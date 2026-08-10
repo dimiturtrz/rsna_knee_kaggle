@@ -14,7 +14,7 @@ question needs the leaderboard to answer it.
 | 2026-08-10 | `kneemri-probe` | 2 | passthrough `sample_submission` | — | not submitted | environment + corpus probe |
 | 2026-08-10 | `kneemri-graft-verify` | 6 | fingerprint check only | 20/20 @ 4.65e-06 | not submitted | proves the architecture port |
 | 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
-| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | pending | our first real number |
+| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | our first real number |
 
 ## What counts as ours
 
@@ -27,11 +27,34 @@ was proven before a model depended on it.
 head, our fitting. It starts below the graft, which is the honest starting position for a replication
 plus one day's work.
 
+## The two numbers, side by side
+
+| | members | epochs each | per-member holdout | public LB | rank of 1061 |
+|---|---|---|---|---|---|
+| graft (their weights) | 20 (5 folds x 4 seeds) | 60 | 0.8398 | 0.888 | 349 |
+| ours (one day) | 5 (5 folds) | 16 | 0.8162 | 0.868 | 393 |
+
+**0.020 apart, from an ensemble four times smaller trained for a quarter as long.** The public median
+is 0.819, so both clear it; the leader is 0.942, so neither is close. Rank 349 with the field's own
+weights is the tell that a graft scores where forks score — 86 teams sit within 0.005 of it.
+
+The comparison is only this clean because both sides train on the SAME public label tables and run
+through the SAME data layer. Members and epochs are the two axes we have not spent, and they are cheap:
+27 s per epoch on the 5090 over the memory-mapped cache. Spending them is the obvious next move and
+also the LEAST informative one — it buys rank without teaching anything. The labels are where the
+un-shared edge is.
+
 ## What 0.888 bought
 
 The graft is not only a floor — it **prices our data layer in leaderboard units**. The weights are the
-same CC0 members the public forks run, so the only difference between our 0.888 and the ~0.899 of the
-best public fork is our pipeline's reading of the pixels. Our reading costs about **0.011**.
+same CC0 members the public forks run, so the difference between our 0.888 and what those weights score
+in other hands is our pipeline's reading of the pixels.
+
+**Correction to the first reading of this.** 0.899 was taken from a public notebook's title and called
+"the plateau"; on the actual leaderboard 0.899 is about 100th place and the frontier is 0.942. So the
+0.011 gap is to 100th place, not to the people running these weights best, and the real distance to the
+top is 0.054 — far too large to be the slot tie-break. Something structural separates the leaders from
+the public stack.
 
 That agrees in direction and rough size with the 0.025 out-of-fold residual measured locally, which
 promotes the slot tie-break from a shrug to a lead: when two candidate series have equal slice counts,
