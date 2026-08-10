@@ -52,3 +52,6 @@ node_modules/
 # zip staging dir the REST upload needs. Never committed — verify_kit.py is what keeps it honest.
 /comp/kit/
 /comp/kit_staging/
+# Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git — the manifest
+# beside them IS tracked, because it is the reproducible description of what was packaged.
+/comp/members/*.pt

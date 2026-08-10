@@ -44,6 +44,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.package_members",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.slot_reader",
       "target": "kneemri.acquisition",
       "weight": 1
@@ -340,6 +346,12 @@
       "kind": "calls",
       "source": "kneemri.model.StudyModel.forward",
       "target": "kneemri.model.StudyModel._pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.package_members.main",
+      "target": "core.paths.DataRoot.from_config",
       "weight": 1
     },
     {
@@ -667,7 +679,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -726,6 +738,14 @@
       "descendants": 0,
       "id": "kneemri.model",
       "label": "model",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members",
+      "label": "package_members",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -1296,6 +1316,14 @@
       "label": "parameter_groups",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.package_members",
       "role": null
     },
     {
