@@ -52,9 +52,12 @@ uv run python comp/publish.py dataset -m "<message>"
 - **`machine_shape: NvidiaTeslaT4` really does give two T4s** — `sm_75`, 15.6 GB each, torch 2.10.0+cu128
   whose `arch_list` includes `sm_75`. The host has only **4 CPUs** and 32.9 GB RAM: on a read-bound
   pipeline the CPU count, not the GPU, is the binding constraint.
-- **Almost nothing needs to ship as a wheel.** Present offline: pydicom 3.0.2, timm 1.0.26,
-  transformers 5.0.0, polars, cv2, SimpleITK, nibabel, einops, sklearn, scipy, PIL. Absent: monai, zarr.
-  The sibling competition needed six wheels; this one may need none.
+- **Almost nothing needs to ship as a wheel — but "almost" is not "nothing".** Present offline: pydicom
+  3.0.2, timm 1.0.26, transformers 5.0.0, polars, cv2, SimpleITK, nibabel, einops, sklearn, scipy, PIL.
+  Absent: monai, zarr, **and `jaxtyping`** — which `kneemri.model` imports at module top, so the kit
+  ships `jaxtyping` + `wadler_lindig` wheels and the kernel `pip install --no-index --no-deps`s them
+  before importing anything of ours. The probe asked which libraries the *pipeline* needs and missed the
+  ones *our own source* imports: **probe what you import, not only what you plan to use.**
 - **12 ms per DICOM slice** off the mount (186 slices in 2.31 s).
 
 ## Gotchas that cost real time (inherited, verify each still holds)

@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import override
 
@@ -187,3 +187,15 @@ def test_pixel_group():
         annot=0.1,
     )
     assert resized.pixel_group != same, "a different resolution is a different decode"
+
+
+def test_state_dict_of(tmp_path: Path):
+    """A published checkpoint wraps its tensors under `model` beside training metadata; unwrap it."""
+    package, device = _package(tmp_path)
+    member = package.members[0]
+    bare = package.state_dict_of(member, device)
+    assert "head.out.weight" in bare
+
+    wrapped = tmp_path / "m_wrapped.pt"
+    torch.save({"model": bare, "epoch": 60, "holdout": 0.84, "annot": 0.87}, wrapped)
+    assert package.state_dict_of(replace(member, file=wrapped), device).keys() == bare.keys()

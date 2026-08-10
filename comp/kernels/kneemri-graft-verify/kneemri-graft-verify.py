@@ -9,7 +9,9 @@ So this kernel is the oracle for the port: no pixels, no data layer, no submissi
 loads all twenty members and prints how much slack each one had.
 """
 
+import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -25,11 +27,51 @@ def section(title: str) -> None:
 
 
 def find_kit() -> Path:
-    """The mounted source tree. Discovered, not assumed — the probe already taught us that lesson."""
-    matches = sorted(Path("/kaggle/input").glob("*/kneemri_src"))
-    if not matches:
-        raise FileNotFoundError("kneemri-kit is not mounted (no */kneemri_src under /kaggle/input)")
-    return matches[0]
+    """The directory to put on `sys.path`, found by looking for the package rather than the wrapper.
+
+    Three runs were spent on mount-shape assumptions: the competition nests under
+    `/kaggle/input/competitions/<slug>`, datasets under `/kaggle/input/datasets/<owner>/<name>`, and a
+    tree uploaded with `--dir-mode zip` is expanded on mount with the wrapping directory REMOVED — so
+    `kneemri_src/` never appears and the mount holds `core/` and `kneemri/` directly.
+
+    The lesson generalises past this kernel: search for the artefact you need (`kneemri/model.py`),
+    never for the container you think holds it. The zip branch stays as a fallback for a mount that is
+    not expanded.
+    """
+    marker = next(iter(sorted(Path("/kaggle/input").rglob("kneemri/model.py"))), None)
+    if marker is not None:
+        return marker.parent.parent
+
+    archive = next(iter(sorted(Path("/kaggle/input").rglob("kneemri_src.zip"))), None)
+    if archive is None:
+        raise FileNotFoundError("no kneemri package and no kneemri_src.zip anywhere under /kaggle/input")
+    destination = Path("/tmp/kit")
+    with zipfile.ZipFile(archive) as bundle:
+        bundle.extractall(destination)
+    inner = next(iter(sorted(destination.rglob("kneemri/model.py"))), None)
+    if inner is None:
+        raise FileNotFoundError(f"{archive} does not contain a kneemri package")
+    print(f"expanded {archive.name} -> {destination}")
+    return inner.parent.parent
+
+
+def install_wheels(kit: Path) -> None:
+    """Install the kit's wheels offline, before anything imports our package.
+
+    The runtime probe checked the libraries the PIPELINE needs (pydicom, timm, transformers…) and found
+    them all present — but not the ones our own modules import. `jaxtyping` is not in Kaggle's image and
+    `kneemri.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
+    not only what you plan to use.
+    """
+    wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
+    if not wheels:
+        print("no wheels in the kit — assuming every import is already in the image")
+        return
+    print(f"installing {[w.name for w in wheels]}")
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
+        check=True,
+    )
 
 
 def find_dinov2() -> Path:
@@ -44,10 +86,15 @@ def find_dinov2() -> Path:
 
 def main() -> None:
     section("0. MOUNTS")
-    for entry in sorted(Path("/kaggle/input").glob("*")):
-        print(f"  {entry.name}")
+    for kind in sorted(Path("/kaggle/input").glob("*")):
+        print(f"  {kind.name}/")
+        for owner in sorted(kind.glob("*")):
+            print(f"      {owner.name}/")
+            for item in sorted(owner.glob("*"))[:6]:
+                print(f"          {item.name}{'/' if item.is_dir() else ''}")
 
     kit = find_kit()
+    install_wheels(kit)
     sys.path.insert(0, str(kit))
     print(f"kit: {kit}")
 

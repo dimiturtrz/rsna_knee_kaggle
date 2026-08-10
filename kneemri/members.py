@@ -18,7 +18,7 @@ from typing import TypedDict
 import numpy as np
 import torch
 from numpy.typing import NDArray
-from torch import nn
+from torch import Tensor, nn
 
 from kneemri.model import StudyModel
 
@@ -149,9 +149,20 @@ class MemberPackage:
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""
         model = StudyModel(backbone, dim, member.slot_count, member.pool).to(device)
-        model.load_state_dict(torch.load(member.file, map_location=device, weights_only=True))
+        model.load_state_dict(self.state_dict_of(member, device))
         self.check(model, member, device)
         return model
+
+    def state_dict_of(self, member: Member, device: torch.device) -> dict[str, Tensor]:
+        """The member's tensors, unwrapped from whatever the checkpoint wraps them in.
+
+        A published checkpoint is a training artefact, not a bare state dict: it carries the weights
+        under `model` alongside the epoch, the fold scores, the config, the out-of-fold predictions and
+        its own copy of the fingerprint. Loading the wrapper directly fails loudly on unexpected keys —
+        which is the good case, and the reason to unwrap explicitly rather than to load non-strictly.
+        """
+        checkpoint = torch.load(member.file, map_location=device, weights_only=True)
+        return checkpoint.get("model", checkpoint)
 
     def check(self, model: StudyModel, member: Member, device: torch.device) -> float:
         """Compare the model's answer to the seeded question against the stored one.
