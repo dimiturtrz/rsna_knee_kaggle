@@ -1,0 +1,15 @@
+{
+  "id": "dimiturnt/kneemri-graft",
+  "title": "kneemri-graft",
+  "code_file": "kneemri-graft.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["dimiturnt/kneemri-kit", "pilkwang/rsna-knee-weights"],
+  "competition_sources": ["rsna-knee-abnormality-detection"],
+  "kernel_sources": [],
+  "model_sources": ["metaresearch/dinov2/PyTorch/small/1"]
+}

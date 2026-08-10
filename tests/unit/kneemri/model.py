@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import override
+from typing import cast, override
 
 import numpy as np
 import pytest
@@ -21,7 +21,16 @@ class _Output:
 
 
 class _FakeBackbone(torch.nn.Module):
-    """A stand-in encoder: deterministic tokens of the right shape, no download, no pretrained weights."""
+    """A stand-in encoder: deterministic tokens of the right shape, no download, no pretrained weights.
+
+    It carries an `encoder.layer` list because that is the structure the freezing walks — a stand-in
+    that lacked it would let `parameter_groups` pass here and fail on the real DINOv2.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.encoder = torch.nn.Module()
+        self.encoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
 
     @override
     def forward(self, *, pixel_values: Tensor) -> _Output:
@@ -85,3 +94,14 @@ def test_pool_parts_widths_match_the_head_input():
     torch.manual_seed(SEED)
     focal = StudyModel(_FakeBackbone(), DIM, 2, pool="cls_mean_focal")
     assert focal.head.proj[1].in_features == DIM * POOL_PARTS["cls_mean_focal"]
+
+
+def test_parameter_groups(study_model: StudyModel):
+    """The head gets its own learning rate; the encoder gets a slower one and only its last blocks."""
+    groups = study_model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+    assert [group["lr"] for group in groups] == [1e-3, 8e-6]
+    opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
+    assert opened, "the last blocks must remain trainable"
+    assert all(parameter.requires_grad for parameter in opened)
+    frozen = [p for p in study_model.backbone.parameters() if not p.requires_grad]
+    assert frozen, "the early blocks must be frozen"

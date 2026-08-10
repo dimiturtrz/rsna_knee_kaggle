@@ -2,6 +2,36 @@
   "edges": [
     {
       "kind": "import",
+      "source": "kneemri.build_cache",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_cache",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ensemble",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ensemble",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.laterality",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.model",
       "weight": 1
@@ -13,9 +43,213 @@
       "weight": 1
     },
     {
+      "kind": "import",
+      "source": "kneemri.slot_reader",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.slots",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study",
+      "target": "kneemri.laterality",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study_cache",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study_cache",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.study_cache",
+      "target": "kneemri.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.targets",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.paths.DataRoot",
       "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.acquisition.Acquisition",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.acquisition.Acquisition._weighting",
+      "target": "kneemri.acquisition.Acquisition._number",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.acquisition.Acquisition.ordered_files",
+      "target": "kneemri.acquisition.Acquisition._through_plane_key",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.study_cache.StudyCache.build",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.study_cache.StudyCache.planes_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_member",
+      "target": "kneemri.ensemble.Ensemble.windows",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.laterality.Laterality",
+      "target": "kneemri.acquisition.Acquisition",
       "weight": 1
     },
     {
@@ -107,6 +341,312 @@
       "source": "kneemri.model.StudyModel.forward",
       "target": "kneemri.model.StudyModel._pool",
       "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.slot_reader.SlotReader",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.acquisition.Acquisition.ordered_files",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader._crop",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader._decode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader._nearest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader._sample_indices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader._to_uint8",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.slots.Slot",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.slots.SlotScheme",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.slots.SlotScheme",
+      "target": "kneemri.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.study.SlotPipeline",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.study.SlotPipeline",
+      "target": "kneemri.laterality.Laterality",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.study.SlotPipeline",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.study.SlotPipeline",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.route",
+      "target": "kneemri.slots.SlotScheme.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.side_of",
+      "target": "kneemri.laterality.Laterality.of_study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.slot_images",
+      "target": "kneemri.laterality.Laterality.normalise",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.slot_images",
+      "target": "kneemri.slot_reader.SlotReader.read",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.study.Study",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.study.Study",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.study.Study",
+      "target": "kneemri.study.Study",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study.Study.__init__",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.Study.bag",
+      "target": "kneemri.study.Study.side",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.Study.from_directory",
+      "target": "kneemri.acquisition.Acquisition.probe",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.study_cache.StudyCache",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study_cache.StudyCache.build",
+      "target": "kneemri.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study_cache.StudyCache.decode_one",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study_cache.StudyCache.decode_one",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study_cache.StudyCache.decode_one",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study_cache.StudyCache.load",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.targets.Targets",
+      "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.study_cache.StudyCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.evaluate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.fit_epoch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.predict",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.evaluate",
+      "target": "kneemri.trainer.Trainer.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.targets.Targets.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.trainer.Trainer.batches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.trainer.Trainer.loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.predict",
+      "target": "kneemri.trainer.Trainer.batches",
+      "weight": 1
     }
   ],
   "nodes": [
@@ -127,11 +667,51 @@
       "role": null
     },
     {
-      "descendants": 3,
+      "descendants": 15,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
       "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition",
+      "label": "acquisition",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.build_cache",
+      "label": "build_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble",
+      "label": "ensemble",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.folds",
+      "label": "folds",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.laterality",
+      "label": "laterality",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -160,10 +740,98 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slot_reader",
+      "label": "slot_reader",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots",
+      "label": "slots",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study",
+      "label": "study",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache",
+      "label": "study_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets",
+      "label": "targets",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train",
+      "label": "train",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer",
+      "label": "trainer",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.paths.DataRoot",
       "label": "DataRoot",
       "level": "class",
       "parent": "core.paths",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition",
+      "label": "Acquisition",
+      "level": "class",
+      "parent": "kneemri.acquisition",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble",
+      "label": "Ensemble",
+      "level": "class",
+      "parent": "kneemri.ensemble",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.folds.ReportFolds",
+      "label": "ReportFolds",
+      "level": "class",
+      "parent": "kneemri.folds",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.laterality.Laterality",
+      "label": "Laterality",
+      "level": "class",
+      "parent": "kneemri.laterality",
       "role": "primary"
     },
     {
@@ -224,6 +892,78 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader",
+      "label": "SlotReader",
+      "level": "class",
+      "parent": "kneemri.slot_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.Slot",
+      "label": "Slot",
+      "level": "class",
+      "parent": "kneemri.slots",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme",
+      "label": "SlotScheme",
+      "level": "class",
+      "parent": "kneemri.slots",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.SlotPipeline",
+      "label": "SlotPipeline",
+      "level": "class",
+      "parent": "kneemri.study",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study",
+      "label": "Study",
+      "level": "class",
+      "parent": "kneemri.study",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.CachedCorpus",
+      "label": "CachedCorpus",
+      "level": "class",
+      "parent": "kneemri.study_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache",
+      "label": "StudyCache",
+      "level": "class",
+      "parent": "kneemri.study_cache",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Targets",
+      "label": "Targets",
+      "level": "class",
+      "parent": "kneemri.targets",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer",
+      "label": "Trainer",
+      "level": "class",
+      "parent": "kneemri.trainer",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.paths.DataRoot.__init__",
       "label": "__init__",
       "level": "method",
@@ -252,6 +992,190 @@
       "label": "raw",
       "level": "method",
       "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._centre_x",
+      "label": "_centre_x",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._fat_suppressed",
+      "label": "_fat_suppressed",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._laterality_tag",
+      "label": "_laterality_tag",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._number",
+      "label": "_number",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._spacing",
+      "label": "_spacing",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._through_plane_key",
+      "label": "_through_plane_key",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition._weighting",
+      "label": "_weighting",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition.fluid_sensitive",
+      "label": "fluid_sensitive",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition.ordered_files",
+      "label": "ordered_files",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition.probe",
+      "label": "probe",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.acquisition.Acquisition.slice_count",
+      "label": "slice_count",
+      "level": "method",
+      "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.build_cache.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.build_cache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.predict_member",
+      "label": "predict_member",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.submission",
+      "label": "submission",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.windows",
+      "label": "windows",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.folds.ReportFolds.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.folds.ReportFolds.assign",
+      "label": "assign",
+      "level": "method",
+      "parent": "kneemri.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.folds.ReportFolds.holdout",
+      "label": "holdout",
+      "level": "method",
+      "parent": "kneemri.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.laterality.Laterality.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.laterality.Laterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.laterality.Laterality.normalise",
+      "label": "normalise",
+      "level": "method",
+      "parent": "kneemri.laterality.Laterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.laterality.Laterality.of_study",
+      "label": "of_study",
+      "level": "method",
+      "parent": "kneemri.laterality.Laterality",
       "role": null
     },
     {
@@ -368,6 +1292,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.model.StudyModel.parameter_groups",
+      "label": "parameter_groups",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.slot_head.SlotHead.__init__",
       "label": "__init__",
       "level": "method",
@@ -380,6 +1312,350 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader._crop",
+      "label": "_crop",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader._decode",
+      "label": "_decode",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader._nearest",
+      "label": "_nearest",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader._sample_indices",
+      "label": "_sample_indices",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader._to_uint8",
+      "label": "_to_uint8",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.Slot.accepts",
+      "label": "accepts",
+      "level": "method",
+      "parent": "kneemri.slots.Slot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.assign",
+      "label": "assign",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.presence",
+      "label": "presence",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.SlotPipeline.image_size",
+      "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.study.SlotPipeline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.SlotPipeline.route",
+      "label": "route",
+      "level": "method",
+      "parent": "kneemri.study.SlotPipeline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.SlotPipeline.side_of",
+      "label": "side_of",
+      "level": "method",
+      "parent": "kneemri.study.SlotPipeline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.SlotPipeline.slot_images",
+      "label": "slot_images",
+      "level": "method",
+      "parent": "kneemri.study.SlotPipeline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study.bag",
+      "label": "bag",
+      "level": "method",
+      "parent": "kneemri.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study.from_directory",
+      "label": "from_directory",
+      "level": "method",
+      "parent": "kneemri.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study.side",
+      "label": "side",
+      "level": "method",
+      "parent": "kneemri.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.CachedCorpus.image_size",
+      "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.study_cache.CachedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.CachedCorpus.slices",
+      "label": "slices",
+      "level": "method",
+      "parent": "kneemri.study_cache.CachedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.decode_one",
+      "label": "decode_one",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.images_path",
+      "label": "images_path",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.index_path",
+      "label": "index_path",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.mask_path",
+      "label": "mask_path",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.planes_of",
+      "label": "planes_of",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.shape",
+      "label": "shape",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Targets.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Targets.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Targets.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Targets.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.train",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.area_under_curve",
+      "label": "area_under_curve",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.augment",
+      "label": "augment",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.batches",
+      "label": "batches",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.evaluate",
+      "label": "evaluate",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.fit_epoch",
+      "label": "fit_epoch",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.loss",
+      "label": "loss",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.predict",
+      "label": "predict",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
       "role": null
     }
   ]

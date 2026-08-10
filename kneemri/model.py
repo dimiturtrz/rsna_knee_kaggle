@@ -125,6 +125,26 @@ class StudyModel(nn.Module):
             self.train()
         return out
 
+    def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
+        """Freeze the encoder except its last blocks, and give what remains its own learning rate.
+
+        The model owns this rather than the trainer: which blocks exist, and therefore which of them can
+        be opened, is a fact about the encoder, not about the fitting procedure.
+        """
+        blocks = list(self.backbone.encoder.layer)  # pyrefly: ignore[missing-attribute]
+        trainable = {id(parameter) for block in blocks[-unfreeze_last:] for parameter in block.parameters()}
+        opened: list[torch.nn.Parameter] = []
+        frozen: list[torch.nn.Parameter] = []
+        for parameter in self.backbone.parameters():
+            (opened if id(parameter) in trainable else frozen).append(parameter)
+        for parameter in frozen:
+            # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
+            parameter.requires_grad_(False)  # noqa: FBT003
+        return [
+            {"params": list(self.head.parameters()), "lr": head_lr},
+            {"params": opened, "lr": backbone_lr},
+        ]
+
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce patch tokens to one vector: the class token, the patch mean, optionally the tail."""
         patch = tokens[:, 1:]

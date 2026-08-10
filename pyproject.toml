@@ -19,6 +19,14 @@ dependencies = [
     # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
     # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
     "pydicom>=3",
+    # Tables (train.csv, train_series.csv, the submission). pandas rather than polars, which the sibling
+    # repos use: this code runs unchanged inside a Kaggle kernel, pandas is what that image ships, and a
+    # second dataframe library in the kit buys nothing the submission path needs.
+    "pandas",
+    # The DINOv2 encoder is loaded through transformers' AutoModel, which is also how the published
+    # members were built — same class, same weights, so a state dict transfers. Present in Kaggle's
+    # image at 5.0.0, so it needs no wheel in the kit.
+    "transformers",
 ]
 
 [project.optional-dependencies]
@@ -171,7 +179,11 @@ exclude = []
 [tool.coverage.run]
 # >>> LOCAL-SLOT: coverage-scan — edit freely, the template will not overwrite intent here
 source = ["core", "kneemri"]
-omit = []
+# The two CLI entrypoints are driven by the corpus, not by unit tests: build_cache decodes 819,640
+# DICOM files into a 35.8 GB memory map and train fits a DINOv2 for hours. Both are exercised end to
+# end by the runs that produce the cache and the members, and their LOGIC lives in StudyCache and
+# Trainer, which are unit-tested. Covering them here would mean asserting on an argparse call.
+omit = ["kneemri/build_cache.py", "kneemri/train.py"]
 # <<< LOCAL-SLOT: coverage-scan
 
 [tool.coverage.report]
