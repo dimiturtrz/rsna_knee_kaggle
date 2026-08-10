@@ -16,6 +16,9 @@ dependencies = [
     # (which is CPU-only): the local GPU is an RTX 5090 (sm_120) and needs cu128. Kaggle's own image
     # ships torch 2.10.0+cu128 with sm_75 in its arch list, measured by comp/kernels/kneemri-probe.
     "torch>=2.10",
+    # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
+    # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
+    "pydicom>=3",
 ]
 
 [project.optional-dependencies]
