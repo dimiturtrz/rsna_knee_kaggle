@@ -42,10 +42,20 @@ uv run python comp/publish.py dataset -m "<message>"
 - **Is submission notebook-only?** The sibling competition rejected file uploads with
   `400 FAILED_PRECONDITION "only accepts Submissions from Notebooks"`, which is the entire reason the
   kit-as-dataset machinery exists. Unverified here. If RSNA accepts a CSV upload, most of this is optional.
-- **Which wheels are actually missing** from Kaggle's image (pydicom? timm?) — probe with a throwaway
-  kernel rather than guessing. Pushes are unlimited; only submissions are rate-limited.
 - **The Efficiency Prize track** is a separate leaderboard with its own scoring. Decide whether to target it
   before optimizing inference cost by accident.
+
+## Measured on 2026-08-10 by `kernels/kneemri-probe`
+
+- **The competition mounts at `/kaggle/input/competitions/<slug>`**, not `/kaggle/input/<slug>`. Probe v1
+  assumed the latter and died before any other probe ran.
+- **`machine_shape: NvidiaTeslaT4` really does give two T4s** — `sm_75`, 15.6 GB each, torch 2.10.0+cu128
+  whose `arch_list` includes `sm_75`. The host has only **4 CPUs** and 32.9 GB RAM: on a read-bound
+  pipeline the CPU count, not the GPU, is the binding constraint.
+- **Almost nothing needs to ship as a wheel.** Present offline: pydicom 3.0.2, timm 1.0.26,
+  transformers 5.0.0, polars, cv2, SimpleITK, nibabel, einops, sklearn, scipy, PIL. Absent: monai, zarr.
+  The sibling competition needed six wheels; this one may need none.
+- **12 ms per DICOM slice** off the mount (186 slices in 2.31 s).
 
 ## Gotchas that cost real time (inherited, verify each still holds)
 

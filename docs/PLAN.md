@@ -42,11 +42,17 @@ would otherwise have inherited.
 
 ### What the task actually is
 
-Only a subset of training studies carry the twelve annotations. Every training study carries a
-radiology report, and **`test.csv` has no `Report` column** — text is available when fitting and absent
-when predicting. That rules out a text branch at inference and leaves reports usable only as training
-targets, as auxiliary signal, or as a weight on how confidently a study could be read (`knee-6xm`,
-`knee-9k2`).
+**Measured 2026-08-10: 4407 training studies, all 4407 carry a `Report`, and exactly 58 carry all
+twelve annotations.** 1.3%. This is a weak-supervision problem first and an imaging problem second —
+the labels for 98.7% of the corpus have to be read out of free text, in nine languages, or not exist.
+
+And **`test.csv` has no `Report` column** — text is available when fitting and absent when predicting.
+That rules out a text branch at inference and leaves reports usable only as training targets, as
+auxiliary signal, or as a weight on how confidently a study could be read (`knee-6xm`, `knee-9k2`).
+
+Read the annotated 58 as *counts*, not rates: MCL has nine positives, Lateral OA eleven, Baker's
+twelve. Any decision made on the annotation check is made on single-digit positives — which is the
+whole reason the holdout, not the annotation check, arbitrates (`knee-92z`).
 
 ### Three tracks, run in parallel
 
