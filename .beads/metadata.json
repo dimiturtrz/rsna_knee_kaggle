@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "knee",
+  "project_id": "02dfacd7-34be-4923-9415-8c2bda698a8b"
+}
