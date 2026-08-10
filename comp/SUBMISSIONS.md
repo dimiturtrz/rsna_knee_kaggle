@@ -13,8 +13,8 @@ question needs the leaderboard to answer it.
 |---|---|---|---|---|---|---|
 | 2026-08-10 | `kneemri-probe` | 2 | passthrough `sample_submission` | — | not submitted | environment + corpus probe |
 | 2026-08-10 | `kneemri-graft-verify` | 6 | fingerprint check only | 20/20 @ 4.65e-06 | not submitted | proves the architecture port |
-| 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | pending | **their result, not ours** |
-| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | fold 0 @ 6 epochs: 0.7928 | — | our first real number |
+| 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
+| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | pending | our first real number |
 
 ## What counts as ours
 
@@ -26,6 +26,21 @@ was proven before a model depended on it.
 `kneemri-trained` is ours end to end — our slot routing, our ordering, our laterality, our crop, our
 head, our fitting. It starts below the graft, which is the honest starting position for a replication
 plus one day's work.
+
+## What 0.888 bought
+
+The graft is not only a floor — it **prices our data layer in leaderboard units**. The weights are the
+same CC0 members the public forks run, so the only difference between our 0.888 and the ~0.899 of the
+best public fork is our pipeline's reading of the pixels. Our reading costs about **0.011**.
+
+That agrees in direction and rough size with the 0.025 out-of-fold residual measured locally, which
+promotes the slot tie-break from a shrug to a lead: when two candidate series have equal slice counts,
+a stable `sort_values` picks the first in FRAME order and our `max()` picks the first in LIST order, and
+a different series in a slot is a different image for the head to read.
+
+The measurement that would settle it: re-run the out-of-fold oracle logging which series filled each
+slot, and count how many studies have a tie at all. If ties are rare and the residual survives, the
+cause is somewhere else and this lead is dead — which is worth knowing just as much.
 
 ## The two oracles
 
