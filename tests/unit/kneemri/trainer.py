@@ -127,3 +127,51 @@ def test_predict():
     assert predictions.shape == (6, len(TARGETS))
     assert predictions.min() >= 0.0
     assert predictions.max() <= 1.0
+
+
+def test_augment_bag():
+    """Bags stay uint8 and keep their shape, and every slot is perturbed rather than passed through.
+
+    This exists because `augment` was written, unit-tested and then never called by `fit_epoch` — the
+    training loop ran with no augmentation at all, which the dead-code gate could not see (the method
+    WAS referenced: by its test) and the mirror gate could not see (it HAD a test). A test on the caller
+    is what catches that class of bug.
+    """
+    trainer = _trainer()
+    torch.manual_seed(SEED)
+    bag = torch.randint(0, 256, (2, SLOTS, 3, 16, 16), dtype=torch.uint8)
+    out = trainer.augment_bag(bag)
+    assert out.shape == bag.shape
+    assert out.dtype == torch.uint8
+    assert not torch.equal(out, bag), "augmentation must actually perturb the bag"
+
+
+def test_fit_epoch_augments():
+    """`fit_epoch` must route its pixels through augmentation — the bug was that it did not."""
+    trainer = _trainer()
+    seen: list[torch.Tensor] = []
+    original = trainer.augment_bag
+    trainer.augment_bag = lambda images: seen.append(images) or original(images)  # type: ignore[method-assign]
+    trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+    assert seen, "fit_epoch called no augmentation at all"
+    assert seen[0].dtype == torch.uint8
+
+
+def test_one_cycle():
+    """The cycle starts BELOW the peak, warms up to it, and decays far below it by the end.
+
+    Comparing against the pre-attach rate would prove nothing: `max_lr` IS the constant rate, so a
+    warmed-up schedule passes through exactly the value it started from. The contract is the SHAPE.
+    """
+    trainer = _trainer()
+    peak = [group["lr"] for group in trainer.optimiser.param_groups]
+    total_steps = 40
+    trainer.one_cycle(total_steps=total_steps)
+    assert trainer.schedule is not None
+    warmup_start = [group["lr"] for group in trainer.optimiser.param_groups]
+    assert all(start < top for start, top in zip(warmup_start, peak, strict=True)), "must warm UP to the peak"
+
+    for _ in range(total_steps):
+        trainer.schedule.step()
+    ended = [group["lr"] for group in trainer.optimiser.param_groups]
+    assert all(end < top / 100 for end, top in zip(ended, peak, strict=True)), "must decay far below the peak"

@@ -27,9 +27,10 @@ of which removes a design choice rather than adding one:
 
 | metric | baseline | target | current |
 |---|---|---|---|
-| mean of 12 AUCs (LB) | 0.5 (constant submission) | > public plateau ~0.899 | — |
-| worst single-label AUC | 0.5 | — | — |
-| submission path works end to end | — | proven | — |
+| mean of 12 AUCs (public LB) | 0.5 (constant) · 0.819 median · 0.888 graft | 0.942 (leader) | **0.868** (ours, rank 393/1061) |
+| per-member holdout AUC | — | 0.8398 (theirs) | **0.8162** (ours) |
+| worst single-label AUC | 0.5 | — | 0.742 (Lateral Meniscus) |
+| submission path works end to end | — | proven | proven (both scored) |
 
 Track the **worst label**, not only the mean — that is where the 1/12 is being forfeited.
 
@@ -85,6 +86,33 @@ controls are *perfecting* tools — they harden a number that already moves, and
 buys wall-clock, not signal.
 
 Cost-tiered: a cheap proxy gates the expensive commit, and the slow confirmation runs async.
+
+## Phase 3 — what the second audit found
+
+The first list of next moves was written from memory and got the headline wrong: it blamed the
+per-member gap on training length. The curves say otherwise — five folds peak at epochs 13/13/10/12/11
+and gain ~0 over their last five, so **training is saturated at ~12 epochs** and running longer at a
+constant learning rate buys nothing. Reading their code found the actual differences:
+
+| difference | ours | theirs | issue |
+|---|---|---|---|
+| learning-rate schedule | **none** (constant) | `OneCycleLR`, `pct_start=0.15` | `knee-2fk` |
+| weight for an unmentioned finding | `conf` (so 0.0 — dropped) | `0.25 + 0.75·conf` (floor) | `knee-9sy` |
+| loss normalisation | `/ w.sum()` | `/ element count` | `knee-sbr` |
+| inference windows | 4 disjoint | 10 overlapping | `knee-36y` |
+
+A constant LR that plateaus at 12 while a one-cycle run improves to 60 is exactly the expected shape,
+which makes the schedule the first thing to test and the most likely single cause.
+
+**The diagnostic that outranks all of them** (`knee-o42`): both medial/lateral pairs favour medial
+(−0.043 meniscus, −0.066 OA), and the side-defined targets are precisely what a broken laterality
+normalisation would damage. It is cheap to settle because it needs **headers, not pixels** — split the
+holdout by how each study's side was decided (tag / geometry / unresolved) and compare the asymmetry.
+A flat result kills the lead honestly; a worse geometry half is a bug worth more than any ensemble.
+
+Ranked deliberately: the schedule and the diagnostic first, **members last** — 20 members is the most
+predictable gain available and the least informative, and it would raise the number while leaving every
+open question exactly where it is.
 
 ## Open questions
 

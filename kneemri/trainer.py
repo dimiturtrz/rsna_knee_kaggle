@@ -17,7 +17,7 @@ lateral one and teaching the model that the distinction is noise.
 
 import numpy as np
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
@@ -29,6 +29,10 @@ HEAD_LR = 1e-3
 BACKBONE_LR = 8e-6
 WEIGHT_DECAY = 0.02
 UNFREEZE_LAST = 6
+SEED = 2026
+
+ONE_CYCLE_WARMUP = 0.15
+"""Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
 
 GROUP = 3
 """Consecutive slices stacked as the encoder's three channels."""
@@ -52,6 +56,24 @@ class Trainer:
         groups = self.model.parameter_groups(HEAD_LR, BACKBONE_LR, unfreeze_last)
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
+        self.schedule: torch.optim.lr_scheduler.OneCycleLR | None = None
+        self.torch_generator = torch.Generator(device=device).manual_seed(SEED)
+
+    def one_cycle(self, total_steps: int) -> None:
+        """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
+
+        MEASURED REASON: at a constant learning rate our five folds peaked at epochs 13/13/10/12/11 and
+        gained ~0 over their final five — saturated at ~12 epochs. A run that improves out to 60 epochs
+        is not training longer, it is training on a decaying learning rate. `pct_start=0.15` spends the
+        first sixth warming up, which also protects the pretrained encoder from the first few hundred
+        steps at full rate.
+        """
+        self.schedule = torch.optim.lr_scheduler.OneCycleLR(
+            self.optimiser,
+            max_lr=[HEAD_LR, BACKBONE_LR],
+            total_steps=max(total_steps, 1),
+            pct_start=ONE_CYCLE_WARMUP,
+        )
 
     def augment(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
         """Rigid jitter and a brightness scale — never a flip, which laterality normalisation forbids."""
@@ -67,6 +89,24 @@ class Trainer:
         warped = nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
         gain = 1 + (torch.rand(count, 1, 1, 1, generator=generator, device=images.device) * 2 - 1) * INTENSITY_JITTER
         return (warped * gain).clamp(0, 1)
+
+    def augment_bag(self, images: UInt8[Tensor, "b n g h w"]) -> UInt8[Tensor, "b n g h w"]:
+        """Augment a batch of slot bags, staying in uint8 so the model's own forward is untouched.
+
+        The warp needs floats, but `StudyModel.forward` owns the byte scaling and the ImageNet
+        normalisation — and its fingerprint is the identity check that stops a member being run under a
+        reading it was not fitted under. So the augmentation converts, warps and converts back rather
+        than handing the model a tensor in a different space. The requantisation is lossless in the
+        sense that matters: the cache is already uint8.
+
+        Each slot image is warped INDEPENDENTLY (the bag is folded into the batch axis). That is
+        deliberate — the six slots are separate acquisitions of the same knee, not one volume, so a
+        shared jitter would imply a registration between them that does not exist.
+        """
+        batch, slots = images.shape[:2]
+        flat = images.reshape(batch * slots, *images.shape[2:]).float().div(255.0)
+        warped = self.augment(flat, self.torch_generator)
+        return (warped * 255).round().clamp(0, 255).to(torch.uint8).reshape(images.shape)
 
     def batches(
         self, positions: NDArray[np.int64], size: int, generator: np.random.Generator, *, shuffle: bool
@@ -89,13 +129,18 @@ class Trainer:
         same depth, which keeps the batch a single contiguous slice of the memory map instead of a
         gather, and the randomness across steps still covers the stack.
         """
+        # `images[batch, :, s:s+G]` in ONE indexing op, never `images[batch][:, :, s:s+G]`. The latter
+        # fancy-indexes first, materialising all twelve cached slices (97.5 MB per batch) before
+        # discarding three quarters of them: measured 35 ms against 3.3 ms, or about ten seconds of
+        # every forty-second epoch spent reading data that is then thrown away.
         self.model.train()
         total, steps = 0.0, 0
         for batch in self.batches(positions, size, generator, shuffle=True):
             start = int(generator.integers(0, corpus.slices - GROUP + 1))
-            pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch][:, :, start : start + GROUP])).to(
+            pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, start : start + GROUP])).to(
                 self.device
             )
+            pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
             with torch.autocast("cuda", enabled=self.device.type == "cuda"):
@@ -109,6 +154,8 @@ class Trainer:
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimiser)
             self.scaler.update()
+            if self.schedule is not None:
+                self.schedule.step()
             total += float(loss.detach())
             steps += 1
         return total / max(steps, 1)
@@ -126,7 +173,7 @@ class Trainer:
         chunks = []
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for batch in self.batches(positions, size, generator, shuffle=False):
-                pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch][:, :, middle : middle + GROUP])).to(
+                pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, middle : middle + GROUP])).to(
                     self.device
                 )
                 flags = torch.from_numpy(corpus.mask[batch]).to(self.device)

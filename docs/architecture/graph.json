@@ -14,6 +14,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.diagnose_laterality",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.diagnose_laterality",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.diagnose_laterality",
+      "target": "kneemri.laterality",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.ensemble",
       "target": "kneemri.members",
       "weight": 1
@@ -226,6 +244,42 @@
       "kind": "calls",
       "source": "kneemri.build_cache.main",
       "target": "kneemri.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.diagnose_laterality.LateralityAudit.resolve_one",
+      "target": "kneemri.acquisition.Acquisition.probe",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.diagnose_laterality.LateralityAudit.resolve_one",
+      "target": "kneemri.laterality.Laterality",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.diagnose_laterality.LateralityAudit.resolve_one",
+      "target": "kneemri.laterality.Laterality.of_study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.diagnose_laterality.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.diagnose_laterality.main",
+      "target": "kneemri.diagnose_laterality.LateralityAudit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.diagnose_laterality.main",
+      "target": "kneemri.diagnose_laterality.LateralityAudit.run",
       "weight": 1
     },
     {
@@ -609,6 +663,12 @@
     {
       "kind": "calls",
       "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.one_cycle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
       "target": "kneemri.trainer.Trainer.predict",
       "weight": 1
     },
@@ -632,6 +692,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.trainer.Trainer.augment_bag",
+      "target": "kneemri.trainer.Trainer.augment",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.trainer.Trainer.evaluate",
       "target": "kneemri.trainer.Trainer.area_under_curve",
       "weight": 1
@@ -640,6 +706,12 @@
       "kind": "calls",
       "source": "kneemri.trainer.Trainer.fit_epoch",
       "target": "kneemri.targets.Targets.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.trainer.Trainer.augment_bag",
       "weight": 1
     },
     {
@@ -679,7 +751,7 @@
       "role": null
     },
     {
-      "descendants": 16,
+      "descendants": 17,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -698,6 +770,14 @@
       "descendants": 0,
       "id": "kneemri.build_cache",
       "label": "build_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.diagnose_laterality",
+      "label": "diagnose_laterality",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -829,6 +909,14 @@
       "level": "class",
       "parent": "kneemri.acquisition",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.diagnose_laterality.LateralityAudit",
+      "label": "LateralityAudit",
+      "level": "class",
+      "parent": "kneemri.diagnose_laterality",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -1108,6 +1196,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.build_cache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.diagnose_laterality.LateralityAudit.resolve_one",
+      "label": "resolve_one",
+      "level": "method",
+      "parent": "kneemri.diagnose_laterality.LateralityAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.diagnose_laterality.LateralityAudit.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.diagnose_laterality.LateralityAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.diagnose_laterality.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.diagnose_laterality",
       "role": null
     },
     {
@@ -1648,6 +1760,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.trainer.Trainer.augment_bag",
+      "label": "augment_bag",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.trainer.Trainer.batches",
       "label": "batches",
       "level": "method",
@@ -1674,6 +1794,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.Trainer.loss",
       "label": "loss",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.one_cycle",
+      "label": "one_cycle",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null

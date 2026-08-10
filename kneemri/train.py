@@ -38,6 +38,7 @@ def main() -> None:
     parser.add_argument("--batch", type=int, default=12)
     parser.add_argument("--slices", type=int, default=12)
     parser.add_argument("--seed", type=int, default=2026)
+    parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
     parser.add_argument("--labels", type=Path, required=True, help="report-derived label table")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -59,6 +60,12 @@ def main() -> None:
 
     model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS))
     trainer = Trainer(model, device)
+    if arguments.one_cycle:
+        # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
+        # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
+        # been logged and before the checkpoint is written, which is the most expensive place to fail.
+        steps_per_epoch = -(-len(training) // arguments.batch)
+        trainer.one_cycle(arguments.epochs * max(steps_per_epoch, 1))
 
     best, best_state = -1.0, None
     for epoch in range(arguments.epochs):
