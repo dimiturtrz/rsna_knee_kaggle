@@ -1,0 +1,76 @@
+{
+  "edges": [
+    {
+      "kind": "references",
+      "source": "core.paths.DataRoot",
+      "target": "core.paths.DataRoot",
+      "weight": 1
+    }
+  ],
+  "nodes": [
+    {
+      "descendants": 1,
+      "id": "core",
+      "label": "core",
+      "level": "module",
+      "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths",
+      "label": "paths",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri",
+      "label": "kneemri",
+      "level": "module",
+      "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot",
+      "label": "DataRoot",
+      "level": "class",
+      "parent": "core.paths",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.from_config",
+      "label": "from_config",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.processed",
+      "label": "processed",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.raw",
+      "label": "raw",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    }
+  ]
+}

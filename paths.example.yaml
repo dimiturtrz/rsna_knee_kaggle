@@ -1,0 +1,9 @@
+# Copy to paths.yaml (gitignored — machine-specific absolute paths).
+#   cp paths.example.yaml paths.yaml   # then set the one path below
+#
+# ONE data root. Everything else is derived:
+#   <data>/raw/rsna_knee_abnormality/   the competition download, unzipped and never written to
+#   <data>/processed/rsna_knee_abnormality/   slice cache, folds, weights — created automatically
+#
+# Env KNEEMRI_DATA overrides this file (CI points it at an empty dir so data-gated tests skip).
+data: /path/to/data/volumetric/mri

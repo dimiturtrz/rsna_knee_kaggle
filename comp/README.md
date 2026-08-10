@@ -1,0 +1,67 @@
+# Kaggle submission — kneemri
+
+Competition: [`rsna-knee-abnormality-detection`](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection).
+Deadline **2026-10-22**. Score is the **unweighted mean of twelve per-label ROC AUCs**.
+
+This directory is named `comp/`, not `kaggle/`, on purpose: a top-level `kaggle/` directory shadows the
+installed `kaggle` package on `sys.path[0]`, so `import kaggle` and `python -m kaggle` resolve to the repo
+instead of the library. The sibling project hit that and had to call the venv entrypoint by path forever
+after.
+
+## Provenance
+
+`survey.py`, `publish.py`, `build_kit.py`, `verify_kit.py` were copied from `biohub_kaggle/kaggle/` and
+retargeted at four constants (kit dataset id, packages, kit path, competition slug). They are a **copy on
+purpose** — the second consumer is what reveals which parts are genuinely competition-agnostic, and the
+extraction into an installed `sdlc-kaggle` package waits on that evidence. Fix a bug in both, and note it
+here, until they are one thing.
+
+## The two auth paths
+
+- `survey.py` / `publish.py` speak the REST API directly with a `KGAT_*` access token from `KAGGLE_TOKEN`
+  (env-only — never written to `~/.kaggle/`, never committed). They exist because the official CLI
+  authenticates with a username + key pair, which is a *different* credential.
+- The official `kaggle` CLI reads `~/.kaggle/kaggle.json` and works for reads (`competitions files`,
+  `kernels list`, `kernels pull`). Both are live on this machine; pick by which credential you have.
+
+## Method (lib-as-dataset + light kernel)
+
+1. **`kneemri-kit` dataset** (`dimiturnt/kneemri-kit`) — our `kneemri`/`core` source tree, trained weights,
+   and wheels for whatever is missing from Kaggle's base image. No code is duplicated into the kernel.
+2. **A light script kernel** mounts the kit + competition data, `pip install --no-index --no-deps *.whl`,
+   adds the source root to `sys.path`, imports the pipeline, writes `/kaggle/working/submission.csv`.
+
+```bash
+uv run python comp/build_kit.py --wheels <dir> --processed <data>/processed/rsna_knee_abnormality
+uv run python comp/verify_kit.py                       # fails if the kit drifted from the repo
+uv run python comp/publish.py dataset -m "<message>"
+```
+
+## Open questions — settle before building around them
+
+- **Is submission notebook-only?** The sibling competition rejected file uploads with
+  `400 FAILED_PRECONDITION "only accepts Submissions from Notebooks"`, which is the entire reason the
+  kit-as-dataset machinery exists. Unverified here. If RSNA accepts a CSV upload, most of this is optional.
+- **Which wheels are actually missing** from Kaggle's image (pydicom? timm?) — probe with a throwaway
+  kernel rather than guessing. Pushes are unlimited; only submissions are rate-limited.
+- **The Efficiency Prize track** is a separate leaderboard with its own scoring. Decide whether to target it
+  before optimizing inference cost by accident.
+
+## Gotchas that cost real time (inherited, verify each still holds)
+
+- **T4, not the default P100** — set `"machine_shape": "NvidiaTeslaT4"` in `kernel-metadata.json`. Kaggle's
+  default GPU is a P100 (`sm_60`, Pascal), which modern torch builds (compiled for `sm_70`+) refuse with
+  *"no kernel image is available for execution on the device"*. The `--accelerator` CLI flag does **not**
+  override it; only the metadata field does. Valid tokens: `NvidiaTeslaT4`, `NvidiaTeslaP100`, `Tpu1VmV38`.
+  **Do not invent one** — an unrecognised token is not rejected, it silently degrades to the P100, and the
+  only symptom is that `sm_60` error thrown hours later from the first forward.
+- **`NvidiaTeslaT4` gives you TWO T4s** — `device_count() == 2`, each `sm_75` with 14.6 GB. There is no
+  separate "x2" shape to ask for; shard the work yourself.
+- **fp16 inference, not bf16** — the T4's `sm_75` has no bf16 at all. bf16 is a *training*-only choice
+  (gradient range); a forward has no gradients, so it buys nothing and costs mantissa.
+- **No internet** (`enable_internet: false`) — every dependency must be a wheel in the kit, and every
+  pretrained backbone must be a mounted Kaggle model. Every public notebook for this competition mounts
+  `metaresearch/dinov2/PyTorch/small/1` for exactly this reason.
+- **GPU kernels queue** — a run is not instant; poll `kernels status`.
+- **Probe cheaply, early.** Kernel *pushes* are unlimited; *submissions* are 5/day. Accelerator and
+  environment questions are answerable in a minute — do not learn them six hours into a run.
