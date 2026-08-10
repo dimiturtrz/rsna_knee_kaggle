@@ -12,6 +12,10 @@ dependencies = [
     "beartype",    # the runtime checker jaxtyping delegates to; wrap as @shapecheck in your types module (see devtools/README)
     "pydantic>=2",
     "pyyaml",      # paths.yaml — the one machine-local config (core/paths.py)
+    # The encoder and head (kneemri/model.py). CUDA build comes from the PyTorch index below, not PyPI
+    # (which is CPU-only): the local GPU is an RTX 5090 (sm_120) and needs cu128. Kaggle's own image
+    # ships torch 2.10.0+cu128 with sm_75 in its arch list, measured by comp/kernels/kneemri-probe.
+    "torch>=2.10",
 ]
 
 [project.optional-dependencies]
@@ -25,6 +29,9 @@ submit = ["kaggle"]
 # `devtools` (`python -m devtools.graph.fitness …`); grimp/networkx arrive transitively. ast-grep/jscpd configs are
 # located from the install via `python -m devtools.tools.config`. Pin lives in .copier-answers.yml (devtools_ref).
 devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.27.1#subdirectory=sdlc-devtools"]
+
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/cu128"
 
 [build-system]
 requires = ["setuptools>=68"]

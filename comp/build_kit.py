@@ -24,9 +24,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=_REPO / "comp" / "kit")
     ap.add_argument("--weights", nargs="*", default=[], help="weight files under processed/")
-    ap.add_argument("--wheels", type=Path, required=True, help="dir holding the offline dependency wheels")
-    ap.add_argument("--processed", type=Path, required=True, help="processed data dir holding the weight files")
+    # Both optional, because the probe measured that Kaggle's image already carries pydicom, timm,
+    # transformers, cv2, SimpleITK, sklearn, scipy and polars — this competition may need no wheels at
+    # all, unlike the sibling one that needed six. A kit of pure source is a legitimate kit.
+    ap.add_argument("--wheels", type=Path, default=None, help="dir holding the offline dependency wheels")
+    ap.add_argument("--processed", type=Path, default=None, help="processed data dir holding the weight files")
     arguments = ap.parse_args()
+    if arguments.weights and arguments.processed is None:
+        ap.error("--weights needs --processed to say where the files live")
 
     out = arguments.out
     if out.exists():
@@ -34,8 +39,9 @@ def main() -> None:
     (out / _SOURCE_DIR).mkdir(parents=True)
     for package in _PACKAGES:
         shutil.copytree(_REPO / package, out / _SOURCE_DIR / package, ignore=shutil.ignore_patterns("__pycache__"))
-    for wheel in sorted(arguments.wheels.glob("*.whl")):
-        shutil.copy2(wheel, out / wheel.name)
+    if arguments.wheels is not None:
+        for wheel in sorted(arguments.wheels.glob("*.whl")):
+            shutil.copy2(wheel, out / wheel.name)
     for weight in arguments.weights:
         shutil.copy2(arguments.processed / weight, out / weight)
     (out / "dataset-metadata.json").write_text(
