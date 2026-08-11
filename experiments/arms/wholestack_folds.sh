@@ -16,6 +16,8 @@
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
+# An arm asked for no folds has nothing to do, and saying so beats exiting 0 with an empty log.
+[ "$#" -gt 0 ] || { echo "ARM FAILED wholestack_folds (no folds given)"; exit 1; }
 
 for fold in "$@"; do
   run_train "wholestack_fold${fold}" \

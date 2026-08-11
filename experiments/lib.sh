@@ -29,10 +29,13 @@ run_snapshot() {
   # truncated whole_stack.sh under a running bash, which died with "unexpected EOF while looking for
   # matching quote" and took a 2-hour arm with it. The repo has to stay editable while long work runs,
   # so the run gets its own immutable copy.
-  local arm="$1"
+  local arm="$1"; shift
   local snapshot="$LOGS/$(basename "$arm" .sh).running.sh"
   cp "$arm" "$snapshot"
-  ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot"
+  # "$@" is forwarded: an arm that takes arguments (which folds, which resolution) was being run with
+  # none, so its loop iterated zero times and it exited 0 with an empty log. A silent no-op is the
+  # worst failure available - the GPU simply sat idle and nothing reported anything.
+  ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot" "$@"
 }
 
 require() {
