@@ -28,6 +28,7 @@ from torch import Tensor, nn
 
 from kneemri.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.model import StudyModel
+from kneemri.objective import Objective
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
@@ -104,14 +105,13 @@ class Trainer:
         device: torch.device,
         unfreeze_last: int = UNFREEZE_LAST,
         augment_config: AugmentConfig | None = None,
-        *,
-        normalise_by_count: bool = False,
+        objective: Objective | None = None,
     ) -> None:
         self.model = model.to(device)
         self.device = device
         self.unfreeze_last = unfreeze_last
         self.augment_config = augment_config or AugmentConfig.geometric_only()
-        self.normalise_by_count = normalise_by_count
+        self.objective = objective or Objective()
         groups = self.model.parameter_groups(HEAD_LR, BACKBONE_LR, unfreeze_last)
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
@@ -304,21 +304,8 @@ class Trainer:
         scores: Float[Tensor, "b o"],
         weights: Float[Tensor, "b o"],
     ) -> Float[Tensor, ""]:
-        """Confidence-weighted BCE, normalised either by total weight or by element count.
-
-        BY WEIGHT (ours): a batch carrying little confidence does not take a full-sized step on almost
-        no evidence. BY COUNT (the public baseline's `.mean()`): the step size is a fixed scale that
-        does not depend on how confidently the batch happened to be labelled.
-
-        The two are not interchangeable in magnitude. With most weights below one, dividing by their
-        sum makes our gradients roughly twice theirs for the same batch — which interacts with the
-        learning-rate schedule, so the pair has to be measured together rather than one at a time.
-        """
-        elementwise = nn.functional.binary_cross_entropy_with_logits(logits, scores, reduction="none")
-        weighted = elementwise * weights
-        if self.normalise_by_count:
-            return weighted.mean()
-        return weighted.sum() / weights.sum().clamp(min=1.0)
+        """The scalar this step descends, as decided by whichever objective this run holds."""
+        return self.objective(logits, scores, weights)
 
     def save_partial(self, destination: Path, state: dict[str, Tensor], holdout: float, epoch: int) -> None:
         """Write the best weights so far, atomically, the moment they improve.

@@ -19,6 +19,7 @@ from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.objective import Objective, RankedObjective
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
@@ -52,6 +53,7 @@ class TrainingOptions:
     intensity_aug: bool = False
     weight_floor: bool = False
     normalise_by_count: bool = False
+    rank_weight: float = 0.0
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
     variant: str = SMALL
@@ -96,6 +98,14 @@ class TrainingOptions:
         parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise too")
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
         parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() not /weight-sum")
+        parser.add_argument(
+            "--rank-weight",
+            type=float,
+            default=0.0,
+            help="add a pairwise ranking term at this strength (0 = cross-entropy only). The metric is "
+            "a mean of per-label AUCs, which reads ORDER and discards calibration; this term pays only "
+            "for pairs of studies ordered the wrong way round.",
+        )
         parser.add_argument(
             "--slice-pooling",
             choices=("channels", "max"),
@@ -160,11 +170,16 @@ def main() -> None:
     encoder = ENCODERS[arguments.variant]
     model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS), design)
     scores = LabelScores()
+    objective = (
+        RankedObjective(arguments.rank_weight, normalise_by_count=arguments.normalise_by_count)
+        if arguments.rank_weight
+        else Objective(normalise_by_count=arguments.normalise_by_count)
+    )
     trainer = Trainer(
         model,
         device,
         augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
-        normalise_by_count=arguments.normalise_by_count,
+        objective=objective,
     )
     if arguments.ema:
         trainer.exponential_average()
@@ -231,6 +246,7 @@ def main() -> None:
                 "slice_pooling": arguments.slice_pooling,
                 "anatomical_prior": arguments.anatomical_prior,
                 "ema": arguments.ema,
+                "rank_weight": arguments.rank_weight,
                 "unfreeze_last": UNFREEZE_LAST,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),

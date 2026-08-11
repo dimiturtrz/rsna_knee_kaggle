@@ -7,6 +7,7 @@ import torch
 from torch import Tensor
 
 from kneemri.model import TARGETS, StudyModel
+from kneemri.objective import Objective, RankedObjective
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 from kneemri.trainer import AugmentConfig, Trainer
@@ -194,15 +195,24 @@ def test_intensity_perturbs_and_stays_in_range():
     assert float(out.max()) <= 1.0
 
 
-def test_loss_normalisation_modes_differ():
-    """By-weight and by-count are different scales, which is why they are measured as a pair."""
+def test_loss_uses_the_objective_the_run_was_given():
+    """The trainer must not carry its own copy of the rule — the objective decides, and it is held.
+
+    Written after `normalise_by_count` moved onto the objective: the old test set that attribute on the
+    TRAINER, where it now means nothing at all, and would have gone on passing while proving nothing.
+    """
+    # The targets must DIFFER between the two studies: identical readings separate no pair, so the
+    # ranking term would be zero and this test would compare the default objective against itself.
     logits = torch.zeros(2, len(TARGETS))
-    scores = torch.ones(2, len(TARGETS))
+    scores = torch.cat([torch.ones(1, len(TARGETS)), torch.zeros(1, len(TARGETS))])
     weights = torch.full((2, len(TARGETS)), 0.25)
-    by_weight = _trainer().loss(logits, scores, weights)
-    counted = _trainer()
-    counted.normalise_by_count = True
-    assert float(counted.loss(logits, scores, weights)) < float(by_weight)
+
+    torch.manual_seed(SEED)
+    ranked = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), objective=RankedObjective(1.0))
+    assert float(ranked.loss(logits, scores, weights)) != float(_trainer().loss(logits, scores, weights))
+    assert float(_trainer().loss(logits, scores, weights)) == float(Objective()(logits, scores, weights)), (
+        "the default trainer must descend plain weighted cross-entropy"
+    )
 
 
 def test_save_partial(tmp_path: Path):
