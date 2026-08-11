@@ -114,13 +114,34 @@ Ranked deliberately: the schedule and the diagnostic first, **members last** —
 predictable gain available and the least informative, and it would raise the number while leaving every
 open question exactly where it is.
 
+## The measured noise floor changes what is worth running (2026-08-11)
+
+Three seeds of one recipe on one split spread **0.0062**. Every knob-sized change this project has left
+is therefore invisible at n=1 — intensity augmentation, the weight floor, the label table and per-slice
+max all measured inside it, which means *no measured effect*, not *a small one*.
+
+Two rules follow, and they are the plan now:
+
+1. **Run only levers that could plausibly clear 0.006 on one fold.** Encoder size, epoch budget,
+   training-set size, resolution. Not head tweaks, not loss tweaks, not TTA variants.
+2. **Anything to be KEPT needs three seeds** — about twelve minutes at four minutes a run. Budget it
+   up front rather than discovering afterwards that an arm cannot be read.
+
+The corollary for ensembling: members two and three buy +0.0018 and +0.0007, and the best single member
+beats the three-member ensemble. Stacking members is no longer a lever, it is only an
+Efficiency-Prize liability.
+
 ## Open questions
 
 - **Is submission notebook-only?** (`knee-kca`) The entire kit-as-dataset design in `comp/` is contingent
   on it. Unverified — the overview page is JS-rendered.
 - **Which wheels are missing** from Kaggle's image (pydicom? timm?) (`knee-61q`). Probe, don't guess:
   pushes are unlimited, submissions are 5/day.
-- **Efficiency Prize** (`knee-5bv`) — a separate leaderboard. Target it deliberately or not at all.
+- **Efficiency Prize** (`knee-5bv`) — MEASURED: all 905 teams are ranked automatically, the best
+  accuracy on the board (0.940) sits at efficiency rank 638, and teams at exactly our 0.888 sit at
+  ranks 29–50. With the member curve flat, a one- or two-member entry is close to free. The remaining
+  unknown is whether the board scores a team's *selected* submissions, in which case a cheap entry
+  competes with the accurate one instead of adding to it.
 - **DINOv2 vs medical-pretrained** (`knee-zkz`) — the field defaulted to DINOv2 with no visible
   evidence against RadImageNet / MedicalNet / BiomedCLIP. Cheap, uncrowded, needs a harness first.
 - **Can we beat the shared LLM label tables?** Everyone mounts the same ones, so this is the one axis
