@@ -132,6 +132,10 @@ case a fast entry competes with the accurate one rather than adding to it.
   separate "x2" shape to ask for; shard the work yourself.
 - **fp16 inference, not bf16** — the T4's `sm_75` has no bf16 at all. bf16 is a *training*-only choice
   (gradient range); a forward has no gradients, so it buys nothing and costs mantissa.
+- **Mount every variant a member might need.** The trained kernel mounts DINOv2 small AND base, and
+  picks the mount matching each member's own recorded variant. Mounting one and loading the other is not
+  a loud failure: widths differ (384 vs 768), so it surfaces as a shape error during load if we are
+  lucky and as a silently wrong model if the head accepts it.
 - **No internet** (`enable_internet: false`) — every dependency must be a wheel in the kit, and every
   pretrained backbone must be a mounted Kaggle model. Every public notebook for this competition mounts
   `metaresearch/dinov2/PyTorch/small/1` for exactly this reason.
