@@ -14,7 +14,8 @@ question needs the leaderboard to answer it.
 | 2026-08-10 | `kneemri-probe` | 2 | passthrough `sample_submission` | — | not submitted | environment + corpus probe |
 | 2026-08-10 | `kneemri-graft-verify` | 6 | fingerprint check only | 20/20 @ 4.65e-06 | not submitted | proves the architecture port |
 | 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
-| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | our first real number |
+| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | trained with augmentation silently disabled |
+| 2026-08-11 | `kneemri-trained` | 3 | **OURS v2** — augmentation actually applied + OneCycle + overlap TTA | holdout mean **0.8269** | pending | +0.0107 local, every fold up |
 
 ## What counts as ours
 
@@ -64,6 +65,29 @@ a different series in a slot is a different image for the head to read.
 The measurement that would settle it: re-run the out-of-fold oracle logging which series filled each
 slot, and count how many studies have a tie at all. If ties are rare and the residual survives, the
 cause is somewhere else and this lead is dead — which is worth knowing just as much.
+
+## What the ablations say (fold 0, matched; ruler held at pilkwang)
+
+|  | pilkwang labels | v4_blend labels |
+|---|---|---|
+| geometric augmentation | **0.8202** | 0.8194 |
+| + intensity augmentation | **0.8221** | 0.8203 |
+
+Both imported ideas are null: intensity augmentation +0.0014 on average, better labels −0.0013, no
+interaction. Set against what fixing our own code was worth — augmentation never called +0.0110, the
+missing schedule +0.0061, the TTA default +0.0035 — **repairing what we had beat importing what others
+had by an order of magnitude.**
+
+That is not an argument against reading the field: the reading is what found the schedule, and the
+`.903` notebook is what made label quality checkable at all. It is an argument against assuming a
+published gain transfers. Every imported idea here either needed adapting or died on a mechanism
+specific to this architecture — channel-stacked slices, side-defined targets, a ViT that is not
+translation-equivariant, readers that are not independent.
+
+Intensity augmentation stays behind `--intensity-aug` rather than being deleted: the holdout is drawn
+from the same corpus as training, so it is structurally blind to the cross-scanner axis that transform
+exists for. It is worth one submission slot when a slot is being spent anyway — a claim that is only
+honest because it was written down before the result.
 
 ## The two oracles
 
