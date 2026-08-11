@@ -3982,6 +3982,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.key",
+      "label": "key",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.study_cache.StudyCache.load",
       "label": "load",
       "level": "method",
