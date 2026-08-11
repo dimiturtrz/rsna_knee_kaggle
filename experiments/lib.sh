@@ -94,6 +94,21 @@ wait_for() {
   until grep -q "$marker" "$file" 2>/dev/null; do sleep 60; done
 }
 
+wait_for_pid() {
+  # Block until a process exits. The gate of LAST resort - `wait_for` on a marker is the default.
+  #
+  # It exists because a marker is written by the arm's shell, not by the trainer, so a trainer that
+  # outlives its shell finishes without ever announcing it. That is a real state, not a hypothetical:
+  # cutting folds 2-3 out of a running queue meant killing the parent script while deliberately
+  # leaving its python child alive, and nothing was ever going to write that child's marker.
+  #
+  # Gates on the PID rather than the checkpoint file, because torch.save is not atomic - the .pt
+  # appears at the first byte written, and a queue that fires there hands the next arm a truncated
+  # file.
+  local pid="$1"
+  while kill -0 "$pid" 2>/dev/null; do sleep 60; done
+}
+
 wait_for_cache() {
   # Block until a cache is genuinely finished, keyed on its MASK file.
   #

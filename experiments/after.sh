@@ -10,14 +10,29 @@
 #
 #   nohup bash experiments/after.sh "ARM DONE compose_base" \
 #     "$(...)/experiments/compose_base.full.log" experiments/arms/whole_stack.sh &
+#
+# The marker may instead be `pid:<n>`, which gates on that process exiting and ignores <file-to-watch>.
+# Markers are written by an arm's SHELL, so a trainer that outlives its shell never announces itself -
+# gating on the PID is the only thing left that is true. Second choice, not first: a PID says a
+# process ended, never that it succeeded.
+#
+# An arm may carry its own arguments as ONE argv element: "experiments/arms/resolution.sh 448".
 source "$(dirname "$0")/lib.sh"
 
 MARKER="$1"; WATCH="$2"; shift 2
-require "$@"
+for entry in "$@"; do
+  require "${entry%% *}"   # the arm path is the entry up to its first argument
+done
 
 echo "waiting for '$MARKER' in $WATCH before running: $*"
-wait_for "$MARKER" "$WATCH"
-for arm in "$@"; do
-  echo "=== $arm ==="
-  run_snapshot "$arm"
+case "$MARKER" in
+  pid:*) wait_for_pid "${MARKER#pid:}" ;;
+  *) wait_for "$MARKER" "$WATCH" ;;
+esac
+for entry in "$@"; do
+  echo "=== $entry ==="
+  # Unquoted on purpose: an entry is "<arm.sh> [args...]" and has to word-split into run_snapshot,
+  # which forwards everything after the arm path to the arm itself.
+  # shellcheck disable=SC2086
+  run_snapshot $entry
 done
