@@ -332,6 +332,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.slot_ties",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.slot_ties",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.slot_ties",
+      "target": "kneemri.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.slot_ties",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.slots",
       "target": "kneemri.acquisition",
       "weight": 1
@@ -1430,6 +1454,54 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.slot_ties.SlotTies",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.slot_ties.SlotTies.__init__",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.SlotTies._contested_of",
+      "target": "kneemri.slot_ties.SlotTies.of_study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.SlotTies.of_study",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.slot_ties.main",
+      "target": "kneemri.slot_ties.SlotTies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.main",
+      "target": "kneemri.slot_ties.SlotTies.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.main",
+      "target": "kneemri.study_cache.StudyCache.planes_of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.slots.Slot",
       "target": "kneemri.acquisition.Acquisition",
       "weight": 1
@@ -1987,7 +2059,7 @@
       "role": null
     },
     {
-      "descendants": 31,
+      "descendants": 32,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2182,6 +2254,14 @@
       "descendants": 0,
       "id": "kneemri.slot_reader",
       "label": "slot_reader",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties",
+      "label": "slot_ties",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2512,6 +2592,14 @@
       "label": "SlotReader",
       "level": "class",
       "parent": "kneemri.slot_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies",
+      "label": "SlotTies",
+      "level": "class",
+      "parent": "kneemri.slot_ties",
       "role": "primary"
     },
     {
@@ -3604,6 +3692,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies._contested_of",
+      "label": "_contested_of",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.of_study",
+      "label": "of_study",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.slot_ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.slots.Slot.accepts",
       "label": "accepts",
       "level": "method",
@@ -3622,6 +3750,14 @@
       "descendants": 0,
       "id": "kneemri.slots.SlotScheme.assign",
       "label": "assign",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.contested",
+      "label": "contested",
       "level": "method",
       "parent": "kneemri.slots.SlotScheme",
       "role": null
