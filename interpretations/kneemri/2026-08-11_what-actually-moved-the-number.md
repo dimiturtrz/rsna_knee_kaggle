@@ -891,3 +891,63 @@ document treats as one of the two things that ever paid. A 36-epoch arm at 4e-5 
 
 That is the shape of the whole session in one line: the constants inherited from the reference were
 never measured, and each one that gets a flag turns out to be load-bearing.
+
+## Everything above is a knob inside one design, and the design is the problem
+
+The owner asked why two days of work moved the public score so little. Answering it properly demotes
+almost every section of this document, so it belongs at the end of it.
+
+**Where we actually stand.** Public LB 0.888, rank 367 of 1077. The public median is 0.819 and the
+leader is 0.942. We are comfortably above the median and 0.054 below the front — and 0.054 is *thirty
+times* the size of the largest lever measured today.
+
+**It is not a bug.** The one real bug — augmentation silently disabled — was found, fixed, and worth
++0.020, which is more than every method change in this document combined. That should have updated the
+priors much harder than it did: when bug-fixes dominate method work, the correct inference is that
+there are more bugs, not that the method work needs another arm.
+
+**It is not mainly the regimen.** pilkwang trains 60 epochs × 20 members; we train 24 × 5. Real, but
+five of our members already equal twenty of theirs on the leaderboard, so per member we are
+competitive. Call it 0.007, not 0.054.
+
+**It is that we replicated a design and then optimised inside it.** That design discards most of the
+data it is handed, and every number is already somewhere in this repo:
+
+| what we are given | what we use |
+|---|---|
+| ~180 acquired slices per study | **18 per training step** (6 slots × 3 consecutive) |
+| a median 30 slices per series | **12 cached** |
+| 24,371 series | **17.4% never reach a slot at all** |
+| millimetre-scale findings | **336 px over a 130 mm crop** ≈ 0.39 mm/pixel |
+
+A knob inside that family returns about 0.005 by construction. Rate (+0.0051), max pooling (+0.0038),
+ranking (+0.005), the weight floor (+0.0019), per-slice max (+0.0018) — the consistency of that
+magnitude across unrelated mechanisms is itself the evidence. They are not each independently
+unlucky; they are all bounded by the same thing.
+
+**The targeting error that allowed it** is recorded in `comp/SUBMISSIONS.md`: 0.899 was taken from a
+public notebook's title and called "the plateau", when on the actual leaderboard 0.899 is around
+100th place. We anchored on the best *published* artefact and treated it as the frontier.
+
+**Why that was easy to do, and is a real constraint:** the competition is live until 2026-10-22, so no
+top-solution write-ups exist and none will until it closes. The house rule is *gather SOTA → replicate
+→ merge → build past*. Here there is nothing to gather. Replication had to stop at the best public
+notebook, and the frontier has to be reached by reasoning about the data instead of by copying.
+
+**It also reinterprets the two occlusion anomalies.** Border-only scores 0.8006 against a whole-image
+0.8448 with centre-only at 0.8021 — I filed that as a possible periphery shortcut. Read against the
+table above it is more likely the same fact seen from another angle: a model that cannot resolve fine
+joint structure has nothing to lose when the joint is removed, so it leans on coarse global context.
+The 0.036 depth spread says the same thing from the third axis. Three findings, one cause.
+
+**What follows, and what stops.** Stop running arms whose mechanism is bounded by the family. Run only
+arms that leave it: whole-stack reading (18 → 72 slices per step), resolution (336 → 448), and routing
+every series rather than six fixed slots. Each carries a prediction written before the run — the
+resolution arm's is that the gain must concentrate in ACL/MCL/meniscus and be near zero for effusion
+and Baker's, or the resolution story is refuted.
+
+**The honest accounting for the day.** The public number moved 0.868 → 0.888, and all of it came from
+the augmentation fix, OneCycle and TTA — banked before the afternoon began. The afternoon produced
+three refutations (slice count, report-embedding supervision, encoder depth), two sub-bar keepers, a
+diagnosis, and three arms lost to process management. The refutations are worth something: each one is
+a plan not spent. None of it is worth a point on the leaderboard yet.
