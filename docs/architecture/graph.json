@@ -1785,6 +1785,12 @@
     {
       "kind": "calls",
       "source": "kneemri.train.main",
+      "target": "kneemri.model.StudyModel.recompute_activations",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
       "target": "kneemri.report_supervision.ReportSupervision.from_file",
       "weight": 1
     },
@@ -3420,6 +3426,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel.parameter_groups",
       "label": "parameter_groups",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel.recompute_activations",
+      "label": "recompute_activations",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
