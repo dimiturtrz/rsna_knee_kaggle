@@ -47,6 +47,7 @@ class TrainingOptions:
     batch: int = 12
     slices: int = 12
     seed: int = 2026
+    split_seed: int = 2026
     one_cycle: bool = False
     intensity_aug: bool = False
     weight_floor: bool = False
@@ -65,7 +66,15 @@ class TrainingOptions:
         parser.add_argument("--epochs", type=int, default=8)
         parser.add_argument("--batch", type=int, default=12)
         parser.add_argument("--slices", type=int, default=12)
-        parser.add_argument("--seed", type=int, default=2026)
+        parser.add_argument("--seed", type=int, default=2026, help="model init and data order ONLY")
+        parser.add_argument(
+            "--split-seed",
+            type=int,
+            default=2026,
+            help="fold assignment. SEPARATE from --seed on purpose: deriving the split from the "
+            "training seed gives every seed a different holdout, so two runs are not comparable and "
+            "cross-scoring them leaks training data.",
+        )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
         parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise too")
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
@@ -101,8 +110,12 @@ def main() -> None:
         identifiers,
         CONFIDENCE_FLOOR if arguments.weight_floor else 0.0,
     )
-    assignments = ReportFolds(arguments.folds, arguments.seed).assign(str(root.raw() / "train.csv"), identifiers)
-    training, holdout = ReportFolds(arguments.folds, arguments.seed).holdout(assignments, arguments.fold)
+    # The split is a property of the CORPUS, not of this run: it must not move when the model seed
+    # does. Deriving it from --seed gave seed 7 a fold-0 holdout sharing only 192 of 909 studies with
+    # seed 2026's, so their holdout numbers were never comparable and scoring one on the other's split
+    # was scoring a model on 717 studies it had trained on.
+    folds = ReportFolds(arguments.folds, arguments.split_seed)
+    training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
     logger.info(f"{len(identifiers)} studies: {len(training)} train / {len(holdout)} holdout (fold {arguments.fold})")
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 

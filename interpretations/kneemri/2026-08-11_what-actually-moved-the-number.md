@@ -18,30 +18,34 @@ leaderboard submission.*
 
 Five folds on the shipped recipe: **0.8269** against **0.8162**, +0.0107, every fold improved.
 
-## A correction to this table, found after writing it
+## A correction, and then a correction to the correction
 
-Fold 0 trained twice with an identical recipe and only the seed changed scores **0.8202** and
-**0.8323** — a spread of **+0.0121**. Every single-fold row above with an effect near ±0.002 is
-therefore *below the noise floor of one run*, and the honest verdict for those is **not detectable at
-n=1**, not "null". I wrote the stronger claim and closed two issues on it.
+I first read the seed runs as showing a **±0.0121 run-to-run spread** (0.8202 against 0.8323) and used
+it to downgrade every small row above to "not detectable at n=1".
 
-Matched seeds do not rescue it, which is the subtle part: fixing the seed fixes initialisation and data
-order, but every arm perturbs the random *stream* — augmentation draws differ — so the arms diverge
-stochastically much as different seeds would.
+**That reading was wrong, because of a bug in the trainer.** The fold split was derived from the
+TRAINING seed: `ReportFolds(folds, arguments.seed)`. So seed 7 did not train the same model on the same
+split — it trained on a *different split*, whose fold-0 holdout shares only **192 of 909** studies with
+seed 2026's. The two numbers were never measurements of the same thing, and the "seed variance" was
+mostly split difficulty.
 
-What survives unchanged is the five-fold result: **+0.0107 with all five folds improving** is a paired
-comparison across five independent splits, and five-for-five is not scatter. The bug fixes stand; the
-±0.002 rows do not support the weight I put on them.
+Worse, the member-count experiment built on top of it cross-scored those models on seed 2026's
+holdout, of which **717 studies were seed 7's training data**. That is why it reported an implausible
+0.8807 for a member whose own run logged 0.8323 — leakage, not ensembling.
 
-Resolving a 0.002 effect against a 0.012 spread would need roughly (0.012/0.002)² ≈ 36 paired runs —
-nine hours per cell. The right conclusion is not "measure it harder" but "too small to matter at our
-current distance from the frontier".
+**What is actually true, after fixing the split to be a property of the corpus (`--split-seed`):**
 
-The project's own rule says exactly this — *once a result works, multi-seed; never read signal into
-single-seed scatter*. I applied the first half and skipped the second.
+- The ablation arms all ran at seed 2026 and therefore shared one split. Those comparisons stand as
+  matched pairs, and the small effects (+0.0019, −0.0008) are real *as single-run measurements*.
+- The run-to-run noise floor is **still unmeasured**. I do not know whether ±0.002 is signal, and I
+  should stop implying I do in either direction.
+- The five-fold result stands: +0.0107 with five of five folds improving, all on one split family.
+- The marginal-member curve is **unmeasured**; the numbers it produced are void.
 
-**This also makes the member-count experiment more promising, not less:** a ±0.012 spread between
-independent runs is precisely the variance that rank-averaging exists to average away.
+The lesson is not the one I drew an hour ago. It is narrower and sharper: **a split is a property of
+the corpus, and anything that makes it move with a run's configuration silently destroys
+comparability** — and then quietly rewards you with better-looking numbers, which is the dangerous
+direction for a bug to fail in.
 
 ## The two findings that were bugs, not ideas
 

@@ -26,3 +26,16 @@ def test_parse_reads_a_separate_evaluation_ruler(monkeypatch: pytest.MonkeyPatch
     options = TrainingOptions.parse()
     assert options.labels == Path("a.csv")
     assert options.eval_labels == Path("b.csv")
+
+
+def test_parse_keeps_the_split_seed_independent_of_the_model_seed(monkeypatch: pytest.MonkeyPatch):
+    """Changing the model seed must NOT move the fold split.
+
+    This exists because it once did. `ReportFolds` was constructed with the training seed, so seed 7's
+    fold-0 holdout shared 192 of 909 studies with seed 2026's — the two runs' holdout numbers were
+    never comparable, and cross-scoring them evaluated a model on 717 studies it had trained on.
+    """
+    monkeypatch.setattr("sys.argv", ["train", "--labels", "a.csv", "--seed", "7"])
+    options = TrainingOptions.parse()
+    assert options.seed == 7
+    assert options.split_seed == 2026, "the split is a property of the corpus, not of the run"
