@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from kneemri.folds import ReportFolds
@@ -40,3 +41,15 @@ def test_holdout(tmp_path: Path):
     training, holdout = folds.holdout(assignments, fold=0)
     assert set(training.tolist()) & set(holdout.tolist()) == set()
     assert len(training) + len(holdout) == len(identifiers)
+
+
+def test_holdout_with_fold_minus_one_trains_on_everything():
+    """The final-fit mode: no fold is ever assigned -1, so nothing is held back.
+
+    Asserted rather than left implicit because train.py's --fold -1 depends on exactly this, and a
+    future change to how folds are numbered could take it away without any other test noticing.
+    """
+    assignments = np.array([0, 1, 2, 3, 4, 0, 1], dtype=np.int64)
+    training, holdout = ReportFolds(5, 2026).holdout(assignments, -1)
+    assert len(holdout) == 0
+    assert training.tolist() == list(range(len(assignments)))

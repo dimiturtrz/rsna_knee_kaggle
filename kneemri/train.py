@@ -63,7 +63,14 @@ class TrainingOptions:
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object."""
         parser = argparse.ArgumentParser(description=__doc__)
-        parser.add_argument("--fold", type=int, default=0)
+        parser.add_argument(
+            "--fold",
+            type=int,
+            default=0,
+            help="-1 trains on EVERY study: no fold is ever assigned -1, so the holdout comes out "
+            "empty and nothing is held back. That is the final-fit mode the public recipes use, and it "
+            "cannot report a score by construction - the last epoch is kept rather than the best one.",
+        )
         parser.add_argument("--folds", type=int, default=5)
         parser.add_argument("--epochs", type=int, default=8)
         parser.add_argument("--batch", type=int, default=12)
@@ -163,9 +170,16 @@ def main() -> None:
     for epoch in range(arguments.epochs):
         started = time.time()
         mean_loss = trainer.fit_epoch(corpus, targets, training, arguments.batch, generator)
-        predictions = trainer.predict(corpus, holdout, arguments.batch, generator)
-        per_label = scores.per_label(predictions, evaluation.scores[holdout])
-        mean = float(np.nanmean(list(per_label.values())))
+        # An empty holdout (--fold -1) has no score to rank epochs by, so the epoch number stands in:
+        # it increases every time, which makes the existing "keep the best" machinery keep the LAST
+        # state instead. That is the right choice for a final fit and needs no second code path.
+        empty: dict[str, float] = {}
+        per_label = (
+            scores.per_label(trainer.predict(corpus, holdout, arguments.batch, generator), evaluation.scores[holdout])
+            if len(holdout)
+            else empty
+        )
+        mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         logger.info("    %s", {name: round(value, 3) for name, value in per_label.items()})
         if mean > best:
