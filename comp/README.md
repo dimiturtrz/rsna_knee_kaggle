@@ -61,6 +61,12 @@ to import a newly extracted module, the MEMBERS dataset was pushed, and the kit 
 because the change felt like it was "only in the kernels", which is backwards. The kernels are a
 bootstrap that imports the kit, so a change to either is a change to both.
 
+**`build_kit.py` rebuilds the kit directory from scratch, so run it WITH `--wheels`.** Running it
+without produced a kit whose source was perfectly in sync and which could not import anything, because
+the jaxtyping wheels were gone — and `verify_kit.py` called that "safe to submit", since it only
+compared source. It now checks the required wheels too, which is what makes the gate below mean
+something.
+
 **This is now a gate, not advice.** `publish.py` runs the drift check in `main`, before authenticating
 and on every subcommand, so a stale kit cannot reach Kaggle by either route — including a members-only
 dataset push, which is how it escaped the first time. It fired on its first real run.

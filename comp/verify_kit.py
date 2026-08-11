@@ -22,6 +22,20 @@ _REPO = Path(__file__).resolve().parents[1]
 _KIT_SRC = _REPO / "comp" / "kit" / "kneemri_src"
 _PACKAGES = ("kneemri", "core")
 
+_KIT = _REPO / "comp" / "kit"
+
+_REQUIRED_WHEELS = ("jaxtyping", "wadler_lindig")
+"""Third-party imports our own source makes that Kaggle's base image does not carry.
+
+Probed from a kernel, not guessed: pydicom, timm, transformers, polars, cv2, SimpleITK, einops and
+sklearn are all present offline, and `jaxtyping` is not — which `kneemri.model` imports at module top,
+so the kernel dies at import without it. `wadler_lindig` is jaxtyping's own dependency.
+
+Checked here because `build_kit.py` rebuilds the kit directory from scratch: running it without
+`--wheels` produces a kit whose SOURCE is perfectly in sync and which still cannot import. That is
+exactly the failure this script exists to prevent, and it passed silently until the wheels were checked
+too."""
+
 
 def _sources(root: Path, package: str) -> dict[Path, Path]:
     """Every non-cache `.py` under `root/package`, keyed by its path relative to `root`."""
@@ -44,6 +58,11 @@ def drift() -> list[str]:
         problems.extend(
             f"orphaned in kit (deleted from repo): {relative}" for relative in kit_files.keys() - repo_files.keys()
         )
+    problems.extend(
+        f"missing wheel: {name} (kernel will fail at import; rebuild with --wheels)"
+        for name in _REQUIRED_WHEELS
+        if not list(_KIT.glob(f"{name.replace('_', '?')}-*.whl"))
+    )
     return problems
 
 
