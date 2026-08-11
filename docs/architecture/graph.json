@@ -1119,6 +1119,12 @@
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.run",
+      "target": "kneemri.ensemble.Ensemble.slices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.run",
       "target": "kneemri.ensemble.Ensemble.submission",
       "weight": 1
     },
@@ -2276,6 +2282,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.slices",
+      "label": "slices",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.submission",
       "label": "submission",
       "level": "method",
@@ -2454,6 +2468,14 @@
       "descendants": 0,
       "id": "kneemri.members.Member.pool",
       "label": "pool",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.slices",
+      "label": "slices",
       "level": "method",
       "parent": "kneemri.members.Member",
       "role": null
