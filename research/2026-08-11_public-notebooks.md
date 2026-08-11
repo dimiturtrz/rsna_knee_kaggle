@@ -56,8 +56,16 @@ own bugs** (augmentation never called, +0.0110; a fold split derived from the tr
 
 - **DINOv2-base.** They run base; we have only ever run small. 86M parameters against 22M. Running.
 - **EMA.** Universal in their notebooks; damps exactly the run-to-run wobble we measured at 0.0062.
-  Implemented (`kneemri/ema.py`), not yet wired.
-- **Checkpoint soup / final full-data fit.** The full-data fit is now available as `--fold -1`.
+  Wired 2026-08-11 (`--ema`), and measuring.
+- **Checkpoint soup — subsumed, not skipped.** A soup averages weights along one training trajectory,
+  which is what an EMA already computes online. Souping across our *seeds* would be a different and
+  worse thing: `--seed` reseeds the head's initialisation as well as the data order, so two seeds start
+  their heads in different basins and averaging them is not a soup, it is a collision. The shared
+  DINOv2 init means only the ENCODER halves would be legitimately soupable, and a head matched to a
+  soup of encoders it never saw is a new model, not an average. So EMA is our test of this mechanism.
+- **Final full-data fit.** Available as `--fold -1`. The place EMA should matter MOST, and for a reason
+  separate from variance: with no holdout, the run keeps its last epoch by construction, so the answer
+  depends entirely on where training happened to stop. An average removes that arbitrariness.
 - **The report reader itself.** Expensive. Gated behind a cheap power test first (`knee-5od`): if
   striking the current reader's own `UNK` calls — 27% of all pairs — cannot move our score by more than
   the noise floor, then label content is not our lever whatever they spend their lines on.
