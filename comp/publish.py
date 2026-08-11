@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from survey import KaggleApi, MissingToken  # noqa: TID251 - sibling script, kaggle/ is on sys.path[0]
+from verify_kit import drift  # noqa: TID251 - sibling script, as above
 
 _REPO = Path(__file__).resolve().parents[1]
 _BASE = "https://www.kaggle.com/api/v1"
@@ -65,6 +66,25 @@ class Publisher:
         guessed = mimetypes.guess_type(file.name)[0] or "application/octet-stream"
         self._request("PUT", str(slot["createUrl"]), file.read_bytes(), guessed)
         return str(slot.get("token", ""))
+
+
+def _refuse_if_stale() -> None:
+    """Halt any push while the kit's bundled source differs from this repo's.
+
+    Called from `main` rather than from each handler: it then covers every subcommand by construction
+    rather than by remembering, and it runs BEFORE authentication, so a stale kit fails in a second
+    without a token instead of after the credential check.
+
+    It guards a dataset push regardless of which dataset is named,
+    because the failure it exists to prevent was a push of the *members* dataset while the kit was the
+    thing that had gone stale. A kernel imports the kit; a members version is loaded by code from the
+    kit; so anything reaching Kaggle while the kit lags the repo is shipping a code path nobody here is
+    looking at. This is the README's "rebuild the kit whenever kneemri/ changes" turned into a gate,
+    because that sentence was already written when the run it warns about was lost.
+    """
+    problems = drift()
+    if problems:
+        raise SystemExit("kit is stale — run build_kit.py before publishing:\n  " + "\n  ".join(problems))
 
 
 def _uploadable(directory: Path, staging: Path) -> list[Path]:
@@ -150,6 +170,7 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> None:
     """Run one publish subcommand."""
     arguments = _parser().parse_args()
+    _refuse_if_stale()
     try:
         api = KaggleApi.from_environment()
     except MissingToken as error:

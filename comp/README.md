@@ -44,6 +44,10 @@ to import a newly extracted module, the MEMBERS dataset was pushed, and the kit 
 because the change felt like it was "only in the kernels", which is backwards. The kernels are a
 bootstrap that imports the kit, so a change to either is a change to both.
 
+**This is now a gate, not advice.** `publish.py` runs the drift check in `main`, before authenticating
+and on every subcommand, so a stale kit cannot reach Kaggle by either route — including a members-only
+dataset push, which is how it escaped the first time. It fired on its first real run.
+
 ## Open questions — settle before building around them
 
 - **Is submission notebook-only?** The sibling competition rejected file uploads with
