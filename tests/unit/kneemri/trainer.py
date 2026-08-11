@@ -79,25 +79,6 @@ def test_loss():
     assert float(trainer.loss(logits, scores, weights)) > 0.0
 
 
-def test_area_under_curve():
-    """A perfect ranking scores 1, a reversed one 0, and a label with one class is undefined."""
-    trainer = _trainer()
-    truth = np.array([0, 0, 1, 1], dtype=np.int64)
-    assert trainer.area_under_curve(np.array([0.1, 0.2, 0.8, 0.9]), truth) == 1.0
-    assert trainer.area_under_curve(np.array([0.9, 0.8, 0.2, 0.1]), truth) == 0.0
-    assert np.isnan(trainer.area_under_curve(np.array([0.5, 0.6]), np.array([1, 1], dtype=np.int64)))
-
-
-def test_evaluate():
-    """Per-label AUC against the graded targets binarised at their midpoint."""
-    trainer = _trainer()
-    predictions = np.tile(np.array([[0.1], [0.9]]), (1, len(TARGETS)))
-    scores = np.tile(np.array([[0.0], [1.0]], dtype=np.float32), (1, len(TARGETS)))
-    per_label = trainer.evaluate(predictions, scores)
-    assert set(per_label) == set(TARGETS)
-    assert per_label["ACL"] == 1.0
-
-
 def _corpus(studies: int = 6, slices: int = 6, size: int = 14) -> CachedCorpus:
     generator = np.random.default_rng(SEED)
     images = generator.integers(0, 256, (studies, SLOTS, slices, size, size), dtype=np.uint8)

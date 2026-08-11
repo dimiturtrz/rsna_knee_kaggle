@@ -17,6 +17,7 @@ from transformers import AutoModel
 from core.paths import DataRoot
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS, StudyModel
+from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
@@ -67,6 +68,7 @@ def main() -> None:
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 
     model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS))
+    scores = LabelScores()
     trainer = Trainer(
         model,
         device,
@@ -86,7 +88,7 @@ def main() -> None:
         started = time.time()
         mean_loss = trainer.fit_epoch(corpus, targets, training, arguments.batch, generator)
         predictions = trainer.predict(corpus, holdout, arguments.batch, generator)
-        per_label = trainer.evaluate(predictions, targets.scores[holdout])
+        per_label = scores.per_label(predictions, targets.scores[holdout])
         mean = float(np.nanmean(list(per_label.values())))
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         logger.info("    %s", {name: round(value, 3) for name, value in per_label.items()})

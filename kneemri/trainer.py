@@ -24,7 +24,7 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import StudyModel
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
@@ -39,9 +39,6 @@ ONE_CYCLE_WARMUP = 0.15
 
 GROUP = 3
 """Consecutive slices stacked as the encoder's three channels."""
-
-MIDPOINT = 0.5
-"""Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""
 
 
 @dataclass(frozen=True)
@@ -301,34 +298,15 @@ class Trainer:
             return weighted.mean()
         return weighted.sum() / weights.sum().clamp(min=1.0)
 
-    def area_under_curve(self, scores: NDArray[np.float64], truth: NDArray[np.int64]) -> float:
-        """ROC AUC by rank, which is its definition — no sklearn, no calibration, no thresholds."""
-        positives, negatives = int(truth.sum()), int((1 - truth).sum())
-        if positives == 0 or negatives == 0:
-            return float("nan")
-        order = scores.argsort().argsort() + 1
-        return float((order[truth == 1].sum() - positives * (positives + 1) / 2) / (positives * negatives))
-
     def save_partial(self, destination: Path, state: dict[str, Tensor], holdout: float, epoch: int) -> None:
         """Write the best weights so far, atomically, the moment they improve.
 
         Holding the only copy in memory until the final epoch is how a run that has already produced
         its best epoch loses everything — which the OneCycle off-by-one demonstrated by raising on the
-        very last step of a thirty-epoch run. The temp-then-rename means a crash mid-write cannot leave
-        a truncated file behind either.
+        very last step of a thirty-epoch run. Temp-then-rename means a crash mid-write cannot leave a
+        truncated file behind either.
         """
         partial = destination.with_suffix(".partial")
         temporary = partial.with_suffix(".tmp")
         torch.save({"model": state, "holdout": holdout, "epoch": epoch}, temporary)
         temporary.replace(partial)
-
-    def evaluate(self, predictions: NDArray[np.float64], scores: NDArray[np.float32]) -> dict[str, float]:
-        """Per-label AUC on the holdout, against the graded targets binarised at their midpoint.
-
-        Binarising is only so an AUC exists at all; it decides which epoch is kept and never a submitted
-        score, and the metric is invariant to any increasing map of the predictions anyway.
-        """
-        return {
-            target: self.area_under_curve(predictions[:, column], (scores[:, column] > MIDPOINT).astype(np.int64))
-            for column, target in enumerate(TARGETS)
-        }
