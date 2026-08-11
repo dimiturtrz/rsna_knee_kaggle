@@ -505,3 +505,43 @@ together. Nothing knob-sized in this whole document reached a third of that.
 That is the submission recipe — base, 20 epochs, batch 12 — and a five-fold retrain is queued. The
 members currently on the leaderboard are small-at-8-epochs, so this is the first change since the
 augmentation bug that should move the public number rather than the holdout one.
+
+## Label content is not our lever, and the reader's own doubts are why
+
+The cheapest way to find out whether a 2000-line multilingual report parser is worth porting is not to
+port it. It is to ask whether label CONTENT can move our score at all — and the current reader hands us
+a free instrument for that, because it marks its own uncertain calls.
+
+`ConfidentLabels.struck()` clears the value of every `UNK`-verdict target, which drops it to weight zero
+in `Targets.load`. That strikes **27% of all (study, finding) pairs** — 84% of Synovitis, 56% of
+Fracture, 46% of Baker's, 6% of Medial Meniscus. If those 27% are noise, removing them should help or do
+nothing. If they carry signal, removing them should hurt.
+
+Matched pairs, small@24, one-cycle, weight floor, fold 0, **scored against the full table in both arms**
+so the ruler never moves:
+
+| seed | full labels | confident-only | Δ |
+|---|---|---|---|
+| 2026 | 0.8205 | 0.8132 | **−0.0073** |
+| 7 | 0.8248 | 0.8192 | **−0.0056** |
+
+Mean **−0.0065**, and — the part that matters — *the same sign in both seeds*. The unpaired noise floor
+is 0.0062, which a single arm here would not clear. But these are paired: same split, same schedule,
+same evaluation table, one variable. Two paired arms agreeing in sign and magnitude is a far stronger
+read than one number sitting 0.0065 from a floor.
+
+**Verdict on the report reader: deprioritised, and now for a measured reason rather than a hunch.** The
+labels this reader is least sure of are still worth more than nothing. That is what a soft, weighted
+target is FOR — an `UNK` does not enter training as a coin flip, it enters at low weight, and the model
+extracts the residual signal that survives. Deleting those rows throws away real supervision to remove
+imagined noise.
+
+### What this does NOT rule out
+
+It kills one specific idea — *filtering* the current labels by the current reader's confidence. It does
+not show that a BETTER reader is worthless. The 0.899 notebook's parser does not strike uncertain rows;
+it resolves more of them correctly, which is the opposite operation. This test says our supervision is
+not noise-limited in the way filtering would fix; it cannot say what a reader with Turkish negation
+scoping would add. Re-test that separately, and do not treat this as having closed it.
+
+Recorded so a later session does not re-run the same arms: `knee-5od` closed, `knee-crl` stays P2.

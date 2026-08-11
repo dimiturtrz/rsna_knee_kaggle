@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from kneemri.objective import Objective, RankedObjective
 from kneemri.train import TrainingOptions
 
 
@@ -39,3 +40,19 @@ def test_parse_keeps_the_split_seed_independent_of_the_model_seed(monkeypatch: p
     options = TrainingOptions.parse()
     assert options.seed == 7
     assert options.split_seed == 2026, "the split is a property of the corpus, not of the run"
+
+
+def test_objective():
+    """The flags choose the loss, and the default must stay plain weighted cross-entropy.
+
+    Checked without a GPU, a corpus or a downloaded encoder on purpose: the ranking arm sits behind a
+    queue, and a miswired objective would otherwise surface only after the card had been waited on.
+    """
+    assert type(TrainingOptions().objective()) is Objective
+    assert not TrainingOptions().objective().normalise_by_count
+
+    ranked = TrainingOptions(rank_weight=0.5).objective()
+    assert isinstance(ranked, RankedObjective)
+    assert ranked.weight == 0.5
+
+    assert TrainingOptions(rank_weight=0.5, normalise_by_count=True).objective().normalise_by_count

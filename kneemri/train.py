@@ -138,6 +138,17 @@ class TrainingOptions:
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
 
+    def objective(self) -> Objective:
+        """The loss policy these flags ask for.
+
+        On the options object rather than in `main` so the choice can be checked without a GPU, a
+        corpus or a downloaded encoder. The alternative is finding out that a queued arm was miswired
+        after it has already waited forty minutes for the card.
+        """
+        if self.rank_weight:
+            return RankedObjective(self.rank_weight, normalise_by_count=self.normalise_by_count)
+        return Objective(normalise_by_count=self.normalise_by_count)
+
 
 def main() -> None:
     arguments = TrainingOptions.parse()
@@ -170,16 +181,11 @@ def main() -> None:
     encoder = ENCODERS[arguments.variant]
     model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS), design)
     scores = LabelScores()
-    objective = (
-        RankedObjective(arguments.rank_weight, normalise_by_count=arguments.normalise_by_count)
-        if arguments.rank_weight
-        else Objective(normalise_by_count=arguments.normalise_by_count)
-    )
     trainer = Trainer(
         model,
         device,
         augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
-        objective=objective,
+        objective=arguments.objective(),
     )
     if arguments.ema:
         trainer.exponential_average()
