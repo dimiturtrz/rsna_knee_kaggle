@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from kneemri.attribution import Attribution, Holdout
+from kneemri.attribution import Attribution, Diagnostics, Holdout
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.model import TARGETS, StudyModel
 
@@ -74,15 +74,45 @@ def test_depth_profile():
     assert all(np.isfinite(value) for value in depth.values())
 
 
+def test_ring_importance():
+    """A ring that holds none of the signal must fall toward chance as it narrows.
+
+    The fixture writes its label into the centre of one slot, so every ring is blind to it. This is
+    the control the whole diagnostic rests on: if a ring scored well HERE, the measurement would be
+    reading something other than the pixels it kept.
+    """
+    rings = _attribution().ring_importance(cast(StudyModel, _SlotReader()), _holdout(), widths=(0.125, 0.25))
+
+    assert sorted(rings) == ["0.12", "0.25"]
+    assert rings["0.12"] < 0.6, "a ring holding no signal must be near chance"
+
+
+def test_depth_by_label():
+    """Each window is scored per diagnosis, so two labels can be seen to prefer different depths."""
+    starts = [0, 1]
+    by_label = _attribution().depth_by_label(cast(StudyModel, _SlotReader()), _holdout(starts))
+
+    assert sorted(by_label) == ["0", "1"]
+    assert list(by_label["0"]) == list(TARGETS), "every label keeps its own score at every depth"
+
+
 def test_report():
     """The report states the verdict each diagnostic supports rather than leaving numbers bare."""
     lines = _attribution().report(
-        {"0": 0.01, "2": 0.30}, {"whole": 0.83, "centre_only": 0.82, "border_only": 0.51}, {"0": 0.80, "3": 0.83}
+        Diagnostics(
+            slots={"0": 0.01, "2": 0.30},
+            regions={"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
+            rings={"0.05": 0.52, "0.25": 0.74},
+            depth={"0": 0.80, "3": 0.83},
+            depth_by_label={"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
+        )
     )
     text = "\n".join(lines)
     assert "spread 0.2900" in text
-    assert "border-only should be near chance" in text
+    assert "ring 0.05: 0.5200" in text
+    assert "the narrowest ring holds no joint" in text
     assert "slice 3" in text, "the best window has to be named, not left to be read off"
+    assert "1 distinct depths over 12 labels" in text, "agreement across labels is what gates acting on depth"
 
 
 def test_targets():
