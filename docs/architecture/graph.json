@@ -513,6 +513,12 @@
     {
       "kind": "import",
       "source": "kneemri.trainer",
+      "target": "kneemri.heartbeat",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
       "target": "kneemri.model",
       "weight": 1
     },
@@ -1963,6 +1969,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.heartbeat.Heartbeat",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.trainer.Trainer",
       "target": "kneemri.model.StudyModel",
@@ -2014,6 +2026,12 @@
       "kind": "construct",
       "source": "kneemri.trainer.Trainer.__init__",
       "target": "kneemri.ema.LiveWeights",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.trainer.Trainer.__init__",
+      "target": "kneemri.heartbeat.Heartbeat",
       "weight": 1
     },
     {
@@ -2079,6 +2097,12 @@
     {
       "kind": "calls",
       "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.heartbeat.Heartbeat.tick",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
       "target": "kneemri.targets.Targets.rows",
       "weight": 1
     },
@@ -2125,7 +2149,7 @@
       "role": null
     },
     {
-      "descendants": 32,
+      "descendants": 33,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2208,6 +2232,14 @@
       "descendants": 0,
       "id": "kneemri.folds",
       "label": "folds",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.heartbeat",
+      "label": "heartbeat",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2498,6 +2530,14 @@
       "label": "ReportFolds",
       "level": "class",
       "parent": "kneemri.folds",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.heartbeat.Heartbeat",
+      "label": "Heartbeat",
+      "level": "class",
+      "parent": "kneemri.heartbeat",
       "role": "primary"
     },
     {
@@ -3234,6 +3274,22 @@
       "label": "holdout",
       "level": "method",
       "parent": "kneemri.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.heartbeat.Heartbeat.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.heartbeat.Heartbeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.heartbeat.Heartbeat.tick",
+      "label": "tick",
+      "level": "method",
+      "parent": "kneemri.heartbeat.Heartbeat",
       "role": null
     },
     {
