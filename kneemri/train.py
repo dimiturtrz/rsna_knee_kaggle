@@ -16,6 +16,7 @@ import torch
 from transformers import AutoModel
 
 from core.paths import DataRoot
+from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.scores import LabelScores
@@ -25,8 +26,6 @@ from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.trainer import UNFREEZE_LAST, AugmentConfig, Trainer
 
-DINOV2 = "facebook/dinov2-small"
-DIM = 384
 GROUP = 3
 
 logger = logging.getLogger(__name__)
@@ -54,6 +53,7 @@ class TrainingOptions:
     normalise_by_count: bool = False
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
+    variant: str = SMALL
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
     out: Path | None = None
@@ -103,6 +103,12 @@ class TrainingOptions:
             action="store_true",
             help="start each diagnosis's slot attention from how the finding is actually read",
         )
+        parser.add_argument(
+            "--variant",
+            choices=tuple(ENCODERS),
+            default=SMALL,
+            help="DINOv2 size. base is 86M parameters and 768-wide against small's 22M and 384.",
+        )
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
@@ -136,7 +142,8 @@ def main() -> None:
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 
     design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
-    model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS), design)
+    encoder = ENCODERS[arguments.variant]
+    model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS), design)
     scores = LabelScores()
     trainer = Trainer(
         model,
@@ -190,7 +197,7 @@ def main() -> None:
                 "band": list(SLICE_BAND),
                 "slots": [slot.name for slot in SLOTS],
                 "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
-                "variant": "small",
+                "variant": encoder.variant,
                 "pool": "cls_mean",
                 "slice_pooling": arguments.slice_pooling,
                 "anatomical_prior": arguments.anatomical_prior,

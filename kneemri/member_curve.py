@@ -29,6 +29,7 @@ from numpy.typing import NDArray
 from transformers import AutoModel
 
 from core.paths import DataRoot
+from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
 from kneemri.folds import ReportFolds
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions
@@ -37,9 +38,6 @@ from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
 from kneemri.targets import Targets
-
-DINOV2 = "facebook/dinov2-small"
-DIM = 384
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +100,10 @@ def main() -> None:
     scores = LabelScores()
     per_member = []
     for checkpoint in arguments.checkpoints:
-        member = predictions.load(checkpoint, AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS))
+        encoder = ENCODERS[
+            str(torch.load(checkpoint, map_location="cpu", weights_only=True).get("config", {}).get("variant", SMALL))
+        ]
+        member = predictions.load(checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS))
         scored = predictions.predict(member, images, mask, starts, IMAGE_SIZE)
         per_member.append(scored)
         logger.info("%s alone: %.4f", checkpoint.name, scores.mean(scored, truth))
