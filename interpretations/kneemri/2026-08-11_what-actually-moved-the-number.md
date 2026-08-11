@@ -355,3 +355,30 @@ manufacturer ranking is not itself established; the honest claim is that variati
 size exists between sites and that language is confounded with it. That is enough to change what to
 build: a nine-language label parser is aimed at the language reading, and the language reading is the
 one the evidence does not isolate. It should not be started on this evidence.
+
+
+## The encoder is the first lever in this session to clear the noise floor
+
+DINOv2-**base** against DINOv2-**small**, matched on split, ruler, recipe, epochs and batch:
+
+| encoder | parameters | holdout | epoch |
+|---|---|---|---|
+| small | 22M | 0.8081 | 55 s at batch 12 |
+| base | 86M | **0.8166** | 56 s at batch 12 |
+
+**+0.0085**, against a measured floor of 0.0062. It is the only change this session that clears it, and
+it is still one seed — a second is queued, because the whole point of measuring the floor was to stop
+reading single draws as findings.
+
+Two things worth keeping from how it was run.
+
+**It nearly ran confounded.** The first attempt used `--batch 6` out of caution about a larger model,
+while every arm it would have been compared against used batch 12 — encoder size and batch size varying
+together, which is the same class of error as the different-rulers one further up this file. It was
+caught seven minutes in and rerun. Batch 12 also turned out to use 13.7 GB of 32 and run **four times
+faster** per epoch, so the caution cost validity and wall-clock at once.
+
+**Base looks undertrained at eight epochs.** Its curve was still climbing at the end — 0.8097, 0.8123,
+0.8166, 0.8162 over the last four epochs, where small had flattened. A 20-epoch base arm is queued on
+that basis: the mechanism (four times the parameters need more steps to fit) is stated in advance rather
+than fitted to whatever the run returns.
