@@ -27,12 +27,25 @@ of which removes a design choice rather than adding one:
 
 | metric | baseline | target | current |
 |---|---|---|---|
-| mean of 12 AUCs (public LB) | 0.5 (constant) · 0.819 median · 0.888 graft | 0.942 (leader) | **0.868** (ours, rank 393/1061) |
-| per-member holdout AUC | — | 0.8398 (theirs) | **0.8162** (ours) |
+| mean of 12 AUCs (public LB) | 0.5 (constant) · 0.819 median · 0.888 graft | 0.942 (leader) | **0.888** (ours, equalling the 20-member graft with 5 of our own) |
+| per-member holdout AUC (proxy ruler) | 0.8081 (small@8) | — | **0.8283** base+ranking · 0.8304 large+depth+ranking |
 | worst single-label AUC | 0.5 | — | 0.742 (Lateral Meniscus) |
 | submission path works end to end | — | proven | proven (both scored) |
 
 Track the **worst label**, not only the mean — that is where the 1/12 is being forfeited.
+
+**Two things about the second row, both established 2026-08-11 and both load-bearing:**
+
+1. **It is measured with the wrong ruler.** `train.csv` carries the twelve radiologist annotations for
+   exactly 58 studies (1.32% of cells, all-or-nothing), and RSNA states the evaluation set is
+   radiologist-annotated. So every local number is agreement with LLM-read *report* labels, and it
+   cannot be fixed locally — the 58 are trained on at weight 3.0, and the dozen in fold 0's holdout sit
+   in the ±0.17 Hanley-McNeil regime. **The local number decides WHICH recipe to submit; only the
+   leaderboard decides whether it is better.** The two ledger rows carrying both numbers suggest the
+   proxy COMPRESSES by ~2x (local +0.0107 → LB +0.020), on two confounded points.
+2. **A result needs ~1.5% absolute.** Nothing measured here has ever cleared that as a single change —
+   not base (+0.0085), not 8→24 epochs (+0.0068), not the ranking term (+0.0067/+0.0036/+0.0028). They
+   are *directional*. What clears the bar is the CUMULATIVE 0.8081 → 0.8283 = **+0.0202**.
 
 ## Approach
 
@@ -162,3 +175,27 @@ Efficiency-Prize liability.
   build/normalise/query, locked test sets. The closest existing code to this task's data layer.
 - `../biohub_kaggle` — the graft pattern (mount a competitor's trained weights as a dataset), and the
   kernel gotchas now recorded in `comp/README.md`.
+
+## Where the constraint sits now (2026-08-11)
+
+**Supervision-limited, not capacity-limited.** Capacity was the only axis that ever paid here, and it
+has stopped: base → large is +0.0021 for 3.5x the parameters, and large *peaks at epoch 10* then gives
+back 0.009 while small and base peak at 13-15 and hold. A model that overfits a third of the way
+through has more capacity than the labels can constrain — and 98.7% of those labels are read out of
+report text.
+
+That reading is what orders the current queue, and each item is falsifiable:
+
+| running | why it should pay, if the reading is right |
+|---|---|
+| slice coverage 12 → 20 | adds EVIDENCE, not parameters: 89% of series have more than 12 slices inside the 0.20-0.80 band we chose to read, so a third of it is discarded |
+| report supervision | 12 numbers → the whole report (median 129 words, twelve languages). More supervision per study, at zero inference cost |
+| full-data fit | 4,407 studies against 3,527 — more supervision, not more model |
+| encoder rate bracket | should be **neutral to negative**. If a faster encoder helps materially, this whole reading is wrong and the encoder was simply frozen too hard |
+
+**What is closed.** Label *filtering* (refuted on two matched seeds, −0.0065), the anatomical prior
+(neutral), EMA (+0.0010), encoder depth at the inherited rate (uninterpretable — see the bracket),
+fold ensembling (flat member curve, and the owner has ruled out folds).
+
+**What is NOT ruled out.** A better report *reader* — that resolves uncertain rows rather than striking
+them, which is the opposite operation to the one refuted.
