@@ -12,6 +12,9 @@ _PRESENT = 0.5
 _ABSENT_LOGIT = -1e4
 """What an absent slot's attention logit becomes: negligible after softmax, finite in fp16."""
 
+REPORT_DIMS = 64
+"""Width of the report-embedding target — see `kneemri.report_embeddings` for why it is reduced."""
+
 _HIDDEN = 256
 """Width the slot embeddings are projected to before the per-diagnosis attention."""
 
@@ -38,7 +41,14 @@ class SlotHead(nn.Module):
     signal to learn that from. Where the supervision is coarse, so is the head.
     """
 
-    def __init__(self, dim: int, n_slot: int, n_out: int, prior: Float[Tensor, "o s"] | None = None) -> None:
+    def __init__(
+        self,
+        dim: int,
+        n_slot: int,
+        n_out: int,
+        prior: Float[Tensor, "o s"] | None = None,
+        report_dims: int = REPORT_DIMS,
+    ) -> None:
         super().__init__()
         hidden, p = _HIDDEN, _DROPOUT
         self.proj = nn.Sequential(nn.LayerNorm(dim), nn.Linear(dim, hidden), nn.GELU())
@@ -50,6 +60,10 @@ class SlotHead(nn.Module):
         # A parameter, not a buffer: the anatomy is where the query should START looking, and the data
         # is allowed to overrule it. Zeros when absent, so the prior costs nothing when it is not used.
         self.prior = nn.Parameter(torch.zeros(n_out, n_slot) if prior is None else prior.clone())
+        # Predicts the study's REPORT embedding from the same slot features the diagnoses read. It is
+        # always built and costs one small Linear, so no call site has to ask whether report
+        # supervision is switched on; an unused head simply receives no gradient.
+        self.report = nn.Linear(hidden, report_dims)
 
     @override
     def forward(self, x: Float[Tensor, "b s d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o"]:
@@ -61,3 +75,16 @@ class SlotHead(nn.Module):
         ctx = self.drop(torch.einsum("bos,bsh->boh", att, h))
         readout = self.out
         return (ctx * readout.weight.unsqueeze(0)).sum(-1) + readout.bias
+
+    def report_vector(self, x: Float[Tensor, "b s d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b r"]:
+        """Predict the study's report embedding from the mean of its PRESENT slots.
+
+        Averaged over the present slots rather than over the per-diagnosis contexts: a report describes
+        the whole study, so its target is a property of the study and not of any one finding's
+        attention. Masked, for the reason the attention is masked — an absent acquisition must not pull
+        the average toward whatever an unfilled slot happens to hold.
+        """
+        h = self.proj(x) + self.slot_emb
+        present = (mask >= _PRESENT).float().unsqueeze(-1)
+        pooled = (h * present).sum(dim=1) / present.sum(dim=1).clamp(min=1.0)
+        return self.report(pooled)

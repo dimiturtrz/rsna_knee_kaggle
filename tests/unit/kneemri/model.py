@@ -7,6 +7,7 @@ import torch
 from torch import Tensor
 
 from kneemri.model import POOL_PARTS, TARGETS, StudyDesign, StudyModel
+from kneemri.slot_head import REPORT_DIMS
 
 SEED = 2026
 DIM = 8
@@ -178,3 +179,29 @@ def test_load_trained_still_rejects_a_checkpoint_that_does_not_fit():
     state["head.out.weight"] = torch.zeros(3, 3)
     with pytest.raises(RuntimeError):
         model.load_trained(state)
+
+
+def test_slot_features(study_model: StudyModel):
+    """One embedding per slot, before any head reads them — the shape the two readouts share."""
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    features = study_model.slot_features(imgs, 14)
+    assert features.shape[:2] == (2, SLOTS)
+    assert torch.isfinite(features).all()
+
+
+def test_supervised(study_model: StudyModel):
+    """Both readouts come from ONE encoder pass, and the logits match plain `forward` exactly.
+
+    The equality is the contract: the fingerprint, the kernel and every published member read
+    `forward`, so a member fitted through `supervised` has to be the same function at inference.
+    """
+    model = study_model.eval()
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+
+    with torch.no_grad():
+        logits, report = model.supervised(imgs, mask, 14)
+        plain = model(imgs, mask, 14)
+
+    assert torch.allclose(logits, plain, atol=1e-6), "training and inference must be the same function"
+    assert report.shape == (2, REPORT_DIMS)

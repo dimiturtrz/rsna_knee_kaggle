@@ -20,6 +20,7 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
+from kneemri.report_supervision import ReportSupervision
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
@@ -54,6 +55,8 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     rank_weight: float = 0.0
+    report_weight: float = 0.0
+    report_vectors: Path | None = None
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
@@ -155,6 +158,16 @@ class TrainingOptions:
             "measured, and at 8e-6 the encoder barely moves - which is why our depth bracket came out "
             "neutral: unfreezing more blocks cannot help at a rate where no block moves.",
         )
+        parser.add_argument(
+            "--report-weight",
+            type=float,
+            default=0.0,
+            help="also predict each study's REPORT embedding, at this weight (0 = off). Our supervision "
+            "is twelve numbers where the report has a median of 129 words in twelve languages; this "
+            "term supervises the representation with the rest of it. Training-only - test.csv has no "
+            "Report column, so inference is unchanged.",
+        )
+        parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
@@ -213,6 +226,10 @@ def main() -> None:
         adaptation=arguments.adaptation(),
         objective=arguments.objective(),
     )
+    if arguments.report_weight and arguments.report_vectors:
+        trainer.report_supervision(
+            ReportSupervision.from_file(arguments.report_vectors, identifiers, arguments.report_weight)
+        )
     if arguments.ema:
         trainer.exponential_average()
     if arguments.one_cycle:
@@ -279,6 +296,7 @@ def main() -> None:
                 "anatomical_prior": arguments.anatomical_prior,
                 "ema": arguments.ema,
                 "rank_weight": arguments.rank_weight,
+                "report_weight": arguments.report_weight,
                 # The value this run USED, never the module constant. Recording the constant made the
                 # field a lie the moment the depth became a flag, and it is read back by the loader to
                 # decide how a member was fitted.

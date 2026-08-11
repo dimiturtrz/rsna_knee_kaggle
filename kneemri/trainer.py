@@ -29,6 +29,7 @@ from torch import Tensor, nn
 from kneemri.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.model import StudyModel
 from kneemri.objective import Objective
+from kneemri.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
@@ -141,6 +142,11 @@ class Trainer:
         # or may not want, and a sixth constructor argument trips the argument-count gate. The default
         # is a no-op object rather than None, so no call site has to test for one.
         self.average: LiveWeights = LiveWeights()
+        self.reports: NoReportSupervision = NoReportSupervision()
+
+    def report_supervision(self, reports: ReportSupervision) -> None:
+        """Also supervise the study representation by its report embedding."""
+        self.reports = reports
 
     def exponential_average(self, decay: float = DECAY) -> None:
         """Keep an EMA of the weights, and score and save from it rather than from the live ones."""
@@ -281,12 +287,14 @@ class Trainer:
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
             with torch.autocast("cuda", enabled=self.device.type == "cuda"):
-                logits = self.model(pixels, flags, corpus.image_size)
+                # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
+                # gradient when report supervision is off, so the loop needs no branch for it.
+                logits, report = self.model.supervised(pixels, flags, corpus.image_size)
                 loss = self.loss(
                     logits.float(),
                     torch.from_numpy(score).to(self.device),
                     torch.from_numpy(weight).to(self.device),
-                )
+                ) + self.reports(report.float(), batch)
             self.optimiser.zero_grad(set_to_none=True)
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimiser)

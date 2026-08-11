@@ -8,6 +8,8 @@ from torch import Tensor
 
 from kneemri.model import TARGETS, StudyModel
 from kneemri.objective import Objective, RankedObjective
+from kneemri.report_supervision import ReportSupervision
+from kneemri.slot_head import REPORT_DIMS
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 from kneemri.trainer import Adaptation, AugmentConfig, Trainer
@@ -266,3 +268,25 @@ def test_evaluated_without_an_average_is_a_no_op():
     with trainer.evaluated():
         assert torch.equal(trainer.model.head.out.weight.detach(), before)
     assert torch.equal(trainer.model.head.out.weight.detach(), before)
+
+
+def test_report_supervision():
+    """Attaching report supervision changes the loss a step descends, and the default does not.
+
+    The term is an auxiliary on the study representation, so it has to reach the loss without the
+    training loop asking whether it is switched on.
+    """
+    torch.manual_seed(SEED)
+    vectors = np.random.default_rng(SEED).normal(size=(6, REPORT_DIMS)).astype(np.float32)
+
+    plain = _trainer()
+    plain_loss = plain.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+
+    supervised = _trainer()
+    supervised.report_supervision(ReportSupervision(vectors, weight=1.0))
+    supervised_loss = supervised.fit_epoch(
+        _corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED)
+    )
+
+    assert supervised_loss != plain_loss, "the auxiliary term must reach the loss"
+    assert np.isfinite(supervised_loss)

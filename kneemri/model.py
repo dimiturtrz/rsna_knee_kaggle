@@ -111,6 +111,19 @@ class StudyModel(nn.Module):
         img_size: int | None = None,
     ) -> Float[Tensor, "b o"]:
         """Encode every slot image of every study in the batch, then aggregate per diagnosis."""
+        return self.head(self.slot_features(imgs, img_size), mask)
+
+    def slot_features(
+        self,
+        imgs: UInt8[Tensor, "b s g p q"],
+        img_size: int | None = None,
+    ) -> Float[Tensor, "b s d"]:
+        """One embedding per acquisition slot — everything before the head reads them.
+
+        Split out of `forward` so a training step can take BOTH readouts from one encoder pass. The
+        encoder is essentially the whole cost of a step, so computing it twice to also predict a report
+        embedding would have doubled training time to add an auxiliary loss.
+        """
         batch, slots, group = imgs.shape[:3]
         # "channels": three consecutive slices become the encoder's three channels — one forward per
         # slot. "max": each slice is encoded ALONE (replicated across the three channels the encoder
@@ -134,8 +147,22 @@ class StudyModel(nn.Module):
         x = (x - self.mean) / self.std
         tokens = self.backbone(pixel_values=x).last_hidden_state
         pooled = self._pool(tokens)
-        feat = pooled.reshape(batch, slots, group, -1).amax(dim=2) if per_slice else pooled.reshape(batch, slots, -1)
-        return self.head(feat, mask)
+        return pooled.reshape(batch, slots, group, -1).amax(dim=2) if per_slice else pooled.reshape(batch, slots, -1)
+
+    def supervised(
+        self,
+        imgs: UInt8[Tensor, "b s g p q"],
+        mask: Float[Tensor, "b s"],
+        img_size: int | None = None,
+    ) -> tuple[Float[Tensor, "b o"], Float[Tensor, "b r"]]:
+        """The diagnosis logits AND the predicted report embedding, from one pass over the encoder.
+
+        Training-only, and deliberately NOT what `forward` returns: the fingerprint, the kernel and
+        every published member read `forward`, so the inference contract stays exactly as it was and a
+        member fitted with report supervision loads into the old path unchanged.
+        """
+        features = self.slot_features(imgs, img_size)
+        return self.head(features, mask), self.head.report_vector(features, mask)
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
         """This model's output on a fixed synthetic bag, as a portable identity.
