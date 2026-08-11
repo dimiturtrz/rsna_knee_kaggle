@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 336 -> 448 px. A mechanism that could plausibly clear the 1.5% bar, unlike any knob measured so far.
+# 336 -> 392 px read from the 448 px cache. A mechanism that could plausibly clear the 1.5% bar,
+# unlike any knob measured so far. (448 px was the original target and does not fit — see below.)
 #
 # We read a 130 mm crop at 336 px, so a pixel is ~0.39 mm. A meniscal tear, a cruciate fibre
 # discontinuity and a cartilage defect are millimetre-scale. Five of the twelve targets are meniscus
@@ -65,7 +66,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # crash - it would fit a mostly-zero array and return a plausible, wrong answer to the resolution
 # question. The MASK is written by a single np.save after the decode loop returns, so it exists if and
 # only if the build finished.
-wait_for_cache "$SIZE"
+wait_for_cache "$CACHE_PX"
 
 # READ UNDER WHOLE-STACK, and the control moves with it: fold 0 whole-stack = 0.8457, not the
 # windowed lr5x_d6_s2026 = 0.8323 this arm was written against. Resolution and slice reading are
@@ -85,5 +86,6 @@ wait_for_cache "$SIZE"
 run_train "resolution_${SIZE}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack \
-  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations --vram-gb 22 \
+  --image-size "$CACHE_PX" --train-size "$SIZE" \
+  --backbone-lr 4e-5 --recompute-activations --vram-gb 28 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"
