@@ -102,8 +102,15 @@ If the curve is flat past two members, a one- or two-member submission is a top-
 nearly our current accuracy. If it is steep, the track is not worth the accuracy. **`knee-uxg` answers
 `knee-5bv`** — do not spend anything on inference cost until that curve exists.
 
-The open risk to check first: whether the efficiency board scores a team's *selected* submissions, in which
-case a fast entry competes with the accurate one rather than adding to it.
+**That risk is now settled, and the answer is favourable.** Joining the efficiency leaderboard to the
+public one on team name (897 teams in common): 61.3% have the same score on both, and **38.7% — 347
+teams — carry an efficiency score strictly BELOW their public best**, by a median of 0.018. It is never
+above. The efficiency entry is therefore not forced to be the team's best-accuracy submission: teams
+demonstrably hold both, including the efficiency leader (public 0.939, efficiency entry 0.934).
+
+So a cheap submission **adds** an efficiency candidate rather than displacing the accurate one, and the
+track costs us nothing but a submission slot. Get both leaderboards with
+`kaggle competitions leaderboard <slug> -d` and `kaggle kernels output ryanholbrook/rsna-knee-abnormalities-efficiency-lb`.
 
 ## Measured on 2026-08-10 by `kernels/kneemri-probe`
 
