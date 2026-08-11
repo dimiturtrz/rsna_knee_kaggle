@@ -76,3 +76,26 @@ own bugs** (augmentation never called, +0.0110; a fold split derived from the tr
 leaderboard as a csv. From it: all 905 teams are ranked automatically, the best accuracy anywhere on the
 board (0.940) sits at **efficiency rank 638**, and the teams scoring exactly our 0.888 sit at ranks
 **29, 33 and 50**. Runtime is weighted hard, and it is not a re-sort of the accuracy board.
+
+## What the host says, from the primary source
+
+`rsna.org` and the competition page, rather than a notebook's summary of them:
+
+- **The evaluation set is annotated by expert radiologists.** Our training labels are read out of
+  reports; the thing being scored is not. That is the ruler gap, now confirmed rather than inferred —
+  see `interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md`.
+- **Twelve languages, 16 sites, five continents**, over 5,000 exams. We had recorded *nine* languages,
+  which was a count of what we detected rather than of what is there. Corrected in `docs/PLAN.md`.
+- **The competition runs to 22 October 2026**, winners announced in November. So there are no published
+  winning solutions to gather yet: everything in this document is a mid-competition public notebook, and
+  the frontier it describes is the *shared* frontier, not the best one.
+- **$77,000 total, including a first-time efficiency award** — which is the second leaderboard our
+  efficiency kernel targets.
+
+The practical consequence of the third point: "SOTA gather → replicate → merge → build upon" has no SOTA
+to gather here. The public notebooks ARE the floor, we have replicated them, and the remaining distance
+to 0.940 is somebody's unshared work. That argues for spending effort on the axes our own measurements
+endorse rather than waiting for a write-up that will not exist until December.
+
+Sources: <https://www.rsna.org/news/2026/august/ai-challenge-knee-mri>,
+<https://www.kaggle.com/competitions/rsna-knee-abnormality-detection>

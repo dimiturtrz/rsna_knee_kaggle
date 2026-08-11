@@ -45,7 +45,9 @@ would otherwise have inherited.
 
 **Measured 2026-08-10: 4407 training studies, all 4407 carry a `Report`, and exactly 58 carry all
 twelve annotations.** 1.3%. This is a weak-supervision problem first and an imaging problem second —
-the labels for 98.7% of the corpus have to be read out of free text, in nine languages, or not exist.
+the labels for 98.7% of the corpus have to be read out of free text, in twelve languages, or not exist.
+(Twelve, not the nine we had counted: RSNA's own announcement states twelve languages across 16 sites
+on five continents. Ours was a count of what we happened to detect, not of what is there.)
 
 And **`test.csv` has no `Report` column** — text is available when fitting and absent when predicting.
 That rules out a text branch at inference and leaves reports usable only as training targets, as
