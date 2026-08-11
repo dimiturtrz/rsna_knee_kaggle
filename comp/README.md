@@ -32,10 +32,17 @@ here, until they are one thing.
    adds the source root to `sys.path`, imports the pipeline, writes `/kaggle/working/submission.csv`.
 
 ```bash
-uv run python comp/build_kit.py --wheels <dir> --processed <data>/processed/rsna_knee_abnormality
+uv run python comp/build_kit.py --wheels <dir>         # rebuild FIRST, every time kneemri/ changes
 uv run python comp/verify_kit.py                       # fails if the kit drifted from the repo
-uv run python comp/publish.py dataset -m "<message>"
+cd comp && kaggle datasets version -p kit -m "<message>" --dir-mode zip
 ```
+
+**Rebuild the kit whenever `kneemri/` changes, not only when the weights change.** A kernel run was
+lost to `ModuleNotFoundError: No module named 'kneemri.submission'`: the kernels had been refactored
+to import a newly extracted module, the MEMBERS dataset was pushed, and the kit was not.
+`verify_kit.py` compares the kit against the repo and catches this in a second — it was skipped
+because the change felt like it was "only in the kernels", which is backwards. The kernels are a
+bootstrap that imports the kit, so a change to either is a change to both.
 
 ## Open questions — settle before building around them
 

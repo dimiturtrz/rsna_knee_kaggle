@@ -63,3 +63,19 @@ def test_load_applies_a_confidence_floor(tmp_path: Path):
     assert floored.weights[2, 0] == CONFIDENCE_FLOOR, "with a floor it keeps a quarter of the weight"
     # a fully-confident derived target is unchanged by the floor
     assert floored.weights[1, 0] > dropped.weights[1, 0]
+
+
+def test_pair(tmp_path: Path):
+    """Training and scoring tables are separable, so two arms can be judged with one ruler."""
+    derived_path, annotated_path = _tables(tmp_path)
+    other = tmp_path / "other.csv"
+    frame = pd.read_csv(derived_path)
+    for target in TARGETS:
+        frame[target] = 1.0 - frame[target]
+    frame.to_csv(other, index=False)
+
+    training, evaluation = Targets.pair(derived_path, other, annotated_path, ["a", "b", "c"])
+    assert training.scores[1, 0] != evaluation.scores[1, 0], "the ruler must be the OTHER table"
+
+    same_training, same_evaluation = Targets.pair(derived_path, None, annotated_path, ["a", "b", "c"])
+    assert same_training is same_evaluation, "no eval table means score on what you trained on"

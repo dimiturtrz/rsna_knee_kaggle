@@ -183,7 +183,7 @@ source = ["core", "kneemri"]
 # DICOM files into a 35.8 GB memory map and train fits a DINOv2 for hours. Both are exercised end to
 # end by the runs that produce the cache and the members, and their LOGIC lives in StudyCache and
 # Trainer, which are unit-tested. Covering them here would mean asserting on an argparse call.
-omit = ["kneemri/build_cache.py", "kneemri/train.py", "kneemri/package_members.py", "kneemri/diagnose_laterality.py"]
+omit = ["kneemri/build_cache.py", "kneemri/package_members.py", "kneemri/diagnose_laterality.py"]
 # <<< LOCAL-SLOT: coverage-scan
 
 [tool.coverage.report]

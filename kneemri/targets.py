@@ -76,6 +76,22 @@ class Targets:
                         weights[row, column] = ANNOTATED_WEIGHT
         return cls(scores, weights, identifiers)
 
+    @classmethod
+    def pair(
+        cls, labels: Path, eval_labels: Path | None, train_table: Path, identifiers: list[str], floor: float = 0.0
+    ) -> tuple["Targets", "Targets"]:
+        """The table to TRAIN on and the table to SCORE against, which are not always the same.
+
+        Scoring a run against the labels it trained on makes two arms incomparable: a holdout AUC can
+        rise because the labels agree with themselves more, not because the model improved. When the
+        training labels are the variable under test, the ruler has to be held fixed — and ideally held
+        at the table the interesting arm did NOT train on, so it earns no self-agreement credit.
+        """
+        training = cls.load(labels, train_table, identifiers, floor)
+        if eval_labels is None:
+            return training, training
+        return training, cls.load(eval_labels, train_table, identifiers)
+
     def rows(self, positions: NDArray[np.int64]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         """Scores and weights for a batch of study positions."""
         return self.scores[positions], self.weights[positions]
