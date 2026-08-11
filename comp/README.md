@@ -83,7 +83,16 @@ reflexively, its value was the stale-kit refusal, not the transport.
 export KAGGLE_CONFIG_DIR="$HOME/.kaggle"
 cd comp && kaggle datasets version -p members -m "<notes>" --dir-mode zip   # from INSIDE comp/
 cd comp && kaggle kernels push -p kernels/kneemri-trained
+cd comp && kaggle competitions submit rsna-knee-abnormality-detection \
+  -k dimiturnt/kneemri-trained -v <version> -f submission.csv -m "<what changed>"
 ```
+
+**A code submission needs an explicit kernel `-v <version>`.** Omitting it — which the Python API
+allows, `competition_submit_code(..., kernel=...)` with no `kernel_version` — answers **403 Forbidden**
+from `CreateCodeSubmission`, not a message naming the missing field. The same 403 shape also comes back
+for a competition slug that does not exist, so check the slug before assuming a permission problem:
+ours is `rsna-knee-abnormality-detection`, and a wrong guess made `ListSubmissions` 403 and
+`kaggle competitions list -s <guess>` return "No competitions found" while the credential was fine.
 
 **Run it from inside `comp/`.** `-p comp/members` fails with a mangled temp path
 (`comp/members_manifest.json.json`) — the CLI concatenates directory and filename on Windows.
