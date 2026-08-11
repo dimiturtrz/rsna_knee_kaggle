@@ -725,3 +725,38 @@ was invalid for exactly that reason. It is not the reading now.
 
 It does not resurrect the label-filtering idea, which was refuted twice over on matched seeds. Being
 supervision-limited means more or better-READ supervision, not less of it.
+
+## Seed 7 is worth +0.0038 on this fold, which invalidates a "best" of mine
+
+Arm J — base, every block trainable, ranking, **seed 7** — scored 0.8313, the highest number in this
+document. It is not an improvement, and the arm was mis-designed: it changed the unfreeze depth AND the
+seed against its comparator (`rankbase24_s2026`, 0.8283, depth 6, seed 2026).
+
+The seed is not free on this split. Every matched pair we have:
+
+| recipe | seed 2026 | seed 7 | Δ |
+|---|---|---|---|
+| small, 24 epochs | 0.8205 | 0.8248 | +0.0043 |
+| confident-only labels | 0.8132 | 0.8192 | +0.0060 |
+| EMA | 0.8217 | 0.8255 | +0.0038 |
+| small + ranking | 0.8272 | 0.8284 | +0.0012 |
+
+**Mean +0.0038, positive four times out of four.** Seed 7 draws a better model on fold 0 — or, more
+precisely, the pair (initialisation, data order) that seed 7 produces suits this holdout better.
+
+Subtracting it puts arm J at ≈0.8275 against 0.8283: **training every block of base is neutral to
+slightly negative**, which is what the depth bracket already said (+0.0008 at depth 12 on small).
+
+### The methodological consequence, which outlives this arm
+
+A seed is not a nuisance parameter here, it is worth as much as most of the ideas in this document.
+Three rules follow:
+
+1. **Never compare across seeds.** A cross-seed comparison carries a systematic ±0.004 that is larger
+   than every effect this project has measured except capacity.
+2. **A "new best" from a different seed is not a result** — this one survived about four minutes.
+3. The measured seed spread (0.0062 over three seeds, and +0.0038 between these two) is a floor for
+   *detectability*, and the reason the owner's 1.5% decision bar is the right one to plan against.
+
+I should have caught this when queueing the arm: it was written as "the stacked recipe, seed 7" without
+a seed-7 comparator existing for it.
