@@ -125,6 +125,17 @@ The residual 0.025 is an OPEN QUESTION, not a rounding error — a faithful pipe
 1e-6, as the fingerprint does. The likeliest cause is the slot tie-break when two candidate series have
 equal slice counts.
 
+## Provenance warning on the live entry
+
+The 0.888 submission's five members were trained and epoch-selected against a report-derived label
+table that is **no longer reproducible** — it was not on disk anywhere and had no fetch step (see
+`comp/README.md`). The members themselves are fine and the leaderboard score is real; what cannot be
+reproduced is the holdout number that chose their epochs, or any comparison between them and an arm
+trained today.
+
+Anything retrained from here uses `pilkwang/rsna-knee-llm-labels` → `report_labels_v2.csv`, which is
+fetched rather than remembered. Do not compare a new member's holdout against the old ones'.
+
 ## Gotchas paid for in full
 
 - **Submission is notebook-only.** `kaggle competitions submit -f submission.csv` returns 400. The

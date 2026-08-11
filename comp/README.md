@@ -73,9 +73,9 @@ dataset push, which is how it escaped the first time. It fired on its first real
 
 ## Open questions — settle before building around them
 
-- **Is submission notebook-only?** The sibling competition rejected file uploads with
-  `400 FAILED_PRECONDITION "only accepts Submissions from Notebooks"`, which is the entire reason the
-  kit-as-dataset machinery exists. Unverified here. If RSNA accepts a CSV upload, most of this is optional.
+- ~~**Is submission notebook-only?**~~ **Settled: yes.** `kaggle competitions submit -f submission.csv`
+  returns 400 here too; the working form is `-k <owner>/<kernel> -v <version> -f submission.csv`. The
+  kit-as-dataset machinery is therefore load-bearing, not optional. Recorded in `SUBMISSIONS.md`.
 - **The competition rules page is JavaScript-only** to every tool here — WebFetch returns the title, and
   `curl` returns a 5.6 KB SPA shell. The external-data clause is therefore *unread*. What we rely on is
   low-risk on its face: DINOv2 weights (which the competition itself mounts as a Kaggle model, and every
