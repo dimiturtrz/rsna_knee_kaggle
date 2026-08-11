@@ -8,6 +8,66 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.holdout_predictions",
+      "weight": 2
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.build_cache",
       "target": "core.paths",
       "weight": 1
@@ -490,6 +550,150 @@
       "kind": "references",
       "source": "kneemri.anatomy.SlotAffinity",
       "target": "kneemri.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.attribution.Attribution",
+      "target": "kneemri.attribution.Holdout",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.attribution.Attribution",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.attribution.Attribution",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.attribution.Attribution",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.Attribution.__init__",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution._mean",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.depth_profile",
+      "target": "kneemri.attribution.Attribution._mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.region_importance",
+      "target": "kneemri.attribution.Attribution._mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.slot_importance",
+      "target": "kneemri.attribution.Attribution._mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.depth_profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.region_importance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.slot_importance",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.study_cache.StudyCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.targets.Targets.load",
       "weight": 1
     },
     {
@@ -1735,7 +1939,7 @@
       "role": null
     },
     {
-      "descendants": 30,
+      "descendants": 31,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -1754,6 +1958,14 @@
       "descendants": 0,
       "id": "kneemri.anatomy",
       "label": "anatomy",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution",
+      "label": "attribution",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2013,6 +2225,22 @@
       "level": "class",
       "parent": "kneemri.anatomy",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution",
+      "label": "Attribution",
+      "level": "class",
+      "parent": "kneemri.attribution",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Holdout",
+      "label": "Holdout",
+      "level": "class",
+      "parent": "kneemri.attribution",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -2476,6 +2704,70 @@
       "label": "matrix",
       "level": "method",
       "parent": "kneemri.anatomy.SlotAffinity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution._mean",
+      "label": "_mean",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.depth_profile",
+      "label": "depth_profile",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.region_importance",
+      "label": "region_importance",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.slot_importance",
+      "label": "slot_importance",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.targets",
+      "label": "targets",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.attribution",
       "role": null
     },
     {
