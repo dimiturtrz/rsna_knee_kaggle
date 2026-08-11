@@ -40,6 +40,23 @@ def test_assign_admits_no_substitute_for_an_empty_slot(tmp_path: Path):
     assert "SAG_T1" not in chosen
 
 
+def test_contested(tmp_path: Path):
+    """A slot is contested when two candidates share the top slice count, and clear when one leads.
+
+    The tie is the whole point: `assign` resolves it by list order and the published members resolved
+    it by frame order, so a contested slot is where two pipelines can put different images.
+    """
+    same_a = _acquisition(tmp_path, "same_a", slices=12)
+    same_b = _acquisition(tmp_path, "same_b", slices=12)
+    planes = {"same_a": "Sagittal", "same_b": "Sagittal"}
+    assert SlotScheme().contested([same_a, same_b], planes)["SAG_FLUID_FS"] == 1
+
+    clear = _acquisition(tmp_path, "clear", slices=20)
+    planes["clear"] = "Sagittal"
+    assert SlotScheme().contested([same_a, clear], planes)["SAG_FLUID_FS"] == 0
+    assert SlotScheme().contested([same_a, same_b], planes)["AX_FLUID_FS"] == 0, "an empty slot is not contested"
+
+
 def test_presence(tmp_path: Path):
     """The mask is one flag per slot, in the fixed slot order the head's embedding assumes."""
     fluid = _acquisition(tmp_path, "fluid")

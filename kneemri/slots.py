@@ -90,6 +90,28 @@ class SlotScheme:
                 chosen[slot.name] = max(candidates, key=lambda acquisition: acquisition.slice_count)
         return chosen
 
+    def contested(self, acquisitions: list[Acquisition], planes: dict[str, str]) -> dict[str, int]:
+        """Per slot, whether its winner was a TIE on slice count — 1 if contested, 0 if clear.
+
+        `assign` breaks a tie with `max`, which returns the FIRST maximal element in list order. The
+        published members were routed by a pandas `sort_values` that takes the first in FRAME order.
+        Two different series in a slot means the head reads a different image, and nothing downstream
+        recovers it — which is the leading explanation for our data layer scoring 0.888 against the
+        public forks' ~0.899 on identical weights, and for the 0.025 out-of-fold residual.
+
+        This counts how often the ambiguity ARISES. If ties are rare and the residual persists, the
+        cause is elsewhere and the hypothesis dies cleanly, which is most of what it is worth.
+        """
+        contested = {}
+        for slot in self.slots:
+            counts = [
+                acquisition.slice_count
+                for acquisition in acquisitions
+                if slot.accepts(acquisition, planes.get(acquisition.series, ""))
+            ]
+            contested[slot.name] = int(bool(counts) and counts.count(max(counts)) > 1)
+        return contested
+
     def presence(self, chosen: dict[str, Acquisition]) -> list[float]:
         """The mask the head's softmax renormalises over: 1.0 where a slot was filled, 0.0 where not."""
         return [1.0 if slot.name in chosen else 0.0 for slot in self.slots]
