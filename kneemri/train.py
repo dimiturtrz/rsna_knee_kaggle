@@ -47,6 +47,7 @@ class TrainingOptions:
     epochs: int = 8
     batch: int = 12
     slices: int = 12
+    image_size: int = IMAGE_SIZE
     seed: int = 2026
     split_seed: int = 2026
     one_cycle: bool = False
@@ -85,6 +86,14 @@ class TrainingOptions:
         parser.add_argument("--epochs", type=int, default=8)
         parser.add_argument("--batch", type=int, default=12)
         parser.add_argument("--slices", type=int, default=12)
+        parser.add_argument(
+            "--image-size",
+            type=int,
+            default=IMAGE_SIZE,
+            help="resolution of the cache to train on. Selects the cache file AND is recorded in the "
+            "member's config and fingerprint, so a member can never advertise a reading it was not "
+            "fitted under.",
+        )
         parser.add_argument("--seed", type=int, default=2026, help="model init and data order ONLY")
         parser.add_argument(
             "--split-seed",
@@ -206,7 +215,7 @@ def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     root = DataRoot.from_config(arguments.paths)
-    cache = StudyCache(root.processed(), slices=arguments.slices)
+    cache = StudyCache(root.processed(), slices=arguments.slices, image_size=arguments.image_size)
     corpus, identifiers = cache.load()
     targets, evaluation = Targets.pair(
         arguments.labels,
@@ -294,7 +303,7 @@ def main() -> None:
             "targets": list(TARGETS),
             "slots": [slot.name for slot in SLOTS],
             "config": {
-                "img": IMAGE_SIZE,
+                "img": arguments.image_size,
                 "slices": arguments.slices,
                 "group": GROUP,
                 "crop_mm": CROP_MM,
@@ -316,8 +325,8 @@ def main() -> None:
                 "head_lr": arguments.head_lr,
                 "backbone_lr": arguments.backbone_lr,
             },
-            "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),
-            "fingerprint_config": {"img": IMAGE_SIZE, "n_slot": len(SLOTS), "group": GROUP, "seed": 2026},
+            "fingerprint": model.to(device).fingerprint(arguments.image_size, GROUP, device).tolist(),
+            "fingerprint_config": {"img": arguments.image_size, "n_slot": len(SLOTS), "group": GROUP, "seed": 2026},
         },
         destination,
     )

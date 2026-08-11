@@ -13,6 +13,7 @@ import pandas as pd
 
 from core.paths import DataRoot
 from kneemri.folds import ReportFolds
+from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,13 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slices", type=int, default=12, help="slices cached per slot")
+    parser.add_argument(
+        "--image-size",
+        type=int,
+        default=IMAGE_SIZE,
+        help="in-plane resolution. Bytes grow with the SQUARE of this, and the cache path carries it, "
+        "so a new resolution never disturbs an existing cache or the members fitted on it.",
+    )
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--split", default="train_series", help="which split to decode")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -43,7 +51,7 @@ def main() -> None:
         identifiers = [identifiers[index] for index in holdout]
         logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(identifiers)} studies")
 
-    cache = StudyCache(arguments.out or root.processed(), slices=arguments.slices)
+    cache = StudyCache(arguments.out or root.processed(), slices=arguments.slices, image_size=arguments.image_size)
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")

@@ -40,9 +40,20 @@ so everything below is **directional**, and only the cumulative total clears the
 | `severity_flat` | three YES levels collapsed to one | 0.8228 | −0.0044 | gradation is live signal |
 | `report_supervision` | report-embedding term @0.3 | 0.8219 | −0.0053 | **refuted** |
 | `report_supervision` | report-embedding term @1.0 | 0.8209 | −0.0063 | refuted, monotone |
-| `compose_small` | rate + pooling together | running | pred. +0.0089 | additivity test |
 | `compose_base` | rate + pooling on base | running | — | shipping candidate |
-| `whole_stack` | all 12 slices per step | queued | — | — |
+| `whole_stack` | all 12 slices per step | queued | — | leaves the design family |
+| `resolution` | 336 → 448 px | queued behind its cache | — | per-label prediction registered |
+
+`compose_small` was **dropped from the queue unrun**: an hour of GPU to confirm that two sub-bar
+levers add cannot change any decision.
+
+## Why the arms above mostly could not have mattered
+
+Every row that moved less than 0.006 is a knob *inside* one design, and that design uses about a tenth
+of the data it is handed — 18 of ~180 acquired slices per step, 12 cached of a median 30 per series,
+17.4% of series never routed to a slot at all, 336 px for findings a few voxels wide. We are at 0.888
+on the leaderboard against a 0.942 frontier, and a knob inside a family returns ~0.005 by
+construction. `whole_stack` and `resolution` are the first two arms that leave it. See `knee-jk3`.
 
 Interpretation of the whole ledger, including what each refutation rules out, lives in
 `interpretations/kneemri/`. The build log is git history.
