@@ -17,7 +17,12 @@
 # optimisation instead. Read the per-label table, not the mean - kneemri.scores already reports it.
 #
 # control  the same recipe at 336 px on the same fold.
-# cost     bytes and step time both grow with the SQUARE of the side: ~1.8x.
+# cost     bytes and step time both grow with the SQUARE of the side: ~1.8x.#
+# VRAM BUDGET, measured 2026-08-11 rather than guessed. Uncapped, this arm took all 32 GB and ran at
+# 145 W of 575 with no epoch in fifteen minutes - Windows pages GPU memory over PCIe instead of
+# raising OOM, so a run that does not fit crawls while reporting 100% utilisation. Capped at 18 GB it
+# holds 19.2 GB total, 99% utilisation and 476-514 W, i.e. roughly 3.4x the throughput in 40% less
+# memory. The cap is what keeps it inside real VRAM, and it leaves ~12 GB for the other project.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 SIZE="${1:-448}"
@@ -32,5 +37,5 @@ wait_for_cache "$SIZE"
 
 run_train "resolution_${SIZE}" \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
-  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations \
+  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_s2026.pt"

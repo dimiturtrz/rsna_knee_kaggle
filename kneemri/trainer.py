@@ -15,6 +15,7 @@ laterality normalisation that five of the twelve targets depend on, turning a me
 lateral one and teaching the model that the distinction is noise.
 """
 
+import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -33,8 +34,49 @@ from kneemri.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
+logger = logging.getLogger(__name__)
+
+BYTES_PER_GB = 1024**3
+"""So a VRAM budget can be stated in the unit the card is sold in."""
+
 WEIGHT_DECAY = 0.02
 SEED = 2026
+
+
+@dataclass(frozen=True)
+class DeviceBudget:
+    """The card a run may use, and how much of it it is allowed to hold.
+
+    A cap looks like a restriction and is actually a throughput fix, which is why it is a first-class
+    object rather than three lines in `main`. MEASURED 2026-08-11 on a 32 GB 5090, whole-stack reading
+    at batch 12:
+
+        uncapped   32.0 GB held, 145 W of 575, 100% "utilisation", NO epoch in fifteen minutes
+        18 GB cap  19.2 GB held, 470-514 W,     99% utilisation,    training normally
+
+    Windows pages GPU memory over PCIe rather than raising OOM, so a run that does not fit does not
+    fail - it crawls, while `nvidia-smi` reports full utilisation because a kernel is resident. Power
+    draw is the honest signal: a card doing real work draws its budget. Holding the run to a share of
+    the card keeps it inside physical VRAM, and turns the worst failure mode we have into an immediate
+    OutOfMemoryError.
+
+    The second reason is coexistence: another project trains on this same card, and an uncapped run
+    takes all of it.
+    """
+
+    vram_gb: float = 0.0
+    """0 leaves the card uncapped."""
+
+    def select(self) -> torch.device:
+        """The device to train on, already held to this budget."""
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if self.vram_gb and device.type == "cuda":
+            # An INDEX, not torch.device("cuda"): both torch calls reject an indexless device.
+            card = torch.cuda.current_device()
+            whole = torch.cuda.get_device_properties(card).total_memory / BYTES_PER_GB
+            torch.cuda.set_per_process_memory_fraction(min(self.vram_gb / whole, 1.0), card)
+            logger.info("VRAM capped at %.1f GB of %.1f GB", self.vram_gb, whole)
+        return device
 
 
 @dataclass(frozen=True)

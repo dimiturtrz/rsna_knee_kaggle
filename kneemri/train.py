@@ -26,7 +26,7 @@ from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Targets
-from kneemri.trainer import Adaptation, AugmentConfig, Trainer
+from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
 GROUP = 3
 
@@ -58,6 +58,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
+    vram_gb: float = 0.0
     report_weight: float = 0.0
     report_vectors: Path | None = None
     unfreeze_last: int = Adaptation().unfreeze_last
@@ -105,6 +106,16 @@ class TrainingOptions:
             "cross-scoring them leaks training data.",
         )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+        parser.add_argument(
+            "--vram-gb",
+            type=float,
+            default=0.0,
+            help="hard cap on this run's share of the card, in GB (0 = uncapped). Two reasons. It lets "
+            "another project hold the rest of the GPU. And it converts the WORST failure mode we have "
+            "into the best one: Windows pages GPU memory over PCIe rather than raising OOM, so a run "
+            "that does not fit crawls at a quarter of the power budget while reporting 100%% "
+            "utilisation. Under a cap, PyTorch raises OOM immediately instead.",
+        )
         parser.add_argument(
             "--recompute-activations",
             action="store_true",
@@ -221,7 +232,7 @@ def main() -> None:
 
     torch.manual_seed(arguments.seed)
     generator = np.random.default_rng(arguments.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = DeviceBudget(arguments.vram_gb).select()
 
     root = DataRoot.from_config(arguments.paths)
     cache = StudyCache(root.processed(), slices=arguments.slices, image_size=arguments.image_size)

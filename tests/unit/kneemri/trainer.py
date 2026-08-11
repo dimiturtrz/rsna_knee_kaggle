@@ -13,7 +13,7 @@ from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import REPORT_DIMS
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import GROUP, Adaptation, AugmentConfig, Trainer
+from kneemri.trainer import GROUP, Adaptation, AugmentConfig, DeviceBudget, Trainer
 
 SEED = 2026
 DIM = 8
@@ -313,3 +313,16 @@ def test_whole_stack():
 
     loss = per_slice.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
     assert np.isfinite(loss), "a whole-stack step must still train"
+
+
+def test_select():
+    """An uncapped budget still yields a device; the cap is applied only where there is a card.
+
+    The unit suite runs without a GPU, so this pins the contract that matters here — `select` is the
+    one place a run's device is decided, and it must work with no CUDA present rather than being a
+    CUDA-only path that silently never runs.
+    """
+    device = DeviceBudget().select()
+
+    assert device.type in {"cuda", "cpu"}
+    assert DeviceBudget(vram_gb=8.0).select().type == device.type, "a budget must not change WHICH device"
