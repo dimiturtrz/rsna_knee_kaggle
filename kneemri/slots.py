@@ -90,6 +90,23 @@ class SlotScheme:
                 chosen[slot.name] = max(candidates, key=lambda acquisition: acquisition.slice_count)
         return chosen
 
+    def unrouted(self, acquisitions: list[Acquisition], planes: dict[str, str]) -> list[Acquisition]:
+        """The series no slot accepts, which the model therefore never sees.
+
+        Six slots cover three planes x two weighting axes only partly: there is no AX_T1, no
+        AX_FLUID_NOFS and no COR_FLUID_NOFS. A study acquiring any of those loses them entirely, and
+        `assign` is silent about it because a slot with no candidate simply stays empty.
+
+        This is distinct from a slot LOSING a contest (`contested`): a contested slot still gets an
+        image, just possibly a different one than another pipeline would pick. An unrouted series
+        contributes nothing at all.
+        """
+        return [
+            acquisition
+            for acquisition in acquisitions
+            if not any(slot.accepts(acquisition, planes.get(acquisition.series, "")) for slot in self.slots)
+        ]
+
     def contested(self, acquisitions: list[Acquisition], planes: dict[str, str]) -> dict[str, int]:
         """Per slot, whether its winner was a TIE on slice count — 1 if contested, 0 if clear.
 

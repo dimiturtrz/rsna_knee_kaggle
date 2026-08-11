@@ -34,6 +34,41 @@ class SlotTies:
         study = Study.from_directory(directory, planes)
         return self.scheme.contested(study.acquisitions, planes)
 
+    def lost_of_study(self, directory: Path, planes: dict[str, str]) -> Counter[str]:
+        """What this study's unrouted series ARE, keyed by the predicate axes that failed to match.
+
+        Counting them is not enough to decide anything: a discarded localiser is worth nothing and a
+        discarded axial T1 may be worth a great deal. The key carries plane, weighting and fat
+        suppression so the answer says WHICH sequences the six-slot scheme cannot express, and the
+        slice total says how much imaging goes with them.
+        """
+        study = Study.from_directory(directory, planes)
+        lost: Counter[str] = Counter()
+        for acquisition in self.scheme.unrouted(study.acquisitions, planes):
+            plane = planes.get(acquisition.series, "unknown")
+            fluid = "fluid" if acquisition.fluid_sensitive else "t1"
+            suppression = "fs" if acquisition.fat_suppressed else "nofs"
+            lost[f"{plane}|{fluid}|{suppression}"] += 1
+            lost["__slices__"] += acquisition.slice_count
+        lost["__series__"] += len(study.acquisitions)
+        return lost
+
+    def lost_report(self, totals: Counter[str], studies: int) -> list[str]:
+        """The unrouted census, with the slice count that decides whether it matters."""
+        series = totals["__series__"]
+        lost = sum(count for key, count in totals.items() if not key.startswith("__"))
+        share = lost / max(series, 1) * PERCENT
+        lines = [f"{studies} studies, {series} series acquired, {lost} unrouted ({share:.1f}%)"]
+        for key, count in sorted(totals.items(), key=lambda item: -item[1]):
+            if not key.startswith("__"):
+                lines.append(f"  {key}: {count}")
+        lines.append(f"  slices in unrouted series: {totals['__slices__']}")
+        lines.append(
+            "  a discarded localiser is worth nothing and a discarded axial T1 may be worth a lot - "
+            "the SEQUENCE breakdown is the answer here, not the percentage"
+        )
+        return lines
+
     def report(self, totals: Counter[str], studies: int) -> list[str]:
         """The counts as lines, with the verdict each one supports stated rather than implied."""
         lines = [f"contested slots over {studies} studies:"]
@@ -52,6 +87,12 @@ class SlotTies:
             "in what they show. That is the next measurement, not this one"
         )
         return lines
+
+    @staticmethod
+    def _lost_of(argument: tuple[Path, dict[str, str]]) -> Counter[str]:
+        """Pool worker for the unrouted census."""
+        directory, planes = argument
+        return SlotTies().lost_of_study(directory, planes)
 
     @staticmethod
     def _contested_of(argument: tuple[Path, dict[str, str]]) -> dict[str, int]:
@@ -78,6 +119,7 @@ def main() -> None:
     parser.add_argument("--split", type=str, default="train_series")
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--studies", type=int, default=0, help="0 reads the whole corpus")
+    parser.add_argument("--lost", action="store_true", help="census the series no slot accepts")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -91,13 +133,16 @@ def main() -> None:
 
     ties = SlotTies()
     totals: Counter[str] = Counter()
+    worker = SlotTies._lost_of if arguments.lost else SlotTies._contested_of  # noqa: SLF001
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         work = ((directory, planes) for directory in directories)
-        for contested in pool.map(SlotTies._contested_of, work, chunksize=8):  # noqa: SLF001
-            totals.update({name: count for name, count in contested.items() if count})
-            totals["studies_with_any"] += int(any(contested.values()))
+        for counted in pool.map(worker, work, chunksize=8):
+            totals.update({name: count for name, count in counted.items() if count})
+            if not arguments.lost:
+                totals["studies_with_any"] += int(any(counted.values()))
 
-    for line in ties.report(totals, len(directories)):
+    lines = ties.lost_report(totals, len(directories)) if arguments.lost else ties.report(totals, len(directories))
+    for line in lines:
         logger.info("%s", line)
 
 

@@ -40,6 +40,21 @@ def test_assign_admits_no_substitute_for_an_empty_slot(tmp_path: Path):
     assert "SAG_T1" not in chosen
 
 
+def test_unrouted(tmp_path: Path):
+    """A series matching no slot predicate is reported as lost, and a routed one is not.
+
+    The scheme has no AX_T1, AX_FLUID_NOFS or COR_FLUID_NOFS, so an axial T1 is invisible to the
+    model - `assign` cannot say so, because a slot with no candidate just stays empty.
+    """
+    axial_t1 = _acquisition(tmp_path, "ax_t1", description="AX T1", repetition=500.0, echo=10.0, scan_options="")
+    sagittal = _acquisition(tmp_path, "sag")
+    planes = {"ax_t1": "Axial", "sag": "Sagittal"}
+
+    lost = SlotScheme().unrouted([axial_t1, sagittal], planes)
+
+    assert [acquisition.series for acquisition in lost] == ["ax_t1"]
+
+
 def test_contested(tmp_path: Path):
     """A slot is contested when two candidates share the top slice count, and clear when one leads.
 
