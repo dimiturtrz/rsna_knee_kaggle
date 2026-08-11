@@ -53,27 +53,37 @@ class Targets:
         `floor` sets what an unmentioned finding still pulls with: 0.0 drops it (our original
         behaviour), `CONFIDENCE_FLOOR` reproduces the public baseline's `0.25 + 0.75*conf`.
         """
-        derived = pd.read_csv(report_labels).set_index("StudyInstanceUID")
-        annotated = pd.read_csv(train_table).set_index("StudyInstanceUID")
+        # Aligned to OUR study order once per table, rather than looked up per (study, target). The
+        # loop this replaces ran 4,407 x 12 = 52,884 pandas scalar lookups and re-scanned `.columns`
+        # inside the inner loop; it also needed three `float(Any)` suppressions, because a `.at` scalar
+        # is untyped. Whole columns are typed, so both the cost and the suppressions go together.
+        index = pd.Index(identifiers)
+        derived = pd.read_csv(report_labels).set_index("StudyInstanceUID").reindex(index)
+        annotated = pd.read_csv(train_table).set_index("StudyInstanceUID").reindex(index)
 
         scores = np.full((len(identifiers), len(TARGETS)), 0.5, dtype=np.float32)
         weights = np.zeros((len(identifiers), len(TARGETS)), dtype=np.float32)
-        for row, identifier in enumerate(identifiers):
-            for column, target in enumerate(TARGETS):
-                if identifier in derived.index and target in derived.columns:
-                    value = derived.at[identifier, target]
-                    confidence = (
-                        derived.at[identifier, f"{target}__conf"] if f"{target}__conf" in derived.columns else 1.0
-                    )
-                    if pd.notna(value):
-                        scores[row, column] = float(value)  # pyrefly: ignore[bad-argument-type]
-                        raw = float(confidence) if pd.notna(confidence) else 1.0  # pyrefly: ignore[bad-argument-type]
-                        weights[row, column] = floor + (1.0 - floor) * raw
-                if identifier in annotated.index and target in annotated.columns:
-                    truth = annotated.at[identifier, target]
-                    if pd.notna(truth):
-                        scores[row, column] = float(truth)  # pyrefly: ignore[bad-argument-type]
-                        weights[row, column] = ANNOTATED_WEIGHT
+        # float64 for the confidence arithmetic, not float32. The loop this replaces computed
+        # `floor + (1 - floor) * raw` in Python floats and stored the float32 result; doing the
+        # multiply in float32 instead lands one ULP away on 22,102 of the pairs. Harmless to training,
+        # but it would make this refactor unprovable, and an equality oracle is worth more than an ULP.
+        ones = np.ones(len(identifiers), dtype=np.float64)
+        for column, target in enumerate(TARGETS):
+            if target in derived.columns:
+                value = derived[target].to_numpy(dtype=np.float32)
+                confidence = f"{target}__conf"
+                # A missing confidence COLUMN and a missing confidence CELL both mean "fully
+                # confident": the reader either does not report confidence at all, or reported none
+                # for this row. Neither is evidence of doubt.
+                raw = derived[confidence].to_numpy(dtype=np.float64) if confidence in derived.columns else ones
+                said = ~np.isnan(value)
+                scores[said, column] = value[said]
+                weights[said, column] = floor + (1.0 - floor) * np.nan_to_num(raw, nan=1.0)[said]
+            if target in annotated.columns:
+                truth = annotated[target].to_numpy(dtype=np.float32)
+                read = ~np.isnan(truth)
+                scores[read, column] = truth[read]
+                weights[read, column] = ANNOTATED_WEIGHT
         return cls(scores, weights, identifiers)
 
     @classmethod
