@@ -459,6 +459,30 @@ actually mirror, which is the opposite of what a broken mirror produces.
 
 But it leaves a real gap, and it is a big one: **the geometry rule is validated only where the tag also
 exists — that is, on Siemens and Philips — and it is the sole rule for the 24.8% of studies from
-vendors that never write the tag.** Nothing in this project has ever checked it there. A left/right
+vendors that never write the tag.** Nothing in this project had ever checked it there. A left/right
 error on a fifth of the corpus would suppress exactly the medial/lateral targets, and it would be
 invisible to every check run so far.
+
+### Checked, and the rule holds
+
+No eyeballing needed. After normalisation every knee should sit in one canonical orientation, so the
+*mean* coronal image of the tag-resolved vendor and of a geometry-only vendor should resemble each
+other and not each other's mirror. A knee is asymmetric enough for that to bite: the medial compartment
+carries the larger, more concave tibial plateau, and the lateral side has the fibular head.
+
+| vendor | tag present | corr vs Siemens mean | corr vs its MIRROR |
+|---|---|---|---|
+| Siemens (reference) | 84.3% | 1.000 | 0.780 |
+| Philips | 38.3% | 0.904 | 0.709 |
+| **GE** | **0.0%** | **0.925** | 0.730 |
+| **Toshiba** | **0.0%** | **0.913** | 0.721 |
+
+The 0.780 in the first row is the test's floor — Siemens against its own mirror — so a genuinely
+mirrored population would score at or below that. Every vendor scores 0.90+ upright and ~0.72 flipped.
+**The geometry rule agrees with the tag-resolved orientation on exactly the vendors that never write a
+tag.**
+
+What this does *not* rule out: it is a population-mean test, so it detects a systematic flip and not a
+sporadic one. A rule that mirrored a random 5-10% of studies would leave these numbers much as they
+are. It closes the question of whether a quarter of the corpus is upside down; it does not certify the
+rule study-by-study.
