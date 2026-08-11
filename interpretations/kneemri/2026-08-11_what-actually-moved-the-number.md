@@ -190,17 +190,53 @@ nothing above, for the reason given in the previous section.
 Note the baseline lands at 0.8081 where the ledger recorded 0.8221 for the same nominal recipe. That
 difference *is* the missing ruler, and it is why nothing here is compared upward.
 
-### The noise floor is a property of the ruler too
+### The noise floor is ~0.006, and it demotes most of this document
 
-The 0.0012 spread quoted above was measured on the lost table at 30 epochs. On `report_labels_v2` at 8
-epochs the same recipe gives **0.8081 at seed 2026 and 0.8121 at seed 7 — a spread of 0.0040**, three
-times larger. A third seed is running. If 0.0040 holds, per-slice max at +0.0018 is unambiguously
-inside the noise, and the anatomical prior's −0.0076 is about twice it rather than six times.
+Three seeds, one recipe, one split, the recovered ruler, scored identically with overlap TTA:
 
-Neither arm's verdict below is restated until that seed lands, but both should be read with the wider
-floor in mind. The general point is the one worth keeping: a noise floor measured under one ruler,
-epoch budget and split does not transfer to another, and quoting it as if it were a property of the
-method is how a single run gets promoted to a finding.
+| seed | holdout |
+|---|---|
+| 2026 | 0.8171 |
+| 7 | 0.8209 |
+| 13 | 0.8233 |
+
+**A spread of 0.0062** — five times the 0.0012 I measured on the lost table at 30 epochs, and enough to
+change several verdicts in this file. What survives it and what does not:
+
+- **+0.0110 (augmentation applied)** and **+0.0107 (five folds)** — still outside it. These stand.
+- **+0.0061 (OneCycle)** — comparable to the floor. Weaker than stated.
+- **+0.0019 (intensity aug), +0.0019 (floor), −0.0008 (labels), +0.0018 (per-slice max)** — all noise.
+  Not "small effects", *no measured effect*.
+- **−0.0076 (anatomical prior)** — about one seed spread. **That regression is not established either,**
+  and I called it "six times the noise floor" an hour ago on a floor that was wrong.
+
+The general lesson costs more than any row: **a noise floor is a property of the ruler, the epoch
+budget and the split, not of the method.** Quoting one measured elsewhere is how a single run gets
+promoted to a finding — which is exactly what I did with it, in both directions, within one session.
+
+The practical consequence is a change of strategy, not just of wording. At a floor of 0.006, every knob
+this project has left is unmeasurable at n=1. Either a change is big enough to clear 0.006 on one fold,
+or it needs multiple seeds per arm — and at ~4 minutes a run, that is affordable but it has to be
+budgeted deliberately rather than discovered afterwards.
+
+### Members two and three buy almost nothing
+
+Every subset of the three seed members above, rank-averaged:
+
+| members | mean | range | gain |
+|---|---|---|---|
+| 1 | 0.8204 | [0.8171, 0.8233] | — |
+| 2 | 0.8223 | [0.8211, 0.8237] | +0.0018 |
+| 3 | 0.8229 | — | +0.0007 |
+
+**The best single member (0.8233) beats the three-member ensemble (0.8229).** Ensembling here buys
+about 0.002 for three times the inference cost — less than the seed spread it is averaging over.
+
+One thing this does *not* measure: these three differ only by initialisation, trained on the same fold
+of the same data. Our submitted ensemble is five **fold** members, which also see different training
+data and should decorrelate more. So this is a lower bound on ensembling value, not a verdict on the
+submission — but it is the relevant number for the Efficiency Prize, where a one- or two-member entry
+at nearly full accuracy is worth ranks 29–50 while the same accuracy run expensively is worth 638.
 
 ### Per-slice max pooling: refuted at the size that mattered
 
