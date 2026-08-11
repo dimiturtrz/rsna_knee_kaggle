@@ -19,7 +19,11 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# 12 epochs to MATCH the control, not 8. One-cycle is defined over total_steps, so the epoch budget
+# sets the whole rate trajectory - an 8-epoch arm against a 12-epoch control varies the schedule as
+# well as the aggregation, and this arm's whole claim is that it varies one thing. 8 may well be the
+# better budget (both folds peaked at epoch 6), but that is a different arm.
 run_train slice_attention \
-  --fold 0 --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
+  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling attend --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/sliceattn_s2026.pt"
