@@ -19,8 +19,9 @@
 # both refuted - Synovitis is rarer (580 positives vs 767) with the corpus's lowest reader confidence
 # (0.189) and still scores 0.873. So MCL is hard to SEE, which is an imaging problem.
 #
-# CONTROL: lr5x_d6_s2026 = 0.8323, the same recipe at 336 px (channel stacking, rate 4e-5). Single
-# variable. NOT compared against the whole-stack members - those differ in the slice read as well.
+# CONTROL: wsfold0_e6 = 0.8457, the same whole-stack recipe at 336 px on the same fold. Single
+# variable. (This arm originally read a windowed 336 px control, lr5x_d6_s2026 = 0.8323; see the
+# note above the run for why the control moved.)
 #
 # THE PREDICTION, written before the run so it cannot be decided afterwards:
 #   the gain must CONCENTRATE in ACL, MCL, Medial Meniscus, Lateral Meniscus
@@ -48,7 +49,23 @@ require "$LABELS"
 # only if the build finished.
 wait_for_cache "$SIZE"
 
+# READ UNDER WHOLE-STACK, and the control moves with it: fold 0 whole-stack = 0.8457, not the
+# windowed lr5x_d6_s2026 = 0.8323 this arm was written against. Resolution and slice reading are
+# separate variables, so either control is single-variable; the whole-stack one is the better
+# question because it is the recipe we now ship. Asking it under the windowed reading would price
+# 448 px inside a design we have already left, and a win there would still have to be re-measured
+# before it could be used.
+#
+# 12 epochs, not 24: both whole-stack folds peaked at epoch 6, and one-cycle is defined over
+# total_steps, so an inflated budget leaves the rate far from annealed where the model converges
+# (knee-1je). The budget belongs to the recipe.
+#
+# BATCH STAYS 12 even though 448 px is ~1.8x the activations. The ranking term scores pairs WITHIN a
+# batch - 66 at batch 12, 28 at batch 8 - so shrinking the batch changes the objective and this stops
+# being a single-variable arm. If 22 GB does not hold it, Windows pages over PCIe rather than raising
+# OOM: watch img/s in the first minutes, not for a crash.
 run_train "resolution_${SIZE}" \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
-  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations --vram-gb 20 \
-  --labels "$LABELS" --out "$PROCESSED/res${SIZE}_s2026.pt"
+  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  --slice-pooling max --whole-stack \
+  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations --vram-gb 22 \
+  --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"
