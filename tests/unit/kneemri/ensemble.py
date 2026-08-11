@@ -23,12 +23,22 @@ class _Output:
 
 
 class _FakeBackbone(torch.nn.Module):
+    """A stand-in encoder whose tokens vary PER DIMENSION with the input.
+
+    An earlier version returned `base + mean(pixels)` — the same scalar added to every feature. The
+    head begins with a LayerNorm, which removes exactly that, so the stand-in made the model's output
+    independent of its pixels and no test could detect a change in pooling. A useful double has to
+    perturb the feature vector's SHAPE, not just its level.
+    """
+
     @override
     def forward(self, *, pixel_values: Tensor) -> _Output:
         n = pixel_values.shape[0]
-        column = pixel_values.mean(dim=(1, 2, 3)).reshape(n, 1, 1)
-        base = torch.arange(PATCHES + 1, dtype=torch.float32).reshape(1, -1, 1)
-        return _Output(last_hidden_state=(base + column).expand(n, PATCHES + 1, DIM).contiguous())
+        rows = pixel_values.mean(dim=(1, 3))[:, :DIM] if pixel_values.shape[2] >= DIM else None
+        if rows is None:
+            rows = pixel_values.mean(dim=(1, 3)).repeat(1, (DIM // pixel_values.shape[2]) + 1)[:, :DIM]
+        base = torch.arange(PATCHES + 1, dtype=torch.float32).reshape(1, -1, 1) * 0.01
+        return _Output(last_hidden_state=base + rows.reshape(n, 1, DIM))
 
 
 def _ensemble(tmp_path: Path) -> Ensemble:

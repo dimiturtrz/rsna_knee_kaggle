@@ -21,10 +21,12 @@ class _Output:
 
 
 class _FakeBackbone(torch.nn.Module):
-    """A stand-in encoder: deterministic tokens of the right shape, no download, no pretrained weights.
+    """A stand-in encoder whose tokens vary PER DIMENSION with the input.
 
-    It carries an `encoder.layer` list because that is the structure the freezing walks — a stand-in
-    that lacked it would let `parameter_groups` pass here and fail on the real DINOv2.
+    An earlier version returned `base + mean(pixels)` — the same scalar added to every feature. The
+    head begins with a LayerNorm, which removes exactly that, so the stand-in made the model's output
+    independent of its pixels and no test could detect a change in pooling. A useful double has to
+    perturb the feature vector's SHAPE, not just its level.
     """
 
     def __init__(self) -> None:
@@ -35,9 +37,11 @@ class _FakeBackbone(torch.nn.Module):
     @override
     def forward(self, *, pixel_values: Tensor) -> _Output:
         n = pixel_values.shape[0]
-        column = pixel_values.mean(dim=(1, 2, 3)).reshape(n, 1, 1)
-        base = torch.arange(PATCHES + 1, dtype=torch.float32).reshape(1, -1, 1)
-        return _Output(last_hidden_state=(base + column).expand(n, PATCHES + 1, DIM).contiguous())
+        rows = pixel_values.mean(dim=(1, 3))[:, :DIM] if pixel_values.shape[2] >= DIM else None
+        if rows is None:
+            rows = pixel_values.mean(dim=(1, 3)).repeat(1, (DIM // pixel_values.shape[2]) + 1)[:, :DIM]
+        base = torch.arange(PATCHES + 1, dtype=torch.float32).reshape(1, -1, 1) * 0.01
+        return _Output(last_hidden_state=base + rows.reshape(n, 1, DIM))
 
 
 @pytest.fixture
@@ -105,3 +109,44 @@ def test_parameter_groups(study_model: StudyModel):
     assert all(parameter.requires_grad for parameter in opened)
     frozen = [p for p in study_model.backbone.parameters() if not p.requires_grad]
     assert frozen, "the early blocks must be frozen"
+
+
+def test_forward_per_slice_pooling_differs_from_channel_stacking():
+    """The two aggregations are different functions, and a test double must be able to tell.
+
+    The first version of this could not: the stand-in encoder added the same scalar to every feature
+    dimension, and the head's opening LayerNorm removed it, so the model's output did not depend on
+    its pixels at all. A double has to perturb the feature vector's SHAPE to be worth anything.
+    """
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+    outputs = {}
+    for mode in ("channels", "max"):
+        torch.manual_seed(SEED)
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, slice_pooling=mode).eval()
+        with torch.no_grad():
+            outputs[mode] = model.forward(imgs, mask, 14)
+    assert not torch.allclose(outputs["channels"], outputs["max"]), "per-slice pooling must change the function"
+
+
+def test_forward_is_sensitive_to_its_pixels():
+    """A guard for the double itself: two different STRUCTURED images must give different logits.
+
+    Written because a degenerate stand-in silently made every pooling test vacuous — it added the same
+    scalar to every feature, and the head's opening LayerNorm removed it.
+
+    The images are structured rather than uniform on purpose. A uniform image drives this double to a
+    constant feature vector, which LayerNorm legitimately erases; a real encoder would still separate
+    black from white through its biases and position embeddings. Asserting on uniform inputs would be
+    testing the stand-in's limits rather than the model's behaviour.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS).eval()
+    mask = torch.ones(1, SLOTS)
+    generator = torch.Generator().manual_seed(SEED)
+    first = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), generator=generator, dtype=torch.uint8)
+    second = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), generator=generator, dtype=torch.uint8)
+    with torch.no_grad():
+        assert not torch.allclose(model.forward(first, mask, 14), model.forward(second, mask, 14)), (
+            "the model must respond to its input"
+        )

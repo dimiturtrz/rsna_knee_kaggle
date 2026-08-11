@@ -61,7 +61,14 @@ class StudyModel(nn.Module):
     mean: Tensor
     std: Tensor
 
-    def __init__(self, backbone: nn.Module, dim: int, n_slot: int, pool: str = "cls_mean") -> None:
+    def __init__(
+        self,
+        backbone: nn.Module,
+        dim: int,
+        n_slot: int,
+        pool: str = "cls_mean",
+        slice_pooling: str = "channels",
+    ) -> None:
         # `backbone` is any module callable as `backbone(pixel_values=x)` returning an object with
         # `last_hidden_state` of shape (n, 1 + patches, dim) — a DINOv2 from transformers in
         # production, a deterministic stand-in under test, and a medical-pretrained encoder when that
@@ -70,6 +77,7 @@ class StudyModel(nn.Module):
         super().__init__()
         self.backbone = backbone
         self.pool = pool
+        self.slice_pooling = slice_pooling
         self.n_slot = n_slot
         self.head = SlotHead(dim * POOL_PARTS[pool], n_slot, len(TARGETS))
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
@@ -83,8 +91,21 @@ class StudyModel(nn.Module):
         img_size: int | None = None,
     ) -> Float[Tensor, "b o"]:
         """Encode every slot image of every study in the batch, then aggregate per diagnosis."""
-        batch, slots = imgs.shape[:2]
-        x = imgs.reshape(batch * slots, *imgs.shape[2:]).float().div_(255.0)
+        batch, slots, group = imgs.shape[:3]
+        # "channels": three consecutive slices become the encoder's three channels — one forward per
+        # slot. "max": each slice is encoded ALONE (replicated across the three channels the encoder
+        # expects) and the slot's embedding is the per-dimension maximum over its slices.
+        #
+        # The difference is not a preference. Channel stacking couples the group's PHYSICAL THICKNESS
+        # to the slice count, which is measurably why raising inference slices from 12 to 32 cost
+        # -0.018 here while the recipe that pools per-slice can do it freely. It also means a finding
+        # is only visible if it falls inside a sampled three-slice group.
+        per_slice = self.slice_pooling == "max"
+        if per_slice:
+            x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
+            x = x.float().div(255.0)
+        else:
+            x = imgs.reshape(batch * slots, *imgs.shape[2:]).float().div_(255.0)
         if img_size is not None and img_size != x.shape[-1]:
             # The cache is held at the highest resolution any configuration needs and the rest
             # downsample from it, so every configuration sees the same pixels through a different
@@ -92,7 +113,8 @@ class StudyModel(nn.Module):
             x = nn.functional.interpolate(x, size=(img_size, img_size), mode="bilinear", align_corners=False)
         x = (x - self.mean) / self.std
         tokens = self.backbone(pixel_values=x).last_hidden_state
-        feat = self._pool(tokens).reshape(batch, slots, -1)
+        pooled = self._pool(tokens)
+        feat = pooled.reshape(batch, slots, group, -1).amax(dim=2) if per_slice else pooled.reshape(batch, slots, -1)
         return self.head(feat, mask)
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
