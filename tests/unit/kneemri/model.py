@@ -34,6 +34,11 @@ class _FakeBackbone(torch.nn.Module):
         super().__init__()
         self.encoder = torch.nn.Module()
         self.encoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+        self.checkpointing: dict[str, object] | None = None
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs: dict[str, object]) -> None:
+        """Stand-in for the transformers hook, recording how it was asked."""
+        self.checkpointing = gradient_checkpointing_kwargs
 
     @override
     def forward(self, *, pixel_values: Tensor) -> _Output:
@@ -205,3 +210,16 @@ def test_supervised(study_model: StudyModel):
 
     assert torch.allclose(logits, plain, atol=1e-6), "training and inference must be the same function"
     assert report.shape == (2, REPORT_DIMS)
+
+
+def test_recompute_activations(study_model: StudyModel):
+    """Checkpointing is turned on through the encoder's own hook, non-reentrant.
+
+    use_reentrant=False matters: the reentrant implementation silently produces no gradients when the
+    checkpointed block's inputs do not require grad, which is exactly our case - the early encoder
+    blocks are frozen, so the first trainable block receives an input with no grad history.
+    """
+    study_model.recompute_activations()
+
+    backbone = cast("_FakeBackbone", study_model.backbone)
+    assert backbone.checkpointing == {"use_reentrant": False}

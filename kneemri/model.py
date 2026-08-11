@@ -229,6 +229,29 @@ class StudyModel(nn.Module):
             {"params": opened, "lr": backbone_lr},
         ]
 
+    def recompute_activations(self) -> None:
+        """Trade about 30% compute for nearly all of the encoder's activation memory.
+
+        MEASURED NEED, 2026-08-11. Whole-stack reading puts 12 studies x 6 slots x 12 slices = 864
+        images through the encoder in one step. At 336 px that is 577 tokens x 384 dims held for each
+        of the six trainable blocks, roughly 14-20 GB of stored activations, and the arm pinned all
+        32 GB of a 5090 and then THRASHED: Windows pages GPU memory over PCIe rather than failing, so
+        utilisation still read 100% while power sat at 145 W of 575 and fifteen minutes produced no
+        epoch at all. A card that is genuinely working draws its power budget.
+
+        Checkpointing stores one tensor per block boundary and recomputes the rest in the backward
+        pass. It is the option that changes NOTHING about the experiment - same batch, same loss, and
+        in particular the same 66 within-batch pairs the ranking term scores. Splitting the batch
+        instead would have quietly changed the objective, since pairs across micro-batches do not
+        exist.
+
+        Attention was checked first and is already fused (`_attn_implementation` is sdpa), so the
+        memory is genuine activation volume rather than materialised attention matrices.
+        """
+        # pyrefly: ignore[not-callable] - the hook is transformers', not torch's, and nn.Module's
+        # __getattr__ is typed as returning Tensor, so any model-specific method reads as uncallable.
+        self.backbone.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce patch tokens to one vector: the class token, the patch mean, optionally the tail."""
         patch = tokens[:, 1:]

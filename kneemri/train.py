@@ -57,6 +57,7 @@ class TrainingOptions:
     normalise_by_count: bool = False
     rank_weight: float = 0.0
     whole_stack: bool = False
+    recompute_activations: bool = False
     report_weight: float = 0.0
     report_vectors: Path | None = None
     unfreeze_last: int = Adaptation().unfreeze_last
@@ -104,6 +105,14 @@ class TrainingOptions:
             "cross-scoring them leaks training data.",
         )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+        parser.add_argument(
+            "--recompute-activations",
+            action="store_true",
+            help="gradient checkpointing: ~30%% more compute for nearly all of the encoder's "
+            "activation memory. Needed once a step puts many images through the encoder - whole-stack "
+            "reading and higher resolutions both overflow 32 GB, and an overflow THRASHES rather than "
+            "failing, which looks like 100%% utilisation at a quarter of the power budget.",
+        )
         parser.add_argument(
             "--ema",
             action="store_true",
@@ -236,6 +245,8 @@ def main() -> None:
     design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
     encoder = ENCODERS[arguments.variant]
     model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS), design)
+    if arguments.recompute_activations:
+        model.recompute_activations()
     scores = LabelScores()
     trainer = Trainer(
         model,

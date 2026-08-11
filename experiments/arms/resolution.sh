@@ -32,5 +32,5 @@ wait_for_cache "$SIZE"
 
 run_train "resolution_${SIZE}" \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
-  --image-size "$SIZE" --backbone-lr 4e-5 \
+  --image-size "$SIZE" --backbone-lr 4e-5 --recompute-activations \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_s2026.pt"
