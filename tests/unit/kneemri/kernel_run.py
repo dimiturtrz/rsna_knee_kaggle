@@ -60,3 +60,19 @@ def test_run(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().run()
+
+
+def test_package(monkeypatch: MonkeyPatch):
+    """The mount is resolved through one overridable seam, and its absence is fatal rather than empty.
+
+    The seam exists so the fusion entry can merge two mounted packages; the contract that matters to
+    every entry is the second half — an unmounted package must raise, because a run that quietly
+    continues writes a submission from an untrained model and nothing downstream can tell.
+    """
+    sentinel = object()
+    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: sentinel))
+    assert KernelRun().package() is sentinel
+
+    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: None))
+    with pytest.raises(FileNotFoundError):
+        KernelRun().package()

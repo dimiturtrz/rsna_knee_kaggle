@@ -121,6 +121,13 @@ wait_for_cache() {
   # filesystem as the artefact it certifies, so it cannot be lost, rotated or truncated separately -
   # and a build killed by the OS leaves no trace in a log at all. On 2026-08-11 the 448 px build was
   # killed at 2200/4407 and its log simply stopped, with no error to grep for.
-  local size="$1" slices="${2:-12}"
-  until [ -f "$PROCESSED/mask_${size}px_${slices}sl.npy" ]; do sleep 60; done
+  # The SCHEME is part of a cache's name for anything but the canonical six slots, and it has to be
+  # part of this gate too. Without it an extended-scheme arm watches mask_336px_12sl.npy - the
+  # CANONICAL mask, which already exists - so the gate passes instantly on a cache that has not been
+  # built. The gate would report ready for the wrong file, which is the failure this function exists
+  # to prevent.
+  local size="$1" slices="${2:-12}" scheme="${3:-canonical}"
+  local key="${size}px_${slices}sl"
+  [ "$scheme" = "canonical" ] || key="${key}_${scheme}"
+  until [ -f "$PROCESSED/mask_${key}.npy" ]; do sleep 60; done
 }

@@ -1,0 +1,24 @@
+{
+  "id": "dimiturnt/kneemri-fusion",
+  "title": "kneemri-fusion",
+  "code_file": "kneemri-fusion.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "dimiturnt/kneemri-kit",
+    "dimiturnt/kneemri-members",
+    "pilkwang/rsna-knee-weights"
+  ],
+  "competition_sources": [
+    "rsna-knee-abnormality-detection"
+  ],
+  "kernel_sources": [],
+  "model_sources": [
+    "metaresearch/dinov2/PyTorch/small/1",
+    "metaresearch/dinov2/PyTorch/base/1"
+  ]
+}

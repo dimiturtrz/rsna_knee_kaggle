@@ -57,14 +57,25 @@ class KernelRun:
         """Which members to run: all of them, or the strongest few for the efficiency entry."""
         return package.members if self.members is None else package.strongest(self.members)
 
+    def package(self) -> MemberPackage:
+        """The mounted weights package this kernel runs.
+
+        A method rather than a line inside `run` so an entry can mount something else — the fusion
+        entry merges OUR members with the published ones, which are two packages under two mounts and
+        one decode, because both were fitted on the same pixels (336 px, 12 slices, group 3, canonical
+        slots) and `pixel_group` says so.
+        """
+        found = MemberPackage.find()
+        if found is None:
+            message = "no weights package mounted"
+            raise FileNotFoundError(message)
+        return found
+
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
         from transformers import AutoModel  # noqa: PLC0415 - only importable after the kit is on sys.path
 
-        package = MemberPackage.find()
-        if package is None:
-            message = "no weights package mounted"
-            raise FileNotFoundError(message)
+        package = self.package()
         package.members = self.chosen(package)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
