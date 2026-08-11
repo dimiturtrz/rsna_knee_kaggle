@@ -1478,6 +1478,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.slot_ties.SlotTies._lost_of",
+      "target": "kneemri.slot_ties.SlotTies.lost_of_study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.SlotTies.lost_of_study",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.slot_ties.SlotTies.of_study",
       "target": "kneemri.study.Study.from_directory",
       "weight": 1
@@ -1492,6 +1504,12 @@
       "kind": "construct",
       "source": "kneemri.slot_ties.main",
       "target": "kneemri.slot_ties.SlotTies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.main",
+      "target": "kneemri.slot_ties.SlotTies.lost_report",
       "weight": 1
     },
     {
@@ -3748,6 +3766,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies._lost_of",
+      "label": "_lost_of",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.lost_of_study",
+      "label": "lost_of_study",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.lost_report",
+      "label": "lost_report",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.slot_ties.SlotTies.of_study",
       "label": "of_study",
       "level": "method",
@@ -3806,6 +3848,14 @@
       "descendants": 0,
       "id": "kneemri.slots.SlotScheme.presence",
       "label": "presence",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.unrouted",
+      "label": "unrouted",
       "level": "method",
       "parent": "kneemri.slots.SlotScheme",
       "role": null
