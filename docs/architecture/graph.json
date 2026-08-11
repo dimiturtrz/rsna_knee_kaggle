@@ -68,6 +68,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.laterality",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.member_curve",
       "target": "core.paths",
       "weight": 1
@@ -325,6 +331,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.anatomy.FindingAnatomy",
+      "target": "kneemri.slots.Plane",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.anatomy.FindingAnatomy",
       "target": "kneemri.slots.Slot",
@@ -478,6 +490,12 @@
       "kind": "construct",
       "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
       "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "target": "kneemri.model.StudyModel.load_trained",
       "weight": 1
     },
     {
@@ -1534,6 +1552,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slots.Plane",
+      "label": "Plane",
+      "level": "class",
+      "parent": "kneemri.slots",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.slots.Slot",
       "label": "Slot",
       "level": "class",
@@ -2056,6 +2082,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel.load_trained",
+      "label": "load_trained",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
