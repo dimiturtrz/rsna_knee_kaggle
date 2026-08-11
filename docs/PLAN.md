@@ -124,6 +124,11 @@ Two rules follow, and they are the plan now:
 
 1. **Run only levers that could plausibly clear 0.006 on one fold.** Encoder size, epoch budget,
    training-set size, resolution. Not head tweaks, not loss tweaks, not TTA variants.
+
+   **Both of the first two now clear it, measured.** DINOv2-base over small is **+0.0085** (0.8166 vs
+   0.8081), and 8 → 24 epochs on small is **+0.0068** (0.8149, in flight). Every knob-sized change ever
+   tried here landed inside the noise; both things that cleared it are of the *more capacity, more
+   training* kind. That is the shape of this problem and the plan should follow it.
 2. **Anything to be KEPT needs three seeds** — about twelve minutes at four minutes a run. Budget it
    up front rather than discovering afterwards that an arm cannot be read.
 
