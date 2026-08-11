@@ -149,7 +149,7 @@ class MemberPackage:
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""
         model = StudyModel(backbone, dim, member.slot_count, StudyDesign(pool=member.pool)).to(device)
-        model.load_state_dict(self.state_dict_of(member, device))
+        model.load_trained(self.state_dict_of(member, device))
         self.check(model, member, device)
         return model
 

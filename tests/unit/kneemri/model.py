@@ -150,3 +150,31 @@ def test_forward_is_sensitive_to_its_pixels():
         assert not torch.allclose(model.forward(first, mask, 14), model.forward(second, mask, 14)), (
             "the model must respond to its input"
         )
+
+
+def test_load_trained():
+    """Every member on the leaderboard was saved without `head.prior`, and must still load.
+
+    A strict load rejects them all. The missing parameter is unambiguous — it is zeros unless the design
+    asks for the prior — so it keeps its initialised value while everything the checkpoint does carry is
+    still matched by name and shape.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    older = {name: value for name, value in model.state_dict().items() if name != "head.prior"}
+
+    torch.manual_seed(SEED + 1)
+    loaded = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    loaded.load_trained(older)
+
+    assert torch.equal(loaded.head.out.weight, model.head.out.weight)
+    assert float(loaded.head.prior.abs().sum()) == 0.0
+
+
+def test_load_trained_still_rejects_a_checkpoint_that_does_not_fit():
+    """Narrower than strict=False: a wrong shape is still an error, not a silent partial load."""
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    state = dict(model.state_dict())
+    state["head.out.weight"] = torch.zeros(3, 3)
+    with pytest.raises(RuntimeError):
+        model.load_trained(state)

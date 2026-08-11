@@ -47,7 +47,7 @@ class HoldoutPredictions:
             anatomical_prior=bool(config.get("anatomical_prior", False)),
         )
         model = StudyModel(backbone, dim, slots, design)
-        model.load_state_dict(saved["model"])
+        model.load_trained(saved["model"])
         return model.to(self.device).eval()
 
     def predict(

@@ -167,6 +167,21 @@ class StudyModel(nn.Module):
             self.train()
         return out
 
+    def load_trained(self, state: dict[str, Tensor]) -> None:
+        """Load weights saved by any earlier version of this model.
+
+        Every checkpoint written before the anatomical prior existed lacks `head.prior`, and a strict
+        load rejects the lot — including the five members already on the leaderboard and the ones the
+        Kaggle kernel mounts. A missing prior is not ambiguous: the parameter is zeros when the design
+        does not use it, which is exactly the model this checkpoint was trained as.
+
+        So keys the checkpoint does not carry keep their initialised value, and everything it does carry
+        must still match in name and shape. That is deliberately narrower than `strict=False`, which
+        would also swallow a checkpoint that had nothing to do with this model.
+        """
+        merged = self.state_dict() | state
+        self.load_state_dict(merged)
+
     def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its own learning rate.
 

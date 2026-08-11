@@ -173,3 +173,106 @@ separate them — of which there are 58. Second, **language cannot be an inferen
 `test.csv` has no `Report` column. Nothing here can become a language-conditioned model. The only
 lever available is better *supervision* on the non-English half, which is precisely what a rule-based
 parser in the report's own language would provide.
+
+
+## A matched trio on the recovered ruler
+
+All three arms below share a split (2026, fold 0), a recipe (one-cycle, geometric augmentation, weight
+floor, 8 epochs) and the recovered `report_labels_v2` ruler. They are compared to each other and to
+nothing above, for the reason given in the previous section.
+
+| arm | holdout | vs baseline |
+|---|---|---|
+| channel-stacked groups (baseline) | 0.8081 | — |
+| per-slice max pooling | 0.8099 | +0.0018 |
+| anatomical prior on slot attention | 0.8005 | **−0.0076** |
+
+Note the baseline lands at 0.8081 where the ledger recorded 0.8221 for the same nominal recipe. That
+difference *is* the missing ruler, and it is why nothing here is compared upward.
+
+### Per-slice max pooling: refuted at the size that mattered
+
+`knee-wif` predicted 0.02–0.03 and wrote its own kill criterion: *"if it lands in the noise, it is a
+refutation, not a tuning opportunity."* It landed at **+0.0018**, about 1.5x the 0.0012 noise floor, for
+three times the encoder cost. Refuted as a headline change.
+
+**And the mechanism I proposed for it was wrong.** The argument was that channel-stacking ties a
+group's physical thickness to the slice count, which is why reading 32 slices cost −0.018; per-slice
+pooling breaks that coupling and should therefore unlock the wider read. It does not:
+
+| | 12 slices, overlap | 32 slices, disjoint | 32 slices, overlap |
+|---|---|---|---|
+| channel-stacked | 0.8171 | 0.8085 | 0.8080 |
+| per-slice max | 0.8177 | 0.8078 | 0.8070 |
+
+The 32-slice penalty is **the same size under both** (−0.009 and −0.010). Removing the coupling did not
+remove the penalty, so the coupling was not the cause. Whatever makes a 32-slice read worse here is
+something else — a candidate is that a fixed band sampled 32 ways gives each window less physical
+extent and averages many near-duplicate views — and that remains untested. The published recipe's
+32-slice inference stays refuted for our pipeline, now for an unknown reason rather than a wrong one.
+
+### The anatomical prior: it worked, and the score fell
+
+Giving each diagnosis's slot attention the anatomy it was being asked to learn cost **−0.0076**, six
+times the noise floor. The prior is not failing to take — it takes exactly as designed. Correlation
+between the learned attention and the anatomy table, averaged over findings:
+
+| | correlation with anatomy |
+|---|---|
+| baseline | +0.127 |
+| with the prior | +0.809 |
+
+What the baseline actually learned is the interesting part. **It routes nearly every finding to one
+slot — `AX_FLUID_FS`** — including MCL, both menisci and both tibiofemoral OA targets, none of which a
+radiologist reads axially. With the prior, routing becomes radiologically sensible (MCL to coronal
+fluid, OA to coronal T1) and the model gets worse.
+
+That is evidence against the premise in `SlotHead`'s own docstring. The head is not localising evidence
+to the sequence that shows it; it is selecting a slot that makes a good *study-level* embedding, and
+one consistently-present fat-saturated axial series apparently serves that better than the anatomically
+correct one. Which is coherent with the supervision: the label is attached to the study and never says
+where the finding was seen, so nothing in the loss rewards localisation — and slot routing is itself
+recovered from headers rather than given, so the anatomically-correct slot is also the noisier target.
+
+Kept opt-in and documented rather than deleted. What is refuted is the prior at strength 2.0 on one
+fold, not the idea that anatomy is real; what is *learned* is that this head does not use its slots the
+way we said it did, which is worth more than the arm.
+
+## The language gap is a site gap wearing a language coat
+
+The 0.016 English/non-English gap survives the obvious deflation. Restricting the score to labels the
+reader was confident about (conf >= 0.7, 71% of pairs) lifts both halves and leaves the gap intact:
+
+| | all labels | conf >= 0.7 |
+|---|---|---|
+| English | 0.8242 | 0.8431 |
+| non-English | 0.8123 | 0.8314 |
+| gap | 0.0119 | 0.0117 |
+
+So it is not simply that the ruler is noisier where it is unsure. But **scanner model predicts report
+language almost deterministically**: `MAGNETOM Avanto fit` is 0% English over 262 studies, `SonataVision`
+0.9%, `Optima MR450w` and `SIGNA EXCITE` 100%. Reports in Spanish come from Spanish hospitals, with
+their own scanners and protocols, so "non-English" and "from a particular site" are very nearly the same
+column.
+
+Scoring the same predictions by scanner instead:
+
+| group | n | holdout | English share |
+|---|---|---|---|
+| Siemens Healthineers | 223 | 0.8020 | 20% |
+| SIEMENS | 168 | 0.8157 | 38% |
+| GE Medical Systems | 155 | 0.8181 | 68% |
+| Philips Medical Systems | 146 | **0.8256** | 50% |
+| Philips | 111 | 0.8106 | 46% |
+| 1.5 T | 525 | 0.8159 | 39% |
+| 3.0 T | 322 | 0.8156 | 48% |
+
+The manufacturer spread (0.024) is larger than the language gap and does not order by English share —
+the best group is 50% English. Field strength does nothing at all, which rules out a simple
+resolution or SNR story.
+
+**These subgroups are small**, 111–223 studies against 420/489 for the language split, so the
+manufacturer ranking is not itself established; the honest claim is that variation of at least this
+size exists between sites and that language is confounded with it. That is enough to change what to
+build: a nine-language label parser is aimed at the language reading, and the language reading is the
+one the evidence does not isolate. It should not be started on this evidence.
