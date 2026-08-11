@@ -15,7 +15,7 @@ question needs the leaderboard to answer it.
 | 2026-08-10 | `kneemri-graft-verify` | 6 | fingerprint check only | 20/20 @ 4.65e-06 | not submitted | proves the architecture port |
 | 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
 | 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | trained with augmentation silently disabled |
-| 2026-08-11 | `kneemri-trained` | 3 | **OURS v2** — augmentation actually applied + OneCycle + overlap TTA | holdout mean **0.8269** | pending | +0.0107 local, every fold up |
+| 2026-08-11 | `kneemri-trained` | 3 | **OURS v2** — augmentation actually applied + OneCycle + overlap TTA | holdout mean **0.8269** | **0.888** | **equals the 20-member graft with 5 of our own** |
 
 ## What counts as ours
 
@@ -65,6 +65,27 @@ a different series in a slot is a different image for the head to read.
 The measurement that would settle it: re-run the out-of-fold oracle logging which series filled each
 slot, and count how many studies have a tie at all. If ties are rare and the residual survives, the
 cause is somewhere else and this lead is dead — which is worth knowing just as much.
+
+## v2: our five members equal their twenty
+
+| | members | public LB | rank of 1077 |
+|---|---|---|---|
+| graft (their weights) | 20 | 0.888 | 367 |
+| ours v1 | 5 | 0.868 | 412 |
+| **ours v2** | **5** | **0.888** | **367** |
+
+**+0.020 on the leaderboard, 45 places, from three defects in our own code** — augmentation never
+called, no learning-rate schedule, and the TTA default left off. No new idea, no bigger model, no
+extra data.
+
+The graft has since stopped being a floor and become a *control*: same data layer, same ensembling,
+same submission path, differing only in whose weights and how many. Matching it with a quarter of the
+members says our per-member training is now roughly on par with the published one — which is what the
+holdout was already saying (0.8269 against their reported 0.8398, on different splits) and is now
+confirmed on the hidden test, where neither of us chose the studies.
+
+The remaining 0.054 to the leader is untouched by any of this, and nothing measured so far explains
+it. It is not the schedule, the augmentation, the labels, the slice count or the TTA.
 
 ## What the ablations say (fold 0, matched; ruler held at pilkwang)
 
