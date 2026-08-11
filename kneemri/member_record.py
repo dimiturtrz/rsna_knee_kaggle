@@ -22,6 +22,9 @@ class RunOptions(Protocol):
     def image_size(self) -> int: ...
 
     @property
+    def train_size(self) -> int: ...
+
+    @property
     def slices(self) -> int: ...
 
     @property
@@ -81,6 +84,17 @@ class MemberRecord:
     device: torch.device
     slot_names: list[str]
 
+    @property
+    def read_size(self) -> int:
+        """The resolution the model actually saw — the cache's, unless the run resampled off it.
+
+        The fingerprint is taken at THIS size, not at the cache's. A member trained at 392 px from a
+        448 px cache and rebuilt at 448 is a different function on different pixels; recording the
+        cache size alone would let it advertise a reading it was never fitted under. That failure has
+        happened once already, with `slice_pooling`, and cost 2.25 against a 2e-3 tolerance.
+        """
+        return self.options.train_size or self.options.image_size
+
     def payload(self, state: dict[str, torch.Tensor], holdout: float, epoch: int) -> dict[str, object]:
         """The full checkpoint for a set of weights — identical in shape whenever it is written."""
         options = self.options
@@ -101,6 +115,7 @@ class MemberRecord:
             "slots": list(self.slot_names),
             "config": {
                 "img": options.image_size,
+                "train_size": self.read_size,
                 "slices": options.slices,
                 "group": GROUP,
                 "crop_mm": CROP_MM,
@@ -122,9 +137,9 @@ class MemberRecord:
                 "head_lr": options.head_lr,
                 "backbone_lr": options.backbone_lr,
             },
-            "fingerprint": self.model.fingerprint(options.image_size, GROUP, self.device).tolist(),
+            "fingerprint": self.model.fingerprint(self.read_size, GROUP, self.device).tolist(),
             "fingerprint_config": {
-                "img": options.image_size,
+                "img": self.read_size,
                 "n_slot": self.model.n_slot,
                 "group": GROUP,
                 "seed": FINGERPRINT_SEED,

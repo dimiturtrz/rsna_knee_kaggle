@@ -50,6 +50,8 @@ class TrainingOptions:
     batch: int = 12
     slices: int = 12
     image_size: int = IMAGE_SIZE
+    train_size: int = 0
+    """0 means read the cache at its own resolution; anything else resamples to that size."""
     scheme: str = StudyCache.CANONICAL
     seed: int = 2026
     split_seed: int = 2026
@@ -99,6 +101,14 @@ class TrainingOptions:
             help="resolution of the cache to train on. Selects the cache file AND is recorded in the "
             "member's config and fingerprint, so a member can never advertise a reading it was not "
             "fitted under.",
+        )
+        parser.add_argument(
+            "--train-size",
+            type=int,
+            default=0,
+            help="resolution the model actually READS, resampled from the cache. 0 means the cache's "
+            "own. Decouples resolution from decoding: a 448 px cache can be read at 392 without a "
+            "second 45-minute build, and without changing the batch or the slice count to afford it.",
         )
         parser.add_argument(
             "--scheme",
@@ -247,6 +257,46 @@ class TrainingOptions:
             return RankedObjective(self.rank_weight, normalise_by_count=self.normalise_by_count)
         return Objective(normalise_by_count=self.normalise_by_count)
 
+    def fitted_trainer(
+        self,
+        model: StudyModel,
+        device: torch.device,
+        identifiers: list[str],
+        training_positions: int,
+    ) -> Trainer:
+        """A `Trainer` with every optional policy this run asked for already attached.
+
+        The policies are attached rather than passed because each is something a run may or may not want,
+        and they were accumulating in `main` as a run of `if self.x: trainer.y()` — eight of them by
+        the time resampling arrived, which is what pushed `main` past the statement gate. That gate was
+        reading a real thing: the run's SETUP and the run's LOOP are two jobs, and only one of them grows
+        every time a flag is added.
+        """
+        trainer = Trainer(
+            model,
+            device,
+            augment_config=AugmentConfig() if self.intensity_aug else AugmentConfig.geometric_only(),
+            adaptation=self.adaptation(),
+            objective=self.objective(),
+        )
+        if self.whole_stack:
+            trainer.whole_stack(self.slices)
+        if self.train_size:
+            trainer.resample_to(self.train_size)
+        if self.report_weight and self.report_vectors:
+            trainer.report_supervision(
+                ReportSupervision.from_file(self.report_vectors, identifiers, self.report_weight)
+            )
+        if self.ema:
+            trainer.exponential_average()
+        if self.one_cycle:
+            # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
+            # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
+            # been logged and before the checkpoint is written, which is the most expensive place to fail.
+            steps_per_epoch = -(-training_positions // self.batch)
+            trainer.one_cycle(self.epochs * max(steps_per_epoch, 1))
+        return trainer
+
 
 def main() -> None:
     arguments = TrainingOptions.parse()
@@ -295,27 +345,7 @@ def main() -> None:
     if arguments.compile_encoder:
         model.compile_encoder()
     scores = LabelScores()
-    trainer = Trainer(
-        model,
-        device,
-        augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
-        adaptation=arguments.adaptation(),
-        objective=arguments.objective(),
-    )
-    if arguments.whole_stack:
-        trainer.whole_stack(arguments.slices)
-    if arguments.report_weight and arguments.report_vectors:
-        trainer.report_supervision(
-            ReportSupervision.from_file(arguments.report_vectors, identifiers, arguments.report_weight)
-        )
-    if arguments.ema:
-        trainer.exponential_average()
-    if arguments.one_cycle:
-        # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
-        # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
-        # been logged and before the checkpoint is written, which is the most expensive place to fail.
-        steps_per_epoch = -(-len(training) // arguments.batch)
-        trainer.one_cycle(arguments.epochs * max(steps_per_epoch, 1))
+    trainer = arguments.fitted_trainer(model, device, identifiers, len(training))
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
     metrics = RunMetrics(destination)

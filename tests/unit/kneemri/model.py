@@ -135,6 +135,19 @@ def test_forward_per_slice_pooling_differs_from_channel_stacking():
     assert not torch.allclose(outputs["channels"], outputs["max"]), "per-slice pooling must change the function"
 
 
+def test_per_slice():
+    """Which poolings encode a slice ALONE — the one fact three call sites used to each decide alone.
+
+    "attend" is the case that broke: the encoder branched on a set containing it, the attention module
+    built itself on it, and the trainer's whole-stack guard tested `!= "max"` — so an arm that had
+    been written, reviewed and queued died at startup with 'whole-stack reading needs per-slice
+    pooling, not attend', against a model that supports precisely that.
+    """
+    for mode in ("max", "attend"):
+        assert StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=mode)).per_slice, mode
+    assert not StudyModel(_FakeBackbone(), DIM, SLOTS).per_slice, "channel stacking reads three at once"
+
+
 def test_forward_is_sensitive_to_its_pixels():
     """A guard for the double itself: two different STRUCTURED images must give different logits.
 

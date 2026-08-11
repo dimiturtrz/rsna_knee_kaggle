@@ -152,6 +152,21 @@ def test_image_size():
     assert _member().image_size == IMAGE
 
 
+def test_read_size():
+    """Absent means "the cache's own size", which is what every member written before this key means.
+
+    The equivalence classes are the two a manifest can be in: no `train_size` (every published member
+    and both whole-stack members on disk), and one that differs from `img`. Getting the first wrong
+    would refuse members that are perfectly valid; getting the second wrong would rebuild a member at
+    a resolution it never saw and mispredict rather than fail.
+    """
+    assert _member().read_size == IMAGE, "no train_size means the model read the cache as decoded"
+
+    resampled = replace(_member(), config={**_config(), "train_size": 392})
+    assert resampled.read_size == 392
+    assert resampled.image_size == IMAGE, "the cache it decodes from is unchanged"
+
+
 def test_slot_count():
     assert _member().slot_count == len(SLOTS)
 

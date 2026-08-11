@@ -39,8 +39,26 @@
 # memory. The cap is what keeps it inside real VRAM, and it leaves ~12 GB for the other project.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
-SIZE="${1:-448}"
+
+# 392, NOT 448, and the reason is a hard ceiling rather than caution. Tokens go as the square of the
+# side: 336 px is 576 tokens, 392 is 784 (1.36x), 448 is 1024 (1.78x). Whole-stack at 336 already
+# holds 19.2 GB WITH fp16 autocast and gradient checkpointing, so 448 is ~34 GB on a 32 GB card - it
+# OOMed at 20:48 UTC after ~90 seconds, and no VRAM cap could have helped.
+#
+# The alternatives were rejected for the same reason across the board: batch 8 fits but the ranking
+# term scores pairs WITHIN a batch (66 at 12, 28 at 8), and fewer slices at 448 collides with the
+# slice-count arm. Both trade the single variable away to buy pixels. 392 keeps batch, slices and
+# reading fixed and moves only the sampling grid: 0.39 mm/px -> 0.33 mm.
+#
+# Costs no decode: slot_features interpolates from whatever cache it is handed, so this reads the
+# 448 px cache that already exists and resamples down.
+SIZE="${1:-392}"
+CACHE_PX="${2:-448}"
 require "$LABELS"
+
+# Fragmentation, not capacity, wrote the last 2.54 GB of that OOM: 1.17 GB sat reserved-but-unallocated
+# inside the cap. Expandable segments is the standing fix and costs nothing when there is headroom.
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # NOT `require` on the images .npy: build_cache allocates that file at build START and fills it over
 # hours, so its existence proves the build began and nothing more. Training on it early would not

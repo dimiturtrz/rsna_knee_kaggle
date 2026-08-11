@@ -193,6 +193,9 @@ class Trainer:
         self.average: LiveWeights = LiveWeights()
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
+        # None means "read the cache at its own resolution", which is what every run did before
+        # resampling existed. See `resample_to`.
+        self.read_size: int | None = None
 
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
@@ -211,10 +214,28 @@ class Trainer:
 
         Costs one encoder pass per slice rather than per group — about 4x a step at twelve slices.
         """
-        if self.model.slice_pooling != "max":
+        if not self.model.per_slice:
             message = f"whole-stack reading needs per-slice pooling, not {self.model.slice_pooling!r}"
             raise ValueError(message)
         self.window = slices
+
+    def resample_to(self, size: int) -> None:
+        """Train at `size` px from whatever resolution the cache holds, instead of the cache's own.
+
+        Decoupling the two makes resolution a FREE variable: the encoder already interpolates in
+        `slot_features`, so a 448 px cache can be read at 392 without a second 45-minute decode, and
+        every size sees the same pixels through a different sampling grid rather than a different crop.
+
+        It exists because resolution had a hard ceiling otherwise. Whole-stack at 448 px needs ~34 GB
+        on a 32 GB card — tokens go as the square of the side — and every way of affording it changed
+        a second variable: batch 8 halves the ranking term's within-batch pairs, fewer slices collides
+        with the slice-count arm. Resampling moves the sampling grid and nothing else.
+
+        The size is recorded in the member's config and fingerprint, because a member trained at 392
+        from a 448 cache and rebuilt at 448 is a different function on different pixels — the same
+        failure `slice_pooling` already caused once, caught then by the fingerprint gate.
+        """
+        self.read_size = size
 
     def exponential_average(self, decay: float = DECAY) -> None:
         """Keep an EMA of the weights, and score and save from it rather than from the live ones."""
@@ -358,7 +379,7 @@ class Trainer:
             with torch.autocast("cuda", enabled=self.device.type == "cuda"):
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.
-                logits, report = self.model.supervised(pixels, flags, corpus.image_size)
+                logits, report = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
                 loss = self.loss(
                     logits.float(),
                     torch.from_numpy(score).to(self.device),
@@ -393,7 +414,9 @@ class Trainer:
                     np.ascontiguousarray(corpus.images[batch, :, middle : middle + self.window])
                 ).to(self.device)
                 flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
-                chunks.append(torch.sigmoid(self.model(pixels, flags, corpus.image_size).float()).cpu().numpy())
+                chunks.append(
+                    torch.sigmoid(self.model(pixels, flags, self.read_size or corpus.image_size).float()).cpu().numpy()
+                )
         return np.concatenate(chunks).astype(np.float64)
 
     def loss(

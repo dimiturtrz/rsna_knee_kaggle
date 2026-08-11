@@ -321,6 +321,25 @@ def test_whole_stack():
     assert np.isfinite(loss), "a whole-stack step must still train"
 
 
+def test_resample_to():
+    """Resampling changes the size the model is READ at, and leaves the cache's own size alone.
+
+    The contract that matters is the default: an untouched trainer must pass the corpus's resolution
+    through unchanged, because every member fitted before resampling existed means exactly that. If
+    `read_size` defaulted to anything but None, those members would be rebuilt at a size they were
+    never fitted under — the failure `slice_pooling` already caused once.
+    """
+    torch.manual_seed(SEED)
+    trainer = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"))
+    assert trainer.read_size is None, "an untouched trainer reads the cache at its own resolution"
+
+    trainer.resample_to(392)
+    assert trainer.read_size == 392
+
+    loss = trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+    assert np.isfinite(loss), "a resampled step must still train"
+
+
 def test_select():
     """An uncapped budget still yields a device; the cap is applied only where there is a card.
 

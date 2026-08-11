@@ -73,7 +73,7 @@ class Ensemble:
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for start in starts:
-                logits = model(images[:, :, start : start + member.group], mask, member.image_size).float()
+                logits = model(images[:, :, start : start + member.group], mask, member.read_size).float()
                 total = total + torch.sigmoid(logits)
         return (total / len(starts)).cpu().numpy().astype(np.float64)
 

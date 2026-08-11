@@ -74,3 +74,31 @@ def test_adaptation():
     assert faster.backbone_lr == 1e-4
     assert faster.unfreeze_last == 12
     assert faster.head_lr == Adaptation().head_lr, "raising the encoder rate must not move the head's"
+
+
+def test_fitted_trainer():
+    """Every optional policy a run asked for is attached, and nothing it did not ask for is.
+
+    This is the function that replaced a run of `if arguments.x: trainer.y()` in `main`, and the
+    failure it guards against is silent: a flag that stops being wired does not raise, it trains a
+    different recipe than the one on the command line and reports a plausible number for it.
+    """
+    import torch  # noqa: PLC0415 - the rest of this module needs no torch
+
+    from kneemri.model import StudyDesign, StudyModel  # noqa: PLC0415
+    from kneemri.trainer import GROUP  # noqa: PLC0415
+
+    from .model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
+
+    device = torch.device("cpu")
+    plain = TrainingOptions().fitted_trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), device, [], 120)
+    assert plain.window == GROUP, "a default run reads one group, not the stack"
+    assert plain.read_size is None
+    assert plain.schedule is None
+
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
+    asked = TrainingOptions(whole_stack=True, slices=16, train_size=392, one_cycle=True, epochs=2)
+    trainer = asked.fitted_trainer(model, device, [], 120)
+    assert trainer.window == 16
+    assert trainer.read_size == 392
+    assert trainer.schedule is not None, "one-cycle must reach the trainer, or the rate never anneals"

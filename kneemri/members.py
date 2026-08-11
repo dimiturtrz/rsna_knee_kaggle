@@ -13,7 +13,7 @@ move it by about 1e-5, which is why the tolerance sits between them rather than 
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 import numpy as np
 import torch
@@ -43,6 +43,9 @@ class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
 
     img: int
+    train_size: NotRequired[int]
+    """Absent on every member fitted before the read size could differ from the cache's."""
+
     slices: int
     group: int
     crop_mm: float
@@ -77,6 +80,16 @@ class Member:
     def image_size(self) -> int:
         """Pixels per side the encoder is fed — with the crop, this fixes the effective mm/pixel."""
         return int(self.config["img"])
+
+    @property
+    def read_size(self) -> int:
+        """Pixels per side the model actually READ, which is the cache's size unless it resampled.
+
+        Defaults to `image_size` when the key is absent, which is what every member fitted before
+        resampling existed means — so the two whole-stack members already on disk keep verifying
+        against their stored fingerprints rather than being refused by a field they predate.
+        """
+        return int(self.config.get("train_size") or self.config["img"])
 
     @property
     def slot_count(self) -> int:
@@ -224,7 +237,7 @@ class MemberPackage:
 
         Returns the largest absolute difference, so a caller can report how much slack was left.
         """
-        got = model.fingerprint(member.image_size, member.group, device)
+        got = model.fingerprint(member.read_size, member.group, device)
         if got.shape != member.fingerprint.shape:
             raise WeightsError(
                 f"{member.identifier}: fingerprint shape {got.shape} != stored "

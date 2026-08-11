@@ -37,6 +37,9 @@ TARGETS: tuple[str, ...] = (
 """The twelve findings, in the column order the submission and the trained members both use."""
 
 POOL_PARTS: dict[str, int] = {"cls_mean": 2, "cls_mean_focal": 3}
+
+ATTEND = "attend"
+"""The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
 """How many `dim`-wide parts each pooling scheme concatenates, which fixes the head's input width."""
 
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
@@ -103,10 +106,22 @@ class StudyModel(nn.Module):
         width = dim * POOL_PARTS[self.pool]
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
-        self.slices = SliceAttention(width) if self.slice_pooling == "attend" else None
+        self.slices = SliceAttention(width) if self.slice_pooling == ATTEND else None
         self.head = SlotHead(width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
+
+    @property
+    def per_slice(self) -> bool:
+        """Whether each slice is encoded ALONE, so a slot's embedding does not depend on a window.
+
+        The one place that knows which poolings read per-slice. It was three places: the encoder
+        branched on `{"max", "attend"}`, the module built itself on `== "attend"`, and the trainer's
+        whole-stack guard tested `!= "max"` — so adding attention pooling silently left the guard
+        rejecting it, and the arm died at startup with 'whole-stack reading needs per-slice pooling,
+        not attend' against a model that supports exactly that.
+        """
+        return self.slice_pooling in {"max", ATTEND}
 
     @override
     def forward(
@@ -138,7 +153,7 @@ class StudyModel(nn.Module):
         # to the slice count, which is measurably why raising inference slices from 12 to 32 cost
         # -0.018 here while the recipe that pools per-slice can do it freely. It also means a finding
         # is only visible if it falls inside a sampled three-slice group.
-        per_slice = self.slice_pooling in {"max", "attend"}
+        per_slice = self.per_slice
         if per_slice:
             x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
             x = x.float().div(255.0)
