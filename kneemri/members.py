@@ -104,6 +104,22 @@ class Member:
         return str(self.config["pool"])
 
     @property
+    def slice_pooling(self) -> str:
+        """How the member turns a group of slices into one feature — "channels" or "max".
+
+        This is not a preference, it is a different FUNCTION on different pixels: "channels" stacks
+        three slices as the encoder's RGB, "max" encodes each slice alone and takes the per-dimension
+        maximum. A member fitted one way and run the other predicts from an image it never saw.
+
+        It was recorded in every checkpoint and read by nobody — `load` built StudyDesign(pool=...) and
+        let this fall back to the default. The fingerprint check would have refused such a member
+        rather than mispredicting, so the failure was loud, but it made every max-pooling member we
+        train unsubmittable. Defaults to "channels" for the published members, which predate the
+        option and were all fitted that way.
+        """
+        return str(self.config.get("slice_pooling", "channels"))
+
+    @property
     def variant(self) -> str:
         """Which DINOv2 size this member was fitted on, so the kernel mounts the matching weights.
 
@@ -186,7 +202,8 @@ class MemberPackage:
 
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""
-        model = StudyModel(backbone, dim, member.slot_count, StudyDesign(pool=member.pool)).to(device)
+        design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling)
+        model = StudyModel(backbone, dim, member.slot_count, design).to(device)
         model.load_trained(self.state_dict_of(member, device))
         self.check(model, member, device)
         return model

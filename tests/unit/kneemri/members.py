@@ -253,3 +253,17 @@ def test_slices(tmp_path: Path):
 
     legacy = MemberPackage(tmp_path).members[0]
     assert legacy.slices == LEGACY_SLICES, "a manifest predating variable depth means the twelve it was fitted on"
+
+
+def test_slice_pooling():
+    """A member's slice aggregation is read from its config, defaulting to the published behaviour.
+
+    It is a different function on different pixels, not a preference: "max" encodes each slice alone
+    and takes the per-dimension maximum, "channels" stacks three as RGB. This was recorded by every
+    checkpoint and read by nobody, which made every max-pooling member unsubmittable — the fingerprint
+    check refused them, correctly, for being a different architecture than the one stored.
+    """
+    assert _member().slice_pooling == "channels", "published members predate the option and were fitted so"
+
+    maxed = replace(_member(), config={**_config(), "slice_pooling": "max"})
+    assert maxed.slice_pooling == "max"
