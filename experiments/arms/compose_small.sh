@@ -16,4 +16,3 @@ require "$LABELS"
 run_train compose_small \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
   --backbone-lr 4e-5 --slice-pooling max --labels "$LABELS" --out "$PROCESSED/compose_small_s2026.pt"
-echo "ARM DONE compose_small"

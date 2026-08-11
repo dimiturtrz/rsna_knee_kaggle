@@ -34,10 +34,41 @@ run_train() {
   # The FULL output is kept out of the repo under processed/experiments, and only the epoch and best
   # lines reach the terminal. Earlier arms piped straight into grep, which discarded any traceback
   # whose wording missed the filter - the tee is what makes a silent failure recoverable.
+  #
+  # THE STATUS IS THE TRAINER'S, NOT THE PIPELINE'S. A pipeline reports its LAST command, so without
+  # PIPESTATUS a crashed trainer is reported by a contented `grep` and the arm goes on to announce it
+  # finished. That is exactly what arm U did on 2026-08-11: it died at epoch 7 of 24 and printed
+  # 'ARM U DONE', the queue advanced on it, and the ledger would have recorded silence as a result.
+  # Same family as knee-b02 - never let a wrapper's exit code speak for the work.
   local name="$1"; shift
   uv run python -u -m kneemri.train "$@" 2>&1 \
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
+  local status="${PIPESTATUS[0]}"
+  if [ "$status" -ne 0 ]; then
+    _mark "$name" "ARM FAILED $name (trainer exit $status) - see $LOGS/$name.full.log"
+    return "$status"
+  fi
+  # A trainer can also exit 0 having produced nothing useful. The best-score line is the artefact the
+  # ledger quotes, so its absence is a failure whatever the exit code says.
+  if ! grep -q "best holdout" "$LOGS/$name.full.log"; then
+    _mark "$name" "ARM FAILED $name (exit 0 but no 'best holdout' line) - see $LOGS/$name.full.log"
+    return 1
+  fi
+  # The completion marker is emitted HERE, on success only, rather than by each arm. An arm that
+  # prints its own marker prints it whatever happened - which is how a dead arm advanced the queue.
+  _mark "$name" "ARM DONE $name"
+}
+
+_mark() {
+  # Write an arm's verdict to BOTH the terminal and the arm's own log.
+  #
+  # It used to go only to stdout, which lands wherever the caller redirected - so an arm's full.log
+  # held every epoch and no verdict, and a gate pointed at that log waited forever for a marker that
+  # was never going to arrive there. Found while queueing the resolution arm: the GPU would simply
+  # have gone idle with nothing reporting an error.
+  local name="$1" message="$2"
+  echo "$message" | tee -a "$LOGS/$name.full.log"
 }
 
 wait_for() {

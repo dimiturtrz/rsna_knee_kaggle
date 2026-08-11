@@ -22,4 +22,3 @@ run_train maxpool_12 \
 run_train maxpool_20 \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --slices 20 --labels "$LABELS" --out "$PROCESSED/max20_s2026.pt"
-echo "ARM DONE slice_count_maxpool"

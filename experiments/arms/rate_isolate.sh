@@ -13,4 +13,3 @@ require "$LABELS"
 run_train rate_isolate \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
   --backbone-lr 4e-5 --labels "$LABELS" --out "$PROCESSED/lr5x_d6_s2026.pt"
-echo "ARM DONE rate_isolate"

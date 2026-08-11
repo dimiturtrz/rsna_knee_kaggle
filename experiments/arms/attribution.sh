@@ -14,4 +14,6 @@ require "$LABELS" "$CHECKPOINT"
 
 uv run python -u -m kneemri.attribution \
   --checkpoint "$CHECKPOINT" --labels "$LABELS" --studies 400 2>&1 | tee "$LOGS/attribution.full.log"
+status="${PIPESTATUS[0]}"
+[ "$status" -eq 0 ] || { echo "ARM FAILED attribution (exit $status)"; exit "$status"; }
 echo "ARM DONE attribution"

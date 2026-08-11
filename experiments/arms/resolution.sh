@@ -32,4 +32,3 @@ run_train "resolution_${SIZE}" \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
   --image-size "$SIZE" --backbone-lr 4e-5 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_s2026.pt"
-echo "ARM DONE resolution_${SIZE}"

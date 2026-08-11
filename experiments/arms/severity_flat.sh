@@ -20,4 +20,3 @@ require "$LABELS" "$FLAT"
 run_train severity_flat \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
   --labels "$FLAT" --eval-labels "$LABELS" --out "$PROCESSED/flatyes_s2026.pt"
-echo "ARM DONE severity_flat"

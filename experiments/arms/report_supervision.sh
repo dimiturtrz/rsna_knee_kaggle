@@ -22,4 +22,3 @@ for weight in 0.3 1.0; do
     --report-weight "$weight" --report-vectors "$VECTORS" \
     --labels "$LABELS" --out "$PROCESSED/report${weight}_s2026.pt"
 done
-echo "ARM DONE report_supervision"
