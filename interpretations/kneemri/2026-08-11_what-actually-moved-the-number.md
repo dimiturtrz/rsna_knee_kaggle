@@ -18,6 +18,31 @@ leaderboard submission.*
 
 Five folds on the shipped recipe: **0.8269** against **0.8162**, +0.0107, every fold improved.
 
+## A correction to this table, found after writing it
+
+Fold 0 trained twice with an identical recipe and only the seed changed scores **0.8202** and
+**0.8323** — a spread of **+0.0121**. Every single-fold row above with an effect near ±0.002 is
+therefore *below the noise floor of one run*, and the honest verdict for those is **not detectable at
+n=1**, not "null". I wrote the stronger claim and closed two issues on it.
+
+Matched seeds do not rescue it, which is the subtle part: fixing the seed fixes initialisation and data
+order, but every arm perturbs the random *stream* — augmentation draws differ — so the arms diverge
+stochastically much as different seeds would.
+
+What survives unchanged is the five-fold result: **+0.0107 with all five folds improving** is a paired
+comparison across five independent splits, and five-for-five is not scatter. The bug fixes stand; the
+±0.002 rows do not support the weight I put on them.
+
+Resolving a 0.002 effect against a 0.012 spread would need roughly (0.012/0.002)² ≈ 36 paired runs —
+nine hours per cell. The right conclusion is not "measure it harder" but "too small to matter at our
+current distance from the frontier".
+
+The project's own rule says exactly this — *once a result works, multi-seed; never read signal into
+single-seed scatter*. I applied the first half and skipped the second.
+
+**This also makes the member-count experiment more promising, not less:** a ±0.012 spread between
+independent runs is precisely the variance that rank-averaging exists to average away.
+
 ## The two findings that were bugs, not ideas
 
 **Augmentation was written, unit-tested, and never called.** `fit_epoch` did not invoke it. Both
