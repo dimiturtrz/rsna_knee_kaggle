@@ -130,9 +130,14 @@ def test_predict(tmp_path: Path):
 
 
 def test_run(tmp_path: Path):
-    """The whole path writes a submission whose rows are the test studies, in order."""
+    """The whole path writes a submission whose rows are the test studies, in order.
+
+    `run()` takes no slice count: it reads the depth from the members. This test used to pass
+    `slices=3` explicitly, which meant it exercised the caller's opinion rather than the member's, and
+    so could not have noticed that every kernel was decoding a hardcoded twelve.
+    """
     submission = _submission(tmp_path)
-    frame = submission.run(slices=3)
+    frame = submission.run()
     written = pd.read_csv(submission.working / "submission.csv")
     assert written["StudyInstanceUID"].tolist() == ["study_a", "study_b"]
     assert list(written.columns) == ["StudyInstanceUID", *TARGETS]

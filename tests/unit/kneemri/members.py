@@ -9,7 +9,7 @@ import torch
 from torch import Tensor
 
 from kneemri.backbone import SMALL
-from kneemri.members import Member, MemberConfig, MemberPackage, WeightsError
+from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
 
 SEED = 2026
@@ -230,3 +230,26 @@ def test_variant(tmp_path: Path):
 
     package.members = [replace(package.members[0], config={**package.members[0].config, "variant": "base"})]
     assert package.members[0].variant == "base"
+
+
+def test_slices(tmp_path: Path):
+    """A member states the stack depth it was fitted on, and old manifests fall back to twelve.
+
+    The key was in MemberConfig from the start with no accessor to read it - the same gap that left
+    `variant` unreadable while the kernel already called it - so inference decoded a hardcoded twelve
+    whatever the member had actually seen.
+    """
+    package, _ = _package(tmp_path)
+    member = package.members[0]
+
+    member.config["slices"] = 20
+    assert member.slices == 20
+
+    # Re-read a manifest with the key STRIPPED rather than deleting it from the typed config: a legacy
+    # manifest on disk is the real case, and `slices` is a required key the type system refuses to drop.
+    manifest = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    del manifest["members"][0]["config"]["slices"]
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    legacy = MemberPackage(tmp_path).members[0]
+    assert legacy.slices == LEGACY_SLICES, "a manifest predating variable depth means the twelve it was fitted on"

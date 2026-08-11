@@ -44,6 +44,20 @@ class Ensemble:
             return list(range(slices - group + 1))
         return [index * group for index in range(max(slices // group, 1))]
 
+    def slices(self) -> int:
+        """How deep a stack to decode: the deepest any member was fitted on.
+
+        Derived, never defaulted. A member trained on twenty slices and fed twelve is a train/inference
+        mismatch that raises nothing — the window loop reads `images.shape[2]`, so it simply runs on a
+        shallower stack than the weights ever saw. The fingerprint cannot catch it either: it covers the
+        image size and the group, not the depth of the stack they are drawn from. That is the same class
+        of silent mismatch that cost 0.018 when inference ran at 32 slices.
+
+        The MAX rather than each member's own, because a chunk is decoded once and shown to every
+        member; a member that wants fewer simply windows over part of it.
+        """
+        return max(member.slices for member in self.package.members)
+
     def predict_member(
         self,
         member: Member,

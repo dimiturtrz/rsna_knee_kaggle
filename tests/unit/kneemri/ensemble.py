@@ -144,3 +144,17 @@ def test_predict_chunks(tmp_path: Path):
     combined = ensemble.predict_chunks(source(), overlap=False)
     assert consumed == 3, "the generator must be drained, not indexed"
     assert combined.shape == (6, len(TARGETS)), "three chunks of two studies"
+
+
+def test_slices(tmp_path: Path):
+    """The decode depth is the deepest stack any member was fitted on, never a default.
+
+    A member trained on twenty slices and fed twelve raises nothing - the window loop just reads a
+    shallower stack than the weights ever saw, and the fingerprint covers image size and group rather
+    than depth. So the number has to come from the members, which is what this pins.
+    """
+    ensemble = _ensemble(tmp_path)
+    assert ensemble.slices() == 6, "the fixture member declares six, so six is what gets decoded"
+
+    ensemble.package.members[0].config["slices"] = 20
+    assert ensemble.slices() == 20, "a deeper member must raise the decode depth, not be truncated to it"

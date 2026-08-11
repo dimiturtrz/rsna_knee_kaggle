@@ -26,6 +26,9 @@ from kneemri.model import StudyDesign, StudyModel
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
 
+LEGACY_SLICES = 12
+"""What a manifest written before members could differ in depth was fitted on."""
+
 
 class ReadingRules(TypedDict):
     """The four decisions that settle what a slice IS, none of which changes a tensor shape."""
@@ -84,6 +87,16 @@ class Member:
     def group(self) -> int:
         """Consecutive slices stacked as the encoder's three channels."""
         return int(self.config["group"])
+
+    @property
+    def slices(self) -> int:
+        """How deep a stack this member was fitted on — the depth inference has to decode.
+
+        `slices` was in `MemberConfig` from the start with nothing to read it, exactly as `variant`
+        was: the key existed, the accessor did not, and inference used a hardcoded twelve instead.
+        Defaults to twelve for manifests written before members could differ in depth.
+        """
+        return int(self.config.get("slices", LEGACY_SLICES))
 
     @property
     def pool(self) -> str:

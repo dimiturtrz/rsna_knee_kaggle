@@ -79,8 +79,14 @@ class Submission:
         """Every member's predictions over every study, rank-combined into one table."""
         return self.ensemble.predict_chunks(self.chunks(identifiers, planes, slices), overlap=self.overlap)
 
-    def run(self, slices: int = 12) -> pd.DataFrame:
-        """The whole submission: fallback, decode, predict, write — in that order."""
+    def run(self) -> pd.DataFrame:
+        """The whole submission: fallback, decode, predict, write — in that order.
+
+        The slice depth comes from the members, not from a default. It used to be `slices: int = 12`,
+        and every kernel called `run()` — so a member fitted on a deeper stack would have been scored on
+        twelve slices without a word.
+        """
+        slices = self.ensemble.slices()
         self.fallback()
         test = pd.read_csv(self.competition / "test.csv")
         series = pd.read_csv(self.competition / "test_series.csv")
