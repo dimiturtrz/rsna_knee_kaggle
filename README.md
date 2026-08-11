@@ -50,12 +50,12 @@ packages are **opt-in** (add import-linter yourself — see `devtools/README.md`
 ```bash
 git clone https://github.com/dimiturtrz/rsna_knee_kaggle
 uv sync --extra dev --extra devtools
-nox -s lint test cov
+uvx nox -s lint test cov
 ```
 
 ## Gates
 
-`nox -s lint test cov` (or `nox -s gates`) runs exactly what CI runs:
+`uvx nox -s lint test cov` (or `uvx nox -s gates`) runs exactly what CI runs:
 
 - **lint** — ruff check (pinned) + ruff format --check (advisory) + vulture + arch-fitness (`graph.py --assert`) + ast-grep + jscpd.
 - **test** — pytest.
@@ -63,7 +63,7 @@ nox -s lint test cov
 
 ## Architecture site
 
-`nox -s archmap` writes `docs/architecture/graph.json` (committed, diffable — nodes + weighted import edges)
+`uvx nox -s archmap` writes `docs/architecture/graph.json` (committed, diffable — nodes + weighted import edges)
 plus a self-contained interactive viewer (`index.html`, gitignored, rebuilt on demand). **Commit the
 graph.json diff** — it's the architecture-erosion record.
 
@@ -87,7 +87,7 @@ Publishing to GitHub Pages — one repo = one Pages site, so pick ONE of:
       cp docs/architecture/graph.json docs/architecture/index.html _site/architecture/
   ```
 
-  graph.json stays committed (the diff-truth); regen it locally with `nox -s archmap` when the import
+  graph.json stays committed (the diff-truth); regen it locally with `uvx nox -s archmap` when the import
   structure changes. (`../synthscape` is the reference — archmap folded into its `deploy-fit-explorer`
   workflow beside the fit-explorer views.)
 

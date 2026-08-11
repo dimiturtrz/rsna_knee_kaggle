@@ -16,9 +16,19 @@ so local runs match CI exactly).
 
 ```bash
 uv sync --extra dev --extra devtools   # create/refresh .venv
-nox -s lint test cov                   # the merge gate, locally
-nox -s gates                           # same, one entrypoint
+uvx nox -s lint test cov               # the merge gate, locally
+uvx nox -s gates                       # same, one entrypoint
 ```
+
+**`uvx nox`, never bare `nox`.** It is not on PATH here and is not a project dependency, so both `nox`
+and `uv run nox` fail — and they fail in the way that costs you most: *silently*. `nox -s gates > log
+2>&1; echo "EXIT $?"` reports the ECHO's status, so a missing binary reads as a clean pass while the
+log holds one line saying `command not found`. This has now happened twice in one session (`pkill` was
+the first).
+
+**Verify a gate by its own success marker, not by an exit code you printed.** Grep the log for
+`Session gates was successful`. Chain with `&&`, not `;`, so a missing binary short-circuits instead of
+handing the next command a fresh exit status to succeed with.
 
 ## Package structure
 
@@ -52,7 +62,7 @@ the repo's current state. The linter is a bug-finder, not cosmetics.
 - **archmap** (advisory / doc-gen) — `python -m devtools.archmap <packages>` emits
   `docs/architecture/graph.json` (the committed, diffable architecture — nodes + weighted import edges) plus
   a self-contained interactive **cytoscape viewer** (`index.html`, regenerated + gitignored) that folds/expands
-  packages to any depth and focuses a module's neighbourhood. Regenerate with `nox -s archmap` and **commit the
+  packages to any depth and focuses a module's neighbourhood. Regenerate with `uvx nox -s archmap` and **commit the
   graph.json diff** — it's the architecture-erosion record. The pre-commit hook regenerates on commit; CI runs
   `--check` (advisory) to flag a stale graph.json. **Publishing** (one repo = one Pages site): if the repo has
   no other Pages deployer, opt in with `archviz_pages` — it owns a staged site (`/architecture/` = main,
