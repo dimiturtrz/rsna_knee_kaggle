@@ -190,6 +190,18 @@ nothing above, for the reason given in the previous section.
 Note the baseline lands at 0.8081 where the ledger recorded 0.8221 for the same nominal recipe. That
 difference *is* the missing ruler, and it is why nothing here is compared upward.
 
+### The noise floor is a property of the ruler too
+
+The 0.0012 spread quoted above was measured on the lost table at 30 epochs. On `report_labels_v2` at 8
+epochs the same recipe gives **0.8081 at seed 2026 and 0.8121 at seed 7 — a spread of 0.0040**, three
+times larger. A third seed is running. If 0.0040 holds, per-slice max at +0.0018 is unambiguously
+inside the noise, and the anatomical prior's −0.0076 is about twice it rather than six times.
+
+Neither arm's verdict below is restated until that seed lands, but both should be read with the wider
+floor in mind. The general point is the one worth keeping: a noise floor measured under one ruler,
+epoch budget and split does not transfer to another, and quoting it as if it were a property of the
+method is how a single run gets promoted to a finding.
+
 ### Per-slice max pooling: refuted at the size that mattered
 
 `knee-wif` predicted 0.02–0.03 and wrote its own kill criterion: *"if it lands in the noise, it is a
@@ -210,6 +222,31 @@ remove the penalty, so the coupling was not the cause. Whatever makes a 32-slice
 something else — a candidate is that a fixed band sampled 32 ways gives each window less physical
 extent and averages many near-duplicate views — and that remains untested. The published recipe's
 32-slice inference stays refuted for our pipeline, now for an unknown reason rather than a wrong one.
+
+### The prior's regression was one row of the table, and the row was mine
+
+Scoring per target rather than in aggregate: **the loss is Baker's cyst at −0.0589**. The other eleven
+findings average −0.0009 and six of them improve.
+
+| worst | delta | | best | delta |
+|---|---|---|---|---|
+| Baker's | −0.0589 | | MCL | +0.0077 |
+| Effusion | −0.0108 | | Fracture | +0.0047 |
+| Synovitis | −0.0059 | | Medial OA | +0.0040 |
+
+It also refutes the mechanism I expected. The hypothesis was that forcing anatomy hurts where the
+anatomically-correct slot is often absent — the correlation between per-target change and that slot's
+presence is **−0.091**, nothing at all, and the two findings with the rarest correct slot (`COR_T1`,
+present in 62% of studies) are among those that improved.
+
+The cause is simply that the row was wrong. A Baker's cyst is identified by its *neck*, which runs
+between the semimembranosus tendon and the medial head of gastrocnemius — an axial relationship — and I
+had axial as secondary behind sagittal. The baseline, which routes almost everything axially, scores
+0.8511 on this finding; the prior pulled it toward sagittal and lost 0.06. Axial is now co-primary and
+the arm is rerunning.
+
+So the prior is not refuted. What was refuted is one line of anatomy I wrote, which the per-target view
+found in a minute and the aggregate number would have hidden as "the idea does not work".
 
 ### The anatomical prior: it worked, and the score fell
 
