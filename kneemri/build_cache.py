@@ -14,6 +14,7 @@ import pandas as pd
 from core.paths import DataRoot
 from kneemri.folds import ReportFolds
 from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,15 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slices", type=int, default=12, help="slices cached per slot")
+    parser.add_argument(
+        "--scheme",
+        choices=tuple(SCHEMES),
+        default=StudyCache.CANONICAL,
+        help="which slot scheme to route with. 'extended' adds COR_FLUID_NOFS, AX_T1 and "
+        "AX_FLUID_NOFS, the three combinations the canonical six cannot express - measured at 96%% of "
+        "the 2,421 series (9.9%%) that currently match no slot at all. It writes a SEPARATE cache; the "
+        "canonical arrays and the members fitted on them are untouched.",
+    )
     parser.add_argument(
         "--image-size",
         type=int,
@@ -51,7 +61,12 @@ def main() -> None:
         identifiers = [identifiers[index] for index in holdout]
         logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(identifiers)} studies")
 
-    cache = StudyCache(arguments.out or root.processed(), slices=arguments.slices, image_size=arguments.image_size)
+    cache = StudyCache(
+        arguments.out or root.processed(),
+        slices=arguments.slices,
+        image_size=arguments.image_size,
+        scheme=arguments.scheme,
+    )
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")

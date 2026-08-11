@@ -60,6 +60,28 @@ SLOTS: tuple[Slot, ...] = (
 )
 """The order is load-bearing: it is the slot axis of every cached array and of the head's slot embedding."""
 
+EXTENDED_SLOTS: tuple[Slot, ...] = (
+    *SLOTS,
+    Slot("COR_FLUID_NOFS", Plane.CORONAL, fluid_sensitive=True, fat_suppressed=False),
+    Slot("AX_T1", Plane.AXIAL, fluid_sensitive=False, fat_suppressed=False),
+    Slot("AX_FLUID_NOFS", Plane.AXIAL, fluid_sensitive=True, fat_suppressed=False),
+)
+"""The canonical six plus the three combinations they cannot express.
+
+MEASURED over all 4,407 studies: 2,421 of 24,371 acquired series (9.9%) match no canonical slot, and
+these three account for 2,335 of them — 96.4%, and 83,297 slices of imaging the model never sees.
+None are localisers: coronal PD without fat suppression is a standard meniscus sequence and axial T1
+reads patellar cartilage.
+
+APPENDED, never inserted. The order is the slot axis of every cached array and of the head's slot
+embedding, so the first six positions must keep meaning what they meant — that is what lets a
+canonical member and an extended one share every other piece of code.
+"""
+
+SCHEMES: dict[str, tuple[Slot, ...]] = {"canonical": SLOTS, "extended": EXTENDED_SLOTS}
+"""Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
+grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
+
 
 class SlotScheme:
     """Assigns each study's series to slots, leaving a slot empty when nothing matches its predicate."""

@@ -23,7 +23,7 @@ from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
-from kneemri.slots import SLOTS
+from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
@@ -48,6 +48,7 @@ class TrainingOptions:
     batch: int = 12
     slices: int = 12
     image_size: int = IMAGE_SIZE
+    scheme: str = StudyCache.CANONICAL
     seed: int = 2026
     split_seed: int = 2026
     one_cycle: bool = False
@@ -95,6 +96,15 @@ class TrainingOptions:
             help="resolution of the cache to train on. Selects the cache file AND is recorded in the "
             "member's config and fingerprint, so a member can never advertise a reading it was not "
             "fitted under.",
+        )
+        parser.add_argument(
+            "--scheme",
+            choices=tuple(SCHEMES),
+            default=StudyCache.CANONICAL,
+            help="slot scheme. 'extended' routes three sequences the canonical six cannot express - "
+            "coronal PD without fat suppression, axial T1, axial fluid without fat suppression - which "
+            "are 96%% of the series we currently discard. It needs its own cache and produces members "
+            "with a wider slot embedding, so it does not interoperate with the published six-slot ones.",
         )
         parser.add_argument("--seed", type=int, default=2026, help="model init and data order ONLY")
         parser.add_argument(
@@ -235,7 +245,9 @@ def main() -> None:
     device = DeviceBudget(arguments.vram_gb).select()
 
     root = DataRoot.from_config(arguments.paths)
-    cache = StudyCache(root.processed(), slices=arguments.slices, image_size=arguments.image_size)
+    cache = StudyCache(
+        root.processed(), slices=arguments.slices, image_size=arguments.image_size, scheme=arguments.scheme
+    )
     corpus, identifiers = cache.load()
     targets, evaluation = Targets.pair(
         arguments.labels,
@@ -255,7 +267,8 @@ def main() -> None:
 
     design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
     encoder = ENCODERS[arguments.variant]
-    model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS), design)
+    slots = len(SCHEMES[arguments.scheme])
+    model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
     if arguments.recompute_activations:
         model.recompute_activations()
     scores = LabelScores()
@@ -323,14 +336,14 @@ def main() -> None:
             # unloadable by our own code.
             "options": {name: str(value) for name, value in asdict(arguments).items()},
             "targets": list(TARGETS),
-            "slots": [slot.name for slot in SLOTS],
+            "slots": [slot.name for slot in SCHEMES[arguments.scheme]],
             "config": {
                 "img": arguments.image_size,
                 "slices": arguments.slices,
                 "group": GROUP,
                 "crop_mm": CROP_MM,
                 "band": list(SLICE_BAND),
-                "slots": [slot.name for slot in SLOTS],
+                "slots": [slot.name for slot in SCHEMES[arguments.scheme]],
                 "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
                 "variant": encoder.variant,
                 "pool": "cls_mean",
@@ -348,7 +361,7 @@ def main() -> None:
                 "backbone_lr": arguments.backbone_lr,
             },
             "fingerprint": model.to(device).fingerprint(arguments.image_size, GROUP, device).tolist(),
-            "fingerprint_config": {"img": arguments.image_size, "n_slot": len(SLOTS), "group": GROUP, "seed": 2026},
+            "fingerprint_config": {"img": arguments.image_size, "n_slot": slots, "group": GROUP, "seed": 2026},
         },
         destination,
     )

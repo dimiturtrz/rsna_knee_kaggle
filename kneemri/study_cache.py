@@ -24,7 +24,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from kneemri.slot_reader import IMAGE_SIZE, SlotReader
-from kneemri.slots import SLOTS
+from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.study import SlotPipeline, Study
 
 logger = logging.getLogger(__name__)
@@ -52,16 +52,44 @@ class CachedCorpus:
         return int(self.images.shape[2])
 
 
+@dataclass(frozen=True)
+class DecodeRequest:
+    """One study's decode job, as the pool receives it.
+
+    These seven values were a positional tuple that had to be unpacked identically in two places, and
+    the slot SCHEME was about to become an eighth. A worker argument is configuration, not control
+    flow, so it gets a type — and the type is what makes it impossible to pass the scheme in the
+    position where the resolution used to be.
+    """
+
+    position: int
+    identifier: str
+    source: str
+    images_path: str
+    slices: int
+    image_size: int
+    scheme: str
+    planes: dict[str, str]
+
+
 class StudyCache:
     """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask."""
 
+    CANONICAL = "canonical"
+    """The scheme whose caches keep their historic names, and the one the published members use."""
+
     def __init__(
-        self, directory: Path, slices: int = 12, image_size: int = IMAGE_SIZE, slots: int = len(SLOTS)
+        self, directory: Path, slices: int = 12, image_size: int = IMAGE_SIZE, scheme: str = CANONICAL
     ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
-        self.slots = slots
+        self.scheme = scheme
+
+    @property
+    def slots(self) -> int:
+        """How wide the slot axis is — derived from the scheme, so the two cannot disagree."""
+        return len(SCHEMES[self.scheme])
 
     @property
     def key(self) -> str:
@@ -79,7 +107,7 @@ class StudyCache:
         memory-mapped. Any other scheme is named explicitly.
         """
         base = f"{self.image_size}px_{self.slices}sl"
-        return base if self.slots == len(SLOTS) else f"{base}_{self.slots}slot"
+        return base if self.scheme == self.CANONICAL else f"{base}_{self.scheme}"
 
     @property
     def images_path(self) -> Path:
@@ -106,18 +134,11 @@ class StudyCache:
         Workers write disjoint slices of the same file, so no locking is needed and nothing is returned
         through the pool but a flag — the pixels never cross a process boundary.
 
-        Raises `ValueError` if asked for a slot count the decoder cannot fill. The workers route with
-        the module-level scheme, so a cache declaring nine slots would be filled six-wide and the
-        remaining three left as zeros — an array of exactly the right shape, quietly holding blank
-        sequences, which is this project's recurring failure mode rather than a hypothetical one.
-        Extending the scheme means changing `SLOTS` and rebuilding, not passing a bigger number here.
+        A cache cannot declare more slots than its decoder fills: `slots` is DERIVED from the scheme
+        and the scheme is what the workers route with, so the two cannot disagree. This briefly had a
+        ValueError guarding exactly that mismatch, which the derivation then made unreachable — an
+        invariant is better held by construction than by a check.
         """
-        if self.slots != len(SLOTS):
-            message = (
-                f"cache declares {self.slots} slots but the decoder routes with {len(SLOTS)}; "
-                "the extra slots would be written as zeros"
-            )
-            raise ValueError(message)
         self.directory.mkdir(parents=True, exist_ok=True)
         images = np.lib.format.open_memmap(
             self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))
@@ -127,7 +148,16 @@ class StudyCache:
         self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
 
         arguments = [
-            (position, identifier, str(source), str(self.images_path), self.slices, self.image_size, planes)
+            DecodeRequest(
+                position=position,
+                identifier=identifier,
+                source=str(source),
+                images_path=str(self.images_path),
+                slices=self.slices,
+                image_size=self.image_size,
+                scheme=self.scheme,
+                planes=planes,
+            )
             for position, identifier in enumerate(identifiers)
         ]
         done = 0
@@ -153,26 +183,27 @@ class StudyCache:
         return table.set_index("SeriesInstanceUID")["Anatomical_Plane"].to_dict()
 
     @staticmethod
-    def decode_one(argument: tuple[int, str, str, str, int, int, dict[str, str]]) -> tuple[int, list[float]]:
+    def decode_one(request: "DecodeRequest") -> tuple[int, list[float]]:
         """Decode one study into its slot of the memory map. Top-level so a process pool can pickle it.
 
         The reader is built at the CACHE's resolution, not at its own default. Taking the default worked
         only while the two happened to agree; at any other resolution the decoded bag simply would not fit
         the map, and the shape error was being caught and reported as an absent study.
         """
-        position, identifier, source, images_path, slices, image_size, planes = argument
-        images = np.load(images_path, mmap_mode="r+")
+        images = np.load(request.images_path, mmap_mode="r+")
         try:
-            pipeline = SlotPipeline(reader=SlotReader(image_size=image_size))
-            study = Study.from_directory(Path(source) / identifier, planes, pipeline)
-            bag, mask = study.bag(slices)
-            images[position] = bag.numpy()
+            pipeline = SlotPipeline(
+                scheme=SlotScheme(SCHEMES[request.scheme]), reader=SlotReader(image_size=request.image_size)
+            )
+            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
+            bag, mask = study.bag(request.slices)
+            images[request.position] = bag.numpy()
             images.flush()
-            return position, mask.tolist()
+            return request.position, mask.tolist()
         except (OSError, ValueError, RuntimeError, IndexError) as failure:
             # A study that will not decode is reported ABSENT in every slot rather than black in all of
             # them: the mask can express "not acquired", and a black image the mask calls acquired is a
             # silent lie the head cannot detect. The reason is PRINTED rather than swallowed — an
             # unreported decode failure is indistinguishable from a black knee.
-            logger.info(f"  decode failed for {identifier}: {type(failure).__name__}: {failure}")
-            return position, [0.0] * len(SLOTS)
+            logger.info(f"  decode failed for {request.identifier}: {type(failure).__name__}: {failure}")
+            return request.position, [0.0] * len(SCHEMES[request.scheme])

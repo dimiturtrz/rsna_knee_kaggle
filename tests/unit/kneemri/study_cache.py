@@ -2,10 +2,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from kneemri.slots import SLOTS
-from kneemri.study_cache import StudyCache
+from kneemri.study_cache import DecodeRequest, StudyCache
 
 from .conftest import write_series
 
@@ -90,7 +89,16 @@ def test_decode_one(tmp_path: Path):
     cache.directory.mkdir(parents=True, exist_ok=True)
     np.lib.format.open_memmap(cache.images_path, mode="w+", dtype=np.uint8, shape=cache.shape(1))
     position, flags = StudyCache.decode_one(
-        (0, "study0", str(source), str(cache.images_path), 2, 8, {"sag": "Sagittal"})
+        DecodeRequest(
+            position=0,
+            identifier="study0",
+            source=str(source),
+            images_path=str(cache.images_path),
+            slices=2,
+            image_size=8,
+            scheme="canonical",
+            planes={"sag": "Sagittal"},
+        )
     )
     assert position == 0
     assert flags == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -107,8 +115,8 @@ def test_key(tmp_path: Path):
     assert canonical.key == "336px_12sl"
     assert canonical.images_path.name == "images_336px_12sl.npy"
 
-    extended = StudyCache(tmp_path, slices=12, image_size=336, slots=9)
-    assert extended.key == "336px_12sl_9slot"
+    extended = StudyCache(tmp_path, slices=12, image_size=336, scheme="extended")
+    assert extended.key == "336px_12sl_extended"
     assert extended.images_path != canonical.images_path, "a different slot count must not collide"
     assert extended.mask_path != canonical.mask_path
     assert extended.index_path != canonical.index_path
@@ -116,15 +124,14 @@ def test_key(tmp_path: Path):
 
 def test_shape_follows_the_slot_count(tmp_path: Path):
     """The shape reports the cache's OWN slot count, not the module-level scheme's."""
-    assert StudyCache(tmp_path, slices=12, image_size=336, slots=9).shape(4407)[1] == 9
+    assert StudyCache(tmp_path, slices=12, image_size=336, scheme="extended").shape(4407)[1] == 9
 
 
-def test_build_refuses_a_slot_count_the_decoder_cannot_fill(tmp_path: Path):
-    """A nine-slot cache built by a six-slot decoder would hold three blank sequences and look fine.
+def test_slots(tmp_path: Path):
+    """The slot axis is derived from the scheme, so a cache cannot disagree with its own decoder.
 
-    Verified by asking for it: the shape would be right, the file would be the right size, and three
-    of every study's sequences would be zeros. That is the failure this project keeps meeting — the
-    run completes and the result is quietly meaningless — so it is an error, not a warning.
+    This replaced a ValueError that checked exactly that mismatch. Deriving the width made the check
+    unreachable, and an invariant held by construction beats one held by a guard.
     """
-    with pytest.raises(ValueError, match="would be written as zeros"):
-        StudyCache(tmp_path, slices=12, image_size=336, slots=9).build(tmp_path, ["a"], {})
+    assert StudyCache(tmp_path).slots == len(SLOTS)
+    assert StudyCache(tmp_path, scheme="extended").slots == len(SLOTS) + 3
