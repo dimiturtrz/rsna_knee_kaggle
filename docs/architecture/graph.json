@@ -1765,6 +1765,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.whole_stack",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.trainer.AugmentConfig",
       "target": "kneemri.trainer.AugmentConfig",
@@ -3934,6 +3940,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.Trainer.save_partial",
       "label": "save_partial",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.whole_stack",
+      "label": "whole_stack",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null
