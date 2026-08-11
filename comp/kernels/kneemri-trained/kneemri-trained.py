@@ -22,7 +22,6 @@ from pathlib import Path
 import torch
 
 WORKING = Path("/kaggle/working")
-DINOV2_DIM = 384
 
 
 def find_kit() -> Path:
@@ -52,12 +51,22 @@ def install_wheels(kit: Path) -> None:
         )
 
 
-def find_dinov2() -> Path:
-    """The mounted DINOv2 weights: a config.json under the model mounts, not under the image trees."""
-    for config in sorted(Path("/kaggle/input").rglob("config.json")):
-        if not {"train_series", "test_series"} & set(config.parts) and "dinov2" in str(config).lower():
-            return config.parent
-    raise FileNotFoundError("no DINOv2 model mount")
+def find_dinov2(variant: str) -> Path:
+    """The mounted DINOv2 weights for one variant: a config.json under the model mounts.
+
+    The variant has to be matched, not merely found. Mounting both small and base and taking whichever
+    sorted first would build a member at the wrong width — which surfaces as a shape error during load
+    if we are lucky, and as a silently wrong model if the head happens to accept it.
+    """
+    candidates = [
+        config.parent
+        for config in sorted(Path("/kaggle/input").rglob("config.json"))
+        if not {"train_series", "test_series"} & set(config.parts) and "dinov2" in str(config).lower()
+    ]
+    for mount in candidates:
+        if variant in str(mount).lower().split("dinov2")[-1]:
+            return mount
+    raise FileNotFoundError(f"no DINOv2 {variant} model mount among {candidates}")
 
 
 def main() -> None:
@@ -76,11 +85,13 @@ def main() -> None:
     if package is None:
         raise FileNotFoundError("no weights package mounted")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    weights = find_dinov2()
-    models = {
-        member.identifier: package.load(member, AutoModel.from_pretrained(weights), DINOV2_DIM, device)
-        for member in package.members
-    }
+    from kneemri.backbone import ENCODERS
+
+    models = {}
+    for member in package.members:
+        encoder = ENCODERS[member.variant]
+        weights = find_dinov2(encoder.variant)
+        models[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
     logging.info(f"loaded and fingerprint-checked {len(models)} members from {package.root}")
 
     competition = next(iter(sorted(Path("/kaggle/input").rglob("sample_submission.csv")))).parent
