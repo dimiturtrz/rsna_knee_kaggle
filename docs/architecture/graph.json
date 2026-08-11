@@ -471,6 +471,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.scores",
       "weight": 1
     },
@@ -1417,6 +1423,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.run_metrics.RunMetrics",
+      "target": "kneemri.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.scores.LabelScores.mean",
       "target": "kneemri.scores.LabelScores.per_label",
@@ -1833,6 +1845,12 @@
     {
       "kind": "calls",
       "source": "kneemri.train.main",
+      "target": "kneemri.model.StudyModel.compile_encoder",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
       "target": "kneemri.model.StudyModel.recompute_activations",
       "weight": 1
     },
@@ -1840,6 +1858,24 @@
       "kind": "calls",
       "source": "kneemri.train.main",
       "target": "kneemri.report_supervision.ReportSupervision.from_file",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.run_metrics.RunMetrics.record",
       "weight": 1
     },
     {
@@ -2149,7 +2185,7 @@
       "role": null
     },
     {
-      "descendants": 33,
+      "descendants": 34,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2328,6 +2364,14 @@
       "descendants": 0,
       "id": "kneemri.ruler_check",
       "label": "ruler_check",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics",
+      "label": "run_metrics",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2674,6 +2718,22 @@
       "label": "RulerCheck",
       "level": "class",
       "parent": "kneemri.ruler_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.EpochRow",
+      "label": "EpochRow",
+      "level": "class",
+      "parent": "kneemri.run_metrics",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics",
+      "label": "RunMetrics",
+      "level": "class",
+      "parent": "kneemri.run_metrics",
       "role": "primary"
     },
     {
@@ -3526,6 +3586,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.model.StudyModel.compile_encoder",
+      "label": "compile_encoder",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.model.StudyModel.fingerprint",
       "label": "fingerprint",
       "level": "method",
@@ -3730,6 +3798,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.ruler_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics.record",
+      "label": "record",
+      "level": "method",
+      "parent": "kneemri.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.run_metrics.RunMetrics",
       "role": null
     },
     {
