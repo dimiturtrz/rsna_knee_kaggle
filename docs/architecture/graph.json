@@ -357,6 +357,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.scores",
       "weight": 1
     },
@@ -393,7 +399,19 @@
     {
       "kind": "import",
       "source": "kneemri.trainer",
+      "target": "kneemri.ema",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
       "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.objective",
       "weight": 1
     },
     {
@@ -1303,6 +1321,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.adaptation",
+      "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.objective",
       "target": "kneemri.objective.Objective",
@@ -1312,6 +1342,12 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.objective",
       "target": "kneemri.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.parse",
+      "target": "kneemri.trainer.Adaptation",
       "weight": 1
     },
     {
@@ -1479,6 +1515,12 @@
     {
       "kind": "references",
       "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
       "target": "kneemri.trainer.AugmentConfig",
       "weight": 1
     },
@@ -1492,6 +1534,12 @@
       "kind": "construct",
       "source": "kneemri.trainer.Trainer.__init__",
       "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.trainer.Trainer.__init__",
+      "target": "kneemri.trainer.Adaptation",
       "weight": 1
     },
     {
@@ -2118,6 +2166,14 @@
       "label": "TrainingOptions",
       "level": "class",
       "parent": "kneemri.train",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Adaptation",
+      "label": "Adaptation",
+      "level": "class",
+      "parent": "kneemri.trainer",
       "role": "satellite"
     },
     {
@@ -3206,6 +3262,14 @@
       "label": "rows",
       "level": "method",
       "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.adaptation",
+      "label": "adaptation",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
       "role": null
     },
     {
