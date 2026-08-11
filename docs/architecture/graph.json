@@ -1845,6 +1845,18 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.trainer.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.DeviceBudget.select",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.trainer.Trainer",
       "weight": 1
     },
@@ -2706,6 +2718,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.AugmentConfig",
       "label": "AugmentConfig",
+      "level": "class",
+      "parent": "kneemri.trainer",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.DeviceBudget",
+      "label": "DeviceBudget",
       "level": "class",
       "parent": "kneemri.trainer",
       "role": "satellite"
@@ -4068,6 +4088,14 @@
       "label": "geometric_only",
       "level": "method",
       "parent": "kneemri.trainer.AugmentConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.DeviceBudget.select",
+      "label": "select",
+      "level": "method",
+      "parent": "kneemri.trainer.DeviceBudget",
       "role": null
     },
     {
