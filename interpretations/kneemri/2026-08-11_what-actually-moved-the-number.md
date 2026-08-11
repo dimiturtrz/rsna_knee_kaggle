@@ -634,3 +634,48 @@ A change now needs a *mechanism that could plausibly deliver 1.5%*, not merely a
 helps. Knob-sized ideas are kept only when they are free and physically sound — ranking costs nothing
 at inference and is the quantity the metric literally scores, so it stays in the recipe — but they no
 longer justify a confirmation seed of their own, and they never gate a plan.
+
+## Every number in this document is measured with the wrong ruler
+
+`train.csv` carries the twelve annotations for **exactly 58 studies, all or nothing** — 696 of 52,884
+(study, label) cells, 1.32%. There are no partial annotations to scavenge: a study has all twelve or
+none.
+
+So every score here — 0.8081, 0.8205, 0.8283 — is agreement with **LLM-read report labels**, and the
+competition scores agreement with **radiologist annotations**. Those are different targets, and this
+project selects its epochs, its members and its recipe on the proxy.
+
+It cannot be fixed locally, and it is worth being precise about why:
+
+- The 58 annotated studies are **trained on**, at `ANNOTATED_WEIGHT = 3.0`. Scoring them is scoring
+  training data.
+- Held-out, fold 0 gets about a fifth of them — twelve studies, carrying between 2 and 7 positives per
+  label. That is the regime `knee-6xm` already computed a Hanley-McNeil standard error for: ±0.17 at
+  95%, far wider than any difference this project separates.
+
+**The only true ruler available is the leaderboard.** That is not a reason to distrust the local
+numbers — it is a reason to know what they are: a proxy that ranks recipes, validated against the real
+metric only when we submit.
+
+### The proxy appears to COMPRESS, by roughly a factor of two
+
+Two rows of the submission ledger have both numbers:
+
+| local | LB | |
+|---|---|---|
+| 0.8162 | 0.868 | 5 members, augmentation silently disabled |
+| 0.8269 | 0.888 | augmentation actually applied + OneCycle + overlap TTA |
+
+**+0.0107 local became +0.020 on the leaderboard.** If that ratio holds, our local deltas understate
+the thing being scored by about 2x, and the 1.5% bar applied to the LB corresponds to roughly +0.008
+locally.
+
+Stated with its limits, because it is two points and a confounded pair: three changes landed together,
+the member count is the same but the recipe is not, and no error bar exists on either number. It is
+enough to justify *submitting to find out*, and not enough to re-score the ledger by.
+
+### What follows for how this project should spend its submissions
+
+Five per day, kernel pushes unlimited. The local ruler is free but proxied; the LB is scarce but true.
+So the local number decides WHICH recipe to submit, and only the LB decides whether a recipe is better.
+A change that looks like +0.008 locally is exactly the case that cannot be settled without spending one.
