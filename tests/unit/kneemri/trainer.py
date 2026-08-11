@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import override
 
 import numpy as np
@@ -8,7 +9,7 @@ from torch import Tensor
 from kneemri.model import TARGETS, StudyModel
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import Trainer
+from kneemri.trainer import AugmentConfig, Trainer
 
 SEED = 2026
 DIM = 8
@@ -175,3 +176,57 @@ def test_one_cycle():
         trainer.schedule.step()
     ended = [group["lr"] for group in trainer.optimiser.param_groups]
     assert all(end < top / 100 for end, top in zip(ended, peak, strict=True)), "must decay far below the peak"
+
+
+def test_geometric_only():
+    """The default must reproduce the pre-existing recipe exactly, or it silently changes members.
+
+    Folds trained before the intensity block existed have to remain comparable with folds trained
+    after it, so `geometric_only` is asserted to leave the intensity distribution alone: every pixel
+    of an image scales by the SAME factor, which is what a gain is and a gamma/contrast/blur is not.
+    """
+    trainer = _trainer()
+    trainer.augment_config = AugmentConfig.geometric_only()
+    images = torch.rand(4, 3, 16, 16) * 0.8 + 0.1
+    generator = torch.Generator().manual_seed(7)
+    out = trainer._intensity(images, generator)
+    ratio = out / images
+    assert float(ratio.flatten(1).std(1).max()) < 1e-3, "a pure gain scales every pixel identically"
+
+
+def test_intensity_perturbs_and_stays_in_range():
+    """The full config must actually bite, and must not leave [0, 1] — the cache is uint8."""
+    trainer = _trainer()
+    trainer.augment_config = AugmentConfig()
+    images = torch.rand(8, 3, 16, 16)
+    out = trainer._intensity(images, torch.Generator().manual_seed(7))
+    assert float((out - images).abs().gt(1e-4).float().mean()) > 0.5, "intensity augmentation must perturb"
+    assert float(out.min()) >= 0.0
+    assert float(out.max()) <= 1.0
+
+
+def test_loss_normalisation_modes_differ():
+    """By-weight and by-count are different scales, which is why they are measured as a pair."""
+    logits = torch.zeros(2, len(TARGETS))
+    scores = torch.ones(2, len(TARGETS))
+    weights = torch.full((2, len(TARGETS)), 0.25)
+    by_weight = _trainer().loss(logits, scores, weights)
+    counted = _trainer()
+    counted.normalise_by_count = True
+    assert float(counted.loss(logits, scores, weights)) < float(by_weight)
+
+
+def test_save_partial(tmp_path: Path):
+    """The best weights hit disk the moment they improve, and a partial write cannot survive."""
+    trainer = _trainer()
+    destination = tmp_path / "member_fold0.pt"
+    state = {key: value.detach().cpu() for key, value in trainer.model.head.state_dict().items()}
+    trainer.save_partial(destination, state, holdout=0.81, epoch=7)
+
+    partial = destination.with_suffix(".partial")
+    assert partial.exists()
+    assert not partial.with_suffix(".tmp").exists(), "the temp file must be renamed, not left behind"
+    reloaded = torch.load(partial, map_location="cpu", weights_only=True)
+    assert reloaded["holdout"] == 0.81
+    assert reloaded["epoch"] == 7
+    assert reloaded["model"].keys() == state.keys()

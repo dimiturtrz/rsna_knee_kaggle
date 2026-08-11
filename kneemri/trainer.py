@@ -15,6 +15,9 @@ laterality normalisation that five of the twelve targets depend on, turning a me
 lateral one and teaching the model that the distinction is noise.
 """
 
+from dataclasses import dataclass
+from pathlib import Path
+
 import numpy as np
 import torch
 from jaxtyping import Float, UInt8
@@ -40,6 +43,49 @@ GROUP = 3
 MIDPOINT = 0.5
 """Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""
 
+
+@dataclass(frozen=True)
+class AugmentConfig:
+    """How hard to perturb a training image, and which perturbations to apply at all.
+
+    The geometric widths are the public baseline's. The INTENSITY block is not: it comes from the
+    sibling cardiac-MRI project, where gamma / contrast / blur / noise were the transforms that
+    measurably closed a cross-vendor gap (`../cardiac-seg/core/data/dynamic/augment.py`). This corpus
+    has the same problem in a harder form — reports in nine languages means many countries and many
+    scanners — and the public baseline augments geometry only.
+
+    NO FLIPS, ever. A horizontal flip undoes the laterality normalisation that five of the twelve
+    targets depend on. The sibling project flips both axes freely because a cardiac label is not
+    side-defined; here it would teach the model that medial and lateral are the same thing.
+
+    One inherited finding does NOT transfer, and the reason is worth keeping: cardiac-seg measured
+    translation as NEUTRAL and turned it off, because a fully-convolutional U-Net is
+    translation-equivariant so absolute position barely matters. Our encoder is a ViT with position
+    embeddings and is NOT equivariant, so translation is kept on here.
+    """
+
+    rotation_degrees: float = 8.0
+    scale_jitter: float = 0.08
+    shift_jitter: float = 0.05
+    gain_jitter: float = 0.10
+    gamma: tuple[float, float] = (0.7, 1.5)
+    gamma_probability: float = 0.3
+    blur_probability: float = 0.2
+    contrast: tuple[float, float] = (0.85, 1.15)
+    noise: float = 0.02
+    """Noise is far below the sibling's 0.08: theirs acts on z-scored images, ours on [0, 1]."""
+
+    @classmethod
+    def geometric_only(cls) -> "AugmentConfig":
+        """The public baseline's augmentation: rigid jitter and one global gain, no intensity ops.
+
+        This is the DEFAULT, so that enabling the intensity block is an explicit, ablatable decision
+        rather than a silent change of recipe. It also keeps a run reproducible against members that
+        were fitted before the block existed.
+        """
+        return cls(gamma_probability=0.0, blur_probability=0.0, contrast=(1.0, 1.0), noise=0.0)
+
+
 ROTATION_DEGREES = 8.0
 SCALE_JITTER = 0.08
 SHIFT_JITTER = 0.05
@@ -49,10 +95,23 @@ INTENSITY_JITTER = 0.10
 class Trainer:
     """Fits a `StudyModel` on a cached corpus and scores it on a held-out fold."""
 
-    def __init__(self, model: StudyModel, device: torch.device, unfreeze_last: int = UNFREEZE_LAST) -> None:
+    _BLUR = torch.tensor([[1.0, 2.0, 1.0], [2.0, 4.0, 2.0], [1.0, 2.0, 1.0]]) / 16.0
+    """A 3x3 Gaussian, normalised so a blur cannot change the image's overall level."""
+
+    def __init__(
+        self,
+        model: StudyModel,
+        device: torch.device,
+        unfreeze_last: int = UNFREEZE_LAST,
+        augment_config: AugmentConfig | None = None,
+        *,
+        normalise_by_count: bool = False,
+    ) -> None:
         self.model = model.to(device)
         self.device = device
         self.unfreeze_last = unfreeze_last
+        self.augment_config = augment_config or AugmentConfig.geometric_only()
+        self.normalise_by_count = normalise_by_count
         groups = self.model.parameter_groups(HEAD_LR, BACKBONE_LR, unfreeze_last)
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
@@ -76,19 +135,59 @@ class Trainer:
         )
 
     def augment(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
-        """Rigid jitter and a brightness scale — never a flip, which laterality normalisation forbids."""
-        count = images.shape[0]
-        angles = (torch.rand(count, generator=generator, device=images.device) * 2 - 1) * np.deg2rad(ROTATION_DEGREES)
-        scales = 1 + (torch.rand(count, generator=generator, device=images.device) * 2 - 1) * SCALE_JITTER
-        shifts = (torch.rand(count, 2, generator=generator, device=images.device) * 2 - 1) * SHIFT_JITTER
+        """Rigid jitter, then intensity — never a flip, which laterality normalisation forbids.
+
+        Every transform is per-sample and vectorised: parameters come from one `torch.rand(n, ...)` and
+        probabilistic transforms are applied with a mask (`out = do*transformed + (1-do)*original`)
+        rather than a Python branch, so a batch costs one kernel per transform and not one per image.
+        """
+        warped = self._warp(images, generator)
+        return self._intensity(warped, generator)
+
+    def _warp(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
+        """Rotation, scale and translation as a single affine resample."""
+        config, count, device = self.augment_config, images.shape[0], images.device
+        angles = (torch.rand(count, generator=generator, device=device) * 2 - 1) * np.deg2rad(config.rotation_degrees)
+        scales = 1 + (torch.rand(count, generator=generator, device=device) * 2 - 1) * config.scale_jitter
+        shifts = (torch.rand(count, 2, generator=generator, device=device) * 2 - 1) * config.shift_jitter
         cosine, sine = torch.cos(angles) / scales, torch.sin(angles) / scales
-        theta = torch.zeros(count, 2, 3, device=images.device)
+        theta = torch.zeros(count, 2, 3, device=device)
         theta[:, 0, 0], theta[:, 0, 1], theta[:, 0, 2] = cosine, -sine, shifts[:, 0]
         theta[:, 1, 0], theta[:, 1, 1], theta[:, 1, 2] = sine, cosine, shifts[:, 1]
         grid = nn.functional.affine_grid(theta, list(images.shape), align_corners=False)
-        warped = nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
-        gain = 1 + (torch.rand(count, 1, 1, 1, generator=generator, device=images.device) * 2 - 1) * INTENSITY_JITTER
-        return (warped * gain).clamp(0, 1)
+        # `border` rather than `zeros`: a rotated knee should run out into tissue-like values, not into a
+        # black wedge the encoder can use to infer how far the image was rotated.
+        return nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
+
+    def _intensity(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
+        """Gain, gamma, blur, contrast and noise — the scanner-variation axis, on [0, 1] inputs."""
+        config, count, device = self.augment_config, images.shape[0], images.device
+        shape = (count, 1, 1, 1)
+
+        gain = 1 + (torch.rand(shape, generator=generator, device=device) * 2 - 1) * config.gain_jitter
+        images = images * gain
+
+        low, high = config.gamma
+        exponent = torch.rand(shape, generator=generator, device=device) * (high - low) + low
+        apply_gamma = (torch.rand(shape, generator=generator, device=device) < config.gamma_probability).float()
+        images = apply_gamma * images.clamp(0, 1) ** exponent + (1 - apply_gamma) * images
+
+        apply_blur = (torch.rand(shape, generator=generator, device=device) < config.blur_probability).float()
+        channels = images.shape[1]
+        kernel = self._BLUR.to(device, images.dtype).view(1, 1, 3, 3).expand(channels, 1, 3, 3)
+        blurred = nn.functional.conv2d(images, kernel, padding=1, groups=channels)
+        images = apply_blur * blurred + (1 - apply_blur) * images
+
+        low, high = config.contrast
+        contrast = torch.rand(shape, generator=generator, device=device) * (high - low) + low
+        # Contrast scales about the image's own mean, so it changes the SPREAD of intensities without
+        # also shifting the level — which `gain` above is already responsible for.
+        mean = images.mean(dim=(1, 2, 3), keepdim=True)
+        images = (images - mean) * contrast + mean
+
+        if config.noise > 0:
+            images = images + torch.randn(images.shape, generator=generator, device=device) * config.noise
+        return images.clamp(0, 1)
 
     def augment_bag(self, images: UInt8[Tensor, "b n g h w"]) -> UInt8[Tensor, "b n g h w"]:
         """Augment a batch of slot bags, staying in uint8 so the model's own forward is untouched.
@@ -186,13 +285,21 @@ class Trainer:
         scores: Float[Tensor, "b o"],
         weights: Float[Tensor, "b o"],
     ) -> Float[Tensor, ""]:
-        """Confidence-weighted BCE: a target the report never mentioned pulls with weight zero.
+        """Confidence-weighted BCE, normalised either by total weight or by element count.
 
-        Normalised by the total weight rather than by the element count, so a batch that happens to
-        carry little confidence does not take a full-sized step on almost no evidence.
+        BY WEIGHT (ours): a batch carrying little confidence does not take a full-sized step on almost
+        no evidence. BY COUNT (the public baseline's `.mean()`): the step size is a fixed scale that
+        does not depend on how confidently the batch happened to be labelled.
+
+        The two are not interchangeable in magnitude. With most weights below one, dividing by their
+        sum makes our gradients roughly twice theirs for the same batch — which interacts with the
+        learning-rate schedule, so the pair has to be measured together rather than one at a time.
         """
         elementwise = nn.functional.binary_cross_entropy_with_logits(logits, scores, reduction="none")
-        return (elementwise * weights).sum() / weights.sum().clamp(min=1.0)
+        weighted = elementwise * weights
+        if self.normalise_by_count:
+            return weighted.mean()
+        return weighted.sum() / weights.sum().clamp(min=1.0)
 
     def area_under_curve(self, scores: NDArray[np.float64], truth: NDArray[np.int64]) -> float:
         """ROC AUC by rank, which is its definition — no sklearn, no calibration, no thresholds."""
@@ -201,6 +308,19 @@ class Trainer:
             return float("nan")
         order = scores.argsort().argsort() + 1
         return float((order[truth == 1].sum() - positives * (positives + 1) / 2) / (positives * negatives))
+
+    def save_partial(self, destination: Path, state: dict[str, Tensor], holdout: float, epoch: int) -> None:
+        """Write the best weights so far, atomically, the moment they improve.
+
+        Holding the only copy in memory until the final epoch is how a run that has already produced
+        its best epoch loses everything — which the OneCycle off-by-one demonstrated by raising on the
+        very last step of a thirty-epoch run. The temp-then-rename means a crash mid-write cannot leave
+        a truncated file behind either.
+        """
+        partial = destination.with_suffix(".partial")
+        temporary = partial.with_suffix(".tmp")
+        torch.save({"model": state, "holdout": holdout, "epoch": epoch}, temporary)
+        temporary.replace(partial)
 
     def evaluate(self, predictions: NDArray[np.float64], scores: NDArray[np.float32]) -> dict[str, float]:
         """Per-label AUC on the holdout, against the graded targets binarised at their midpoint.

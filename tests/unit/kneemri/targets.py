@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from kneemri.model import TARGETS
-from kneemri.targets import ANNOTATED_WEIGHT, Targets
+from kneemri.targets import ANNOTATED_WEIGHT, CONFIDENCE_FLOOR, Targets
 
 
 def _tables(tmp_path: Path) -> tuple[Path, Path]:
@@ -52,3 +52,14 @@ def test_coverage(tmp_path: Path):
     coverage = Targets.load(derived_path, annotated_path, ["a", "b", "c"]).coverage()
     assert set(coverage) == set(TARGETS)
     assert coverage["ACL"] == 2 / 3
+
+
+def test_load_applies_a_confidence_floor(tmp_path: Path):
+    """With a floor, a finding the report never mentions still pulls — weakly, not not at all."""
+    derived_path, annotated_path = _tables(tmp_path)
+    floored = Targets.load(derived_path, annotated_path, ["a", "b", "c"], CONFIDENCE_FLOOR)
+    dropped = Targets.load(derived_path, annotated_path, ["a", "b", "c"])
+    assert dropped.weights[2, 0] == 0.0, "without a floor an unmentioned finding is dropped"
+    assert floored.weights[2, 0] == CONFIDENCE_FLOOR, "with a floor it keeps a quarter of the weight"
+    # a fully-confident derived target is unchanged by the floor
+    assert floored.weights[1, 0] > dropped.weights[1, 0]

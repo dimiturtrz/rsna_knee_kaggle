@@ -24,6 +24,14 @@ from numpy.typing import NDArray
 
 from kneemri.model import TARGETS
 
+CONFIDENCE_FLOOR = 0.25
+"""What a finding the report never mentions still pulls with, as a fraction of a fully-confident one.
+
+Ours dropped such targets entirely (weight 0.0); the public baseline uses `0.25 + 0.75*conf`. Silence
+in a radiology report is weak evidence of ABSENCE — a knee report lists what was checked and found
+intact — so dropping it discards evidence rather than declining to guess. Kept as a parameter because
+the two behaviours are a measurable difference, not a matter of taste."""
+
 ANNOTATED_WEIGHT = 3.0
 """Image-read annotations outweigh any derived row: they are the only labels read from the pixels rather
 than from text, and there are 58 of them."""
@@ -39,8 +47,12 @@ class Targets:
         self.position = {identifier: index for index, identifier in enumerate(identifiers)}
 
     @classmethod
-    def load(cls, report_labels: Path, train_table: Path, identifiers: list[str]) -> "Targets":
-        """Read the derived table, then overwrite with annotations where a study has them."""
+    def load(cls, report_labels: Path, train_table: Path, identifiers: list[str], floor: float = 0.0) -> "Targets":
+        """Read the derived table, then overwrite with annotations where a study has them.
+
+        `floor` sets what an unmentioned finding still pulls with: 0.0 drops it (our original
+        behaviour), `CONFIDENCE_FLOOR` reproduces the public baseline's `0.25 + 0.75*conf`.
+        """
         derived = pd.read_csv(report_labels).set_index("StudyInstanceUID")
         annotated = pd.read_csv(train_table).set_index("StudyInstanceUID")
 
@@ -55,7 +67,8 @@ class Targets:
                     )
                     if pd.notna(value):
                         scores[row, column] = float(value)  # pyrefly: ignore[bad-argument-type]
-                        weights[row, column] = float(confidence) if pd.notna(confidence) else 1.0  # pyrefly: ignore[bad-argument-type]
+                        raw = float(confidence) if pd.notna(confidence) else 1.0  # pyrefly: ignore[bad-argument-type]
+                        weights[row, column] = floor + (1.0 - floor) * raw
                 if identifier in annotated.index and target in annotated.columns:
                     truth = annotated.at[identifier, target]
                     if pd.notna(truth):

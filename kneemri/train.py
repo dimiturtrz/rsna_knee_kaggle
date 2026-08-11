@@ -20,8 +20,8 @@ from kneemri.model import TARGETS, StudyModel
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
-from kneemri.targets import Targets
-from kneemri.trainer import UNFREEZE_LAST, Trainer
+from kneemri.targets import CONFIDENCE_FLOOR, Targets
+from kneemri.trainer import UNFREEZE_LAST, AugmentConfig, Trainer
 
 DINOV2 = "facebook/dinov2-small"
 DIM = 384
@@ -39,6 +39,9 @@ def main() -> None:
     parser.add_argument("--slices", type=int, default=12)
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+    parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise as well as geometry")
+    parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding still pulls at 0.25")
+    parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() rather than /weight-sum")
     parser.add_argument("--labels", type=Path, required=True, help="report-derived label table")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -52,14 +55,24 @@ def main() -> None:
     root = DataRoot.from_config(arguments.paths)
     cache = StudyCache(root.processed(), slices=arguments.slices)
     corpus, identifiers = cache.load()
-    targets = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers)
+    targets = Targets.load(
+        arguments.labels,
+        root.raw() / "train.csv",
+        identifiers,
+        CONFIDENCE_FLOOR if arguments.weight_floor else 0.0,
+    )
     assignments = ReportFolds(arguments.folds, arguments.seed).assign(str(root.raw() / "train.csv"), identifiers)
     training, holdout = ReportFolds(arguments.folds, arguments.seed).holdout(assignments, arguments.fold)
     logger.info(f"{len(identifiers)} studies: {len(training)} train / {len(holdout)} holdout (fold {arguments.fold})")
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 
     model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS))
-    trainer = Trainer(model, device)
+    trainer = Trainer(
+        model,
+        device,
+        augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
+        normalise_by_count=arguments.normalise_by_count,
+    )
     if arguments.one_cycle:
         # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
         # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
@@ -67,6 +80,7 @@ def main() -> None:
         steps_per_epoch = -(-len(training) // arguments.batch)
         trainer.one_cycle(arguments.epochs * max(steps_per_epoch, 1))
 
+    destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
     best, best_state = -1.0, None
     for epoch in range(arguments.epochs):
         started = time.time()
@@ -79,8 +93,8 @@ def main() -> None:
         if mean > best:
             best = mean
             best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
+            trainer.save_partial(destination, best_state, best, epoch)
 
-    destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
     model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
     torch.save(
         {
