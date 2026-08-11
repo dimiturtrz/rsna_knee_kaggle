@@ -545,3 +545,47 @@ not noise-limited in the way filtering would fix; it cannot say what a reader wi
 scoping would add. Re-test that separately, and do not treat this as having closed it.
 
 Recorded so a later session does not re-run the same arms: `knee-5od` closed, `knee-crl` stays P2.
+
+## EMA: real, positive, and too small to be a lever
+
+Every strong public notebook here keeps an exponential moving average of the weights. Ours existed as a
+module, was unit-tested, and had never been constructed by a training run — the augmentation bug's exact
+shape, and invisible to both the dead-code gate (its own test referenced it) and the mirror gate (it had
+a test).
+
+Wired and measured, matched, small@24, fold 0:
+
+| seed | control | EMA | Δ |
+|---|---|---|---|
+| 2026 | 0.8205 | 0.8217 | +0.0012 |
+| 7 | 0.8248 | 0.8255 | +0.0007 |
+
+**+0.0010 on average, the same sign twice, and far inside the 0.0062 noise floor.** By this project's
+own stated rule that is not a result, and it goes in the ledger next to per-slice max pooling (+0.0018)
+and the weight floor (+0.0019) rather than next to capacity.
+
+### A claim I made mid-run and then had to withdraw
+
+Watching the seed-7 EMA arm pass 0.8220 at epoch 10 while the control had been at 0.8148 at *its* epoch
+10, I said EMA reached the control's final score in half the epochs. That was wrong, and it was wrong in
+the way single-point comparisons usually are. Time to within 0.001 of each arm's own best:
+
+| arm | best | at epoch | within 0.001 at |
+|---|---|---|---|
+| control, seed 7 | 0.8248 | 13 | 13 |
+| EMA, seed 7 | 0.8255 | 15 | 12 |
+| EMA, seed 2026 | 0.8217 | 16 | 12 |
+
+The control peaks at epoch 13 too. One epoch of difference is not a convergence story; comparing two
+noisy curves at one arbitrary epoch produced a speedup that a proper time-to-target measurement does not
+support.
+
+### Kept anyway, and for a reason the fold-0 number cannot show
+
+The final fit uses `--fold -1` and has no holdout, so it keeps its **last** epoch by construction. Its
+answer therefore depends entirely on where training happened to stop — which, given a curve that wanders
+0.004 between epochs 13 and 24, is a real coin-flip we currently take for free. An average removes it.
+
+That is an argument about the *variance of the shipped artefact*, not about the mean of a fold-0 score,
+and no arm measured here can confirm or refute it. Stated as a design choice rather than a measured
+gain, which is what it is.
