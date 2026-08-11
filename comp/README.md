@@ -67,6 +67,27 @@ the jaxtyping wheels were gone — and `verify_kit.py` called that "safe to subm
 compared source. It now checks the required wheels too, which is what makes the gate below mean
 something.
 
+**Which credential actually works (2026-08-11).** Two live in `~/.kaggle/`:
+
+| file | what it is | state |
+|---|---|---|
+| `access_token` | the `KGAT_*` bearer token `publish.py` uses | **expired 2026-07-23** |
+| `kaggle.json` | username + key, for the official CLI | **works** |
+
+An expired bearer token gets Kaggle's marketing HTML rather than a 401, so `publish.py` fails with a
+wall of markup and exit 1. The official CLI authenticates fine, which makes `publish.py`'s founding
+claim — that the CLI "cannot run here at all" — false today. See `knee-cws`; do not delete that module
+reflexively, its value was the stale-kit refusal, not the transport.
+
+```bash
+export KAGGLE_CONFIG_DIR="$HOME/.kaggle"
+cd comp && kaggle datasets version -p members -m "<notes>" --dir-mode zip   # from INSIDE comp/
+cd comp && kaggle kernels push -p kernels/kneemri-trained
+```
+
+**Run it from inside `comp/`.** `-p comp/members` fails with a mangled temp path
+(`comp/members_manifest.json.json`) — the CLI concatenates directory and filename on Windows.
+
 **A member's SLICE AGGREGATION travels with it, and this was verified by breaking it (2026-08-11).**
 `members.py` reconstructed every member with `StudyDesign(pool=...)` and never passed `slice_pooling`,
 so a member fitted with `--slice-pooling max` came back with the default channel stacking. Checked
