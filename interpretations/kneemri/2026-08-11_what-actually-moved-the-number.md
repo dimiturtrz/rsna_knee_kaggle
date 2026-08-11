@@ -760,3 +760,50 @@ Three rules follow:
 
 I should have caught this when queueing the arm: it was written as "the stacked recipe, seed 7" without
 a seed-7 comparator existing for it.
+
+## Slice coverage: my prediction was wrong, and the reason was already written down
+
+I predicted more slices would pay, on the supervision-limited reading: 89% of series hold more than 12
+slices inside the 0.20-0.80 band we read, so a third of the evidence we had already decided was worth
+reading was being discarded.
+
+Matched, base + ranking, seed 2026, fold 0, only the slice count moved:
+
+| slices | best |
+|---|---|
+| 12 | 0.8283 |
+| **20** | **0.8267** |
+
+**−0.0016.** Inside noise, and in the wrong direction. The prediction is refuted.
+
+### Why — and it is not "more data does not help"
+
+`model.py` already carries the mechanism, in a comment written after a different failure:
+
+> Channel stacking couples the group's PHYSICAL THICKNESS to the slice count, which is measurably why
+> raising inference slices from 12 to 32 cost −0.018 here.
+
+Under `slice_pooling="channels"` a group is three CONSECUTIVE cached slices stacked as the encoder's
+three channels. The cached slices span a fixed anatomical band, so at 20 slices they sit closer
+together and a three-slice group covers **40% less tissue** than at 12. I did not add evidence per
+view. I made every view thinner, and then added more of them.
+
+So the arm did not test slice coverage. It tested slice coverage MINUS group thickness, and those two
+moved in opposite directions — which is exactly the confound that cost 0.018 the first time this
+project met it, in a comment I had read this morning and did not connect.
+
+### The deconfounded test
+
+Group size is fixed at three by the RGB trick, so thickness cannot be restored by widening the group.
+`slice_pooling="max"` is the escape the codebase already has: each slice is encoded ALONE and the
+slot's embedding is the per-dimension maximum, so a group's physical extent stops depending on how
+finely the band was sampled. It is also what the 0.903 reference does, and per-slice max pooling
+measured +0.0018 at 12 slices — inside noise, and tested at the one slice count where the confound it
+fixes does not bite.
+
+Queued on small (3x the encoder passes, so base was too expensive for a signal test): max pooling at 12
+slices to isolate the pooling change, then max pooling at 20 to move the slice count with thickness
+held constant. Control: small + ranking at 12 slices, 0.8272.
+
+**If 20+max still does not beat 12+max, slice coverage is genuinely not a lever here** and the
+supervision-limited reading loses its evidence branch, keeping only the label branch.
