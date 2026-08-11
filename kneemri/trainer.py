@@ -28,6 +28,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.ema import DECAY, LiveWeights, WeightAverage
+from kneemri.heartbeat import Heartbeat
 from kneemri.model import StudyModel
 from kneemri.objective import Objective
 from kneemri.report_supervision import NoReportSupervision, ReportSupervision
@@ -190,6 +191,7 @@ class Trainer:
         # or may not want, and a sixth constructor argument trips the argument-count gate. The default
         # is a no-op object rather than None, so no call site has to test for one.
         self.average: LiveWeights = LiveWeights()
+        self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
 
     def report_supervision(self, reports: ReportSupervision) -> None:
@@ -344,6 +346,7 @@ class Trainer:
         # every forty-second epoch spent reading data that is then thrown away.
         self.model.train()
         total, steps = 0.0, 0
+        planned = len(positions) // max(size, 1)
         for batch in self.batches(positions, size, generator, shuffle=True):
             start = int(generator.integers(0, corpus.slices - self.window + 1))
             pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, start : start + self.window])).to(
@@ -370,6 +373,7 @@ class Trainer:
             self.average.update(self.model)
             total += float(loss.detach())
             steps += 1
+            self.heartbeat.tick(steps, planned, total / steps, int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]))
         return total / max(steps, 1)
 
     def predict(
