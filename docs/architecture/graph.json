@@ -608,12 +608,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.attribution.Attribution.depth_profile",
-      "target": "kneemri.attribution.Attribution._mean",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.attribution.Attribution.region_importance",
       "target": "kneemri.attribution.Attribution._mean",
       "weight": 1
@@ -651,13 +645,13 @@
     {
       "kind": "calls",
       "source": "kneemri.attribution.main",
-      "target": "kneemri.attribution.Attribution.depth_by_label",
+      "target": "kneemri.attribution.Attribution.averaged",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.attribution.main",
-      "target": "kneemri.attribution.Attribution.depth_profile",
+      "target": "kneemri.attribution.Attribution.depth_by_label",
       "weight": 1
     },
     {
@@ -2802,16 +2796,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.attribution.Attribution.depth_by_label",
-      "label": "depth_by_label",
+      "id": "kneemri.attribution.Attribution.averaged",
+      "label": "averaged",
       "level": "method",
       "parent": "kneemri.attribution.Attribution",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.attribution.Attribution.depth_profile",
-      "label": "depth_profile",
+      "id": "kneemri.attribution.Attribution.depth_by_label",
+      "label": "depth_by_label",
       "level": "method",
       "parent": "kneemri.attribution.Attribution",
       "role": null
