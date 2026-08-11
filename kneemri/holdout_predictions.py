@@ -13,7 +13,7 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 GROUP = 3
 BATCH = 8
@@ -42,7 +42,11 @@ class HoldoutPredictions:
         """
         saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
         config = saved.get("config", {})
-        model = StudyModel(backbone, dim, slots, slice_pooling=str(config.get("slice_pooling", "channels")))
+        design = StudyDesign(
+            slice_pooling=str(config.get("slice_pooling", "channels")),
+            anatomical_prior=bool(config.get("anatomical_prior", False)),
+        )
+        model = StudyModel(backbone, dim, slots, design)
         model.load_state_dict(saved["model"])
         return model.to(self.device).eval()
 

@@ -6,6 +6,7 @@ load only into this shape. `MemberPackage` checks that faithfulness numerically 
 this module is what it checks.
 """
 
+from dataclasses import dataclass
 from typing import override
 
 import numpy as np
@@ -14,7 +15,9 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
+from kneemri.anatomy import ANATOMY, SlotAffinity
 from kneemri.slot_head import SlotHead
+from kneemri.slots import SLOTS
 
 TARGETS: tuple[str, ...] = (
     "ACL",
@@ -48,6 +51,22 @@ _FOCAL_FRACTION = 8
 """The focal pooling keeps the top 1/8 of each channel's patch responses."""
 
 
+@dataclass(frozen=True)
+class StudyDesign:
+    """The model's behavioural switches, as one value rather than as a growing argument list.
+
+    They arrived one at a time — a pooling mode, then a slice aggregation, then the anatomical prior —
+    and each was a string or a flag threaded through the constructor, the trainer, the checkpoint and
+    every analysis that rebuilds a member. Grouping them means a new switch is one field rather than an
+    edit at each of sixteen call sites, and it means a checkpoint can record the design it was trained
+    under as one object.
+    """
+
+    pool: str = "cls_mean"
+    slice_pooling: str = "channels"
+    anatomical_prior: bool = False
+
+
 class StudyModel(nn.Module):
     """Encoder plus head over a study's bag of slot images.
 
@@ -61,25 +80,26 @@ class StudyModel(nn.Module):
     mean: Tensor
     std: Tensor
 
-    def __init__(
-        self,
-        backbone: nn.Module,
-        dim: int,
-        n_slot: int,
-        pool: str = "cls_mean",
-        slice_pooling: str = "channels",
-    ) -> None:
+    def __init__(self, backbone: nn.Module, dim: int, n_slot: int, design: StudyDesign | None = None) -> None:
         # `backbone` is any module callable as `backbone(pixel_values=x)` returning an object with
         # `last_hidden_state` of shape (n, 1 + patches, dim) — a DINOv2 from transformers in
         # production, a deterministic stand-in under test, and a medical-pretrained encoder when that
         # ablation runs. Kept structural rather than a named protocol so a substitution is a
         # constructor argument, not an edit here.
         super().__init__()
+        self.design = design or StudyDesign()
         self.backbone = backbone
-        self.pool = pool
-        self.slice_pooling = slice_pooling
+        self.pool = self.design.pool
+        self.slice_pooling = self.design.slice_pooling
         self.n_slot = n_slot
-        self.head = SlotHead(dim * POOL_PARTS[pool], n_slot, len(TARGETS))
+        # The prior is defined over the canonical six slots, so asking for it with a different slot
+        # count is a mistake rather than something to silently truncate — a (12, 6) table broadcast
+        # against a (12, 2) attention map would either throw deep inside the head or, worse, not.
+        if self.design.anatomical_prior and n_slot != len(SLOTS):
+            message = f"anatomical prior covers {len(SLOTS)} slots, model has {n_slot}"
+            raise ValueError(message)
+        prior = SlotAffinity(ANATOMY).matrix(TARGETS, SLOTS) if self.design.anatomical_prior else None
+        self.head = SlotHead(dim * POOL_PARTS[self.pool], n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
 

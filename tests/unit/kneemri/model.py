@@ -6,7 +6,7 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.model import POOL_PARTS, TARGETS, StudyModel
+from kneemri.model import POOL_PARTS, TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
 DIM = 8
@@ -96,7 +96,7 @@ def test_pool_parts_widths_match_the_head_input():
     """`cls_mean` concatenates two `dim`-wide parts, `cls_mean_focal` three — the head's width follows."""
     assert POOL_PARTS["cls_mean"] == 2
     torch.manual_seed(SEED)
-    focal = StudyModel(_FakeBackbone(), DIM, 2, pool="cls_mean_focal")
+    focal = StudyModel(_FakeBackbone(), DIM, 2, StudyDesign(pool="cls_mean_focal"))
     assert focal.head.proj[1].in_features == DIM * POOL_PARTS["cls_mean_focal"]
 
 
@@ -123,7 +123,7 @@ def test_forward_per_slice_pooling_differs_from_channel_stacking():
     outputs = {}
     for mode in ("channels", "max"):
         torch.manual_seed(SEED)
-        model = StudyModel(_FakeBackbone(), DIM, SLOTS, slice_pooling=mode).eval()
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=mode)).eval()
         with torch.no_grad():
             outputs[mode] = model.forward(imgs, mask, 14)
     assert not torch.allclose(outputs["channels"], outputs["max"]), "per-slice pooling must change the function"

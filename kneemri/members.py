@@ -20,7 +20,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
-from kneemri.model import StudyModel
+from kneemri.model import StudyDesign, StudyModel
 
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
@@ -148,7 +148,7 @@ class MemberPackage:
 
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""
-        model = StudyModel(backbone, dim, member.slot_count, member.pool).to(device)
+        model = StudyModel(backbone, dim, member.slot_count, StudyDesign(pool=member.pool)).to(device)
         model.load_state_dict(self.state_dict_of(member, device))
         self.check(model, member, device)
         return model

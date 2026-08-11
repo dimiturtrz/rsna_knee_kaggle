@@ -2,6 +2,12 @@
   "edges": [
     {
       "kind": "import",
+      "source": "kneemri.anatomy",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.build_cache",
       "target": "core.paths",
       "weight": 1
@@ -123,7 +129,19 @@
     {
       "kind": "import",
       "source": "kneemri.model",
+      "target": "kneemri.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.model",
       "target": "kneemri.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.model",
+      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -307,6 +325,24 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.anatomy.FindingAnatomy",
+      "target": "kneemri.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.anatomy.SlotAffinity",
+      "target": "kneemri.anatomy.FindingAnatomy",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.anatomy.SlotAffinity",
+      "target": "kneemri.slots.Slot",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.build_cache.main",
       "target": "core.paths.DataRoot.from_config",
@@ -430,6 +466,12 @@
       "kind": "references",
       "source": "kneemri.holdout_predictions.HoldoutPredictions",
       "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "target": "kneemri.model.StudyDesign",
       "weight": 1
     },
     {
@@ -621,13 +663,43 @@
     {
       "kind": "construct",
       "source": "kneemri.members.MemberPackage.load",
+      "target": "kneemri.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.MemberPackage.load",
       "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.model.StudyModel",
+      "target": "kneemri.model.StudyDesign",
       "weight": 1
     },
     {
       "kind": "holds",
       "source": "kneemri.model.StudyModel",
       "target": "kneemri.slot_head.SlotHead",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.model.StudyModel.__init__",
+      "target": "kneemri.anatomy.SlotAffinity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.__init__",
+      "target": "kneemri.anatomy.SlotAffinity.matrix",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.model.StudyModel.__init__",
+      "target": "kneemri.model.StudyDesign",
       "weight": 1
     },
     {
@@ -927,6 +999,12 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.model.StudyModel",
       "weight": 1
     },
@@ -1111,7 +1189,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 22,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -1122,6 +1200,14 @@
       "descendants": 0,
       "id": "kneemri.acquisition",
       "label": "acquisition",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy",
+      "label": "anatomy",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -1304,6 +1390,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.anatomy.FindingAnatomy",
+      "label": "FindingAnatomy",
+      "level": "class",
+      "parent": "kneemri.anatomy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.SlotAffinity",
+      "label": "SlotAffinity",
+      "level": "class",
+      "parent": "kneemri.anatomy",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.diagnose_laterality.LateralityAudit",
       "label": "LateralityAudit",
       "level": "class",
@@ -1388,6 +1490,14 @@
       "label": "WeightsError",
       "level": "class",
       "parent": "kneemri.members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyDesign",
+      "label": "StudyDesign",
+      "level": "class",
+      "parent": "kneemri.model",
       "role": "satellite"
     },
     {
@@ -1628,6 +1738,30 @@
       "label": "slice_count",
       "level": "method",
       "parent": "kneemri.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.FindingAnatomy.affinity",
+      "label": "affinity",
+      "level": "method",
+      "parent": "kneemri.anatomy.FindingAnatomy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.SlotAffinity.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.anatomy.SlotAffinity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.SlotAffinity.matrix",
+      "label": "matrix",
+      "level": "method",
+      "parent": "kneemri.anatomy.SlotAffinity",
       "role": null
     },
     {

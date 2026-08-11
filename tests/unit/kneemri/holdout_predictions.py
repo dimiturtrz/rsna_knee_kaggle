@@ -11,7 +11,7 @@ from typing import override
 import torch
 
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 DIM = 12
 """At most SIZE: the double reads one feature per image ROW, so a wider feature than the image has
@@ -65,7 +65,7 @@ def test_load(tmp_path: Path):
 def test_load_honours_a_checkpoint_trained_with_per_slice_pooling(tmp_path: Path):
     """A member saved as `max` must not be rebuilt as `channels` — they are different functions."""
     torch.manual_seed(SEED)
-    saved = StudyModel(_FakeBackbone(), DIM, SLOTS, slice_pooling="max")
+    saved = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
     checkpoint = tmp_path / "max.pt"
     torch.save({"model": saved.state_dict(), "config": {"slice_pooling": "max"}}, checkpoint)
 

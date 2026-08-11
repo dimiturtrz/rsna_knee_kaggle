@@ -17,7 +17,7 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.folds import ReportFolds
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
@@ -53,6 +53,7 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     slice_pooling: str = "channels"
+    anatomical_prior: bool = False
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
     out: Path | None = None
@@ -97,6 +98,11 @@ class TrainingOptions:
             help="table to SCORE against (default: --labels). Hold this fixed across arms when the "
             "training labels are the variable, or the arms are measured with different rulers.",
         )
+        parser.add_argument(
+            "--anatomical-prior",
+            action="store_true",
+            help="start each diagnosis's slot attention from how the finding is actually read",
+        )
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
@@ -129,7 +135,8 @@ def main() -> None:
     logger.info(f"{len(identifiers)} studies: {len(training)} train / {len(holdout)} holdout (fold {arguments.fold})")
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 
-    model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS), slice_pooling=arguments.slice_pooling)
+    design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
+    model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS), design)
     scores = LabelScores()
     trainer = Trainer(
         model,
@@ -186,6 +193,7 @@ def main() -> None:
                 "variant": "small",
                 "pool": "cls_mean",
                 "slice_pooling": arguments.slice_pooling,
+                "anatomical_prior": arguments.anatomical_prior,
                 "unfreeze_last": UNFREEZE_LAST,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),
