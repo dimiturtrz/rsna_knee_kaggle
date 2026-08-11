@@ -416,3 +416,49 @@ The two consequences for what happens next:
   for ~24 is worth about +0.012 before anything else changes.
 - Any knob worth re-testing should be re-tested at the longer budget, and re-tested *cheaply* — but the
   queue for that is long and the capacity levers are not exhausted yet, so it waits.
+
+
+## Corpus facts, finally measured on our own copy
+
+`knee-25n` asked these of *our* data rather than of a public notebook. One header sweep over all 24,371
+series answers the three that were still open.
+
+**The 130 mm crop is a crop, not a pad.** Field of view (Rows x PixelSpacing) has a median of 160 mm and
+a 1st percentile of 130 mm: only **0.43%** of series are narrower than the crop, and 5.1% are narrower
+than 140 mm. The borrowed constant survives our own measurement.
+
+**Pixel spacing is finer than the crop needs, mostly.** Median 0.3125 mm, 95th percentile 0.5625 mm.
+Resampling 130 mm onto 336 px gives 0.387 mm/px, so for the median series we are slightly downsampling
+and for the **9.6%** of series coarser than 0.5 mm we are interpolating past their native resolution —
+which is the group where a 1 mm meniscal tear was never resolvable in the first place.
+
+**Half the corpus has no laterality tag, and which half is decided by the vendor.**
+
+| vendor | studies | share | Laterality tag present |
+|---|---|---|---|
+| Siemens | 1,951 | 44.3% | 84.3% |
+| Philips | 1,301 | 29.5% | 38.3% |
+| GE | 868 | 19.7% | **0.0%** |
+| Toshiba | 181 | 4.1% | **0.0%** |
+| Canon | 45 | 1.0% | **0.0%** |
+
+The tag is absent on 50.7% of series and on 50.0% of studies entirely. It is not missing at random: it
+is missing for *every* GE, Toshiba and Canon study and for most Philips ones.
+
+### That confounds one of my earlier refutations
+
+I refuted the laterality-bug hypothesis partly on this: *"the asymmetry is identical across
+tag-resolved and geometry-resolved studies"*. Those two groups are now revealed to be, near enough,
+**Siemens-and-some-Philips versus GE-Toshiba-and-most-Philips** — a vendor comparison wearing a
+rule-comparison's clothes. Any difference between them would have been a vendor difference; any
+absence of difference could equally be two errors cancelling across two populations.
+
+The other leg of that refutation is unaffected and remains the stronger one: where both rules can be
+evaluated, they agree on 98.6% of 2,135 studies, and the asymmetry is *smaller* on the knees we
+actually mirror, which is the opposite of what a broken mirror produces.
+
+But it leaves a real gap, and it is a big one: **the geometry rule is validated only where the tag also
+exists — that is, on Siemens and Philips — and it is the sole rule for the 24.8% of studies from
+vendors that never write the tag.** Nothing in this project has ever checked it there. A left/right
+error on a fifth of the corpus would suppress exactly the medial/lateral targets, and it would be
+invisible to every check run so far.
