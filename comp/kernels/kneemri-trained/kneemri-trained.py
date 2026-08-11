@@ -8,9 +8,9 @@ The same fingerprint check guards these members as guards the published ones: a 
 different reading than it was fitted under loads cleanly and predicts from the wrong image, and nothing
 else in the run would say so.
 
-Everything below the bootstrap lives in `kneemri.submission`, shared with the graft kernel. Only the
-bootstrap — finding the mounted kit and installing its wheels — has to be here, because it runs BEFORE
-the package it is finding can be imported.
+Everything below the bootstrap lives in `kneemri.kernel_run`, shared with the efficiency kernel. Only
+the bootstrap — finding the mounted kit and installing its wheels — has to be here, because it runs
+BEFORE the package it is finding can be imported.
 """
 
 import logging
@@ -19,7 +19,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-import torch
 
 WORKING = Path("/kaggle/working")
 
@@ -51,52 +50,15 @@ def install_wheels(kit: Path) -> None:
         )
 
 
-def find_dinov2(variant: str) -> Path:
-    """The mounted DINOv2 weights for one variant: a config.json under the model mounts.
-
-    The variant has to be matched, not merely found. Mounting both small and base and taking whichever
-    sorted first would build a member at the wrong width — which surfaces as a shape error during load
-    if we are lucky, and as a silently wrong model if the head happens to accept it.
-    """
-    candidates = [
-        config.parent
-        for config in sorted(Path("/kaggle/input").rglob("config.json"))
-        if not {"train_series", "test_series"} & set(config.parts) and "dinov2" in str(config).lower()
-    ]
-    for mount in candidates:
-        if variant in str(mount).lower().split("dinov2")[-1]:
-            return mount
-    raise FileNotFoundError(f"no DINOv2 {variant} model mount among {candidates}")
-
-
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from transformers import AutoModel
+    from kneemri.kernel_run import KernelRun
 
-    from kneemri.ensemble import Ensemble
-    from kneemri.members import MemberPackage
-    from kneemri.submission import Submission
-
-    package = MemberPackage.find()
-    if package is None:
-        raise FileNotFoundError("no weights package mounted")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    from kneemri.backbone import ENCODERS
-
-    models = {}
-    for member in package.members:
-        encoder = ENCODERS[member.variant]
-        weights = find_dinov2(encoder.variant)
-        models[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
-    logging.info(f"loaded and fingerprint-checked {len(models)} members from {package.root}")
-
-    competition = next(iter(sorted(Path("/kaggle/input").rglob("sample_submission.csv")))).parent
-    frame = Submission(Ensemble(package, models, device), competition, WORKING).run()
-    logging.info("%s", frame.head())
+    KernelRun().run()
 
 
 if __name__ == "__main__":
