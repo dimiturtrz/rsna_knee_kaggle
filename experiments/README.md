@@ -40,9 +40,41 @@ so everything below is **directional**, and only the cumulative total clears the
 | `severity_flat` | three YES levels collapsed to one | 0.8228 | −0.0044 | gradation is live signal |
 | `report_supervision` | report-embedding term @0.3 | 0.8219 | −0.0053 | **refuted** |
 | `report_supervision` | report-embedding term @1.0 | 0.8209 | −0.0063 | refuted, monotone |
-| `compose_base` | rate + pooling on base | **lost at epoch 7/24** | — | rerun queued |
-| `whole_stack` | all 12 slices per step | running (2nd attempt) | — | leaves the design family |
-| `resolution` | 336 → 448 px | queued behind its cache | — | per-label prediction registered |
+| `compose_base` | rate + pooling on base | **lost at epoch 7/24** | — | not rerun |
+| **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
+| `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
+| `resolution` | 336 → 448 px | queued | — | prediction: MCL first |
+| `slice_attention` | attention over slices, not max | built, not run | — | the published successor |
+
+## Whole-stack is the result of the day
+
+Reading every cached slice per step instead of one random three-slice window, against arm Q (identical
+recipe, windowed, best of 24 epochs) = 0.8310:
+
+| | holdout | note |
+|---|---|---|
+| whole-stack, 24 epochs | 0.8413 | peaked epoch 6, then declined |
+| **whole-stack, 12 epochs** | **0.8457** | peaked epoch 6 — *higher* AND half the wall-clock |
+| whole-stack, fold 1 | **0.8505** | second fold, same recipe |
+| the five members behind our 0.888 LB | 0.8269 | mean of `member_fold0..4` |
+
+**The shorter budget scored higher, not merely cheaper.** One-cycle is defined over `total_steps`, so a
+24-epoch budget stretches the anneal across epochs the model does not need and leaves the rate far from
+annealed where the model actually converges. An oversized epoch budget detunes the schedule; it is not
+just wasted GPU. Both folds peaked at epoch 6, so the arms now run **8**.
+
+It is also a replication rather than an invention: MRNet combines per-slice features by an elementwise
+max over ALL slices of a series. Our three-slice window was the deviation.
+
+## The biggest lever is not architecture
+
+The metric is the **unweighted** mean of twelve AUCs, and our labels are far from level — MCL 0.755 and
+Fracture 0.784 against Baker's 0.896. Lifting those two to 0.873, a level five other labels already
+reach, is worth **+0.0173** on the mean: larger than whole-stack, and above the 1.5% bar.
+
+Rarity and label noise were both tested and refuted as explanations: Synovitis has *fewer* positives
+than MCL (580 vs 767) and the corpus's *lowest* reader confidence (0.189), and scores 0.873. So MCL is
+hard to **see** — a thin ligament at the medial margin — which is what the resolution arm now targets.
 
 ## Three arms were lost on 2026-08-11, and only one cause is known
 
