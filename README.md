@@ -9,7 +9,22 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-Nothing is built yet. What exists is the scaffold, the data-root convention, and the submission machinery.
+**Where it stands.** Two submissions scored: a graft of published weights at **0.888** and our own
+trained five-member ensemble at **0.888** (rank 367/1077 at the time) — five of our members matching
+twenty of theirs. The full measured account, including what was refuted, is in
+[interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md](interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md);
+what the public frontier does is in [research/](research/2026-08-11_public-notebooks.md).
+
+Two numbers govern how the rest of this is read. The run-to-run **noise floor is 0.0062** (three seeds,
+one recipe, one split), which puts every knob-sized change out of reach at n=1. And the **member curve is
+flat** — members two and three buy +0.0018 and +0.0007, and the best single member outscored the
+three-member ensemble — so stacking members is not a lever here.
+
+The two changes that moved the number most were not ideas imported from anywhere; they were our own
+defects. Augmentation was written, unit-tested, and never called by the training loop (+0.0110). The fold
+split was derived from the training seed, so two seeds never shared a holdout and cross-scoring them
+leaked 717 training studies into a validation number. Of six ideas taken from the strongest public
+notebooks, five were refuted or landed inside the noise floor.
 
 **What the task actually is.** The score is the unweighted mean of twelve per-label ROC AUCs, so only rank
 order is read — calibration is worth nothing and ensembling averages *ranks*, not probabilities. A label
