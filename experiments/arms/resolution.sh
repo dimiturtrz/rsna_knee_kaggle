@@ -20,7 +20,13 @@
 # cost     bytes and step time both grow with the SQUARE of the side: ~1.8x.
 source "$(dirname "$0")/../lib.sh"
 SIZE="${1:-448}"
-require "$LABELS" "$PROCESSED/images_${SIZE}px_12sl.npy"
+require "$LABELS"
+
+# NOT `require` on the .npy: build_cache creates that file at build START and fills it over hours, so
+# its existence proves the build began and nothing more. Training on it early would not crash - it
+# would fit a mostly-zero array and return a plausible, wrong answer for the resolution question.
+# Gate on the marker the producer writes when it FINISHES.
+wait_for "CACHE BUILD COMPLETE" "$LOGS/cache${SIZE}.log"
 
 run_train "resolution_${SIZE}" \
   --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
