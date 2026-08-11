@@ -50,8 +50,68 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.holdout_predictions",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.laterality",
       "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.targets",
       "weight": 1
     },
     {
@@ -368,8 +428,128 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.laterality.Laterality",
       "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.member_curve.MemberCurve",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.sizes",
+      "target": "kneemri.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.sizes",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions.predict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.member_curve.MemberCurve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.member_curve.MemberCurve.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.member_curve.MemberCurve.sizes",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.study_cache.StudyCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.targets.Targets.load",
       "weight": 1
     },
     {
@@ -931,7 +1111,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 21,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -980,8 +1160,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.holdout_predictions",
+      "label": "holdout_predictions",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality",
       "label": "laterality",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve",
+      "label": "member_curve",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -1132,10 +1328,26 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.holdout_predictions.HoldoutPredictions",
+      "label": "HoldoutPredictions",
+      "level": "class",
+      "parent": "kneemri.holdout_predictions",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality.Laterality",
       "label": "Laterality",
       "level": "class",
       "parent": "kneemri.laterality",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve",
+      "label": "MemberCurve",
+      "level": "class",
+      "parent": "kneemri.member_curve",
       "role": "primary"
     },
     {
@@ -1524,6 +1736,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.holdout_predictions.HoldoutPredictions.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_predictions.HoldoutPredictions.predict",
+      "label": "predict",
+      "level": "method",
+      "parent": "kneemri.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality.Laterality.__init__",
       "label": "__init__",
       "level": "method",
@@ -1544,6 +1780,38 @@
       "label": "of_study",
       "level": "method",
       "parent": "kneemri.laterality.Laterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.sizes",
+      "label": "sizes",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.member_curve",
       "role": null
     },
     {

@@ -1,0 +1,56 @@
+"""The member curve's arithmetic, on constructed predictions whose right answer is known by hand."""
+
+import numpy as np
+
+from kneemri.member_curve import MemberCurve
+from kneemri.model import TARGETS
+from kneemri.scores import LabelScores
+
+STUDIES = 40
+SEED = 2026
+
+
+def _truth() -> np.ndarray:
+    """Half the studies positive on every label."""
+    column = np.array([1.0] * (STUDIES // 2) + [0.0] * (STUDIES // 2), dtype=np.float32)
+    return np.repeat(column[:, None], len(TARGETS), axis=1)
+
+
+def _member(strength: float, seed: int) -> np.ndarray:
+    """A member that ranks the positives above the negatives with the given reliability."""
+    generator = np.random.default_rng(seed)
+    signal = _truth()[:, 0].astype(np.float64) * strength
+    return np.repeat((signal + generator.normal(0.0, 1.0, STUDIES))[:, None], len(TARGETS), axis=1)
+
+
+def test_sizes():
+    """Three members give three singletons, three pairs and one triple."""
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    by_size = MemberCurve(LabelScores()).sizes(members, _truth())
+    assert [len(by_size[size]) for size in (1, 2, 3)] == [3, 3, 1]
+
+
+def test_sizes_shows_independent_members_helping():
+    """Averaging ranks of independent noisy members beats any one of them.
+
+    This is the property the whole experiment exists to measure, so a curve that could not detect it
+    would be measuring nothing. The members here are independent by construction; real ones share
+    training data and are not, which is exactly why the real curve has to be run rather than assumed.
+    """
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    by_size = MemberCurve(LabelScores()).sizes(members, _truth())
+    assert np.mean(by_size[3]) > np.mean(by_size[1])
+
+
+def test_sizes_is_flat_for_duplicated_members():
+    """A member added twice adds nothing — the guard against reading ensembling into a copy."""
+    duplicated = [_member(1.0, 1)] * 3
+    by_size = MemberCurve(LabelScores()).sizes(duplicated, _truth())
+    assert np.mean(by_size[3]) == np.mean(by_size[1])
+
+
+def test_report():
+    """One line per size, carrying the mean, the range and the step from the previous size."""
+    lines = MemberCurve(LabelScores()).report({1: [0.80, 0.82], 2: [0.85]})
+    assert lines[0].startswith("1 member(s): mean 0.8100")
+    assert "+0.0400 over 1" in lines[1]

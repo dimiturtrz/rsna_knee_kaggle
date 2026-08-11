@@ -78,11 +78,17 @@ class Ensemble:
                 per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
         return self.combine([np.concatenate(per_member[member.identifier]) for member in self.package.members])
 
-    def combine(self, per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
+    @staticmethod
+    def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
         """Rank-average across members, per label, normalised to [0, 1].
 
         Ranking is per label because the metric ranks per label; ranking across labels would mix twelve
         unrelated orderings into one and destroy exactly the information being scored.
+
+        Static because it reads no member state — it is arithmetic over arrays that happens to describe
+        how this ensemble votes. Analysis code needs exactly this rule without owning a package or a set
+        of loaded models, and the alternative to saying so is calling it with a `None` self, which this
+        repository has already done once with `Trainer.area_under_curve` and had to unpick.
         """
         if len(per_member) == 1:
             return per_member[0]
