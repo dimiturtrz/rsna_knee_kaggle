@@ -8,6 +8,7 @@ import pytest
 import torch
 from torch import Tensor
 
+from kneemri.backbone import SMALL
 from kneemri.members import Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
 
@@ -215,3 +216,17 @@ def test_strongest(tmp_path: Path):
 
     assert [member.holdout for member in package.strongest(2)] == [0.87, 0.84]
     assert len(package.strongest(9)) == 3
+
+
+def test_variant(tmp_path: Path):
+    """A manifest written before variants existed still answers, and answers `small`.
+
+    Every member published so far predates the field, and the kernel indexes its DINOv2 mounts by this
+    value — so a missing key has to mean the encoder those members were actually fitted on, not a
+    KeyError at submission time.
+    """
+    package, _ = _package(tmp_path)
+    assert package.members[0].variant == SMALL
+
+    package.members = [replace(package.members[0], config={**package.members[0].config, "variant": "base"})]
+    assert package.members[0].variant == "base"

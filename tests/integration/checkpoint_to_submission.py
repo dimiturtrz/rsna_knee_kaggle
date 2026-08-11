@@ -23,8 +23,10 @@ import numpy as np
 import torch
 from torch import nn
 
+from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions
+from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 DIM = 12
@@ -32,6 +34,8 @@ SLOTS = 6
 SIZE = 14
 STUDIES = 5
 SEED = 2026
+DIM_SMALL = 384
+"""What ENCODERS says small is — asserted rather than imported, so a change to it fails here."""
 
 
 class _FakeBackbone(nn.Module):
@@ -140,3 +144,52 @@ def test_the_pooling_rule_travels_with_the_checkpoint(tmp_path: Path):
 
     model = HoldoutPredictions(torch.device("cpu")).load(path, _FakeBackbone(), DIM, SLOTS)
     assert model.slice_pooling == "max"
+
+
+def test_a_packaged_member_exposes_what_the_kernel_asks_it_for(tmp_path: Path):
+    """The kernel path, which the tests above do not touch — and which was broken when this was written.
+
+    The kernel picks a DINOv2 mount with `ENCODERS[member.variant]`. `variant` was a key in the manifest
+    and in the MemberConfig type, and was NOT a property on Member, so that line was an AttributeError
+    waiting for the next kernel run. Nothing else here could see it: the other tests reach the model
+    through HoldoutPredictions, and the kernel reaches it through MemberPackage.
+
+    A manifest written before variants existed must still answer, because every member published so far
+    predates them.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS).eval()
+    torch.save(model.state_dict(), tmp_path / "m_a.pt")
+    config = {
+        "img": SIZE,
+        "slices": GROUP + 3,
+        "group": GROUP,
+        "crop_mm": 130.0,
+        "band": [0.2, 0.8],
+        "slots": [f"slot{index}" for index in range(SLOTS)],
+        "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
+        "pool": "cls_mean",
+    }
+    (tmp_path / "manifest.json").write_text(
+        json.dumps(
+            {
+                "format": 2,
+                "members": [
+                    {
+                        "id": "a",
+                        "file": "m_a.pt",
+                        "fold": 0,
+                        "config": config,
+                        "fingerprint": model.fingerprint(SIZE, GROUP, torch.device("cpu")).tolist(),
+                        "holdout": 0.82,
+                        "annot": float("nan"),
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    member = MemberPackage(tmp_path).members[0]
+    assert member.variant == SMALL
+    assert ENCODERS[member.variant].dim == DIM_SMALL

@@ -20,6 +20,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
+from kneemri.backbone import SMALL
 from kneemri.model import StudyDesign, StudyModel
 
 FINGERPRINT_TOLERANCE = 2e-3
@@ -88,6 +89,16 @@ class Member:
     def pool(self) -> str:
         """Which token-pooling scheme the encoder read-out uses."""
         return str(self.config["pool"])
+
+    @property
+    def variant(self) -> str:
+        """Which DINOv2 size this member was fitted on, so the kernel mounts the matching weights.
+
+        Defaults to small for any manifest written before variants existed — every member published so
+        far is small, and guessing wrong here is not a loud failure: the widths differ, so it surfaces
+        as a shape error during load if we are lucky and as a silently wrong model if not.
+        """
+        return str(self.config.get("variant", SMALL))
 
     @property
     def pixel_group(self) -> str:
