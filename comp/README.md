@@ -67,6 +67,20 @@ the jaxtyping wheels were gone — and `verify_kit.py` called that "safe to subm
 compared source. It now checks the required wheels too, which is what makes the gate below mean
 something.
 
+**A member's SLICE AGGREGATION travels with it, and this was verified by breaking it (2026-08-11).**
+`members.py` reconstructed every member with `StudyDesign(pool=...)` and never passed `slice_pooling`,
+so a member fitted with `--slice-pooling max` came back with the default channel stacking. Checked
+against a real checkpoint (`max12_s2026.pt`):
+
+| reconstruction | max&#124;diff&#124; vs its stored fingerprint | outcome |
+|---|---|---|
+| with `slice_pooling` (fixed) | 6.32e-06 | passes, against a 2e-3 tolerance |
+| without it (the old path) | **2.25** | refused |
+
+A 2.25 discrepancy is not numerical noise — the two aggregations are different functions on different
+pixels. The fingerprint gate did its job, so the failure was loud rather than a wrong submission; but
+it made every member of the current best recipe unsubmittable until the accessor existed.
+
 **This is now a gate, not advice.** `publish.py` runs the drift check in `main`, before authenticating
 and on every subcommand, so a stale kit cannot reach Kaggle by either route — including a members-only
 dataset push, which is how it escaped the first time. It fired on its first real run.
