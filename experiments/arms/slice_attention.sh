@@ -20,6 +20,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train slice_attention \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  --fold 0 --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling attend --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/sliceattn_s2026.pt"

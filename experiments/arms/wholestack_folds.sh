@@ -10,7 +10,10 @@
 # averaged 0.8269 on their own holdouts. Folds also cover the corpus between them, which a bag of
 # fold-0 members cannot: every member here trains on a different 3,498 studies.
 #
-# COST ~58 min per fold. Folds are run one at a time because the card is already compute-saturated at
+# COST ~45 min per fold at 8 epochs. MEASURED: folds 0 and 1 BOTH peaked at epoch 6 of 12, so the
+# last five epochs cost 28 minutes and 42% of the run to produce nothing. Eight keeps the peak plus
+# two epochs of margin. Evaluation is not worth trimming - 254,016 images per epoch at ~850 img/s is
+# 299s of the ~310s epoch, so eval and overhead are about 3%. Folds are run one at a time because the card is already compute-saturated at
 # 96% of its power limit - a second concurrent arm would split throughput, not add it.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
@@ -21,7 +24,7 @@ require "$LABELS"
 
 for fold in "$@"; do
   run_train "wholestack_fold${fold}" \
-    --fold "$fold" --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+    --fold "$fold" --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
     --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
     --labels "$LABELS" --out "$PROCESSED/wholestack_fold${fold}.pt"
 done

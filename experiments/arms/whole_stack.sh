@@ -34,6 +34,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train whole_stack \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  --fold 0 --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/wholestack_s2026.pt"
