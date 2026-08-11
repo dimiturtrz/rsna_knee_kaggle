@@ -122,6 +122,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.submission",
+      "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.submission",
+      "target": "kneemri.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.targets",
       "target": "kneemri.model",
       "weight": 1
@@ -298,6 +310,18 @@
       "kind": "holds",
       "source": "kneemri.ensemble.Ensemble",
       "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_chunks",
+      "target": "kneemri.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_chunks",
+      "target": "kneemri.ensemble.Ensemble.predict_member",
       "weight": 1
     },
     {
@@ -589,6 +613,54 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.submission.Submission",
+      "target": "kneemri.ensemble.Ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.chunks",
+      "target": "kneemri.submission.Submission.decode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.predict",
+      "target": "kneemri.ensemble.Ensemble.predict_chunks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.predict",
+      "target": "kneemri.submission.Submission.chunks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.run",
+      "target": "kneemri.ensemble.Ensemble.submission",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.run",
+      "target": "kneemri.submission.Submission.fallback",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.run",
+      "target": "kneemri.submission.Submission.predict",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.targets.Targets",
       "target": "kneemri.targets.Targets",
@@ -645,6 +717,18 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.trainer.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.AugmentConfig.geometric_only",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.trainer.Trainer",
       "weight": 1
     },
@@ -673,6 +757,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.save_partial",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.AugmentConfig",
+      "target": "kneemri.trainer.AugmentConfig",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.trainer.Trainer",
       "target": "kneemri.model.StudyModel",
@@ -688,6 +784,30 @@
       "kind": "references",
       "source": "kneemri.trainer.Trainer",
       "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.trainer.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.__init__",
+      "target": "kneemri.trainer.AugmentConfig.geometric_only",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.augment",
+      "target": "kneemri.trainer.Trainer._intensity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.augment",
+      "target": "kneemri.trainer.Trainer._warp",
       "weight": 1
     },
     {
@@ -751,7 +871,7 @@
       "role": null
     },
     {
-      "descendants": 17,
+      "descendants": 18,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -866,6 +986,14 @@
       "descendants": 0,
       "id": "kneemri.study_cache",
       "label": "study_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission",
+      "label": "submission",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -1056,11 +1184,27 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.submission.Submission",
+      "label": "Submission",
+      "level": "class",
+      "parent": "kneemri.submission",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.targets.Targets",
       "label": "Targets",
       "level": "class",
       "parent": "kneemri.targets",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.AugmentConfig",
+      "label": "AugmentConfig",
+      "level": "class",
+      "parent": "kneemri.trainer",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -1234,6 +1378,14 @@
       "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.combine",
       "label": "combine",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.predict_chunks",
+      "label": "predict_chunks",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
@@ -1696,6 +1848,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.submission.Submission.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.chunks",
+      "label": "chunks",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.decode",
+      "label": "decode",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.fallback",
+      "label": "fallback",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.predict",
+      "label": "predict",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.targets.Targets.__init__",
       "label": "__init__",
       "level": "method",
@@ -1736,8 +1936,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.trainer.AugmentConfig.geometric_only",
+      "label": "geometric_only",
+      "level": "method",
+      "parent": "kneemri.trainer.AugmentConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.trainer.Trainer.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer._intensity",
+      "label": "_intensity",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer._warp",
+      "label": "_warp",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null
@@ -1810,6 +2034,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.Trainer.predict",
       "label": "predict",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.save_partial",
+      "label": "save_partial",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null

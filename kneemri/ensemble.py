@@ -13,6 +13,8 @@ this is the pooling the published members' own out-of-fold predictions were prod
 disjoint windows, probability pooling, 0.025 max deviation against ours).
 """
 
+from collections.abc import Iterable
+
 import numpy as np
 import torch
 from jaxtyping import Float, UInt8
@@ -60,6 +62,21 @@ class Ensemble:
                 logits = model(images[:, :, start : start + member.group], mask, member.image_size).float()
                 total = total + torch.sigmoid(logits)
         return (total / len(starts)).cpu().numpy().astype(np.float64)
+
+    def predict_chunks(
+        self, chunks: Iterable[tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]], *, overlap: bool = True
+    ) -> NDArray[np.float64]:
+        """Every member over every decoded chunk, rank-combined into one table.
+
+        The chunk loop is outside the member loop on purpose: a chunk is decoded once and then shown to
+        every member, so the read cost is paid per STUDY rather than per (study, member). That is the
+        whole reason members are grouped by the pixels they need.
+        """
+        per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in self.package.members}
+        for images, mask in chunks:
+            for member in self.package.members:
+                per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
+        return self.combine([np.concatenate(per_member[member.identifier]) for member in self.package.members])
 
     def combine(self, per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
         """Rank-average across members, per label, normalised to [0, 1].

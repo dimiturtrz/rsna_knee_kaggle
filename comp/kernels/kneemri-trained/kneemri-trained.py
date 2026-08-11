@@ -8,37 +8,30 @@ The same fingerprint check guards these members as guards the published ones: a 
 different reading than it was fitted under loads cleanly and predicts from the wrong image, and nothing
 else in the run would say so.
 
-This is the number that is ours. The graft kernel measures the field's floor; this measures us.
+Everything below the bootstrap lives in `kneemri.submission`, shared with the graft kernel. Only the
+bootstrap — finding the mounted kit and installing its wheels — has to be here, because it runs BEFORE
+the package it is finding can be imported.
 """
 
+import logging
 import subprocess
 import sys
-import time
 import zipfile
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import pandas as pd
 import torch
 
 WORKING = Path("/kaggle/working")
 DINOV2_DIM = 384
-SLICES = 12
-OVERLAP_TTA = True
-"""Ten overlapping windows rather than four disjoint ones. MEASURED on our fold-0 holdout: overlapping
-0.8205, disjoint 0.8180, a single middle window 0.8092. It costs forward passes and no extra decoding —
-the cache already holds the slices — against a kernel whose fixed cost is 542 s."""
-STUDY_CHUNK = 48
-DECODE_THREADS = 8
-RULE = "=" * 78
-
-
-def section(title: str) -> None:
-    print(f"\n{RULE}\n{title}\n{RULE}", flush=True)
 
 
 def find_kit() -> Path:
-    """Search for the package, never the container that is assumed to hold it."""
+    """The directory to put on `sys.path`, found by looking for the package rather than the wrapper.
+
+    Mounts nest by kind (`/kaggle/input/{competitions,datasets,models}/…`) and a tree uploaded with
+    `--dir-mode zip` is expanded with its wrapping directory REMOVED. Three runs were spent on that;
+    the rule is to search for the artefact you need, never the container assumed to hold it.
+    """
     marker = next(iter(sorted(Path("/kaggle/input").rglob("kneemri/model.py"))), None)
     if marker is not None:
         return marker.parent.parent
@@ -46,12 +39,11 @@ def find_kit() -> Path:
     if archive is None:
         raise FileNotFoundError("no kneemri package under /kaggle/input")
     zipfile.ZipFile(archive).extractall("/tmp/kit")
-    inner = next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py"))))
-    return inner.parent.parent
+    return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
 
 
 def install_wheels(kit: Path) -> None:
-    """jaxtyping is not in Kaggle's image and our modules import it at module top."""
+    """jaxtyping is absent from Kaggle's image and our modules import it at module top."""
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if wheels:
         subprocess.run(
@@ -61,6 +53,7 @@ def install_wheels(kit: Path) -> None:
 
 
 def find_dinov2() -> Path:
+    """The mounted DINOv2 weights: a config.json under the model mounts, not under the image trees."""
     for config in sorted(Path("/kaggle/input").rglob("config.json")):
         if not {"train_series", "test_series"} & set(config.parts) and "dinov2" in str(config).lower():
             return config.parent
@@ -68,79 +61,31 @@ def find_dinov2() -> Path:
 
 
 def main() -> None:
-    started = time.time()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
+    from transformers import AutoModel
+
     from kneemri.ensemble import Ensemble
     from kneemri.members import MemberPackage
-    from kneemri.model import StudyModel
-    from kneemri.study import Study
-
-    competition = next(iter(sorted(Path("/kaggle/input").rglob("sample_submission.csv")))).parent
-    sample = pd.read_csv(competition / "sample_submission.csv")
-    sample.to_csv(WORKING / "submission.csv", index=False)
-    print(f"kit={kit}  competition={competition}  wrote a fallback submission ({len(sample)} rows)")
+    from kneemri.submission import Submission
 
     package = MemberPackage.find()
     if package is None:
         raise FileNotFoundError("no weights package mounted")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    section("1. MEMBERS")
-    from transformers import AutoModel
-
     weights = find_dinov2()
-    models = {}
-    for member in package.members:
-        model = package.load(member, AutoModel.from_pretrained(weights), DINOV2_DIM, device)
-        models[member.identifier] = model
-    print(f"loaded and fingerprint-checked {len(models)} members in {time.time() - started:.0f}s")
-    ensemble = Ensemble(package, models, device)
+    models = {
+        member.identifier: package.load(member, AutoModel.from_pretrained(weights), DINOV2_DIM, device)
+        for member in package.members
+    }
+    logging.info(f"loaded and fingerprint-checked {len(models)} members from {package.root}")
 
-    section("2. TEST STUDIES")
-    test = pd.read_csv(competition / "test.csv")
-    series = pd.read_csv(competition / "test_series.csv")
-    planes = series.set_index("SeriesInstanceUID")["Anatomical_Plane"].to_dict()
-    identifiers = test["StudyInstanceUID"].tolist()
-    print(f"{len(identifiers)} studies, {len(series)} series")
-
-    per_member: dict[str, list] = {member.identifier: [] for member in package.members}
-    order: list[str] = []
-    for start in range(0, len(identifiers), STUDY_CHUNK):
-        chunk = identifiers[start : start + STUDY_CHUNK]
-        decode_started = time.time()
-        with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
-            bags = list(
-                pool.map(
-                    lambda name: Study.from_directory(competition / "test_series" / name, planes).bag(SLICES), chunk
-                )
-            )
-        images = torch.stack([bag[0] for bag in bags]).to(device)
-        mask = torch.stack([bag[1] for bag in bags]).to(device)
-        decoded = time.time() - decode_started
-
-        predict_started = time.time()
-        for member in package.members:
-            per_member[member.identifier].append(ensemble.predict_member(member, images, mask, overlap=OVERLAP_TTA))
-        order.extend(chunk)
-        print(
-            f"  studies {start + 1}-{start + len(chunk)}: decode {decoded:.0f}s, "
-            f"predict {time.time() - predict_started:.0f}s, elapsed {time.time() - started:.0f}s",
-            flush=True,
-        )
-
-    section("3. SUBMISSION")
-    import numpy as np
-
-    stacked = [np.concatenate(per_member[member.identifier]) for member in package.members]
-    combined = ensemble.combine(stacked)
-    frame = pd.DataFrame(ensemble.submission(order, combined))
-    frame = frame.set_index("StudyInstanceUID").loc[identifiers].reset_index()
-    frame.to_csv(WORKING / "submission.csv", index=False)
-    print(frame.head())
-    print(f"wrote {len(frame)} rows in {time.time() - started:.0f}s total")
+    competition = next(iter(sorted(Path("/kaggle/input").rglob("sample_submission.csv")))).parent
+    frame = Submission(Ensemble(package, models, device), competition, WORKING).run()
+    logging.info("%s", frame.head())
 
 
 if __name__ == "__main__":

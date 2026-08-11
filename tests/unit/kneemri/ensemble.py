@@ -116,3 +116,21 @@ def test_submission():
     assert list(table)[0] == "StudyInstanceUID"
     assert list(table)[1:] == list(TARGETS)
     assert len(table["ACL"]) == 2
+
+
+def test_predict_chunks(tmp_path: Path):
+    """Chunks are consumed lazily and every member sees every chunk before the table is combined."""
+    ensemble = _ensemble(tmp_path)
+    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, len(SLOTS))
+    consumed = 0
+
+    def source():
+        nonlocal consumed
+        for _ in range(3):
+            consumed += 1
+            yield images, mask
+
+    combined = ensemble.predict_chunks(source(), overlap=False)
+    assert consumed == 3, "the generator must be drained, not indexed"
+    assert combined.shape == (6, len(TARGETS)), "three chunks of two studies"
