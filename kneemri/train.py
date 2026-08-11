@@ -8,7 +8,7 @@ import argparse
 import json
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
@@ -166,6 +166,13 @@ def main() -> None:
             "holdout": best,
             "annot": float("nan"),
             "epochs_done": arguments.epochs,
+            # The recipe, not just the image geometry. Without this a checkpoint cannot say which arm
+            # produced it: two seed runs were left on disk whose one-cycle/floor/label flags are now
+            # unrecoverable, so they cannot be used as a noise floor for anything.
+            # str(), not the dataclass as-is: every loader here reads with weights_only=True, which
+            # refuses to unpickle a Path, so saving the options raw would make each new checkpoint
+            # unloadable by our own code.
+            "options": {name: str(value) for name, value in asdict(arguments).items()},
             "targets": list(TARGETS),
             "slots": [slot.name for slot in SLOTS],
             "config": {
