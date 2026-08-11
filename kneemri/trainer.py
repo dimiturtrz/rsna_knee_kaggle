@@ -63,6 +63,9 @@ ONE_CYCLE_WARMUP = 0.15
 GROUP = 3
 """Consecutive slices stacked as the encoder's three channels."""
 
+WHOLE_STACK = 0
+"""`window=0` means read every cached slice at once — the whole stack rather than one window of it."""
+
 
 @dataclass(frozen=True)
 class AugmentConfig:
@@ -138,6 +141,9 @@ class Trainer:
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
         self.schedule: torch.optim.lr_scheduler.OneCycleLR | None = None
         self.torch_generator = torch.Generator(device=device).manual_seed(SEED)
+        # How many consecutive slices one read covers. Three is the RGB trick; anything else needs
+        # per-slice pooling, because channel stacking has exactly three channels to stack into.
+        self.window = GROUP
         # Attached rather than passed, for the same reason the schedule is: both are policies a run may
         # or may not want, and a sixth constructor argument trips the argument-count gate. The default
         # is a no-op object rather than None, so no call site has to test for one.
@@ -147,6 +153,24 @@ class Trainer:
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
         self.reports = reports
+
+    def whole_stack(self, slices: int) -> None:
+        """Read the ENTIRE cached stack in one step instead of one sampled window of it.
+
+        Only meaningful with per-slice pooling, which encodes each slice alone and takes the
+        per-dimension maximum — so a slot's embedding stops depending on which window was drawn, and a
+        finding is no longer invisible unless it happens to fall inside the sampled three.
+
+        The evidence for trying it is the strongest single number in this project: averaging ten
+        overlapping windows at INFERENCE is worth +0.0156, far more than any method change measured
+        here. Training already had that information available and was throwing it away each step.
+
+        Costs one encoder pass per slice rather than per group — about 4x a step at twelve slices.
+        """
+        if self.model.slice_pooling != "max":
+            message = f"whole-stack reading needs per-slice pooling, not {self.model.slice_pooling!r}"
+            raise ValueError(message)
+        self.window = slices
 
     def exponential_average(self, decay: float = DECAY) -> None:
         """Keep an EMA of the weights, and score and save from it rather than from the live ones."""
@@ -279,8 +303,8 @@ class Trainer:
         self.model.train()
         total, steps = 0.0, 0
         for batch in self.batches(positions, size, generator, shuffle=True):
-            start = int(generator.integers(0, corpus.slices - GROUP + 1))
-            pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, start : start + GROUP])).to(
+            start = int(generator.integers(0, corpus.slices - self.window + 1))
+            pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, start : start + self.window])).to(
                 self.device
             )
             pixels = self.augment_bag(pixels)
@@ -315,13 +339,13 @@ class Trainer:
     ) -> NDArray[np.float64]:
         """Probabilities for a set of positions, read from the middle window of the stack."""
         self.model.eval()
-        middle = (corpus.slices - GROUP) // 2
+        middle = (corpus.slices - self.window) // 2
         chunks = []
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for batch in self.batches(positions, size, generator, shuffle=False):
-                pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, middle : middle + GROUP])).to(
-                    self.device
-                )
+                pixels = torch.from_numpy(
+                    np.ascontiguousarray(corpus.images[batch, :, middle : middle + self.window])
+                ).to(self.device)
                 flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
                 chunks.append(torch.sigmoid(self.model(pixels, flags, corpus.image_size).float()).cpu().numpy())
         return np.concatenate(chunks).astype(np.float64)

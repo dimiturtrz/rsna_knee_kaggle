@@ -55,6 +55,7 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     rank_weight: float = 0.0
+    whole_stack: bool = False
     report_weight: float = 0.0
     report_vectors: Path | None = None
     unfreeze_last: int = Adaptation().unfreeze_last
@@ -159,6 +160,14 @@ class TrainingOptions:
             "neutral: unfreezing more blocks cannot help at a rate where no block moves.",
         )
         parser.add_argument(
+            "--whole-stack",
+            action="store_true",
+            help="read EVERY cached slice each step instead of one sampled 3-slice window. Requires "
+            "--slice-pooling max. A step currently sees 18 of a study's ~180 slices, while averaging "
+            "ten windows at INFERENCE is worth +0.0156 - the largest single effect measured here - so "
+            "training was discarding information it already had. Costs about 4x a step.",
+        )
+        parser.add_argument(
             "--report-weight",
             type=float,
             default=0.0,
@@ -226,6 +235,8 @@ def main() -> None:
         adaptation=arguments.adaptation(),
         objective=arguments.objective(),
     )
+    if arguments.whole_stack:
+        trainer.whole_stack(arguments.slices)
     if arguments.report_weight and arguments.report_vectors:
         trainer.report_supervision(
             ReportSupervision.from_file(arguments.report_vectors, identifiers, arguments.report_weight)
@@ -297,6 +308,7 @@ def main() -> None:
                 "ema": arguments.ema,
                 "rank_weight": arguments.rank_weight,
                 "report_weight": arguments.report_weight,
+                "whole_stack": arguments.whole_stack,
                 # The value this run USED, never the module constant. Recording the constant made the
                 # field a lie the moment the depth became a flag, and it is read back by the loader to
                 # decide how a member was fitted.

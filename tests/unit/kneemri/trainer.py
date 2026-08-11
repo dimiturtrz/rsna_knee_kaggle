@@ -3,16 +3,17 @@ from pathlib import Path
 from typing import override
 
 import numpy as np
+import pytest
 import torch
 from torch import Tensor
 
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import REPORT_DIMS
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import Adaptation, AugmentConfig, Trainer
+from kneemri.trainer import GROUP, Adaptation, AugmentConfig, Trainer
 
 SEED = 2026
 DIM = 8
@@ -290,3 +291,25 @@ def test_report_supervision():
 
     assert supervised_loss != plain_loss, "the auxiliary term must reach the loss"
     assert np.isfinite(supervised_loss)
+
+
+def test_whole_stack():
+    """Reading the whole stack changes what a step sees, and is refused under channel stacking.
+
+    Channel stacking has exactly three channels to stack into, so a wider window is not a preference
+    there - it is a shape error waiting to happen. Per-slice pooling encodes each slice alone, which is
+    what makes any window width meaningful.
+    """
+    torch.manual_seed(SEED)
+    stacked = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"))
+    with pytest.raises(ValueError, match="per-slice pooling"):
+        stacked.whole_stack(6)
+
+    torch.manual_seed(SEED)
+    per_slice = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")), torch.device("cpu"))
+    assert per_slice.window == GROUP
+    per_slice.whole_stack(6)
+    assert per_slice.window == 6
+
+    loss = per_slice.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+    assert np.isfinite(loss), "a whole-stack step must still train"
