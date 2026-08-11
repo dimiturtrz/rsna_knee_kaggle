@@ -119,6 +119,12 @@ case a fast entry competes with the accurate one rather than adding to it.
   before importing anything of ours. The probe asked which libraries the *pipeline* needs and missed the
   ones *our own source* imports: **probe what you import, not only what you plan to use.**
 - **12 ms per DICOM slice** off the mount (186 slices in 2.31 s).
+- **The base-variant submission path is verified locally** (2026-08-11): a DINOv2-base member packages,
+  reports `variant=base`, resolves to `facebook/dinov2-base` at width 768 and the
+  `metaresearch/dinov2/PyTorch/base/1` mount, loads, and passes its fingerprint check. Worth doing on
+  the host rather than discovering in a queued kernel — the previous variant defect (`Member.variant`
+  did not exist while the kernel already called it) would have surfaced only as an AttributeError
+  minutes into a run.
 
 ## Gotchas that cost real time (inherited, verify each still holds)
 
