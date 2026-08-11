@@ -223,3 +223,18 @@ def test_recompute_activations(study_model: StudyModel):
 
     backbone = cast("_FakeBackbone", study_model.backbone)
     assert backbone.checkpointing == {"use_reentrant": False}
+
+
+def test_compile_encoder(study_model: StudyModel):
+    """The encoder is replaced by a compiled callable, and the model still answers.
+
+    Asserting on behaviour rather than on the wrapper's type: torch.compile returns different objects
+    across versions, and what matters is that the swap does not break the forward path.
+    """
+    before = study_model.backbone
+    study_model.compile_encoder()
+
+    assert study_model.backbone is not before, "the encoder must actually be replaced"
+    imgs = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    with torch.no_grad():
+        assert study_model.forward(imgs, torch.ones(1, SLOTS), 14).shape == (1, len(TARGETS))

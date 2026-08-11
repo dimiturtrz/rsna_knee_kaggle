@@ -21,6 +21,7 @@ from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
+from kneemri.run_metrics import EpochRow, RunMetrics
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SCHEMES
@@ -59,6 +60,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
+    compile_encoder: bool = False
     vram_gb: float = 0.0
     report_weight: float = 0.0
     report_vectors: Path | None = None
@@ -125,6 +127,13 @@ class TrainingOptions:
             "into the best one: Windows pages GPU memory over PCIe rather than raising OOM, so a run "
             "that does not fit crawls at a quarter of the power budget while reporting 100%% "
             "utilisation. Under a cap, PyTorch raises OOM immediately instead.",
+        )
+        parser.add_argument(
+            "--compile-encoder",
+            action="store_true",
+            help="torch.compile the encoder with dynamic shapes. The encoder only, because training "
+            "calls supervised() rather than forward(); dynamic because the last batch of an epoch is "
+            "partial and a static graph would recompile every epoch.",
         )
         parser.add_argument(
             "--recompute-activations",
@@ -262,8 +271,17 @@ def main() -> None:
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-    logger.info(f"{len(identifiers)} studies: {len(training)} train / {len(holdout)} holdout (fold {arguments.fold})")
-    logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
+    # ONE call, and %s rather than a second positional: logging treats extra positionals as %-format
+    # arguments, so `logger.info("target coverage:", {...})` printed the label and silently dropped the
+    # dict. Every run so far has logged the words "target coverage:" and none of the coverage.
+    logger.info(
+        "%d studies: %d train / %d holdout (fold %d) | target coverage: %s",
+        len(identifiers),
+        len(training),
+        len(holdout),
+        arguments.fold,
+        {k: round(v, 3) for k, v in targets.coverage().items()},
+    )
 
     design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
     encoder = ENCODERS[arguments.variant]
@@ -271,6 +289,8 @@ def main() -> None:
     model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
     if arguments.recompute_activations:
         model.recompute_activations()
+    if arguments.compile_encoder:
+        model.compile_encoder()
     scores = LabelScores()
     trainer = Trainer(
         model,
@@ -295,6 +315,7 @@ def main() -> None:
         trainer.one_cycle(arguments.epochs * max(steps_per_epoch, 1))
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
+    metrics = RunMetrics(destination)
     best, best_state = -1.0, None
     for epoch in range(arguments.epochs):
         started = time.time()
@@ -319,7 +340,9 @@ def main() -> None:
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
                 trainer.save_partial(destination, best_state, best, epoch)
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
-        logger.info("    %s", {name: round(value, 3) for name, value in per_label.items()})
+        metrics.record(
+            EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
+        )
 
     model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
     torch.save(

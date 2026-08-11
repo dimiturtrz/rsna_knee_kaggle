@@ -7,7 +7,7 @@ this module is what it checks.
 """
 
 from dataclasses import dataclass
-from typing import override
+from typing import cast, override
 
 import numpy as np
 import torch
@@ -228,6 +228,26 @@ class StudyModel(nn.Module):
             {"params": list(self.head.parameters()), "lr": head_lr},
             {"params": opened, "lr": backbone_lr},
         ]
+
+    def compile_encoder(self) -> None:
+        """Fuse the encoder's kernels. The ENCODER only, and with dynamic shapes, for two reasons.
+
+        Only the encoder: `supervised` is called directly rather than through `forward`, so compiling
+        the module would leave the path training actually takes in eager mode. The encoder is the bulk
+        of the arithmetic anyway — 864 images a step under whole-stack against one small head.
+
+        Dynamic shapes: `batches` does not drop the last, partial batch (3,498 studies over batches of
+        12 leaves six), so a static graph would recompile once per epoch and spend more time compiling
+        than it saved. The alternative — dropping that batch — would silently change what the model
+        trains on, which is not a trade a speed flag should make on its own.
+
+        TEMPER THE EXPECTATION: compile usually buys 10-30% on a ViT by fusing away memory traffic,
+        but this loop already draws 96% of the card's power limit, so most of that headroom is
+        spent. Measure it, do not assume it.
+        """
+        # torch.compile returns an OptimizedModule - an nn.Module at runtime - but is TYPED as a bare
+        # callable, so the assignment needs the cast rather than the attribute needing a wider type.
+        self.backbone = cast("nn.Module", torch.compile(self.backbone, dynamic=True))
 
     def recompute_activations(self) -> None:
         """Trade about 30% compute for nearly all of the encoder's activation memory.
