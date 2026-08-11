@@ -4,6 +4,7 @@ import pytest
 
 from kneemri.objective import Objective, RankedObjective
 from kneemri.train import TrainingOptions
+from kneemri.trainer import Adaptation
 
 
 def test_parse(monkeypatch: pytest.MonkeyPatch):
@@ -56,3 +57,20 @@ def test_objective():
     assert ranked.weight == 0.5
 
     assert TrainingOptions(rank_weight=0.5, normalise_by_count=True).objective().normalise_by_count
+
+
+def test_adaptation():
+    """Which blocks move and how fast are reachable, and default to the inherited pair.
+
+    Both were module constants with no flags - which is why the depth bracket could not distinguish
+    "more blocks do not help" from "no block moved at this rate". They travel together because a depth
+    result is uninterpretable without the rate it was measured at.
+    """
+    assert TrainingOptions().adaptation() == Adaptation()
+    default = TrainingOptions().adaptation()
+    assert round(default.head_lr / default.backbone_lr) == 125, "the inherited head:encoder ratio"
+
+    faster = TrainingOptions(backbone_lr=1e-4, unfreeze_last=12).adaptation()
+    assert faster.backbone_lr == 1e-4
+    assert faster.unfreeze_last == 12
+    assert faster.head_lr == Adaptation().head_lr, "raising the encoder rate must not move the head's"

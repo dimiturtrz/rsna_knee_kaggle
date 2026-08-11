@@ -32,11 +32,29 @@ from kneemri.objective import Objective
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
-HEAD_LR = 1e-3
-BACKBONE_LR = 8e-6
 WEIGHT_DECAY = 0.02
-UNFREEZE_LAST = 6
 SEED = 2026
+
+
+@dataclass(frozen=True)
+class Adaptation:
+    """How much of the encoder moves, and how fast — one object because they cannot be read apart.
+
+    The head is random at initialisation and has everything to learn; the encoder starts from a good
+    solution and needs only to be moved off it. That argument sets the 125:1 default ratio, and it was
+    inherited from the reference rather than measured.
+
+    Depth and rate are ENTANGLED, which is why they stopped being three constants. Our bracket found
+    unfreezing every block worth +0.0008, and a null result at a backbone rate of 8e-6 cannot
+    distinguish "more trainable blocks do not help" from "no block was going to move anyway". Asking
+    how many blocks should train is only a real question at a rate where a block moves.
+    """
+
+    head_lr: float = 1e-3
+    backbone_lr: float = 8e-6
+    unfreeze_last: int = 6
+    """Six of twelve blocks — inherited from the reference, and only meaningful beside the rate above."""
+
 
 ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
@@ -103,16 +121,18 @@ class Trainer:
         self,
         model: StudyModel,
         device: torch.device,
-        unfreeze_last: int = UNFREEZE_LAST,
+        adaptation: Adaptation | None = None,
         augment_config: AugmentConfig | None = None,
         objective: Objective | None = None,
     ) -> None:
         self.model = model.to(device)
         self.device = device
-        self.unfreeze_last = unfreeze_last
+        self.adaptation = adaptation or Adaptation()
         self.augment_config = augment_config or AugmentConfig.geometric_only()
         self.objective = objective or Objective()
-        groups = self.model.parameter_groups(HEAD_LR, BACKBONE_LR, unfreeze_last)
+        groups = self.model.parameter_groups(
+            self.adaptation.head_lr, self.adaptation.backbone_lr, self.adaptation.unfreeze_last
+        )
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
         self.schedule: torch.optim.lr_scheduler.OneCycleLR | None = None
@@ -147,7 +167,7 @@ class Trainer:
         """
         self.schedule = torch.optim.lr_scheduler.OneCycleLR(
             self.optimiser,
-            max_lr=[HEAD_LR, BACKBONE_LR],
+            max_lr=[self.adaptation.head_lr, self.adaptation.backbone_lr],
             total_steps=max(total_steps, 1),
             pct_start=ONE_CYCLE_WARMUP,
         )

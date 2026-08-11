@@ -25,7 +25,7 @@ from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Targets
-from kneemri.trainer import UNFREEZE_LAST, AugmentConfig, Trainer
+from kneemri.trainer import Adaptation, AugmentConfig, Trainer
 
 GROUP = 3
 
@@ -54,7 +54,9 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     rank_weight: float = 0.0
-    unfreeze_last: int = UNFREEZE_LAST
+    unfreeze_last: int = Adaptation().unfreeze_last
+    head_lr: float = Adaptation().head_lr
+    backbone_lr: float = Adaptation().backbone_lr
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
     variant: str = SMALL
@@ -138,15 +140,28 @@ class TrainingOptions:
         parser.add_argument(
             "--unfreeze-last",
             type=int,
-            default=UNFREEZE_LAST,
+            default=Adaptation().unfreeze_last,
             help="how many of the encoder's trailing blocks train. The restraint is a HYPOTHESIS, not "
             "a measurement: with 58 image-read labels the early generic blocks may have too little "
             "supervision to improve and enough to damage. Capacity is the only axis that has ever "
             "cleared our noise floor, so the hypothesis is worth testing rather than inheriting.",
         )
+        parser.add_argument("--head-lr", type=float, default=Adaptation().head_lr)
+        parser.add_argument(
+            "--backbone-lr",
+            type=float,
+            default=Adaptation().backbone_lr,
+            help="how fast the ENCODER adapts. The 125:1 ratio to the head was inherited, never "
+            "measured, and at 8e-6 the encoder barely moves - which is why our depth bracket came out "
+            "neutral: unfreezing more blocks cannot help at a rate where no block moves.",
+        )
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
+
+    def adaptation(self) -> Adaptation:
+        """How the encoder adapts: which blocks move and how fast, which are one decision."""
+        return Adaptation(head_lr=self.head_lr, backbone_lr=self.backbone_lr, unfreeze_last=self.unfreeze_last)
 
     def objective(self) -> Objective:
         """The loss policy these flags ask for.
@@ -194,8 +209,8 @@ def main() -> None:
     trainer = Trainer(
         model,
         device,
-        arguments.unfreeze_last,
         augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
+        adaptation=arguments.adaptation(),
         objective=arguments.objective(),
     )
     if arguments.ema:
@@ -268,6 +283,8 @@ def main() -> None:
                 # field a lie the moment the depth became a flag, and it is read back by the loader to
                 # decide how a member was fitted.
                 "unfreeze_last": arguments.unfreeze_last,
+                "head_lr": arguments.head_lr,
+                "backbone_lr": arguments.backbone_lr,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),
             "fingerprint_config": {"img": IMAGE_SIZE, "n_slot": len(SLOTS), "group": GROUP, "seed": 2026},

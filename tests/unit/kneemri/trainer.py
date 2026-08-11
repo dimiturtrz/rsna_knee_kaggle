@@ -10,7 +10,7 @@ from kneemri.model import TARGETS, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import AugmentConfig, Trainer
+from kneemri.trainer import Adaptation, AugmentConfig, Trainer
 
 SEED = 2026
 DIM = 8
@@ -49,7 +49,7 @@ class _FakeBackbone(torch.nn.Module):
 
 def _trainer() -> Trainer:
     torch.manual_seed(SEED)
-    return Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), unfreeze_last=6)
+    return Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), Adaptation(unfreeze_last=6))
 
 
 def test_augment():
