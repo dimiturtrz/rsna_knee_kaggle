@@ -589,3 +589,48 @@ answer therefore depends entirely on where training happened to stop — which, 
 That is an argument about the *variance of the shipped artefact*, not about the mean of a fold-0 score,
 and no arm measured here can confirm or refute it. Stated as a design choice rather than a measured
 gain, which is what it is.
+
+## The bar moved, and it demotes almost everything above
+
+The owner's threshold for calling a result significant is **1–2% absolute, ~1.5% working**. This
+document was written against a *measured noise floor* of 0.0062, and that was the wrong quantity to
+judge against. A noise floor says what is **detectable**; it says nothing about what is **worth
+building on**. Clearing it means "probably not zero", which is a much weaker claim than this project
+needs.
+
+Under the 1.5% bar, re-scored:
+
+| change | Δ | old verdict | verdict now |
+|---|---|---|---|
+| DINOv2-base | +0.0085 | cleared the floor | directional |
+| 8 → 24 epochs | +0.0068 | cleared the floor | directional |
+| ranking term | +0.0067, +0.0036 | cleared the floor | directional |
+| EMA | +0.0010 | inside the floor | noise |
+| encoder depth 6 → 12 | +0.0008 | — | noise |
+| per-slice max pooling | +0.0018 | inside the floor | noise |
+| weight floor | +0.0019 | inside the floor | noise |
+
+**Nothing measured in this project has ever cleared 1.5% as a single change.** That is the honest
+statement, and it is more useful than the previous framing because it says where the effort should go:
+not into another knob worth +0.005.
+
+### What survives is the CUMULATIVE number
+
+Increments below the bar still compose, and the composition is above it:
+
+| recipe | score |
+|---|---|
+| small, 8 epochs (the original baseline) | 0.8081 |
+| small, 24 epochs | 0.8205 |
+| base, 20 epochs | 0.8255 |
+| **base + ranking, 24 epochs** | **0.8283** |
+
+**+0.0202 from the original baseline** — 2%, above the bar. So the rule going forward is to track the
+running total against the *original* baseline and to stop reporting each +0.005 step as a finding.
+
+### The consequence for how experiments get chosen
+
+A change now needs a *mechanism that could plausibly deliver 1.5%*, not merely a hypothesis that it
+helps. Knob-sized ideas are kept only when they are free and physically sound — ranking costs nothing
+at inference and is the quantity the metric literally scores, so it stays in the recipe — but they no
+longer justify a confirmation seed of their own, and they never gate a plan.
