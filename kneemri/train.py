@@ -8,7 +8,7 @@ import argparse
 import json
 import logging
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -18,12 +18,13 @@ from transformers import AutoModel
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
-from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.member_record import MemberRecord
+from kneemri.model import StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.run_metrics import EpochRow, RunMetrics
 from kneemri.scores import LabelScores
-from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SLICE_BAND
+from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Targets
@@ -316,6 +317,7 @@ def main() -> None:
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
     metrics = RunMetrics(destination)
+    record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
     best, best_state = -1.0, None
     for epoch in range(arguments.epochs):
         started = time.time()
@@ -338,58 +340,23 @@ def main() -> None:
             if mean > best:
                 best = mean
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
-                trainer.save_partial(destination, best_state, best, epoch)
+                trainer.save_partial(destination, record.payload(best_state, best, epoch))
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         metrics.record(
             EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
         )
 
     model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
-    torch.save(
-        {
-            "model": best_state,
-            "holdout": best,
-            "annot": float("nan"),
-            "epochs_done": arguments.epochs,
-            # The recipe, not just the image geometry. Without this a checkpoint cannot say which arm
-            # produced it: two seed runs were left on disk whose one-cycle/floor/label flags are now
-            # unrecoverable, so they cannot be used as a noise floor for anything.
-            # str(), not the dataclass as-is: every loader here reads with weights_only=True, which
-            # refuses to unpickle a Path, so saving the options raw would make each new checkpoint
-            # unloadable by our own code.
-            "options": {name: str(value) for name, value in asdict(arguments).items()},
-            "targets": list(TARGETS),
-            "slots": [slot.name for slot in SCHEMES[arguments.scheme]],
-            "config": {
-                "img": arguments.image_size,
-                "slices": arguments.slices,
-                "group": GROUP,
-                "crop_mm": CROP_MM,
-                "band": list(SLICE_BAND),
-                "slots": [slot.name for slot in SCHEMES[arguments.scheme]],
-                "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
-                "variant": encoder.variant,
-                "pool": "cls_mean",
-                "slice_pooling": arguments.slice_pooling,
-                "anatomical_prior": arguments.anatomical_prior,
-                "ema": arguments.ema,
-                "rank_weight": arguments.rank_weight,
-                "report_weight": arguments.report_weight,
-                "whole_stack": arguments.whole_stack,
-                # The value this run USED, never the module constant. Recording the constant made the
-                # field a lie the moment the depth became a flag, and it is read back by the loader to
-                # decide how a member was fitted.
-                "unfreeze_last": arguments.unfreeze_last,
-                "head_lr": arguments.head_lr,
-                "backbone_lr": arguments.backbone_lr,
-            },
-            "fingerprint": model.to(device).fingerprint(arguments.image_size, GROUP, device).tolist(),
-            "fingerprint_config": {"img": arguments.image_size, "n_slot": slots, "group": GROUP, "seed": 2026},
-        },
+    # The SAME assembler the periodic save uses, so a run killed at its best epoch and a run allowed
+    # to finish produce checkpoints of identical shape.
+    # best_state is set on the first epoch that scores; a run with none is already unusable above.
+    torch.save(record.payload(best_state, best, arguments.epochs - 1), destination)  # pyrefly: ignore[bad-argument-type]
+    logger.info(
+        "best holdout mean AUC %.4f -> %s | %s",
+        best,
         destination,
+        json.dumps({"fold": arguments.fold, "holdout": best}),
     )
-    logger.info(f"best holdout mean AUC {best:.4f} -> {destination}")
-    logger.info(json.dumps({"fold": arguments.fold, "holdout": best}))
 
 
 if __name__ == "__main__":

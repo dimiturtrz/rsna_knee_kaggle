@@ -405,15 +405,20 @@ class Trainer:
         """The scalar this step descends, as decided by whichever objective this run holds."""
         return self.objective(logits, scores, weights)
 
-    def save_partial(self, destination: Path, state: dict[str, Tensor], holdout: float, epoch: int) -> None:
+    def save_partial(self, destination: Path, payload: dict[str, object]) -> None:
         """Write the best weights so far, atomically, the moment they improve.
 
         Holding the only copy in memory until the final epoch is how a run that has already produced
         its best epoch loses everything — which the OneCycle off-by-one demonstrated by raising on the
         very last step of a thirty-epoch run. Temp-then-rename means a crash mid-write cannot leave a
         truncated file behind either.
+
+        The payload is assembled by the CALLER, and is the same one the final save writes. This used
+        to store only weights, holdout and epoch, which preserved a run's work but not its identity:
+        a member with no fingerprint and no recorded reading is refused by MemberPackage, so a killed
+        run left weights that could be inspected and never submitted.
         """
         partial = destination.with_suffix(".partial")
         temporary = partial.with_suffix(".tmp")
-        torch.save({"model": state, "holdout": holdout, "epoch": epoch}, temporary)
+        torch.save(payload, temporary)
         temporary.replace(partial)

@@ -219,11 +219,16 @@ def test_loss_uses_the_objective_the_run_was_given():
 
 
 def test_save_partial(tmp_path: Path):
-    """The best weights hit disk the moment they improve, and a partial write cannot survive."""
+    """The best weights hit disk the moment they improve, and a partial write cannot survive.
+
+    The payload is now assembled by the caller and is the SAME one the final save writes — a partial
+    that carried only weights preserved a killed run's work but not its identity, and MemberPackage
+    refuses a member with no fingerprint.
+    """
     trainer = _trainer()
     destination = tmp_path / "member_fold0.pt"
     state = {key: value.detach().cpu() for key, value in trainer.model.head.state_dict().items()}
-    trainer.save_partial(destination, state, holdout=0.81, epoch=7)
+    trainer.save_partial(destination, {"model": state, "holdout": 0.81, "epoch": 7, "config": {"slice_pooling": "max"}})
 
     partial = destination.with_suffix(".partial")
     assert partial.exists()
@@ -232,6 +237,7 @@ def test_save_partial(tmp_path: Path):
     assert reloaded["holdout"] == 0.81
     assert reloaded["epoch"] == 7
     assert reloaded["model"].keys() == state.keys()
+    assert reloaded["config"]["slice_pooling"] == "max", "the reading travels with the weights"
 
 
 def test_exponential_average():
