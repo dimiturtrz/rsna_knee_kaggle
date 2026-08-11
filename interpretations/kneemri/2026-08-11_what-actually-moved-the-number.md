@@ -278,8 +278,14 @@ present in 62% of studies) are among those that improved.
 The cause is simply that the row was wrong. A Baker's cyst is identified by its *neck*, which runs
 between the semimembranosus tendon and the medial head of gastrocnemius — an axial relationship — and I
 had axial as secondary behind sagittal. The baseline, which routes almost everything axially, scores
-0.8511 on this finding; the prior pulled it toward sagittal and lost 0.06. Axial is now co-primary and
-the arm is rerunning.
+0.8511 on this finding; the prior pulled it toward sagittal and lost 0.06. Axial is now co-primary, and the rerun confirms it: **0.8073 against the baseline's 0.8081**, where the
+first version scored 0.8005. Correcting one row recovered +0.0068 of a −0.0076 regression, leaving the
+prior indistinguishable from no prior at a noise floor of 0.006.
+
+So the final verdict on the anatomical prior is *neutral*, not harmful — and it took a per-target view
+to get there. The aggregate number said "the idea does not work" twice: once when it was really one
+wrong row, and once more when the row was fixed and the remainder was noise. It stays opt-in and off by
+default, on its merits: it costs a parameter and buys nothing measurable.
 
 So the prior is not refuted. What was refuted is one line of anatomy I wrote, which the per-target view
 found in a minute and the aggregate number would have hidden as "the idea does not work".
