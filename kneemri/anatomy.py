@@ -27,7 +27,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.slots import Slot
+from kneemri.slots import Plane, Slot
 
 PRIMARY = 1.0
 """The plane a finding is normally read on."""
@@ -54,8 +54,8 @@ place, not to hard-route it.
 class FindingAnatomy:
     """How one finding is read: on which planes, and whether it needs fluid weighting."""
 
-    primary: tuple[str, ...]
-    secondary: tuple[str, ...] = ()
+    primary: tuple[Plane, ...]
+    secondary: tuple[Plane, ...] = ()
     needs_fluid: bool = True
     needs_fat_sat: bool = False
     """Marrow oedema is invisible without fat suppression, whatever the plane and whatever the
@@ -78,22 +78,22 @@ class FindingAnatomy:
 
 
 ANATOMY: dict[str, FindingAnatomy] = {
-    "ACL": FindingAnatomy(primary=("Sagittal",), secondary=("Coronal",)),
-    "MCL": FindingAnatomy(primary=("Coronal",)),
+    "ACL": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.CORONAL,)),
+    "MCL": FindingAnatomy(primary=(Plane.CORONAL,)),
     # The meniscal body is coronal and its horns are sagittal, so a tear is genuinely read on both.
-    "Medial Meniscus": FindingAnatomy(primary=("Sagittal", "Coronal")),
-    "Lateral Meniscus": FindingAnatomy(primary=("Sagittal", "Coronal")),
+    "Medial Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL)),
+    "Lateral Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL)),
     # Cartilage loss, joint-space narrowing and osteophytes are morphology: T1 shows them well.
-    "Medial OA": FindingAnatomy(primary=("Coronal",), secondary=("Sagittal",), needs_fluid=False),
-    "Lateral OA": FindingAnatomy(primary=("Coronal",), secondary=("Sagittal",), needs_fluid=False),
-    "PF OA": FindingAnatomy(primary=("Axial",), secondary=("Sagittal",), needs_fluid=False),
-    "Effusion": FindingAnatomy(primary=("Axial", "Sagittal")),
-    "Synovitis": FindingAnatomy(primary=("Axial",), secondary=("Sagittal",)),
+    "Medial OA": FindingAnatomy(primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
+    "Lateral OA": FindingAnatomy(primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
+    "PF OA": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
+    "Effusion": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL)),
+    "Synovitis": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,)),
     # A Baker's cyst sits posteromedially, between the gastrocnemius and semimembranosus tendons.
-    "Baker's": FindingAnatomy(primary=("Sagittal",), secondary=("Axial", "Coronal")),
+    "Baker's": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.AXIAL, Plane.CORONAL)),
     # Marrow oedema is invisible without fat suppression and fluid weighting, whatever the plane.
-    "Contusion": FindingAnatomy(primary=("Sagittal", "Coronal"), secondary=("Axial",), needs_fat_sat=True),
-    "Fracture": FindingAnatomy(primary=("Sagittal", "Coronal"), secondary=("Axial",), needs_fat_sat=True),
+    "Contusion": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
+    "Fracture": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
 }
 
 

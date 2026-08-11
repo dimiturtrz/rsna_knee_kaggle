@@ -17,6 +17,7 @@ from jaxtyping import UInt8
 from torch import Tensor
 
 from kneemri.acquisition import Acquisition
+from kneemri.slots import Plane
 
 MIDLINE_DEAD_ZONE_MM = 20.0
 """Inside this distance of the midline the sign of x is no better than chance, so the side is left
@@ -57,6 +58,6 @@ class Laterality:
         """
         if side != "R":
             return images
-        if plane in ("Coronal", "Axial"):
+        if plane in (Plane.CORONAL, Plane.AXIAL):
             return torch.flip(images, dims=[-1])
         return torch.flip(images, dims=[0])

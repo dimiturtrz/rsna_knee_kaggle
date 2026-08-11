@@ -12,8 +12,24 @@ shipped flags alone would therefore put fluid-weighted series in the T1 slots fo
 """
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 from kneemri.acquisition import Acquisition
+
+
+class Plane(StrEnum):
+    """The three acquisition planes, spelled once.
+
+    A StrEnum rather than a bare string because these are matched by VALUE in two places that fail
+    quietly when the spelling is wrong: routing a series into a slot, and the anatomy table, where a
+    mistyped plane produces a flat prior row for that finding rather than an error. The values are the
+    ones `train_series.csv` carries in `Anatomical_Plane`, so comparison against raw ingest data still
+    works without converting it.
+    """
+
+    SAGITTAL = "Sagittal"
+    CORONAL = "Coronal"
+    AXIAL = "Axial"
 
 
 @dataclass(frozen=True)
@@ -35,12 +51,12 @@ class Slot:
 
 
 SLOTS: tuple[Slot, ...] = (
-    Slot("SAG_FLUID_FS", "Sagittal", fluid_sensitive=True, fat_suppressed=True),
-    Slot("COR_FLUID_FS", "Coronal", fluid_sensitive=True, fat_suppressed=True),
-    Slot("AX_FLUID_FS", "Axial", fluid_sensitive=True, fat_suppressed=True),
-    Slot("SAG_FLUID_NOFS", "Sagittal", fluid_sensitive=True, fat_suppressed=False),
-    Slot("COR_T1", "Coronal", fluid_sensitive=False, fat_suppressed=False),
-    Slot("SAG_T1", "Sagittal", fluid_sensitive=False, fat_suppressed=False),
+    Slot("SAG_FLUID_FS", Plane.SAGITTAL, fluid_sensitive=True, fat_suppressed=True),
+    Slot("COR_FLUID_FS", Plane.CORONAL, fluid_sensitive=True, fat_suppressed=True),
+    Slot("AX_FLUID_FS", Plane.AXIAL, fluid_sensitive=True, fat_suppressed=True),
+    Slot("SAG_FLUID_NOFS", Plane.SAGITTAL, fluid_sensitive=True, fat_suppressed=False),
+    Slot("COR_T1", Plane.CORONAL, fluid_sensitive=False, fat_suppressed=False),
+    Slot("SAG_T1", Plane.SAGITTAL, fluid_sensitive=False, fat_suppressed=False),
 )
 """The order is load-bearing: it is the slot axis of every cached array and of the head's slot embedding."""
 
