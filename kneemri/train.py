@@ -52,6 +52,7 @@ class TrainingOptions:
     intensity_aug: bool = False
     weight_floor: bool = False
     normalise_by_count: bool = False
+    slice_pooling: str = "channels"
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
     out: Path | None = None
@@ -79,6 +80,15 @@ class TrainingOptions:
         parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise too")
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
         parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() not /weight-sum")
+        parser.add_argument(
+            "--slice-pooling",
+            choices=("channels", "max"),
+            default="channels",
+            help="how a group of slices becomes one feature. 'channels' stacks three slices as RGB, "
+            "which couples a group's physical thickness to the slice count; 'max' encodes each slice "
+            "on its own and takes the elementwise max, which does not, and is what the .903 reference "
+            "does. 'max' costs three encoder passes per group.",
+        )
         parser.add_argument("--labels", type=Path, required=True, help="label table to TRAIN on")
         parser.add_argument(
             "--eval-labels",
@@ -119,7 +129,7 @@ def main() -> None:
     logger.info(f"{len(identifiers)} studies: {len(training)} train / {len(holdout)} holdout (fold {arguments.fold})")
     logger.info("target coverage:", {k: round(v, 3) for k, v in targets.coverage().items()})
 
-    model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS))
+    model = StudyModel(AutoModel.from_pretrained(DINOV2), DIM, len(SLOTS), slice_pooling=arguments.slice_pooling)
     scores = LabelScores()
     trainer = Trainer(
         model,
@@ -168,6 +178,7 @@ def main() -> None:
                 "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
                 "variant": "small",
                 "pool": "cls_mean",
+                "slice_pooling": arguments.slice_pooling,
                 "unfreeze_last": UNFREEZE_LAST,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),

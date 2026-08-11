@@ -15,6 +15,13 @@ leaderboard submission.*
 | better label table (v4_blend, +0.028 vs gold) | 0.8194 | −0.0008 | **neutral** |
 | 32 inference slices instead of 12 | 0.8137 | **−0.018** | refuted |
 | overlap TTA (inference only) | +0.0035 | +0.0035 | shipped |
+| + weight floor at 0.25 | 0.8221 | +0.0019 | kept |
+| + loss normalised by count (their `.mean()`) | 0.8199 | −0.0022 | refuted, on top of the floor |
+
+With arm E the reference recipe's differences from ours are now all measured. Normalising the loss by
+label count instead of by weight sum is the last of them and it does not transfer: a study with two
+confident findings and ten unmentioned ones contributes the same total gradient as one with twelve
+confident findings, which is exactly the reweighting the confidence floor already does more carefully.
 
 Five folds on the shipped recipe: **0.8269** against **0.8162**, +0.0107, every fold improved.
 
