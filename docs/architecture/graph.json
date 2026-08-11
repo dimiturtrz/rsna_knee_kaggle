@@ -236,6 +236,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.member_record",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_record",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_record",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.backbone",
       "weight": 1
@@ -448,6 +466,12 @@
       "kind": "import",
       "source": "kneemri.train",
       "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.member_record",
       "weight": 1
     },
     {
@@ -1126,6 +1150,30 @@
       "kind": "calls",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.member_record.MemberRecord",
+      "target": "kneemri.backbone.Encoder",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.member_record.MemberRecord",
+      "target": "kneemri.member_record.RunOptions",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.member_record.MemberRecord",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_record.MemberRecord.payload",
+      "target": "kneemri.model.StudyModel.fingerprint",
       "weight": 1
     },
     {
@@ -1833,6 +1881,18 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.member_record.MemberRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.member_record.MemberRecord.payload",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.model.StudyDesign",
       "weight": 1
     },
@@ -2185,7 +2245,7 @@
       "role": null
     },
     {
-      "descendants": 34,
+      "descendants": 35,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2308,6 +2368,14 @@
       "descendants": 0,
       "id": "kneemri.member_curve",
       "label": "member_curve",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record",
+      "label": "member_record",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2614,6 +2682,22 @@
       "label": "MemberCurve",
       "level": "class",
       "parent": "kneemri.member_curve",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.MemberRecord",
+      "label": "MemberRecord",
+      "level": "class",
+      "parent": "kneemri.member_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions",
+      "label": "RunOptions",
+      "level": "class",
+      "parent": "kneemri.member_record",
       "role": "primary"
     },
     {
@@ -3462,6 +3546,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.member_curve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.MemberRecord.payload",
+      "label": "payload",
+      "level": "method",
+      "parent": "kneemri.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.anatomical_prior",
+      "label": "anatomical_prior",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.backbone_lr",
+      "label": "backbone_lr",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.ema",
+      "label": "ema",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.head_lr",
+      "label": "head_lr",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.image_size",
+      "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.rank_weight",
+      "label": "rank_weight",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.report_weight",
+      "label": "report_weight",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.slice_pooling",
+      "label": "slice_pooling",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.slices",
+      "label": "slices",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.unfreeze_last",
+      "label": "unfreeze_last",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.whole_stack",
+      "label": "whole_stack",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
       "role": null
     },
     {
