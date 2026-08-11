@@ -555,6 +555,12 @@
     {
       "kind": "references",
       "source": "kneemri.attribution.Attribution",
+      "target": "kneemri.attribution.Diagnostics",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.attribution.Attribution",
       "target": "kneemri.attribution.Holdout",
       "weight": 1
     },
@@ -584,8 +590,20 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.attribution.Attribution._mean",
+      "source": "kneemri.attribution.Attribution._labels",
       "target": "kneemri.holdout_predictions.HoldoutPredictions.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution._mean",
+      "target": "kneemri.attribution.Attribution._labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.depth_by_label",
+      "target": "kneemri.attribution.Attribution._labels",
       "weight": 1
     },
     {
@@ -597,6 +615,18 @@
     {
       "kind": "calls",
       "source": "kneemri.attribution.Attribution.region_importance",
+      "target": "kneemri.attribution.Attribution._mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.report",
+      "target": "kneemri.attribution.Attribution._depth_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.Attribution.ring_importance",
       "target": "kneemri.attribution.Attribution._mean",
       "weight": 1
     },
@@ -621,6 +651,12 @@
     {
       "kind": "calls",
       "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.depth_by_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
       "target": "kneemri.attribution.Attribution.depth_profile",
       "weight": 1
     },
@@ -639,7 +675,19 @@
     {
       "kind": "calls",
       "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Attribution.ring_importance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
       "target": "kneemri.attribution.Attribution.slot_importance",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.attribution.Diagnostics",
       "weight": 1
     },
     {
@@ -2242,6 +2290,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.attribution.Diagnostics",
+      "label": "Diagnostics",
+      "level": "class",
+      "parent": "kneemri.attribution",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.attribution.Holdout",
       "label": "Holdout",
       "level": "class",
@@ -2722,8 +2778,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.attribution.Attribution._depth_agreement",
+      "label": "_depth_agreement",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution._labels",
+      "label": "_labels",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.attribution.Attribution._mean",
       "label": "_mean",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.depth_by_label",
+      "label": "depth_by_label",
       "level": "method",
       "parent": "kneemri.attribution.Attribution",
       "role": null
@@ -2748,6 +2828,14 @@
       "descendants": 0,
       "id": "kneemri.attribution.Attribution.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.attribution.Attribution.ring_importance",
+      "label": "ring_importance",
       "level": "method",
       "parent": "kneemri.attribution.Attribution",
       "role": null
