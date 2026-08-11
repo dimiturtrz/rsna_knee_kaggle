@@ -9,6 +9,19 @@
 # 0.8006 against a whole-image 0.8448. A model reading fine joint structure would collapse when the
 # joint is removed. Ours does not - which is what leaning on coarse global context looks like.
 #
+# THE TARGET IS NOW NAMED, which it was not when this arm was filed. Per-label scores from the
+# whole-stack member (mean 0.8457) put MCL at 0.755 and Fracture at 0.784 against Baker's 0.896 and
+# Medial Meniscus 0.893. The metric is an UNWEIGHTED mean of twelve AUCs, so lifting MCL alone to a
+# level five other labels already reach is worth +0.0098 on the mean - twice the encoder-rate result.
+#
+# And MCL is where a resolution limit would bite: a thin ligament at the MEDIAL MARGIN of the field,
+# read coronally, at 0.39 mm per pixel. Rarity and label noise were both TESTED as explanations and
+# both refuted - Synovitis is rarer (580 positives vs 767) with the corpus's lowest reader confidence
+# (0.189) and still scores 0.873. So MCL is hard to SEE, which is an imaging problem.
+#
+# CONTROL: lr5x_d6_s2026 = 0.8323, the same recipe at 336 px (channel stacking, rate 4e-5). Single
+# variable. NOT compared against the whole-stack members - those differ in the slice read as well.
+#
 # THE PREDICTION, written before the run so it cannot be decided afterwards:
 #   the gain must CONCENTRATE in ACL, MCL, Medial Meniscus, Lateral Meniscus
 #   and be near zero for Effusion and Baker's, which are large fluid collections a coarse model
