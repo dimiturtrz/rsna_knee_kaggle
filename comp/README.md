@@ -16,6 +16,23 @@ purpose** — the second consumer is what reveals which parts are genuinely comp
 extraction into an installed `sdlc-kaggle` package waits on that evidence. Fix a bug in both, and note it
 here, until they are one thing.
 
+## The label table is an external dependency, and it needs fetching
+
+We do not train on `train.csv`'s annotations — only **58 of 4,407** studies carry them. We train on a
+report-derived table with a confidence per (study, target), published as a Kaggle dataset:
+
+```bash
+kaggle datasets download pilkwang/rsna-knee-llm-labels -p "<processed>/labels" --unzip
+```
+
+That produces `report_labels_v2.csv`, whose `<target>` / `<target>__conf` columns are exactly what
+`Targets.load` reads. **Run this before any training run**; a missing table is a hard failure at
+`pd.read_csv`, not a degraded run.
+
+This step was missing, and the cost was real: the whole measured ablation ledger was scored against a
+table that no longer existed anywhere on disk, so its ruler could not be reproduced and no new arm could
+be compared against it. An external input with no fetch step is not a dependency, it is a memory.
+
 ## The two auth paths
 
 - `survey.py` / `publish.py` speak the REST API directly with a `KGAT_*` access token from `KAGGLE_TOKEN`
