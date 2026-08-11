@@ -44,8 +44,11 @@ holdout, of which **717 studies were seed 7's training data**. That is why it re
 
 - The ablation arms all ran at seed 2026 and therefore shared one split. Those comparisons stand as
   matched pairs, and the small effects (+0.0019, −0.0008) are real *as single-run measurements*.
-- The run-to-run noise floor is **still unmeasured**. I do not know whether ±0.002 is signal, and I
-  should stop implying I do in either direction.
+- The run-to-run noise floor is **now measured, and it is small**. Two seeds under one fixed split and
+  one identical recipe: **0.8233 (seed 7) against 0.8221 (seed 13), a spread of 0.0012**. That is an
+  order of magnitude below the ±0.0121 I had wrongly inferred from the split bug, and it means the
+  ledger's +0.0061 and +0.0110 rows are far outside noise while the +0.0019 rows sit at roughly 1.6x
+  it — suggestive, not established, and not worth defending.
 - The five-fold result stands: +0.0107 with five of five folds improving, all on one split family.
 - The marginal-member curve is **unmeasured**; the numbers it produced are void.
 
@@ -119,3 +122,54 @@ every local measure — LCOM4, testability, 95% duplication between two kernels 
 kernel run with `ModuleNotFoundError`, because the kit carrying our source was not rebuilt.
 `verify_kit.py` catches this in a second and was skipped, because the change felt like it was "only in
 the kernels". The kernels *import* the kit; a change to either is a change to both.
+
+
+## The ruler went missing, and that is worse than any row in the table
+
+Every number above was scored against a report-derived label table — the one with a confidence per
+(study, target), which is what we actually train on, since `train.csv` annotates only 58 of 4,407
+studies. **That table was not on disk.** A drive-wide search for any csv or parquet written since
+Aug 5 under `D:/data` returned nothing; there was no copy in the repo and none in the Kaggle kit.
+
+It was recoverable — it is a public Kaggle dataset, `pilkwang/rsna-knee-llm-labels` — and it now has a
+documented fetch step in `comp/README.md`. But the consequence for this document stands: **a new arm
+cannot be compared against a row above** unless the same table was in use, which cannot now be
+verified. New comparisons are being run as matched pairs instead, both arms fresh, both on the
+recovered `report_labels_v2.csv`.
+
+The lesson generalises past this repo. The gates here check code, and they check it well; nothing
+checked that an *input* was reproducible. An external input with no fetch step is not a dependency, it
+is a memory — and it fails silently in the direction of "the numbers I already have look fine".
+
+## Half the corpus is not in English, and it scores 0.016 worse
+
+**2,303 of 4,407 reports (52%) contain no common English word.** Spanish, Dutch, French, Greek and
+Cyrillic all appear. This was not on anyone's list here; it turned up while reading a public notebook
+that ships a rule-based *multilingual* parser, complete with Turkish dotted-i folding and the
+Croatian d-with-stroke — a detail that only makes sense if its author had hit the same thing.
+
+The LLM label table does cover them, so this is not missing supervision. It is *weaker* supervision:
+
+| | studies | mean confidence | UNK verdicts |
+|---|---|---|---|
+| English report | 2,104 | 0.717 | 20.2% |
+| non-English report | 2,303 | 0.611 | 33.8% |
+
+And it shows in the score. One member, fold-0 holdout, overlap TTA, split by report language:
+
+| | studies | holdout mean AUC |
+|---|---|---|
+| English | 420 | **0.8446** |
+| non-English | 489 | **0.8286** |
+| all | 909 | 0.8352 |
+
+**A 0.016 gap across 54% of the holdout, against a measured noise floor of 0.0012.** That is larger
+than every lever in the table above except the augmentation bug.
+
+Two things must stay attached to that number. First, it is scored against the *same* weaker labels, so
+it conflates "the model is worse on these studies" with "the ruler is noisier on these studies". Both
+readings point at the same remedy, but they imply very different ceilings, and only gold labels can
+separate them — of which there are 58. Second, **language cannot be an inference-time input**:
+`test.csv` has no `Report` column. Nothing here can become a language-conditioned model. The only
+lever available is better *supervision* on the non-English half, which is precisely what a rule-based
+parser in the report's own language would provide.
