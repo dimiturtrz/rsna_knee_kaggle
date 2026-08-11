@@ -382,3 +382,37 @@ faster** per epoch, so the caution cost validity and wall-clock at once.
 0.8166, 0.8162 over the last four epochs, where small had flattened. A 20-epoch base arm is queued on
 that basis: the mechanism (four times the parameters need more steps to fit) is stated in advance rather
 than fitted to whatever the run returns.
+
+
+## The whole ablation table was measured on an undertrained model
+
+Raising the epoch budget from 8 to 24, small encoder, everything else matched:
+
+| epochs | holdout |
+|---|---|
+| 8 | 0.8081 |
+| 24 | **0.8205** (still climbing at the end) |
+
+**+0.0124** — twice the noise floor, and larger than the encoder change. A 24-epoch *small* model beats
+an 8-epoch *base* one (0.8166), which is not what "bigger encoder" intuition predicts and is exactly
+what "both models are undertrained" predicts.
+
+This is the most useful thing measured today, and not because of the number.
+
+**Every arm in the table at the top of this file was run at 8 epochs.** OneCycle, intensity
+augmentation, the weight floor, the label table, per-slice max, the anatomical prior — each was
+compared against a baseline that had not finished learning. A knob that matters only once a model is
+near convergence would look like noise under that protocol, and eleven of them did. So "no measured
+effect at 8 epochs" is a much weaker statement than it sounded when written, and the honest reading of
+that table is now: *these were measured in the wrong regime*, not *these do not work*.
+
+It also explains the shape of the results without needing a story about our head or our data being
+special. Nothing knob-sized cleared the floor; both things that did were capacity or training time.
+That is the signature of a model that is under-fitted, not of one that is out of ideas.
+
+The two consequences for what happens next:
+
+- The five members currently on the leaderboard were trained for 8 epochs. Retraining the same recipe
+  for ~24 is worth about +0.012 before anything else changes.
+- Any knob worth re-testing should be re-tested at the longer budget, and re-tested *cheaply* — but the
+  queue for that is long and the capacity levers are not exhausted yet, so it waits.
