@@ -12,7 +12,8 @@
 #
 # control  compose_small / arm Q (max pooling, WINDOWED). Single variable: the read.
 # cost     ~4x a step - 12 encoder passes per slot against 3.
-source "$(dirname "$0")/../lib.sh"
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train whole_stack \

@@ -21,6 +21,20 @@ LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$PROCESSED/experiments"
 mkdir -p "$LOGS"
 
+run_snapshot() {
+  # Run an arm from a COPY, never from the file in the repo.
+  #
+  # bash reads a script incrementally, by byte offset, as it executes. Editing that file mid-run makes
+  # it resume at a stale offset - on 2026-08-11 a sweep that rewrote every arm's trailing marker
+  # truncated whole_stack.sh under a running bash, which died with "unexpected EOF while looking for
+  # matching quote" and took a 2-hour arm with it. The repo has to stay editable while long work runs,
+  # so the run gets its own immutable copy.
+  local arm="$1"
+  local snapshot="$LOGS/$(basename "$arm" .sh).running.sh"
+  cp "$arm" "$snapshot"
+  ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot"
+}
+
 require() {
   # Fail before spending GPU, not after. Every path an arm depends on goes through here.
   for path in "$@"; do
@@ -75,4 +89,20 @@ wait_for() {
   # wait_for <completion-marker> <file>. Blocks until the marker appears.
   local marker="$1" file="$2"
   until grep -q "$marker" "$file" 2>/dev/null; do sleep 60; done
+}
+
+wait_for_cache() {
+  # Block until a cache is genuinely finished, keyed on its MASK file.
+  #
+  # The images .npy is allocated at build start and filled over hours, so its existence proves only
+  # that a build began - gating on it is how an arm nearly trained on a mostly-zero array. The mask is
+  # different: build() writes it with a single np.save AFTER the decode loop returns, so it exists if
+  # and only if the build ran to completion.
+  #
+  # Better than grepping the build log, which is what this replaced: the mask lives on the same
+  # filesystem as the artefact it certifies, so it cannot be lost, rotated or truncated separately -
+  # and a build killed by the OS leaves no trace in a log at all. On 2026-08-11 the 448 px build was
+  # killed at 2200/4407 and its log simply stopped, with no error to grep for.
+  local size="$1" slices="${2:-12}"
+  until [ -f "$PROCESSED/mask_${size}px_${slices}sl.npy" ]; do sleep 60; done
 }

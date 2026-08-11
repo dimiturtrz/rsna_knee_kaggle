@@ -13,7 +13,8 @@
 #
 # So the gradation is live signal the model can use, not assertion-strength it ignores. That is the
 # gate a reader emitting true ordinal severity was waiting on, and it passed.
-source "$(dirname "$0")/../lib.sh"
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 FLAT="$PROCESSED/labels/flatyes_v2.csv"
 require "$LABELS" "$FLAT"
 

@@ -19,5 +19,5 @@ echo "waiting for '$MARKER' in $WATCH before running: $*"
 wait_for "$MARKER" "$WATCH"
 for arm in "$@"; do
   echo "=== $arm ==="
-  bash "$arm"
+  run_snapshot "$arm"
 done

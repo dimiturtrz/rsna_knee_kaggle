@@ -12,7 +12,8 @@
 # MONOTONE in the weight, which is what makes this a kill rather than a tuning miss. The report
 # describes the whole study - technique, history, incidental findings - so the auxiliary target pulls
 # capacity toward text the metric never scores. Kept opt-in and default off.
-source "$(dirname "$0")/../lib.sh"
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 VECTORS="$PROCESSED/labels/report_embeddings.npz"
 require "$LABELS" "$VECTORS"
 

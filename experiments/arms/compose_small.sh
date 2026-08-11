@@ -10,7 +10,8 @@
 # pooling alone (slice_count Q)    0.8310   +0.0038
 # ADDITIVE PREDICTION              0.8361   - written before the run, so 'as expected' cannot be
 #                                             decided after seeing the number.
-source "$(dirname "$0")/../lib.sh"
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train compose_small \

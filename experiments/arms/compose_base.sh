@@ -9,7 +9,8 @@
 # adds     encoder rate 4e-5       isolated at +0.0051 (rate_isolate)
 # adds     max slice pooling       isolated at +0.0038 (slice_count_maxpool, arm Q)
 # If the levers add, this lands near 0.837.
-source "$(dirname "$0")/../lib.sh"
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train compose_base \
