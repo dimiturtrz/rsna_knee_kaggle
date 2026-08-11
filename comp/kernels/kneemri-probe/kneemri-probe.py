@@ -75,7 +75,8 @@ def probe_runtime() -> None:
             for parts in (line.split() for line in Path("/proc/meminfo").read_text().splitlines())
         )
         print(
-            f"ram     total={int(meminfo['MemTotal']) / 1e6:.1f} GB  available={int(meminfo['MemAvailable']) / 1e6:.1f} GB"
+            f"ram     total={int(meminfo['MemTotal']) / 1e6:.1f} GB  "
+            f"available={int(meminfo['MemAvailable']) / 1e6:.1f} GB"
         )
     except (OSError, KeyError) as exc:
         print(f"ram     unreadable ({exc})")

@@ -24,7 +24,7 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-from survey import KaggleApi, MissingToken  # noqa: TID251 - sibling script, kaggle/ is on sys.path[0]
+from survey import KaggleApi, MissingTokenError  # noqa: TID251 - sibling script, kaggle/ is on sys.path[0]
 from verify_kit import drift  # noqa: TID251 - sibling script, as above
 
 _REPO = Path(__file__).resolve().parents[1]
@@ -173,7 +173,7 @@ def main() -> None:
     _refuse_if_stale()
     try:
         api = KaggleApi.from_environment()
-    except MissingToken as error:
+    except MissingTokenError as error:
         raise SystemExit(str(error)) from error
     try:
         arguments.handler(Publisher(api=api), arguments)

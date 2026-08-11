@@ -40,7 +40,11 @@ _MAX_PAGES = 6
 _SORTS = ("voteCount", "dateRun", "hotness")
 
 
-class MissingToken(RuntimeError):
+_PRINTABLE_CEILING = 0x2000
+"""Above this, a codepoint is a formatting or private-use character a terminal cannot be trusted with."""
+
+
+class MissingTokenError(RuntimeError):
     """Raised when the environment holds no Kaggle access token."""
 
 
@@ -56,7 +60,7 @@ class KaggleApi:
         token = os.environ.get(_TOKEN_VARIABLE, "").strip()
         if not token:
             message = f"{_TOKEN_VARIABLE} is not set — export a KGAT_* access token before running this."
-            raise MissingToken(message)
+            raise MissingTokenError(message)
         return cls(token=token)
 
     def get(self, path: str, **parameters: str | int) -> object:
@@ -75,9 +79,11 @@ class KaggleApi:
             f"{_BASE}{path}",
             headers={"Authorization": f"Bearer {self.token}"},
         )
-        with urllib.request.urlopen(request, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response:  # noqa: S310
-            with destination.open("wb") as sink:
-                return sum(sink.write(chunk) for chunk in iter(lambda: response.read(_CHUNK_BYTES), b""))
+        with (
+            urllib.request.urlopen(request, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response,  # noqa: S310
+            destination.open("wb") as sink,
+        ):
+            return sum(sink.write(chunk) for chunk in iter(lambda: response.read(_CHUNK_BYTES), b""))
 
     def leaderboard(self, competition: str) -> list[dict[str, object]]:
         """The public leaderboard, best team first."""
@@ -145,7 +151,7 @@ def _as_int(value: object) -> int:
 
 def _printable(text: str) -> str:
     """Strip the emoji and box-drawing characters a Windows console codepage cannot encode."""
-    return "".join(character for character in text if character.isprintable() and ord(character) < 0x2000)
+    return "".join(character for character in text if character.isprintable() and ord(character) < _PRINTABLE_CEILING)
 
 
 def _list_kernels(api: KaggleApi, arguments: argparse.Namespace) -> None:
@@ -212,7 +218,7 @@ def _show_leaderboard(api: KaggleApi, arguments: argparse.Namespace) -> None:
 def _show_submissions(api: KaggleApi, arguments: argparse.Namespace) -> None:
     """Print our submissions with the score each actually landed."""
     for entry in api.submissions(arguments.competition):
-        print(f"{str(entry.get('date'))[:19]}  {str(entry.get('publicScore')):>7}  {entry.get('status')}")
+        print(f"{str(entry.get('date'))[:19]}  {entry.get('publicScore')!s:>7}  {entry.get('status')}")
         print(f"          {_printable(str(entry.get('description', '')))[:150]}")
 
 
@@ -253,7 +259,7 @@ def main() -> None:
     arguments = _parser().parse_args()
     try:
         api = KaggleApi.from_environment()
-    except MissingToken as error:
+    except MissingTokenError as error:
         raise SystemExit(str(error)) from error
     arguments.handler(api, arguments)
 
