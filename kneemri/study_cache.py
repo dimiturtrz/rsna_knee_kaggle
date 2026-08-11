@@ -55,42 +55,75 @@ class CachedCorpus:
 class StudyCache:
     """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask."""
 
-    def __init__(self, directory: Path, slices: int = 12, image_size: int = IMAGE_SIZE) -> None:
+    def __init__(
+        self, directory: Path, slices: int = 12, image_size: int = IMAGE_SIZE, slots: int = len(SLOTS)
+    ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
+        self.slots = slots
+
+    @property
+    def key(self) -> str:
+        """Everything that decides the cache's CONTENTS, in its filename.
+
+        The slot count used to be absent, while `shape` read it from the module-level `SLOTS`. The
+        docstring here claimed the name stated everything that decides the contents, and it did not:
+        extending the scheme to nine slots — which the census says would recover 96% of the series we
+        currently cannot route — would have written a differently-shaped array to the SAME path and
+        destroyed the six-slot cache every existing member was fitted on. Same defect as recording a
+        module constant in a member's fingerprint instead of the run's own value.
+
+        The canonical six-slot cache keeps its original name so the arrays already on disk, and the
+        members fitted on them, stay loadable without renaming a file that a running trainer holds
+        memory-mapped. Any other scheme is named explicitly.
+        """
+        base = f"{self.image_size}px_{self.slices}sl"
+        return base if self.slots == len(SLOTS) else f"{base}_{self.slots}slot"
 
     @property
     def images_path(self) -> Path:
-        """Where the pixel cache lives; the name states everything that decides its contents."""
-        return self.directory / f"images_{self.image_size}px_{self.slices}sl.npy"
+        """Where the pixel cache lives."""
+        return self.directory / f"images_{self.key}.npy"
 
     @property
     def mask_path(self) -> Path:
         """The per-study presence mask, one flag per slot."""
-        return self.directory / f"mask_{self.image_size}px_{self.slices}sl.npy"
+        return self.directory / f"mask_{self.key}.npy"
 
     @property
     def index_path(self) -> Path:
         """The study order the two arrays are indexed by."""
-        return self.directory / f"index_{self.image_size}px_{self.slices}sl.json"
+        return self.directory / f"index_{self.key}.json"
 
     def shape(self, studies: int) -> tuple[int, int, int, int, int]:
         """The cache's dimensions for a given number of studies."""
-        return (studies, len(SLOTS), self.slices, self.image_size, self.image_size)
+        return (studies, self.slots, self.slices, self.image_size, self.image_size)
 
     def build(self, source: Path, identifiers: list[str], planes: dict[str, str], workers: int = 16) -> None:
         """Decode every study into the cache, in parallel, writing straight into the memory map.
 
         Workers write disjoint slices of the same file, so no locking is needed and nothing is returned
         through the pool but a flag — the pixels never cross a process boundary.
+
+        Raises `ValueError` if asked for a slot count the decoder cannot fill. The workers route with
+        the module-level scheme, so a cache declaring nine slots would be filled six-wide and the
+        remaining three left as zeros — an array of exactly the right shape, quietly holding blank
+        sequences, which is this project's recurring failure mode rather than a hypothetical one.
+        Extending the scheme means changing `SLOTS` and rebuilding, not passing a bigger number here.
         """
+        if self.slots != len(SLOTS):
+            message = (
+                f"cache declares {self.slots} slots but the decoder routes with {len(SLOTS)}; "
+                "the extra slots would be written as zeros"
+            )
+            raise ValueError(message)
         self.directory.mkdir(parents=True, exist_ok=True)
         images = np.lib.format.open_memmap(
             self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))
         )
         del images
-        mask = np.zeros((len(identifiers), len(SLOTS)), dtype=np.float32)
+        mask = np.zeros((len(identifiers), self.slots), dtype=np.float32)
         self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
 
         arguments = [

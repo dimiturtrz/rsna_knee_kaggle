@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
@@ -93,3 +94,37 @@ def test_decode_one(tmp_path: Path):
     )
     assert position == 0
     assert flags == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+
+def test_key(tmp_path: Path):
+    """The canonical scheme keeps its historic name; any other slot count is named explicitly.
+
+    The slot count decides the array's SHAPE, so leaving it out of the filename meant a nine-slot
+    build would overwrite the six-slot cache in place. The canonical name is preserved so arrays
+    already on disk stay loadable — a rename cannot be done while a trainer holds one mapped.
+    """
+    canonical = StudyCache(tmp_path, slices=12, image_size=336)
+    assert canonical.key == "336px_12sl"
+    assert canonical.images_path.name == "images_336px_12sl.npy"
+
+    extended = StudyCache(tmp_path, slices=12, image_size=336, slots=9)
+    assert extended.key == "336px_12sl_9slot"
+    assert extended.images_path != canonical.images_path, "a different slot count must not collide"
+    assert extended.mask_path != canonical.mask_path
+    assert extended.index_path != canonical.index_path
+
+
+def test_shape_follows_the_slot_count(tmp_path: Path):
+    """The shape reports the cache's OWN slot count, not the module-level scheme's."""
+    assert StudyCache(tmp_path, slices=12, image_size=336, slots=9).shape(4407)[1] == 9
+
+
+def test_build_refuses_a_slot_count_the_decoder_cannot_fill(tmp_path: Path):
+    """A nine-slot cache built by a six-slot decoder would hold three blank sequences and look fine.
+
+    Verified by asking for it: the shape would be right, the file would be the right size, and three
+    of every study's sequences would be zeros. That is the failure this project keeps meeting — the
+    run completes and the result is quietly meaningless — so it is an error, not a warning.
+    """
+    with pytest.raises(ValueError, match="would be written as zeros"):
+        StudyCache(tmp_path, slices=12, image_size=336, slots=9).build(tmp_path, ["a"], {})
