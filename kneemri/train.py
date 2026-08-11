@@ -48,6 +48,7 @@ class TrainingOptions:
     seed: int = 2026
     split_seed: int = 2026
     one_cycle: bool = False
+    ema: bool = False
     intensity_aug: bool = False
     weight_floor: bool = False
     normalise_by_count: bool = False
@@ -85,6 +86,13 @@ class TrainingOptions:
             "cross-scoring them leaks training data.",
         )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+        parser.add_argument(
+            "--ema",
+            action="store_true",
+            help="score and save an exponential moving average of the weights rather than the live "
+            "ones. Universal in the public notebooks, and aimed at the 0.0062 seed spread we measured: "
+            "it stops the answer depending on which step training happened to stop at.",
+        )
         parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise too")
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
         parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() not /weight-sum")
@@ -158,6 +166,8 @@ def main() -> None:
         augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
         normalise_by_count=arguments.normalise_by_count,
     )
+    if arguments.ema:
+        trainer.exponential_average()
     if arguments.one_cycle:
         # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
         # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
@@ -174,18 +184,23 @@ def main() -> None:
         # it increases every time, which makes the existing "keep the best" machinery keep the LAST
         # state instead. That is the right choice for a final fit and needs no second code path.
         empty: dict[str, float] = {}
-        per_label = (
-            scores.per_label(trainer.predict(corpus, holdout, arguments.batch, generator), evaluation.scores[holdout])
-            if len(holdout)
-            else empty
-        )
-        mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
+        # Both the score and the state come from inside this block, so the number that ranks an epoch is
+        # measured on exactly the weights that epoch would write.
+        with trainer.evaluated():
+            per_label = (
+                scores.per_label(
+                    trainer.predict(corpus, holdout, arguments.batch, generator), evaluation.scores[holdout]
+                )
+                if len(holdout)
+                else empty
+            )
+            mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
+            if mean > best:
+                best = mean
+                best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
+                trainer.save_partial(destination, best_state, best, epoch)
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         logger.info("    %s", {name: round(value, 3) for name, value in per_label.items()})
-        if mean > best:
-            best = mean
-            best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
-            trainer.save_partial(destination, best_state, best, epoch)
 
     model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
     torch.save(
@@ -215,6 +230,7 @@ def main() -> None:
                 "pool": "cls_mean",
                 "slice_pooling": arguments.slice_pooling,
                 "anatomical_prior": arguments.anatomical_prior,
+                "ema": arguments.ema,
                 "unfreeze_last": UNFREEZE_LAST,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),

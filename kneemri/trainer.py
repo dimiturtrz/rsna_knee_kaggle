@@ -15,6 +15,8 @@ laterality normalisation that five of the twelve targets depend on, turning a me
 lateral one and teaching the model that the distinction is noise.
 """
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,6 +26,7 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
+from kneemri.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.model import StudyModel
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
@@ -114,6 +117,24 @@ class Trainer:
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
         self.schedule: torch.optim.lr_scheduler.OneCycleLR | None = None
         self.torch_generator = torch.Generator(device=device).manual_seed(SEED)
+        # Attached rather than passed, for the same reason the schedule is: both are policies a run may
+        # or may not want, and a sixth constructor argument trips the argument-count gate. The default
+        # is a no-op object rather than None, so no call site has to test for one.
+        self.average: LiveWeights = LiveWeights()
+
+    def exponential_average(self, decay: float = DECAY) -> None:
+        """Keep an EMA of the weights, and score and save from it rather than from the live ones."""
+        self.average = WeightAverage(self.model, decay)
+
+    @contextmanager
+    def evaluated(self) -> Iterator[None]:
+        """Run a block under the weights this run would SAVE.
+
+        Scoring the live weights while saving the averaged ones ranks epochs for a model that is never
+        written to disk — the checkpoint's own number would then belong to a different function.
+        """
+        with self.average.applied(self.model):
+            yield
 
     def one_cycle(self, total_steps: int) -> None:
         """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
@@ -252,6 +273,7 @@ class Trainer:
             self.scaler.update()
             if self.schedule is not None:
                 self.schedule.step()
+            self.average.update(self.model)
             total += float(loss.detach())
             steps += 1
         return total / max(steps, 1)

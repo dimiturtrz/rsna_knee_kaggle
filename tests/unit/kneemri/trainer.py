@@ -219,3 +219,40 @@ def test_save_partial(tmp_path: Path):
     assert reloaded["holdout"] == 0.81
     assert reloaded["epoch"] == 7
     assert reloaded["model"].keys() == state.keys()
+
+
+def test_exponential_average():
+    """With an EMA attached, the saved weights lag the live ones instead of being them."""
+    trainer = _trainer()
+    trainer.exponential_average()
+    trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+
+    live = trainer.model.head.out.weight.detach().clone()
+    averaged = trainer.average.state_dict(trainer.model)["head.out.weight"]
+    assert not torch.allclose(live, averaged), "an EMA that equals the live weights is not averaging"
+
+
+def test_evaluated():
+    """The block scores under the averaged weights and puts the live ones back afterwards.
+
+    Leaving the average in place would resume training from smoothed weights, which is a different
+    optimisation entirely - and one that compounds every epoch.
+    """
+    trainer = _trainer()
+    trainer.exponential_average()
+    trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+
+    live = trainer.model.head.out.weight.detach().clone()
+    with trainer.evaluated():
+        inside = trainer.model.head.out.weight.detach().clone()
+    assert not torch.allclose(inside, live), "scoring must happen under the averaged weights"
+    assert torch.equal(trainer.model.head.out.weight.detach(), live), "the live weights must be restored"
+
+
+def test_evaluated_without_an_average_is_a_no_op():
+    """The default policy leaves the weights alone, so a run without an EMA pays nothing."""
+    trainer = _trainer()
+    before = trainer.model.head.out.weight.detach().clone()
+    with trainer.evaluated():
+        assert torch.equal(trainer.model.head.out.weight.detach(), before)
+    assert torch.equal(trainer.model.head.out.weight.detach(), before)

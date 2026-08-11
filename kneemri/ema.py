@@ -11,6 +11,7 @@ and so a run that does not want one pays nothing.
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from typing import override
 
 from torch import Tensor, nn
 
@@ -30,7 +31,29 @@ the one set of weights we know to be worthless.
 """
 
 
-class WeightAverage:
+class LiveWeights:
+    """The weights the optimiser is stepping, used directly — the default policy, and a no-op.
+
+    This exists so the training loop never asks "is there an average?". A run without one holds this
+    object and calls the same three methods; a run with one holds a `WeightAverage` and calls the same
+    three methods. The alternative is an `if self.average is not None` at three call sites, one of which
+    (scoring) is the site where getting it wrong picks an epoch for weights that are never written.
+    """
+
+    def update(self, model: nn.Module) -> None:
+        """Nothing to move: the live weights are already the answer."""
+
+    def state_dict(self, model: nn.Module) -> dict[str, Tensor]:
+        """What would be saved — here, exactly what the model holds."""
+        return model.state_dict()
+
+    @contextmanager
+    def applied(self, model: nn.Module) -> Iterator[None]:
+        """Scoring weights are the live ones, so there is nothing to swap in or put back."""
+        yield
+
+
+class WeightAverage(LiveWeights):
     """A shadow copy of the model's floating-point parameters, moved toward them each step."""
 
     def __init__(self, model: nn.Module, decay: float = DECAY) -> None:
@@ -42,6 +65,7 @@ class WeightAverage:
             if value.is_floating_point()
         }
 
+    @override
     def update(self, model: nn.Module) -> None:
         """Move the average toward the live weights by one step.
 
@@ -54,6 +78,7 @@ class WeightAverage:
         for name, value in self.shadow.items():
             value.mul_(rate).add_(state[name].detach().float(), alpha=1.0 - rate)
 
+    @override
     def state_dict(self, model: nn.Module) -> dict[str, Tensor]:
         """The averaged weights, in the model's own dtypes, with non-float entries carried through.
 
@@ -66,6 +91,7 @@ class WeightAverage:
             for name, value in live.items()
         }
 
+    @override
     @contextmanager
     def applied(self, model: nn.Module) -> Iterator[None]:
         """Run a block with the averaged weights in place, then put the live ones back.

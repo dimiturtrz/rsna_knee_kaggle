@@ -3,7 +3,7 @@
 import torch
 from torch import nn
 
-from kneemri.ema import WeightAverage
+from kneemri.ema import LiveWeights, WeightAverage
 
 SEED = 2026
 
@@ -43,7 +43,7 @@ def test_update_ramps_in_so_the_initialisation_does_not_dominate():
     assert float(average.shadow["weight"]) > 0.5
 
 
-def test_state_dict():
+def test_weight_average_state_dict():
     """Averaged floats come back in the model's own dtype, and every key is present."""
     model = _model(1.0)
     average = WeightAverage(model)
@@ -53,7 +53,7 @@ def test_state_dict():
     assert state["weight"].dtype == model.state_dict()["weight"].dtype
 
 
-def test_applied():
+def test_weight_average_applied():
     """Scoring under the averaged weights must not leave them behind — training continues from live."""
     model = _model(0.0)
     average = WeightAverage(model, decay=0.5)
@@ -62,6 +62,25 @@ def test_applied():
     average.update(model)
 
     with average.applied(model):
-        inside = float(model.weight)
+        inside = float(model.weight.detach())
     assert inside != 1.0
-    assert float(model.weight) == 1.0
+    assert float(model.weight.detach()) == 1.0
+
+
+def test_live_weights_state_dict():
+    """The default policy hands back exactly what the model holds."""
+    model = nn.Linear(3, 2)
+    assert torch.equal(LiveWeights().state_dict(model)["weight"], model.weight.detach())
+
+
+def test_live_weights_applied():
+    """The default policy swaps nothing in and nothing out, so a run without an EMA pays nothing."""
+    model = nn.Linear(3, 2)
+    policy = LiveWeights()
+    before = model.weight.detach().clone()
+
+    policy.update(model)
+    with policy.applied(model):
+        assert torch.equal(model.weight.detach(), before)
+
+    assert torch.equal(model.weight.detach(), before)
