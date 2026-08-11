@@ -16,6 +16,12 @@
 #
 # control  compose_small / arm Q (max pooling, WINDOWED). Single variable: the read.
 #
+# EPOCH BUDGET, measured 2026-08-11 rather than inherited. The 24-epoch version peaked at 0.8413
+# around epoch 6 and then gave it back - 0.8298 by epoch 10 with the loss still falling. Showing the
+# model 4x the imaging per step means it converges in roughly a third of the epochs, so 24 was not
+# merely 80 wasted minutes: one-cycle is defined over total_steps, so a budget the model does not need
+# stretches the anneal across it. 12 epochs, with the schedule defined over 12.
+#
 # VRAM BUDGET, measured 2026-08-11 rather than guessed. A step puts 12 studies x 6 slots x 12 slices =
 # 864 images through the encoder. Uncapped and without checkpointing it took all 32 GB and ran at
 # 145 W of 575 with NO epoch in fifteen minutes: Windows pages GPU memory over PCIe instead of raising
@@ -28,6 +34,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train whole_stack \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/wholestack_s2026.pt"
