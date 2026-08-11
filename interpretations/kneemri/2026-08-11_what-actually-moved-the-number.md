@@ -854,3 +854,40 @@ real, but it reorders recipes that were never separated by a decision-grade marg
 agree/disagree verdict was the wrong contract for a question whose answer is a magnitude; the honest
 statement is that the fine ordering of the ledger is not trustworthy, and that no decision at the 1.5%
 scale rests on it.
+
+## The encoder was frozen too hard — a prediction of mine, refuted in direction
+
+I predicted the encoder-rate bracket would be neutral to negative, on the supervision-limited reading:
+a faster encoder is more capacity to fit noise, not more signal to fit. I wrote the falsifier down
+first, which is the only reason this is a clean refutation rather than a reinterpretation.
+
+Bracketed on small + ranking, fold 0, seed 2026:
+
+| backbone LR | best | note |
+|---|---|---|
+| 8e-6 (inherited) | 0.8272 | control |
+| **4e-5 (5x)** | **0.8316** | +0.0044 |
+| 1.6e-4 (20x) | ~0.739 | collapsing — the encoder is being destroyed |
+
+So the rate has a real optimum near 5x the inherited value, and the inherited 125:1 head-to-encoder
+ratio was too conservative. It was never measured; it came from the reference.
+
+### Two qualifications, one of them mine to own
+
+**+0.0044 is under the 1.5% bar.** By the owner's rule this is directional, not a result — so the
+supervision-limited reading is not refuted at DECISION scale, only in direction. Both things are true
+and it would be dishonest to report either alone.
+
+**The arm changed two variables**, rate and depth (6 → 12), which is the arm-J mistake repeated. It is
+partially recoverable because depth alone measured +0.0008, leaving ~+0.0035 for the rate — partially,
+not cleanly. A single-variable arm is queued.
+
+### The detail that matters more than the delta
+
+**Arm L was still improving at epoch 19 (0.8316) while the control had peaked at 17 and turned down.**
+If a faster encoder wants a longer schedule, then every epoch-budget result in this project was
+measured at a rate where the encoder barely moves — including the 8 → 24 epoch result that this
+document treats as one of the two things that ever paid. A 36-epoch arm at 4e-5 is queued to test it.
+
+That is the shape of the whole session in one line: the constants inherited from the reference were
+never measured, and each one that gets a flag turns out to be load-bearing.
