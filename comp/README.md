@@ -53,8 +53,34 @@ dataset push, which is how it escaped the first time. It fired on its first real
 - **Is submission notebook-only?** The sibling competition rejected file uploads with
   `400 FAILED_PRECONDITION "only accepts Submissions from Notebooks"`, which is the entire reason the
   kit-as-dataset machinery exists. Unverified here. If RSNA accepts a CSV upload, most of this is optional.
-- **The Efficiency Prize track** is a separate leaderboard with its own scoring. Decide whether to target it
-  before optimizing inference cost by accident.
+- **The competition rules page is JavaScript-only** to every tool here — WebFetch returns the title, and
+  `curl` returns a 5.6 KB SPA shell. The external-data clause is therefore *unread*. What we rely on is
+  low-risk on its face: DINOv2 weights (which the competition itself mounts as a Kaggle model, and every
+  public notebook uses) and a public label table derived from the competition's own reports, which is not
+  external data at all. The clause still needs a human with a logged-in browser before any winner-eligibility
+  claim — that is a user action, not one this session can complete.
+
+## The Efficiency Prize, measured rather than assumed (2026-08-11)
+
+Its evaluation page is JS-only like the rules, but `ryanholbrook/rsna-knee-abnormalities-efficiency-lb`
+publishes the leaderboard as a notebook output, and `kaggle kernels output` pulls it. From the snapshot:
+
+- **905 teams are ranked**, which is essentially everyone — participation is automatic, not opt-in, and
+  costs us nothing to leave alone.
+- **Runtime is weighted hard.** The best score anywhere on that board, **0.940, sits at efficiency rank
+  638**; rank 1 scores 0.934 and rank 100 scores 0.836. It is not a re-sort of the accuracy leaderboard.
+- **Our accuracy is already worth a top-30 efficiency place if it runs cheaply.** The three teams scoring
+  exactly our 0.888 sit at ranks **29, 33 and 50**.
+
+So the decision is not "target it or not" — it is one number: what do members two through five actually
+buy? We currently pay 5 members x 10 TTA windows = 50 forward passes per study for an ensemble gain that
+is presently *unmeasured* (the member-count curve was void: it was computed across split-seeds and leaked).
+If the curve is flat past two members, a one- or two-member submission is a top-30 efficiency entry at
+nearly our current accuracy. If it is steep, the track is not worth the accuracy. **`knee-uxg` answers
+`knee-5bv`** — do not spend anything on inference cost until that curve exists.
+
+The open risk to check first: whether the efficiency board scores a team's *selected* submissions, in which
+case a fast entry competes with the accurate one rather than adding to it.
 
 ## Measured on 2026-08-10 by `kernels/kneemri-probe`
 
