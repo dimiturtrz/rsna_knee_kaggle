@@ -16,6 +16,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.anatomy import ANATOMY, SlotAffinity
+from kneemri.slice_attention import SliceAttention
 from kneemri.slot_head import SlotHead
 from kneemri.slots import SLOTS
 
@@ -99,7 +100,11 @@ class StudyModel(nn.Module):
             message = f"anatomical prior covers {len(SLOTS)} slots, model has {n_slot}"
             raise ValueError(message)
         prior = SlotAffinity(ANATOMY).matrix(TARGETS, SLOTS) if self.design.anatomical_prior else None
-        self.head = SlotHead(dim * POOL_PARTS[self.pool], n_slot, len(TARGETS), prior)
+        width = dim * POOL_PARTS[self.pool]
+        # Built only for the design that uses it: an unused module would still land in the state dict
+        # and every published member would fail to load against it.
+        self.slices = SliceAttention(width) if self.slice_pooling == "attend" else None
+        self.head = SlotHead(width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
 
@@ -133,7 +138,7 @@ class StudyModel(nn.Module):
         # to the slice count, which is measurably why raising inference slices from 12 to 32 cost
         # -0.018 here while the recipe that pools per-slice can do it freely. It also means a finding
         # is only visible if it falls inside a sampled three-slice group.
-        per_slice = self.slice_pooling == "max"
+        per_slice = self.slice_pooling in {"max", "attend"}
         if per_slice:
             x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
             x = x.float().div(255.0)
@@ -147,7 +152,10 @@ class StudyModel(nn.Module):
         x = (x - self.mean) / self.std
         tokens = self.backbone(pixel_values=x).last_hidden_state
         pooled = self._pool(tokens)
-        return pooled.reshape(batch, slots, group, -1).amax(dim=2) if per_slice else pooled.reshape(batch, slots, -1)
+        if not per_slice:
+            return pooled.reshape(batch, slots, -1)
+        stacked = pooled.reshape(batch, slots, group, -1)
+        return self.slices(stacked) if self.slices is not None else stacked.amax(dim=2)
 
     def supervised(
         self,

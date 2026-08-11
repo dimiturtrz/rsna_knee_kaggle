@@ -164,12 +164,14 @@ class TrainingOptions:
         )
         parser.add_argument(
             "--slice-pooling",
-            choices=("channels", "max"),
+            choices=("channels", "max", "attend"),
             default="channels",
             help="how a group of slices becomes one feature. 'channels' stacks three slices as RGB, "
             "which couples a group's physical thickness to the slice count; 'max' encodes each slice "
             "on its own and takes the elementwise max, which does not, and is what the .903 reference "
-            "does. 'max' costs three encoder passes per group.",
+            "does. 'attend' encodes each slice alone as 'max' does and then pools them by learned "
+            "attention instead, which keeps WHICH slice mattered - the operation the post-MRNet "
+            "literature uses. 'max' and 'attend' cost three encoder passes per group.",
         )
         parser.add_argument("--labels", type=Path, required=True, help="label table to TRAIN on")
         parser.add_argument(
