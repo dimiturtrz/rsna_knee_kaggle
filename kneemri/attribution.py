@@ -186,24 +186,26 @@ class Attribution:
             scores[f"{width:.2f}"] = self._mean(model, replace(holdout, images=ring))
         return scores
 
-    def depth_profile(
-        self,
-        model: StudyModel,
-        holdout: Holdout,
-    ) -> dict[str, float]:
-        """Each window of the slice stack scored ALONE, so the signal can be located along the depth.
+    def averaged(self, by_label: dict[str, dict[str, float]]) -> dict[str, float]:
+        """Mean over labels at each depth — the profile, derived rather than measured a second time.
 
-        This is the only localisation a study-level label can support: the model is never told where a
-        finding is, but it can be asked which depth it needed in order to find one.
+        This used to be its own method that re-ran every window through the model, which doubled the
+        cost of the depth diagnostic to compute a number already contained in `depth_by_label`. Ten
+        GPU passes for an arithmetic mean.
         """
-        return {str(start): self._mean(model, replace(holdout, starts=[start])) for start in holdout.starts}
+        return {start: float(np.nanmean(list(labels.values()))) for start, labels in by_label.items()}
 
     def depth_by_label(
         self,
         model: StudyModel,
         holdout: Holdout,
     ) -> dict[str, dict[str, float]]:
-        """The depth profile per diagnosis, because twelve findings have no reason to share a depth.
+        """Each window of the slice stack scored ALONE, per diagnosis.
+
+        Depth is the only localisation a study-level label can support: the model is never told where
+        a finding is, but it can be asked which depth it needed in order to find one. Kept per label
+        because twelve findings have no reason to share a depth.
+
 
         The averaged profile says the best single window is worth 0.036 more than the worst, which is
         larger than every method change measured in this project. What it cannot say is whether ONE
@@ -328,12 +330,13 @@ def main() -> None:
     holdout_data = Holdout(images, mask, truth, starts, IMAGE_SIZE)
     logger.info("slots: %s", [slot.name for slot in SLOTS])
     logger.info("labels: %s", list(TARGETS))
+    by_label = attribution.depth_by_label(model, holdout_data)
     diagnostics = Diagnostics(
         slots=attribution.slot_importance(model, holdout_data),
         regions=attribution.region_importance(model, holdout_data),
         rings=attribution.ring_importance(model, holdout_data),
-        depth=attribution.depth_profile(model, holdout_data),
-        depth_by_label=attribution.depth_by_label(model, holdout_data),
+        depth=attribution.averaged(by_label),
+        depth_by_label=by_label,
     )
     for line in attribution.report(diagnostics):
         logger.info("%s", line)

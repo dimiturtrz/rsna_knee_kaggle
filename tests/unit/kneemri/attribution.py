@@ -1,6 +1,7 @@
 from typing import cast, override
 
 import numpy as np
+import pytest
 import torch
 from torch import nn
 
@@ -65,13 +66,13 @@ def test_region_importance():
     assert regions["border_only"] < regions["centre_only"], "the border holds no signal in this fixture"
 
 
-def test_depth_profile():
-    """Every window is scored on its own, so the profile has one entry per start."""
-    starts = [0, 1, 2]
-    depth = _attribution().depth_profile(cast(StudyModel, _SlotReader()), _holdout(starts))
+def test_averaged():
+    """The profile is the per-label table meaned over labels, not a second pass over the model."""
+    averaged = _attribution().averaged({"0": {"ACL": 0.80, "MCL": 0.90}, "3": {"ACL": 0.70, "MCL": 0.70}})
 
-    assert sorted(depth) == sorted(str(start) for start in starts)
-    assert all(np.isfinite(value) for value in depth.values())
+    assert sorted(averaged) == ["0", "3"]
+    assert averaged["0"] == pytest.approx(0.85)
+    assert averaged["3"] == pytest.approx(0.70)
 
 
 def test_ring_importance():
