@@ -199,3 +199,19 @@ def test_state_dict_of(tmp_path: Path):
     wrapped = tmp_path / "m_wrapped.pt"
     torch.save({"model": bare, "epoch": 60, "holdout": 0.84, "annot": 0.87}, wrapped)
     assert package.state_dict_of(replace(member, file=wrapped), device).keys() == bare.keys()
+
+
+def test_strongest(tmp_path: Path):
+    """Best holdout first, and never more than asked for.
+
+    The members are varied by replacing the loaded one rather than by writing three checkpoints: the
+    ordering is a property of the recorded scores, and saving three identical models to prove it would
+    only test `torch.save`.
+    """
+    package, _ = _package(tmp_path)
+    package.members = [
+        replace(package.members[0], identifier=str(score), holdout=score) for score in (0.81, 0.87, 0.84)
+    ]
+
+    assert [member.holdout for member in package.strongest(2)] == [0.87, 0.84]
+    assert len(package.strongest(9)) == 3

@@ -129,6 +129,20 @@ class MemberPackage:
                 f"{len(missing)} of their files are absent (first {missing[0]!r})"
             )
 
+    def strongest(self, count: int) -> list[Member]:
+        """The `count` members with the best recorded holdout, best first.
+
+        For the Efficiency Prize, where the accuracy leaderboard and the efficiency one reward opposite
+        things. Measured here: members two and three of a seed ensemble buy +0.0018 and +0.0007, and the
+        best single member outscored the three-member average — while on the efficiency board the best
+        accuracy anywhere sits at rank 638 and our accuracy run cheaply is worth ranks 29-50.
+
+        Ranking by each member's OWN holdout is the only ordering available at submission time, and it
+        is a weak one: those numbers come from different folds and, for anything trained before the
+        label table was recovered, from different rulers. It picks a good member, not provably the best.
+        """
+        return sorted(self.members, key=lambda member: member.holdout, reverse=True)[:count]
+
     @classmethod
     def find(cls, base: Path = Path("/kaggle/input"), name: str = "manifest.json") -> "MemberPackage | None":
         """Locate a mounted package, or return None when none is attached.
