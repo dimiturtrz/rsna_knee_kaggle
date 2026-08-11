@@ -807,3 +807,50 @@ held constant. Control: small + ranking at 12 slices, 0.8272.
 
 **If 20+max still does not beat 12+max, slice coverage is genuinely not a lever here** and the
 supervision-limited reading loses its evidence branch, keeping only the label branch.
+
+## The two rulers disagree, and the disagreement says which model fits noise
+
+`ruler_check` scores every checkpoint twice on the same fold-0 holdout: against the full report-derived
+table, and against the same table with the reader's own UNKNOWN calls **dropped** (71% of pairs kept —
+dropped, never scored as negatives, which would assert absence).
+
+| checkpoint | full | confident | Δ |
+|---|---|---|---|
+| large_deep_rank24 | **0.8450** (1st) | 0.8671 (3rd) | **+0.0221** |
+| rankbase24_s2026 | 0.8439 (2nd) | **0.8723** (1st) | **+0.0284** |
+| rank24_s2026 | 0.8431 | 0.8689 | +0.0257 |
+| ep24_fold0 | 0.8377 | 0.8624 | +0.0247 |
+| deep24_s2026 | 0.8371 | 0.8643 | +0.0272 |
+| large24_s2026 | 0.8328 | 0.8578 | +0.0251 |
+| shallow24_s2026 | 0.8270 | 0.8552 | +0.0282 |
+
+**The ordering changes**: `large_deep_rank24` leads on the full table and falls to third on the
+confident one, while `rankbase24_s2026` takes first.
+
+### The deltas are the interesting column, not the scores
+
+Every model scores higher once the unsure pairs are dropped, which is what removing label noise from a
+ruler does. But they do not gain equally, and the spread is the finding:
+
+- **Large gains the LEAST (+0.0221).** Its advantage on the full table comes disproportionately from
+  the pairs the reader could not read — it is fitting label noise. That is an independent confirmation
+  of what its training curve already said: it peaks at epoch 10 and gives back 0.009.
+- **base + ranking gains the MOST (+0.0284).** It is the best model on the pairs we actually trust.
+
+Two models can therefore be ranked in either order depending on how much reader noise the ruler
+carries, and the one that looks best on the noisy ruler is the one that fits the noise. That is a
+better argument against shipping large than the cost argument.
+
+### Two things this does NOT say, including a correction to my own tool
+
+**These numbers are not comparable to the training ledger.** `ruler_check` reads all ten overlapping
+windows where training scores one middle window, so every score here sits ~0.015 above the same
+checkpoint's training holdout. Compare within this table, never across.
+
+**The tool's verdict line overstates the case.** It prints "the local ledger is ranking label noise,
+not recipes" whenever the orderings differ, and the confident-ruler spread across the top three is
+0.8723 / 0.8689 / 0.8671 — about 0.005, comfortably **below the 1.5% decision bar**. The reordering is
+real, but it reorders recipes that were never separated by a decision-grade margin. A binary
+agree/disagree verdict was the wrong contract for a question whose answer is a magnitude; the honest
+statement is that the fine ordering of the ledger is not trustworthy, and that no decision at the 1.5%
+scale rests on it.
