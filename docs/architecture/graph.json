@@ -1009,6 +1009,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kernel_run.KernelRun.package",
+      "target": "kneemri.members.MemberPackage.find",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.kernel_run.KernelRun.run",
       "target": "kneemri.ensemble.Ensemble",
@@ -1029,7 +1035,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kernel_run.KernelRun.run",
-      "target": "kneemri.members.MemberPackage.find",
+      "target": "kneemri.kernel_run.KernelRun.package",
       "weight": 1
     },
     {
@@ -3514,6 +3520,14 @@
       "descendants": 0,
       "id": "kneemri.kernel_run.KernelRun.find_dinov2",
       "label": "find_dinov2",
+      "level": "method",
+      "parent": "kneemri.kernel_run.KernelRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kernel_run.KernelRun.package",
+      "label": "package",
       "level": "method",
       "parent": "kneemri.kernel_run.KernelRun",
       "role": null
