@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 SMALL = "small"
 BASE = "base"
+LARGE = "large"
 
 
 @dataclass(frozen=True)
@@ -36,6 +37,16 @@ class Encoder:
 ENCODERS: dict[str, Encoder] = {
     SMALL: Encoder(SMALL, "facebook/dinov2-small", 384),
     # 86M parameters against 22M, and 768-wide features. The strongest public notebooks here run base;
-    # ours has only ever run small, which makes this the largest single untested knob we have.
+    # ours had only ever run small, which made this the largest single untested knob we had. Measured
+    # at +0.0085 matched, one of only two changes ever to clear our 0.0062 noise floor.
     BASE: Encoder(BASE, "facebook/dinov2-base", 768),
+    # 300M parameters, 1024-wide. The rung ABOVE the public frontier: every strong notebook here stops
+    # at base, and the reason is the scored kernel's T4 rather than anything about the task. That
+    # constraint binds INFERENCE only — training happens on our own card, and the weights are mounted
+    # from `metaresearch/dinov2/PyTorch/large/1`, which exists and is 1.2 GB.
+    #
+    # Worth the cost because it is the one axis our own measurements endorse: capacity and training
+    # time are the only two levers that have ever cleared the noise floor here, and every knob-sized
+    # idea we have tried has landed inside it.
+    LARGE: Encoder(LARGE, "facebook/dinov2-large", 1024),
 }
