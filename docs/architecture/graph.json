@@ -200,6 +200,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.report_embeddings",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.ruler_check",
       "target": "core.paths",
       "weight": 1
@@ -363,6 +369,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.report_supervision",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.scores",
       "weight": 1
     },
@@ -412,6 +424,12 @@
       "kind": "import",
       "source": "kneemri.trainer",
       "target": "kneemri.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.report_supervision",
       "weight": 1
     },
     {
@@ -933,7 +951,25 @@
     {
       "kind": "calls",
       "source": "kneemri.model.StudyModel.forward",
+      "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.slot_features",
       "target": "kneemri.model.StudyModel._pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.supervised",
+      "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.supervised",
+      "target": "kneemri.slot_head.SlotHead.report_vector",
       "weight": 1
     },
     {
@@ -964,6 +1000,42 @@
       "kind": "calls",
       "source": "kneemri.package_members.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_embeddings.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.report_embeddings.main",
+      "target": "kneemri.report_embeddings.ReportEmbeddings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_embeddings.main",
+      "target": "kneemri.report_embeddings.ReportEmbeddings.encode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_embeddings.main",
+      "target": "kneemri.report_embeddings.ReportEmbeddings.reduce",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.report_supervision.ReportSupervision",
+      "target": "kneemri.report_supervision.NoReportSupervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.report_supervision.ReportSupervision",
+      "target": "kneemri.report_supervision.ReportSupervision",
       "weight": 1
     },
     {
@@ -1387,6 +1459,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.report_supervision.ReportSupervision.from_file",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.train.main",
       "target": "kneemri.scores.LabelScores",
@@ -1473,6 +1551,12 @@
     {
       "kind": "calls",
       "source": "kneemri.train.main",
+      "target": "kneemri.trainer.Trainer.report_supervision",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
       "target": "kneemri.trainer.Trainer.save_partial",
       "weight": 1
     },
@@ -1498,6 +1582,18 @@
       "kind": "references",
       "source": "kneemri.trainer.Trainer",
       "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.report_supervision.NoReportSupervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.trainer.Trainer",
+      "target": "kneemri.report_supervision.ReportSupervision",
       "weight": 1
     },
     {
@@ -1534,6 +1630,12 @@
       "kind": "construct",
       "source": "kneemri.trainer.Trainer.__init__",
       "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.trainer.Trainer.__init__",
+      "target": "kneemri.report_supervision.NoReportSupervision",
       "weight": 1
     },
     {
@@ -1633,7 +1735,7 @@
       "role": null
     },
     {
-      "descendants": 28,
+      "descendants": 30,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -1772,6 +1874,22 @@
       "descendants": 0,
       "id": "kneemri.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings",
+      "label": "report_embeddings",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision",
+      "label": "report_supervision",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2054,6 +2172,30 @@
       "label": "RankedObjective",
       "level": "class",
       "parent": "kneemri.objective",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings.ReportEmbeddings",
+      "label": "ReportEmbeddings",
+      "level": "class",
+      "parent": "kneemri.report_embeddings",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.NoReportSupervision",
+      "label": "NoReportSupervision",
+      "level": "class",
+      "parent": "kneemri.report_supervision",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.ReportSupervision",
+      "label": "ReportSupervision",
+      "level": "class",
+      "parent": "kneemri.report_supervision",
       "role": "satellite"
     },
     {
@@ -2810,6 +2952,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.model.StudyModel.slot_features",
+      "label": "slot_features",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel.supervised",
+      "label": "supervised",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.objective.Objective.__call__",
       "label": "__call__",
       "level": "method",
@@ -2862,6 +3020,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings.ReportEmbeddings.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.report_embeddings.ReportEmbeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings.ReportEmbeddings.encode",
+      "label": "encode",
+      "level": "method",
+      "parent": "kneemri.report_embeddings.ReportEmbeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings.ReportEmbeddings.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.report_embeddings.ReportEmbeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_embeddings.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.report_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.NoReportSupervision.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.report_supervision.NoReportSupervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.ReportSupervision.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.report_supervision.ReportSupervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.ReportSupervision.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.report_supervision.ReportSupervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_supervision.ReportSupervision.from_file",
+      "label": "from_file",
+      "level": "method",
+      "parent": "kneemri.report_supervision.ReportSupervision",
       "role": null
     },
     {
@@ -2932,6 +3154,14 @@
       "descendants": 0,
       "id": "kneemri.slot_head.SlotHead.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_head.SlotHead.report_vector",
+      "label": "report_vector",
       "level": "method",
       "parent": "kneemri.slot_head.SlotHead",
       "role": null
@@ -3396,6 +3626,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.Trainer.predict",
       "label": "predict",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.report_supervision",
+      "label": "report_supervision",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null
