@@ -89,8 +89,12 @@ ANATOMY: dict[str, FindingAnatomy] = {
     "PF OA": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
     "Effusion": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL)),
     "Synovitis": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,)),
-    # A Baker's cyst sits posteromedially, between the gastrocnemius and semimembranosus tendons.
-    "Baker's": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.AXIAL, Plane.CORONAL)),
+    # A Baker's cyst sits posteromedially, and its NECK - the part that identifies it as a cyst rather
+    # than a fluid collection - runs between the semimembranosus tendon and the medial head of
+    # gastrocnemius, which is an axial relationship. Axial was demoted to secondary in the first version
+    # of this table and it was the single worst row in it: the prior cost 0.0589 of AUC on this finding
+    # alone, against a mean of -0.0009 across the other eleven, six of which improved.
+    "Baker's": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL), secondary=(Plane.CORONAL,)),
     # Marrow oedema is invisible without fat suppression and fluid weighting, whatever the plane.
     "Contusion": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
     "Fracture": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
