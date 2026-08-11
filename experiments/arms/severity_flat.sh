@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Is the severity gradation we already have worth anything? Collapse it and see what it costs.
+#
+# report_labels_v2 carries three YES levels (0.68 / 0.82 / 0.94, 9,702 pairs). The flat table collapses
+# all three to 0.82 - the middle, so the average pull on a YES pair is unchanged - and changes nothing
+# else. The EVAL table is held at the graded original so the ruler cannot move under the arm.
+#
+# Ranking is on because it is the only component that consumes the gradation (pair weight is
+# relu(s_i - s_j)); BCE pulls both toward present and the local evaluation binarises at 0.5.
+#
+# control  rank24_s2026 (graded)   0.8272
+# P  flat YES                      0.8228   -0.0044
+#
+# So the gradation is live signal the model can use, not assertion-strength it ignores. That is the
+# gate a reader emitting true ordinal severity was waiting on, and it passed.
+source "$(dirname "$0")/../lib.sh"
+FLAT="$PROCESSED/labels/flatyes_v2.csv"
+require "$LABELS" "$FLAT"
+
+run_train severity_flat \
+  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  --labels "$FLAT" --eval-labels "$LABELS" --out "$PROCESSED/flatyes_s2026.pt"
+echo "ARM DONE severity_flat"

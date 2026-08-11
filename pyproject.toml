@@ -195,6 +195,14 @@ exclude_lines = [
     "raise NotImplementedError",
     "^\\s*\\.\\.\\.$",
     "@(abc\\.)?abstractmethod",
+    # A module's `def main()` is argparse wiring over a corpus-driven run: it resolves paths, loads a
+    # 35.8 GB memory map, fits or scores a model. `omit` already exempts the modules that are NOTHING
+    # but a CLI; this covers the ones that are a tested class PLUS an entrypoint (train, attribution,
+    # ruler_check, report_embeddings), where omitting the whole file would hide the class too.
+    # THE RULE THIS ASSUMES: a main() holds no logic worth testing. Logic goes in a class - which is
+    # the project's design anyway (config objects, strategy over dispatch). If a main() ever needs a
+    # test, that is the signal it has grown something that belongs in a class instead.
+    "^def main\\(\\) -> None:$",
 ]
 
 
