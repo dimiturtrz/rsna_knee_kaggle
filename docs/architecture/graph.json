@@ -1143,7 +1143,25 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.train.TrainingOptions",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.objective",
+      "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.objective",
+      "target": "kneemri.objective.RankedObjective",
       "weight": 1
     },
     {
@@ -1180,18 +1198,6 @@
       "kind": "construct",
       "source": "kneemri.train.main",
       "target": "kneemri.model.StudyModel",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.objective.RankedObjective",
       "weight": 1
     },
     {
@@ -2986,6 +2992,14 @@
       "label": "rows",
       "level": "method",
       "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.objective",
+      "label": "objective",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
       "role": null
     },
     {
