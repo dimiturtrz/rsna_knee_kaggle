@@ -486,3 +486,22 @@ What this does *not* rule out: it is a population-mean test, so it detects a sys
 sporadic one. A rule that mirrored a random 5-10% of studies would leave these numbers much as they
 are. It closes the question of whether a quarter of the corpus is upside down; it does not certify the
 rule study-by-study.
+
+
+## The ladder, finished
+
+Every rung matched on split, ruler, recipe and batch, fold 0, against a 0.0062 noise floor:
+
+| encoder | epochs | holdout | vs the 8-epoch small baseline |
+|---|---|---|---|
+| small | 8 | 0.8081 | — |
+| base | 8 | 0.8166 | +0.0085 |
+| small | 24 | 0.8205 | +0.0124 |
+| **base** | **20** | **0.8255** | **+0.0174** |
+
+The two capacity levers **add** rather than substitute: +0.0085 and +0.0124 separately, +0.0174
+together. Nothing knob-sized in this whole document reached a third of that.
+
+That is the submission recipe — base, 20 epochs, batch 12 — and a five-fold retrain is queued. The
+members currently on the leaderboard are small-at-8-epochs, so this is the first change since the
+augmentation bug that should move the public number rather than the holdout one.
