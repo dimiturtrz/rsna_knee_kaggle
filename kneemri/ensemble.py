@@ -101,8 +101,14 @@ class Ensemble:
                 ranks[index, :, label] = order / max(studies - 1, 1)
         return ranks.mean(0)
 
-    def submission(self, identifiers: list[str], predictions: NDArray[np.float64]) -> dict[str, list[object]]:
-        """The submission table as plain columns: the study id, then one column per target in order."""
+    @staticmethod
+    def submission(identifiers: list[str], predictions: NDArray[np.float64]) -> dict[str, list[object]]:
+        """The submission table as plain columns: the study id, then one column per target in order.
+
+        Static for the same reason `combine` is: it reads no ensemble state, only the target order. A
+        test or an analysis that has predictions and identifiers should not have to construct a package
+        and a dict of loaded models to lay them out as columns.
+        """
         table: dict[str, list[object]] = {"StudyInstanceUID": list(identifiers)}
         for position, target in enumerate(TARGETS):
             table[target] = predictions[:, position].tolist()
