@@ -372,22 +372,29 @@ def main() -> None:
             if mean > best:
                 best = mean
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
-                trainer.save_partial(destination, record.payload(best_state, best, epoch))
+                # NaN, not `mean`: with no holdout `mean` is the epoch index standing in for a score.
+                scored = mean if per_label else float("nan")
+                trainer.save_partial(destination, record.payload(best_state, scored, epoch))
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         metrics.record(
             EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
         )
 
+    # A run with no holdout ranks its epochs by epoch NUMBER, so `best` is an epoch index rather than a
+    # score. Recording that would have a final-fit member advertise holdout 6.0 — beating every real
+    # member in `strongest()`, and reading as a score in the manifest and the ledger. NaN is the honest
+    # value: this run cannot report one by construction.
+    reported = best if len(holdout) else float("nan")
     model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
     # The SAME assembler the periodic save uses, so a run killed at its best epoch and a run allowed
     # to finish produce checkpoints of identical shape.
     # best_state is set on the first epoch that scores; a run with none is already unusable above.
-    torch.save(record.payload(best_state, best, arguments.epochs - 1), destination)  # pyrefly: ignore[bad-argument-type]
+    torch.save(record.payload(best_state, reported, arguments.epochs - 1), destination)  # pyrefly: ignore[bad-argument-type]
     logger.info(
         "best holdout mean AUC %.4f -> %s | %s",
-        best,
+        reported,
         destination,
-        json.dumps({"fold": arguments.fold, "holdout": best}),
+        json.dumps({"fold": arguments.fold, "holdout": reported}),
     )
 
 
