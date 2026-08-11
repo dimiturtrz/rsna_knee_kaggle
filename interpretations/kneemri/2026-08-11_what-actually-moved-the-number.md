@@ -679,3 +679,49 @@ enough to justify *submitting to find out*, and not enough to re-score the ledge
 Five per day, kernel pushes unlimited. The local ruler is free but proxied; the LB is scarce but true.
 So the local number decides WHICH recipe to submit, and only the LB decides whether a recipe is better.
 A change that looks like +0.008 locally is exactly the case that cannot be settled without spending one.
+
+## The capacity era is over: we are supervision-limited now
+
+Capacity was the only axis that ever paid here, and it has stopped paying. Three independent readings,
+all fold 0, all 24 epochs unless noted:
+
+| recipe | best | at epoch |
+|---|---|---|
+| small | 0.8205 | 15 |
+| small + ranking | 0.8272 | — |
+| base (20 epochs) | 0.8255 | — |
+| base + ranking | 0.8283 | — |
+| **large, every block, + ranking** | **0.8304** | **10** |
+| large, 6 of 24 blocks, no ranking | 0.8156 | — |
+
+**1. The ladder saturates.** small → base was +0.0085. base → large, both with ranking and both with
+half the encoder trainable, is **+0.0021** — inside noise, for 3.5x the parameters and 185s an epoch
+against 50s.
+
+**2. Large overfits our supervision.** It peaks at **epoch 10** and gives back 0.009 by epoch 23, on a
+one-cycle schedule that has not even finished decaying. The small and base arms peak at 13-15 and hold.
+A model that reaches its best a third of the way through and then declines has more capacity than the
+labels can constrain.
+
+**3. The labels are 98.7% read out of text.** Only 58 of 4,407 studies carry an image-read annotation.
+
+Together these say the binding constraint has moved. Capacity paid early because the model was
+UNDER-FITTED — that was the correct reading of the ladder at the time, and the 8-epoch ablation table
+was invalid for exactly that reason. It is not the reading now.
+
+### What that predicts, so it can be wrong out loud
+
+- The encoder-rate bracket should be **neutral to negative**: letting the encoder move faster is more
+  capacity to fit noise, not more signal to fit. If a higher rate helps materially, this whole reading
+  is wrong and the encoder was simply frozen too hard.
+- **Slice coverage should be one of the few things that still pays**, because it adds EVIDENCE rather
+  than parameters — a third of the band we chose to read is currently discarded.
+- **The full-data fit should pay**, for the same reason: 4,407 studies against 3,527 is more
+  supervision, not more model.
+- A larger encoder should be run with a SHORTER schedule if it is run at all — 24 epochs is past its
+  peak.
+
+### What it does NOT license
+
+It does not resurrect the label-filtering idea, which was refuted twice over on matched seeds. Being
+supervision-limited means more or better-READ supervision, not less of it.
