@@ -54,6 +54,7 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     rank_weight: float = 0.0
+    unfreeze_last: int = UNFREEZE_LAST
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
     variant: str = SMALL
@@ -134,6 +135,15 @@ class TrainingOptions:
             default=SMALL,
             help="DINOv2 size. base is 86M parameters and 768-wide against small's 22M and 384.",
         )
+        parser.add_argument(
+            "--unfreeze-last",
+            type=int,
+            default=UNFREEZE_LAST,
+            help="how many of the encoder's trailing blocks train. The restraint is a HYPOTHESIS, not "
+            "a measurement: with 58 image-read labels the early generic blocks may have too little "
+            "supervision to improve and enough to damage. Capacity is the only axis that has ever "
+            "cleared our noise floor, so the hypothesis is worth testing rather than inheriting.",
+        )
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return cls(**vars(parser.parse_args()))
@@ -184,6 +194,7 @@ def main() -> None:
     trainer = Trainer(
         model,
         device,
+        arguments.unfreeze_last,
         augment_config=AugmentConfig() if arguments.intensity_aug else AugmentConfig.geometric_only(),
         objective=arguments.objective(),
     )
@@ -253,7 +264,10 @@ def main() -> None:
                 "anatomical_prior": arguments.anatomical_prior,
                 "ema": arguments.ema,
                 "rank_weight": arguments.rank_weight,
-                "unfreeze_last": UNFREEZE_LAST,
+                # The value this run USED, never the module constant. Recording the constant made the
+                # field a lie the moment the depth became a flag, and it is read back by the loader to
+                # decide how a member was fitted.
+                "unfreeze_last": arguments.unfreeze_last,
             },
             "fingerprint": model.to(device).fingerprint(IMAGE_SIZE, GROUP, device).tolist(),
             "fingerprint_config": {"img": IMAGE_SIZE, "n_slot": len(SLOTS), "group": GROUP, "seed": 2026},
