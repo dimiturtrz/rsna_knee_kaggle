@@ -35,15 +35,28 @@ class LabelScores:
         order = predictions.argsort().argsort() + 1
         return float((order[truth == 1].sum() - positives * (positives + 1) / 2) / (positives * negatives))
 
-    def per_label(self, predictions: NDArray[np.float64], targets: NDArray[np.float32]) -> dict[str, float]:
+    def per_label(
+        self,
+        predictions: NDArray[np.float64],
+        targets: NDArray[np.float32],
+        where: NDArray[np.bool_] | None = None,
+    ) -> dict[str, float]:
         """One AUC per finding, against graded targets binarised at their midpoint.
 
         Binarising exists only so an AUC is defined; it decides which epoch is kept and never a
         submitted score, and the metric is invariant to any increasing map of the predictions anyway.
+
+        `where` selects which (study, finding) pairs are scored at all, per finding. It exists because
+        a pair the label reader marked UNKNOWN is not a negative: `Targets.load` leaves such a pair at
+        the 0.5 default, which binarises to zero, so scoring a confidence-filtered table without a
+        selection would silently assert that every unknown finding was ABSENT. Dropping the pair is the
+        only honest reading of "we do not know", and it is what makes a lower-noise ruler possible.
         """
+        scored = np.ones(predictions.shape, dtype=np.bool_) if where is None else where
         return {
             target: self.area_under_curve(
-                predictions[:, column].astype(np.float64), (targets[:, column] > MIDPOINT).astype(np.int64)
+                predictions[scored[:, column], column].astype(np.float64),
+                (targets[scored[:, column], column] > MIDPOINT).astype(np.int64),
             )
             for column, target in enumerate(TARGETS)
         }

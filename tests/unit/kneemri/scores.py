@@ -36,3 +36,28 @@ def test_mean():
     predictions = np.tile(np.array([[0.1], [0.9]]), (1, len(TARGETS)))
     targets = np.tile(np.array([[0.0], [1.0]], dtype=np.float32), (1, len(TARGETS)))
     assert LabelScores().mean(predictions, targets) == 1.0
+
+
+def test_per_label_selection_drops_pairs_rather_than_calling_them_negative():
+    """An unreadable pair must be DROPPED, never scored as a negative.
+
+    Targets.load leaves a struck pair at the 0.5 default, which binarises to zero. Scoring a
+    confidence-filtered table without a selection would therefore assert that every finding the reader
+    could not read was ABSENT - a ruler more biased than the one it replaces.
+
+    The fixture makes the difference visible: study 1 is UNKNOWN and the model ranks it top. Dropped,
+    the model is perfect. Counted as a negative, it sits above the only positive.
+    """
+    column = np.array([0.9, 0.95, 0.1, 0.2], dtype=np.float64)
+    graded = np.array([1.0, 0.5, 0.0, 0.5], dtype=np.float32)
+    readable = np.array([True, False, True, False])
+
+    predictions = np.tile(column[:, None], (1, len(TARGETS)))
+    targets = np.tile(graded[:, None], (1, len(TARGETS)))
+    keep = np.tile(readable[:, None], (1, len(TARGETS)))
+
+    dropped = LabelScores().per_label(predictions, targets, keep)
+    assert all(value == 1.0 for value in dropped.values()), "on the readable pairs the ranking is perfect"
+
+    as_negative = LabelScores().per_label(predictions, targets)
+    assert all(value < 1.0 for value in as_negative.values()), "the unknown rows counted as negatives change it"
