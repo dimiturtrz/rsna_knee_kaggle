@@ -14,14 +14,16 @@
 # and its mechanism is exactly that. Every knob INSIDE the design returned ~0.005. This is a data
 # recovery, not a knob.
 #
-# AND IT POINTS AT THE WORST LABEL. The largest discarded group is CORONAL, and MCL is read coronally:
-# it scores 0.755 against Baker's 0.896, the weakest of the twelve on an UNWEIGHTED mean. A coronal
-# sequence that never reaches the model cannot be read for a medial ligament.
+# IT IS NOT AIMED AT MCL, AND AN EARLIER VERSION OF THIS HEADER CLAIMED IT WAS. A coverage audit over
+# mask_336px_12sl.npy killed that framing: 95.5% of studies already carry a coronal (COR_FLUID_FS) and
+# 64.1% already carry an ANATOMICAL coronal (COR_T1), which is the contrast a collateral ligament is
+# actually read on. So the 1,139 Coronal|fluid|nofs series mostly add a THIRD coronal view to studies
+# that already have two - not a first coronal to studies that have none.
 #
-# PREDICTION, written before the run: the gain concentrates in MCL and LCL, the two collateral
-# ligaments, and is small for the sagittal-read targets (ACL, PCL, menisci). A uniform lift instead
-# would say the extra slots act as generic capacity or regularisation rather than as the missing view,
-# which is a different finding and a weaker one.
+# WHAT REMAINS TRUE: 83,297 slices are never seen by any step, and this is the same 'more data' family
+# as whole-stack. What is gone is any reason to expect the gain to land on a NAMED label, so read the
+# mean - which is also the only number this holdout can resolve, since per-label AUC carries a
+# +/-0.03 to +/-0.06 error bar at these positive counts (knee-2rx).
 #
 # control  wsfold0_e6 = 0.8457, the same whole-stack recipe over six slots.
 # cost     a 9-slot cache is 1.5x the 6-slot one (~54 GB) and a step encodes 1.5x the images.
