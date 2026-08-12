@@ -33,19 +33,38 @@ hold_card() {
   # `mkdir` is the lock because it is ATOMIC: two shells racing cannot both create the same directory,
   # where a test-then-write on a lockfile can interleave. A lock whose holder is gone is cleared rather
   # than waited on, so a killed arm does not wedge the queue forever.
-  local lock="$LOGS/gpu.lock"
-  until mkdir "$lock" 2>/dev/null; do
+  # ONE ARM AT A TIME, NOT ONE CHAIN AT A TIME. The lock used to be taken here and released by an
+  # EXIT trap, which meant a chain of several arms took it once and then blocked FOREVER on its own
+  # lock at the second arm: mkdir fails, the recorded holder is this very shell, kill -0 says it is
+  # alive, and the loop sleeps against itself. A four-arm chain would have idled the card silently
+  # after its first arm. `release_card` after each arm is what makes a chain possible at all.
+  #
+  # The trap is a safety net for a killed chain, and it must expand the path NOW rather than at exit:
+  # written as 'rm -rf "$lock"' the variable is read when the trap fires, by which time the function's
+  # local is gone — under `set -u` that is "lock: unbound variable" and the lock is never removed.
+  LOCK_DIR="$LOGS/gpu.lock"
+  until mkdir "$LOCK_DIR" 2>/dev/null; do
     local holder
-    holder="$(cat "$lock/pid" 2>/dev/null)"
+    holder="$(cat "$LOCK_DIR/pid" 2>/dev/null)"
     if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
       echo "clearing a GPU lock held by dead process $holder"
-      rm -rf "$lock"
+      rm -rf "$LOCK_DIR"
       continue
     fi
     sleep 60
   done
-  echo $$ > "$lock/pid"
-  trap 'rm -rf "$lock"' EXIT
+  echo $$ > "$LOCK_DIR/pid"
+  trap "rm -rf '$LOCK_DIR'" EXIT
+}
+
+release_card() {
+  # Hand the card to the next chain the moment THIS arm is done, rather than at the end of ours.
+  # An `if` rather than `[ ... ] && rm`, because that construct returns non-zero when the guard fails
+  # and this file runs under `set -e` — releasing a lock we do not hold would then kill the chain.
+  if [ -n "${LOCK_DIR:-}" ]; then
+    rm -rf "$LOCK_DIR"
+  fi
+  LOCK_DIR=""
 }
 
 run_snapshot() {
@@ -64,7 +83,10 @@ run_snapshot() {
   # "$@" is forwarded: an arm that takes arguments (which folds, which resolution) was being run with
   # none, so its loop iterated zero times and it exited 0 with an empty log. A silent no-op is the
   # worst failure available - the GPU simply sat idle and nothing reported anything.
-  ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot" "$@"
+  local status=0
+  ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot" "$@" || status=$?
+  release_card
+  return "$status"
 }
 
 require() {
