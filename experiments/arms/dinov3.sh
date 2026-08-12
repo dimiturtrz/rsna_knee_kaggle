@@ -35,6 +35,12 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 VARIANT="${1:-v3small}"
 SIZE="${2:-336}"
 
+# THE ENCODER RATE IS AN ARGUMENT because the recipe was tuned on DINOv2 and need not transfer. 8e-6
+# suits a block whose weights are already close to what the task wants; DINOv3 places position with
+# RoPE, carries LayerScale, and was distilled from a 7B teacher rather than trained directly - nothing
+# says its blocks want the same step size, and read size has already been eliminated as the difference.
+RATE="${3:-8e-6}"
+
 # READ SIZE IS THE SUSPECT, AND THE TWO ENCODERS DISAGREE ABOUT WHAT IS NATIVE.
 #   DINOv2-small  config image_size 518, patch 14 -> our 336 px read is INSIDE its training range
 #   DINOv3-S/16   config image_size 224, patch 16 -> our 336 px read is 1.5x BEYOND its native grid
@@ -65,9 +71,9 @@ export HF_TOKEN
 # checkpoint. The 336 member survives as dinov3_v3small_336_s2026.pt only because it was copied aside
 # while the 224 run was already going. A run that can destroy the run it is being compared against is
 # not an experiment.
-run_train "dinov3_${VARIANT}_${SIZE}" \
+run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
-  --image-size "$CACHE" --train-size "$SIZE" \
+  --image-size "$CACHE" --train-size "$SIZE" --backbone-lr "$RATE" \
   --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
-  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_lr${RATE}_s2026.pt"
