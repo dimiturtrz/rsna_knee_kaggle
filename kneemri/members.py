@@ -175,6 +175,15 @@ class Member:
         return str(self.config["pool"])
 
     @property
+    def lora_rank(self) -> int:
+        """The rank of this member's adapters, or 0 if its encoder was fine-tuned directly.
+
+        Zero for every manifest written before low-rank adaptation existed, which is correct: those
+        members carry no adapter keys and must be built without them.
+        """
+        return int(str(self.config.get("lora_rank", 0) or 0))
+
+    @property
     def slice_pooling(self) -> str:
         """How the member turns a group of slices into one feature — "channels" or "max".
 
@@ -333,7 +342,15 @@ class MemberPackage:
         # combination no patch grid can express and only fail inside a kernel.
         ENCODERS[member.variant].require_tiling(member.read_size)
         design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling)
-        model = StudyModel(backbone, dim, member.slot_count, design).to(device)
+        model = StudyModel(backbone, dim, member.slot_count, design)
+        # THE ADAPTERS MUST EXIST BEFORE THE WEIGHTS ARRIVE. A LoRA member's state dict carries adapter
+        # keys that only exist once `low_rank` has wrapped the encoder's linears; building the plain
+        # architecture and loading into it fails on unexpected keys at best, and at worst — under a
+        # non-strict load — returns a model with the pretrained base and no adaptation at all, which
+        # scores like a broken member for no visible reason.
+        if member.lora_rank:
+            model.low_rank(member.lora_rank)
+        model = model.to(device)
         model.load_trained(self.state_dict_of(member, device))
         self.check(model, member, device)
         return model

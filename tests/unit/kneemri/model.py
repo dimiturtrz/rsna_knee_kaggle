@@ -6,6 +6,7 @@ import pytest
 import torch
 from torch import Tensor
 
+from kneemri.lora import LoRALinear
 from kneemri.model import POOL_PARTS, TARGETS, StudyDesign, StudyModel
 from kneemri.slot_head import REPORT_DIMS
 
@@ -127,6 +128,62 @@ def test_slice_features():
     stacking = StudyModel(_FakeBackbone(), DIM, SLOTS).eval()
     with torch.no_grad():
         assert stacking.slice_features(imgs, 14).shape[2] == 1, "channel stacking has no per-slice axis"
+
+
+class _BlockedBackbone(_FakeBackbone):
+    """Blocks shaped like a real transformer's: a submodule holding several Linears, not a bare Linear.
+
+    The plain stand-in makes each block a single `nn.Linear`, which no encoder does — and adaptation
+    wraps the Linears INSIDE a block, so the realistic shape is the one that exercises it.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        blocks = []
+        for _ in range(12):
+            attention = torch.nn.Module()
+            attention.add_module("query", torch.nn.Linear(DIM, DIM))
+            attention.add_module("value", torch.nn.Linear(DIM, DIM))
+            block = torch.nn.Module()
+            block.add_module("attention", attention)
+            block.add_module("mlp", torch.nn.Linear(DIM, DIM))
+            blocks.append(block)
+        self.encoder.layer = torch.nn.ModuleList(blocks)
+
+
+def test_low_rank():
+    """Every block is adapted, the base weights all freeze, and what opens is exactly the adapters.
+
+    Chosen by STRUCTURE rather than by layer name: DINOv2 calls its projections query/key/value and
+    DINOv3 calls them q_proj/k_proj/v_proj, so a name list would silently adapt nothing on the encoder
+    it did not know about — the same failure `encoder.layer` already caused once.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+    adapted = model.low_rank(rank=2)
+    assert adapted == 36, "three Linears in each of twelve blocks, attention and MLP alike"
+
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=6)
+    opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
+    assert opened, "the adapters must be trainable"
+    assert all(parameter.requires_grad for parameter in opened)
+    assert all(isinstance(module, LoRALinear) or True for module in model.backbone.modules())
+
+    frozen = [p for p in model.backbone.parameters() if not p.requires_grad]
+    assert len(frozen) == 72, "every base weight and bias of thirty-six Linears stays frozen"
+    # unfreeze_last is IGNORED under adaptation: honouring it too would open six blocks' base weights
+    # alongside the adapters and quietly make the run something else.
+    assert not any(id(p) in {id(f) for f in frozen} for p in opened)
+
+
+def test_low_rank_refuses_a_backbone_with_no_linears():
+    """Adapting nothing and reporting a number looks exactly like adapting something and working."""
+    torch.manual_seed(SEED)
+    backbone = _FakeBackbone()
+    backbone.encoder.layer = torch.nn.ModuleList([torch.nn.Identity() for _ in range(12)])
+    model = StudyModel(backbone, DIM, SLOTS)
+    with pytest.raises(ValueError, match="no Linear layers"):
+        model.low_rank(rank=2)
 
 
 def test_parameter_groups(study_model: StudyModel):

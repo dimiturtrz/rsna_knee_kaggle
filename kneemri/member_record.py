@@ -42,6 +42,9 @@ class RunOptions(Protocol):
     def bf16(self) -> bool: ...
 
     @property
+    def lora_rank(self) -> int: ...
+
+    @property
     def rank_weight(self) -> float: ...
 
     @property
@@ -180,6 +183,11 @@ class MemberRecord:
                 # arithmetic, and a member scored under one is not strictly comparable to a control
                 # measured under the other. Recorded so the ledger can say which, rather than assume.
                 "bf16": options.bf16,
+                # WITHOUT THIS THE CHECKPOINT IS UNLOADABLE. A LoRA member's state dict carries adapter
+                # keys that exist only if `low_rank` ran first, so a loader that does not know the rank
+                # builds the wrong architecture — the seventh instance of a value travelling in a config
+                # while a consumer reads a default, and the first one caught before it cost anything.
+                "lora_rank": options.lora_rank,
                 "rank_weight": options.rank_weight,
                 "report_weight": options.report_weight,
                 "whole_stack": options.whole_stack,

@@ -16,7 +16,7 @@ import torch
 from transformers import AutoModel
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS, SMALL
+from kneemri.backbone import ENCODERS, SMALL, Encoder
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
 from kneemri.model import StudyDesign, StudyModel
@@ -64,6 +64,7 @@ class TrainingOptions:
     whole_stack: bool = False
     recompute_activations: bool = False
     bf16: bool = False
+    lora_rank: int = 0
     compile_encoder: bool = False
     vram_gb: float = 0.0
     report_weight: float = 0.0
@@ -146,6 +147,15 @@ class TrainingOptions:
             help="torch.compile the encoder, shape-specialised. The encoder only, because training "
             "calls supervised() rather than forward(). Measured -20% per step; the partial last batch "
             "costs one 22 s recompile per process, not per epoch. Needs Triton (triton-windows here).",
+        )
+        parser.add_argument(
+            "--lora-rank",
+            type=int,
+            default=0,
+            help="adapt every block along a rank-r subspace with the pretrained weights FROZEN, "
+            "instead of rewriting the last few blocks. 0 disables it. The base weight stays "
+            "bit-identical, so what a small noisy dataset can do to a 1.7B-image representation is "
+            "bounded by the rank rather than by the learning rate.",
         )
         parser.add_argument(
             "--bf16",
@@ -266,6 +276,25 @@ class TrainingOptions:
             return RankedObjective(self.rank_weight, normalise_by_count=self.normalise_by_count)
         return Objective(normalise_by_count=self.normalise_by_count)
 
+    def fitted_model(self, encoder: Encoder, slots: int, design: StudyDesign) -> StudyModel:
+        """The model this run asked for, with every wrapper applied IN ORDER.
+
+        The sibling of `fitted_trainer`, extracted for the same reason and by the same gate: `main` was
+        accumulating a statement per switch, and the run's SETUP is a different job from the run's LOOP.
+
+        THE ORDER IS THE WHOLE VALUE OF THIS METHOD. Adaptation first, because checkpointing and compile
+        both WRAP what they are handed — adapters injected after compilation would sit outside the
+        compiled graph, and the run would report a speed and a score belonging to two different models.
+        """
+        model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
+        if self.lora_rank:
+            logger.info("low-rank adaptation: %d layers at rank %d", model.low_rank(self.lora_rank), self.lora_rank)
+        if self.recompute_activations:
+            model.recompute_activations()
+        if self.compile_encoder:
+            model.compile_encoder()
+        return model
+
     def fitted_trainer(
         self,
         model: StudyModel,
@@ -355,12 +384,7 @@ def main() -> None:
     # a configuration mistake, and the failure without this is either a crash deep in the encoder or a
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
-    slots = len(SCHEMES[arguments.scheme])
-    model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
-    if arguments.recompute_activations:
-        model.recompute_activations()
-    if arguments.compile_encoder:
-        model.compile_encoder()
+    model = arguments.fitted_model(encoder, len(SCHEMES[arguments.scheme]), design)
     scores = LabelScores()
     trainer = arguments.fitted_trainer(model, device, identifiers, len(training))
 

@@ -152,6 +152,18 @@ def test_image_size():
     assert _member().image_size == IMAGE
 
 
+def test_lora_rank():
+    """A member says whether its encoder was adapted, and every older manifest correctly says no.
+
+    The loader has to know BEFORE it builds the model: a LoRA member's state dict carries adapter keys
+    that only exist once `low_rank` has wrapped the encoder's linears, so a default of zero for old
+    manifests is not a convenience, it is the correct answer for members that carry no adapters.
+    """
+    assert _member().lora_rank == 0, "a manifest written before adaptation existed has no adapters"
+    adapted = replace(_member(), config=_config() | {"lora_rank": 8})
+    assert adapted.lora_rank == 8
+
+
 def test_read_size():
     """Absent means "the cache's own size", which is what every member written before this key means.
 

@@ -22,6 +22,7 @@ class _Options:
     anatomical_prior: bool = False
     ema: bool = False
     bf16: bool = False
+    lora_rank: int = 0
     rank_weight: float = 1.0
     report_weight: float = 0.0
     whole_stack: bool = True

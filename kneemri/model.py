@@ -16,6 +16,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.anatomy import ANATOMY, SlotAffinity
+from kneemri.lora import LoRALinear
 from kneemri.slice_attention import SliceAttention
 from kneemri.slot_head import SlotHead
 from kneemri.slots import SLOTS
@@ -291,12 +292,47 @@ class StudyModel(nn.Module):
             raise ValueError(message)
         return list(candidates[0])
 
+    def low_rank(self, rank: int, alpha: float = 1.0) -> int:
+        """Adapt EVERY block along a rank-r subspace instead of adapting the last few completely.
+
+        Every `nn.Linear` inside a block is wrapped, attention and MLP alike, chosen by STRUCTURE
+        rather than by name: DINOv2 calls its projections query/key/value/dense and DINOv3 calls them
+        q_proj/k_proj/v_proj/o_proj, and a name list would silently adapt nothing on the encoder it did
+        not know about. That failure has already happened once here, with `encoder.layer`.
+
+        Returns how many layers were adapted, because "silently adapted nothing" is the failure mode
+        worth making impossible: an arm that trains a frozen encoder and reports a number looks exactly
+        like an arm that worked.
+        """
+        adapted = 0
+        for block in self._blocks():
+            for module in list(block.modules()):
+                for name, child in list(module.named_children()):
+                    if isinstance(child, nn.Linear):
+                        setattr(module, name, LoRALinear(child, rank, alpha))
+                        adapted += 1
+        if adapted == 0:
+            message = f"{type(self.backbone).__name__} has no Linear layers inside its blocks to adapt"
+            raise ValueError(message)
+        return adapted
+
     def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its own learning rate.
 
         The model owns this rather than the trainer: which blocks exist, and therefore which of them can
         be opened, is a fact about the encoder, not about the fitting procedure.
+
+        UNDER LoRA the depth argument does not apply: every block carries an adapter and the base
+        weights are all frozen, so what opens is exactly the adapters. Honouring `unfreeze_last` as well
+        would open six blocks' base weights alongside them and quietly make the run something else.
         """
+        adapters = [module for module in self.backbone.modules() if isinstance(module, LoRALinear)]
+        if adapters:
+            opened = [parameter for parameter in self.backbone.parameters() if parameter.requires_grad]
+            return [
+                {"params": list(self.head.parameters()), "lr": head_lr},
+                {"params": opened, "lr": backbone_lr},
+            ]
         blocks = self._blocks()
         trainable = {id(parameter) for block in blocks[-unfreeze_last:] for parameter in block.parameters()}
         opened: list[torch.nn.Parameter] = []
