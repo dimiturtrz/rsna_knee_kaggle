@@ -23,7 +23,8 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.ensemble import Ensemble
-from kneemri.study import Study
+from kneemri.slot_reader import SlotReader
+from kneemri.study import SlotPipeline, Study
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +53,18 @@ class Submission:
         logger.info(f"wrote a fallback submission ({len(sample)} rows)")
 
     def decode(self, identifiers: list[str], planes: dict[str, str], slices: int) -> tuple[torch.Tensor, torch.Tensor]:
-        """Decode a chunk of studies into one batched bag and its presence mask."""
+        """Decode a chunk of studies into one batched bag and its presence mask.
+
+        The pipeline is built at the MEMBERS' resolution rather than at `SlotReader`'s default, which
+        was 336 whatever the members said. See `Ensemble.decoded_size`.
+        """
+        pipeline = SlotPipeline(reader=SlotReader(image_size=self.ensemble.decoded_size()))
         with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
             bags = list(
                 pool.map(
-                    lambda name: Study.from_directory(self.competition / "test_series" / name, planes).bag(slices),
+                    lambda name: Study.from_directory(
+                        self.competition / "test_series" / name, planes, pipeline
+                    ).bag(slices),
                     identifiers,
                 )
             )

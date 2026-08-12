@@ -1,14 +1,15 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import override
 
 import numpy as np
+import pytest
 import torch
 from torch import Tensor
 
 from kneemri.ensemble import Ensemble
-from kneemri.members import MemberPackage
+from kneemri.members import MemberConfig, MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
@@ -204,3 +205,20 @@ def test_predict_member_still_windows_a_member_that_is_not_whole_stack(tmp_path:
     assert not np.allclose(windowed.predict_member(member, images, mask, overlap=True), single), (
         "a windowed member averaged over its windows is not one pass over the stack"
     )
+
+
+def test_decoded_size(tmp_path: Path):
+    """The decode resolution comes from the members, and disagreement is refused rather than resolved.
+
+    A single value, not a maximum: depth can be windowed down at inference but resolution cannot, so
+    two members wanting different sizes genuinely need two decodes. Silently picking one would hand the
+    other an image it never saw — 336 px upsampled to 392 where training downsampled from 448.
+    """
+    ensemble = _ensemble(tmp_path / "one")
+    assert ensemble.decoded_size() == 14
+
+    member = ensemble.package.members[0]
+    coarser: MemberConfig = {**member.config, "img": 28}
+    ensemble.package.members = [member, replace(member, identifier="other", config=coarser)]
+    with pytest.raises(ValueError, match="two decodes"):
+        ensemble.decoded_size()

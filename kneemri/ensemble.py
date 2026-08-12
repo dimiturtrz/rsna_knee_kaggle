@@ -58,6 +58,29 @@ class Ensemble:
         """
         return max(member.slices for member in self.package.members)
 
+    def decoded_size(self) -> int:
+        """The resolution the test set must be DECODED at — the members', never a default.
+
+        `run()` already derives the slice depth this way, after a member fitted on a deeper stack was
+        silently scored on twelve. Resolution and the slot list were left behind on that lesson: the
+        decode used `SlotReader()`'s default 336 whatever `img` said, and `pixel_group` — which exists
+        precisely to say which members can share one decode — was computed by `verify_members` and
+        consulted nowhere at inference.
+
+        It matters as soon as a member is fitted on another cache. A member trained by reading a 448 px
+        cache at 392 would be handed 336 px pixels here and UPSAMPLED to 392, where training
+        DOWNSAMPLED from 448. Same tensor shape, different image, nothing raised.
+
+        A single value rather than a maximum, because unlike depth this cannot be windowed down: two
+        members wanting different resolutions need two decodes, so disagreement is refused loudly here
+        rather than silently resolved in favour of one of them.
+        """
+        sizes = {member.image_size for member in self.package.members}
+        if len(sizes) != 1:
+            message = f"members disagree on decode resolution {sorted(sizes)} — that is two decodes, not one"
+            raise ValueError(message)
+        return sizes.pop()
+
     def predict_member(
         self,
         member: Member,
