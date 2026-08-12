@@ -17,11 +17,12 @@
 # A channel-stacked member and a per-slice one are different functions on different pixels, so they
 # fail differently — which is the only reason averaging them can beat either.
 #
-# IT ALSO SETTLES A STANDING CLAIM WITH DATA WE ALREADY OWN. rank24_s7 and rankbase_deep24_s7 differ
-# from their siblings only by SEED. `member_curve` scores every subset of each size, so the subsets
-# that add a seed twin can be read against the subsets that add a different recipe at the same count.
-# That is a direct measurement of whether seed diversity is worth anything next to mechanism
-# diversity, rather than an assertion either way.
+# NO SEED TWINS. rank24_s7 differs from its sibling only by seed and was in this list to "settle
+# whether seed diversity is worth anything". It is out: seeds and folds are the same move played
+# twice, both are banned here, and an arm that measures a banned method still spends the loop on it.
+# The mechanism argument is also already settled without running anything — the noise floor is the
+# holdout's SAMPLING error (predicted 0.0053, measured 0.0062, knee-2rx), so re-running the same
+# recipe cannot move what the same 881 studies with the same 62 Fractures will report.
 #
 # THE MEMBERS THAT MUST NEVER APPEAR HERE: member_fold1, member_fold3, member_fold4 and any other
 # member fitted on a different fold. Their training data is this holdout. That exact mistake once
@@ -40,7 +41,6 @@ MEMBERS=(
   "$PROCESSED/max12_s2026.pt"
   "$PROCESSED/max20_s2026.pt"
   "$PROCESSED/large_deep_rank24.pt"
-  "$PROCESSED/rank24_s7.pt"
 )
 require "${MEMBERS[@]}"
 
