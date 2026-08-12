@@ -16,6 +16,13 @@ dependencies = [
     # (which is CPU-only): the local GPU is an RTX 5090 (sm_120) and needs cu128. Kaggle's own image
     # ships torch 2.10.0+cu128 with sm_75 in its arch list, measured by comp/kernels/kneemri-probe.
     "torch>=2.10",
+    # torch.compile's inductor backend needs Triton, which upstream does not ship for Windows — so
+    # `--compile-encoder` failed with `InductorError: TritonMissing` at the first backward, on every
+    # run, since the day the flag was added. triton-windows is the maintained community build and it
+    # works here: a compiled forward+backward with dynamic shapes runs on this card. Windows-only
+    # because every other platform gets Triton with torch itself, and the Kaggle kernel must not try
+    # to install it.
+    "triton-windows; sys_platform == 'win32'",
     # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
     # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
     "pydicom>=3",
