@@ -360,9 +360,25 @@ class Trainer:
     def batches(
         self, positions: NDArray[np.int64], size: int, generator: np.random.Generator, *, shuffle: bool
     ) -> list[NDArray[np.int64]]:
-        """Positions split into batches: shuffled for training, left in order for evaluation."""
+        """Positions split into batches: shuffled for training, left in order for evaluation.
+
+        TRAINING DROPS THE PARTIAL LAST BATCH. 3,498 studies over batches of 12 leaves six, and that
+        six was the ONLY reason the encoder's graph was not static — a second shape means a second
+        compilation, and it was why `compile_encoder` asked for dynamic shapes, which inductor cannot
+        build here at all. One shape in, one graph out.
+
+        The cost is bounded and known: the order is reshuffled every epoch, so the dropped six are a
+        DIFFERENT six each time. Over twelve epochs a study is seen 11.98 times instead of 12. That is
+        0.17% of the steps against a compiled encoder for all of them.
+
+        Evaluation keeps every batch, because dropping studies there would not cost 0.17% of a
+        gradient, it would silently score a different holdout than the one the ledger quotes.
+        """
         order = generator.permutation(positions) if shuffle else positions
-        return [order[start : start + size] for start in range(0, len(order), size)]
+        batches = [order[start : start + size] for start in range(0, len(order), size)]
+        if shuffle and len(batches) > 1 and len(batches[-1]) < size:
+            batches.pop()
+        return batches
 
     def fit_epoch(
         self,
@@ -427,13 +443,18 @@ class Trainer:
         chunks = []
         with torch.no_grad(), torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
             for batch in self.batches(positions, size, generator, shuffle=False):
+                # PADDED TO A FULL BATCH, then trimmed. The holdout cannot drop its remainder the way
+                # training does — that would score a different holdout than the ledger quotes — so the
+                # last batch is repeated up to size and the extra rows are discarded after the forward.
+                # The alternative is a second graph shape for the sake of one batch per epoch.
+                short = size - len(batch)
+                padded = batch if short == 0 else np.concatenate([batch, np.repeat(batch[-1:], short)])
                 pixels = torch.from_numpy(
-                    np.ascontiguousarray(corpus.images[batch, :, middle : middle + self.window])
+                    np.ascontiguousarray(corpus.images[padded, :, middle : middle + self.window])
                 ).to(self.device)
-                flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
-                chunks.append(
-                    torch.sigmoid(self.model(pixels, flags, self.read_size or corpus.image_size).float()).cpu().numpy()
-                )
+                flags = torch.from_numpy(corpus.mask[padded]).to(self.device)
+                scored = self.model(pixels, flags, self.read_size or corpus.image_size).float()
+                chunks.append(torch.sigmoid(scored).cpu().numpy()[: len(batch)])
         return np.concatenate(chunks).astype(np.float64)
 
     def loss(

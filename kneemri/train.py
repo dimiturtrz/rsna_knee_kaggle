@@ -301,10 +301,12 @@ class TrainingOptions:
         if self.ema:
             trainer.exponential_average()
         if self.one_cycle:
-            # ceil, not floor: our batcher KEEPS the final partial batch, so a floor undercounts by one
-            # step per epoch and OneCycleLR raises on the very last step of the run — after every epoch has
-            # been logged and before the checkpoint is written, which is the most expensive place to fail.
-            steps_per_epoch = -(-training_positions // self.batch)
+            # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
+            # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR
+            # raised on the very last step of the run — after every epoch had been logged and before the
+            # checkpoint was written, the most expensive place to fail. Training now drops that batch so
+            # the encoder's graph has ONE shape, and the step count must follow it exactly.
+            steps_per_epoch = max(training_positions // self.batch, 1)
             trainer.one_cycle(self.epochs * max(steps_per_epoch, 1))
         return trainer
 

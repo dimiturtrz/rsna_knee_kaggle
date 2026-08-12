@@ -320,20 +320,20 @@ class StudyModel(nn.Module):
 
         NOT `dynamic=True`, which is what this did and which cannot work on this machine: inductor
         raises `InductorError: AssertionError` inside its own size reasoning, with or without gradient
-        checkpointing, on every configuration tried. Shape specialisation compiles cleanly, so the
-        question becomes what the ragged last batch costs — `batches` keeps it, and 3,498 studies over
-        batches of 12 leaves six.
+        checkpointing, on every configuration tried.
 
-        MEASURED 2026-08-12 on a contended card, batch 2 at 336 px, whole-stack, checkpointing on:
+        AND IT DOES NOT NEED TO BE. The ragged batch that motivated dynamic shapes was a CHOICE, not a
+        property of the data: `Trainer.batches` now drops the partial last batch for training, so every
+        training step has one shape and the encoder compiles ONCE. Evaluation pads its final batch to
+        full width and trims the result, so the holdout stays exactly the holdout the ledger quotes.
 
-            eager      steady 153 ms/step
-            compiled   steady 122 ms/step        -20%
-            the partial batch costs ONE 22 s recompile, then runs at 68 ms
+        MEASURED 2026-08-12, batch 2 at 336 px, whole-stack, checkpointing on, single shape throughout:
 
-        So the shape set is two, both compiled once per PROCESS rather than once per epoch — about 24 s
-        of compilation against a 66-minute arm. The docstring that justified `dynamic=True` assumed a
-        recompile per epoch; that assumption was wrong, and it was the reason the working configuration
-        was never tried.
+            eager      steady 150 ms/step
+            compiled   steady 119 ms/step        -21%, for 2.2 s of compilation
+
+        The docstring that justified `dynamic=True` assumed a recompile per epoch. That was wrong twice
+        over: shapes are compiled once per PROCESS, and the second shape did not have to exist at all.
 
         It needs Triton, which upstream ships for everything except Windows — `triton-windows` is
         pinned in pyproject for exactly this.

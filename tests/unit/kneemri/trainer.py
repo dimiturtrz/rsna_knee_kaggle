@@ -69,15 +69,22 @@ def test_augment():
 
 
 def test_batches():
-    """Evaluation keeps corpus order; training shuffles, and both cover every position exactly once."""
+    """Evaluation keeps every position; training drops the partial batch so the graph has ONE shape."""
     trainer = _trainer()
     generator = np.random.default_rng(SEED)
     positions = np.arange(10, dtype=np.int64)
+
     ordered = trainer.batches(positions, 4, generator, shuffle=False)
-    assert [len(batch) for batch in ordered] == [4, 4, 2]
+    assert [len(batch) for batch in ordered] == [4, 4, 2], "the holdout keeps its remainder"
     assert np.concatenate(ordered).tolist() == positions.tolist()
-    shuffled = np.concatenate(trainer.batches(positions, 4, generator, shuffle=True))
-    assert sorted(shuffled.tolist()) == positions.tolist()
+
+    shuffled = trainer.batches(positions, 4, generator, shuffle=True)
+    assert [len(batch) for batch in shuffled] == [4, 4], "one shape in, one compiled graph out"
+    assert len(set(np.concatenate(shuffled).tolist())) == 8, "the dropped two are dropped, not repeated"
+
+    # A batch larger than the data must still yield ONE batch rather than none, or an epoch does
+    # nothing and reports a mean over an empty list.
+    assert len(trainer.batches(positions, 32, generator, shuffle=True)) == 1
 
 
 def test_loss():
