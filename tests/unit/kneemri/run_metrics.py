@@ -49,3 +49,15 @@ def test_best(tmp_path: Path):
         encoding="utf-8",
     )
     assert RunMetrics(unscored).best() is None
+
+
+def test_exists(tmp_path: Path):
+    """The recorder answers whether anything is there, so callers need not reach for its path.
+
+    The distinction is worth making: a missing file is usually the wrong path, and an empty one is a run
+    that died before its first scored epoch. They need different fixes.
+    """
+    metrics = RunMetrics(tmp_path / "run.pt")
+    assert not metrics.exists()
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.5, seconds=1, per_label={"ACL": 0.5}))
+    assert metrics.exists()

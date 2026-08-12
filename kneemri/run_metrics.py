@@ -54,6 +54,14 @@ class RunMetrics:
             destination if destination.name.endswith(".metrics.jsonl") else destination.with_suffix(".metrics.jsonl")
         )
 
+    def exists(self) -> bool:
+        """Whether anything has been recorded here yet.
+
+        Asked of the recorder rather than of its path, so a caller distinguishing "wrong file" from
+        "run died before its first scored epoch" does not have to know where the file lives.
+        """
+        return self.path.exists()
+
     def record(self, row: EpochRow) -> None:
         """Append one epoch's row, attach the VRAM peak, and report the per-label scores.
 
