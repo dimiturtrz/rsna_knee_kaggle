@@ -43,7 +43,7 @@ so everything below is **directional**, and only the cumulative total clears the
 | `compose_base` | rate + pooling on base | **lost at epoch 7/24** | — | not rerun |
 | **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
-| `resolution` | 336 → 448 px | queued | — | prediction: MCL first |
+| **`resolution`** | **336 → 392 px, read from the 448 cache** | **0.8523** | **+0.0066** | **clears the floor** |
 | `slice_attention` | attention over slices, not max | queued | — | guard fixed, was refusing 'attend' |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
@@ -59,12 +59,14 @@ still compose.
 |---|---|---|---|
 | `rank24_s2026` — the control every early arm was read against | 0.8272 | — | — |
 | whole-stack reading | 0.8457 | +0.0185 | **+0.0185** |
-| + 392 px, read from the 448 cache | 0.8477* | +0.0020 | **+0.0205** |
+| + 392 px, read from the 448 cache | **0.8523** | +0.0066 | **+0.0251** |
 
-\* epoch 5 of 12 and still climbing; its matched-epoch deltas against the 336 control are +0.0127 and
-+0.0105 at epochs 2 and 3, so the step above is a floor rather than the result.
+Both peak at epoch 6. 392 px is the last rung that fits: patch-14 needs multiples of 14, so the ladder
+is 336 (576 tokens) → 392 (784) → 420 (900) → 448 (1024), and 392 already holds 28.4 GB of a 32 GB card
+while 448 OOMed outright. Buying the next rung would mean a smaller batch, which changes the ranking
+term's within-batch pair count and stops it being one variable.
 
-**+0.0205 clears the 1.5% bar**, against a floor of 0.0053. No single arm did — whole-stack came
+**+0.0251 clears the 1.5% bar**, against a floor of 0.0053. No single arm did — whole-stack came
 closest at +0.0185 on its own control. Two things this does NOT license: reading the total as evidence
 for any individual knob inside it, and expecting it on the leaderboard, where our holdout gains have so
 far transferred at roughly half (`knee-lv2`).
