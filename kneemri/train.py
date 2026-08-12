@@ -158,7 +158,7 @@ class TrainingOptions:
         parser.add_argument(
             "--recompute-activations",
             action="store_true",
-            help="gradient checkpointing: ~30%% more compute for nearly all of the encoder's "
+            help="gradient checkpointing: 19%% less throughput (measured here) for nearly all of the encoder's "
             "activation memory. Needed once a step puts many images through the encoder - whole-stack "
             "reading and higher resolutions both overflow 32 GB, and an overflow THRASHES rather than "
             "failing, which looks like 100%% utilisation at a quarter of the power budget.",

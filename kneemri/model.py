@@ -343,7 +343,13 @@ class StudyModel(nn.Module):
         self.backbone = cast("nn.Module", torch.compile(self.backbone))
 
     def recompute_activations(self) -> None:
-        """Trade about 30% compute for nearly all of the encoder's activation memory.
+        """Trade 19% of throughput for nearly all of the encoder's activation memory.
+
+        MEASURED HERE 2026-08-12, one epoch each way at batch 6 — the only batch that fits both with
+        and without it: 798 img/s against 946, so the tax is 19%. The "about 30%" this docstring
+        carried was inherited from the literature and never checked against this workload; it is the
+        kind of number that decides whether a lever is worth pulling, so it should have been measured
+        the day it was written.
 
         MEASURED NEED, 2026-08-11. Whole-stack reading puts 12 studies x 6 slots x 12 slices = 864
         images through the encoder in one step. At 336 px that is 577 tokens x 384 dims held for each
