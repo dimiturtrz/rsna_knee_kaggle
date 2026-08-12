@@ -2,7 +2,7 @@
 
 import pytest
 
-from kneemri.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL, Encoder
+from kneemri.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL, V3_SMALL_PLUS, Encoder
 
 
 def test_mounted_name():
@@ -49,19 +49,26 @@ def test_dinov3_is_mountable_from_our_own_dataset():
 
 
 def test_locates():
-    """Each encoder recognises its own mount and no sibling's, across both families at once.
+    """Each encoder recognises its own mount and no sibling's — by SEGMENT, never by substring.
 
-    `vits16` is a substring of nothing else here, but `dinov2/PyTorch/small` and `dinov3-hf/vits16`
-    both contain a size word — so the match is on ALL fragments, and a v2 encoder must not answer to a
-    v3 directory even when the sizes agree.
+    `vits16` is a substring of `vits16plus`, and BOTH ARE 384 WIDE, so a substring rule would let each
+    claim the other's mount and build a member on weights it was not fitted on with no shape error to
+    show for it. That silent version is the one this matching exists to prevent; the loud version is
+    merely a kernel that refuses to start.
     """
     assert ENCODERS[SMALL].locates("/kaggle/input/dinov2/pytorch/small/1")
     assert not ENCODERS[SMALL].locates("/kaggle/input/dinov3-hf/vits16")
     assert not ENCODERS[BASE].locates("/kaggle/input/dinov2/pytorch/small/1")
     assert ENCODERS[V3_SMALL].locates(r"C:\kaggle\input\dinov3-hf\vits16"), "a Windows path is the same mount"
     assert not ENCODERS[V3_SMALL].locates("/kaggle/input/dinov3-hf/vitb16")
+
+    assert ENCODERS[V3_SMALL_PLUS].locates("/kaggle/input/dinov3-hf/vits16plus")
+    assert not ENCODERS[V3_SMALL].locates("/kaggle/input/dinov3-hf/vits16plus"), "a substring is not a match"
+    assert not ENCODERS[V3_SMALL_PLUS].locates("/kaggle/input/dinov3-hf/vits16")
+    assert ENCODERS[V3_SMALL_PLUS].dim == ENCODERS[V3_SMALL].dim, "same width is what makes the mixup silent"
+
     assert not Encoder("nowhere", "facebook/nothing", 384).locates("/kaggle/input/anything"), (
-        "an encoder that states no fragments must match NOTHING rather than everything"
+        "an encoder that names no directory must match NOTHING rather than everything"
     )
 
 

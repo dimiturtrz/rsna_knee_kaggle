@@ -18,19 +18,28 @@
 # The opposite outcome is the interesting one: matching the control while touching nothing pretrained
 # means the fine-tuning was spending capacity to recover what it had just destroyed.
 #
-# THE LEARNING RATE IS 20x THE CONTROL'S. Adapters start at zero and are the only thing moving, so the
-# 8e-6 that suits a pretrained block is far too small for a matrix that begins as nothing; 2e-4 is the
-# standard starting point for LoRA and is what this arm uses. That is a REAL confound with the control
-# and it cannot be avoided — a frozen-base run and a fine-tuned run cannot share a backbone rate.
+# THE RATE IS 5e-4, WHICH IS A PEAK AND NOT A CONSTANT. OneCycle warms up to it over the first 15% of
+# steps and anneals to near zero, so the number chosen is the top of the curve, not the rate the run
+# spends its time at.
+#
+# 60x THE CONTROL'S 8e-6, and that is the right order of magnitude rather than an aggressive one: the
+# adapters are zero-initialised, so they are new parameters being learned from scratch, not pretrained
+# weights being nudged. A fine-tuning peak would leave them approximately where they started. It is
+# also a REAL confound against the control that cannot be removed — a frozen-base run and a fine-tuned
+# run cannot share a backbone rate, because the parameter being rated is not the same parameter.
+#
+# NOT SWEPT, deliberately. Self-tuning a learning rate spends card time on our own hyperparameters
+# instead of on the data, so this starts from a value the literature agrees on and moves on.
 #
 # control  wsfold0_e6 = 0.8457, same recipe, six blocks fine-tuned at 8e-6.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 RANK="${1:-8}"
+RATE="${2:-5e-4}"
 require "$LABELS"
 
 run_train "lora_r${RANK}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
-  --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr 2e-4 \
+  --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
   --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/lora_r${RANK}_s2026.pt"

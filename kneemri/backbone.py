@@ -15,6 +15,7 @@ SMALL = "small"
 BASE = "base"
 LARGE = "large"
 V3_SMALL = "v3small"
+V3_SMALL_PLUS = "v3splus"
 V3_BASE = "v3base"
 
 
@@ -32,25 +33,30 @@ class Encoder:
     patch: int = 14
     """DINOv2 is patch 14 and DINOv3 is patch 16, which decides which read sizes tile cleanly."""
 
-    tokens: tuple[str, ...] = ()
-    """Lowercase fragments that ALL appear in this encoder's mounted path and in no sibling's.
+    family: str = ""
+    """The encoder line, as it appears somewhere in the mounted path: `dinov2` or `dinov3`."""
+
+    leaf: str = ""
+    """The directory named for THIS encoder, matched as a whole path segment and never as a substring.
 
     A kernel has no internet, so the weights arrive as a mount and the code has to recognise which
-    directory holds which encoder. That recognition used to be `"dinov2" in path` plus a split on the
-    literal string `dinov2` — which cannot see a DINOv3 at all, and cannot tell `vits16` from `vitb16`
-    because those are not what our variants are called. Stating the fragments per encoder means a new
-    encoder is a registry row rather than an edit inside the kernel.
+    directory holds which encoder. Substring matching was enough while the sizes were `small`, `base`
+    and `large`, and stops being enough the moment DINOv3's ViT-S+ arrives: `vits16` is a substring of
+    `vits16plus`, so a substring rule makes both encoders claim both mounts — the LOUD version of which
+    is a kernel refusing to start, and the quiet version is a member built on the wrong weights at the
+    same 384 width, which loads without a shape error and scores like nothing in particular.
     """
 
     def locates(self, path: str) -> bool:
         """Whether a mounted directory holds THIS encoder's weights.
 
-        Matched rather than merely found: mounting small and base together and taking whichever sorted
-        first builds a member at the wrong width, which surfaces as a shape error during load if we are
-        lucky and as a silently wrong model if the head happens to accept it.
+        Matched rather than merely found: mounting two encoders together and taking whichever sorted
+        first builds a member on weights it was not fitted on, which surfaces as a shape error during
+        load if we are lucky and as a silently wrong model if the widths happen to agree — and between
+        `vits16` and `vits16plus` they do agree, both being 384 wide.
         """
-        lowered = path.lower().replace("\\", "/")
-        return bool(self.tokens) and all(token in lowered for token in self.tokens)
+        segments = path.lower().replace("\\", "/").split("/")
+        return bool(self.leaf) and self.family in path.lower() and self.leaf in segments
 
     def require_tiling(self, size: int) -> None:
         """Refuse a read size the patch grid cannot tile, naming the sizes that would work.
@@ -94,7 +100,7 @@ class Encoder:
 
 ENCODERS: dict[str, Encoder] = {
     SMALL: Encoder(
-        SMALL, "facebook/dinov2-small", 384, mount="metaresearch/dinov2/PyTorch/small/1", tokens=("dinov2", "small")
+        SMALL, "facebook/dinov2-small", 384, mount="metaresearch/dinov2/PyTorch/small/1", family="dinov2", leaf="small"
     ),
     # 86M parameters against 22M, and 768-wide features. The strongest public notebooks here run base.
     #
@@ -107,7 +113,7 @@ ENCODERS: dict[str, Encoder] = {
     # Left here rather than deleted because the stale claim nearly bought a 90-minute arm: it reads as
     # evidence FOR capacity, and our own current numbers say capacity is not the constraint (knee-7u5).
     BASE: Encoder(
-        BASE, "facebook/dinov2-base", 768, mount="metaresearch/dinov2/PyTorch/base/1", tokens=("dinov2", "base")
+        BASE, "facebook/dinov2-base", 768, mount="metaresearch/dinov2/PyTorch/base/1", family="dinov2", leaf="base"
     ),
     # 300M parameters, 1024-wide. The rung ABOVE the public frontier: every strong notebook here stops
     # at base, and the reason is the scored kernel's T4 rather than anything about the task. That
@@ -120,7 +126,7 @@ ENCODERS: dict[str, Encoder] = {
     # floor. The lever that HAS cleared the floor since is whole-stack reading (+0.0147), which is a
     # data question, not a capacity one.
     LARGE: Encoder(
-        LARGE, "facebook/dinov2-large", 1024, mount="metaresearch/dinov2/PyTorch/large/1", tokens=("dinov2", "large")
+        LARGE, "facebook/dinov2-large", 1024, mount="metaresearch/dinov2/PyTorch/large/1", family="dinov2", leaf="large"
     ),
     # DINOv3, authorised 2026-08-12. Patch 16 rather than 14, so the read sizes that tile cleanly are
     # multiples of 16: 336 (441 tokens), 384 (576), 448 (784). Note 392 - our best DINOv2 read size -
@@ -147,7 +153,20 @@ ENCODERS: dict[str, Encoder] = {
         384,
         mount="dimiturnt/dinov3-hf/vits16",
         patch=16,
-        tokens=("dinov3", "vits16"),
+        family="dinov3",
+        leaf="vits16",
+    ),
+    # ViT-S+/16: the SAME 384-wide, 12-layer, 6-head, patch-16 shape as vits16 with a wider MLP —
+    # 28.7M parameters against 21.6M. A drop-in for the head, and the apples-to-apples partner for the
+    # small comparison, since capacity is the only thing that differs.
+    V3_SMALL_PLUS: Encoder(
+        V3_SMALL_PLUS,
+        "facebook/dinov3-vits16plus-pretrain-lvd1689m",
+        384,
+        mount="dimiturnt/dinov3-hf/vits16plus",
+        patch=16,
+        family="dinov3",
+        leaf="vits16plus",
     ),
     V3_BASE: Encoder(
         V3_BASE,
@@ -155,6 +174,7 @@ ENCODERS: dict[str, Encoder] = {
         768,
         mount="dimiturnt/dinov3-hf/vitb16",
         patch=16,
-        tokens=("dinov3", "vitb16"),
+        family="dinov3",
+        leaf="vitb16",
     ),
 }
