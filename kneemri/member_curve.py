@@ -125,9 +125,7 @@ def main() -> None:
             member = predictions.load(
                 reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
             )
-            scored = predictions.predict(
-                member, images, mask, reading.window(corpus.slices, overlap=arguments.overlap)
-            )
+            scored = predictions.predict(member, images, mask, reading.window(corpus.slices, overlap=arguments.overlap))
             per_member.append(scored)
             logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))
 

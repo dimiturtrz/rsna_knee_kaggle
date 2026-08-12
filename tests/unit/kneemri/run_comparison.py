@@ -41,9 +41,7 @@ def test_deltas(tmp_path: Path):
 def test_deltas_refuses_a_control_with_no_scored_epoch(tmp_path: Path):
     """A final fit records NaN AUCs, so it can be an ARM but never the control it is measured against."""
     empty: dict[str, float] = {}
-    unscored: list[EpochRow] = [
-        {"epoch": 0, "loss": 1.0, "auc": float("nan"), "seconds": 10, "per_label": empty}
-    ]
+    unscored: list[EpochRow] = [{"epoch": 0, "loss": 1.0, "auc": float("nan"), "seconds": 10, "per_label": empty}]
     comparison = RunComparison(_run(tmp_path, "final", unscored), [_run(tmp_path, "arm", ARM)])
     with pytest.raises(ValueError, match="no scored epoch"):
         comparison.deltas()

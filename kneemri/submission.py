@@ -68,9 +68,9 @@ class Submission:
         with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
             bags = list(
                 pool.map(
-                    lambda name: Study.from_directory(
-                        self.competition / "test_series" / name, planes, pipeline
-                    ).bag(slices),
+                    lambda name: Study.from_directory(self.competition / "test_series" / name, planes, pipeline).bag(
+                        slices
+                    ),
                     identifiers,
                 )
             )

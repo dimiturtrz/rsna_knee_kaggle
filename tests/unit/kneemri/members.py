@@ -314,11 +314,23 @@ def test_from_checkpoint(tmp_path: Path):
     Analysis kept re-deriving these fields from raw checkpoints and getting one wrong each time — the
     read size, the slot count, whether the whole stack is read. One description, one place.
     """
-    path = _saved(tmp_path, "arm", {"img": 448, "train_size": 392, "slices": 12, "whole_stack": True,
-                                    "variant": "small", "slots": SLOTS, "group": GROUP, "pool": "cls_mean",
-                                    "crop_mm": 130.0, "band": [0.2, 0.8],
-                                    "rules": {"order": "normal", "lat": "centre", "slot_fallback": False,
-                                              "decode_fill": "nearest"}})
+    path = _saved(
+        tmp_path,
+        "arm",
+        {
+            "img": 448,
+            "train_size": 392,
+            "slices": 12,
+            "whole_stack": True,
+            "variant": "small",
+            "slots": SLOTS,
+            "group": GROUP,
+            "pool": "cls_mean",
+            "crop_mm": 130.0,
+            "band": [0.2, 0.8],
+            "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
+        },
+    )
     member = Member.from_checkpoint(path)
     assert (member.image_size, member.read_size, member.whole_stack) == (448, 392, True)
     assert member.holdout == pytest.approx(0.84)

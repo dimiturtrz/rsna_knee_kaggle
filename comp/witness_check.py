@@ -95,7 +95,12 @@ def main() -> None:
 
     refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
     unverified = [name for name, verdict in verdicts.items() if verdict.startswith("UNVERIFIED")]
-    logger.info("%d ok, %d unverified, %d refused", len(verdicts) - len(refused) - len(unverified), len(unverified), len(refused))
+    logger.info(
+        "%d ok, %d unverified, %d refused",
+        len(verdicts) - len(refused) - len(unverified),
+        len(unverified),
+        len(refused),
+    )
     if refused:
         sys.exit(1)
 

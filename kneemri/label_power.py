@@ -58,9 +58,9 @@ class LabelPower:
             return float("nan")
         first = auc / (2 - auc)
         second = 2 * auc**2 / (1 + auc)
-        variance = (
-            auc * (1 - auc) + (positives - 1) * (first - auc**2) + (negatives - 1) * (second - auc**2)
-        ) / (positives * negatives)
+        variance = (auc * (1 - auc) + (positives - 1) * (first - auc**2) + (negatives - 1) * (second - auc**2)) / (
+            positives * negatives
+        )
         return math.sqrt(variance)
 
     def report(self) -> str:

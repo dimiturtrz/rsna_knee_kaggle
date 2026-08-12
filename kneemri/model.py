@@ -243,13 +243,41 @@ class StudyModel(nn.Module):
         merged = self.state_dict() | state
         self.load_state_dict(merged)
 
+    def _blocks(self) -> list[nn.Module]:
+        """The encoder's repeated transformer blocks, found by structure rather than by a path.
+
+        `backbone.encoder.layer` was hardcoded, which is where a DINOv2 keeps them and NOT where a
+        DINOv3 does — its tree is `embeddings / rope_embeddings / model.layer / norm`, with no
+        `encoder` at all. A registry field naming the path per encoder would work and would be one more
+        value that travels in a config while some consumer reads a default: the bug shape this project
+        has now hit seven times.
+
+        The blocks are instead the longest `ModuleList` in the tree, which is what "the layers a
+        transformer repeats" means structurally in both trees and in any third one. Ambiguity raises
+        rather than picking, because opening the wrong six modules trains something that is not the
+        encoder's top and reports a clean number for it.
+        """
+        lists = [module for module in self.backbone.modules() if isinstance(module, nn.ModuleList)]
+        if not lists:
+            message = f"{type(self.backbone).__name__} has no ModuleList, so it has no blocks to unfreeze"
+            raise ValueError(message)
+        deepest = max(len(module) for module in lists)
+        candidates = [module for module in lists if len(module) == deepest]
+        if len(candidates) > 1:
+            message = (
+                f"{type(self.backbone).__name__} has {len(candidates)} ModuleLists of {deepest}, "
+                "so its blocks are ambiguous"
+            )
+            raise ValueError(message)
+        return list(candidates[0])
+
     def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its own learning rate.
 
         The model owns this rather than the trainer: which blocks exist, and therefore which of them can
         be opened, is a fact about the encoder, not about the fitting procedure.
         """
-        blocks = list(self.backbone.encoder.layer)  # pyrefly: ignore[missing-attribute]
+        blocks = self._blocks()
         trainable = {id(parameter) for block in blocks[-unfreeze_last:] for parameter in block.parameters()}
         opened: list[torch.nn.Parameter] = []
         frozen: list[torch.nn.Parameter] = []

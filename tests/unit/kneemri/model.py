@@ -117,6 +117,47 @@ def test_parameter_groups(study_model: StudyModel):
     assert frozen, "the early blocks must be frozen"
 
 
+class _V3ShapedBackbone(_FakeBackbone):
+    """A backbone that keeps its blocks where a DINOv3 keeps them: `model.layer`, with no `encoder`."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        del self.encoder
+        self.model = torch.nn.Module()
+        self.model.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+
+
+def test_parameter_groups_finds_blocks_that_are_not_under_encoder():
+    """A DINOv3 tree has no `encoder.layer`, and the hardcoded path raised AttributeError on it."""
+    torch.manual_seed(SEED)
+    model = StudyModel(_V3ShapedBackbone(), DIM, SLOTS)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+    opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
+    assert len(opened) == 4, "two Linear blocks is two weights and two biases"
+    assert [p for p in model.backbone.parameters() if not p.requires_grad], "the early blocks must freeze"
+
+
+def test_parameter_groups_refuses_a_backbone_with_no_blocks():
+    """Something with no ModuleList is not a transformer, and silently opening nothing trains nothing."""
+    torch.manual_seed(SEED)
+    backbone = _FakeBackbone()
+    del backbone.encoder
+    model = StudyModel(backbone, DIM, SLOTS)
+    with pytest.raises(ValueError, match="no ModuleList"):
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+
+
+def test_parameter_groups_refuses_ambiguous_blocks():
+    """Two equally long ModuleLists give no answer, and guessing opens modules that are not the top."""
+    torch.manual_seed(SEED)
+    backbone = _FakeBackbone()
+    backbone.decoder = torch.nn.Module()
+    backbone.decoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+    model = StudyModel(backbone, DIM, SLOTS)
+    with pytest.raises(ValueError, match="ambiguous"):
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+
+
 def test_forward_per_slice_pooling_differs_from_channel_stacking():
     """The two aggregations are different functions, and a test double must be able to tell.
 
