@@ -41,6 +41,12 @@ SIZE="${2:-336}"
 # says its blocks want the same step size, and read size has already been eliminated as the difference.
 RATE="${3:-8e-6}"
 
+# EIGHT EPOCHS, NOT TWELVE, and that is measured rather than impatient: schedule_8 scored 0.8429 against
+# the twelve-epoch control's 0.8457, -0.0028 on a 0.0062 floor, for two thirds of the cost. OneCycle
+# anneals over whatever length it is given, so a shorter schedule is a complete run and not a truncated
+# one. At 224 px that puts a full DINOv3 answer at about ELEVEN MINUTES.
+EPOCHS="${4:-8}"
+
 # READ SIZE IS THE SUSPECT, AND THE TWO ENCODERS DISAGREE ABOUT WHAT IS NATIVE.
 #   DINOv2-small  config image_size 518, patch 14 -> our 336 px read is INSIDE its training range
 #   DINOv3-S/16   config image_size 224, patch 16 -> our 336 px read is 1.5x BEYOND its native grid
@@ -72,7 +78,7 @@ export HF_TOKEN
 # while the 224 run was already going. A run that can destroy the run it is being compared against is
 # not an experiment.
 run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  --fold 0 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
   --image-size "$CACHE" --train-size "$SIZE" --backbone-lr "$RATE" \
   --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
