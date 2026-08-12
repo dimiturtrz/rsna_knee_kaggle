@@ -126,7 +126,12 @@ run_train() {
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
   # trainer that is already going. `cd` rather than PYTHONPATH, because the working directory wins.
-  (cd "${ARM_SRC:-$REPO}" && uv run python -u -m kneemri.train "$@") 2>&1 \
+  # `--project "$REPO"` is what makes the snapshot survivable: `uv run` resolves its ENVIRONMENT from
+  # the working directory, and the snapshot holds only the packages — no pyproject.toml — so running
+  # there gave a bare interpreter and `ModuleNotFoundError: jaxtyping` in under a second. The project
+  # comes from the repo, the IMPORTS come from the snapshot (python puts the working directory first),
+  # which is the split this needed all along.
+  (cd "${ARM_SRC:-$REPO}" && uv run --project "$REPO" python -u -m kneemri.train "$@") 2>&1 \
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
