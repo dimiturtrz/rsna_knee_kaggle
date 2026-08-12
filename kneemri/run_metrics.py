@@ -2,6 +2,7 @@
 
 import json
 import logging
+import math
 from pathlib import Path
 from typing import NotRequired, TypedDict
 
@@ -73,5 +74,7 @@ class RunMetrics:
         train.py keeps the best state, so a comparison against the final epoch would report a number no
         saved member ever had.
         """
-        rows = [row for row in self.rows() if row["auc"] == row["auc"]]  # NaN != NaN: an unscored run
+        # An unscored run (--fold -1) records NaN, and NaN loses every comparison - an unguarded
+        # max() would return whichever row happened to come first and call it the best.
+        rows = [row for row in self.rows() if not math.isnan(row["auc"])]
         return max(rows, key=lambda row: row["auc"]) if rows else None
