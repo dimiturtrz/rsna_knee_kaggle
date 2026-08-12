@@ -41,6 +41,23 @@ be compared against it. An external input with no fetch step is not a dependency
 - The official `kaggle` CLI reads `~/.kaggle/kaggle.json` and works for reads (`competitions files`,
   `kernels list`, `kernels pull`). Both are live on this machine; pick by which credential you have.
 
+## Spending a submission
+
+**Every entry is justified OFFLINE first.** `kneemri.member_curve` scores every subset of members on
+the shared fold-0 holdout and costs no slot; every arm is fitted on that same split, so any candidate
+ensemble is rankable before it is submitted. A slot is spent only when the offline number predicts a
+gain over our best (0.888), or when the question cannot be answered offline at all — holdout-to-LB
+transfer for a recipe that has never been on the board.
+
+Two mechanics make this cheaper than it sounds:
+
+- **Unused daily slots do not roll over.** Five per day, reset at 00:00 UTC. Abstaining banks nothing;
+  it only avoids waste. The limit that actually binds is the **two Final Submissions** that get judged
+  (rule 2.2.b), and those are chosen deliberately at the deadline, never by "the last two submitted".
+- **The count curve is already measured**, so the leaderboard no longer has to tell us that more
+  members help — one model at 0.8518 scored 0.868 against five weaker ones at 0.888 (`knee-9pl`). The
+  open question is WHICH members, and the offline curve answers exactly that.
+
 ## Method (lib-as-dataset + light kernel)
 
 1. **`kneemri-kit` dataset** (`dimiturnt/kneemri-kit`) — our `kneemri`/`core` source tree, trained weights,
