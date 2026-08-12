@@ -49,6 +49,26 @@ so everything below is **directional**, and only the cumulative total clears the
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
 | `extended_slots` | nine slots, +1,139 coronal series | queued | — | aimed at MCL |
 
+## The running total, which is the number the bar applies to
+
+Individual arms keep landing inside the noise floor, and that is the wrong frame to judge them by: the
+rule is to track the cumulative total against the ORIGINAL baseline, because increments below the bar
+still compose.
+
+| | holdout | step | total vs baseline |
+|---|---|---|---|
+| `rank24_s2026` — the control every early arm was read against | 0.8272 | — | — |
+| whole-stack reading | 0.8457 | +0.0185 | **+0.0185** |
+| + 392 px, read from the 448 cache | 0.8477* | +0.0020 | **+0.0205** |
+
+\* epoch 5 of 12 and still climbing; its matched-epoch deltas against the 336 control are +0.0127 and
++0.0105 at epochs 2 and 3, so the step above is a floor rather than the result.
+
+**+0.0205 clears the 1.5% bar**, against a floor of 0.0053. No single arm did — whole-stack came
+closest at +0.0185 on its own control. Two things this does NOT license: reading the total as evidence
+for any individual knob inside it, and expecting it on the leaderboard, where our holdout gains have so
+far transferred at roughly half (`knee-lv2`).
+
 ## Ensemble SIZE is worth more than anything we can do to a single model
 
 | members | holdout per member | public LB |
