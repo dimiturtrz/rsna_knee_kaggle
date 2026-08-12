@@ -8,7 +8,8 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.ensemble import IMAGE_BUDGET, Ensemble
+from kneemri.backbone import ENCODERS
+from kneemri.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble
 from kneemri.members import Member, MemberConfig, MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
@@ -117,6 +118,22 @@ def test_predict_member_bounds_the_forward_by_images(tmp_path: Path):
     with torch.no_grad():
         whole = torch.sigmoid(model(images, mask, member.read_size).float()).numpy()
     assert np.allclose(split, whole), "splitting the forward must not change the answer"
+
+
+def test_predict_member_shrinks_the_budget_for_a_wider_encoder(tmp_path: Path):
+    """A 1024-wide member costs 2.4x a 384-wide one per image, so one flat budget OOMs the wide one.
+
+    MEASURED on this card at 336 px, no-grad, autocast, activation per image beyond the weights: small
+    0.0099 GB, base 0.0187, large 0.0235. At 864 images that is 8.6 GB, 16.5 GB and 21 GB against a
+    T4's ~15 GB — so the flat number that was safe for every scored entry so far would have OOM'd the
+    first one carrying `large_deep_rank24`, which is in our pool at 0.8450.
+    """
+    ensemble = _ensemble(tmp_path / "wide", whole_stack=True, slice_pooling="max")
+    member = ensemble.package.members[0]
+    assert ENCODERS[member.variant].dim == BUDGET_WIDTH, "this fixture is the width the budget was measured at"
+
+    for variant, expected in (("small", 864), ("base", 432), ("large", 324)):
+        assert IMAGE_BUDGET * BUDGET_WIDTH // ENCODERS[variant].dim == expected
 
 
 def test_predict_member(tmp_path: Path):

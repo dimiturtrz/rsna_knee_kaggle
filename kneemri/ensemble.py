@@ -21,17 +21,37 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
+from kneemri.backbone import ENCODERS
 from kneemri.members import Member, MemberPackage
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
 IMAGE_BUDGET = 864
-"""Images per forward — the largest that has ever completed on a Kaggle T4.
+"""Images per forward for a 384-wide encoder — the largest that has ever completed on a Kaggle T4.
 
 Not a tuned number: it is 48 studies x 6 slots x a 3-slice window, which is what every scored kernel
-before 2026-08-12 sent, including the 0.894 entry. Deriving the study count from it keeps that peak
-fixed however deep a member reads, instead of letting depth multiply it.
+before 2026-08-12 sent, including the 0.894 entry — whose members are all `small`. Deriving the study
+count from it keeps that peak fixed however deep a member reads, instead of letting depth multiply it.
+
+IT DOES NOT TRANSFER TO A WIDER ENCODER. Measured on this card at 336 px, no-grad, autocast, as
+activation per image beyond the weights:
+
+    small  (384)   0.0099 GB      864 images ->  8.6 GB     fits a T4's ~15 GB
+    base   (768)   0.0187 GB      864 images -> 16.5 GB     does NOT
+    large  (1024)  0.0235 GB      864 images -> 21   GB     does NOT
+
+A flat 864 would therefore have OOM'd the first entry carrying `large_deep_rank24` — which is in our
+pool at 0.8450 — in exactly the way fusion v2 did, and for exactly the same reason: one constant
+standing in for a value that travels per member.
+"""
+
+BUDGET_WIDTH = 384
+"""The encoder width the budget was measured at.
+
+Activation scales with hidden size, so the budget is divided by how much wider a member is: base gets
+432 images, large 324. Both land near 8-9 GB by the table above — the headroom `small` has always run
+with, rather than a limit discovered by a failed submission.
 """
 
 
@@ -162,7 +182,11 @@ class Ensemble:
         # is an OOM, the run produced no submission, and the deleted fallback scored the sample table at
         # 0.500. Compute was never the problem — reading whole is CHEAPER than ten overlapping windows
         # (12 images against 30), which is what rules out a timeout and points at memory.
-        rows = max(1, IMAGE_BUDGET // max(images.shape[1] * window.width, 1))
+        #
+        # The budget is per ENCODER WIDTH, not flat: a 1024-wide member costs 2.4x a 384-wide one per
+        # image, so one number for both is the same mistake one number for every depth was.
+        budget = IMAGE_BUDGET * BUDGET_WIDTH // ENCODERS[member.variant].dim
+        rows = max(1, budget // max(images.shape[1] * window.width, 1))
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for view in views.apply(images):
                 for start in window.starts:
