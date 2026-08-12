@@ -345,6 +345,12 @@
     {
       "kind": "import",
       "source": "kneemri.model",
+      "target": "kneemri.lora",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.model",
       "target": "kneemri.slice_attention",
       "weight": 1
     },
@@ -1561,6 +1567,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.members.MemberPackage.load",
+      "target": "kneemri.model.StudyModel.load_trained",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.MemberPackage.load",
+      "target": "kneemri.model.StudyModel.low_rank",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.model.StudyModel",
       "target": "kneemri.model.StudyDesign",
@@ -1606,6 +1624,18 @@
       "kind": "calls",
       "source": "kneemri.model.StudyModel.forward",
       "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.model.StudyModel.low_rank",
+      "target": "kneemri.lora.LoRALinear",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.low_rank",
+      "target": "kneemri.model.StudyModel._blocks",
       "weight": 1
     },
     {
@@ -2223,6 +2253,18 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.backbone.Encoder",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.model.StudyModel",
       "weight": 1
     },
@@ -2254,6 +2296,30 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.adaptation",
       "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.fitted_model",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.fitted_model",
+      "target": "kneemri.model.StudyModel.compile_encoder",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.fitted_model",
+      "target": "kneemri.model.StudyModel.low_rank",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.fitted_model",
+      "target": "kneemri.model.StudyModel.recompute_activations",
       "weight": 1
     },
     {
@@ -2392,24 +2458,6 @@
       "kind": "construct",
       "source": "kneemri.train.main",
       "target": "kneemri.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.model.StudyModel",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.model.StudyModel.compile_encoder",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.model.StudyModel.recompute_activations",
       "weight": 1
     },
     {
@@ -2671,7 +2719,7 @@
       "role": null
     },
     {
-      "descendants": 41,
+      "descendants": 42,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2810,6 +2858,14 @@
       "descendants": 0,
       "id": "kneemri.laterality",
       "label": "laterality",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.lora",
+      "label": "lora",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3180,6 +3236,14 @@
       "label": "Laterality",
       "level": "class",
       "parent": "kneemri.laterality",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.lora.LoRALinear",
+      "label": "LoRALinear",
+      "level": "class",
+      "parent": "kneemri.lora",
       "role": "primary"
     },
     {
@@ -4240,6 +4304,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.lora.LoRALinear.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.lora.LoRALinear",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.lora.LoRALinear.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.lora.LoRALinear",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.lora.LoRALinear.merged",
+      "label": "merged",
+      "level": "method",
+      "parent": "kneemri.lora.LoRALinear",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.lora.LoRALinear.rank",
+      "label": "rank",
+      "level": "method",
+      "parent": "kneemri.lora.LoRALinear",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_curve.MemberCurve.__init__",
       "label": "__init__",
       "level": "method",
@@ -4344,6 +4440,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.lora_rank",
+      "label": "lora_rank",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_record.RunOptions.rank_weight",
       "label": "rank_weight",
       "level": "method",
@@ -4418,6 +4522,14 @@
       "descendants": 0,
       "id": "kneemri.members.Member.image_size",
       "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.lora_rank",
+      "label": "lora_rank",
       "level": "method",
       "parent": "kneemri.members.Member",
       "role": null
@@ -4610,6 +4722,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel.load_trained",
       "label": "load_trained",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel.low_rank",
+      "label": "low_rank",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
@@ -5410,6 +5530,14 @@
       "descendants": 0,
       "id": "kneemri.train.TrainingOptions.adaptation",
       "label": "adaptation",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.fitted_model",
+      "label": "fitted_model",
       "level": "method",
       "parent": "kneemri.train.TrainingOptions",
       "role": null
