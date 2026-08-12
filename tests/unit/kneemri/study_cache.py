@@ -1,9 +1,11 @@
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
-from kneemri.slots import SLOTS
+from kneemri.slots import EXTENDED_SLOTS, SLOTS
 from kneemri.study_cache import DecodeRequest, StudyCache
 
 from .conftest import write_series
@@ -135,3 +137,29 @@ def test_slots(tmp_path: Path):
     """
     assert StudyCache(tmp_path).slots == len(SLOTS)
     assert StudyCache(tmp_path, scheme="extended").slots == len(SLOTS) + 3
+
+
+def test_scheme_slots():
+    """The slot names a cache is built over, in order — the width of its own second axis."""
+    cache = StudyCache(Path("nowhere"))
+    assert cache.scheme_slots == [slot.name for slot in SLOTS]
+    assert len(StudyCache(Path("nowhere"), scheme="extended").scheme_slots) == len(EXTENDED_SLOTS)
+
+
+def test_report(caplog: pytest.LogCaptureFixture):
+    """Coverage is logged per slot, and a build that decoded NOTHING is refused rather than announced.
+
+    `decode_one` reports a study absent rather than raising, by design, so a systematic failure looks
+    exactly like a corpus of empty studies — and the build used to print CACHE BUILD COMPLETE either
+    way. A nine-slot scheme emitting six-slot bags would have finished over 54 GB of zeros (knee-gv3).
+    """
+    cache = StudyCache(Path("nowhere"))
+    healthy = np.zeros((4, len(SLOTS)), dtype=np.float32)
+    healthy[:, 0] = 1.0
+    healthy[:2, 1] = 1.0
+    with caplog.at_level(logging.INFO):
+        cache.report(healthy)
+    assert "4/4" in caplog.text and "studies with no slot at all: 0/4" in caplog.text
+
+    with pytest.raises(ValueError, match="decoded to nothing"):
+        cache.report(np.zeros((4, len(SLOTS)), dtype=np.float32))

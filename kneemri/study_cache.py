@@ -21,6 +21,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from jaxtyping import Float
 from numpy.typing import NDArray
 
 from kneemri.slot_reader import IMAGE_SIZE, SlotReader
@@ -110,6 +111,11 @@ class StudyCache:
         return base if self.scheme == self.CANONICAL else f"{base}_{self.scheme}"
 
     @property
+    def scheme_slots(self) -> list[str]:
+        """The slot names this cache is built over, in order — the width of its second axis."""
+        return [slot.name for slot in SCHEMES[self.scheme]]
+
+    @property
     def images_path(self) -> Path:
         """Where the pixel cache lives."""
         return self.directory / f"images_{self.key}.npy"
@@ -167,7 +173,39 @@ class StudyCache:
                 done += 1
                 if done % 200 == 0:
                     logger.info(f"  cached {done}/{len(identifiers)} studies")
+        self.report(mask)
+        # LAST, and only once the mask has been judged: `wait_for_cache` keys on this file existing, so
+        # writing it is the signal that the cache is usable. A build that decoded nothing must not get
+        # that far.
         np.save(self.mask_path, mask)
+
+    def report(self, mask: Float[np.ndarray, "studies slots"]) -> None:
+        """Log what the build actually produced, and refuse a cache that decoded nothing.
+
+        The build used to log progress and then `CACHE BUILD COMPLETE` unconditionally. That message is
+        printed whether every study decoded or none did — and `decode_one` reports a study ABSENT rather
+        than raising, by design, so a systematic failure looks exactly like a corpus of empty studies.
+        It nearly cost a 54 GB build: a nine-slot scheme emitted six-slot bags, every write raised a
+        shape error, all 4,407 studies were caught and reported absent, and the build would have
+        announced completion over an array of zeros with a mask saying nothing was acquired (knee-gv3).
+
+        Coverage per slot is worth logging even when it is fine, because it is the number that prices
+        an arm: the extended scheme was argued for on a slot census that had to be recovered by loading
+        the mask separately, months after the builds that produced it.
+        """
+        filled = mask.sum(axis=0)
+        studies = mask.shape[0]
+        for position, slot in enumerate(self.scheme_slots):
+            share = 100 * filled[position] / studies
+            logger.info(f"  {slot:22s} {int(filled[position]):5d}/{studies} studies ({share:.1f}%)")
+        empty = int((mask.sum(axis=1) == 0).sum())
+        logger.info(f"  studies with no slot at all: {empty}/{studies}")
+        if empty == studies:
+            message = (
+                f"every one of {studies} studies decoded to nothing — the cache is zeros. "
+                "The mask has NOT been written, so nothing downstream will treat this build as usable."
+            )
+            raise ValueError(message)
 
     def load(self) -> tuple[CachedCorpus, list[str]]:
         """The cache, memory-mapped read-only, with its study order."""
