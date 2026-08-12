@@ -48,7 +48,23 @@ require "$LABELS"
 # exactly that reason: it is the second-best single member we have, it reads 392 off the same 448 cache
 # so it shares res392's pixel group and costs no extra decode, and a model trained under contrast and
 # noise jitter makes DIFFERENT mistakes than one that never saw them. A refuted arm is still a member.
+# extended_ws is the one member whose INPUTS differ. Every other entry here is a different recipe on
+# the same pixels; this one reads nine slots and sees 83,297 slices - 2,421 series, 1,139 of them
+# coronal - that no other member can reach. It is REFUTED as an improvement (0.8459 against the
+# control's 0.8457, and its per-label prediction failed), which says nothing about whether it fails on
+# the same studies as the others. That is the only question a curve asks.
+#
+# It forms its own cache group (336 px, 12 slices, extended scheme), which member_curve handles by
+# grouping on exactly that key and building each member with its own slot count. At inference it is one
+# extra decode, costed at 108 units/study against an entry that already completed at 4140.
+# dinov3_v3small_224 is our WEAKEST member by a distance — 0.8057 against the field's 0.843-0.852 — and
+# it is here because it is the only one from a different ENCODER FAMILY. A rank-average can be helped by
+# a weak member that fails on different studies and is usually hurt by one that is simply worse, and
+# nothing except the curve distinguishes those two cases. It costs NOTHING extra to serve: it reads 224
+# off the same 336 cache, so it shares that decode and resamples inside the model.
 MEMBERS=(
+  "$PROCESSED/dinov3_v3small_224_s2026.pt"
+  "$PROCESSED/extended_ws_s2026.pt"
   "$PROCESSED/res392_ws_s2026.pt"
   "$PROCESSED/intensity392_ws_s2026.pt"
   "$PROCESSED/sliceattn_s2026.pt"
