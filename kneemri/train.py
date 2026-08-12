@@ -143,9 +143,9 @@ class TrainingOptions:
         parser.add_argument(
             "--compile-encoder",
             action="store_true",
-            help="torch.compile the encoder with dynamic shapes. The encoder only, because training "
-            "calls supervised() rather than forward(); dynamic because the last batch of an epoch is "
-            "partial and a static graph would recompile every epoch.",
+            help="torch.compile the encoder, shape-specialised. The encoder only, because training "
+            "calls supervised() rather than forward(). Measured -20% per step; the partial last batch "
+            "costs one 22 s recompile per process, not per epoch. Needs Triton (triton-windows here).",
         )
         parser.add_argument(
             "--bf16",

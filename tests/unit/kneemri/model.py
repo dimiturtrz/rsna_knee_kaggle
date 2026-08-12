@@ -106,6 +106,29 @@ def test_pool_parts_widths_match_the_head_input():
     assert focal.head.proj[1].in_features == DIM * POOL_PARTS["cls_mean_focal"]
 
 
+def test_slice_features():
+    """The per-slice features are what slot pooling reduces, so pooling must be their function.
+
+    Split out because it is the last point where the result depends only on pixels and encoder — the
+    seam a cached-embedding harness needs, and the reason it can exist at all. Channel stacking has no
+    per-slice axis by construction, so it returns a single position.
+    """
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+
+    torch.manual_seed(SEED)
+    per_slice = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    with torch.no_grad():
+        stacked = per_slice.slice_features(imgs, 14)
+        pooled = per_slice.slot_features(imgs, 14)
+    assert stacked.shape == (2, SLOTS, GROUP, DIM * POOL_PARTS["cls_mean"])
+    assert torch.allclose(stacked.amax(dim=2), pooled), "max pooling must be a function of these features"
+
+    torch.manual_seed(SEED)
+    stacking = StudyModel(_FakeBackbone(), DIM, SLOTS).eval()
+    with torch.no_grad():
+        assert stacking.slice_features(imgs, 14).shape[2] == 1, "channel stacking has no per-slice axis"
+
+
 def test_parameter_groups(study_model: StudyModel):
     """The head gets its own learning rate; the encoder gets a slower one and only its last blocks."""
     groups = study_model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)

@@ -155,6 +155,27 @@ class StudyModel(nn.Module):
         encoder is essentially the whole cost of a step, so computing it twice to also predict a report
         embedding would have doubled training time to add an auxiliary loss.
         """
+        stacked = self.slice_features(imgs, img_size)
+        if not self.per_slice:
+            return stacked[:, :, 0]
+        return self.slices(stacked) if self.slices is not None else stacked.amax(dim=2)
+
+    def slice_features(
+        self,
+        imgs: UInt8[Tensor, "b s g p q"],
+        img_size: int | None = None,
+    ) -> Float[Tensor, "b s g w"]:
+        """The encoder's output for each slice of each slot, BEFORE the slices are pooled together.
+
+        This is where the whole cost of a step lives, and it is the last point at which the result
+        still depends only on the pixels and the encoder — everything after it is head. Split out so
+        the features can be computed ONCE and reused: pooling, slot attention, the prior and the head
+        are all cheap functions of this tensor, and they are the questions we currently answer at 320 s
+        an epoch (see the cached-embedding harness).
+
+        Channel stacking has no per-slice axis by construction — the group IS the encoder's three
+        channels — so it returns a single position, and pooling over it is the identity.
+        """
         batch, slots, group = imgs.shape[:3]
         # "channels": three consecutive slices become the encoder's three channels — one forward per
         # slot. "max": each slice is encoded ALONE (replicated across the three channels the encoder
@@ -179,9 +200,8 @@ class StudyModel(nn.Module):
         tokens = self.backbone(pixel_values=x).last_hidden_state
         pooled = self._pool(tokens)
         if not per_slice:
-            return pooled.reshape(batch, slots, -1)
-        stacked = pooled.reshape(batch, slots, group, -1)
-        return self.slices(stacked) if self.slices is not None else stacked.amax(dim=2)
+            return pooled.reshape(batch, slots, 1, -1)
+        return pooled.reshape(batch, slots, group, -1)
 
     def supervised(
         self,
@@ -292,24 +312,35 @@ class StudyModel(nn.Module):
         ]
 
     def compile_encoder(self) -> None:
-        """Fuse the encoder's kernels. The ENCODER only, and with dynamic shapes, for two reasons.
+        """Fuse the encoder's kernels. The ENCODER only, and SHAPE-SPECIALISED, both measured.
 
         Only the encoder: `supervised` is called directly rather than through `forward`, so compiling
         the module would leave the path training actually takes in eager mode. The encoder is the bulk
         of the arithmetic anyway — 864 images a step under whole-stack against one small head.
 
-        Dynamic shapes: `batches` does not drop the last, partial batch (3,498 studies over batches of
-        12 leaves six), so a static graph would recompile once per epoch and spend more time compiling
-        than it saved. The alternative — dropping that batch — would silently change what the model
-        trains on, which is not a trade a speed flag should make on its own.
+        NOT `dynamic=True`, which is what this did and which cannot work on this machine: inductor
+        raises `InductorError: AssertionError` inside its own size reasoning, with or without gradient
+        checkpointing, on every configuration tried. Shape specialisation compiles cleanly, so the
+        question becomes what the ragged last batch costs — `batches` keeps it, and 3,498 studies over
+        batches of 12 leaves six.
 
-        TEMPER THE EXPECTATION: compile usually buys 10-30% on a ViT by fusing away memory traffic,
-        but this loop already draws 96% of the card's power limit, so most of that headroom is
-        spent. Measure it, do not assume it.
+        MEASURED 2026-08-12 on a contended card, batch 2 at 336 px, whole-stack, checkpointing on:
+
+            eager      steady 153 ms/step
+            compiled   steady 122 ms/step        -20%
+            the partial batch costs ONE 22 s recompile, then runs at 68 ms
+
+        So the shape set is two, both compiled once per PROCESS rather than once per epoch — about 24 s
+        of compilation against a 66-minute arm. The docstring that justified `dynamic=True` assumed a
+        recompile per epoch; that assumption was wrong, and it was the reason the working configuration
+        was never tried.
+
+        It needs Triton, which upstream ships for everything except Windows — `triton-windows` is
+        pinned in pyproject for exactly this.
         """
         # torch.compile returns an OptimizedModule - an nn.Module at runtime - but is TYPED as a bare
         # callable, so the assignment needs the cast rather than the attribute needing a wider type.
-        self.backbone = cast("nn.Module", torch.compile(self.backbone, dynamic=True))
+        self.backbone = cast("nn.Module", torch.compile(self.backbone))
 
     def recompute_activations(self) -> None:
         """Trade about 30% compute for nearly all of the encoder's activation memory.
