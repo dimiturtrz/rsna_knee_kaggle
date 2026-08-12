@@ -36,13 +36,32 @@ run_train throughput_compiled "${BASE[@]}" --compile-encoder --out "$PROCESSED/t
 # is the loss scaler, and with it scale collapse - insurance, not speed.
 run_train throughput_bf16 "${BASE[@]}" --bf16 --out "$PROCESSED/throughput_bf16.pt"
 
+# THE CHECKPOINTING TAX, which we have paid on every arm since 2026-08-11 and never priced. The
+# docstring claims 'about 30% compute' from the literature; that is a guess about our workload, and 30%
+# of a 320 s epoch is 96 s per epoch on every arm we will ever run. It cannot be measured at batch 12,
+# because that is exactly the batch that does not fit without checkpointing - so BOTH sides run at
+# batch 6, where both fit. The pair is comparable to each other, not to the rows above: a smaller batch
+# changes the ranking term's within-batch pairs, and img/s is per IMAGE, so the tax reads clean.
+HALF=(--fold 0 --epochs 1 --one-cycle --weight-floor --rank-weight 1.0
+      --slice-pooling max --whole-stack --batch 6 --vram-gb 28 --labels "$LABELS")
+run_train throughput_ckpt_on "${HALF[@]}" --recompute-activations --out "$PROCESSED/throughput_ckpt_on.pt"
+run_train throughput_ckpt_off "${HALF[@]}" --out "$PROCESSED/throughput_ckpt_off.pt"
+
+# HOW MUCH OF THE BACKWARD IS THE ENCODER'S TOP SIX BLOCKS. We unfreeze six of twelve by default and
+# have never asked what four would cost - and our own numbers say capacity is NOT the constraint here
+# (base over small was +0.0011 against a 0.0053 floor), which is precisely the condition under which
+# opening fewer blocks should be close to free. Speed compounds across every future arm, so a 15%
+# saving here is worth more than most single-arm results. ONE EPOCH prices the throughput; whether the
+# SCORE holds needs a full arm, and that is a separate decision this measurement informs.
+run_train throughput_unfreeze4 "${BASE[@]}" --unfreeze-last 4 --out "$PROCESSED/throughput_unfreeze4.pt"
+
 echo "=== epoch-0 holdout, which precision must not move ==="
-for name in throughput_plain throughput_compiled throughput_bf16; do
+for name in throughput_plain throughput_compiled throughput_bf16 throughput_ckpt_on throughput_ckpt_off throughput_unfreeze4; do
   printf "%-22s " "$name"; grep -oE "holdout mean AUC [0-9.]+" "$LOGS/$name.full.log" | tail -1
 done
 
 echo "=== steady-state img/s, later steps only (the first steps pay for the graph) ==="
-for name in throughput_plain throughput_compiled throughput_bf16; do
+for name in throughput_plain throughput_compiled throughput_bf16 throughput_ckpt_on throughput_ckpt_off throughput_unfreeze4; do
   printf "%-22s " "$name"
   grep -oE "[0-9]+ img/s" "$LOGS/$name.full.log" | tail -5 | tr '\n' ' '
   echo
