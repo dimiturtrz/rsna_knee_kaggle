@@ -222,3 +222,28 @@ def test_decoded_size(tmp_path: Path):
     ensemble.package.members = [member, replace(member, identifier="other", config=coarser)]
     with pytest.raises(ValueError, match="two decodes"):
         ensemble.decoded_size()
+
+
+def test_decoded_scheme(tmp_path: Path):
+    """The slot list comes from the members, and an unknown or conflicting one is refused.
+
+    Inference built SlotPipeline() with no scheme, so a nine-slot member would have been routed and
+    bagged under the canonical six — the head expects nine positions and the three it never received
+    are exactly the ones the extended scheme exists to add.
+    """
+    ensemble = _ensemble(tmp_path / "canonical")
+    assert [slot.name for slot in ensemble.decoded_scheme().slots] == SLOTS
+
+    member = ensemble.package.members[0]
+    wider: MemberConfig = {**member.config, "slots": [*SLOTS, "COR_FLUID_NOFS"]}
+    ensemble.package.members = [replace(member, identifier="wide", config=wider)]
+    assert len(ensemble.decoded_scheme().slots) == len(SLOTS) + 1
+
+    ensemble.package.members = [member, replace(member, identifier="other", config=wider)]
+    with pytest.raises(ValueError, match="two decodes"):
+        ensemble.decoded_scheme()
+
+    unknown: MemberConfig = {**member.config, "slots": ["NOT_A_SLOT"]}
+    ensemble.package.members = [replace(member, identifier="bad", config=unknown)]
+    with pytest.raises(ValueError, match="does not define"):
+        ensemble.decoded_scheme()

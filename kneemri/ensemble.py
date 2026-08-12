@@ -23,6 +23,7 @@ from torch import Tensor
 
 from kneemri.members import Member, MemberPackage
 from kneemri.model import TARGETS, StudyModel
+from kneemri.slots import SCHEMES, SlotScheme
 
 
 class Ensemble:
@@ -80,6 +81,30 @@ class Ensemble:
             message = f"members disagree on decode resolution {sorted(sizes)} — that is two decodes, not one"
             raise ValueError(message)
         return sizes.pop()
+
+    def decoded_scheme(self) -> SlotScheme:
+        """The slot scheme the test set must be DECODED under — the members', never a default.
+
+        The sibling of `decoded_size`, and the last of the four fields that travelled in a checkpoint
+        and were read by a default somewhere. `Submission.decode` built `SlotPipeline()` with no
+        scheme, so a nine-slot member would have been routed and bagged under the canonical six: the
+        head's slot embedding expects nine positions, would receive six, and the three it never saw are
+        precisely the ones the extended scheme exists to add.
+
+        Refused rather than resolved when members disagree, for the same reason as resolution — a
+        different slot list is a different decode, not a subset of one.
+        """
+        lists = {tuple(member.config["slots"]) for member in self.package.members}
+        if len(lists) != 1:
+            message = f"members disagree on the slot list ({len(lists)} distinct) — that is two decodes, not one"
+            raise ValueError(message)
+        names = lists.pop()
+        known = {slot.name: slot for scheme in SCHEMES.values() for slot in scheme}
+        missing = [name for name in names if name not in known]
+        if missing:
+            message = f"members name slots this build does not define: {missing}"
+            raise ValueError(message)
+        return SlotScheme(tuple(known[name] for name in names))
 
     def predict_member(
         self,

@@ -58,7 +58,9 @@ class Submission:
         The pipeline is built at the MEMBERS' resolution rather than at `SlotReader`'s default, which
         was 336 whatever the members said. See `Ensemble.decoded_size`.
         """
-        pipeline = SlotPipeline(reader=SlotReader(image_size=self.ensemble.decoded_size()))
+        pipeline = SlotPipeline(
+            scheme=self.ensemble.decoded_scheme(), reader=SlotReader(image_size=self.ensemble.decoded_size())
+        )
         with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
             bags = list(
                 pool.map(
