@@ -44,8 +44,13 @@ require "$LABELS"
 # res392 reads the 448 px cache and every other member reads 336, which member_curve could not mix
 # until it learned to group checkpoints by cache and read each one the way it was fitted. It is also
 # our best single member (0.8523), so a curve without it was ranking subsets of the second team.
+# intensity392 is REFUTED as an improvement (0.8459 against res392's 0.8523) and belongs here for
+# exactly that reason: it is the second-best single member we have, it reads 392 off the same 448 cache
+# so it shares res392's pixel group and costs no extra decode, and a model trained under contrast and
+# noise jitter makes DIFFERENT mistakes than one that never saw them. A refuted arm is still a member.
 MEMBERS=(
   "$PROCESSED/res392_ws_s2026.pt"
+  "$PROCESSED/intensity392_ws_s2026.pt"
   "$PROCESSED/sliceattn_s2026.pt"
   "$PROCESSED/wsfold0_e6.pt"
   "$PROCESSED/slices16_ws_s2026.pt"
