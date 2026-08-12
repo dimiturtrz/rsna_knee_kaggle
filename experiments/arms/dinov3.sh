@@ -35,14 +35,23 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 VARIANT="${1:-v3small}"
 SIZE="${2:-336}"
 
-# THE GRID, NOT THE PIXELS, is what a patch-16 encoder gets less of. At 336 px DINOv2 cuts a 24x24
-# grid (576 patches) and DINOv3 cuts 21x21 (441) - so "same resolution" hands v3 a 23% COARSER map of
-# the same anatomy, on a task whose findings are 1-3 mm. Reading at 384 restores 24x24 and costs what
-# DINOv2 costs at 336, which is why it is the honest comparison rather than a bigger-is-better rung.
-# 384 does not tile at patch 14, so it is a size only a v3 can read - and it comes off the 448 cache
-# that already exists, resampled the same way res392 is.
+# READ SIZE IS THE SUSPECT, AND THE TWO ENCODERS DISAGREE ABOUT WHAT IS NATIVE.
+#   DINOv2-small  config image_size 518, patch 14 -> our 336 px read is INSIDE its training range
+#   DINOv3-S/16   config image_size 224, patch 16 -> our 336 px read is 1.5x BEYOND its native grid
+# v3 places position with RoPE (rope_theta 100, pos_embed_rescale 2.0), which extrapolates far better
+# than v2's learned embeddings would, but extrapolation is still not the same as having been trained
+# there - and the high-resolution adaptation stage in the paper is applied to the 7B teacher.
+#
+# TWO MECHANISMS PULL OPPOSITE WAYS and only a measurement separates them:
+#   (a) GRID: at 336 v2 cuts 24x24 = 576 patches and v3 cuts 21x21 = 441, so equal PIXELS hands v3 a
+#       23% coarser map of anatomy whose findings are 1-3 mm. This wants a LARGER read (384 -> 24x24).
+#   (b) EXTRAPOLATION: 336 is already 1.5x v3's native 224, and 384 is 1.7x. This wants a SMALLER read.
+# 224 is the cheap end to test first: it is v3's own training resolution, and a quarter of the tokens
+# of 336, so an epoch is a fraction of the cost of the answer it buys.
+#
+# The cache only has to be at least as large as the read; 448 is needed only above 336.
 CACHE=336
-[ "$SIZE" = "336" ] || CACHE=448
+[ "$SIZE" -le 336 ] || CACHE=448
 require "$LABELS"
 
 # The gated weights need a token. Read from the credential file into the environment, never echoed and
