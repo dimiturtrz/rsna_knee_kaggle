@@ -116,3 +116,30 @@ def test_ranking_carries_a_gradient_to_every_study_in_a_misordered_batch():
     assert logits.grad is not None
     assert torch.isfinite(logits.grad).all()
     assert float(logits.grad.abs().sum()) > 0.0
+
+
+def test_cross_entropy_per_label_gives_every_label_the_same_say():
+    """Pooled, a label's share of the gradient tracks how OFTEN it is mentioned; the metric does not.
+
+    Effusion is positive in 60% of studies and Fracture in 7%, so the pooled objective spends about ten
+    times more on one than the other while the score averages the twelve equally. Normalising per column
+    removes that, which is the only sense in which the loss can be said to match the metric.
+    """
+    common, rare = 0, 1
+    logits = torch.zeros(20, 2)
+    logits[:, common] = 3.0  # mentioned everywhere, and nearly right
+    logits[0, rare] = -3.0  # mentioned once, and badly wrong
+    scores = torch.ones(20, 2)
+    weights = torch.zeros(20, 2)
+    weights[:, common] = 1.0
+    weights[0, rare] = 1.0
+
+    pooled = float(Objective()(logits, scores, weights))
+    balanced = float(Objective(per_label=True)(logits, scores, weights))
+    assert balanced > pooled * 4, "the rare label must dominate once every column counts the same"
+
+    # And with the columns equally represented the two agree, so this is a REWEIGHTING and not a rescale.
+    even = torch.ones(20, 2)
+    pooled_even = float(Objective()(logits, scores, even))
+    balanced_even = float(Objective(per_label=True)(logits, scores, even))
+    assert abs(pooled_even - balanced_even) < 1e-6, "equal representation, equal answer — a reweighting, not a rescale"

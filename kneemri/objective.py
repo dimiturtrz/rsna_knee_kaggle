@@ -47,8 +47,9 @@ class Objective:
     schedule, so the pair has to be measured together rather than one at a time.
     """
 
-    def __init__(self, *, normalise_by_count: bool = False) -> None:
+    def __init__(self, *, normalise_by_count: bool = False, per_label: bool = False) -> None:
         self.normalise_by_count = normalise_by_count
+        self.per_label = per_label
 
     def __call__(
         self,
@@ -68,6 +69,16 @@ class Objective:
         """The weighted BCE term, which every objective here is built on top of."""
         elementwise = nn.functional.binary_cross_entropy_with_logits(logits, scores, reduction="none")
         weighted = elementwise * weights
+        if self.per_label:
+            # EACH OF THE TWELVE CONTRIBUTES EQUALLY, because that is what the metric does. Pooling the
+            # whole batch makes a label's share of the gradient proportional to how often it is
+            # mentioned: Effusion is positive in 60% of studies and Fracture in 7%, so the objective
+            # spends roughly ten times more on one than the other while the score averages them the
+            # same. Normalising per COLUMN and then averaging removes that entirely.
+            #
+            # It does not touch positives-versus-negatives within a label — a separate question, and a
+            # weaker one for a rank metric, since AUC is invariant to the positive rate.
+            return (weighted.sum(dim=0) / weights.sum(dim=0).clamp(min=1.0)).mean()
         if self.normalise_by_count:
             return weighted.mean()
         return weighted.sum() / weights.sum().clamp(min=1.0)
@@ -82,8 +93,10 @@ class RankedObjective(Objective):
     finding with few separating pairs in a batch would contribute almost nothing to any step.
     """
 
-    def __init__(self, weight: float = RANK_WEIGHT, *, normalise_by_count: bool = False) -> None:
-        super().__init__(normalise_by_count=normalise_by_count)
+    def __init__(
+        self, weight: float = RANK_WEIGHT, *, normalise_by_count: bool = False, per_label: bool = False
+    ) -> None:
+        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label)
         self.weight = weight
 
     def __call__(

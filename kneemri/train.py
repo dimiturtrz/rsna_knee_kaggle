@@ -60,6 +60,7 @@ class TrainingOptions:
     intensity_aug: bool = False
     weight_floor: bool = False
     normalise_by_count: bool = False
+    per_label_loss: bool = False
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
@@ -184,6 +185,14 @@ class TrainingOptions:
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
         parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() not /weight-sum")
         parser.add_argument(
+            "--per-label-loss",
+            action="store_true",
+            help="normalise the loss PER LABEL so each of the twelve contributes equally, as the metric "
+            "does. Pooled, a label's share of the gradient tracks how often it is mentioned — Effusion "
+            "is positive in 60%% of studies and Fracture in 7%% — while the score averages the twelve "
+            "the same.",
+        )
+        parser.add_argument(
             "--rank-weight",
             type=float,
             default=0.0,
@@ -273,8 +282,10 @@ class TrainingOptions:
         after it has already waited forty minutes for the card.
         """
         if self.rank_weight:
-            return RankedObjective(self.rank_weight, normalise_by_count=self.normalise_by_count)
-        return Objective(normalise_by_count=self.normalise_by_count)
+            return RankedObjective(
+                self.rank_weight, normalise_by_count=self.normalise_by_count, per_label=self.per_label_loss
+            )
+        return Objective(normalise_by_count=self.normalise_by_count, per_label=self.per_label_loss)
 
     def fitted_model(self, encoder: Encoder, slots: int, design: StudyDesign) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
