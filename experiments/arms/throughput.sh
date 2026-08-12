@@ -29,9 +29,20 @@ BASE=(--fold 0 --epochs 1 --one-cycle --weight-floor --rank-weight 1.0
 
 run_train throughput_plain "${BASE[@]}" --out "$PROCESSED/throughput_plain.pt"
 run_train throughput_compiled "${BASE[@]}" --compile-encoder --out "$PROCESSED/throughput_compiled.pt"
+# bf16 rides along because the expensive part - a whole-stack epoch on an idle card - is already being
+# paid twice, and a third run answers a question that would otherwise need its own hour. THE EXPECTED
+# ANSWER IS 'no faster': bf16 and fp16 have the same matmul throughput on Blackwell, so this is here to
+# CONFIRM that, and to show the epoch-0 holdout is not moved by the precision change. What bf16 removes
+# is the loss scaler, and with it scale collapse - insurance, not speed.
+run_train throughput_bf16 "${BASE[@]}" --bf16 --out "$PROCESSED/throughput_bf16.pt"
+
+echo "=== epoch-0 holdout, which precision must not move ==="
+for name in throughput_plain throughput_compiled throughput_bf16; do
+  printf "%-22s " "$name"; grep -oE "holdout mean AUC [0-9.]+" "$LOGS/$name.full.log" | tail -1
+done
 
 echo "=== steady-state img/s, later steps only (the first steps pay for the graph) ==="
-for name in throughput_plain throughput_compiled; do
+for name in throughput_plain throughput_compiled throughput_bf16; do
   printf "%-22s " "$name"
   grep -oE "[0-9]+ img/s" "$LOGS/$name.full.log" | tail -5 | tr '\n' ' '
   echo

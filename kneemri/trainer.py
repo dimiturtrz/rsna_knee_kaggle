@@ -181,6 +181,9 @@ class Trainer:
             self.adaptation.head_lr, self.adaptation.backbone_lr, self.adaptation.unfreeze_last
         )
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
+        # fp16 until a run says otherwise, because that is what every number in the ledger was measured
+        # under and a precision change is a numerics change.
+        self.autocast_dtype = torch.float16
         self.scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
         self.schedule: torch.optim.lr_scheduler.OneCycleLR | None = None
         self.torch_generator = torch.Generator(device=device).manual_seed(SEED)
@@ -200,6 +203,20 @@ class Trainer:
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
         self.reports = reports
+
+    def bfloat16(self) -> None:
+        """Autocast in bf16 and drop the loss scaler with it.
+
+        ATTACHED rather than passed, like every other thing a run may or may not want — the constructor
+        is not where policies accumulate, and the argument gate said so at the sixth one.
+
+        The scaler goes because bf16 carries fp32's exponent range, so there is no scale to collapse and
+        nothing for the scaler to do: leaving it enabled would keep a second thing that can go wrong for
+        no gain. Throughput is unchanged on this card — bf16 and fp16 share the same matmul path — so
+        what this buys is robustness, not speed.
+        """
+        self.autocast_dtype = torch.bfloat16
+        self.scaler = torch.amp.GradScaler("cuda", enabled=False)
 
     def whole_stack(self, slices: int) -> None:
         """Read the ENTIRE cached stack in one step instead of one sampled window of it.
@@ -376,7 +393,7 @@ class Trainer:
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
-            with torch.autocast("cuda", enabled=self.device.type == "cuda"):
+            with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.
                 logits, report = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
@@ -408,7 +425,7 @@ class Trainer:
         self.model.eval()
         middle = (corpus.slices - self.window) // 2
         chunks = []
-        with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
+        with torch.no_grad(), torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
             for batch in self.batches(positions, size, generator, shuffle=False):
                 pixels = torch.from_numpy(
                     np.ascontiguousarray(corpus.images[batch, :, middle : middle + self.window])

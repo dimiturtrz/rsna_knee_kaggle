@@ -321,6 +321,27 @@ def test_whole_stack():
     assert np.isfinite(loss), "a whole-stack step must still train"
 
 
+def test_bfloat16():
+    """bf16 carries fp32's exponent range, so a GradScaler is not merely unneeded — it is a second
+    thing that can go wrong for no gain, and it is disabled rather than left enabled and idle.
+
+    fp16 stays the DEFAULT because every number in the ledger was measured under it, and a precision
+    change is a numerics change: a run under bf16 is not strictly matched to an fp16 control.
+    """
+    torch.manual_seed(SEED)
+    default = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"))
+    assert default.autocast_dtype is torch.float16
+
+    torch.manual_seed(SEED)
+    wide = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"))
+    wide.bfloat16()
+    assert wide.autocast_dtype is torch.bfloat16
+    assert not wide.scaler.is_enabled()
+
+    loss = wide.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+    assert np.isfinite(loss), "a bf16 step must still train"
+
+
 def test_resample_to():
     """Resampling changes the size the model is READ at, and leaves the cache's own size alone.
 

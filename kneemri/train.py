@@ -63,6 +63,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
+    bf16: bool = False
     compile_encoder: bool = False
     vram_gb: float = 0.0
     report_weight: float = 0.0
@@ -145,6 +146,14 @@ class TrainingOptions:
             help="torch.compile the encoder with dynamic shapes. The encoder only, because training "
             "calls supervised() rather than forward(); dynamic because the last batch of an epoch is "
             "partial and a static graph would recompile every epoch.",
+        )
+        parser.add_argument(
+            "--bf16",
+            action="store_true",
+            help="autocast in bfloat16 rather than fp16, and drop the loss scaler with it. Same matmul "
+            "throughput on this card; what it removes is scale collapse, since bf16 carries fp32's "
+            "exponent range. It CHANGES NUMERICS, so a run under it is not strictly matched to a "
+            "control measured in fp16.",
         )
         parser.add_argument(
             "--recompute-activations",
@@ -279,6 +288,8 @@ class TrainingOptions:
             adaptation=self.adaptation(),
             objective=self.objective(),
         )
+        if self.bf16:
+            trainer.bfloat16()
         if self.whole_stack:
             trainer.whole_stack(self.slices)
         if self.train_size:

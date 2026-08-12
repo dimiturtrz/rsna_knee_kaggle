@@ -21,6 +21,7 @@ class _Options:
     slice_pooling: str = "max"
     anatomical_prior: bool = False
     ema: bool = False
+    bf16: bool = False
     rank_weight: float = 1.0
     report_weight: float = 0.0
     whole_stack: bool = True

@@ -39,6 +39,9 @@ class RunOptions(Protocol):
     def ema(self) -> bool: ...
 
     @property
+    def bf16(self) -> bool: ...
+
+    @property
     def rank_weight(self) -> float: ...
 
     @property
@@ -173,6 +176,10 @@ class MemberRecord:
                 "slice_pooling": options.slice_pooling,
                 "anatomical_prior": options.anatomical_prior,
                 "ema": options.ema,
+                # Precision is part of what produced these weights: bf16 and fp16 are different
+                # arithmetic, and a member scored under one is not strictly comparable to a control
+                # measured under the other. Recorded so the ledger can say which, rather than assume.
+                "bf16": options.bf16,
                 "rank_weight": options.rank_weight,
                 "report_weight": options.report_weight,
                 "whole_stack": options.whole_stack,
