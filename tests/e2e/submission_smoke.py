@@ -21,7 +21,7 @@ import torch
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions
+from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.model import TARGETS
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SLOTS
@@ -65,7 +65,9 @@ def test_a_real_study_becomes_a_submission_row():
     model = predictions.load(checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS))
 
     rows = np.arange(STUDIES)
-    scored = predictions.predict(model, corpus.images[rows], corpus.mask[rows], [0], IMAGE_SIZE)
+    scored = predictions.predict(
+        model, corpus.images[rows], corpus.mask[rows], Window(starts=[0], width=GROUP, size=IMAGE_SIZE)
+    )
 
     assert scored.shape == (STUDIES, len(TARGETS))
     assert np.isfinite(scored).all(), "a non-finite probability would be written straight into a submission"

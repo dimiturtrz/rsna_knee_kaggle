@@ -32,7 +32,7 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
-from kneemri.holdout_predictions import HoldoutPredictions
+from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.model import TARGETS, StudyModel
 from kneemri.scores import LabelScores
 
@@ -99,7 +99,9 @@ class Attribution:
         holdout: Holdout,
     ) -> dict[str, float]:
         """Per-label held-out AUC under whatever occlusion the caller has already applied."""
-        scored = self.predictions.predict(model, holdout.images, holdout.mask, holdout.starts, holdout.size)
+        scored = self.predictions.predict(
+            model, holdout.images, holdout.mask, Window(starts=holdout.starts, width=GROUP, size=holdout.size)
+        )
         return self.scores.per_label(scored, holdout.truth)
 
     def _mean(

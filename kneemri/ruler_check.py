@@ -31,7 +31,7 @@ from transformers import AutoModel
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions
+from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SLOTS
@@ -118,7 +118,9 @@ def main() -> None:
         saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
         encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
         model = predictions.load(checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS))
-        scored[checkpoint.stem] = predictions.predict(model, images, mask, starts, IMAGE_SIZE)
+        scored[checkpoint.stem] = predictions.predict(
+            model, images, mask, Window(starts=starts, width=GROUP, size=IMAGE_SIZE)
+        )
         logger.info("scored %s", checkpoint.stem)
 
     check = RulerCheck()

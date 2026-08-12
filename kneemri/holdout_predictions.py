@@ -5,6 +5,7 @@ the same loop was already open-coded in a throwaway slice-count script. An analy
 and reads them over test-time windows is a recurring shape here, not a one-off.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +18,21 @@ from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 GROUP = 3
 BATCH = 8
+
+
+@dataclass(frozen=True)
+class Window:
+    """How a member is read at test time: where its windows begin, how wide, at what resolution.
+
+    One object because the three are never chosen apart — a whole-stack member wants one centred
+    window of full width, a windowed one wants three-slice windows, and the read size follows the
+    member's own config either way. They were three positional arguments, which tripped the
+    argument-count gate and, more to the point, let a caller vary one and forget the others.
+    """
+
+    starts: list[int]
+    width: int
+    size: int
 
 
 class HoldoutPredictions:
@@ -55,10 +71,17 @@ class HoldoutPredictions:
         model: StudyModel,
         images: UInt8[np.ndarray, "b n s h w"],
         mask: Float[np.ndarray, "b n"],
-        starts: list[int],
-        size: int,
+        window: "Window",
     ) -> NDArray[np.float64]:
-        """Probabilities for every study, averaged over the given test-time windows."""
+        """Probabilities for every study, averaged over the given test-time windows.
+
+        `width` is how many slices each window covers, and it defaults to the three-slice group only
+        because that is what a windowed member reads. A WHOLE-STACK member's slot embedding is the
+        elementwise maximum over its entire stack, so it must be given one window of full width — this
+        was hardcoded to GROUP, which windowed such a member by three and quietly scored a different
+        function. The same defect shipped to the leaderboard through `Ensemble` (knee-y8y); this is the
+        analysis path, where it decides which members we choose to submit.
+        """
         chunks = []
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for begin in range(0, images.shape[0], BATCH):
@@ -67,7 +90,9 @@ class HoldoutPredictions:
                 ).to(self.device)
                 flags: Float[Tensor, "b n"] = torch.from_numpy(mask[begin : begin + BATCH]).to(self.device)
                 total = torch.zeros(pixels.shape[0], len(TARGETS), device=self.device)
-                for start in starts:
-                    total = total + torch.sigmoid(model(pixels[:, :, start : start + GROUP], flags, size).float())
-                chunks.append((total / len(starts)).cpu().numpy())
+                for start in window.starts:
+                    total = total + torch.sigmoid(
+                        model(pixels[:, :, start : start + window.width], flags, window.size).float()
+                    )
+                chunks.append((total / len(window.starts)).cpu().numpy())
         return np.concatenate(chunks).astype(np.float64)

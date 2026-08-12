@@ -10,7 +10,7 @@ from typing import override
 
 import torch
 
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions
+from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 DIM = 12
@@ -81,7 +81,7 @@ def test_predict():
     images = torch.randint(0, 256, (5, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8).numpy()
     mask = torch.ones(5, SLOTS).numpy()
 
-    scored = predictions.predict(_member().eval(), images, mask, [0, 3], SIZE)
+    scored = predictions.predict(_member().eval(), images, mask, Window(starts=[0, 3], width=GROUP, size=SIZE))
 
     assert scored.shape == (5, len(TARGETS))
     assert scored.min() >= 0.0
@@ -95,7 +95,9 @@ def test_predict_over_one_window_matches_a_single_forward():
     images = torch.randint(0, 256, (3, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8)
     mask = torch.ones(3, SLOTS)
 
-    scored = HoldoutPredictions(torch.device("cpu")).predict(model, images.numpy(), mask.numpy(), [0], SIZE)
+    scored = HoldoutPredictions(torch.device("cpu")).predict(
+        model, images.numpy(), mask.numpy(), Window(starts=[0], width=GROUP, size=SIZE)
+    )
 
     with torch.no_grad():
         direct = torch.sigmoid(model.forward(images[:, :, 0:GROUP], mask, SIZE))
