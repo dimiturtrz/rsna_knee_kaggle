@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 
 from kneemri.slot_reader import SlotReader
-from kneemri.slots import SLOTS
+from kneemri.slots import EXTENDED_SLOTS, SLOTS, SlotScheme
 from kneemri.study import SlotPipeline, Study
 
 from .conftest import write_series
@@ -71,3 +71,20 @@ def test_slot_images(tmp_path: Path):
     right = pipeline.slot_images(acquisition, 3, "Sagittal", "R")
     assert left is not None and right is not None
     assert torch.equal(right, torch.flip(left, dims=[0])), "a right knee reverses the sagittal stack"
+
+
+def test_bag_widths_to_the_pipeline_scheme(tmp_path: Path):
+    """A nine-slot scheme produces nine bags, because `route` already routes nine.
+
+    The two halves of `bag` used to disagree: routing honoured the pipeline's scheme while the emit
+    loop iterated the module's canonical six. The cache is allocated at the scheme's width, so an
+    extended build would have raised a shape error on EVERY study, been caught as "decode failed", and
+    left a fully zero cache whose mask claims nothing was acquired — a build that finishes and a
+    trainer that reads zeros.
+    """
+    root, planes = _study(tmp_path)
+    extended = SlotPipeline(scheme=SlotScheme(EXTENDED_SLOTS), reader=SlotReader(image_size=16))
+    images, mask = Study.from_directory(root, planes, extended).bag(slices=3)
+    assert images.shape == (len(EXTENDED_SLOTS), 3, 16, 16)
+    assert len(mask) == len(EXTENDED_SLOTS)
+    assert len(EXTENDED_SLOTS) > len(SLOTS), "the point of the scheme is that it is wider"

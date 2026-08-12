@@ -10,7 +10,7 @@ from torch import Tensor
 from kneemri.acquisition import Acquisition
 from kneemri.laterality import Laterality
 from kneemri.slot_reader import SlotReader
-from kneemri.slots import SLOTS, SlotScheme
+from kneemri.slots import SlotScheme
 
 
 @dataclass(frozen=True)
@@ -87,7 +87,13 @@ class Study:
         size = self.pipeline.image_size
         images: list[Tensor] = []
         mask: list[float] = []
-        for slot in SLOTS:
+        # THE PIPELINE'S slots, not the module's. `route` already honours the scheme, so iterating the
+        # canonical six here made the two halves of this method disagree: a nine-slot scheme routed
+        # nine series and emitted six bags. The cache is allocated at the scheme's width, so every
+        # `images[position] = bag` would raise a shape error, land in decode_one's except branch, and be
+        # reported as an absent study — 4,407 of them, leaving a fully zero cache whose mask says
+        # nothing was acquired. A build that "finished" and a trainer that reads zeros.
+        for slot in self.pipeline.scheme.slots:
             acquisition = chosen.get(slot.name)
             stack = None if acquisition is None else self.pipeline.slot_images(acquisition, slices, slot.plane, side)
             if stack is None:
