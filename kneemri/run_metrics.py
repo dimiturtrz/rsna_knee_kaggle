@@ -65,3 +65,13 @@ class RunMetrics:
         if not self.path.exists():
             return []
         return [json.loads(line) for line in self.path.read_text(encoding="utf-8").splitlines() if line]
+
+    def best(self) -> EpochRow | None:
+        """The recorded epoch with the highest mean AUC, or None if the run recorded nothing.
+
+        The BEST rather than the last, because that is the epoch whose weights the checkpoint holds —
+        train.py keeps the best state, so a comparison against the final epoch would report a number no
+        saved member ever had.
+        """
+        rows = [row for row in self.rows() if row["auc"] == row["auc"]]  # NaN != NaN: an unscored run
+        return max(rows, key=lambda row: row["auc"]) if rows else None

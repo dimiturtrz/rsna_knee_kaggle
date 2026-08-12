@@ -23,3 +23,29 @@ def test_rows(tmp_path: Path):
 
     metrics.record(EpochRow(epoch=0, loss=1.2, auc=0.73, seconds=30, per_label={"ACL": 0.7}))
     assert [row["epoch"] for row in metrics.rows()] == [0]
+
+
+def test_best(tmp_path: Path):
+    """The best scored epoch, not the last — that is the epoch whose weights the checkpoint holds.
+
+    An unscored run (--fold -1 records NaN) must come back None rather than picking a NaN row: NaN
+    compares false against everything, so an unguarded max() returns whichever row happened to be first.
+    """
+    checkpoint = tmp_path / "run.pt"
+    empty: dict[str, float] = {}
+    rows: list[EpochRow] = [
+        {"epoch": 0, "loss": 1.0, "auc": 0.84, "seconds": 9, "per_label": empty},
+        {"epoch": 1, "loss": 0.9, "auc": 0.81, "seconds": 9, "per_label": empty},
+    ]
+    checkpoint.with_suffix(".metrics.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8"
+    )
+    best = RunMetrics(checkpoint).best()
+    assert best is not None and best["epoch"] == 0
+
+    unscored = tmp_path / "final.pt"
+    unscored.with_suffix(".metrics.jsonl").write_text(
+        json.dumps({"epoch": 0, "loss": 1.0, "auc": float("nan"), "seconds": 9, "per_label": {}}) + "\n",
+        encoding="utf-8",
+    )
+    assert RunMetrics(unscored).best() is None
