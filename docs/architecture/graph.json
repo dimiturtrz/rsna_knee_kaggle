@@ -165,6 +165,12 @@
     {
       "kind": "import",
       "source": "kneemri.ensemble",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ensemble",
       "target": "kneemri.members",
       "weight": 1
     },
