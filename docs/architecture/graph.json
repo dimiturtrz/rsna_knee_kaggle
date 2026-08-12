@@ -525,6 +525,12 @@
     {
       "kind": "import",
       "source": "kneemri.submission",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.submission",
       "target": "kneemri.slot_reader",
       "weight": 1
     },
@@ -2187,7 +2193,7 @@
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.run",
-      "target": "kneemri.submission.Submission.fallback",
+      "target": "kneemri.submission.Submission.check",
       "weight": 1
     },
     {
@@ -5292,6 +5298,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.submission.Submission.check",
+      "label": "check",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.submission.Submission.chunks",
       "label": "chunks",
       "level": "method",
@@ -5302,14 +5316,6 @@
       "descendants": 0,
       "id": "kneemri.submission.Submission.decode",
       "label": "decode",
-      "level": "method",
-      "parent": "kneemri.submission.Submission",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.submission.Submission.fallback",
-      "label": "fallback",
       "level": "method",
       "parent": "kneemri.submission.Submission",
       "role": null
