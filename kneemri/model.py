@@ -96,8 +96,17 @@ class StudyModel(nn.Module):
         self.pool = self.design.pool
         self.slice_pooling = self.design.slice_pooling
         self.n_slot = n_slot
+        # The BACKBONE's own config decides these, not our registry, because the loaded weights are the
+        # only authority on what they emit. DINOv2 has one class token and no registers; DINOv3 adds
+        # four registers, which must be excluded from the patch pooling below.
         config = getattr(backbone, "config", None)
         self.prefix_tokens = 1 + int(getattr(config, "num_register_tokens", 0) or 0)
+        width = int(getattr(config, "hidden_size", dim) or dim)
+        if width != dim:
+            # A registry that disagrees with the weights is a typo, and it surfaces otherwise as a shape
+            # error deep inside the head - or not at all, if the head happens to accept the width.
+            message = f"encoder emits {width}-wide features and the registry says {dim}"
+            raise ValueError(message)
         # The prior is defined over the canonical six slots, so asking for it with a different slot
         # count is a mistake rather than something to silently truncate — a (12, 6) table broadcast
         # against a (12, 2) attention map would either throw deep inside the head or, worse, not.
@@ -105,11 +114,11 @@ class StudyModel(nn.Module):
             message = f"anatomical prior covers {len(SLOTS)} slots, model has {n_slot}"
             raise ValueError(message)
         prior = SlotAffinity(ANATOMY).matrix(TARGETS, SLOTS) if self.design.anatomical_prior else None
-        width = dim * POOL_PARTS[self.pool]
+        head_width = dim * POOL_PARTS[self.pool]
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
-        self.slices = SliceAttention(width) if self.slice_pooling == ATTEND else None
-        self.head = SlotHead(width, n_slot, len(TARGETS), prior)
+        self.slices = SliceAttention(head_width) if self.slice_pooling == ATTEND else None
+        self.head = SlotHead(head_width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
 

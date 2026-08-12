@@ -338,6 +338,10 @@ def main() -> None:
 
     design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
     encoder = ENCODERS[arguments.variant]
+    # Before the weights are fetched and the cache is mapped: a read size the patch grid cannot tile is
+    # a configuration mistake, and the failure without this is either a crash deep in the encoder or a
+    # silent interpolation of the position embeddings onto a grid the weights never saw.
+    encoder.require_tiling(arguments.train_size or arguments.image_size)
     slots = len(SCHEMES[arguments.scheme])
     model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
     if arguments.recompute_activations:

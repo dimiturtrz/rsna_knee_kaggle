@@ -32,6 +32,28 @@ class Encoder:
     patch: int = 14
     """DINOv2 is patch 14 and DINOv3 is patch 16, which decides which read sizes tile cleanly."""
 
+    def require_tiling(self, size: int) -> None:
+        """Refuse a read size the patch grid cannot tile, naming the sizes that would work.
+
+        A vision transformer cuts the image into `patch`-sized squares, so a side that is not a
+        multiple of `patch` has no clean grid. DINOv2 is patch 14 and DINOv3 is patch 16, and they do
+        NOT agree about which sizes are legal: 336 tiles under both, 392 tiles only under 14, 384 only
+        under 16. Our best DINOv2 recipe reads 392, which a DINOv3 run cannot copy.
+
+        Checked BEFORE a run allocates anything, because the alternative is discovering it after the
+        weights are downloaded and the cache is mapped — or worse, not discovering it, since a
+        transformers backbone may silently interpolate its position embeddings to fit and hand back a
+        plausible answer computed on a grid the weights were never trained for.
+        """
+        if size % self.patch == 0:
+            return
+        below = (size // self.patch) * self.patch
+        message = (
+            f"{self.variant} is patch {self.patch}, which cannot tile a {size} px read — "
+            f"use {below} or {below + self.patch}"
+        )
+        raise ValueError(message)
+
     @property
     def mounted_name(self) -> str:
         """The Kaggle model slug this variant is mounted under in a kernel.

@@ -39,3 +39,25 @@ def test_mount_is_refused_when_there_is_none():
         _ = ENCODERS[V3_SMALL].mounted_name
     assert ENCODERS[V3_SMALL].patch == 16, "patch 16 decides which read sizes tile cleanly"
     assert ENCODERS[V3_BASE].dim == 768
+
+
+def test_require_tiling():
+    """A read size the patch grid cannot tile is refused, with the sizes that would work.
+
+    The two encoders disagree about which sizes are legal, which is the whole point: 336 and 448 tile
+    under both, 392 only under patch 14, 384 only under patch 16. Our best DINOv2 recipe reads 392, so
+    a DINOv3 run cannot simply copy it — and without this the failure is either a crash deep in the
+    encoder or, worse, a silent interpolation of the position embeddings onto a grid the weights never
+    saw.
+    """
+    for size in (336, 448):
+        ENCODERS[SMALL].require_tiling(size)
+        ENCODERS[V3_SMALL].require_tiling(size)
+
+    ENCODERS[SMALL].require_tiling(392)
+    with pytest.raises(ValueError, match="use 384 or 400"):
+        ENCODERS[V3_SMALL].require_tiling(392)
+
+    ENCODERS[V3_SMALL].require_tiling(384)
+    with pytest.raises(ValueError, match="use 378 or 392"):
+        ENCODERS[SMALL].require_tiling(384)

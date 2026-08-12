@@ -20,7 +20,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
-from kneemri.backbone import SMALL
+from kneemri.backbone import ENCODERS, SMALL
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.slots import SCHEMES
 
@@ -328,6 +328,10 @@ class MemberPackage:
 
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""
+        # The member records BOTH its encoder and the size it read at, and nothing until now checked
+        # that the two are compatible: DINOv2 tiles 392 and DINOv3 does not, so a member could name a
+        # combination no patch grid can express and only fail inside a kernel.
+        ENCODERS[member.variant].require_tiling(member.read_size)
         design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling)
         model = StudyModel(backbone, dim, member.slot_count, design).to(device)
         model.load_trained(self.state_dict_of(member, device))
