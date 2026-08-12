@@ -13,7 +13,7 @@ this is the pooling the published members' own out-of-fold predictions were prod
 disjoint windows, probability pooling, 0.025 max deviation against ours).
 """
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 import numpy as np
 import torch
@@ -45,7 +45,27 @@ class Ensemble:
             return list(range(slices - group + 1))
         return [index * group for index in range(max(slices // group, 1))]
 
-    def slices(self) -> int:
+    def groups(self) -> list[list[Member]]:
+        """Members needing identical pixels, gathered so ONE decode serves each group.
+
+        `pixel_group` has existed since the first package and inference never asked: the whole test set
+        was decoded once, at whatever the default happened to be, and every member was fed it. That was
+        harmless only while every member wanted the same pixels.
+
+        It stopped being harmless the moment resolution paid off. Our best recipe reads a 448 px cache
+        at 392, so it records img=448, while every other member records 336 — and `decoded_size`
+        correctly refuses to serve both from one decode. Without grouping, the two things that actually
+        work here (a better recipe, and ensembling) could not be used together.
+
+        The cost is honest and worth naming: N groups is N decodes of the test set, which is the
+        dominant cost of a submission. Grouping keeps it at one decode PER GROUP rather than per member.
+        """
+        gathered: dict[str, list[Member]] = {}
+        for member in self.package.members:
+            gathered.setdefault(member.pixel_group, []).append(member)
+        return list(gathered.values())
+
+    def slices(self, members: list[Member] | None = None) -> int:
         """How deep a stack to decode: the deepest any member was fitted on.
 
         Derived, never defaulted. A member trained on twenty slices and fed twelve is a train/inference
@@ -57,9 +77,9 @@ class Ensemble:
         The MAX rather than each member's own, because a chunk is decoded once and shown to every
         member; a member that wants fewer simply windows over part of it.
         """
-        return max(member.slices for member in self.package.members)
+        return max(member.slices for member in (members or self.package.members))
 
-    def decoded_size(self) -> int:
+    def decoded_size(self, members: list[Member] | None = None) -> int:
         """The resolution the test set must be DECODED at — the members', never a default.
 
         `run()` already derives the slice depth this way, after a member fitted on a deeper stack was
@@ -76,13 +96,13 @@ class Ensemble:
         members wanting different resolutions need two decodes, so disagreement is refused loudly here
         rather than silently resolved in favour of one of them.
         """
-        sizes = {member.image_size for member in self.package.members}
+        sizes = {member.image_size for member in (members or self.package.members)}
         if len(sizes) != 1:
             message = f"members disagree on decode resolution {sorted(sizes)} — that is two decodes, not one"
             raise ValueError(message)
         return sizes.pop()
 
-    def decoded_scheme(self) -> SlotScheme:
+    def decoded_scheme(self, members: list[Member] | None = None) -> SlotScheme:
         """The slot scheme the test set must be DECODED under — the members', never a default.
 
         The sibling of `decoded_size`, and the last of the four fields that travelled in a checkpoint
@@ -94,7 +114,7 @@ class Ensemble:
         Refused rather than resolved when members disagree, for the same reason as resolution — a
         different slot list is a different decode, not a subset of one.
         """
-        lists = {tuple(member.config["slots"]) for member in self.package.members}
+        lists = {tuple(member.config["slots"]) for member in (members or self.package.members)}
         if len(lists) != 1:
             message = f"members disagree on the slot list ({len(lists)} distinct) — that is two decodes, not one"
             raise ValueError(message)
@@ -150,11 +170,47 @@ class Ensemble:
         every member, so the read cost is paid per STUDY rather than per (study, member). That is the
         whole reason members are grouped by the pixels they need.
         """
-        per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in self.package.members}
+        return self.combine(self.predict_members(self.package.members, chunks, overlap=overlap))
+
+    def predict_groups(
+        self,
+        chunks_for: "Callable[[list[Member], int], Iterable[tuple[UInt8[Tensor, 'b n s h w'], Float[Tensor, 'b n']]]]",
+        *,
+        overlap: bool = True,
+    ) -> NDArray[np.float64]:
+        """Predict every member, decoding once PER PIXEL GROUP, and rank-combine across all of them.
+
+        The decode is injected rather than performed here: this class knows which members can share
+        pixels and how their outputs combine, and nothing about DICOM directories. It lives here rather
+        than in `Submission` because the loop is six calls into this object and two into the caller's —
+        the feature-envy gate said so, and it was right.
+
+        Combining across ALL groups at once matters: rank-averaging within a group and then averaging
+        the group results would weight a group of one as heavily as a group of five.
+        """
+        per_member: list[NDArray[np.float64]] = []
+        for members in self.groups():
+            per_member.extend(self.predict_members(members, chunks_for(members, self.slices(members)), overlap=overlap))
+        return self.combine(per_member)
+
+    def predict_members(
+        self,
+        members: list[Member],
+        chunks: Iterable[tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]],
+        *,
+        overlap: bool = True,
+    ) -> list[NDArray[np.float64]]:
+        """One array per member, over every chunk — UNCOMBINED, so groups can be combined together.
+
+        Returned uncombined because rank-averaging must happen ACROSS every member of every group at
+        once: combining per group and then averaging the results would weight a group of one as heavily
+        as a group of five.
+        """
+        per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in members}
         for images, mask in chunks:
-            for member in self.package.members:
+            for member in members:
                 per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
-        return self.combine([np.concatenate(per_member[member.identifier]) for member in self.package.members])
+        return [np.concatenate(per_member[member.identifier]) for member in members]
 
     @staticmethod
     def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:

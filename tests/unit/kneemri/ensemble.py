@@ -9,7 +9,7 @@ import torch
 from torch import Tensor
 
 from kneemri.ensemble import Ensemble
-from kneemri.members import MemberConfig, MemberPackage
+from kneemri.members import Member, MemberConfig, MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
@@ -247,3 +247,56 @@ def test_decoded_scheme(tmp_path: Path):
     ensemble.package.members = [replace(member, identifier="bad", config=unknown)]
     with pytest.raises(ValueError, match="does not define"):
         ensemble.decoded_scheme()
+
+
+def test_groups(tmp_path: Path):
+    """Members needing identical pixels share a group; a different resolution is a different decode."""
+    ensemble = _ensemble(tmp_path / "grouped")
+    member = ensemble.package.members[0]
+    assert len(ensemble.groups()) == 1
+
+    coarser: MemberConfig = {**member.config, "img": 28}
+    ensemble.package.members = [member, replace(member, identifier="big", config=coarser)]
+    grouped = ensemble.groups()
+    assert len(grouped) == 2, "336 and 448 cannot share one decode"
+    assert [len(members) for members in grouped] == [1, 1]
+
+    twin = replace(member, identifier="twin")
+    ensemble.package.members = [member, twin]
+    assert len(ensemble.groups()) == 1, "same pixels, one decode"
+
+
+def test_predict_members(tmp_path: Path):
+    """One array per member, uncombined — groups must be rank-averaged together, not group by group."""
+    ensemble = _ensemble(tmp_path / "members")
+    member = ensemble.package.members[0]
+    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, len(SLOTS))
+
+    arrays = ensemble.predict_members([member], [(images, mask)], overlap=False)
+    assert len(arrays) == 1
+    assert arrays[0].shape == (2, len(TARGETS))
+
+
+def test_predict_groups(tmp_path: Path):
+    """Each group is decoded once, at its own resolution, and every member votes in one combine.
+
+    The decode is injected, so this records what was asked for: one call per group, carrying that
+    group's members and its own slice depth.
+    """
+    ensemble = _ensemble(tmp_path / "two-groups")
+    member = ensemble.package.members[0]
+    coarser: MemberConfig = {**member.config, "img": 28}
+    ensemble.package.members = [member, replace(member, identifier="big", config=coarser)]
+    ensemble.models["big"] = ensemble.models[member.identifier]
+
+    asked: list[tuple[int, int]] = []
+
+    def chunks_for(members: list[Member], slices: int):
+        asked.append((len(members), slices))
+        images = torch.randint(0, 256, (2, len(SLOTS), slices, 14, 14), dtype=torch.uint8)
+        return [(images, torch.ones(2, len(SLOTS)))]
+
+    combined = ensemble.predict_groups(chunks_for, overlap=False)
+    assert asked == [(1, 6), (1, 6)], "one decode per group, never one per member"
+    assert combined.shape == (2, len(TARGETS))

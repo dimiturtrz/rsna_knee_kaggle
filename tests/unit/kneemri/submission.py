@@ -114,7 +114,9 @@ def test_fallback(tmp_path: Path):
 def test_decode(tmp_path: Path):
     """A chunk of studies becomes one batched bag and its presence mask."""
     submission = _submission(tmp_path)
-    images, mask = submission.decode(["study_a", "study_b"], {"sag": "Sagittal"}, slices=3)
+    images, mask = submission.decode(
+        ["study_a", "study_b"], {"sag": "Sagittal"}, 3, submission.ensemble.package.members
+    )
     assert images.shape[0] == 2
     assert mask.shape == (2, len(SLOT_NAMES))
     assert mask[:, 0].tolist() == [1.0, 1.0], "the sagittal fluid slot is filled for both"
@@ -123,7 +125,7 @@ def test_decode(tmp_path: Path):
 def test_predict(tmp_path: Path):
     """Every study gets one probability per target, in [0, 1]."""
     submission = _submission(tmp_path)
-    combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"}, slices=3)
+    combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"})
     assert combined.shape == (2, len(TARGETS))
     assert combined.min() >= 0.0
     assert combined.max() <= 1.0
@@ -147,7 +149,9 @@ def test_run(tmp_path: Path):
 def test_chunks(tmp_path: Path):
     """Chunks arrive already on the ensemble's device, so the predictor never has to move them."""
     submission = _submission(tmp_path)
-    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, slices=3))
+    produced = list(
+        submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, 3, submission.ensemble.package.members)
+    )
     assert len(produced) == 1, "two studies fit in one chunk"
     images, mask = produced[0]
     assert images.device.type == submission.device.type
