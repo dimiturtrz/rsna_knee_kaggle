@@ -44,7 +44,26 @@ so everything below is **directional**, and only the cumulative total clears the
 | **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
 | `resolution` | 336 → 448 px | queued | — | prediction: MCL first |
-| `slice_attention` | attention over slices, not max | built, not run | — | the published successor |
+| `slice_attention` | attention over slices, not max | queued | — | guard fixed, was refusing 'attend' |
+| `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
+| `slices16_ws` | 16 cached slices, whole-stack | running | — | the 20-vs-12 null was windowed-only |
+| `extended_slots` | nine slots, +1,139 coronal series | queued | — | aimed at MCL |
+
+## The leaderboard disagreed with the holdout, and that is the finding of the night
+
+| entry | members | holdout mean | public LB |
+|---|---|---|---|
+| ours v2 | 5 (channel-stacked, windowed) | 0.8269 | **0.888** |
+| whole-stack | 2 (fold 0 + fold 1) | 0.8481 | **0.882** |
+
+Two members that are **+0.021 better each** scored **0.006 lower**. The prediction written before that
+submission — "my honest expectation is an improvement on 0.888" — is refuted.
+
+It is NOT evidence against whole-stack, which is +0.0147 on a matched holdout comparison measured on
+two folds. It is evidence that member QUALITY alone does not carry this leaderboard, and that our
+holdout gains are not transferring one-for-one. 0.006 is also small enough to be LB noise on a public
+subset, so the honest reading needs the rest of the curve — 1, 3 and 23 members are in flight on
+nearly the same members. See `knee-lv2`.
 
 ## Whole-stack is the result of the day
 
