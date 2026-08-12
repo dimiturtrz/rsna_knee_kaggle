@@ -76,8 +76,23 @@ run_snapshot() {
   # matching quote" and took a 2-hour arm with it. The repo has to stay editable while long work runs,
   # so the run gets its own immutable copy.
   local arm="$1"; shift
-  local snapshot="$LOGS/$(basename "$arm" .sh).running.sh"
+  local name; name="$(basename "$arm" .sh)"
+  local snapshot="$LOGS/$name.running.sh"
   cp "$arm" "$snapshot"
+
+  # THE PACKAGE IS SNAPSHOT TOO, and it was not: only the arm script was copied, while the trainer
+  # imported kneemri/ live from the repo. On 2026-08-12 speed_combo launched during an edit and died
+  # with `NameError: name 'Encoder' is not defined` — a half-written import, three seconds wide, that
+  # cost the whole arm. The repo has to stay editable while long work runs; that is the entire reason
+  # the arm gets a copy, and the package is no different.
+  # PYTHONPATH IS NOT ENOUGH, checked rather than assumed: python puts the working directory ahead of
+  # it, so a trainer launched from the repo imports the repo whatever PYTHONPATH says. The trainer
+  # therefore RUNS from the snapshot directory, which needs paths.yaml beside the packages.
+  ARM_SRC="$LOGS/$name.src"
+  export ARM_SRC
+  rm -rf "$ARM_SRC"; mkdir -p "$ARM_SRC"
+  cp -r "$REPO/kneemri" "$REPO/core" "$ARM_SRC/"
+  cp "$REPO/paths.yaml" "$ARM_SRC/"
   # Wait for the card BEFORE the arm starts, so a second chain queues instead of contending.
   hold_card
   # "$@" is forwarded: an arm that takes arguments (which folds, which resolution) was being run with
@@ -109,7 +124,9 @@ run_train() {
   # 'ARM U DONE', the queue advanced on it, and the ledger would have recorded silence as a result.
   # Same family as knee-b02 - never let a wrapper's exit code speak for the work.
   local name="$1"; shift
-  uv run python -u -m kneemri.train "$@" 2>&1 \
+  # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
+  # trainer that is already going. `cd` rather than PYTHONPATH, because the working directory wins.
+  (cd "${ARM_SRC:-$REPO}" && uv run python -u -m kneemri.train "$@") 2>&1 \
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
