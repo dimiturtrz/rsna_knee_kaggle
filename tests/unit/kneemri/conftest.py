@@ -24,10 +24,11 @@ def write_series(
     size: int = 64,
     normal: tuple[float, float, float] = (1.0, 0.0, 0.0),
     reversed_names: bool = True,
+    seed: int = SEED,
 ) -> Path:
     """A series whose file NAMES run opposite to its geometry, as the real corpus's UIDs do."""
     directory.mkdir(parents=True, exist_ok=True)
-    generator = np.random.default_rng(SEED)
+    generator = np.random.default_rng(seed)
     for index in range(slices):
         data = Dataset()
         data.file_meta = FileMetaDataset()

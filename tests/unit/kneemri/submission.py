@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import override
 
 import pandas as pd
+import pytest
 import torch
 from torch import Tensor
 
@@ -49,8 +50,11 @@ def _competition(root: Path) -> Path:
     root.mkdir(parents=True, exist_ok=True)
     identifiers = ["study_a", "study_b"]
     series_rows = []
-    for identifier in identifiers:
-        write_series(root / "test_series" / identifier / "sag", slices=4, size=32)
+    # A DIFFERENT SEED PER STUDY. They shared one, so both studies decoded to identical pixels and the
+    # whole table came out constant — which `Submission.check` now refuses, correctly: two identical
+    # studies carry no ordering, and ordering is the only thing this metric scores.
+    for seed, identifier in enumerate(identifiers):
+        write_series(root / "test_series" / identifier / "sag", slices=4, size=32, seed=SEED + seed)
         series_rows.append({"StudyInstanceUID": identifier, "SeriesInstanceUID": "sag", "Anatomical_Plane": "Sagittal"})
     pd.DataFrame({"StudyInstanceUID": identifiers}).to_csv(root / "test.csv", index=False)
     pd.DataFrame(series_rows).to_csv(root / "test_series.csv", index=False)
@@ -102,13 +106,30 @@ def _submission(tmp_path: Path) -> Submission:
     return Submission(ensemble, _competition(tmp_path / "comp"), working)
 
 
-def test_fallback(tmp_path: Path):
-    """A scoreable file exists BEFORE any prediction, so a later crash still leaves something."""
-    submission = _submission(tmp_path)
-    submission.fallback()
-    written = pd.read_csv(submission.working / "submission.csv")
-    assert list(written.columns) == ["StudyInstanceUID", *TARGETS]
-    assert len(written) == 2
+def test_check(tmp_path: Path):
+    """A table that cannot be a real answer is refused BEFORE it is written and scored.
+
+    Both refused shapes score around chance and neither looks wrong: a table missing studies, and a
+    table whose columns are constant — which is what a rank-average degenerates to when every member
+    returns the same thing, and what the old fallback wrote on purpose. That fallback scored 0.500 on
+    2026-08-12 and spent a submission slot to say nothing.
+    """
+    frame = pd.DataFrame({"StudyInstanceUID": ["a", "b"], **{target: [0.1, 0.9] for target in TARGETS}})
+    Submission.check(frame, ["a", "b"])
+
+    with pytest.raises(ValueError, match="1 rows for 2 studies"):
+        Submission.check(frame.head(1), ["a", "b"])
+
+    # ONE flat column is allowed: predictions tie on small splits, and the visible test set inside a
+    # kernel is three studies — a per-column rule would fail the run that must succeed before anything
+    # can be submitted at all.
+    one_flat = frame.copy()
+    one_flat["MCL"] = 0.5
+    Submission.check(one_flat, ["a", "b"])
+
+    flat = pd.DataFrame({"StudyInstanceUID": ["a", "b"], **{target: [0.5, 0.5] for target in TARGETS}})
+    with pytest.raises(ValueError, match="scores as chance"):
+        Submission.check(flat, ["a", "b"])
 
 
 def test_decode(tmp_path: Path):

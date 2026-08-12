@@ -24,6 +24,7 @@ from torch import Tensor
 
 from kneemri.ensemble import Ensemble
 from kneemri.members import Member
+from kneemri.model import TARGETS
 from kneemri.slot_reader import SlotReader
 from kneemri.study import SlotPipeline, Study
 
@@ -46,12 +47,6 @@ class Submission:
         self.competition = competition
         self.working = working
         self.overlap = overlap
-
-    def fallback(self) -> None:
-        """Copy the sample submission out FIRST, so a crash later still leaves a scoreable file."""
-        sample = pd.read_csv(self.competition / "sample_submission.csv")
-        sample.to_csv(self.working / "submission.csv", index=False)
-        logger.info(f"wrote a fallback submission ({len(sample)} rows)")
 
     def decode(
         self, identifiers: list[str], planes: dict[str, str], slices: int, members: list[Member]
@@ -102,13 +97,22 @@ class Submission:
         )
 
     def run(self) -> pd.DataFrame:
-        """The whole submission: fallback, decode, predict, write — in that order.
+        """The whole submission: decode, predict, write — and NOTHING if any of it fails.
+
+        THERE WAS A FALLBACK HERE AND IT COST A SUBMISSION. It copied `sample_submission.csv` out
+        first, "so a crash later still leaves a scoreable file", and on 2026-08-12 that is exactly what
+        it left: fusion v2 did not finish on the hidden test set, the sample's constant values were
+        scored, and the leaderboard reported 0.500 — chance. A slot was spent to learn nothing, and the
+        number looked like a model result rather than a crash.
+
+        A kernel that fails must produce NO submission.csv. Kaggle then fails the submission itself,
+        which costs no slot and says plainly that the run broke. A fallback converts a loud failure into
+        a quiet wrong answer, and on a five-a-day budget that is the more expensive of the two.
 
         The slice depth comes from the members, not from a default. It used to be `slices: int = 12`,
         and every kernel called `run()` — so a member fitted on a deeper stack would have been scored on
         twelve slices without a word.
         """
-        self.fallback()
         test = pd.read_csv(self.competition / "test.csv")
         series = pd.read_csv(self.competition / "test_series.csv")
         planes = series.set_index("SeriesInstanceUID")["Anatomical_Plane"].to_dict()
@@ -117,6 +121,27 @@ class Submission:
 
         combined = self.predict(identifiers, planes)
         frame = pd.DataFrame(self.ensemble.submission(identifiers, combined))
+        self.check(frame, identifiers)
         frame.to_csv(self.working / "submission.csv", index=False)
         logger.info(f"wrote {len(frame)} rows")
         return frame
+
+    @staticmethod
+    def check(frame: pd.DataFrame, identifiers: list[str]) -> None:
+        """Refuse a table that cannot be a real answer, before it is written and scored.
+
+        Two failures are indistinguishable from a working submission by eye and both score around
+        chance: a table missing studies, and a table with no ordering in it at all.
+
+        EVERY target constant, not any of them. A single flat column is possible on a small split
+        where predictions tie — and the visible test set inside a kernel is three studies, so a
+        per-column rule would fail the run that has to succeed before anything can be submitted. All
+        twelve flat is not a tie, it is the sample submission, which is what the removed fallback wrote
+        and what scored 0.500.
+        """
+        if len(frame) != len(identifiers):
+            message = f"submission has {len(frame)} rows for {len(identifiers)} studies"
+            raise ValueError(message)
+        if len(frame) > 1 and all(frame[target].nunique() == 1 for target in TARGETS):
+            message = "every target is constant — that scores as chance, not as a model"
+            raise ValueError(message)
