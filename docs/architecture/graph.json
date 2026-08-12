@@ -134,6 +134,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.ensemble",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ensemble",
+      "target": "kneemri.test_time",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_predictions",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.holdout_predictions",
       "target": "kneemri.model",
       "weight": 1
@@ -160,6 +178,12 @@
       "kind": "import",
       "source": "kneemri.kernel_run",
       "target": "kneemri.submission",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.label_power",
+      "target": "kneemri.model",
       "weight": 1
     },
     {
@@ -207,19 +231,13 @@
     {
       "kind": "import",
       "source": "kneemri.member_curve",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
       "target": "kneemri.scores",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.member_curve",
-      "target": "kneemri.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.member_curve",
-      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -262,6 +280,12 @@
       "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.members",
+      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -356,6 +380,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.run_comparison",
+      "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.scores",
       "target": "kneemri.model",
       "weight": 1
@@ -442,6 +472,18 @@
       "kind": "import",
       "source": "kneemri.submission",
       "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.submission",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.submission",
+      "target": "kneemri.slot_reader",
       "weight": 1
     },
     {
@@ -949,21 +991,69 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.ensemble.Ensemble.decoded_scheme",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
       "kind": "calls",
-      "source": "kneemri.ensemble.Ensemble.predict_chunks",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
       "target": "kneemri.ensemble.Ensemble.combine",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.ensemble.Ensemble.predict_chunks",
-      "target": "kneemri.ensemble.Ensemble.predict_member",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.ensemble.Ensemble.groups",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.ensemble.Ensemble.predict_members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.ensemble.Ensemble.slices",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_member",
-      "target": "kneemri.ensemble.Ensemble.windows",
+      "target": "kneemri.members.Member.window",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.ensemble.Ensemble.predict_member",
+      "target": "kneemri.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_members",
+      "target": "kneemri.ensemble.Ensemble.predict_member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.members.Window",
       "weight": 1
     },
     {
@@ -1051,6 +1141,30 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.label_power.LabelPower.report",
+      "target": "kneemri.label_power.LabelPower.positives",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_power.LabelPower.report",
+      "target": "kneemri.label_power.LabelPower.standard_error",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.label_power.main",
+      "target": "kneemri.label_power.LabelPower",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_power.main",
+      "target": "kneemri.label_power.LabelPower.report",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.laterality.Laterality",
       "target": "kneemri.acquisition.Acquisition",
@@ -1135,6 +1249,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.scores.LabelScores",
@@ -1189,9 +1309,27 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.members.Member",
+      "target": "kneemri.members.Member",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.members.Member",
       "target": "kneemri.members.MemberConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.members.Member",
+      "target": "kneemri.members.Window",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.Member.window",
+      "target": "kneemri.members.Window",
       "weight": 1
     },
     {
@@ -1312,6 +1450,12 @@
       "kind": "calls",
       "source": "kneemri.model.StudyModel.forward",
       "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.parameter_groups",
+      "target": "kneemri.model.StudyModel._blocks",
       "weight": 1
     },
     {
@@ -1489,9 +1633,57 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.run_comparison.RunComparison",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.run_comparison.RunComparison.__init__",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.deltas",
+      "target": "kneemri.run_metrics.RunMetrics.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.report",
+      "target": "kneemri.run_comparison.RunComparison.deltas",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.report",
+      "target": "kneemri.run_metrics.RunMetrics.best",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.run_comparison.main",
+      "target": "kneemri.run_comparison.RunComparison",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.main",
+      "target": "kneemri.run_comparison.RunComparison.report",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.run_metrics.RunMetrics",
       "target": "kneemri.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_metrics.RunMetrics.best",
+      "target": "kneemri.run_metrics.RunMetrics.rows",
       "weight": 1
     },
     {
@@ -1737,6 +1929,12 @@
     {
       "kind": "calls",
       "source": "kneemri.study_cache.StudyCache.build",
+      "target": "kneemri.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study_cache.StudyCache.build",
       "target": "kneemri.study_cache.StudyCache.shape",
       "weight": 1
     },
@@ -1777,9 +1975,39 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.submission.Submission",
+      "target": "kneemri.members.Member",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.submission.Submission.chunks",
       "target": "kneemri.submission.Submission.decode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.ensemble.Ensemble.decoded_scheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.ensemble.Ensemble.decoded_size",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.study.SlotPipeline",
       "weight": 1
     },
     {
@@ -1791,19 +2019,13 @@
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.predict",
-      "target": "kneemri.ensemble.Ensemble.predict_chunks",
+      "target": "kneemri.ensemble.Ensemble.predict_groups",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.predict",
       "target": "kneemri.submission.Submission.chunks",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.submission.Submission.run",
-      "target": "kneemri.ensemble.Ensemble.slices",
       "weight": 1
     },
     {
@@ -1828,6 +2050,12 @@
       "kind": "references",
       "source": "kneemri.targets.Targets",
       "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.test_time.SpatialViews.apply",
+      "target": "kneemri.test_time.SpatialViews._warp",
       "weight": 1
     },
     {
@@ -1984,6 +2212,12 @@
       "kind": "calls",
       "source": "kneemri.train.main",
       "target": "kneemri.member_record.MemberRecord.payload",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.member_record.MemberRecord.witness",
       "weight": 1
     },
     {
@@ -2269,7 +2503,7 @@
       "role": null
     },
     {
-      "descendants": 36,
+      "descendants": 39,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2382,6 +2616,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.label_power",
+      "label": "label_power",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality",
       "label": "laterality",
       "level": "module",
@@ -2456,6 +2698,14 @@
       "descendants": 0,
       "id": "kneemri.ruler_check",
       "label": "ruler_check",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison",
+      "label": "run_comparison",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2544,6 +2794,14 @@
       "descendants": 0,
       "id": "kneemri.targets",
       "label": "targets",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.test_time",
+      "label": "test_time",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2702,6 +2960,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.label_power.LabelPower",
+      "label": "LabelPower",
+      "level": "class",
+      "parent": "kneemri.label_power",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality.Laterality",
       "label": "Laterality",
       "level": "class",
@@ -2774,6 +3040,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.members.Window",
+      "label": "Window",
+      "level": "class",
+      "parent": "kneemri.members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.model.StudyDesign",
       "label": "StudyDesign",
       "level": "class",
@@ -2834,6 +3108,14 @@
       "label": "RulerCheck",
       "level": "class",
       "parent": "kneemri.ruler_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison",
+      "label": "RunComparison",
+      "level": "class",
+      "parent": "kneemri.run_comparison",
       "role": "primary"
     },
     {
@@ -2971,6 +3253,14 @@
       "level": "class",
       "parent": "kneemri.targets",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.test_time.SpatialViews",
+      "label": "SpatialViews",
+      "level": "class",
+      "parent": "kneemri.test_time",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -3262,6 +3552,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.backbone.Encoder.require_tiling",
+      "label": "require_tiling",
+      "level": "method",
+      "parent": "kneemri.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.build_cache.main",
       "label": "main",
       "level": "method",
@@ -3398,8 +3696,32 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.ensemble.Ensemble.predict_chunks",
-      "label": "predict_chunks",
+      "id": "kneemri.ensemble.Ensemble.decoded_scheme",
+      "label": "decoded_scheme",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.decoded_size",
+      "label": "decoded_size",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.groups",
+      "label": "groups",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.predict_groups",
+      "label": "predict_groups",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
@@ -3408,6 +3730,14 @@
       "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.predict_member",
       "label": "predict_member",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.predict_members",
+      "label": "predict_members",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
@@ -3424,14 +3754,6 @@
       "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.submission",
       "label": "submission",
-      "level": "method",
-      "parent": "kneemri.ensemble.Ensemble",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.ensemble.Ensemble.windows",
-      "label": "windows",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
@@ -3542,6 +3864,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.label_power.LabelPower.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.label_power.LabelPower",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_power.LabelPower.positives",
+      "label": "positives",
+      "level": "method",
+      "parent": "kneemri.label_power.LabelPower",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_power.LabelPower.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.label_power.LabelPower",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_power.LabelPower.standard_error",
+      "label": "standard_error",
+      "level": "method",
+      "parent": "kneemri.label_power.LabelPower",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_power.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.label_power",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.laterality.Laterality.__init__",
       "label": "__init__",
       "level": "method",
@@ -3608,6 +3970,14 @@
       "descendants": 0,
       "id": "kneemri.member_record.MemberRecord.read_size",
       "label": "read_size",
+      "level": "method",
+      "parent": "kneemri.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.MemberRecord.witness",
+      "label": "witness",
       "level": "method",
       "parent": "kneemri.member_record.MemberRecord",
       "role": null
@@ -3710,6 +4080,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.members.Member.from_checkpoint",
+      "label": "from_checkpoint",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.members.Member.group",
       "label": "group",
       "level": "method",
@@ -3750,6 +4128,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.members.Member.scheme",
+      "label": "scheme",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.members.Member.slice_pooling",
       "label": "slice_pooling",
       "level": "method",
@@ -3776,6 +4162,30 @@
       "descendants": 0,
       "id": "kneemri.members.Member.variant",
       "label": "variant",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.whole_stack",
+      "label": "whole_stack",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.window",
+      "label": "window",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.witness",
+      "label": "witness",
       "level": "method",
       "parent": "kneemri.members.Member",
       "role": null
@@ -3832,6 +4242,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel._blocks",
+      "label": "_blocks",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
@@ -4070,8 +4488,48 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison.deltas",
+      "label": "deltas",
+      "level": "method",
+      "parent": "kneemri.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.run_comparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.run_metrics.RunMetrics.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics.best",
+      "label": "best",
       "level": "method",
       "parent": "kneemri.run_metrics.RunMetrics",
       "role": null
@@ -4478,6 +4936,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.StudyCache.scheme_slots",
+      "label": "scheme_slots",
+      "level": "method",
+      "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.study_cache.StudyCache.shape",
       "label": "shape",
       "level": "method",
@@ -4578,6 +5052,30 @@
       "label": "rows",
       "level": "method",
       "parent": "kneemri.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.test_time.SpatialViews.__len__",
+      "label": "__len__",
+      "level": "method",
+      "parent": "kneemri.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.test_time.SpatialViews._warp",
+      "label": "_warp",
+      "level": "method",
+      "parent": "kneemri.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.test_time.SpatialViews.apply",
+      "label": "apply",
+      "level": "method",
+      "parent": "kneemri.test_time.SpatialViews",
       "role": null
     },
     {
