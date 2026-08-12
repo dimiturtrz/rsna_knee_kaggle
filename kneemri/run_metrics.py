@@ -46,7 +46,13 @@ class RunMetrics:
     """
 
     def __init__(self, destination: Path) -> None:
-        self.path = destination.with_suffix(".metrics.jsonl")
+        # IDEMPOTENT, because both spellings are natural at a command line: the TRAINER passes its
+        # checkpoint path and an analysis reaches for the metrics file it can see on disk. Appending
+        # blindly turned the second into `.metrics.metrics.jsonl`, which then reported "recorded no
+        # scored epoch" — an error that describes a real state and hides a typo.
+        self.path = (
+            destination if destination.name.endswith(".metrics.jsonl") else destination.with_suffix(".metrics.jsonl")
+        )
 
     def record(self, row: EpochRow) -> None:
         """Append one epoch's row, attach the VRAM peak, and report the per-label scores.

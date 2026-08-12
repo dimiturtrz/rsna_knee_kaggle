@@ -30,7 +30,10 @@ class RunComparison:
         """Per-arm, per-label difference against the control's best epoch."""
         reference = self.control.best()
         if reference is None:
-            message = f"control {self.control.path} recorded no scored epoch"
+            # Distinguished, because they need different fixes: a missing file is usually the wrong
+            # path, and an empty one is a run that died before its first scored epoch.
+            missing = "does not exist" if not self.control.path.exists() else "recorded no scored epoch"
+            message = f"control {self.control.path} {missing}"
             raise ValueError(message)
         table: dict[str, dict[str, float]] = {}
         for arm in self.arms:
