@@ -1340,13 +1340,25 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.member_curve.MemberCurve.sizes",
-      "target": "kneemri.ensemble.Ensemble.combine",
+      "source": "kneemri.member_curve.MemberCurve.best",
+      "target": "kneemri.member_curve.MemberCurve.subsets",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.member_curve.MemberCurve.sizes",
+      "target": "kneemri.member_curve.MemberCurve.subsets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.subsets",
+      "target": "kneemri.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.subsets",
       "target": "kneemri.scores.LabelScores.mean",
       "weight": 1
     },
@@ -1396,6 +1408,12 @@
       "kind": "construct",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.member_curve.MemberCurve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.member_curve.MemberCurve.best",
       "weight": 1
     },
     {
@@ -4344,6 +4362,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.best",
+      "label": "best",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_curve.MemberCurve.report",
       "label": "report",
       "level": "method",
@@ -4354,6 +4380,14 @@
       "descendants": 0,
       "id": "kneemri.member_curve.MemberCurve.sizes",
       "label": "sizes",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.subsets",
+      "label": "subsets",
       "level": "method",
       "parent": "kneemri.member_curve.MemberCurve",
       "role": null
