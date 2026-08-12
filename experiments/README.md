@@ -71,6 +71,28 @@ closest at +0.0185 on its own control. Two things this does NOT license: reading
 for any individual knob inside it, and expecting it on the leaderboard, where our holdout gains have so
 far transferred at roughly half (`knee-lv2`).
 
+## Whole-stack and overlap TTA are the same mechanism
+
+Each member scored twice: once by training at its best epoch, once by the corrected curve with overlap
+TTA at inference.
+
+| member | trained holdout | with overlap TTA | gain |
+|---|---|---|---|
+| `lr5x_d6` — windowed | 0.8323 | **0.8475** | +0.0152 |
+| `max12` — windowed | 0.8310 | 0.8451 | +0.0141 |
+| `large_deep` — windowed | 0.8304 | 0.8450 | +0.0146 |
+| `wsfold0_e6` — whole-stack | 0.8457 | 0.8457 | **0.0000** |
+| `slices16` — whole-stack | 0.8452 | 0.8452 | **0.0000** |
+
+Averaging ten overlapping three-slice windows means the model **does** see every slice — aggregated in
+PREDICTION space rather than in FEATURE space. So the windowed lift (+0.0146) and whole-stack's
+training-time advantage (+0.0147) are the same thing bought twice, and they do not compose.
+
+**This partly re-prices whole-stack.** Its +0.0147 was measured against a control scored WITHOUT the
+TTA that control gets at inference. Where both are given their own best reading, `lr5x_d6` (0.8475)
+edges `wsfold0_e6` (0.8457). What survives untouched is resolution: `res392` scores 0.8523 with no TTA
+available to it at all. See `knee-eeo`.
+
 ## What is ours, and what is grafted
 
 **0.894 is not our number.** Twenty of its twenty-three models are `pilkwang/rsna-knee-weights` — CC0
