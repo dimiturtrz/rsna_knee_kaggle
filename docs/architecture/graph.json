@@ -1862,6 +1862,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.deltas",
+      "target": "kneemri.run_metrics.RunMetrics.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.report",
       "target": "kneemri.run_comparison.RunComparison.deltas",
       "weight": 1
@@ -5012,6 +5018,14 @@
       "descendants": 0,
       "id": "kneemri.run_metrics.RunMetrics.best",
       "label": "best",
+      "level": "method",
+      "parent": "kneemri.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_metrics.RunMetrics.exists",
+      "label": "exists",
       "level": "method",
       "parent": "kneemri.run_metrics.RunMetrics",
       "role": null
