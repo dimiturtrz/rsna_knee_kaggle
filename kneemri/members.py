@@ -43,6 +43,9 @@ class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
 
     img: int
+    whole_stack: NotRequired[bool]
+    """Absent on every member fitted before whole-stack reading existed; those were windowed."""
+
     train_size: NotRequired[int]
     """Absent on every member fitted before the read size could differ from the cache's."""
 
@@ -90,6 +93,24 @@ class Member:
         against their stored fingerprints rather than being refused by a field they predate.
         """
         return int(self.config.get("train_size") or self.config["img"])
+
+    @property
+    def whole_stack(self) -> bool:
+        """Whether this member was fitted reading EVERY cached slice in one pass.
+
+        Recorded in every checkpoint since whole-stack training landed, and read by nobody until
+        2026-08-12 — the same defect as `slice_pooling`, which was also written faithfully and ignored.
+
+        It changes what inference must do, not merely how it is described. A whole-stack member's slot
+        embedding is the elementwise maximum over the FULL stack; serving it three slices at a time
+        gives it maxima over a quarter of the stack, which is a different function of the same pixels.
+        Nothing raises, the fingerprint passes (it fixes image size and group, not stack depth), and the
+        holdout cannot see it because holdout scoring reads the same window training did.
+
+        Defaults to False for every member fitted before the flag existed, including all twenty
+        published ones — they were windowed, and windowed is what they must stay.
+        """
+        return bool(self.config.get("whole_stack", False))
 
     @property
     def slot_count(self) -> int:

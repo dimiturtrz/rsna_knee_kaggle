@@ -9,7 +9,7 @@ from torch import Tensor
 
 from kneemri.ensemble import Ensemble
 from kneemri.members import MemberPackage
-from kneemri.model import TARGETS, StudyModel
+from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
 DIM = 8
@@ -41,12 +41,15 @@ class _FakeBackbone(torch.nn.Module):
         return _Output(last_hidden_state=base + rows.reshape(n, 1, DIM))
 
 
-def _ensemble(tmp_path: Path) -> Ensemble:
+def _ensemble(tmp_path: Path, *, whole_stack: bool = False, slice_pooling: str = "channels") -> Ensemble:
     device = torch.device("cpu")
     torch.manual_seed(SEED)
-    model = StudyModel(_FakeBackbone(), DIM, len(SLOTS))
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    model = StudyModel(_FakeBackbone(), DIM, len(SLOTS), StudyDesign(slice_pooling=slice_pooling))
     config = {
         "img": 14,
+        "whole_stack": whole_stack,
+        "slice_pooling": slice_pooling,
         "slices": 6,
         "group": 3,
         "crop_mm": 130.0,
@@ -158,3 +161,46 @@ def test_slices(tmp_path: Path):
 
     ensemble.package.members[0].config["slices"] = 20
     assert ensemble.slices() == 20, "a deeper member must raise the decode depth, not be truncated to it"
+
+
+def test_predict_member_reads_a_whole_stack_member_in_one_pass(tmp_path: Path):
+    """A whole-stack member sees its ENTIRE stack at once, not `group` slices at a time.
+
+    Its slot embedding is the elementwise maximum over the full stack, so windowing it by three would
+    hand it maxima over a quarter of the stack — a different function of the same pixels. Nothing
+    raises when that happens and the holdout cannot expose it, because holdout scoring reads the same
+    window training did. The leaderboard did: two members at 0.8481 holdout scored 0.882 while five at
+    0.8269 scored 0.888.
+
+    The stack here is deeper than the member wants, which is the real case — a chunk is decoded to the
+    deepest depth ANY member needs, so a member fitted on six must be handed the middle six of eight,
+    exactly as `Trainer.predict` takes the middle window.
+    """
+    ensemble = _ensemble(tmp_path / "whole", whole_stack=True, slice_pooling="max")
+    member = ensemble.package.members[0]
+    images = torch.randint(0, 256, (2, len(SLOTS), 8, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, len(SLOTS))
+
+    predictions = ensemble.predict_member(member, images, mask, overlap=True)
+
+    model = ensemble.models[member.identifier]
+    model.eval()
+    with torch.no_grad():
+        expected = torch.sigmoid(model(images[:, :, 1:7], mask, member.read_size).float()).numpy()
+    assert np.allclose(predictions, expected), "one pass over the middle six slices, not ten windows of three"
+
+
+def test_predict_member_still_windows_a_member_that_is_not_whole_stack(tmp_path: Path):
+    """The published members were fitted windowed and must stay windowed — the two paths differ."""
+    windowed = _ensemble(tmp_path / "win", whole_stack=False, slice_pooling="max")
+    member = windowed.package.members[0]
+    images = torch.randint(0, 256, (2, len(SLOTS), 8, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, len(SLOTS))
+
+    model = windowed.models[member.identifier]
+    model.eval()
+    with torch.no_grad():
+        single = torch.sigmoid(model(images[:, :, 1:7], mask, member.read_size).float()).numpy()
+    assert not np.allclose(windowed.predict_member(member, images, mask, overlap=True), single), (
+        "a windowed member averaged over its windows is not one pass over the stack"
+    )

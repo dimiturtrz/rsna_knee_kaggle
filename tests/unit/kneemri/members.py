@@ -282,3 +282,14 @@ def test_slice_pooling():
 
     maxed = replace(_member(), config={**_config(), "slice_pooling": "max"})
     assert maxed.slice_pooling == "max"
+
+
+def test_whole_stack():
+    """Absent means windowed, which is what every member fitted before the flag existed was.
+
+    The two published-member classes are the equivalence classes that matter: the twenty CC0 members
+    carry no such key and must never be served a whole stack, and ours carry it True and must never be
+    served three slices at a time.
+    """
+    assert not _member().whole_stack, "a manifest without the key describes a windowed member"
+    assert replace(_member(), config={**_config(), "whole_stack": True}).whole_stack

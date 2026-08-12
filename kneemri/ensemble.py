@@ -69,6 +69,22 @@ class Ensemble:
         """One member's probabilities for a batch of studies, averaged over its windows."""
         model = self.models[member.identifier]
         model.eval()
+        if member.whole_stack:
+            # A whole-stack member's slot embedding is the elementwise maximum over its ENTIRE stack.
+            # Windowing it by `group` would hand it maxima over three slices at a time — a different
+            # function of the same pixels, and one the holdout cannot expose, because holdout scoring
+            # reads the same window training did. Measured consequence before this existed: two members
+            # at 0.8481 holdout scored 0.882 on the leaderboard while five members at 0.8269 scored
+            # 0.888.
+            #
+            # The MIDDLE `member.slices` of whatever was decoded, which is exactly what
+            # `Trainer.predict` does — the decoded depth is the deepest any member wants, so a member
+            # fitted on twelve must not be handed sixteen.
+            width = min(member.slices, images.shape[2])
+            start = (images.shape[2] - width) // 2
+            with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
+                logits = model(images[:, :, start : start + width], mask, member.read_size).float()
+            return torch.sigmoid(logits).cpu().numpy().astype(np.float64)
         starts = self.windows(images.shape[2], member.group, overlap=overlap)
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
