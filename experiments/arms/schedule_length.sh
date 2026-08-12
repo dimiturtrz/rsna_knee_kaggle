@@ -33,5 +33,5 @@ require "$LABELS"
 run_train "schedule_${EPOCHS}" \
   --fold 0 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack \
-  --recompute-activations --compile-encoder --vram-gb 26 \
+  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/schedule_${EPOCHS}_s2026.pt"

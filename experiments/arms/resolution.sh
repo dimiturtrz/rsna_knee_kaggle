@@ -87,5 +87,5 @@ run_train "resolution_${SIZE}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr 4e-5 --recompute-activations --vram-gb 28 \
+  --backbone-lr 4e-5 --recompute-activations --compile-encoder --bf16 --vram-gb 28 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"

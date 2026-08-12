@@ -26,5 +26,5 @@ require "$LABELS"
 run_train "unfreeze_${BLOCKS}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --unfreeze-last "$BLOCKS" \
-  --recompute-activations --compile-encoder --vram-gb 26 \
+  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/unfreeze${BLOCKS}_s2026.pt"
