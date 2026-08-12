@@ -41,7 +41,12 @@ require "$LABELS"
 # depth of stack, so it is exactly the kind of member worth having. Its inference costs a second decode
 # (pixel_group includes the slice count), which is a real cost and the reason to check it earns a place
 # rather than assume it.
+# res392 reads the 448 px cache and every other member reads 336, which member_curve could not mix
+# until it learned to group checkpoints by cache and read each one the way it was fitted. It is also
+# our best single member (0.8523), so a curve without it was ranking subsets of the second team.
 MEMBERS=(
+  "$PROCESSED/res392_ws_s2026.pt"
+  "$PROCESSED/sliceattn_s2026.pt"
   "$PROCESSED/wsfold0_e6.pt"
   "$PROCESSED/slices16_ws_s2026.pt"
   "$PROCESSED/lr5x_d6_s2026.pt"
