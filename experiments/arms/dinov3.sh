@@ -33,6 +33,16 @@
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 VARIANT="${1:-v3small}"
+SIZE="${2:-336}"
+
+# THE GRID, NOT THE PIXELS, is what a patch-16 encoder gets less of. At 336 px DINOv2 cuts a 24x24
+# grid (576 patches) and DINOv3 cuts 21x21 (441) - so "same resolution" hands v3 a 23% COARSER map of
+# the same anatomy, on a task whose findings are 1-3 mm. Reading at 384 restores 24x24 and costs what
+# DINOv2 costs at 336, which is why it is the honest comparison rather than a bigger-is-better rung.
+# 384 does not tile at patch 14, so it is a size only a v3 can read - and it comes off the 448 cache
+# that already exists, resampled the same way res392 is.
+CACHE=336
+[ "$SIZE" = "336" ] || CACHE=448
 require "$LABELS"
 
 # The gated weights need a token. Read from the credential file into the environment, never echoed and
