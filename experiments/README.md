@@ -46,8 +46,25 @@ so everything below is **directional**, and only the cumulative total clears the
 | `resolution` | 336 → 448 px | queued | — | prediction: MCL first |
 | `slice_attention` | attention over slices, not max | queued | — | guard fixed, was refusing 'attend' |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
-| `slices16_ws` | 16 cached slices, whole-stack | running | — | the 20-vs-12 null was windowed-only |
+| `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
 | `extended_slots` | nine slots, +1,139 coronal series | queued | — | aimed at MCL |
+
+## Ensemble SIZE is worth more than anything we can do to a single model
+
+| members | holdout per member | public LB |
+|---|---|---|
+| 1 — our strongest model ever | 0.8518 | **0.868** |
+| 2 — whole-stack | 0.8481 | **0.882** |
+| 5 — old, channel-stacked, windowed | 0.8269 | **0.888** |
+
+Four entries built to isolate one variable. The best single model this project has produced loses to
+five much weaker ones by **0.020** — more than whole-stack (+0.0147) and more than every knob combined.
+
+This does NOT defend folds or seeds, which remain banned and rightly so: the noise floor is the
+holdout's own sampling error (`knee-2rx`), so re-running a recipe cannot buy a better measurement. It
+says that AVERAGING MANY PREDICTORS is worth ~0.02, whatever produced them. So the members have to
+differ by MECHANISM rather than by RNG — and every arm here is fitted on the same fold-0 split, which
+makes every arm a member as well as a verdict. See `knee-9pl`.
 
 ## The leaderboard disagreed with the holdout, and that is the finding of the night
 
