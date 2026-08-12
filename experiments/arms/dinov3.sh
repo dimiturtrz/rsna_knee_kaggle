@@ -63,5 +63,5 @@ export HF_TOKEN
 run_train "dinov3_${VARIANT}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
-  --recompute-activations --vram-gb 26 \
+  --recompute-activations --compile-encoder --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_s2026.pt"
