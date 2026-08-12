@@ -96,6 +96,8 @@ class StudyModel(nn.Module):
         self.pool = self.design.pool
         self.slice_pooling = self.design.slice_pooling
         self.n_slot = n_slot
+        config = getattr(backbone, "config", None)
+        self.prefix_tokens = 1 + int(getattr(config, "num_register_tokens", 0) or 0)
         # The prior is defined over the canonical six slots, so asking for it with a different slot
         # count is a mistake rather than something to silently truncate — a (12, 6) table broadcast
         # against a (12, 2) attention map would either throw deep inside the head or, worse, not.
@@ -297,7 +299,12 @@ class StudyModel(nn.Module):
 
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce patch tokens to one vector: the class token, the patch mean, optionally the tail."""
-        patch = tokens[:, 1:]
+        # PREFIX TOKENS, not "the first one". DINOv2 puts a single class token in front of the patches;
+        # DINOv3 adds four REGISTER tokens, so `tokens[:, 1:]` would fold them into the patch mean —
+        # and registers exist precisely to absorb high-norm outliers, which is the worst thing to
+        # average and the worst thing to hand a top-k. The count comes off the backbone's own config,
+        # so a v2 member is unchanged (no registers, prefix of one) and nothing re-fingerprints.
+        patch = tokens[:, self.prefix_tokens :]
         parts = [tokens[:, 0], patch.mean(1)]
         if self.pool == "cls_mean_focal":
             # The upper tail of each channel over the patch grid, taken per channel rather than by
