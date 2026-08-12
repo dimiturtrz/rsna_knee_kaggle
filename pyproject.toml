@@ -86,7 +86,19 @@ extend_exclude = ["noxfile.py", "comp"]
 # (numpy/jaxtyping/beartype/pydantic) — they read as unused until you import them.
 [tool.deptry.per_rule_ignores]
 # >>> LOCAL-SLOT: deptry-unused — PRUNE a starter once you wire it (keep pytest/pytest-cov/sdlc-devtools)
-DEP002 = ["pytest", "pytest-cov", "sdlc-devtools", "numpy", "jaxtyping", "beartype", "pydantic", "kaggle"]
+# `triton-windows` is never imported by us: it is the backend torch.compile's inductor loads at the
+# first backward, and its absence is why --compile-encoder failed here on every run it was ever given.
+DEP002 = [
+    "pytest",
+    "pytest-cov",
+    "sdlc-devtools",
+    "numpy",
+    "jaxtyping",
+    "beartype",
+    "pydantic",
+    "kaggle",
+    "triton-windows",
+]
 # <<< LOCAL-SLOT: deptry-unused
 
 [tool.ruff]

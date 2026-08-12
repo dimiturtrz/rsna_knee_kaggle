@@ -6,6 +6,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from kneemri import kernel_run
+from kneemri.backbone import BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
 from kneemri.kernel_run import KernelRun
 
 
@@ -27,24 +28,33 @@ def test_chosen():
     assert [member.holdout for member in KernelRun(members=1).chosen(package)] == [0.87]
 
 
-def test_find_dinov2(tmp_path: Path, monkeypatch: MonkeyPatch):
-    """The mount is matched on VARIANT, not merely found.
+def test_find_encoder(tmp_path: Path, monkeypatch: MonkeyPatch):
+    """The mount is matched on the ENCODER, not merely found, across both families at once.
 
-    Mounting both sizes and taking whichever sorts first would build a member at the wrong width, which
-    surfaces as a shape error during load if we are lucky and as a silently wrong model if not.
+    Mounting several and taking whichever sorts first would build a member at the wrong width, which
+    surfaces as a shape error during load if we are lucky and as a silently wrong model if not. All
+    four mounts are present together because that is the case the old `"dinov2" in path` predicate got
+    wrong: it could not see a DINOv3 at all, and `vits16`/`vitb16` are not what our variants are called.
     """
-    for variant in ("base", "small"):
-        mount = tmp_path / "models" / "metaresearch" / "dinov2" / "PyTorch" / variant / "1"
+    for parts in (
+        ("models", "metaresearch", "dinov2", "PyTorch", "small", "1"),
+        ("models", "metaresearch", "dinov2", "PyTorch", "base", "1"),
+        ("datasets", "dinov3-hf", "vits16"),
+        ("datasets", "dinov3-hf", "vitb16"),
+    ):
+        mount = tmp_path.joinpath(*parts)
         mount.mkdir(parents=True)
         (mount / "config.json").write_text("{}", encoding="utf-8")
     monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
 
-    assert KernelRun().find_dinov2("small").name == "1"
-    assert "small" in str(KernelRun().find_dinov2("small"))
-    assert "base" in str(KernelRun().find_dinov2("base"))
+    assert KernelRun().find_encoder(ENCODERS[SMALL]).name == "1"
+    assert "small" in str(KernelRun().find_encoder(ENCODERS[SMALL]))
+    assert "base" in str(KernelRun().find_encoder(ENCODERS[BASE]))
+    assert KernelRun().find_encoder(ENCODERS[V3_SMALL]).name == "vits16"
+    assert KernelRun().find_encoder(ENCODERS[V3_BASE]).name == "vitb16"
 
 
-def test_find_dinov2_refuses_when_the_variant_is_not_mounted(tmp_path: Path, monkeypatch: MonkeyPatch):
+def test_find_encoder_refuses_when_the_variant_is_not_mounted(tmp_path: Path, monkeypatch: MonkeyPatch):
     """A missing mount is fatal rather than silently substituted with the other size."""
     mount = tmp_path / "models" / "dinov2" / "small" / "1"
     mount.mkdir(parents=True)
@@ -52,7 +62,19 @@ def test_find_dinov2_refuses_when_the_variant_is_not_mounted(tmp_path: Path, mon
     monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
 
     with pytest.raises(FileNotFoundError):
-        KernelRun().find_dinov2("base")
+        KernelRun().find_encoder(ENCODERS[BASE])
+
+
+def test_find_encoder_refuses_when_two_mounts_match(tmp_path: Path, monkeypatch: MonkeyPatch):
+    """Two directories answering to one encoder is unresolvable, and picking one loads wrong weights."""
+    for version in ("1", "2"):
+        mount = tmp_path / "models" / "metaresearch" / "dinov2" / "PyTorch" / "small" / version
+        mount.mkdir(parents=True)
+        (mount / "config.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
+
+    with pytest.raises(FileNotFoundError, match="matches 2 mounts"):
+        KernelRun().find_encoder(ENCODERS[SMALL])
 
 
 def test_run(monkeypatch: MonkeyPatch):

@@ -17,7 +17,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.backbone import ENCODERS
+from kneemri.backbone import ENCODERS, Encoder
 from kneemri.ensemble import Ensemble
 from kneemri.members import Member, MemberPackage
 from kneemri.submission import Submission
@@ -35,23 +35,29 @@ class KernelRun:
         self.members = members
         self.overlap = overlap
 
-    def find_dinov2(self, variant: str) -> Path:
-        """The mounted DINOv2 weights for one variant.
+    def find_encoder(self, encoder: Encoder) -> Path:
+        """The mounted weights for one encoder.
 
-        The variant is matched, not merely found. Mounting both small and base and taking whichever
-        sorted first would build a member at the wrong width, which surfaces as a shape error during
-        load if we are lucky and as a silently wrong model if the head happens to accept it.
+        The encoder owns its own recognition (`Encoder.locates`) rather than this method knowing the
+        word 'dinov2' twice and splitting on it — which is what it did, and which cannot see a DINOv3
+        mount at all, nor tell `vits16` from `vitb16`, because those are not what our variants are
+        called.
         """
         candidates = [
             config.parent
             for config in sorted(INPUT.rglob("config.json"))
-            if not {"train_series", "test_series"} & set(config.parts) and "dinov2" in str(config).lower()
+            if not {"train_series", "test_series"} & set(config.parts)
         ]
-        for mount in candidates:
-            if variant in str(mount).lower().split("dinov2")[-1]:
-                return mount
-        message = f"no DINOv2 {variant} mount among {candidates}"
-        raise FileNotFoundError(message)
+        found = [mount for mount in candidates if encoder.locates(str(mount))]
+        if not found:
+            message = f"no {encoder.variant} mount among {candidates}"
+            raise FileNotFoundError(message)
+        if len(found) > 1:
+            # Loading whichever sorted first builds a member on weights it was not fitted on, which
+            # surfaces as a shape error if we are lucky and as a silently wrong model if not.
+            message = f"{encoder.variant} matches {len(found)} mounts: {found}"
+            raise FileNotFoundError(message)
+        return found[0]
 
     def chosen(self, package: MemberPackage) -> list[Member]:
         """Which members to run: all of them, or the strongest few for the efficiency entry."""
@@ -82,7 +88,7 @@ class KernelRun:
         models = {}
         for member in package.members:
             encoder = ENCODERS[member.variant]
-            weights = self.find_dinov2(encoder.variant)
+            weights = self.find_encoder(encoder)
             models[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
         logger.info("loaded and fingerprint-checked %d members from %s", len(models), package.root)
 

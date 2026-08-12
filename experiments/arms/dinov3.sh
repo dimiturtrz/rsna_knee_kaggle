@@ -25,9 +25,11 @@
 # board against 0.894 for a diverse ensemble. Expect a member that fails differently rather than a
 # jump. That is still worth having: differently-failing members are the one thing measured to pay.
 #
-# NOT SUBMITTABLE YET, deliberately: Kaggle has no official metaresearch/dinov3, so `mounted_name`
-# raises for this encoder rather than letting a kernel mount nothing and fail deep inside a load.
-# Publishing the weights as a dataset is a Meta-licence question, not a code one.
+# SUBMITTABLE. Kaggle has no official metaresearch/dinov3 - its only DINOv3 is Keras's, in a KerasHub
+# preset format `AutoModel.from_pretrained` cannot read - so the transformers snapshot is published as
+# the PRIVATE dataset `dimiturnt/dinov3-hf`, one directory per variant. The DINOv3 licence permits
+# making the materials available under its own terms with a copy of the Agreement alongside; the HF
+# snapshot ships LICENSE.md and it was uploaded with the weights, so that holds by construction.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 VARIANT="${1:-v3small}"

@@ -1083,6 +1083,12 @@
     {
       "kind": "references",
       "source": "kneemri.kernel_run.KernelRun",
+      "target": "kneemri.backbone.Encoder",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kernel_run.KernelRun",
       "target": "kneemri.members.Member",
       "weight": 1
     },
@@ -1096,6 +1102,12 @@
       "kind": "calls",
       "source": "kneemri.kernel_run.KernelRun.chosen",
       "target": "kneemri.members.MemberPackage.strongest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kernel_run.KernelRun.find_encoder",
+      "target": "kneemri.backbone.Encoder.locates",
       "weight": 1
     },
     {
@@ -1119,7 +1131,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kernel_run.KernelRun.run",
-      "target": "kneemri.kernel_run.KernelRun.find_dinov2",
+      "target": "kneemri.kernel_run.KernelRun.find_encoder",
       "weight": 1
     },
     {
@@ -3544,6 +3556,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.backbone.Encoder.locates",
+      "label": "locates",
+      "level": "method",
+      "parent": "kneemri.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.backbone.Encoder.mounted_name",
       "label": "mounted_name",
       "level": "method",
@@ -3840,8 +3860,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kernel_run.KernelRun.find_dinov2",
-      "label": "find_dinov2",
+      "id": "kneemri.kernel_run.KernelRun.find_encoder",
+      "label": "find_encoder",
       "level": "method",
       "parent": "kneemri.kernel_run.KernelRun",
       "role": null

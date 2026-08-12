@@ -2,7 +2,7 @@
 
 import pytest
 
-from kneemri.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL
+from kneemri.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL, Encoder
 
 
 def test_mounted_name():
@@ -30,15 +30,39 @@ def test_every_variant_states_its_own_width():
 
 
 def test_mount_is_refused_when_there_is_none():
-    """DINOv3 has no Kaggle mirror, so asking where a kernel would find it must raise HERE.
+    """An encoder with no Kaggle mirror must raise HERE, not inside a kernel.
 
     The alternative is a kernel that mounts nothing, fails deep inside a load, and burns a submission
-    slot to tell us something the encoder table already knew.
+    slot to tell us something the encoder table already knew. DINOv3 no longer exercises this — its
+    weights are published as a private dataset — so the case is stated with an encoder that has none.
     """
     with pytest.raises(ValueError, match="no Kaggle mount"):
-        _ = ENCODERS[V3_SMALL].mounted_name
+        _ = Encoder("nowhere", "facebook/nothing", 384).mounted_name
+
+
+def test_dinov3_is_mountable_from_our_own_dataset():
+    """Kaggle's only DINOv3 is Keras's, in a preset format `AutoModel.from_pretrained` cannot read."""
+    assert ENCODERS[V3_SMALL].mounted_name == "dimiturnt/dinov3-hf/vits16"
+    assert ENCODERS[V3_BASE].mounted_name == "dimiturnt/dinov3-hf/vitb16"
     assert ENCODERS[V3_SMALL].patch == 16, "patch 16 decides which read sizes tile cleanly"
     assert ENCODERS[V3_BASE].dim == 768
+
+
+def test_locates():
+    """Each encoder recognises its own mount and no sibling's, across both families at once.
+
+    `vits16` is a substring of nothing else here, but `dinov2/PyTorch/small` and `dinov3-hf/vits16`
+    both contain a size word — so the match is on ALL fragments, and a v2 encoder must not answer to a
+    v3 directory even when the sizes agree.
+    """
+    assert ENCODERS[SMALL].locates("/kaggle/input/dinov2/pytorch/small/1")
+    assert not ENCODERS[SMALL].locates("/kaggle/input/dinov3-hf/vits16")
+    assert not ENCODERS[BASE].locates("/kaggle/input/dinov2/pytorch/small/1")
+    assert ENCODERS[V3_SMALL].locates(r"C:\kaggle\input\dinov3-hf\vits16"), "a Windows path is the same mount"
+    assert not ENCODERS[V3_SMALL].locates("/kaggle/input/dinov3-hf/vitb16")
+    assert not Encoder("nowhere", "facebook/nothing", 384).locates("/kaggle/input/anything"), (
+        "an encoder that states no fragments must match NOTHING rather than everything"
+    )
 
 
 def test_require_tiling():
