@@ -98,6 +98,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "kneemri.embedding_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.confident_labels",
       "target": "kneemri.model",
       "weight": 1
@@ -910,6 +946,54 @@
       "kind": "calls",
       "source": "kneemri.build_cache.main",
       "target": "kneemri.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_embeddings.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.embedding_cache.EmbeddingCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.embedding_cache.EmbeddingCache.build",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.embedding_cache.EmbeddingSpec",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.study_cache.StudyCache.load",
       "weight": 1
     },
     {
@@ -2575,7 +2659,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 41,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2618,6 +2702,14 @@
       "descendants": 0,
       "id": "kneemri.build_cache",
       "label": "build_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.build_embeddings",
+      "label": "build_embeddings",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3676,6 +3768,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.build_cache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.build_embeddings.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.build_embeddings",
       "role": null
     },
     {
