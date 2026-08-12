@@ -71,6 +71,27 @@ closest at +0.0185 on its own control. Two things this does NOT license: reading
 for any individual knob inside it, and expecting it on the leaderboard, where our holdout gains have so
 far transferred at roughly half (`knee-lv2`).
 
+## What is ours, and what is grafted
+
+**0.894 is not our number.** Twenty of its twenty-three models are `pilkwang/rsna-knee-weights` — CC0
+weights someone else trained, grafted on 2026-08-10 and run through our data layer. Ours is three
+models. Legal (rule 2.6.b permits external models) and fine as a competition entry; it is NOT evidence
+that our pipeline is good.
+
+| what | LB | whose |
+|---|---|---|
+| published 20, alone | 0.888 | theirs |
+| our 5, old recipe | 0.888 | **ours** |
+| our 3, whole-stack | 0.882 | **ours** |
+| the 23 fused | **0.894** | mostly theirs |
+
+**Our own best is 0.888.** Quote that one. The fused number's marginal gain from our three members is
++0.006 over their twenty.
+
+What IS ours and worth keeping is the FINDING: members that fail differently help, members that fail
+the same way do not. Our third whole-stack member bought 0.000; a different recipe bought +0.006. That
+is reproducible without anyone else's weights, and the all-ours ensemble is the test of it.
+
 ## Ensemble SIZE is worth more than anything we can do to a single model
 
 | members | holdout per member | public LB |
