@@ -54,3 +54,31 @@ def test_report():
     lines = MemberCurve(LabelScores()).report({1: [0.80, 0.82], 2: [0.85]})
     assert lines[0].startswith("1 member(s): mean 0.8100")
     assert "+0.0400 over 1" in lines[1]
+
+
+def test_subsets():
+    """Every subset of one size, carrying the INDICES that identify it and not just its score."""
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    members = [_member(2.0, SEED), _member(0.5, SEED + 1)]
+
+    pairs = curve.subsets(members, truth, size=1)
+    assert [subset for _, subset in pairs] == [(0,), (1,)], "one entry per member, each naming itself"
+    assert all(np.isfinite(score) for score, _ in pairs)
+    assert [subset for _, subset in curve.subsets(members, truth, size=2)] == [(0, 1)]
+
+
+def test_best():
+    """The winning subset is NAMED at every size, which is what a submission is built from.
+
+    `report` said five members reached 0.8601 and never said WHICH five, so the best number this
+    analysis produced could not be turned into an entry.
+    """
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    members = [_member(2.0, SEED), _member(0.2, SEED + 1)]
+
+    lines = curve.best(members, truth, ["strong.pt", "weak.pt"])
+    assert len(lines) == 2
+    assert "strong.pt" in lines[0] and "weak.pt" not in lines[0], "the best single member is the strong one"
+    assert "strong.pt" in lines[1] and "weak.pt" in lines[1], "the only pair is both of them"

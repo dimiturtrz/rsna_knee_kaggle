@@ -53,13 +53,35 @@ class MemberCurve:
         All subsets rather than a sample: with five members that is 31 combinations and a few seconds of
         numpy, and the spread within a size is the only error bar available without retraining.
         """
-        by_size: dict[int, list[float]] = {}
+        return {
+            size: [score for score, _ in self.subsets(per_member, truth, size)]
+            for size in range(1, len(per_member) + 1)
+        }
+
+    def subsets(
+        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], size: int
+    ) -> list[tuple[float, tuple[int, ...]]]:
+        """Every subset of one size, as (score, member indices).
+
+        The indices are the point. `sizes` reported that five members reach 0.8601 and never said WHICH
+        five, so the best number this analysis produces could not be acted on — the next entry has to
+        name its members. An analysis that reports a score nobody can reproduce as a submission is doing
+        half its job.
+        """
+        return [
+            (self.scores.mean(Ensemble.combine([per_member[index] for index in subset]), truth), subset)
+            for subset in itertools.combinations(range(len(per_member)), size)
+        ]
+
+    def best(
+        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
+    ) -> list[str]:
+        """The winning subset at each size, named — the line a submission is built from."""
+        lines = []
         for size in range(1, len(per_member) + 1):
-            by_size[size] = [
-                self.scores.mean(Ensemble.combine([per_member[index] for index in subset]), truth)
-                for subset in itertools.combinations(range(len(per_member)), size)
-            ]
-        return by_size
+            score, subset = max(self.subsets(per_member, truth, size), key=lambda pair: pair[0])
+            lines.append(f"best {size}: {score:.4f}  " + " + ".join(names[index] for index in subset))
+        return lines
 
     def report(self, by_size: dict[int, list[float]]) -> list[str]:
         """One line per ensemble size: its mean, its range, and what the member added."""
@@ -113,6 +135,7 @@ def main() -> None:
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
 
     per_member: list[NDArray[np.float64]] = []
+    names: list[str] = []
     for key in keys:
         if key != keys[0]:
             corpus, identifiers = cache_of(key)
@@ -127,10 +150,15 @@ def main() -> None:
             )
             scored = predictions.predict(member, images, mask, reading.window(corpus.slices, overlap=arguments.overlap))
             per_member.append(scored)
+            names.append(reading.file.name)
             logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))
 
     curve = MemberCurve(scores)
     for line in curve.report(curve.sizes(per_member, truth)):
+        logger.info(line)
+    # The subsets BY NAME, because the mean and the range describe the ensemble question while a
+    # submission needs the answer: which members to package.
+    for line in curve.best(per_member, truth, names):
         logger.info(line)
 
 
