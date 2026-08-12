@@ -61,7 +61,7 @@ def test_report():
     assert "+0.0400 over 1" in lines[1]
 
 
-def _checkpoint(tmp_path: Path, name: str, config: dict) -> Path:
+def _checkpoint(tmp_path: Path, name: str, config: dict[str, object]) -> Path:
     path = tmp_path / f"{name}.pt"
     torch.save({"model": {}, "config": config}, path)
     return path

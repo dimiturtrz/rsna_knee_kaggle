@@ -37,7 +37,7 @@ from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SCHEMES, SLOTS
-from kneemri.study_cache import StudyCache
+from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -154,24 +154,29 @@ def main() -> None:
     # on the 448 px cache could not be scored at all. It is the tool that decides WHICH members to
     # submit, so a wrong number here chooses the wrong ensemble.
     readings = [Reading.of(checkpoint) for checkpoint in arguments.checkpoints]
-    reference: list[str] | None = None
-    truth = None
+    keys = list(dict.fromkeys(reading.cache_key for reading in readings))
+
+    def cache_of(key: tuple[int, int, str]) -> tuple[CachedCorpus, list[str]]:
+        size, slices, scheme = key
+        return StudyCache(root.processed(), slices=slices, image_size=size, scheme=scheme).load()
+
+    # The split is taken from the FIRST cache and reused, so every member is scored on the same studies
+    # in the same order. Any other cache that disagrees about that order is refused: its rows would be
+    # silently misaligned against the truth vector, which is a wrong number rather than an error.
+    corpus, reference = cache_of(keys[0])
+    folds = ReportFolds(arguments.folds, arguments.split_seed)
+    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
+    truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
+
     per_member: list[NDArray[np.float64]] = []
-    for key in dict.fromkeys(reading.cache_key for reading in readings):
-        group = [reading for reading in readings if reading.cache_key == key]
-        corpus, identifiers = StudyCache(
-            root.processed(), slices=group[0].slices, image_size=group[0].image_size, scheme=group[0].scheme
-        ).load()
-        if reference is None:
-            reference = identifiers
-            folds = ReportFolds(arguments.folds, arguments.split_seed)
-            _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-            truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
-        elif identifiers != reference:
-            message = f"cache {key} indexes studies in a different order — its rows would not line up"
-            raise ValueError(message)
+    for key in keys:
+        if key != keys[0]:
+            corpus, identifiers = cache_of(key)
+            if identifiers != reference:
+                message = f"cache {key} indexes studies in a different order — its rows would not line up"
+                raise ValueError(message)
         images, mask = corpus.images[holdout], corpus.mask[holdout]
-        for reading in group:
+        for reading in (item for item in readings if item.cache_key == key):
             encoder = ENCODERS[reading.variant]
             member = predictions.load(
                 reading.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slots
