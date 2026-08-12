@@ -35,6 +35,6 @@ uv run python comp/verify_kit.py || { echo "KIT STALE - do not submit"; exit 1; 
 
 echo
 echo "=== READY. The outward-facing steps are yours to run: ==="
-echo "  uv run python comp/publish.py dataset --path comp/members --message '<what changed>'"
-echo "  uv run python comp/publish.py kernel  --path comp/kernels/<kernel>"
+echo "  bash comp/push.sh dataset members '<what changed>'"
+echo "  bash comp/push.sh kernel  kernels/<kernel>"
 echo "  then run the kernel on Kaggle and submit its output"

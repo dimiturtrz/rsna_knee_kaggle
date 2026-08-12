@@ -35,9 +35,11 @@ be compared against it. An external input with no fetch step is not a dependency
 
 ## The two auth paths
 
-- `survey.py` / `publish.py` speak the REST API directly with a `KGAT_*` access token from `KAGGLE_TOKEN`
-  (env-only — never written to `~/.kaggle/`, never committed). They exist because the official CLI
-  authenticates with a username + key pair, which is a *different* credential.
+- `survey.py` speaks the REST API directly with a `KGAT_*` access token from `KAGGLE_TOKEN` (env-only —
+  never written to `~/.kaggle/`, never committed). `publish.py` did too and was **retired 2026-08-12**:
+  its transport had been dead since the token expired on 2026-07-23, and its one irreplaceable
+  behaviour — refusing to push while the kit differs from the repo — now lives in `push.sh`, on the
+  path we actually use.
 - The official `kaggle` CLI reads `~/.kaggle/kaggle.json` and works for reads (`competitions files`,
   `kernels list`, `kernels pull`). Both are live on this machine; pick by which credential you have.
 
@@ -98,8 +100,8 @@ reflexively, its value was the stale-kit refusal, not the transport.
 
 ```bash
 export KAGGLE_CONFIG_DIR="$HOME/.kaggle"
-cd comp && kaggle datasets version -p members -m "<notes>" --dir-mode zip   # from INSIDE comp/
-cd comp && kaggle kernels push -p kernels/kneemri-trained
+bash comp/push.sh dataset members "<notes>"      # verify_kit gates it, then the CLI runs
+bash comp/push.sh kernel  kernels/kneemri-trained
 cd comp && kaggle competitions submit rsna-knee-abnormality-detection \
   -k dimiturnt/kneemri-trained -v <version> -f submission.csv -m "<what changed>"
 ```
