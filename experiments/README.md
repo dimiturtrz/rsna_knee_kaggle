@@ -75,12 +75,22 @@ far transferred at roughly half (`knee-lv2`).
 
 | members | holdout per member | public LB |
 |---|---|---|
-| 1 — our strongest model ever | 0.8518 | **0.868** |
+| our strongest model ever | 1 | 0.8518 | 0.868 |
+| whole-stack | 2 | 0.8481 | 0.882 |
+| whole-stack | 3 | 0.8493 | 0.882 |
+| ours, old channel-stacked windowed recipe | 5 | 0.8269 | 0.888 |
+| the published CC0 members | 20 | 0.8398 | 0.888 |
+| **ours 3 + the published 20** | **23** | mixed | **0.894** |
 | 2 — whole-stack | 0.8481 | **0.882** |
 | 5 — old, channel-stacked, windowed | 0.8269 | **0.888** |
 
-Four entries built to isolate one variable. The best single model this project has produced loses to
+Six entries built to isolate one variable. The best single model this project has produced loses to
 five much weaker ones by **0.020** — more than whole-stack (+0.0147) and more than every knob combined.
+
+**And DIVERSITY beats more of the same.** A third member of our own recipe bought nothing (0.882 →
+0.882), while adding our three to the twenty published ones — a different recipe, not a different draw
+of ours — bought **+0.006 over either component alone**. Members that fail the same way do not help
+each other. That is the mechanism worth building on, and it is neither folds nor seeds.
 
 This does NOT defend folds or seeds, which remain banned and rightly so: the noise floor is the
 holdout's own sampling error (`knee-2rx`), so re-running a recipe cannot buy a better measurement. It
