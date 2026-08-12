@@ -5,7 +5,6 @@ the same loop was already open-coded in a throwaway slice-count script. An analy
 and reads them over test-time windows is a recurring shape here, not a one-off.
 """
 
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -14,25 +13,11 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
+from kneemri.members import Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 GROUP = 3
 BATCH = 8
-
-
-@dataclass(frozen=True)
-class Window:
-    """How a member is read at test time: where its windows begin, how wide, at what resolution.
-
-    One object because the three are never chosen apart — a whole-stack member wants one centred
-    window of full width, a windowed one wants three-slice windows, and the read size follows the
-    member's own config either way. They were three positional arguments, which tripped the
-    argument-count gate and, more to the point, let a caller vary one and forget the others.
-    """
-
-    starts: list[int]
-    width: int
-    size: int
 
 
 class HoldoutPredictions:

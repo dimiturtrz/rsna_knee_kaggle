@@ -20,7 +20,6 @@ spread between the best and worst subset of a given size is the honest error bar
 import argparse
 import itertools
 import logging
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -30,71 +29,16 @@ from numpy.typing import NDArray
 from transformers import AutoModel
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS, SMALL
+from kneemri.backbone import ENCODERS
 from kneemri.ensemble import Ensemble
 from kneemri.folds import ReportFolds
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions
+from kneemri.members import Member
 from kneemri.scores import LabelScores
-from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import SCHEMES, SLOTS
 from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class Reading:
-    """How one checkpoint must be read back — taken from the checkpoint, never assumed.
-
-    Every field here was previously a default in this CLI, and each default was wrong for some member
-    we own: 336 px for a member fitted on the 448 px cache, three-slice windows for a whole-stack
-    member, the canonical slot count for anything wider.
-    """
-
-    checkpoint: Path
-    image_size: int
-    read_size: int
-    slices: int
-    scheme: str
-    variant: str
-    slots: int
-    whole_stack: bool
-
-    @classmethod
-    def of(cls, checkpoint: Path) -> "Reading":
-        """Read a checkpoint's config, falling back only where a field predates being recorded."""
-        config = torch.load(checkpoint, map_location="cpu", weights_only=True).get("config", {})
-        names = list(config.get("slots", [slot.name for slot in SLOTS]))
-        known = ((name, [slot.name for slot in slots]) for name, slots in SCHEMES.items())
-        scheme = next((name for name, slot_names in known if slot_names == names), StudyCache.CANONICAL)
-        return cls(
-            checkpoint=checkpoint,
-            image_size=int(config.get("img", IMAGE_SIZE)),
-            read_size=int(config.get("train_size") or config.get("img", IMAGE_SIZE)),
-            slices=int(config.get("slices", 12)),
-            scheme=scheme,
-            variant=str(config.get("variant", SMALL)),
-            slots=len(names),
-            whole_stack=bool(config.get("whole_stack", False)),
-        )
-
-    @property
-    def cache_key(self) -> tuple[int, int, str]:
-        """Members sharing this need the same cache, so it is loaded once for all of them."""
-        return (self.image_size, self.slices, self.scheme)
-
-    @property
-    def width(self) -> int:
-        """How many slices one window covers: the whole stack, or the three-slice group."""
-        return self.slices if self.whole_stack else GROUP
-
-    def window(self, *, overlap: bool) -> Window:
-        """How this member is read at test time — one centred full-width window if it is whole-stack."""
-        if self.whole_stack:
-            return Window(starts=[(self.slices - self.width) // 2], width=self.width, size=self.read_size)
-        starts = list(range(self.slices - GROUP + 1)) if overlap else [index * GROUP for index in range(4)]
-        return Window(starts=starts, width=GROUP, size=self.read_size)
 
 
 class MemberCurve:
@@ -153,8 +97,8 @@ def main() -> None:
     # the member was - so a whole-stack member was scored on three slices at a time and a member fitted
     # on the 448 px cache could not be scored at all. It is the tool that decides WHICH members to
     # submit, so a wrong number here chooses the wrong ensemble.
-    readings = [Reading.of(checkpoint) for checkpoint in arguments.checkpoints]
-    keys = list(dict.fromkeys(reading.cache_key for reading in readings))
+    readings = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
+    keys = list(dict.fromkeys((member.image_size, member.slices, member.scheme) for member in readings))
 
     def cache_of(key: tuple[int, int, str]) -> tuple[CachedCorpus, list[str]]:
         size, slices, scheme = key
@@ -176,14 +120,16 @@ def main() -> None:
                 message = f"cache {key} indexes studies in a different order — its rows would not line up"
                 raise ValueError(message)
         images, mask = corpus.images[holdout], corpus.mask[holdout]
-        for reading in (item for item in readings if item.cache_key == key):
+        for reading in (item for item in readings if (item.image_size, item.slices, item.scheme) == key):
             encoder = ENCODERS[reading.variant]
             member = predictions.load(
-                reading.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slots
+                reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
             )
-            scored = predictions.predict(member, images, mask, reading.window(overlap=arguments.overlap))
+            scored = predictions.predict(
+                member, images, mask, reading.window(corpus.slices, overlap=arguments.overlap)
+            )
             per_member.append(scored)
-            logger.info("%s alone: %.4f", reading.checkpoint.name, scores.mean(scored, truth))
+            logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))
 
     curve = MemberCurve(scores)
     for line in curve.report(curve.sizes(per_member, truth)):

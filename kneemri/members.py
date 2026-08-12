@@ -22,9 +22,13 @@ from torch import Tensor, nn
 
 from kneemri.backbone import SMALL
 from kneemri.model import StudyDesign, StudyModel
+from kneemri.slots import SCHEMES
 
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
+
+CANONICAL = "canonical"
+"""The scheme a member names when its slot list is the published six."""
 
 LEGACY_SLICES = 12
 """What a manifest written before members could differ in depth was fitted on."""
@@ -68,6 +72,21 @@ class WeightsError(RuntimeError):
     Deliberately fatal: a run that predicts from a mismatched model completes, writes a plausible
     submission, and differs from a correct one only in a number no output of the run reveals.
     """
+
+
+@dataclass(frozen=True)
+class Window:
+    """How a member is read at test time: where its windows begin, how wide, at what resolution.
+
+    One object because the three are never chosen apart — a whole-stack member wants one centred
+    window of full width, a windowed one wants three-slice windows, and the read size follows the
+    member's own config either way. They were three positional arguments, which tripped the
+    argument-count gate and, more to the point, let a caller vary one and forget the others.
+    """
+
+    starts: list[int]
+    width: int
+    size: int
 
 
 @dataclass(frozen=True)
@@ -180,6 +199,61 @@ class Member:
         as a shape error during load if we are lucky and as a silently wrong model if not.
         """
         return str(self.config.get("variant", SMALL))
+
+    def window(self, available: int, *, overlap: bool) -> Window:
+        """How THIS member is read at test time, given a decoded stack of `available` slices.
+
+        One definition, so every reader shares it. There were three: `Ensemble.predict_member` branched
+        inline, `member_curve` grew its own `Reading`, and `HoldoutPredictions` took three loose
+        arguments a caller could vary one at a time. Each place that decided independently got it wrong
+        at least once — a whole-stack member windowed by three is a different function, and it reached
+        the leaderboard that way (knee-y8y).
+
+        A whole-stack member gets ONE centred window of its full depth: its slot embedding is the
+        elementwise maximum over the whole stack, so there is nothing to overlap and nothing to average.
+        A windowed member gets its group-sized windows, overlapping or disjoint as asked.
+        """
+        if self.whole_stack:
+            width = min(self.slices, available)
+            return Window(starts=[(available - width) // 2], width=width, size=self.read_size)
+        starts = (
+            list(range(available - self.group + 1))
+            if overlap and available >= self.group
+            else [index * self.group for index in range(max(available // self.group, 1))]
+        )
+        return Window(starts=starts, width=self.group, size=self.read_size)
+
+    @classmethod
+    def from_checkpoint(cls, path: Path) -> "Member":
+        """A member read straight from a training checkpoint, without a package around it.
+
+        Analysis reads the same fields packaging does — resolution, depth, pooling, scheme, whether the
+        whole stack is read — and every tool that re-derived them from a raw checkpoint got at least one
+        wrong. This is the same type inference uses, so there is one description of a member's reading
+        and analysis cannot drift from it.
+        """
+        saved = torch.load(path, map_location="cpu", weights_only=True)
+        holdout = float(saved.get("holdout", float("nan")))
+        return cls(
+            identifier=path.stem,
+            file=path,
+            fold=int(str(saved.get("options", {}).get("fold", 0))),
+            config=saved.get("config", {}),
+            fingerprint=np.asarray(saved.get("fingerprint", []), np.float32),
+            holdout=holdout,
+            annot=float(saved.get("annot", float("nan"))),
+        )
+
+    @property
+    def scheme(self) -> str:
+        """Which named slot scheme this member's recorded slot list is, so its cache can be found.
+
+        On the member because it is a fact ABOUT the member, and because two tools had already grown
+        their own copy of this lookup — the curve and the witness check — which is how a description
+        drifts from the thing it describes.
+        """
+        known = ((name, [slot.name for slot in slots]) for name, slots in SCHEMES.items())
+        return next((name for name, names in known if names == list(self.config["slots"])), CANONICAL)
 
     @property
     def pixel_group(self) -> str:

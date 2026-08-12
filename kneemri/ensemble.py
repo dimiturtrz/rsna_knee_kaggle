@@ -34,17 +34,6 @@ class Ensemble:
         self.models = models
         self.device = device
 
-    def windows(self, slices: int, group: int, *, overlap: bool) -> list[int]:
-        """Where each test-time window begins.
-
-        Overlapping windows cost forward passes and no extra decoding, which is the cheap direction to
-        spend — the cache already holds the slices. Disjoint windows are what the published members'
-        out-of-fold predictions were computed under.
-        """
-        if overlap and slices >= group:
-            return list(range(slices - group + 1))
-        return [index * group for index in range(max(slices // group, 1))]
-
     def groups(self) -> list[list[Member]]:
         """Members needing identical pixels, gathered so ONE decode serves each group.
 
@@ -134,43 +123,22 @@ class Ensemble:
         *,
         overlap: bool = False,
     ) -> NDArray[np.float64]:
-        """One member's probabilities for a batch of studies, averaged over its windows."""
+        """One member's probabilities for a batch of studies, averaged over its windows.
+
+        The window comes from the MEMBER, which is the only thing that knows how it was fitted. This
+        method used to decide inline, `member_curve` decided separately, and `HoldoutPredictions` took
+        loose arguments — three independent decisions about one fact, and each got it wrong at least
+        once.
+        """
         model = self.models[member.identifier]
         model.eval()
-        if member.whole_stack:
-            # A whole-stack member's slot embedding is the elementwise maximum over its ENTIRE stack.
-            # Windowing it by `group` would hand it maxima over three slices at a time — a different
-            # function of the same pixels, and one the holdout cannot expose, because holdout scoring
-            # reads the same window training did. Measured consequence before this existed: two members
-            # at 0.8481 holdout scored 0.882 on the leaderboard while five members at 0.8269 scored
-            # 0.888.
-            #
-            # The MIDDLE `member.slices` of whatever was decoded, which is exactly what
-            # `Trainer.predict` does — the decoded depth is the deepest any member wants, so a member
-            # fitted on twelve must not be handed sixteen.
-            width = min(member.slices, images.shape[2])
-            start = (images.shape[2] - width) // 2
-            with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
-                logits = model(images[:, :, start : start + width], mask, member.read_size).float()
-            return torch.sigmoid(logits).cpu().numpy().astype(np.float64)
-        starts = self.windows(images.shape[2], member.group, overlap=overlap)
+        window = member.window(images.shape[2], overlap=overlap)
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
-            for start in starts:
-                logits = model(images[:, :, start : start + member.group], mask, member.read_size).float()
+            for start in window.starts:
+                logits = model(images[:, :, start : start + window.width], mask, window.size).float()
                 total = total + torch.sigmoid(logits)
-        return (total / len(starts)).cpu().numpy().astype(np.float64)
-
-    def predict_chunks(
-        self, chunks: Iterable[tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]], *, overlap: bool = True
-    ) -> NDArray[np.float64]:
-        """Every member over every decoded chunk, rank-combined into one table.
-
-        The chunk loop is outside the member loop on purpose: a chunk is decoded once and then shown to
-        every member, so the read cost is paid per STUDY rather than per (study, member). That is the
-        whole reason members are grouped by the pixels they need.
-        """
-        return self.combine(self.predict_members(self.package.members, chunks, overlap=overlap))
+        return (total / len(window.starts)).cpu().numpy().astype(np.float64)
 
     def predict_groups(
         self,

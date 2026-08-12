@@ -83,14 +83,6 @@ def _ensemble(tmp_path: Path, *, whole_stack: bool = False, slice_pooling: str =
     return Ensemble(package, {"m": model}, device)
 
 
-def test_windows():
-    """Overlapping windows are every consecutive run; disjoint ones tile the stack without overlap."""
-    ensemble = Ensemble.__new__(Ensemble)
-    assert ensemble.windows(12, 3, overlap=True) == list(range(10))
-    assert ensemble.windows(12, 3, overlap=False) == [0, 3, 6, 9]
-    assert ensemble.windows(2, 3, overlap=True) == [0], "a stack thinner than a window still yields one"
-
-
 def test_predict_member(tmp_path: Path):
     """A member's probabilities are averaged over its windows and land in [0, 1]."""
     ensemble = _ensemble(tmp_path)
@@ -130,24 +122,6 @@ def test_submission():
     assert list(table)[0] == "StudyInstanceUID"
     assert list(table)[1:] == list(TARGETS)
     assert len(table["ACL"]) == 2
-
-
-def test_predict_chunks(tmp_path: Path):
-    """Chunks are consumed lazily and every member sees every chunk before the table is combined."""
-    ensemble = _ensemble(tmp_path)
-    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
-    mask = torch.ones(2, len(SLOTS))
-    consumed = 0
-
-    def source():
-        nonlocal consumed
-        for _ in range(3):
-            consumed += 1
-            yield images, mask
-
-    combined = ensemble.predict_chunks(source(), overlap=False)
-    assert consumed == 3, "the generator must be drained, not indexed"
-    assert combined.shape == (6, len(TARGETS)), "three chunks of two studies"
 
 
 def test_slices(tmp_path: Path):

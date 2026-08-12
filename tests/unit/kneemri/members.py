@@ -300,3 +300,54 @@ def test_witness():
     assert _member().witness == {}
     carried = {"studies": ["a"], "predictions": [[0.1] * 12]}
     assert replace(_member(), config={**_config(), "witness": carried}).witness == carried
+
+
+def _saved(tmp_path: Path, name: str, config: dict[str, object]) -> Path:
+    path = tmp_path / f"{name}.pt"
+    torch.save({"model": {}, "config": config, "holdout": 0.84}, path)
+    return path
+
+
+def test_from_checkpoint(tmp_path: Path):
+    """A member read straight from a training checkpoint is the SAME type inference uses.
+
+    Analysis kept re-deriving these fields from raw checkpoints and getting one wrong each time — the
+    read size, the slot count, whether the whole stack is read. One description, one place.
+    """
+    path = _saved(tmp_path, "arm", {"img": 448, "train_size": 392, "slices": 12, "whole_stack": True,
+                                    "variant": "small", "slots": SLOTS, "group": GROUP, "pool": "cls_mean",
+                                    "crop_mm": 130.0, "band": [0.2, 0.8],
+                                    "rules": {"order": "normal", "lat": "centre", "slot_fallback": False,
+                                              "decode_fill": "nearest"}})
+    member = Member.from_checkpoint(path)
+    assert (member.image_size, member.read_size, member.whole_stack) == (448, 392, True)
+    assert member.holdout == pytest.approx(0.84)
+    assert member.identifier == "arm"
+
+
+def test_window(tmp_path: Path):
+    """A whole-stack member reads one centred full-depth window; a windowed one reads its groups.
+
+    Overlap is a choice about WINDOWED members. A whole-stack member has nothing to overlap: its slot
+    embedding is the maximum over the whole stack, and reading it three slices at a time measures a
+    different function — which is exactly how it reached the leaderboard (knee-y8y).
+    """
+    whole = replace(_member(), config={**_config(), "whole_stack": True})
+    window = whole.window(16, overlap=True)
+    assert window.starts == [2] and window.width == 12, "the middle twelve of sixteen, in one pass"
+
+    windowed = _member()
+    assert len(windowed.window(12, overlap=True).starts) == 12 - GROUP + 1
+    assert windowed.window(12, overlap=False).starts == [0, 3, 6, 9]
+    assert windowed.window(12, overlap=True).width == GROUP
+
+
+def test_scheme():
+    """A member's slot list names its scheme, which is how its cache is found.
+
+    Two tools had grown their own copy of this lookup — the member curve and the witness check — which
+    is exactly how a description drifts from the thing it describes.
+    """
+    assert _member().scheme == "canonical"
+    extended = replace(_member(), config={**_config(), "slots": [*SLOTS, "COR_FLUID_NOFS", "AX_T1", "AX_FLUID_NOFS"]})
+    assert extended.scheme == "extended"

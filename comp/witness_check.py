@@ -34,7 +34,6 @@ from core.paths import DataRoot  # noqa: E402
 from kneemri.backbone import ENCODERS  # noqa: E402
 from kneemri.ensemble import Ensemble  # noqa: E402
 from kneemri.members import Member, MemberPackage  # noqa: E402
-from kneemri.slots import SCHEMES  # noqa: E402
 from kneemri.study_cache import StudyCache  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -43,23 +42,13 @@ TOLERANCE = 2e-3
 """The fingerprint's tolerance, for the same reason: above GPU noise, far below any reading change."""
 
 
-def scheme_of(member: Member) -> str:
-    """Which named scheme a member's recorded slot list is, so its cache can be found."""
-    names = list(member.config["slots"])
-    for scheme, slots in SCHEMES.items():
-        if [slot.name for slot in slots] == names:
-            return scheme
-    message = f"member {member.identifier} names a slot list matching no scheme this build defines"
-    raise ValueError(message)
-
-
 def check(package: MemberPackage, member: Member, root: Path, device: torch.device) -> str:
     """Re-derive one member's witness, returning a human-readable verdict."""
     witness = member.witness
     if not witness:
         return "UNVERIFIED - no witness (trained before the check existed, or a published member)"
 
-    cache = StudyCache(root, slices=member.slices, image_size=member.image_size, scheme=scheme_of(member))
+    cache = StudyCache(root, slices=member.slices, image_size=member.image_size, scheme=member.scheme)
     corpus, identifiers = cache.load()
     index = {name: position for position, name in enumerate(identifiers)}
     studies = [str(name) for name in witness["studies"]]  # pyright: ignore[reportGeneralTypeIssues]
