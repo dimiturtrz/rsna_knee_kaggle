@@ -43,6 +43,9 @@ class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
 
     img: int
+    witness: NotRequired[dict[str, object]]
+    """Training-path predictions for a few named studies; absent on members predating the check."""
+
     whole_stack: NotRequired[bool]
     """Absent on every member fitted before whole-stack reading existed; those were windowed."""
 
@@ -111,6 +114,21 @@ class Member:
         published ones — they were windowed, and windowed is what they must stay.
         """
         return bool(self.config.get("whole_stack", False))
+
+    @property
+    def witness(self) -> dict[str, object]:
+        """What the training path predicted for a few named studies, or empty for members without one.
+
+        The fingerprint proves the WEIGHTS are the weights. This proves the READING is the reading, and
+        that is the gap four defects walked through in one session — whole-stack reading windowed to
+        three slices, the decode resolution and the slot list each taken from a default. All four
+        loaded cleanly and verified cleanly, because the fingerprint pins image size and group only.
+
+        Empty for the twenty published members and for anything trained before this existed; a check
+        that cannot run is not a failure, it is an unverified member, and it must say so rather than
+        pass quietly.
+        """
+        return dict(self.config.get("witness", {}))
 
     @property
     def slot_count(self) -> int:

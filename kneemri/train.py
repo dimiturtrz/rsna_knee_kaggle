@@ -351,6 +351,7 @@ def main() -> None:
     metrics = RunMetrics(destination)
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
     best, best_state = -1.0, None
+    witnessed: dict[str, object] | None = None
     for epoch in range(arguments.epochs):
         started = time.time()
         mean_loss = trainer.fit_epoch(corpus, targets, training, arguments.batch, generator)
@@ -361,20 +362,19 @@ def main() -> None:
         # Both the score and the state come from inside this block, so the number that ranks an epoch is
         # measured on exactly the weights that epoch would write.
         with trainer.evaluated():
-            per_label = (
-                scores.per_label(
-                    trainer.predict(corpus, holdout, arguments.batch, generator), evaluation.scores[holdout]
-                )
-                if len(holdout)
-                else empty
-            )
+            predicted = trainer.predict(corpus, holdout, arguments.batch, generator) if len(holdout) else None
+            per_label = empty if predicted is None else scores.per_label(predicted, evaluation.scores[holdout])
             mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
             if mean > best:
                 best = mean
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
                 # NaN, not `mean`: with no holdout `mean` is the epoch index standing in for a score.
                 scored = mean if per_label else float("nan")
-                trainer.save_partial(destination, record.payload(best_state, scored, epoch))
+                # The witness travels with the weights it was produced by, so a checkpoint kept from a
+                # killed run carries its own proof of how it should be read.
+                seen = None if predicted is None else record.witness(identifiers, holdout, predicted)
+                trainer.save_partial(destination, record.payload(best_state, scored, epoch, seen))
+                witnessed = seen
         logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
         metrics.record(
             EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
@@ -389,7 +389,7 @@ def main() -> None:
     # The SAME assembler the periodic save uses, so a run killed at its best epoch and a run allowed
     # to finish produce checkpoints of identical shape.
     # best_state is set on the first epoch that scores; a run with none is already unusable above.
-    torch.save(record.payload(best_state, reported, arguments.epochs - 1), destination)  # pyrefly: ignore[bad-argument-type]
+    torch.save(record.payload(best_state, reported, arguments.epochs - 1, witnessed), destination)  # pyrefly: ignore[bad-argument-type]
     logger.info(
         "best holdout mean AUC %.4f -> %s | %s",
         reported,

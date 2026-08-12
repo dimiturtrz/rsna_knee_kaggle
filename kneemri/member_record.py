@@ -3,7 +3,9 @@
 from dataclasses import dataclass
 from typing import Protocol
 
+import numpy as np
 import torch
+from numpy.typing import NDArray
 
 from kneemri.backbone import Encoder
 from kneemri.model import TARGETS, StudyModel
@@ -58,6 +60,9 @@ class RunOptions(Protocol):
 GROUP = 3
 FINGERPRINT_SEED = 2026
 
+WITNESS_STUDIES = 8
+"""Enough to catch a reading difference, small enough to cost nothing — a mismatch moves every row."""
+
 
 @dataclass(frozen=True)
 class MemberRecord:
@@ -95,8 +100,46 @@ class MemberRecord:
         """
         return self.options.train_size or self.options.image_size
 
-    def payload(self, state: dict[str, torch.Tensor], holdout: float, epoch: int) -> dict[str, object]:
-        """The full checkpoint for a set of weights — identical in shape whenever it is written."""
+    def witness(
+        self,
+        identifiers: list[str],
+        holdout: NDArray[np.int64],
+        predictions: NDArray[np.float64],
+    ) -> dict[str, object]:
+        """What the TRAINING path predicted for a few named holdout studies.
+
+        Named studies rather than positions, because a position means nothing without the same corpus
+        index — and the whole point is to be checkable from a different process, against a cache built
+        later, by code that never saw this run.
+        """
+        chosen = holdout[:WITNESS_STUDIES]
+        return {
+            "studies": [identifiers[position] for position in chosen],
+            "predictions": predictions[: len(chosen)].tolist(),
+            "reading": "trainer.predict — the middle window of the stack, at the run's own read size",
+        }
+
+    def payload(
+        self,
+        state: dict[str, torch.Tensor],
+        holdout: float,
+        epoch: int,
+        witness: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        """The full checkpoint for a set of weights — identical in shape whenever it is written.
+
+        `witness` is what the TRAINING path predicted for a handful of named holdout studies. The
+        fingerprint proves the model is the model; it cannot prove that inference READS the model the
+        way training did, because it fixes only image size and group. Four separate defects this
+        session were exactly that — a value recorded in this config and a consumer using a default
+        instead: whole-stack reading windowed to three slices, the decode resolution taken from
+        SlotReader's default, the slot list taken from a module constant twice. Every one of them
+        loaded cleanly, verified cleanly, and predicted from something the weights had never seen.
+
+        A witness closes that hole because it is an end-to-end claim: re-derive these studies through
+        the INFERENCE path and you must get these numbers back. Any consumer-side default that changes
+        what the model reads moves them.
+        """
         options = self.options
         return {
             "model": state,
@@ -114,6 +157,9 @@ class MemberRecord:
             "targets": list(TARGETS),
             "slots": list(self.slot_names),
             "config": {
+                # Inside the config so it reaches the manifest for free: package_members copies
+                # config wholesale, and a witness that does not travel with the member cannot check it.
+                "witness": witness or {},
                 "img": options.image_size,
                 "train_size": self.read_size,
                 "slices": options.slices,

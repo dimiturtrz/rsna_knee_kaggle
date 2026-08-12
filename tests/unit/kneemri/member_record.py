@@ -76,3 +76,23 @@ def test_read_size():
     resampled = replace(record, options=_Options(train_size=392))
     assert resampled.read_size == 392
     assert resampled.payload({}, 0.8, 0)["fingerprint_config"]["img"] == 392
+
+
+def test_witness():
+    """The witness names STUDIES, not corpus positions, and carries what training predicted for them.
+
+    A position is meaningless without the same corpus index, and the entire point is to be checkable
+    from another process against a cache built later — so the identifiers have to travel.
+    """
+    import numpy as np  # noqa: PLC0415 - only this test needs arrays
+
+    record = _record()
+    identifiers = [f"study-{index}" for index in range(20)]
+    holdout = np.array([5, 7, 11], dtype=np.int64)
+    predictions = np.arange(3 * 12, dtype=np.float64).reshape(3, 12) / 100.0
+
+    witness = record.witness(identifiers, holdout, predictions)
+    assert witness["studies"] == ["study-5", "study-7", "study-11"]
+    assert len(witness["predictions"]) == 3
+    assert record.payload({}, 0.8, 0, witness)["config"]["witness"] == witness
+    assert record.payload({}, 0.8, 0)["config"]["witness"] == {}, "a run without a holdout has nothing to witness"

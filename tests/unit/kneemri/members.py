@@ -293,3 +293,10 @@ def test_whole_stack():
     """
     assert not _member().whole_stack, "a manifest without the key describes a windowed member"
     assert replace(_member(), config={**_config(), "whole_stack": True}).whole_stack
+
+
+def test_witness():
+    """Absent means unverified, not verified — the check must say so rather than pass quietly."""
+    assert _member().witness == {}
+    carried = {"studies": ["a"], "predictions": [[0.1] * 12]}
+    assert replace(_member(), config={**_config(), "witness": carried}).witness == carried
