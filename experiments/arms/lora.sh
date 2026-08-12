@@ -35,11 +35,26 @@
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 RANK="${1:-8}"
+
+# IT OOM'D THE FIRST TIME, and the reason is the point of the method rather than a bug in it. Adapting
+# every block means every block needs its activations kept for the backward pass; fine-tuning the top
+# six keeps six. Measured beside it: unfreezing all twelve costs +29% over six at batch 2, and adapters
+# add their own down/up intermediates on top of that.
+#
+# TWO CHANGES, neither of which touches the objective. `expandable_segments` reclaims the 2.41 GB the
+# allocator was holding reserved-but-unallocated when it died — pure fragmentation, visible in the OOM
+# message itself. And the cap goes to 30 GB of 31.8: the 26 GB ceiling was set to leave room for the
+# sibling project, and nothing else is on the card tonight.
+#
+# WHAT IS NOT CHANGED: the batch. Batch 12 is what every number in the ledger was measured at, and the
+# ranking term scores 66 within-batch pairs at 12 against 15 at 6 — shrinking it to fit would make this
+# a different experiment that happens to also use LoRA.
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 RATE="${2:-5e-4}"
 require "$LABELS"
 
 run_train "lora_r${RANK}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  --recompute-activations --compile-encoder --bf16 --vram-gb 30 \
   --labels "$LABELS" --out "$PROCESSED/lora_r${RANK}_s2026.pt"
