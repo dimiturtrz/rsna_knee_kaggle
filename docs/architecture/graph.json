@@ -122,6 +122,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embedding_cache",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.ensemble",
       "target": "kneemri.members",
       "weight": 1
@@ -970,6 +976,48 @@
       "kind": "calls",
       "source": "kneemri.ema.WeightAverage.applied",
       "target": "kneemri.ema.WeightAverage.state_dict",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embedding_cache.EmbeddingCache",
+      "target": "kneemri.embedding_cache.EmbeddedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embedding_cache.EmbeddingCache",
+      "target": "kneemri.embedding_cache.EmbeddingSpec",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embedding_cache.EmbeddingCache",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embedding_cache.EmbeddingCache.build",
+      "target": "kneemri.embedding_cache.EmbeddedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embedding_cache.EmbeddingCache.build",
+      "target": "kneemri.embedding_cache.EmbeddingCache._probe_width",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embedding_cache.EmbeddingCache.load",
+      "target": "kneemri.embedding_cache.EmbeddedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embedding_cache.EmbeddingCache.load",
+      "target": "kneemri.embedding_cache.EmbeddingCache.exists",
       "weight": 1
     },
     {
@@ -2527,7 +2575,7 @@
       "role": null
     },
     {
-      "descendants": 39,
+      "descendants": 40,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -2594,6 +2642,14 @@
       "descendants": 0,
       "id": "kneemri.ema",
       "label": "ema",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache",
+      "label": "embedding_cache",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -2940,6 +2996,30 @@
       "label": "WeightAverage",
       "level": "class",
       "parent": "kneemri.ema",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddedCorpus",
+      "label": "EmbeddedCorpus",
+      "level": "class",
+      "parent": "kneemri.embedding_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache",
+      "label": "EmbeddingCache",
+      "level": "class",
+      "parent": "kneemri.embedding_cache",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingSpec",
+      "label": "EmbeddingSpec",
+      "level": "class",
+      "parent": "kneemri.embedding_cache",
       "role": "satellite"
     },
     {
@@ -3708,6 +3788,94 @@
       "label": "update",
       "level": "method",
       "parent": "kneemri.ema.WeightAverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddedCorpus.slices",
+      "label": "slices",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddedCorpus.width",
+      "label": "width",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache._probe_width",
+      "label": "_probe_width",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.exists",
+      "label": "exists",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.features_path",
+      "label": "features_path",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.index_path",
+      "label": "index_path",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.key",
+      "label": "key",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embedding_cache.EmbeddingCache.mask_path",
+      "label": "mask_path",
+      "level": "method",
+      "parent": "kneemri.embedding_cache.EmbeddingCache",
       "role": null
     },
     {
