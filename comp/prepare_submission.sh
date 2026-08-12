@@ -29,6 +29,17 @@ uv run python comp/verify_members.py --root comp/members || {
 }
 
 echo
+echo "=== 2b. does INFERENCE read each member the way training did? ==="
+# The fingerprint pins image size and group only, so it cannot see a consumer that reads a default
+# instead of the member's own config - which is how whole-stack members were served three slices at a
+# time all the way onto the leaderboard. This re-derives each member's witness through the inference
+# path. UNVERIFIED is not a failure: members trained before the witness existed have nothing to check.
+uv run python comp/witness_check.py --root comp/members || {
+  echo "A MEMBER IS READ DIFFERENTLY BY INFERENCE THAN BY TRAINING - do not submit"
+  exit 1
+}
+
+echo
 echo "=== 3. kit must match the repo (a kernel imports it) ==="
 uv run python comp/build_kit.py --wheels "${WHEELS:-$TEMP/kneewheels}"
 uv run python comp/verify_kit.py || { echo "KIT STALE - do not submit"; exit 1; }
