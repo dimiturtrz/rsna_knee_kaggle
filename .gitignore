@@ -55,3 +55,4 @@ node_modules/
 # Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git — the manifest
 # beside them IS tracked, because it is the reproducible description of what was packaged.
 /comp/members/*.pt
+comp/members_ours/

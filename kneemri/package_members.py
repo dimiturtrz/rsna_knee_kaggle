@@ -21,7 +21,16 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=Path("comp/members"))
-    parser.add_argument("--pattern", default="member_fold*.pt")
+    parser.add_argument(
+        "--pattern",
+        nargs="+",
+        default=["member_fold*.pt"],
+        help="one or more globs under the processed root. SEVERAL because a set of members "
+        "chosen for their DIVERSITY shares no name prefix - whole-stack, windowed, large, "
+        "attention - and squeezing that into one glob means widening it until it matches "
+        "everything. `--pattern '*.pt'` once packaged all 54 checkpoints and 8 GB without "
+        "a word.",
+    )
     parser.add_argument("--title", default="kneemri-members")
     parser.add_argument("--owner", default="dimiturnt")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -29,9 +38,14 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     source = DataRoot.from_config(arguments.paths).processed()
-    checkpoints = sorted(source.glob(arguments.pattern))
+    checkpoints = sorted({path for pattern in arguments.pattern for path in source.glob(pattern)})
     if not checkpoints:
         raise FileNotFoundError(f"no checkpoints matching {arguments.pattern} under {source}")
+    # Named, not counted: a glob that matched more than intended is invisible as a number and obvious
+    # as a list, and this copies ~89 MB per member.
+    logger.info("packaging %d checkpoint(s):", len(checkpoints))
+    for path in checkpoints:
+        logger.info("  %s", path.name)
 
     destination = arguments.out
     if destination.exists():
