@@ -60,8 +60,14 @@ HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head 
 export HF_TOKEN
 [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
-run_train "dinov3_${VARIANT}" \
+# THE READ SIZE IS IN THE NAME, and it was not: this arm wrote `dinov3_v3small` whatever size it read,
+# so launching the 224 probe began overwriting the 336 run's log and was about to overwrite its
+# checkpoint. The 336 member survives as dinov3_v3small_336_s2026.pt only because it was copied aside
+# while the 224 run was already going. A run that can destroy the run it is being compared against is
+# not an experiment.
+run_train "dinov3_${VARIANT}_${SIZE}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
+  --image-size "$CACHE" --train-size "$SIZE" \
   --recompute-activations --compile-encoder --vram-gb 26 \
-  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_s2026.pt"
