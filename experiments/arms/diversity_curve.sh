@@ -35,8 +35,15 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# A REFUTED ARM IS STILL A MEMBER. slices16_ws peaked at 0.8452 against the control's 0.8457, so 16
+# cached slices is refuted as an IMPROVEMENT - and that says nothing about whether it fails on the same
+# studies as the others, which is the only thing that matters for an average. It reads a different
+# depth of stack, so it is exactly the kind of member worth having. Its inference costs a second decode
+# (pixel_group includes the slice count), which is a real cost and the reason to check it earns a place
+# rather than assume it.
 MEMBERS=(
   "$PROCESSED/wsfold0_e6.pt"
+  "$PROCESSED/slices16_ws_s2026.pt"
   "$PROCESSED/lr5x_d6_s2026.pt"
   "$PROCESSED/max12_s2026.pt"
   "$PROCESSED/max20_s2026.pt"
