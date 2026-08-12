@@ -24,15 +24,25 @@ from torch import Tensor
 from kneemri.members import Member, MemberPackage
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slots import SCHEMES, SlotScheme
+from kneemri.test_time import SpatialViews
 
 
 class Ensemble:
     """A package's members, read over test-time windows and combined by rank."""
 
-    def __init__(self, package: MemberPackage, models: dict[str, StudyModel], device: torch.device) -> None:
+    def __init__(
+        self,
+        package: MemberPackage,
+        models: dict[str, StudyModel],
+        device: torch.device,
+        views: SpatialViews | None = None,
+    ) -> None:
         self.package = package
         self.models = models
         self.device = device
+        # None means the identity view alone, which is what every entry so far has run. Spatial views
+        # are the one test-time axis a whole-stack member has not already spent (knee-eeo).
+        self.views = views
 
     def groups(self) -> list[list[Member]]:
         """Members needing identical pixels, gathered so ONE decode serves each group.
@@ -133,12 +143,16 @@ class Ensemble:
         model = self.models[member.identifier]
         model.eval()
         window = member.window(images.shape[2], overlap=overlap)
+        views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
+        passes = 0
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
-            for start in window.starts:
-                logits = model(images[:, :, start : start + window.width], mask, window.size).float()
-                total = total + torch.sigmoid(logits)
-        return (total / len(window.starts)).cpu().numpy().astype(np.float64)
+            for view in views.apply(images):
+                for start in window.starts:
+                    logits = model(view[:, :, start : start + window.width], mask, window.size).float()
+                    total = total + torch.sigmoid(logits)
+                    passes += 1
+        return (total / passes).cpu().numpy().astype(np.float64)
 
     def predict_groups(
         self,
