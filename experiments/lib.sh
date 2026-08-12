@@ -21,6 +21,33 @@ LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$PROCESSED/experiments"
 mkdir -p "$LOGS"
 
+hold_card() {
+  # Block until this shell owns the GPU, then release it when the arm exits.
+  #
+  # after.sh serialises the arms WITHIN one chain, and nothing stopped two chains from firing at once.
+  # On 2026-08-12 two waiters were armed on the same gate PID; when it exited they both started, and
+  # the card went to 31.9 GB of 32.6 with the training arm crawling at 32-37 img/s against ~520 with
+  # the card to itself. Not a crash - Windows pages GPU memory over PCIe, so it reports 99%
+  # utilisation at a third of the power budget and simply takes fifteen times longer.
+  #
+  # `mkdir` is the lock because it is ATOMIC: two shells racing cannot both create the same directory,
+  # where a test-then-write on a lockfile can interleave. A lock whose holder is gone is cleared rather
+  # than waited on, so a killed arm does not wedge the queue forever.
+  local lock="$LOGS/gpu.lock"
+  until mkdir "$lock" 2>/dev/null; do
+    local holder
+    holder="$(cat "$lock/pid" 2>/dev/null)"
+    if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
+      echo "clearing a GPU lock held by dead process $holder"
+      rm -rf "$lock"
+      continue
+    fi
+    sleep 60
+  done
+  echo $$ > "$lock/pid"
+  trap 'rm -rf "$lock"' EXIT
+}
+
 run_snapshot() {
   # Run an arm from a COPY, never from the file in the repo.
   #
@@ -32,6 +59,8 @@ run_snapshot() {
   local arm="$1"; shift
   local snapshot="$LOGS/$(basename "$arm" .sh).running.sh"
   cp "$arm" "$snapshot"
+  # Wait for the card BEFORE the arm starts, so a second chain queues instead of contending.
+  hold_card
   # "$@" is forwarded: an arm that takes arguments (which folds, which resolution) was being run with
   # none, so its loop iterated zero times and it exited 0 with an empty log. A silent no-op is the
   # worst failure available - the GPU simply sat idle and nothing reported anything.
