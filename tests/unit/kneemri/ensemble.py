@@ -8,7 +8,7 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.ensemble import Ensemble
+from kneemri.ensemble import IMAGE_BUDGET, Ensemble
 from kneemri.members import Member, MemberConfig, MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
@@ -81,6 +81,42 @@ def _ensemble(tmp_path: Path, *, whole_stack: bool = False, slice_pooling: str =
     )
     package = MemberPackage(tmp_path)
     return Ensemble(package, {"m": model}, device)
+
+
+def test_predict_member_bounds_the_forward_by_images(tmp_path: Path):
+    """Peak work per forward is fixed by IMAGES, so reading deeper cannot multiply it.
+
+    A chunk is studies; what reaches the encoder is studies x slots x window width. A whole-stack
+    member reads four times the depth of a windowed one, and sending the whole chunk regardless is what
+    OOM'd the kernel's T4 on 2026-08-12 — the run wrote no submission and the deleted fallback scored
+    0.500. The answer must be identical whether it took one forward or six; only the peak changes.
+
+    Watched with a forward hook rather than by swapping the model out: the hook sees exactly what the
+    encoder is asked for, and leaves the object the ensemble holds untouched.
+    """
+    ensemble = _ensemble(tmp_path / "budget", whole_stack=True, slice_pooling="max")
+    member = ensemble.package.members[0]
+    model = ensemble.models[member.identifier]
+    widest = 0
+
+    def watch(_module: object, inputs: tuple[torch.Tensor, ...]) -> None:
+        nonlocal widest
+        images = inputs[0]
+        widest = max(widest, int(images.shape[0]) * int(images.shape[1]) * int(images.shape[2]))
+
+    handle = model.register_forward_pre_hook(watch)
+    studies = IMAGE_BUDGET // (len(SLOTS) * 6) + 3
+    images = torch.randint(0, 256, (studies, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(studies, len(SLOTS))
+    split = ensemble.predict_member(member, images, mask, overlap=False)
+    handle.remove()
+
+    assert widest <= IMAGE_BUDGET, f"a forward sent {widest} images, over the T4's known-good {IMAGE_BUDGET}"
+    assert studies * len(SLOTS) * 6 > IMAGE_BUDGET, "the fixture must actually exceed the budget"
+    model.eval()
+    with torch.no_grad():
+        whole = torch.sigmoid(model(images, mask, member.read_size).float()).numpy()
+    assert np.allclose(split, whole), "splitting the forward must not change the answer"
 
 
 def test_predict_member(tmp_path: Path):

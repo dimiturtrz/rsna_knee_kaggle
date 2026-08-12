@@ -26,6 +26,14 @@ from kneemri.model import TARGETS, StudyModel
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
+IMAGE_BUDGET = 864
+"""Images per forward — the largest that has ever completed on a Kaggle T4.
+
+Not a tuned number: it is 48 studies x 6 slots x a 3-slice window, which is what every scored kernel
+before 2026-08-12 sent, including the 0.894 entry. Deriving the study count from it keeps that peak
+fixed however deep a member reads, instead of letting depth multiply it.
+"""
+
 
 class Ensemble:
     """A package's members, read over test-time windows and combined by rank."""
@@ -146,10 +154,25 @@ class Ensemble:
         views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         passes = 0
+        # THE FORWARD IS SPLIT BY IMAGES, NOT BY STUDIES, and this cost a submission on 2026-08-12.
+        # A chunk is 48 studies; what reaches the encoder is studies x slots x window width. A windowed
+        # member sends 48 x 6 x 3 = 864 images and a whole-stack member sends 48 x 6 x 12 = 3,456 — four
+        # times the peak activation for an identical chunk. Locally that is invisible: this card has
+        # 32 GB and training runs under a --vram-gb cap with checkpointing. On the kernel's 16 GB T4 it
+        # is an OOM, the run produced no submission, and the deleted fallback scored the sample table at
+        # 0.500. Compute was never the problem — reading whole is CHEAPER than ten overlapping windows
+        # (12 images against 30), which is what rules out a timeout and points at memory.
+        rows = max(1, IMAGE_BUDGET // max(images.shape[1] * window.width, 1))
         with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
             for view in views.apply(images):
                 for start in window.starts:
-                    logits = model(view[:, :, start : start + window.width], mask, window.size).float()
+                    read = view[:, :, start : start + window.width]
+                    logits = torch.cat(
+                        [
+                            model(read[begin : begin + rows], mask[begin : begin + rows], window.size).float()
+                            for begin in range(0, read.shape[0], rows)
+                        ]
+                    )
                     total = total + torch.sigmoid(logits)
                     passes += 1
         return (total / passes).cpu().numpy().astype(np.float64)
