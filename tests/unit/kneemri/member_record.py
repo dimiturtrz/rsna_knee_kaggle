@@ -20,6 +20,7 @@ class _Options:
     slices: int = 12
     slice_pooling: str = "max"
     anatomical_prior: bool = False
+    encoder_layer: int = -1
     ema: bool = False
     bf16: bool = False
     lora_rank: int = 0

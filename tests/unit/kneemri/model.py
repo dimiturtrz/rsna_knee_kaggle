@@ -20,6 +20,7 @@ GROUP = 3
 @dataclass
 class _Output:
     last_hidden_state: Tensor
+    hidden_states: tuple[Tensor, ...] | None = None
 
 
 class _FakeBackbone(torch.nn.Module):
@@ -42,13 +43,16 @@ class _FakeBackbone(torch.nn.Module):
         self.checkpointing = gradient_checkpointing_kwargs
 
     @override
-    def forward(self, *, pixel_values: Tensor) -> _Output:
+    def forward(self, *, pixel_values: Tensor, output_hidden_states: bool = False) -> _Output:
         n = pixel_values.shape[0]
         rows = pixel_values.mean(dim=(1, 3))[:, :DIM] if pixel_values.shape[2] >= DIM else None
         if rows is None:
             rows = pixel_values.mean(dim=(1, 3)).repeat(1, (DIM // pixel_values.shape[2]) + 1)[:, :DIM]
         base = torch.arange(PATCHES + 1, dtype=torch.float32).reshape(1, -1, 1) * 0.01
-        return _Output(last_hidden_state=base + rows.reshape(n, 1, DIM))
+        last = base + rows.reshape(n, 1, DIM)
+        # Each "block" differs by a constant so a test can tell which one the head was handed.
+        states = tuple(last + index for index in range(13)) if output_hidden_states else None
+        return _Output(last_hidden_state=last, hidden_states=states)
 
 
 @pytest.fixture
@@ -388,3 +392,25 @@ def test_compile_encoder(study_model: StudyModel):
     imgs = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
     with torch.no_grad():
         assert study_model.forward(imgs, torch.ones(1, SLOTS), 14).shape == (1, len(TARGETS))
+
+
+def test_tokens_reads_the_layer_the_design_asks_for():
+    """-1 takes the cheap `last_hidden_state` path; any other index reads that block's tokens.
+
+    The default must be byte-identical to what every member in the ledger was fitted on, which is why
+    -1 does not go through `output_hidden_states` at all. Reading an intermediate layer is a knob, not
+    a fix: the final block of a self-supervised ViT is the most specialised toward its pretraining
+    objective, and our findings are 1-3 mm.
+    """
+    imgs = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    torch.manual_seed(SEED)
+    last = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    torch.manual_seed(SEED)
+    middle = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max", layer=6)).eval()
+
+    with torch.no_grad():
+        from_last = last.slice_features(imgs, 14)
+        from_middle = middle.slice_features(imgs, 14)
+
+    assert from_last.shape == from_middle.shape
+    assert not torch.allclose(from_last, from_middle), "a different block must reach the head"

@@ -53,6 +53,9 @@ class MemberConfig(TypedDict):
     whole_stack: NotRequired[bool]
     """Absent on every member fitted before whole-stack reading existed; those were windowed."""
 
+    encoder_layer: NotRequired[int]
+    """Which encoder block the head read; absent on every member fitted before it was a flag."""
+
     bf16: NotRequired[bool]
     """Whether the run's autocast was bfloat16; absent on every member fitted before the flag existed."""
 
@@ -136,6 +139,11 @@ class Member:
         published ones — they were windowed, and windowed is what they must stay.
         """
         return bool(self.config.get("whole_stack", False))
+
+    @property
+    def layer(self) -> int:
+        """Which encoder block this member read, defaulting to the last for everything fitted before."""
+        return int(self.config.get("encoder_layer", -1))
 
     @property
     def precision(self) -> torch.dtype:
@@ -362,7 +370,7 @@ class MemberPackage:
         # that the two are compatible: DINOv2 tiles 392 and DINOv3 does not, so a member could name a
         # combination no patch grid can express and only fail inside a kernel.
         ENCODERS[member.variant].require_tiling(member.read_size)
-        design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling)
+        design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling, layer=member.layer)
         model = StudyModel(backbone, dim, member.slot_count, design)
         # THE ADAPTERS MUST EXIST BEFORE THE WEIGHTS ARRIVE. A LoRA member's state dict carries adapter
         # keys that only exist once `low_rank` has wrapped the encoder's linears; building the plain

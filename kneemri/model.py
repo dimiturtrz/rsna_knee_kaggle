@@ -78,6 +78,16 @@ class StudyDesign:
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
 
+    layer: int = -1
+    """Which encoder block's tokens the head reads. -1 is the last, which is what every member so far
+    was fitted on and therefore the only value that leaves the ledger's meaning untouched.
+
+    It is a knob and not a defect: `last_hidden_state` is what the API returns and what linear probes
+    conventionally use. But the final block of a self-supervised ViT is the most specialised toward its
+    PRETRAINING objective, which is why both DINOv2 and DINOv3 ship `get_intermediate_layers` for dense
+    work — and our findings are 1-3 mm while our head pools patch tokens, so this is the axis they live
+    on. Untested for either encoder until now."""
+
 
 class StudyModel(nn.Module):
     """Encoder plus head over a study's bag of slot images.
@@ -205,7 +215,7 @@ class StudyModel(nn.Module):
             # sampling grid rather than a different crop.
             x = nn.functional.interpolate(x, size=(img_size, img_size), mode="bilinear", align_corners=False)
         x = (x - self.mean) / self.std
-        tokens = self.backbone(pixel_values=x).last_hidden_state
+        tokens = self._tokens(x)
         pooled = self._pool(tokens)
         if not per_slice:
             return pooled.reshape(batch, slots, 1, -1)
@@ -442,6 +452,17 @@ class StudyModel(nn.Module):
         # pyrefly: ignore[not-callable] - the hook is transformers', not torch's, and nn.Module's
         # __getattr__ is typed as returning Tensor, so any model-specific method reads as uncallable.
         self.backbone.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+
+    def _tokens(self, x: Float[Tensor, "n c h w"]) -> Float[Tensor, "n t d"]:
+        """The block's tokens the design asks for, in one forward pass.
+
+        `output_hidden_states` returns every block's output, so reading an intermediate layer costs no
+        second pass — the tensors already exist and the last one is exactly `last_hidden_state`. The
+        default therefore takes the cheap path and produces byte-identical results to before.
+        """
+        if self.design.layer == -1:
+            return self.backbone(pixel_values=x).last_hidden_state
+        return self.backbone(pixel_values=x, output_hidden_states=True).hidden_states[self.design.layer]
 
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce patch tokens to one vector: the class token, the patch mean, optionally the tail."""

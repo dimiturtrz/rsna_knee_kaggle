@@ -390,3 +390,14 @@ def test_scheme():
     assert _member().scheme == "canonical"
     extended = replace(_member(), config={**_config(), "slots": [*SLOTS, "COR_FLUID_NOFS", "AX_T1", "AX_FLUID_NOFS"]})
     assert extended.scheme == "extended"
+
+
+def test_layer():
+    """Absent means the LAST block, which is what every member fitted before the flag actually read.
+
+    Rebuilding a member on a different block than it was fitted on is a different function that loads
+    cleanly and predicts from features it never saw - the ninth-instance shape. So this is read back by
+    both rebuilders rather than defaulted at either.
+    """
+    assert _member().layer == -1, "a manifest without the key describes a member that read the last block"
+    assert replace(_member(), config={**_config(), "encoder_layer": 6}).layer == 6

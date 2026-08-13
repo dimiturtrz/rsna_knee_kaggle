@@ -80,6 +80,7 @@ class TrainingOptions:
     backbone_lr: float = Adaptation().backbone_lr
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
+    encoder_layer: int = -1
     variant: str = SMALL
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
@@ -240,6 +241,15 @@ class TrainingOptions:
             default=None,
             help="table to SCORE against (default: --labels). Hold this fixed across arms when the "
             "training labels are the variable, or the arms are measured with different rulers.",
+        )
+        parser.add_argument(
+            "--encoder-layer",
+            type=int,
+            default=-1,
+            help="which encoder block the head reads. -1 is the last, which is what every member so far "
+            "was fitted on. The final block of a self-supervised ViT is the most specialised toward its "
+            "PRETRAINING objective, and our findings are 1-3 mm - both DINOv2 and DINOv3 ship "
+            "get_intermediate_layers for dense work. Costs no extra forward pass.",
         )
         parser.add_argument(
             "--anatomical-prior",
@@ -416,7 +426,11 @@ def main() -> None:
         {k: round(v, 3) for k, v in targets.coverage().items()},
     )
 
-    design = StudyDesign(slice_pooling=arguments.slice_pooling, anatomical_prior=arguments.anatomical_prior)
+    design = StudyDesign(
+        slice_pooling=arguments.slice_pooling,
+        anatomical_prior=arguments.anatomical_prior,
+        layer=arguments.encoder_layer,
+    )
     encoder = ENCODERS[arguments.variant]
     # Before the weights are fetched and the cache is mapped: a read size the patch grid cannot tile is
     # a configuration mistake, and the failure without this is either a crash deep in the encoder or a

@@ -24,6 +24,9 @@ class RunOptions(Protocol):
     def image_size(self) -> int: ...
 
     @property
+    def encoder_layer(self) -> int: ...
+
+    @property
     def train_size(self) -> int: ...
 
     @property
@@ -178,6 +181,9 @@ class MemberRecord:
                 "pool": "cls_mean",
                 "slice_pooling": options.slice_pooling,
                 "anatomical_prior": options.anatomical_prior,
+                # Recorded AND read back by Member.layer. A value written here and defaulted by a
+                # consumer is the shape that has cost this project nine defects.
+                "encoder_layer": options.encoder_layer,
                 "ema": options.ema,
                 # Precision is part of what produced these weights: bf16 and fp16 are different
                 # arithmetic, and a member scored under one is not strictly comparable to a control
