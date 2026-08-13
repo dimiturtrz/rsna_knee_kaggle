@@ -4592,6 +4592,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.members.Member.precision",
+      "label": "precision",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.members.Member.read_size",
       "label": "read_size",
       "level": "method",
