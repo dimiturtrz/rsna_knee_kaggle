@@ -88,6 +88,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
+- **Three checks, none needing a GPU, each for a failure that already happened**: `python -m
+  kneemri.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
+  `python -m kneemri.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
+  two days after running), and `python comp/witness_check.py --device cpu` before a submission (it
+  found three defects on first use). See `experiments/README.md`.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint

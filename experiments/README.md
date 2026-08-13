@@ -17,6 +17,35 @@ stay in it.
 An arm file carries its hypothesis, its control number, and its result in the header. Reading the
 directory is meant to be the same as reading the ledger.
 
+## The three checks, and when to run them
+
+Each exists because the failure it catches happened, silently, and cost either a queue or a slot. None
+needs a GPU.
+
+```bash
+uv run python -m kneemri.arm_check      # BEFORE arming a queue
+uv run python -m kneemri.ledger_check   # AFTER runs finish
+uv run python comp/witness_check.py --root <members> --device cpu   # BEFORE a submission
+```
+
+**`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
+prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
+a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed
+because bash is what runs it — an arm once died on a quoting error and no regex finds that.
+
+**`ledger_check` — after runs finish.** Reports any run whose metrics file exists and whose best score
+is quoted nowhere above. Five arms once sat in this table as "queued" for two days after they had run,
+and the next planning pass read them as unstarted work. It found four more on its first execution,
+*after* the table had just been updated by hand.
+
+**`witness_check` — before a submission.** Re-derives what training predicted for eight named studies
+through the INFERENCE path and refuses the member if the numbers move. It is the only check that spans
+both paths, and it found three defects on first use — `torch.compile` renaming every state-dict key,
+bf16 members served in fp16, and its own tolerance being tighter than bf16's epsilon.
+
+What none of them check is whether a SENTENCE is true. A number can be present and its interpretation
+stale; that still needs a reader.
+
 ## Two rules encoded in `lib.sh` rather than remembered
 
 - **`wait_for` keys on a completion marker.** A gate that watches an output path fires when the
