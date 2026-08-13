@@ -1,4 +1,10 @@
-"""Submission from OUR OWN trained members.
+"""Submission from OUR OWN trained members: the strongest five of the all-ours package.
+
+FIVE AND NOT ALL SIX, and the reason is a slot. The package's sixth member is `lora_r8_v3small_224`,
+which is fitted on DINOv3 - and this kernel mounts DINOv2 small and base only, with internet disabled,
+because wiring a v3 member through to a submission is still open work (knee-98j). Running all members
+would reach for weights that are not there and fail the run, which is how the 0.500 entry was spent.
+`strongest(5)` drops exactly that member, which is also our weakest by 0.024.
 
 Our weights, our data layer, our submission path. The members were fitted by `kneemri.train` on the
 report-derived labels, selected on a holdout split by REPORT-TEXT HASH so the template reports that
@@ -57,7 +63,7 @@ def main() -> None:
 
     from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
-    KernelRun().run()
+    KernelRun(members=5).run()
 
 
 if __name__ == "__main__":
