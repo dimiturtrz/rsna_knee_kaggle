@@ -179,3 +179,42 @@ English: it is there, in most of the corpus, and only the tool could not see it.
 
 It also makes the negation defect worth re-measuring. That was sized on located English sentences —
 6.6% of all positives — and located-ness was itself an English-regex property.
+
+## And the reader is not measurably worse in any of those languages
+
+`python -m kneemri.reader_agreement`, same day, no GPU. Branch (a) of `knee-mxj` assumes the reader
+struggles outside English. Measured against the 58 annotated studies — the only ground truth that is not
+the reader's own output — it does not:
+
+| | cells | radiologist agrees |
+|---|---:|---:|
+| nl | 13 | 92.3% |
+| el | 21 | 71.4% |
+| en | 135 | **66.7%** |
+| bg | 15 | 66.7% |
+| tr | 36 | 63.9% |
+| de | 13 | 61.5% |
+| es | 47 | 57.4% |
+
+**English 66.7% against non-English 64.2%: +0.025, 95% CI [−0.076, +0.126].** The interval is
+bootstrapped over STUDIES rather than cells, because twelve cells sharing one report and one radiologist
+are not twelve independent draws — a cell-wise interval would be about half this width and would be
+wrong.
+
+**State what this can and cannot establish.** It rules out an English advantage larger than about 12.6
+points. It cannot rule out a small one, and with 26 English against 30 non-English studies nothing
+finer is available. What it does refute is the *large* multilingual deficit that branch (a) was
+premised on: whatever is wrong with our labels is close to language-independent.
+
+### The two findings converge, and they sharpen the P0
+
+- the severity vocabulary is present in **61.3%** of the corpus, not the 29% assumed
+- the reader reads those languages about as well as it reads English
+
+So "reach the other 60% with a multilingual reader" is not the lever — that ground is already covered.
+What remains is what the English-only analysis already isolated: **ordinal extraction within a report the
+reader can already read**, where a regex adds nothing and the measured defect is negation. The plan that
+survives is narrower and better aimed than the one that went in.
+
+`reader_agreement` is also the acceptance test for any replacement reader: it has to agree more, and a
+reader built for a language has to close that language's gap.
