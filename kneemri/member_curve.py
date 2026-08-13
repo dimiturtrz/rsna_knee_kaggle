@@ -26,14 +26,14 @@ import numpy as np
 import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
-from transformers import AutoModel
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS
 from kneemri.ensemble import Ensemble
 from kneemri.folds import ReportFolds
 from kneemri.holdout_predictions import HoldoutPredictions
+from kneemri.holdout_slab import HoldoutSlab
 from kneemri.members import Member
+from kneemri.prediction_cache import PredictionCache
 from kneemri.scores import LabelScores
 from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
@@ -175,12 +175,20 @@ def main() -> None:
         "three forward passes per member.",
     )
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="re-read every member through its encoder instead of using cached probabilities. The cache "
+        "keys on the checkpoint's size and mtime, the scored studies and the whole reading policy, so a "
+        "stale hit should not be possible - this is the escape hatch for when it is.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    predictions = HoldoutPredictions(device, SpatialViews() if arguments.tta else None)
+    views = SpatialViews() if arguments.tta else None
+    predictions = HoldoutPredictions(device, views)
     scores = LabelScores()
 
     # EACH MEMBER'S OWN READING, never one cache and one size for all of them. This CLI loaded a single
@@ -203,6 +211,14 @@ def main() -> None:
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
 
+    # Keyed on the studies actually scored, so a different fold or split cannot hand back these rows.
+    cache = PredictionCache(
+        root.processed() / "holdout_predictions",
+        [reference[i] for i in holdout],
+        predictions.views,
+        refresh=arguments.refresh,
+    )
+
     per_member: list[NDArray[np.float64]] = []
     names: list[str] = []
     for key in keys:
@@ -211,19 +227,10 @@ def main() -> None:
             if identifiers != reference:
                 message = f"cache {key} indexes studies in a different order — its rows would not line up"
                 raise ValueError(message)
-        images, mask = corpus.images[holdout], corpus.mask[holdout]
+        slab = HoldoutSlab(corpus, holdout)
         for reading in (item for item in readings if (item.image_size, item.slices, item.scheme) == key):
-            encoder = ENCODERS[reading.variant]
-            member = predictions.load(
-                reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
-            )
-            scored = predictions.predict(
-                member,
-                images,
-                mask,
-                reading.window(corpus.slices, overlap=arguments.overlap),
-                reading.precision,
-            )
+            window = reading.window(corpus.slices, overlap=arguments.overlap)
+            scored = predictions.cached(reading, slab, cache, window)
             per_member.append(scored)
             names.append(reading.file.name)
             logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))

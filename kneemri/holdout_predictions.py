@@ -5,6 +5,7 @@ the same loop was already open-coded in a throwaway slice-count script. An analy
 and reads them over test-time windows is a recurring shape here, not a one-off.
 """
 
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -12,10 +13,16 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
+from transformers import AutoModel
 
-from kneemri.members import Window
+from kneemri.backbone import ENCODERS
+from kneemri.holdout_slab import HoldoutSlab
+from kneemri.members import Member, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.prediction_cache import PredictionCache
 from kneemri.test_time import SpatialViews
+
+logger = logging.getLogger(__name__)
 
 GROUP = 3
 BATCH = 8
@@ -97,3 +104,27 @@ class HoldoutPredictions:
                         passes += 1
                 chunks.append((total / passes).cpu().numpy())
         return np.concatenate(chunks).astype(np.float64)
+
+    def cached(
+        self, reading: Member, slab: HoldoutSlab, cache: PredictionCache, window: Window
+    ) -> Float[np.ndarray, "studies targets"]:
+        """One member's probabilities — from the cache when it holds them, from the encoder when not.
+
+        The encoder, its download, the holdout's pixels and the GPU are ALL reached only on a miss. That
+        is the difference between an analysis that can run while the card belongs to something else and
+        one that cannot, and every paired interval, oracle and subset search here is arithmetic over what
+        this returns.
+
+        `load` takes its backbone as an argument so it can be tested without a network; this method is
+        the caller that does the fetching, and it does it inside the miss branch for the same reason.
+        """
+        entry = cache.key(reading.file, window, reading.precision)
+        stored = cache.read(entry)
+        if stored is not None:
+            return stored
+        images, mask = slab.arrays()
+        encoder = ENCODERS[reading.variant]
+        model = self.load(reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count)
+        values = self.predict(model, images, mask, window, reading.precision)
+        cache.write(entry, values)
+        return values

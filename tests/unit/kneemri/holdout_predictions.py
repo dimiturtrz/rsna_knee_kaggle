@@ -8,10 +8,15 @@ nothing checks.
 from pathlib import Path
 from typing import override
 
+import numpy as np
 import torch
 
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_slab import HoldoutSlab
+from kneemri.members import Member
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.prediction_cache import PredictionCache
+from kneemri.study_cache import CachedCorpus
 from kneemri.test_time import SpatialViews
 
 DIM = 12
@@ -128,3 +133,49 @@ def test_predict_averages_over_views():
     assert (plain == identity).all(), "the identity view must be exactly the un-augmented answer"
     assert rotated.shape == plain.shape
     assert not (rotated == plain).all(), "rotating the input must move the answer, or the average is a no-op"
+
+
+def _reading(tmp_path: Path) -> Member:
+    """A member whose checkpoint exists on disk, because the cache key stats it."""
+    checkpoint = tmp_path / "m_x.pt"
+    checkpoint.write_bytes(b"weights")
+    return Member(
+        identifier="x",
+        file=checkpoint,
+        fold=0,
+        config={
+            "img": 336,
+            "slices": 12,
+            "group": 3,
+            "crop_mm": 130.0,
+            "band": [0.2, 0.8],
+            "slots": ["a", "b"],
+            "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
+            "variant": "small",
+            "pool": "cls_mean",
+        },
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.8,
+        annot=0.8,
+    )
+
+
+def test_cached(tmp_path: Path):
+    """A cached reading comes back without materialising the pixels — which is the point of caching at all.
+
+    The slab is left UNTOUCHED and that is asserted directly: everything expensive on this path sits
+    downstream of `slab.arrays()` — the several-GB copy, the encoder download, the GPU — so a slab that
+    was never materialised is proof that none of them ran. Without it the test would pass on any machine
+    that happens to have a free card, which is the state this cache exists to stop depending on.
+    """
+    reading = _reading(tmp_path)
+    cache = PredictionCache(tmp_path / "cached", ["s1", "s2"], SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),)))
+    window = Window(starts=[0], width=3, size=336)
+    stored = np.array([[0.25, 0.75], [0.5, 0.5]])
+    cache.write(cache.key(reading.file, window, reading.precision), stored)
+    slab = HoldoutSlab(CachedCorpus(np.zeros((2, 1, 1, 1, 1), np.uint8), np.ones((2, 1), np.float32)), np.array([0, 1]))
+
+    scored = HoldoutPredictions(torch.device("cpu")).cached(reading, slab, cache, window)
+
+    assert (scored == stored).all()
+    assert slab.held is None, "a cache hit must not reach the pixels, and so must not reach the encoder"
