@@ -82,3 +82,25 @@ def test_best():
     assert len(lines) == 2
     assert "strong.pt" in lines[0] and "weak.pt" not in lines[0], "the best single member is the strong one"
     assert "strong.pt" in lines[1] and "weak.pt" in lines[1], "the only pair is both of them"
+
+
+def test_oracle():
+    """The ceiling is at least the plain average, and strictly above it when members differ per label.
+
+    Constructed so member A is perfect on the first label and useless on the second while member B is
+    the reverse. Averaging them cannot beat either on the label it owns, so the per-label ceiling must
+    exceed the average - which is exactly the case the measurement exists to detect.
+    """
+    truth = np.zeros((6, len(TARGETS)), dtype=np.float32)
+    truth[3:, 0] = 1.0
+    truth[3:, 1] = 1.0
+    first = np.tile(np.array([[0.1], [0.2], [0.3], [0.7], [0.8], [0.9]]), (1, len(TARGETS)))
+    second = first.copy()
+    second[:, 0] = first[::-1, 0]  # B is inverted on label 0
+    first[:, 1] = second[::-1, 1].copy()  # A is inverted on label 1
+
+    ceiling = MemberCurve(LabelScores()).oracle([first, second], truth)
+
+    assert ceiling["oracle"] >= ceiling["average"], "a ceiling below the thing it bounds is not a ceiling"
+    assert ceiling["oracle"] > ceiling["average"], "members that differ per label must show headroom"
+    assert ceiling["average"] >= 0.0

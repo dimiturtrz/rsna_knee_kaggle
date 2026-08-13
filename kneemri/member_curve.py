@@ -84,6 +84,33 @@ class MemberCurve:
             lines.append(f"best {size}: {score:.4f}  " + " + ".join(names[index] for index in subset))
         return lines
 
+    def oracle(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> dict[str, float]:
+        """The CEILING of combining these members, per label — against the best subset actually reachable.
+
+        A ceiling by construction, and it must never be quoted as a score: it picks, for each of the
+        twelve findings, whichever member happens to score that finding best ON THIS HOLDOUT. Nothing
+        can be selected that way at submission time, because the choice uses the answers.
+
+        WHAT IT IS FOR. It prices a whole class of work before any of it is done. Our current members
+        are +0.02 better on this ruler than the five that scored 0.888, and the entry built from them
+        scored 0.882 (knee-jk3). Either diversity dominates quality here, or holdout-to-leaderboard
+        transfer is not what we assume. If this ceiling sits near the plain rank-average, then per-label
+        weighting is worthless and so is another member of the same kind; if it sits far above, the gain
+        is already sitting in the members we have and costs no training to collect.
+
+        Reported beside the best PLAIN average so the two are read together — a ceiling alone tempts
+        exactly the misreading it exists to prevent.
+        """
+        per_label = [self.scores.per_label(member, truth) for member in per_member]
+        labels = list(per_label[0])
+        best = {label: max(scored[label] for scored in per_label) for label in labels}
+        combined = Ensemble.combine(per_member)
+        return {
+            "oracle": float(np.nanmean(list(best.values()))),
+            "average": self.scores.mean(combined, truth),
+            "best_single": max(self.scores.mean(member, truth) for member in per_member),
+        }
+
     def report(self, by_size: dict[int, list[float]]) -> list[str]:
         """One line per ensemble size: its mean, its range, and what the member added."""
         lines = []
@@ -175,6 +202,17 @@ def main() -> None:
     # submission needs the answer: which members to package.
     for line in curve.best(per_member, truth, names):
         logger.info(line)
+    # The CEILING beside the reachable numbers, never alone: it selects per label using the answers, so
+    # quoting it as a score would be quoting a cheat. What it prices is whether per-label weighting - or
+    # another member of the same kind - is worth anything at all before either is built.
+    ceiling = curve.oracle(per_member, truth)
+    logger.info(
+        "oracle %.4f  vs plain average %.4f  vs best single %.4f  (headroom %+.4f)",
+        ceiling["oracle"],
+        ceiling["average"],
+        ceiling["best_single"],
+        ceiling["oracle"] - ceiling["average"],
+    )
 
 
 if __name__ == "__main__":

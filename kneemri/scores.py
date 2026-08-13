@@ -28,12 +28,27 @@ class LabelScores:
 
         A label with only one class present is undefined rather than zero: reporting 0.5 there would
         silently drag the mean toward chance on exactly the rare findings that matter most.
+
+        TIES TAKE MIDRANKS, and they must. This was `argsort().argsort() + 1`, which are ORDINAL ranks:
+        tied predictions are ordered by their position in the array, so a tie is settled by study order.
+        A CONSTANT predictor — no information at all — scored 1.0 when the positives happened to sit
+        late in the corpus and 0.0 when they sat early, instead of the 0.5 it must score.
+
+        Raw model outputs are float64 sigmoids and effectively never tie, so single-member numbers are
+        unaffected. RANK-AVERAGED ENSEMBLES ARE NOT: `Ensemble.combine` maps each member onto k/(n-1)
+        and averages, so exact ties are common by construction — and that is precisely the number
+        `member_curve` uses to choose which members to submit.
         """
         positives, negatives = int(truth.sum()), int((1 - truth).sum())
         if positives == 0 or negatives == 0:
             return float("nan")
-        order = predictions.argsort().argsort() + 1
-        return float((order[truth == 1].sum() - positives * (positives + 1) / 2) / (positives * negatives))
+        order = np.argsort(predictions, kind="mergesort")
+        ranked = np.empty(len(predictions), dtype=np.float64)
+        _, starts, counts = np.unique(predictions[order], return_index=True, return_counts=True)
+        for start, count in zip(starts, counts, strict=True):
+            # 1-based midrank of a tie group: the mean of the ordinal ranks it spans.
+            ranked[order[start : start + count]] = start + (count + 1) / 2
+        return float((ranked[truth == 1].sum() - positives * (positives + 1) / 2) / (positives * negatives))
 
     def per_label(
         self,

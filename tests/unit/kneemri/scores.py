@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from kneemri.model import TARGETS
 from kneemri.scores import LabelScores
@@ -61,3 +62,27 @@ def test_per_label_selection_drops_pairs_rather_than_calling_them_negative():
 
     as_negative = LabelScores().per_label(predictions, targets)
     assert all(value < 1.0 for value in as_negative.values()), "the unknown rows counted as negatives change it"
+
+
+def test_area_under_curve_gives_ties_midranks():
+    """A constant predictor scores chance whatever the label order, and partial ties interpolate.
+
+    This was `argsort().argsort() + 1` — ORDINAL ranks — so tied predictions were ordered by their
+    position in the array and a tie was settled by STUDY ORDER. A constant predictor, carrying no
+    information at all, scored 1.0 when the positives happened to sit late in the corpus and 0.0 when
+    they sat early. Both orders are asserted here because a fix that only handles one is not a fix.
+
+    Raw sigmoids effectively never tie, so single-member scores never moved. `Ensemble.combine` maps
+    each member onto k/(n-1) and averages, which ties 20.5% of 881 studies at two members and 14.4% at
+    five — and that is the number `member_curve` uses to choose what to submit.
+    """
+    late = np.array([0, 0, 0, 1, 1, 1], dtype=np.int64)
+    early = np.array([1, 1, 1, 0, 0, 0], dtype=np.int64)
+    constant = np.full(6, 0.5)
+
+    assert LabelScores.area_under_curve(constant, late) == 0.5
+    assert LabelScores.area_under_curve(constant, early) == 0.5
+
+    # two positives ranked clear, the third tied with all three negatives: (2*3 + 0.5*3) / 9
+    partial = np.array([0.5, 0.5, 0.5, 0.5, 0.8, 0.9])
+    assert LabelScores.area_under_curve(partial, late) == pytest.approx(0.8333333, abs=1e-6)
