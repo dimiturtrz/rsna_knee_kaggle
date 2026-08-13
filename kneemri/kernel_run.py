@@ -12,6 +12,7 @@ is worth having, because the two leaderboards reward opposite things and a team 
 897 teams carry an efficiency score strictly below their public best.
 """
 
+import json
 import logging
 from pathlib import Path
 
@@ -77,9 +78,27 @@ class KernelRun:
             raise FileNotFoundError(message)
         return found
 
+    def revision(self) -> str:
+        """The commit the mounted kit was built from, or a plain statement that it does not say.
+
+        A kit built before the stamp existed carries no `kit.json`, and that is reported as UNSTAMPED
+        rather than guessed at — an unknown version is exactly the state that cost a submission.
+        """
+        stamp = Path(__file__).resolve().parent.parent / "kit.json"
+        if not stamp.exists():
+            return "UNSTAMPED (built before build_kit recorded its commit)"
+        recorded = json.loads(stamp.read_text(encoding="utf-8"))
+        return f"{recorded['commit']}{' DIRTY' if recorded.get('dirty') else ''}"
+
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
         from transformers import AutoModel  # noqa: PLC0415 - only importable after the kit is on sys.path
+
+        # WHICH CODE IS THIS? Members are versioned and kernels are versioned; the source between them
+        # was not, and on 2026-08-13 a submission ran on a kit 54 commits stale — without
+        # Member.precision, so a bf16 member was served in fp16 on a T4. The run's own log now names the
+        # commit that produced it, which is the only place the drift is visible from.
+        logger.info("kit %s", self.revision())
 
         package = self.package()
         package.members = self.chosen(package)

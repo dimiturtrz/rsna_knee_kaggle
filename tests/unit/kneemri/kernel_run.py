@@ -1,5 +1,6 @@
 """What a kernel does once it can import us — without a Kaggle mount."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -98,3 +99,22 @@ def test_package(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().package()
+
+
+def test_revision(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The kit's stamped commit, and an explicit UNSTAMPED when the kit predates the stamp.
+
+    Unknown is reported rather than guessed: a kit whose version cannot be named is exactly the state
+    that spent a submission on 2026-08-13, when the mounted source was 54 commits behind HEAD.
+    """
+    source = tmp_path / "kneemri_src"
+    (source / "kneemri").mkdir(parents=True)
+    monkeypatch.setattr(kernel_run, "__file__", str(source / "kneemri" / "kernel_run.py"))
+
+    assert "UNSTAMPED" in KernelRun().revision()
+
+    (source / "kit.json").write_text(json.dumps({"commit": "abc1234", "dirty": False}), encoding="utf-8")
+    assert KernelRun().revision() == "abc1234"
+
+    (source / "kit.json").write_text(json.dumps({"commit": "abc1234", "dirty": True}), encoding="utf-8")
+    assert KernelRun().revision() == "abc1234 DIRTY"
