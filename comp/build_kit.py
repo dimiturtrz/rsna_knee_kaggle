@@ -15,8 +15,9 @@ import logging
 import shutil
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from core.paths import DataRoot
 
+logger = logging.getLogger(__name__)
 
 _REPO = Path(__file__).resolve().parents[1]
 _DATASET_ID = "dimiturnt/kneemri-kit"
@@ -27,7 +28,19 @@ _SOURCE_DIR = "kneemri_src"
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", type=Path, default=_REPO / "comp" / "kit")
+    # OUT OF THE REPO by default. The kit is ~200 MB of weights and wheels beside a copy of our own
+    # packages - build output, not source - and "data lives out of the repo" is the house rule for
+    # exactly that. It also removes a real hazard: while it sat at comp/kit, adding `comp` to the lint
+    # scope put a STALE COPY of kneemri under the type checker, which then reported every refactor as
+    # an error at a path nobody edits. `pyrefly check <paths>` discards project_excludes when paths are
+    # given on the command line (its own --help says so), so no config could exclude it - the directory
+    # simply must not live inside a checked tree.
+    ap.add_argument(
+        "--out",
+        type=Path,
+        default=DataRoot.from_config(_REPO / "paths.yaml").processed() / "kit",
+        help="where to assemble the kit. Defaults out of the repo, beside the other build artefacts.",
+    )
     ap.add_argument("--weights", nargs="*", default=[], help="weight files under processed/")
     # Both optional, because the probe measured that Kaggle's image already carries pydicom, timm,
     # transformers, cv2, SimpleITK, sklearn, scipy and polars — this competition may need no wheels at

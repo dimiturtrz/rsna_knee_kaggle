@@ -11,18 +11,23 @@ exit means rebuild the kit before shipping.
 
 from __future__ import annotations
 
+import argparse
 import filecmp
 import logging
 import sys
 from pathlib import Path
 
+from core.paths import DataRoot
+
 logger = logging.getLogger(__name__)
 
 _REPO = Path(__file__).resolve().parents[1]
-_KIT_SRC = _REPO / "comp" / "kit" / "kneemri_src"
 _PACKAGES = ("kneemri", "core")
 
-_KIT = _REPO / "comp" / "kit"
+_KIT = DataRoot.from_config(_REPO / "paths.yaml").processed() / "kit"
+"""Where build_kit writes. OUT OF THE REPO, and the two defaults must agree or this gate checks a
+directory nobody built — which is the failure this file just had in a different form, silently
+ignoring a --kit it was handed."""
 
 _REQUIRED_WHEELS = ("jaxtyping", "wadler_lindig")
 """Third-party imports our own source makes that Kaggle's base image does not carry.
@@ -43,14 +48,15 @@ def _sources(root: Path, package: str) -> dict[Path, Path]:
     return {path.relative_to(root): path for path in base.rglob("*.py") if "__pycache__" not in path.parts}
 
 
-def drift() -> list[str]:
+def drift(kit: Path = _KIT) -> list[str]:
     """Each way the kit's source diverges from the repo's — missing, changed, or orphaned files."""
+    kit_src = kit / "kneemri_src"
     problems: list[str] = []
     for package in _PACKAGES:
         repo_files = _sources(_REPO, package)
-        kit_files = _sources(_KIT_SRC, package)
+        kit_files = _sources(kit_src, package)
         for relative, repo_path in repo_files.items():
-            kit_path = _KIT_SRC / relative
+            kit_path = kit_src / relative
             if not kit_path.exists():
                 problems.append(f"missing from kit: {relative}")
             elif not filecmp.cmp(repo_path, kit_path, shallow=False):
@@ -61,17 +67,33 @@ def drift() -> list[str]:
     problems.extend(
         f"missing wheel: {name} (kernel will fail at import; rebuild with --wheels)"
         for name in _REQUIRED_WHEELS
-        if not list(_KIT.glob(f"{name.replace('_', '?')}-*.whl"))
+        if not list(kit.glob(f"{name.replace('_', '?')}-*.whl"))
     )
     return problems
 
 
 def main() -> None:
-    """Report kit/repo source drift; exit non-zero so a submit workflow halts before shipping a stale kit."""
+    """Report kit/repo source drift; exit non-zero so a submit workflow halts before shipping a stale kit.
+
+    IT TAKES A --kit, and until 2026-08-13 it took nothing at all: there was no argument parser, so
+    `verify_kit.py --kit somewhere` checked `comp/kit` and reported on a directory the caller had not
+    named. That is the silent-no-op class this project has already paid for twice — an arm run with no
+    arguments that iterated zero times and exited 0, and a `str.replace` that matched nothing. A gate
+    that answers about the wrong thing is worse than one that refuses.
+    """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--kit",
+        type=Path,
+        default=_KIT,
+        help="the kit directory to check. Defaults to where build_kit writes, out of the repo.",
+    )
+    arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    if not _KIT_SRC.exists():
-        sys.exit(f"kit source absent: {_KIT_SRC} — run build_kit.py first")
-    problems = drift()
+    kit_src = arguments.kit / "kneemri_src"
+    if not kit_src.exists():
+        sys.exit(f"kit source absent: {kit_src} — run build_kit.py first")
+    problems = drift(arguments.kit)
     if problems:
         sys.exit("kit is stale — rebuild before submitting:\n  " + "\n  ".join(problems))
     logger.info("kit source matches repo (%s) — safe to submit", ", ".join(_PACKAGES))

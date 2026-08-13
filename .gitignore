@@ -48,9 +48,9 @@ htmlcov/
 # jscpd (node) — pulled transiently by npx for the duplication gate
 node_modules/
 
-# Kaggle kit: a regenerated copy of our own source + weights + wheels (comp/build_kit.py), plus the
-# zip staging dir the REST upload needs. Never committed — verify_kit.py is what keeps it honest.
-/comp/kit/
+# Kaggle kit staging: the zip dir the REST upload needs. The kit ITSELF now builds under the data
+# root, out of the repo - it is ~200 MB of weights and wheels, and while it lived at comp/kit it
+# put a stale copy of kneemri inside the type checker's scope. verify_kit.py keeps it honest.
 /comp/kit_staging/
 # Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git — the manifest
 # beside them IS tracked, because it is the reproducible description of what was packaged.
