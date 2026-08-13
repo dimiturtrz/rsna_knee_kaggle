@@ -9,9 +9,11 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-**Where it stands.** Six entries scored. Our own best is **0.888** (five members, rank 367/1077 at the
-time); the highest number on the board is **0.894**, and it is *mostly not ours* — twenty of its
-twenty-three models are CC0 weights someone else trained. The full measured account, including what was
+**Where it stands** (2026-08-13). Six entries scored. Our own best is **0.888**; the highest number on
+the board is **0.894**, and it is *mostly not ours* — twenty of its twenty-three models are CC0 weights
+someone else trained. That 0.894 ranks **431 of 1,395**, against a leader at 0.946 and a median at
+0.840. The field is improving faster than we are: in two days the median rose 0.021 while our best rose
+0.006, so we fell from the 34th percentile to the 31st *while gaining*. The full measured account, including what was
 refuted, is in
 [interpretations/kneemri/](interpretations/kneemri/) — what actually moved the number, what the
 leaderboard taught us, [what the labels
