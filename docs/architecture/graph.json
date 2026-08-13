@@ -639,6 +639,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.patience",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.report_supervision",
       "weight": 1
     },
@@ -2661,6 +2667,18 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.patience.Patience",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.patience.Patience.exhausted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.run_metrics.EpochRow",
       "weight": 1
     },
@@ -2917,7 +2935,7 @@
       "role": null
     },
     {
-      "descendants": 43,
+      "descendants": 44,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3112,6 +3130,14 @@
       "descendants": 0,
       "id": "kneemri.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.patience",
+      "label": "patience",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3555,6 +3581,14 @@
       "level": "class",
       "parent": "kneemri.objective",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.patience.Patience",
+      "label": "Patience",
+      "level": "class",
+      "parent": "kneemri.patience",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -5082,6 +5116,22 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.patience.Patience.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.patience.Patience",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.patience.Patience.exhausted",
+      "label": "exhausted",
+      "level": "method",
+      "parent": "kneemri.patience.Patience",
       "role": null
     },
     {
