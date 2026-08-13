@@ -172,10 +172,15 @@ Kaggle's T4.
 |---|---:|---:|---|
 | `kneemri-efficient` | 2 (res392 0.8523 + calibrated_targets 0.8495) | 2 | **0.500 — null, see below** |
 | `kneemri-trained` v6 | 5 all-ours whole-stack | 5 | pending |
+| `kneemri-efficient` v2 | the same 2, RE-RUN on kit 5ba86ee | 2 | pending |
 
 The members dataset had been stuck at 2026-08-11 — `res392`, `calibrated_targets`, `sliceattn`,
 `intensity392` and `extended_ws` existed only on this machine. It now carries all six (498 MB), which is
 also why `strongest(2)` selects a different, untested pair rather than repeating the 0.882 fold pair.
+
+THREE SLOTS SPENT, TWO LEFT, and `kneemri-fusion` v4 was still running when the machine slept — its
+output can be submitted whenever, so it becomes the next day's first entry rather than a loss. Which is
+the operating fact worth keeping: a run is not tied to the day it started, only a SLOT is.
 
 **That 0.500 is a NULL RESULT, not a floor, and the stale kit is the whole cause.** The OOM fix that
 bounds the forward pass by IMAGES rather than studies landed at 2026-08-12 13:11 UTC (`9f31b35`); the
