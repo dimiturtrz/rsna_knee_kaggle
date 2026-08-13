@@ -194,6 +194,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.embedding_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.holdout_predictions",
       "target": "kneemri.members",
       "weight": 1
@@ -1288,6 +1336,120 @@
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_members",
       "target": "kneemri.ensemble.Ensemble.predict_member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.head_trial.HeadTrial",
+      "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.head_trial.HeadTrial._batches",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.slot_head.SlotHead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.HeadTrial.run",
+      "target": "kneemri.targets.Targets.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.embedding_cache.EmbeddingCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.embedding_cache.EmbeddingCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.embedding_cache.EmbeddingSpec",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.head_trial.HeadTrial",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.head_trial.HeadTrial.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.head_trial.HeadTrial.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.targets.Targets.load",
       "weight": 1
     },
     {
@@ -3079,7 +3241,7 @@
       "role": null
     },
     {
-      "descendants": 45,
+      "descendants": 46,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3186,6 +3348,14 @@
       "descendants": 0,
       "id": "kneemri.folds",
       "label": "folds",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial",
+      "label": "head_trial",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3589,6 +3759,14 @@
       "level": "class",
       "parent": "kneemri.folds",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial.HeadTrial",
+      "label": "HeadTrial",
+      "level": "class",
+      "parent": "kneemri.head_trial",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -4612,6 +4790,38 @@
       "label": "holdout",
       "level": "method",
       "parent": "kneemri.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial.HeadTrial._batches",
+      "label": "_batches",
+      "level": "method",
+      "parent": "kneemri.head_trial.HeadTrial",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial.HeadTrial.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.head_trial.HeadTrial",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial.HeadTrial.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.head_trial.HeadTrial",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.head_trial.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.head_trial",
       "role": null
     },
     {
