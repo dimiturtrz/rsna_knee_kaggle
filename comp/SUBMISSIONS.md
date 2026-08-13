@@ -16,6 +16,11 @@ question needs the leaderboard to answer it.
 | 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
 | 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | trained with augmentation silently disabled |
 | 2026-08-11 | `kneemri-trained` | 3 | **OURS v2** — augmentation actually applied + OneCycle + overlap TTA | holdout mean **0.8269** | **0.888** | **equals the 20-member graft with 5 of our own** |
+| 2026-08-11 | `kneemri-trained` | 4 | **OURS** — 2 whole-stack members (fold 0 + fold 1) | 0.8481 | **0.882** | +0.021 per member on the holdout, −0.006 on the board |
+| 2026-08-12 | `kneemri-trained` | 5 | **OURS** — 3 whole-stack members | 0.8493 | **0.882** | a third member of the same recipe bought NOTHING |
+| 2026-08-12 | `kneemri-solo` | 1 | **OURS** — one model, no ensemble (our strongest member) | **0.8518** | **0.868** | the price of dropping ensembling: −0.020 |
+| 2026-08-12 | `kneemri-fusion` | 1 | **FUSION** — our 3 whole-stack + their 20, one decode, rank-avg | mixed | **0.894** | best entry; 20 of 23 models are theirs |
+| 2026-08-12 | `kneemri-fusion` | 2 | same 23, whole-stack members read WHOLE instead of windowed | mixed | **0.500** | T4 OOM → no submission written → the deleted `fallback` scored the sample table (knee-d16) |
 
 ## What counts as ours
 
@@ -65,6 +70,25 @@ a different series in a slot is a different image for the head to read.
 The measurement that would settle it: re-run the out-of-fold oracle logging which series filled each
 slot, and count how many studies have a tie at all. If ties are rare and the residual survives, the
 cause is somewhere else and this lead is dead — which is worth knowing just as much.
+
+## What the six scored entries say, read together
+
+| entry | members | per-member holdout | public LB |
+|---|---|---|---|
+| one model, no ensemble | 1 | **0.8518** (our best ever) | 0.868 |
+| whole-stack | 2 | 0.8481 | 0.882 |
+| whole-stack | 3 | 0.8493 | 0.882 |
+| ours v2, old windowed recipe | 5 | 0.8269 | **0.888** |
+| the published CC0 members | 20 | 0.8398 | **0.888** |
+| **ours 3 + their 20** | **23** | mixed | **0.894** |
+
+Built to isolate one variable, and they do. **The best single model this project has produced loses to
+five much weaker ones by 0.020** — more than whole-stack (+0.0147) and more than every knob combined.
+And a third member of our OWN recipe bought nothing (0.882 → 0.882) while a different recipe bought
++0.006, so it is DIVERSITY and not count. Members that fail the same way do not help each other.
+
+That is also why the holdout cannot pick an entry alone: the 5-member set is +0.021 WORSE per member
+than the 3 whole-stack set and scored +0.006 better.
 
 ## v2: our five members equal their twenty
 
