@@ -64,6 +64,13 @@ one training-side change that has not been explained away.
 | `img` at inference | `SlotReader`'s default 336 | latent; would have hit the 392 recipe |
 | the slot scheme | the module's canonical six | 54 GB of zeros, twice over |
 
+**Three more of this shape landed on 2026-08-13, and the witness caught all three** — see
+`2026-08-13_the-ruler-was-wrong-and-the-witness-earned-its-keep.md`. `config['bf16']` recorded while
+`Ensemble.predict_member` ran a dtype-less autocast (eighth), the same defect again in
+`HoldoutPredictions` (ninth), and `torch.compile` renaming every state-dict key so five members were
+unloadable. The prediction below — that the witness is what would catch the next ones — held on its
+first real use.
+
 None of these fails loudly. The fingerprint cannot catch them because it pins image size and group and
 nothing else — a member with the wrong depth, pooling, reading mode or scheme verifies clean and
 predicts from an image it never saw.
