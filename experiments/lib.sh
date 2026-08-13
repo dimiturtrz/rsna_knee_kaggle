@@ -131,7 +131,12 @@ run_train() {
   # there gave a bare interpreter and `ModuleNotFoundError: jaxtyping` in under a second. The project
   # comes from the repo, the IMPORTS come from the snapshot (python puts the working directory first),
   # which is the split this needed all along.
-  (cd "${ARM_SRC:-$REPO}" && uv run --project "$REPO" python -u -m kneemri.train "$@") 2>&1 \
+  # --no-sync, because a gate or a git push run while this trains will otherwise RE-SYNC .venv under
+  # the interpreter and kill it. Measured 2026-08-13: pyproject.toml was edited at 11:28, a push at
+  # 14:03 ran the pre-push hook's `uv run pytest`, uv rewrote uv.lock at 14:05, and the arm died mid
+  # epoch 4 with exit 127 and no traceback. run_snapshot protects the SOURCE from edits mid-run; this
+  # protects the ENVIRONMENT, which is the other half and was missing.
+  (cd "${ARM_SRC:-$REPO}" && uv run --no-sync --project "$REPO" python -u -m kneemri.train "$@") 2>&1 \
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
