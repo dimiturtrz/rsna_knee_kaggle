@@ -228,7 +228,9 @@ class TrainingOptions:
             "--variant",
             choices=tuple(ENCODERS),
             default=SMALL,
-            help="DINOv2 size. base is 86M parameters and 768-wide against small's 22M and 384.",
+            help="which pretrained encoder. DINOv2-small is the committed default: DINOv3 is refuted "
+            "as an improvement at -0.038 and retained only as a diversity member (see "
+            "interpretations/kneemri/2026-08-13_dinov2-stays-and-why-dinov3-loses-the-focal-findings.md).",
         )
         parser.add_argument(
             "--unfreeze-last",
