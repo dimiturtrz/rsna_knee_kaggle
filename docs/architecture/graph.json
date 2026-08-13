@@ -2271,6 +2271,12 @@
     {
       "kind": "calls",
       "source": "kneemri.reader_agreement.ReaderAgreement.report",
+      "target": "kneemri.reader_agreement.ReaderAgreement.by_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.reader_agreement.ReaderAgreement.report",
       "target": "kneemri.reader_agreement.ReaderAgreement.gap",
       "weight": 1
     },
@@ -6166,6 +6172,14 @@
       "descendants": 0,
       "id": "kneemri.reader_agreement.ReaderAgreement._resample",
       "label": "_resample",
+      "level": "method",
+      "parent": "kneemri.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.reader_agreement.ReaderAgreement.by_label",
+      "label": "by_label",
       "level": "method",
       "parent": "kneemri.reader_agreement.ReaderAgreement",
       "role": null
