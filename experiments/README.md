@@ -44,10 +44,14 @@ so everything below is **directional**, and only the cumulative total clears the
 | **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
 | **`resolution`** | **336 → 392 px, read from the 448 cache** | **0.8523** | **+0.0066** | **clears the floor** |
-| `slice_attention` | attention over slices, not max | queued | — | guard fixed, was refusing 'attend' |
+| `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | kept as a member |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
-| `extended_slots` | nine slots, +1,139 coronal series | queued | — | aimed at MCL |
+| `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
+| `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
+| `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
+| `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
+| `lora` v3small 224 | rank-8 adapters, base frozen | **0.8217** | **+0.0160 vs v3 fine-tuned** | **recipe was damaging v3** |
 
 ## The running total, which is the number the bar applies to
 
