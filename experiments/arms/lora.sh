@@ -36,6 +36,37 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 RANK="${1:-8}"
 
+# THE ENCODER IS AN ARGUMENT, and on DINOv3 this stops being the same experiment. Every v3 run so far
+# inherited DINOv2's adaptation recipe - six blocks rewritten at 8e-6 - and the interpretation committed
+# on 2026-08-13 ruled out patch grid (441 patches against 196 bought 0.0023) and capacity (v3-S+ scored
+# 0.0045 WORSE than v3-S) while leaving ADAPTATION untested. This is that test.
+#
+# WHY v3 SPECIFICALLY MIGHT BE RECIPE-DAMAGED WHERE v2 IS NOT: v3 carries LayerScale, a per-channel
+# learned gain initialised small, and places position with RoPE. A backbone rate chosen for a network
+# with neither is not obviously the right step for one with both, and an oversized step on those gammas
+# would degrade exactly the fine local structure the per-label table says v3 lost - Baker's -0.115,
+# lateral meniscus -0.077, against effusion -0.014. LoRA freezes all of it: gammas, RoPE, base weights
+# bit-identical, the entire update confined to a rank-r subspace.
+#
+# THE OUTCOME IS READABLE EITHER WAY. Near 0.84 and the encoder was never the problem - our fine-tuning
+# was destroying it, which is a finding that applies back to DINOv2. Still near 0.80 and the
+# representation verdict hardens and the scope caveat in that document closes.
+VARIANT="${3:-small}"
+SIZE="${4:-336}"
+# The cache only has to be at least as large as the read; 448 is needed only above 336.
+CACHE=336
+[ "$SIZE" -le 336 ] || CACHE=448
+
+# The gated weights need a token, and only the v3 variants do. Read from the credential file into the
+# environment, never echoed and never written into a log - the trainer needs it to reach the hub once.
+case "$VARIANT" in
+  v3*)
+    HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
+    export HF_TOKEN
+    [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
+    ;;
+esac
+
 # IT OOM'D THE FIRST TIME, and the reason is the point of the method rather than a bug in it. Adapting
 # every block means every block needs its activations kept for the backward pass; fine-tuning the top
 # six keeps six. Measured beside it: unfreezing all twelve costs +29% over six at batch 2, and adapters
@@ -53,8 +84,14 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 RATE="${2:-5e-4}"
 require "$LABELS"
 
-run_train "lora_r${RANK}" \
+# THE ENCODER AND READ SIZE ARE IN THE NAME. dinov3.sh once wrote one name whatever size it read, so
+# launching a second probe began overwriting the first run's log and was about to take its checkpoint.
+# A run that can destroy the run it is being compared against is not an experiment.
+NAME="lora_r${RANK}_${VARIANT}_${SIZE}"
+
+run_train "$NAME" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
+  --variant "$VARIANT" --image-size "$CACHE" --train-size "$SIZE" \
   --recompute-activations --compile-encoder --bf16 --vram-gb 30 \
-  --labels "$LABELS" --out "$PROCESSED/lora_r${RANK}_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/${NAME}_s2026.pt"
