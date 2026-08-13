@@ -124,6 +124,13 @@ The detector is crude: "ACL intact, medial meniscus torn" is one sentence carryi
 flagged cells are false alarms — which means the true effect on genuinely-negated cells is **larger**
 than 42.3%, not smaller.
 
+**But size it before building on it.** Corpus-wide, 1,057 of 16,129 report-YES cells are negated —
+17.8% of the located subset but only **6.6% of all positives**, because only 36.9% of cells can have
+their finding's sentence located at all. Down-weighting them is free and sound and moves the effective
+label noise by a couple of points; it is not a lever. The value is in the **63% we cannot currently
+inspect**, which is the population a stronger multilingual reader reaches. The negation gap's job is to
+demonstrate that the reader has extractable errors — not to be the fix.
+
 One limit worth stating: the non-English figure (16.6% carrying severity) is a **lower bound, not a
 measurement**. English patterns against non-English text find little by construction, and those reports
 very likely grade their findings in their own vocabularies. Reading a tool's blind spot as a property
