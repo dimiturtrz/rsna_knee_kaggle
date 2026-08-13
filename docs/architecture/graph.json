@@ -28,7 +28,13 @@
       "kind": "import",
       "source": "kneemri.attribution",
       "target": "kneemri.holdout_predictions",
-      "weight": 2
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.attribution",
+      "target": "kneemri.members",
+      "weight": 1
     },
     {
       "kind": "import",
@@ -40,18 +46,6 @@
       "kind": "import",
       "source": "kneemri.attribution",
       "target": "kneemri.scores",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.attribution",
-      "target": "kneemri.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.attribution",
-      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -958,6 +952,12 @@
       "kind": "calls",
       "source": "kneemri.attribution.main",
       "target": "kneemri.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.attribution.main",
+      "target": "kneemri.members.Member.from_checkpoint",
       "weight": 1
     },
     {
