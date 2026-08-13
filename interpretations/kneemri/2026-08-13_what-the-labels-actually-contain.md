@@ -218,3 +218,45 @@ survives is narrower and better aimed than the one that went in.
 
 `reader_agreement` is also the acceptance test for any replacement reader: it has to agree more, and a
 reader built for a language has to close that language's gap.
+
+## MCL is the one label whose weakness is real, and Fracture is the one that taught us to doubt it
+
+2026-08-13, no GPU: `python -m kneemri.label_stability`, reading the per-label AUCs every run has been
+writing since the first epoch and which nothing had ever read ACROSS runs.
+
+The project's plan was once "track per-label AUC and treat the worst label as the work item". It was
+refuted, correctly, by our own folds: **Fracture** reads 0.806, 0.903 and 0.864 on three holdouts under
+an identical recipe, because an AUC from 62 positives has a standard error near 0.04. The refutation was
+then applied to per-label work in general. That over-generalised.
+
+**MCL is the worst label in all fifteen runs that have ever scored** — across DINOv2 and DINOv3, LoRA
+and full fine-tuning, whole-stack and windowed, and on three different holdouts (fold 0 mean 0.761, fold
+1 0.802, fold 2 0.760). No sampling error survives a change of holdout that reliably.
+
+| | fold 0 (7 recipes) | fold 1 | fold 2 |
+|---|---|---|---|
+| MCL | 0.761, spread 0.037 | 0.802 | 0.760 |
+| Fracture | 0.806, spread 0.025 | **0.903** | **0.864** |
+
+**Read the two correlations correctly.** Recipes sharing one fold also share that fold's sampling error,
+so their per-label profiles agree almost by construction: median rank correlation **+0.92** within fold 0
+and only **+0.51** across holdouts. The within-fold number is a floor, not evidence — which is exactly
+the mistake the original per-label plan made, and the reason `label_stability` reports them apart.
+
+### What it is worth, stated honestly
+
+MCL sits about 0.09 under the twelve-label mean. Closing that gap entirely would be **+0.0075** on the
+metric — below the 1.5% bar, so directional, not a plan on its own. What changes is that per-label work
+is no longer refuted wholesale: there is one label whose deficit is reproducible across encoders and
+holdouts, and it is the same label every time.
+
+### A mechanism worth testing before any arm is queued
+
+Two facts already in this file point the same way. MCL's severity levels skew **low** — 495/219/53
+across the three YES levels, the second-most-skewed of the twelve — so MCL is dominated by MILD injury,
+which is where both the image evidence is faintest and the reader's calibration was worst (0.28 assigned
+against 0.136 measured, 0.68 against 0.378).
+
+And the obvious rival explanation is already dead: MCL is read coronally, and the nine-slot arm that
+added 1,139 coronal series bought **+0.0002**. So it is not that the model cannot see a coronal — it is
+that mild collateral injury is faint in the image and unreliable in the label.
