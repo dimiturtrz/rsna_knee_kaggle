@@ -99,6 +99,31 @@ not extending to the articular surface"), and the 60% of reports that are not En
 model to read severity" is no longer a sufficient statement of that plan. Coverage limit: only 44.1% of
 report-YES cells had their finding's own sentence located, so this holds on the half we can read.
 
+### The reader's actual defect is negation, and that is measurable
+
+If a regex adds nothing on severity, what would a stronger reader fix? Splitting located report-YES
+cells by whether the finding's own sentence carries a negation — *no, not, without, intact, normal,
+unremarkable, ruled out*:
+
+| finding sentence | n | radiologist agrees |
+|---|---:|---:|
+| no negation | 111 | **73.9%** |
+| contains negation | 26 | **42.3%** |
+
+Difference 0.316, SE 0.105, **z = 3.00**, 95% CI [0.109, 0.523] — excludes zero. When the reader calls a
+finding present and the sentence naming it carries a negation, it is **wrong more often than right**,
+and 19% of located report-YES cells are in that state.
+
+This is the opposite case to severity, and that contrast is the point. Severity is already captured, so
+a stronger model adds little. Negation is a *known* failure mode of clinical text extraction, is
+measurably present here, and is exactly what a language model handles and a pattern-matcher does not.
+It converts "use a better reader" into a specific defect with a measured cost — and into a cheap
+action, since only the negated cells need re-reading.
+
+The detector is crude: "ACL intact, medial meniscus torn" is one sentence carrying both, so some
+flagged cells are false alarms — which means the true effect on genuinely-negated cells is **larger**
+than 42.3%, not smaller.
+
 One limit worth stating: the non-English figure (16.6% carrying severity) is a **lower bound, not a
 measurement**. English patterns against non-English text find little by construction, and those reports
 very likely grade their findings in their own vocabularies. Reading a tool's blind spot as a property
