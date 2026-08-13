@@ -560,6 +560,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "kneemri.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "kneemri.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.tie_divergence",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.train",
       "target": "core.paths",
       "weight": 1
@@ -2276,6 +2312,108 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.tie_divergence.TieDivergence",
+      "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.tie_divergence.TieDivergence",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.tie_divergence.TieDivergence",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.tie_divergence.TieDivergence",
+      "target": "kneemri.tie_divergence.SlotDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.tie_divergence.TieDivergence.__init__",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.tie_divergence.TieDivergence.__init__",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence._distance",
+      "target": "kneemri.tie_divergence.TieDivergence._read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence._of",
+      "target": "kneemri.tie_divergence.TieDivergence.of_study",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.tie_divergence.TieDivergence._of_slot",
+      "target": "kneemri.tie_divergence.SlotDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence._of_slot",
+      "target": "kneemri.tie_divergence.TieDivergence._distance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence._of_slot",
+      "target": "kneemri.tie_divergence.TieDivergence._read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence.of_study",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.TieDivergence.of_study",
+      "target": "kneemri.tie_divergence.TieDivergence._of_slot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.main",
+      "target": "kneemri.study_cache.StudyCache.planes_of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.tie_divergence.main",
+      "target": "kneemri.tie_divergence.TieDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.tie_divergence.main",
+      "target": "kneemri.tie_divergence.TieDivergence.report",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.backbone.Encoder",
       "weight": 1
@@ -2743,7 +2881,7 @@
       "role": null
     },
     {
-      "descendants": 42,
+      "descendants": 43,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3066,6 +3204,14 @@
       "descendants": 0,
       "id": "kneemri.test_time",
       "label": "test_time",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence",
+      "label": "tie_divergence",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3557,6 +3703,22 @@
       "level": "class",
       "parent": "kneemri.test_time",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.SlotDivergence",
+      "label": "SlotDivergence",
+      "level": "class",
+      "parent": "kneemri.tie_divergence",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence",
+      "label": "TieDivergence",
+      "level": "class",
+      "parent": "kneemri.tie_divergence",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -5580,6 +5742,78 @@
       "label": "apply",
       "level": "method",
       "parent": "kneemri.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.SlotDivergence.identical",
+      "label": "identical",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.SlotDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence._distance",
+      "label": "_distance",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence._of",
+      "label": "_of",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence._of_slot",
+      "label": "_of_slot",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence._read",
+      "label": "_read",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence.of_study",
+      "label": "of_study",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.TieDivergence.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.tie_divergence.TieDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.tie_divergence.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.tie_divergence",
       "role": null
     },
     {
