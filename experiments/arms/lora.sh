@@ -8,9 +8,16 @@
 # balancing it: the base weight stays bit-identical and the entire update lives in an added rank-r
 # term, so what a small noisy dataset can do to that representation is bounded by the rank.
 #
+# THE 1.44M FIGURE THIS HEADER USED TO QUOTE AS VALIDATION WAS THE BUG. 663,552 adapter parameters
+# plus 781,440 that were never adapters at all - position embeddings, the patch projection, every norm,
+# every LayerScale gamma - sum to exactly 1,444,992, so counting the TOTAL without asking which
+# parameters made a wrecking ball look like the expected 6.4%. LoRALinear freezes the Linear it wraps
+# and nothing else; low_rank now freezes the whole backbone first. Measured after the fix: 663,552
+# trainable, zero non-adapter, and the optimiser's backbone group matches exactly.
+#
 # MEASURED BEFORE RUNNING, on both encoders: 72 layers adapted, the model is BIT-IDENTICAL to the
-# pretrained one at initialisation (up is zero-init), 1.44M trainable parameters against DINOv2-small's
-# 22.7M (6.4%), and a saved member rebuilds from its recorded rank and reloads exactly.
+# pretrained one at initialisation (up is zero-init), and a saved member rebuilds from its recorded
+# rank and reloads exactly.
 #
 # TRAINABLE PARAMETERS ARE 7x FEWER THAN THE CONTROL'S, which is the honest risk: our control opens
 # 10.9M parameters over six blocks. If the task needs that much movement, rank 8 will underfit and the

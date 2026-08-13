@@ -139,6 +139,12 @@ class _BlockedBackbone(_FakeBackbone):
 
     def __init__(self) -> None:
         super().__init__()
+        # NON-LINEAR PARAMETERS, because a real encoder has them and their absence hid a bug. LoRALinear
+        # freezes only the Linear it wraps, so position embeddings, norms and DINOv3's LayerScale gammas
+        # stayed trainable and were optimised at the ADAPTER rate - 781,440 parameters against the
+        # adapters' 663,552. A stand-in made only of Linears cannot catch that, and did not.
+        self.register_parameter("position_embeddings", torch.nn.Parameter(torch.zeros(1, 4, DIM)))
+        self.layer_scale = torch.nn.Parameter(torch.ones(DIM))
         blocks = []
         for _ in range(12):
             attention = torch.nn.Module()
@@ -170,7 +176,12 @@ def test_low_rank():
     assert all(isinstance(module, LoRALinear) or True for module in model.backbone.modules())
 
     frozen = [p for p in model.backbone.parameters() if not p.requires_grad]
-    assert len(frozen) == 72, "every base weight and bias of thirty-six Linears stays frozen"
+    assert len(frozen) == 74, "36 Linears' weight and bias, PLUS the position embedding and layer scale"
+    trainable = [name for name, p in model.backbone.named_parameters() if p.requires_grad]
+    assert all(".down." in name or ".up." in name for name in trainable), (
+        "ONLY adapters may train: everything that is not an nn.Linear - embeddings, norms, LayerScale - "
+        "is invisible to LoRALinear and stayed open at the adapter rate until low_rank froze it"
+    )
     # unfreeze_last is IGNORED under adaptation: honouring it too would open six blocks' base weights
     # alongside the adapters and quietly make the run something else.
     assert not any(id(p) in {id(f) for f in frozen} for p in opened)

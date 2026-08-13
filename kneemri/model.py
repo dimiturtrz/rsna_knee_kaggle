@@ -315,7 +315,23 @@ class StudyModel(nn.Module):
         Returns how many layers were adapted, because "silently adapted nothing" is the failure mode
         worth making impossible: an arm that trains a frozen encoder and reports a number looks exactly
         like an arm that worked.
+
+        THE WHOLE BACKBONE IS FROZEN FIRST, and leaving that out cost two arms. `LoRALinear` freezes the
+        Linear it wraps and nothing else, so everything that is not an `nn.Linear` stayed trainable:
+        position embeddings (526k), the patch-embedding projection (226k), every norm, and DINOv3's
+        LayerScale gammas — 781,440 parameters against the adapters' 663,552, i.e. MORE than half of
+        what the optimiser opened was not an adapter at all. All of it then trained at the ADAPTER rate
+        of 5e-4, sixty times the fine-tuning rate, which is not low-rank adaptation of a frozen encoder
+        but a wrecking ball through the pretrained representation. Measured on the v3 arm: loss flat at
+        1.23 over four epochs and 0.6867 against fine-tuned v3's 0.8057.
+
+        THE ARM'S OWN PRE-RUN CHECK MISSED IT AND LOOKED LIKE IT PASSED: 663,552 + 781,440 = 1,444,992,
+        which is the "1.44M trainable parameters, 6.4% of the encoder" the header quotes as validation.
+        Counting the total without asking WHICH parameters is how a bug reports the expected number.
         """
+        for parameter in self.backbone.parameters():
+            # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
+            parameter.requires_grad_(False)  # noqa: FBT003
         adapted = 0
         for block in self._blocks():
             for module in list(block.modules()):
