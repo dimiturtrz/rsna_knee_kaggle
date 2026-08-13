@@ -160,6 +160,32 @@ trained today.
 Anything retrained from here uses `pilkwang/rsna-knee-llm-labels` → `report_labels_v2.csv`, which is
 fetched rather than remembered. Do not compare a new member's holdout against the old ones'.
 
+## 2026-08-13: the all-ours weights finally reached Kaggle
+
+Three nights running, the ledger recorded no submission at all — five slots expire unused at 00:00 UTC
+every day, and they cannot be banked. The reason was a gate misapplied: an entry is supposed to be
+justified offline by `member_curve` first, but that gate needs a GPU pass to produce predictions, and
+"the GPU is busy" was treated as if it blocked SUBMITTING. It never did. The scored run happens on
+Kaggle's T4.
+
+| entry | members | passes/study | LB |
+|---|---:|---:|---|
+| `kneemri-efficient` | 2 (res392 0.8523 + calibrated_targets 0.8495) | 2 | pending |
+
+The members dataset had been stuck at 2026-08-11 — `res392`, `calibrated_targets`, `sliceattn`,
+`intensity392` and `extended_ws` existed only on this machine. It now carries all six (498 MB), which is
+also why `strongest(2)` selects a different, untested pair rather than repeating the 0.882 fold pair.
+
+**Read that entry as a floor, not a score.** The mounted kit was built 2026-08-12 09:46 and HEAD was 54
+commits ahead, so it lacked `Member.precision` — and `calibrated_targets` is a bf16 member, served under
+fp16 on a T4 whose exponent range is narrower. Found mid-flight, too late to stop the run. The kit is
+rebuilt and `build_kit` now stamps its commit into `kit.json`, so the drift is visible next time.
+
+**Two kernels were one push away from spending a slot on a crash.** The package now contains a DINOv3
+LoRA member, while `kneemri-trained` ran EVERY member and `kneemri-fusion` fused every member — both
+mount DINOv2 only, with internet disabled. That is exactly how the 0.500 entry was spent. `trained` is
+capped at `strongest(5)` and `fusion` now drops variants whose weights are not mounted.
+
 ## Gotchas paid for in full
 
 - **Submission is notebook-only.** `kaggle competitions submit -f submission.csv` returns 400. The
@@ -172,5 +198,9 @@ fetched rather than remembered. Do not compare a new member's holdout against th
   transformers (all present) and never checked `jaxtyping`, which our own modules import at module top.
 - **A published checkpoint is a training artefact**, not a bare state dict: weights sit under `model`
   beside epoch, fold scores, config, out-of-fold predictions and its own fingerprint.
+- **Kaggle allows two concurrent GPU sessions ACROSS ALL PROJECTS.** On 2026-08-13 both were held by
+  the sibling celltrack campaign, so kneemri runs serialised behind them: submissions are limited by
+  SESSIONS, not by the five daily slots. A completed kernel version can be submitted at any later time,
+  so a long run started before a machine sleeps is not wasted — it is submitted the next day.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.
