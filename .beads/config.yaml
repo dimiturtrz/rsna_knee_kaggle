@@ -54,3 +54,5 @@
 # - github.repo
 
 sync.remote: "git+https://github.com/dimiturtrz/rsna_knee_kaggle.git"
+
+dolt.auto-push: false
