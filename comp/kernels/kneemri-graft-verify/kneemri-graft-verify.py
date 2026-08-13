@@ -9,6 +9,7 @@ So this kernel is the oracle for the port: no pixels, no data layer, no submissi
 loads all twenty members and prints how much slack each one had.
 """
 
+import logging
 import subprocess
 import sys
 import zipfile
@@ -17,13 +18,16 @@ from pathlib import Path
 import pandas as pd
 import torch
 
+logger = logging.getLogger(__name__)
+
+
 WORKING = Path("/kaggle/working")
 DINOV2_DIM = 384  # facebook/dinov2-small hidden size
 RULE = "=" * 78
 
 
 def section(title: str) -> None:
-    print(f"\n{RULE}\n{title}\n{RULE}", flush=True)
+    logger.info(f"\n{RULE}\n{title}\n{RULE}")
 
 
 def find_kit() -> Path:
@@ -51,7 +55,7 @@ def find_kit() -> Path:
     inner = next(iter(sorted(destination.rglob("kneemri/model.py"))), None)
     if inner is None:
         raise FileNotFoundError(f"{archive} does not contain a kneemri package")
-    print(f"expanded {archive.name} -> {destination}")
+    logger.info(f"expanded {archive.name} -> {destination}")
     return inner.parent.parent
 
 
@@ -65,10 +69,10 @@ def install_wheels(kit: Path) -> None:
     """
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if not wheels:
-        print("no wheels in the kit — assuming every import is already in the image")
+        logger.info("no wheels in the kit — assuming every import is already in the image")
         return
-    print(f"installing {[w.name for w in wheels]}")
-    subprocess.run(
+    logger.info(f"installing {[w.name for w in wheels]}")
+    subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
         [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
         check=True,
     )
@@ -85,64 +89,69 @@ def find_dinov2() -> Path:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     section("0. MOUNTS")
     for kind in sorted(Path("/kaggle/input").glob("*")):
-        print(f"  {kind.name}/")
+        logger.info(f"  {kind.name}/")
         for owner in sorted(kind.glob("*")):
-            print(f"      {owner.name}/")
+            logger.info(f"      {owner.name}/")
             for item in sorted(owner.glob("*"))[:6]:
-                print(f"          {item.name}{'/' if item.is_dir() else ''}")
+                logger.info(f"          {item.name}{'/' if item.is_dir() else ''}")
 
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
-    print(f"kit: {kit}")
+    logger.info(f"kit: {kit}")
 
-    from kneemri.members import MemberPackage, WeightsError
-    from kneemri.model import TARGETS
+    from kneemri.members import (  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+        MemberPackage,
+        WeightsError,
+    )
+    from kneemri.model import TARGETS  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
     package = MemberPackage.find()
     if package is None:
         raise FileNotFoundError("no weights package mounted")
-    print(f"package: {package.root} with {len(package.members)} members")
+    logger.info(f"package: {package.root} with {len(package.members)} members")
 
     section("1. SUBMISSION (passthrough, so the run leaves a valid file)")
     competition = sorted(Path("/kaggle/input").glob("*/*/sample_submission.csv"))
     if competition:
         pd.read_csv(competition[0]).to_csv(WORKING / "submission.csv", index=False)
-        print(f"wrote a passthrough submission from {competition[0]}")
+        logger.info(f"wrote a passthrough submission from {competition[0]}")
 
     section("2. FINGERPRINTS")
-    from transformers import AutoModel
+    from transformers import AutoModel  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
     weights = find_dinov2()
-    print(f"dinov2: {weights}")
+    logger.info(f"dinov2: {weights}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    passed, failed = [], []
+    passed: list[float] = []  # each member's fingerprint slack
+    failed: list[str] = []  # the identifiers that were refused
     for member in package.members:
         backbone = AutoModel.from_pretrained(weights)
         try:
             model = package.load(member, backbone, DINOV2_DIM, device)
         except WeightsError as exc:
             failed.append(member.identifier)
-            print(f"  {member.identifier}  fold={member.fold}  REFUSED: {exc}")
+            logger.info(f"  {member.identifier}  fold={member.fold}  REFUSED: {exc}")
             continue
         slack = package.check(model, member, device)
         passed.append(slack)
-        print(
+        logger.info(
             f"  {member.identifier}  fold={member.fold}  max|diff|={slack:.2e}  "
             f"holdout={member.holdout:.4f}  annot={member.annot:.4f}"
         )
 
     section("3. VERDICT")
-    print(f"targets: {len(TARGETS)}")
-    print(f"passed {len(passed)} / {len(package.members)}; refused {len(failed)}")
+    logger.info(f"targets: {len(TARGETS)}")
+    logger.info(f"passed {len(passed)} / {len(package.members)}; refused {len(failed)}")
     if passed:
-        print(f"worst slack across members: {max(passed):.2e} (tolerance 2e-3)")
+        logger.info(f"worst slack across members: {max(passed):.2e} (tolerance 2e-3)")
     if failed:
         raise SystemExit(f"the port is NOT faithful for: {failed}")
-    print("PORT IS FAITHFUL — our StudyModel computes what these weights computed when they were fitted.")
+    logger.info("PORT IS FAITHFUL — our StudyModel computes what these weights computed when they were fitted.")
 
 
 if __name__ == "__main__":

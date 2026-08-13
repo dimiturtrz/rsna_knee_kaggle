@@ -23,6 +23,7 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
+from typing import override
 
 WORKING = Path("/kaggle/working")
 
@@ -43,7 +44,7 @@ def install_wheels(kit: Path) -> None:
     """jaxtyping is absent from Kaggle's image and our modules import it at module top."""
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if wheels:
-        subprocess.run(
+        subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
             [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
             check=True,
         )
@@ -55,14 +56,15 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from kneemri.kernel_run import KernelRun
-    from kneemri.members import MemberPackage
+    from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.members import MemberPackage  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
     logger = logging.getLogger("fusion")
 
     class Fused(KernelRun):
         """Every mounted package's members, run as one ensemble."""
 
+        @override
         def package(self) -> MemberPackage:
             """Merge every mounted manifest into one package, refusing mixed pixel groups."""
             roots = [
@@ -76,7 +78,10 @@ def main() -> None:
 
             groups = {member.pixel_group for package in packages for member in package.members}
             if len(groups) != 1:
-                message = f"{len(groups)} distinct pixel groups across {len(packages)} packages — one decode cannot serve them"
+                message = (
+                    f"{len(groups)} distinct pixel groups across {len(packages)} packages "
+                    "— one decode cannot serve them"
+                )
                 raise ValueError(message)
 
             merged = packages[0]

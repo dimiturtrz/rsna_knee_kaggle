@@ -11,8 +11,12 @@ kernel before assuming (torch/numpy/scipy/pandas ship; pydicom and the timm/DINO
 
 import argparse
 import json
+import logging
 import shutil
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
 
 _REPO = Path(__file__).resolve().parents[1]
 _DATASET_ID = "dimiturnt/kneemri-kit"
@@ -21,6 +25,7 @@ _SOURCE_DIR = "kneemri_src"
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=_REPO / "comp" / "kit")
     ap.add_argument("--weights", nargs="*", default=[], help="weight files under processed/")
@@ -49,8 +54,8 @@ def main() -> None:
     )
     wheels = [w.name for w in out.glob("*.whl")]
     weights = list(arguments.weights)
-    print(f"kit at {out}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights}")
-    print(f"push a new version:\n  kaggle datasets version -p {out} -m '<message>' --dir-mode zip")
+    logger.info(f"kit at {out}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights}")
+    logger.info(f"push a new version:\n  kaggle datasets version -p {out} -m '<message>' --dir-mode zip")
 
 
 if __name__ == "__main__":

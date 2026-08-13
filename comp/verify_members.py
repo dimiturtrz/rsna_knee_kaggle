@@ -21,8 +21,8 @@ from transformers import AutoModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from kneemri.backbone import ENCODERS  # noqa: E402
-from kneemri.members import MemberPackage  # noqa: E402
+from kneemri.backbone import ENCODERS
+from kneemri.members import MemberPackage
 
 logger = logging.getLogger(__name__)
 

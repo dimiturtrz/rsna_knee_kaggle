@@ -51,7 +51,7 @@ def install_wheels(kit: Path) -> None:
     """jaxtyping is absent from Kaggle's image and our modules import it at module top."""
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if wheels:
-        subprocess.run(
+        subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
             [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
             check=True,
         )
@@ -63,7 +63,7 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from kneemri.kernel_run import KernelRun
+    from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
     KernelRun(members=1, overlap=False).run()
 

@@ -30,11 +30,11 @@ from transformers import AutoModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from core.paths import DataRoot  # noqa: E402
-from kneemri.backbone import ENCODERS  # noqa: E402
-from kneemri.ensemble import Ensemble  # noqa: E402
-from kneemri.members import Member, MemberPackage  # noqa: E402
-from kneemri.study_cache import StudyCache  # noqa: E402
+from core.paths import DataRoot
+from kneemri.backbone import ENCODERS
+from kneemri.ensemble import Ensemble
+from kneemri.members import Member, MemberPackage
+from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,13 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     cache = StudyCache(root, slices=member.slices, image_size=member.image_size, scheme=member.scheme)
     corpus, identifiers = cache.load()
     index = {name: position for position, name in enumerate(identifiers)}
-    studies = [str(name) for name in witness["studies"]]  # pyright: ignore[reportGeneralTypeIssues]
+    # `witness` is a dict[str, object] by declaration, so its members are narrowed before use rather
+    # than suppressed per call site. A malformed witness is UNVERIFIED and never an empty study list:
+    # that would have reported "ok over 0 studies", which is a pass this check cannot afford to give.
+    named = witness["studies"]
+    if not isinstance(named, list) or not named:
+        return "UNVERIFIED - the witness carries no readable list of studies"
+    studies = [str(name) for name in named]
     missing = [name for name in studies if name not in index]
     if missing:
         return f"UNVERIFIED - {len(missing)} witnessed studies are absent from this cache"
@@ -117,7 +123,10 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     difference = float(np.abs(got - expected).max())
     bound = tolerance(member.precision, device)
     if difference > bound:
-        return f"REFUSED - inference reads this member differently than training did (max|diff| {difference:.3g} > {bound:.3g})"
+        return (
+            "REFUSED - inference reads this member differently than training did "
+            f"(max|diff| {difference:.3g} > {bound:.3g})"
+        )
     return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies)"
 
 

@@ -16,6 +16,7 @@ reports what landed while `kaggle/README.md` owns the flow that puts it there.
 import argparse
 import io
 import json
+import logging
 import os
 import sys
 import urllib.error
@@ -24,6 +25,9 @@ import urllib.request
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
 
 _REPO = Path(__file__).resolve().parents[1]
 _COMPETITION = "rsna-knee-abnormality-detection"
@@ -66,21 +70,21 @@ class KaggleApi:
     def get(self, path: str, **parameters: str | int) -> object:
         """One authenticated GET, decoded from JSON."""
         query = urllib.parse.urlencode(parameters)
-        request = urllib.request.Request(  # noqa: S310 - fixed https base, path is caller-controlled
+        request = urllib.request.Request(
             f"{_BASE}{path}?{query}" if query else f"{_BASE}{path}",
             headers={"Authorization": f"Bearer {self.token}"},
         )
-        with urllib.request.urlopen(request, timeout=_TIMEOUT_SECONDS) as response:  # noqa: S310
+        with urllib.request.urlopen(request, timeout=_TIMEOUT_SECONDS) as response:
             return json.loads(response.read().decode("utf-8", "replace"))
 
     def download(self, path: str, destination: Path) -> int:
         """Stream one authenticated GET to a file in chunks, returning the bytes written."""
-        request = urllib.request.Request(  # noqa: S310 - fixed https base, path is caller-controlled
+        request = urllib.request.Request(
             f"{_BASE}{path}",
             headers={"Authorization": f"Bearer {self.token}"},
         )
         with (
-            urllib.request.urlopen(request, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response,  # noqa: S310
+            urllib.request.urlopen(request, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response,
             destination.open("wb") as sink,
         ):
             return sum(sink.write(chunk) for chunk in iter(lambda: response.read(_CHUNK_BYTES), b""))
@@ -162,10 +166,10 @@ def _list_kernels(api: KaggleApi, arguments: argparse.Namespace) -> None:
         rows.sort(key=lambda row: row.last_run, reverse=True)
     else:
         rows.sort(key=lambda row: -row.votes)
-    print(f"{len(rows)} notebooks" + (f" run on/after {arguments.since}" if arguments.since else ""))
-    print(f"{'votes':>4}  {'last run':<16}  {'ref':<62}  title")
+    logger.info(f"{len(rows)} notebooks" + (f" run on/after {arguments.since}" if arguments.since else ""))
+    logger.info(f"{'votes':>4}  {'last run':<16}  {'ref':<62}  title")
     for row in rows[: arguments.limit]:
-        print(row.line())
+        logger.info(row.line())
 
 
 def _pull_kernels(api: KaggleApi, arguments: argparse.Namespace) -> None:
@@ -175,11 +179,11 @@ def _pull_kernels(api: KaggleApi, arguments: argparse.Namespace) -> None:
         try:
             source = api.source(reference)
         except urllib.error.HTTPError as error:
-            print(f"FAILED {reference}: HTTP {error.code}")
+            logger.info(f"FAILED {reference}: HTTP {error.code}")
             continue
         destination = arguments.out / f"{reference.replace('/', '__')}.ipynb"
         destination.write_text(source, encoding="utf-8")
-        print(f"{len(source):>8} bytes  {_repo_relative(destination)}")
+        logger.info(f"{len(source):>8} bytes  {_repo_relative(destination)}")
 
 
 def _safe_members(bundle: zipfile.ZipFile, target: Path) -> list[zipfile.ZipInfo]:
@@ -197,13 +201,13 @@ def _fetch_dataset(api: KaggleApi, arguments: argparse.Namespace) -> None:
     arguments.out.mkdir(parents=True, exist_ok=True)
     archive = arguments.out / f"{arguments.reference.replace('/', '__')}.zip"
     written = api.download(f"/datasets/download/{arguments.reference}", archive)
-    print(f"{written} bytes -> {_repo_relative(archive)}")
+    logger.info(f"{written} bytes -> {_repo_relative(archive)}")
     target = arguments.out / arguments.reference.partition("/")[2]
     with zipfile.ZipFile(archive) as bundle:
         members = _safe_members(bundle, target)
         skipped = len(bundle.infolist()) - len(members)
-        bundle.extractall(target, members=members)  # noqa: S202 - members filtered to the target subtree
-    print(
+        bundle.extractall(target, members=members)
+    logger.info(
         f"extracted {len(members)} entries to {_repo_relative(target)}"
         + (f" ({skipped} unsafe skipped)" if skipped else "")
     )
@@ -212,14 +216,14 @@ def _fetch_dataset(api: KaggleApi, arguments: argparse.Namespace) -> None:
 def _show_leaderboard(api: KaggleApi, arguments: argparse.Namespace) -> None:
     """Print the top of the public leaderboard."""
     for rank, entry in enumerate(api.leaderboard(arguments.competition)[: arguments.limit], start=1):
-        print(f"{rank:>4}  {entry.get('score', '—'):>7}  {_printable(str(entry.get('teamName', '')))[:48]}")
+        logger.info(f"{rank:>4}  {entry.get('score', '—'):>7}  {_printable(str(entry.get('teamName', '')))[:48]}")
 
 
 def _show_submissions(api: KaggleApi, arguments: argparse.Namespace) -> None:
     """Print our submissions with the score each actually landed."""
     for entry in api.submissions(arguments.competition):
-        print(f"{str(entry.get('date'))[:19]}  {entry.get('publicScore')!s:>7}  {entry.get('status')}")
-        print(f"          {_printable(str(entry.get('description', '')))[:150]}")
+        logger.info(f"{str(entry.get('date'))[:19]}  {entry.get('publicScore')!s:>7}  {entry.get('status')}")
+        logger.info(f"          {_printable(str(entry.get('description', '')))[:150]}")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -254,6 +258,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     """Run one survey subcommand."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     arguments = _parser().parse_args()

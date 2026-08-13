@@ -45,7 +45,7 @@ def install_wheels(kit: Path) -> None:
     """jaxtyping is absent from Kaggle's image and our modules import it at module top."""
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if wheels:
-        subprocess.run(
+        subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
             [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
             check=True,
         )
@@ -65,11 +65,11 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from transformers import AutoModel
+    from transformers import AutoModel  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
-    from kneemri.ensemble import Ensemble
-    from kneemri.members import MemberPackage
-    from kneemri.submission import Submission
+    from kneemri.ensemble import Ensemble  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.members import MemberPackage  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.submission import Submission  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
     package = MemberPackage.find()
     if package is None:

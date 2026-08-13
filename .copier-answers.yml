@@ -8,7 +8,7 @@ coverage_floor: 90
 data_env_var: KNEEMRI_DATA
 domain: ml
 jscpd_paths: core kneemri
-lint_paths: core kneemri tests
+lint_paths: core kneemri tests comp
 packages: core,kneemri
 project_name: kneemri
 repo_url: https://github.com/dimiturtrz/rsna_knee_kaggle
