@@ -13,6 +13,7 @@ import argparse
 import json
 import logging
 import shutil
+import subprocess
 from pathlib import Path
 
 from core.paths import DataRoot
