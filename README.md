@@ -9,19 +9,30 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-**Where it stands.** Two submissions scored: a graft of published weights at **0.888** and our own
-trained five-member ensemble at **0.888** (rank 367/1077 at the time) — five of our members matching
-twenty of theirs. The full measured account, including what was refuted, is in
-[interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md](interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md);
-what the public frontier does is in [research/](research/2026-08-11_public-notebooks.md).
+**Where it stands.** Six entries scored. Our own best is **0.888** (five members, rank 367/1077 at the
+time); the highest number on the board is **0.894**, and it is *mostly not ours* — twenty of its
+twenty-three models are CC0 weights someone else trained. The full measured account, including what was
+refuted, is in
+[interpretations/kneemri/](interpretations/kneemri/) — what actually moved the number, what the
+leaderboard taught us, [what the labels
+contain](interpretations/kneemri/2026-08-13_what-the-labels-actually-contain.md), and [the day the
+ruler itself was
+wrong](interpretations/kneemri/2026-08-13_the-ruler-was-wrong-and-the-witness-earned-its-keep.md).
+What the public frontier does is in [research/](research/2026-08-11_public-notebooks.md).
 
-Two numbers govern how the rest of this is read. The run-to-run **noise floor is 0.0062** (three seeds,
-one recipe, one split), which puts every knob-sized change out of reach at n=1. And the **member curve is
-flat** — members two and three buy +0.0018 and +0.0007, and the best single member outscored the
-three-member ensemble — so stacking members is not a lever here.
+Two numbers govern how the rest is read. The run-to-run **noise floor is 0.0062** (three seeds, one
+recipe, one split), which puts every knob-sized change out of reach at n=1 — and it is the holdout's own
+*sampling* error, so more seeds cannot lower it.
 
-The two changes that moved the number most were not ideas imported from anywhere; they were our own
-defects. Augmentation was written, unit-tested, and never called by the training loop (+0.0110). The fold
+And **ensembling is the largest effect here**, which took the leaderboard to establish and contradicts
+what an early three-member curve suggested. One member scored **0.868**; five weaker ones scored
+**0.888**. But it is DIVERSITY rather than count: a third member of our own recipe bought *nothing*
+(0.882 → 0.882), while adding our three to twenty differently-trained ones bought +0.006 over either
+component alone. Members that fail the same way do not help each other.
+
+The changes that moved the number most were not ideas imported from anywhere; they were our own
+defects, and finding them is most of what this project has done. Augmentation was written,
+unit-tested, and never called by the training loop (+0.0110). The fold
 split was derived from the training seed, so two seeds never shared a holdout and cross-scoring them
 leaked 717 training studies into a validation number. Of six ideas taken from the strongest public
 notebooks, five were refuted or landed inside the noise floor.
