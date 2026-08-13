@@ -98,6 +98,14 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   `research/` = external / field synthesis (theirs); `interpretations/<task>/<date>_<topic>.md` =
   sense-making of *our own* results (per task, `converging/` for cross-task). The build log is git history;
   portfolio READMEs carry the result + link out.
+- **Before filing a finding, READ THE LEDGER AND THE INTERPRETATIONS** — `experiments/README.md` and
+  `interpretations/kneemri/`. Beads are the work queue; those two are where measured results live, and a
+  bead can be silent about a number that was settled a day earlier. On 2026-08-13 I raised two P0s in one
+  session against things already recorded there with better evidence: that whole-stack members gain
+  nothing from overlap TTA (five members, measured, plus bead knee-eeo, plus an interpretation), and
+  that ensemble diversity beats member quality (six leaderboard entries built to isolate it). Both were
+  filed as discoveries and then "corrected" by measurements the repo had already made. `bd search` will
+  not find them; grep the ledger.
 
 
 
