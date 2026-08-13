@@ -173,11 +173,26 @@ publishes the leaderboard as a notebook output, and `kaggle kernels output` pull
   exactly our 0.888 sit at ranks **29, 33 and 50**.
 
 So the decision is not "target it or not" — it is one number: what do members two through five actually
-buy? We currently pay 5 members x 10 TTA windows = 50 forward passes per study for an ensemble gain that
-is presently *unmeasured* (the member-count curve was void: it was computed across split-seeds and leaked).
-If the curve is flat past two members, a one- or two-member submission is a top-30 efficiency entry at
-nearly our current accuracy. If it is steep, the track is not worth the accuracy. **`knee-uxg` answers
-`knee-5bv`** — do not spend anything on inference cost until that curve exists.
+buy? We currently pay 5 members x 10 TTA windows = 50 forward passes per study.
+
+**THAT NUMBER NOW EXISTS, and it was answered on the leaderboard rather than the holdout** (the
+member-count curve was void — computed across split-seeds and leaked):
+
+| entry | members | passes/study | public LB |
+|---|---:|---:|---:|
+| solo, our strongest member | 1 | 10 | 0.868 |
+| **whole-stack** | **2** | **2** | **0.882** |
+| whole-stack | 3 | 3 | 0.882 |
+| ours v2, windowed | 5 | 50 | 0.888 |
+
+The curve is NOT flat at the bottom — one member costs −0.020 against five — so a one-member entry is
+out. But **two whole-stack members is the efficiency entry**, and it is already scored: 0.882, six
+thousandths under our own best, for **2 forward passes against 50**. Twenty-five times cheaper.
+
+The reason it is that cheap is measured and specific: **a whole-stack member reads ONE window**, because
+its slot embedding is already the elementwise max over every slice. Window TTA is worth +0.0146 to a
+windowed member and exactly **0.0000** to a whole-stack one, so the 10x TTA multiplier simply does not
+apply. The accuracy work and the efficiency work turn out to want the same member.
 
 **That risk is now settled, and the answer is favourable.** Joining the efficiency leaderboard to the
 public one on team name (897 teams in common): 61.3% have the same score on both, and **38.7% — 347
