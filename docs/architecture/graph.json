@@ -488,6 +488,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.report_language",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.ruler_check",
       "target": "core.paths",
       "weight": 1
@@ -2221,6 +2227,36 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.report_language.ReportLanguages.census",
+      "target": "kneemri.report_language.ReportLanguages.graded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_language.ReportLanguages.census",
+      "target": "kneemri.report_language.ReportLanguages.language",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_language.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.report_language.main",
+      "target": "kneemri.report_language.ReportLanguages",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.report_language.main",
+      "target": "kneemri.report_language.ReportLanguages.census",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.report_supervision.ReportSupervision",
       "target": "kneemri.report_supervision.NoReportSupervision",
@@ -3403,7 +3439,7 @@
       "role": null
     },
     {
-      "descendants": 49,
+      "descendants": 50,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3654,6 +3690,14 @@
       "descendants": 0,
       "id": "kneemri.report_embeddings",
       "label": "report_embeddings",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language",
+      "label": "report_language",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4144,6 +4188,14 @@
       "label": "ReportEmbeddings",
       "level": "class",
       "parent": "kneemri.report_embeddings",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.ReportLanguages",
+      "label": "ReportLanguages",
+      "level": "class",
+      "parent": "kneemri.report_language",
       "role": "primary"
     },
     {
@@ -5920,6 +5972,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.report_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.ReportLanguages.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.ReportLanguages.census",
+      "label": "census",
+      "level": "method",
+      "parent": "kneemri.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.ReportLanguages.graded",
+      "label": "graded",
+      "level": "method",
+      "parent": "kneemri.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.ReportLanguages.language",
+      "label": "language",
+      "level": "method",
+      "parent": "kneemri.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.report_language.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.report_language",
       "role": null
     },
     {
