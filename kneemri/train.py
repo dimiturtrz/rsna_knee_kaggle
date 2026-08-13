@@ -21,6 +21,7 @@ from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
+from kneemri.patience import Patience
 from kneemri.report_supervision import ReportSupervision
 from kneemri.run_metrics import EpochRow, RunMetrics
 from kneemri.scores import LabelScores
@@ -70,6 +71,9 @@ class TrainingOptions:
     vram_gb: float = 0.0
     report_weight: float = 0.0
     report_vectors: Path | None = None
+    patience: int = 0
+    """Epochs without holdout improvement before stopping; 0 runs the full schedule."""
+
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
@@ -132,6 +136,15 @@ class TrainingOptions:
             "cross-scoring them leaks training data.",
         )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+        parser.add_argument(
+            "--patience",
+            type=int,
+            default=0,
+            help="stop after this many epochs without improving the holdout (0 = run every epoch). "
+            "The twelve-epoch cycle peaks at epoch 6 and never recovers, and the best epoch is the one "
+            "whose weights are kept, so the tail produces checkpoints that are discarded. The SCHEDULE "
+            "is still built for the full count - this ends the loop, it does not compress the anneal.",
+        )
         parser.add_argument(
             "--vram-gb",
             type=float,
@@ -405,6 +418,7 @@ def main() -> None:
     metrics = RunMetrics(destination)
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
     best, best_state = -1.0, None
+    patience = Patience(arguments.patience)
     witnessed: dict[str, object] | None = None
     for epoch in range(arguments.epochs):
         started = time.time()
@@ -419,7 +433,8 @@ def main() -> None:
             predicted = trainer.predict(corpus, holdout, arguments.batch, generator) if len(holdout) else None
             per_label = empty if predicted is None else scores.per_label(predicted, evaluation.scores[holdout])
             mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
-            if mean > best:
+            improved = mean > best
+            if improved:
                 best = mean
                 best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
                 # NaN, not `mean`: with no holdout `mean` is the epoch index standing in for a score.
@@ -433,6 +448,12 @@ def main() -> None:
         metrics.record(
             EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
         )
+        # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
+        # The SCHEDULE is untouched: it was built for the full epoch count above, so the epochs that do
+        # run are the same epochs they would have been. Only the discarded tail is skipped.
+        if patience.exhausted(improved=improved):
+            logger.info(f"stopping at epoch {epoch}: {patience.epochs} epochs without improving on {best:.4f}")
+            break
 
     # A run with no holdout ranks its epochs by epoch NUMBER, so `best` is an epoch index rather than a
     # score. Recording that would have a final-fit member advertise holdout 6.0 — beating every real
