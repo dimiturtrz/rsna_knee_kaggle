@@ -45,7 +45,16 @@ def main() -> None:
     # Both optional, because the probe measured that Kaggle's image already carries pydicom, timm,
     # transformers, cv2, SimpleITK, sklearn, scipy and polars — this competition may need no wheels at
     # all, unlike the sibling one that needed six. A kit of pure source is a legitimate kit.
-    ap.add_argument("--wheels", type=Path, default=None, help="dir holding the offline dependency wheels")
+    # BESIDE THE KIT, under the data root. These lived in /tmp - in three scattered copies - and /tmp is
+    # wiped on reboot, so the submission path depended on scratch files surviving by luck. verify_kit
+    # would have caught the absence (it names the missing wheel), but a gate catching it at submission
+    # time is a slot spent discovering that a dependency was never durable.
+    ap.add_argument(
+        "--wheels",
+        type=Path,
+        default=DataRoot.from_config(_REPO / "paths.yaml").processed() / "wheels",
+        help="dir holding the offline dependency wheels the Kaggle image lacks",
+    )
     ap.add_argument("--processed", type=Path, default=None, help="processed data dir holding the weight files")
     arguments = ap.parse_args()
     if arguments.weights and arguments.processed is None:
