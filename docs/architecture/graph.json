@@ -302,6 +302,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.ledger_check",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.member_curve",
       "target": "core.paths",
       "weight": 1
@@ -1594,6 +1600,30 @@
       "kind": "references",
       "source": "kneemri.laterality.Laterality",
       "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ledger_check.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.ledger_check.main",
+      "target": "kneemri.ledger_check.LedgerCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ledger_check.main",
+      "target": "kneemri.ledger_check.LedgerCheck.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ledger_check.main",
+      "target": "kneemri.ledger_check.LedgerCheck.unrecorded",
       "weight": 1
     },
     {
@@ -3241,7 +3271,7 @@
       "role": null
     },
     {
-      "descendants": 46,
+      "descendants": 47,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3396,6 +3426,14 @@
       "descendants": 0,
       "id": "kneemri.laterality",
       "label": "laterality",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check",
+      "label": "ledger_check",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -3806,6 +3844,14 @@
       "label": "Laterality",
       "level": "class",
       "parent": "kneemri.laterality",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.LedgerCheck",
+      "label": "LedgerCheck",
+      "level": "class",
+      "parent": "kneemri.ledger_check",
       "role": "primary"
     },
     {
@@ -4966,6 +5012,38 @@
       "label": "of_study",
       "level": "method",
       "parent": "kneemri.laterality.Laterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.LedgerCheck.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.LedgerCheck.best",
+      "label": "best",
+      "level": "method",
+      "parent": "kneemri.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.LedgerCheck.unrecorded",
+      "label": "unrecorded",
+      "level": "method",
+      "parent": "kneemri.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.ledger_check",
       "role": null
     },
     {
