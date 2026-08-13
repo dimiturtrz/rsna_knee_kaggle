@@ -170,11 +170,18 @@ Kaggle's T4.
 
 | entry | members | passes/study | LB |
 |---|---:|---:|---|
-| `kneemri-efficient` | 2 (res392 0.8523 + calibrated_targets 0.8495) | 2 | pending |
+| `kneemri-efficient` | 2 (res392 0.8523 + calibrated_targets 0.8495) | 2 | **0.500 — null, see below** |
+| `kneemri-trained` v6 | 5 all-ours whole-stack | 5 | pending |
 
 The members dataset had been stuck at 2026-08-11 — `res392`, `calibrated_targets`, `sliceattn`,
 `intensity392` and `extended_ws` existed only on this machine. It now carries all six (498 MB), which is
 also why `strongest(2)` selects a different, untested pair rather than repeating the 0.882 fold pair.
+
+**That 0.500 is a NULL RESULT, not a floor, and the stale kit is the whole cause.** The OOM fix that
+bounds the forward pass by IMAGES rather than studies landed at 2026-08-12 13:11 UTC (`9f31b35`); the
+mounted kit was built at 09:46 UTC the same day, before it. So the run served whole-stack members
+without the budget split, blew the T4's 16 GB exactly as the 08-12 entry did, and the fallback wrote a
+constant table. The members were never measured. The same stale kit also cost `Member.precision`:
 
 **Read that entry as a floor, not a score.** The mounted kit was built 2026-08-12 09:46 and HEAD was 54
 commits ahead, so it lacked `Member.precision` — and `calibrated_targets` is a bf16 member, served under
