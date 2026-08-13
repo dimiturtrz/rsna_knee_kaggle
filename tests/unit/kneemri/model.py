@@ -360,15 +360,20 @@ def test_recompute_activations(study_model: StudyModel):
 
 
 def test_compile_encoder(study_model: StudyModel):
-    """The encoder is replaced by a compiled callable, and the model still answers.
+    """Compiling leaves the model's PARAMETER NAMES alone, and the forward path still answers.
 
-    Asserting on behaviour rather than on the wrapper's type: torch.compile returns different objects
-    across versions, and what matters is that the swap does not break the forward path.
+    This test used to assert `backbone is not before` — "the encoder must actually be replaced" — which
+    pinned the defect rather than the contract. Rebinding the attribute to torch.compile's wrapper puts
+    its `_orig_mod` into every state-dict key, and five members were saved unloadable before anything
+    tried to read one back. Identity is now asserted the other way, because the names are what a
+    checkpoint carries and a submission needs.
     """
     before = study_model.backbone
+    names = set(study_model.state_dict())
     study_model.compile_encoder()
 
-    assert study_model.backbone is not before, "the encoder must actually be replaced"
+    assert study_model.backbone is before, "compiling must not rebind the encoder"
+    assert set(study_model.state_dict()) == names, "compiling must not rename a single parameter"
     imgs = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
     with torch.no_grad():
         assert study_model.forward(imgs, torch.ones(1, SLOTS), 14).shape == (1, len(TARGETS))

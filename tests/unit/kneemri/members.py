@@ -307,6 +307,21 @@ def test_whole_stack():
     assert replace(_member(), config={**_config(), "whole_stack": True}).whole_stack
 
 
+def test_precision():
+    """Absent means float16, which is the arithmetic every member predating the flag actually used.
+
+    The three equivalence classes are the three states a manifest can be in, and they are not
+    interchangeable: absent (the twenty published members and everything trained before --bf16),
+    explicitly False (a run that had the flag and declined it), and True. Defaulting the first two to
+    anything but float16 would serve those members arithmetic they were never fitted under — which is
+    precisely the defect this property was added to fix, in the other direction: `predict_member` ran a
+    dtype-less autocast, so every bf16 member was served in fp16.
+    """
+    assert _member().precision is torch.float16, "no bf16 key means the run used autocast's cuda default"
+    assert replace(_member(), config={**_config(), "bf16": False}).precision is torch.float16
+    assert replace(_member(), config={**_config(), "bf16": True}).precision is torch.bfloat16
+
+
 def test_witness():
     """Absent means unverified, not verified — the check must say so rather than pass quietly."""
     assert _member().witness == {}

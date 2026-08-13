@@ -187,7 +187,11 @@ class Ensemble:
         # image, so one number for both is the same mistake one number for every depth was.
         budget = IMAGE_BUDGET * BUDGET_WIDTH // ENCODERS[member.variant].dim
         rows = max(1, budget // max(images.shape[1] * window.width, 1))
-        with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
+        # THE DTYPE COMES FROM THE MEMBER. Written dtype-less, this autocast defaults to float16, so
+        # every bf16-trained member was served in arithmetic it was never fitted under — and fp16's
+        # exponent range is float32's minus eight bits, which a bf16 model can overflow to inf on the
+        # very T4 the submission runs on. The witness check found it; nothing else could have.
+        with torch.no_grad(), torch.autocast("cuda", dtype=member.precision, enabled=self.device.type == "cuda"):
             for view in views.apply(images):
                 for start in window.starts:
                     read = view[:, :, start : start + window.width]

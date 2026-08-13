@@ -53,6 +53,9 @@ class MemberConfig(TypedDict):
     whole_stack: NotRequired[bool]
     """Absent on every member fitted before whole-stack reading existed; those were windowed."""
 
+    bf16: NotRequired[bool]
+    """Whether the run's autocast was bfloat16; absent on every member fitted before the flag existed."""
+
     train_size: NotRequired[int]
     """Absent on every member fitted before the read size could differ from the cache's."""
 
@@ -133,6 +136,24 @@ class Member:
         published ones — they were windowed, and windowed is what they must stay.
         """
         return bool(self.config.get("whole_stack", False))
+
+    @property
+    def precision(self) -> torch.dtype:
+        """The autocast dtype this member was fitted under, which inference must match.
+
+        `bf16` has been recorded in every checkpoint since the flag landed, with a comment saying that
+        bf16 and fp16 are different arithmetic — and read by nobody, so `Ensemble.predict_member` ran a
+        dtype-less `torch.autocast("cuda")`, whose default is FLOAT16. Every bf16 member was therefore
+        served in fp16. The eighth instance here of a value travelling in a config while its consumer
+        reads a constant, and the first found by the witness check rather than by a lost submission.
+
+        It is not only a precision question. bfloat16 carries float32's exponent range and float16 does
+        not, so an activation a bf16-trained model produces comfortably can overflow to inf under fp16 —
+        on the T4 the kernel actually submits from, where there is no second chance.
+
+        Defaults to float16, which is what every member fitted before the flag existed genuinely used.
+        """
+        return torch.bfloat16 if self.config.get("bf16", False) else torch.float16
 
     @property
     def witness(self) -> dict[str, object]:

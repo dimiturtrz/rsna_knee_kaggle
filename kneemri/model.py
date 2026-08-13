@@ -7,7 +7,7 @@ this module is what it checks.
 """
 
 from dataclasses import dataclass
-from typing import cast, override
+from typing import override
 
 import numpy as np
 import torch
@@ -42,6 +42,13 @@ POOL_PARTS: dict[str, int] = {"cls_mean": 2, "cls_mean_focal": 3}
 ATTEND = "attend"
 """The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
 """How many `dim`-wide parts each pooling scheme concatenates, which fixes the head's input width."""
+
+COMPILED_PREFIX = "_orig_mod."
+"""What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
+
+Spelled once, and read only by `load_trained`, which strips it so the five members written before
+`compile_encoder` switched to in-place compilation can still be loaded.
+"""
 
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
 IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
@@ -260,8 +267,13 @@ class StudyModel(nn.Module):
         So keys the checkpoint does not carry keep their initialised value, and everything it does carry
         must still match in name and shape. That is deliberately narrower than `strict=False`, which
         would also swallow a checkpoint that had nothing to do with this model.
+
+        COMPILE'S PREFIX IS STRIPPED rather than rejected, which recovers weights rather than merely
+        explaining them. `compile_encoder` now compiles in place so nothing new carries it, but five
+        members were already saved through the rebinding version and are worth real GPU hours. The
+        substitution is a no-op on every checkpoint that never met `torch.compile`.
         """
-        merged = self.state_dict() | state
+        merged = self.state_dict() | {key.replace(COMPILED_PREFIX, ""): value for key, value in state.items()}
         self.load_state_dict(merged)
 
     def _blocks(self) -> list[nn.Module]:
@@ -374,9 +386,17 @@ class StudyModel(nn.Module):
         It needs Triton, which upstream ships for everything except Windows — `triton-windows` is
         pinned in pyproject for exactly this.
         """
-        # torch.compile returns an OptimizedModule - an nn.Module at runtime - but is TYPED as a bare
-        # callable, so the assignment needs the cast rather than the attribute needing a wider type.
-        self.backbone = cast("nn.Module", torch.compile(self.backbone))
+        # IN PLACE, NOT REBOUND, and this is not a style preference. `self.backbone =
+        # torch.compile(self.backbone)` replaces the attribute with an OptimizedModule that holds the
+        # real module as `_orig_mod`, and that name lands in every state-dict key: a compiled run saves
+        # `backbone._orig_mod.embeddings.cls_token`, which `load_state_dict` then refuses as unexpected.
+        # FIVE checkpoints were written that way before anything tried to load one - schedule_8,
+        # extended_ws and all three DINOv3 members, every GPU hour of them unloadable and none of it
+        # visible, because training never reloads its own weights through the inference path.
+        #
+        # `nn.Module.compile()` compiles the forward and leaves the module, and therefore its
+        # parameter names, exactly where they were.
+        self.backbone.compile()
 
     def recompute_activations(self) -> None:
         """Trade 19% of throughput for nearly all of the encoder's activation memory.
