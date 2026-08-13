@@ -135,3 +135,47 @@ One limit worth stating: the non-English figure (16.6% carrying severity) is a *
 measurement**. English patterns against non-English text find little by construction, and those reports
 very likely grade their findings in their own vocabularies. Reading a tool's blind spot as a property
 of the data is a mistake this project has already made once.
+
+## The lower bound was measured, and it was the tool
+
+2026-08-13, same day, no GPU: `python -m kneemri.report_language`. The caution above was right and the
+correction is larger than the caution implied.
+
+The corpus is not English with a tail. **English is 40.1% of it**, and the rest is a set of complete
+radiology reports in six other languages:
+
+| | n | share | graded, own words | graded, English patterns |
+|---|---:|---:|---:|---:|
+| en | 1,769 | 40.1% | 64.7% | 64.7% |
+| es | 727 | 16.5% | **55.2%** | 1.5% |
+| tr | 546 | 12.4% | **80.8%** | 51.5% |
+| *unclassified* | 412 | 9.3% | — | 0.0% |
+| el | 321 | 7.3% | **75.1%** | 24.6% |
+| de | 259 | 5.9% | **83.8%** | 2.7% |
+| bg | 220 | 5.0% | **61.4%** | 30.5% |
+| nl | 153 | 3.5% | **80.4%** | 2.6% |
+
+Across the 2,226 classified non-English reports: **70.0% grade their findings in their own vocabulary,
+against 20.2% visible to the English patterns** — and 20.2% is within reach of the 16.6% quoted above.
+The old figure was measuring the ruler.
+
+**Denominators, since this section exists to correct one.** 61.3% of **all 4,407** reports carry an
+explicit severity marker when each is read in its own language, against 36.1% under English patterns
+alone. The 61.3% is itself a lower bound: the 9.3% unclassified are counted as ungraded, and Dutch and
+Greek were only added to the detector after their reports turned up as "unknown".
+
+### What it re-prices
+
+`knee-mxj`'s two branches were called coupled, on the reasoning that a monolingual reader upgrade
+reaches "about 29%" of the corpus. That 29% was English share times English-visible severity. The
+severity information is actually present in **61.3%** of the corpus — more than double the assumed
+reach — and it is present in ordinary graded words (`parcial`, `geringgradig`, `hafif`, `grade III`)
+rather than anything exotic.
+
+This does **not** say a better reader wins. The English-only finding still stands that per-finding regex
+extraction adds nothing a level does not already carry, so *presence of a marker* is not *severity
+attached to a finding*. What it removes is the reason to believe the information is unavailable outside
+English: it is there, in most of the corpus, and only the tool could not see it.
+
+It also makes the negation defect worth re-measuring. That was sized on located English sentences —
+6.6% of all positives — and located-ness was itself an English-regex property.
