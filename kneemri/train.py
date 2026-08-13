@@ -28,7 +28,7 @@ from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
-from kneemri.targets import CONFIDENCE_FLOOR, Targets
+from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
 GROUP = 3
@@ -62,6 +62,7 @@ class TrainingOptions:
     weight_floor: bool = False
     normalise_by_count: bool = False
     per_label_loss: bool = False
+    calibrated_targets: bool = False
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
@@ -134,6 +135,14 @@ class TrainingOptions:
             help="fold assignment. SEPARATE from --seed on purpose: deriving the split from the "
             "training seed gives every seed a different holdout, so two runs are not comparable and "
             "cross-scoring them leaks training data.",
+        )
+        parser.add_argument(
+            "--calibrated-targets",
+            action="store_true",
+            help="replace each report level with what it was MEASURED to be worth against the 57 "
+            "annotated studies: 0.08->0.041, 0.28->0.136, 0.68->0.378, 0.82->0.688, 0.94->0.958. Four of "
+            "the five assigned values sit outside their own 95%% interval, all too high. Applies to the "
+            "TRAINING table only - recalibrating the ruler would raise the AUC by construction.",
         )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
         parser.add_argument(
@@ -384,7 +393,10 @@ def main() -> None:
         arguments.eval_labels,
         root.raw() / "train.csv",
         identifiers,
-        CONFIDENCE_FLOOR if arguments.weight_floor else 0.0,
+        Supervision(
+            floor=CONFIDENCE_FLOOR if arguments.weight_floor else 0.0,
+            calibrated=arguments.calibrated_targets,
+        ),
     )
     # The split is a property of the CORPUS, not of this run: it must not move when the model seed
     # does. Deriving it from --seed gave seed 7 a fold-0 holdout sharing only 192 of 909 studies with
