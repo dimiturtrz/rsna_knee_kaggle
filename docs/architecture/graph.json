@@ -1790,6 +1790,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.model.StudyModel.slice_features",
+      "target": "kneemri.model.StudyModel._tokens",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.model.StudyModel.slot_features",
       "target": "kneemri.model.StudyModel.slice_features",
       "weight": 1
@@ -4828,6 +4834,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.encoder_layer",
+      "label": "encoder_layer",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_record.RunOptions.head_lr",
       "label": "head_lr",
       "level": "method",
@@ -4926,6 +4940,14 @@
       "descendants": 0,
       "id": "kneemri.members.Member.image_size",
       "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.layer",
+      "label": "layer",
       "level": "method",
       "parent": "kneemri.members.Member",
       "role": null
@@ -5102,6 +5124,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel._pool",
       "label": "_pool",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel._tokens",
+      "label": "_tokens",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
