@@ -1436,6 +1436,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.paired",
+      "target": "kneemri.scores.LabelScores.paired_interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.paired",
+      "target": "kneemri.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.member_curve.MemberCurve.sizes",
       "target": "kneemri.member_curve.MemberCurve.subsets",
       "weight": 1
@@ -1510,6 +1522,12 @@
       "kind": "calls",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.member_curve.MemberCurve.oracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.member_curve.MemberCurve.paired",
       "weight": 1
     },
     {
@@ -2037,6 +2055,12 @@
     {
       "kind": "calls",
       "source": "kneemri.scores.LabelScores.mean",
+      "target": "kneemri.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.scores.LabelScores.paired_interval",
       "target": "kneemri.scores.LabelScores.per_label",
       "weight": 1
     },
@@ -4708,6 +4732,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.paired",
+      "label": "paired",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_curve.MemberCurve.report",
       "label": "report",
       "level": "method",
@@ -5430,6 +5462,14 @@
       "descendants": 0,
       "id": "kneemri.scores.LabelScores.mean",
       "label": "mean",
+      "level": "method",
+      "parent": "kneemri.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.scores.LabelScores.paired_interval",
+      "label": "paired_interval",
       "level": "method",
       "parent": "kneemri.scores.LabelScores",
       "role": null
