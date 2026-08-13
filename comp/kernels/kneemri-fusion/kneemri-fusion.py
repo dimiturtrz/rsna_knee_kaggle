@@ -85,7 +85,15 @@ def main() -> None:
                 raise ValueError(message)
 
             merged = packages[0]
-            merged.members = [member for package in packages for member in package.members]
+            # ONLY THE VARIANTS WHOSE WEIGHTS ARE MOUNTED. This kernel mounts DINOv2 small and base with
+            # internet disabled, and our members package now carries a DINOv3 LoRA member — wiring v3
+            # through to a submission is still open (knee-98j). Fusing it would reach for weights that
+            # are not there and fail the run, which is how the 0.500 entry was spent.
+            usable = [m for package in packages for m in package.members if not m.variant.startswith("v3")]
+            dropped = sum(len(package.members) for package in packages) - len(usable)
+            if dropped:
+                logger.info("dropped %d member(s) whose encoder weights are not mounted", dropped)
+            merged.members = usable
             logger.info(
                 "fused %d members from %d packages: %s",
                 len(merged.members),
