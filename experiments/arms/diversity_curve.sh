@@ -51,8 +51,13 @@ require "$LABELS"
 # extended_ws is the one member whose INPUTS differ. Every other entry here is a different recipe on
 # the same pixels; this one reads nine slots and sees 83,297 slices - 2,421 series, 1,139 of them
 # coronal - that no other member can reach. It is REFUTED as an improvement (0.8459 against the
-# control's 0.8457, and its per-label prediction failed), which says nothing about whether it fails on
-# the same studies as the others. That is the only question a curve asks.
+# control's 0.8457), which says nothing about whether it fails on the same studies as the others. That
+# is the only question a curve asks.
+#
+# "AND ITS PER-LABEL PREDICTION FAILED" was here and is WITHDRAWN. Calibrated against each label's own
+# sampling interval, not one of its twelve deltas clears - MCL's +0.0056 against +/-0.040, Lateral
+# Meniscus's -0.0130 against +/-0.033. The prediction was not refuted, it was UNREAD, and reporting it
+# as refuted spent a mechanism on noise.
 #
 # It forms its own cache group (336 px, 12 slices, extended scheme), which member_curve handles by
 # grouping on exactly that key and building each member with its own slot count. At inference it is one

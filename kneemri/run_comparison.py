@@ -4,6 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 
+from kneemri.label_power import FOLDS, LabelPower
 from kneemri.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,27 @@ class RunComparison:
     both stories while leaving the mean looking like a win, and a mean is exactly what hides that.
     """
 
-    def __init__(self, control: Path, arms: list[Path]) -> None:
+    def __init__(self, control: Path, arms: list[Path], labels: Path | None = None) -> None:
         self.control = RunMetrics(control)
         self.arms = [RunMetrics(arm) for arm in arms]
+        self.errors = self._intervals(labels) if labels else {}
+
+    @staticmethod
+    def _intervals(labels: Path) -> dict[str, float]:
+        """Each label's 95% sampling interval, so no delta is printed without its own precision.
+
+        `LabelPower` has carried these since it was written and NOTHING read them at the point deltas
+        are quoted — which is how four arms with unrelated mechanisms were each recorded improving
+        Fracture by +0.012 to +0.037 against an interval of +/-0.061. The knowledge existed; it did not
+        reach the place it was needed. Same shape as the config values this project keeps recording and
+        not reading, in prose rather than in code.
+        """
+        power = LabelPower(labels)
+        studies = len(power.table) // FOLDS
+        return {
+            target: 1.96 * power.standard_error(total // FOLDS, studies - total // FOLDS)
+            for target, total in power.positives().items()
+        }
 
     def deltas(self) -> dict[str, dict[str, float]]:
         """Per-arm, per-label difference against the control's best epoch."""
@@ -59,8 +78,26 @@ class RunComparison:
         lines = [f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}"]
         for name, deltas in table.items():
             ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
-            lines.append(f"\n{name}  " + "  ".join(f"{label} {value:+.4f}" for label, value in ordered))
+            lines.append(f"\n{name}  " + "  ".join(f"{label} {self._marked(label, value)}" for label, value in ordered))
+        if self.errors:
+            lines.append(
+                "\n* the delta exceeds that label's own 95% sampling interval; unmarked deltas are "
+                "smaller than the precision of the instrument that produced them. Fracture carries 62 "
+                "holdout positives and an interval of +/-0.061, which is why four arms with unrelated "
+                "mechanisms all 'improved' it."
+            )
+            lines.append(
+                "  IT IS AN UNPAIRED BOUND, deliberately conservative: two arms scored on the SAME "
+                "studies share their sampling error, so a paired delta has a tighter floor than this. "
+                "An unmarked delta is not refuted, it is UNREAD - what it needs is the paired floor."
+            )
         return "\n".join(lines)
+
+    def _marked(self, label: str, value: float) -> str:
+        """A delta with a star when it clears its own label's 95% interval, and bare when it cannot."""
+        interval = self.errors.get(label)
+        star = "*" if interval is not None and abs(value) > interval else ""
+        return f"{value:+.4f}{star}"
 
 
 def main() -> None:
@@ -68,9 +105,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=RunComparison.__doc__)
     parser.add_argument("--control", type=Path, required=True, help="the checkpoint the arms are measured against")
     parser.add_argument("--arms", type=Path, nargs="+", required=True)
+    parser.add_argument("--labels", type=Path, help="the label table, to print each delta's own error bar")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("%s", RunComparison(arguments.control, arguments.arms).report())
+    logger.info("%s", RunComparison(arguments.control, arguments.arms, arguments.labels).report())
 
 
 if __name__ == "__main__":

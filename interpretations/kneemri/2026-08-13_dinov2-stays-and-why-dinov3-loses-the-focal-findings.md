@@ -30,6 +30,14 @@ The deficit runs from −0.115 to −0.012 depending on the label, and the order
 three v3 runs: **Baker's, both menisci and Contusion lose four to ten times what Effusion and
 Synovitis lose.** A uniform shift would have said "worse model". This is not that.
 
+CALIBRATED AFTERWARDS, and it is the reason this section is allowed to carry an argument. Each label's
+AUC has its own sampling error, from how many positives carry it — Fracture's 62 positives give a 95%
+interval of ±0.061 where Effusion's 533 give ±0.025 (`kneemri.label_power`). Against those intervals
+exactly four of v3-S's twelve deltas clear their own: **Baker's, Lateral Meniscus, Medial Meniscus and
+Contusion** — the four this argument rests on. The rest, Fracture's −0.025 included, are smaller than
+the instrument that produced them and are not evidence of anything. The same calibration deletes a
+claim made the day before about extended slots, where NOT ONE per-label delta cleared its interval.
+
 ## What the shape rules out
 
 **Not the patch grid.** The obvious story is tiling density: at 336 px DINOv2's patch-14 cuts a 24x24
