@@ -25,11 +25,30 @@
 # to fall back on, so the answer would otherwise depend entirely on where the last step landed.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
-EPOCHS="${1:-7}"
+# EVERY CHOICE HERE IS NOW THE ONE THAT SURVIVED, and four of them were not on 2026-08-11.
+#
+# 392 px READ OFF THE 448 CACHE. res392 is our best single member at 0.8523, +0.0066 over the 336
+# control, and it is the one coverage lever that whole-stack does not already contain. Fitting the
+# deliverable at 336 would ship a model measurably worse than a member we already have.
+#
+# TWELVE EPOCHS, NOT SEVEN. OneCycle is defined over total_steps, so seven is a COMPRESSED schedule
+# rather than a truncated one - measured, schedule_8 scored 0.8429 against the twelve-epoch 0.8457, so
+# compressing costs 0.0028. Every member in the ledger was fitted under the twelve-epoch shape and the
+# deliverable has to be fitted under the same one.
+#
+# NO --patience, and that is by construction rather than an oversight: --fold -1 leaves no holdout, so
+# the epoch INDEX stands in for the score, it increases every epoch, and nothing ever looks stale. The
+# last epoch is kept, which is what a final fit wants.
+#
+# bf16 AND compile, both measured and both free: -21% per step for 2.2 s of compilation, and bf16
+# carries fp32's exponent range so the loss scaler goes with it.
+#
+# --ema STAYS. It is the sanctioned variance reduction now that folds and seeds are banned: it averages
+# within a run rather than across runs, so it buys what a seed ensemble bought without a second fit.
+#
+# THE CAP LEAVES HEADROOM. 22 of 32.6, because --vram-gb bounds PyTorch's allocator and not the device -
+# set close to physical, Windows pages over PCIe instead of raising OOM and the run crawls at a
+# twenty-fifth of the throughput while reporting 100% utilisation.
+EPOCHS="${1:-12}"
 require "$LABELS"
-
-run_train "final_fit_e${EPOCHS}" \
-  --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 \
-  --slice-pooling max --whole-stack --ema \
-  --recompute-activations --vram-gb 22 \
-  --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}"   --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0   --slice-pooling max --whole-stack --ema   --image-size 448 --train-size 392   --recompute-activations --compile-encoder --bf16 --vram-gb 22   --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
