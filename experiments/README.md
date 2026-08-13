@@ -53,6 +53,25 @@ so everything below is **directional**, and only the cumulative total clears the
 | `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
 | `lora` v3small 224 | rank-8 adapters, base frozen | **0.8217** | **+0.0160 vs v3 fine-tuned** | **recipe was damaging v3** |
 
+## A peak is not a rate: OneCycle delivers half of the constant it replaced
+
+Measured at our exact settings — peak 8e-6, `pct_start` 0.15, 12 epochs of 291 steps — by summing the
+learning rate over every step:
+
+| regime | total LR over the run | mean rate |
+|---|---|---|
+| constant 8e-6 | 0.02794 | 8.0e-6 |
+| **OneCycle at peak 8e-6** | **0.01405** | **4.0e-6** |
+
+**OneCycle delivers 50.3% of the movement the constant did.** The backbone starts at 3.2e-7
+(`div_factor` 25, a default nobody chose) and ends at 3.2e-11 (`final_div_factor` 1e4), so the number
+in the arm header is the top of a curve the run barely visits.
+
+Every arm quoted by its peak carries the same halving: the "5x rate" arm at 4e-5 delivers a mean 2e-5,
+which is **2.5x** the old constant rather than 5x. This is a framing correction and not a defect —
+OneCycle's value is the warmup and the anneal, and the schedule measurably works — but a peak and a
+constant are not the same quantity and were being read as one.
+
 ## The running total, which is the number the bar applies to
 
 Individual arms keep landing inside the noise floor, and that is the wrong frame to judge them by: the
