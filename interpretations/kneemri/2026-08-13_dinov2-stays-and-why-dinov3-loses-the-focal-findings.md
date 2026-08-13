@@ -70,13 +70,29 @@ The per-label RANKING moves too, which is the same fact from the other side. Bak
 best label (0.896) and v3's ninth (0.817); Medial OA is the control's third and v3's first. v3 is not
 the control shifted down. It is a differently-shaped reader.
 
-## Scope, stated rather than glossed
+## Scope, stated rather than glossed — and then measured
 
 Every v3 run inherited DINOv2's adaptation recipe: last six blocks, backbone LR 8e-6, 12-epoch
 OneCycle. So the claim is "DINOv3-S under DINOv2's recipe", not "DINOv3 is worse". We are not sweeping
 the rate to close that — a 0.040 deficit with a per-label shape this consistent is not a hyperparameter
 miss, and the read-side knob we DID vary (441 patches against 196) moved 0.0023, which says this
 encoder's behaviour here is insensitive to exactly the axis a rate sweep would be tuning.
+
+**MEASURED LATER THE SAME DAY, and the caveat was half right.** Adaptation was the one axis never
+varied, so it was varied: LoRA freezes the base — gammas, RoPE, patch embedding, norms — and confines
+the update to a rank-8 subspace. Against fine-tuned v3 at the same 224 px read, matched epoch for
+epoch: 0.8118 against 0.7940 at epoch 4, 0.8189 against 0.8009 at 5, 0.8193 against 0.8041 at 6.
+Fine-tuned v3's best over twelve epochs was 0.8057; LoRA reaches **0.8193**, **+0.0136** — 2.6x the
+floor.
+
+So **about a third of v3's deficit was our recipe damaging it, and about two thirds is the encoder on
+this data.** The verdict below is unchanged — v3+LoRA is still 0.027 short of DINOv2's 0.8457, so
+DINOv2 stays — but "DINOv3 is worse here" is now a narrower and better-supported claim than it was
+this morning, and the axis this section flagged as untested turned out to be worth more than the two
+that were tested.
+
+It also asks a question larger than DINOv3: if our fine-tuning recipe costs v3 0.0136, what is it
+costing DINOv2?
 
 ## What DINOv3 is still for
 
