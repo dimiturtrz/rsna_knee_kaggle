@@ -2373,7 +2373,31 @@
     {
       "kind": "references",
       "source": "kneemri.targets.Targets",
+      "target": "kneemri.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.targets.Targets",
       "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.targets.Targets.load",
+      "target": "kneemri.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.targets.Targets.load",
+      "target": "kneemri.targets.Supervision.applied",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.targets.Targets.pair",
+      "target": "kneemri.targets.Supervision",
       "weight": 1
     },
     {
@@ -2746,6 +2770,12 @@
       "kind": "calls",
       "source": "kneemri.train.main",
       "target": "kneemri.study_cache.StudyCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.targets.Supervision",
       "weight": 1
     },
     {
@@ -3787,6 +3817,14 @@
       "level": "class",
       "parent": "kneemri.submission",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Supervision",
+      "label": "Supervision",
+      "level": "class",
+      "parent": "kneemri.targets",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -5810,6 +5848,14 @@
       "label": "run",
       "level": "method",
       "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.targets.Supervision.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.targets.Supervision",
       "role": null
     },
     {
