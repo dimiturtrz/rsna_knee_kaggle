@@ -139,12 +139,26 @@ dataset push, which is how it escaped the first time. It fired on its first real
 - ~~**Is submission notebook-only?**~~ **Settled: yes.** `kaggle competitions submit -f submission.csv`
   returns 400 here too; the working form is `-k <owner>/<kernel> -v <version> -f submission.csv`. The
   kit-as-dataset machinery is therefore load-bearing, not optional. Recorded in `SUBMISSIONS.md`.
-- **The competition rules page is JavaScript-only** to every tool here — WebFetch returns the title, and
-  `curl` returns a 5.6 KB SPA shell. The external-data clause is therefore *unread*. What we rely on is
-  low-risk on its face: DINOv2 weights (which the competition itself mounts as a Kaggle model, and every
-  public notebook uses) and a public label table derived from the competition's own reports, which is not
-  external data at all. The clause still needs a human with a logged-in browser before any winner-eligibility
-  claim — that is a user action, not one this session can complete.
+- ~~**The competition rules page is JavaScript-only**~~ **Settled 2026-08-13, from the rules saved
+  verbatim to `COMPETITION_RULES.txt` on 2026-08-12.** The clause was unreadable by any tool here for
+  three days and then sat unread for one more because the issue still said it needed a browser.
+  - **External data and models are PERMITTED.** §2.6.a allows External Data that is "publicly available
+    and equally accessible to use by all Participants … at no cost"; §2.6.b says use "is acceptable
+    unless specifically prohibited by the Host", and the Competition-Specific Rules contain no such
+    prohibition. Everything we rely on qualifies: DINOv2 (free, and the competition mounts it itself),
+    DINOv3 (free behind a click-through Meta licence), and pilkwang's two datasets (CC0-1.0). No forum
+    disclosure of external data is required by these rules.
+  - **Nothing here conditions a SUBMISSION.** The obligations attach to winners (§2.8, §8), which is why
+    the entry that went out while this was open was never at risk — only a prize claim was.
+  - **The winner licence is CC-BY-NC 4.0**, and §2.5.a carves out exactly our awkward case: "in the event
+    that input data or pretrained models with an incompatible license are used … you do not need to grant
+    an open source license for that data and/or model(s)". DINOv3's licence is covered.
+  - **The one real obligation, and it is not yet met.** §8.a: a winner must deliver model weights "as a
+    public kaggle dataset so it is both publicly accessible and linked to the inference/submission code".
+    All three of ours are **private** — `kneemri-members`, `kneemri-kit`, `dinov3-hf`. That is correct for
+    now: §5.d and §6.a forbid private sharing during the Competition Period, and publishing early would
+    hand the solution to the field. **If we place, `kneemri-members` and `kneemri-kit` must be flipped to
+    public before the winner deadline.**
 
 ## The Efficiency Prize, measured rather than assumed (2026-08-11)
 
