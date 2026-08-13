@@ -308,6 +308,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kit_check",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.label_power",
       "target": "kneemri.model",
       "weight": 1
@@ -1708,6 +1714,42 @@
       "kind": "calls",
       "source": "kneemri.kernel_run.KernelRun.run",
       "target": "kneemri.submission.Submission.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.KitCheck.drift",
+      "target": "kneemri.kit_check.KitCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.KitCheck.drift",
+      "target": "kneemri.kit_check.KitCheck.stamped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kit_check.main",
+      "target": "kneemri.kit_check.KitCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.main",
+      "target": "kneemri.kit_check.KitCheck.drift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.main",
+      "target": "kneemri.kit_check.KitCheck.stamped",
       "weight": 1
     },
     {
@@ -3559,7 +3601,7 @@
       "role": null
     },
     {
-      "descendants": 52,
+      "descendants": 53,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3706,6 +3748,14 @@
       "descendants": 0,
       "id": "kneemri.kernel_run",
       "label": "kernel_run",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check",
+      "label": "kit_check",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4164,6 +4214,14 @@
       "label": "KernelRun",
       "level": "class",
       "parent": "kneemri.kernel_run",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck",
+      "label": "KitCheck",
+      "level": "class",
+      "parent": "kneemri.kit_check",
       "role": "primary"
     },
     {
@@ -5356,6 +5414,46 @@
       "label": "run",
       "level": "method",
       "parent": "kneemri.kernel_run.KernelRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck.asked",
+      "label": "asked",
+      "level": "method",
+      "parent": "kneemri.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck.drift",
+      "label": "drift",
+      "level": "method",
+      "parent": "kneemri.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck.stamped",
+      "label": "stamped",
+      "level": "method",
+      "parent": "kneemri.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kit_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kit_check",
       "role": null
     },
     {
