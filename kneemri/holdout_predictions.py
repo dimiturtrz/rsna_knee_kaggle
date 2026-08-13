@@ -15,6 +15,7 @@ from torch import Tensor
 
 from kneemri.members import Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.test_time import SpatialViews
 
 GROUP = 3
 BATCH = 8
@@ -27,8 +28,13 @@ class HoldoutPredictions:
     keeping the curve itself a pure function of arrays is what lets the curve be tested at all.
     """
 
-    def __init__(self, device: torch.device) -> None:
+    def __init__(self, device: torch.device, views: "SpatialViews | None" = None) -> None:
         self.device = device
+        # The SAME views the submission path uses, or none. A whole-stack member gets one window, so
+        # window averaging - worth a measured +0.0156 to the windowed members - is unavailable to it and
+        # rotation is the only test-time average left. The ruler has to apply whatever deployment will,
+        # or it ranks members under a policy they will not ship under.
+        self.views = views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
 
     def load(self, checkpoint: Path, backbone: torch.nn.Module, dim: int, slots: int) -> StudyModel:
         """One member, rebuilt in the shape its own config records.
@@ -57,6 +63,7 @@ class HoldoutPredictions:
         images: UInt8[np.ndarray, "b n s h w"],
         mask: Float[np.ndarray, "b n"],
         window: "Window",
+        precision: torch.dtype = torch.float16,
     ) -> NDArray[np.float64]:
         """Probabilities for every study, averaged over the given test-time windows.
 
@@ -68,16 +75,22 @@ class HoldoutPredictions:
         analysis path, where it decides which members we choose to submit.
         """
         chunks = []
-        with torch.no_grad(), torch.autocast("cuda", enabled=self.device.type == "cuda"):
+        # The member's OWN arithmetic, not autocast's cuda default of float16: this is the tool that
+        # decides which members to submit, so scoring a bf16 member in fp16 ranks it under a function
+        # it was never fitted as. Same defect as Ensemble.predict_member carried until today.
+        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
             for begin in range(0, images.shape[0], BATCH):
                 pixels: UInt8[Tensor, "b n s h w"] = torch.from_numpy(
                     np.ascontiguousarray(images[begin : begin + BATCH])
                 ).to(self.device)
                 flags: Float[Tensor, "b n"] = torch.from_numpy(mask[begin : begin + BATCH]).to(self.device)
                 total = torch.zeros(pixels.shape[0], len(TARGETS), device=self.device)
-                for start in window.starts:
-                    total = total + torch.sigmoid(
-                        model(pixels[:, :, start : start + window.width], flags, window.size).float()
-                    )
-                chunks.append((total / len(window.starts)).cpu().numpy())
+                passes = 0
+                for view in self.views.apply(pixels):
+                    for start in window.starts:
+                        total = total + torch.sigmoid(
+                            model(view[:, :, start : start + window.width], flags, window.size).float()
+                        )
+                        passes += 1
+                chunks.append((total / passes).cpu().numpy())
         return np.concatenate(chunks).astype(np.float64)

@@ -206,6 +206,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.holdout_predictions",
+      "target": "kneemri.test_time",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kernel_run",
       "target": "kneemri.backbone",
       "weight": 1
@@ -298,6 +304,12 @@
       "kind": "import",
       "source": "kneemri.member_curve",
       "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.test_time",
       "weight": 1
     },
     {
@@ -1261,6 +1273,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_predictions.HoldoutPredictions.__init__",
+      "target": "kneemri.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
       "target": "kneemri.model.StudyDesign",
@@ -1510,6 +1534,12 @@
       "kind": "calls",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.member_curve.main",
+      "target": "kneemri.test_time.SpatialViews",
       "weight": 1
     },
     {

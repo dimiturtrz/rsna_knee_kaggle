@@ -37,6 +37,7 @@ from kneemri.members import Member
 from kneemri.scores import LabelScores
 from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
+from kneemri.test_time import SpatialViews
 
 logger = logging.getLogger(__name__)
 
@@ -105,13 +106,21 @@ def main() -> None:
     parser.add_argument("--split-seed", type=int, default=2026)
     parser.add_argument("--slices", type=int, default=12)
     parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    parser.add_argument(
+        "--tta",
+        action="store_true",
+        help="average over SpatialViews (rotations 0/-6/+6) as well as windows. A whole-stack member "
+        "reads one window, so window averaging - worth a measured +0.0156 to the windowed members - is "
+        "structurally unavailable to it and rotation is the only test-time average it can have. Costs "
+        "three forward passes per member.",
+    )
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    predictions = HoldoutPredictions(device)
+    predictions = HoldoutPredictions(device, SpatialViews() if arguments.tta else None)
     scores = LabelScores()
 
     # EACH MEMBER'S OWN READING, never one cache and one size for all of them. This CLI loaded a single
@@ -148,7 +157,13 @@ def main() -> None:
             member = predictions.load(
                 reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
             )
-            scored = predictions.predict(member, images, mask, reading.window(corpus.slices, overlap=arguments.overlap))
+            scored = predictions.predict(
+                member,
+                images,
+                mask,
+                reading.window(corpus.slices, overlap=arguments.overlap),
+                reading.precision,
+            )
             per_member.append(scored)
             names.append(reading.file.name)
             logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))

@@ -12,6 +12,7 @@ import torch
 
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.test_time import SpatialViews
 
 DIM = 12
 """At most SIZE: the double reads one feature per image ROW, so a wider feature than the image has
@@ -102,3 +103,28 @@ def test_predict_over_one_window_matches_a_single_forward():
     with torch.no_grad():
         direct = torch.sigmoid(model.forward(images[:, :, 0:GROUP], mask, SIZE))
     assert torch.allclose(torch.from_numpy(scored).float(), direct, atol=1e-5)
+
+
+def test_predict_averages_over_views():
+    """Views multiply the passes averaged over, and the identity view alone must change nothing.
+
+    The default is identity-only, so every number already in the ledger keeps its meaning. Real views
+    matter because a whole-stack member reads ONE window: window averaging - worth a measured +0.0156
+    to the windowed members - is structurally unavailable to it, leaving rotation as the only
+    test-time average it can have.
+    """
+    model = _member().eval()
+    generator = torch.Generator().manual_seed(SEED)
+    images = torch.randint(0, 256, (3, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8).numpy()
+    mask = torch.ones(3, SLOTS).numpy()
+    window = Window(starts=[0], width=GROUP, size=SIZE)
+
+    plain = HoldoutPredictions(torch.device("cpu")).predict(model, images, mask, window)
+    identity = HoldoutPredictions(torch.device("cpu"), SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))).predict(
+        model, images, mask, window
+    )
+    rotated = HoldoutPredictions(torch.device("cpu"), SpatialViews()).predict(model, images, mask, window)
+
+    assert (plain == identity).all(), "the identity view must be exactly the un-augmented answer"
+    assert rotated.shape == plain.shape
+    assert not (rotated == plain).all(), "rotating the input must move the answer, or the average is a no-op"
