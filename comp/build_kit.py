@@ -74,9 +74,24 @@ def main() -> None:
     (out / "dataset-metadata.json").write_text(
         json.dumps({"title": "kneemri-kit", "id": _DATASET_ID, "licenses": [{"name": "CC0-1.0"}]}, indent=2)
     )
+    # THE CODE ON KAGGLE GOES STALE SILENTLY, and nothing in a kernel run said which version it held.
+    # On 2026-08-13 the mounted kit was a day and 54 commits behind, missing Member.precision — so a
+    # bf16 member would have been served in fp16 on a T4, which is the arithmetic that property exists
+    # to fix. Stamped here and logged by kernel_run, so a run's own output names the code that made it.
+    revision = subprocess.run(  # noqa: S603 - fixed argv, no shell, reading our own repo
+        ["git", "-C", str(_REPO), "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    dirty = bool(
+        subprocess.run(  # noqa: S603 - fixed argv, no shell, reading our own repo
+            ["git", "-C", str(_REPO), "status", "--porcelain"], capture_output=True, text=True, check=True
+        ).stdout.strip()
+    )
+    (out / _SOURCE_DIR / "kit.json").write_text(json.dumps({"commit": revision, "dirty": dirty}, indent=2))
+
     wheels = [w.name for w in out.glob("*.whl")]
     weights = list(arguments.weights)
-    logger.info(f"kit at {out}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights}")
+    stamp = f"{revision} (DIRTY)" if dirty else revision
+    logger.info(f"kit at {out} from {stamp}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights}")
     logger.info(f"push a new version:\n  kaggle datasets version -p {out} -m '<message>' --dir-mode zip")
 
 
