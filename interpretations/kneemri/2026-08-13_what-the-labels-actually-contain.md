@@ -77,6 +77,28 @@ needs the multilingual encoder that branch (a) is about. And the reader already 
 quarter to a third of what an ordinal one would extract — explicit severity moves the level 0.074 on a
 range of 0.26 — so branch (b) buys the remainder, not the whole thing.
 
+### And a regex-grade reader is already priced in
+
+Extracting per-FINDING severity properly — sentences naming that finding's anatomy, severity read from
+those only — reproduces the ladder marginally (weak 52.8%, none 65.2%, strong 89.5% agreement) and adds
+**nothing within a level**:
+
+| level | weak | none | strong |
+|---:|---:|---:|---:|
+| 0.68 | 40.7% (27) | 37.1% (70) | — |
+| 0.82 | 87.5% (8) | 68.2% (132) | — |
+| 0.94 | — | 94.4% (54) | 100% (17) |
+
+Inconsistent in sign, small in every cell. The marginal monotonicity is the LEVEL showing through, not
+new information — so the reader already captures what a regex can see, and the "quarter to a third"
+estimate above is an upper bound on what this kind of extraction could add.
+
+**That raises the bar for branch (b) rather than lowering it.** A better reader has to extract what a
+regex cannot: negation and hedging, finding-specific grading the words do not carry ("grade 2 signal
+not extending to the articular surface"), and the 60% of reports that are not English. "Use a stronger
+model to read severity" is no longer a sufficient statement of that plan. Coverage limit: only 44.1% of
+report-YES cells had their finding's own sentence located, so this holds on the half we can read.
+
 One limit worth stating: the non-English figure (16.6% carrying severity) is a **lower bound, not a
 measurement**. English patterns against non-English text find little by construction, and those reports
 very likely grade their findings in their own vocabularies. Reading a tool's blind spot as a property
