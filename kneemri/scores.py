@@ -19,6 +19,13 @@ MIDPOINT = 0.5
 """Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""
 
 
+RESAMPLES = 1000
+"""Bootstrap draws. Enough that the 2.5th percentile is stable to about a thousandth."""
+
+BOOTSTRAP_SEED = 2026
+"""Fixed, so an interval quoted in a bead is the interval anyone else recomputes."""
+
+
 class LabelScores:
     """Per-label ROC AUC and its mean, computed by rank rather than by any library."""
 
@@ -74,6 +81,47 @@ class LabelScores:
                 (targets[scored[:, column], column] > MIDPOINT).astype(np.int64),
             )
             for column, target in enumerate(TARGETS)
+        }
+
+    def paired_interval(
+        self,
+        first: NDArray[np.float64],
+        second: NDArray[np.float64],
+        targets: NDArray[np.float32],
+        resamples: int = RESAMPLES,
+    ) -> dict[str, tuple[float, float]]:
+        """The 95% interval of the per-label DIFFERENCE between two arms, by bootstrap over studies.
+
+        The unpaired bound - each label's own sampling error from its positive count - is what
+        `run_comparison` prints today, and it is far too conservative to read a knob by. Two arms scored
+        on the SAME 881 studies share that error almost entirely: if a study is hard, it is hard for
+        both, and the DIFFERENCE does not care. Resampling studies with replacement and recomputing the
+        difference each time measures what is actually left.
+
+        THIS IS THE DIFFERENCE BETWEEN 'UNREAD' AND AN ANSWER. Every per-label claim this project has
+        made was read bare, and when the intervals were finally applied, four arms with unrelated
+        mechanisms had each 'improved' Fracture inside its +/-0.061 band, and the calibrated-targets arm
+        produced twelve deltas of which none cleared. That arm's entire falsifiable claim was per-label.
+
+        Seeded, because an interval that moves between runs cannot settle an argument - and because the
+        unit-test gate refuses unseeded randomness, for the same reason.
+        """
+        generator = np.random.default_rng(BOOTSTRAP_SEED)
+        studies = targets.shape[0]
+        deltas: dict[str, list[float]] = {target: [] for target in TARGETS}
+        for _ in range(resamples):
+            drawn = generator.integers(0, studies, size=studies)
+            left = self.per_label(first[drawn], targets[drawn])
+            right = self.per_label(second[drawn], targets[drawn])
+            for target in TARGETS:
+                difference = right[target] - left[target]
+                if not np.isnan(difference):
+                    deltas[target].append(difference)
+        return {
+            target: (float(np.percentile(values, 2.5)), float(np.percentile(values, 97.5)))
+            if values
+            else (float("nan"), float("nan"))
+            for target, values in deltas.items()
         }
 
     def mean(self, predictions: NDArray[np.float64], targets: NDArray[np.float32]) -> float:

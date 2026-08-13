@@ -86,3 +86,32 @@ def test_area_under_curve_gives_ties_midranks():
     # two positives ranked clear, the third tied with all three negatives: (2*3 + 0.5*3) / 9
     partial = np.array([0.5, 0.5, 0.5, 0.5, 0.8, 0.9])
     assert LabelScores.area_under_curve(partial, late) == pytest.approx(0.8333333, abs=1e-6)
+
+
+def test_paired_interval():
+    """Two arms scored on the same studies share their sampling error, so the paired band is tighter.
+
+    The unpaired bound - each label's own error from its positive count - is what run_comparison
+    prints, and at 200 positives it spans about 0.067. Two arms that differ only by a small
+    perturbation must land far inside that, or the interval is not measuring the difference at all.
+
+    Also pins the interval BRACKETS the observed delta, which is the property that makes it usable as
+    a floor: a band that excludes the number it is meant to bound would refuse every real result.
+    """
+    generator = np.random.default_rng(7)
+    studies = 400
+    truth = np.zeros((studies, len(TARGETS)), dtype=np.float32)
+    for column in range(len(TARGETS)):
+        truth[generator.choice(studies, 120, replace=False), column] = 1.0
+    signal = truth + generator.normal(0, 1.0, truth.shape)
+    first = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
+    second = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
+
+    scores = LabelScores()
+    interval = scores.paired_interval(first, second, truth, resamples=120)
+    observed = scores.per_label(second, truth)["ACL"] - scores.per_label(first, truth)["ACL"]
+    low, high = interval["ACL"]
+
+    assert low <= observed <= high, "the band must bracket the delta it bounds"
+    assert (high - low) < 0.067, "a paired band must beat the unpaired bound it replaces"
+    assert scores.paired_interval(first, second, truth, resamples=120) == interval, "seeded, so it is quotable"

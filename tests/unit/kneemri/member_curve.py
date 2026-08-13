@@ -104,3 +104,21 @@ def test_oracle():
     assert ceiling["oracle"] >= ceiling["average"], "a ceiling below the thing it bounds is not a ceiling"
     assert ceiling["oracle"] > ceiling["average"], "members that differ per label must show headroom"
     assert ceiling["average"] >= 0.0
+
+
+def test_paired():
+    """Reports one block per member against the first, and stars only intervals that exclude zero."""
+    generator = np.random.default_rng(11)
+    truth = np.zeros((120, len(TARGETS)), dtype=np.float32)
+    truth[generator.choice(120, 40, replace=False), :] = 1.0
+    signal = truth + generator.normal(0, 1.0, truth.shape)
+    control = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
+    # NOT a rescaling of `signal`: AUC is invariant to any increasing map, so `signal * 3` ranks
+    # identically and would be no better at all. Extra TRUTH is what actually separates.
+    better = (signal + truth * 2.0).astype(np.float64)
+
+    lines = MemberCurve(LabelScores()).paired([control, better], truth, ["control.pt", "better.pt"])
+    text = "\n".join(lines)
+
+    assert "paired deltas, better.pt against control.pt:" in text
+    assert "*" in text, "a member built to be strictly better must clear the interval somewhere"

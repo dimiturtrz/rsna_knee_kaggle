@@ -84,6 +84,31 @@ class MemberCurve:
             lines.append(f"best {size}: {score:.4f}  " + " + ".join(names[index] for index in subset))
         return lines
 
+    def paired(
+        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
+    ) -> list[str]:
+        """Each member's per-label delta against the FIRST, with the interval that says if it is real.
+
+        Against the first because a paired interval is a two-arm statement and the caller names its
+        control by putting it first — the same convention `run_comparison` uses.
+
+        A star means the interval excludes zero. Without one, `run_comparison` prints the UNPAIRED
+        bound, which ignores that both arms are scored on the same studies and runs about eleven times
+        wider — wide enough that the calibrated-targets arm returned twelve deltas of which none
+        cleared, and its whole falsifiable claim was per-label.
+        """
+        lines = []
+        for index in range(1, len(per_member)):
+            control = self.scores.per_label(per_member[0], truth)
+            observed = self.scores.per_label(per_member[index], truth)
+            interval = self.scores.paired_interval(per_member[0], per_member[index], truth)
+            lines.append(f"paired deltas, {names[index]} against {names[0]}:")
+            for label, (low, high) in interval.items():
+                clears = "*" if low > 0.0 or high < 0.0 else ""
+                delta = observed[label] - control[label]
+                lines.append(f"  {label:18s} {delta:+.4f}  [{low:+.4f}, {high:+.4f}]{clears}")
+        return lines
+
     def oracle(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> dict[str, float]:
         """The CEILING of combining these members, per label — against the best subset actually reachable.
 
@@ -133,6 +158,14 @@ def main() -> None:
     parser.add_argument("--split-seed", type=int, default=2026)
     parser.add_argument("--slices", type=int, default=12)
     parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    parser.add_argument(
+        "--paired",
+        action="store_true",
+        help="per-label 95%% interval of each member's delta against the FIRST, by bootstrap over "
+        "studies. The unpaired bound run_comparison prints is ~11x wider because it ignores that both "
+        "arms are scored on the same studies - wide enough that a whole arm's per-label claim came "
+        "back unread. Costs a thousand rescorings of arrays already in memory, and no GPU.",
+    )
     parser.add_argument(
         "--tta",
         action="store_true",
@@ -205,6 +238,9 @@ def main() -> None:
     # The CEILING beside the reachable numbers, never alone: it selects per label using the answers, so
     # quoting it as a score would be quoting a cheat. What it prices is whether per-label weighting - or
     # another member of the same kind - is worth anything at all before either is built.
+    if arguments.paired:
+        for line in curve.paired(per_member, truth, names):
+            logger.info(line)
     ceiling = curve.oracle(per_member, truth)
     logger.info(
         "oracle %.4f  vs plain average %.4f  vs best single %.4f  (headroom %+.4f)",
