@@ -260,3 +260,34 @@ against 0.136 measured, 0.68 against 0.378).
 And the obvious rival explanation is already dead: MCL is read coronally, and the nine-slot arm that
 added 1,139 coronal series bought **+0.0002**. So it is not that the model cannot see a coronal — it is
 that mild collateral injury is faint in the image and unreliable in the label.
+
+### And MCL is where the ruler is least trustworthy, which makes it the worst thing to optimise locally
+
+Same day, `python -m kneemri.reader_agreement`. Agreement on the reader's POSITIVE calls, per finding:
+
+| | calls | radiologist agrees | mean AUC (3 folds) |
+|---|---:|---:|---:|
+| Contusion | 36 | **44.4%** | 0.856 |
+| **MCL** | 18 | **50.0%** | **0.782** |
+| Lateral OA | 16 | 56.2% | 0.822 |
+| … | | | |
+| Medial Meniscus | 32 | 78.1% | 0.894 |
+| Synovitis | 16 | 81.2% | 0.858 |
+
+MCL is the **second-noisiest label** as well as the worst-scoring one. Across the twelve, agreement and
+AUC correlate **+0.51** (Spearman) — but twelve points put roughly ±0.6 on that, so it is suggestive and
+nothing more, and **Contusion refutes any simple version of it**: worst agreement of all, above-median
+AUC. Label noise is a contributing factor, not the explanation.
+
+**What this changes about the MCL finding.** MCL's AUC is agreement with a label that is right about
+half the time. So an arm that genuinely improves mild collateral detection may not move the number, and
+something that moves the number need not have improved the finding. MCL is simultaneously the one
+reproducible deficit and the one place our ruler is least able to tell us whether we fixed it.
+
+**And it cannot be settled locally.** The clean test — MCL scored against the radiologist rather than
+the reader — has **9 MCL positives among 58 annotated studies**. An AUC from nine positives has a
+standard error near 0.15, which is twenty times the effect being chased. Only the leaderboard can
+arbitrate this one, which is `knee-7d1`'s standing conclusion arriving from a new direction.
+
+So: keep MCL as the named weakness, do NOT build a loss or a sampler around it — that is the
+loss-engineering the working rules forbid, and here the measurement cannot even confirm it worked.

@@ -56,8 +56,8 @@ class ReaderAgreement:
                 verdict, truth = study.get(f"{target}__verdict"), study.get(target)
                 if pd.isna(verdict) or pd.isna(truth):
                     continue
-                rows.append((study["StudyInstanceUID"], language, str(verdict).upper(), float(truth)))
-        return pd.DataFrame(rows, columns=["study", "language", "verdict", "truth"])
+                rows.append((study["StudyInstanceUID"], language, target, str(verdict).upper(), float(truth)))
+        return pd.DataFrame(rows, columns=["study", "language", "target", "verdict", "truth"])
 
     def gap(self, cells: pd.DataFrame) -> dict[str, float]:
         """English minus non-English agreement on the reader's POSITIVE calls, with a study-clustered interval.
@@ -90,12 +90,29 @@ class ReaderAgreement:
 
         return np.array([drawn(english) - drawn(other) for _ in range(RESAMPLES)])
 
+    def by_label(self, cells: pd.DataFrame) -> dict[str, tuple[int, float]]:
+        """Agreement on the reader's positive calls for each finding, as (cells, rate).
+
+        THE RULER IS NOT EQUALLY GOOD EVERYWHERE, and that decides where local optimisation is safe.
+        A label the reader is right about half the time is a label whose AUC measures agreement with a
+        coin as much as it measures the model — so a change that improves the true finding there may not
+        move the number, and a change that moves the number may not have improved the finding.
+
+        Counts are returned beside every rate because they are small: twelve findings over 58 annotated
+        studies leaves 16-50 positive calls each, so these separate a bad label from a good one and
+        cannot rank two adjacent ones.
+        """
+        positives = cells[cells["verdict"] == POSITIVE]
+        return {str(label): (len(group), float(group["truth"].mean())) for label, group in positives.groupby("target")}
+
     def report(self, cells: pd.DataFrame) -> list[str]:
         """Per-language agreement on the reader's positive calls, then the English/non-English gap."""
         positives = cells[cells["verdict"] == POSITIVE]
         lines = [f"{len(cells)} annotated cells, {len(positives)} of them called positive by the reader"]
         for language, group in positives.groupby("language"):
             lines.append(f"  {language:>8} {len(group):>4} cells   radiologist agrees {group['truth'].mean():>6.1%}")
+        for label, (count, rate) in sorted(self.by_label(cells).items(), key=lambda item: item[1][1]):
+            lines.append(f"  {label:18s} {count:>4} calls   radiologist agrees {rate:>6.1%}")
         gap = self.gap(cells)
         lines.append(
             f"English {gap['english']:.1%} against non-English {gap['other']:.1%}: {gap['delta']:+.3f} "

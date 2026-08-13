@@ -1,6 +1,7 @@
 """Reader-radiologist agreement per language, on constructed studies whose right answer is known by hand."""
 
 import pandas as pd
+import pytest
 
 from kneemri.model import TARGETS
 from kneemri.reader_agreement import ReaderAgreement
@@ -32,6 +33,7 @@ def test_cells():
     cells = ReaderAgreement().cells(annotated, read)
 
     assert len(cells) == 2, "one dropped for missing truth, one for a target the reader never verdicted"
+    assert set(cells["target"]) <= set(TARGETS)
     assert set(cells["language"]) == {"en", "es"}
     assert list(cells["verdict"].unique()) == ["YES"]
 
@@ -61,3 +63,18 @@ def test_report():
     assert "3 annotated cells, 3 of them called positive" in lines[0]
     assert any(line.strip().startswith("es") and "50.0%" in line for line in lines)
     assert "over studies" in lines[-1]
+
+
+def test_by_label():
+    """Agreement per finding, each carrying its own count because the counts are small.
+
+    The ruler is not equally good everywhere: a label the reader is right about half the time measures
+    agreement with a coin as much as it measures the model, which is what decides whether optimising
+    that label locally is safe at all.
+    """
+    annotated, read = _studies([ENGLISH, SPANISH, SPANISH], [[1.0, 1.0], [1.0, 0.0], [0.0, 0.0]])
+
+    by_label = ReaderAgreement().by_label(ReaderAgreement().cells(annotated, read))
+
+    assert by_label[TARGETS[0]] == (3, pytest.approx(2 / 3))
+    assert by_label[TARGETS[1]] == (3, pytest.approx(1 / 3))
