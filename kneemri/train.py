@@ -79,6 +79,7 @@ class TrainingOptions:
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
     slice_pooling: str = "channels"
+    slot_pooling: str = "attend"
     anatomical_prior: bool = False
     encoder_layer: int = -1
     variant: str = SMALL
@@ -222,6 +223,15 @@ class TrainingOptions:
             help="add a pairwise ranking term at this strength (0 = cross-entropy only). The metric is "
             "a mean of per-label AUCs, which reads ORDER and discards calibration; this term pays only "
             "for pairs of studies ordered the wrong way round.",
+        )
+        parser.add_argument(
+            "--slot-pooling",
+            choices=("attend", "mean"),
+            default="attend",
+            help="how the twelve diagnoses read the six slots. 'attend' gives each diagnosis its own "
+            "query over the present slots; 'mean' pools them uniformly and is the ABLATION - it exists "
+            "to give the attention a denominator, since every number in the ledger was measured on a "
+            "recipe that already contained it.",
         )
         parser.add_argument(
             "--slice-pooling",
@@ -428,6 +438,7 @@ def main() -> None:
 
     design = StudyDesign(
         slice_pooling=arguments.slice_pooling,
+        slot_pooling=arguments.slot_pooling,
         anatomical_prior=arguments.anatomical_prior,
         layer=arguments.encoder_layer,
     )

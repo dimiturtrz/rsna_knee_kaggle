@@ -58,6 +58,7 @@ class HoldoutPredictions:
         config = saved.get("config", {})
         design = StudyDesign(
             slice_pooling=str(config.get("slice_pooling", "channels")),
+            slot_pooling=str(config.get("slot_pooling", "attend")),
             anatomical_prior=bool(config.get("anatomical_prior", False)),
             # Read back, not defaulted. A member fitted on an intermediate block and rebuilt on the last
             # one is a different function that loads cleanly - the shape that has cost nine defects.

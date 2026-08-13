@@ -18,7 +18,7 @@ from torch import Tensor, nn
 from kneemri.anatomy import ANATOMY, SlotAffinity
 from kneemri.lora import LoRALinear
 from kneemri.slice_attention import SliceAttention
-from kneemri.slot_head import SlotHead
+from kneemri.slot_head import MeanSlotHead, SlotHead
 from kneemri.slots import SLOTS
 
 TARGETS: tuple[str, ...] = (
@@ -78,6 +78,13 @@ class StudyDesign:
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
 
+    slot_pooling: str = "attend"
+    """How the twelve diagnoses read the six slots: per-diagnosis attention, or a uniform `mean`.
+
+    `mean` is the ABLATION and never a proposal — it exists so the attention has a denominator. Every
+    number in the ledger was measured on a recipe that already contained the attention, so nothing says
+    what it carries, and that is the bar every future pooling idea has to clear."""
+
     layer: int = -1
     """Which encoder block's tokens the head reads. -1 is the last, which is what every member so far
     was fitted on and therefore the only value that leaves the ledger's meaning untouched.
@@ -136,7 +143,8 @@ class StudyModel(nn.Module):
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
         self.slices = SliceAttention(head_width) if self.slice_pooling == ATTEND else None
-        self.head = SlotHead(head_width, n_slot, len(TARGETS), prior)
+        head = MeanSlotHead if self.design.slot_pooling == "mean" else SlotHead
+        self.head = head(head_width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
 

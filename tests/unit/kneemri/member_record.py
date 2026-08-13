@@ -19,6 +19,7 @@ class _Options:
     train_size: int = 0
     slices: int = 12
     slice_pooling: str = "max"
+    slot_pooling: str = "attend"
     anatomical_prior: bool = False
     encoder_layer: int = -1
     ema: bool = False

@@ -65,14 +65,17 @@ class SlotHead(nn.Module):
         # supervision is switched on; an unused head simply receives no gradient.
         self.report = nn.Linear(hidden, report_dims)
 
+    def attention(self, h: Float[Tensor, "b s h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
+        """How much each diagnosis reads from each slot: a per-diagnosis softmax over the present ones."""
+        att = torch.einsum("bsh,oh->bos", h, self.query) / self.hidden**0.5
+        att = att + self.prior.unsqueeze(0)
+        return att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
+
     @override
     def forward(self, x: Float[Tensor, "b s d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o"]:
         """Attend each diagnosis's query over the present slots and read out one logit per diagnosis."""
         h = self.proj(x) + self.slot_emb
-        att = torch.einsum("bsh,oh->bos", h, self.query) / self.hidden**0.5
-        att = att + self.prior.unsqueeze(0)
-        att = att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
-        ctx = self.drop(torch.einsum("bos,bsh->boh", att, h))
+        ctx = self.drop(torch.einsum("bos,bsh->boh", self.attention(h, mask), h))
         readout = self.out
         return (ctx * readout.weight.unsqueeze(0)).sum(-1) + readout.bias
 
@@ -88,3 +91,33 @@ class SlotHead(nn.Module):
         present = (mask >= _PRESENT).float().unsqueeze(-1)
         pooled = (h * present).sum(dim=1) / present.sum(dim=1).clamp(min=1.0)
         return self.report(pooled)
+
+
+class MeanSlotHead(SlotHead):
+    """The same head with its per-diagnosis attention replaced by a uniform mean over present slots.
+
+    THE DENOMINATOR, not a proposal. Every arm this project has run is measured against a recipe that
+    already contains slot attention, so nothing says what the attention itself carries — and that number
+    sets the bar for every future pooling idea. A new scheme beating mean-pooling by 0.01 is
+    uninteresting if attention already beats it by 0.05, and it is the whole game if attention is worth
+    0.002.
+
+    IT IS THE MECHANISM'S LIMIT AND NOT A THIRD MODE, which is the trap this ablation was written to
+    avoid: an ablation knob at zero that lands between two behaviours produces a number that reads as a
+    finding and is an artefact. Only `attention` changes — the projection, the slot embeddings, the
+    dropout, the readout and the parameter count are identical — so with constant attention logits the
+    two heads compute the same function, and `tests/unit/kneemri/slot_head.py` asserts exactly that.
+    """
+
+    @override
+    def attention(self, h: Float[Tensor, "b s h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
+        """Uniform over the slots the study actually has, and zero on the ones it does not.
+
+        Masked for the same reason the softmax is masked: an absent acquisition must not pull the
+        average toward whatever an unfilled slot happens to hold. A study with no present slots at all
+        would divide by zero, so the denominator is floored — it cannot occur in the corpus, and a
+        silent NaN through a loss is not the way to discover that it has.
+        """
+        present = (mask >= _PRESENT).float()
+        weights = present / present.sum(dim=1, keepdim=True).clamp(min=1.0)
+        return weights.unsqueeze(1).expand(-1, self.query.shape[0], -1)

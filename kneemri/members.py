@@ -229,6 +229,20 @@ class Member:
         return str(self.config.get("slice_pooling", "channels"))
 
     @property
+    def slot_pooling(self) -> str:
+        """How the twelve diagnoses read the six slots — "attend" or the ablation's uniform "mean".
+
+        Wired to its consumers BEFORE the arm that uses it was queued, which is the whole point of
+        writing it down here. A head fitted with uniform pooling and rebuilt with per-diagnosis
+        attention loads without complaint and predicts from a different function; that shape has cost
+        this project nine defects, and each was found after a run rather than before one.
+
+        Defaults to "attend" — every member on disk was fitted that way, so the ledger's meaning is
+        untouched.
+        """
+        return str(self.config.get("slot_pooling", "attend"))
+
+    @property
     def variant(self) -> str:
         """Which DINOv2 size this member was fitted on, so the kernel mounts the matching weights.
 
@@ -375,7 +389,12 @@ class MemberPackage:
         # that the two are compatible: DINOv2 tiles 392 and DINOv3 does not, so a member could name a
         # combination no patch grid can express and only fail inside a kernel.
         ENCODERS[member.variant].require_tiling(member.read_size)
-        design = StudyDesign(pool=member.pool, slice_pooling=member.slice_pooling, layer=member.layer)
+        design = StudyDesign(
+            pool=member.pool,
+            slice_pooling=member.slice_pooling,
+            slot_pooling=member.slot_pooling,
+            layer=member.layer,
+        )
         model = StudyModel(backbone, dim, member.slot_count, design)
         # THE ADAPTERS MUST EXIST BEFORE THE WEIGHTS ARRIVE. A LoRA member's state dict carries adapter
         # keys that only exist once `low_rank` has wrapped the encoder's linears; building the plain

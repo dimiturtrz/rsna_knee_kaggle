@@ -36,6 +36,9 @@ class RunOptions(Protocol):
     def slice_pooling(self) -> str: ...
 
     @property
+    def slot_pooling(self) -> str: ...
+
+    @property
     def anatomical_prior(self) -> bool: ...
 
     @property
@@ -180,6 +183,11 @@ class MemberRecord:
                 "variant": self.encoder.variant,
                 "pool": "cls_mean",
                 "slice_pooling": options.slice_pooling,
+                # Recorded AND read back by Member.slot_pooling and HoldoutPredictions.load. A head
+                # fitted with uniform slot pooling and rebuilt with attention is a different function
+                # whose weights load without complaint - the ninth instance of that shape is why the
+                # ablation's field was wired to its consumers before the arm was ever queued.
+                "slot_pooling": options.slot_pooling,
                 "anatomical_prior": options.anatomical_prior,
                 # Recorded AND read back by Member.layer. A value written here and defaulted by a
                 # consumer is the shape that has cost this project nine defects.

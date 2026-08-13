@@ -401,3 +401,16 @@ def test_layer():
     """
     assert _member().layer == -1, "a manifest without the key describes a member that read the last block"
     assert replace(_member(), config={**_config(), "encoder_layer": 6}).layer == 6
+
+
+def test_slot_pooling():
+    """Read back from the member's own config, defaulting to attention for everything fitted before.
+
+    Wired to its consumer before the ablation arm was queued rather than after it returned a number: a
+    head fitted with uniform pooling and rebuilt with per-diagnosis attention loads without complaint,
+    which is the shape that has cost this project nine defects.
+    """
+    member = _member()
+
+    assert member.slot_pooling == "attend", "every member on disk predates the flag and was attended"
+    assert replace(member, config={**member.config, "slot_pooling": "mean"}).slot_pooling == "mean"
