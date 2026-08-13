@@ -72,7 +72,7 @@ so everything below is **directional**, and only the cumulative total clears the
 | `compose_base` | rate + pooling on base | **lost at epoch 7/24** | — | not rerun |
 | **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
-| **`resolution`** | **336 → 392 px, read from the 448 cache** | **0.8523** | **+0.0066** | **clears the floor** |
+| **`resolution`** | **336 → 392 px, 448 cache — AND encoder rate 8e-6 → 4e-5** | **0.8523** | **+0.0066** | **CONFOUNDED, see below** |
 | `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | kept as a member |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
@@ -85,6 +85,30 @@ so everything below is **directional**, and only the cumulative total clears the
 | `dinov3` 224 | v3-S at its own native read | 0.8057 | −0.0400 | read size is not the axis: 0.0023 from 441 patches to 196 |
 | `dinov3` S+ 224 | wider small, 28.7M | 0.8012 | −0.0445 | capacity scaled the WRONG way inside the family |
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
+
+## Our best single member changed TWO things, and the ledger credited one
+
+`res392_ws_s2026` is the best member this project has produced (0.8523) and its row has read
+"336 → 392 px, +0.0066, clears the floor" since 2026-08-12. The checkpoint's own recorded options say
+otherwise:
+
+| member | backbone lr | cache | read |
+|---|---|---|---|
+| `wholestack_s2026` (the control) | **8e-6** | 336 | 336 |
+| `res392_ws_s2026` | **4e-5** | 448 | 392 |
+| `intensity392_ws_s2026` | 4e-5 | 448 | 392 |
+
+**Five times the encoder rate, on top of the resolution change.** And the rate was independently
+measured at **+0.0044** in the windowed era (`knee-3om`), which is most of the +0.0066 being attributed
+here to resolution. If that transfers, resolution alone is ~+0.002 — comfortably inside the 0.0053
+floor and not a finding at all.
+
+It may not transfer: +0.0044 was measured under windowed reading, before whole-stack existed, so the
+rate's value under the current recipe is genuinely unknown. What is *not* uncertain is that this row
+cannot be read as a resolution result.
+
+**The clean test is one arm**: 392 px at 8e-6, matched to the control's rate. Either resolution
+survives on its own or our best member is mostly a rate change we already knew about.
 
 ## A peak is not a rate: OneCycle delivers half of the constant it replaced
 
@@ -115,7 +139,7 @@ still compose.
 |---|---|---|---|
 | `rank24_s2026` — the control every early arm was read against | 0.8272 | — | — |
 | whole-stack reading | 0.8457 | +0.0185 | **+0.0185** |
-| + 392 px, read from the 448 cache | **0.8523** | +0.0066 | **+0.0251** |
+| + 392 px AND encoder rate 4e-5 | **0.8523** | +0.0066 | **+0.0251** (confounded — two changes, see above) |
 
 Both peak at epoch 6. 392 px is the last rung that fits: patch-14 needs multiples of 14, so the ladder
 is 336 (576 tokens) → 392 (784) → 420 (900) → 448 (1024), and 392 already holds 28.4 GB of a 32 GB card

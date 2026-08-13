@@ -55,6 +55,19 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # 448 px cache that already exists and resamples down.
 SIZE="${1:-392}"
 CACHE_PX="${2:-448}"
+
+# THE RATE IS AN ARGUMENT NOW, because this arm changed TWO things and the ledger credited one. It ran
+# at 4e-5 against a control at 8e-6, so its +0.0066 is resolution AND five times the encoder rate - and
+# the rate alone measured +0.0044 in the windowed era (knee-3om). Run this at 8e-6 to find out whether
+# resolution survives on its own; the default stays 4e-5 so re-running reproduces the member on disk.
+#
+# THE CAP IS 26, not 28: --vram-gb bounds PyTorch's allocator and not the device, so a number close to
+# physical leaves the driver no room and Windows pages over PCIe instead of raising OOM - 40 img/s
+# against ~1000, measured 2026-08-13.
+#
+# --patience 3 saves about 9% of wall-clock and cannot change the recorded best (measured by replaying
+# every arm in the ledger).
+RATE="${3:-4e-5}"
 require "$LABELS"
 
 # Fragmentation, not capacity, wrote the last 2.54 GB of that OOM: 1.17 GB sat reserved-but-unallocated
@@ -88,5 +101,5 @@ run_train "resolution_${SIZE}" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr 4e-5 --recompute-activations --compile-encoder --bf16 --vram-gb 28 \
+  --backbone-lr "$RATE" --patience 3   --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"
