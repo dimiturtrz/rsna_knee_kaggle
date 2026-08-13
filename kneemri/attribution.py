@@ -32,7 +32,7 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions, Window
 from kneemri.model import TARGETS, StudyModel
 from kneemri.scores import LabelScores
 
@@ -66,8 +66,14 @@ class Holdout:
     images: UInt8[NDArray[np.uint8], "b n s h w"]
     mask: Float[NDArray[np.float32], "b n"]
     truth: Float[NDArray[np.float32], "b o"]
-    starts: list[int]
-    size: int
+    window: Window
+    """HOW the member is read — starts, WIDTH and size together, from `Member.window`.
+
+    It was `starts` and `size` as two loose fields, and the width was then supplied by `score` as the
+    constant GROUP. So a whole-stack member, whose window is its full depth, was occluded three slices
+    at a time — the knee-y8y defect surviving in the analysis path after inference and `member_curve`
+    were both fixed for it. Carrying the whole `Window` makes the width impossible to supply from
+    somewhere else."""
 
 
 @dataclass(frozen=True)
@@ -99,9 +105,7 @@ class Attribution:
         holdout: Holdout,
     ) -> dict[str, float]:
         """Per-label held-out AUC under whatever occlusion the caller has already applied."""
-        scored = self.predictions.predict(
-            model, holdout.images, holdout.mask, Window(starts=holdout.starts, width=GROUP, size=holdout.size)
-        )
+        scored = self.predictions.predict(model, holdout.images, holdout.mask, holdout.window)
         return self.scores.per_label(scored, holdout.truth)
 
     def _mean(
@@ -218,7 +222,10 @@ class Attribution:
         the sampled windows helps all twelve; if they disagree, the only correct response is to read
         more of the stack rather than to pick a better window.
         """
-        return {str(start): self._labels(model, replace(holdout, starts=[start])) for start in holdout.starts}
+        return {
+            str(start): self._labels(model, replace(holdout, window=replace(holdout.window, starts=[start])))
+            for start in holdout.window.starts
+        }
 
     def report(self, diagnostics: Diagnostics) -> list[str]:
         """The diagnostics as lines, with the verdict each one supports stated rather than implied."""
@@ -292,9 +299,7 @@ def main() -> None:
     from core.paths import DataRoot  # noqa: PLC0415 - as above
     from kneemri.backbone import ENCODERS, SMALL  # noqa: PLC0415 - as above
     from kneemri.folds import ReportFolds  # noqa: PLC0415 - as above
-    from kneemri.holdout_predictions import GROUP  # noqa: PLC0415 - as above
-    from kneemri.slot_reader import IMAGE_SIZE  # noqa: PLC0415 - as above
-    from kneemri.slots import SLOTS  # noqa: PLC0415 - as above
+    from kneemri.members import Member  # noqa: PLC0415 - as above
     from kneemri.study_cache import StudyCache  # noqa: PLC0415 - as above
     from kneemri.targets import Targets  # noqa: PLC0415 - as above
 
@@ -312,7 +317,17 @@ def main() -> None:
     logger = logging.getLogger(__name__)
 
     root = DataRoot.from_config(arguments.paths)
-    corpus, identifiers = StudyCache(root.processed(), slices=arguments.slices).load()
+    # THE MEMBER'S OWN READING, never a constant. This CLI loaded the default 336 px cache, windowed by
+    # GROUP whatever the member was, passed IMAGE_SIZE as the read size and assumed the canonical six
+    # slots — so a whole-stack member was occluded three slices at a time, a 448-cache member could not
+    # be read at all, and an extended-scheme member would have been rebuilt with the wrong slot count.
+    # member_curve carried the identical defect and was fixed; this, the other analysis CLI, was not.
+    # It is the tool that produced the border-only and depth-spread findings, so a wrong reading here
+    # does not fail — it publishes.
+    reading = Member.from_checkpoint(arguments.checkpoint)
+    corpus, identifiers = StudyCache(
+        root.processed(), slices=reading.slices, image_size=reading.image_size, scheme=reading.scheme
+    ).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
     holdout = holdout[: arguments.studies]
@@ -323,14 +338,16 @@ def main() -> None:
 
     predictions = HoldoutPredictions(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     model = predictions.load(
-        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS)
+        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
     )
     images, mask = corpus.images[holdout], corpus.mask[holdout]
-    starts = list(range(arguments.slices - GROUP + 1))
+    # `overlap=True` gives a windowed member every start and a whole-stack member the ONE centred window
+    # of its full depth, which is the whole point of routing this through Member.window.
+    window = reading.window(corpus.slices, overlap=True)
 
     attribution = Attribution(predictions)
-    holdout_data = Holdout(images, mask, truth, starts, IMAGE_SIZE)
-    logger.info("slots: %s", [slot.name for slot in SLOTS])
+    holdout_data = Holdout(images, mask, truth, window)
+    logger.info("reading: %s", f"{len(window.starts)} window(s) of {window.width} at {window.size} px")
     logger.info("labels: %s", list(TARGETS))
     by_label = attribution.depth_by_label(model, holdout_data)
     diagnostics = Diagnostics(

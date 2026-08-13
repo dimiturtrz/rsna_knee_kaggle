@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from kneemri.attribution import Attribution, Diagnostics, Holdout
-from kneemri.holdout_predictions import HoldoutPredictions
+from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.model import TARGETS, StudyModel
 
 SEED = 2026
@@ -28,10 +28,15 @@ class _SlotReader(nn.Module):
         return ((centre * present) * 10.0 - 5.0).unsqueeze(1).expand(-1, len(TARGETS))
 
 
-def _holdout(starts: list[int] | None = None) -> Holdout:
-    """The fixture as the object the diagnostics take."""
+def _holdout(starts: list[int] | None = None, width: int = GROUP) -> Holdout:
+    """The fixture as the object the diagnostics take.
+
+    The WIDTH travels inside the window rather than being supplied by the scorer. It used to be the
+    constant GROUP there, so a whole-stack member - whose window is its full depth - was occluded three
+    slices at a time in every diagnostic this module produces.
+    """
     images, mask, truth = _fixture()
-    return Holdout(images, mask, truth, starts or [0], SIZE)
+    return Holdout(images, mask, truth, Window(starts=starts or [0], width=width, size=SIZE))
 
 
 def _fixture() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
