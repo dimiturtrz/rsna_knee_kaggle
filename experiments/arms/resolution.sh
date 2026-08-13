@@ -58,8 +58,9 @@ CACHE_PX="${2:-448}"
 require "$LABELS"
 
 # Fragmentation, not capacity, wrote the last 2.54 GB of that OOM: 1.17 GB sat reserved-but-unallocated
-# inside the cap. Expandable segments is the standing fix and costs nothing when there is headroom.
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# inside the cap. Expandable segments WOULD be the standing fix and is a NO-OP HERE - torch prints
+# 'expandable_segments not supported on this platform' on Windows, so this arm fitted for another
+# reason and the fragmentation was never reclaimed. Measured 2026-08-13; the line is removed.
 
 # NOT `require` on the images .npy: build_cache allocates that file at build START and fills it over
 # hours, so its existence proves the build began and nothing more. Training on it early would not

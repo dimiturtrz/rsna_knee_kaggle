@@ -32,7 +32,9 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# NO-OP ON THIS MACHINE, kept only so nobody re-adds it. Torch prints 'expandable_segments not
+# supported on this platform' on Windows at startup, so this line never reclaimed anything - any
+# arm that fitted while carrying it fitted for another reason. Measured 2026-08-13.
 wait_for_cache 448
 
 run_train intensity_392 \

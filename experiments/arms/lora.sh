@@ -67,20 +67,29 @@ case "$VARIANT" in
     ;;
 esac
 
-# IT OOM'D THE FIRST TIME, and the reason is the point of the method rather than a bug in it. Adapting
-# every block means every block needs its activations kept for the backward pass; fine-tuning the top
-# six keeps six. Measured beside it: unfreezing all twelve costs +29% over six at batch 2, and adapters
-# add their own down/up intermediates on top of that.
+# IT DOES NOT FIT AT 336 px, and the two things done about that on 2026-08-12 were both wrong.
 #
-# TWO CHANGES, neither of which touches the objective. `expandable_segments` reclaims the 2.41 GB the
-# allocator was holding reserved-but-unallocated when it died — pure fragmentation, visible in the OOM
-# message itself. And the cap goes to 30 GB of 31.8: the 26 GB ceiling was set to leave room for the
-# sibling project, and nothing else is on the card tonight.
+# THE METHOD IS WHY, not a bug in it. Adapting every block means every block keeps its activations for
+# the backward pass; fine-tuning the top six keeps six. Measured beside it: unfreezing all twelve costs
+# +29% over six at batch 2, and adapters add their own down/up intermediates on top.
+#
+# WHAT WAS TRIED AND WHY IT FAILED, measured 2026-08-13:
+#   expandable_segments  IS A NO-OP ON WINDOWS. Torch says so at startup - "expandable_segments not
+#     supported on this platform" - so the 2.41 GB of fragmentation it was credited with reclaiming was
+#     never reclaimed. It has been removed rather than left as a comforting line.
+#   --vram-gb 30  MADE IT WORSE. The cap bounds PYTORCH'S allocator, not the device: driver context and
+#     kernel workspaces sit on top, so 30 GB of tensors on a 32.6 GB card leaves no headroom and Windows
+#     PAGES GPU MEMORY OVER PCIe rather than raising OOM. The run then crawls at 40 img/s against the
+#     control's ~1000 while reporting 100% utilisation - 25x slower, 1.75 hours per epoch, 21 hours for
+#     the arm. A cap only converts thrashing into a clean OOM if it leaves the driver its room.
+#
+# SO THE CAP IS 26 AGAIN, which every other arm on this card runs under successfully. At 336 px this
+# arm will now OOM in two minutes instead of thrashing for a day, which is the answer arriving fast
+# rather than the answer being avoided.
 #
 # WHAT IS NOT CHANGED: the batch. Batch 12 is what every number in the ledger was measured at, and the
-# ranking term scores 66 within-batch pairs at 12 against 15 at 6 — shrinking it to fit would make this
+# ranking term scores 66 within-batch pairs at 12 against 15 at 6 - shrinking it to fit would make this
 # a different experiment that happens to also use LoRA.
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 RATE="${2:-5e-4}"
 require "$LABELS"
 
@@ -93,5 +102,5 @@ run_train "$NAME" \
   --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
   --variant "$VARIANT" --image-size "$CACHE" --train-size "$SIZE" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 30 \
+  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/${NAME}_s2026.pt"
