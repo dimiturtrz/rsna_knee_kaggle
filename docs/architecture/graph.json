@@ -314,6 +314,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.label_stability",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.laterality",
       "target": "kneemri.acquisition",
       "weight": 1
@@ -1720,6 +1726,48 @@
       "kind": "calls",
       "source": "kneemri.label_power.main",
       "target": "kneemri.label_power.LabelPower.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.LabelStability.correlation",
+      "target": "kneemri.label_stability.LabelStability._ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.LabelStability.report",
+      "target": "kneemri.label_stability.LabelStability.correlation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.LabelStability.report",
+      "target": "kneemri.label_stability.LabelStability.worst",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.label_stability.main",
+      "target": "kneemri.label_stability.LabelStability",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.main",
+      "target": "kneemri.label_stability.LabelStability.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_stability.main",
+      "target": "kneemri.label_stability.LabelStability.report",
       "weight": 1
     },
     {
@@ -3499,7 +3547,7 @@
       "role": null
     },
     {
-      "descendants": 51,
+      "descendants": 52,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3654,6 +3702,14 @@
       "descendants": 0,
       "id": "kneemri.label_power",
       "label": "label_power",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability",
+      "label": "label_stability",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4104,6 +4160,14 @@
       "label": "LabelPower",
       "level": "class",
       "parent": "kneemri.label_power",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability",
+      "label": "LabelStability",
+      "level": "class",
+      "parent": "kneemri.label_stability",
       "role": "primary"
     },
     {
@@ -5312,6 +5376,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.label_power",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability._ranked",
+      "label": "_ranked",
+      "level": "method",
+      "parent": "kneemri.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability.best",
+      "label": "best",
+      "level": "method",
+      "parent": "kneemri.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability.correlation",
+      "label": "correlation",
+      "level": "method",
+      "parent": "kneemri.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.LabelStability.worst",
+      "label": "worst",
+      "level": "method",
+      "parent": "kneemri.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_stability.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.label_stability",
       "role": null
     },
     {
