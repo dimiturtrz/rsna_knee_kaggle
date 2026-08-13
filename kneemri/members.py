@@ -337,9 +337,14 @@ class MemberPackage:
         """The `count` members with the best recorded holdout, best first.
 
         For the Efficiency Prize, where the accuracy leaderboard and the efficiency one reward opposite
-        things. Measured here: members two and three of a seed ensemble buy +0.0018 and +0.0007, and the
-        best single member outscored the three-member average — while on the efficiency board the best
-        accuracy anywhere sits at rank 638 and our accuracy run cheaply is worth ranks 29-50.
+        things: the best accuracy anywhere on the efficiency board sits at rank 638, while our accuracy
+        run cheaply is worth ranks 29-50.
+
+        HOW MANY TO ASK FOR is not a free choice, and the holdout answer this docstring used to give was
+        wrong on the leaderboard. On a SEED ensemble's holdout, members two and three bought +0.0018 and
+        +0.0007 and the best single outscored the three-member average, which reads as "one is enough".
+        Scored entries say otherwise: one member 0.868, two whole-stack 0.882, three whole-stack 0.882,
+        five windowed 0.888. Ask for two — one costs 0.020, and a third buys nothing.
 
         Ranking by each member's OWN holdout is the only ordering available at submission time, and it
         is a weak one: those numbers come from different folds and, for anything trained before the

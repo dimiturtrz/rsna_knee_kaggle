@@ -1,13 +1,29 @@
-"""The Efficiency Prize entry: one member, no overlapping windows.
+"""The Efficiency Prize entry: two members, no overlapping windows.
 
 Identical to the accuracy kernel except for two arguments, which is the whole point of putting the work
 in `kneemri.kernel_run`.
 
-Why one member and disjoint windows: the two leaderboards reward opposite things. The best accuracy
-anywhere on the efficiency board sits at rank 638, teams scoring exactly our 0.888 sit at ranks 29-50,
-and our own member curve is flat — members two and three bought +0.0018 and +0.0007, and the best single
-member outscored the three-member ensemble. So this trades almost no accuracy for 1/5 of the members and
-1/10 of the forward passes.
+WHY TWO AND NOT ONE, which is what this kernel shipped until 2026-08-13. It said "our own member curve is
+flat" and cited a SEED ensemble's holdout, where members two and three bought +0.0018 and +0.0007. The
+leaderboard has since answered the same question directly, and the curve is not flat at the bottom:
+
+    entry                        members  passes/study    LB
+    solo, our strongest member       1         10        0.868
+    whole-stack                      2          2        0.882
+    whole-stack                      3          3        0.882
+    ours v2, windowed                5         50        0.888
+
+One member costs 0.020 against five. TWO whole-stack members cost 0.006 for a twenty-fifth of the
+forward passes, and a third buys nothing on top. So two is the entry, and the file's own justification
+was arguing for a configuration its ledger had already refuted.
+
+WHY IT IS THIS CHEAP is measured rather than hoped: a whole-stack member's slot embedding is already the
+elementwise max over every slice, so it reads ONE window and the ten-fold window TTA multiplier does not
+apply to it at all — worth +0.0146 to a windowed member and exactly 0.0000 to this one. The accuracy
+work and the efficiency work want the same member, which is not what the trade-off framing assumed.
+
+The pair is chosen by `strongest(2)`, which ranks by each member's own recorded holdout; that is not
+necessarily the same pair as the 0.882 entry above, only the same cost class.
 
 It does not compete with the accuracy entry: 347 of 897 teams carry an efficiency score strictly below
 their public best, so a cheap submission adds a candidate rather than displacing one.
@@ -65,7 +81,7 @@ def main() -> None:
 
     from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
-    KernelRun(members=1, overlap=False).run()
+    KernelRun(members=2, overlap=False).run()
 
 
 if __name__ == "__main__":
