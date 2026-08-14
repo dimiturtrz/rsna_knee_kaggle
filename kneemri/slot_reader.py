@@ -22,6 +22,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.acquisition import Acquisition
+from kneemri.crop_centre import CropCentre, ImageCentre
 
 CROP_MM = 130.0
 """Below the acquired field of view of almost every series here, while still containing the joint."""
@@ -43,9 +44,16 @@ class SlotReader:
     """Reads a series into `[slices, size, size]` uint8, physically scaled and intensity-normalised."""
 
     def __init__(
-        self, crop_mm: float = CROP_MM, image_size: int = IMAGE_SIZE, band: tuple[float, float] = SLICE_BAND
+        self,
+        crop_mm: float = CROP_MM,
+        image_size: int = IMAGE_SIZE,
+        band: tuple[float, float] = SLICE_BAND,
+        centre: CropCentre | None = None,
     ) -> None:
         self.crop_mm = crop_mm
+        # Defaulting to the image centre keeps every cache on disk and every member fitted on one
+        # byte-identical; a different centre is a different reading and is keyed as such.
+        self.centre = centre or ImageCentre()
         self.image_size = image_size
         self.band = band
 
@@ -146,7 +154,11 @@ class SlotReader:
         if not _MIN_CROP_PIXELS < wanted < min(height, width):
             return stack
         half = wanted // 2
-        centre_y, centre_x = height // 2, width // 2
+        centre_y, centre_x = self.centre.of(stack)
+        # CLAMPED INTO THE FRAME, so a centre near an edge still yields the full physical extent rather
+        # than a crop silently short on one side — which would be a different mm/pixel for that study.
+        centre_y = int(np.clip(centre_y, half, height - half))
+        centre_x = int(np.clip(centre_x, half, width - half))
         return stack[:, max(0, centre_y - half) : centre_y + half, max(0, centre_x - half) : centre_x + half]
 
     def sized(self, stack: NDArray[np.float32], size: int) -> UInt8[Tensor, "s h w"]:
