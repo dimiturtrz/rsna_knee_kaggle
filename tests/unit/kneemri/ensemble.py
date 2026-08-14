@@ -384,11 +384,11 @@ def test_arithmetic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     fitted_fp16 = replace(member, config={**member.config, "bf16": False})
     object.__setattr__(ensemble, "device", torch.device("cuda"))
 
-    monkeypatch.setattr(torch.cuda, "is_bf16_supported", lambda: False)
-    assert ensemble.arithmetic(fitted_bf16) is torch.float16, "a T4 cannot run bf16, so it must not be asked to"
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda: (7, 5))
+    assert ensemble.arithmetic(fitted_bf16) is torch.float16, "emulated bf16 is not what the member was fitted under"
     assert ensemble.arithmetic(fitted_fp16) is torch.float16
 
-    monkeypatch.setattr(torch.cuda, "is_bf16_supported", lambda: True)
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda: (8, 0))
     assert ensemble.arithmetic(fitted_bf16) is torch.bfloat16, "a card that can run it gets the real arithmetic"
 
     ensemble.device = torch.device("cpu")
@@ -419,3 +419,54 @@ def test_reads(tmp_path: Path):
     shared = next(group for group in reads if len(group) > 1)
     assert {m.identifier for m in shared} == {member.identifier, "coarse"}
     assert {m.image_size for m in shared} == {member.image_size, 28}
+
+
+class _BrokenModel(StudyModel):
+    """A member that dies the way a card out of memory dies: mid-prediction, not at load."""
+
+    @override
+    def forward(self, imgs: torch.Tensor, mask: torch.Tensor, img_size: int | None = None) -> torch.Tensor:
+        message = "CUDA out of memory"
+        raise RuntimeError(message)
+
+
+def _broken() -> StudyModel:
+    return _BrokenModel(_FakeBackbone(), DIM, len(SLOTS), StudyDesign())
+
+
+def test_predict_members_drops_a_member_that_fails_instead_of_the_entry(tmp_path: Path):
+    """One member failing mid-prediction costs that member, not the submission.
+
+    Three entries died because any single failure took the whole run down, and a run that fails writes
+    no submission at all — so the slot buys nothing. An ensemble is the one structure that does not need
+    every part: losing a member costs a little accuracy, losing the entry costs a slot and a day.
+    """
+    ensemble = _ensemble(tmp_path / "resilient")
+    good = ensemble.package.members[0]
+    bad = replace(good, identifier="doomed")
+    ensemble.package.members = [good, bad]
+
+    ensemble.models["doomed"] = _broken()
+    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    chunk = {good.image_size: (images, torch.ones(2, len(SLOTS)))}
+
+    arrays = ensemble.predict_members([good, bad], [chunk], overlap=False)
+
+    assert len(arrays) == 1, "the working member still votes"
+    assert arrays[0].shape == (2, len(TARGETS))
+
+
+def test_predict_members_raises_when_every_member_fails(tmp_path: Path):
+    """All of them failing is a broken run, and a broken run must write NO submission.
+
+    The difference matters: dropping some members is a real answer from the rest, while dropping all of
+    them and writing a table anyway is the constant-value submission that scored 0.500 twice.
+    """
+    ensemble = _ensemble(tmp_path / "doomed")
+    member = ensemble.package.members[0]
+
+    ensemble.models[member.identifier] = _broken()
+    chunk = {member.image_size: (torch.zeros(2, len(SLOTS), 6, 14, 14, dtype=torch.uint8), torch.ones(2, len(SLOTS)))}
+
+    with pytest.raises(RuntimeError, match="every member"):
+        ensemble.predict_members([member], [chunk], overlap=False)

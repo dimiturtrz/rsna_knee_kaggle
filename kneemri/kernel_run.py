@@ -105,11 +105,30 @@ class KernelRun:
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         models = {}
+        usable = []
         for member in package.members:
             encoder = ENCODERS[member.variant]
-            weights = self.find_encoder(encoder)
-            models[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
-        logger.info("loaded and fingerprint-checked %d members from %s", len(models), package.root)
+            try:
+                weights = self.find_encoder(encoder)
+                models[member.identifier] = package.load(
+                    member, AutoModel.from_pretrained(weights), encoder.dim, device
+                )
+            # A MEMBER THAT WILL NOT LOAD IS A MEMBER, NOT AN ENTRY. A DINOv3 member cost a whole
+            # submission this way: its weights did not match the class the runtime built, and the run
+            # died with twenty-five other members loaded and ready.
+            except Exception:
+                logger.exception(
+                    "member %s (%s) would not load — dropping it from this entry", member.identifier, member.variant
+                )
+            else:
+                usable.append(member)
+        if not usable:
+            message = "no member loaded"
+            raise RuntimeError(message)
+        package.members = usable
+        logger.info(
+            "loaded and fingerprint-checked %d of %d members from %s", len(usable), len(models) or 0, package.root
+        )
 
         competition = next(iter(sorted(INPUT.rglob("sample_submission.csv")))).parent
         frame = Submission(Ensemble(package, models, device), competition, WORKING, overlap=self.overlap).run()

@@ -17,7 +17,19 @@ import logging
 import subprocess
 import sys
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # THE CHECKER CAN IMPORT THE KIT; THE RUNTIME CANNOT. This file bootstraps — it runs before the kit
+    # is on sys.path — so these names exist for annotations only and never at import time on Kaggle.
+    import torch as torch_types
+
+    from kneemri.ensemble import Ensemble
+    from kneemri.kernel_run import KernelRun
+    from kneemri.members import Member, MemberPackage
+    from kneemri.model import StudyModel
 
 
 def find_kit() -> Path:
@@ -42,6 +54,59 @@ def install_wheels(kit: Path) -> None:
         )
 
 
+def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API anyone calls twice
+    member: "Member",
+    run: "KernelRun",
+    package: "MemberPackage",
+    ensemble_of: "Callable[[], Ensemble]",
+    device: "torch_types.device",
+    logger: logging.Logger,
+) -> bool:
+    """Load, forward and chunk ONE member on this runtime, reporting rather than raising.
+
+    Annotated through `TYPE_CHECKING` because this file is a BOOTSTRAP: it runs before the kit is on
+    `sys.path`, so the classes these arguments belong to cannot be imported at runtime — but the type
+    checker reads them fine. The three checks are ordered by what each rules out: the weights match the
+    class the runtime builds, the arithmetic runs on this card, and a chunk of the shape a submission
+    actually sends fits in its memory.
+    """
+    import torch  # noqa: PLC0415 - after the kit is on sys.path
+    from transformers import AutoModel  # noqa: PLC0415 - after the kit is on sys.path
+
+    from kneemri.backbone import ENCODERS  # noqa: PLC0415 - after the kit is on sys.path
+    from kneemri.submission import STUDY_CHUNK  # noqa: PLC0415 - the chunk a submission actually sends
+
+    encoder = ENCODERS[member.variant]
+    try:
+        weights = run.find_encoder(encoder)
+        package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
+    except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
+        logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
+        return False
+
+    slots = len(member.config["slots"])
+    window = member.window(member.slices, overlap=False)
+    try:
+        with torch.no_grad(), torch.autocast("cuda", dtype=member.precision, enabled=device.type == "cuda"):
+            pixels = torch.zeros(1, slots, window.width, window.size, window.size, dtype=torch.uint8)
+            ensemble_of().models[member.identifier](pixels.to(device), torch.ones(1, slots).to(device), window.size)
+    except Exception as error:  # noqa: BLE001 - the point is to name which member and which failure
+        logger.error("FORWARD FAILED %s (%s): %s", member.identifier, member.precision, str(error)[:300])
+        return False
+    logger.info("ok     %s (%s, %s, read %d)", member.identifier, member.variant, member.precision, window.size)
+
+    # A FORWARD OF ONE STUDY PROVES NOTHING ABOUT MEMORY. A submission sends a chunk of 48, and the
+    # entries that died had every member loading and forwarding perfectly well.
+    chunk = torch.zeros(STUDY_CHUNK, slots, member.slices, member.image_size, member.image_size, dtype=torch.uint8)
+    try:
+        ensemble_of().predict_member(member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True)
+    except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
+        logger.error("CHUNK FAILED %s at %d studies: %s", member.identifier, STUDY_CHUNK, str(error)[:300])
+        return False
+    logger.info("       chunk of %d ok", STUDY_CHUNK)
+    return True
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger("loadcheck")
@@ -51,12 +116,8 @@ def main() -> None:
 
     import torch  # noqa: PLC0415 - after the kit is on sys.path
     import transformers  # noqa: PLC0415 - the version is the point
-    from transformers import AutoModel  # noqa: PLC0415 - after the kit is on sys.path
 
-    from kneemri.backbone import ENCODERS  # noqa: PLC0415 - after the kit is on sys.path
-    from kneemri.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
     from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - after the kit is on sys.path
-    from kneemri.submission import STUDY_CHUNK  # noqa: PLC0415 - the chunk a submission actually sends
 
     logger.info("transformers %s, torch %s", transformers.__version__, torch.__version__)
     capability = torch.cuda.get_device_capability() if torch.cuda.is_available() else None
@@ -68,54 +129,25 @@ def main() -> None:
     )
 
     run = KernelRun()
-    models: dict[str, object] = {}
+    models: "dict[str, StudyModel]" = {}
     logger.info("kit %s", run.revision())
     package = run.package()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    failures = 0
-    ensemble = None
-    for member in package.members:
-        encoder = ENCODERS[member.variant]
-        try:
-            weights = run.find_encoder(encoder)
-            model = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
-            models[member.identifier] = model
-        except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
-            failures += 1
-            logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
-            continue
-        # LOADING IS NOT RUNNING. Two entries died with the model built and the weights in place, so the
-        # check has to reach the arithmetic: one forward per member, in the precision that member was
-        # fitted under, on this card. A T4 reports bf16 as supported and emulates it, which is exactly
-        # the kind of "supported" that fails inside a kernel rather than at the autocast call.
-        window = member.window(member.slices, overlap=False)
-        pixels = torch.zeros(1, len(member.config["slots"]), window.width, window.size, window.size, dtype=torch.uint8)
-        try:
-            with torch.no_grad(), torch.autocast("cuda", dtype=member.precision, enabled=device.type == "cuda"):
-                model(pixels.to(device), torch.ones(1, len(member.config["slots"])).to(device), window.size)
-        except Exception as error:  # noqa: BLE001 - the point is to name which member and which failure
-            failures += 1
-            logger.error(
-                "FORWARD FAILED %s (%s, %s): %s", member.identifier, member.variant, member.precision, str(error)[:300]
-            )
-            continue
-        logger.info("ok     %s (%s, %s, read %d)", member.identifier, member.variant, member.precision, window.size)
+    models: "dict[str, StudyModel]" = {}
 
-        # A FORWARD OF ONE STUDY PROVES NOTHING ABOUT MEMORY. A submission sends a chunk of 48, and two
-        # entries died with every member loading and forwarding perfectly well. This is the same call the
-        # submission makes, on a chunk of the same SHAPE, with zeros standing in for pixels we do not
-        # have here — so an out-of-memory on this card surfaces at no cost instead of at a slot.
-        ensemble = ensemble or Ensemble(package, models, device)
-        slots = len(member.config["slots"])
-        chunk = torch.zeros(STUDY_CHUNK, slots, member.slices, member.image_size, member.image_size, dtype=torch.uint8)
-        try:
-            ensemble.predict_member(member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True)
-        except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
+    def ensemble_of() -> "Ensemble":
+        """Built once, and only after the first member has loaded into `models`."""
+        from kneemri.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
+
+        return Ensemble(package, models, device)
+
+    failures = 0
+    for member in package.members:
+        before = dict(models)
+        if not check(member, run, package, ensemble_of, device, logger):
             failures += 1
-            logger.error("CHUNK FAILED %s at %d studies: %s", member.identifier, STUDY_CHUNK, str(error)[:300])
-        else:
-            logger.info("       chunk of %d ok", STUDY_CHUNK)
+        models.update(before)
     logger.info("%d members, %d failed", len(package.members), failures)
 
 

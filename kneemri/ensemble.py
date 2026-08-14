@@ -50,6 +50,9 @@ pool at 0.8450 — in exactly the way fusion v2 did, and for exactly the same re
 standing in for a value that travels per member.
 """
 
+NATIVE_BF16 = (8, 0)
+"""Compute capability where bfloat16 stops being emulated. A T4 is (7, 5) and reports it as supported."""
+
 BUDGET_TOKENS = 576
 """Patch tokens per image the budget was measured at: 336 px on a patch-14 grid is 24 x 24.
 
@@ -209,19 +212,22 @@ class Ensemble:
     def arithmetic(self, member: Member) -> torch.dtype:
         """The dtype this DEVICE can actually run, which is not always the one the member was fitted in.
 
-        THE CLAIM THIS GUARD WAS BUILT ON WAS WRONG, and the correction is recorded rather than the
-        guard quietly deleted. I argued that a T4 (Turing, sm_75) cannot run bf16 autocast and that this
-        explained three failed entries. Measured on the card itself by `kneemri-loadcheck`: a T4 reports
-        `capability (7, 5)` AND `is_bf16_supported() True` — torch emulates it — and all six members
-        load there. So bf16 is not refused at the autocast call, and the failures need another cause.
+        SUPPORTED IS NOT NATIVE, and that distinction is the whole guard. A T4 is Turing, sm_75:
+        `is_bf16_supported()` answers True because torch EMULATES bfloat16 there, so the autocast call
+        does not raise — it just runs a different, slower path through kernels that were never the ones
+        the member was fitted under. Native bf16 starts at sm_80.
 
-        The guard stays because what it asks is still the right question: run what the DEVICE can run,
-        not what the checkpoint asked for. On a card that genuinely lacks bf16 this serves fp16 and says
-        so, which is a real compromise — fp16 has eight fewer exponent bits and a bf16-trained
-        activation can overflow it — but a compromised answer beats an entry that does not run. On a T4
-        it is inert, which is the honest state of it today.
+        So the question asked here is `capability >= (8, 0)`, not "is it supported". Emulated bf16 is
+        exactly the kind of works-until-it-does-not that costs a submission rather than a warning, and
+        fp16 is what every entry that has ever SCORED here ran under.
+
+        It is a real compromise: fp16 carries eight fewer exponent bits than bf16 and a bf16-trained
+        activation can overflow it. On a card with native bf16 nothing changes, and on one without, a
+        compromised answer beats an entry that does not run. Logged either way, because a later reader
+        must not have to guess which arithmetic produced a number.
         """
-        if member.precision is torch.bfloat16 and self.device.type == "cuda" and not torch.cuda.is_bf16_supported():
+        native = self.device.type == "cuda" and torch.cuda.get_device_capability() >= NATIVE_BF16
+        if member.precision is torch.bfloat16 and self.device.type == "cuda" and not native:
             logger.warning("%s was fitted in bf16 and this device cannot run it — serving fp16", member.identifier)
             return torch.float16
         return member.precision
@@ -357,11 +363,26 @@ class Ensemble:
         as a group of five.
         """
         per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in members}
+        failed: set[str] = set()
         for sized in chunks:
             for member in members:
+                if member.identifier in failed:
+                    continue
                 images, mask = sized[member.image_size]
-                per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
-        return [np.concatenate(per_member[member.identifier]) for member in members]
+                try:
+                    per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
+                # ONE MEMBER MUST NOT COST THE ENTRY. Three submissions died because any single failure
+                # anywhere took the whole run down, and a run that fails writes no submission at all. An
+                # ensemble is the one structure that does not need every part: dropping a member costs a
+                # little accuracy, and dropping the entry costs a slot and a day.
+                except Exception:
+                    logger.exception("member %s failed mid-prediction — dropping it from this entry", member.identifier)
+                    failed.add(member.identifier)
+        survived = [member for member in members if member.identifier not in failed and per_member[member.identifier]]
+        if not survived:
+            message = f"every member of this group failed: {sorted(failed)}"
+            raise RuntimeError(message)
+        return [np.concatenate(per_member[member.identifier]) for member in survived]
 
     @staticmethod
     def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
