@@ -95,10 +95,22 @@ def main() -> None:
                 )
 
             merged = packages[0]
-            # DINOv3 is mounted now, so nothing is excluded for its ENCODER — only for its pixels. A
-            # member outside the serving group reads a different image size, and one decode cannot
-            # produce two. That is a property of this kernel's single-decode design, not of the member.
-            usable = [m for package in packages for m in package.members if m.pixel_group == serving]
+            # TWO REASONS A MEMBER IS DROPPED, and they are different.
+            #
+            # PIXELS: a member outside the serving group reads a size this decode does not produce. That
+            # is this kernel's single-decode design, not a fault of the member.
+            #
+            # ENCODER: v3 members are excluded because their weights do not load against a v3 backbone
+            # rebuilt here — 178 unexpected keys under `backbone.model.layer.*`, a nesting the rebuilt
+            # model does not have (2026-08-14, this kernel's own run). Mounting dinov3-hf was necessary
+            # and NOT sufficient, which is the opposite of what the previous version of this comment
+            # claimed. Until a v3 member is proven to load, including one costs the whole entry.
+            usable = [
+                m
+                for package in packages
+                for m in package.members
+                if m.pixel_group == serving and not m.variant.startswith("v3")
+            ]
             dropped = sum(len(package.members) for package in packages) - len(usable)
             if dropped:
                 logger.info("dropped %d member(s) that one decode cannot serve", dropped)
