@@ -299,5 +299,26 @@ of the data it is handed — 18 of ~180 acquired slices per step, 12 cached of a
 on the leaderboard against a 0.942 frontier, and a knob inside a family returns ~0.005 by
 construction. `whole_stack` and `resolution` are the first two arms that leave it. See `knee-jk3`.
 
+## Results that cost no GPU, and belong here anyway
+
+This ledger is a table of ARMS, so a day spent on measurement rather than training leaves it empty and
+reads as a day with no results. 2026-08-14 was such a day, and its findings change what the arms above
+mean:
+
+- **The ruler was five times too small.** The twenty published members carry their own out-of-fold
+  predictions, four seeds over five folds, whose id-sets partition all 4,407 studies exactly. Every
+  study therefore has a held-out prediction, on a ruler with a sampling floor near **0.0024** against
+  our one fold's **0.0053** — on a CPU, with no new labels.
+- **The label profile is not the one the plan was built on.** Fracture, which this ledger names a target
+  at 0.784, is our BEST finding at 0.8923 over the corpus. The weakest is Lateral Meniscus at 0.7981,
+  never named. The `+0.0173 from MCL and Fracture` target above is dead, exactly as `label_power`
+  predicted from the standard error of 62 positives.
+- **Six findings are held back by their LABELS and six by the MODEL**, and the split is by structure
+  size. Measured against radiologist annotations, held out.
+- **Caching 12 slices of a median 36 shows no measurable cost** — one of `knee-jk3`'s four named causes,
+  tested for the first time and not supported.
+- **The slot tie-break is refuted**, by one CSV read, after a 4,407-study census had left it standing.
+
 Interpretation of the whole ledger, including what each refutation rules out, lives in
-`interpretations/kneemri/`. The build log is git history.
+`interpretations/kneemri/` — for the above, `2026-08-14_the-ruler-was-five-times-too-small.md` and
+`2026-08-14_labels-or-pixels.md`. The build log is git history.

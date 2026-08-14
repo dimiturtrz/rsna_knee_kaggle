@@ -62,14 +62,23 @@ in other hands is our pipeline's reading of the pixels.
 top is 0.054 — far too large to be the slot tie-break. Something structural separates the leaders from
 the public stack.
 
-That agrees in direction and rough size with the 0.025 out-of-fold residual measured locally, which
-promotes the slot tie-break from a shrug to a lead: when two candidate series have equal slice counts,
-a stable `sort_values` picks the first in FRAME order and our `max()` picks the first in LIST order, and
-a different series in a slot is a different image for the head to read.
+That agrees in direction and rough size with the 0.025 out-of-fold residual measured locally, which for
+three days made the slot tie-break the lead: when two candidate series have equal slice counts, a stable
+`sort_values` picks the first in FRAME order and our `max()` picks the first in LIST order.
 
-The measurement that would settle it: re-run the out-of-fold oracle logging which series filled each
-slot, and count how many studies have a tie at all. If ties are rare and the residual survives, the
-cause is somewhere else and this lead is dead — which is worth knowing just as much.
+**The tie-break is refuted (2026-08-14), by one CSV read.** Both rules keep the first maximal by slice
+count, so they can only diverge if the two pipelines see the candidates in a different ORDER.
+`Study.from_directory` probes `sorted(directory.iterdir())` and the directory names ARE the series UIDs;
+`train_series.csv`'s frame order is that same sorted-UID order for **4,407 of 4,407 studies**. Same order
+in, same series out, in every contested slot. `SlotTies.disagreeing_order` measures it and the CLI prints
+it first.
+
+**And no declared reading axis differs either.** The published members' own checkpoints record
+`crop_mm 130.0`, `band 0.20,0.80`, `img 336`, `slices 12`, `group 3`, `pool cls_mean`, the identical slot
+ORDER, and byte-for-byte the `rules` dict `member_record.py` hardcodes. So the residual lives in the
+IMPLEMENTATION of those rules — decode, percentile normalisation, resize — not in any recorded policy.
+`kneemri.oof_oracle` is rebuilt and pointed at exactly that, reporting per-study residuals against free
+covariates so a defect that concentrates says so.
 
 ## What the six scored entries say, read together
 
@@ -141,13 +150,20 @@ things and neither implies the other:
 
 - **Fingerprint** (`kneemri-graft-verify`) — each member's output on a seeded synthetic bag. Proves the
   ARCHITECTURE is the function those weights were fitted to. Blind to the pixels: it feeds noise.
-- **Out-of-fold agreement** (`scratchpad/oof_oracle.py`) — our pipeline against the member's own stored
-  predictions on the studies it held out. Proves the PIXELS: routing, order, laterality, crop,
-  percentile, resize. Currently max|diff| 0.025, per-study correlation 0.99, under disjoint windows.
+- **Out-of-fold agreement** (`python -m kneemri.oof_oracle`) — our pipeline against the member's own
+  stored predictions on the studies it held out. Proves the PIXELS: routing, order, laterality, crop,
+  percentile, resize. Last measured max|diff| 0.025, per-study correlation 0.99, under disjoint windows.
 
 The residual 0.025 is an OPEN QUESTION, not a rounding error — a faithful pipeline would agree to about
-1e-6, as the fingerprint does. The likeliest cause is the slot tie-break when two candidate series have
-equal slice counts.
+1e-6, as the fingerprint does. The tie-break explanation is **refuted** (above), and so is every
+recorded reading rule: the published checkpoints declare the same crop, band, slot order and rules we
+use. What is left is the IMPLEMENTATION of those rules.
+
+**This oracle was lost and rebuilt, which is why it is named as a module and not a script.** It lived in
+`scratchpad/oof_oracle.py`, was never committed, and vanished with the weights it ran on — so for three
+days two beads argued about a number nobody could recompute, and both were settled by facts sitting
+inside those checkpoints the whole time. It reports per-study residuals against free covariates now,
+because a max|diff| says a defect exists and nothing about where.
 
 ## Provenance warning on the live entry
 
