@@ -9,8 +9,8 @@ import torch
 from torch import Tensor
 
 from kneemri.backbone import ENCODERS
-from kneemri.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble
-from kneemri.members import Member, MemberConfig, MemberPackage, Window
+from kneemri.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read
+from kneemri.members import MemberConfig, MemberPackage, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
@@ -300,16 +300,20 @@ def test_predict_members(tmp_path: Path):
     images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
     mask = torch.ones(2, len(SLOTS))
 
-    arrays = ensemble.predict_members([member], [(images, mask)], overlap=False)
+    arrays = ensemble.predict_members([member], [{member.image_size: (images, mask)}], overlap=False)
     assert len(arrays) == 1
     assert arrays[0].shape == (2, len(TARGETS))
 
 
 def test_predict_groups(tmp_path: Path):
-    """Each group is decoded once, at its own resolution, and every member votes in one combine.
+    """Members at DIFFERENT resolutions share ONE read, and every member still votes in one combine.
 
-    The decode is injected, so this records what was asked for: one call per group, carrying that
-    group's members and its own slice depth.
+    This used to assert the opposite — one decode per pixel group — and that was the cost: our best
+    member reads a 448 px cache while the rest read 336, so an entry carrying both decoded every DICOM
+    twice. Resolution is the one axis a single read can serve many of, because the decode and the crop
+    do not depend on the grid, so the unit of decoding is (scheme, slices) and the sizes ride along.
+
+    The decode is injected, so this records exactly what was asked for.
     """
     ensemble = _ensemble(tmp_path / "two-groups")
     member = ensemble.package.members[0]
@@ -317,15 +321,23 @@ def test_predict_groups(tmp_path: Path):
     ensemble.package.members = [member, replace(member, identifier="big", config=coarser)]
     ensemble.models["big"] = ensemble.models[member.identifier]
 
-    asked: list[tuple[int, int]] = []
+    asked: list[tuple[int, tuple[int, ...]]] = []
 
-    def chunks_for(members: list[Member], slices: int):
-        asked.append((len(members), slices))
-        images = torch.randint(0, 256, (2, len(SLOTS), slices, 14, 14), dtype=torch.uint8)
-        return [(images, torch.ones(2, len(SLOTS)))]
+    def chunks_for(read: Read):
+        asked.append((read.slices, read.sizes))
+        return [
+            {
+                size: (
+                    torch.randint(0, 256, (2, len(SLOTS), read.slices, 14, 14), dtype=torch.uint8),
+                    torch.ones(2, len(SLOTS)),
+                )
+                for size in read.sizes
+            }
+        ]
 
     combined = ensemble.predict_groups(chunks_for, overlap=False)
-    assert asked == [(1, 6), (1, 6)], "one decode per group, never one per member"
+
+    assert asked == [(6, (14, 28))], "ONE read serving both resolutions, not one decode per group"
     assert combined.shape == (2, len(TARGETS))
 
 
@@ -381,3 +393,29 @@ def test_arithmetic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     ensemble.device = torch.device("cpu")
     assert ensemble.arithmetic(fitted_bf16) is torch.bfloat16, "off cuda there is no autocast to constrain"
+
+
+def test_reads(tmp_path: Path):
+    """Resolution shares a read; scheme and depth do not.
+
+    The distinction is the whole saving. A decode cannot serve two slot SCHEMES (different series are
+    routed) or two DEPTHS (different slices are sampled), but resolution is only the grid the same
+    cropped stack is resized onto — so members at 336 and 448 belong in one read, and grouping them by
+    pixels charged a full decode of the corpus for the difference.
+    """
+    ensemble = _ensemble(tmp_path / "reads")
+    member = ensemble.package.members[0]
+    coarser: MemberConfig = {**member.config, "img": 28}
+    deeper: MemberConfig = {**member.config, "slices": member.slices * 2}
+    ensemble.package.members = [
+        member,
+        replace(member, identifier="coarse", config=coarser),
+        replace(member, identifier="deep", config=deeper),
+    ]
+
+    reads = ensemble.reads()
+
+    assert len(reads) == 2, "two resolutions share one read; a different depth cannot"
+    shared = next(group for group in reads if len(group) > 1)
+    assert {m.identifier for m in shared} == {member.identifier, "coarse"}
+    assert {m.image_size for m in shared} == {member.image_size, 28}

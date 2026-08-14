@@ -23,8 +23,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.ensemble import Ensemble
-from kneemri.members import Member
+from kneemri.ensemble import Ensemble, Read
 from kneemri.model import TARGETS
 from kneemri.slot_reader import SlotReader
 from kneemri.study import SlotPipeline, Study
@@ -78,22 +77,30 @@ class Submission:
         self.split = split or Split()
 
     def decode(
-        self, identifiers: list[str], planes: dict[str, str], slices: int, members: list[Member]
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Decode a chunk of studies into one batched bag and its presence mask.
+        self, identifiers: list[str], planes: dict[str, str], read: Read
+    ) -> dict[int, tuple[torch.Tensor, torch.Tensor]]:
+        """Decode a chunk of studies ONCE and return the batched bag at every size asked for.
 
-        The pipeline is built at the MEMBERS' resolution rather than at `SlotReader`'s default, which
-        was 336 whatever the members said. See `Ensemble.decoded_size`.
+        Sizes rather than one size, because the resize is the only size-dependent step: `SlotReader`
+        stops before it, so a chunk read once serves 448 and 336 together and each is byte-identical to
+        a native read. That turns N resolutions from N decodes into one — decode being the I/O-bound
+        half of a submission on four CPUs — and it is what lets our strongest member share an entry with
+        members fitted at another resolution.
+
+        The scheme still comes from the members, never a default: a nine-slot member routed under the
+        canonical six is fed three slots it never saw.
         """
-        pipeline = SlotPipeline(
-            scheme=self.ensemble.decoded_scheme(members),
-            reader=SlotReader(image_size=self.ensemble.decoded_size(members)),
-        )
+        pipeline = SlotPipeline(scheme=read.scheme, reader=SlotReader(image_size=max(read.sizes)))
         with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
-            bags = list(pool.map(lambda name: self.decoded(name, planes, pipeline, slices), identifiers))
-        return torch.stack([bag for bag, _ in bags]), torch.stack([mask for _, mask in bags])
+            bags = list(pool.map(lambda name: self.decoded(name, planes, pipeline, read), identifiers))
+        return {
+            size: (torch.stack([bag[size][0] for bag in bags]), torch.stack([bag[size][1] for bag in bags]))
+            for size in read.sizes
+        }
 
-    def decoded(self, name: str, planes: dict[str, str], pipeline: SlotPipeline, slices: int) -> tuple[Tensor, Tensor]:
+    def decoded(
+        self, name: str, planes: dict[str, str], pipeline: SlotPipeline, read: Read
+    ) -> dict[int, tuple[Tensor, Tensor]]:
         """One study's bag, or zeros with an empty mask if it cannot be read at all.
 
         ONE UNREADABLE STUDY MUST NOT COST THE ENTRY. `pool.map` re-raises, so a single study that
@@ -109,30 +116,32 @@ class Submission:
         """
         try:
             directory = self.split.series(self.competition) / name
-            return Study.from_directory(directory, planes, pipeline).bag(slices)
+            return Study.from_directory(directory, planes, pipeline).bags(read.slices, read.sizes)
         # Broad on purpose: pydicom, the filesystem and the router each fail in their own way, and any
         # failure to read ONE study must cost one row rather than the entry. Logged with the traceback,
         # which is what keeps this from being a silent swallow — and what BLE001 asks for.
         except Exception:
             logger.exception("study %s could not be decoded — contributing zeros and an empty mask", name)
             slots = len(pipeline.scheme.slots)
-            size = pipeline.image_size
-            return torch.zeros(slots, slices, size, size, dtype=torch.uint8), torch.zeros(slots)
+            return {
+                size: (torch.zeros(slots, read.slices, size, size, dtype=torch.uint8), torch.zeros(slots))
+                for size in read.sizes
+            }
 
     def chunks(
-        self, identifiers: list[str], planes: dict[str, str], slices: int, members: list[Member]
-    ) -> Iterator[tuple[Tensor, Tensor]]:
+        self, identifiers: list[str], planes: dict[str, str], read: Read
+    ) -> Iterator[dict[int, tuple[Tensor, Tensor]]]:
         """Decoded chunks, yielded as they are read so prediction overlaps the next decode's I/O."""
         started = time.time()
         for begin in range(0, len(identifiers), STUDY_CHUNK):
             chunk = identifiers[begin : begin + STUDY_CHUNK]
             decode_started = time.time()
-            images, mask = self.decode(chunk, planes, slices, members)
+            sized = self.decode(chunk, planes, read)
             logger.info(
-                f"  studies {begin + 1}-{begin + len(chunk)}: decode {time.time() - decode_started:.0f}s, "
-                f"elapsed {time.time() - started:.0f}s"
+                f"  studies {begin + 1}-{begin + len(chunk)}: decode {time.time() - decode_started:.0f}s "
+                f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s"
             )
-            yield images.to(self.device), mask.to(self.device)
+            yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
 
     def predict(self, identifiers: list[str], planes: dict[str, str]) -> NDArray[np.float64]:
         """Every member's predictions over every study, rank-combined into one table.
@@ -140,9 +149,7 @@ class Submission:
         The grouping and combining live on `Ensemble`, which knows which members can share pixels; this
         supplies the only thing it cannot know, which is how to turn a set of studies into chunks.
         """
-        return self.ensemble.predict_groups(
-            lambda members, slices: self.chunks(identifiers, planes, slices, members), overlap=self.overlap
-        )
+        return self.ensemble.predict_groups(lambda read: self.chunks(identifiers, planes, read), overlap=self.overlap)
 
     def run(self) -> pd.DataFrame:
         """The whole submission: decode, predict, write — and NOTHING if any of it fails.

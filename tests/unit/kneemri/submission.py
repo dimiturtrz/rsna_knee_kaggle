@@ -9,7 +9,7 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.ensemble import Ensemble
+from kneemri.ensemble import Ensemble, Read
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slot_reader import SlotReader
@@ -21,6 +21,8 @@ from .conftest import write_series
 SEED = 2026
 DIM = 8
 PATCHES = 16
+IMAGE = 32
+"""The size the fixture members record as their cache — matched to their config img."""
 SLOT_NAMES = ["SAG_FLUID_FS", "COR_FLUID_FS", "AX_FLUID_FS", "SAG_FLUID_NOFS", "COR_T1", "SAG_T1"]
 
 
@@ -136,14 +138,25 @@ def test_check(tmp_path: Path):
 
 
 def test_decode(tmp_path: Path):
-    """A chunk of studies becomes one batched bag and its presence mask."""
+    """A chunk decoded ONCE comes back at every size, each identical to a read at that size alone.
+
+    The identity is the point: resolution is the one axis a single read can serve many of, so members
+    fitted at different sizes can share a decode without any of them being fed pixels it never saw.
+    """
     submission = _submission(tmp_path)
-    images, mask = submission.decode(
-        ["study_a", "study_b"], {"sag": "Sagittal"}, 3, submission.ensemble.package.members
-    )
+    members = submission.ensemble.package.members
+    scheme = submission.ensemble.decoded_scheme(members)
+
+    sized = submission.decode(["study_a", "study_b"], {"sag": "Sagittal"}, Read(3, scheme, (IMAGE, IMAGE // 2)))
+
+    assert sorted(sized) == sorted((IMAGE, IMAGE // 2))
+    images, mask = sized[IMAGE]
     assert images.shape[0] == 2
     assert mask.shape == (2, len(SLOT_NAMES))
     assert mask[:, 0].tolist() == [1.0, 1.0], "the sagittal fluid slot is filled for both"
+
+    alone = submission.decode(["study_a", "study_b"], {"sag": "Sagittal"}, Read(3, scheme, (IMAGE // 2,)))
+    assert torch.equal(sized[IMAGE // 2][0], alone[IMAGE // 2][0]), "sharing a read must change nothing"
 
 
 def test_predict(tmp_path: Path):
@@ -173,11 +186,11 @@ def test_run(tmp_path: Path):
 def test_chunks(tmp_path: Path):
     """Chunks arrive already on the ensemble's device, so the predictor never has to move them."""
     submission = _submission(tmp_path)
-    produced = list(
-        submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, 3, submission.ensemble.package.members)
-    )
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, Read(3, scheme, (IMAGE,))))
+
     assert len(produced) == 1, "two studies fit in one chunk"
-    images, mask = produced[0]
+    images, mask = produced[0][IMAGE]
     assert images.device.type == submission.device.type
     assert images.shape[0] == 2
 
@@ -197,9 +210,10 @@ def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     )
 
     with caplog.at_level(logging.ERROR):
-        bag, mask = submission.decoded("no-such-study", {"sag": "Sagittal"}, pipeline, 3)
+        sized = submission.decoded("no-such-study", {"sag": "Sagittal"}, pipeline, Read(3, pipeline.scheme, (IMAGE,)))
+    bag, mask = sized[IMAGE]
 
-    assert bag.shape == (len(SLOT_NAMES), 3, pipeline.image_size, pipeline.image_size)
+    assert bag.shape == (len(SLOT_NAMES), 3, IMAGE, IMAGE)
     assert bag.dtype == torch.uint8
     assert float(mask.sum()) == 0.0, "an unreadable study must claim nothing was acquired"
     assert "no-such-study" in caplog.text, "and it must say so, or a silent zero row reads as a real one"

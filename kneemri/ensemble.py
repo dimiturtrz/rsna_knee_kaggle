@@ -15,6 +15,7 @@ disjoint windows, probability pooling, 0.025 max deviation against ours).
 
 import logging
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 
 import numpy as np
 import torch
@@ -68,6 +69,24 @@ with, rather than a limit discovered by a failed submission.
 """
 
 
+@dataclass(frozen=True)
+class Read:
+    """What ONE decode of the corpus has to produce: how deep, under which scheme, at which sizes.
+
+    One object because a decode is not free to vary these separately — the scheme decides which series
+    are routed, the depth how many slices are sampled, and the sizes are simply the grids the same
+    cropped stack is resized onto. Passing them one by one is the shape `Window` and `Split` were each
+    created to fix in this package.
+
+    Sizes is a tuple rather than a number because that is the whole point: resolution is the one axis a
+    single read CAN serve many of, and pretending otherwise cost a full decode per resolution.
+    """
+
+    slices: int
+    scheme: SlotScheme
+    sizes: tuple[int, ...]
+
+
 class Ensemble:
     """A package's members, read over test-time windows and combined by rank."""
 
@@ -103,6 +122,27 @@ class Ensemble:
         gathered: dict[str, list[Member]] = {}
         for member in self.package.members:
             gathered.setdefault(member.pixel_group, []).append(member)
+        return list(gathered.values())
+
+    def reads(self) -> list[list[Member]]:
+        """Members that can share ONE read of the corpus, whatever resolutions they then want.
+
+        Grouping by pixels alone charged a full decode per RESOLUTION: our best member reads a 448 px
+        cache and the rest read 336, so an entry carrying both decoded every DICOM twice — and decode is
+        the I/O-bound half on a host with four CPUs. Measured in our own dry run: three groups, three
+        decodes, for the same studies.
+
+        What a decode actually cannot share is the slot SCHEME (which series are routed) and the slice
+        DEPTH (how many are sampled). Resolution is not in that list: `SlotReader.cropped` stops before
+        the resize, so one read serves every size exactly — `Study.bags` returns them together and each
+        is byte-identical to a native read at that size.
+
+        So the unit of decoding is (scheme, slices), and pixel groups remain the unit of PREDICTION,
+        because a member is still fed the cache size it was fitted from.
+        """
+        gathered: dict[tuple[str, int], list[Member]] = {}
+        for member in self.package.members:
+            gathered.setdefault((member.scheme, member.slices), []).append(member)
         return list(gathered.values())
 
     def slices(self, members: list[Member] | None = None) -> int:
@@ -275,7 +315,7 @@ class Ensemble:
 
     def predict_groups(
         self,
-        chunks_for: "Callable[[list[Member], int], Iterable[tuple[UInt8[Tensor, 'b n s h w'], Float[Tensor, 'b n']]]]",
+        chunks_for: "Callable[[Read], Iterable[dict[int, tuple[UInt8[Tensor, 'b n s h w'], Float[Tensor, 'b n']]]]]",
         *,
         overlap: bool = True,
     ) -> NDArray[np.float64]:
@@ -290,26 +330,36 @@ class Ensemble:
         the group results would weight a group of one as heavily as a group of five.
         """
         per_member: list[NDArray[np.float64]] = []
-        for members in self.groups():
-            per_member.extend(self.predict_members(members, chunks_for(members, self.slices(members)), overlap=overlap))
+        for members in self.reads():
+            read = Read(
+                slices=self.slices(members),
+                scheme=self.decoded_scheme(members),
+                sizes=tuple(sorted({member.image_size for member in members})),
+            )
+            per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return self.combine(per_member)
 
     def predict_members(
         self,
         members: list[Member],
-        chunks: Iterable[tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]],
+        chunks: Iterable[dict[int, tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]]],
         *,
         overlap: bool = True,
     ) -> list[NDArray[np.float64]]:
         """One array per member, over every chunk — UNCOMBINED, so groups can be combined together.
+
+        A chunk arrives as {decoded size: (images, mask)} from ONE read, and each member is handed the
+        size it was fitted from. That is what lets members of different resolutions share a decode
+        without any of them being fed pixels it never saw.
 
         Returned uncombined because rank-averaging must happen ACROSS every member of every group at
         once: combining per group and then averaging the results would weight a group of one as heavily
         as a group of five.
         """
         per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in members}
-        for images, mask in chunks:
+        for sized in chunks:
             for member in members:
+                images, mask = sized[member.image_size]
                 per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
         return [np.concatenate(per_member[member.identifier]) for member in members]
 
