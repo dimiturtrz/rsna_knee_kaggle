@@ -1,9 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import torch
 
 from kneemri.backbone import Encoder
+from kneemri.crop_centre import CROP_MM, Crop
 from kneemri.member_record import MemberRecord
 
 from .model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
@@ -32,6 +33,7 @@ class _Options:
     head_lr: float = 1e-3
     backbone_lr: float = 4e-5
     out: Path | None = None
+    crop: Crop = Crop()
 
 
 def _record() -> MemberRecord:
@@ -100,3 +102,19 @@ def test_witness():
     assert len(witness["predictions"]) == 3
     assert record.payload({}, 0.8, 0, witness)["config"]["witness"] == witness
     assert record.payload({}, 0.8, 0)["config"]["witness"] == {}, "a run without a holdout has nothing to witness"
+
+
+def test_payload_records_the_runs_own_crop():
+    """The member stamps the crop the RUN used, not the module constant.
+
+    Stamping the constant would record 130 mm about the image centre for an arm trained at 80 mm about
+    the tissue — and the serve path reads this field, so the member would then be fed pixels it was
+    never fitted on, with every fingerprint still passing against its own reading.
+    """
+    record = replace(_record(), options=_Options(crop=Crop(mm=80.0, centre="tissue")))
+
+    config = record.payload({}, holdout=0.8, epoch=1)["config"]
+
+    assert config["crop_mm"] == 80.0
+    assert config["centre"] == "tissue"
+    assert _record().payload({}, holdout=0.8, epoch=1)["config"]["crop_mm"] == CROP_MM

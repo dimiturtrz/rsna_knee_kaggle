@@ -17,6 +17,7 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL, Encoder
+from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
 from kneemri.model import StudyDesign, StudyModel
@@ -54,6 +55,8 @@ class TrainingOptions:
     train_size: int = 0
     """0 means read the cache at its own resolution; anything else resamples to that size."""
     scheme: str = StudyCache.CANONICAL
+    crop_mm: float = CROP_MM
+    centre: str = DEFAULT_CENTRE
     seed: int = 2026
     split_seed: int = 2026
     one_cycle: bool = False
@@ -88,6 +91,16 @@ class TrainingOptions:
     out: Path | None = None
     paths: Path = Path("paths.yaml")
 
+    @property
+    def crop(self) -> Crop:
+        """The physical crop this run reads, as one value.
+
+        A property rather than a field because `parse` builds this dataclass straight from argparse's
+        dest names, so the two flags have to land as scalars — but everything downstream wants the pair,
+        and `member_record` in particular must stamp what the RUN used rather than a module constant.
+        """
+        return Crop(mm=self.crop_mm, centre=self.centre)
+
     @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object."""
@@ -119,6 +132,20 @@ class TrainingOptions:
             help="resolution the model actually READS, resampled from the cache. 0 means the cache's "
             "own. Decouples resolution from decoding: a 448 px cache can be read at 392 without a "
             "second 45-minute build, and without changing the batch or the slice count to afford it.",
+        )
+        parser.add_argument(
+            "--crop-mm",
+            type=float,
+            default=CROP_MM,
+            help="physical extent this arm reads. It selects the CACHE built at that extent and is "
+            "recorded on the member, so serving cannot silently fall back to the default.",
+        )
+        parser.add_argument(
+            "--centre",
+            default=DEFAULT_CENTRE,
+            choices=sorted(CENTRES),
+            help="where that extent is taken about. A tight crop needs the joint located rather than "
+            "assumed (knee-yrf); at 130mm the difference is small and at 80mm it clips the joint.",
         )
         parser.add_argument(
             "--scheme",
@@ -170,7 +197,7 @@ class TrainingOptions:
             "--compile-encoder",
             action="store_true",
             help="torch.compile the encoder, shape-specialised. The encoder only, because training "
-            "calls supervised() rather than forward(). Measured -20% per step; the partial last batch "
+            "calls supervised() rather than forward(). Measured -20%% per step; the partial last batch "
             "costs one 22 s recompile per process, not per epoch. Needs Triton (triton-windows here).",
         )
         parser.add_argument(
@@ -198,7 +225,7 @@ class TrainingOptions:
             "collapse, since bf16 carries fp32's exponent range and needs no scaler. Serving is a "
             "SEPARATE choice and is fp16 — a T4 has fp16 tensor cores and none for bf16, 65 TFLOPS "
             "against 8.1, and fp16 has MORE mantissa than bf16, so the only thing given up is range. "
-            "Measured on real studies, our members peak at 3% of fp16's ceiling, and `Ensemble.arithmetic` "
+            "Measured on real studies, our members peak at 3%% of fp16's ceiling, and `Ensemble.arithmetic` "
             "does the swap while `predict_member` redoes any non-finite pass in fp32.",
         )
         parser.add_argument(
@@ -416,7 +443,11 @@ def main() -> None:
 
     root = DataRoot.from_config(arguments.paths)
     cache = StudyCache(
-        root.processed(), slices=arguments.slices, image_size=arguments.image_size, scheme=arguments.scheme
+        root.processed(),
+        slices=arguments.slices,
+        image_size=arguments.image_size,
+        scheme=arguments.scheme,
+        crop=arguments.crop,
     )
     corpus, identifiers = cache.load()
     targets, evaluation = Targets.pair(

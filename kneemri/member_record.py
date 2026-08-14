@@ -8,7 +8,7 @@ import torch
 from numpy.typing import NDArray
 
 from kneemri.backbone import Encoder
-from kneemri.crop_centre import CROP_MM
+from kneemri.crop_centre import Crop
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slot_reader import SLICE_BAND
 
@@ -23,6 +23,11 @@ class RunOptions(Protocol):
 
     @property
     def image_size(self) -> int: ...
+
+    @property
+    def crop(self) -> Crop:
+        """The physical crop the RUN read, which the checkpoint must record rather than assume."""
+        ...
 
     @property
     def encoder_layer(self) -> int: ...
@@ -177,7 +182,12 @@ class MemberRecord:
                 "train_size": self.read_size,
                 "slices": options.slices,
                 "group": GROUP,
-                "crop_mm": CROP_MM,
+                # THE RUN'S OWN CROP, not the module constant. Stamping the constant here would have
+                # recorded 130 mm about the image centre for an arm trained at 80 mm about the tissue,
+                # and the serve path reads this field — so the member would have been fed pixels it was
+                # never fitted on, with every fingerprint still passing against its own reading.
+                "crop_mm": options.crop.mm,
+                "centre": options.crop.centre,
                 "band": list(SLICE_BAND),
                 "slots": list(self.slot_names),
                 "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},

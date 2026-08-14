@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from kneemri.backbone import ENCODERS, SMALL
+from kneemri.crop_centre import Crop
 from kneemri.model import StudyDesign
 from kneemri.objective import Objective, RankedObjective
 from kneemri.train import TrainingOptions
@@ -135,3 +136,9 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     options.fitted_model(ENCODERS[SMALL], 6, StudyDesign())
 
     assert order == ["low_rank:4", "recompute"], "adaptation first, and compile only when asked"
+
+
+def test_crop():
+    """The two flags argparse must land as scalars, read back as the one value everything else wants."""
+    assert TrainingOptions().crop == Crop()
+    assert TrainingOptions(crop_mm=80.0, centre="tissue").crop == Crop(mm=80.0, centre="tissue")
