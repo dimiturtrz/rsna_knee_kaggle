@@ -23,7 +23,9 @@ Each exists because the failure it catches happened, silently, and cost either a
 needs a GPU.
 
 ```bash
-uv run python -m kneemri.kit_check      # BEFORE shipping a kit
+uv run python -m kneemri.kit_check      # BEFORE shipping a kit (refuses stale or dirty)
+# then push comp/kernels/kneemri-loadcheck and read it: loads, forwards and chunks every
+# member on a real T4, spends no submission, and answers what only the runtime knows
 uv run python -m kneemri.arm_check      # BEFORE arming a queue
 uv run python -m kneemri.ledger_check   # AFTER runs finish
 uv run python comp/witness_check.py --root <members> --device cpu   # BEFORE a submission

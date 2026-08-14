@@ -210,6 +210,16 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   transformers (all present) and never checked `jaxtyping`, which our own modules import at module top.
 - **A published checkpoint is a training artefact**, not a bare state dict: weights sit under `model`
   beside epoch, fold scores, config, out-of-fold predictions and its own fingerprint.
+- **bfloat16 is EMULATED on the T4, and it costs about 5x.** `torch.cuda.is_bf16_supported()` returns
+  True there, which reads as "fine" and is not: its own source returns True immediately for compute
+  capability >= 8 and otherwise falls through to an emulation check. Turing has fp16 tensor cores and no
+  bf16 ones, so bf16 matmuls leave the fast path. Measured on the card, a chunk of 48 studies at 336 px:
+  **12 s in fp16 against 58 s in bf16**, same architecture, same resolution. Serve bf16 members in fp16
+  on anything below sm_80 — `Ensemble.arithmetic` does, and every entry that has ever scored ran fp16.
+- **A kernel that only LOADS is not a submission and costs no slot.** `kneemri-loadcheck` mounts the kit
+  and the members, then loads, forwards and sends a 48-study chunk per member. Every runtime fact that
+  cost a slot on 2026-08-13/14 — a class mismatch from a transformers version, an emulated dtype, a
+  memory ceiling — is answerable there in twenty minutes for free. Run it after any kit rebuild.
 - **Kaggle allows two concurrent GPU sessions ACROSS ALL PROJECTS.** On 2026-08-13 both were held by
   the sibling celltrack campaign, so kneemri runs serialised behind them: submissions are limited by
   SESSIONS, not by the five daily slots. A completed kernel version can be submitted at any later time,
