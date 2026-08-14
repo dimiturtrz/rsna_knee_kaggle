@@ -184,15 +184,27 @@ def test_run(tmp_path: Path):
 
 
 def test_chunks(tmp_path: Path):
-    """Chunks arrive already on the ensemble's device, so the predictor never has to move them."""
+    """On the ensemble's device, and PIXEL-IDENTICAL to decoding serially.
+
+    THE EQUALITY ORACLE FOR THE DECODE OPTIMISATION. `chunks` runs a spawned process pool across the
+    whole read and submits the next chunk before awaiting this one, so decode overlaps the forward
+    pass. None of that may change a single pixel, and nothing downstream would notice if it did — a
+    submission built from subtly different pixels has the right shape, the right length, and scores
+    like a coin.
+    """
     submission = _submission(tmp_path)
     scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
-    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, Read(3, scheme, (IMAGE,))))
+    read = Read(3, scheme, (IMAGE,))
+    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, read))
 
     assert len(produced) == 1, "two studies fit in one chunk"
     images, mask = produced[0][IMAGE]
     assert images.device.type == submission.device.type
     assert images.shape[0] == 2
+
+    serial = submission.decode(["study_a", "study_b"], {"sag": "Sagittal"}, read)
+    assert torch.equal(images.cpu(), serial[IMAGE][0]), "the pooled path must be pixel-identical"
+    assert torch.equal(mask.cpu(), serial[IMAGE][1]), "and mask-identical"
 
 
 def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
@@ -229,3 +241,40 @@ def test_series(tmp_path: Path):
     assert Split().series(tmp_path) == tmp_path / "test_series"
     assert Split("train").series(tmp_path) == tmp_path / "train_series"
     assert Split("train", tmp_path / "elsewhere").series(tmp_path) == tmp_path / "elsewhere"
+
+
+def test_decoded_at(tmp_path: Path):
+    """One study read from its directory, and an unreadable one costing a row rather than the entry."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    read = Read(3, scheme, (IMAGE,))
+    pipeline = SlotPipeline(scheme=scheme, reader=SlotReader(image_size=IMAGE))
+    root = submission.split.series(submission.competition)
+
+    images, mask = Submission.decoded_at(root / "study_a", {"sag": "Sagittal"}, pipeline, read)[IMAGE]
+    assert mask[0] == 1.0, "the sagittal fluid slot is filled"
+
+    missing, empty = Submission.decoded_at(root / "no_such_study", {"sag": "Sagittal"}, pipeline, read)[IMAGE]
+    assert not missing.any(), "an unreadable study contributes zeros"
+    assert not empty.any(), "and an empty mask, so the head renormalises over what is really there"
+
+
+def test_batched(tmp_path: Path):
+    """Per-study bags stacked into one batch per size, in the order given."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    read = Read(3, scheme, (IMAGE,))
+    pipeline = SlotPipeline(scheme=scheme, reader=SlotReader(image_size=IMAGE))
+    root = submission.split.series(submission.competition)
+    bags = [Submission.decoded_at(root / name, {"sag": "Sagittal"}, pipeline, read) for name in ("study_a", "study_b")]
+
+    images, mask = submission.batched(bags, read)[IMAGE]
+
+    assert images.shape[0] == 2
+    assert torch.equal(images[0], bags[0][IMAGE][0]), "row order follows the bags given"
+
+
+def test_pool(tmp_path: Path):
+    """A usable executor, whatever kind it turns out to be — the point is that decode can run on it."""
+    with _submission(tmp_path).pool() as pool:
+        assert pool.submit(len, "abc").result() == 3

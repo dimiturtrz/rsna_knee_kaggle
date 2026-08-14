@@ -11,9 +11,11 @@ part that should.
 """
 
 import logging
+import multiprocessing
+import os
 import time
 from collections.abc import Iterator
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,8 +36,12 @@ STUDY_CHUNK = 48
 """Studies decoded before a prediction pass. Bounds peak memory: a chunk of 48 at twelve slices and
 336 pixels is about 390 MB, against a Kaggle host with 32 GB and four CPUs."""
 
-DECODE_THREADS = 8
-"""Above the four available cores on purpose: decoding is dominated by waiting on the mount."""
+DECODE_WORKERS = 0
+"""Decode processes; 0 means one per core. MEASURED, not assumed (`kneemri.decode_bench`, 96 studies,
+warm, returning the real bags): serial 25.7s, threads(4) 19.0s, threads(8) 26.1s — the setting this
+replaces, SLOWER than no pool at all — processes(4) 11.2s, processes(8) 12.8s. pydicom parses headers in
+Python, so decode is GIL-bound and threads contend; processes reach 2.3x and peak at the core count,
+which is what a Kaggle host has four of."""
 
 
 @dataclass(frozen=True)
@@ -89,14 +95,39 @@ class Submission:
 
         The scheme still comes from the members, never a default: a nine-slot member routed under the
         canonical six is fed three slots it never saw.
+
+        SERIAL, and deliberately so. `chunks` is the path a submission runs and it owns the pool, one
+        for the whole read; this is the direct form a test or a dry run calls for ONE chunk, and it is
+        the reference the equality test measures the pooled path against. A second pool here would have
+        been a second decode path to keep in step, which is what the two kernels taught.
         """
         pipeline = SlotPipeline(scheme=read.scheme, reader=SlotReader(image_size=max(read.sizes)))
-        with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
-            bags = list(pool.map(lambda name: self.decoded(name, planes, pipeline, read), identifiers))
-        return {
-            size: (torch.stack([bag[size][0] for bag in bags]), torch.stack([bag[size][1] for bag in bags]))
-            for size in read.sizes
-        }
+        root = self.split.series(self.competition)
+        return self.batched([self.decoded_at(root / name, planes, pipeline, read) for name in identifiers], read)
+
+    @staticmethod
+    def decoded_at(
+        directory: Path, planes: dict[str, str], pipeline: SlotPipeline, read: Read
+    ) -> dict[int, tuple[Tensor, Tensor]]:
+        """One study's bag from its DIRECTORY, or zeros with an empty mask if it cannot be read.
+
+        Static, and taking the directory rather than a name plus this object's split, so a PROCESS pool
+        can call it: a bound method would drag the whole `Submission` — its ensemble and every loaded
+        model — through a pickle for each study. `decoded` is the instance-level convenience that
+        resolves a name against the split and calls this.
+        """
+        try:
+            return Study.from_directory(directory, planes, pipeline).bags(read.slices, read.sizes)
+        # Broad on purpose: pydicom, the filesystem and the router each fail in their own way, and any
+        # failure to read ONE study must cost one row rather than the entry. Logged with the traceback,
+        # which is what keeps this from being a silent swallow — and what BLE001 asks for.
+        except Exception:
+            logger.exception("study %s could not be decoded — contributing zeros and an empty mask", directory.name)
+            slots = len(pipeline.scheme.slots)
+            return {
+                size: (torch.zeros(slots, read.slices, size, size, dtype=torch.uint8), torch.zeros(slots))
+                for size in read.sizes
+            }
 
     def decoded(
         self, name: str, planes: dict[str, str], pipeline: SlotPipeline, read: Read
@@ -114,34 +145,80 @@ class Submission:
         weak row rather than a wrong one. A SYSTEMATIC failure is still caught — every study zero means
         every prediction ties, and `check` refuses an all-constant table.
         """
-        try:
-            directory = self.split.series(self.competition) / name
-            return Study.from_directory(directory, planes, pipeline).bags(read.slices, read.sizes)
-        # Broad on purpose: pydicom, the filesystem and the router each fail in their own way, and any
-        # failure to read ONE study must cost one row rather than the entry. Logged with the traceback,
-        # which is what keeps this from being a silent swallow — and what BLE001 asks for.
-        except Exception:
-            logger.exception("study %s could not be decoded — contributing zeros and an empty mask", name)
-            slots = len(pipeline.scheme.slots)
-            return {
-                size: (torch.zeros(slots, read.slices, size, size, dtype=torch.uint8), torch.zeros(slots))
-                for size in read.sizes
-            }
+        return self.decoded_at(self.split.series(self.competition) / name, planes, pipeline, read)
+
+    def batched(self, bags: list[dict[int, tuple[Tensor, Tensor]]], read: Read) -> dict[int, tuple[Tensor, Tensor]]:
+        """A chunk's per-study bags stacked into one batch per decoded size."""
+        return {
+            size: (torch.stack([bag[size][0] for bag in bags]), torch.stack([bag[size][1] for bag in bags]))
+            for size in read.sizes
+        }
 
     def chunks(
         self, identifiers: list[str], planes: dict[str, str], read: Read
     ) -> Iterator[dict[int, tuple[Tensor, Tensor]]]:
-        """Decoded chunks, yielded as they are read so prediction overlaps the next decode's I/O."""
+        """Decoded chunks, with the NEXT chunk already decoding while this one is on the GPU.
+
+        THE OVERLAP THIS DOCSTRING USED TO CLAIM DID NOT EXIST. The body was `sized = self.decode(...)`
+        followed by `yield`, and `Ensemble.predict_members` consumes it with a plain `for`: so the run
+        was decode(1), forward every member on (1), decode(2), forward on (2). The GPU idled through
+        every decode and the CPUs idled through every forward, for the whole hidden test set.
+
+        One pool, alive for the entire read rather than rebuilt per chunk, gives both halves at once.
+        The next chunk's studies are SUBMITTED before this one is awaited, so the workers chew on it
+        while the main thread is inside the forward pass — and a pool rebuilt per chunk would have paid
+        process spawn plus a torch import every 48 studies, which is how this optimisation turns into a
+        pessimisation.
+
+        PROCESSES, NOT THREADS, and measured rather than assumed: `kneemri.decode_bench` puts 8 threads
+        at 0.98x of running SERIALLY on 96 studies while 4 processes reach 2.29x. pydicom parses in
+        Python, so decode is GIL-bound; the previous setting's stated reason — "dominated by waiting on
+        the mount" — predicts the opposite of what happens.
+        """
         started = time.time()
-        for begin in range(0, len(identifiers), STUDY_CHUNK):
-            chunk = identifiers[begin : begin + STUDY_CHUNK]
-            decode_started = time.time()
-            sized = self.decode(chunk, planes, read)
-            logger.info(
-                f"  studies {begin + 1}-{begin + len(chunk)}: decode {time.time() - decode_started:.0f}s "
-                f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s"
-            )
-            yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
+        pipeline = SlotPipeline(scheme=read.scheme, reader=SlotReader(image_size=max(read.sizes)))
+        root = self.split.series(self.competition)
+        groups = [identifiers[begin : begin + STUDY_CHUNK] for begin in range(0, len(identifiers), STUDY_CHUNK)]
+
+        def submit(pool: Executor, names: list[str]) -> list[Future[dict[int, tuple[Tensor, Tensor]]]]:
+            return [pool.submit(self.decoded_at, root / name, planes, pipeline, read) for name in names]
+
+        with self.pool() as pool:
+            pending: list[Future[dict[int, tuple[Tensor, Tensor]]]] = submit(pool, groups[0]) if groups else []
+            for index, group in enumerate(groups):
+                # QUEUED BEFORE THE WAIT, which is the whole point: by the time the main thread returns
+                # from the GPU, these have been decoding rather than waiting to be asked.
+                following: list[Future[dict[int, tuple[Tensor, Tensor]]]] = (
+                    submit(pool, groups[index + 1]) if index + 1 < len(groups) else []
+                )
+                decode_started = time.time()
+                sized = self.batched([future.result() for future in pending], read)
+                pending = following
+                begin = index * STUDY_CHUNK
+                logger.info(
+                    f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
+                    f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s"
+                )
+                yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
+
+    def pool(self) -> Executor:
+        """The decode pool: SPAWNED processes where they help, threads where they cannot be used.
+
+        SPAWN, EXPLICITLY, and this is not a detail. Kaggle is Linux, where the default start method is
+        fork, and by the time a submission decodes anything the parent has loaded every member onto the
+        GPU — forking a process with an initialised CUDA context is undefined behaviour. These workers
+        never touch CUDA, so a fork would PROBABLY be fine, and "probably fine" in this exact path is
+        what three lost entries were made of. Spawn costs one interpreter start per worker, paid once
+        because the pool lives for the whole read rather than per chunk.
+
+        Threads are the fallback on a single core, and they produce IDENTICAL bags — the equality test
+        in `test_chunks` measures the pooled path against the serial one — so it costs speed, never
+        correctness.
+        """
+        workers = DECODE_WORKERS or (os.cpu_count() or 1)
+        if workers <= 1:
+            return ThreadPoolExecutor(max_workers=1)
+        return ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"))
 
     def predict(self, identifiers: list[str], planes: dict[str, str]) -> NDArray[np.float64]:
         """Every member's predictions over every study, rank-combined into one table.
