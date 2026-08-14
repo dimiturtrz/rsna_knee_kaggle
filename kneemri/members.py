@@ -381,7 +381,19 @@ class Member:
 class MemberPackage:
     """A mounted weights package: the manifest, its members, and the check that they are trustworthy."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, tie: str | None = None) -> None:
+        """A mounted package, optionally under a tie rule WE measured rather than one it declares.
+
+        THE OVERRIDE IS AN INFERENCE ABOUT SOMEONE ELSE'S WEIGHTS, and it is an argument rather than a
+        default so that it can never be mistaken for something the package said. The published manifest
+        carries no `tie` field, so its members would otherwise be routed under OUR first-maximal rule —
+        and they reproduce their own recorded predictions markedly better under last-maximal (4 of 4
+        members, 3 seeds, mean residual 15-25% lower; knee-evn). Passing it here keeps the claim, its
+        evidence and its owner in one place instead of buried in a kernel.
+
+        It applies to every member of the package, which is right for a package whose members share one
+        author and one pipeline, and wrong for anything else — so it is opt-in per construction.
+        """
         self.root = root
         manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
         self.members = [
@@ -389,7 +401,7 @@ class MemberPackage:
                 identifier=entry["id"],
                 file=root / entry["file"],
                 fold=int(entry["fold"]),
-                config=entry["config"],
+                config=entry["config"] if tie is None else {**entry["config"], "tie": tie},
                 fingerprint=np.asarray(entry["fingerprint"], np.float32),
                 holdout=float(entry["holdout"]),
                 annot=float(entry["annot"]),

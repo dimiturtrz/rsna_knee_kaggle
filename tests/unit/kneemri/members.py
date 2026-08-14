@@ -471,3 +471,19 @@ def test_routing():
 
     assert _member().routing == Routing(scheme="canonical", tie="first")
     assert theirs.routing.tie == "last", "recorded per member, because ours and theirs differ"
+
+
+def test_member_package_takes_a_measured_tie_override(tmp_path: Path):
+    """A package can be read under a tie rule WE measured, since theirs declares none.
+
+    An argument rather than a default: it is an inference about someone else's weights, and burying it
+    in a kernel would hide the claim from the manifest it contradicts.
+    """
+    _package(tmp_path)
+
+    plain = MemberPackage(tmp_path)
+    assert plain.members[0].tie == "first", "what a manifest that says nothing about it means"
+
+    overridden = MemberPackage(tmp_path, tie="last")
+    assert overridden.members[0].tie == "last"
+    assert overridden.members[0].pixel_group != plain.members[0].pixel_group, "different pixels"

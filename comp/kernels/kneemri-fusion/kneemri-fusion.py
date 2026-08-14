@@ -28,6 +28,19 @@ from typing import override
 
 WORKING = Path("/kaggle/working")
 
+GRAFT_TIE = "last"
+"""The router the published members were fitted under, measured against their own predictions."""
+
+
+def _published(root: Path) -> bool:
+    """Whether a mounted package is the published CC0 one rather than ours.
+
+    By the dataset directory name, which is what distinguishes them on Kaggle. Explicit rather than
+    inferred from the config, because the whole point is that their manifest does NOT record the
+    field we are supplying.
+    """
+    return "rsna-knee-weights" in str(root)
+
 
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
@@ -95,7 +108,17 @@ def main() -> None:
                 for found in sorted(Path("/kaggle/input").rglob("manifest.json"))
                 if not {"train_series", "test_series"} & set(found.parts)
             ]
-            packages = [MemberPackage(root) for root in roots]
+            # THEIR ROUTER, WHICH THEIR MANIFEST DOES NOT DECLARE. The published members carry no
+            # `tie` field, so they would be routed under OUR first-maximal rule — and they reproduce
+            # their OWN recorded predictions markedly better under last-maximal: 4 of 4 members across
+            # 3 seeds, mean residual 15-25% lower, max 0.128 -> 0.025 on studies with a contested slot
+            # (knee-evn). That is our inference about someone else's weights, so it is applied here by
+            # name and never defaulted, and it is the ONLY difference found in ten tested axes.
+            #
+            # IT COSTS A SECOND DECODE. `Ensemble.reads` groups by tie, so an entry holding both routers
+            # decodes the test set twice. That is the honest price of serving each side under the rule
+            # its weights were fitted with, and it is why this is a separate decision from the fusion.
+            packages = [MemberPackage(root, tie=GRAFT_TIE if _published(root) else None) for root in roots]
             if not packages:
                 raise FileNotFoundError("no weights package mounted")
 
