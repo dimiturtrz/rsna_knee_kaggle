@@ -2923,6 +2923,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.submission.Submission",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.submission.Submission.chunks",
       "target": "kneemri.submission.Submission.decode",
@@ -2955,6 +2961,12 @@
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.submission.Submission.decoded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decoded",
       "target": "kneemri.study.Study.from_directory",
       "weight": 1
     },
@@ -7040,6 +7052,14 @@
       "descendants": 0,
       "id": "kneemri.submission.Submission.decode",
       "label": "decode",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.decoded",
+      "label": "decoded",
       "level": "method",
       "parent": "kneemri.submission.Submission",
       "role": null
