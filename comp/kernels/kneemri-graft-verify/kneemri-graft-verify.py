@@ -10,6 +10,7 @@ loads all twenty members and prints how much slack each one had.
 """
 
 import logging
+import os
 import subprocess
 import sys
 import zipfile
@@ -30,33 +31,38 @@ def section(title: str) -> None:
     logger.info(f"\n{RULE}\n{title}\n{RULE}")
 
 
+SERIES = {"train_series", "test_series", "train_images", "test_images"}
+"""Competition mounts holding one directory per study. `rglob` walks every one of them."""
+
+KIT_DEPTH = 5
+"""How deep under /kaggle/input a mounted kit has ever sat, plus room. A bound rather than a guess: it
+turns an unbounded walk into a bounded one even if a mount arrives with a name this does not know."""
+
+
 def find_kit() -> Path:
-    """The directory to put on `sys.path`, found by looking for the package rather than the wrapper.
+    """The directory to put on `sys.path`, found WITHOUT walking the competition data.
 
-    Three runs were spent on mount-shape assumptions: the competition nests under
-    `/kaggle/input/competitions/<slug>`, datasets under `/kaggle/input/datasets/<owner>/<name>`, and a
-    tree uploaded with `--dir-mode zip` is expanded on mount with the wrapping directory REMOVED — so
-    `kneemri_src/` never appears and the mount holds `core/` and `kneemri/` directly.
+    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/model.py")` — cost **248 seconds** on
+    2026-08-14, four minutes before a single line of ours ran. It descends into the competition mount,
+    which holds one directory per study and one per series beneath that, and stats every DICOM on the
+    way. The efficiency board scores total runtime, so this was our largest single expense and it was
+    spent looking for a file we already knew the neighbourhood of.
 
-    The lesson generalises past this kernel: search for the artefact you need (`kneemri/model.py`),
-    never for the container you think holds it. The zip branch stays as a fallback for a mount that is
-    not expanded.
+    Pruning by name is what removes the cost; the depth bound is what keeps a differently-named mount
+    from restoring it silently.
     """
-    marker = next(iter(sorted(Path("/kaggle/input").rglob("kneemri/model.py"))), None)
-    if marker is not None:
-        return marker.parent.parent
-
-    archive = next(iter(sorted(Path("/kaggle/input").rglob("kneemri_src.zip"))), None)
-    if archive is None:
-        raise FileNotFoundError("no kneemri package and no kneemri_src.zip anywhere under /kaggle/input")
-    destination = Path("/tmp/kit")
-    with zipfile.ZipFile(archive) as bundle:
-        bundle.extractall(destination)
-    inner = next(iter(sorted(destination.rglob("kneemri/model.py"))), None)
-    if inner is None:
-        raise FileNotFoundError(f"{archive} does not contain a kneemri package")
-    logger.info(f"expanded {archive.name} -> {destination}")
-    return inner.parent.parent
+    root = Path("/kaggle/input")
+    for parent, directories, _ in os.walk(root):
+        here = Path(parent)
+        depth = len(here.relative_to(root).parts)
+        directories[:] = [] if depth >= KIT_DEPTH else [name for name in directories if name not in SERIES]
+        if here.name == "kneemri" and (here / "model.py").exists():
+            return here.parent
+        archive = here / "kneemri_src.zip"
+        if archive.exists():
+            zipfile.ZipFile(archive).extractall("/tmp/kit")
+            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+    raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
 def install_wheels(kit: Path) -> None:

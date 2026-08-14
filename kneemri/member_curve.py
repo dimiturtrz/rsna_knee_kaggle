@@ -32,6 +32,7 @@ from kneemri.ensemble import Ensemble
 from kneemri.folds import ReportFolds
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.holdout_slab import HoldoutSlab
+from kneemri.label_combine import LabelCombine
 from kneemri.members import Member
 from kneemri.prediction_cache import PredictionCache
 from kneemri.scores import LabelScores
@@ -41,12 +42,18 @@ from kneemri.test_time import SpatialViews
 
 logger = logging.getLogger(__name__)
 
+COMBINE_SEED = 2026
+"""Which studies fit the per-label choice and which report it — the corpus split seed, since both are
+arbitrary-but-fixed partitions of the same corpus and a second free number would only be a second thing
+to accidentally vary."""
+
 
 class MemberCurve:
     """Mean score against ensemble size, over every subset of that size."""
 
-    def __init__(self, scores: LabelScores) -> None:
+    def __init__(self, scores: LabelScores, combine_seed: int = COMBINE_SEED) -> None:
         self.scores = scores
+        self.combine_seed = combine_seed
 
     def sizes(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> dict[int, list[float]]:
         """Every subset's score, grouped by how many members it holds.
@@ -136,6 +143,41 @@ class MemberCurve:
             "best_single": max(self.scores.mean(member, truth) for member in per_member),
         }
 
+    def logged(
+        self,
+        per_member: list[NDArray[np.float64]],
+        truth: Float[np.ndarray, "b t"],
+        names: list[str],
+        *,
+        paired: bool,
+    ) -> list[str]:
+        """Every reading of these members' arrays — the half of this CLI that needs no GPU and no corpus.
+
+        Split from `main` because it is the whole analysis: `main` finds checkpoints, builds a holdout
+        and fills a cache, and this reads what came back. Together they made one function that could
+        only run with a card, a corpus and minutes, which is to say one that nothing could exercise.
+        """
+        lines = list(self.report(self.sizes(per_member, truth)))
+        # The subsets BY NAME, because the mean and the range describe the ensemble question while a
+        # submission needs the answer: which members to package.
+        lines += self.best(per_member, truth, names)
+        if paired:
+            lines += self.paired(per_member, truth, names)
+        # The CEILING beside the reachable numbers, never alone: it selects per label using the answers,
+        # so quoting it as a score would be quoting a cheat. What it prices is whether per-label
+        # weighting - or another member of the same kind - is worth anything before either is built.
+        ceiling = self.oracle(per_member, truth)
+        lines.append(
+            f"oracle {ceiling['oracle']:.4f}  vs plain average {ceiling['average']:.4f}  "
+            f"vs best single {ceiling['best_single']:.4f}  "
+            f"(headroom {ceiling['oracle'] - ceiling['average']:+.4f})"
+        )
+        # THE REACHABLE HALF OF THAT CEILING. The oracle says what per-label selection would be worth if
+        # the answers were available; this says what is left once they are not. Its last row is the flat
+        # rank-average under the same split-half estimator, so the two columns are a matched comparison
+        # rather than a number beside a differently-measured number.
+        return lines + LabelCombine(self.scores).curve(per_member, truth, self.combine_seed)
+
     def report(self, by_size: dict[int, list[float]]) -> list[str]:
         """One line per ensemble size: its mean, its range, and what the member added."""
         lines = []
@@ -175,6 +217,13 @@ def main() -> None:
         "three forward passes per member.",
     )
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+    parser.add_argument(
+        "--combine-seed",
+        type=int,
+        default=COMBINE_SEED,
+        help="which half of the holdout fits the per-label member choice and which reports it. Fixed by "
+        "default so the curve is reproducible; vary it to see how much of a gain is the split.",
+    )
     parser.add_argument(
         "--refresh",
         action="store_true",
@@ -235,27 +284,8 @@ def main() -> None:
             names.append(reading.file.name)
             logger.info("%s alone: %.4f", reading.file.name, scores.mean(scored, truth))
 
-    curve = MemberCurve(scores)
-    for line in curve.report(curve.sizes(per_member, truth)):
+    for line in MemberCurve(scores, arguments.combine_seed).logged(per_member, truth, names, paired=arguments.paired):
         logger.info(line)
-    # The subsets BY NAME, because the mean and the range describe the ensemble question while a
-    # submission needs the answer: which members to package.
-    for line in curve.best(per_member, truth, names):
-        logger.info(line)
-    # The CEILING beside the reachable numbers, never alone: it selects per label using the answers, so
-    # quoting it as a score would be quoting a cheat. What it prices is whether per-label weighting - or
-    # another member of the same kind - is worth anything at all before either is built.
-    if arguments.paired:
-        for line in curve.paired(per_member, truth, names):
-            logger.info(line)
-    ceiling = curve.oracle(per_member, truth)
-    logger.info(
-        "oracle %.4f  vs plain average %.4f  vs best single %.4f  (headroom %+.4f)",
-        ceiling["oracle"],
-        ceiling["average"],
-        ceiling["best_single"],
-        ceiling["oracle"] - ceiling["average"],
-    )
 
 
 if __name__ == "__main__":

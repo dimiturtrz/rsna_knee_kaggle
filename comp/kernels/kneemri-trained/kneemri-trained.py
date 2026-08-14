@@ -23,6 +23,7 @@ BEFORE the package it is finding can be imported.
 """
 
 import logging
+import os
 import subprocess
 import sys
 import zipfile
@@ -31,21 +32,38 @@ from pathlib import Path
 WORKING = Path("/kaggle/working")
 
 
-def find_kit() -> Path:
-    """The directory to put on `sys.path`, found by looking for the package rather than the wrapper.
+SERIES = {"train_series", "test_series", "train_images", "test_images"}
+"""Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
-    Mounts nest by kind (`/kaggle/input/{competitions,datasets,models}/…`) and a tree uploaded with
-    `--dir-mode zip` is expanded with its wrapping directory REMOVED. Three runs were spent on that;
-    the rule is to search for the artefact you need, never the container assumed to hold it.
+KIT_DEPTH = 5
+"""How deep under /kaggle/input a mounted kit has ever sat, plus room. A bound rather than a guess: it
+turns an unbounded walk into a bounded one even if a mount arrives with a name this does not know."""
+
+
+def find_kit() -> Path:
+    """The directory to put on `sys.path`, found WITHOUT walking the competition data.
+
+    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/model.py")` — cost **248 seconds** on
+    2026-08-14, four minutes before a single line of ours ran. It descends into the competition mount,
+    which holds one directory per study and one per series beneath that, and stats every DICOM on the
+    way. The efficiency board scores total runtime, so this was our largest single expense and it was
+    spent looking for a file we already knew the neighbourhood of.
+
+    Pruning by name is what removes the cost; the depth bound is what keeps a differently-named mount
+    from restoring it silently.
     """
-    marker = next(iter(sorted(Path("/kaggle/input").rglob("kneemri/model.py"))), None)
-    if marker is not None:
-        return marker.parent.parent
-    archive = next(iter(sorted(Path("/kaggle/input").rglob("kneemri_src.zip"))), None)
-    if archive is None:
-        raise FileNotFoundError("no kneemri package under /kaggle/input")
-    zipfile.ZipFile(archive).extractall("/tmp/kit")
-    return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+    root = Path("/kaggle/input")
+    for parent, directories, _ in os.walk(root):
+        here = Path(parent)
+        depth = len(here.relative_to(root).parts)
+        directories[:] = [] if depth >= KIT_DEPTH else [name for name in directories if name not in SERIES]
+        if here.name == "kneemri" and (here / "model.py").exists():
+            return here.parent
+        archive = here / "kneemri_src.zip"
+        if archive.exists():
+            zipfile.ZipFile(archive).extractall("/tmp/kit")
+            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+    raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
 def install_wheels(kit: Path) -> None:

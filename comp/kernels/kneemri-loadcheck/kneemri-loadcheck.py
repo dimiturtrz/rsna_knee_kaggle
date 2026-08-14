@@ -14,6 +14,7 @@ submission cannot afford to ask: does this thing load, on this runtime, from the
 """
 
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -33,16 +34,38 @@ if TYPE_CHECKING:
     from kneemri.model import StudyModel
 
 
+SERIES = {"train_series", "test_series", "train_images", "test_images"}
+"""Competition mounts holding one directory per study. `rglob` walks every one of them."""
+
+KIT_DEPTH = 5
+"""How deep under /kaggle/input a mounted kit has ever sat, plus room. A bound rather than a guess: it
+turns an unbounded walk into a bounded one even if a mount arrives with a name this does not know."""
+
+
 def find_kit() -> Path:
-    """The directory to put on `sys.path`, found by looking for the package rather than the wrapper."""
-    marker = next(iter(sorted(Path("/kaggle/input").rglob("kneemri/model.py"))), None)
-    if marker is not None:
-        return marker.parent.parent
-    archive = next(iter(sorted(Path("/kaggle/input").rglob("kneemri_src.zip"))), None)
-    if archive is None:
-        raise FileNotFoundError("no kneemri package under /kaggle/input")
-    zipfile.ZipFile(archive).extractall("/tmp/kit")
-    return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+    """The directory to put on `sys.path`, found WITHOUT walking the competition data.
+
+    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/model.py")` — cost **248 seconds** on
+    2026-08-14, four minutes before a single line of ours ran. It descends into the competition mount,
+    which holds one directory per study and one per series beneath that, and stats every DICOM on the
+    way. The efficiency board scores total runtime, so this was our largest single expense and it was
+    spent looking for a file we already knew the neighbourhood of.
+
+    Pruning by name is what removes the cost; the depth bound is what keeps a differently-named mount
+    from restoring it silently.
+    """
+    root = Path("/kaggle/input")
+    for parent, directories, _ in os.walk(root):
+        here = Path(parent)
+        depth = len(here.relative_to(root).parts)
+        directories[:] = [] if depth >= KIT_DEPTH else [name for name in directories if name not in SERIES]
+        if here.name == "kneemri" and (here / "model.py").exists():
+            return here.parent
+        archive = here / "kneemri_src.zip"
+        if archive.exists():
+            zipfile.ZipFile(archive).extractall("/tmp/kit")
+            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+    raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
 def install_wheels(kit: Path) -> None:
@@ -59,6 +82,7 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
     member: "Member",
     run: "KernelRun",
     package: "MemberPackage",
+    loaded: "dict[str, StudyModel]",
     ensemble_of: "Callable[[], Ensemble]",
     device: "torch_types.device",
     logger: logging.Logger,
@@ -80,7 +104,12 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
     encoder = ENCODERS[member.variant]
     try:
         weights = run.find_encoder(encoder)
-        package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
+        # REGISTERED, not merely built. The return value was discarded here, so `models` stayed empty
+        # and every forward below died on `models[member.identifier]` — a KeyError of the member's own
+        # name, reported as "FORWARD FAILED". On 2026-08-14 that read as six members failing on a T4
+        # when all six had in fact loaded their 223 weights cleanly. A probe that manufactures the
+        # failure it is looking for is worse than no probe.
+        loaded[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
     except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
         logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
         return False
@@ -162,25 +191,28 @@ def main() -> None:
     )
 
     run = KernelRun()
-    models: "dict[str, StudyModel]" = {}
     logger.info("kit %s", run.revision())
     package = run.package()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    models: "dict[str, StudyModel]" = {}
-
-    def ensemble_of() -> "Ensemble":
-        """Built once, and only after the first member has loaded into `models`."""
-        from kneemri.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
-
-        return Ensemble(package, models, device)
-
     failures = 0
     for member in package.members:
-        before = dict(models)
-        if not check(member, run, package, ensemble_of, device, logger):
+        # ONE MEMBER RESIDENT AT A TIME. This probe answers "does each member work", not "do they all
+        # fit at once" — and holding twenty-two of them on a 16 GB T4 would make every member after the
+        # first few fail for a reason that has nothing to do with the member.
+        loaded: "dict[str, StudyModel]" = {}
+
+        def ensemble_of(models: "dict[str, StudyModel]" = loaded) -> "Ensemble":
+            """Over whichever member is currently resident, bound at definition rather than by closure."""
+            from kneemri.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
+
+            return Ensemble(package, models, device)
+
+        if not check(member, run, package, loaded, ensemble_of, device, logger):
             failures += 1
-        models.update(before)
+        loaded.clear()
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
     logger.info("%d members, %d failed", len(package.members), failures)
 
 

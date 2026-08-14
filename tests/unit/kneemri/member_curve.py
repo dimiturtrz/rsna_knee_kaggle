@@ -122,3 +122,28 @@ def test_paired():
 
     assert "paired deltas, better.pt against control.pt:" in text
     assert "*" in text, "a member built to be strictly better must clear the interval somewhere"
+
+
+def test_logged():
+    """The whole reading as lines: the curve, the named subsets, the ceiling and the reachable curve.
+
+    Asserted by what each section CONTRIBUTES rather than by a line count, so adding a reading extends
+    the test instead of breaking it — and the paired block is checked by its absence when unasked,
+    because a flag that reports the same thing either way is not a flag.
+    """
+    generator = np.random.default_rng(19)
+    truth = np.zeros((80, len(TARGETS)), dtype=np.float32)
+    truth[40:, :] = 1.0
+    members = [generator.random((80, len(TARGETS))) for _ in range(2)]
+    members[0][:, 0] = truth[:, 0] * 0.5 + generator.random(80) * 0.1
+
+    curve = MemberCurve(LabelScores(), combine_seed=5)
+    lines = curve.logged(members, truth, ["a.pt", "b.pt"], paired=False)
+
+    assert any(line.startswith("2 member(s):") for line in lines), "the size curve"
+    assert any("a.pt + b.pt" in line for line in lines), "the subsets, named for packaging"
+    assert any(line.startswith("oracle ") and "headroom" in line for line in lines), "the ceiling"
+    assert any("(= the flat rank-average)" in line for line in lines), "the reachable per-label curve"
+    assert not any("paired deltas" in line for line in lines)
+
+    assert any("paired deltas" in line for line in curve.logged(members, truth, ["a.pt", "b.pt"], paired=True))
