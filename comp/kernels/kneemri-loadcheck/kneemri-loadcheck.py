@@ -54,7 +54,9 @@ def main() -> None:
     from transformers import AutoModel  # noqa: PLC0415 - after the kit is on sys.path
 
     from kneemri.backbone import ENCODERS  # noqa: PLC0415 - after the kit is on sys.path
+    from kneemri.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
     from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - after the kit is on sys.path
+    from kneemri.submission import STUDY_CHUNK  # noqa: PLC0415 - the chunk a submission actually sends
 
     logger.info("transformers %s, torch %s", transformers.__version__, torch.__version__)
     capability = torch.cuda.get_device_capability() if torch.cuda.is_available() else None
@@ -66,16 +68,19 @@ def main() -> None:
     )
 
     run = KernelRun()
+    models: dict[str, object] = {}
     logger.info("kit %s", run.revision())
     package = run.package()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     failures = 0
+    ensemble = None
     for member in package.members:
         encoder = ENCODERS[member.variant]
         try:
             weights = run.find_encoder(encoder)
             model = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
+            models[member.identifier] = model
         except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
             failures += 1
             logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
@@ -94,8 +99,23 @@ def main() -> None:
             logger.error(
                 "FORWARD FAILED %s (%s, %s): %s", member.identifier, member.variant, member.precision, str(error)[:300]
             )
+            continue
+        logger.info("ok     %s (%s, %s, read %d)", member.identifier, member.variant, member.precision, window.size)
+
+        # A FORWARD OF ONE STUDY PROVES NOTHING ABOUT MEMORY. A submission sends a chunk of 48, and two
+        # entries died with every member loading and forwarding perfectly well. This is the same call the
+        # submission makes, on a chunk of the same SHAPE, with zeros standing in for pixels we do not
+        # have here — so an out-of-memory on this card surfaces at no cost instead of at a slot.
+        ensemble = ensemble or Ensemble(package, models, device)
+        slots = len(member.config["slots"])
+        chunk = torch.zeros(STUDY_CHUNK, slots, member.slices, member.image_size, member.image_size, dtype=torch.uint8)
+        try:
+            ensemble.predict_member(member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True)
+        except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
+            failures += 1
+            logger.error("CHUNK FAILED %s at %d studies: %s", member.identifier, STUDY_CHUNK, str(error)[:300])
         else:
-            logger.info("ok     %s (%s, %s, read %d)", member.identifier, member.variant, member.precision, window.size)
+            logger.info("       chunk of %d ok", STUDY_CHUNK)
     logger.info("%d members, %d failed", len(package.members), failures)
 
 
