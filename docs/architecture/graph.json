@@ -140,6 +140,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.decode_bench",
+      "target": "core.paths",
+      "weight": 2
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.decode_bench",
+      "target": "kneemri.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.decode_bench",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.diagnose_laterality",
       "target": "core.paths",
       "weight": 1
@@ -1366,6 +1384,54 @@
       "kind": "calls",
       "source": "kneemri.confident_labels.main",
       "target": "kneemri.confident_labels.ConfidentLabels.struck_share",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.DecodeBench._decode_one",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.decode_bench.DecodeBench._decode_one",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.DecodeBench._decode_one",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.DecodeBench._decode_one",
+      "target": "kneemri.study_cache.StudyCache.planes_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.decode_bench.main",
+      "target": "kneemri.decode_bench.DecodeBench",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.main",
+      "target": "kneemri.decode_bench.DecodeBench.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.decode_bench.main",
+      "target": "kneemri.decode_bench.DecodeBench.timings",
       "weight": 1
     },
     {
@@ -4123,7 +4189,7 @@
       "role": null
     },
     {
-      "descendants": 56,
+      "descendants": 57,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -4190,6 +4256,14 @@
       "descendants": 0,
       "id": "kneemri.confident_labels",
       "label": "confident_labels",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench",
+      "label": "decode_bench",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4656,6 +4730,14 @@
       "label": "ConfidentLabels",
       "level": "class",
       "parent": "kneemri.confident_labels",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench.DecodeBench",
+      "label": "DecodeBench",
+      "level": "class",
+      "parent": "kneemri.decode_bench",
       "role": "primary"
     },
     {
@@ -5584,6 +5666,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.confident_labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench.DecodeBench._decode_one",
+      "label": "_decode_one",
+      "level": "method",
+      "parent": "kneemri.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench.DecodeBench.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench.DecodeBench.timings",
+      "label": "timings",
+      "level": "method",
+      "parent": "kneemri.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.decode_bench.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.decode_bench",
       "role": null
     },
     {
