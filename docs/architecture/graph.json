@@ -640,6 +640,12 @@
       "kind": "import",
       "source": "kneemri.oof_oracle",
       "target": "kneemri.slots",
+      "weight": 2
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.oof_oracle",
+      "target": "kneemri.study",
       "weight": 1
     },
     {
@@ -2899,6 +2905,36 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.slots.SlotScheme.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.slots.SlotScheme.contested",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.slots.SlotScheme.unrouted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.study.Study.from_directory",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.oof_oracle.main",
       "target": "core.paths.DataRoot.from_config",
@@ -2971,6 +3007,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.main",
+      "target": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.oof_oracle.main",
       "target": "kneemri.slot_ties.SlotTies",
@@ -2992,6 +3034,12 @@
       "kind": "calls",
       "source": "kneemri.oof_oracle.main",
       "target": "kneemri.study_cache.StudyCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.main",
+      "target": "kneemri.study_cache.StudyCache.planes_of",
       "weight": 1
     },
     {
@@ -7632,6 +7680,14 @@
       "descendants": 0,
       "id": "kneemri.oof_oracle.OutOfFoldOracle.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.oof_oracle.OutOfFoldOracle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.oof_oracle.OutOfFoldOracle.routing",
+      "label": "routing",
       "level": "method",
       "parent": "kneemri.oof_oracle.OutOfFoldOracle",
       "role": null
