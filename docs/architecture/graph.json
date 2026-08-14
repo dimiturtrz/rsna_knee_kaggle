@@ -1357,6 +1357,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.members.Window",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.ensemble.Ensemble",
       "target": "kneemri.model.StudyModel",
@@ -1402,6 +1408,12 @@
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_groups",
       "target": "kneemri.ensemble.Ensemble.slices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_member",
+      "target": "kneemri.ensemble.Ensemble.forwarded",
       "weight": 1
     },
     {
@@ -5196,6 +5208,14 @@
       "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.decoded_size",
       "label": "decoded_size",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.forwarded",
+      "label": "forwarded",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
