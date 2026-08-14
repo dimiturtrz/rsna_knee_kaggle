@@ -99,40 +99,50 @@ def main() -> None:
             if not packages:
                 raise FileNotFoundError("no weights package mounted")
 
-            # ONE DECODE, SO ONE PIXEL GROUP — and since 2026-08-13 our own package spans three of them
-            # (res392 and intensity392 read 392 px off a 448 cache, the rest 336). Refusing outright, as
-            # this did, throws away the fusion entry entirely; the honest move is to fuse the largest
-            # group and say what was dropped. The published twenty define it, being the biggest block and
-            # the reason this kernel exists.
-            counts: dict[object, int] = {}
+            # ONE DECODE, AND IT SERVES MANY SIZES. This filtered on `pixel_group`, which keys on
+            # image size — so it dropped res392 (0.8523, our best member ever) and intensity392 for
+            # reading 392 px off a 448 cache, and our two strongest members had never appeared in a
+            # scored entry.
+            #
+            # THAT REASON EXPIRED AND THE FILTER OUTLIVED IT. `SlotReader.cropped` stops before the
+            # resize, so one read of a study serves every size exactly and byte-identically to a native
+            # read at each; `Ensemble.reads` therefore groups by (scheme, slices, crop) and NOT by size,
+            # and `Read.sizes` carries them all. Verified on our own package: res392 at 448 lands in the
+            # same read group as the 336 px members, sizes [336, 448].
+            #
+            # So the unit to filter on is the READ, not the pixel group. What genuinely cannot share a
+            # decode is a different slot SCHEME (which series are routed at all) or a different DEPTH or
+            # CROP — extended_ws is nine-slot and is still dropped, and that one is real.
+            reads: dict[object, int] = {}
             for package in packages:
                 for member in package.members:
-                    counts[member.pixel_group] = counts.get(member.pixel_group, 0) + 1
-            serving = max(counts, key=lambda group: counts[group])
-            if len(counts) > 1:
+                    key = (member.scheme, member.slices, member.crop)
+                    reads[key] = reads.get(key, 0) + 1
+            serving = max(reads, key=lambda group: reads[group])
+            if len(reads) > 1:
                 logger.info(
-                    "fusing the %d members that share one decode, dropping %d in %d other group(s)",
-                    counts[serving],
-                    sum(counts.values()) - counts[serving],
-                    len(counts) - 1,
+                    "fusing the %d members that share one read, dropping %d in %d other group(s)",
+                    reads[serving],
+                    sum(reads.values()) - reads[serving],
+                    len(reads) - 1,
                 )
 
             merged = packages[0]
             # TWO REASONS A MEMBER IS DROPPED, and they are different.
             #
-            # PIXELS: a member outside the serving group reads a size this decode does not produce. That
-            # is this kernel's single-decode design, not a fault of the member.
+            # READ: a member wanting another slot scheme, depth or crop needs its own decode of the whole
+            # test set. That is this kernel's single-decode design, not a fault of the member.
             #
             # ENCODER: v3 members are excluded because their weights do not load against a v3 backbone
             # rebuilt here — 178 unexpected keys under `backbone.model.layer.*`, a nesting the rebuilt
             # model does not have (2026-08-14, this kernel's own run). Mounting dinov3-hf was necessary
-            # and NOT sufficient, which is the opposite of what the previous version of this comment
-            # claimed. Until a v3 member is proven to load, including one costs the whole entry.
+            # and NOT sufficient. The probe that was meant to settle this reported every member as
+            # failing because of a bug in the probe, so v3 remains unproven rather than refuted.
             usable = [
                 m
                 for package in packages
                 for m in package.members
-                if m.pixel_group == serving and not m.variant.startswith("v3")
+                if (m.scheme, m.slices, m.crop) == serving and not m.variant.startswith("v3")
             ]
             dropped = sum(len(package.members) for package in packages) - len(usable)
             if dropped:
