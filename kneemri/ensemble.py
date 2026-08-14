@@ -166,6 +166,26 @@ class Ensemble:
             raise ValueError(message)
         return SlotScheme(tuple(known[name] for name in names))
 
+    def arithmetic(self, member: Member) -> torch.dtype:
+        """The dtype this DEVICE can actually run, which is not always the one the member was fitted in.
+
+        A T4 is Turing, sm_75, and bfloat16 autocast needs sm_80 or newer — so `torch.autocast("cuda",
+        dtype=torch.bfloat16)` is an unhandled error on the very card every submission runs on. THIS
+        MACHINE CANNOT SEE THAT: its card is sm_120 and supports bf16, so the kernel was the first place
+        the difference existed.
+
+        It cost three entries. `Member.precision` landed on 2026-08-13 to stop bf16 members being served
+        in fp16 — correct on our hardware and fatal on Kaggle's — and every entry built on the kit that
+        carried it failed, while every entry on the kit before it scored. Serving a bf16 member in fp16
+        is a real compromise, since fp16 has eight fewer exponent bits and a bf16-trained activation can
+        overflow it, but a compromised answer beats an entry that does not run. Logged rather than
+        silent, because the compromise is exactly the thing a later reader must not have to guess at.
+        """
+        if member.precision is torch.bfloat16 and self.device.type == "cuda" and not torch.cuda.is_bf16_supported():
+            logger.warning("%s was fitted in bf16 and this device cannot run it — serving fp16", member.identifier)
+            return torch.float16
+        return member.precision
+
     def forwarded(
         self,
         model: StudyModel,
@@ -243,7 +263,8 @@ class Ensemble:
         # every bf16-trained member was served in arithmetic it was never fitted under — and fp16's
         # exponent range is float32's minus eight bits, which a bf16 model can overflow to inf on the
         # very T4 the submission runs on. The witness check found it; nothing else could have.
-        with torch.no_grad(), torch.autocast("cuda", dtype=member.precision, enabled=self.device.type == "cuda"):
+        precision = self.arithmetic(member)
+        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
             for view in views.apply(images):
                 for start in window.starts:
                     read = view[:, :, start : start + window.width]

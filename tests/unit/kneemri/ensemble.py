@@ -357,3 +357,27 @@ def test_forwarded():
     assert calls[0] == 6, "the budget is tried first, so a card that can take it pays nothing"
     assert calls[-1] <= 2, "and it comes down to a size the card accepts rather than raising"
     assert calls == [6, 3, 1, 1, 1, 1, 1, 1], "halving, and each accepted size then runs every chunk"
+
+
+def test_arithmetic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A bf16 member is served in fp16 on a card that cannot do bf16, and unchanged on one that can.
+
+    A T4 is sm_75 and bf16 autocast needs sm_80, so this is not a preference — it is the difference
+    between an entry that runs and an unhandled error. It cost three submissions, and it could not be
+    seen from this machine, whose card supports bf16.
+    """
+    ensemble = _ensemble(tmp_path / "arith")
+    member = ensemble.package.members[0]
+    fitted_bf16 = replace(member, config={**member.config, "bf16": True})
+    fitted_fp16 = replace(member, config={**member.config, "bf16": False})
+    object.__setattr__(ensemble, "device", torch.device("cuda"))
+
+    monkeypatch.setattr(torch.cuda, "is_bf16_supported", lambda: False)
+    assert ensemble.arithmetic(fitted_bf16) is torch.float16, "a T4 cannot run bf16, so it must not be asked to"
+    assert ensemble.arithmetic(fitted_fp16) is torch.float16
+
+    monkeypatch.setattr(torch.cuda, "is_bf16_supported", lambda: True)
+    assert ensemble.arithmetic(fitted_bf16) is torch.bfloat16, "a card that can run it gets the real arithmetic"
+
+    ensemble.device = torch.device("cpu")
+    assert ensemble.arithmetic(fitted_bf16) is torch.bfloat16, "off cuda there is no autocast to constrain"
