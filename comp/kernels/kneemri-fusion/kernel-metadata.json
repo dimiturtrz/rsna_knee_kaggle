@@ -11,7 +11,8 @@
   "dataset_sources": [
     "dimiturnt/kneemri-kit",
     "dimiturnt/kneemri-members",
-    "pilkwang/rsna-knee-weights"
+    "pilkwang/rsna-knee-weights",
+    "dimiturnt/dinov3-hf"
   ],
   "competition_sources": [
     "rsna-knee-abnormality-detection"

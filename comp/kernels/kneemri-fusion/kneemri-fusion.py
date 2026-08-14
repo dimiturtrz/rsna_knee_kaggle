@@ -95,19 +95,13 @@ def main() -> None:
                 )
 
             merged = packages[0]
-            # ONLY THE VARIANTS WHOSE WEIGHTS ARE MOUNTED. This kernel mounts DINOv2 small and base with
-            # internet disabled, and our members package now carries a DINOv3 LoRA member — wiring v3
-            # through to a submission is still open (knee-98j). Fusing it would reach for weights that
-            # are not there and fail the run, which is how the 0.500 entry was spent.
-            usable = [
-                m
-                for package in packages
-                for m in package.members
-                if not m.variant.startswith("v3") and m.pixel_group == serving
-            ]
+            # DINOv3 is mounted now, so nothing is excluded for its ENCODER — only for its pixels. A
+            # member outside the serving group reads a different image size, and one decode cannot
+            # produce two. That is a property of this kernel's single-decode design, not of the member.
+            usable = [m for package in packages for m in package.members if m.pixel_group == serving]
             dropped = sum(len(package.members) for package in packages) - len(usable)
             if dropped:
-                logger.info("dropped %d member(s) whose encoder weights are not mounted", dropped)
+                logger.info("dropped %d member(s) that one decode cannot serve", dropped)
             merged.members = usable
             logger.info(
                 "fused %d members from %d packages: %s",
