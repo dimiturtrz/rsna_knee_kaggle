@@ -50,7 +50,27 @@ class SlotReader:
         self.band = band
 
     def read(self, acquisition: Acquisition, slices: int) -> UInt8[Tensor, "s h w"] | None:
-        """Sample `slices` physically-spread slices, or None when nothing in the series decodes.
+        """Sample `slices` physically-spread slices at this reader's size, or None if nothing decodes."""
+        cropped = self.cropped(acquisition, slices)
+        return None if cropped is None else self.sized(cropped, self.image_size)
+
+    def cropped(self, acquisition: Acquisition, slices: int) -> NDArray[np.float32] | None:
+        """The decoded, physically-cropped stack — everything expensive, and NOTHING size-dependent.
+
+        Split out because the same series is currently decoded once PER PIXEL GROUP: a submission
+        carrying members that read 392, 336 and 224 px reads every DICOM three times, and decode is the
+        I/O-bound half on a Kaggle host with four CPUs. Reading once and resizing per target is exact
+        rather than approximate — each size still comes from ONE bilinear resize of this same stack, so
+        the bytes are identical to a native read and no fingerprint or witness moves.
+
+        The alternative considered and rejected: decode at the largest size and downsample between
+        sizes. Measured at about one grey level in 255 against a native decode — small, but a needless
+        change to members that already score.
+
+        Or None when nothing in the series decodes. A series where nothing decodes is reported ABSENT,
+        which the presence mask can express, rather than black, which it cannot. A single failed slice is
+        filled from the nearest slice that did decode — never from a zero plane, which would otherwise
+        become the authority for the stack's shape and blacken every good slice with it.
 
         A series where nothing decodes is reported ABSENT, which the presence mask can express, rather
         than black, which it cannot. A single failed slice is filled from the nearest slice that did
@@ -71,7 +91,7 @@ class SlotReader:
         # those are genuinely not stackable, so an odd one out is dropped to zeros rather than resized.
         shape = filled[0].shape
         stack = np.stack([plane if plane.shape == shape else np.zeros(shape, np.float32) for plane in filled])
-        return self._to_uint8(self._crop(stack, acquisition.pixel_spacing))
+        return self._crop(stack, acquisition.pixel_spacing)
 
     @staticmethod
     def _nearest(planes: list[NDArray[np.float32] | None], decoded: list[int], index: int) -> NDArray[np.float32]:
@@ -129,7 +149,7 @@ class SlotReader:
         centre_y, centre_x = height // 2, width // 2
         return stack[:, max(0, centre_y - half) : centre_y + half, max(0, centre_x - half) : centre_x + half]
 
-    def _to_uint8(self, stack: NDArray[np.float32]) -> UInt8[Tensor, "s h w"]:
+    def sized(self, stack: NDArray[np.float32], size: int) -> UInt8[Tensor, "s h w"]:
         """Percentile-normalise, resize to the encoder's grid, and store eight bits per pixel.
 
         uint8 rather than float32 because these buffers are the largest allocation in the pipeline and
@@ -138,7 +158,5 @@ class SlotReader:
         low, high = np.percentile(stack, _PERCENTILES)
         scaled = np.clip((stack - low) / max(high - low, 1e-6), 0, 1)
         tensor = torch.from_numpy(np.ascontiguousarray(scaled)).unsqueeze(0)
-        resized = nn.functional.interpolate(
-            tensor, size=(self.image_size, self.image_size), mode="bilinear", align_corners=False
-        )
+        resized = nn.functional.interpolate(tensor, size=(size, size), mode="bilinear", align_corners=False)
         return (resized.squeeze(0) * 255).round().clamp(0, 255).to(torch.uint8)

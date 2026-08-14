@@ -32,3 +32,37 @@ def test_read_repeats_the_last_index_when_the_band_is_thin(tmp_path: Path):
     stack = SlotReader(image_size=16).read(acquisition, slices=6)
     assert stack is not None
     assert stack.shape == (6, 16, 16)
+
+
+def test_cropped(tmp_path: Path):
+    """Everything expensive and nothing size-dependent — so ONE read serves every size, exactly.
+
+    This is the whole reason the split exists: a submission carrying members that read 392, 336 and 224
+    px currently decodes every DICOM three times, because `predict_groups` decodes once per pixel group.
+    Reading once and resizing per target is only worth doing if it is EXACT, and byte-identity against a
+    native read at each size is what makes it so — a downsample between sizes would instead move every
+    member that already scores.
+    """
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=10, size=128))
+    reader = SlotReader(image_size=32)
+
+    stack = reader.cropped(acquisition, 3)
+    assert stack is not None
+
+    for size in (32, 16):
+        native = SlotReader(image_size=size).read(acquisition, 3)
+        assert native is not None
+        assert torch.equal(reader.sized(stack, size), native), f"one read must equal a native read at {size}"
+
+
+def test_sized(tmp_path: Path):
+    """The stack becomes uint8 on the requested grid, whatever the reader's own size is."""
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=10, size=128))
+    reader = SlotReader(image_size=32)
+    stack = reader.cropped(acquisition, 3)
+    assert stack is not None
+
+    small = reader.sized(stack, 16)
+
+    assert small.shape == (3, 16, 16)
+    assert small.dtype == torch.uint8
