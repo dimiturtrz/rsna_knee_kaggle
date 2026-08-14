@@ -158,6 +158,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.submission",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.dry_run",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.embedding_cache",
       "target": "kneemri.study_cache",
       "weight": 1
@@ -1288,6 +1336,132 @@
       "kind": "calls",
       "source": "kneemri.diagnose_laterality.main",
       "target": "kneemri.diagnose_laterality.LateralityAudit.run",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.dry_run.DryRun",
+      "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.dry_run.DryRun",
+      "target": "kneemri.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "core.paths.DataRoot.processed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.dry_run.DryRun.tables",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.ensemble.Ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.members.MemberPackage.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.submission.Split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.submission.Submission",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun._table",
+      "target": "kneemri.submission.Submission.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun.scored",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.DryRun.scored",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun.scored",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun.scored",
+      "target": "kneemri.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun.scored",
+      "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.DryRun.tables",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.main",
+      "target": "kneemri.dry_run.DryRun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.main",
+      "target": "kneemri.dry_run.DryRun._table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.dry_run.main",
+      "target": "kneemri.dry_run.DryRun.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.dry_run.main",
+      "target": "kneemri.members.MemberPackage",
       "weight": 1
     },
     {
@@ -2929,6 +3103,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.submission.Submission",
+      "target": "kneemri.submission.Split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.submission.Submission.__init__",
+      "target": "kneemri.submission.Split",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.submission.Submission.chunks",
       "target": "kneemri.submission.Submission.decode",
@@ -3625,7 +3811,7 @@
       "role": null
     },
     {
-      "descendants": 53,
+      "descendants": 54,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -3700,6 +3886,14 @@
       "descendants": 0,
       "id": "kneemri.diagnose_laterality",
       "label": "diagnose_laterality",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run",
+      "label": "dry_run",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4142,6 +4336,14 @@
       "label": "LateralityAudit",
       "level": "class",
       "parent": "kneemri.diagnose_laterality",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.DryRun",
+      "label": "DryRun",
+      "level": "class",
+      "parent": "kneemri.dry_run",
       "role": "primary"
     },
     {
@@ -4591,6 +4793,14 @@
       "level": "class",
       "parent": "kneemri.study_cache",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Split",
+      "label": "Split",
+      "level": "class",
+      "parent": "kneemri.submission",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -5046,6 +5256,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.diagnose_laterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.DryRun.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.DryRun._table",
+      "label": "_table",
+      "level": "method",
+      "parent": "kneemri.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.DryRun.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.DryRun.tables",
+      "label": "tables",
+      "level": "method",
+      "parent": "kneemri.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.dry_run.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.dry_run",
       "role": null
     },
     {
@@ -7022,6 +7272,14 @@
       "label": "slots",
       "level": "method",
       "parent": "kneemri.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Split.series",
+      "label": "series",
+      "level": "method",
+      "parent": "kneemri.submission.Split",
       "role": null
     },
     {
