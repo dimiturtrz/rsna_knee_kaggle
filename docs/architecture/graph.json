@@ -639,6 +639,12 @@
     {
       "kind": "import",
       "source": "kneemri.oof_oracle",
+      "target": "kneemri.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.oof_oracle",
       "target": "kneemri.study_cache",
       "weight": 1
     },
