@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import override
@@ -11,6 +12,8 @@ from torch import Tensor
 from kneemri.ensemble import Ensemble
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
+from kneemri.slot_reader import SlotReader
+from kneemri.study import SlotPipeline
 from kneemri.submission import Submission
 
 from .conftest import write_series
@@ -177,3 +180,26 @@ def test_chunks(tmp_path: Path):
     images, mask = produced[0]
     assert images.device.type == submission.device.type
     assert images.shape[0] == 2
+
+
+def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    """A study that cannot be opened contributes zeros and an empty mask, not an exception.
+
+    `pool.map` re-raises, so before this a single unreadable study took down the whole run — and a run
+    that fails writes no submission by design, so the entry is lost. Three visible studies never fire
+    it; a hidden test set of thousands almost certainly does.
+    """
+    submission = _submission(tmp_path)
+    members = submission.ensemble.package.members
+    pipeline = SlotPipeline(
+        scheme=submission.ensemble.decoded_scheme(members),
+        reader=SlotReader(image_size=submission.ensemble.decoded_size(members)),
+    )
+
+    with caplog.at_level(logging.ERROR):
+        bag, mask = submission.decoded("no-such-study", {"sag": "Sagittal"}, pipeline, 3)
+
+    assert bag.shape == (len(SLOT_NAMES), 3, pipeline.image_size, pipeline.image_size)
+    assert bag.dtype == torch.uint8
+    assert float(mask.sum()) == 0.0, "an unreadable study must claim nothing was acquired"
+    assert "no-such-study" in caplog.text, "and it must say so, or a silent zero row reads as a real one"

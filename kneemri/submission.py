@@ -61,15 +61,33 @@ class Submission:
             reader=SlotReader(image_size=self.ensemble.decoded_size(members)),
         )
         with ThreadPoolExecutor(max_workers=DECODE_THREADS) as pool:
-            bags = list(
-                pool.map(
-                    lambda name: Study.from_directory(self.competition / "test_series" / name, planes, pipeline).bag(
-                        slices
-                    ),
-                    identifiers,
-                )
-            )
+            bags = list(pool.map(lambda name: self.decoded(name, planes, pipeline, slices), identifiers))
         return torch.stack([bag for bag, _ in bags]), torch.stack([mask for _, mask in bags])
+
+    def decoded(self, name: str, planes: dict[str, str], pipeline: SlotPipeline, slices: int) -> tuple[Tensor, Tensor]:
+        """One study's bag, or zeros with an empty mask if it cannot be read at all.
+
+        ONE UNREADABLE STUDY MUST NOT COST THE ENTRY. `pool.map` re-raises, so a single study that
+        `Study.from_directory` cannot open took down the whole run — and a run that fails writes no
+        submission at all, by design. Across three visible studies that never fires; across a hidden
+        test set of thousands it is close to certain, which is exactly the asymmetry that makes it
+        expensive to discover.
+
+        Zeros with a ZERO MASK is the same answer `bag` already gives for a slot whose series will not
+        decode: the head renormalises over what the study actually has, so an unreadable study is one
+        weak row rather than a wrong one. A SYSTEMATIC failure is still caught — every study zero means
+        every prediction ties, and `check` refuses an all-constant table.
+        """
+        try:
+            return Study.from_directory(self.competition / "test_series" / name, planes, pipeline).bag(slices)
+        # Broad on purpose: pydicom, the filesystem and the router each fail in their own way, and any
+        # failure to read ONE study must cost one row rather than the entry. Logged with the traceback,
+        # which is what keeps this from being a silent swallow — and what BLE001 asks for.
+        except Exception:
+            logger.exception("study %s could not be decoded — contributing zeros and an empty mask", name)
+            slots = len(pipeline.scheme.slots)
+            size = pipeline.image_size
+            return torch.zeros(slots, slices, size, size, dtype=torch.uint8), torch.zeros(slots)
 
     def chunks(
         self, identifiers: list[str], planes: dict[str, str], slices: int, members: list[Member]
