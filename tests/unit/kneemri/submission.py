@@ -14,7 +14,7 @@ from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slot_reader import SlotReader
 from kneemri.study import SlotPipeline
-from kneemri.submission import Submission
+from kneemri.submission import Split, Submission
 
 from .conftest import write_series
 
@@ -203,3 +203,15 @@ def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     assert bag.dtype == torch.uint8
     assert float(mask.sum()) == 0.0, "an unreadable study must claim nothing was acquired"
     assert "no-such-study" in caplog.text, "and it must say so, or a silent zero row reads as a real one"
+
+
+def test_series(tmp_path: Path):
+    """Pixels sit beside the tables by default, and elsewhere when a dry run says so.
+
+    The override is what lets the SHIPPED submission path run over labelled studies: a scratch
+    directory holds a subset of the train tables while the DICOMs stay where they are. Without it the
+    only way to find out whether this path produces sane predictions was to spend an entry.
+    """
+    assert Split().series(tmp_path) == tmp_path / "test_series"
+    assert Split("train").series(tmp_path) == tmp_path / "train_series"
+    assert Split("train", tmp_path / "elsewhere").series(tmp_path) == tmp_path / "elsewhere"

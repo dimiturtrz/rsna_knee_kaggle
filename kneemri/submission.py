@@ -14,6 +14,7 @@ import logging
 import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -38,15 +39,43 @@ DECODE_THREADS = 8
 """Above the four available cores on purpose: decoding is dominated by waiting on the mount."""
 
 
+@dataclass(frozen=True)
+class Split:
+    """Which tables a submission reads, and where that split's pixels live.
+
+    One object because the two are never chosen apart, and because they arrived as a fifth and sixth
+    argument to a constructor — which is the shape `Window` was created to fix elsewhere in this
+    package. `test` is the competition's own split and the only one a kernel names; `train` lets the
+    SAME path run over studies whose labels we hold, which is how a submission full of nonsense can be
+    told apart from a crash without spending an entry.
+    """
+
+    name: str = "test"
+    series_root: Path | None = None
+
+    def series(self, competition: Path) -> Path:
+        """Where the DICOM directories are — beside the tables unless a dry run says otherwise."""
+        return self.series_root or competition / f"{self.name}_series"
+
+
 class Submission:
     """Runs an ensemble over a split's studies and writes `submission.csv`."""
 
-    def __init__(self, ensemble: Ensemble, competition: Path, working: Path, *, overlap: bool = True) -> None:
+    def __init__(
+        self,
+        ensemble: Ensemble,
+        competition: Path,
+        working: Path,
+        *,
+        overlap: bool = True,
+        split: Split | None = None,
+    ) -> None:
         self.ensemble = ensemble
         self.device = ensemble.device
         self.competition = competition
         self.working = working
         self.overlap = overlap
+        self.split = split or Split()
 
     def decode(
         self, identifiers: list[str], planes: dict[str, str], slices: int, members: list[Member]
@@ -79,7 +108,8 @@ class Submission:
         every prediction ties, and `check` refuses an all-constant table.
         """
         try:
-            return Study.from_directory(self.competition / "test_series" / name, planes, pipeline).bag(slices)
+            directory = self.split.series(self.competition) / name
+            return Study.from_directory(directory, planes, pipeline).bag(slices)
         # Broad on purpose: pydicom, the filesystem and the router each fail in their own way, and any
         # failure to read ONE study must cost one row rather than the entry. Logged with the traceback,
         # which is what keeps this from being a silent swallow — and what BLE001 asks for.
@@ -131,8 +161,8 @@ class Submission:
         and every kernel called `run()` — so a member fitted on a deeper stack would have been scored on
         twelve slices without a word.
         """
-        test = pd.read_csv(self.competition / "test.csv")
-        series = pd.read_csv(self.competition / "test_series.csv")
+        test = pd.read_csv(self.competition / f"{self.split.name}.csv")
+        series = pd.read_csv(self.competition / f"{self.split.name}_series.csv")
         planes = series.set_index("SeriesInstanceUID")["Anatomical_Plane"].to_dict()
         identifiers = test["StudyInstanceUID"].tolist()
         logger.info(f"{len(identifiers)} studies, {len(series)} series")
