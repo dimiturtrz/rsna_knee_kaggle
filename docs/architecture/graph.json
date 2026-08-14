@@ -752,6 +752,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.slot_reader",
+      "target": "kneemri.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.slot_ties",
       "target": "core.paths",
       "weight": 1
@@ -1462,6 +1468,30 @@
       "kind": "calls",
       "source": "kneemri.confident_labels.main",
       "target": "kneemri.confident_labels.ConfidentLabels.struck_share",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.crop_centre.TissueCentre.centroid",
+      "target": "kneemri.crop_centre.TissueCentre.threshold",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.crop_centre.TissueCentre.of",
+      "target": "kneemri.crop_centre.ImageCentre",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.crop_centre.TissueCentre.of",
+      "target": "kneemri.crop_centre.ImageCentre.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.crop_centre.TissueCentre.of",
+      "target": "kneemri.crop_centre.TissueCentre.centroid",
       "weight": 1
     },
     {
@@ -3259,6 +3289,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.slot_reader.SlotReader",
+      "target": "kneemri.crop_centre.CropCentre",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.slot_reader.SlotReader.__init__",
+      "target": "kneemri.crop_centre.ImageCentre",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.acquisition.Acquisition.ordered_files",
@@ -4435,7 +4477,7 @@
       "role": null
     },
     {
-      "descendants": 59,
+      "descendants": 60,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -4502,6 +4544,14 @@
       "descendants": 0,
       "id": "kneemri.confident_labels",
       "label": "confident_labels",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre",
+      "label": "crop_centre",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4993,6 +5043,30 @@
       "level": "class",
       "parent": "kneemri.confident_labels",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.CropCentre",
+      "label": "CropCentre",
+      "level": "class",
+      "parent": "kneemri.crop_centre",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.ImageCentre",
+      "label": "ImageCentre",
+      "level": "class",
+      "parent": "kneemri.crop_centre",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.TissueCentre",
+      "label": "TissueCentre",
+      "level": "class",
+      "parent": "kneemri.crop_centre",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -5944,6 +6018,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.confident_labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.CropCentre.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.crop_centre.CropCentre",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.ImageCentre.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.crop_centre.ImageCentre",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.TissueCentre.centroid",
+      "label": "centroid",
+      "level": "method",
+      "parent": "kneemri.crop_centre.TissueCentre",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.TissueCentre.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.crop_centre.TissueCentre",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.crop_centre.TissueCentre.threshold",
+      "label": "threshold",
+      "level": "method",
+      "parent": "kneemri.crop_centre.TissueCentre",
       "role": null
     },
     {
