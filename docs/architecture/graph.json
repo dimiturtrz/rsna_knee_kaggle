@@ -3565,6 +3565,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.slots.SlotScheme.assign",
+      "target": "kneemri.slots.SlotScheme.won",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.stack_coverage.StackCoverage",
       "target": "kneemri.scores.LabelScores",
@@ -8328,6 +8334,14 @@
       "descendants": 0,
       "id": "kneemri.slots.SlotScheme.unrouted",
       "label": "unrouted",
+      "level": "method",
+      "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slots.SlotScheme.won",
+      "label": "won",
       "level": "method",
       "parent": "kneemri.slots.SlotScheme",
       "role": null
