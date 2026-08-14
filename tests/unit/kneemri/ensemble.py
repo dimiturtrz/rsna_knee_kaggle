@@ -10,7 +10,7 @@ from torch import Tensor
 
 from kneemri.backbone import ENCODERS
 from kneemri.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble
-from kneemri.members import Member, MemberConfig, MemberPackage
+from kneemri.members import Member, MemberConfig, MemberPackage, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 
 SEED = 2026
@@ -327,3 +327,33 @@ def test_predict_groups(tmp_path: Path):
     combined = ensemble.predict_groups(chunks_for, overlap=False)
     assert asked == [(1, 6), (1, 6)], "one decode per group, never one per member"
     assert combined.shape == (2, len(TARGETS))
+
+
+def test_forwarded():
+    """Chunks the forward, and halves the rows rather than dying when the card runs out.
+
+    A budget is a PREDICTION about a card we cannot measure from here, and predicting high costs the
+    whole entry: the kernel writes no submission by design, so Kaggle fails it and the run is gone.
+    Predicting low costs a slower pass. The double raises once and then succeeds, which is the case
+    that decides between those two outcomes.
+    """
+    calls: list[int] = []
+
+    class _Greedy(torch.nn.Module):
+        """Refuses any batch above two rows, exactly as a T4 refuses a budget set too high."""
+
+        def forward(self, images: torch.Tensor, mask: torch.Tensor, size: int) -> torch.Tensor:
+            calls.append(images.shape[0])
+            if images.shape[0] > 2:
+                raise torch.OutOfMemoryError
+            return torch.zeros(images.shape[0], len(TARGETS))
+
+    read = torch.zeros(6, 2, 3, 8, 8, dtype=torch.uint8)
+    logits = Ensemble.forwarded(
+        Ensemble.__new__(Ensemble), _Greedy(), read, torch.ones(6, 2), Window(starts=[0], width=3, size=8), rows=6
+    )
+
+    assert logits.shape == (6, len(TARGETS))
+    assert calls[0] == 6, "the budget is tried first, so a card that can take it pays nothing"
+    assert calls[-1] <= 2, "and it comes down to a size the card accepts rather than raising"
+    assert calls == [6, 3, 1, 1, 1, 1, 1, 1], "halving, and each accepted size then runs every chunk"

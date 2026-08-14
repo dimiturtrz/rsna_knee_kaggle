@@ -13,6 +13,7 @@ this is the pooling the published members' own out-of-fold predictions were prod
 disjoint windows, probability pooling, 0.025 max deviation against ours).
 """
 
+import logging
 from collections.abc import Callable, Iterable
 
 import numpy as np
@@ -22,10 +23,12 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.backbone import ENCODERS
-from kneemri.members import Member, MemberPackage
+from kneemri.members import Member, MemberPackage, Window
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
+
+logger = logging.getLogger(__name__)
 
 IMAGE_BUDGET = 864
 """Images per forward for a 384-wide encoder — the largest that has ever completed on a Kaggle T4.
@@ -44,6 +47,16 @@ activation per image beyond the weights:
 A flat 864 would therefore have OOM'd the first entry carrying `large_deep_rank24` — which is in our
 pool at 0.8450 — in exactly the way fusion v2 did, and for exactly the same reason: one constant
 standing in for a value that travels per member.
+"""
+
+BUDGET_TOKENS = 576
+"""Patch tokens per image the budget was measured at: 336 px on a patch-14 grid is 24 x 24.
+
+THE BUDGET COUNTED IMAGES AND ENCODER WIDTH AND NOT RESOLUTION, and on 2026-08-14 that cost two
+submissions. `res392` reads 392 px, which is 28 x 28 = 784 tokens against this 576 — a third more
+activation per image, before the attention matrices that grow with the SQUARE of the token count. Both
+entries that came back unscored carried it; every entry that has ever scored (0.882, 0.888, 0.894) was
+336 px only. A transformer's cost is per TOKEN, so a budget in images is only valid at one resolution.
 """
 
 BUDGET_WIDTH = 384
@@ -153,6 +166,40 @@ class Ensemble:
             raise ValueError(message)
         return SlotScheme(tuple(known[name] for name in names))
 
+    def forwarded(
+        self,
+        model: StudyModel,
+        read: UInt8[Tensor, "b n s h w"],
+        mask: Float[Tensor, "b n"],
+        window: Window,
+        rows: int,
+    ) -> Float[Tensor, "b t"]:
+        """The chunked forward, halving the rows per pass rather than dying when memory runs out.
+
+        A budget is a PREDICTION about a card we cannot measure from here, and the cost of predicting
+        high is total: the kernel writes no submission (deliberately — a fallback scored 0.500 twice),
+        Kaggle fails the entry, and the run is gone. The cost of predicting low is a slower pass. So an
+        out-of-memory is caught and retried at half the rows until it fits, and only a batch of one that
+        still cannot run is a real failure.
+
+        This is the belt to the budget's braces: the budget being wrong about resolution is exactly what
+        this session discovered, and no arithmetic here can be trusted more than the card's own answer.
+        """
+        while True:
+            try:
+                return torch.cat(
+                    [
+                        model(read[begin : begin + rows], mask[begin : begin + rows], window.size).float()
+                        for begin in range(0, read.shape[0], rows)
+                    ]
+                )
+            except torch.OutOfMemoryError:
+                if rows <= 1:
+                    raise
+                torch.cuda.empty_cache()
+                rows = max(1, rows // 2)
+                logger.info("out of memory — retrying at %d rows per forward", rows)
+
     def predict_member(
         self,
         member: Member,
@@ -185,7 +232,12 @@ class Ensemble:
         #
         # The budget is per ENCODER WIDTH, not flat: a 1024-wide member costs 2.4x a 384-wide one per
         # image, so one number for both is the same mistake one number for every depth was.
-        budget = IMAGE_BUDGET * BUDGET_WIDTH // ENCODERS[member.variant].dim
+        encoder = ENCODERS[member.variant]
+        tokens = (window.size // encoder.patch) ** 2
+        # NEVER ABOVE THE CEILING, only below it. 864 is the largest forward that has ever completed on
+        # a T4; the width and token terms can justify sending FEWER images, never more, and a small read
+        # size would otherwise scale the budget up into a number nothing has ever survived.
+        budget = min(IMAGE_BUDGET, IMAGE_BUDGET * BUDGET_WIDTH * BUDGET_TOKENS // (encoder.dim * max(tokens, 1)))
         rows = max(1, budget // max(images.shape[1] * window.width, 1))
         # THE DTYPE COMES FROM THE MEMBER. Written dtype-less, this autocast defaults to float16, so
         # every bf16-trained member was served in arithmetic it was never fitted under — and fp16's
@@ -195,12 +247,7 @@ class Ensemble:
             for view in views.apply(images):
                 for start in window.starts:
                     read = view[:, :, start : start + window.width]
-                    logits = torch.cat(
-                        [
-                            model(read[begin : begin + rows], mask[begin : begin + rows], window.size).float()
-                            for begin in range(0, read.shape[0], rows)
-                        ]
-                    )
+                    logits = self.forwarded(model, read, mask, window, rows)
                     total = total + torch.sigmoid(logits)
                     passes += 1
         return (total / passes).cpu().numpy().astype(np.float64)
