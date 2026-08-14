@@ -729,12 +729,6 @@
     {
       "kind": "import",
       "source": "kneemri.submission",
-      "target": "kneemri.members",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.submission",
       "target": "kneemri.model",
       "weight": 1
     },
@@ -1521,6 +1515,12 @@
     {
       "kind": "references",
       "source": "kneemri.ensemble.Ensemble",
+      "target": "kneemri.ensemble.Read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.ensemble.Ensemble",
       "target": "kneemri.members.Member",
       "weight": 1
     },
@@ -1569,7 +1569,7 @@
     {
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_groups",
-      "target": "kneemri.ensemble.Ensemble.groups",
+      "target": "kneemri.ensemble.Ensemble.decoded_scheme",
       "weight": 1
     },
     {
@@ -1581,7 +1581,19 @@
     {
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.ensemble.Ensemble.reads",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
       "target": "kneemri.ensemble.Ensemble.slices",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.ensemble.Read",
       "weight": 1
     },
     {
@@ -1612,6 +1624,12 @@
       "kind": "calls",
       "source": "kneemri.ensemble.Ensemble.predict_members",
       "target": "kneemri.ensemble.Ensemble.predict_member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.ensemble.Read",
+      "target": "kneemri.slots.SlotScheme",
       "weight": 1
     },
     {
@@ -3123,7 +3141,7 @@
     {
       "kind": "references",
       "source": "kneemri.submission.Submission",
-      "target": "kneemri.members.Member",
+      "target": "kneemri.ensemble.Read",
       "weight": 1
     },
     {
@@ -3148,18 +3166,6 @@
       "kind": "calls",
       "source": "kneemri.submission.Submission.chunks",
       "target": "kneemri.submission.Submission.decode",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.submission.Submission.decode",
-      "target": "kneemri.ensemble.Ensemble.decoded_scheme",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.submission.Submission.decode",
-      "target": "kneemri.ensemble.Ensemble.decoded_size",
       "weight": 1
     },
     {
@@ -4426,6 +4432,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.ensemble.Read",
+      "label": "Read",
+      "level": "class",
+      "parent": "kneemri.ensemble",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.folds.ReportFolds",
       "label": "ReportFolds",
       "level": "class",
@@ -5548,6 +5562,14 @@
       "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.predict_members",
       "label": "predict_members",
+      "level": "method",
+      "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ensemble.Ensemble.reads",
+      "label": "reads",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null
