@@ -47,17 +47,26 @@ class KitCheck:
         None rather than a guess: a kit whose version cannot be named is the state that spent the slot,
         so it is reported as unknown and refused rather than assumed current.
         """
+        recorded = self.recorded(kit)
+        return str(recorded["commit"]) if recorded else None
+
+    def recorded(self, kit: Path) -> dict[str, object] | None:
+        """The whole stamp — the commit AND whether the tree was dirty when it was built."""
         stamp = kit / "kneemri_src" / "kit.json"
-        return str(json.loads(stamp.read_text(encoding="utf-8"))["commit"]) if stamp.exists() else None
+        return dict(json.loads(stamp.read_text(encoding="utf-8"))) if stamp.exists() else None
 
     def drift(self, kit: Path) -> list[str]:
         """Commits touching the shipped packages that the kit does not have, newest first."""
-        stamped = self.stamped(kit)
-        if stamped is None:
+        recorded = self.recorded(kit)
+        if recorded is None:
             return ["the kit carries no commit stamp — rebuild it before shipping"]
-        span = f"{stamped}..HEAD"
-        log = self.asked("log", "--oneline", span, "--", *PACKAGES)
-        return log.splitlines() if log else []
+        behind = self.asked("log", "--oneline", f"{recorded['commit']}..HEAD", "--", *PACKAGES).splitlines()
+        # A DIRTY KIT NAMES A COMMIT IT IS NOT. On 2026-08-14 one was uploaded and run from a tree with
+        # uncommitted changes, so its stamp pointed at code that was never what shipped — which is the
+        # same unnameable-version state the stamp exists to end, wearing a commit hash.
+        if recorded.get("dirty"):
+            behind.append(f"built from a DIRTY tree at {recorded['commit']} — the stamp names code that did not ship")
+        return behind
 
 
 def main() -> None:

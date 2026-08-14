@@ -24,11 +24,11 @@ def _repo(tmp_path: Path) -> Path:
     return repo
 
 
-def _kit(tmp_path: Path, commit: str | None) -> Path:
+def _kit(tmp_path: Path, commit: str | None, *, dirty: bool = False) -> Path:
     kit = tmp_path / "kit" / "kneemri_src"
     kit.mkdir(parents=True)
     if commit is not None:
-        (kit / "kit.json").write_text(json.dumps({"commit": commit, "dirty": False}), encoding="utf-8")
+        (kit / "kit.json").write_text(json.dumps({"commit": commit, "dirty": dirty}), encoding="utf-8")
     return kit.parent
 
 
@@ -73,3 +73,27 @@ def test_drift(tmp_path: Path):
     behind = check.drift(_kit(tmp_path / "after_code", current))
     assert len(behind) == 1
     assert "the fix the kit would be missing" in behind[0]
+
+
+def test_recorded(tmp_path: Path):
+    """The whole stamp, so a dirty build can be refused as well as a stale one."""
+    repo = _repo(tmp_path)
+
+    assert KitCheck(repo).recorded(_kit(tmp_path / "a", "abc1234", dirty=True)) == {"commit": "abc1234", "dirty": True}
+    assert KitCheck(repo).recorded(_kit(tmp_path / "b", None)) is None
+
+
+def test_drift_refuses_a_kit_built_from_a_dirty_tree(tmp_path: Path):
+    """A dirty kit names a commit it is not, which is the unnameable version wearing a hash.
+
+    One was uploaded and run on 2026-08-14: current against HEAD by its stamp, and carrying uncommitted
+    code that no commit describes.
+    """
+    repo = _repo(tmp_path)
+    check = KitCheck(repo)
+    current = check.asked("rev-parse", "--short", "HEAD")
+
+    assert check.drift(_kit(tmp_path / "clean", current)) == []
+    dirty = check.drift(_kit(tmp_path / "dirty", current, dirty=True))
+    assert len(dirty) == 1
+    assert "DIRTY" in dirty[0]
