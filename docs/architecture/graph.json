@@ -770,6 +770,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "kneemri.oof_oracle",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.stack_coverage",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.study",
       "target": "kneemri.acquisition",
       "weight": 1
@@ -3344,6 +3380,84 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.stack_coverage.StackCoverage",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.stack_coverage.StackCoverage.__init__",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.StackCoverage.trend",
+      "target": "kneemri.stack_coverage.StackCoverage._delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.oof_oracle.OutOfFoldOracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.oof_oracle.OutOfFoldOracle.corpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.stack_coverage.StackCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.stack_coverage.StackCoverage.acquired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.stack_coverage.StackCoverage.bands",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.stack_coverage.StackCoverage.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.stack_coverage.StackCoverage.trend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.stack_coverage.main",
+      "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.study.SlotPipeline",
       "target": "kneemri.acquisition.Acquisition",
       "weight": 1
@@ -4309,7 +4423,7 @@
       "role": null
     },
     {
-      "descendants": 58,
+      "descendants": 59,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -4704,6 +4818,14 @@
       "descendants": 0,
       "id": "kneemri.slots",
       "label": "slots",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage",
+      "label": "stack_coverage",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -5314,6 +5436,14 @@
       "label": "SlotScheme",
       "level": "class",
       "parent": "kneemri.slots",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage",
+      "label": "StackCoverage",
+      "level": "class",
+      "parent": "kneemri.stack_coverage",
       "role": "primary"
     },
     {
@@ -7842,6 +7972,62 @@
       "label": "unrouted",
       "level": "method",
       "parent": "kneemri.slots.SlotScheme",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage._delta",
+      "label": "_delta",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage.acquired",
+      "label": "acquired",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage.bands",
+      "label": "bands",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.StackCoverage.trend",
+      "label": "trend",
+      "level": "method",
+      "parent": "kneemri.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.stack_coverage.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.stack_coverage",
       "role": null
     },
     {
