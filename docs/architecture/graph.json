@@ -3505,9 +3505,27 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.submission.Submission.chunks",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.submission.Submission.chunks",
+      "target": "kneemri.study.SlotPipeline",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.submission.Submission.chunks",
-      "target": "kneemri.submission.Submission.decode",
+      "target": "kneemri.submission.Submission.batched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.chunks",
+      "target": "kneemri.submission.Submission.pool",
       "weight": 1
     },
     {
@@ -3525,12 +3543,24 @@
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.decode",
-      "target": "kneemri.submission.Submission.decoded",
+      "target": "kneemri.submission.Submission.batched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decode",
+      "target": "kneemri.submission.Submission.decoded_at",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.submission.Submission.decoded",
+      "target": "kneemri.submission.Submission.decoded_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.submission.Submission.decoded_at",
       "target": "kneemri.study.Study.from_directory",
       "weight": 1
     },
@@ -7926,6 +7956,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.submission.Submission.batched",
+      "label": "batched",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.submission.Submission.check",
       "label": "check",
       "level": "method",
@@ -7952,6 +7990,22 @@
       "descendants": 0,
       "id": "kneemri.submission.Submission.decoded",
       "label": "decoded",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.decoded_at",
+      "label": "decoded_at",
+      "level": "method",
+      "parent": "kneemri.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.submission.Submission.pool",
+      "label": "pool",
       "level": "method",
       "parent": "kneemri.submission.Submission",
       "role": null
