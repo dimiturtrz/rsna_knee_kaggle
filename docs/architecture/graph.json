@@ -2991,13 +2991,25 @@
     {
       "kind": "calls",
       "source": "kneemri.study.SlotPipeline.slot_images",
+      "target": "kneemri.study.SlotPipeline.slot_sizes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.slot_sizes",
       "target": "kneemri.laterality.Laterality.normalise",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.study.SlotPipeline.slot_images",
-      "target": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.study.SlotPipeline.slot_sizes",
+      "target": "kneemri.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.SlotPipeline.slot_sizes",
+      "target": "kneemri.slot_reader.SlotReader.sized",
       "weight": 1
     },
     {
@@ -3027,6 +3039,12 @@
     {
       "kind": "calls",
       "source": "kneemri.study.Study.bag",
+      "target": "kneemri.study.Study.bags",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.study.Study.bags",
       "target": "kneemri.study.Study.side",
       "weight": 1
     },
@@ -7152,6 +7170,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.study.SlotPipeline.slot_sizes",
+      "label": "slot_sizes",
+      "level": "method",
+      "parent": "kneemri.study.SlotPipeline",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.study.Study.__init__",
       "label": "__init__",
       "level": "method",
@@ -7162,6 +7188,14 @@
       "descendants": 0,
       "id": "kneemri.study.Study.bag",
       "label": "bag",
+      "level": "method",
+      "parent": "kneemri.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study.Study.bags",
+      "label": "bags",
       "level": "method",
       "parent": "kneemri.study.Study",
       "role": null
