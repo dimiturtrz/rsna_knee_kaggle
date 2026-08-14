@@ -291,3 +291,30 @@ arbitrate this one, which is `knee-7d1`'s standing conclusion arriving from a ne
 
 So: keep MCL as the named weakness, do NOT build a loss or a sampler around it — that is the
 loss-engineering the working rules forbid, and here the measurement cannot even confirm it worked.
+
+### The reader grades severity in every language, and only partly in all of them
+
+2026-08-14, CPU only. Splitting each language's reports by whether they lean on STRONG severity words
+(severe, grade 3, full-thickness and their equivalents) or WEAK ones (mild, minimal, grade 1, partial),
+and reading the level the reader assigned to report-YES cells:
+
+| lang | YES cells | level given strong | given weak | gap |
+|---|---:|---:|---:|---:|
+| en | 2,609 | 0.841 | 0.762 | **+0.078** |
+| es | 989 | 0.843 | 0.779 | +0.064 |
+| el | 568 | 0.844 | 0.788 | +0.055 |
+| de | 538 | 0.806 | 0.759 | +0.047 |
+| bg | 341 | 0.802 | 0.771 | +0.031 |
+
+Every gap is positive and they are the same order of magnitude, so the reader is reading severity in
+each language rather than only in English. That is the third independent measurement pointing the same
+way, after the language census (severity vocabulary present in 61.3% of the corpus) and the agreement
+gap (English 66.7% against non-English 64.2%, interval spanning zero).
+
+**What it settles.** There is no language-specific severity blind spot to fix, so `knee-mxj` branch (a)
+— "the rest needs a multilingual encoder" — has now failed three different ways of looking for it.
+
+**What survives, and it is the same everywhere.** The gap is 0.03–0.08 on a level range of 0.26, so the
+reader captures perhaps a quarter to a third of what the words carry — in EVERY language equally. That
+is branch (b), ordinal extraction quality, and the uniformity is the useful part: an improvement there
+applies to the whole corpus rather than to a slice of it.
