@@ -24,7 +24,8 @@ import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SlotReader
+from kneemri.crop_centre import Crop
+from kneemri.slot_reader import IMAGE_SIZE, SlotReader
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.study import SlotPipeline, Study
 
@@ -71,7 +72,7 @@ class DecodeRequest:
     image_size: int
     scheme: str
     planes: dict[str, str]
-    crop_mm: float = CROP_MM
+    crop: Crop = Crop()
 
 
 class StudyCache:
@@ -86,13 +87,13 @@ class StudyCache:
         slices: int = 12,
         image_size: int = IMAGE_SIZE,
         scheme: str = CANONICAL,
-        crop_mm: float = CROP_MM,
+        crop: Crop | None = None,
     ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
         self.scheme = scheme
-        self.crop_mm = crop_mm
+        self.crop = crop or Crop()
 
     @property
     def slots(self) -> int:
@@ -120,9 +121,7 @@ class StudyCache:
         with no shape change to notice. The default crop keeps the historic name for the same reason the
         canonical scheme does.
         """
-        base = f"{self.image_size}px_{self.slices}sl"
-        if self.crop_mm != CROP_MM:
-            base = f"{base}_{self.crop_mm:g}mm"
+        base = f"{self.image_size}px_{self.slices}sl{self.crop.suffix()}"
         return base if self.scheme == self.CANONICAL else f"{base}_{self.scheme}"
 
     @property
@@ -178,7 +177,7 @@ class StudyCache:
                 image_size=self.image_size,
                 scheme=self.scheme,
                 planes=planes,
-                crop_mm=self.crop_mm,
+                crop=self.crop,
             )
             for position, identifier in enumerate(identifiers)
         ]
@@ -248,7 +247,9 @@ class StudyCache:
         try:
             pipeline = SlotPipeline(
                 scheme=SlotScheme(SCHEMES[request.scheme]),
-                reader=SlotReader(crop_mm=request.crop_mm, image_size=request.image_size),
+                reader=SlotReader(
+                    crop_mm=request.crop.mm, image_size=request.image_size, centre=request.crop.located()
+                ),
             )
             study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
             bag, mask = study.bag(request.slices)

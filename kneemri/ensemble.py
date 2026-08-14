@@ -24,9 +24,9 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.backbone import ENCODERS
+from kneemri.crop_centre import Crop
 from kneemri.members import Member, MemberPackage, Window
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import CROP_MM
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
@@ -94,7 +94,7 @@ class Read:
     slices: int
     scheme: SlotScheme
     sizes: tuple[int, ...]
-    crop_mm: float = CROP_MM
+    crop: Crop = Crop()
 
 
 class Ensemble:
@@ -154,9 +154,9 @@ class Ensemble:
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int, float], list[Member]] = {}
+        gathered: dict[tuple[str, int, Crop], list[Member]] = {}
         for member in self.package.members:
-            gathered.setdefault((member.scheme, member.slices, member.crop_mm), []).append(member)
+            gathered.setdefault((member.scheme, member.slices, member.crop), []).append(member)
         return list(gathered.values())
 
     def slices(self, members: list[Member] | None = None) -> int:
@@ -370,7 +370,7 @@ class Ensemble:
                 sizes=tuple(sorted({member.image_size for member in members})),
                 # One value, because `reads` groups by it — a group spanning two crops would be a group
                 # whose members want different pixels, which is the thing that grouping exists to stop.
-                crop_mm=members[0].crop_mm,
+                crop=members[0].crop,
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return self.combine(per_member)

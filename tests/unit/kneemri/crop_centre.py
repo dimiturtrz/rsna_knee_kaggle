@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from kneemri.crop_centre import ImageCentre, TissueCentre
+from kneemri.crop_centre import Crop, ImageCentre, TissueCentre
 
 
 def _offset_stack() -> np.ndarray:
@@ -47,3 +47,22 @@ def test_tissue_centre_threshold():
 
     assert 0.0 < threshold < 10.0, "between the background and the tissue mode"
     assert np.isinf(TissueCentre().threshold(np.zeros((10, 10), np.float32))), "a flat slice has no split"
+
+
+def test_suffix():
+    """The historic crop adds NOTHING to a cache's name, and every other one adds itself.
+
+    Empty by design: those arrays are memory-mapped by running trainers and every member on disk was
+    fitted on them, so the default must keep resolving to the file it always did. The two axes compose
+    rather than shadow, or an 80mm tissue-centred cache would collide with an 80mm image-centred one.
+    """
+    assert Crop().suffix() == "", "the default keeps the historic cache name"
+    assert Crop(mm=80.0).suffix() == "_80mm"
+    assert Crop(centre="tissue").suffix() == "_tissue"
+    assert Crop(mm=80.0, centre="tissue").suffix() == "_80mm_tissue"
+
+
+def test_located():
+    """The crop names its centring strategy, and builds the one it names."""
+    assert isinstance(Crop().located(), ImageCentre)
+    assert isinstance(Crop(centre="tissue").located(), TissueCentre)

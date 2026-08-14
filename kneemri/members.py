@@ -21,8 +21,8 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.backbone import ENCODERS, SMALL
+from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
-from kneemri.slot_reader import CROP_MM
 from kneemri.slots import SCHEMES
 
 FINGERPRINT_TOLERANCE = 2e-3
@@ -114,18 +114,21 @@ class Member:
         return int(self.config["img"])
 
     @property
-    def crop_mm(self) -> float:
-        """The physical extent this member was fitted on, in millimetres.
+    def crop(self) -> Crop:
+        """The physical crop this member was fitted under — its extent, and the point it was taken about.
 
-        Recorded since the first manifest and read by NOTHING until now: `Submission.decode` built its
-        reader from the module constant, so a member fitted on a different crop was served under 130 mm
-        regardless. `pixel_group` has always included it, so the ensemble already refused to let such
-        members share a decode — it was the decode itself that ignored the answer.
+        Both were recorded in every manifest and read by NOTHING until 2026-08-14: the decode built its
+        reader from module constants, so a member fitted on a different crop was served under 130 mm
+        about the image centre regardless, and nothing would have said so — every fingerprint passes
+        against its OWN reading, and the witness replays the training path.
 
-        Defaults to the constant for manifests written before a crop could vary, which is every member
-        on disk today and is exactly what they were fitted on.
+        Defaults are the historic behaviour, which is what every member on disk was fitted under and
+        what its manifest means without saying so.
         """
-        return float(self.config.get("crop_mm", CROP_MM))
+        return Crop(
+            mm=float(self.config.get("crop_mm", CROP_MM)),
+            centre=str(self.config.get("centre", DEFAULT_CENTRE)),
+        )
 
     @property
     def read_size(self) -> int:
@@ -327,7 +330,9 @@ class Member:
         """Members sharing this key need identical pixels, so one decode serves all of them."""
         pixels = {
             "band": self.config["band"],
-            "crop_mm": self.config["crop_mm"],
+            # Extent AND centre: two members cropped differently are looking at different pixels, so one
+            # decode cannot serve both.
+            "crop": [self.crop.mm, self.crop.centre],
             "group": self.config["group"],
             "img": self.config["img"],
             "rules": self.config["rules"],

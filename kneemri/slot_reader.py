@@ -22,10 +22,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.acquisition import Acquisition
-from kneemri.crop_centre import CropCentre, ImageCentre
-
-CROP_MM = 130.0
-"""Below the acquired field of view of almost every series here, while still containing the joint."""
+from kneemri.crop_centre import CROP_MM, CropCentre, ImageCentre
 
 IMAGE_SIZE = 336
 """130 mm / 336 px = 0.387 mm per pixel, which clears the 0.5 mm a 1 mm tear needs."""

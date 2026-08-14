@@ -9,9 +9,9 @@ import torch
 from torch import Tensor
 
 from kneemri.backbone import SMALL
+from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
-from kneemri.slot_reader import CROP_MM
 
 SEED = 2026
 DIM = 8
@@ -417,7 +417,7 @@ def test_slot_pooling():
     assert replace(member, config={**member.config, "slot_pooling": "mean"}).slot_pooling == "mean"
 
 
-def test_crop_mm():
+def test_crop():
     """The physical extent a member was fitted on, defaulting to the constant for older manifests.
 
     Read by NOTHING until 2026-08-14: the decode built its reader from the module constant, so a member
@@ -425,7 +425,12 @@ def test_crop_mm():
     checked against its own reading.
     """
     tighter = replace(_member(), config={**_config(), "crop_mm": 80.0})
-    assert tighter.crop_mm == 80.0
+    assert tighter.crop.mm == 80.0
 
     older = replace(_member(), config={key: value for key, value in _config().items() if key != "crop_mm"})
-    assert older.crop_mm == CROP_MM, "a manifest written before the crop could vary means the default"
+    assert older.crop.mm == CROP_MM, "a manifest written before the crop could vary means the default"
+
+    located = replace(_member(), config={**_config(), "centre": "tissue"})
+    assert located.crop.centre == "tissue"
+    assert _member().crop.centre == DEFAULT_CENTRE, "a manifest that does not say means the historic centre"
+    assert located.pixel_group != _member().pixel_group, "different pixels cannot share one decode"

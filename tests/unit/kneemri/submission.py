@@ -10,10 +10,11 @@ import pytest
 import torch
 from torch import Tensor
 
+from kneemri.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.ensemble import Ensemble, Read
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import CROP_MM, SlotReader
+from kneemri.slot_reader import SlotReader
 from kneemri.study import SlotPipeline
 from kneemri.submission import Split, Submission
 
@@ -301,6 +302,18 @@ def test_pipeline(tmp_path: Path):
     default = submission.pipeline(Read(3, scheme, (IMAGE,)))
     assert default.reader.crop_mm == CROP_MM
 
-    tighter = submission.pipeline(Read(3, scheme, (IMAGE,), crop_mm=80.0))
+    tighter = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(mm=80.0)))
     assert tighter.reader.crop_mm == 80.0, "the crop the member recorded reaches the reader"
     assert tighter.reader.image_size == IMAGE, "and the size is still the largest the group asked for"
+
+
+def test_pipeline_honours_the_recorded_centre(tmp_path: Path):
+    """A member cropped about the tissue must not be served cropped about the image."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+
+    default = submission.pipeline(Read(3, scheme, (IMAGE,)))
+    assert isinstance(default.reader.centre, ImageCentre)
+
+    located = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(centre="tissue")))
+    assert isinstance(located.reader.centre, TissueCentre), "the recorded centre reaches the reader"

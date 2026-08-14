@@ -22,6 +22,13 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
+CROP_MM = 130.0
+"""Below the acquired field of view of almost every series here, while still containing the joint.
+
+It lives here rather than with the reader because it is this crop's default extent, and the reader now
+takes a crop rather than owning one — putting it beside `SlotReader` made the import cycle that this
+split exists to avoid."""
+
 MIN_TISSUE_PIXELS = 100
 """Below this a slice holds too little signal for a centroid to mean anything."""
 
@@ -112,3 +119,51 @@ class TissueCentre:
         mean_above = (mass - totals[:-1][usable]) / above[usable]
         between = below[usable] * above[usable] * (mean_below - mean_above) ** 2
         return float(centres[:-1][usable][int(np.argmax(between))])
+
+
+CENTRES: dict[str, type[CropCentre]] = {"image": ImageCentre, "tissue": TissueCentre}
+"""Selectable crop centres, by the name a cache and a manifest record.
+
+A declaration-only dispatch table rather than a bucket module: it is the vocabulary a config speaks, and
+`SCHEMES` in `slots.py` is the same shape for the same reason. "image" is the historic behaviour and the
+name every cache and member on disk means without saying so.
+"""
+
+DEFAULT_CENTRE = "image"
+"""What every cache built before the crop centre could vary was taken about."""
+
+
+@dataclass(frozen=True)
+class Crop:
+    """A physical crop: how much to take, and about what point.
+
+    One object because the two are not free to vary separately in any way that matters. The extent
+    decides how much margin there is for a mis-centred window, and the centre decides whether that
+    margin is needed — at 130 mm about the image centre the p90 error costs nothing, and at 80 mm it
+    cuts into the joint. Passing them one by one is the shape `Window`, `Split` and `Read` were each
+    created to fix in this package, and the argument-count gate said so the moment the second one
+    arrived.
+
+    Both defaults are the historic behaviour, so a caller that says nothing gets the pixels every cache
+    on disk already holds.
+    """
+
+    mm: float = CROP_MM
+    centre: str = DEFAULT_CENTRE
+
+    def suffix(self) -> str:
+        """What this crop adds to a cache's name — empty for the historic one.
+
+        Empty by design: those arrays are memory-mapped by running trainers and every member on disk was
+        fitted on them, so the default must keep resolving to the file it always did.
+        """
+        parts = []
+        if self.mm != CROP_MM:
+            parts.append(f"{self.mm:g}mm")
+        if self.centre != DEFAULT_CENTRE:
+            parts.append(self.centre)
+        return "".join(f"_{part}" for part in parts)
+
+    def located(self) -> CropCentre:
+        """The strategy this crop names, built."""
+        return CENTRES[self.centre]()

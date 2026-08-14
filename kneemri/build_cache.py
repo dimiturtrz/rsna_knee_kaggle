@@ -12,8 +12,9 @@ from pathlib import Path
 import pandas as pd
 
 from core.paths import DataRoot
+from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
-from kneemri.slot_reader import CROP_MM, IMAGE_SIZE
+from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 
@@ -46,6 +47,13 @@ def main() -> None:
         help="physical extent cropped about the centre. The default keeps the historic cache NAME, so "
         "any other value writes to its own file rather than over the arrays every member was fitted on.",
     )
+    parser.add_argument(
+        "--centre",
+        default=DEFAULT_CENTRE,
+        choices=sorted(CENTRES),
+        help="where the physical crop is taken about. 'image' is the historic behaviour and keeps the "
+        "historic cache name; 'tissue' locates the knee, which a tight crop needs (knee-yrf).",
+    )
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--split", default="train_series", help="which split to decode")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -73,7 +81,7 @@ def main() -> None:
         slices=arguments.slices,
         image_size=arguments.image_size,
         scheme=arguments.scheme,
-        crop_mm=arguments.crop_mm,
+        crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
     )
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)

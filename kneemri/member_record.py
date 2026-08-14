@@ -8,8 +8,9 @@ import torch
 from numpy.typing import NDArray
 
 from kneemri.backbone import Encoder
+from kneemri.crop_centre import CROP_MM
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import CROP_MM, SLICE_BAND
+from kneemri.slot_reader import SLICE_BAND
 
 
 class RunOptions(Protocol):

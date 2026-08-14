@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from kneemri.crop_centre import Crop
 from kneemri.slots import EXTENDED_SLOTS, SLOTS
 from kneemri.study_cache import DecodeRequest, StudyCache
 
@@ -174,10 +175,23 @@ def test_key_separates_a_different_crop(tmp_path: Path):
     for the same reason the canonical scheme does: those files are on disk and memory-mapped.
     """
     default = StudyCache(tmp_path, slices=12, image_size=336)
-    tighter = StudyCache(tmp_path, slices=12, image_size=336, crop_mm=80.0)
+    tighter = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(mm=80.0))
 
     assert default.key == "336px_12sl", "the historic name is unchanged"
     assert tighter.key != default.key
     assert "80mm" in tighter.key
     assert tighter.images_path != default.images_path
     assert tighter.mask_path != default.mask_path
+
+
+def test_key_separates_a_different_centre(tmp_path: Path):
+    """A tissue-centred cache is different pixels, so it must not share the image-centred file."""
+    default = StudyCache(tmp_path, slices=12, image_size=336)
+    located = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(centre="tissue"))
+
+    assert default.key == "336px_12sl", "the historic name means the historic centre"
+    assert "tissue" in located.key
+    assert located.images_path != default.images_path
+
+    both = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(mm=80.0, centre="tissue"))
+    assert both.key == "336px_12sl_80mm_tissue", "the two axes compose rather than shadowing each other"

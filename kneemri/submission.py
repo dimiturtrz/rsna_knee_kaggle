@@ -121,7 +121,10 @@ class Submission:
         reading. `Member.pixel_group` has always separated such members; `Ensemble.reads` now groups by
         the crop too, and this is where that answer finally reaches the decode.
         """
-        return SlotPipeline(scheme=read.scheme, reader=SlotReader(crop_mm=read.crop_mm, image_size=max(read.sizes)))
+        return SlotPipeline(
+            scheme=read.scheme,
+            reader=SlotReader(crop_mm=read.crop.mm, image_size=max(read.sizes), centre=read.crop.located()),
+        )
 
     @staticmethod
     def decoded_at(

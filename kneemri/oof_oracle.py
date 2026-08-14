@@ -46,6 +46,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
+from kneemri.crop_centre import CROP_MM
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.members import Member
 from kneemri.slot_ties import SlotTies
@@ -128,7 +129,7 @@ class OutOfFoldOracle:
         """
         saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
         config = saved["config"]
-        from kneemri.slot_reader import CROP_MM, SLICE_BAND  # noqa: PLC0415 - the constants under test
+        from kneemri.slot_reader import SLICE_BAND  # noqa: PLC0415 - the constants under test
 
         band = tuple(float(part) for part in str(config["band"]).split(","))
         differences = []
