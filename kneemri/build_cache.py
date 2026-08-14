@@ -54,6 +54,12 @@ def main() -> None:
         help="where the physical crop is taken about. 'image' is the historic behaviour and keeps the "
         "historic cache name; 'tissue' locates the knee, which a tight crop needs (knee-yrf).",
     )
+    parser.add_argument(
+        "--print-key",
+        action="store_true",
+        help="print the cache key this configuration resolves to and exit. The arm script used to "
+        "rebuild the key in bash, so every new reading axis silently broke its own completion check.",
+    )
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--split", default="train_series", help="which split to decode")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -83,6 +89,11 @@ def main() -> None:
         scheme=arguments.scheme,
         crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
     )
+    if arguments.print_key:
+        # The arm script's completion check needs the same key StudyCache writes, and it used to
+        # rebuild it in bash — so every reading axis added since silently broke that check.
+        logger.info("%s", cache.key)
+        return
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")

@@ -24,13 +24,19 @@ SCHEME="${3:-canonical}"
 # default because this arm's failure mode is not a slow build, it is a lost one - there is no resume.
 WORKERS="${4:-6}"
 
-# The same key StudyCache writes, so the gate and the artefact cannot drift: canonical keeps the bare
-# name the existing arrays use, anything else is named explicitly.
-KEY="${SIZE}px_${SLICES}sl"
-[ "$SCHEME" = "canonical" ] || KEY="${KEY}_${SCHEME}"
+# CROP is the physical extent and CENTRE is the point it is taken about (knee-yrf). Both default to
+# the historic reading, which every cache on disk and every member fitted on one already means.
+CROP="${5:-130}"; CENTRE="${6:-image}"
+
+# ASKED FOR, never rebuilt here. This used to reassemble StudyCache's key in bash, so the completion
+# check below tested a filename the builder had stopped writing the moment a reading axis was
+# added - and the arm's own comment claimed the gate and the artefact could not drift. They could.
+KEY="$(uv run python -m kneemri.build_cache --print-key \
+  --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" --crop-mm "$CROP" --centre "$CENTRE")"
 
 uv run python -u -m kneemri.build_cache \
-  --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" --workers "$WORKERS" 2>&1 \
+  --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" \
+  --crop-mm "$CROP" --centre "$CENTRE" --workers "$WORKERS" 2>&1 \
   | tee "$LOGS/cache_${KEY}.log"
 status="${PIPESTATUS[0]}"
 [ "$status" -eq 0 ] || { echo "ARM FAILED build_cache_${KEY} (exit $status)"; exit "$status"; }
