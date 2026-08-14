@@ -2828,38 +2828,44 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.acquisition.Acquisition.ordered_files",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.slot_reader.SlotReader._crop",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.slot_reader.SlotReader._decode",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.slot_reader.SlotReader._nearest",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.slot_reader.SlotReader.read",
+      "source": "kneemri.slot_reader.SlotReader.cropped",
       "target": "kneemri.slot_reader.SlotReader._sample_indices",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.slot_reader.SlotReader.read",
-      "target": "kneemri.slot_reader.SlotReader._to_uint8",
+      "target": "kneemri.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.SlotReader.read",
+      "target": "kneemri.slot_reader.SlotReader.sized",
       "weight": 1
     },
     {
@@ -6978,8 +6984,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.slot_reader.SlotReader._to_uint8",
-      "label": "_to_uint8",
+      "id": "kneemri.slot_reader.SlotReader.cropped",
+      "label": "cropped",
       "level": "method",
       "parent": "kneemri.slot_reader.SlotReader",
       "role": null
@@ -6988,6 +6994,14 @@
       "descendants": 0,
       "id": "kneemri.slot_reader.SlotReader.read",
       "label": "read",
+      "level": "method",
+      "parent": "kneemri.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.SlotReader.sized",
+      "label": "sized",
       "level": "method",
       "parent": "kneemri.slot_reader.SlotReader",
       "role": null
