@@ -66,3 +66,22 @@ def test_lost_report():
     assert "Coronal|fluid|nofs: 1139" in text
     assert "slices in unrouted series: 83297" in text
     assert "a discarded localiser is worth nothing" in text
+
+
+def test_disagreeing_order(tmp_path: Path):
+    """Counts only the studies whose table order differs from the sorted-UID order we route by.
+
+    The real corpus answers ZERO, which is what refutes the tie-break hypothesis — so the test builds
+    both cases explicitly rather than trusting a fixture that happens to agree.
+    """
+    table = tmp_path / "series.csv"
+    table.write_text(
+        "StudyInstanceUID,SeriesInstanceUID\n"
+        "agrees,1.1\nagrees,1.2\n"  # already sorted, as the whole real corpus is
+        "differs,2.9\ndiffers,2.1\n",  # the table leads with the LATER uid
+        encoding="utf-8",
+    )
+
+    disagreeing, total = SlotTies().disagreeing_order(table)
+
+    assert (disagreeing, total) == (1, 2)

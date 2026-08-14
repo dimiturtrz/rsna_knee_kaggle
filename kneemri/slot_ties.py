@@ -1,21 +1,36 @@
-"""How often two series compete for one slot — the ambiguity our routing resolves by list order.
+"""How often two series compete for one slot — and whether that ambiguity is ever resolved differently.
 
 `SlotScheme.assign` picks the densest stack for a slot and breaks a tie with `max`, which keeps the
 FIRST maximal element in list order. The published members we grafted were routed by a pandas
-`sort_values` that keeps the first in FRAME order. Where a slot is contested the two rules can pick
+`sort_values` that keeps the first in FRAME order. Where a slot is contested the two rules CAN pick
 different series, and a different series in a slot is a different image under the head — nothing
-downstream recovers it.
+downstream recovers it. Two independent measurements said the difference costs us something: our
+pipeline reproduces those members' out-of-fold predictions only to max|diff| 0.025, and the graft
+scored 0.888 against the public forks' ~0.899 on identical weights.
 
-Two independent measurements say that costs us something: our pipeline reproduces those members'
-out-of-fold predictions only to max|diff| 0.025, and the graft scored 0.888 against the public forks'
-~0.899 on identical weights. This module measures how often the ambiguity ARISES at all. Rare ties
-with the residual intact would kill the hypothesis, which is most of what it is worth measuring.
+THE HYPOTHESIS IS REFUTED, and by the cheapest thing in this module rather than the most careful.
+`disagreeing_order` reads one CSV: the frame order of `train_series.csv` is the sorted-UID order for
+ALL 4,407 studies, and `Study.from_directory` probes `sorted(directory.iterdir())` whose names ARE
+those UIDs. Same input order, and both rules keep the first maximal by slice count — so the two
+pipelines make the SAME choice in every contested slot. The 1,100 rivalries are opportunity that is
+never taken.
+
+WHAT SURVIVES: the census. 20.3% of studies hold a contested slot and 96% of those hold genuinely
+different pictures, so the routing IS load-bearing and a future change to it would move real images.
+What does not survive is tie-break as the explanation for the 0.011-0.025 residual, which must live in
+the other candidates — window policy, laterality, crop geometry, interpolation.
+
+THE ORDER OF THE TWO MEASUREMENTS WAS BACKWARDS. Counting contested slots takes 4,407 DICOM header
+reads and answers whether a divergence is POSSIBLE; comparing the two orderings takes one CSV read and
+answers whether it HAPPENS. The second strictly dominates, and it was available on day one.
 
 It reads one DICOM header per series and no pixels, so it is cheap and runs happily beside training.
 """
 
 from collections import Counter
 from pathlib import Path
+
+import pandas as pd
 
 from kneemri.slots import SLOTS, SlotScheme
 from kneemri.study import Study
@@ -28,6 +43,25 @@ class SlotTies:
 
     def __init__(self, scheme: SlotScheme | None = None) -> None:
         self.scheme = scheme or SlotScheme()
+
+    def disagreeing_order(self, series_table: Path) -> tuple[int, int]:
+        """Studies whose CSV ROW ORDER differs from the SORTED-UID order we route by, and the total.
+
+        THE MEASUREMENT THAT DECIDES WHETHER ANY OF THE REST MATTERS, and it costs a CSV read.
+
+        A tie can only be resolved differently by two pipelines if the two pipelines see the candidates
+        in a different ORDER — both rules keep the first maximal by slice count, so identical input
+        order forces an identical choice no matter how many slots are contested. `Study.from_directory`
+        probes `sorted(directory.iterdir())`, and the directory names ARE the series UIDs, so our list
+        order is the sorted-UID order. Theirs is the frame order of this table.
+
+        Counting contested slots (20.3% of studies, 1,100 rivalries, 96% of them genuinely different
+        pictures) measures the OPPORTUNITY to diverge. This measures whether the opportunity is ever
+        taken. It is the denominator the rest of this module does not have.
+        """
+        frame = pd.read_csv(series_table)
+        grouped = frame.groupby("StudyInstanceUID", sort=False)["SeriesInstanceUID"].apply(list)
+        return sum(1 for series in grouped if list(series) != sorted(series)), len(grouped)
 
     def of_study(self, directory: Path, planes: dict[str, str]) -> dict[str, int]:
         """Which of this study's slots were won by a tie on slice count."""
@@ -126,12 +160,25 @@ def main() -> None:
     logger = logging.getLogger(__name__)
 
     raw = DataRoot.from_config(arguments.paths).raw()
-    planes = StudyCache.planes_of(raw / arguments.split.replace("_series", "_series.csv"))
+    table = raw / arguments.split.replace("_series", "_series.csv")
+
+    # FIRST, because it can make everything below moot in one CSV read: if the two pipelines see the
+    # candidates in the same order, no number of contested slots can make them choose differently.
+    ties = SlotTies()
+    disagreeing, total = ties.disagreeing_order(table)
+    logger.info(
+        "%d of %d studies order their series differently in the table than on disk (%.1f%%)%s",
+        disagreeing,
+        total,
+        disagreeing / max(total, 1) * PERCENT,
+        "" if disagreeing else " — SAME ORDER, so both tie rules pick the same series everywhere",
+    )
+
+    planes = StudyCache.planes_of(table)
     directories = sorted(path for path in (raw / arguments.split).iterdir() if path.is_dir())
     if arguments.studies:
         directories = directories[: arguments.studies]
 
-    ties = SlotTies()
     totals: Counter[str] = Counter()
     worker = SlotTies._lost_of if arguments.lost else SlotTies._contested_of  # noqa: SLF001
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
