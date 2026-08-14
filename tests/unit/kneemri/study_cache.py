@@ -163,3 +163,21 @@ def test_report(caplog: pytest.LogCaptureFixture):
 
     with pytest.raises(ValueError, match="decoded to nothing"):
         cache.report(np.zeros((4, len(SLOTS)), dtype=np.float32))
+
+
+def test_key_separates_a_different_crop(tmp_path: Path):
+    """An 80mm cache must NOT write over the 130mm arrays every member was fitted on.
+
+    The key carried resolution, depth and scheme but not the physical crop, so a tighter-crop cache at
+    the same size and depth resolved to `images_336px_12sl.npy` — the path already holding 99 GB of
+    decoded arrays, with no shape change for anything to notice. The default keeps the historic name
+    for the same reason the canonical scheme does: those files are on disk and memory-mapped.
+    """
+    default = StudyCache(tmp_path, slices=12, image_size=336)
+    tighter = StudyCache(tmp_path, slices=12, image_size=336, crop_mm=80.0)
+
+    assert default.key == "336px_12sl", "the historic name is unchanged"
+    assert tighter.key != default.key
+    assert "80mm" in tighter.key
+    assert tighter.images_path != default.images_path
+    assert tighter.mask_path != default.mask_path

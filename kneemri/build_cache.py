@@ -13,7 +13,7 @@ import pandas as pd
 
 from core.paths import DataRoot
 from kneemri.folds import ReportFolds
-from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slot_reader import CROP_MM, IMAGE_SIZE
 from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 
@@ -38,6 +38,13 @@ def main() -> None:
         default=IMAGE_SIZE,
         help="in-plane resolution. Bytes grow with the SQUARE of this, and the cache path carries it, "
         "so a new resolution never disturbs an existing cache or the members fitted on it.",
+    )
+    parser.add_argument(
+        "--crop-mm",
+        type=float,
+        default=CROP_MM,
+        help="physical extent cropped about the centre. The default keeps the historic cache NAME, so "
+        "any other value writes to its own file rather than over the arrays every member was fitted on.",
     )
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--split", default="train_series", help="which split to decode")
@@ -66,6 +73,7 @@ def main() -> None:
         slices=arguments.slices,
         image_size=arguments.image_size,
         scheme=arguments.scheme,
+        crop_mm=arguments.crop_mm,
     )
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)

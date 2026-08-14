@@ -24,7 +24,7 @@ import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from kneemri.slot_reader import IMAGE_SIZE, SlotReader
+from kneemri.slot_reader import CROP_MM, IMAGE_SIZE, SlotReader
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.study import SlotPipeline, Study
 
@@ -71,6 +71,7 @@ class DecodeRequest:
     image_size: int
     scheme: str
     planes: dict[str, str]
+    crop_mm: float = CROP_MM
 
 
 class StudyCache:
@@ -80,12 +81,18 @@ class StudyCache:
     """The scheme whose caches keep their historic names, and the one the published members use."""
 
     def __init__(
-        self, directory: Path, slices: int = 12, image_size: int = IMAGE_SIZE, scheme: str = CANONICAL
+        self,
+        directory: Path,
+        slices: int = 12,
+        image_size: int = IMAGE_SIZE,
+        scheme: str = CANONICAL,
+        crop_mm: float = CROP_MM,
     ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
         self.scheme = scheme
+        self.crop_mm = crop_mm
 
     @property
     def slots(self) -> int:
@@ -106,8 +113,16 @@ class StudyCache:
         The canonical six-slot cache keeps its original name so the arrays already on disk, and the
         members fitted on them, stay loadable without renaming a file that a running trainer holds
         memory-mapped. Any other scheme is named explicitly.
+
+        THE PHYSICAL CROP IS HERE FOR THE SAME REASON THE SLOT COUNT IS, and it was missing. An 80 mm
+        cache at 336 px and 12 slices would have written to `images_336px_12sl.npy` — the path the 130 mm
+        arrays already occupy, which every existing member was fitted on — and destroyed them, silently,
+        with no shape change to notice. The default crop keeps the historic name for the same reason the
+        canonical scheme does.
         """
         base = f"{self.image_size}px_{self.slices}sl"
+        if self.crop_mm != CROP_MM:
+            base = f"{base}_{self.crop_mm:g}mm"
         return base if self.scheme == self.CANONICAL else f"{base}_{self.scheme}"
 
     @property
@@ -163,6 +178,7 @@ class StudyCache:
                 image_size=self.image_size,
                 scheme=self.scheme,
                 planes=planes,
+                crop_mm=self.crop_mm,
             )
             for position, identifier in enumerate(identifiers)
         ]
@@ -231,7 +247,8 @@ class StudyCache:
         images = np.load(request.images_path, mmap_mode="r+")
         try:
             pipeline = SlotPipeline(
-                scheme=SlotScheme(SCHEMES[request.scheme]), reader=SlotReader(image_size=request.image_size)
+                scheme=SlotScheme(SCHEMES[request.scheme]),
+                reader=SlotReader(crop_mm=request.crop_mm, image_size=request.image_size),
             )
             study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
             bag, mask = study.bag(request.slices)

@@ -11,6 +11,7 @@ from torch import Tensor
 from kneemri.backbone import SMALL
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
+from kneemri.slot_reader import CROP_MM
 
 SEED = 2026
 DIM = 8
@@ -414,3 +415,17 @@ def test_slot_pooling():
 
     assert member.slot_pooling == "attend", "every member on disk predates the flag and was attended"
     assert replace(member, config={**member.config, "slot_pooling": "mean"}).slot_pooling == "mean"
+
+
+def test_crop_mm():
+    """The physical extent a member was fitted on, defaulting to the constant for older manifests.
+
+    Read by NOTHING until 2026-08-14: the decode built its reader from the module constant, so a member
+    fitted on a tighter crop was served under 130 mm and every fingerprint still passed, because each is
+    checked against its own reading.
+    """
+    tighter = replace(_member(), config={**_config(), "crop_mm": 80.0})
+    assert tighter.crop_mm == 80.0
+
+    older = replace(_member(), config={key: value for key, value in _config().items() if key != "crop_mm"})
+    assert older.crop_mm == CROP_MM, "a manifest written before the crop could vary means the default"

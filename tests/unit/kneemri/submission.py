@@ -13,7 +13,7 @@ from torch import Tensor
 from kneemri.ensemble import Ensemble, Read
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import SlotReader
+from kneemri.slot_reader import CROP_MM, SlotReader
 from kneemri.study import SlotPipeline
 from kneemri.submission import Split, Submission
 
@@ -287,3 +287,20 @@ def test_pool(tmp_path: Path):
     with submission.pool(studies=3) as small:
         assert isinstance(small, ThreadPoolExecutor), "a three-study run must not spawn interpreters"
         assert small.submit(len, "abc").result() == 3
+
+
+def test_pipeline(tmp_path: Path):
+    """The decode reader is built from what the members RECORDED, not from the module constant.
+
+    A member fitted on an 80mm crop and served under 130mm is a different function, and nothing
+    downstream would say so: every fingerprint passes, because each is checked against its own reading.
+    """
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+
+    default = submission.pipeline(Read(3, scheme, (IMAGE,)))
+    assert default.reader.crop_mm == CROP_MM
+
+    tighter = submission.pipeline(Read(3, scheme, (IMAGE,), crop_mm=80.0))
+    assert tighter.reader.crop_mm == 80.0, "the crop the member recorded reaches the reader"
+    assert tighter.reader.image_size == IMAGE, "and the size is still the largest the group asked for"

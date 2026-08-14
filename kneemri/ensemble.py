@@ -26,6 +26,7 @@ from torch import Tensor
 from kneemri.backbone import ENCODERS
 from kneemri.members import Member, MemberPackage, Window
 from kneemri.model import TARGETS, StudyModel
+from kneemri.slot_reader import CROP_MM
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
@@ -83,11 +84,17 @@ class Read:
 
     Sizes is a tuple rather than a number because that is the whole point: resolution is the one axis a
     single read CAN serve many of, and pretending otherwise cost a full decode per resolution.
+
+    `crop_mm` is here because it is the one reading rule that changes the PIXELS and was reaching the
+    reader as a module constant regardless of what a member recorded. A member fitted on an 80 mm crop
+    served under 130 mm is a different function, and nothing downstream would notice: every fingerprint
+    still passes, because each is checked against its own reading.
     """
 
     slices: int
     scheme: SlotScheme
     sizes: tuple[int, ...]
+    crop_mm: float = CROP_MM
 
 
 class Ensemble:
@@ -140,12 +147,16 @@ class Ensemble:
         the resize, so one read serves every size exactly — `Study.bags` returns them together and each
         is byte-identical to a native read at that size.
 
-        So the unit of decoding is (scheme, slices), and pixel groups remain the unit of PREDICTION,
-        because a member is still fed the cache size it was fitted from.
+        So the unit of decoding is (scheme, slices, crop), and pixel groups remain the unit of
+        PREDICTION, because a member is still fed the cache size it was fitted from.
+
+        THE CROP JOINS THAT LIST for the same reason the scheme is in it: it changes which pixels exist,
+        not merely how they are sampled, so two members that crop differently cannot share one read.
+        `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int], list[Member]] = {}
+        gathered: dict[tuple[str, int, float], list[Member]] = {}
         for member in self.package.members:
-            gathered.setdefault((member.scheme, member.slices), []).append(member)
+            gathered.setdefault((member.scheme, member.slices, member.crop_mm), []).append(member)
         return list(gathered.values())
 
     def slices(self, members: list[Member] | None = None) -> int:
@@ -357,6 +368,9 @@ class Ensemble:
                 slices=self.slices(members),
                 scheme=self.decoded_scheme(members),
                 sizes=tuple(sorted({member.image_size for member in members})),
+                # One value, because `reads` groups by it — a group spanning two crops would be a group
+                # whose members want different pixels, which is the thing that grouping exists to stop.
+                crop_mm=members[0].crop_mm,
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return self.combine(per_member)

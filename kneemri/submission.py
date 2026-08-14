@@ -108,9 +108,20 @@ class Submission:
         the reference the equality test measures the pooled path against. A second pool here would have
         been a second decode path to keep in step, which is what the two kernels taught.
         """
-        pipeline = SlotPipeline(scheme=read.scheme, reader=SlotReader(image_size=max(read.sizes)))
+        pipeline = self.pipeline(read)
         root = self.split.series(self.competition)
         return self.batched([self.decoded_at(root / name, planes, pipeline, read) for name in identifiers], read)
+
+    def pipeline(self, read: Read) -> SlotPipeline:
+        """The reader ONE decode needs, built from what the members recorded rather than a constant.
+
+        `crop_mm` reached `SlotReader` as its module default no matter what a member's manifest said, so
+        a member fitted on a different physical extent was served under 130 mm and nothing anywhere
+        would have said so — every fingerprint still passes, because each is checked against its own
+        reading. `Member.pixel_group` has always separated such members; `Ensemble.reads` now groups by
+        the crop too, and this is where that answer finally reaches the decode.
+        """
+        return SlotPipeline(scheme=read.scheme, reader=SlotReader(crop_mm=read.crop_mm, image_size=max(read.sizes)))
 
     @staticmethod
     def decoded_at(
@@ -183,7 +194,7 @@ class Submission:
         the mount" — predicts the opposite of what happens.
         """
         started = time.time()
-        pipeline = SlotPipeline(scheme=read.scheme, reader=SlotReader(image_size=max(read.sizes)))
+        pipeline = self.pipeline(read)
         root = self.split.series(self.competition)
         groups = [identifiers[begin : begin + STUDY_CHUNK] for begin in range(0, len(identifiers), STUDY_CHUNK)]
 

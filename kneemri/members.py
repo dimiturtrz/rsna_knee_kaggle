@@ -22,6 +22,7 @@ from torch import Tensor, nn
 
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.model import StudyDesign, StudyModel
+from kneemri.slot_reader import CROP_MM
 from kneemri.slots import SCHEMES
 
 FINGERPRINT_TOLERANCE = 2e-3
@@ -111,6 +112,20 @@ class Member:
     def image_size(self) -> int:
         """Pixels per side the encoder is fed — with the crop, this fixes the effective mm/pixel."""
         return int(self.config["img"])
+
+    @property
+    def crop_mm(self) -> float:
+        """The physical extent this member was fitted on, in millimetres.
+
+        Recorded since the first manifest and read by NOTHING until now: `Submission.decode` built its
+        reader from the module constant, so a member fitted on a different crop was served under 130 mm
+        regardless. `pixel_group` has always included it, so the ensemble already refused to let such
+        members share a decode — it was the decode itself that ignored the answer.
+
+        Defaults to the constant for manifests written before a crop could vary, which is every member
+        on disk today and is exactly what they were fitted on.
+        """
+        return float(self.config.get("crop_mm", CROP_MM))
 
     @property
     def read_size(self) -> int:
