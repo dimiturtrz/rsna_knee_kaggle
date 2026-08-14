@@ -1,5 +1,6 @@
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import override
@@ -275,6 +276,14 @@ def test_batched(tmp_path: Path):
 
 
 def test_pool(tmp_path: Path):
-    """A usable executor, whatever kind it turns out to be — the point is that decode can run on it."""
-    with _submission(tmp_path).pool() as pool:
+    """A usable executor either way, and a small run does NOT pay to spawn one.
+
+    The floor is not cosmetic: the Kaggle run of 2026-08-14 decoded three visible studies in 6s against
+    3s serially, because four spawned interpreters cost more than three studies of decoding save.
+    """
+    submission = _submission(tmp_path)
+    with submission.pool(studies=1000) as pool:
         assert pool.submit(len, "abc").result() == 3
+    with submission.pool(studies=3) as small:
+        assert isinstance(small, ThreadPoolExecutor), "a three-study run must not spawn interpreters"
+        assert small.submit(len, "abc").result() == 3

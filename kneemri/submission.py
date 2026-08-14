@@ -36,6 +36,13 @@ STUDY_CHUNK = 48
 """Studies decoded before a prediction pass. Bounds peak memory: a chunk of 48 at twelve slices and
 336 pixels is about 390 MB, against a Kaggle host with 32 GB and four CPUs."""
 
+POOL_FLOOR = 20
+"""Below this many studies, spawning the pool costs more than it saves. DERIVED, not picked: the Kaggle
+run of 2026-08-14 decoded 3 visible studies in 6s against 3s for the serial path, so four spawned
+interpreters cost about 3s; the pool saves about 0.15s per study (0.27 -> 0.12, `decode_bench`). Three
+seconds buys twenty studies. A real split is thousands and always wins; the three-study visible pass and
+a dry run are exactly the cases that would silently get slower."""
+
 DECODE_WORKERS = 0
 """Decode processes; 0 means one per core. MEASURED, not assumed (`kneemri.decode_bench`, 96 studies,
 warm, returning the real bags): serial 25.7s, threads(4) 19.0s, threads(8) 26.1s — the setting this
@@ -183,7 +190,7 @@ class Submission:
         def submit(pool: Executor, names: list[str]) -> list[Future[dict[int, tuple[Tensor, Tensor]]]]:
             return [pool.submit(self.decoded_at, root / name, planes, pipeline, read) for name in names]
 
-        with self.pool() as pool:
+        with self.pool(len(identifiers)) as pool:
             pending: list[Future[dict[int, tuple[Tensor, Tensor]]]] = submit(pool, groups[0]) if groups else []
             for index, group in enumerate(groups):
                 # QUEUED BEFORE THE WAIT, which is the whole point: by the time the main thread returns
@@ -201,7 +208,7 @@ class Submission:
                 )
                 yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
 
-    def pool(self) -> Executor:
+    def pool(self, studies: int = POOL_FLOOR) -> Executor:
         """The decode pool: SPAWNED processes where they help, threads where they cannot be used.
 
         SPAWN, EXPLICITLY, and this is not a detail. Kaggle is Linux, where the default start method is
@@ -211,12 +218,12 @@ class Submission:
         what three lost entries were made of. Spawn costs one interpreter start per worker, paid once
         because the pool lives for the whole read rather than per chunk.
 
-        Threads are the fallback on a single core, and they produce IDENTICAL bags — the equality test
-        in `test_chunks` measures the pooled path against the serial one — so it costs speed, never
-        correctness.
+        Threads are the fallback on a single core AND on a run too small to amortise the spawn — they
+        produce IDENTICAL bags, which the equality test in `test_chunks` measures against the serial
+        path, so the fallback costs speed and never correctness.
         """
         workers = DECODE_WORKERS or (os.cpu_count() or 1)
-        if workers <= 1:
+        if workers <= 1 or studies < POOL_FLOOR:
             return ThreadPoolExecutor(max_workers=1)
         return ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"))
 
