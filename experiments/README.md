@@ -317,8 +317,14 @@ mean:
   size. Measured against radiologist annotations, held out.
 - **Caching 12 slices of a median 36 shows no measurable cost** — one of `knee-jk3`'s four named causes,
   tested for the first time and not supported.
-- **The slot tie-break is refuted**, by one CSV read, after a 4,407-study census had left it standing.
+- **Their router keeps the LAST of equally dense candidates; ours keeps the first.** The one difference
+  found in eleven tested axes, replicated on 4 of 4 published members across 3 seeds. Correcting it makes
+  the routing signature vanish entirely (`corr(residual, series_count)` +0.647 → −0.070). It is worth
+  about a third of the residual, not all of it.
+- **Ten other axes say our decode already IS theirs** — percentiles, DICOM windowing, crop rounding,
+  band sampling, resize filter, slice order and window policy — several of them assumptions recorded in
+  `comp/SUBMISSIONS.md` that had never been tested.
 
 Interpretation of the whole ledger, including what each refutation rules out, lives in
-`interpretations/kneemri/` — for the above, `2026-08-14_the-ruler-was-five-times-too-small.md` and
-`2026-08-14_labels-or-pixels.md`. The build log is git history.
+`interpretations/kneemri/` — for the above, `2026-08-14_the-ruler-was-five-times-too-small.md`,
+`2026-08-14_labels-or-pixels.md` and `2026-08-14_their-router-not-ours.md`. The build log is git history.
