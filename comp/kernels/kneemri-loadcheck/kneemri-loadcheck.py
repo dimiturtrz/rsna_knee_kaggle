@@ -130,9 +130,22 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger("loadcheck")
+
+    # WHERE THE STARTUP GOES, and it is worth knowing precisely: the efficiency board weights total
+    # runtime, and this kernel spent 343 s before its first line — six minutes of something. The
+    # candidates are container boot, ~1 GB of dataset mounts, unzipping a --dir-mode zip kit, the pip
+    # install, and importing torch. Only one of them is ours to fix, so measure rather than assume.
+    started = time.time()
+    logger.info("t=%5.1fs  script running (everything before this is Kaggle's own boot)", 0.0)
     kit = find_kit()
+    logger.info("t=%5.1fs  kit located at %s", time.time() - started, kit)
     install_wheels(kit)
+    logger.info("t=%5.1fs  wheels installed", time.time() - started)
     sys.path.insert(0, str(kit))
+
+    import torch as _torch  # noqa: PLC0415, F401 - timing the import is the point
+
+    logger.info("t=%5.1fs  torch imported", time.time() - started)
 
     import torch  # noqa: PLC0415 - after the kit is on sys.path
     import transformers  # noqa: PLC0415 - the version is the point
