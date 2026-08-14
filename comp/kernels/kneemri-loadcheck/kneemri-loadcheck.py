@@ -16,6 +16,7 @@ submission cannot afford to ask: does this thing load, on this runtime, from the
 import logging
 import subprocess
 import sys
+import time
 import zipfile
 from collections.abc import Callable
 from pathlib import Path
@@ -97,13 +98,32 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
 
     # A FORWARD OF ONE STUDY PROVES NOTHING ABOUT MEMORY. A submission sends a chunk of 48, and the
     # entries that died had every member loading and forwarding perfectly well.
+    #
+    # ALL THREE ARITHMETICS, timed and compared, because the choice is not obvious and I have twice
+    # guessed it. bf16 shares fp32's exponent range and gives up mantissa; fp16 keeps precision but tops
+    # out near 65504, which is the overflow a bf16-trained activation can meet. Turing has fp16 tensor
+    # cores, none for bf16, and no TF32 — so if emulated bf16 is really doing fp32 work, fp32 costs
+    # nothing over the bf16 we were already paying AND is the safer of the two. fp32 is the reference
+    # here: it cannot overflow where the others might, so the diffs say what each precision costs.
     chunk = torch.zeros(STUDY_CHUNK, slots, member.slices, member.image_size, member.image_size, dtype=torch.uint8)
-    try:
-        ensemble_of().predict_member(member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True)
-    except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
-        logger.error("CHUNK FAILED %s at %d studies: %s", member.identifier, STUDY_CHUNK, str(error)[:300])
-        return False
-    logger.info("       chunk of %d ok", STUDY_CHUNK)
+    reference = None
+    for name, dtype in (("fp32", torch.float32), ("fp16", torch.float16), ("bf16", torch.bfloat16)):
+        started = time.time()
+        try:
+            with torch.autocast("cuda", dtype=dtype, enabled=device.type == "cuda" and dtype is not torch.float32):
+                scored = ensemble_of().predict_member(
+                    member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True
+                )
+        except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
+            logger.error("CHUNK FAILED %s in %s: %s", member.identifier, name, str(error)[:250])
+            return False
+        elapsed = time.time() - started
+        if reference is None:
+            reference = scored
+            logger.info("       chunk of %d in %s: %5.1fs (reference)", STUDY_CHUNK, name, elapsed)
+        else:
+            worst = float(abs(scored - reference).max())
+            logger.info("       chunk of %d in %s: %5.1fs, max|diff| vs fp32 %.2e", STUDY_CHUNK, name, elapsed, worst)
     return True
 
 
