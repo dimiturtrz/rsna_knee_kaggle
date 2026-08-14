@@ -434,3 +434,22 @@ def test_crop():
     assert located.crop.centre == "tissue"
     assert _member().crop.centre == DEFAULT_CENTRE, "a manifest that does not say means the historic centre"
     assert located.pixel_group != _member().pixel_group, "different pixels cannot share one decode"
+
+
+def test_from_checkpoint_reads_a_published_slot_list(tmp_path: Path):
+    """A published checkpoint records its slots at the TOP LEVEL, not inside config.
+
+    Ours put them in `config`; theirs do not have the key at all, so `scheme` and `slot_count` raised
+    KeyError on every published checkpoint. It went unnoticed because published members normally arrive
+    through a manifest that supplies the list — the first tool to open one of their .pt files directly
+    was `oof_oracle`, whose whole purpose is to compare their pipeline against ours.
+    """
+    slots = list(SLOTS)
+    path = tmp_path / "m_published.pt"
+    torch.save({"config": {"img": 336, "slices": 12}, "slots": slots, "holdout": 0.84}, path)
+
+    member = Member.from_checkpoint(path)
+
+    assert member.config["slots"] == slots, "taken from where they actually live"
+    assert member.slot_count == len(slots)
+    assert member.scheme == "canonical", "and the scheme resolves, which is what finds its cache"

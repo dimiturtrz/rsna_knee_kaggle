@@ -8,8 +8,11 @@ import torch
 
 from kneemri.members import Member
 from kneemri.oof_oracle import OutOfFoldOracle
+from kneemri.slots import SLOTS
 
 TARGET_COUNT = 12
+CANONICAL = [slot.name for slot in SLOTS]
+"""The published members use the canonical six, and `agrees` compares their order against OURS."""
 SEEDS = (2026, 7717)
 FOLDS = (
     {"a", "b"},
@@ -25,8 +28,8 @@ def _checkpoint(path: Path, seed: int, identifiers: list[str], *, crop_mm: float
     torch.save(
         {
             "oof": {"ids": identifiers, "pred": rows},
-            "config": {"seed": seed, "crop_mm": crop_mm, "band": "0.20,0.80", "slots": ["SAG_FLUID_FS"]},
-            "slots": ["SAG_FLUID_FS"],
+            "config": {"seed": seed, "crop_mm": crop_mm, "band": "0.20,0.80", "slots": CANONICAL},
+            "slots": CANONICAL,
         },
         path,
     )

@@ -50,6 +50,7 @@ from kneemri.crop_centre import CROP_MM
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.members import Member
 from kneemri.slot_ties import SlotTies
+from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -137,8 +138,12 @@ class OutOfFoldOracle:
             differences.append(f"crop_mm {config['crop_mm']} vs our {CROP_MM}")
         if band != SLICE_BAND:
             differences.append(f"band {band} vs our {SLICE_BAND}")
-        if list(saved["slots"]) != list(member.config["slots"]):
-            differences.append(f"slot ORDER {saved['slots']} vs ours {member.config['slots']}")
+        # THEIR slot order against OURS, not against their own config: a published checkpoint records
+        # its slots at the top level and not inside `config`, so comparing the two config fields asked a
+        # question about their file rather than about the difference between their pipeline and ours.
+        ours = [slot.name for slot in SLOTS]
+        if list(saved["slots"]) != ours:
+            differences.append(f"slot ORDER {saved['slots']} vs ours {ours}")
         return differences
 
     def covariates(self, identifiers: list[str], series: pd.DataFrame) -> dict[str, NDArray[np.float64]]:

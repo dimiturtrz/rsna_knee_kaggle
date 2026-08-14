@@ -304,11 +304,20 @@ class Member:
         """
         saved = torch.load(path, map_location="cpu", weights_only=True)
         holdout = float(saved.get("holdout", float("nan")))
+        # THE SLOT LIST LIVES IN TWO PLACES AND ONLY ONE OF THEM IS OURS. Our own checkpoints record it
+        # inside `config`; the published ones record it at the TOP LEVEL and their config has no `slots`
+        # key at all, so `scheme` and `slot_count` raised KeyError on every published checkpoint. That
+        # went unnoticed because published members normally arrive through a manifest, which supplies
+        # it - and the first tool to read one of their .pt files directly was `oof_oracle`, whose whole
+        # purpose is to compare their pipeline against ours.
+        config: MemberConfig = dict(saved.get("config", {}))  # type: ignore[assignment]
+        if "slots" not in config and saved.get("slots"):
+            config["slots"] = list(saved["slots"])
         return cls(
             identifier=path.stem,
             file=path,
             fold=int(str(saved.get("options", {}).get("fold", 0))),
-            config=saved.get("config", {}),
+            config=config,
             fingerprint=np.asarray(saved.get("fingerprint", []), np.float32),
             holdout=holdout,
             annot=float(saved.get("annot", float("nan"))),
