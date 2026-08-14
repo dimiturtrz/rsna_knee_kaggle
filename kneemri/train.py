@@ -66,7 +66,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     whole_stack: bool = False
     recompute_activations: bool = False
-    bf16: bool = False
+    bf16: bool = True
     lora_rank: int = 0
     compile_encoder: bool = False
     vram_gb: float = 0.0
@@ -182,13 +182,24 @@ class TrainingOptions:
             "bit-identical, so what a small noisy dataset can do to a 1.7B-image representation is "
             "bounded by the rank rather than by the learning rate.",
         )
+        # BOTH SPELLINGS, because bf16 became the default AFTER fourteen arms were written asking for
+        # it explicitly. Removing the flag refused every one of them — arm_check said so before a queue
+        # slot was spent, which is exactly what it exists for — and an arm that names the default it
+        # wants is not wrong, it is just redundant now.
         parser.add_argument(
-            "--bf16",
-            action="store_true",
-            help="autocast in bfloat16 rather than fp16, and drop the loss scaler with it. Same matmul "
-            "throughput on this card; what it removes is scale collapse, since bf16 carries fp32's "
-            "exponent range. It CHANGES NUMERICS, so a run under it is not strictly matched to a "
-            "control measured in fp16.",
+            "--bf16", dest="bf16", action="store_true", default=True, help="the default; kept so older arms parse"
+        )
+        parser.add_argument(
+            "--fp16",
+            dest="bf16",
+            action="store_false",
+            help="train in fp16 with a loss scaler instead of the bf16 default. THE DEFAULT IS bf16: it "
+            "matches fp16's matmul throughput on this card (native from sm_80) and removes scale "
+            "collapse, since bf16 carries fp32's exponent range and needs no scaler. Serving is a "
+            "SEPARATE choice and is fp16 — a T4 has fp16 tensor cores and none for bf16, 65 TFLOPS "
+            "against 8.1, and fp16 has MORE mantissa than bf16, so the only thing given up is range. "
+            "Measured on real studies, our members peak at 3% of fp16's ceiling, and `Ensemble.arithmetic` "
+            "does the swap while `predict_member` redoes any non-finite pass in fp32.",
         )
         parser.add_argument(
             "--recompute-activations",

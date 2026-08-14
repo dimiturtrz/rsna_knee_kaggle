@@ -221,10 +221,17 @@ class Ensemble:
         exactly the kind of works-until-it-does-not that costs a submission rather than a warning, and
         fp16 is what every entry that has ever SCORED here ran under.
 
-        It is a real compromise: fp16 carries eight fewer exponent bits than bf16 and a bf16-trained
-        activation can overflow it. On a card with native bf16 nothing changes, and on one without, a
-        compromised answer beats an entry that does not run. Logged either way, because a later reader
-        must not have to guess which arithmetic produced a number.
+        AND IT IS NOT THE COMPROMISE THIS DOCSTRING ONCE CLAIMED. fp16 has 5 exponent bits against
+        bf16's 8, but it has MORE mantissa (10 against 7) — so the only thing at risk is range, and the
+        range was measured rather than feared: on real studies these members peak at 127.6 of fp16's
+        65504 ceiling, 2026 for the v3 one, a margin of 32x at worst. The weights are float32 in the
+        checkpoint either way (autocast never stored bf16), 0.0004% of them sit below fp16's smallest
+        subnormal, and loss scaling is a TRAINING device for gradient underflow that inference has no
+        use for.
+
+        So this serves fp16 for the speed — a T4 has fp16 tensor cores and none for bf16, which is
+        65 TFLOPS against 8.1 — and gives up nothing that was measured to matter. `predict_member`
+        carries the belt: a non-finite logit redoes that pass in fp32.
         """
         native = self.device.type == "cuda" and torch.cuda.get_device_capability() >= NATIVE_BF16
         if member.precision is torch.bfloat16 and self.device.type == "cuda" and not native:
@@ -315,6 +322,15 @@ class Ensemble:
                 for start in window.starts:
                     read = view[:, :, start : start + window.width]
                     logits = self.forwarded(model, read, mask, window, rows)
+                    # THE ONLY FAILURE MODE fp16 HAS THAT fp32 DOES NOT: an activation past 65504 comes
+                    # back inf, and a rank-average over inf is a wrong answer that looks like a number.
+                    # Measured on real studies, these members peak at 128 of 65504 (3% for the v3 one),
+                    # so this should never fire — and if a hidden study is stranger than any we hold, it
+                    # costs that chunk a slower pass instead of costing the entry its meaning.
+                    if not torch.isfinite(logits).all():
+                        logger.warning("%s produced non-finite logits — redoing this pass in fp32", member.identifier)
+                        with torch.autocast("cuda", enabled=False):
+                            logits = self.forwarded(model, read, mask, window, rows)
                     total = total + torch.sigmoid(logits)
                     passes += 1
         return (total / passes).cpu().numpy().astype(np.float64)

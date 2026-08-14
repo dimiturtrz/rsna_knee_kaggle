@@ -470,3 +470,35 @@ def test_predict_members_raises_when_every_member_fails(tmp_path: Path):
 
     with pytest.raises(RuntimeError, match="every member"):
         ensemble.predict_members([member], [chunk], overlap=False)
+
+
+def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):
+    """An inf logit is redone rather than averaged, because a rank-average over inf is a wrong number.
+
+    fp16 gives up range, not precision — it has more mantissa than bf16 — so overflow is its only real
+    failure mode. Measured, these members peak at 3% of the fp16 ceiling, so this is a belt: it should
+    never fire, and if a hidden study is stranger than any we hold it costs a slower pass rather than
+    the meaning of the entry.
+    """
+    ensemble = _ensemble(tmp_path / "overflow")
+    member = ensemble.package.members[0]
+    calls: list[bool] = []
+
+    class _Overflowing(StudyModel):
+        """Returns inf the first time, exactly as an activation past 65504 does under fp16."""
+
+        @override
+        def forward(self, imgs: torch.Tensor, mask: torch.Tensor, img_size: int | None = None) -> torch.Tensor:
+            calls.append(torch.is_autocast_enabled())
+            rows = imgs.shape[0]
+            if len(calls) == 1:
+                return torch.full((rows, len(TARGETS)), float("inf"))
+            return torch.zeros(rows, len(TARGETS))
+
+    ensemble.models[member.identifier] = _Overflowing(_FakeBackbone(), DIM, len(SLOTS), StudyDesign())
+    images = torch.zeros(2, len(SLOTS), 6, 14, 14, dtype=torch.uint8)
+
+    scored = ensemble.predict_member(member, images, torch.ones(2, len(SLOTS)), overlap=False)
+
+    assert len(calls) == 3, "two windows, and the one that overflowed is redone — not kept"
+    assert np.isfinite(scored).all(), "and what comes back is a number"
