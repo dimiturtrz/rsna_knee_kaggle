@@ -362,6 +362,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.label_combine",
+      "target": "kneemri.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.label_combine",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.label_combine",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.label_power",
       "target": "kneemri.model",
       "weight": 1
@@ -418,6 +436,12 @@
       "kind": "import",
       "source": "kneemri.member_curve",
       "target": "kneemri.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.member_curve",
+      "target": "kneemri.label_combine",
       "weight": 1
     },
     {
@@ -1969,6 +1993,78 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.label_combine.LabelCombine",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.applied",
+      "target": "kneemri.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.curve",
+      "target": "kneemri.label_combine.LabelCombine.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.curve",
+      "target": "kneemri.label_combine.LabelCombine.honest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.curve",
+      "target": "kneemri.label_combine.LabelCombine.ranking",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.curve",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.honest",
+      "target": "kneemri.label_combine.LabelCombine.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.honest",
+      "target": "kneemri.label_combine.LabelCombine.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.honest",
+      "target": "kneemri.label_combine.LabelCombine.ranking",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.honest",
+      "target": "kneemri.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.ranking",
+      "target": "kneemri.label_combine.LabelCombine._finite",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.label_combine.LabelCombine.ranking",
+      "target": "kneemri.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.label_power.LabelPower.report",
       "target": "kneemri.label_power.LabelPower.positives",
@@ -2077,6 +2173,48 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.label_combine.LabelCombine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.label_combine.LabelCombine.curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.member_curve.MemberCurve.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.member_curve.MemberCurve.oracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.member_curve.MemberCurve.paired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.member_curve.MemberCurve.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.member_curve.MemberCurve.logged",
+      "target": "kneemri.member_curve.MemberCurve.sizes",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.member_curve.MemberCurve.oracle",
       "target": "kneemri.ensemble.Ensemble.combine",
@@ -2175,31 +2313,7 @@
     {
       "kind": "calls",
       "source": "kneemri.member_curve.main",
-      "target": "kneemri.member_curve.MemberCurve.best",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.member_curve.MemberCurve.oracle",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.member_curve.MemberCurve.paired",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.member_curve.MemberCurve.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.member_curve.MemberCurve.sizes",
+      "target": "kneemri.member_curve.MemberCurve.logged",
       "weight": 1
     },
     {
@@ -3853,7 +3967,7 @@
       "role": null
     },
     {
-      "descendants": 54,
+      "descendants": 55,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -4016,6 +4130,14 @@
       "descendants": 0,
       "id": "kneemri.kit_check",
       "label": "kit_check",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine",
+      "label": "label_combine",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -4498,6 +4620,14 @@
       "label": "KitCheck",
       "level": "class",
       "parent": "kneemri.kit_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine",
+      "label": "LabelCombine",
+      "level": "class",
+      "parent": "kneemri.label_combine",
       "role": "primary"
     },
     {
@@ -5814,6 +5944,62 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine._finite",
+      "label": "_finite",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.curve",
+      "label": "curve",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.halves",
+      "label": "halves",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.honest",
+      "label": "honest",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.label_combine.LabelCombine.ranking",
+      "label": "ranking",
+      "level": "method",
+      "parent": "kneemri.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.label_power.LabelPower.__init__",
       "label": "__init__",
       "level": "method",
@@ -6000,6 +6186,14 @@
       "descendants": 0,
       "id": "kneemri.member_curve.MemberCurve.best",
       "label": "best",
+      "level": "method",
+      "parent": "kneemri.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_curve.MemberCurve.logged",
+      "label": "logged",
       "level": "method",
       "parent": "kneemri.member_curve.MemberCurve",
       "role": null
