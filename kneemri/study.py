@@ -41,9 +41,28 @@ class SlotPipeline:
     def slot_images(
         self, acquisition: Acquisition, slices: int, plane: str, side: str | None
     ) -> UInt8[Tensor, "s h w"] | None:
-        """Read one slot and normalise its laterality — the two steps are never useful apart."""
-        stack = self.reader.read(acquisition, slices)
-        return None if stack is None else self.laterality.normalise(stack, plane, side)
+        """Read one slot at this pipeline's size and normalise its laterality."""
+        sized = self.slot_sizes(acquisition, slices, plane, side, (self.image_size,))
+        return None if sized is None else sized[self.image_size]
+
+    def slot_sizes(
+        self, acquisition: Acquisition, slices: int, plane: str, side: str | None, sizes: "tuple[int, ...]"
+    ) -> "dict[int, UInt8[Tensor, 's h w']] | None":
+        """One slot read ONCE and delivered at every size asked for.
+
+        The decode and the physical crop do not depend on the grid; only the final resize does. So a
+        submission whose members read 392, 336 and 224 px can pay for one read instead of three — which
+        is what `predict_groups` currently costs, because it decodes the split once per pixel group.
+
+        Each size is still a single resize of the same cropped stack, so what a member is handed here is
+        BYTE-IDENTICAL to what a native read at its own size would produce; no fingerprint and no
+        witness moves. Laterality is normalised per size for the same reason it is normalised at all: a
+        flip is a property of the grid it is applied to.
+        """
+        stack = self.reader.cropped(acquisition, slices)
+        if stack is None:
+            return None
+        return {size: self.laterality.normalise(self.reader.sized(stack, size), plane, side) for size in sizes}
 
 
 class Study:
@@ -76,16 +95,22 @@ class Study:
         return self.pipeline.side_of(self.acquisitions)
 
     def bag(self, slices: int) -> tuple[UInt8[Tensor, "n s h w"], Float[Tensor, " n"]]:
-        """The per-slot image stacks and the presence mask, in the fixed slot order.
+        """The per-slot image stacks and the presence mask, at this pipeline's own size."""
+        return self.bags(slices, (self.pipeline.image_size,))[self.pipeline.image_size]
+
+    def bags(
+        self, slices: int, sizes: "tuple[int, ...]"
+    ) -> "dict[int, tuple[UInt8[Tensor, 'n s h w'], Float[Tensor, ' n']]]":
+        """The per-slot stacks and presence mask at EVERY requested size, from one read per series.
 
         A slot that is empty, or whose series will not decode at all, contributes zeros AND a zero in
         the mask — the head's softmax then renormalises over the slots the study actually has, rather
-        than attending to a black image that the mask claims was acquired.
+        than attending to a black image that the mask claims was acquired. The mask is a property of the
+        study rather than of the grid, so every size gets the same one.
         """
         chosen = self.pipeline.route(self.acquisitions, self.planes)
         side = self.side()
-        size = self.pipeline.image_size
-        images: list[Tensor] = []
+        images: dict[int, list[Tensor]] = {size: [] for size in sizes}
         mask: list[float] = []
         # THE PIPELINE'S slots, not the module's. `route` already honours the scheme, so iterating the
         # canonical six here made the two halves of this method disagree: a nine-slot scheme routed
@@ -95,11 +120,11 @@ class Study:
         # nothing was acquired. A build that "finished" and a trainer that reads zeros.
         for slot in self.pipeline.scheme.slots:
             acquisition = chosen.get(slot.name)
-            stack = None if acquisition is None else self.pipeline.slot_images(acquisition, slices, slot.plane, side)
-            if stack is None:
-                images.append(torch.zeros(slices, size, size, dtype=torch.uint8))
-                mask.append(0.0)
-                continue
-            images.append(stack)
-            mask.append(1.0)
-        return torch.stack(images), torch.tensor(mask, dtype=torch.float32)
+            read = (
+                None if acquisition is None else self.pipeline.slot_sizes(acquisition, slices, slot.plane, side, sizes)
+            )
+            for size in sizes:
+                images[size].append(torch.zeros(slices, size, size, dtype=torch.uint8) if read is None else read[size])
+            mask.append(0.0 if read is None else 1.0)
+        presence = torch.tensor(mask, dtype=torch.float32)
+        return {size: (torch.stack(stacks), presence) for size, stacks in images.items()}
