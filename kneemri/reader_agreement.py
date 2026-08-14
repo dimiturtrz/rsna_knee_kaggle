@@ -34,6 +34,9 @@ INTERVAL = (2.5, 97.5)
 ENGLISH = "en"
 POSITIVE = "YES"
 
+MIDPOINT = 0.5
+"""Where a graded annotation becomes a positive, matching `LabelScores`."""
+
 
 class ReaderAgreement:
     """How often the reader's verdict matches the radiologist, split by the report's language."""
@@ -58,6 +61,47 @@ class ReaderAgreement:
                     continue
                 rows.append((study["StudyInstanceUID"], language, target, str(verdict).upper(), float(truth)))
         return pd.DataFrame(rows, columns=["study", "language", "target", "verdict", "truth"])
+
+    def errors(self, cells: pd.DataFrame) -> pd.DataFrame:
+        """Every cell the reader got wrong, split by DIRECTION and by what it said.
+
+        WHY THE DIRECTION IS THE WHOLE POINT. "A third of positive calls are wrong" prices the reader
+        but does not say what a replacement must do differently, and the two directions ask for opposite
+        things: over-calling wants precision on YES, under-calling wants recall. Measured over the 58
+        annotated studies they are not balanced — 108 false positives against 32 misses — so a
+        replacement tuned for recall would make the dominant failure worse.
+
+        SPLIT BY VERDICT TOO, because a confident error and an abstention are different defects. All
+        108 false positives are confident YES, while 24 of the 32 misses are UNK: the reader is
+        confidently wrong far more often than it is uncertain, which is why its constant per-verdict
+        `__conf` cannot be used to downweight them.
+        """
+        wrong = cells[(cells["verdict"] == POSITIVE) != (cells["truth"] > MIDPOINT)].copy()
+        wrong["kind"] = np.where(wrong["verdict"] == POSITIVE, "false positive", "missed")
+        return wrong
+
+    def error_report(self, cells: pd.DataFrame) -> list[str]:
+        """The error census as lines: the two directions, then the findings that drive each.
+
+        Sorted by how LOPSIDED a finding is rather than by its error count, because a finding that only
+        over-calls and one that only under-calls need different work, and a ranking by volume hides
+        exactly that. Synovitis is the reason: it is the sole inversion, missing 14 and over-calling 3,
+        and it is also the finding whose labels predict the radiologist worst (0.6953, `supervision_gap`).
+        """
+        wrong = self.errors(cells)
+        lines = [f"{len(wrong)} wrong of {len(cells)} cells over {cells['study'].nunique()} studies"]
+        for kind, group in sorted(wrong.groupby("kind"), key=lambda item: -len(item[1])):
+            said = ", ".join(f"{verdict} {count}" for verdict, count in group["verdict"].value_counts().items())
+            lines.append(f"  {kind}: {len(group)}   (the reader said {said})")
+        counts = wrong.groupby(["target", "kind"]).size().unstack(fill_value=0)
+        for column in ("false positive", "missed"):
+            if column not in counts:
+                counts[column] = 0
+        counts["net"] = counts["false positive"] - counts["missed"]
+        lines.append(f"  {'finding':18s} {'over':>5s} {'under':>6s}   net (over minus under)")
+        for target, row in counts.sort_values("net", ascending=False).iterrows():
+            lines.append(f"  {target:18s} {row['false positive']:5d} {row['missed']:6d}   {row['net']:+d}")
+        return lines
 
     def gap(self, cells: pd.DataFrame) -> dict[str, float]:
         """English minus non-English agreement on the reader's POSITIVE calls, with a study-clustered interval.
@@ -137,7 +181,12 @@ def main() -> None:
     annotated = truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     agreement = ReaderAgreement()
-    for line in agreement.report(agreement.cells(annotated, read)):
+    cells = agreement.cells(annotated, read)
+    for line in agreement.report(cells):
+        logger.info(line)
+    # WHAT a replacement reader must do differently, beside how well this one agrees. The two are
+    # separate questions and the second is the actionable one.
+    for line in agreement.error_report(cells):
         logger.info(line)
 
 

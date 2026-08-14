@@ -78,3 +78,38 @@ def test_by_label():
 
     assert by_label[TARGETS[0]] == (3, pytest.approx(2 / 3))
     assert by_label[TARGETS[1]] == (3, pytest.approx(1 / 3))
+
+
+def _cells() -> pd.DataFrame:
+    """Four cells: one right, one over-called, one missed while confident, one missed while unsure."""
+    return pd.DataFrame(
+        [
+            ("s1", "en", "ACL", "YES", 1.0),
+            ("s1", "en", "MCL", "YES", 0.0),
+            ("s2", "en", "ACL", "NO", 1.0),
+            ("s2", "en", "Synovitis", "UNK", 1.0),
+        ],
+        columns=["study", "language", "target", "verdict", "truth"],
+    )
+
+
+def test_errors():
+    """Only the cells the reader got wrong, labelled by DIRECTION rather than lumped together."""
+    wrong = ReaderAgreement().errors(_cells())
+
+    assert len(wrong) == 3, "the agreeing cell is not an error"
+    assert set(wrong["kind"]) == {"false positive", "missed"}
+    assert list(wrong[wrong["kind"] == "false positive"]["target"]) == ["MCL"]
+    assert sorted(wrong[wrong["kind"] == "missed"]["target"]) == ["ACL", "Synovitis"]
+
+
+def test_error_report():
+    """Both directions, what the reader SAID on each, and findings ranked by how lopsided they are."""
+    lines = ReaderAgreement().error_report(_cells())
+    text = "\n".join(lines)
+
+    assert "3 wrong of 4 cells over 2 studies" in text
+    assert "missed: 2" in text and "UNK 1" in text and "NO 1" in text
+    assert "false positive: 1" in text
+    # MCL only over-calls (+1) and Synovitis only under-calls (-1), so they sit at opposite ends.
+    assert text.index("MCL") < text.index("Synovitis"), "ranked by net over-calling, not by volume"
