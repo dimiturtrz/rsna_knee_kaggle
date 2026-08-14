@@ -999,6 +999,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.folds",
       "weight": 1
     },
@@ -2654,6 +2660,12 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.member_record.RunOptions",
+      "target": "kneemri.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.members.Member",
       "target": "kneemri.crop_centre.Crop",
       "weight": 1
@@ -4071,6 +4083,12 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.model.StudyDesign",
       "weight": 1
     },
@@ -4108,6 +4126,12 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.adaptation",
       "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.crop",
+      "target": "kneemri.crop_centre.Crop",
       "weight": 1
     },
     {
@@ -7070,6 +7094,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.crop",
+      "label": "crop",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_record.RunOptions.ema",
       "label": "ema",
       "level": "method",
@@ -8744,6 +8776,14 @@
       "descendants": 0,
       "id": "kneemri.train.TrainingOptions.adaptation",
       "label": "adaptation",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.crop",
+      "label": "crop",
       "level": "method",
       "parent": "kneemri.train.TrainingOptions",
       "role": null
