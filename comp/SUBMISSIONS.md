@@ -78,10 +78,36 @@ verified, because **we have their checkpoints and their config but not their rou
 ties by anything else (the last maximal, SeriesNumber, acquisition time) diverges no matter how the
 candidates are ordered.
 
-And the rebuilt oracle's own covariates argue it does: over 24 studies the residual correlates **+0.664
-with contested slots**, the strongest of four routing covariates, and it survives controlling for series
-count (**partial +0.496, p ≈ 0.009**). The population whose divergence was declared impossible is the one
-that best predicts where the two pipelines disagree.
+And the rebuilt oracle's own covariates argued it does: over 24 studies the residual correlated **+0.664
+with contested slots**, the strongest of four routing covariates, surviving control for series count
+(**partial +0.496, p ≈ 0.009**). The population whose divergence was declared impossible was the one that
+best predicted where the two pipelines disagree.
+
+**Their rule is LAST-maximal; ours is first.** Decoding the same studies under each rule and scoring a
+published member against its OWN recorded predictions:
+
+| | 16 studies WITH a contested slot | 40 studies, unselected |
+|---|---|---|
+| `tie=first` (ours) | 0.1277 / 0.0236 | 0.1205 / 0.0094 |
+| `tie=last` | **0.0252 / 0.0061** | **0.0671 / 0.0062** |
+
+Replicated on **4 of 4 published members across 3 seeds**. Once the rule is corrected the routing
+signature disappears entirely — `corr(residual, series_count)` falls from **+0.647 to −0.070** — so the
+series-count correlation *was* the tie-break and nothing else.
+
+**It is one contributor, not the cause.** On the unselected sample the mean falls by a third while 32 of
+40 studies still disagree above 0.01, against the 1e-6 a faithful pipeline reaches.
+
+**Ten axes are now ruled out and our decode matches theirs on every one**: slice order (their
+`rules.order = 'normal'` is what we already do), percentile values and scope, DICOM windowing (they apply
+none — VOI LUT is far worse), crop rounding, band sampling and its dedupe, the resize filter, and the
+disjoint-window inference policy. Several of those were assumptions recorded in this file and never
+tested.
+
+The rule is plumbed as a per-member reading axis (`Routing(scheme, tie)`), because our members were
+FITTED under first-maximal — a global switch would fix the graft and break everything of ours. The cost
+of serving each side correctly is that `Ensemble.reads` groups by it, so a mixed entry decodes the test
+set twice.
 
 **And no declared reading axis differs either.** The published members' own checkpoints record
 `crop_mm 130.0`, `band 0.20,0.80`, `img 336`, `slices 12`, `group 3`, `pool cls_mean`, the identical slot
