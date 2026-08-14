@@ -3032,6 +3032,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.reader_agreement.ReaderAgreement.error_report",
+      "target": "kneemri.reader_agreement.ReaderAgreement.errors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.reader_agreement.ReaderAgreement.gap",
       "target": "kneemri.reader_agreement.ReaderAgreement._resample",
       "weight": 1
@@ -3064,6 +3070,12 @@
       "kind": "calls",
       "source": "kneemri.reader_agreement.main",
       "target": "kneemri.reader_agreement.ReaderAgreement.cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.reader_agreement.main",
+      "target": "kneemri.reader_agreement.ReaderAgreement.error_report",
       "weight": 1
     },
     {
@@ -7712,6 +7724,22 @@
       "descendants": 0,
       "id": "kneemri.reader_agreement.ReaderAgreement.cells",
       "label": "cells",
+      "level": "method",
+      "parent": "kneemri.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.reader_agreement.ReaderAgreement.error_report",
+      "label": "error_report",
+      "level": "method",
+      "parent": "kneemri.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.reader_agreement.ReaderAgreement.errors",
+      "label": "errors",
       "level": "method",
       "parent": "kneemri.reader_agreement.ReaderAgreement",
       "role": null
