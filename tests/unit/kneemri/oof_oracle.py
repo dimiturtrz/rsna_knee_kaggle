@@ -10,6 +10,8 @@ from kneemri.members import Member
 from kneemri.oof_oracle import OutOfFoldOracle
 from kneemri.slots import SLOTS
 
+from .conftest import write_series
+
 TARGET_COUNT = 12
 CANONICAL = [slot.name for slot in SLOTS]
 """The published members use the canonical six, and `agrees` compares their order against OURS."""
@@ -107,3 +109,21 @@ def test_report():
     assert "studies above 0.01: 1 of 2" in text
     assert "corr(residual, series_count) = +1.000" in text, "a defect that tracks a covariate says so"
     assert text.index("loud") < text.index("quiet"), "worst first, because that is what gets opened"
+
+
+def test_routing(tmp_path: Path):
+    """Per-study routing covariates, on a study whose slots are known by construction.
+
+    These exist because `series_count` alone said "routing" without saying WHICH part of it, and one of
+    them — contested slots — turned out to carry independent signal against a hypothesis I had already
+    called refuted.
+    """
+    study = tmp_path / "s1"
+    write_series(study / "a", slices=6)
+    planes = {"a": "Sagittal"}
+
+    covariates = OutOfFoldOracle().routing(["s1"], tmp_path, planes)
+
+    assert sorted(covariates) == ["contested_slots", "empty_slots", "unrouted_series"]
+    assert all(len(values) == 1 for values in covariates.values())
+    assert covariates["empty_slots"][0] >= 1.0, "one sagittal series cannot fill six slots"

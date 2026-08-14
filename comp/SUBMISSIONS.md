@@ -66,12 +66,22 @@ That agrees in direction and rough size with the 0.025 out-of-fold residual meas
 three days made the slot tie-break the lead: when two candidate series have equal slice counts, a stable
 `sort_values` picks the first in FRAME order and our `max()` picks the first in LIST order.
 
-**The tie-break is refuted (2026-08-14), by one CSV read.** Both rules keep the first maximal by slice
-count, so they can only diverge if the two pipelines see the candidates in a different ORDER.
+**The ORDER is refuted (2026-08-14), by one CSV read** — and that is less than it first appeared.
 `Study.from_directory` probes `sorted(directory.iterdir())` and the directory names ARE the series UIDs;
-`train_series.csv`'s frame order is that same sorted-UID order for **4,407 of 4,407 studies**. Same order
-in, same series out, in every contested slot. `SlotTies.disagreeing_order` measures it and the CLI prints
-it first.
+`train_series.csv`'s frame order is that same sorted-UID order for **4,407 of 4,407 studies**. So the two
+pipelines see a slot's candidates in the same order, and order cannot be the source of a divergence.
+`SlotTies.disagreeing_order` measures it and the CLI prints it first.
+
+**That was written up as "the tie-break is refuted", which overstates it.** The step from "same order" to
+"same choice" assumes their rule is *first maximal by slice count* — an inference recorded here, never
+verified, because **we have their checkpoints and their config but not their router**. A rule that breaks
+ties by anything else (the last maximal, SeriesNumber, acquisition time) diverges no matter how the
+candidates are ordered.
+
+And the rebuilt oracle's own covariates argue it does: over 24 studies the residual correlates **+0.664
+with contested slots**, the strongest of four routing covariates, and it survives controlling for series
+count (**partial +0.496, p ≈ 0.009**). The population whose divergence was declared impossible is the one
+that best predicts where the two pipelines disagree.
 
 **And no declared reading axis differs either.** The published members' own checkpoints record
 `crop_mm 130.0`, `band 0.20,0.80`, `img 336`, `slices 12`, `group 3`, `pool cls_mean`, the identical slot

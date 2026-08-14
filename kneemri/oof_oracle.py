@@ -156,6 +156,43 @@ class OutOfFoldOracle:
         counts = series.groupby("StudyInstanceUID")["SeriesInstanceUID"].count()
         return {"series_count": np.array([float(counts.get(name, 0)) for name in identifiers])}
 
+    def routing(
+        self, identifiers: list[str], series_root: Path, planes: dict[str, str]
+    ) -> dict[str, NDArray[np.float64]]:
+        """Per-study ROUTING covariates, which is where the residual pointed.
+
+        `series_count` correlated +0.647 with the residual over 24 studies, and that is a routing
+        signature rather than a decode one — a decode difference spreads evenly, while a study with two
+        series has almost no routing to get wrong and one with nine has a great deal. But series_count
+        also tracks study complexity in general, so it cannot say WHICH part of routing.
+
+        These three can. `unrouted` counts series no slot accepts at all — 17.4% of the corpus, the
+        population `knee-t92` measured and nothing has ever tied to an outcome. `empty` counts slots left
+        with no candidate, which the presence mask then declares absent. `contested` counts slots two
+        series competed for, the population whose tie-break was refuted this morning — included
+        precisely so the refuted candidate gets a second, independent chance to show itself.
+
+        Headers only, no pixels, so this costs seconds beside the forward pass it explains.
+        """
+        from kneemri.slots import SlotScheme  # noqa: PLC0415 - CLI-side analysis, not the library path
+        from kneemri.study import Study  # noqa: PLC0415 - as above
+
+        scheme = SlotScheme()
+        unrouted: list[float] = []
+        empty: list[float] = []
+        contested: list[float] = []
+        for name in identifiers:
+            study = Study.from_directory(series_root / name, planes)
+            routed = scheme.assign(study.acquisitions, planes)
+            unrouted.append(float(len(scheme.unrouted(study.acquisitions, planes))))
+            empty.append(float(len(scheme.slots) - len(routed)))
+            contested.append(float(sum(scheme.contested(study.acquisitions, planes).values())))
+        return {
+            "unrouted_series": np.array(unrouted),
+            "empty_slots": np.array(empty),
+            "contested_slots": np.array(contested),
+        }
+
     def report(
         self,
         identifiers: list[str],
@@ -233,7 +270,11 @@ def main() -> None:
 
     chosen = [identifiers[index] for index in keep]
     series = pd.read_csv(root.raw() / "train_series.csv")
-    for line in oracle.report(chosen, ours, theirs[keep], oracle.covariates(chosen, series)):
+    covariates = oracle.covariates(chosen, series)
+    covariates.update(
+        oracle.routing(chosen, root.raw() / "train_series", StudyCache.planes_of(root.raw() / "train_series.csv"))
+    )
+    for line in oracle.report(chosen, ours, theirs[keep], covariates):
         logger.info(line)
     logger.info("(contested-slot rate for context: %s)", SlotTies().disagreeing_order(root.raw() / "train_series.csv"))
 
