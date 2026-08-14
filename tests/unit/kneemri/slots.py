@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from kneemri.acquisition import Acquisition
-from kneemri.slots import LAST_MAXIMAL, SLOTS, Slot, SlotScheme
+from kneemri.slots import LAST_MAXIMAL, SLOTS, Routing, Slot, SlotScheme
 
 from .conftest import write_series
 
@@ -97,3 +97,20 @@ def test_won(tmp_path: Path):
     assert SlotScheme().won(candidates) is dense_a, "the default keeps the first of the densest"
     assert SlotScheme(tie=LAST_MAXIMAL).won(candidates) is dense_b
     assert SlotScheme(tie=LAST_MAXIMAL).won([thin, dense_a]) is dense_a, "density still outranks the rule"
+
+
+def test_suffix():
+    """What a routing adds to a cache's name — nothing for the historic one, so 99 GB stays findable."""
+    assert Routing().suffix() == ""
+    assert Routing(tie=LAST_MAXIMAL).suffix() == "_last"
+    assert Routing(scheme="extended").suffix() == "_extended"
+    assert Routing(scheme="extended", tie=LAST_MAXIMAL).suffix() == "_extended_last"
+
+
+def test_built():
+    """The routing builds the scheme it names, carrying its tie rule rather than dropping it."""
+    built = Routing(tie=LAST_MAXIMAL).built()
+
+    assert built.tie == LAST_MAXIMAL
+    assert [slot.name for slot in built.slots] == [slot.name for slot in SLOTS]
+    assert len(Routing(scheme="extended").built().slots) > len(SLOTS), "the named scheme, not a default"

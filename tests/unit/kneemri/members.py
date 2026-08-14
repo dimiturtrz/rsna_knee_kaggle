@@ -12,6 +12,7 @@ from kneemri.backbone import SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
+from kneemri.slots import Routing
 
 SEED = 2026
 DIM = 8
@@ -453,3 +454,20 @@ def test_from_checkpoint_reads_a_published_slot_list(tmp_path: Path):
     assert member.config["slots"] == slots, "taken from where they actually live"
     assert member.slot_count == len(slots)
     assert member.scheme == "canonical", "and the scheme resolves, which is what finds its cache"
+
+
+def test_tie():
+    """Which router a member was fitted under, and that a different one is different PIXELS."""
+    theirs = replace(_member(), config={**_config(), "tie": "last"})
+
+    assert theirs.tie == "last"
+    assert _member().tie == "first", "ours, and what every cache on disk holds"
+    assert theirs.pixel_group != _member().pixel_group, "a different router cannot share a decode"
+
+
+def test_routing():
+    """A member's routing is the pair its pixels depend on: which slots, and who wins a tie."""
+    theirs = replace(_member(), config={**_config(), "tie": "last"})
+
+    assert _member().routing == Routing(scheme="canonical", tie="first")
+    assert theirs.routing.tie == "last", "recorded per member, because ours and theirs differ"

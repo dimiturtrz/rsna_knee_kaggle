@@ -15,7 +15,7 @@ from core.paths import DataRoot
 from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
 from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import SCHEMES
+from kneemri.slots import FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -60,6 +60,14 @@ def main() -> None:
         help="print the cache key this configuration resolves to and exit. The arm script used to "
         "rebuild the key in bash, so every new reading axis silently broke its own completion check.",
     )
+    parser.add_argument(
+        "--tie",
+        default=FIRST_MAXIMAL,
+        choices=(FIRST_MAXIMAL, LAST_MAXIMAL),
+        help="which of several equally dense candidates fills a slot. 'first' is ours and keeps the "
+        "historic cache name; the published members reproduce their own predictions better under "
+        "'last' (knee-evn), so a graft-matching cache is built with it.",
+    )
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--split", default="train_series", help="which split to decode")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -86,7 +94,7 @@ def main() -> None:
         arguments.out or root.processed(),
         slices=arguments.slices,
         image_size=arguments.image_size,
-        scheme=arguments.scheme,
+        routing=Routing(scheme=arguments.scheme, tie=arguments.tie),
         crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
     )
     if arguments.print_key:

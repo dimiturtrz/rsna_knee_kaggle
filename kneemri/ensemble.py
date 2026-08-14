@@ -150,13 +150,18 @@ class Ensemble:
         So the unit of decoding is (scheme, slices, crop), and pixel groups remain the unit of
         PREDICTION, because a member is still fed the cache size it was fitted from.
 
+        THE TIE RULE IS IN THAT LIST TOO, and it is the reason a fused entry may need two decodes: the
+        published members were fitted under a LAST-maximal router and ours under first (knee-evn), and a
+        different router puts a different SERIES in a slot — which is different pixels, not a different
+        view of the same ones.
+
         THE CROP JOINS THAT LIST for the same reason the scheme is in it: it changes which pixels exist,
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int, Crop], list[Member]] = {}
+        gathered: dict[tuple[str, int, Crop, str], list[Member]] = {}
         for member in self.package.members:
-            gathered.setdefault((member.scheme, member.slices, member.crop), []).append(member)
+            gathered.setdefault((member.scheme, member.slices, member.crop, member.tie), []).append(member)
         return list(gathered.values())
 
     def slices(self, members: list[Member] | None = None) -> int:
@@ -218,7 +223,11 @@ class Ensemble:
         if missing:
             message = f"members name slots this build does not define: {missing}"
             raise ValueError(message)
-        return SlotScheme(tuple(known[name] for name in names))
+        ties = {member.tie for member in (members or self.package.members)}
+        if len(ties) != 1:
+            message = f"members disagree on the tie rule ({sorted(ties)}) — that is two decodes, not one"
+            raise ValueError(message)
+        return SlotScheme(tuple(known[name] for name in names), tie=ties.pop())
 
     def arithmetic(self, member: Member) -> torch.dtype:
         """The dtype this DEVICE can actually run, which is not always the one the member was fitted in.

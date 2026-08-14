@@ -23,7 +23,7 @@ from torch import Tensor, nn
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
-from kneemri.slots import SCHEMES
+from kneemri.slots import FIRST_MAXIMAL, SCHEMES, Routing
 
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
@@ -66,6 +66,13 @@ class MemberConfig(TypedDict):
     slices: int
     group: int
     crop_mm: float
+
+    tie: NotRequired[str]
+    """Which of several equally dense candidates filled a slot. Absent on every member fitted before the
+    rule could vary, and those were all fitted under `first`."""
+
+    centre: NotRequired[str]
+    """Where the physical crop was taken about. Absent means the image centre, as every member on disk."""
     band: list[float]
     slots: list[str]
     rules: ReadingRules
@@ -112,6 +119,24 @@ class Member:
     def image_size(self) -> int:
         """Pixels per side the encoder is fed — with the crop, this fixes the effective mm/pixel."""
         return int(self.config["img"])
+
+    @property
+    def routing(self) -> Routing:
+        """How this member's series became slots: which slots, and which candidate won a tie."""
+        return Routing(scheme=self.scheme, tie=self.tie)
+
+    @property
+    def tie(self) -> str:
+        """Which of several equally dense candidates filled a slot when this member was fitted.
+
+        MEASURED, not assumed: the twenty published members reproduce their own recorded predictions
+        better under LAST-maximal than under the first-maximal rule our `max()` applies — 4 of 4 members
+        tested across 3 seeds, mean residual 15-25% lower (knee-evn). Ours were fitted under `first`, so
+        this cannot be a global switch: one flag would fix the graft and break everything of ours.
+
+        Defaults to `first`, which is what every cache and every member of ours on disk was built with.
+        """
+        return str(self.config.get("tie", FIRST_MAXIMAL))
 
     @property
     def crop(self) -> Crop:
@@ -342,6 +367,8 @@ class Member:
             # Extent AND centre: two members cropped differently are looking at different pixels, so one
             # decode cannot serve both.
             "crop": [self.crop.mm, self.crop.centre],
+            # A different router puts different SERIES in a slot, which is different pixels.
+            "tie": self.tie,
             "group": self.config["group"],
             "img": self.config["img"],
             "rules": self.config["rules"],

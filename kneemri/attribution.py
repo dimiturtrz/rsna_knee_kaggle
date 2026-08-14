@@ -326,7 +326,7 @@ def main() -> None:
     # does not fail — it publishes.
     reading = Member.from_checkpoint(arguments.checkpoint)
     corpus, identifiers = StudyCache(
-        root.processed(), slices=reading.slices, image_size=reading.image_size, scheme=reading.scheme
+        root.processed(), slices=reading.slices, image_size=reading.image_size, routing=reading.routing
     ).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)

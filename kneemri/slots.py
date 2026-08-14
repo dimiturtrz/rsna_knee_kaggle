@@ -88,7 +88,10 @@ also a FIRST-maximal rule, so if the two pipelines diverge on contested slots it
 is not the one we assumed. For TESTING against the published members' recorded predictions, not for
 switching on."""
 
-SCHEMES: dict[str, tuple[Slot, ...]] = {"canonical": SLOTS, "extended": EXTENDED_SLOTS}
+CANONICAL_SCHEME = "canonical"
+"""The scheme whose caches keep their historic names, and the one the published members use."""
+
+SCHEMES: dict[str, tuple[Slot, ...]] = {CANONICAL_SCHEME: SLOTS, "extended": EXTENDED_SLOTS}
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 
@@ -186,3 +189,35 @@ class SlotScheme:
     def presence(self, chosen: dict[str, Acquisition]) -> list[float]:
         """The mask the head's softmax renormalises over: 1.0 where a slot was filled, 0.0 where not."""
         return [1.0 if slot.name in chosen else 0.0 for slot in self.slots]
+
+
+@dataclass(frozen=True)
+class Routing:
+    """How a study's series become slots: which slots exist, and which candidate wins a tie.
+
+    One object because the argument-count gate refused the second one separately, and because they are
+    the same subject — `SlotScheme` already holds both. The scheme decides which series are ROUTED at
+    all and the tie decides WHICH of the eligible ones fills a slot; either changes the pixels a member
+    sees, so neither can be resolved silently when members disagree.
+
+    Both defaults are what every cache and every member of ours on disk was built with.
+    """
+
+    scheme: str = CANONICAL_SCHEME
+    tie: str = FIRST_MAXIMAL
+
+    def suffix(self) -> str:
+        """What this routing adds to a cache's name — empty for the historic one.
+
+        Empty by design, for the same reason `Crop.suffix` is: those arrays are memory-mapped by running
+        trainers and every member on disk was fitted on them.
+        """
+        named = (
+            self.scheme if self.scheme != CANONICAL_SCHEME else "",
+            self.tie if self.tie != FIRST_MAXIMAL else "",
+        )
+        return "".join(f"_{part}" for part in named if part)
+
+    def built(self) -> "SlotScheme":
+        """The scheme this routing names, carrying its tie rule."""
+        return SlotScheme(SCHEMES[self.scheme], tie=self.tie)

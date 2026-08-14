@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from kneemri.crop_centre import Crop
-from kneemri.slots import EXTENDED_SLOTS, SLOTS
+from kneemri.slots import EXTENDED_SLOTS, SLOTS, Routing
 from kneemri.study_cache import DecodeRequest, StudyCache
 
 from .conftest import write_series
@@ -99,7 +99,6 @@ def test_decode_one(tmp_path: Path):
             images_path=str(cache.images_path),
             slices=2,
             image_size=8,
-            scheme="canonical",
             planes={"sag": "Sagittal"},
         )
     )
@@ -118,7 +117,7 @@ def test_key(tmp_path: Path):
     assert canonical.key == "336px_12sl"
     assert canonical.images_path.name == "images_336px_12sl.npy"
 
-    extended = StudyCache(tmp_path, slices=12, image_size=336, scheme="extended")
+    extended = StudyCache(tmp_path, slices=12, image_size=336, routing=Routing(scheme="extended"))
     assert extended.key == "336px_12sl_extended"
     assert extended.images_path != canonical.images_path, "a different slot count must not collide"
     assert extended.mask_path != canonical.mask_path
@@ -127,7 +126,7 @@ def test_key(tmp_path: Path):
 
 def test_shape_follows_the_slot_count(tmp_path: Path):
     """The shape reports the cache's OWN slot count, not the module-level scheme's."""
-    assert StudyCache(tmp_path, slices=12, image_size=336, scheme="extended").shape(4407)[1] == 9
+    assert StudyCache(tmp_path, slices=12, image_size=336, routing=Routing(scheme="extended")).shape(4407)[1] == 9
 
 
 def test_slots(tmp_path: Path):
@@ -137,14 +136,14 @@ def test_slots(tmp_path: Path):
     unreachable, and an invariant held by construction beats one held by a guard.
     """
     assert StudyCache(tmp_path).slots == len(SLOTS)
-    assert StudyCache(tmp_path, scheme="extended").slots == len(SLOTS) + 3
+    assert StudyCache(tmp_path, routing=Routing(scheme="extended")).slots == len(SLOTS) + 3
 
 
 def test_scheme_slots():
     """The slot names a cache is built over, in order — the width of its own second axis."""
     cache = StudyCache(Path("nowhere"))
     assert cache.scheme_slots == [slot.name for slot in SLOTS]
-    assert len(StudyCache(Path("nowhere"), scheme="extended").scheme_slots) == len(EXTENDED_SLOTS)
+    assert len(StudyCache(Path("nowhere"), routing=Routing(scheme="extended")).scheme_slots) == len(EXTENDED_SLOTS)
 
 
 def test_report(caplog: pytest.LogCaptureFixture):
@@ -195,3 +194,13 @@ def test_key_separates_a_different_centre(tmp_path: Path):
 
     both = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(mm=80.0, centre="tissue"))
     assert both.key == "336px_12sl_80mm_tissue", "the two axes compose rather than shadowing each other"
+
+
+def test_key_separates_a_different_tie(tmp_path: Path):
+    """A last-maximal cache holds different SERIES in its slots, so it needs its own file."""
+    default = StudyCache(tmp_path, slices=12, image_size=336)
+    theirs = StudyCache(tmp_path, slices=12, image_size=336, routing=Routing(tie="last"))
+
+    assert default.key == "336px_12sl"
+    assert theirs.key == "336px_12sl_last"
+    assert theirs.images_path != default.images_path

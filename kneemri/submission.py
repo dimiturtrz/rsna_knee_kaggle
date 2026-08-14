@@ -115,6 +115,10 @@ class Submission:
     def pipeline(self, read: Read) -> SlotPipeline:
         """The reader ONE decode needs, built from what the members recorded rather than a constant.
 
+        The scheme carries the TIE RULE, so this needs no extra field: `Ensemble.decoded_scheme` refuses
+        a group whose members disagree about it, and `reads` groups by it, so a mixed entry is two
+        decodes rather than one silently wrong one.
+
         `crop_mm` reached `SlotReader` as its module default no matter what a member's manifest said, so
         a member fitted on a different physical extent was served under 130 mm and nothing anywhere
         would have said so — every fingerprint still passes, because each is checked against its own

@@ -20,7 +20,7 @@ from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.model import StudyDesign, StudyModel
-from kneemri.slots import SCHEMES
+from kneemri.slots import SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def main() -> None:
 
     root = DataRoot.from_config(arguments.paths).processed()
     corpus, identifiers = StudyCache(
-        root, slices=arguments.slices, image_size=arguments.image_size, scheme=arguments.scheme
+        root, slices=arguments.slices, image_size=arguments.image_size, routing=Routing(scheme=arguments.scheme)
     ).load()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

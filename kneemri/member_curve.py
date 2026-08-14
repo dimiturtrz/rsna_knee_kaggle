@@ -36,6 +36,7 @@ from kneemri.label_combine import LabelCombine
 from kneemri.members import Member
 from kneemri.prediction_cache import PredictionCache
 from kneemri.scores import LabelScores
+from kneemri.slots import Routing
 from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
 from kneemri.test_time import SpatialViews
@@ -250,7 +251,7 @@ def main() -> None:
 
     def cache_of(key: tuple[int, int, str]) -> tuple[CachedCorpus, list[str]]:
         size, slices, scheme = key
-        return StudyCache(root.processed(), slices=slices, image_size=size, scheme=scheme).load()
+        return StudyCache(root.processed(), slices=slices, image_size=size, routing=Routing(scheme=scheme)).load()
 
     # The split is taken from the FIRST cache and reused, so every member is scored on the same studies
     # in the same order. Any other cache that disagrees about that order is refused: its rows would be

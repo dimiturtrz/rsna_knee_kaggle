@@ -27,7 +27,7 @@ from kneemri.report_supervision import ReportSupervision
 from kneemri.run_metrics import EpochRow, RunMetrics
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import SCHEMES
+from kneemri.slots import SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
@@ -446,7 +446,7 @@ def main() -> None:
         root.processed(),
         slices=arguments.slices,
         image_size=arguments.image_size,
-        scheme=arguments.scheme,
+        routing=Routing(scheme=arguments.scheme),
         crop=arguments.crop,
     )
     corpus, identifiers = cache.load()

@@ -91,7 +91,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     if not witness:
         return "UNVERIFIED - no witness (trained before the check existed, or a published member)"
 
-    cache = StudyCache(root, slices=member.slices, image_size=member.image_size, scheme=member.scheme)
+    cache = StudyCache(root, slices=member.slices, image_size=member.image_size, routing=member.routing)
     corpus, identifiers = cache.load()
     index = {name: position for position, name in enumerate(identifiers)}
     # `witness` is a dict[str, object] by declaration, so its members are narrowed before use rather

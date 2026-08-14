@@ -26,7 +26,7 @@ from numpy.typing import NDArray
 
 from kneemri.crop_centre import Crop
 from kneemri.slot_reader import IMAGE_SIZE, SlotReader
-from kneemri.slots import SCHEMES, SlotScheme
+from kneemri.slots import SCHEMES, Routing
 from kneemri.study import SlotPipeline, Study
 
 logger = logging.getLogger(__name__)
@@ -70,9 +70,9 @@ class DecodeRequest:
     images_path: str
     slices: int
     image_size: int
-    scheme: str
     planes: dict[str, str]
     crop: Crop = Crop()
+    routing: Routing = Routing()
 
 
 class StudyCache:
@@ -86,19 +86,19 @@ class StudyCache:
         directory: Path,
         slices: int = 12,
         image_size: int = IMAGE_SIZE,
-        scheme: str = CANONICAL,
+        routing: Routing | None = None,
         crop: Crop | None = None,
     ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
-        self.scheme = scheme
+        self.routing = routing or Routing()
         self.crop = crop or Crop()
 
     @property
     def slots(self) -> int:
         """How wide the slot axis is — derived from the scheme, so the two cannot disagree."""
-        return len(SCHEMES[self.scheme])
+        return len(SCHEMES[self.routing.scheme])
 
     @property
     def key(self) -> str:
@@ -121,13 +121,12 @@ class StudyCache:
         with no shape change to notice. The default crop keeps the historic name for the same reason the
         canonical scheme does.
         """
-        base = f"{self.image_size}px_{self.slices}sl{self.crop.suffix()}"
-        return base if self.scheme == self.CANONICAL else f"{base}_{self.scheme}"
+        return f"{self.image_size}px_{self.slices}sl{self.crop.suffix()}{self.routing.suffix()}"
 
     @property
     def scheme_slots(self) -> list[str]:
         """The slot names this cache is built over, in order — the width of its second axis."""
-        return [slot.name for slot in SCHEMES[self.scheme]]
+        return [slot.name for slot in SCHEMES[self.routing.scheme]]
 
     @property
     def images_path(self) -> Path:
@@ -175,7 +174,7 @@ class StudyCache:
                 images_path=str(self.images_path),
                 slices=self.slices,
                 image_size=self.image_size,
-                scheme=self.scheme,
+                routing=self.routing,
                 planes=planes,
                 crop=self.crop,
             )
@@ -246,7 +245,7 @@ class StudyCache:
         images = np.load(request.images_path, mmap_mode="r+")
         try:
             pipeline = SlotPipeline(
-                scheme=SlotScheme(SCHEMES[request.scheme]),
+                scheme=request.routing.built(),
                 reader=SlotReader(
                     crop_mm=request.crop.mm, image_size=request.image_size, centre=request.crop.located()
                 ),
@@ -262,4 +261,4 @@ class StudyCache:
             # silent lie the head cannot detect. The reason is PRINTED rather than swallowed — an
             # unreported decode failure is indistinguishable from a black knee.
             logger.info(f"  decode failed for {request.identifier}: {type(failure).__name__}: {failure}")
-            return request.position, [0.0] * len(SCHEMES[request.scheme])
+            return request.position, [0.0] * len(SCHEMES[request.routing.scheme])

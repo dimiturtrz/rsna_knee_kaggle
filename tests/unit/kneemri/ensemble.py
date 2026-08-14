@@ -502,3 +502,20 @@ def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):
 
     assert len(calls) == 3, "two windows, and the one that overflowed is redone — not kept"
     assert np.isfinite(scored).all(), "and what comes back is a number"
+
+
+def test_decoded_scheme_refuses_mixed_tie_rules(tmp_path: Path):
+    """Members fitted under different routers cannot share one decode, and must say so.
+
+    The published members reproduce their own predictions better under last-maximal and ours were fitted
+    under first, so a fused entry really does hold both. Resolving that silently would feed one side
+    images it never trained on, with every fingerprint still passing against its own reading.
+    """
+    ensemble = _ensemble(tmp_path)
+    ours = ensemble.package.members[0]
+    theirs = replace(ours, config={**ours.config, "tie": "last"})
+
+    assert ensemble.decoded_scheme([ours]).tie == "first"
+    assert ensemble.decoded_scheme([theirs]).tie == "last"
+    with pytest.raises(ValueError, match="tie rule"):
+        ensemble.decoded_scheme([ours, theirs])

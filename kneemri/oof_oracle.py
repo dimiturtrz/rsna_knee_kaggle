@@ -242,7 +242,7 @@ def main() -> None:
         logger.info("READING DIFFERS: %s", difference)
 
     corpus, reference = StudyCache(
-        root.processed(), slices=member.slices, image_size=member.image_size, scheme=member.scheme
+        root.processed(), slices=member.slices, image_size=member.image_size, routing=member.routing
     ).load()
     # THE STUDIES THEY SCORED, in THEIR order, and only those our cache holds — a row compared against
     # the wrong study's answer is a residual that no amount of staring at the reader will explain.
