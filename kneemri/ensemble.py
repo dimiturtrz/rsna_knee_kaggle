@@ -209,17 +209,17 @@ class Ensemble:
     def arithmetic(self, member: Member) -> torch.dtype:
         """The dtype this DEVICE can actually run, which is not always the one the member was fitted in.
 
-        A T4 is Turing, sm_75, and bfloat16 autocast needs sm_80 or newer — so `torch.autocast("cuda",
-        dtype=torch.bfloat16)` is an unhandled error on the very card every submission runs on. THIS
-        MACHINE CANNOT SEE THAT: its card is sm_120 and supports bf16, so the kernel was the first place
-        the difference existed.
+        THE CLAIM THIS GUARD WAS BUILT ON WAS WRONG, and the correction is recorded rather than the
+        guard quietly deleted. I argued that a T4 (Turing, sm_75) cannot run bf16 autocast and that this
+        explained three failed entries. Measured on the card itself by `kneemri-loadcheck`: a T4 reports
+        `capability (7, 5)` AND `is_bf16_supported() True` — torch emulates it — and all six members
+        load there. So bf16 is not refused at the autocast call, and the failures need another cause.
 
-        It cost three entries. `Member.precision` landed on 2026-08-13 to stop bf16 members being served
-        in fp16 — correct on our hardware and fatal on Kaggle's — and every entry built on the kit that
-        carried it failed, while every entry on the kit before it scored. Serving a bf16 member in fp16
-        is a real compromise, since fp16 has eight fewer exponent bits and a bf16-trained activation can
-        overflow it, but a compromised answer beats an entry that does not run. Logged rather than
-        silent, because the compromise is exactly the thing a later reader must not have to guess at.
+        The guard stays because what it asks is still the right question: run what the DEVICE can run,
+        not what the checkpoint asked for. On a card that genuinely lacks bf16 this serves fp16 and says
+        so, which is a real compromise — fp16 has eight fewer exponent bits and a bf16-trained
+        activation can overflow it — but a compromised answer beats an entry that does not run. On a T4
+        it is inert, which is the honest state of it today.
         """
         if member.precision is torch.bfloat16 and self.device.type == "cuda" and not torch.cuda.is_bf16_supported():
             logger.warning("%s was fitted in bf16 and this device cannot run it — serving fp16", member.identifier)

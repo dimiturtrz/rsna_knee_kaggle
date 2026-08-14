@@ -75,12 +75,27 @@ def main() -> None:
         encoder = ENCODERS[member.variant]
         try:
             weights = run.find_encoder(encoder)
-            package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
+            model = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
         except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
             failures += 1
-            logger.error("FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
+            logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
+            continue
+        # LOADING IS NOT RUNNING. Two entries died with the model built and the weights in place, so the
+        # check has to reach the arithmetic: one forward per member, in the precision that member was
+        # fitted under, on this card. A T4 reports bf16 as supported and emulates it, which is exactly
+        # the kind of "supported" that fails inside a kernel rather than at the autocast call.
+        window = member.window(member.slices, overlap=False)
+        pixels = torch.zeros(1, len(member.config["slots"]), window.width, window.size, window.size, dtype=torch.uint8)
+        try:
+            with torch.no_grad(), torch.autocast("cuda", dtype=member.precision, enabled=device.type == "cuda"):
+                model(pixels.to(device), torch.ones(1, len(member.config["slots"])).to(device), window.size)
+        except Exception as error:  # noqa: BLE001 - the point is to name which member and which failure
+            failures += 1
+            logger.error(
+                "FORWARD FAILED %s (%s, %s): %s", member.identifier, member.variant, member.precision, str(error)[:300]
+            )
         else:
-            logger.info("ok     %s (%s, %s)", member.identifier, member.variant, member.precision)
+            logger.info("ok     %s (%s, %s, read %d)", member.identifier, member.variant, member.precision, window.size)
     logger.info("%d members, %d failed", len(package.members), failures)
 
 
