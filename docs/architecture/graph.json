@@ -3057,6 +3057,12 @@
     {
       "kind": "calls",
       "source": "kneemri.slot_ties.main",
+      "target": "kneemri.slot_ties.SlotTies.disagreeing_order",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_ties.main",
       "target": "kneemri.slot_ties.SlotTies.lost_report",
       "weight": 1
     },
@@ -7274,6 +7280,14 @@
       "descendants": 0,
       "id": "kneemri.slot_ties.SlotTies._lost_of",
       "label": "_lost_of",
+      "level": "method",
+      "parent": "kneemri.slot_ties.SlotTies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_ties.SlotTies.disagreeing_order",
+      "label": "disagreeing_order",
       "level": "method",
       "parent": "kneemri.slot_ties.SlotTies",
       "role": null
