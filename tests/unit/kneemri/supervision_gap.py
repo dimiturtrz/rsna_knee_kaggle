@@ -58,3 +58,19 @@ def test_report():
     assert text.index(TARGETS[2]) < text.index("--- above"), "a positive gap sits above the line"
     assert text.index("--- above") < text.index(TARGETS[1]), "and the model-bottlenecked finding below it"
     assert "+0.1000" in text
+
+
+def test_thresholds():
+    """Where a graded label becomes positive, priced by base rate and precision against the truth."""
+    truth = np.zeros((4, len(TARGETS)), dtype=np.float32)
+    truth[2:, :] = 1.0
+    # The lower band is the reader's "mild" level: called present at 0.5, excluded at 0.75, and WRONG.
+    values = np.full((4, len(TARGETS)), 0.68, dtype=np.float32)
+    values[2:, :] = 0.94
+
+    lines = SupervisionGap().thresholds(values, truth, cuts=(0.5, 0.75))
+
+    assert "the radiologist calls 50.0% positive" in lines[0]
+    assert "100.0%" in lines[2], "at 0.5 every cell is called positive"
+    assert "50.0%" in lines[3], "at 0.75 only the top band is, which here is exactly right"
+    assert lines[3].strip().endswith("100.0%"), "and it recovers every true positive"

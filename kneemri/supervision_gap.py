@@ -44,6 +44,11 @@ logger = logging.getLogger(__name__)
 PRESENT = 0.5
 """Where a graded value becomes a positive, matching `LabelScores.per_label`'s own binarisation."""
 
+CUTS = (0.5, 0.6, 0.75, 0.88)
+"""The reader emits 0.08/0.28/0.68/0.82/0.94, so these cuts fall BETWEEN its levels: 0.5 admits the
+mild band, 0.75 excludes it, 0.88 keeps only the top level."""
+"""Where a graded value becomes a positive, matching `LabelScores.per_label`'s own binarisation."""
+
 
 class SupervisionGap:
     """The labels' own predictive power beside the model's, per finding."""
@@ -78,6 +83,46 @@ class SupervisionGap:
             )
             for column, target in enumerate(TARGETS[: values.shape[1]])
         }
+
+    def thresholds(
+        self,
+        values: Float[np.ndarray, "studies targets"],
+        truth: Float[np.ndarray, "studies targets"],
+        cuts: tuple[float, ...] = CUTS,
+    ) -> list[str]:
+        """Where to call a graded report label POSITIVE, priced against the radiologist.
+
+        THE POSITIVE RATE IS THE HEADLINE. Our ruler and our training targets binarise at 0.5, which
+        calls 45.5% of cells positive while the radiologist calls 34.4% — we over-label by a third, and
+        it is all one band: the reader's lowest YES level, which `Supervision` measures the radiologist
+        agreeing with only 37.8% of the time, and which `knee-37f` found is the report faithfully
+        recording a trace or low-grade finding the annotator did not count.
+
+        WHAT THIS IS NOT. It is not an argument to hard-threshold the training targets — the three YES
+        levels are live signal the model already orders correctly (11 of 11 findings, knee-mxj), and
+        cutting them to binary throws that away. The graded calibration is the way to use it.
+
+        WHAT IT IS. Evidence that the local ruler measures a measurably different task from the one
+        scored: a positive set a third larger than the radiologist's. That is a candidate mechanism for
+        the local-to-leaderboard compression knee-7d1 measured from the other side, and it is testable —
+        a ruler cut at 0.75 should track the leaderboard better than one cut at 0.5.
+
+        Changing the ruler is NOT free and is deliberately not done here: every historical number was
+        computed at 0.5, so moving it silently would make the ledger incomparable with itself.
+        """
+        lines = [
+            f"{truth.size} cells; the radiologist calls {float((truth > PRESENT).mean()):.1%} positive",
+            f"{'cut':>6s} {'ours':>8s} {'agree':>8s} {'precision':>10s} {'recall':>8s}",
+        ]
+        positive = truth > PRESENT
+        for cut in cuts:
+            said = values > cut
+            hit = float((said & positive).sum())
+            lines.append(
+                f"{cut:6.2f} {float(said.mean()):8.1%} {float((said == positive).mean()):8.1%} "
+                f"{hit / max(float(said.sum()), 1.0):10.1%} {hit / max(float(positive.sum()), 1.0):8.1%}"
+            )
+        return lines
 
     def report(self, reference: dict[str, float], achieved: dict[str, float]) -> list[str]:
         """Every finding ordered by what holds it back, with the dividing line drawn explicitly.
@@ -135,6 +180,9 @@ def main() -> None:
 
     annotations = truth[keep]
     for line in gap.report(gap.against(values, annotations), gap.against(combined[rows], annotations)):
+        logger.info(line)
+    # WHERE the graded label becomes a positive, which decides the base rate our ruler scores against.
+    for line in gap.thresholds(values, annotations):
         logger.info(line)
 
 
