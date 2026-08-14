@@ -78,6 +78,16 @@ embedding, so the first six positions must keep meaning what they meant — that
 canonical member and an extended one share every other piece of code.
 """
 
+FIRST_MAXIMAL = "first"
+"""Keep the first of equally dense candidates, in the order they were probed. What every cache holds."""
+
+LAST_MAXIMAL = "last"
+"""Keep the LAST of equally dense candidates — what a sort by slice count ascending then `.iloc[-1]`
+gives. The alternative worth testing: their rule was recorded here as a stable `sort_values`, which is
+also a FIRST-maximal rule, so if the two pipelines diverge on contested slots it is because their rule
+is not the one we assumed. For TESTING against the published members' recorded predictions, not for
+switching on."""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {"canonical": SLOTS, "extended": EXTENDED_SLOTS}
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
@@ -86,8 +96,12 @@ grafted are six-slot by construction, so it has to remain expressible for the gr
 class SlotScheme:
     """Assigns each study's series to slots, leaving a slot empty when nothing matches its predicate."""
 
-    def __init__(self, slots: tuple[Slot, ...] = SLOTS) -> None:
+    def __init__(self, slots: tuple[Slot, ...] = SLOTS, tie: str = FIRST_MAXIMAL) -> None:
         self.slots = slots
+        # WHICH of several equally dense candidates wins. Default is what every cache and member on
+        # disk was built with; the alternatives exist to be TESTED against the published members'
+        # recorded predictions, not to be switched on.
+        self.tie = tie
 
     def assign(self, acquisitions: list[Acquisition], planes: dict[str, str]) -> dict[str, Acquisition]:
         """One acquisition per slot, ties broken toward the stack with the most slices.
@@ -109,8 +123,26 @@ class SlotScheme:
                 if slot.accepts(acquisition, planes.get(acquisition.series, ""))
             ]
             if candidates:
-                chosen[slot.name] = max(candidates, key=lambda acquisition: acquisition.slice_count)
+                chosen[slot.name] = self.won(candidates)
         return chosen
+
+    def won(self, candidates: list[Acquisition]) -> Acquisition:
+        """Which of a slot's candidates fills it — the densest stack, and a rule for equal ones.
+
+        THE TIE RULE IS A STRATEGY BECAUSE IT IS AN OPEN QUESTION, not because anything wants to vary
+        it. Our residual against the published members correlates +0.664 with the number of contested
+        slots a study has, and +0.496 controlling for series count — so the rule may be where their
+        pipeline and ours part company. What was refuted on 2026-08-14 is that the two see candidates
+        in a different ORDER; what was never checked is whether their rule is this one at all, because
+        we hold their checkpoints and not their router.
+
+        `first` is what every cache and every member on disk was built with and stays the default.
+        """
+        densest = max(candidate.slice_count for candidate in candidates)
+        tied = [candidate for candidate in candidates if candidate.slice_count == densest]
+        if self.tie == LAST_MAXIMAL:
+            return tied[-1]
+        return tied[0]
 
     def unrouted(self, acquisitions: list[Acquisition], planes: dict[str, str]) -> list[Acquisition]:
         """The series no slot accepts, which the model therefore never sees.

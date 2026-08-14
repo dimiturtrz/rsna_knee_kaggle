@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from kneemri.acquisition import Acquisition
-from kneemri.slots import SLOTS, Slot, SlotScheme
+from kneemri.slots import LAST_MAXIMAL, SLOTS, Slot, SlotScheme
 
 from .conftest import write_series
 
@@ -79,3 +79,21 @@ def test_presence(tmp_path: Path):
     assert len(mask) == len(SLOTS)
     assert mask[0] == 1.0
     assert sum(mask) == 1.0
+
+
+def test_won(tmp_path: Path):
+    """Which of several equally dense candidates fills a slot — the open question, as a strategy.
+
+    Our residual against a published member drops from max|diff| 0.128 to 0.025 on studies with a
+    contested slot when the LAST maximal is taken instead of the first, so their router is not the
+    first-maximal rule ours is. `first` stays the default because every cache and member on disk was
+    built with it.
+    """
+    dense_a = _acquisition(tmp_path, "a", slices=12)
+    dense_b = _acquisition(tmp_path, "b", slices=12)
+    thin = _acquisition(tmp_path, "c", slices=4)
+    candidates = [dense_a, thin, dense_b]
+
+    assert SlotScheme().won(candidates) is dense_a, "the default keeps the first of the densest"
+    assert SlotScheme(tie=LAST_MAXIMAL).won(candidates) is dense_b
+    assert SlotScheme(tie=LAST_MAXIMAL).won([thin, dense_a]) is dense_a, "density still outranks the rule"
