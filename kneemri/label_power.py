@@ -41,11 +41,21 @@ class LabelPower:
     """
 
     def __init__(self, labels: Path, folds: int = FOLDS) -> None:
+        self.labels = labels
         self.table = pd.read_csv(labels)
         self.folds = folds
 
     def positives(self) -> dict[str, int]:
-        """How many studies each label is asserted positive on, corpus-wide."""
+        """How many studies each label is asserted positive on, corpus-wide.
+
+        Names the file when the columns are not there, because the obvious guess at "the label table"
+        is the competition's own train.csv, and indexing it raised `KeyError: 'ACL__verdict'` nine
+        frames deep in pandas — an error about a column, from a caller who asked about a path.
+        """
+        missing = [f"{target}__verdict" for target in TARGETS if f"{target}__verdict" not in self.table.columns]
+        if missing:
+            message = f"{self.labels} is not a verdict table: no {', '.join(missing[:3])}"
+            raise ValueError(message)
         return {target: int((self.table[f"{target}__verdict"] == "YES").sum()) for target in TARGETS}
 
     def standard_error(self, positives: int, negatives: int, auc: float = TYPICAL_AUC) -> float:

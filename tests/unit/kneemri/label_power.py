@@ -23,6 +23,19 @@ def test_positives(tmp_path: Path):
     assert counted["MCL"] == 30
 
 
+def test_positives_names_the_file_when_it_is_not_a_verdict_table(tmp_path: Path):
+    """The competition's own train.csv is the obvious guess and it is the wrong one.
+
+    Handing it over raised `KeyError: 'ACL__verdict'` nine frames deep in pandas — a message about a
+    column, to a caller who asked about a path. `run_comparison --labels` is where this is reached.
+    """
+    path = tmp_path / "train.csv"
+    pd.DataFrame({"study_id": ["s0"], "ACL": [1]}).to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="not a verdict table"):
+        LabelPower(path).positives()
+
+
 def test_standard_error(tmp_path: Path):
     """Fewer positives means a wider error bar, and an empty class has no AUC at all.
 
