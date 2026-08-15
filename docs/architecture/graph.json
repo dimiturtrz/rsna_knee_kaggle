@@ -320,6 +320,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.patience",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
+      "target": "kneemri.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.head_trial",
       "target": "core.paths",
       "weight": 1
@@ -1161,6 +1203,12 @@
     {
       "kind": "import",
       "source": "kneemri.train",
+      "target": "kneemri.fitting",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
       "target": "kneemri.folds",
       "weight": 1
     },
@@ -1185,25 +1233,7 @@
     {
       "kind": "import",
       "source": "kneemri.train",
-      "target": "kneemri.patience",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.train",
       "target": "kneemri.report_supervision",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.train",
-      "target": "kneemri.run_metrics",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.train",
-      "target": "kneemri.scores",
       "weight": 1
     },
     {
@@ -2272,6 +2302,162 @@
       "kind": "holds",
       "source": "kneemri.ensemble.Read",
       "target": "kneemri.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.fitting.Fitted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.fitting.Fold",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.fitting.RunPlan",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.member_record.MemberRecord",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.patience.Patience",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.trainer.Trainer",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.__init__",
+      "target": "kneemri.patience.Patience",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.__init__",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.__init__",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.fitting.Fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.member_record.MemberRecord.payload",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.member_record.MemberRecord.witness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.trainer.Trainer.save_partial",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.ranked",
+      "target": "kneemri.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.ranked",
+      "target": "kneemri.trainer.Trainer.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.fitting.Fitting.keep",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.fitting.Fitting.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.patience.Patience.exhausted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.run_metrics.RunMetrics.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.trainer.Trainer.evaluated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.run",
+      "target": "kneemri.trainer.Trainer.fit_epoch",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fold",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fold",
+      "target": "kneemri.targets.Targets",
       "weight": 1
     },
     {
@@ -5031,6 +5217,30 @@
     {
       "kind": "construct",
       "source": "kneemri.train.main",
+      "target": "kneemri.fitting.Fitting",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.main",
+      "target": "kneemri.fitting.Fitting.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.fitting.Fold",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
+      "target": "kneemri.fitting.RunPlan",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.main",
       "target": "kneemri.folds.ReportFolds",
       "weight": 1
     },
@@ -5059,57 +5269,9 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.member_record.MemberRecord.witness",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.train.main",
       "target": "kneemri.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.patience.Patience",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.patience.Patience.exhausted",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.run_metrics.EpochRow",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.run_metrics.RunMetrics",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.run_metrics.RunMetrics.record",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.main",
-      "target": "kneemri.scores.LabelScores.per_label",
       "weight": 1
     },
     {
@@ -5347,7 +5509,7 @@
       "role": null
     },
     {
-      "descendants": 66,
+      "descendants": 67,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -5486,6 +5648,14 @@
       "descendants": 0,
       "id": "kneemri.ensemble",
       "label": "ensemble",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting",
+      "label": "fitting",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -6096,6 +6266,38 @@
       "label": "Read",
       "level": "class",
       "parent": "kneemri.ensemble",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitted",
+      "label": "Fitted",
+      "level": "class",
+      "parent": "kneemri.fitting",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitting",
+      "label": "Fitting",
+      "level": "class",
+      "parent": "kneemri.fitting",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fold",
+      "label": "Fold",
+      "level": "class",
+      "parent": "kneemri.fitting",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.RunPlan",
+      "label": "RunPlan",
+      "level": "class",
+      "parent": "kneemri.fitting",
       "role": "satellite"
     },
     {
@@ -7520,6 +7722,46 @@
       "label": "submission",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitting.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitting.keep",
+      "label": "keep",
+      "level": "method",
+      "parent": "kneemri.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitting.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fitting.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.fitting.Fold.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.fitting.Fold",
       "role": null
     },
     {

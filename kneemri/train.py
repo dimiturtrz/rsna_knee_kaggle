@@ -7,25 +7,21 @@ config, the fold scores and a fingerprint — so our own members and theirs load
 import argparse
 import json
 import logging
-import time
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
 import torch
 from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL, Encoder
 from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
+from kneemri.fitting import Fitting, Fold, RunPlan
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
-from kneemri.patience import Patience
 from kneemri.report_supervision import ReportSupervision
-from kneemri.run_metrics import EpochRow, RunMetrics
-from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
@@ -450,8 +446,9 @@ def main() -> None:
     arguments = TrainingOptions.parse()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+    # The MODEL's initialisation. The data order is seeded from the same value inside `Fitting`, which
+    # is where the only consumer of it lives.
     torch.manual_seed(arguments.seed)
-    generator = np.random.default_rng(arguments.seed)
     device = DeviceBudget(arguments.vram_gb).select()
 
     root = DataRoot.from_config(arguments.paths)
@@ -503,65 +500,31 @@ def main() -> None:
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
     model = arguments.fitted_model(encoder, len(SCHEMES[arguments.scheme]), design)
-    scores = LabelScores()
     trainer = arguments.fitted_trainer(model, device, identifiers, len(training))
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
-    metrics = RunMetrics(destination)
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
-    best, best_state = -1.0, None
-    patience = Patience(arguments.patience)
-    witnessed: dict[str, object] | None = None
-    for epoch in range(arguments.epochs):
-        started = time.time()
-        mean_loss = trainer.fit_epoch(corpus, targets, training, arguments.batch, generator)
-        # An empty holdout (--fold -1) has no score to rank epochs by, so the epoch number stands in:
-        # it increases every time, which makes the existing "keep the best" machinery keep the LAST
-        # state instead. That is the right choice for a final fit and needs no second code path.
-        empty: dict[str, float] = {}
-        # Both the score and the state come from inside this block, so the number that ranks an epoch is
-        # measured on exactly the weights that epoch would write.
-        with trainer.evaluated():
-            predicted = trainer.predict(corpus, holdout, arguments.batch, generator) if len(holdout) else None
-            per_label = empty if predicted is None else scores.per_label(predicted, evaluation.scores[holdout])
-            mean = float(np.nanmean(list(per_label.values()))) if per_label else float(epoch)
-            improved = mean > best
-            if improved:
-                best = mean
-                best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
-                # NaN, not `mean`: with no holdout `mean` is the epoch index standing in for a score.
-                scored = mean if per_label else float("nan")
-                # The witness travels with the weights it was produced by, so a checkpoint kept from a
-                # killed run carries its own proof of how it should be read.
-                seen = None if predicted is None else record.witness(identifiers, holdout, predicted)
-                trainer.save_partial(destination, record.payload(best_state, scored, epoch, seen))
-                witnessed = seen
-        logger.info(f"epoch {epoch}: loss {mean_loss:.4f}  holdout mean AUC {mean:.4f}  ({time.time() - started:.0f}s)")
-        metrics.record(
-            EpochRow(epoch=epoch, loss=mean_loss, auc=mean, seconds=round(time.time() - started), per_label=per_label)
-        )
-        # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
-        # The SCHEDULE is untouched: it was built for the full epoch count above, so the epochs that do
-        # run are the same epochs they would have been. Only the discarded tail is skipped.
-        if patience.exhausted(improved=improved):
-            logger.info(f"stopping at epoch {epoch}: {patience.epochs} epochs without improving on {best:.4f}")
-            break
+    plan = RunPlan(
+        destination=destination,
+        epochs=arguments.epochs,
+        batch=arguments.batch,
+        patience=arguments.patience,
+        seed=arguments.seed,
+    )
+    kept = Fitting(trainer, record, plan).run(
+        Fold(corpus=corpus, targets=targets, evaluation=evaluation, training=training, holdout=holdout)
+    )
 
-    # A run with no holdout ranks its epochs by epoch NUMBER, so `best` is an epoch index rather than a
-    # score. Recording that would have a final-fit member advertise holdout 6.0 — beating every real
-    # member in `strongest()`, and reading as a score in the manifest and the ledger. NaN is the honest
-    # value: this run cannot report one by construction.
-    reported = best if len(holdout) else float("nan")
-    model.load_state_dict(best_state)  # pyrefly: ignore[bad-argument-type]
-    # The SAME assembler the periodic save uses, so a run killed at its best epoch and a run allowed
-    # to finish produce checkpoints of identical shape.
-    # best_state is set on the first epoch that scores; a run with none is already unusable above.
-    torch.save(record.payload(best_state, reported, arguments.epochs - 1, witnessed), destination)  # pyrefly: ignore[bad-argument-type]
+    model.load_state_dict(kept.state)
+    # The SAME assembler the periodic save uses, so a run killed at its best epoch and a run allowed to
+    # finish produce checkpoints of identical shape — and the EPOCH is the kept one in both, where the
+    # final save used to record the last epoch index and so contradicted its own partial under patience.
+    torch.save(record.payload(kept.state, kept.holdout, kept.epoch, kept.witness), destination)
     logger.info(
         "best holdout mean AUC %.4f -> %s | %s",
-        reported,
+        kept.holdout,
         destination,
-        json.dumps({"fold": arguments.fold, "holdout": reported}),
+        json.dumps({"fold": arguments.fold, "holdout": kept.holdout}),
     )
 
 
