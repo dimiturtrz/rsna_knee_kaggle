@@ -202,13 +202,14 @@ wait_for_cache() {
   # filesystem as the artefact it certifies, so it cannot be lost, rotated or truncated separately -
   # and a build killed by the OS leaves no trace in a log at all. On 2026-08-11 the 448 px build was
   # killed at 2200/4407 and its log simply stopped, with no error to grep for.
-  # The SCHEME is part of a cache's name for anything but the canonical six slots, and it has to be
-  # part of this gate too. Without it an extended-scheme arm watches mask_336px_12sl.npy - the
-  # CANONICAL mask, which already exists - so the gate passes instantly on a cache that has not been
-  # built. The gate would report ready for the wrong file, which is the failure this function exists
-  # to prevent.
-  local size="$1" slices="${2:-12}" scheme="${3:-canonical}"
-  local key="${size}px_${slices}sl"
-  [ "$scheme" = "canonical" ] || key="${key}_${scheme}"
+  # THE KEY IS ASKED FOR, never spelled here. This used to rebuild it in bash from size, slices and
+  # scheme, which covers one naming axis of four: an arm waiting on 336px_12sl_80mm_tissue watched
+  # mask_336px_12sl.npy - the canonical mask, which already exists - and proceeded instantly against a
+  # cache nobody had built. Reporting ready for the wrong file is the failure this function exists to
+  # prevent, so the reading goes to the builder that names it, in full.
+  local size="$1" slices="${2:-12}" scheme="${3:-canonical}" crop="${4:-130}" centre="${5:-image}"
+  local key
+  key="$(uv run python -m kneemri.build_cache --print-key     --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
+  [ -n "$key" ] || { echo "wait_for_cache: the builder named no key"; return 1; }
   until [ -f "$PROCESSED/mask_${key}.npy" ]; do sleep 60; done
 }

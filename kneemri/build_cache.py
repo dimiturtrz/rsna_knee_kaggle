@@ -7,6 +7,7 @@ to import, so every child dies with BrokenProcessPool.
 
 import argparse
 import logging
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -100,7 +101,12 @@ def main() -> None:
     if arguments.print_key:
         # The arm script's completion check needs the same key StudyCache writes, and it used to
         # rebuild it in bash — so every reading axis added since silently broke that check.
-        logger.info("%s", cache.key)
+        #
+        # STDOUT, because the key is the ANSWER and not a log line. `logging` writes to stderr, so
+        # `KEY="$(... --print-key)"` captured the empty string while the key still appeared on the
+        # terminal — and the arm then checked `mask_.npy`, reporting ARM FAILED over a decode that had
+        # written all 4407 studies and its mask (2026-08-15).
+        sys.stdout.write(f"{cache.key}\n")
         return
     logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
