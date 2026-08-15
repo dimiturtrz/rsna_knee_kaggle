@@ -2,7 +2,7 @@ import json
 import math
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 import numpy as np
 import pytest
@@ -218,6 +218,30 @@ def test_pixel_group():
         annot=0.1,
     )
     assert resized.pixel_group != same, "a different resolution is a different decode"
+
+    without_depth = {key: value for key, value in _config().items() if key != "slices"}
+    legacy = Member(
+        identifier="w",
+        file=Path("m_w.pt"),
+        fold=3,
+        config=cast(MemberConfig, without_depth),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    stated = Member(
+        identifier="v",
+        file=Path("m_v.pt"),
+        fold=4,
+        config=_config() | {"slices": LEGACY_SLICES},
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    # A manifest predating variable depth is SERVED at twelve, so it must be GROUPED at twelve. The key
+    # indexed the config raw and raised KeyError here instead — one fact answered two ways, and this is
+    # the answer that decides which decode a member shares.
+    assert legacy.pixel_group == stated.pixel_group
 
 
 def test_state_dict_of(tmp_path: Path):

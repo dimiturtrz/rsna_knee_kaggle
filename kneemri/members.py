@@ -375,8 +375,12 @@ class Member:
             # A different router puts different SERIES in a slot, which is different pixels.
             "tie": self.tie,
             "group": self.config["group"],
-            "img": self.config["img"],
-            "slices": self.config["slices"],
+            # THROUGH THE ACCESSORS, because the group must be a function of the reading this member is
+            # SERVED under. `slices` carries a default for manifests written before members could differ
+            # in depth, so indexing the config here answered KeyError where every other consumer answers
+            # twelve — one fact with two answers, and the one that decides which decode a member shares.
+            "img": self.image_size,
+            "slices": self.slices,
             "slots": self.config["slots"],
         }
         return json.dumps(pixels, sort_keys=True)
