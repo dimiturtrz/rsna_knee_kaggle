@@ -26,13 +26,16 @@ import torch
 from core.paths import COMPETITION
 from kneemri import train as train_module
 from kneemri.backbone import ENCODERS, SMALL
+from kneemri.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
+from kneemri.members import Member, MemberConfig
 from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
 from kneemri.slot_head import AVERAGED
+from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
-from ..unit.kneemri.model import DIM, _FakeBackbone
+from ..unit.kneemri.model import DIM, _BlockedBackbone, _FakeBackbone
 
 STUDIES = 8
 SLICES = 4
@@ -41,16 +44,23 @@ SIZE = 28
 FOLDS = 2
 SPLIT_SEED = 2026
 """Passed on the argv too, so the labels are balanced against the split the run actually uses."""
+READ_SIZE = 14
+"""One patch, so it tiles — and NOT `SIZE`, so a dropped `train_size` stamp cannot hide behind `img`."""
+TIGHT_MM = 80.0
+"""The tight crop an arm would actually ask for, which is a different cache than the historic 130 mm."""
+TISSUE = next(name for name in sorted(CENTRES) if name != DEFAULT_CENTRE)
+"""The centre a run must state to be served about it; taken from the table so a third one is noticed."""
 
 
-def _corpus(root: Path, routing: Routing | None = None) -> list[str]:
+def _corpus(root: Path, routing: Routing | None = None, crop: Crop | None = None) -> list[str]:
     """Write the three files `StudyCache.load` reads, under the key the argv below selects.
 
-    The routing is a parameter because it is part of that key: an arm asking for the other tie rule
-    reads a DIFFERENT cache, which is the property that keeps two routings from overwriting each other.
+    The routing and the crop are parameters because they are part of that key: an arm asking for the
+    other tie rule or another physical extent reads a DIFFERENT cache, which is the property that keeps
+    two readings from overwriting each other.
     """
     identifiers = [f"s{index}" for index in range(STUDIES)]
-    cache = StudyCache(root / "processed" / COMPETITION, slices=SLICES, image_size=SIZE, routing=routing)
+    cache = StudyCache(root / "processed" / COMPETITION, slices=SLICES, image_size=SIZE, routing=routing, crop=crop)
     cache.directory.mkdir(parents=True, exist_ok=True)
     generator = np.random.default_rng(2026)
     np.save(cache.images_path, generator.integers(0, 256, cache.shape(STUDIES), dtype=np.uint8))
@@ -130,6 +140,19 @@ def _run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *flags: str) -> dict[s
     return cast(dict[str, object], torch.load(destination, map_location="cpu", weights_only=False))
 
 
+def _member(config: dict[str, object]) -> Member:
+    """A member reading a config, with the fields no reading is derived from left empty."""
+    return Member(
+        identifier="x",
+        file=Path("m_x.pt"),
+        fold=0,
+        config=cast(MemberConfig, config),
+        fingerprint=np.zeros((1, 1), np.float32),
+        holdout=0.0,
+        annot=0.0,
+    )
+
+
 def _nested(payload: dict[str, object], key: str) -> dict[str, object]:
     """One of the checkpoint's nested tables, as the loaders read it."""
     return cast(dict[str, object], payload[key])
@@ -205,6 +228,79 @@ def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch:
     for field in fields(StudyDesign):
         assert getattr(rebuilt, field.name) != field.default, (
             f"{field.name} came back as its default, so the run's own value never reached the manifest"
+        )
+
+
+FIXED_BY_THE_BUILD = {"group", "band", "variant"}
+"""Readings no command line can move, so a run cannot state them away from a legacy manifest's answer.
+
+`group` and `band` are module constants in the record — the encoder takes three channels and the stack
+is sampled over one fraction — and there is no flag for either. `variant` has one entry in the encoder
+table this suite patches, since a second would need a second set of weights to download. Anything else
+that lands in this set is a switch losing its ratchet, which is what the set exists to make visible.
+"""
+
+
+def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """Every reading `Member` exposes must come back as the run's own, not as a legacy manifest's default.
+
+    The other half of the design ratchet, and the half that has actually cost submissions: eight of the
+    nine defects were a READING — the crop, the depth, the tie rule, the precision, the whole-stack flag
+    — recorded faithfully and then answered by a consumer's own default. Every one of those accessors
+    carries a default for manifests that predate it, which is correct and is also exactly what hides a
+    stamp that stopped being written.
+
+    So this compares against a member built from a config carrying ONLY the keys with no default, and
+    walks `Member`'s properties rather than naming them: each must differ from what the legacy manifest
+    answers. A property added tomorrow whose value never reaches the record answers identically here and
+    fails at that commit. The three that no argv can move are named, with the reason, in
+    `FIXED_BY_THE_BUILD` — a switch that ends up there has to be put there deliberately.
+    """
+    # The blocked stand-in, because `--lora-rank` wraps the Linears INSIDE a block and the plain one
+    # has none — an encoder shape, not a preference, and adaptation refuses a backbone it cannot adapt.
+    monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
+    _corpus(corpus, Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL), Crop(mm=TIGHT_MM, centre=TISSUE))
+    payload = _run(
+        corpus,
+        monkeypatch,
+        *("--scheme", MULTISCALE_SCHEME),
+        *("--tie", LAST_MAXIMAL),
+        *("--crop-mm", str(TIGHT_MM)),
+        *("--centre", TISSUE),
+        *("--train-size", str(READ_SIZE)),
+        *("--pool", CLS_MEAN_FOCAL),
+        *("--slice-pooling", MAXIMUM),
+        *("--slot-pooling", AVERAGED),
+        *("--encoder-layer", "-2"),
+        *("--lora-rank", "4"),
+        # No `--anatomical-prior`: the prior is defined over the canonical six slots and this run is
+        # multiscale. It is not a reading either — `Member` exposes no accessor for it — so the design
+        # ratchet above is where it belongs.
+        "--whole-stack",
+    )
+
+    stated = _member(_nested(payload, "config"))
+    legacy = _member(
+        {
+            "img": IMAGE_SIZE,
+            "group": stated.config["group"],
+            "band": stated.config["band"],
+            "slots": [slot.name for slot in SCHEMES[CANONICAL_SCHEME]],
+        }
+    )
+    # The walk below compares against a LEGACY manifest, so a reading that would differ from it through
+    # some OTHER key is invisible to it: `read_size` falls back to `img`, and both are away from 336
+    # here, so dropping the `train_size` stamp passes the walk. Mutation-checked, and this is the line
+    # that catches it — the two sizes must be each other's, not merely not the legacy one.
+    assert (stated.image_size, stated.read_size) == (SIZE, READ_SIZE), "a resampled member reads its OWN size"
+
+    readings = [name for name, value in vars(Member).items() if isinstance(value, property)]
+    assert set(FIXED_BY_THE_BUILD) < set(readings), "a name here that is not a reading is a stale exemption"
+    for name in readings:
+        if name in FIXED_BY_THE_BUILD:
+            continue
+        assert getattr(stated, name) != getattr(legacy, name), (
+            f"{name} answers what a manifest predating it means, so the run's own value never arrived"
         )
 
 
