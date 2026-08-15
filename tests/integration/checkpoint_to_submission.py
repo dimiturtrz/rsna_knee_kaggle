@@ -27,6 +27,7 @@ from torch import nn
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
 from kneemri.holdout_predictions import HoldoutPredictions, Window
+from kneemri.holdout_slab import HoldoutSlab
 from kneemri.member_record import MemberRecord
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
@@ -106,9 +107,11 @@ def test_a_saved_member_reloads_and_predicts_the_same(tmp_path: Path):
     reloaded = predictions.load(path, _FakeBackbone(), DIM, SLOTS)
 
     direct = HoldoutPredictions(torch.device("cpu")).predict(
-        saved, images, mask, Window(starts=[0], width=GROUP, size=SIZE)
+        saved, HoldoutSlab.of(images, mask), Window(starts=[0], width=GROUP, size=SIZE)
     )
-    through_disk = predictions.predict(reloaded, images, mask, Window(starts=[0], width=GROUP, size=SIZE))
+    through_disk = predictions.predict(
+        reloaded, HoldoutSlab.of(images, mask), Window(starts=[0], width=GROUP, size=SIZE)
+    )
     assert np.allclose(direct, through_disk, atol=1e-6)
 
 
@@ -135,7 +138,8 @@ def test_members_combine_into_a_submission_table(tmp_path: Path):
     for index, design in enumerate((StudyDesign(), StudyDesign(slice_pooling="max"))):
         path, _ = _save(tmp_path, design, f"member{index}.pt")
         model = predictions.load(path, _FakeBackbone(), DIM, SLOTS)
-        per_member.append(predictions.predict(model, images, mask, Window(starts=[0, 1], width=GROUP, size=SIZE)))
+        window = Window(starts=[0, 1], width=GROUP, size=SIZE)
+        per_member.append(predictions.predict(model, HoldoutSlab.of(images, mask), window))
 
     combined = Ensemble.combine(per_member)
     identifiers = [f"study{index}" for index in range(STUDIES)]

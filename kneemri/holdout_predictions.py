@@ -66,12 +66,16 @@ class HoldoutPredictions:
     def predict(
         self,
         model: StudyModel,
-        images: UInt8[np.ndarray, "b n s h w"],
-        mask: Float[np.ndarray, "b n"],
+        slab: HoldoutSlab,
         window: "Window",
         precision: torch.dtype = torch.float16,
     ) -> NDArray[np.float64]:
         """Probabilities for every study, averaged over the given test-time windows.
+
+        Reads the studies a batch at a time out of the slab rather than being handed the whole holdout:
+        the array this used to take was 12.8 GB at 336 px and 22.8 at 448, resident for a walk that
+        never needed more than eight studies of it. `HoldoutSlab.of` wraps arrays a caller already
+        holds, so a caller that genuinely has pixels rather than a corpus is unaffected.
 
         `width` is how many slices each window covers, and it defaults to the three-slice group only
         because that is what a windowed member reads. A WHOLE-STACK member's slot embedding is the
@@ -85,11 +89,9 @@ class HoldoutPredictions:
         # decides which members to submit, so scoring a bf16 member in fp16 ranks it under a function
         # it was never fitted as. Same defect as Ensemble.predict_member carried until today.
         with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
-            for begin in range(0, images.shape[0], BATCH):
-                pixels: UInt8[Tensor, "b n s h w"] = torch.from_numpy(
-                    np.ascontiguousarray(images[begin : begin + BATCH])
-                ).to(self.device)
-                flags: Float[Tensor, "b n"] = torch.from_numpy(mask[begin : begin + BATCH]).to(self.device)
+            for images, mask in slab.batches(BATCH):
+                pixels: UInt8[Tensor, "b n s h w"] = torch.from_numpy(np.ascontiguousarray(images)).to(self.device)
+                flags: Float[Tensor, "b n"] = torch.from_numpy(mask).to(self.device)
                 total = torch.zeros(pixels.shape[0], len(TARGETS), device=self.device)
                 passes = 0
                 for view in self.views.apply(pixels):
@@ -118,9 +120,8 @@ class HoldoutPredictions:
         stored = cache.read(entry)
         if stored is not None:
             return stored
-        images, mask = slab.arrays()
         encoder = ENCODERS[reading.variant]
         model = self.load(reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count)
-        values = self.predict(model, images, mask, window, reading.precision)
+        values = self.predict(model, slab, window, reading.precision)
         cache.write(entry, values)
         return values

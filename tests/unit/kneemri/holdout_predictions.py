@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import override
 
 import numpy as np
+import pytest
 import torch
 
 from kneemri.holdout_predictions import HoldoutPredictions, Window
@@ -27,6 +28,9 @@ SLOTS = 6
 SLICES = 6
 SIZE = 14
 SEED = 2026
+
+ROWS = np.array([0, 1])
+"""Rows the trap corpus does not hold, so any read of it raises instead of quietly returning."""
 
 
 class _FakeBackbone(torch.nn.Module):
@@ -109,7 +113,9 @@ def test_predict():
     images = torch.randint(0, 256, (5, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8).numpy()
     mask = torch.ones(5, SLOTS).numpy()
 
-    scored = predictions.predict(_member().eval(), images, mask, Window(starts=[0, 3], width=GROUP, size=SIZE))
+    scored = predictions.predict(
+        _member().eval(), HoldoutSlab.of(images, mask), Window(starts=[0, 3], width=GROUP, size=SIZE)
+    )
 
     assert scored.shape == (5, len(TARGETS))
     assert scored.min() >= 0.0
@@ -124,7 +130,7 @@ def test_predict_over_one_window_matches_a_single_forward():
     mask = torch.ones(3, SLOTS)
 
     scored = HoldoutPredictions(torch.device("cpu")).predict(
-        model, images.numpy(), mask.numpy(), Window(starts=[0], width=GROUP, size=SIZE)
+        model, HoldoutSlab.of(images.numpy(), mask.numpy()), Window(starts=[0], width=GROUP, size=SIZE)
     )
 
     with torch.no_grad():
@@ -146,11 +152,13 @@ def test_predict_averages_over_views():
     mask = torch.ones(3, SLOTS).numpy()
     window = Window(starts=[0], width=GROUP, size=SIZE)
 
-    plain = HoldoutPredictions(torch.device("cpu")).predict(model, images, mask, window)
+    plain = HoldoutPredictions(torch.device("cpu")).predict(model, HoldoutSlab.of(images, mask), window)
     identity = HoldoutPredictions(torch.device("cpu"), SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))).predict(
-        model, images, mask, window
+        model, HoldoutSlab.of(images, mask), window
     )
-    rotated = HoldoutPredictions(torch.device("cpu"), SpatialViews()).predict(model, images, mask, window)
+    rotated = HoldoutPredictions(torch.device("cpu"), SpatialViews()).predict(
+        model, HoldoutSlab.of(images, mask), window
+    )
 
     assert (plain == identity).all(), "the identity view must be exactly the un-augmented answer"
     assert rotated.shape == plain.shape
@@ -184,19 +192,21 @@ def _reading(tmp_path: Path) -> Member:
 def test_cached(tmp_path: Path):
     """A cached reading comes back without materialising the pixels — which is the point of caching at all.
 
-    The slab is left UNTOUCHED and that is asserted directly: everything expensive on this path sits
-    downstream of `slab.arrays()` — the several-GB copy, the encoder download, the GPU — so a slab that
-    was never materialised is proof that none of them ran. Without it the test would pass on any machine
-    that happens to have a free card, which is the state this cache exists to stop depending on.
+    The slab is one that CANNOT be read — its holdout names rows the corpus does not have — so a hit
+    that touched the pixels raises rather than passing quietly. Everything expensive on this path sits
+    downstream of that read: the encoder download and the GPU. Without the trap the test would pass on
+    any machine that happens to have a free card, which is the state this cache exists to stop
+    depending on.
     """
     reading = _reading(tmp_path)
     cache = PredictionCache(tmp_path / "cached", ["s1", "s2"], SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),)))
     window = Window(starts=[0], width=3, size=336)
     stored = np.array([[0.25, 0.75], [0.5, 0.5]])
     cache.write(cache.key(reading.file, window, reading.precision), stored)
-    slab = HoldoutSlab(CachedCorpus(np.zeros((2, 1, 1, 1, 1), np.uint8), np.ones((2, 1), np.float32)), np.array([0, 1]))
+    unreadable = HoldoutSlab(CachedCorpus(np.zeros((0, 1, 1, 1, 1), np.uint8), np.zeros((0, 1), np.float32)), ROWS)
 
-    scored = HoldoutPredictions(torch.device("cpu")).cached(reading, slab, cache, window)
+    scored = HoldoutPredictions(torch.device("cpu")).cached(reading, unreadable, cache, window)
 
     assert (scored == stored).all()
-    assert slab.held is None, "a cache hit must not reach the pixels, and so must not reach the encoder"
+    with pytest.raises(IndexError):
+        unreadable.batch(0, 2)

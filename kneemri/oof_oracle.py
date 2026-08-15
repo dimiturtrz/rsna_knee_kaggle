@@ -264,7 +264,7 @@ def main() -> None:
     from kneemri.holdout_slab import HoldoutSlab  # noqa: PLC0415 - CLI-only
 
     rows = np.array([position[identifiers[index]] for index in keep])
-    images, mask = HoldoutSlab(corpus, rows).arrays()
+    slab = HoldoutSlab(corpus, rows)
     device = torch.device(arguments.device)
     predictions = HoldoutPredictions(device)
     from transformers import AutoModel  # noqa: PLC0415 - CLI-only, and it downloads
@@ -275,7 +275,7 @@ def main() -> None:
     model = predictions.load(
         arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, member.slot_count
     )
-    ours = predictions.predict(model, images, mask, member.window(corpus.slices, overlap=False), member.precision)
+    ours = predictions.predict(model, slab, member.window(corpus.slices, overlap=False), member.precision)
 
     chosen = [identifiers[index] for index in keep]
     series = pd.read_csv(root.raw() / "train_series.csv")
