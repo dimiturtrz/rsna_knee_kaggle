@@ -19,7 +19,7 @@ from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.fitting import Fitting, Fold, RunPlan
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
-from kneemri.model import CLS_MEAN, POOL_PARTS, StudyDesign, StudyModel
+from kneemri.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import ATTENDED, SLOT_POOLINGS
@@ -80,7 +80,7 @@ class TrainingOptions:
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
     pool: str = CLS_MEAN
-    slice_pooling: str = "channels"
+    slice_pooling: str = CHANNELS
     slot_pooling: str = ATTENDED
     anatomical_prior: bool = False
     encoder_layer: int = -1
@@ -293,8 +293,8 @@ class TrainingOptions:
         )
         parser.add_argument(
             "--slice-pooling",
-            choices=("channels", "max", "attend"),
-            default="channels",
+            choices=tuple(SLICE_POOLINGS),
+            default=CHANNELS,
             help="how a group of slices becomes one feature. 'channels' stacks three slices as RGB, "
             "which couples a group's physical thickness to the slice count; 'max' encodes each slice "
             "on its own and takes the elementwise max, which does not, and is what the .903 reference "

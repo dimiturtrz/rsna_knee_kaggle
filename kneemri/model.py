@@ -55,6 +55,22 @@ serve path rebuilds the design from."""
 ATTEND = "attend"
 """The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
 
+CHANNELS = "channels"
+"""Three consecutive slices become the encoder's three channels — one forward per slot, and the group's
+physical thickness is coupled to the slice count."""
+
+MAXIMUM = "max"
+"""Each slice encoded ALONE, the slot taking the per-dimension maximum. Three forwards, no coupling."""
+
+SLICE_POOLINGS: dict[str, bool] = {CHANNELS: False, MAXIMUM: True, ATTEND: True}
+"""The vocabulary, mapped to whether a slice is encoded ALONE — the fact three call sites each decided.
+
+An unknown name USED to mean channel stacking, because `per_slice` asked `in {"max", "attend"}` and
+anything else fell through. `members.py` and `holdout_predictions.py` read this string out of a
+manifest and hand it straight to `StudyDesign`, so a stale or misspelled name rebuilt a different
+function on different pixels and loaded without complaint. The lookup now happens where the model is
+BUILT, so it raises there instead."""
+
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
 
@@ -87,7 +103,7 @@ class StudyDesign:
     """
 
     pool: str = CLS_MEAN
-    slice_pooling: str = "channels"
+    slice_pooling: str = CHANNELS
     anatomical_prior: bool = False
 
     slot_pooling: str = ATTENDED
@@ -154,6 +170,9 @@ class StudyModel(nn.Module):
         head_width = dim * POOL_PARTS[self.pool]
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
+        # The lookup, not just a read: an unknown pooling raises HERE, before weights are fetched and
+        # before a manifest's stale name can be served as channel stacking.
+        self._encodes_each_slice = SLICE_POOLINGS[self.slice_pooling]
         self.slices = SliceAttention(head_width) if self.slice_pooling == ATTEND else None
         self.head = SLOT_POOLINGS[self.design.slot_pooling](head_width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
@@ -169,7 +188,7 @@ class StudyModel(nn.Module):
         rejecting it, and the arm died at startup with 'whole-stack reading needs per-slice pooling,
         not attend' against a model that supports exactly that.
         """
-        return self.slice_pooling in {"max", ATTEND}
+        return self._encodes_each_slice
 
     @override
     def forward(

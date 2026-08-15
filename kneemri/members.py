@@ -24,7 +24,7 @@ from torch import Tensor, nn
 
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
-from kneemri.model import StudyDesign, StudyModel
+from kneemri.model import CHANNELS, StudyDesign, StudyModel
 from kneemri.mounts import Mounts
 from kneemri.slot_head import ATTENDED
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
@@ -274,7 +274,7 @@ class Member:
         train unsubmittable. Defaults to "channels" for the published members, which predate the
         option and were all fitted that way.
         """
-        return str(self.config.get("slice_pooling", "channels"))
+        return str(self.config.get("slice_pooling", CHANNELS))
 
     @property
     def slot_pooling(self) -> str:

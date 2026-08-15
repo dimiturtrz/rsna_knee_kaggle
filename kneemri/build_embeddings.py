@@ -19,7 +19,7 @@ from transformers import AutoModel
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
-from kneemri.model import CLS_MEAN, POOL_PARTS, StudyDesign, StudyModel
+from kneemri.model import CLS_MEAN, MAXIMUM, POOL_PARTS, StudyDesign, StudyModel
 from kneemri.slots import CANONICAL_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
@@ -65,7 +65,7 @@ def main() -> None:
         AutoModel.from_pretrained(encoder.repository),
         encoder.dim,
         len(corpus.mask[0]),
-        StudyDesign(pool=arguments.pool, slice_pooling="max"),
+        StudyDesign(pool=arguments.pool, slice_pooling=MAXIMUM),
     )
     model.eval().to(device)
 

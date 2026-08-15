@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 
 from kneemri.lora import LoRALinear
-from kneemri.model import POOL_PARTS, TARGETS, StudyDesign, StudyModel
+from kneemri.model import ATTEND, POOL_PARTS, SLICE_POOLINGS, TARGETS, StudyDesign, StudyModel
 from kneemri.slot_head import REPORT_DIMS, SLOT_POOLINGS
 
 SEED = 2026
@@ -121,6 +121,24 @@ def test_every_pool_builds_the_width_its_forward_pass_produces():
 
     with pytest.raises(KeyError):
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(pool="cls_men"))
+
+
+def test_every_slice_pooling_name_says_whether_a_slice_is_encoded_alone():
+    """`per_slice` decides how many forwards a step costs and what a slot's embedding depends on.
+
+    It asked `in {"max", "attend"}`, so a name that was neither — a typo, or a manifest written by a
+    later recipe — meant channel stacking, silently. `Member.slice_pooling` and `HoldoutPredictions`
+    both read that string out of a checkpoint and hand it straight here, so the wrong answer is a
+    different function on different pixels that loads without complaint.
+    """
+    torch.manual_seed(SEED)
+    for name, alone in SLICE_POOLINGS.items():
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=name))
+        assert model.per_slice is alone, name
+        assert (model.slices is not None) == (name == ATTEND), f"{name} builds only the module it uses"
+
+    with pytest.raises(KeyError):
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="chanels"))
 
 
 def test_slice_features():
