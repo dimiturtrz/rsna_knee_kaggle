@@ -9,6 +9,7 @@ from kneemri.model import StudyDesign
 from kneemri.objective import Objective, RankedObjective
 from kneemri.slot_reader import Band, Reading
 from kneemri.slots import Routing
+from kneemri.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.train import TrainingOptions
 from kneemri.trainer import Adaptation
 
@@ -34,6 +35,21 @@ def test_parse_reads_a_separate_evaluation_ruler(monkeypatch: pytest.MonkeyPatch
     options = TrainingOptions.parse()
     assert options.labels == Path("a.csv")
     assert options.eval_labels == Path("b.csv")
+
+
+def test_supervision(monkeypatch: pytest.MonkeyPatch):
+    """The two label switches must reach the targets, from argv, without `main` in the way.
+
+    Both change what the model is FITTED ON while every recorded config keeps agreeing with itself —
+    the shape of nine defects here already — and they map to a data argument rather than to a policy
+    object, so the `options_to_policies` walk cannot see them.
+    """
+    monkeypatch.setattr("sys.argv", ["train", "--labels", "labels.csv", "--weight-floor", "--calibrated-targets"])
+    asked = TrainingOptions.parse().supervision
+
+    assert asked.floor == CONFIDENCE_FLOOR, "a finding the report never mentions still pulls with this"
+    assert asked.calibrated
+    assert TrainingOptions().supervision == Supervision(), "unasked-for, the run trains on the raw levels"
 
 
 def test_parse_keeps_the_split_seed_independent_of_the_model_seed(monkeypatch: pytest.MonkeyPatch):

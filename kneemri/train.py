@@ -121,6 +121,22 @@ class TrainingOptions:
         """The geometry this run decodes under — its crop and its band, which together name its cache."""
         return Reading(crop=self.crop, band=self.band)
 
+    @property
+    def supervision(self) -> Supervision:
+        """What this run's two label switches mean, as the value `Targets.pair` takes.
+
+        A property for the reason `crop` and `band` give, and for one more: this mapping was two
+        expressions inside `main`, which is the only part of the flag-to-policy wiring no test can
+        reach — `options_to_policies` walks `fitted_trainer` and `fitted_model`, and a switch that
+        maps to a DATA argument instead of a policy object sat outside that walk. Both of these change
+        what the model is fitted on while leaving every recorded config agreeing with itself, which is
+        the exact shape of the nine defects this project has already paid for.
+        """
+        return Supervision(
+            floor=CONFIDENCE_FLOOR if self.weight_floor else 0.0,
+            calibrated=self.calibrated_targets,
+        )
+
     @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object."""
@@ -485,10 +501,7 @@ def main() -> None:
         arguments.eval_labels,
         root.raw() / "train.csv",
         identifiers,
-        Supervision(
-            floor=CONFIDENCE_FLOOR if arguments.weight_floor else 0.0,
-            calibrated=arguments.calibrated_targets,
-        ),
+        arguments.supervision,
     )
     # The split is a property of the CORPUS, not of this run: it must not move when the model seed
     # does. Deriving it from --seed gave seed 7 a fold-0 holdout sharing only 192 of 909 studies with
