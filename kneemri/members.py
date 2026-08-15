@@ -26,15 +26,12 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.mounts import Mounts
-from kneemri.slots import FIRST_MAXIMAL, SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 
 logger = logging.getLogger(__name__)
 
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
-
-CANONICAL = "canonical"
-"""The scheme a member names when its slot list is the published six."""
 
 LEGACY_SLICES = 12
 """What a manifest written before members could differ in depth was fitted on."""
@@ -364,7 +361,7 @@ class Member:
         drifts from the thing it describes.
         """
         known = ((name, [slot.name for slot in slots]) for name, slots in SCHEMES.items())
-        return next((name for name, names in known if names == list(self.config["slots"])), CANONICAL)
+        return next((name for name, names in known if names == list(self.config["slots"])), CANONICAL_SCHEME)
 
     @property
     def pixel_group(self) -> str:

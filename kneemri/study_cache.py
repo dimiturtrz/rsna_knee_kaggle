@@ -78,9 +78,6 @@ class DecodeRequest:
 class StudyCache:
     """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask."""
 
-    CANONICAL = "canonical"
-    """The scheme whose caches keep their historic names, and the one the published members use."""
-
     def __init__(
         self,
         directory: Path,

@@ -14,7 +14,7 @@ from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
 from kneemri.mounts import Mounts
-from kneemri.slots import Routing
+from kneemri.slots import SCHEMES, Routing
 
 SEED = 2026
 DIM = 8
@@ -408,6 +408,10 @@ def test_scheme():
     assert _member().scheme == "canonical"
     extended = replace(_member(), config={**_config(), "slots": [*SLOTS, "COR_FLUID_NOFS", "AX_T1", "AX_FLUID_NOFS"]})
     assert extended.scheme == "extended"
+    # The literals above are deliberate: a test comparing against the constant the subject imports only
+    # proves the copy agrees with itself. THIS is the property they protect — the fallback a member gets
+    # when nothing matches must still be a scheme that RESOLVES, because the name is what finds the cache.
+    assert _member().scheme in SCHEMES
 
 
 def test_layer():

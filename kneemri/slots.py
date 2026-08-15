@@ -96,7 +96,12 @@ is not the one we assumed. For TESTING against the published members' recorded p
 switching on."""
 
 CANONICAL_SCHEME = "canonical"
-"""The scheme whose caches keep their historic names, and the one the published members use."""
+"""The scheme whose caches keep their historic names, and the one the published members use.
+
+THE ONE HOME for this name. It keys `SCHEMES`, it is what `Routing` compares against to decide whether
+a cache key carries a suffix, and it is what a member claims when its slot list is the published six —
+three jobs that must agree. They had three separate copies of the literal, so renaming the vocabulary
+here would have left caches written under one name and looked for under another."""
 
 DETAIL_MM = 80.0
 """The tight extent of the multi-scale scheme.

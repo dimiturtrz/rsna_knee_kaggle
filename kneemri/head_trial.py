@@ -33,6 +33,7 @@ from kneemri.model import TARGETS
 from kneemri.objective import Objective, RankedObjective
 from kneemri.scores import LabelScores
 from kneemri.slot_head import SlotHead
+from kneemri.slots import CANONICAL_SCHEME
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ def main() -> None:
     parser.add_argument("--image-size", type=int, default=336)
     parser.add_argument("--read-size", type=int, default=336)
     parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--scheme", default="canonical")
+    parser.add_argument("--scheme", default=CANONICAL_SCHEME)
     parser.add_argument("--pool", default="cls_mean")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep")

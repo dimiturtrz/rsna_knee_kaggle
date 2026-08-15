@@ -34,6 +34,7 @@ from numpy.lib.format import open_memmap
 from numpy.typing import NDArray
 from torch import Tensor
 
+from kneemri.slots import CANONICAL_SCHEME
 from kneemri.study_cache import CachedCorpus
 
 logger = logging.getLogger(__name__)
@@ -116,7 +117,7 @@ class EmbeddingCache:
         """
         spec = self.spec
         parts = [spec.variant, f"{spec.image_size}px", f"r{spec.read_size}", f"{spec.slices}sl", spec.pool]
-        if spec.scheme != "canonical":
+        if spec.scheme != CANONICAL_SCHEME:
             parts.append(spec.scheme)
         return "_".join(parts)
 

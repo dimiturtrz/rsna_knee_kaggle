@@ -15,7 +15,7 @@ from core.paths import DataRoot
 from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
 from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def main() -> None:
     parser.add_argument(
         "--scheme",
         choices=tuple(SCHEMES),
-        default=StudyCache.CANONICAL,
+        default=CANONICAL_SCHEME,
         help="which slot scheme to route with. 'extended' adds COR_FLUID_NOFS, AX_T1 and "
         "AX_FLUID_NOFS, the three combinations the canonical six cannot express - measured at 96%% of "
         "the 2,421 series (9.9%%) that currently match no slot at all. It writes a SEPARATE cache; the "

@@ -23,7 +23,7 @@ from kneemri.model import StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
@@ -50,7 +50,7 @@ class TrainingOptions:
     image_size: int = IMAGE_SIZE
     train_size: int = 0
     """0 means read the cache at its own resolution; anything else resamples to that size."""
-    scheme: str = StudyCache.CANONICAL
+    scheme: str = CANONICAL_SCHEME
     crop_mm: float = CROP_MM
     centre: str = DEFAULT_CENTRE
     tie: str = FIRST_MAXIMAL
@@ -161,7 +161,7 @@ class TrainingOptions:
         parser.add_argument(
             "--scheme",
             choices=tuple(SCHEMES),
-            default=StudyCache.CANONICAL,
+            default=CANONICAL_SCHEME,
             help="slot scheme. 'extended' routes three sequences the canonical six cannot express - "
             "coronal PD without fat suppression, axial T1, axial fluid without fat suppression - which "
             "are 96%% of the series we currently discard. It needs its own cache and produces members "

@@ -20,7 +20,7 @@ from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.model import StudyDesign, StudyModel
-from kneemri.slots import SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def main() -> None:
     parser.add_argument("--image-size", type=int, default=336, help="the PIXEL cache to read")
     parser.add_argument("--train-size", type=int, default=None, help="resample to this before encoding")
     parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--scheme", default=StudyCache.CANONICAL, choices=tuple(SCHEMES))
+    parser.add_argument("--scheme", default=CANONICAL_SCHEME, choices=tuple(SCHEMES))
     parser.add_argument("--pool", default="cls_mean", help="how patch tokens become one vector per slice")
     parser.add_argument("--batch", type=int, default=8, help="studies per forward")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))

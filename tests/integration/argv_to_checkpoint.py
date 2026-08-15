@@ -28,7 +28,7 @@ from kneemri import train as train_module
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS
-from kneemri.slots import DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 from ..unit.kneemri.model import DIM, _FakeBackbone
@@ -152,7 +152,7 @@ def test_the_command_line_reaches_the_checkpoint(corpus: Path, monkeypatch: pyte
     assert config["slices"] == SLICES
     assert config["train_size"] == SIZE, "0 means the cache's own size, and the member must state which that was"
     assert payload["fingerprint"], "a member without one cannot be verified, so it cannot be submitted"
-    assert _nested(payload, "fingerprint_config")["n_slot"] == len(SCHEMES[StudyCache.CANONICAL])
+    assert _nested(payload, "fingerprint_config")["n_slot"] == len(SCHEMES[CANONICAL_SCHEME])
 
 
 def test_the_scheme_reaches_the_model_and_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):
