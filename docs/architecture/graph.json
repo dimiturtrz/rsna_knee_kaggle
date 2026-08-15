@@ -993,6 +993,12 @@
     {
       "kind": "import",
       "source": "kneemri.run_comparison",
+      "target": "kneemri.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.run_comparison",
       "target": "kneemri.label_power",
       "weight": 1
     },
@@ -1407,6 +1413,12 @@
     {
       "kind": "holds",
       "source": "kneemri.anatomy.FindingAnatomy",
+      "target": "kneemri.anatomy.Extent",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.anatomy.FindingAnatomy",
       "target": "kneemri.slots.Plane",
       "weight": 1
     },
@@ -1414,6 +1426,24 @@
       "kind": "references",
       "source": "kneemri.anatomy.FindingAnatomy",
       "target": "kneemri.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.anatomy.ScaleProfile",
+      "target": "kneemri.anatomy.FindingAnatomy",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.anatomy.ScaleProfile",
+      "target": "kneemri.anatomy.ScaleProfile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.anatomy.ScaleProfile.line",
+      "target": "kneemri.anatomy.ScaleProfile.verdict",
       "weight": 1
     },
     {
@@ -4503,6 +4533,12 @@
     {
       "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.report",
+      "target": "kneemri.anatomy.ScaleProfile.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.report",
       "target": "kneemri.run_comparison.RunComparison._marked",
       "weight": 1
     },
@@ -6614,8 +6650,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.anatomy.Extent",
+      "label": "Extent",
+      "level": "class",
+      "parent": "kneemri.anatomy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.anatomy.FindingAnatomy",
       "label": "FindingAnatomy",
+      "level": "class",
+      "parent": "kneemri.anatomy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.ScaleProfile",
+      "label": "ScaleProfile",
       "level": "class",
       "parent": "kneemri.anatomy",
       "role": "satellite"
@@ -7626,6 +7678,38 @@
       "label": "affinity",
       "level": "method",
       "parent": "kneemri.anatomy.FindingAnatomy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.ScaleProfile._mean",
+      "label": "_mean",
+      "level": "method",
+      "parent": "kneemri.anatomy.ScaleProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.ScaleProfile.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.anatomy.ScaleProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.ScaleProfile.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.anatomy.ScaleProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.anatomy.ScaleProfile.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.anatomy.ScaleProfile",
       "role": null
     },
     {
