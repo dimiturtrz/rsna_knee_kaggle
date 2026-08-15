@@ -207,3 +207,27 @@ def test_fitted_carries_the_four_parts_the_final_save_writes():
 
     assert kept.epoch == 6
     assert kept.witness == {"studies": ["s0"]}
+
+
+def test_a_scored_run_keeps_every_holdout_prediction_not_only_the_witnessed_eight(tmp_path: Path):
+    """The array the ledger's per-label numbers were read off, kept whole beside the checkpoint.
+
+    Without it an arm can state a per-label delta and not its own interval, which is how knee-3vh ended
+    up borrowing a floor measured on someone else's seed twins.
+    """
+    fitting = _fitting(tmp_path / "member.pt", epochs=1)
+    kept = fitting.run(_fold())
+
+    reading = fitting.predictions.read()
+    assert reading is not None
+    assert reading.studies == [f"s{index}" for index in range(STUDIES)]
+    assert reading.predictions.shape == (STUDIES, len(TARGETS))
+    assert reading.epoch == kept.epoch, "the kept epoch's, not the last one's"
+
+
+def test_an_unscored_run_records_no_predictions_because_it_made_none(tmp_path: Path):
+    """A final fit holds nothing back, so there is no per-study record and no pairing to be had."""
+    fitting = _fitting(tmp_path / "final.pt", epochs=1)
+    fitting.run(_fold(holdout=False))
+
+    assert not fitting.predictions.exists()

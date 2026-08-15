@@ -28,6 +28,7 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from kneemri.holdout_record import HoldoutRecord
 from kneemri.member_record import MemberRecord
 from kneemri.patience import Patience
 from kneemri.run_metrics import EpochRow, RunMetrics
@@ -95,6 +96,7 @@ class Fitting:
         self.record = record
         self.plan = plan
         self.metrics = RunMetrics(plan.destination)
+        self.predictions = HoldoutRecord(plan.destination)
         # Written HERE rather than at the first scored epoch, so a run killed before it scores still
         # leaves a file that says what it was trying.
         self.metrics.describe(record.recipe)
@@ -131,6 +133,17 @@ class Fitting:
         # NaN, not `ranked`: with no holdout that value is the epoch index standing in for a score.
         holdout = ranked if fold.scored else NO_HOLDOUT
         witness = None if predicted is None else self.record.witness(fold.targets.identifiers, fold.holdout, predicted)
+        if predicted is not None:
+            # The SAME array the ledger's per-label numbers were read off, kept whole. Eight studies of
+            # it become the witness; the other 873 are what any paired interval over this arm needs, and
+            # re-deriving them later would land within a tolerance wider than the interval itself.
+            self.predictions.write(
+                fold.targets.identifiers,
+                fold.holdout,
+                predicted,
+                fold.evaluation.scores[fold.holdout],
+                epoch,
+            )
         kept = Fitted(state=state, holdout=holdout, epoch=epoch, witness=witness)
         self.trainer.save_partial(self.plan.destination, self.record.payload(state, holdout, epoch, witness))
         return kept
