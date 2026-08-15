@@ -37,6 +37,7 @@ def section(title: str) -> None:
     logger.info(f"\n{RULE}\n{title}\n{RULE}")
 
 
+# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -66,7 +67,7 @@ def find_kit() -> Path:
             return here.parent
         archive = here / "kneemri_src.zip"
         if archive.exists():
-            zipfile.ZipFile(archive).extractall("/tmp/kit")
+            zipfile.ZipFile(archive).extractall("/tmp/kit")  # our own kit, built by build_kit.py
             return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
     raise FileNotFoundError("no kneemri package under /kaggle/input")
 
@@ -78,16 +79,22 @@ def install_wheels(kit: Path) -> None:
     them all present — but not the ones our own modules import. `jaxtyping` is not in Kaggle's image and
     `kneemri.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
     not only what you plan to use.
+
+    Names what it installs, because a kit shipped without the wheel it needed fails much later, inside
+    an import, in a log nobody reads until the slot is spent.
     """
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
     if not wheels:
-        logger.info("no wheels in the kit — assuming every import is already in the image")
+        logging.getLogger(__name__).info("no wheels in the kit — assuming every import is already in the image")
         return
-    logger.info(f"installing {[w.name for w in wheels]}")
+    logging.getLogger(__name__).info(f"installing {[wheel.name for wheel in wheels]}")
     subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
         [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
         check=True,
     )
+
+
+# <<< KERNEL-BOOTSTRAP
 
 
 def find_dinov2(mounts: "Mounts") -> Path:

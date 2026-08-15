@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from kneemri.model import StudyModel
 
 
+# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -63,19 +64,34 @@ def find_kit() -> Path:
             return here.parent
         archive = here / "kneemri_src.zip"
         if archive.exists():
-            zipfile.ZipFile(archive).extractall("/tmp/kit")
+            zipfile.ZipFile(archive).extractall("/tmp/kit")  # our own kit, built by build_kit.py
             return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
     raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
 def install_wheels(kit: Path) -> None:
-    """Everything our modules import that the image lacks — or ships at the wrong version."""
+    """Install the kit's wheels offline, before anything imports our package.
+
+    The runtime probe checked the libraries the PIPELINE needs (pydicom, timm, transformers…) and found
+    them all present — but not the ones our own modules import. `jaxtyping` is not in Kaggle's image and
+    `kneemri.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
+    not only what you plan to use.
+
+    Names what it installs, because a kit shipped without the wheel it needed fails much later, inside
+    an import, in a log nobody reads until the slot is spent.
+    """
     wheels = sorted(kit.parent.glob("*.whl")) + sorted(kit.glob("*.whl"))
-    if wheels:
-        subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
-            [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
-            check=True,
-        )
+    if not wheels:
+        logging.getLogger(__name__).info("no wheels in the kit — assuming every import is already in the image")
+        return
+    logging.getLogger(__name__).info(f"installing {[wheel.name for wheel in wheels]}")
+    subprocess.run(  # noqa: S603 - pip installing wheels we mounted ourselves, fixed argv, no shell
+        [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
+        check=True,
+    )
+
+
+# <<< KERNEL-BOOTSTRAP
 
 
 def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API anyone calls twice
