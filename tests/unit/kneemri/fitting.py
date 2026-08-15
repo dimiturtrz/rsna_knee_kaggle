@@ -19,7 +19,7 @@ from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 from kneemri.trainer import Trainer
 
-from .member_record import _Options
+from .member_record import OPTIONS
 from .model import DIM, SLOTS, _FakeBackbone
 
 SEED = 2026
@@ -52,7 +52,7 @@ def _fitting(destination: Path, epochs: int = 1, patience: int = 0) -> Fitting:
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     trainer = Trainer(model, torch.device("cpu"))
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
-    record = MemberRecord(_Options(), encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+    record = MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
     plan = RunPlan(destination=destination, epochs=epochs, batch=BATCH, patience=patience, seed=SEED)
     return Fitting(trainer, record, plan)
 

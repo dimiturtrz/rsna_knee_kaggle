@@ -29,9 +29,8 @@ from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.package_members import MemberManifest, PackagedMember
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import Trainer
+from kneemri.train import TrainingOptions
 
-from ..unit.kneemri.member_record import _Options
 from ..unit.kneemri.model import DIM, SLOTS, _FakeBackbone
 
 SEED = 2026
@@ -85,11 +84,13 @@ def _trained(destination: Path) -> _Checkpoint:
     # Per-slice pooling, which is what whole-stack reading is defined over.
     design = StudyDesign(slice_pooling="max")
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, design)
-    trainer = Trainer(model, DEVICE)
     # Whole-stack, because that is what every arm on the leaderboard reads — and because a member
     # fitted whole and served three slices at a time is the exact defect this chain exists to catch.
-    trainer.whole_stack(SLICES)
-    options = _Options(image_size=SIZE, slices=SLICES, whole_stack=True)
+    # Attached through the SETUP method `train.main` calls: hand-wiring `Trainer(...).whole_stack(...)`
+    # here shared no code with the run it claims to reproduce, so a policy that stopped being attached
+    # in `main` would leave this chain green.
+    options = TrainingOptions(image_size=SIZE, slices=SLICES, whole_stack=True, slice_pooling="max")
+    trainer = options.fitted_trainer(model, DEVICE, [], STUDIES)
     record = MemberRecord(
         options,
         Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM),

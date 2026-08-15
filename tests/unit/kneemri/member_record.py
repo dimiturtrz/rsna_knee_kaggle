@@ -1,41 +1,22 @@
-from dataclasses import dataclass, replace
-from pathlib import Path
+from dataclasses import replace
 
 import torch
 
 from kneemri.backbone import Encoder
-from kneemri.crop_centre import CROP_MM, Crop
+from kneemri.crop_centre import CROP_MM
 from kneemri.member_record import MemberRecord
-from kneemri.slots import Routing
+from kneemri.train import TrainingOptions
 
 from .model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 
 DIM = 8
+OPTIONS = TrainingOptions(slice_pooling="max", whole_stack=True, backbone_lr=4e-5)
+"""The REAL options object, because a stand-in copy of it is a copy that drifts.
 
-
-@dataclass
-class _Options:
-    """The fields MemberRecord reads. A stand-in so the test does not need a parsed command line."""
-
-    image_size: int = 336
-    train_size: int = 0
-    slices: int = 12
-    slice_pooling: str = "max"
-    slot_pooling: str = "attend"
-    anatomical_prior: bool = False
-    encoder_layer: int = -1
-    ema: bool = False
-    bf16: bool = False
-    lora_rank: int = 0
-    rank_weight: float = 1.0
-    report_weight: float = 0.0
-    whole_stack: bool = True
-    unfreeze_last: int = 6
-    head_lr: float = 1e-3
-    backbone_lr: float = 4e-5
-    out: Path | None = None
-    crop: Crop = Crop()
-    routing: Routing = Routing()
+This was 19 hand-written fields mirroring `TrainingOptions`. A field added to the run and read by
+`MemberRecord` would have been recorded by every real run and by nothing here — and what this file
+asserts is precisely that the checkpoint stamps the values the RUN used.
+"""
 
 
 def _record() -> MemberRecord:
@@ -44,7 +25,7 @@ def _record() -> MemberRecord:
     torch.manual_seed(2026)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
-    return MemberRecord(_Options(), encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+    return MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
 
 
 def test_payload():
@@ -81,7 +62,7 @@ def test_read_size():
     assert record.read_size == 336, "train_size 0 means the model read the cache as decoded"
     assert record.payload({}, 0.8, 0)["config"]["train_size"] == 336
 
-    resampled = replace(record, options=_Options(train_size=392))
+    resampled = replace(record, options=replace(OPTIONS, train_size=392))
     assert resampled.read_size == 392
     assert resampled.payload({}, 0.8, 0)["fingerprint_config"]["img"] == 392
 
@@ -113,7 +94,7 @@ def test_payload_records_the_runs_own_crop():
     the tissue — and the serve path reads this field, so the member would then be fed pixels it was
     never fitted on, with every fingerprint still passing against its own reading.
     """
-    record = replace(_record(), options=_Options(crop=Crop(mm=80.0, centre="tissue")))
+    record = replace(_record(), options=replace(OPTIONS, crop_mm=80.0, centre="tissue"))
 
     config = record.payload({}, holdout=0.8, epoch=1)["config"]
 
@@ -129,7 +110,7 @@ def test_payload_records_the_runs_own_router():
     series in every contested slot - fitted on one set of images and shown another, with the fingerprint
     still passing because it is checked against the member's own reading.
     """
-    record = replace(_record(), options=_Options(routing=Routing(tie="last")))
+    record = replace(_record(), options=replace(OPTIONS, tie="last"))
 
     assert record.payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "last"
     assert _record().payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "first"
