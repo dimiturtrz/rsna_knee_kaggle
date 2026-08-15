@@ -12,7 +12,7 @@ from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.labels.targets import Targets
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
-from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.objective import Objective, Predicted, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
@@ -90,13 +90,13 @@ def test_batches():
 
 def test_loss():
     """Weight zero silences a target entirely, which is how an unmentioned finding must behave."""
-    trainer = _trainer()
+    objective = _trainer().objective
     logits = torch.zeros(2, len(TARGETS))
     scores = torch.ones(2, len(TARGETS))
     weights = torch.zeros(2, len(TARGETS))
-    assert float(trainer.loss(logits, scores, weights)) == 0.0
+    assert float(objective(Predicted(logits, scores, weights))) == 0.0
     weights[0, 0] = 1.0
-    assert float(trainer.loss(logits, scores, weights)) > 0.0
+    assert float(objective(Predicted(logits, scores, weights))) > 0.0
 
 
 def _corpus(studies: int = 6, slices: int = 6, size: int = 14) -> CachedCorpus:
@@ -230,8 +230,9 @@ def test_loss_uses_the_objective_the_run_was_given():
 
     torch.manual_seed(SEED)
     ranked = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), objective=RankedObjective(1.0))
-    assert float(ranked.loss(logits, scores, weights)) != float(_trainer().loss(logits, scores, weights))
-    assert float(_trainer().loss(logits, scores, weights)) == float(Objective()(logits, scores, weights)), (
+    judged = Predicted(logits, scores, weights)
+    assert float(ranked.objective(judged)) != float(_trainer().objective(judged))
+    assert float(_trainer().objective(judged)) == float(Objective()(judged)), (
         "the default trainer must descend plain weighted cross-entropy"
     )
 

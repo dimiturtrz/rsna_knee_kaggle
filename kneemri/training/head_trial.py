@@ -34,7 +34,7 @@ from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.targets import Targets
 from kneemri.models.model import CLS_MEAN, POOL_PARTS, TARGETS
 from kneemri.models.slot_head import SlotHead
-from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.objective import Objective, Predicted, RankedObjective
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +92,7 @@ class HeadTrial:
                 rows, weights = targets.rows(batch)
                 optimiser.zero_grad(set_to_none=True)
                 loss = objective(
-                    head(pooled[batch], mask[batch]),
-                    torch.from_numpy(rows),
-                    torch.from_numpy(weights),
+                    Predicted(head(pooled[batch], mask[batch]), torch.from_numpy(rows), torch.from_numpy(weights))
                 )
                 loss.backward()
                 optimiser.step()

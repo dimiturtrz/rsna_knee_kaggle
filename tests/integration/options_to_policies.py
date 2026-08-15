@@ -37,7 +37,6 @@ THE_LOOP = {
     "batches",
     "evaluated",
     "fit_epoch",
-    "loss",
     "plan",
     "predict",
     "save_partial",

@@ -19,6 +19,8 @@ separate the two studies and how confident both of those readings were. A pair t
 about only slightly, or that rests on a guess, pulls proportionally less.
 """
 
+from dataclasses import dataclass
+
 from jaxtyping import Float
 from torch import Tensor, nn
 
@@ -33,6 +35,21 @@ measuring a method that has not yet shown signal.
 
 PAIR_FLOOR = 1e-6
 """Guards a batch in which every study carries the same reading for a label, so no pair separates."""
+
+
+@dataclass(frozen=True)
+class Predicted:
+    """One step's readout beside the weighted reading that judges it.
+
+    The three travelled as three arguments through every method here and through the trainer, which is
+    what makes a fourth one — an ordinal grade, say — a change to five signatures rather than a field.
+    They are also inseparable by construction: a logit judged against another batch's score is not a
+    smaller mistake than a missing one.
+    """
+
+    logits: Float[Tensor, "b o"]
+    scores: Float[Tensor, "b o"]
+    weights: Float[Tensor, "b o"]
 
 
 class Objective:
@@ -51,23 +68,14 @@ class Objective:
         self.normalise_by_count = normalise_by_count
         self.per_label = per_label
 
-    def __call__(
-        self,
-        logits: Float[Tensor, "b o"],
-        scores: Float[Tensor, "b o"],
-        weights: Float[Tensor, "b o"],
-    ) -> Float[Tensor, ""]:
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
         """The scalar this step descends."""
-        return self.cross_entropy(logits, scores, weights)
+        return self.cross_entropy(batch)
 
-    def cross_entropy(
-        self,
-        logits: Float[Tensor, "b o"],
-        scores: Float[Tensor, "b o"],
-        weights: Float[Tensor, "b o"],
-    ) -> Float[Tensor, ""]:
+    def cross_entropy(self, batch: Predicted) -> Float[Tensor, ""]:
         """The weighted BCE term, which every objective here is built on top of."""
-        elementwise = nn.functional.binary_cross_entropy_with_logits(logits, scores, reduction="none")
+        elementwise = nn.functional.binary_cross_entropy_with_logits(batch.logits, batch.scores, reduction="none")
+        weights = batch.weights
         weighted = elementwise * weights
         if self.per_label:
             # EACH OF THE TWELVE CONTRIBUTES EQUALLY, because that is what the metric does. Pooling the
@@ -99,21 +107,11 @@ class RankedObjective(Objective):
         super().__init__(normalise_by_count=normalise_by_count, per_label=per_label)
         self.weight = weight
 
-    def __call__(
-        self,
-        logits: Float[Tensor, "b o"],
-        scores: Float[Tensor, "b o"],
-        weights: Float[Tensor, "b o"],
-    ) -> Float[Tensor, ""]:
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
         """Cross-entropy, plus the ranking term at its configured strength."""
-        return self.cross_entropy(logits, scores, weights) + self.weight * self.ranking(logits, scores, weights)
+        return self.cross_entropy(batch) + self.weight * self.ranking(batch)
 
-    def ranking(
-        self,
-        logits: Float[Tensor, "b o"],
-        scores: Float[Tensor, "b o"],
-        weights: Float[Tensor, "b o"],
-    ) -> Float[Tensor, ""]:
+    def ranking(self, batch: Predicted) -> Float[Tensor, ""]:
         """A soft, confidence-weighted count of the pairs this batch ranks the wrong way round.
 
         Every ordered pair (i, j) within a label is formed at once — the batch is small and the labels
@@ -128,6 +126,7 @@ class RankedObjective(Objective):
         linear in the gap when it trails. That is the surrogate an AUC's step function needs to become
         differentiable, and it is the same one the RankNet family uses.
         """
+        logits, scores, weights = batch.logits, batch.scores, batch.weights
         gap = logits.unsqueeze(1) - logits.unsqueeze(0)
         separation = (scores.unsqueeze(1) - scores.unsqueeze(0)).clamp(min=0.0)
         confidence = weights.unsqueeze(1) * weights.unsqueeze(0)

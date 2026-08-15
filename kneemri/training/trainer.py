@@ -34,7 +34,7 @@ from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import StudyModel
 from kneemri.training.heartbeat import Heartbeat
-from kneemri.training.objective import Objective
+from kneemri.training.objective import Objective, Predicted
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 
 logger = logging.getLogger(__name__)
@@ -435,11 +435,12 @@ class Trainer:
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.
                 logits, report = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
-                loss = self.loss(
+                judged = Predicted(
                     logits.float(),
                     torch.from_numpy(score).to(self.device),
                     torch.from_numpy(weight).to(self.device),
-                ) + self.reports(report.float(), batch)
+                )
+                loss = self.objective(judged) + self.reports(report.float(), batch)
             self.optimiser.zero_grad(set_to_none=True)
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimiser)
@@ -492,15 +493,6 @@ class Trainer:
         # on the device: `.cpu()` blocks the host until that batch's forward has finished, so the reader
         # thread and the card both wait on a copy of 12 floats per study. The whole holdout is 881x12.
         return torch.cat(chunks).cpu().numpy().astype(np.float64)
-
-    def loss(
-        self,
-        logits: Float[Tensor, "b o"],
-        scores: Float[Tensor, "b o"],
-        weights: Float[Tensor, "b o"],
-    ) -> Float[Tensor, ""]:
-        """The scalar this step descends, as decided by whichever objective this run holds."""
-        return self.objective(logits, scores, weights)
 
     def save_partial(self, destination: Path, payload: dict[str, object]) -> None:
         """Write the best weights so far, atomically, the moment they improve.
