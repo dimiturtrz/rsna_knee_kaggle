@@ -11,6 +11,7 @@ from kneemri.backbone import Encoder
 from kneemri.crop_centre import Crop
 from kneemri.model import TARGETS, StudyModel
 from kneemri.slot_reader import SLICE_BAND
+from kneemri.slots import Routing
 
 
 class RunOptions(Protocol):
@@ -27,6 +28,11 @@ class RunOptions(Protocol):
     @property
     def crop(self) -> Crop:
         """The physical crop the RUN read, which the checkpoint must record rather than assume."""
+        ...
+
+    @property
+    def routing(self) -> Routing:
+        """The router the RUN used, for the same reason: a member served under another sees other series."""
         ...
 
     @property
@@ -188,6 +194,9 @@ class MemberRecord:
                 # never fitted on, with every fingerprint still passing against its own reading.
                 "crop_mm": options.crop.mm,
                 "centre": options.crop.centre,
+                # The RUN's router. Without this a graft-matching arm would record nothing and be
+                # served under our first-maximal rule — fitted on one set of series, fed another.
+                "tie": options.routing.tie,
                 "band": list(SLICE_BAND),
                 "slots": list(self.slot_names),
                 "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},

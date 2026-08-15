@@ -6,6 +6,7 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import Crop
 from kneemri.model import StudyDesign
 from kneemri.objective import Objective, RankedObjective
+from kneemri.slots import Routing
 from kneemri.train import TrainingOptions
 from kneemri.trainer import Adaptation
 
@@ -142,3 +143,9 @@ def test_crop():
     """The two flags argparse must land as scalars, read back as the one value everything else wants."""
     assert TrainingOptions().crop == Crop()
     assert TrainingOptions(crop_mm=80.0, centre="tissue").crop == Crop(mm=80.0, centre="tissue")
+
+
+def test_routing():
+    """The scheme and tie flags argparse lands as scalars, read back as the pair everything else wants."""
+    assert TrainingOptions().routing == Routing()
+    assert TrainingOptions(tie="last").routing.tie == "last"

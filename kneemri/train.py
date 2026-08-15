@@ -27,7 +27,7 @@ from kneemri.report_supervision import ReportSupervision
 from kneemri.run_metrics import EpochRow, RunMetrics
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import SCHEMES, Routing
+from kneemri.slots import FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
@@ -57,6 +57,7 @@ class TrainingOptions:
     scheme: str = StudyCache.CANONICAL
     crop_mm: float = CROP_MM
     centre: str = DEFAULT_CENTRE
+    tie: str = FIRST_MAXIMAL
     seed: int = 2026
     split_seed: int = 2026
     one_cycle: bool = False
@@ -90,6 +91,11 @@ class TrainingOptions:
     eval_labels: Path | None = None
     out: Path | None = None
     paths: Path = Path("paths.yaml")
+
+    @property
+    def routing(self) -> Routing:
+        """How this run turns series into slots — the scheme it reads and the tie rule it reads under."""
+        return Routing(scheme=self.scheme, tie=self.tie)
 
     @property
     def crop(self) -> Crop:
@@ -146,6 +152,15 @@ class TrainingOptions:
             choices=sorted(CENTRES),
             help="where that extent is taken about. A tight crop needs the joint located rather than "
             "assumed (knee-yrf); at 130mm the difference is small and at 80mm it clips the joint.",
+        )
+        parser.add_argument(
+            "--tie",
+            default=FIRST_MAXIMAL,
+            choices=(FIRST_MAXIMAL, LAST_MAXIMAL),
+            help="which of several equally dense candidates fills a slot. 'first' is ours and what every "
+            "member on disk was fitted under; the published members reproduce their own predictions "
+            "better under 'last' (knee-evn), so a graft-matching arm needs it. It selects the CACHE and "
+            "is recorded on the member, so serving cannot fall back to the default.",
         )
         parser.add_argument(
             "--scheme",
@@ -446,7 +461,7 @@ def main() -> None:
         root.processed(),
         slices=arguments.slices,
         image_size=arguments.image_size,
-        routing=Routing(scheme=arguments.scheme),
+        routing=arguments.routing,
         crop=arguments.crop,
     )
     corpus, identifiers = cache.load()

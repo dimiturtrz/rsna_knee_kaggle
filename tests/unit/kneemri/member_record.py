@@ -6,6 +6,7 @@ import torch
 from kneemri.backbone import Encoder
 from kneemri.crop_centre import CROP_MM, Crop
 from kneemri.member_record import MemberRecord
+from kneemri.slots import Routing
 
 from .model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 
@@ -34,6 +35,7 @@ class _Options:
     backbone_lr: float = 4e-5
     out: Path | None = None
     crop: Crop = Crop()
+    routing: Routing = Routing()
 
 
 def _record() -> MemberRecord:
@@ -118,3 +120,16 @@ def test_payload_records_the_runs_own_crop():
     assert config["crop_mm"] == 80.0
     assert config["centre"] == "tissue"
     assert _record().payload({}, holdout=0.8, epoch=1)["config"]["crop_mm"] == CROP_MM
+
+
+def test_payload_records_the_runs_own_router():
+    """The member stamps the ROUTER the run used, so serving cannot fall back to ours.
+
+    A graft-matching arm fitted under last-maximal and served under first would be fed a different
+    series in every contested slot - fitted on one set of images and shown another, with the fingerprint
+    still passing because it is checked against the member's own reading.
+    """
+    record = replace(_record(), options=_Options(routing=Routing(tie="last")))
+
+    assert record.payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "last"
+    assert _record().payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "first"
