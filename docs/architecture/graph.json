@@ -680,6 +680,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "kneemri.label_power",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "kneemri.oof_oracle",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "kneemri.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.paired_floor",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.prediction_cache",
       "target": "kneemri.members",
       "weight": 1
@@ -3163,6 +3199,102 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.paired_floor.PairedFloor",
+      "target": "kneemri.label_power.LabelPower",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.paired_floor.PairedFloor",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.paired_floor.PairedFloor.__init__",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.PairedFloor.report",
+      "target": "kneemri.paired_floor.PairedFloor.mean_width",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.PairedFloor.report",
+      "target": "kneemri.paired_floor.PairedFloor.paired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.PairedFloor.report",
+      "target": "kneemri.paired_floor.PairedFloor.tightening",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.PairedFloor.report",
+      "target": "kneemri.paired_floor.PairedFloor.unpaired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.PairedFloor.unpaired",
+      "target": "kneemri.label_power.LabelPower.standard_error",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.label_power.LabelPower",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.oof_oracle.OutOfFoldOracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.oof_oracle.OutOfFoldOracle.corpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.paired_floor.PairedFloor",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.paired_floor.PairedFloor.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.paired_floor.PairedFloor.subset",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.paired_floor.main",
+      "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.prediction_cache.PredictionCache",
       "target": "kneemri.members.Window",
@@ -4813,7 +4945,7 @@
       "role": null
     },
     {
-      "descendants": 61,
+      "descendants": 62,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -5104,6 +5236,14 @@
       "descendants": 0,
       "id": "kneemri.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor",
+      "label": "paired_floor",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -5722,6 +5862,14 @@
       "label": "OutOfFoldOracle",
       "level": "class",
       "parent": "kneemri.oof_oracle",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor",
+      "label": "PairedFloor",
+      "level": "class",
+      "parent": "kneemri.paired_floor",
       "role": "primary"
     },
     {
@@ -8002,6 +8150,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.mean_width",
+      "label": "mean_width",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.paired",
+      "label": "paired",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.subset",
+      "label": "subset",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.tightening",
+      "label": "tightening",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.PairedFloor.unpaired",
+      "label": "unpaired",
+      "level": "method",
+      "parent": "kneemri.paired_floor.PairedFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.paired_floor.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.paired_floor",
       "role": null
     },
     {
