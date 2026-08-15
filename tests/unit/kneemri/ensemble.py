@@ -57,7 +57,6 @@ def _ensemble(tmp_path: Path, *, whole_stack: bool = False, slice_pooling: str =
         "crop_mm": 130.0,
         "band": [0.2, 0.8],
         "slots": SLOTS,
-        "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
         "variant": "small",
         "pool": "cls_mean",
     }
@@ -419,6 +418,18 @@ def test_reads(tmp_path: Path):
     shared = next(group for group in reads if len(group) > 1)
     assert {m.identifier for m in shared} == {member.identifier, "coarse"}
     assert {m.image_size for m in shared} == {member.image_size, 28}
+
+
+def test_reads_separates_bands(tmp_path: Path):
+    """A different band is a different set of slices, so it cannot share a decode with the default."""
+    ensemble = _ensemble(tmp_path / "bands")
+    member = ensemble.package.members[0]
+    wider: MemberConfig = {**member.config, "band": [0.1, 0.9]}
+    ensemble.package.members = [member, replace(member, identifier="wide", config=wider)]
+
+    reads = ensemble.reads()
+
+    assert len(reads) == 2, "the band decides WHICH slices exist, which one decode cannot serve twice"
 
 
 class _BrokenModel(StudyModel):

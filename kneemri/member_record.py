@@ -199,7 +199,6 @@ class MemberRecord:
                 "tie": options.routing.tie,
                 "band": list(SLICE_BAND),
                 "slots": list(self.slot_names),
-                "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
                 "variant": self.encoder.variant,
                 "pool": "cls_mean",
                 "slice_pooling": options.slice_pooling,

@@ -150,7 +150,6 @@ def _reading(tmp_path: Path) -> Member:
             "crop_mm": 130.0,
             "band": [0.2, 0.8],
             "slots": ["a", "b"],
-            "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
             "variant": "small",
             "pool": "cls_mean",
         },

@@ -35,15 +35,6 @@ LEGACY_SLICES = 12
 """What a manifest written before members could differ in depth was fitted on."""
 
 
-class ReadingRules(TypedDict):
-    """The four decisions that settle what a slice IS, none of which changes a tensor shape."""
-
-    order: str
-    lat: str
-    slot_fallback: bool
-    decode_fill: str
-
-
 class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
 
@@ -75,7 +66,6 @@ class MemberConfig(TypedDict):
     """Where the physical crop was taken about. Absent means the image centre, as every member on disk."""
     band: list[float]
     slots: list[str]
-    rules: ReadingRules
     variant: str
     pool: str
 
@@ -137,6 +127,18 @@ class Member:
         Defaults to `first`, which is what every cache and every member of ours on disk was built with.
         """
         return str(self.config.get("tie", FIRST_MAXIMAL))
+
+    @property
+    def band(self) -> tuple[float, float]:
+        """The fraction of the stack this member's slices were sampled from, as a pair.
+
+        Recorded since the first manifest and read by the decode since none of them: the reader took its
+        module default, so a member fitted on a wider band would have been served twelve slices drawn
+        from a narrower one — the same silent train/inference mismatch the crop had, on the other axis.
+        A list on disk because JSON has no tuples; a tuple here because it is a grouping key.
+        """
+        recorded = self.config["band"]
+        return (float(recorded[0]), float(recorded[1]))
 
     @property
     def crop(self) -> Crop:
@@ -363,7 +365,7 @@ class Member:
     def pixel_group(self) -> str:
         """Members sharing this key need identical pixels, so one decode serves all of them."""
         pixels = {
-            "band": self.config["band"],
+            "band": list(self.band),
             # Extent AND centre: two members cropped differently are looking at different pixels, so one
             # decode cannot serve both.
             "crop": [self.crop.mm, self.crop.centre],
@@ -371,7 +373,6 @@ class Member:
             "tie": self.tie,
             "group": self.config["group"],
             "img": self.config["img"],
-            "rules": self.config["rules"],
             "slices": self.config["slices"],
             "slots": self.config["slots"],
         }

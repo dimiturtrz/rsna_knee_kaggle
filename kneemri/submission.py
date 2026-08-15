@@ -127,7 +127,12 @@ class Submission:
         """
         return SlotPipeline(
             scheme=read.scheme,
-            reader=SlotReader(crop_mm=read.crop.mm, image_size=max(read.sizes), centre=read.crop.located()),
+            reader=SlotReader(
+                crop_mm=read.crop.mm,
+                image_size=max(read.sizes),
+                centre=read.crop.located(),
+                band=read.band,
+            ),
         )
 
     @staticmethod

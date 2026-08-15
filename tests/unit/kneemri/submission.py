@@ -14,7 +14,7 @@ from kneemri.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.ensemble import Ensemble, Read
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import SlotReader
+from kneemri.slot_reader import SLICE_BAND, SlotReader
 from kneemri.study import SlotPipeline
 from kneemri.submission import Split, Submission
 
@@ -84,7 +84,6 @@ def _submission(tmp_path: Path) -> Submission:
         "crop_mm": 130.0,
         "band": [0.2, 0.8],
         "slots": SLOT_NAMES,
-        "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
         "variant": "small",
         "pool": "cls_mean",
     }
@@ -305,6 +304,18 @@ def test_pipeline(tmp_path: Path):
     tighter = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(mm=80.0)))
     assert tighter.reader.crop_mm == 80.0, "the crop the member recorded reaches the reader"
     assert tighter.reader.image_size == IMAGE, "and the size is still the largest the group asked for"
+
+
+def test_pipeline_honours_the_recorded_band(tmp_path: Path):
+    """The last recorded reading rule the decode ignored: which slices exist to be sampled at all."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+
+    default = submission.pipeline(Read(3, scheme, (IMAGE,)))
+    assert default.reader.band == SLICE_BAND
+
+    wider = submission.pipeline(Read(3, scheme, (IMAGE,), band=(0.1, 0.9)))
+    assert wider.reader.band == (0.1, 0.9), "the band the member recorded reaches the reader"
 
 
 def test_pipeline_honours_the_recorded_centre(tmp_path: Path):

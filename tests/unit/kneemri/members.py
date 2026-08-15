@@ -46,7 +46,6 @@ def _config() -> MemberConfig:
         "crop_mm": 130.0,
         "band": [0.2, 0.8],
         "slots": SLOTS,
-        "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
         "variant": "small",
         "pool": "cls_mean",
     }
@@ -357,7 +356,6 @@ def test_from_checkpoint(tmp_path: Path):
             "pool": "cls_mean",
             "crop_mm": 130.0,
             "band": [0.2, 0.8],
-            "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
         },
     )
     member = Member.from_checkpoint(path)
@@ -416,6 +414,14 @@ def test_slot_pooling():
 
     assert member.slot_pooling == "attend", "every member on disk predates the flag and was attended"
     assert replace(member, config={**member.config, "slot_pooling": "mean"}).slot_pooling == "mean"
+
+
+def test_band():
+    """A pair, from the list JSON can hold — and it is a grouping key, so it must be hashable."""
+    wider = replace(_member(), config={**_config(), "band": [0.1, 0.9]})
+
+    assert wider.band == (0.1, 0.9)
+    assert hash(wider.band), "the read groups by it, which a list cannot do"
 
 
 def test_crop():

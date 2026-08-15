@@ -27,6 +27,7 @@ from kneemri.backbone import ENCODERS
 from kneemri.crop_centre import Crop
 from kneemri.members import Member, MemberPackage, Window
 from kneemri.model import TARGETS, StudyModel
+from kneemri.slot_reader import SLICE_BAND
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
@@ -89,12 +90,17 @@ class Read:
     reader as a module constant regardless of what a member recorded. A member fitted on an 80 mm crop
     served under 130 mm is a different function, and nothing downstream would notice: every fingerprint
     still passes, because each is checked against its own reading.
+
+    `band` is here for the same reason and was the last recorded reading rule the decode ignored: it
+    decides WHICH slices exist to be sampled, so a member fitted on a wider band and served under a
+    narrower one sees a stack it was never fitted on, and no fingerprint covers it either.
     """
 
     slices: int
     scheme: SlotScheme
     sizes: tuple[int, ...]
     crop: Crop = Crop()
+    band: tuple[float, float] = SLICE_BAND
 
 
 class Ensemble:
@@ -159,9 +165,10 @@ class Ensemble:
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int, Crop, str], list[Member]] = {}
+        gathered: dict[tuple[str, int, Crop, str, tuple[float, float]], list[Member]] = {}
         for member in self.package.members:
-            gathered.setdefault((member.scheme, member.slices, member.crop, member.tie), []).append(member)
+            key = (member.scheme, member.slices, member.crop, member.tie, member.band)
+            gathered.setdefault(key, []).append(member)
         return list(gathered.values())
 
     def slices(self, members: list[Member] | None = None) -> int:
@@ -380,6 +387,7 @@ class Ensemble:
                 # One value, because `reads` groups by it — a group spanning two crops would be a group
                 # whose members want different pixels, which is the thing that grouping exists to stop.
                 crop=members[0].crop,
+                band=members[0].band,
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return self.combine(per_member)

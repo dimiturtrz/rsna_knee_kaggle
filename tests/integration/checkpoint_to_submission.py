@@ -169,7 +169,6 @@ def test_a_packaged_member_exposes_what_the_kernel_asks_it_for(tmp_path: Path):
         "crop_mm": 130.0,
         "band": [0.2, 0.8],
         "slots": [f"slot{index}" for index in range(SLOTS)],
-        "rules": {"order": "normal", "lat": "centre", "slot_fallback": False, "decode_fill": "nearest"},
         "pool": "cls_mean",
     }
     (tmp_path / "manifest.json").write_text(

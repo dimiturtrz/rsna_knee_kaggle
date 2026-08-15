@@ -303,6 +303,12 @@
     {
       "kind": "import",
       "source": "kneemri.ensemble",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ensemble",
       "target": "kneemri.slots",
       "weight": 1
     },
@@ -3040,12 +3046,6 @@
       "kind": "construct",
       "source": "kneemri.members.Member.window",
       "target": "kneemri.members.Window",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.members.MemberConfig",
-      "target": "kneemri.members.ReadingRules",
       "weight": 1
     },
     {
@@ -6026,14 +6026,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.members.ReadingRules",
-      "label": "ReadingRules",
-      "level": "class",
-      "parent": "kneemri.members",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.members.WeightsError",
       "label": "WeightsError",
       "level": "class",
@@ -7990,6 +7982,14 @@
       "label": "whole_stack",
       "level": "method",
       "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.band",
+      "label": "band",
+      "level": "method",
+      "parent": "kneemri.members.Member",
       "role": null
     },
     {
