@@ -27,9 +27,19 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # EVERY CHOICE HERE IS NOW THE ONE THAT SURVIVED, and four of them were not on 2026-08-11.
 #
-# 392 px READ OFF THE 448 CACHE. res392 is our best single member at 0.8523, +0.0066 over the 336
-# control, and it is the one coverage lever that whole-stack does not already contain. Fitting the
-# deliverable at 336 would ship a model measurably worse than a member we already have.
+# 392 px READ OFF THE 448 CACHE, AT THE RATE THAT MEMBER ACTUALLY USED. res392 is our best single
+# member at 0.8523, +0.0066 over the 336 control, and it is the one coverage lever that whole-stack
+# does not already contain. Fitting the deliverable at 336 would ship a model measurably worse than a
+# member we already have.
+#
+# --backbone-lr 4e-5 IS PART OF THAT MEMBER AND WAS MISSING HERE UNTIL 2026-08-15. The default is
+# 8e-6 (trainer.py), and res392 was fitted at 4e-5 - five times the rate - so passing 392 px without
+# the rate builds a configuration NOBODY HAS RUN. It is precisely the arm the ledger calls the unrun
+# clean test ("392 px at 8e-6, matched to the control's rate"), and a deliverable is the wrong place
+# to run an experiment: with --fold -1 there is no score, so a regression would ship unseen.
+#
+# The rate and the resolution stay CONFOUNDED here, deliberately. Which of them carries the +0.0066 is
+# a measurement question and it is open; what ships is the configuration that scored.
 #
 # TWELVE EPOCHS, NOT SEVEN. OneCycle is defined over total_steps, so seven is a COMPRESSED schedule
 # rather than a truncated one - measured, schedule_8 scored 0.8429 against the twelve-epoch 0.8457, so
@@ -51,4 +61,4 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # twenty-fifth of the throughput while reporting 100% utilisation.
 EPOCHS="${1:-12}"
 require "$LABELS"
-run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 $THROUGHPUT --vram-gb 22 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --vram-gb 22 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
