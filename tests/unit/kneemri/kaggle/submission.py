@@ -328,3 +328,10 @@ def test_pipeline_honours_the_recorded_centre(tmp_path: Path):
 
     located = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(centre="tissue")))
     assert isinstance(located.reader.centre, TissueCentre), "the recorded centre reaches the reader"
+
+
+def test_peak_vram(tmp_path: Path):
+    """Off the GPU the reading is zero rather than a raised CUDA error, so the chunk line still logs."""
+    submission = _submission(tmp_path)
+
+    assert submission.peak_vram() == 0.0

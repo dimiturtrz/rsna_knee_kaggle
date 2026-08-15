@@ -36,6 +36,15 @@ STUDY_CHUNK = 48
 """Studies decoded before a prediction pass. Bounds peak memory: a chunk of 48 at twelve slices and
 336 pixels is about 390 MB, against a Kaggle host with 32 GB and four CPUs."""
 
+KERNEL_HOURS = 9
+"""Kaggle's wall-clock ceiling for a batch GPU session. A rerun that hits it is killed with no
+submission and no cause in the log — the same silent shape as an out-of-memory, which is why the chunk
+line names the projection and the ceiling together."""
+
+SECONDS_PER_HOUR = 3600
+
+BYTES_PER_GB = 1024**3
+
 POOL_FLOOR = 20
 """Below this many studies, spawning the pool costs more than it saves. DERIVED, not picked: the Kaggle
 run of 2026-08-14 decoded 3 visible studies in 6s against 3s for the serial path, so four spawned
@@ -225,11 +234,25 @@ class Submission:
                 sized = self.batched([future.result() for future in pending], read)
                 pending = following
                 begin = index * STUDY_CHUNK
+                elapsed = time.time() - started
                 logger.info(
                     f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
-                    f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s"
+                    f"at {list(read.sizes)}, elapsed {elapsed:.0f}s, "
+                    f"projecting {elapsed / (index + 1) * len(groups) / SECONDS_PER_HOUR:.1f}h of {KERNEL_HOURS}h, "
+                    f"peak {self.peak_vram():.1f} GB"
                 )
                 yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
+
+    def peak_vram(self) -> float:
+        """The highest allocation the card has held so far, in GB, or zero off the GPU.
+
+        THREE ENTRIES DIED WITHOUT NAMING WHAT RAN OUT. An out-of-memory kill and a nine-hour timeout
+        leave the same log — the last chunk line, then nothing — so the two are indistinguishable
+        afterwards unless the run says how close it was to each ceiling while it was still alive.
+        """
+        if self.device.type != "cuda":
+            return 0.0
+        return torch.cuda.max_memory_allocated() / BYTES_PER_GB
 
     def pool(self, studies: int = POOL_FLOOR) -> Executor:
         """The decode pool: SPAWNED processes where they help, threads where they cannot be used.
