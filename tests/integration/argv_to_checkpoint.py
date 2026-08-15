@@ -14,7 +14,7 @@ reading it was not fitted under is the defect that reached the leaderboard.
 """
 
 import json
-from dataclasses import replace
+from dataclasses import fields, replace
 from pathlib import Path
 from typing import cast
 
@@ -27,7 +27,8 @@ from core.paths import COMPETITION
 from kneemri import train as train_module
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
-from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, POOL_PARTS, TARGETS
+from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
+from kneemri.slot_head import AVERAGED
 from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
@@ -172,6 +173,39 @@ def test_the_pool_reaches_the_model_and_the_manifest(corpus: Path, monkeypatch: 
     width = cast(torch.Tensor, state["head.proj.0.weight"]).shape[0]
     assert width == DIM * POOL_PARTS[CLS_MEAN_FOCAL], "the head is built for the parts the forward pass concatenates"
     assert width != DIM * POOL_PARTS[CLS_MEAN], "a pooling that does not change the network is a flag that was dropped"
+
+
+def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """Every field of `StudyDesign` must travel argv -> manifest -> `from_config` and come back itself.
+
+    The ratchet the nine defects wanted. Each switch is asserted by ITERATING the dataclass rather than
+    by naming the five that exist today: a field added to the design and not stamped by the record
+    comes back as its default here, which is precisely the failure — a member rebuilt as a different
+    function whose weights load without complaint — and it fails at the run that adds the field rather
+    than at the arm that first uses it.
+
+    Every value on this command line is chosen AWAY from its default for the same reason: a switch that
+    happens to agree with the default proves nothing about whether it was carried.
+    """
+    _corpus(corpus)
+    payload = _run(
+        corpus,
+        monkeypatch,
+        *("--pool", CLS_MEAN_FOCAL),
+        *("--slice-pooling", MAXIMUM),
+        *("--slot-pooling", AVERAGED),
+        *("--encoder-layer", "-2"),
+        "--anatomical-prior",
+    )
+
+    rebuilt = StudyDesign.from_config(_nested(payload, "config"))
+    assert rebuilt == StudyDesign(
+        pool=CLS_MEAN_FOCAL, slice_pooling=MAXIMUM, slot_pooling=AVERAGED, anatomical_prior=True, layer=-2
+    )
+    for field in fields(StudyDesign):
+        assert getattr(rebuilt, field.name) != field.default, (
+            f"{field.name} came back as its default, so the run's own value never reached the manifest"
+        )
 
 
 def test_the_scheme_reaches_the_model_and_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):
