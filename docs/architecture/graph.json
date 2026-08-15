@@ -5079,6 +5079,12 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.report_supervision.ReportSupervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.slots.Routing",
       "weight": 1
     },
@@ -5139,12 +5145,6 @@
     {
       "kind": "calls",
       "source": "kneemri.train.TrainingOptions.fitted_trainer",
-      "target": "kneemri.report_supervision.ReportSupervision.from_file",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.train.TrainingOptions.fitted_trainer",
       "target": "kneemri.train.TrainingOptions.adaptation",
       "weight": 1
     },
@@ -5152,6 +5152,12 @@
       "kind": "calls",
       "source": "kneemri.train.TrainingOptions.fitted_trainer",
       "target": "kneemri.train.TrainingOptions.objective",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.fitted_trainer",
+      "target": "kneemri.train.TrainingOptions.reports",
       "weight": 1
     },
     {
@@ -5224,6 +5230,12 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.parse",
       "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.reports",
+      "target": "kneemri.report_supervision.ReportSupervision.from_file",
       "weight": 1
     },
     {
@@ -10432,6 +10444,14 @@
       "descendants": 0,
       "id": "kneemri.train.TrainingOptions.parse",
       "label": "parse",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.reports",
+      "label": "reports",
       "level": "method",
       "parent": "kneemri.train.TrainingOptions",
       "role": null
