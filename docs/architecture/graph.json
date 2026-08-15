@@ -705,6 +705,12 @@
     {
       "kind": "import",
       "source": "kneemri.members",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.members",
       "target": "kneemri.slots",
       "weight": 1
     },
@@ -1108,12 +1114,6 @@
       "kind": "import",
       "source": "kneemri.study",
       "target": "kneemri.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.study_cache",
-      "target": "kneemri.crop_centre",
       "weight": 1
     },
     {
@@ -1708,6 +1708,18 @@
       "kind": "calls",
       "source": "kneemri.build_cache.main",
       "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.slot_reader.Band.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -2398,6 +2410,12 @@
       "kind": "holds",
       "source": "kneemri.ensemble.Read",
       "target": "kneemri.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.ensemble.Read",
+      "target": "kneemri.slot_reader.Band",
       "weight": 1
     },
     {
@@ -3351,6 +3369,12 @@
     {
       "kind": "references",
       "source": "kneemri.member_record.RunOptions",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.member_record.RunOptions",
       "target": "kneemri.slots.Routing",
       "weight": 1
     },
@@ -3381,7 +3405,31 @@
     {
       "kind": "references",
       "source": "kneemri.members.Member",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.members.Member",
       "target": "kneemri.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.Member.band",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.band",
+      "target": "kneemri.slot_reader.Band.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.band",
+      "target": "kneemri.slot_reader.Band.recorded",
       "weight": 1
     },
     {
@@ -4490,6 +4538,54 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.slot_reader.Band",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.slot_reader.Reading",
+      "target": "kneemri.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.slot_reader.Reading",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.slot_reader.Reading",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.Reading.reader",
+      "target": "kneemri.crop_centre.Crop.located",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.slot_reader.Reading.reader",
+      "target": "kneemri.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.Reading.suffix",
+      "target": "kneemri.crop_centre.Crop.suffix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.slot_reader.Reading.suffix",
+      "target": "kneemri.slot_reader.Band.suffix",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.slot_reader.SlotReader",
       "target": "kneemri.acquisition.Acquisition",
       "weight": 1
@@ -4501,9 +4597,21 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.slot_reader.SlotReader",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.slot_reader.SlotReader.__init__",
       "target": "kneemri.crop_centre.ImageCentre",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.slot_reader.SlotReader.__init__",
+      "target": "kneemri.slot_reader.Band",
       "weight": 1
     },
     {
@@ -4881,7 +4989,7 @@
     {
       "kind": "holds",
       "source": "kneemri.study_cache.DecodeRequest",
-      "target": "kneemri.crop_centre.Crop",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -4893,7 +5001,7 @@
     {
       "kind": "references",
       "source": "kneemri.study_cache.StudyCache",
-      "target": "kneemri.crop_centre.Crop",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -4917,7 +5025,7 @@
     {
       "kind": "construct",
       "source": "kneemri.study_cache.StudyCache.__init__",
-      "target": "kneemri.crop_centre.Crop",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -4942,12 +5050,6 @@
       "kind": "calls",
       "source": "kneemri.study_cache.StudyCache.build",
       "target": "kneemri.study_cache.StudyCache.shape",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.study_cache.StudyCache.decode_one",
-      "target": "kneemri.slot_reader.SlotReader",
       "weight": 1
     },
     {
@@ -5337,6 +5439,18 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.slot_reader.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.slots.Routing",
       "weight": 1
     },
@@ -5362,6 +5476,12 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.adaptation",
       "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.band",
+      "target": "kneemri.slot_reader.Band",
       "weight": 1
     },
     {
@@ -5482,6 +5602,12 @@
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.parse",
       "target": "kneemri.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.reading",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -7035,6 +7161,22 @@
       "level": "class",
       "parent": "kneemri.slot_head",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Band",
+      "label": "Band",
+      "level": "class",
+      "parent": "kneemri.slot_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Reading",
+      "label": "Reading",
+      "level": "class",
+      "parent": "kneemri.slot_reader",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -8758,6 +8900,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.band",
+      "label": "band",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_record.RunOptions.bf16",
       "label": "bf16",
       "level": "method",
@@ -10126,6 +10276,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.slot_reader.Band.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.slot_reader.Band",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Band.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.slot_reader.Band",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Band.suffix",
+      "label": "suffix",
+      "level": "method",
+      "parent": "kneemri.slot_reader.Band",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Reading.reader",
+      "label": "reader",
+      "level": "method",
+      "parent": "kneemri.slot_reader.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.slot_reader.Reading.suffix",
+      "label": "suffix",
+      "level": "method",
+      "parent": "kneemri.slot_reader.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.slot_reader.SlotReader.__init__",
       "label": "__init__",
       "level": "method",
@@ -10926,6 +11116,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.band",
+      "label": "band",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.train.TrainingOptions.crop",
       "label": "crop",
       "level": "method",
@@ -10960,6 +11158,14 @@
       "descendants": 0,
       "id": "kneemri.train.TrainingOptions.parse",
       "label": "parse",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.reading",
+      "label": "reading",
       "level": "method",
       "parent": "kneemri.train.TrainingOptions",
       "role": null
