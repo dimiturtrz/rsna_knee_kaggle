@@ -103,6 +103,37 @@ def test_depth_by_label():
     assert list(by_label["0"]) == list(TARGETS), "every label keeps its own score at every depth"
 
 
+def test_slice_importance():
+    """A stack whose every slice carries the same signal must cost nothing when one is replaced.
+
+    The fixture writes the label into EVERY slice of the carrier slot, so this is the redundant case,
+    and it is the control the diagnostic rests on: a non-zero drop here would be the occlusion
+    disturbing the model rather than removing information.
+    """
+    by_label = _attribution().slice_importance(cast(StudyModel, _SlotReader()), _holdout(width=SLICES))
+
+    assert sorted(by_label, key=int) == [str(index) for index in range(SLICES)]
+    assert list(by_label["0"]) == list(TARGETS), "every label keeps its own cost at every depth"
+    assert all(abs(drop) < 1e-6 for label in by_label.values() for drop in label.values())
+
+
+def test_slice_cost_names_the_verdict():
+    """One slice holding most of the cost, with every label agreeing, is the actionable combination."""
+    concentrated = {"0": dict.fromkeys(TARGETS, 0.30), "1": dict.fromkeys(TARGETS, 0.01)}
+    lines = "\n".join(_attribution()._slice_cost(concentrated))
+
+    assert "slice 0 carries 97% of the total cost over 2 slices" in lines
+    assert "1 distinct depths over 12 labels" in lines
+    assert "still has something to collect" in lines
+
+
+def test_slice_cost_when_no_slice_costs_anything():
+    """A redundant stack is reported as such rather than dividing by a zero total."""
+    lines = "\n".join(_attribution()._slice_cost({"0": dict.fromkeys(TARGETS, 0.0)}))
+
+    assert "carries the finding redundantly" in lines
+
+
 def test_report():
     """The report states the verdict each diagnostic supports rather than leaving numbers bare."""
     lines = _attribution().report(
@@ -112,6 +143,7 @@ def test_report():
             rings={"0.05": 0.52, "0.25": 0.74},
             depth={"0": 0.80, "3": 0.83},
             depth_by_label={"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
+            slices={"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
         )
     )
     text = "\n".join(lines)

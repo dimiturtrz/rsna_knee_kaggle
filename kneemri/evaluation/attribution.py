@@ -53,6 +53,13 @@ the earlier number only ever said the signal is spread out.
 CHANCE = 0.5
 """ROC AUC of a model that knows nothing — the value a ring holding no anatomy should approach."""
 
+CONCENTRATED = 0.5
+"""Share of the total slice cost one slice must carry before depth counts as concentrated.
+
+Half of everything the model loses to depth, sitting on one of twelve slices, is the case where a
+non-uniform read has something to collect. Below it the stack is being used broadly and there is
+nothing to re-weight toward."""
+
 
 @dataclass(frozen=True)
 class Holdout:
@@ -91,6 +98,7 @@ class Diagnostics:
     rings: dict[str, float]
     depth: dict[str, float]
     depth_by_label: dict[str, dict[str, float]]
+    slices: dict[str, dict[str, float]]
 
 
 class Attribution:
@@ -228,6 +236,39 @@ class Attribution:
             for start in holdout.window.starts
         }
 
+    def slice_importance(
+        self,
+        model: StudyModel,
+        holdout: Holdout,
+    ) -> dict[str, dict[str, float]]:
+        """How much each label loses when ONE slice is taken out of the stack, per diagnosis.
+
+        THE DEPTH DIAGNOSTIC ABOVE CANNOT ASK THIS OF A WHOLE-STACK MEMBER. `depth_by_label` scores
+        each window alone, and a whole-stack member has exactly one window by construction — so it
+        returns a single row and the profile it was built to produce is a constant. The finding that
+        motivated it survives (depth spread was 0.0356, larger than every method change we have
+        measured), but the member that collects it can no longer be interrogated the same way.
+
+        Taking a slice OUT of the stack is the question that still has an answer: whether the max over
+        depth concentrates on a few slices, and whether the twelve labels agree about which. Concentrated
+        and agreeing means a non-uniform read is still worth something; spread or disagreeing means the
+        stack is already being used and there is nothing left on this axis.
+
+        THE SLICE IS REPLACED BY ITS NEIGHBOUR, NOT BLANKED. A black slice is an input the encoder never
+        sees in training, so its response to one measures the model's reaction to a novel image rather
+        than the value of what was removed — the same reason `slot_importance` withholds through the
+        presence mask instead of zeroing pixels. A duplicated neighbour keeps the stack in-distribution
+        and removes exactly the information that was unique to that depth.
+        """
+        base = self._labels(model, holdout)
+        drops = {}
+        for index in range(holdout.images.shape[2]):
+            occluded = holdout.images.copy()
+            occluded[:, :, index] = holdout.images[:, :, index - 1 if index else 1]
+            scored = self._labels(model, replace(holdout, images=occluded))
+            drops[str(index)] = {label: base[label] - scored[label] for label in base}
+        return drops
+
     def report(self, diagnostics: Diagnostics) -> list[str]:
         """The diagnostics as lines, with the verdict each one supports stated rather than implied."""
         lines = ["slot importance (score lost when the slot is withheld):"]
@@ -266,6 +307,40 @@ class Attribution:
         lines.append(f"depth: best single window starts at slice {best} ({depth[best]:.4f})")
         lines.append(f"  range {min(depth.values()):.4f} to {max(depth.values()):.4f} over {len(depth)} windows")
         lines.extend(self._depth_agreement(diagnostics.depth_by_label))
+
+        lines.append("")
+        lines.extend(self._slice_cost(diagnostics.slices))
+        return lines
+
+    def _slice_cost(self, by_label: dict[str, dict[str, float]]) -> list[str]:
+        """What each single slice was worth, and whether the labels wanted the same one.
+
+        This is the diagnostic that still works on a whole-stack member, so it carries the verdict the
+        depth profile can no longer give: concentrated AND agreeing is the only combination in which a
+        non-uniform read has anything left to collect.
+        """
+        cost = {index: float(np.nanmean(list(labels.values()))) for index, labels in by_label.items()}
+        total = sum(value for value in cost.values() if value > 0)
+        lines = ["slice cost (score lost when the slice is replaced by its neighbour):"]
+        lines.extend(f"  slice {index}: {cost[index]:+.4f}" for index in sorted(cost, key=float))
+        if total <= 0:
+            lines.append("  no slice costs anything — the stack carries the finding redundantly")
+            return lines
+
+        dearest = max(cost, key=lambda index: cost[index])
+        share = cost[dearest] / total
+        preferred = {
+            label: max(by_label, key=lambda index: by_label[index][label]) for label in next(iter(by_label.values()))
+        }
+        chosen = sorted(set(preferred.values()), key=float)
+        lines.append(f"  slice {dearest} carries {share:.0%} of the total cost over {len(cost)} slices")
+        lines.append(f"  per-label dearest slice: {len(chosen)} distinct depths over {len(preferred)} labels")
+        verdict = (
+            "concentrated on one depth the labels agree about — a non-uniform read still has something to collect"
+            if share >= CONCENTRATED and len(chosen) == 1
+            else "spread or contested — the max over depth has already taken what this axis holds"
+        )
+        lines.append(f"  {verdict}")
         return lines
 
     def _depth_agreement(self, by_label: dict[str, dict[str, float]]) -> list[str]:
@@ -356,6 +431,7 @@ def main() -> None:
         rings=attribution.ring_importance(model, holdout_data),
         depth=attribution.averaged(by_label),
         depth_by_label=by_label,
+        slices=attribution.slice_importance(model, holdout_data),
     )
     for line in attribution.report(diagnostics):
         logger.info("%s", line)
