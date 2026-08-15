@@ -566,6 +566,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.ledger_check",
+      "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.member_curve",
       "target": "core.paths",
       "weight": 1
@@ -3040,6 +3046,18 @@
       "kind": "references",
       "source": "kneemri.laterality.Laterality",
       "target": "kneemri.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.ledger_check.LedgerCheck.best",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ledger_check.LedgerCheck.best",
+      "target": "kneemri.run_metrics.RunMetrics.best",
       "weight": 1
     },
     {
