@@ -18,6 +18,7 @@ import pytest
 from core.paths import COMPETITION
 from kneemri import build_cache
 from kneemri.crop_centre import Crop
+from kneemri.slot_reader import Band, Reading
 from kneemri.slots import Routing
 from kneemri.study_cache import StudyCache
 
@@ -56,15 +57,23 @@ def test_every_reading_axis_reaches_the_key(
 ):
     """A flag that changes which pixels are decoded must change the name they are decoded under.
 
-    Four axes select the file — size, depth, physical crop and the point it is taken about — and the
-    gate that waits for a build spelled only the first two. An axis missing from the key is a decode
-    that overwrites the arrays every member on disk was fitted on.
+    Five axes select the file — size, depth, physical crop, the point it is taken about, and the slice
+    band — and the gate that waits for a build spelled only the first two. An axis missing from the key
+    is a decode that overwrites the arrays every member on disk was fitted on.
     """
     printed = _key(
-        root, monkeypatch, capsys, "--image-size", "448", "--slices", "6", "--crop-mm", "80", "--centre", "tissue"
+        root,
+        monkeypatch,
+        capsys,
+        *("--image-size", "448"),
+        *("--slices", "6"),
+        *("--crop-mm", "80"),
+        *("--centre", "tissue"),
+        *("--band", "0.1", "0.9"),
     )
 
-    assert printed == StudyCache(root, slices=6, image_size=448, crop=Crop(mm=80.0, centre="tissue")).key
+    reading = Reading(crop=Crop(mm=80.0, centre="tissue"), band=Band(0.1, 0.9))
+    assert printed == StudyCache(root, slices=6, image_size=448, reading=reading).key
     assert printed != _key(root, monkeypatch, capsys), "a different reading cannot share a name"
 
 

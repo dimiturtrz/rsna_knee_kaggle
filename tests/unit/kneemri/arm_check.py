@@ -3,6 +3,7 @@ from pathlib import Path
 from core.paths import COMPETITION
 from kneemri.arm_check import ArmCheck
 from kneemri.crop_centre import Crop
+from kneemri.slot_reader import Reading
 from kneemri.study_cache import StudyCache
 
 GOOD = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack --labels /tmp/labels.csv"
@@ -56,9 +57,10 @@ def test_uncached(tmp_path: Path):
     )
 
     assert "decoded" not in uncached, "the reading this arm asks for is on disk"
-    assert (
-        uncached["other_crop"] == StudyCache(cache.directory, slices=SLICES, image_size=SIZE, crop=Crop(mm=80.0)).key
-    ), "a different physical crop is a different cache, and the key is what says which"
+    tighter = StudyCache(cache.directory, slices=SLICES, image_size=SIZE, reading=Reading(crop=Crop(mm=80.0)))
+    assert uncached["other_crop"] == tighter.key, (
+        "a different physical crop is a different cache, and the key is what says which"
+    )
     assert "rootless" not in uncached, "no data root resolves, so nothing can be claimed about it"
 
 

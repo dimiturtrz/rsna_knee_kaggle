@@ -148,7 +148,7 @@ class ArmCheck:
                 slices=options.slices,
                 image_size=options.image_size,
                 routing=options.routing,
-                crop=options.crop,
+                reading=options.reading,
             )
             if not (cache.images_path.is_file() and cache.mask_path.is_file() and cache.index_path.is_file()):
                 uncached[name] = cache.key

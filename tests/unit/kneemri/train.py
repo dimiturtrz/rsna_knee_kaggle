@@ -6,6 +6,7 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import Crop
 from kneemri.model import StudyDesign
 from kneemri.objective import Objective, RankedObjective
+from kneemri.slot_reader import Band, Reading
 from kneemri.slots import Routing
 from kneemri.train import TrainingOptions
 from kneemri.trainer import Adaptation
@@ -191,6 +192,20 @@ def test_crop():
     """The two flags argparse must land as scalars, read back as the one value everything else wants."""
     assert TrainingOptions().crop == Crop()
     assert TrainingOptions(crop_mm=80.0, centre="tissue").crop == Crop(mm=80.0, centre="tissue")
+
+
+def test_band():
+    """The band flags, read back as the rule that names the cache and is stamped on the member."""
+    assert TrainingOptions().band == Band(), "saying nothing is the reading every member on disk has"
+    assert TrainingOptions(band_low=0.1, band_high=0.9).band == Band(0.1, 0.9)
+
+
+def test_reading():
+    """The geometry a run decodes under is BOTH axes, because the cache it selects is named by both."""
+    stated = TrainingOptions(crop_mm=80.0, centre="tissue", band_low=0.1, band_high=0.9)
+
+    assert TrainingOptions().reading == Reading(), "the default reading is the historic cache"
+    assert stated.reading == Reading(crop=Crop(mm=80.0, centre="tissue"), band=Band(0.1, 0.9))
 
 
 def test_routing():

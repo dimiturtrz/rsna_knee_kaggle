@@ -31,7 +31,7 @@ from kneemri.folds import ReportFolds
 from kneemri.members import Member, MemberConfig
 from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
 from kneemri.slot_head import AVERAGED
-from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slot_reader import IMAGE_SIZE, Band, Reading
 from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
@@ -50,17 +50,27 @@ TIGHT_MM = 80.0
 """The tight crop an arm would actually ask for, which is a different cache than the historic 130 mm."""
 TISSUE = next(name for name in sorted(CENTRES) if name != DEFAULT_CENTRE)
 """The centre a run must state to be served about it; taken from the table so a third one is noticed."""
+WIDE_BAND = Band(0.10, 0.90)
+"""A band away from the historic one, which is a different cache and a different set of slices."""
 
 
-def _corpus(root: Path, routing: Routing | None = None, crop: Crop | None = None) -> list[str]:
+def _corpus(
+    root: Path, routing: Routing | None = None, crop: Crop | None = None, band: Band | None = None
+) -> list[str]:
     """Write the three files `StudyCache.load` reads, under the key the argv below selects.
 
-    The routing and the crop are parameters because they are part of that key: an arm asking for the
-    other tie rule or another physical extent reads a DIFFERENT cache, which is the property that keeps
-    two readings from overwriting each other.
+    The routing, the crop and the band are parameters because they are part of that key: an arm asking
+    for the other tie rule, another physical extent or another slice band reads a DIFFERENT cache, which
+    is the property that keeps two readings from overwriting each other.
     """
     identifiers = [f"s{index}" for index in range(STUDIES)]
-    cache = StudyCache(root / "processed" / COMPETITION, slices=SLICES, image_size=SIZE, routing=routing, crop=crop)
+    cache = StudyCache(
+        root / "processed" / COMPETITION,
+        slices=SLICES,
+        image_size=SIZE,
+        routing=routing,
+        reading=Reading(crop=crop or Crop(), band=band or Band()),
+    )
     cache.directory.mkdir(parents=True, exist_ok=True)
     generator = np.random.default_rng(2026)
     np.save(cache.images_path, generator.integers(0, 256, cache.shape(STUDIES), dtype=np.uint8))
@@ -231,12 +241,13 @@ def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch:
         )
 
 
-FIXED_BY_THE_BUILD = {"group", "band", "variant"}
+FIXED_BY_THE_BUILD = {"group", "variant"}
 """Readings no command line can move, so a run cannot state them away from a legacy manifest's answer.
 
-`group` and `band` are module constants in the record — the encoder takes three channels and the stack
-is sampled over one fraction — and there is no flag for either. `variant` has one entry in the encoder
-table this suite patches, since a second would need a second set of weights to download. Anything else
+`group` is a module constant in the record — the encoder takes three channels — and there is no flag
+for it. `variant` has one entry in the encoder table this suite patches, since a second would need a
+second set of weights to download. `band` left this set on 2026-08-15, when it stopped being stamped
+from `SLICE_BAND` and became the run's own value like every rule beside it. Anything else
 that lands in this set is a switch losing its ratchet, which is what the set exists to make visible.
 """
 
@@ -259,7 +270,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
     # The blocked stand-in, because `--lora-rank` wraps the Linears INSIDE a block and the plain one
     # has none — an encoder shape, not a preference, and adaptation refuses a backbone it cannot adapt.
     monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
-    _corpus(corpus, Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL), Crop(mm=TIGHT_MM, centre=TISSUE))
+    _corpus(corpus, Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL), Crop(mm=TIGHT_MM, centre=TISSUE), WIDE_BAND)
     payload = _run(
         corpus,
         monkeypatch,
@@ -267,6 +278,8 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
         *("--tie", LAST_MAXIMAL),
         *("--crop-mm", str(TIGHT_MM)),
         *("--centre", TISSUE),
+        *("--band-low", str(WIDE_BAND.low)),
+        *("--band-high", str(WIDE_BAND.high)),
         *("--train-size", str(READ_SIZE)),
         *("--pool", CLS_MEAN_FOCAL),
         *("--slice-pooling", MAXIMUM),
@@ -284,7 +297,6 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
         {
             "img": IMAGE_SIZE,
             "group": stated.config["group"],
-            "band": stated.config["band"],
             "slots": [slot.name for slot in SCHEMES[CANONICAL_SCHEME]],
         }
     )

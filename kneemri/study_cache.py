@@ -25,8 +25,7 @@ import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from kneemri.crop_centre import Crop
-from kneemri.slot_reader import IMAGE_SIZE, SlotReader
+from kneemri.slot_reader import IMAGE_SIZE, Reading
 from kneemri.slots import SCHEMES, Routing
 from kneemri.study import SlotPipeline, Study
 from kneemri.window_reader import FileReader, MappedReader, WindowReader
@@ -89,8 +88,8 @@ class DecodeRequest:
     slices: int
     image_size: int
     planes: dict[str, str]
-    crop: Crop = Crop()
     routing: Routing = Routing()
+    reading: Reading = Reading()
 
 
 class StudyCache:
@@ -102,13 +101,13 @@ class StudyCache:
         slices: int = 12,
         image_size: int = IMAGE_SIZE,
         routing: Routing | None = None,
-        crop: Crop | None = None,
+        reading: Reading | None = None,
     ) -> None:
         self.directory = directory
         self.slices = slices
         self.image_size = image_size
         self.routing = routing or Routing()
-        self.crop = crop or Crop()
+        self.reading = reading or Reading()
 
     @property
     def slots(self) -> int:
@@ -135,8 +134,13 @@ class StudyCache:
         arrays already occupy, which every existing member was fitted on — and destroyed them, silently,
         with no shape change to notice. The default crop keeps the historic name for the same reason the
         canonical scheme does.
+
+        THE SLICE BAND IS THE THIRD OF THESE and was the last one missing. It decides which slices exist
+        to be sampled, so a wider band at the same size, slice count and scheme is a different array
+        under the same shape and the same name — and it is the axis an unlabeled-corpus rebuild wants
+        first. The historic band names nothing, exactly like the historic crop.
         """
-        return f"{self.image_size}px_{self.slices}sl{self.crop.suffix()}{self.routing.suffix()}"
+        return f"{self.image_size}px_{self.slices}sl{self.reading.suffix()}{self.routing.suffix()}"
 
     @property
     def scheme_slots(self) -> list[str]:
@@ -191,7 +195,7 @@ class StudyCache:
                 image_size=self.image_size,
                 routing=self.routing,
                 planes=planes,
-                crop=self.crop,
+                reading=self.reading,
             )
             for position, identifier in enumerate(identifiers)
         ]
@@ -261,9 +265,7 @@ class StudyCache:
         try:
             pipeline = SlotPipeline(
                 scheme=request.routing.built(),
-                reader=SlotReader(
-                    crop_mm=request.crop.mm, image_size=request.image_size, centre=request.crop.located()
-                ),
+                reader=request.reading.reader(request.image_size),
             )
             study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
             bag, mask = study.bag(request.slices)

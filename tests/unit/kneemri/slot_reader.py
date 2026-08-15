@@ -4,8 +4,8 @@ import numpy as np
 import torch
 
 from kneemri.acquisition import Acquisition
-from kneemri.crop_centre import ImageCentre, TissueCentre
-from kneemri.slot_reader import SlotReader
+from kneemri.crop_centre import Crop, ImageCentre, TissueCentre
+from kneemri.slot_reader import Band, Reading, SlotReader
 
 from .conftest import write_series
 
@@ -138,3 +138,41 @@ def test_narrowed():
     tighter = reader.narrowed(stack, 1.0, 80.0)
     assert tighter.shape[1] == 80, "at 1 mm per pixel an 80 mm extent is 80 pixels"
     assert tighter.shape[1] < stack.shape[1]
+
+
+def test_band_suffix():
+    """The historic band names nothing; any other names itself, because it is a different cache.
+
+    Empty by design and not by accident: those arrays are memory-mapped by running trainers and every
+    member on disk was fitted on them, so a default that suddenly named itself would send a run looking
+    for a file that does not exist.
+    """
+    assert Band().suffix() == "", "the historic reading must keep resolving to the file it always did"
+    assert Band(0.1, 0.9).suffix() == "_0.1-0.9band"
+    assert Band(0.0, 1.0).suffix() == "_0-1band", "the whole stack is a band like any other"
+
+
+def test_recorded():
+    """A manifest holds a list, because JSON has no tuples."""
+    assert Band(0.1, 0.9).recorded() == [0.1, 0.9]
+
+
+def test_of():
+    """Read back from the list a manifest holds."""
+    assert Band.of([0.1, 0.9]) == Band(0.1, 0.9)
+    assert Band.of(Band().recorded()) == Band(), "a round trip through the manifest is the same reading"
+
+
+def test_reader():
+    """The geometry builds the reader, so a call site cannot reach past it and forget an axis."""
+    reading = Reading(crop=Crop(mm=80.0, centre="tissue"), band=Band(0.1, 0.9))
+    reader = reading.reader(224)
+
+    assert (reader.crop_mm, reader.image_size, reader.band) == (80.0, 224, Band(0.1, 0.9))
+    assert isinstance(reader.centre, TissueCentre), "the centre is the STRATEGY the crop names, not its name"
+
+
+def test_reading_suffix():
+    """Both axes compose into the cache's name, and the historic pair still names nothing."""
+    assert Reading().suffix() == "", "the historic geometry must keep resolving to the file it always did"
+    assert Reading(crop=Crop(mm=80.0), band=Band(0.1, 0.9)).suffix() == "_80mm_0.1-0.9band"

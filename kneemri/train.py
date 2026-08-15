@@ -23,7 +23,7 @@ from kneemri.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyD
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import ATTENDED, SLOT_POOLINGS
-from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
@@ -54,6 +54,8 @@ class TrainingOptions:
     scheme: str = CANONICAL_SCHEME
     crop_mm: float = CROP_MM
     centre: str = DEFAULT_CENTRE
+    band_low: float = SLICE_BAND[0]
+    band_high: float = SLICE_BAND[1]
     tie: str = FIRST_MAXIMAL
     seed: int = 2026
     split_seed: int = 2026
@@ -105,6 +107,21 @@ class TrainingOptions:
         """
         return Crop(mm=self.crop_mm, centre=self.centre)
 
+    @property
+    def band(self) -> Band:
+        """The fraction of each series' depth this run's slices are drawn from.
+
+        Two scalar flags and a property for the reason `crop` gives: argparse's dest names have to land
+        as fields, and everything downstream wants the pair — `member_record` above all, which stamped
+        the module constant here while stamping the run's own value for every neighbouring rule.
+        """
+        return Band(low=self.band_low, high=self.band_high)
+
+    @property
+    def reading(self) -> Reading:
+        """The geometry this run decodes under — its crop and its band, which together name its cache."""
+        return Reading(crop=self.crop, band=self.band)
+
     @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object."""
@@ -150,6 +167,21 @@ class TrainingOptions:
             choices=sorted(CENTRES),
             help="where that extent is taken about. A tight crop needs the joint located rather than "
             "assumed (knee-yrf); at 130mm the difference is small and at 80mm it clips the joint.",
+        )
+        parser.add_argument(
+            "--band-low",
+            type=float,
+            default=SLICE_BAND[0],
+            help="the shallowest fraction of a series' depth this arm's slices are drawn from. It "
+            "selects the CACHE built over that band and is recorded on the member, so serving cannot "
+            "fall back to the default.",
+        )
+        parser.add_argument(
+            "--band-high",
+            type=float,
+            default=SLICE_BAND[1],
+            help="the deepest such fraction. The default pair is the historic reading every member on "
+            "disk was fitted under.",
         )
         parser.add_argument(
             "--tie",
@@ -487,7 +519,7 @@ def main() -> None:
         slices=arguments.slices,
         image_size=arguments.image_size,
         routing=arguments.routing,
-        crop=arguments.crop,
+        reading=arguments.reading,
     )
     corpus, identifiers = cache.load()
     device = DeviceBudget(arguments.vram_gb).select()

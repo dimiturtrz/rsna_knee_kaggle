@@ -27,7 +27,7 @@ from kneemri.backbone import ENCODERS
 from kneemri.crop_centre import Crop
 from kneemri.members import Member, MemberPackage, Window
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import SLICE_BAND
+from kneemri.slot_reader import Band
 from kneemri.slots import SCHEMES, SlotScheme
 from kneemri.test_time import SpatialViews
 
@@ -100,7 +100,7 @@ class Read:
     scheme: SlotScheme
     sizes: tuple[int, ...]
     crop: Crop = Crop()
-    band: tuple[float, float] = SLICE_BAND
+    band: Band = Band()
 
 
 class Ensemble:
@@ -145,7 +145,7 @@ class Ensemble:
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int, Crop, str, tuple[float, float]], list[Member]] = {}
+        gathered: dict[tuple[str, int, Crop, str, Band], list[Member]] = {}
         for member in self.package.members:
             key = (member.scheme, member.slices, member.crop, member.tie, member.band)
             gathered.setdefault(key, []).append(member)

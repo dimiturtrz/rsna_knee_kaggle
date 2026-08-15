@@ -4,8 +4,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from numpy.typing import NDArray
 
 from kneemri.crop_centre import Crop
+from kneemri.slot_reader import Band, Reading
 from kneemri.slots import EXTENDED_SLOTS, SLOTS, Routing
 from kneemri.study_cache import CachedCorpus, DecodeRequest, StudyCache
 from kneemri.window_reader import FileReader, MappedReader
@@ -175,7 +177,7 @@ def test_key_separates_a_different_crop(tmp_path: Path):
     for the same reason the canonical scheme does: those files are on disk and memory-mapped.
     """
     default = StudyCache(tmp_path, slices=12, image_size=336)
-    tighter = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(mm=80.0))
+    tighter = StudyCache(tmp_path, slices=12, image_size=336, reading=Reading(crop=Crop(mm=80.0)))
 
     assert default.key == "336px_12sl", "the historic name is unchanged"
     assert tighter.key != default.key
@@ -187,14 +189,73 @@ def test_key_separates_a_different_crop(tmp_path: Path):
 def test_key_separates_a_different_centre(tmp_path: Path):
     """A tissue-centred cache is different pixels, so it must not share the image-centred file."""
     default = StudyCache(tmp_path, slices=12, image_size=336)
-    located = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(centre="tissue"))
+    located = StudyCache(tmp_path, slices=12, image_size=336, reading=Reading(crop=Crop(centre="tissue")))
 
     assert default.key == "336px_12sl", "the historic name means the historic centre"
     assert "tissue" in located.key
     assert located.images_path != default.images_path
 
-    both = StudyCache(tmp_path, slices=12, image_size=336, crop=Crop(mm=80.0, centre="tissue"))
+    both = StudyCache(tmp_path, slices=12, image_size=336, reading=Reading(crop=Crop(mm=80.0, centre="tissue")))
     assert both.key == "336px_12sl_80mm_tissue", "the two axes compose rather than shadowing each other"
+
+
+def test_decode_one_reads_the_band_the_request_states(tmp_path: Path):
+    """The band on the request must reach the READER, not stop at the cache's name.
+
+    The failure this repository has hit nine times is a value that travels as far as a config and is
+    then answered by a consumer's own default — and until 2026-08-15 the band was exactly that: recorded
+    on every member, keyed by nothing, and read by a `SlotReader` taking its module constant. A key that
+    separates two bands while the decode ignores them is worse than no key at all, because the two files
+    would then hold identical pixels under different names.
+
+    Four acquired slices sampled two deep: the historic band takes the shallowest and the middle, and a
+    deep band takes two others. Different slices are different bytes, which is the only proof that does
+    not trust the plumbing it is checking.
+    """
+    source = tmp_path / "src"
+    write_series(source / "study0" / "sag", slices=4, description="SAG PD FS", size=32)
+
+    def decoded(name: str, band: Band) -> NDArray[np.uint8]:
+        cache = StudyCache(tmp_path / name, slices=2, image_size=8, reading=Reading(band=band))
+        cache.directory.mkdir(parents=True, exist_ok=True)
+        np.lib.format.open_memmap(cache.images_path, mode="w+", dtype=np.uint8, shape=cache.shape(1))
+        StudyCache.decode_one(
+            DecodeRequest(
+                position=0,
+                identifier="study0",
+                source=str(source),
+                images_path=str(cache.images_path),
+                slices=2,
+                image_size=8,
+                planes={"sag": "Sagittal"},
+                reading=Reading(band=band),
+            )
+        )
+        return np.load(cache.images_path)
+
+    historic = decoded("historic", Band())
+    deep = decoded("deep", Band(0.6, 1.0))
+
+    assert not np.array_equal(historic, deep), "a stated band that changes no pixel never reached the reader"
+
+
+def test_key_separates_a_different_band(tmp_path: Path):
+    """A wider band samples different SLICES, so it must not write over the historic arrays.
+
+    The third axis the key was missing, and the one an unlabeled-corpus rebuild wants first: the shape
+    is identical, so nothing downstream would have noticed a 0.10-0.90 build landing on the file every
+    member was fitted on. The default names nothing, exactly like the historic crop and scheme.
+    """
+    default = StudyCache(tmp_path, slices=12, image_size=336)
+    wider = StudyCache(tmp_path, slices=12, image_size=336, reading=Reading(band=Band(0.1, 0.9)))
+
+    assert default.key == "336px_12sl", "the historic name means the historic band"
+    assert wider.key == "336px_12sl_0.1-0.9band"
+    assert wider.images_path != default.images_path
+    assert wider.mask_path != default.mask_path
+
+    both = StudyCache(tmp_path, slices=12, image_size=336, reading=Reading(crop=Crop(mm=80.0), band=Band(0.1, 0.9)))
+    assert both.key == "336px_12sl_80mm_0.1-0.9band", "the axes compose rather than shadowing each other"
 
 
 def test_key_separates_a_different_tie(tmp_path: Path):

@@ -14,7 +14,7 @@ from kneemri.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.ensemble import Ensemble, Read
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import SLICE_BAND, SlotReader
+from kneemri.slot_reader import Band, SlotReader
 from kneemri.study import SlotPipeline
 from kneemri.submission import Split, Submission
 
@@ -312,10 +312,10 @@ def test_pipeline_honours_the_recorded_band(tmp_path: Path):
     scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
 
     default = submission.pipeline(Read(3, scheme, (IMAGE,)))
-    assert default.reader.band == SLICE_BAND
+    assert default.reader.band == Band()
 
-    wider = submission.pipeline(Read(3, scheme, (IMAGE,), band=(0.1, 0.9)))
-    assert wider.reader.band == (0.1, 0.9), "the band the member recorded reaches the reader"
+    wider = submission.pipeline(Read(3, scheme, (IMAGE,), band=Band(0.1, 0.9)))
+    assert wider.reader.band == Band(0.1, 0.9), "the band the member recorded reaches the reader"
 
 
 def test_pipeline_honours_the_recorded_centre(tmp_path: Path):

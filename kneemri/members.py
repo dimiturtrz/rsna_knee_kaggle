@@ -26,6 +26,7 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.mounts import Mounts
+from kneemri.slot_reader import Band
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 
 logger = logging.getLogger(__name__)
@@ -131,16 +132,16 @@ class Member:
         return str(self.config.get("tie", FIRST_MAXIMAL))
 
     @property
-    def band(self) -> tuple[float, float]:
+    def band(self) -> Band:
         """The fraction of the stack this member's slices were sampled from, as a pair.
 
         Recorded since the first manifest and read by the decode since none of them: the reader took its
         module default, so a member fitted on a wider band would have been served twelve slices drawn
         from a narrower one — the same silent train/inference mismatch the crop had, on the other axis.
-        A list on disk because JSON has no tuples; a tuple here because it is a grouping key.
+        A list on disk because JSON has no tuples; a `Band` here because it is a reading rule — it
+        names the cache it produces, it is a grouping key, and the decode builds its reader from it.
         """
-        recorded = self.config["band"]
-        return (float(recorded[0]), float(recorded[1]))
+        return Band.of(self.config.get("band", Band().recorded()))
 
     @property
     def crop(self) -> Crop:
@@ -367,7 +368,7 @@ class Member:
     def pixel_group(self) -> str:
         """Members sharing this key need identical pixels, so one decode serves all of them."""
         pixels = {
-            "band": list(self.band),
+            "band": self.band.recorded(),
             # Extent AND centre: two members cropped differently are looking at different pixels, so one
             # decode cannot serve both.
             "crop": [self.crop.mm, self.crop.centre],

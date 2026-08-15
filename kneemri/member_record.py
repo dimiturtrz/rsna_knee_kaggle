@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 from kneemri.backbone import Encoder
 from kneemri.crop_centre import Crop
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import SLICE_BAND
+from kneemri.slot_reader import Band
 from kneemri.slots import Routing
 
 
@@ -28,6 +28,11 @@ class RunOptions(Protocol):
     @property
     def crop(self) -> Crop:
         """The physical crop the RUN read, which the checkpoint must record rather than assume."""
+        ...
+
+    @property
+    def band(self) -> Band:
+        """The slice band the RUN sampled over — recorded, and read by the serve path to build a reader."""
         ...
 
     @property
@@ -214,7 +219,11 @@ class MemberRecord:
                 # The RUN's router. Without this a graft-matching arm would record nothing and be
                 # served under our first-maximal rule — fitted on one set of series, fed another.
                 "tie": options.routing.tie,
-                "band": list(SLICE_BAND),
+                # THE RUN'S OWN BAND, for the reason `crop_mm` gives above and on the axis it does
+                # not cover: this field was the last one stamped from a module constant, and the serve
+                # path reads it to build the reader. A member fitted on a wide band and served on a
+                # narrow one sees a stack it was never fitted on, with every fingerprint still passing.
+                "band": options.band.recorded(),
                 "slots": list(self.slot_names),
                 "variant": self.encoder.variant,
                 # THE RUN'S OWN POOLING, for the reason `crop_mm` gives above: `Member.pool` reads this

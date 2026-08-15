@@ -14,6 +14,9 @@ over the sampled stack rather than per slice so slices keep their relative contr
 rather than extremes so one bright vessel does not compress everything else.
 """
 
+from collections.abc import Sequence
+from dataclasses import dataclass
+
 import numpy as np
 import pydicom
 import torch
@@ -22,7 +25,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.acquisition import Acquisition
-from kneemri.crop_centre import CROP_MM, CropCentre, ImageCentre
+from kneemri.crop_centre import CROP_MM, Crop, CropCentre, ImageCentre
 
 IMAGE_SIZE = 336
 """130 mm / 336 px = 0.387 mm per pixel, which clears the 0.5 mm a 1 mm tear needs."""
@@ -31,10 +34,80 @@ SLICE_BAND = (0.20, 0.80)
 """The central band the samples spread over: the outermost slices of a knee series are mostly soft
 tissue outside the joint."""
 
+
+@dataclass(frozen=True)
+class Band:
+    """Which fraction of a series' depth the slices are drawn from, as a pair of fractions.
+
+    A type rather than a tuple because it is a reading RULE, and every other reading rule in this
+    package is one: it decides which slices exist to be sampled, it has to name the cache it produces,
+    and it has to be stamped into a member's fingerprint as the run's own value. It was the last rule
+    recorded from a module constant instead — `member_record` stamped `SLICE_BAND` while its neighbours
+    each took the run's — which was harmless only because nothing could configure it. The serve path
+    reads the recorded field, so the moment anything could, a member fitted on a wide band would have
+    been served a narrow one with every fingerprint still passing.
+
+    Both defaults are the historic reading, so a caller that says nothing gets the slices every cache on
+    disk already holds.
+    """
+
+    low: float = SLICE_BAND[0]
+    high: float = SLICE_BAND[1]
+
+    def suffix(self) -> str:
+        """What this band adds to a cache's name — empty for the historic one.
+
+        Empty by design, for the reason `Crop.suffix` gives: those arrays are memory-mapped by running
+        trainers and every member on disk was fitted on them, so the default must keep resolving to the
+        file it always did. Any other band is a different set of pixels under the same shape, which is
+        exactly the silent clobber the cache key exists to prevent.
+        """
+        return "" if (self.low, self.high) == SLICE_BAND else f"_{self.low:g}-{self.high:g}band"
+
+    def recorded(self) -> list[float]:
+        """The pair as a manifest writes it — JSON has no tuples, and every manifest holds a list."""
+        return [self.low, self.high]
+
+    @classmethod
+    def of(cls, recorded: Sequence[float]) -> "Band":
+        """The band a manifest recorded, read back."""
+        return cls(low=float(recorded[0]), high=float(recorded[1]))
+
+
 _PERCENTILES = (1.0, 99.0)
 
 MIN_CROP_PIXELS = 16
 """Below this the crop is not a knee at any spacing, and the spacing is the thing to disbelieve."""
+
+
+@dataclass(frozen=True)
+class Reading:
+    """The geometry a cache is decoded under: what is taken in plane, and what is taken through it.
+
+    One object because the two are asked for together everywhere and because the cache's NAME is a
+    function of the pair — `StudyCache` took them as separate arguments until the band arrived and
+    pushed the constructor past the argument-count gate, which is the shape this repository has a
+    strategy for. `Crop` was created from the same pressure one axis down.
+
+    Both defaults are the historic reading, so a caller that says nothing resolves to the arrays every
+    member on disk was fitted on.
+    """
+
+    crop: Crop = Crop()
+    band: Band = Band()
+
+    def suffix(self) -> str:
+        """What this reading adds to a cache's name — empty for the historic one, on both axes."""
+        return f"{self.crop.suffix()}{self.band.suffix()}"
+
+    def reader(self, image_size: int) -> "SlotReader":
+        """The reader that decodes under this geometry, at the size asked for.
+
+        Here rather than at each call site because a caller assembling one reached through this object
+        to the crop and then to the centre STRATEGY inside it — three deep, which is the coupling gate's
+        complaint and a real one: every such site is a place a new axis has to be remembered.
+        """
+        return SlotReader(crop_mm=self.crop.mm, image_size=image_size, band=self.band, centre=self.crop.located())
 
 
 class SlotReader:
@@ -44,7 +117,7 @@ class SlotReader:
         self,
         crop_mm: float = CROP_MM,
         image_size: int = IMAGE_SIZE,
-        band: tuple[float, float] = SLICE_BAND,
+        band: Band | None = None,
         centre: CropCentre | None = None,
     ) -> None:
         self.crop_mm = crop_mm
@@ -52,7 +125,7 @@ class SlotReader:
         # byte-identical; a different centre is a different reading and is keyed as such.
         self.centre = centre or ImageCentre()
         self.image_size = image_size
-        self.band = band
+        self.band = band or Band()
 
     def read(self, acquisition: Acquisition, slices: int) -> UInt8[Tensor, "s h w"] | None:
         """Sample `slices` physically-spread slices at this reader's size, or None if nothing decodes."""
@@ -122,7 +195,7 @@ class SlotReader:
 
         Fix it when a cache is next rebuilt for another reason, not on its own account.
         """
-        low, high = int(self.band[0] * (available - 1)), int(self.band[1] * (available - 1))
+        low, high = int(self.band.low * (available - 1)), int(self.band.high * (available - 1))
         if high <= low:
             return [available // 2] * slices
         indices = list(dict.fromkeys(np.linspace(low, high, slices).astype(int).tolist()))

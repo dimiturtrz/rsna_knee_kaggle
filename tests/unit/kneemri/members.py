@@ -14,6 +14,7 @@ from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
 from kneemri.mounts import Mounts
+from kneemri.slot_reader import Band
 from kneemri.slots import SCHEMES, Routing
 
 SEED = 2026
@@ -463,11 +464,13 @@ def test_slot_pooling():
 
 
 def test_band():
-    """A pair, from the list JSON can hold — and it is a grouping key, so it must be hashable."""
+    """The rule, from the list JSON can hold — and it is a grouping key, so it must be hashable."""
     wider = replace(_member(), config={**_config(), "band": [0.1, 0.9]})
+    legacy = replace(_member(), config={key: value for key, value in _config().items() if key != "band"})
 
-    assert wider.band == (0.1, 0.9)
+    assert wider.band == Band(0.1, 0.9)
     assert hash(wider.band), "the read groups by it, which a list cannot do"
+    assert legacy.band == Band(), "a manifest without the field is the historic reading, not a crash"
 
 
 def test_crop():

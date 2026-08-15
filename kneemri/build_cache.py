@@ -15,7 +15,7 @@ import pandas as pd
 from core.paths import DataRoot
 from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.folds import ReportFolds
-from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
@@ -54,6 +54,16 @@ def main() -> None:
         choices=sorted(CENTRES),
         help="where the physical crop is taken about. 'image' is the historic behaviour and keeps the "
         "historic cache name; 'tissue' locates the knee, which a tight crop needs (knee-yrf).",
+    )
+    parser.add_argument(
+        "--band",
+        type=float,
+        nargs=2,
+        metavar=("LOW", "HIGH"),
+        default=list(SLICE_BAND),
+        help="the fraction of each series' depth the slices are drawn from. The default is the "
+        "historic reading and keeps the historic cache name; a wider band is a different array under "
+        "the same shape, so it is named for itself rather than written over what is there.",
     )
     parser.add_argument(
         "--print-key",
@@ -96,7 +106,7 @@ def main() -> None:
         slices=arguments.slices,
         image_size=arguments.image_size,
         routing=Routing(scheme=arguments.scheme, tie=arguments.tie),
-        crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
+        reading=Reading(crop=Crop(mm=arguments.crop_mm, centre=arguments.centre), band=Band.of(arguments.band)),
     )
     if arguments.print_key:
         # The arm script's completion check needs the same key StudyCache writes, and it used to
