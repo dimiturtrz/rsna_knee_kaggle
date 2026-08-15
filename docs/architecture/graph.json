@@ -1365,6 +1365,12 @@
     {
       "kind": "import",
       "source": "kneemri.trainer",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
       "target": "kneemri.study_cache",
       "weight": 1
     },
