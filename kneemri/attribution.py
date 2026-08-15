@@ -300,7 +300,6 @@ def main() -> None:
     from kneemri.backbone import ENCODERS, SMALL  # noqa: PLC0415 - as above
     from kneemri.folds import ReportFolds  # noqa: PLC0415 - as above
     from kneemri.members import Member  # noqa: PLC0415 - as above
-    from kneemri.study_cache import StudyCache  # noqa: PLC0415 - as above
     from kneemri.targets import Targets  # noqa: PLC0415 - as above
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -323,11 +322,11 @@ def main() -> None:
     # be read at all, and an extended-scheme member would have been rebuilt with the wrong slot count.
     # member_curve carried the identical defect and was fixed; this, the other analysis CLI, was not.
     # It is the tool that produced the border-only and depth-spread findings, so a wrong reading here
-    # does not fail — it publishes.
-    reading = Member.from_checkpoint(arguments.checkpoint)
-    corpus, identifiers = StudyCache(
-        root.processed(), slices=reading.slices, image_size=reading.image_size, routing=reading.routing
-    ).load()
+    # does not fail — it publishes. The crop and the band were the next two fields to be dropped on the
+    # way here, which is why the member names its own cache now instead of a caller spelling it out:
+    # the border ring this CLI blanks is measured in fractions of a crop it was not reading.
+    member = Member.from_checkpoint(arguments.checkpoint)
+    corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
     holdout = holdout[: arguments.studies]
@@ -338,12 +337,12 @@ def main() -> None:
 
     predictions = HoldoutPredictions(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     model = predictions.load(
-        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count
+        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, member.slot_count
     )
     images, mask = corpus.images[holdout], corpus.mask[holdout]
     # `overlap=True` gives a windowed member every start and a whole-stack member the ONE centred window
     # of its full depth, which is the whole point of routing this through Member.window.
-    window = reading.window(corpus.slices, overlap=True)
+    window = member.window(corpus.slices, overlap=True)
 
     attribution = Attribution(predictions)
     holdout_data = Holdout(images, mask, truth, window)
