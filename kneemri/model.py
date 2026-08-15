@@ -37,11 +37,23 @@ TARGETS: tuple[str, ...] = (
 )
 """The twelve findings, in the column order the submission and the trained members both use."""
 
-POOL_PARTS: dict[str, int] = {"cls_mean": 2, "cls_mean_focal": 3}
+CLS_MEAN = "cls_mean"
+"""Class token and patch mean — what every member on disk was fitted with."""
+
+CLS_MEAN_FOCAL = "cls_mean_focal"
+"""Those two plus the per-channel upper tail, for findings that occupy a small part of the field."""
+
+POOL_PARTS: dict[str, int] = {CLS_MEAN: 2, CLS_MEAN_FOCAL: 3}
+"""How many `dim`-wide parts each pooling scheme concatenates, which fixes the head's input width.
+
+THE VOCABULARY as well as the widths: a name here is a name `_pool` builds parts for, and the count
+must match what it appends or the head is built for a width the forward pass does not produce. The two
+strings had five more copies — the design's default, the branch in `_pool`, two argv defaults and the
+manifest's — and the manifest's was a LITERAL, so a run's own pooling could not reach the field the
+serve path rebuilds the design from."""
 
 ATTEND = "attend"
 """The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
-"""How many `dim`-wide parts each pooling scheme concatenates, which fixes the head's input width."""
 
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
@@ -74,7 +86,7 @@ class StudyDesign:
     under as one object.
     """
 
-    pool: str = "cls_mean"
+    pool: str = CLS_MEAN
     slice_pooling: str = "channels"
     anatomical_prior: bool = False
 
@@ -480,7 +492,7 @@ class StudyModel(nn.Module):
         # so a v2 member is unchanged (no registers, prefix of one) and nothing re-fingerprints.
         patch = tokens[:, self.prefix_tokens :]
         parts = [tokens[:, 0], patch.mean(1)]
-        if self.pool == "cls_mean_focal":
+        if self.pool == CLS_MEAN_FOCAL:
             # The upper tail of each channel over the patch grid, taken per channel rather than by
             # selecting whole patches: a finding occupies a small part of the field, so a plain mean
             # over the patches dilutes it, and this keeps the top eighth of each channel's responses.

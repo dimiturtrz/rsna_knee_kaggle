@@ -27,7 +27,7 @@ from core.paths import COMPETITION
 from kneemri import train as train_module
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
-from kneemri.model import TARGETS
+from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, POOL_PARTS, TARGETS
 from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
@@ -153,6 +153,25 @@ def test_the_command_line_reaches_the_checkpoint(corpus: Path, monkeypatch: pyte
     assert config["train_size"] == SIZE, "0 means the cache's own size, and the member must state which that was"
     assert payload["fingerprint"], "a member without one cannot be verified, so it cannot be submitted"
     assert _nested(payload, "fingerprint_config")["n_slot"] == len(SCHEMES[CANONICAL_SCHEME])
+
+
+def test_the_pool_reaches_the_model_and_the_manifest(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """`--pool` must change the network AND the field the serve path rebuilds that network from.
+
+    The manifest stamped the string `cls_mean` as a LITERAL, three lines under the comment explaining
+    why `crop_mm` must be the run's own value — and `Member.pool` reads this field back to rebuild the
+    design. The trainer had no `--pool` at all, so the focal pooling existed in the model and no arm
+    could select it. Both halves are asserted here: the width the checkpoint carries is what the
+    pooling produces, and the name travels with it.
+    """
+    _corpus(corpus)
+    payload = _run(corpus, monkeypatch, "--pool", CLS_MEAN_FOCAL)
+
+    assert _nested(payload, "config")["pool"] == CLS_MEAN_FOCAL, "a member is rebuilt from this field"
+    state = _nested(payload, "model")
+    width = cast(torch.Tensor, state["head.proj.0.weight"]).shape[0]
+    assert width == DIM * POOL_PARTS[CLS_MEAN_FOCAL], "the head is built for the parts the forward pass concatenates"
+    assert width != DIM * POOL_PARTS[CLS_MEAN], "a pooling that does not change the network is a flag that was dropped"
 
 
 def test_the_scheme_reaches_the_model_and_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):

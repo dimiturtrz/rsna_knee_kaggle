@@ -19,7 +19,7 @@ from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.fitting import Fitting, Fold, RunPlan
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
-from kneemri.model import StudyDesign, StudyModel
+from kneemri.model import CLS_MEAN, POOL_PARTS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import ATTENDED, SLOT_POOLINGS
@@ -79,6 +79,7 @@ class TrainingOptions:
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
+    pool: str = CLS_MEAN
     slice_pooling: str = "channels"
     slot_pooling: str = ATTENDED
     anatomical_prior: bool = False
@@ -280,6 +281,15 @@ class TrainingOptions:
             "query over the present slots; 'mean' pools them uniformly and is the ABLATION - it exists "
             "to give the attention a denominator, since every number in the ledger was measured on a "
             "recipe that already contained it.",
+        )
+        parser.add_argument(
+            "--pool",
+            choices=tuple(POOL_PARTS),
+            default=CLS_MEAN,
+            help="how a slice's patch tokens become one vector. 'cls_mean' is the class token beside "
+            "the patch mean and is what every member on disk was fitted with; 'cls_mean_focal' adds "
+            "the mean of each channel's top eighth over the patch grid, which a plain mean dilutes - "
+            "the small findings (meniscus, ACL, MCL) are the ones that occupy a fraction of the field.",
         )
         parser.add_argument(
             "--slice-pooling",
@@ -510,6 +520,7 @@ def main() -> None:
     )
 
     design = StudyDesign(
+        pool=arguments.pool,
         slice_pooling=arguments.slice_pooling,
         slot_pooling=arguments.slot_pooling,
         anatomical_prior=arguments.anatomical_prior,

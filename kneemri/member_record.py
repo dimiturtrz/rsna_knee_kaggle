@@ -45,6 +45,11 @@ class RunOptions(Protocol):
     def slices(self) -> int: ...
 
     @property
+    def pool(self) -> str:
+        """How a slice's patch tokens become one vector, which fixes the head's width when it is rebuilt."""
+        ...
+
+    @property
     def slice_pooling(self) -> str: ...
 
     @property
@@ -200,7 +205,11 @@ class MemberRecord:
                 "band": list(SLICE_BAND),
                 "slots": list(self.slot_names),
                 "variant": self.encoder.variant,
-                "pool": "cls_mean",
+                # THE RUN'S OWN POOLING, for the reason `crop_mm` gives above: `Member.pool` reads this
+                # field back and it is what the serve path rebuilds `StudyDesign` from. A literal here
+                # meant a focal-pooled member would be reconstructed two parts wide against three-part
+                # weights — and, before this, no arm could select the focal pooling at all.
+                "pool": options.pool,
                 "slice_pooling": options.slice_pooling,
                 # Recorded AND read back by Member.slot_pooling and HoldoutPredictions.load. A head
                 # fitted with uniform slot pooling and rebuilt with attention is a different function

@@ -29,7 +29,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
-from kneemri.model import TARGETS
+from kneemri.model import CLS_MEAN, POOL_PARTS, TARGETS
 from kneemri.objective import Objective, RankedObjective
 from kneemri.scores import LabelScores
 from kneemri.slot_head import SlotHead
@@ -122,7 +122,7 @@ def main() -> None:
     parser.add_argument("--read-size", type=int, default=336)
     parser.add_argument("--slices", type=int, default=12)
     parser.add_argument("--scheme", default=CANONICAL_SCHEME)
-    parser.add_argument("--pool", default="cls_mean")
+    parser.add_argument("--pool", default=CLS_MEAN, choices=tuple(POOL_PARTS))
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep")
     parser.add_argument("--fold", type=int, default=0)

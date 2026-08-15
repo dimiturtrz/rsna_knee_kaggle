@@ -103,12 +103,24 @@ def test_fingerprint_leaves_training_mode_untouched(study_model: StudyModel):
     assert study_model.training
 
 
-def test_pool_parts_widths_match_the_head_input():
-    """`cls_mean` concatenates two `dim`-wide parts, `cls_mean_focal` three — the head's width follows."""
-    assert POOL_PARTS["cls_mean"] == 2
+def test_every_pool_builds_the_width_its_forward_pass_produces():
+    """`POOL_PARTS` fixes the head's input width, so every name in it must concatenate exactly that many.
+
+    Iterating the table rather than naming the two: a pooling added with a wrong count builds a head
+    for a width the forward pass never produces, and the failure is a shape error deep in the first
+    batch — after the backbone is fetched and the cache is mapped.
+    """
     torch.manual_seed(SEED)
-    focal = StudyModel(_FakeBackbone(), DIM, 2, StudyDesign(pool="cls_mean_focal"))
-    assert focal.head.proj[1].in_features == DIM * POOL_PARTS["cls_mean_focal"]
+    for name, parts in POOL_PARTS.items():
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(pool=name)).eval()
+        assert model.head.proj[1].in_features == DIM * parts, name
+
+        with torch.no_grad():
+            pooled = model._pool(torch.randn(1, PATCHES + 1, DIM))
+        assert pooled.shape[1] == DIM * parts, f"{name} pools a width its head is not built for"
+
+    with pytest.raises(KeyError):
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(pool="cls_men"))
 
 
 def test_slice_features():
