@@ -27,7 +27,7 @@ uv run python -m kneemri.kit_check      # BEFORE shipping a kit (refuses stale o
 uv run python -m kneemri.kit_check --mounted   # BEFORE a submission — asks KAGGLE what it will run
 # then push comp/kernels/kneemri-loadcheck and read it: loads, forwards and chunks every
 # member on a real T4, spends no submission, and answers what only the runtime knows
-uv run python -m kneemri.arm_check      # BEFORE arming a queue
+uv run python -m kneemri.arm_check      # BEFORE arming a queue (--require-caches: refuse an undecoded reading)
 uv run python -m kneemri.ledger_check   # AFTER runs finish
 uv run python comp/witness_check.py --root <members> --device cpu   # BEFORE a submission
 ```
@@ -44,7 +44,11 @@ run refused the live dataset — mounted `4faac3d`, five shipped-package commits
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed
-because bash is what runs it — an arm once died on a quoting error and no regex finds that.
+because bash is what runs it — an arm once died on a quoting error and no regex finds that. It then asks
+the accepted flags a second question: is the cache that reading names decoded? `--image-size`,
+`--slices`, `--crop-mm`, `--scheme` and `--tie` pick a cache file, and `train.main` takes the card BEFORE
+it maps that file, so an undecoded reading costs a slot exactly as a typo does. Reported by default and
+refused under `--require-caches`, which is what to run when arming a queue that builds no cache itself.
 
 **`ledger_check` — after runs finish.** Reports any run whose metrics file exists and whose best score
 is quoted nowhere above. Five arms once sat in this table as "queued" for two days after they had run,

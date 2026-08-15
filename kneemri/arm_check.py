@@ -12,6 +12,10 @@ its arguments instead of training, and the resulting line is handed to the REAL 
 
 Sourcing rather than parsing the file, because the shell is what runs it: an arm that dies on a quoting
 error is one this project has already lost two hours to, and only bash finds that.
+
+The accepted flags are then asked a second question: is the cache that reading names actually decoded?
+`main` takes the card BEFORE it maps the cache, so an undecoded reading costs the slot in the same way
+a typo does — and it is a `FileNotFoundError` on a memory map rather than anything an arm anticipates.
 """
 
 import argparse
@@ -24,6 +28,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from core.paths import DataRoot
+from kneemri.study_cache import StudyCache
 from kneemri.train import TrainingOptions
 
 logger = logging.getLogger(__name__)
@@ -89,29 +95,64 @@ class ArmCheck:
                     found[name] = flags
         return found
 
+    def _parsed(self, flags: str) -> tuple[TrainingOptions | None, str]:
+        """The options an arm's flags produce, or the parser's own complaint about them.
+
+        One place that drives the real parser, because both halves of the check need it: whether the
+        trainer accepts the arm, and what reading it accepted.
+        """
+        argv = sys.argv
+        sys.argv = ["train", *shlex.split(flags)]
+        # Bound BEFORE the try, because the parser exits by raising: bound inside the `with`, the
+        # handler reads a name the checker cannot prove was ever assigned.
+        complaint = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(complaint):
+                return TrainingOptions.parse(), ""
+        except SystemExit as exit_code:
+            if not exit_code.code:
+                return None, ""
+            lines = complaint.getvalue().strip().splitlines()
+            return None, lines[-1] if lines else "rejected without a message"
+        finally:
+            sys.argv = argv
+
     def refused(self, invocations: dict[str, str]) -> dict[str, str]:
         """The arms whose flags `kneemri.train` would reject, with the parser's own complaint.
 
         A pure function of the invocations, so it is testable without a shell — which matters, because
         the unit gate refuses tests that shell out and this is the half that holds the logic.
         """
-        refused: dict[str, str] = {}
+        complaints = ((name, self._parsed(flags)[1]) for name, flags in invocations.items())
+        return {name: complaint for name, complaint in complaints if complaint}
+
+    def uncached(self, invocations: dict[str, str]) -> dict[str, str]:
+        """The arms whose reading names a cache that is not on disk, by arm name and cache key.
+
+        THE OTHER LATE FAILURE, and the same price as a flag typo. `--image-size`, `--slices`,
+        `--crop-mm`, `--scheme` and `--tie` together pick a cache file, and `main` resolves the CARD
+        before it maps that file — so a reading nothing has been decoded for holds the GPU, raises on
+        the memory map, and is discovered as a burned queue slot. Multiscale makes it live: the twelve-
+        slot scheme is implemented and no twelve-slot cache has ever been built.
+
+        Silent when the data root cannot be resolved, which is CI and any checkout without a
+        `paths.yaml` — a lint that fails on the absence of gitignored data gets switched off.
+        """
+        uncached: dict[str, str] = {}
         for name, flags in invocations.items():
-            argv = sys.argv
-            sys.argv = ["train", *shlex.split(flags)]
-            # Bound BEFORE the try, because the parser exits by raising: bound inside the `with`, the
-            # handler reads a name the checker cannot prove was ever assigned.
-            complaint = io.StringIO()
-            try:
-                with contextlib.redirect_stderr(complaint):
-                    TrainingOptions.parse()
-            except SystemExit as exit_code:
-                if exit_code.code:
-                    lines = complaint.getvalue().strip().splitlines()
-                    refused[name] = lines[-1] if lines else "rejected without a message"
-            finally:
-                sys.argv = argv
-        return refused
+            options = self._parsed(flags)[0]
+            if options is None or not options.paths.is_file():
+                continue
+            cache = StudyCache(
+                DataRoot.from_config(options.paths).processed(),
+                slices=options.slices,
+                image_size=options.image_size,
+                routing=options.routing,
+                crop=options.crop,
+            )
+            if not (cache.images_path.is_file() and cache.mask_path.is_file() and cache.index_path.is_file()):
+                uncached[name] = cache.key
+        return uncached
 
 
 def main() -> None:
@@ -119,6 +160,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arms", type=Path, default=ARMS)
     parser.add_argument("--stub", type=Path, default=STUB)
+    parser.add_argument(
+        "--require-caches",
+        action="store_true",
+        help="also refuse an arm whose cache is not decoded yet. Off by default because a queue may "
+        "legitimately build one in an earlier slot; on when arming a queue that builds nothing.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -127,14 +174,17 @@ def main() -> None:
     refused = check.refused(invocations)
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)
-    logger.info("%d arms checked, %d refused", len(invocations), len(refused))
+    uncached = check.uncached(invocations)
+    for name, key in uncached.items():
+        logger.info("UNCACHED %s: nothing decoded at %s", name, key)
+    logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     # A CLEAN PASS OVER NOTHING IS A FAILURE, and this tool has produced one twice — once from WSL's
     # bash, once from a PowerShell PATH with no coreutils. Both times it printed "0 arms checked, 0
     # refused" and exited 0, which is what a lint says when everything is fine.
     if not invocations:
         logger.info("REFUSED: no arm printed an invocation — the shell, not the arms, is what failed")
         sys.exit(1)
-    if refused:
+    if refused or (uncached and arguments.require_caches):
         sys.exit(1)
 
 

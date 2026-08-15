@@ -1,8 +1,13 @@
 from pathlib import Path
 
+from core.paths import COMPETITION
 from kneemri.arm_check import ArmCheck
+from kneemri.crop_centre import Crop
+from kneemri.study_cache import StudyCache
 
 GOOD = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack --labels /tmp/labels.csv"
+SLICES = 4
+SIZE = 28
 
 
 def test_refused():
@@ -23,6 +28,38 @@ def test_refused():
     assert "typo" in refused, "a misspelled flag is exactly what this exists to catch before a queue"
     assert "bad_value" in refused, "a value outside the choices is refused too"
     assert refused["typo"], "the parser's own complaint is reported, not a generic failure"
+
+
+def test_uncached(tmp_path: Path):
+    """An arm reading a cache nobody has decoded is named, and one reading a decoded cache is not.
+
+    The failure this catches costs the same as a flag typo: `main` selects the card before it maps the
+    cache, so an undecoded reading holds the GPU and then raises on a memory map. It has to stay silent
+    without a data root, because `paths.yaml` is gitignored and CI has none.
+    """
+    cache = StudyCache(tmp_path / "processed" / COMPETITION, slices=SLICES, image_size=SIZE)
+    cache.directory.mkdir(parents=True)
+    for path in (cache.images_path, cache.mask_path, cache.index_path):
+        path.write_text("decoded", encoding="utf-8")
+    paths = tmp_path / "paths.yaml"
+    paths.write_text(f"data: {tmp_path.as_posix()}\n", encoding="utf-8")
+    # POSIX separators: the flags go through `shlex.split`, which eats a Windows backslash as an escape
+    # and hands the parser a path that resolves to nothing — under which this test passes vacuously.
+    reading = f"{GOOD} --paths {paths.as_posix()} --slices {SLICES} --image-size {SIZE}"
+
+    uncached = ArmCheck().uncached(
+        {
+            "decoded": reading,
+            "other_crop": f"{reading} --crop-mm 80",
+            "rootless": f"{GOOD} --paths {(tmp_path / 'absent.yaml').as_posix()}",
+        }
+    )
+
+    assert "decoded" not in uncached, "the reading this arm asks for is on disk"
+    assert (
+        uncached["other_crop"] == StudyCache(cache.directory, slices=SLICES, image_size=SIZE, crop=Crop(mm=80.0)).key
+    ), "a different physical crop is a different cache, and the key is what says which"
+    assert "rootless" not in uncached, "no data root resolves, so nothing can be claimed about it"
 
 
 def test_invocations(tmp_path: Path):
