@@ -1,0 +1,50 @@
+"""The stamp on the dataset Kaggle will MOUNT, as opposed to the kit sitting on this disk.
+
+`kit_check` answered "is the kit I built current?", which is not the question a slot cares about.
+Uploading is a manual `kaggle datasets version` step (`comp/build_kit.py`), so a kit can be built,
+checked clean, and never pushed — after which the local check passes while Kaggle mounts something
+older. On 2026-08-15 that was the live state: the dataset carried `4faac3d` while HEAD was five
+shipped-package commits past it, among them the one that makes a member record the router it read.
+
+Only the 46-byte stamp is fetched. It is listed as its own file in the dataset, so asking which code
+Kaggle holds costs one small download rather than the weights.
+"""
+
+import json
+import logging
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+DATASET = "dimiturnt/kneemri-kit"
+"""The dataset a kernel mounts, and the one `build_kit` writes its metadata for."""
+
+STAMP = "kneemri_src/kit.json"
+"""Where the stamp sits inside a kit, and the only path this needs to download."""
+
+
+class MountedKit:
+    """What Kaggle will run, fetched rather than assumed from the local build."""
+
+    def __init__(self, dataset: str = DATASET) -> None:
+        self.dataset = dataset
+        self.kaggle = shutil.which("kaggle") or "kaggle"
+
+    def recorded(self) -> dict[str, object] | None:
+        """Download the published stamp alone and read it; None when the dataset carries none.
+
+        None rather than a guess, matching a local kit that predates the stamp: a version that cannot
+        be named is the state that spent the slot, and it is refused rather than assumed current.
+        """
+        with tempfile.TemporaryDirectory() as into:
+            subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
+                [self.kaggle, "datasets", "download", "-f", STAMP, self.dataset, "-p", into, "--force"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            stamp = Path(into) / Path(STAMP).name
+            return dict(json.loads(stamp.read_text(encoding="utf-8"))) if stamp.exists() else None

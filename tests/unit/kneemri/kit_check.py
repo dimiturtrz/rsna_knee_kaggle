@@ -83,6 +83,16 @@ def test_recorded(tmp_path: Path):
     assert KitCheck(repo).recorded(_kit(tmp_path / "b", None)) is None
 
 
+def test_behind(tmp_path: Path):
+    """The judgement takes a STAMP rather than a directory, so a mounted kit is judged by the same rule."""
+    repo = _repo(tmp_path)
+    check = KitCheck(repo)
+    current = check.asked("rev-parse", "--short", "HEAD")
+
+    assert check.behind({"commit": current, "dirty": False}) == []
+    assert "no commit stamp" in check.behind(None)[0]
+
+
 def test_drift_refuses_a_kit_built_from_a_dirty_tree(tmp_path: Path):
     """A dirty kit names a commit it is not, which is the unnameable version wearing a hash.
 

@@ -17,19 +17,29 @@ stay in it.
 An arm file carries its hypothesis, its control number, and its result in the header. Reading the
 directory is meant to be the same as reading the ledger.
 
-## The three checks, and when to run them
+## The four checks, and when to run them
 
 Each exists because the failure it catches happened, silently, and cost either a queue or a slot. None
 needs a GPU.
 
 ```bash
 uv run python -m kneemri.kit_check      # BEFORE shipping a kit (refuses stale or dirty)
+uv run python -m kneemri.kit_check --mounted   # BEFORE a submission — asks KAGGLE what it will run
 # then push comp/kernels/kneemri-loadcheck and read it: loads, forwards and chunks every
 # member on a real T4, spends no submission, and answers what only the runtime knows
 uv run python -m kneemri.arm_check      # BEFORE arming a queue
 uv run python -m kneemri.ledger_check   # AFTER runs finish
 uv run python comp/witness_check.py --root <members> --device cpu   # BEFORE a submission
 ```
+
+**`kit_check` — before shipping a kit, and `--mounted` before a submission.** Two slots have been spent
+on code that was already fixed in the repo: one on an OOM whose fix landed three hours after the kit was
+built, one on a bf16 member served in fp16 because the kit predated `Member.precision`. Bare, it compares
+the kit on this disk to HEAD, and only in the packages a kernel runs — a docs commit that failed the check
+would train the reader to ignore it. `--mounted` asks the question a slot actually cares about, because
+uploading is a manual `kaggle datasets version` step: it downloads the published `kit.json` alone (46
+bytes, listed as its own file, so no weights move) and judges it by the same rule. On 2026-08-15 its first
+run refused the live dataset — mounted `4faac3d`, five shipped-package commits behind.
 
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches

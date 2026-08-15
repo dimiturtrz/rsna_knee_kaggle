@@ -13,6 +13,9 @@ in the arithmetic it was fitted under.
 Members are versioned, kernels are versioned, and the code between them was not. `build_kit` now stamps
 the commit into `kit.json` and `kernel_run` logs it, so the drift is VISIBLE. This makes it BLOCKING:
 what matters is not that the kit differs from HEAD, but that it differs in the packages a kernel runs.
+
+`--mounted` ASKS THE ONLY QUESTION A SLOT CARES ABOUT, and `MountedKit` fetches the answer. The kernel's
+log names the mounted commit, but only after the slot is spent — the same too-late that cost the first two.
 """
 
 import argparse
@@ -21,6 +24,8 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
+
+from kneemri.mounted_kit import DATASET, MountedKit
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +61,11 @@ class KitCheck:
         return dict(json.loads(stamp.read_text(encoding="utf-8"))) if stamp.exists() else None
 
     def drift(self, kit: Path) -> list[str]:
-        """Commits touching the shipped packages that the kit does not have, newest first."""
-        recorded = self.recorded(kit)
+        """Commits touching the shipped packages that the built kit does not have, newest first."""
+        return self.behind(self.recorded(kit))
+
+    def behind(self, recorded: dict[str, object] | None) -> list[str]:
+        """The same judgement for any stamp, wherever it was read from — a build directory or Kaggle."""
         if recorded is None:
             return ["the kit carries no commit stamp — rebuild it before shipping"]
         behind = self.asked("log", "--oneline", f"{recorded['commit']}..HEAD", "--", *PACKAGES).splitlines()
@@ -74,18 +82,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kit", type=Path, help="the built kit; defaults beside the other build artefacts")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+    parser.add_argument("--mounted", action="store_true", help="ask Kaggle what it will mount, not the local build")
+    parser.add_argument("--dataset", default=DATASET)
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
     repo = Path(__file__).resolve().parents[1]
-    kit = arguments.kit or DataRoot.from_config(arguments.paths).processed() / "kit"
     check = KitCheck(repo)
-    behind = check.drift(kit)
+    if arguments.mounted:
+        where, recorded = arguments.dataset, MountedKit(arguments.dataset).recorded()
+    else:
+        kit = arguments.kit or DataRoot.from_config(arguments.paths).processed() / "kit"
+        where, recorded = str(kit), check.recorded(kit)
+    behind = check.behind(recorded)
     for line in behind:
         logger.info("MISSING FROM THE KIT: %s", line)
-    logger.info("kit %s, %d commit(s) behind in %s", check.stamped(kit) or "UNSTAMPED", len(behind), "/".join(PACKAGES))
+    stamp = str(recorded["commit"]) if recorded else "UNSTAMPED"
+    logger.info("%s at %s, %d commit(s) behind in %s", where, stamp, len(behind), "/".join(PACKAGES))
     if behind:
         raise SystemExit(1)
 
