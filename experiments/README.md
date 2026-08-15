@@ -127,6 +127,13 @@ cannot be read as a resolution result.
 **The clean test is one arm**: 392 px at 8e-6, matched to the control's rate. Either resolution
 survives on its own or our best member is mostly a rate change we already knew about.
 
+This was found by hand, three days after the row was written. It is now mechanical: every run records
+its recipe beside its scores, and `python -m kneemri.run_comparison --control <ctl> --arms <...>`
+prints a `vs control:` line naming every option the two disagree on — for this arm,
+`image_size 336→448, backbone_lr 8e-06→4e-05`. Runs older than the recorder were backfilled from their
+own checkpoints (`python -m kneemri.metrics_recipe`); `lora_r8_small_336_s2026` and `wholestack_fold2`
+have no checkpoint left and can never be matched controls again.
+
 ## A peak is not a rate: OneCycle delivers half of the constant it replaced
 
 Measured at our exact settings — peak 8e-6, `pct_start` 0.15, 12 epochs of 291 steps — by summing the
