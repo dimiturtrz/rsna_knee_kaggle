@@ -17,6 +17,7 @@ import json
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 
 import numpy as np
@@ -28,6 +29,7 @@ from kneemri.crop_centre import Crop
 from kneemri.slot_reader import IMAGE_SIZE, SlotReader
 from kneemri.slots import SCHEMES, Routing
 from kneemri.study import SlotPipeline, Study
+from kneemri.window_reader import FileReader, MappedReader, WindowReader
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,22 @@ class CachedCorpus:
 
     images: NDArray[np.uint8]
     mask: NDArray[np.float32]
+
+    @cached_property
+    def reader(self) -> WindowReader:
+        """Explicit file reads where the pixels are a memory map, plain indexing where they are not.
+
+        A corpus assembled in memory — a test fixture, a held slab already sliced out — has no file to
+        read, and the map's own path is the only one that pays for the machinery.
+        """
+        images = self.images
+        if isinstance(images, np.memmap) and images.filename:
+            return FileReader(images, Path(images.filename))
+        return MappedReader(images)
+
+    def window(self, batch: NDArray[np.int64], start: int, width: int) -> NDArray[np.uint8]:
+        """`width` slices of every slot, from `start`, for each position in `batch`."""
+        return self.reader.read(batch, start, width)
 
     @property
     def image_size(self) -> int:

@@ -1130,6 +1130,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.study_cache",
+      "target": "kneemri.window_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.submission",
       "target": "kneemri.ensemble",
       "weight": 1
@@ -4831,6 +4837,24 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.study_cache.CachedCorpus",
+      "target": "kneemri.window_reader.WindowReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study_cache.CachedCorpus.reader",
+      "target": "kneemri.window_reader.FileReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.study_cache.CachedCorpus.reader",
+      "target": "kneemri.window_reader.MappedReader",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.study_cache.DecodeRequest",
       "target": "kneemri.crop_centre.Crop",
@@ -5703,6 +5727,12 @@
     {
       "kind": "calls",
       "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.study_cache.CachedCorpus.window",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
       "target": "kneemri.targets.Targets.rows",
       "weight": 1
     },
@@ -5727,7 +5757,19 @@
     {
       "kind": "calls",
       "source": "kneemri.trainer.Trainer.predict",
+      "target": "kneemri.study_cache.CachedCorpus.window",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.trainer.Trainer.predict",
       "target": "kneemri.trainer.Trainer.batches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.window_reader.FileReader.read",
+      "target": "kneemri.window_reader.FileReader._fill",
       "weight": 1
     }
   ],
@@ -5749,7 +5791,7 @@
       "role": null
     },
     {
-      "descendants": 68,
+      "descendants": 69,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6296,6 +6338,14 @@
       "descendants": 0,
       "id": "kneemri.trainer",
       "label": "trainer",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader",
+      "label": "window_reader",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -7138,6 +7188,30 @@
       "label": "Trainer",
       "level": "class",
       "parent": "kneemri.trainer",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader",
+      "label": "FileReader",
+      "level": "class",
+      "parent": "kneemri.window_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.MappedReader",
+      "label": "MappedReader",
+      "level": "class",
+      "parent": "kneemri.window_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.WindowReader",
+      "label": "WindowReader",
+      "level": "class",
+      "parent": "kneemri.window_reader",
       "role": "primary"
     },
     {
@@ -10350,8 +10424,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.study_cache.CachedCorpus.reader",
+      "label": "reader",
+      "level": "method",
+      "parent": "kneemri.study_cache.CachedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.study_cache.CachedCorpus.slices",
       "label": "slices",
+      "level": "method",
+      "parent": "kneemri.study_cache.CachedCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.study_cache.CachedCorpus.window",
+      "label": "window",
       "level": "method",
       "parent": "kneemri.study_cache.CachedCorpus",
       "role": null
@@ -10978,6 +11068,70 @@
       "label": "whole_stack",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.window_reader.FileReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader._fill",
+      "label": "_fill",
+      "level": "method",
+      "parent": "kneemri.window_reader.FileReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader.per_slot",
+      "label": "per_slot",
+      "level": "method",
+      "parent": "kneemri.window_reader.FileReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader.per_study",
+      "label": "per_study",
+      "level": "method",
+      "parent": "kneemri.window_reader.FileReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.FileReader.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.window_reader.FileReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.MappedReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.window_reader.MappedReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.MappedReader.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.window_reader.MappedReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.window_reader.WindowReader.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.window_reader.WindowReader",
       "role": null
     }
   ]

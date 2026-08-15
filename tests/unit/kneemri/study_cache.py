@@ -7,7 +7,8 @@ import pytest
 
 from kneemri.crop_centre import Crop
 from kneemri.slots import EXTENDED_SLOTS, SLOTS, Routing
-from kneemri.study_cache import DecodeRequest, StudyCache
+from kneemri.study_cache import CachedCorpus, DecodeRequest, StudyCache
+from kneemri.window_reader import FileReader, MappedReader
 
 from .conftest import write_series
 
@@ -204,3 +205,27 @@ def test_key_separates_a_different_tie(tmp_path: Path):
     assert default.key == "336px_12sl"
     assert theirs.key == "336px_12sl_last"
     assert theirs.images_path != default.images_path
+
+
+def test_reader(tmp_path: Path):
+    """A mapped corpus reads its file outright; one assembled in memory has no file, and indexes."""
+    written = np.zeros((2, 2, 2, 2, 2), dtype=np.uint8)
+    np.save(tmp_path / "images.npy", written)
+    mask = np.ones((2, 2), dtype=np.float32)
+
+    assert isinstance(CachedCorpus(np.load(tmp_path / "images.npy", mmap_mode="r"), mask).reader, FileReader)
+    assert isinstance(CachedCorpus(written, mask).reader, MappedReader)
+
+
+def test_window(tmp_path: Path):
+    """Either way round, the window is the slices asked for, for the positions asked for."""
+    written = np.random.default_rng(1).integers(0, 255, size=(4, 2, 6, 3, 3), dtype=np.uint8)
+    path = tmp_path / "images.npy"
+    np.save(path, written)
+    mask = np.ones((4, 2), dtype=np.float32)
+
+    mapped = CachedCorpus(np.load(path, mmap_mode="r"), mask)
+    resident = CachedCorpus(written, mask)
+    batch = np.array([3, 0, 2])
+    assert np.array_equal(mapped.window(batch, 1, 2), written[batch, :, 1:3])
+    assert np.array_equal(resident.window(batch, 1, 2), written[batch, :, 1:3])

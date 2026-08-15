@@ -394,18 +394,15 @@ class Trainer:
         same depth, which keeps the batch a single contiguous slice of the memory map instead of a
         gather, and the randomness across steps still covers the stack.
         """
-        # `images[batch, :, s:s+G]` in ONE indexing op, never `images[batch][:, :, s:s+G]`. The latter
-        # fancy-indexes first, materialising all twelve cached slices (97.5 MB per batch) before
-        # discarding three quarters of them: measured 35 ms against 3.3 ms, or about ten seconds of
-        # every forty-second epoch spent reading data that is then thrown away.
+        # The fetch belongs to the corpus — `window()` reads only the slices asked for, where indexing
+        # the batch and slicing afterwards materialises all twelve (97.5 MB per batch) to discard three
+        # quarters of them: measured 35 ms against 3.3 ms, ten seconds of every forty-second epoch.
         self.model.train()
         total, steps = 0.0, 0
         planned = len(positions) // max(size, 1)
         for batch in self.batches(positions, size, generator, shuffle=True):
             start = int(generator.integers(0, corpus.slices - self.window + 1))
-            pixels = torch.from_numpy(np.ascontiguousarray(corpus.images[batch, :, start : start + self.window])).to(
-                self.device
-            )
+            pixels = torch.from_numpy(corpus.window(batch, start, self.window)).to(self.device)
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
@@ -449,9 +446,7 @@ class Trainer:
                 # The alternative is a second graph shape for the sake of one batch per epoch.
                 short = size - len(batch)
                 padded = batch if short == 0 else np.concatenate([batch, np.repeat(batch[-1:], short)])
-                pixels = torch.from_numpy(
-                    np.ascontiguousarray(corpus.images[padded, :, middle : middle + self.window])
-                ).to(self.device)
+                pixels = torch.from_numpy(corpus.window(padded, middle, self.window)).to(self.device)
                 flags = torch.from_numpy(corpus.mask[padded]).to(self.device)
                 scored = self.model(pixels, flags, self.read_size or corpus.image_size).float()
                 chunks.append(torch.sigmoid(scored).cpu().numpy()[: len(batch)])
