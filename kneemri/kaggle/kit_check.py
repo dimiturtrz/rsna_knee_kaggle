@@ -36,9 +36,18 @@ PACKAGES = ("kneemri", "core")
 class KitCheck:
     """The built kit's commit against the working tree's, in the packages a kernel actually runs."""
 
-    def __init__(self, repo: Path) -> None:
-        self.repo = repo
+    def __init__(self, inside: Path) -> None:
+        """Anchored at the repository ROOT, whatever path inside it is handed over.
+
+        The pathspec is what makes this a root and not a directory: `git -C <dir> log -- kneemri core`
+        resolves those names against <dir>, so anchoring one level down asked about `kneemri/kneemri`
+        and `kneemri/core`, matched nothing, and reported EVERY kit as current. The mounted check
+        passed that way for 53 shipped-package commits, including the restructure that moved this
+        module down a level and caused it. Asking git where the root is cannot drift when a file moves.
+        """
         self.git = shutil.which("git") or "git"
+        self.repo = inside
+        self.repo = Path(self.asked("rev-parse", "--show-toplevel"))
 
     def asked(self, *command: str) -> str:
         """One read-only git question, answered from this repo."""
@@ -89,7 +98,7 @@ def main() -> None:
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
-    repo = Path(__file__).resolve().parents[1]
+    repo = Path(__file__).resolve().parent
     check = KitCheck(repo)
     if arguments.mounted:
         where, recorded = arguments.dataset, MountedKit(arguments.dataset).recorded()

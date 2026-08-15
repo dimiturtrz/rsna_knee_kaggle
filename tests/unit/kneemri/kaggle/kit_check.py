@@ -107,3 +107,20 @@ def test_drift_refuses_a_kit_built_from_a_dirty_tree(tmp_path: Path):
     dirty = check.drift(_kit(tmp_path / "dirty", current, dirty=True))
     assert len(dirty) == 1
     assert "DIRTY" in dirty[0]
+
+
+def test_a_path_inside_the_repo_answers_the_same_as_its_root(tmp_path: Path):
+    """The pathspec is relative to where git RUNS, so an anchor one level down matches NOTHING.
+
+    Not hypothetical: `main` anchored at the package directory after the restructure moved this module
+    into `kneemri/kaggle/`, so `-- kneemri core` meant `kneemri/kneemri` and `kneemri/core`, matched no
+    commit, and called the mounted kit current while it was 53 shipped-package commits behind.
+    """
+    repo = _repo(tmp_path)
+    behind_at = KitCheck(repo).asked("rev-parse", "--short", "HEAD")
+    (repo / "kneemri" / "later.py").write_text("second", encoding="utf-8")
+    subprocess.run([GIT, "-C", str(repo), "add", "-A"], check=True, capture_output=True)  # noqa: S603
+    subprocess.run([GIT, "-C", str(repo), "commit", "-qm", "second"], check=True, capture_output=True)  # noqa: S603
+    kit = _kit(tmp_path / "behind", behind_at)
+
+    assert KitCheck(repo).drift(kit) == KitCheck(repo / "kneemri").drift(kit) != []
