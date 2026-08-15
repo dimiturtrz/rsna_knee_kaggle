@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
+from core.mounts import Mounts
 from kneemri.kaggle import kernel_run
 from kneemri.kaggle.kernel_run import KernelRun
-from kneemri.kaggle.mounts import Mounts
 from kneemri.models.backbone import BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
 
 

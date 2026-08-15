@@ -9,11 +9,11 @@ import pytest
 import torch
 from torch import Tensor
 
+from core.mounts import Mounts
 from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import SCHEMES, Routing
 from kneemri.inference.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
-from kneemri.kaggle.mounts import Mounts
 from kneemri.models.backbone import SMALL
 from kneemri.models.model import StudyModel
 

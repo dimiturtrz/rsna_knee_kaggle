@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.kaggle.mounts import Mounts
+from core.mounts import Mounts
 
 
 def _mount(root: Path, *parts: str, name: str = "config.json") -> Path:

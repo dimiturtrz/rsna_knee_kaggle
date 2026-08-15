@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # The kit is not on sys.path when this module is imported, so the finder is a name to the
     # type checker and an argument at runtime.
-    from kneemri.kaggle.mounts import Mounts
+    from core.mounts import Mounts
 
 import torch
 
@@ -111,9 +111,9 @@ def main() -> None:
 
     from transformers import AutoModel  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
+    from core.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-    from kneemri.kaggle.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.kaggle.submission import Submission  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
     # ONE finder for the whole run: it caches, and each of these lookups used to walk the whole

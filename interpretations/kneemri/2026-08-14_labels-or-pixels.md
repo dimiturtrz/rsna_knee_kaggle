@@ -66,7 +66,7 @@ gone before the model sees anything — one of the four causes `knee-jk3` names 
 gap, and never tested. If it cost accuracy, the pixel-limited findings should score worse where more was
 discarded. Across three bands of 1,469 studies by acquired depth they are flat or drift the **other**
 way; 2 of 12 intervals exclude zero against a chance expectation of 0.6, and one of those points against
-the hypothesis (`python -m kneemri.corpus.stack_coverage`).
+the hypothesis (`python -m kneemri.evaluation.stack_coverage`).
 
 Not support for the discard cause. Stated as an association and not more — deeper stacks travel with
 scanner, protocol and habitus, so a real cost could be masked by deeper scans simply being better scans.

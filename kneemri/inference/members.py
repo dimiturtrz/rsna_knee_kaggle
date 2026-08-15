@@ -22,11 +22,11 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
+from core.mounts import Mounts
 from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 from kneemri.corpus.study_cache import StudyCache
-from kneemri.kaggle.mounts import Mounts
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 

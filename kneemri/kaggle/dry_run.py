@@ -1,4 +1,4 @@
-"""Run the SUBMISSION path over labelled studies: `python -m kneemri.corpus.dry_run --studies 40`.
+"""Run the SUBMISSION path over labelled studies: `python -m kneemri.kaggle.dry_run --studies 40`.
 
 WHY THIS EXISTS. Four entries have now failed and nothing local could say why. Two came back at 0.500,
 two came back unscored, and the only evidence available was which configurations scored and which did

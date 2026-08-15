@@ -1,4 +1,4 @@
-"""Does keeping 12 slices of a deep stack cost accuracy? `python -m kneemri.corpus.stack_coverage`.
+"""Does keeping 12 slices of a deep stack cost accuracy? `python -m kneemri.evaluation.stack_coverage`.
 
 THE HYPOTHESIS THIS TESTS. The cache keeps 12 slices per series against a median of about 30 acquired
 (knee-ezz), so a study scanned at 40 slices has three quarters of its imaging discarded before the model

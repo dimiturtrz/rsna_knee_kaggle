@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kneemri.corpus.stack_coverage import StackCoverage
+from kneemri.evaluation.stack_coverage import StackCoverage
 from kneemri.models.model import TARGETS
 
 STUDIES = 9

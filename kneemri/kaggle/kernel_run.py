@@ -18,9 +18,9 @@ from pathlib import Path
 
 import torch
 
+from core.mounts import Mounts
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.members import Member, MemberPackage
-from kneemri.kaggle.mounts import Mounts
 from kneemri.kaggle.submission import Submission
 from kneemri.models.backbone import ENCODERS, Encoder
 

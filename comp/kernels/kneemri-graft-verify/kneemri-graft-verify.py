@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # The kit is not on sys.path when this module is imported, so the finder is a name to the
     # type checker and an argument at runtime.
-    from kneemri.kaggle.mounts import Mounts
+    from core.mounts import Mounts
 
 import pandas as pd
 import torch
@@ -124,11 +124,11 @@ def main() -> None:
     sys.path.insert(0, str(kit))
     logger.info(f"kit: {kit}")
 
+    from core.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.inference.members import (  # noqa: PLC0415 - kit is on sys.path only after install_wheels
         MemberPackage,
         WeightsError,
     )
-    from kneemri.kaggle.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.models.model import TARGETS  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
     mounts = Mounts()

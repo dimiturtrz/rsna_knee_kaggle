@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 
 from core.paths import DataRoot
-from kneemri.corpus.dry_run import DryRun
+from kneemri.kaggle.dry_run import DryRun
 from kneemri.models.model import TARGETS
 
 
