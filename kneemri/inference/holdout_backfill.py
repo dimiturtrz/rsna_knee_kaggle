@@ -34,14 +34,14 @@ from numpy.typing import NDArray
 from core.paths import DataRoot
 from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.evaluation.holdout_record import DERIVED, HoldoutRecord
-from kneemri.evaluation.member_record import StampedRun
-from kneemri.evaluation.run_metrics import RunMetrics
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.labels.targets import Targets
+from kneemri.runs.holdout_record import DERIVED, HoldoutRecord
+from kneemri.runs.member_record import StampedRun
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 

@@ -9,12 +9,12 @@ import torch
 
 from core.paths import DataRoot
 from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.evaluation.holdout_record import DERIVED, HoldoutRecord
 from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, UnbackfillableError
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
 from kneemri.models.model import TARGETS
+from kneemri.runs.holdout_record import DERIVED, HoldoutRecord
 
 STUDIES = ["s0", "s1", "s2", "s3", "s4", "s5"]
 

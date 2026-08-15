@@ -4,8 +4,8 @@ from pathlib import Path
 import torch
 
 from kneemri.corpus.crop_centre import CROP_MM
-from kneemri.evaluation.member_record import MemberRecord, StampedRun
 from kneemri.models.backbone import Encoder
+from kneemri.runs.member_record import MemberRecord, StampedRun
 from kneemri.training.train import TrainingOptions
 
 from ..models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts

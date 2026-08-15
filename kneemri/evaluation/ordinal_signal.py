@@ -27,9 +27,9 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from kneemri.evaluation.holdout_record import HoldoutReading, HoldoutRecord
 from kneemri.evaluation.scores import LabelScores
 from kneemri.models.model import TARGETS
+from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
 

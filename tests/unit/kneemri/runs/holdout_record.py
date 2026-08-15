@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.evaluation.holdout_record import DERIVED, HoldoutReading, HoldoutRecord
+from kneemri.runs.holdout_record import DERIVED, HoldoutReading, HoldoutRecord
 
 LABELS = 12
 

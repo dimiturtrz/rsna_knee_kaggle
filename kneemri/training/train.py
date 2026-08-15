@@ -20,11 +20,11 @@ from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
 from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 from kneemri.corpus.study_cache import StudyCache
-from kneemri.evaluation.member_record import MemberRecord
 from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.models.backbone import ENCODERS, SMALL, Encoder
 from kneemri.models.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyDesign, StudyModel
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision

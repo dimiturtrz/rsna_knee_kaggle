@@ -6,10 +6,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from kneemri.corpus.anatomy import ScaleProfile
-from kneemri.evaluation.holdout_record import TRAINED, HoldoutRecord
-from kneemri.evaluation.run_metrics import RunMetrics
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.label_power import FOLDS, LabelPower
+from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 

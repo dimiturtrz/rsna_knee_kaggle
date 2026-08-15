@@ -12,15 +12,15 @@ import pytest
 import torch
 
 from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.evaluation.member_record import MemberRecord
 from kneemri.labels.targets import Targets
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import TARGETS, StudyModel
+from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitted, Fitting, Fold, RunPlan
 from kneemri.training.trainer import Trainer
 
-from ..evaluation.member_record import OPTIONS
 from ..models.model import DIM, SLOTS, _FakeBackbone
+from ..runs.member_record import OPTIONS
 
 SEED = 2026
 STUDIES = 8

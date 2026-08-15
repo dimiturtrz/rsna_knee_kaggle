@@ -286,14 +286,35 @@ forbidden_modules = [
 ]
 
 [[tool.importlinter.contracts]]
+name = "a run's records sit on corpus and models alone (what produced them never comes back in)"
+type = "forbidden"
+source_modules = ["kneemri.runs"]
+forbidden_modules = [
+    "kneemri.embeddings",
+    "kneemri.labels",
+    "kneemri.training",
+    "kneemri.inference",
+    "kneemri.evaluation",
+    "kneemri.kaggle",
+]
+
+[[tool.importlinter.contracts]]
+name = "inference serves; it never imports the layer that scores it"
+type = "forbidden"
+source_modules = ["kneemri.inference"]
+forbidden_modules = ["kneemri.evaluation", "kneemri.training"]
+
+[[tool.importlinter.contracts]]
 name = "kaggle is the top: nothing below it may import the submission layer"
 type = "forbidden"
 source_modules = [
     "kneemri.corpus",
     "kneemri.models",
     "kneemri.embeddings",
+    "kneemri.runs",
     "kneemri.labels",
     "kneemri.training",
+    "kneemri.inference",
     "kneemri.evaluation",
 ]
 forbidden_modules = ["kneemri.kaggle"]

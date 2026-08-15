@@ -14,8 +14,8 @@ import logging
 from pathlib import Path
 
 from core.paths import DataRoot
-from kneemri.evaluation.member_record import StampedRun
-from kneemri.evaluation.run_metrics import RunMetrics
+from kneemri.runs.member_record import StampedRun
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 

@@ -4,10 +4,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.evaluation.holdout_record import DERIVED, TRAINED, HoldoutRecord
 from kneemri.evaluation.run_comparison import PairedWidths, RunComparison
-from kneemri.evaluation.run_metrics import EpochRow
 from kneemri.models.model import TARGETS
+from kneemri.runs.holdout_record import DERIVED, TRAINED, HoldoutRecord
+from kneemri.runs.run_metrics import EpochRow
 
 STUDIES = 40
 

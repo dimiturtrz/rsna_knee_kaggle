@@ -23,13 +23,13 @@ import pytest
 import torch
 
 from core.mounts import Mounts
-from kneemri.evaluation.member_record import MemberRecord
 from kneemri.inference.ensemble import Ensemble
 from kneemri.kaggle import kernel_run as kernel_module
 from kneemri.kaggle.kernel_run import KernelRun
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyModel
+from kneemri.runs.member_record import MemberRecord
 from kneemri.training.train import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone

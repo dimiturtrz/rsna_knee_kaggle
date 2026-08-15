@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from kneemri.evaluation.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
 
 def test_record(tmp_path: Path):

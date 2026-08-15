@@ -29,11 +29,11 @@ import torch
 from numpy.typing import NDArray
 
 from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.evaluation.holdout_record import HoldoutRecord
-from kneemri.evaluation.member_record import MemberRecord
-from kneemri.evaluation.run_metrics import EpochRow, RunMetrics
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.targets import Targets
+from kneemri.runs.holdout_record import HoldoutRecord
+from kneemri.runs.member_record import MemberRecord
+from kneemri.runs.run_metrics import EpochRow, RunMetrics
 from kneemri.training.patience import Patience
 from kneemri.training.trainer import Trainer
 

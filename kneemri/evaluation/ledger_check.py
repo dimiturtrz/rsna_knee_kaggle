@@ -26,7 +26,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.evaluation.run_metrics import RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
