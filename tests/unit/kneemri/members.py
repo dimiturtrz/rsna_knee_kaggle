@@ -12,6 +12,7 @@ from kneemri.backbone import SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
+from kneemri.mounts import Mounts
 from kneemri.slots import Routing
 
 SEED = 2026
@@ -104,11 +105,11 @@ def test_load(tmp_path: Path):
 
 def test_find(tmp_path: Path):
     """The manifest decides where the package is; absence is a path, not an error."""
-    assert MemberPackage.find(tmp_path / "nothing-here") is None
+    assert MemberPackage.find(Mounts(root=tmp_path / "nothing-here")) is None
     nested = tmp_path / "input" / "some-dataset"
     nested.mkdir(parents=True)
     _package(nested)
-    found = MemberPackage.find(tmp_path / "input")
+    found = MemberPackage.find(Mounts(root=tmp_path / "input"))
     assert found is not None
     assert found.root == nested
 

@@ -429,6 +429,12 @@
     {
       "kind": "import",
       "source": "kneemri.kernel_run",
+      "target": "kneemri.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kernel_run",
       "target": "kneemri.submission",
       "weight": 1
     },
@@ -616,6 +622,12 @@
       "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.members",
+      "target": "kneemri.mounts",
       "weight": 1
     },
     {
@@ -2467,6 +2479,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kernel_run.KernelRun",
+      "target": "kneemri.mounts.Mounts",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kernel_run.KernelRun.__init__",
+      "target": "kneemri.mounts.Mounts",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kernel_run.KernelRun.chosen",
       "target": "kneemri.members.MemberPackage.strongest",
@@ -3067,6 +3091,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.members.MemberPackage",
+      "target": "kneemri.mounts.Mounts",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.members.MemberPackage.__init__",
       "target": "kneemri.members.Member",
@@ -3088,6 +3118,12 @@
       "kind": "calls",
       "source": "kneemri.members.MemberPackage.check",
       "target": "kneemri.model.StudyModel.fingerprint",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.MemberPackage.find",
+      "target": "kneemri.mounts.Mounts",
       "weight": 1
     },
     {
@@ -3202,6 +3238,18 @@
       "kind": "calls",
       "source": "kneemri.model.StudyModel.supervised",
       "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.mounts.Mounts.every",
+      "target": "kneemri.mounts.Mounts.walk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.mounts.Mounts.one",
+      "target": "kneemri.mounts.Mounts.every",
       "weight": 1
     },
     {
@@ -5137,7 +5185,7 @@
       "role": null
     },
     {
-      "descendants": 64,
+      "descendants": 65,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -5420,6 +5468,14 @@
       "descendants": 0,
       "id": "kneemri.mounted_kit",
       "label": "mounted_kit",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts",
+      "label": "mounts",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -6062,6 +6118,14 @@
       "label": "MountedKit",
       "level": "class",
       "parent": "kneemri.mounted_kit",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts.Mounts",
+      "label": "Mounts",
+      "level": "class",
+      "parent": "kneemri.mounts",
       "role": "primary"
     },
     {
@@ -8342,6 +8406,38 @@
       "label": "recorded",
       "level": "method",
       "parent": "kneemri.mounted_kit.MountedKit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts.Mounts.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts.Mounts.every",
+      "label": "every",
+      "level": "method",
+      "parent": "kneemri.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts.Mounts.one",
+      "label": "one",
+      "level": "method",
+      "parent": "kneemri.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounts.Mounts.walk",
+      "label": "walk",
+      "level": "method",
+      "parent": "kneemri.mounts.Mounts",
       "role": null
     },
     {

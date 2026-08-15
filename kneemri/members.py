@@ -23,6 +23,7 @@ from torch import Tensor, nn
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
+from kneemri.mounts import Mounts
 from kneemri.slots import FIRST_MAXIMAL, SCHEMES, Routing
 
 FINGERPRINT_TOLERANCE = 2e-3
@@ -436,21 +437,22 @@ class MemberPackage:
         return sorted(self.members, key=lambda member: member.holdout, reverse=True)[:count]
 
     @classmethod
-    def find(cls, base: Path = Path("/kaggle/input"), name: str = "manifest.json") -> "MemberPackage | None":
+    def find(cls, mounts: "Mounts | None" = None, name: str = "manifest.json") -> "MemberPackage | None":
         """Locate a mounted package, or return None when none is attached.
 
         The manifest decides, not the filenames beside it: testing for a naming convention makes the
         search agree with whatever the packager last called its files, which is a second definition of
-        what a package is. The competition's own image directories are skipped — walking them is
-        hundreds of thousands of stat calls for a file that is not there.
+        what a package is.
+
+        `Mounts` does the walking because the competition's image directories have to be PRUNED, not
+        filtered: this read `base.rglob(name)` and skipped the study paths it yielded, which pays the
+        entire cost of descending into them and then throws the result away.
         """
-        if not base.is_dir():
+        finding = mounts or Mounts()
+        if not finding.root.is_dir():
             return None
-        for candidate in sorted(base.rglob(name)):
-            if {"train_series", "test_series"} & set(candidate.parts):
-                continue
-            return cls(candidate.parent)
-        return None
+        holding = finding.every(name)
+        return cls(holding[0]) if holding else None
 
     def load(self, member: Member, backbone: nn.Module, dim: int, device: torch.device) -> StudyModel:
         """Build the member's model, load its weights, and refuse it if the fingerprint disagrees."""

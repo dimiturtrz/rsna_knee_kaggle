@@ -9,6 +9,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from kneemri import kernel_run
 from kneemri.backbone import BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
 from kneemri.kernel_run import KernelRun
+from kneemri.mounts import Mounts
 
 
 class _Package:
@@ -29,7 +30,7 @@ def test_chosen():
     assert [member.holdout for member in KernelRun(members=1).chosen(package)] == [0.87]
 
 
-def test_find_encoder(tmp_path: Path, monkeypatch: MonkeyPatch):
+def test_find_encoder(tmp_path: Path):
     """The mount is matched on the ENCODER, not merely found, across both families at once.
 
     Mounting several and taking whichever sorts first would build a member at the wrong width, which
@@ -46,41 +47,37 @@ def test_find_encoder(tmp_path: Path, monkeypatch: MonkeyPatch):
         mount = tmp_path.joinpath(*parts)
         mount.mkdir(parents=True)
         (mount / "config.json").write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
+    run = KernelRun(mounts=Mounts(root=tmp_path))
 
-    assert KernelRun().find_encoder(ENCODERS[SMALL]).name == "1"
-    assert "small" in str(KernelRun().find_encoder(ENCODERS[SMALL]))
-    assert "base" in str(KernelRun().find_encoder(ENCODERS[BASE]))
-    assert KernelRun().find_encoder(ENCODERS[V3_SMALL]).name == "vits16"
-    assert KernelRun().find_encoder(ENCODERS[V3_BASE]).name == "vitb16"
+    assert run.find_encoder(ENCODERS[SMALL]).name == "1"
+    assert "small" in str(run.find_encoder(ENCODERS[SMALL]))
+    assert "base" in str(run.find_encoder(ENCODERS[BASE]))
+    assert run.find_encoder(ENCODERS[V3_SMALL]).name == "vits16"
+    assert run.find_encoder(ENCODERS[V3_BASE]).name == "vitb16"
 
 
-def test_find_encoder_refuses_when_the_variant_is_not_mounted(tmp_path: Path, monkeypatch: MonkeyPatch):
+def test_find_encoder_refuses_when_the_variant_is_not_mounted(tmp_path: Path):
     """A missing mount is fatal rather than silently substituted with the other size."""
     mount = tmp_path / "models" / "dinov2" / "small" / "1"
     mount.mkdir(parents=True)
     (mount / "config.json").write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
-
     with pytest.raises(FileNotFoundError):
-        KernelRun().find_encoder(ENCODERS[BASE])
+        KernelRun(mounts=Mounts(root=tmp_path)).find_encoder(ENCODERS[BASE])
 
 
-def test_find_encoder_refuses_when_two_mounts_match(tmp_path: Path, monkeypatch: MonkeyPatch):
+def test_find_encoder_refuses_when_two_mounts_match(tmp_path: Path):
     """Two directories answering to one encoder is unresolvable, and picking one loads wrong weights."""
     for version in ("1", "2"):
         mount = tmp_path / "models" / "metaresearch" / "dinov2" / "PyTorch" / "small" / version
         mount.mkdir(parents=True)
         (mount / "config.json").write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(kernel_run, "INPUT", tmp_path)
-
     with pytest.raises(FileNotFoundError, match="matches 2 mounts"):
-        KernelRun().find_encoder(ENCODERS[SMALL])
+        KernelRun(mounts=Mounts(root=tmp_path)).find_encoder(ENCODERS[SMALL])
 
 
 def test_run(monkeypatch: MonkeyPatch):
     """With no weights mounted the run must die, not write a submission from an untrained model."""
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: None))
+    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().run()
 
@@ -93,10 +90,10 @@ def test_package(monkeypatch: MonkeyPatch):
     continues writes a submission from an untrained model and nothing downstream can tell.
     """
     sentinel = object()
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: sentinel))
+    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: sentinel))
     assert KernelRun().package() is sentinel
 
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls: None))
+    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().package()
 

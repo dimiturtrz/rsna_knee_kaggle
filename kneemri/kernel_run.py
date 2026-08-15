@@ -21,9 +21,9 @@ import torch
 from kneemri.backbone import ENCODERS, Encoder
 from kneemri.ensemble import Ensemble
 from kneemri.members import Member, MemberPackage
+from kneemri.mounts import Mounts
 from kneemri.submission import Submission
 
-INPUT = Path("/kaggle/input")
 WORKING = Path("/kaggle/working")
 
 logger = logging.getLogger(__name__)
@@ -32,9 +32,12 @@ logger = logging.getLogger(__name__)
 class KernelRun:
     """One kernel's work: mount the weights, load the members it wants, write the submission."""
 
-    def __init__(self, members: int | None = None, *, overlap: bool = True) -> None:
+    def __init__(self, members: int | None = None, *, overlap: bool = True, mounts: Mounts | None = None) -> None:
         self.members = members
         self.overlap = overlap
+        # One object for the whole run, because it caches: the cost this removes is a repeated walk,
+        # and a fresh finder per call would keep paying it while looking like it did not.
+        self.mounts = mounts or Mounts()
 
     def find_encoder(self, encoder: Encoder) -> Path:
         """The mounted weights for one encoder.
@@ -43,12 +46,12 @@ class KernelRun:
         word 'dinov2' twice and splitting on it — which is what it did, and which cannot see a DINOv3
         mount at all, nor tell `vits16` from `vitb16`, because those are not what our variants are
         called.
+
+        The search itself is the mounts' job, and it is CACHED there: this is called once per member, so
+        an unpruned `rglob` of `/kaggle/input` — 248 seconds, measured — was being paid twenty-two times
+        by the fusion entry before a single study decoded.
         """
-        candidates = [
-            config.parent
-            for config in sorted(INPUT.rglob("config.json"))
-            if not {"train_series", "test_series"} & set(config.parts)
-        ]
+        candidates = self.mounts.every("config.json")
         found = [mount for mount in candidates if encoder.locates(str(mount))]
         if not found:
             message = f"no {encoder.variant} mount among {candidates}"
@@ -72,7 +75,7 @@ class KernelRun:
         one decode, because both were fitted on the same pixels (336 px, 12 slices, group 3, canonical
         slots) and `pixel_group` says so.
         """
-        found = MemberPackage.find()
+        found = MemberPackage.find(self.mounts)
         if found is None:
             message = "no weights package mounted"
             raise FileNotFoundError(message)
@@ -130,6 +133,6 @@ class KernelRun:
             "loaded and fingerprint-checked %d of %d members from %s", len(usable), len(models) or 0, package.root
         )
 
-        competition = next(iter(sorted(INPUT.rglob("sample_submission.csv")))).parent
+        competition = self.mounts.one("sample_submission.csv", "competition data")
         frame = Submission(Ensemble(package, models, device), competition, WORKING, overlap=self.overlap).run()
         logger.info("%s", frame.head())
