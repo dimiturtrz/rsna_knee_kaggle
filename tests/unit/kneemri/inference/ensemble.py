@@ -491,30 +491,57 @@ def _timed(ensemble: Ensemble, seconds: float, ceiling: float) -> None:
 
 
 def test_afford(tmp_path: Path):
-    """An overrun costs the lowest-holdout member, one per chunk, never the last one — and only an overrun.
+    """An overrun costs the worst score-per-second, one per chunk, never the last one — and only an overrun.
 
     Twenty-five members that do not finish score nothing while twenty that do score most of what
-    twenty-five would have. The order is holdout because it is the only quality every member carries; a
-    diversity order would need predictions the run has no time left to compute.
+    twenty-five would have. What is being bought is TIME, so a slightly better member that costs four
+    times as much per study is the one to give up: shedding cheap members saves the least wall clock per
+    vote lost, and a run can shed three of them and hit the ceiling anyway.
     """
     ensemble = _ensemble(tmp_path)
-    strong = replace(ensemble.package.members[0], identifier="strong", holdout=0.9)
-    weak = replace(strong, identifier="weak", holdout=0.7)
+    quick = replace(ensemble.package.members[0], identifier="quick", holdout=0.84)
+    slow = replace(quick, identifier="slow", holdout=0.85)
+    ensemble.spent = {"quick": 10.0, "slow": 100.0}
     failed: set[str] = set()
 
-    ensemble.afford([strong, weak], failed)
+    ensemble.afford([quick, slow], failed)
     assert not failed, "no budget means no ceiling — the dry run and the witness are not timed"
 
     _timed(ensemble, 1.0, KERNEL_SECONDS)
-    ensemble.afford([strong, weak], failed)
+    ensemble.afford([quick, slow], failed)
     assert not failed, "a run projected well inside nine hours keeps all of them"
 
     _timed(ensemble, 3600, 1.0)
-    ensemble.afford([strong, weak], failed)
-    assert failed == {"weak"}, "the weakest goes first"
+    ensemble.afford([quick, slow], failed)
+    assert failed == {"slow"}, "the better member goes first when it costs ten times as much per second"
 
-    ensemble.afford([strong, weak], failed)
-    assert failed == {"weak"}, "and the last survivor is kept even while overrunning — a run needs a vote"
+    ensemble.afford([quick, slow], failed)
+    assert failed == {"slow"}, "and the last survivor is kept even while overrunning — a run needs a vote"
+
+
+def test_worth(tmp_path: Path):
+    """A member is worth its holdout ABOVE CHANCE per second spent, and an untimed one is not free."""
+    ensemble = _ensemble(tmp_path)
+    member = replace(ensemble.package.members[0], identifier="timed", holdout=0.9)
+    ensemble.spent = {"timed": 20.0}
+
+    assert ensemble.worth(member) == pytest.approx(0.4 / 20.0), "chance is subtracted, not the whole holdout"
+
+    unreached = replace(member, identifier="unreached", holdout=0.9)
+    assert ensemble.worth(unreached) == pytest.approx(0.4 / 20.0), "an unreached member costs the pool's mean"
+
+    ensemble.spent = {}
+    assert ensemble.worth(member) == float("inf"), "before any member is timed there is no cost to divide by"
+
+
+def test_mean_cost(tmp_path: Path):
+    """The stand-in cost for a member the loop has not reached is what the reached ones have cost."""
+    ensemble = _ensemble(tmp_path)
+
+    assert ensemble.mean_cost() == 0.0, "nothing timed yet"
+
+    ensemble.spent = {"a": 10.0, "b": 30.0, "c": 0.0}
+    assert ensemble.mean_cost() == pytest.approx(20.0), "a zero is untimed, not a free member"
 
 
 def test_decoded_scheme_refuses_mixed_tie_rules(tmp_path: Path):

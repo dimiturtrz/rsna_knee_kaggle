@@ -14,6 +14,7 @@ disjoint windows, probability pooling, 0.025 max deviation against ours).
 """
 
 import logging
+import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
@@ -75,6 +76,15 @@ with, rather than a limit discovered by a failed submission.
 """
 
 
+CHANCE = 0.5
+"""ROC AUC of a member that knows nothing — what a member's holdout has to be counted above.
+
+The competition score is a mean of AUCs, and an AUC of 0.5 is the value a random ordering earns, so
+`holdout - CHANCE` is what a member contributes over not being in the entry at all. Using the holdout
+itself instead would call a 0.50 member half as useful as a 1.00 one, when it is useless.
+"""
+
+
 @dataclass(frozen=True)
 class Read:
     """What ONE decode of the corpus has to produce: how deep, under which scheme, at which sizes.
@@ -124,6 +134,10 @@ class Ensemble:
         # None means the identity view alone, which is what every entry so far has run. Spatial views
         # are the one test-time axis a whole-stack member has not already spent (knee-eeo).
         self.views = views
+        # Seconds each member has actually cost, which is what a give-up order under a deadline has to
+        # divide by. A member's cost is not readable from its config: depth, resolution and encoder
+        # width all multiply, and the run only learns the product by paying it.
+        self.spent: dict[str, float] = {}
 
     def reads(self) -> list[list[Member]]:
         """Members that can share ONE read of the corpus, whatever resolutions they then want.
@@ -383,8 +397,10 @@ class Ensemble:
                 if member.identifier in failed:
                     continue
                 images, mask = sized[member.image_size]
+                started = time.time()
                 try:
                     per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
+                    self.spent[member.identifier] = self.spent.get(member.identifier, 0.0) + time.time() - started
                 # ONE MEMBER MUST NOT COST THE ENTRY. Three submissions died because any single failure
                 # anywhere took the whole run down, and a run that fails writes no submission at all. An
                 # ensemble is the one structure that does not need every part: dropping a member costs a
@@ -409,12 +425,21 @@ class Ensemble:
         path that is already tested — its partial predictions discarded, the entry written from the
         rest.
 
-        BY HOLDOUT, LOWEST FIRST, so what is given up is the member the ensemble learns least from.
-        That is not the same as the member worth least to a RANK average, where a weak member that
-        fails differently can be worth more than a strong one that agrees — this project's own ledger
-        says diversity beats quality. A diversity order would need the members' predictions on shared
-        studies, which is exactly the thing the run has no time left to compute. Holdout is the
-        defensible order available at the moment the decision has to be made.
+        BY SCORE PER SECOND, LOWEST FIRST — the ratio, not the score. What is being bought is TIME, and
+        the members do not cost the same: a whole-stack 336 px member reads four times the depth of a
+        224 px one, so it can cost several times as much per study. Ordering on holdout alone gives up
+        the cheap weak members first, which is the order that saves the least wall clock per member lost
+        — a run can shed three of them and still hit the ceiling, having thrown away three votes for
+        nothing. Value is holdout above CHANCE because that is what a member contributes over having no
+        member at all, and this pool's holdouts sit in a narrow band, so between two near-equal members
+        the ratio gives up whichever is slower. Cost is MEASURED here, not predicted from the config:
+        the thing that killed the runs is exactly the gap between what a member should cost and what it
+        does.
+
+        That is still not the member worth least to a RANK average, where a weak member that fails
+        differently can be worth more than a strong one that agrees — this project's own ledger says
+        diversity beats quality. A diversity order would need the members' predictions on shared
+        studies, which is exactly the thing the run has no time left to compute.
 
         ONE PER CHUNK, not a recomputed set: the projection improves as the run goes, so giving up one
         member and re-measuring converges on the smallest set that finishes, instead of over-cutting
@@ -425,16 +450,34 @@ class Ensemble:
         surviving = [member for member in members if member.identifier not in failed]
         if len(surviving) <= 1:
             return
-        weakest = min(surviving, key=lambda member: member.holdout)
+        weakest = min(surviving, key=self.worth)
         failed.add(weakest.identifier)
         logger.warning(
-            "projecting %.1fh against a %.1fh ceiling — giving up %s (holdout %.4f), %d members left",
+            "projecting %.1fh against a %.1fh ceiling — giving up %s (holdout %.4f, %.1fs spent, "
+            "worth %.2e per second), %d members left",
             self.budget.projected() / SECONDS_PER_HOUR,
             self.budget.seconds / SECONDS_PER_HOUR,
             weakest.identifier,
             weakest.holdout,
+            self.spent[weakest.identifier],
+            self.worth(weakest),
             len(surviving) - 1,
         )
+
+    def worth(self, member: Member) -> float:
+        """Holdout above chance per second already spent on this member — what a second of it buys.
+
+        Unmeasured members share the pool's mean cost rather than counting as free: a member the loop
+        has not reached yet would otherwise look infinitely cheap and never be given up, which inverts
+        the order on exactly the first chunk where the decision matters most.
+        """
+        spent = self.spent.get(member.identifier) or self.mean_cost()
+        return (member.holdout - CHANCE) / spent if spent > 0 else float("inf")
+
+    def mean_cost(self) -> float:
+        """Seconds a member has cost on average so far, or zero before any member has been timed."""
+        timed = [seconds for seconds in self.spent.values() if seconds > 0]
+        return sum(timed) / len(timed) if timed else 0.0
 
     @staticmethod
     def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
