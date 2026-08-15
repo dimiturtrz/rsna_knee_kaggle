@@ -126,14 +126,20 @@ class HoldoutRecord:
         `source` travels with the array because a back-filled run's numbers are a re-derivation and a
         trained run's are the array itself, and nothing downstream can tell them apart by looking.
         """
+        # RENAMED INTO PLACE, never written in place: this file is written at the end of an epoch and
+        # re-written by a back-fill, and a kill during either used to leave a truncated archive where a
+        # complete record had been — which `read` cannot answer None to, so one interrupted write took
+        # every later comparison of that run down with it. The rename is the commit.
+        pending = self.path.with_suffix(".pending.npz")
         np.savez(
-            self.path,
+            pending,
             studies=np.array(studies),
             predictions=np.asarray(predictions, dtype=np.float32),
             truth=np.asarray(truth, dtype=np.float32),
             epoch=np.int64(epoch),
             source=np.array(source),
         )
+        pending.replace(self.path)
 
     def read(self) -> HoldoutReading | None:
         """What this run predicted, or None for a run that finished before this was written."""

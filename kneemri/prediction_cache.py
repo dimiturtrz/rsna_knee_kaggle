@@ -69,19 +69,37 @@ class PredictionCache:
         """The stored probabilities for this exact reading, or None if it was never computed.
 
         Verifies the sidecar matches rather than trusting the filename: a digest collision, or a file
-        copied between machines, would otherwise hand back another member's answers.
+        copied between machines, would otherwise hand back another member's answers. A missing sidecar
+        is a MISS rather than an error, because the pass that would have written it may have been killed
+        — and this store's whole purpose is to survive a walk that gets interrupted.
         """
         stored = self._path(key)
-        if self.refresh or not stored.exists() or stored.with_suffix(".json").read_text(encoding="utf-8") != key:
+        sidecar = stored.with_suffix(".json")
+        if self.refresh or not stored.exists() or not sidecar.exists():
+            return None
+        if sidecar.read_text(encoding="utf-8") != key:
             return None
         return np.load(stored)
 
     def write(self, key: str, values: Float[np.ndarray, "studies targets"]) -> None:
-        """Store one reading's probabilities together with the parts that identify it."""
+        """Store one reading's probabilities together with the parts that identify it.
+
+        THE ARRAY LANDS LAST, by rename. Written in place it was the two-step commit that a kill lands
+        in the middle of: a killed walk left a complete `.npy` with no sidecar beside it, and every
+        later read of that key then died on the sidecar instead of recomputing — a cache that turns an
+        interruption into a permanent failure. A member costs hours to re-derive on a CPU, so the walk
+        being killable is a property this store has to keep. Now the array's presence IS the commit.
+        """
         self.directory.mkdir(parents=True, exist_ok=True)
         stored = self._path(key)
-        np.save(stored, values)
+        pending = stored.with_suffix(".pending")
+        # Through a handle, because `np.save` appends `.npy` to any path that does not already end in
+        # it — a pending file named by suffix alone would land as `<digest>.pending.npy` and never be
+        # renamed, leaving the walk with a directory of debris and no cache at all.
+        with pending.open("wb") as handle:
+            np.save(handle, values)
         stored.with_suffix(".json").write_text(key, encoding="utf-8")
+        pending.replace(stored)
 
     def _path(self, key: str) -> Path:
         return self.directory / f"{hashlib.sha256(key.encode()).hexdigest()[:DIGEST]}.npy"

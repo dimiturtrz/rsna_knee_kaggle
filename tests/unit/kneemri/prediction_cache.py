@@ -95,3 +95,23 @@ def test_read(tmp_path: Path):
         sidecar.write_text('{"checkpoint": "somebody else.pt"}', encoding="utf-8")
 
     assert cache.read(key) is None, "a sidecar that disagrees must not answer"
+
+
+def test_read_treats_a_killed_write_as_a_miss(tmp_path: Path):
+    """A walk gets killed mid-member, and the store has to survive it as a MISS rather than an error.
+
+    The back-fill over 69 checkpoints is hours of CPU and has already been killed once to re-order it.
+    An array left without its sidecar used to make every later read of that key die on the sidecar —
+    an interruption turned into a permanent failure for the one member it hit.
+    """
+    cache = _cache(tmp_path)
+    key = cache.key(_checkpoint(tmp_path), Window(starts=[0], width=GROUP, size=SIZE), torch.float16)
+    cache.write(key, np.array([[0.3, 0.7]]))
+    for sidecar in (tmp_path / "cached").glob("*.json"):
+        sidecar.unlink()
+
+    assert cache.read(key) is None, "a half-written entry recomputes; it does not raise"
+
+    cache.write(key, np.array([[0.3, 0.7]]))
+    assert cache.read(key) is not None, "and the recomputation lands"
+    assert not list((tmp_path / "cached").glob("*.pending")), "nothing is left half-committed"

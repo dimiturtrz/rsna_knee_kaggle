@@ -63,6 +63,25 @@ def test_write(tmp_path: Path):
     assert stored.source == DERIVED, "a back-fill is a re-derivation, and only the file can say so"
 
 
+def test_write_commits_by_rename_so_a_kill_cannot_truncate_a_record(tmp_path: Path):
+    """The file is re-written by a back-fill over a run that already has one, and a kill lands mid-write.
+
+    `read` answers None only for a file that is ABSENT; a truncated archive raises instead, so an
+    interrupted write used to take every later comparison of that run down with it. Committing by
+    rename means the path either holds the old record or the new one.
+    """
+    record = HoldoutRecord(tmp_path / "member.pt")
+    truth = np.zeros((1, LABELS), dtype=np.float32)
+    record.write(["a"], np.zeros((1, LABELS)), truth, epoch=1)
+    record.write(["a"], np.ones((1, LABELS)), truth, epoch=2)
+
+    stored = record.read()
+
+    assert stored is not None
+    assert stored.epoch == 2, "the second write replaced the first whole"
+    assert not list(tmp_path.glob("*.pending.npz")), "nothing is left half-committed beside the checkpoint"
+
+
 def test_named():
     """Positions belong to one corpus build; the file has to survive the next one, so it stores names."""
     assert HoldoutRecord.named(["a", "b", "c", "d"], np.array([3, 1], dtype=np.int64)) == ["d", "b"]
