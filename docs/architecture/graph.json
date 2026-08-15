@@ -465,12 +465,6 @@
     {
       "kind": "import",
       "source": "kneemri.holdout_predictions",
-      "target": "kneemri.slot_head",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.holdout_predictions",
       "target": "kneemri.test_time",
       "weight": 1
     },
@@ -700,12 +694,6 @@
       "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.mounts",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.members",
-      "target": "kneemri.slot_head",
       "weight": 1
     },
     {
@@ -2731,21 +2719,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
-      "target": "kneemri.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
-      "target": "kneemri.model.StudyModel",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
-      "target": "kneemri.model.StudyModel.load_trained",
+      "target": "kneemri.model.StudyModel.from_config",
       "weight": 1
     },
     {
@@ -3355,9 +3331,39 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.members.Member.layer",
+      "target": "kneemri.model.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.lora_rank",
+      "target": "kneemri.model.StudyDesign.lora_rank_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.pool",
+      "target": "kneemri.model.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.members.Member.routing",
       "target": "kneemri.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.slice_pooling",
+      "target": "kneemri.model.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.members.Member.slot_pooling",
+      "target": "kneemri.model.StudyDesign.from_config",
       "weight": 1
     },
     {
@@ -3433,33 +3439,27 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.members.MemberPackage.load",
+      "target": "kneemri.model.StudyModel.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.model.StudyDesign",
       "target": "kneemri.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.members.MemberPackage.load",
-      "target": "kneemri.model.StudyModel",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.members.MemberPackage.load",
-      "target": "kneemri.model.StudyModel.load_trained",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.members.MemberPackage.load",
-      "target": "kneemri.model.StudyModel.low_rank",
       "weight": 1
     },
     {
       "kind": "references",
       "source": "kneemri.model.StudyModel",
       "target": "kneemri.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.model.StudyModel",
+      "target": "kneemri.model.StudyModel",
       "weight": 1
     },
     {
@@ -3490,6 +3490,18 @@
       "kind": "calls",
       "source": "kneemri.model.StudyModel.forward",
       "target": "kneemri.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.from_config",
+      "target": "kneemri.model.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.model.StudyModel.from_config",
+      "target": "kneemri.model.StudyDesign.lora_rank_of",
       "weight": 1
     },
     {
@@ -8840,6 +8852,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.model.StudyDesign.from_config",
+      "label": "from_config",
+      "level": "method",
+      "parent": "kneemri.model.StudyDesign",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyDesign.lora_rank_of",
+      "label": "lora_rank_of",
+      "level": "method",
+      "parent": "kneemri.model.StudyDesign",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.model.StudyModel.__init__",
       "label": "__init__",
       "level": "method",
@@ -8890,6 +8918,14 @@
       "descendants": 0,
       "id": "kneemri.model.StudyModel.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.model.StudyModel.from_config",
+      "label": "from_config",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
       "role": null
