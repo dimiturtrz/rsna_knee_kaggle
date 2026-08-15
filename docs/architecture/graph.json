@@ -69,12 +69,6 @@
     {
       "kind": "import",
       "source": "kneemri.attribution",
-      "target": "kneemri.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.attribution",
       "target": "kneemri.targets",
       "weight": 1
     },
@@ -1648,18 +1642,6 @@
       "kind": "calls",
       "source": "kneemri.attribution.main",
       "target": "kneemri.members.Member.from_checkpoint",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.attribution.main",
-      "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.attribution.main",
-      "target": "kneemri.study_cache.StudyCache.load",
       "weight": 1
     },
     {
