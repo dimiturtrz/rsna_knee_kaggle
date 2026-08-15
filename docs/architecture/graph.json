@@ -81,25 +81,13 @@
     {
       "kind": "import",
       "source": "kneemri.build_cache",
-      "target": "kneemri.crop_centre",
+      "target": "kneemri.cache_flags",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.build_cache",
       "target": "kneemri.folds",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.build_cache",
-      "target": "kneemri.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.build_cache",
-      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -123,6 +111,12 @@
     {
       "kind": "import",
       "source": "kneemri.build_embeddings",
+      "target": "kneemri.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.build_embeddings",
       "target": "kneemri.embedding_cache",
       "weight": 1
     },
@@ -134,13 +128,25 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.build_embeddings",
+      "source": "kneemri.cache_flags",
+      "target": "kneemri.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.cache_flags",
+      "target": "kneemri.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.cache_flags",
       "target": "kneemri.slots",
       "weight": 1
     },
     {
       "kind": "import",
-      "source": "kneemri.build_embeddings",
+      "source": "kneemri.cache_flags",
       "target": "kneemri.study_cache",
       "weight": 1
     },
@@ -273,12 +279,6 @@
     {
       "kind": "import",
       "source": "kneemri.embedding_cache",
-      "target": "kneemri.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embedding_cache",
       "target": "kneemri.study_cache",
       "weight": 1
     },
@@ -381,6 +381,12 @@
     {
       "kind": "import",
       "source": "kneemri.head_trial",
+      "target": "kneemri.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.head_trial",
       "target": "kneemri.embedding_cache",
       "weight": 1
     },
@@ -412,12 +418,6 @@
       "kind": "import",
       "source": "kneemri.head_trial",
       "target": "kneemri.slot_head",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.head_trial",
-      "target": "kneemri.slots",
       "weight": 1
     },
     {
@@ -909,6 +909,12 @@
     {
       "kind": "import",
       "source": "kneemri.ruler_check",
+      "target": "kneemri.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.ruler_check",
       "target": "kneemri.folds",
       "weight": 1
     },
@@ -934,12 +940,6 @@
       "kind": "import",
       "source": "kneemri.ruler_check",
       "target": "kneemri.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.ruler_check",
-      "target": "kneemri.study_cache",
       "weight": 1
     },
     {
@@ -1228,6 +1228,12 @@
       "kind": "import",
       "source": "kneemri.train",
       "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.cache_flags",
       "weight": 1
     },
     {
@@ -1657,9 +1663,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.build_cache.main",
-      "target": "kneemri.crop_centre.Crop",
+      "target": "kneemri.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_cache.main",
+      "target": "kneemri.cache_flags.CacheFlags.cache",
       "weight": 1
     },
     {
@@ -1683,49 +1695,25 @@
     {
       "kind": "calls",
       "source": "kneemri.build_cache.main",
-      "target": "kneemri.slot_reader.Band.of",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.build_cache.main",
-      "target": "kneemri.slot_reader.Reading",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.build_cache.main",
-      "target": "kneemri.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.build_cache.main",
-      "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.build_cache.main",
-      "target": "kneemri.study_cache.StudyCache.build",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.build_cache.main",
       "target": "kneemri.study_cache.StudyCache.planes_of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.build_cache.main",
-      "target": "kneemri.study_cache.StudyCache.shape",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.build_embeddings.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.build_embeddings.main",
+      "target": "kneemri.cache_flags.CacheFlags.cache",
       "weight": 1
     },
     {
@@ -1759,21 +1747,39 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.cache_flags.CacheFlags",
+      "target": "kneemri.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
       "kind": "construct",
-      "source": "kneemri.build_embeddings.main",
+      "source": "kneemri.cache_flags.CacheFlags.cache",
+      "target": "kneemri.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.cache_flags.CacheFlags.cache",
+      "target": "kneemri.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.cache_flags.CacheFlags.cache",
+      "target": "kneemri.slot_reader.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.cache_flags.CacheFlags.cache",
       "target": "kneemri.slots.Routing",
       "weight": 1
     },
     {
       "kind": "construct",
-      "source": "kneemri.build_embeddings.main",
+      "source": "kneemri.cache_flags.CacheFlags.cache",
       "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.build_embeddings.main",
-      "target": "kneemri.study_cache.StudyCache.load",
       "weight": 1
     },
     {
@@ -2608,6 +2614,18 @@
       "kind": "calls",
       "source": "kneemri.head_trial.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.head_trial.main",
+      "target": "kneemri.cache_flags.CacheFlags.cache",
       "weight": 1
     },
     {
@@ -4165,6 +4183,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.ruler_check.main",
+      "target": "kneemri.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.ruler_check.main",
+      "target": "kneemri.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.ruler_check.main",
       "target": "kneemri.folds.ReportFolds",
@@ -4216,18 +4246,6 @@
       "kind": "calls",
       "source": "kneemri.ruler_check.main",
       "target": "kneemri.ruler_check.RulerCheck.under",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.ruler_check.main",
-      "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.ruler_check.main",
-      "target": "kneemri.study_cache.StudyCache.load",
       "weight": 1
     },
     {
@@ -5569,6 +5587,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.train.TrainingOptions.parse",
+      "target": "kneemri.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.train.TrainingOptions.parse",
       "target": "kneemri.trainer.Adaptation",
@@ -5917,7 +5941,7 @@
       "role": null
     },
     {
-      "descendants": 70,
+      "descendants": 71,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -5976,6 +6000,14 @@
       "descendants": 0,
       "id": "kneemri.build_embeddings",
       "label": "build_embeddings",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.cache_flags",
+      "label": "cache_flags",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -6555,6 +6587,14 @@
       "level": "class",
       "parent": "kneemri.backbone",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.cache_flags.CacheFlags",
+      "label": "CacheFlags",
+      "level": "class",
+      "parent": "kneemri.cache_flags",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -7706,6 +7746,22 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.build_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.cache_flags.CacheFlags.add_to",
+      "label": "add_to",
+      "level": "method",
+      "parent": "kneemri.cache_flags.CacheFlags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.cache_flags.CacheFlags.cache",
+      "label": "cache",
+      "level": "method",
+      "parent": "kneemri.cache_flags.CacheFlags",
       "role": null
     },
     {
