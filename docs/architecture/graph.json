@@ -801,6 +801,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.ensemble",
+      "target": "kneemri.inference.budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.ensemble",
       "target": "kneemri.inference.members",
       "weight": 1
     },
@@ -1059,6 +1065,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
+      "target": "kneemri.inference.budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.kernel_run",
       "target": "kneemri.inference.ensemble",
       "weight": 1
     },
@@ -1108,6 +1120,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.submission",
       "target": "kneemri.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.submission",
+      "target": "kneemri.inference.budget",
       "weight": 1
     },
     {
@@ -2564,8 +2582,20 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.attribution.Attribution.report",
+      "target": "kneemri.evaluation.attribution.Attribution._slice_cost",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.attribution.Attribution.ring_importance",
       "target": "kneemri.evaluation.attribution.Attribution._mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution.Attribution.slice_importance",
+      "target": "kneemri.evaluation.attribution.Attribution._labels",
       "weight": 1
     },
     {
@@ -2632,6 +2662,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.attribution.main",
       "target": "kneemri.evaluation.attribution.Attribution.ring_importance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution.main",
+      "target": "kneemri.evaluation.attribution.Attribution.slice_importance",
       "weight": 1
     },
     {
@@ -4045,9 +4081,27 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.budget.Budget.overrunning",
+      "target": "kneemri.inference.budget.Budget.measured",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.budget.Budget.overrunning",
+      "target": "kneemri.inference.budget.Budget.projected",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.ensemble.Ensemble",
       "target": "kneemri.corpus.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Ensemble",
+      "target": "kneemri.inference.budget.Budget",
       "weight": 1
     },
     {
@@ -4087,9 +4141,33 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.afford",
+      "target": "kneemri.inference.budget.Budget.overrunning",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.afford",
+      "target": "kneemri.inference.budget.Budget.projected",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
       "target": "kneemri.corpus.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.inference.budget.Budget.begin",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.inference.budget.Budget.group",
       "weight": 1
     },
     {
@@ -4150,6 +4228,12 @@
       "kind": "construct",
       "source": "kneemri.inference.ensemble.Ensemble.predict_member",
       "target": "kneemri.inference.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.predict_members",
+      "target": "kneemri.inference.ensemble.Ensemble.afford",
       "weight": 1
     },
     {
@@ -4918,6 +5002,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_run.KernelRun.package",
       "target": "kneemri.inference.members.MemberPackage.find",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.inference.budget.Budget",
       "weight": 1
     },
     {
@@ -6597,7 +6687,7 @@
       "role": null
     },
     {
-      "descendants": 84,
+      "descendants": 85,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6925,11 +7015,19 @@
       "role": null
     },
     {
-      "descendants": 8,
+      "descendants": 9,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget",
+      "label": "budget",
+      "level": "module",
+      "parent": "kneemri.inference",
       "role": null
     },
     {
@@ -7762,6 +7860,14 @@
       "label": "LedgerCheck",
       "level": "class",
       "parent": "kneemri.experiments.ledger_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget",
+      "label": "Budget",
+      "level": "class",
+      "parent": "kneemri.inference.budget",
       "role": "primary"
     },
     {
@@ -9446,6 +9552,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.attribution.Attribution._slice_cost",
+      "label": "_slice_cost",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution.averaged",
       "label": "averaged",
       "level": "method",
@@ -9480,6 +9594,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution.ring_importance",
       "label": "ring_importance",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution.Attribution.slice_importance",
+      "label": "slice_importance",
       "level": "method",
       "parent": "kneemri.evaluation.attribution.Attribution",
       "role": null
@@ -10374,8 +10496,72 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.begin",
+      "label": "begin",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.chunk",
+      "label": "chunk",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.group",
+      "label": "group",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.measured",
+      "label": "measured",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.overrunning",
+      "label": "overrunning",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.projected",
+      "label": "projected",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.ensemble.Ensemble.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.ensemble.Ensemble.afford",
+      "label": "afford",
       "level": "method",
       "parent": "kneemri.inference.ensemble.Ensemble",
       "role": null
