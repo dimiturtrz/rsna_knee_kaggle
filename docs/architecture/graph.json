@@ -3062,6 +3062,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.ledger_check.LedgerCheck.finished",
+      "target": "kneemri.ledger_check.LedgerCheck.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.ledger_check.main",
       "target": "core.paths.DataRoot.from_config",
       "weight": 1
@@ -3075,7 +3081,7 @@
     {
       "kind": "calls",
       "source": "kneemri.ledger_check.main",
-      "target": "kneemri.ledger_check.LedgerCheck.best",
+      "target": "kneemri.ledger_check.LedgerCheck.finished",
       "weight": 1
     },
     {
@@ -8450,6 +8456,14 @@
       "descendants": 0,
       "id": "kneemri.ledger_check.LedgerCheck.best",
       "label": "best",
+      "level": "method",
+      "parent": "kneemri.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.ledger_check.LedgerCheck.finished",
+      "label": "finished",
       "level": "method",
       "parent": "kneemri.ledger_check.LedgerCheck",
       "role": null
