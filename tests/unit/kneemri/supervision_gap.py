@@ -32,6 +32,19 @@ def test_annotated(tmp_path: Path):
     assert set(np.unique(truth)) <= {0.0, 1.0}
 
 
+def test_reported(tmp_path: Path):
+    """The report table in the CALLER's order, with a missing study defaulted rather than dropped."""
+    path = tmp_path / "labels.csv"
+    rows = [{"StudyInstanceUID": f"s{index}"} | dict.fromkeys(TARGETS, 0.94 - 0.1 * index) for index in (0, 1)]
+    pd.DataFrame(rows).to_csv(path, index=False)
+
+    values = SupervisionGap().reported(path, ["s1", "s0", "absent"])
+
+    assert values.shape == (3, len(TARGETS))
+    assert values[0, 0] < values[1, 0], "reindexed to the order asked for, not the order on disk"
+    assert values[2, 0] == 0.5, "an unlabelled study sits at the default rather than at zero"
+
+
 def test_against():
     """One AUC per finding — a perfect predictor scores 1.0 and its negation scores 0.0."""
     truth = np.zeros((4, len(TARGETS)), dtype=np.float32)

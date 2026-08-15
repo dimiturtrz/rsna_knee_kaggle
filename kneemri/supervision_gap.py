@@ -68,6 +68,21 @@ class SupervisionGap:
         complete = table[columns].dropna(how="any")
         return list(complete.index), complete.to_numpy(dtype=np.float32)
 
+    def reported(self, labels: Path, identifiers: list[str]) -> Float[np.ndarray, "studies targets"]:
+        """The report-derived table for exactly these studies, in their order, READ RAW.
+
+        Raw is the load-bearing word. `Targets.load` overwrites the derived label with the radiologist
+        annotation wherever a study has one, which is right for training and would make any measurement
+        against those annotations compare them with themselves — a perfect score, and a meaningless one.
+
+        A study the table does not carry, or a finding the reader could not read, lands at PRESENT: the
+        same 0.5 default the rest of the project uses, which binarises to absent.
+        """
+        table = pd.read_csv(labels).set_index("StudyInstanceUID").reindex(identifiers)
+        columns = [target for target in TARGETS if target in table.columns]
+        values = table[columns].to_numpy(dtype=np.float32)
+        return np.asarray(np.nan_to_num(values, nan=PRESENT), dtype=np.float32)
+
     def against(
         self, values: Float[np.ndarray, "studies targets"], truth: Float[np.ndarray, "studies targets"]
     ) -> dict[str, float]:
@@ -171,13 +186,7 @@ def main() -> None:
     rows = np.array([position[identifiers[index]] for index in keep])
     logger.info("%d annotated studies, %d of them with a held-out prediction", len(identifiers), len(keep))
 
-    # THE REPORT TABLE READ RAW. `Targets.load` overwrites the derived label with the annotation
-    # wherever a study has one, which is right for training and would make this measurement compare the
-    # annotations against themselves — a perfect score, and a meaningless one.
-    table = pd.read_csv(arguments.labels).set_index("StudyInstanceUID").reindex([identifiers[i] for i in keep])
-    columns = [target for target in TARGETS if target in table.columns]
-    values = np.asarray(np.nan_to_num(table[columns].to_numpy(dtype=np.float32), nan=PRESENT), dtype=np.float32)
-
+    values = gap.reported(arguments.labels, [identifiers[index] for index in keep])
     annotations = truth[keep]
     for line in gap.report(gap.against(values, annotations), gap.against(combined[rows], annotations)):
         logger.info(line)
