@@ -7,6 +7,52 @@ slug. The slug is the claim, so a grafted score can never quietly become ours.
 Budget: **5 submissions per day**. Kernel *pushes* are unlimited — probe there, submit only when the
 question needs the leaderboard to answer it.
 
+## The method tuple
+
+A slug alone cannot say what was run: `kneemri-trained` has meant five windowed members with overlap
+TTA and three whole-stack members without it. Every entry is therefore a tuple over four closed axes,
+and the tuple — not the slug — is what the coverage grid below is indexed by.
+
+| axis | values | what it decides |
+|---|---|---|
+| **source** | `ours` · `theirs` · `fusion` | whose weights produced the prediction; `fusion` means both, decoded once |
+| **members** | `1` · `2` · `3` · `5` · `20` · `23` | how many members are rank-averaged |
+| **read** | `windowed` · `whole` | one group of slices per pass, or the whole stack |
+| **passes** | `1/study` · `n/study` · `overlap` | test-time cost, and whether windows overlap |
+
+`ours×5×windowed×overlap` is a complete method. Any two entries differing in one coordinate are the
+only pair that isolates that coordinate, which is what makes a spend decision arguable rather than a
+preference.
+
+## Coverage grid
+
+Five slots expire unspent at 00:00 UTC daily; they cannot be banked. This grid exists so a slot is
+never spent on a cell that already has a number.
+
+| tuple | status | LB |
+|---|---|---|
+| `ours×1×whole×1/study` | scored | 0.868 |
+| `ours×2×whole×2/study` | scored | 0.882 |
+| `ours×3×whole×3/study` | scored | 0.882 |
+| `ours×5×windowed×overlap` | scored | **0.888** |
+| `theirs×20×windowed×overlap` | scored | **0.888** |
+| `fusion×23×windowed×overlap` | scored | **0.894** — best |
+| `fusion×23×whole×n/study` | **null** — T4 OOM, sample table scored | 0.500 |
+| `ours×2×whole×2/study` (res392 + calibrated) | **null** — stale kit, no `Member.precision` | 0.500 |
+| `ours×5×whole×5/study` | submitted 2026-08-13, result not recorded here | — |
+| `ours×2×whole×2/study` re-run on kit `5ba86ee` | submitted 2026-08-13, result not recorded here | — |
+| `fusion×25×windowed×overlap` (our 5 + their 20) | **untried** | — |
+| `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
+
+A `null` is not a floor: neither of those two cells has ever been measured, and re-running one is a
+legitimate spend. A cell with a number is not, unless the members underneath it changed.
+
+The two untried cells are the ones the six scored entries argue for. Every scored pair says the same
+thing — the best single model this project has produced (holdout 0.8518) sits 0.020 BELOW five weaker
+ones, a third member of an identical recipe bought nothing, and a different recipe bought +0.006. So
+diversity is the axis with a number behind it, and both untried cells add diversity rather than
+quality.
+
 ## Ledger
 
 | date | kernel | v | method | local | LB | note |
