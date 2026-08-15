@@ -26,6 +26,7 @@ from torch import Tensor
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Band
 from kneemri.corpus.slots import SCHEMES, SlotScheme
+from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
 from kneemri.models.backbone import ENCODERS
@@ -112,10 +113,14 @@ class Ensemble:
         models: dict[str, StudyModel],
         device: torch.device,
         views: SpatialViews | None = None,
+        budget: Budget | None = None,
     ) -> None:
         self.package = package
         self.models = models
         self.device = device
+        # None means no wall-clock ceiling, which is right for a dry run and a witness — only a Kaggle
+        # batch session is killed for running long, and only the kernel knows it is inside one.
+        self.budget = budget
         # None means the identity view alone, which is what every entry so far has run. Spatial views
         # are the one test-time axis a whole-stack member has not already spent (knee-eeo).
         self.views = views
@@ -336,7 +341,12 @@ class Ensemble:
         the group results would weight a group of one as heavily as a group of five.
         """
         per_member: list[NDArray[np.float64]] = []
-        for members in self.reads():
+        groups = self.reads()
+        if self.budget:
+            self.budget.begin(len(groups))
+        for index, members in enumerate(groups):
+            if self.budget:
+                self.budget.group(index)
             read = Read(
                 slices=self.slices(members),
                 scheme=self.decoded_scheme(members),
@@ -382,11 +392,49 @@ class Ensemble:
                 except Exception:
                     logger.exception("member %s failed mid-prediction — dropping it from this entry", member.identifier)
                     failed.add(member.identifier)
+            self.afford(members, failed)
         survived = [member for member in members if member.identifier not in failed and per_member[member.identifier]]
         if not survived:
             message = f"every member of this group failed: {sorted(failed)}"
             raise RuntimeError(message)
         return [np.concatenate(per_member[member.identifier]) for member in survived]
+
+    def afford(self, members: list[Member], failed: set[str]) -> None:
+        """Give up the weakest surviving member when the run is projected past its ceiling.
+
+        DROPPING IS THE ONLY LEVER THAT WORKS MID-RUN. The decode is already shared and already
+        overlapped with the forward; what remains is one forward per member per chunk, so members are
+        the term the run can still change while it is running. Reused rather than reinvented: this is
+        the same `failed` set a member that raises goes into, so a member given up here leaves by the
+        path that is already tested — its partial predictions discarded, the entry written from the
+        rest.
+
+        BY HOLDOUT, LOWEST FIRST, so what is given up is the member the ensemble learns least from.
+        That is not the same as the member worth least to a RANK average, where a weak member that
+        fails differently can be worth more than a strong one that agrees — this project's own ledger
+        says diversity beats quality. A diversity order would need the members' predictions on shared
+        studies, which is exactly the thing the run has no time left to compute. Holdout is the
+        defensible order available at the moment the decision has to be made.
+
+        ONE PER CHUNK, not a recomputed set: the projection improves as the run goes, so giving up one
+        member and re-measuring converges on the smallest set that finishes, instead of over-cutting
+        from a single early estimate made when the pool spawn and the first decode are still in it.
+        """
+        if not self.budget or not self.budget.overrunning():
+            return
+        surviving = [member for member in members if member.identifier not in failed]
+        if len(surviving) <= 1:
+            return
+        weakest = min(surviving, key=lambda member: member.holdout)
+        failed.add(weakest.identifier)
+        logger.warning(
+            "projecting %.1fh against a %.1fh ceiling — giving up %s (holdout %.4f), %d members left",
+            self.budget.projected() / SECONDS_PER_HOUR,
+            self.budget.seconds / SECONDS_PER_HOUR,
+            weakest.identifier,
+            weakest.holdout,
+            len(surviving) - 1,
+        )
 
     @staticmethod
     def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:

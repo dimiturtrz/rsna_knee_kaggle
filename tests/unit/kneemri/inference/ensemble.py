@@ -8,6 +8,7 @@ import pytest
 import torch
 from torch import Tensor
 
+from kneemri.inference.budget import KERNEL_SECONDS, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read
 from kneemri.inference.members import MemberConfig, MemberPackage, Window
 from kneemri.models.backbone import ENCODERS
@@ -479,6 +480,41 @@ def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):
 
     assert len(calls) == 3, "two windows, and the one that overflowed is redone — not kept"
     assert np.isfinite(scored).all(), "and what comes back is a number"
+
+
+def _timed(ensemble: Ensemble, seconds: float, ceiling: float) -> None:
+    """Put the ensemble on a budget that has already burned `seconds` of `ceiling`, one whole group done."""
+    ensemble.budget = Budget(seconds=ceiling, margin=1.0)
+    ensemble.budget.started -= seconds
+    ensemble.budget.begin(1)
+    ensemble.budget.chunk(1, 1)
+
+
+def test_afford(tmp_path: Path):
+    """An overrun costs the lowest-holdout member, one per chunk, never the last one — and only an overrun.
+
+    Twenty-five members that do not finish score nothing while twenty that do score most of what
+    twenty-five would have. The order is holdout because it is the only quality every member carries; a
+    diversity order would need predictions the run has no time left to compute.
+    """
+    ensemble = _ensemble(tmp_path)
+    strong = replace(ensemble.package.members[0], identifier="strong", holdout=0.9)
+    weak = replace(strong, identifier="weak", holdout=0.7)
+    failed: set[str] = set()
+
+    ensemble.afford([strong, weak], failed)
+    assert not failed, "no budget means no ceiling — the dry run and the witness are not timed"
+
+    _timed(ensemble, 1.0, KERNEL_SECONDS)
+    ensemble.afford([strong, weak], failed)
+    assert not failed, "a run projected well inside nine hours keeps all of them"
+
+    _timed(ensemble, 3600, 1.0)
+    ensemble.afford([strong, weak], failed)
+    assert failed == {"weak"}, "the weakest goes first"
+
+    ensemble.afford([strong, weak], failed)
+    assert failed == {"weak"}, "and the last survivor is kept even while overrunning — a run needs a vote"
 
 
 def test_decoded_scheme_refuses_mixed_tie_rules(tmp_path: Path):

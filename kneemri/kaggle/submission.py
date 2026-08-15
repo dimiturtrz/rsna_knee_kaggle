@@ -27,6 +27,7 @@ from torch import Tensor
 
 from kneemri.corpus.slot_reader import SlotReader
 from kneemri.corpus.study import SlotPipeline, Study
+from kneemri.inference.budget import SECONDS_PER_HOUR
 from kneemri.inference.ensemble import Ensemble, Read
 from kneemri.models.model import TARGETS
 
@@ -35,13 +36,6 @@ logger = logging.getLogger(__name__)
 STUDY_CHUNK = 48
 """Studies decoded before a prediction pass. Bounds peak memory: a chunk of 48 at twelve slices and
 336 pixels is about 390 MB, against a Kaggle host with 32 GB and four CPUs."""
-
-KERNEL_HOURS = 9
-"""Kaggle's wall-clock ceiling for a batch GPU session. A rerun that hits it is killed with no
-submission and no cause in the log — the same silent shape as an out-of-memory, which is why the chunk
-line names the projection and the ceiling together."""
-
-SECONDS_PER_HOUR = 3600
 
 BYTES_PER_GB = 1024**3
 
@@ -234,12 +228,28 @@ class Submission:
                 sized = self.batched([future.result() for future in pending], read)
                 pending = following
                 begin = index * STUDY_CHUNK
-                elapsed = time.time() - started
+                # THE PROJECTION IS THE ENSEMBLE'S TO MAKE, not this loop's. It used to be computed here
+                # as elapsed / chunks-done x chunks, which is right for ONE read group and wrong for an
+                # entry that decodes twice — it projected the first decode as if it were the whole run,
+                # and a fused entry serving two routers is exactly the case that runs longest.
+                #
+                # `index` and not `index + 1`: this loop is a generator, so by the time it resumes the
+                # chunks BEFORE this one have been forwarded and this one has only been decoded. Counting
+                # it as finished would credit the run with a forward pass it has not made yet, which
+                # under-projects exactly when the forward is the expensive half.
+                budget = self.ensemble.budget
+                if budget:
+                    budget.chunk(index, len(groups))
+                projection = (
+                    f"projecting {budget.projected() / SECONDS_PER_HOUR:.1f}h "
+                    f"of {budget.seconds / SECONDS_PER_HOUR:.1f}h, "
+                    if budget and budget.measured()
+                    else ""
+                )
                 logger.info(
                     f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
-                    f"at {list(read.sizes)}, elapsed {elapsed:.0f}s, "
-                    f"projecting {elapsed / (index + 1) * len(groups) / SECONDS_PER_HOUR:.1f}h of {KERNEL_HOURS}h, "
-                    f"peak {self.peak_vram():.1f} GB"
+                    f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s, "
+                    f"{projection}peak {self.peak_vram():.1f} GB"
                 )
                 yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
 
