@@ -378,6 +378,24 @@ class TrainingOptions:
             )
         return Objective(normalise_by_count=self.normalise_by_count, per_label=self.per_label_loss)
 
+    def reports(self, identifiers: list[str]) -> ReportSupervision | None:
+        """The report-embedding supervision this run asked for, or None — and never half of it.
+
+        A weight with no vectors used to be a silent no-op: `if self.report_weight and
+        self.report_vectors` skipped the attachment, and the run trained the plain recipe while its
+        ledger row, its config and its name all said report supervision. The arm would have been read
+        as a refutation of the mechanism rather than of the invocation.
+        """
+        if not self.report_weight:
+            return None
+        if self.report_vectors is None:
+            message = (
+                f"--report-weight {self.report_weight} asks for report supervision and no "
+                "--report-vectors was given, so the run would train the plain recipe under that name"
+            )
+            raise ValueError(message)
+        return ReportSupervision.from_file(self.report_vectors, identifiers, self.report_weight)
+
     def fitted_model(self, encoder: Encoder, slots: int, design: StudyDesign) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
 
@@ -425,10 +443,9 @@ class TrainingOptions:
             trainer.whole_stack(self.slices)
         if self.train_size:
             trainer.resample_to(self.train_size)
-        if self.report_weight and self.report_vectors:
-            trainer.report_supervision(
-                ReportSupervision.from_file(self.report_vectors, identifiers, self.report_weight)
-            )
+        reports = self.reports(identifiers)
+        if reports is not None:
+            trainer.report_supervision(reports)
         if self.ema:
             trainer.exponential_average()
         if self.one_cycle:

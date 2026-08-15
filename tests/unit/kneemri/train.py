@@ -89,7 +89,9 @@ def test_fitted_trainer():
     """
     import torch  # noqa: PLC0415 - the rest of this module needs no torch
 
+    from kneemri.ema import LiveWeights, WeightAverage  # noqa: PLC0415
     from kneemri.model import StudyDesign, StudyModel  # noqa: PLC0415
+    from kneemri.report_supervision import NoReportSupervision  # noqa: PLC0415
     from kneemri.trainer import GROUP  # noqa: PLC0415
 
     from .model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
@@ -99,13 +101,39 @@ def test_fitted_trainer():
     assert plain.window == GROUP, "a default run reads one group, not the stack"
     assert plain.read_size is None
     assert plain.schedule is None
+    assert plain.autocast_dtype is torch.bfloat16, "bf16 is the DEFAULT, and a precision is a numerics change"
+    assert type(plain.average) is LiveWeights, "no EMA unless asked: it changes which weights are SAVED"
+    assert type(plain.reports) is NoReportSupervision
 
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
-    asked = TrainingOptions(whole_stack=True, slices=16, train_size=392, one_cycle=True, epochs=2)
+    asked = TrainingOptions(whole_stack=True, slices=16, train_size=392, one_cycle=True, epochs=2, ema=True, bf16=False)
     trainer = asked.fitted_trainer(model, device, [], 120)
     assert trainer.window == 16
     assert trainer.read_size == 392
     assert trainer.schedule is not None, "one-cycle must reach the trainer, or the rate never anneals"
+    assert type(trainer.average) is WeightAverage, "the EMA is what `evaluated()` scores and the checkpoint keeps"
+    assert trainer.autocast_dtype is torch.float16, "--fp16 is the only way back, so it must land"
+    assert trainer.scaler is not None, "fp16 has a scale that can collapse, so the scaler comes with it"
+
+
+def test_reports(tmp_path: Path):
+    """Report supervision is all-or-nothing: a weight with no vectors is refused, not skipped.
+
+    Skipping it trained the PLAIN recipe under the report arm's name, so the arm would have read as a
+    refutation of the mechanism when it refuted only the invocation.
+    """
+    import numpy as np  # noqa: PLC0415 - the rest of this module needs no numpy
+
+    assert TrainingOptions().reports([]) is None, "no weight, no supervision, no file read"
+
+    with pytest.raises(ValueError, match="--report-vectors"):
+        TrainingOptions(report_weight=0.3).reports([])
+
+    vectors = tmp_path / "reports.npz"
+    np.savez(vectors, identifiers=np.array(["s0"]), vectors=np.zeros((1, 4), dtype=np.float32))
+    supervision = TrainingOptions(report_weight=0.3, report_vectors=vectors).reports(["s0"])
+    assert supervision is not None
+    assert supervision.weight == 0.3
 
 
 def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
