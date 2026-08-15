@@ -363,7 +363,7 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ledger_check",
-      "target": "kneemri.evaluation.run_metrics",
+      "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
     {
@@ -434,36 +434,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.member_record",
-      "target": "kneemri.corpus.crop_centre",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.member_record",
-      "target": "kneemri.corpus.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.member_record",
-      "target": "kneemri.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.member_record",
-      "target": "kneemri.models.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.member_record",
-      "target": "kneemri.models.model",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.metrics_recipe",
       "target": "core.paths",
       "weight": 1
@@ -471,13 +441,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.metrics_recipe",
-      "target": "kneemri.evaluation.member_record",
+      "target": "kneemri.runs.member_record",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.metrics_recipe",
-      "target": "kneemri.evaluation.run_metrics",
+      "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
     {
@@ -543,12 +513,6 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ordinal_signal",
-      "target": "kneemri.evaluation.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.ordinal_signal",
       "target": "kneemri.evaluation.scores",
       "weight": 1
     },
@@ -556,6 +520,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.ordinal_signal",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ordinal_signal",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -603,18 +573,6 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
-      "target": "kneemri.evaluation.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.run_comparison",
-      "target": "kneemri.evaluation.run_metrics",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.evaluation.scores",
       "weight": 1
     },
@@ -622,6 +580,18 @@
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.labels.label_power",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
+      "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
     {
@@ -765,24 +735,6 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
-      "target": "kneemri.evaluation.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.holdout_backfill",
-      "target": "kneemri.evaluation.member_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.holdout_backfill",
-      "target": "kneemri.evaluation.run_metrics",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.inference.holdout_predictions",
       "weight": 1
     },
@@ -808,6 +760,24 @@
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
     {
@@ -1250,26 +1220,38 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.fitting",
       "target": "kneemri.corpus.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.fitting",
-      "target": "kneemri.evaluation.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.fitting",
-      "target": "kneemri.evaluation.member_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.fitting",
-      "target": "kneemri.evaluation.run_metrics",
       "weight": 1
     },
     {
@@ -1282,6 +1264,24 @@
       "kind": "import",
       "source": "kneemri.training.fitting",
       "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
+      "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
+      "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
     {
@@ -1395,12 +1395,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
-      "target": "kneemri.evaluation.member_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.train",
       "target": "kneemri.labels.targets",
       "weight": 1
     },
@@ -1420,6 +1414,12 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.models.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
+      "target": "kneemri.runs.member_record",
       "weight": 1
     },
     {
@@ -2797,39 +2797,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "target": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "target": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.holdout_record.HoldoutRecord.read",
-      "target": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.holdout_record.HoldoutRecord.read",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.exists",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.evaluation.ledger_check.LedgerCheck.best",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.ledger_check.LedgerCheck.best",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.best",
       "weight": 1
     },
     {
@@ -3067,54 +3043,6 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.evaluation.member_record.MemberRecord",
-      "target": "kneemri.evaluation.member_record.RunOptions",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.evaluation.member_record.MemberRecord",
-      "target": "kneemri.models.backbone.Encoder",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.evaluation.member_record.MemberRecord",
-      "target": "kneemri.models.model.StudyModel",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.member_record.MemberRecord.payload",
-      "target": "kneemri.models.model.StudyModel.fingerprint",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.member_record.RunOptions",
-      "target": "kneemri.corpus.crop_centre.Crop",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.member_record.RunOptions",
-      "target": "kneemri.corpus.slot_reader.Band",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.member_record.RunOptions",
-      "target": "kneemri.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.member_record.StampedRun",
-      "target": "kneemri.evaluation.member_record.StampedRun",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.evaluation.metrics_recipe.MetricsRecipe.backfill",
       "target": "kneemri.evaluation.metrics_recipe.MetricsRecipe.checkpoint_of",
@@ -3129,25 +3057,25 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.metrics_recipe.MetricsRecipe.backfill",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.metrics_recipe.MetricsRecipe.backfill",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.describe",
+      "target": "kneemri.runs.run_metrics.RunMetrics.describe",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.metrics_recipe.MetricsRecipe.backfill",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.recipe",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.metrics_recipe.MetricsRecipe.recipe_of",
-      "target": "kneemri.evaluation.member_record.StampedRun.of",
+      "target": "kneemri.runs.member_record.StampedRun.of",
       "weight": 1
     },
     {
@@ -3301,15 +3229,15 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
-      "target": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalReading",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
       "weight": 1
     },
     {
@@ -3333,18 +3261,6 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.read",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.ordinal_signal.main",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
       "weight": 1
     },
@@ -3352,6 +3268,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.ordinal_signal.main",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ordinal_signal.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -3459,13 +3387,13 @@
     {
       "kind": "holds",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
       "kind": "holds",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
-      "target": "kneemri.evaluation.scores.LabelScores",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
@@ -3477,13 +3405,13 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.RunComparison.__init__",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.RunComparison.__init__",
-      "target": "kneemri.evaluation.scores.LabelScores",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
@@ -3507,31 +3435,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.deltas",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.best",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.deltas",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.exists",
+      "target": "kneemri.runs.run_metrics.RunMetrics.exists",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.floor",
       "target": "kneemri.evaluation.run_comparison.RunComparison.paired",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -3544,6 +3460,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
       "target": "kneemri.evaluation.scores.LabelScores.paired_interval",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -3579,13 +3507,13 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.report",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.best",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.recipe",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
       "weight": 1
     },
     {
@@ -3598,30 +3526,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.run_comparison.RunComparison.report",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.run_metrics.RunMetrics",
-      "target": "kneemri.evaluation.run_metrics.EpochRow",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_metrics.RunMetrics.best",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.rows",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_metrics.RunMetrics.recipe",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics._entries",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_metrics.RunMetrics.rows",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics._entries",
       "weight": 1
     },
     {
@@ -3967,21 +3871,21 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.inference.holdout_backfill.Backfill.of",
-      "target": "kneemri.evaluation.member_record.StampedRun.of",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.inference.holdout_backfill.Backfill.of",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.inference.holdout_backfill.Backfill.of",
       "target": "kneemri.inference.holdout_backfill.UnbackfillableError",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.Backfill.of",
+      "target": "kneemri.runs.member_record.StampedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.Backfill.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
@@ -4057,24 +3961,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.named",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.write",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
       "target": "kneemri.inference.holdout_backfill.Backfill.ruler",
@@ -4111,21 +3997,27 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.inference.holdout_backfill.main",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.holdout_backfill.main",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -4150,6 +4042,18 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -5659,27 +5563,123 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.training.fitting.Fitting",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
+      "kind": "references",
+      "source": "kneemri.runs.holdout_record.HoldoutReading",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
       "kind": "holds",
-      "source": "kneemri.training.fitting.Fitting",
-      "target": "kneemri.evaluation.member_record.MemberRecord",
+      "source": "kneemri.runs.member_record.MemberRecord",
+      "target": "kneemri.models.backbone.Encoder",
       "weight": 1
     },
     {
       "kind": "holds",
-      "source": "kneemri.training.fitting.Fitting",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "source": "kneemri.runs.member_record.MemberRecord",
+      "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.runs.member_record.MemberRecord",
+      "target": "kneemri.runs.member_record.RunOptions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.member_record.MemberRecord.payload",
+      "target": "kneemri.models.model.StudyModel.fingerprint",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.member_record.RunOptions",
+      "target": "kneemri.corpus.crop_centre.Crop",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.member_record.RunOptions",
+      "target": "kneemri.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.member_record.RunOptions",
+      "target": "kneemri.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.member_record.StampedRun",
+      "target": "kneemri.runs.member_record.StampedRun",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.run_metrics.RunMetrics",
+      "target": "kneemri.runs.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "target": "kneemri.runs.run_metrics.RunMetrics._entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "target": "kneemri.runs.run_metrics.RunMetrics._entries",
       "weight": 1
     },
     {
       "kind": "holds",
       "source": "kneemri.training.fitting.Fitting",
       "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.fitting.Fitting",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.fitting.Fitting",
+      "target": "kneemri.runs.member_record.MemberRecord",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.fitting.Fitting",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
@@ -5715,25 +5715,25 @@
     {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.__init__",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.__init__",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.fitting.Fitting.__init__",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.__init__",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.describe",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.fitting.Fitting.__init__",
-      "target": "kneemri.evaluation.scores.LabelScores",
+      "target": "kneemri.runs.run_metrics.RunMetrics.describe",
       "weight": 1
     },
     {
@@ -5745,25 +5745,25 @@
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.keep",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.named",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.named",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.keep",
-      "target": "kneemri.evaluation.holdout_record.HoldoutRecord.write",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.keep",
-      "target": "kneemri.evaluation.member_record.MemberRecord.payload",
+      "target": "kneemri.runs.member_record.MemberRecord.payload",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.keep",
-      "target": "kneemri.evaluation.member_record.MemberRecord.witness",
+      "target": "kneemri.runs.member_record.MemberRecord.witness",
       "weight": 1
     },
     {
@@ -5793,13 +5793,13 @@
     {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.evaluation.run_metrics.EpochRow",
+      "target": "kneemri.runs.run_metrics.EpochRow",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.evaluation.run_metrics.RunMetrics.record",
+      "target": "kneemri.runs.run_metrics.RunMetrics.record",
       "weight": 1
     },
     {
@@ -6283,18 +6283,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.evaluation.member_record.MemberRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.evaluation.member_record.MemberRecord.payload",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.training.train.main",
       "target": "kneemri.labels.targets.Targets.pair",
@@ -6304,6 +6292,18 @@
       "kind": "construct",
       "source": "kneemri.training.train.main",
       "target": "kneemri.models.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.runs.member_record.MemberRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.runs.member_record.MemberRecord.payload",
       "weight": 1
     },
     {
@@ -6567,7 +6567,7 @@
       "role": null
     },
     {
-      "descendants": 82,
+      "descendants": 83,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6751,7 +6751,7 @@
       "role": null
     },
     {
-      "descendants": 16,
+      "descendants": 13,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -6784,14 +6784,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record",
-      "label": "holdout_record",
-      "level": "module",
-      "parent": "kneemri.evaluation",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.ledger_check",
       "label": "ledger_check",
       "level": "module",
@@ -6802,14 +6794,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve",
       "label": "member_curve",
-      "level": "module",
-      "parent": "kneemri.evaluation",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record",
-      "label": "member_record",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -6850,14 +6834,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison",
       "label": "run_comparison",
-      "level": "module",
-      "parent": "kneemri.evaluation",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics",
-      "label": "run_metrics",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -7156,6 +7132,38 @@
       "label": "slot_head",
       "level": "module",
       "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 3,
+      "id": "kneemri.runs",
+      "label": "runs",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record",
+      "label": "holdout_record",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record",
+      "label": "member_record",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics",
+      "label": "run_metrics",
+      "level": "module",
+      "parent": "kneemri.runs",
       "role": null
     },
     {
@@ -7584,22 +7592,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "label": "HoldoutReading",
-      "level": "class",
-      "parent": "kneemri.evaluation.holdout_record",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "label": "HoldoutRecord",
-      "level": "class",
-      "parent": "kneemri.evaluation.holdout_record",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.ledger_check.LedgerCheck",
       "label": "LedgerCheck",
       "level": "class",
@@ -7613,30 +7605,6 @@
       "level": "class",
       "parent": "kneemri.evaluation.member_curve",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.MemberRecord",
-      "label": "MemberRecord",
-      "level": "class",
-      "parent": "kneemri.evaluation.member_record",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions",
-      "label": "RunOptions",
-      "level": "class",
-      "parent": "kneemri.evaluation.member_record",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.StampedRun",
-      "label": "StampedRun",
-      "level": "class",
-      "parent": "kneemri.evaluation.member_record",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -7692,22 +7660,6 @@
       "label": "RunComparison",
       "level": "class",
       "parent": "kneemri.evaluation.run_comparison",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.EpochRow",
-      "label": "EpochRow",
-      "level": "class",
-      "parent": "kneemri.evaluation.run_metrics",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics",
-      "label": "RunMetrics",
-      "level": "class",
-      "parent": "kneemri.evaluation.run_metrics",
       "role": "primary"
     },
     {
@@ -8092,6 +8044,62 @@
       "label": "SlotHead",
       "level": "class",
       "parent": "kneemri.models.slot_head",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutReading",
+      "label": "HoldoutReading",
+      "level": "class",
+      "parent": "kneemri.runs.holdout_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord",
+      "label": "HoldoutRecord",
+      "level": "class",
+      "parent": "kneemri.runs.holdout_record",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.MemberRecord",
+      "label": "MemberRecord",
+      "level": "class",
+      "parent": "kneemri.runs.member_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions",
+      "label": "RunOptions",
+      "level": "class",
+      "parent": "kneemri.runs.member_record",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.StampedRun",
+      "label": "StampedRun",
+      "level": "class",
+      "parent": "kneemri.runs.member_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.EpochRow",
+      "label": "EpochRow",
+      "level": "class",
+      "parent": "kneemri.runs.run_metrics",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics",
+      "label": "RunMetrics",
+      "level": "class",
+      "parent": "kneemri.runs.run_metrics",
       "role": "primary"
     },
     {
@@ -9584,54 +9592,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutReading.aligned",
-      "label": "aligned",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutReading",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord.exists",
-      "label": "exists",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord.named",
-      "label": "named",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord.read",
-      "label": "read",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.holdout_record.HoldoutRecord.write",
-      "label": "write",
-      "level": "method",
-      "parent": "kneemri.evaluation.holdout_record.HoldoutRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.ledger_check.LedgerCheck.__init__",
       "label": "__init__",
       "level": "method",
@@ -9740,206 +9700,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.MemberRecord.payload",
-      "label": "payload",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.MemberRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.MemberRecord.read_size",
-      "label": "read_size",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.MemberRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.MemberRecord.recipe",
-      "label": "recipe",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.MemberRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.MemberRecord.witness",
-      "label": "witness",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.MemberRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.anatomical_prior",
-      "label": "anatomical_prior",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.backbone_lr",
-      "label": "backbone_lr",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.band",
-      "label": "band",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.bf16",
-      "label": "bf16",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.crop",
-      "label": "crop",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.ema",
-      "label": "ema",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.encoder_layer",
-      "label": "encoder_layer",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.head_lr",
-      "label": "head_lr",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.image_size",
-      "label": "image_size",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.lora_rank",
-      "label": "lora_rank",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.pool",
-      "label": "pool",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.rank_weight",
-      "label": "rank_weight",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.report_weight",
-      "label": "report_weight",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.routing",
-      "label": "routing",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.slice_pooling",
-      "label": "slice_pooling",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.slices",
-      "label": "slices",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.slot_pooling",
-      "label": "slot_pooling",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.train_size",
-      "label": "train_size",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.unfreeze_last",
-      "label": "unfreeze_last",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.RunOptions.whole_stack",
-      "label": "whole_stack",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.RunOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_record.StampedRun.of",
-      "label": "of",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_record.StampedRun",
       "role": null
     },
     {
@@ -10220,70 +9980,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics._entries",
-      "label": "_entries",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.best",
-      "label": "best",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.describe",
-      "label": "describe",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.exists",
-      "label": "exists",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.recipe",
-      "label": "recipe",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.record",
-      "label": "record",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.run_metrics.RunMetrics.rows",
-      "label": "rows",
-      "level": "method",
-      "parent": "kneemri.evaluation.run_metrics.RunMetrics",
       "role": null
     },
     {
@@ -12092,6 +11788,318 @@
       "label": "report_vector",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutReading.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "label": "exists",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.MemberRecord.payload",
+      "label": "payload",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.MemberRecord.read_size",
+      "label": "read_size",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.MemberRecord.recipe",
+      "label": "recipe",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.MemberRecord.witness",
+      "label": "witness",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.MemberRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.anatomical_prior",
+      "label": "anatomical_prior",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.backbone_lr",
+      "label": "backbone_lr",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.band",
+      "label": "band",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.bf16",
+      "label": "bf16",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.crop",
+      "label": "crop",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.ema",
+      "label": "ema",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.encoder_layer",
+      "label": "encoder_layer",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.head_lr",
+      "label": "head_lr",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.image_size",
+      "label": "image_size",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.lora_rank",
+      "label": "lora_rank",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.pool",
+      "label": "pool",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.rank_weight",
+      "label": "rank_weight",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.report_weight",
+      "label": "report_weight",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.routing",
+      "label": "routing",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.slice_pooling",
+      "label": "slice_pooling",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.slices",
+      "label": "slices",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.slot_pooling",
+      "label": "slot_pooling",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.train_size",
+      "label": "train_size",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.unfreeze_last",
+      "label": "unfreeze_last",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.whole_stack",
+      "label": "whole_stack",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.StampedRun.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.StampedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics._entries",
+      "label": "_entries",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.best",
+      "label": "best",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.describe",
+      "label": "describe",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.exists",
+      "label": "exists",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "label": "recipe",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.record",
+      "label": "record",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
     },
     {
