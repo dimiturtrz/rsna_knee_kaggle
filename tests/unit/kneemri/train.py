@@ -1,3 +1,4 @@
+import dataclasses
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,32 @@ def test_parse_keeps_the_split_seed_independent_of_the_model_seed(monkeypatch: p
     options = TrainingOptions.parse()
     assert options.seed == 7
     assert options.split_seed == 2026, "the split is a property of the corpus, not of the run"
+
+
+def test_parse_takes_every_default_from_the_dataclass(monkeypatch: pytest.MonkeyPatch):
+    """A run given no flags must be the object every other test constructs — all 45 fields of it.
+
+    THE DRIFT THIS PINS: each field's default is written twice, once here and once as the flag's, and
+    nothing has ever compared them. A parser default that moves is silent in both directions — the CLI
+    fits a recipe no test checks, and the tests prove a recipe no arm runs.
+    """
+    monkeypatch.setattr("sys.argv", ["train", "--labels", "labels.csv"])
+
+    parsed = TrainingOptions.parse()
+
+    assert parsed == TrainingOptions(labels=Path("labels.csv"))
+
+
+def test_parser():
+    """Every field is reachable from argv, and every flag lands on a field.
+
+    A field with no flag is a knob only a test can turn; a flag with no field would raise on `parse`,
+    which is loud — the silent half is the first, and it is the half that queues an arm whose recipe
+    cannot be asked for.
+    """
+    dests = set(vars(TrainingOptions.parser().parse_args(["--labels", "labels.csv"])))
+
+    assert dests == {field.name for field in dataclasses.fields(TrainingOptions)}
 
 
 def test_objective():

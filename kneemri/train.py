@@ -124,6 +124,17 @@ class TrainingOptions:
     @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object."""
+        return cls(**vars(cls.parser().parse_args()))
+
+    @classmethod
+    def parser(cls) -> argparse.ArgumentParser:
+        """The flags, separable from reading them, so a test can ask what argv accepts.
+
+        Every field here has a default in TWO homes — the dataclass and the flag — and a drift between
+        them is silent: the tests construct this object directly, so a parser default that moves means
+        the command line fits a recipe no test has ever checked. Handing the parser out is what lets
+        that be asserted rather than assumed.
+        """
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument(
             "--fold",
@@ -348,7 +359,7 @@ class TrainingOptions:
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-        return cls(**vars(parser.parse_args()))
+        return parser
 
     def adaptation(self) -> Adaptation:
         """How the encoder adapts: which blocks move and how fast, which are one decision."""
