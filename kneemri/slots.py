@@ -11,7 +11,7 @@ sensitivity on only 78.7% — and the non-fat-suppressed pool is 40 T1 against 3
 shipped flags alone would therefore put fluid-weighted series in the T1 slots for a fifth of the corpus.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 
 from kneemri.acquisition import Acquisition
@@ -40,6 +40,13 @@ class Slot:
     plane: str
     fluid_sensitive: bool
     fat_suppressed: bool
+    crop_mm: float | None = None
+    """The physical extent this slot is read at, or None for the reader's own.
+
+    A slot is normally a SEQUENCE selector and this is empty. It is set only by a multi-scale scheme,
+    where the same series is read twice — wide for context and tight for detail — and the two land in
+    different slots so the head's existing slot attention pools over SCALE without a new mechanism.
+    """
 
     def accepts(self, acquisition: Acquisition, plane: str) -> bool:
         """Whether this acquisition satisfies the slot's predicate exactly."""
@@ -91,7 +98,39 @@ switching on."""
 CANONICAL_SCHEME = "canonical"
 """The scheme whose caches keep their historic names, and the one the published members use."""
 
-SCHEMES: dict[str, tuple[Slot, ...]] = {CANONICAL_SCHEME: SLOTS, "extended": EXTENDED_SLOTS}
+DETAIL_MM = 80.0
+"""The tight extent of the multi-scale scheme.
+
+DERIVED, not chosen: the field of view is a median 160 mm and the canonical crop is 130 mm, so we spend
+two thirds of every image outside the joint at 0.387 mm/px — while a meniscal tear is 1-2 mm and DINOv2
+patches at 14 px, making a tear a fraction of ONE token. 80 mm at the same grid is 0.238 mm/px, 1.6x
+finer for identical compute, and still wider than the 70-80 mm the joint itself spans (knee-1nn).
+"""
+
+MULTISCALE_SLOTS: tuple[Slot, ...] = (
+    *SLOTS,
+    *(replace(slot, name=f"{slot.name}@{DETAIL_MM:g}", crop_mm=DETAIL_MM) for slot in SLOTS),
+)
+"""The canonical six read wide, then the SAME six read tight — twelve slots over six sequences.
+
+WHY THIS SHAPE. Both directions have already paid separately and a single scale must trade them against
+each other: res392 (finer) is our best single member at 0.8523 and whole_stack (more context) is our
+biggest arm at +0.0147. Two scales need not trade. The twelve findings do not want the same field of
+view — measured against radiologist annotations, the model BEATS its own labels on the diffuse findings
+and loses badly on the small ones (knee-dtk), a split by structure size.
+
+APPENDED, never interleaved, for the same reason EXTENDED_SLOTS is: the first six positions keep meaning
+what they meant, so a canonical member and a multi-scale one share every other piece of code.
+
+ONE DECODE SERVES BOTH, because 80 mm is a subset of 130 mm: the tight crop is taken from the stack the
+wide one already produced, so scale costs encoder passes and not I/O.
+"""
+
+SCHEMES: dict[str, tuple[Slot, ...]] = {
+    CANONICAL_SCHEME: SLOTS,
+    "extended": EXTENDED_SLOTS,
+    "multiscale": MULTISCALE_SLOTS,
+}
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 

@@ -10,7 +10,7 @@ from torch import Tensor
 from kneemri.acquisition import Acquisition
 from kneemri.laterality import Laterality
 from kneemri.slot_reader import SlotReader
-from kneemri.slots import SlotScheme
+from kneemri.slots import Slot, SlotScheme
 
 
 @dataclass(frozen=True)
@@ -39,14 +39,14 @@ class SlotPipeline:
         return self.scheme.assign(acquisitions, planes)
 
     def slot_images(
-        self, acquisition: Acquisition, slices: int, plane: str, side: str | None
+        self, acquisition: Acquisition, slices: int, slot: Slot, side: str | None
     ) -> UInt8[Tensor, "s h w"] | None:
         """Read one slot at this pipeline's size and normalise its laterality."""
-        sized = self.slot_sizes(acquisition, slices, plane, side, (self.image_size,))
+        sized = self.slot_sizes(acquisition, slices, slot, side, (self.image_size,))
         return None if sized is None else sized[self.image_size]
 
     def slot_sizes(
-        self, acquisition: Acquisition, slices: int, plane: str, side: str | None, sizes: "tuple[int, ...]"
+        self, acquisition: Acquisition, slices: int, slot: Slot, side: str | None, sizes: "tuple[int, ...]"
     ) -> "dict[int, UInt8[Tensor, 's h w']] | None":
         """One slot read ONCE and delivered at every size asked for.
 
@@ -62,7 +62,8 @@ class SlotPipeline:
         stack = self.reader.cropped(acquisition, slices)
         if stack is None:
             return None
-        return {size: self.laterality.normalise(self.reader.sized(stack, size), plane, side) for size in sizes}
+        stack = self.reader.narrowed(stack, acquisition.pixel_spacing, slot.crop_mm)
+        return {size: self.laterality.normalise(self.reader.sized(stack, size), slot.plane, side) for size in sizes}
 
 
 class Study:
@@ -120,9 +121,7 @@ class Study:
         # nothing was acquired. A build that "finished" and a trainer that reads zeros.
         for slot in self.pipeline.scheme.slots:
             acquisition = chosen.get(slot.name)
-            read = (
-                None if acquisition is None else self.pipeline.slot_sizes(acquisition, slices, slot.plane, side, sizes)
-            )
+            read = None if acquisition is None else self.pipeline.slot_sizes(acquisition, slices, slot, side, sizes)
             for size in sizes:
                 images[size].append(torch.zeros(slices, size, size, dtype=torch.uint8) if read is None else read[size])
             mask.append(0.0 if read is None else 1.0)

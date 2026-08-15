@@ -94,3 +94,20 @@ def test_crop_centre_default_is_unchanged():
     tissue = SlotReader(crop_mm=100.0, image_size=64, centre=TissueCentre())._crop(stack, spacing=1.0)
     assert not np.array_equal(default, tissue), "and a tissue centre really does read different pixels"
     assert tissue.shape == default.shape, "the physical extent is the same either way"
+
+
+def test_narrowed():
+    """A tight extent is taken from the stack the wide read already produced, not decoded again.
+
+    That is what lets SCALE be a slot axis rather than a second decode: 80mm is a subset of 130mm, so
+    the multi-scale scheme costs encoder passes and no extra I/O.
+    """
+    stack = np.zeros((2, 200, 200), np.float32)
+    reader = SlotReader(crop_mm=130.0, image_size=64)
+
+    assert reader.narrowed(stack, 1.0, None).shape == stack.shape, "no extent named means untouched"
+    assert reader.narrowed(stack, 1.0, 200.0).shape == stack.shape, "a WIDER extent cannot widen a crop"
+
+    tighter = reader.narrowed(stack, 1.0, 80.0)
+    assert tighter.shape[1] == 80, "at 1 mm per pixel an 80 mm extent is 80 pixels"
+    assert tighter.shape[1] < stack.shape[1]

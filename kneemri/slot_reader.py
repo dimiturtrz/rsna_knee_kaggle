@@ -158,6 +158,29 @@ class SlotReader:
         centre_x = int(np.clip(centre_x, half, width - half))
         return stack[:, max(0, centre_y - half) : centre_y + half, max(0, centre_x - half) : centre_x + half]
 
+    def narrowed(self, stack: NDArray[np.float32], spacing: float | None, crop_mm: float | None) -> NDArray[np.float32]:
+        """A stack already cropped to this reader's extent, cropped again to a TIGHTER one.
+
+        The multi-scale scheme reads the same series wide and tight, and the tight extent is a SUBSET of
+        the wide one — so it is taken from the stack the wide read already produced rather than decoded
+        again. Scale therefore costs encoder passes and not I/O, which is the whole reason it can be a
+        slot axis instead of a second decode.
+
+        None, or an extent no tighter than our own, passes the stack through untouched: a slot that
+        names no crop is a plain sequence slot and must be byte-identical to what it always was.
+        """
+        if crop_mm is None or crop_mm >= self.crop_mm or spacing is None or not np.isfinite(spacing) or spacing <= 0:
+            return stack
+        wanted = round(crop_mm / spacing)
+        height, width = stack.shape[1:]
+        if not _MIN_CROP_PIXELS < wanted < min(height, width):
+            return stack
+        half = wanted // 2
+        centre_y, centre_x = self.centre.of(stack)
+        centre_y = int(np.clip(centre_y, half, height - half))
+        centre_x = int(np.clip(centre_x, half, width - half))
+        return stack[:, centre_y - half : centre_y + half, centre_x - half : centre_x + half]
+
     def sized(self, stack: NDArray[np.float32], size: int) -> UInt8[Tensor, "s h w"]:
         """Percentile-normalise, resize to the encoder's grid, and store eight bits per pixel.
 

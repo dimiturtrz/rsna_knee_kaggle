@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 
 from kneemri.slot_reader import SlotReader
-from kneemri.slots import EXTENDED_SLOTS, SLOTS, SlotScheme
+from kneemri.slots import EXTENDED_SLOTS, SCHEMES, SLOTS, SlotScheme
 from kneemri.study import SlotPipeline, Study
 
 from .conftest import write_series
@@ -67,8 +67,8 @@ def test_slot_images(tmp_path: Path):
     study = Study.from_directory(root, planes)
     pipeline = SlotPipeline(reader=SlotReader(image_size=16))
     acquisition = pipeline.route(study.acquisitions, planes)["SAG_FLUID_FS"]
-    left = pipeline.slot_images(acquisition, 3, "Sagittal", "L")
-    right = pipeline.slot_images(acquisition, 3, "Sagittal", "R")
+    left = pipeline.slot_images(acquisition, 3, SLOTS[0], "L")
+    right = pipeline.slot_images(acquisition, 3, SLOTS[0], "R")
     assert left is not None and right is not None
     assert torch.equal(right, torch.flip(left, dims=[0])), "a right knee reverses the sagittal stack"
 
@@ -120,9 +120,33 @@ def test_slot_sizes(tmp_path: Path):
     study = Study.from_directory(root, planes, pipeline)
     acquisition = study.acquisitions[0]
 
-    sized = pipeline.slot_sizes(acquisition, 3, "Sagittal", "L", (32, 16))
+    sized = pipeline.slot_sizes(acquisition, 3, SLOTS[0], "L", (32, 16))
 
     assert sized is not None
     assert sorted(sized) == [16, 32]
     assert sized[16].shape == (3, 16, 16)
     assert sized[32].dtype == torch.uint8
+
+
+def test_bags_reads_a_multiscale_scheme_at_two_extents(tmp_path: Path):
+    """Twelve slots over six sequences: the same series wide and tight, from ONE decode.
+
+    The canonical six must be byte-identical to what a canonical scheme produces, because every cache on
+    disk and every member fitted on one depends on those first six positions meaning what they meant.
+    """
+    # 3 mm spacing so BOTH extents fit a 64-pixel image: 130 mm is 43 px and 80 mm is 27 px. At the
+    # default 0.3 mm neither crop applies (130 mm wants 433 px) and the two scales come back identical,
+    # which is the fixture failing to exercise the thing rather than the thing not working.
+    write_series(tmp_path / "sag", slices=4, description="SAG PD FS", size=64, spacing=3.0)
+    planes = {"sag": "Sagittal"}
+    study = Study.from_directory(tmp_path, planes, SlotPipeline(reader=SlotReader(image_size=16)))
+    wide = study.bags(2, (16,))[16]
+
+    multi = Study.from_directory(
+        tmp_path, planes, SlotPipeline(scheme=SlotScheme(SCHEMES["multiscale"]), reader=SlotReader(image_size=16))
+    ).bags(2, (16,))[16]
+
+    assert multi[0].shape[0] == 12, "six sequences read at two extents"
+    assert torch.equal(multi[0][:6], wide[0]), "the canonical six are unchanged, byte for byte"
+    assert multi[1][0] == 1.0 and multi[1][6] == 1.0, "a filled slot is filled at both scales"
+    assert not torch.equal(multi[0][6], multi[0][0]), "and the tight read is different pixels"
