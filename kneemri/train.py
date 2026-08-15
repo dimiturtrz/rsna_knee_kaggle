@@ -15,7 +15,8 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL, Encoder
-from kneemri.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
+from kneemri.cache_flags import CacheFlags
+from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.fitting import Fitting, Fold, RunPlan
 from kneemri.folds import ReportFolds
 from kneemri.member_record import MemberRecord
@@ -24,7 +25,7 @@ from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
-from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
+from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
@@ -137,15 +138,9 @@ class TrainingOptions:
         parser.add_argument("--folds", type=int, default=5)
         parser.add_argument("--epochs", type=int, default=8)
         parser.add_argument("--batch", type=int, default=12)
-        parser.add_argument("--slices", type=int, default=12)
-        parser.add_argument(
-            "--image-size",
-            type=int,
-            default=IMAGE_SIZE,
-            help="resolution of the cache to train on. Selects the cache file AND is recorded in the "
-            "member's config and fingerprint, so a member can never advertise a reading it was not "
-            "fitted under.",
-        )
+        # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
+        # blocks here and eight more in `build_cache`, and the two had already diverged on the band.
+        CacheFlags.add_to(parser)
         parser.add_argument(
             "--train-size",
             type=int,
@@ -153,53 +148,6 @@ class TrainingOptions:
             help="resolution the model actually READS, resampled from the cache. 0 means the cache's "
             "own. Decouples resolution from decoding: a 448 px cache can be read at 392 without a "
             "second 45-minute build, and without changing the batch or the slice count to afford it.",
-        )
-        parser.add_argument(
-            "--crop-mm",
-            type=float,
-            default=CROP_MM,
-            help="physical extent this arm reads. It selects the CACHE built at that extent and is "
-            "recorded on the member, so serving cannot silently fall back to the default.",
-        )
-        parser.add_argument(
-            "--centre",
-            default=DEFAULT_CENTRE,
-            choices=sorted(CENTRES),
-            help="where that extent is taken about. A tight crop needs the joint located rather than "
-            "assumed (knee-yrf); at 130mm the difference is small and at 80mm it clips the joint.",
-        )
-        parser.add_argument(
-            "--band-low",
-            type=float,
-            default=SLICE_BAND[0],
-            help="the shallowest fraction of a series' depth this arm's slices are drawn from. It "
-            "selects the CACHE built over that band and is recorded on the member, so serving cannot "
-            "fall back to the default.",
-        )
-        parser.add_argument(
-            "--band-high",
-            type=float,
-            default=SLICE_BAND[1],
-            help="the deepest such fraction. The default pair is the historic reading every member on "
-            "disk was fitted under.",
-        )
-        parser.add_argument(
-            "--tie",
-            default=FIRST_MAXIMAL,
-            choices=(FIRST_MAXIMAL, LAST_MAXIMAL),
-            help="which of several equally dense candidates fills a slot. 'first' is ours and what every "
-            "member on disk was fitted under; the published members reproduce their own predictions "
-            "better under 'last' (knee-evn), so a graft-matching arm needs it. It selects the CACHE and "
-            "is recorded on the member, so serving cannot fall back to the default.",
-        )
-        parser.add_argument(
-            "--scheme",
-            choices=tuple(SCHEMES),
-            default=CANONICAL_SCHEME,
-            help="slot scheme. 'extended' routes three sequences the canonical six cannot express - "
-            "coronal PD without fat suppression, axial T1, axial fluid without fat suppression - which "
-            "are 96%% of the series we currently discard. It needs its own cache and produces members "
-            "with a wider slot embedding, so it does not interoperate with the published six-slot ones.",
         )
         parser.add_argument("--seed", type=int, default=2026, help="model init and data order ONLY")
         parser.add_argument(

@@ -18,10 +18,9 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
+from kneemri.cache_flags import CacheFlags
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.model import CLS_MEAN, MAXIMUM, POOL_PARTS, StudyDesign, StudyModel
-from kneemri.slots import CANONICAL_SCHEME, SCHEMES, Routing
-from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +29,8 @@ def main() -> None:
     """Build one embedding cache from one pixel cache."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--variant", default=SMALL, choices=tuple(ENCODERS))
-    parser.add_argument("--image-size", type=int, default=336, help="the PIXEL cache to read")
+    CacheFlags.add_to(parser)
     parser.add_argument("--train-size", type=int, default=None, help="resample to this before encoding")
-    parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--scheme", default=CANONICAL_SCHEME, choices=tuple(SCHEMES))
     parser.add_argument(
         "--pool",
         default=CLS_MEAN,
@@ -54,9 +51,10 @@ def main() -> None:
     encoder.require_tiling(read_size)
 
     root = DataRoot.from_config(arguments.paths).processed()
-    corpus, identifiers = StudyCache(
-        root, slices=arguments.slices, image_size=arguments.image_size, routing=Routing(scheme=arguments.scheme)
-    ).load()
+    # THE WHOLE READING, not the three axes this CLI happened to take flags for. It could not be pointed
+    # at the 80 mm arrays at all, so it encoded the default ones whatever was asked of it.
+    pixels = CacheFlags.cache(arguments, root)
+    corpus, identifiers = pixels.load()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Per-slice pooling, because the whole point is to keep each slice separate — the slot's own
@@ -69,14 +67,7 @@ def main() -> None:
     )
     model.eval().to(device)
 
-    spec = EmbeddingSpec(
-        variant=arguments.variant,
-        image_size=arguments.image_size,
-        read_size=read_size,
-        slices=arguments.slices,
-        scheme=arguments.scheme,
-        pool=arguments.pool,
-    )
+    spec = EmbeddingSpec(variant=arguments.variant, source=pixels.key, read_size=read_size, pool=arguments.pool)
     cache = EmbeddingCache(root, spec)
     logger.info(f"encoding {len(identifiers)} studies -> {cache.features_path}")
     with torch.no_grad():

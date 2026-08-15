@@ -34,7 +34,6 @@ from numpy.lib.format import open_memmap
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.slots import CANONICAL_SCHEME
 from kneemri.study_cache import CachedCorpus
 
 logger = logging.getLogger(__name__)
@@ -85,13 +84,18 @@ class EmbeddingSpec:
     Seven positional facts about a cache is exactly the shape that gets called with two of them
     transposed, and a transposed `image_size`/`read_size` produces a file that loads fine and describes
     different pixels. Grouped so the key, the paths and the build all read the same object.
+
+    THE PIXEL SIDE IS ONE FIELD — the source cache's own key — rather than a copy of three of its six
+    axes. Restating size, depth and scheme here left the crop, the band and the tie rule with nowhere to
+    land, so features encoded from the 80 mm arrays would have been written over features encoded from
+    the 130 mm ones: a file that loads, of the right shape, describing different pixels. The cache that
+    was read is the thing that decides what these features are, and it already knows how to name itself.
     """
 
     variant: str
-    image_size: int
+    source: str
+    """`StudyCache.key` of the pixels these features were encoded from."""
     read_size: int
-    slices: int
-    scheme: str
     pool: str
 
 
@@ -113,13 +117,12 @@ class EmbeddingCache:
         same shape load into the same head and score differently for no discoverable reason.
 
         The READ size is separate from the cache's size: our best recipe holds a 448 px cache and reads
-        it at 392, and features computed at one are not features computed at the other.
+        it at 392, and features computed at one are not features computed at the other. Everything else
+        the pixels depend on arrives as the source cache's key, so an axis added there cannot go missing
+        here.
         """
         spec = self.spec
-        parts = [spec.variant, f"{spec.image_size}px", f"r{spec.read_size}", f"{spec.slices}sl", spec.pool]
-        if spec.scheme != CANONICAL_SCHEME:
-            parts.append(spec.scheme)
-        return "_".join(parts)
+        return "_".join([spec.variant, spec.source, f"r{spec.read_size}", spec.pool])
 
     @property
     def features_path(self) -> Path:
@@ -166,12 +169,12 @@ class EmbeddingCache:
         studies, slots = corpus.mask.shape
         width = self._probe_width(encode, corpus, device)
         features = open_memmap(
-            self.features_path, mode="w+", dtype=STORED, shape=(studies, slots, self.spec.slices, width)
+            self.features_path, mode="w+", dtype=STORED, shape=(studies, slots, corpus.slices, width)
         )
         with torch.no_grad(), torch.autocast("cuda", enabled=device.type == "cuda"):
             for start in range(0, studies, batch):
                 stop = min(start + batch, studies)
-                block = np.ascontiguousarray(corpus.images[start:stop, :, : self.spec.slices])
+                block = np.ascontiguousarray(corpus.images[start:stop])
                 pixels = torch.from_numpy(block).to(device)
                 encoded = encode(pixels, self.spec.read_size)
                 features[start:stop] = encoded.float().cpu().numpy().astype(STORED)
@@ -191,7 +194,7 @@ class EmbeddingCache:
         on disk matching the model that will later read it.
         """
         with torch.no_grad(), torch.autocast("cuda", enabled=device.type == "cuda"):
-            probe = torch.from_numpy(np.ascontiguousarray(corpus.images[:1, :, : self.spec.slices])).to(device)
+            probe = torch.from_numpy(np.ascontiguousarray(corpus.images[:1])).to(device)
             return int(encode(probe, self.spec.read_size).shape[-1])
 
     def load(self) -> tuple[EmbeddedCorpus, list[str]]:

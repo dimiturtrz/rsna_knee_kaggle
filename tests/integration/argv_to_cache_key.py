@@ -59,7 +59,9 @@ def test_every_reading_axis_reaches_the_key(
 
     Five axes select the file — size, depth, physical crop, the point it is taken about, and the slice
     band — and the gate that waits for a build spelled only the first two. An axis missing from the key
-    is a decode that overwrites the arrays every member on disk was fitted on.
+    is a decode that overwrites the arrays every member on disk was fitted on. The flags themselves now
+    come from `CacheFlags`, which every cache-reading CLI shares, so this also pins that they are all
+    asking for the same file: the builder and the trainer had already diverged on how to spell the band.
     """
     printed = _key(
         root,
@@ -69,7 +71,8 @@ def test_every_reading_axis_reaches_the_key(
         *("--slices", "6"),
         *("--crop-mm", "80"),
         *("--centre", "tissue"),
-        *("--band", "0.1", "0.9"),
+        *("--band-low", "0.1"),
+        *("--band-high", "0.9"),
     )
 
     reading = Reading(crop=Crop(mm=80.0, centre="tissue"), band=Band(0.1, 0.9))

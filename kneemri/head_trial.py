@@ -28,12 +28,12 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 from torch import Tensor
 
+from kneemri.cache_flags import CacheFlags
 from kneemri.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.model import CLS_MEAN, POOL_PARTS, TARGETS
 from kneemri.objective import Objective, RankedObjective
 from kneemri.scores import LabelScores
 from kneemri.slot_head import SlotHead
-from kneemri.slots import CANONICAL_SCHEME
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -118,10 +118,8 @@ def main() -> None:
     """Fit one head on a cached corpus, or sweep the rank weight."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--variant", default="small")
-    parser.add_argument("--image-size", type=int, default=336)
+    CacheFlags.add_to(parser)
     parser.add_argument("--read-size", type=int, default=336)
-    parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--scheme", default=CANONICAL_SCHEME)
     parser.add_argument("--pool", default=CLS_MEAN, choices=tuple(POOL_PARTS))
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep")
@@ -137,14 +135,10 @@ def main() -> None:
     from kneemri.folds import ReportFolds  # noqa: PLC0415 - as above
 
     root = DataRoot.from_config(arguments.paths)
-    spec = EmbeddingSpec(
-        variant=arguments.variant,
-        image_size=arguments.image_size,
-        read_size=arguments.read_size,
-        slices=arguments.slices,
-        scheme=arguments.scheme,
-        pool=arguments.pool,
-    )
+    # The features are named after the PIXELS they were encoded from, so this asks the same question
+    # `build_embeddings` answered rather than restating three of that cache's six axes.
+    source = CacheFlags.cache(arguments, root.processed()).key
+    spec = EmbeddingSpec(variant=arguments.variant, source=source, read_size=arguments.read_size, pool=arguments.pool)
     corpus, identifiers = EmbeddingCache(root.processed(), spec).load()
     targets = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers)
     folds = ReportFolds(arguments.folds, arguments.split_seed)

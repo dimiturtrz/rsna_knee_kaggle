@@ -30,12 +30,12 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
+from kneemri.cache_flags import CacheFlags
 from kneemri.folds import ReportFolds
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.scores import LabelScores
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import SLOTS
-from kneemri.study_cache import StudyCache
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -91,13 +91,13 @@ def main() -> None:
     parser.add_argument("--fold", type=int, default=0)
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--slices", type=int, default=12)
+    CacheFlags.add_to(parser)
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
-    corpus, identifiers = StudyCache(root.processed(), slices=arguments.slices).load()
+    corpus, identifiers = CacheFlags.cache(arguments, root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
 
