@@ -236,6 +236,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.encoder_drift",
+      "target": "kneemri.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.ensemble",
       "target": "kneemri.backbone",
       "weight": 1
@@ -1840,6 +1846,60 @@
       "kind": "calls",
       "source": "kneemri.embedding_cache.EmbeddingCache.load",
       "target": "kneemri.embedding_cache.EmbeddingCache.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.blocks",
+      "target": "kneemri.encoder_drift.EncoderDrift.grouped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.blocks",
+      "target": "kneemri.encoder_drift.EncoderDrift.trained",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.encoder_drift.EncoderDrift.blocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.encoder_drift.EncoderDrift.concentration",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.encoder_drift.EncoderDrift.variant",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.EncoderDrift.repository",
+      "target": "kneemri.encoder_drift.EncoderDrift.variant",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.encoder_drift.main",
+      "target": "kneemri.encoder_drift.EncoderDrift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.main",
+      "target": "kneemri.encoder_drift.EncoderDrift.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.encoder_drift.main",
+      "target": "kneemri.encoder_drift.EncoderDrift.repository",
       "weight": 1
     },
     {
@@ -4753,7 +4813,7 @@
       "role": null
     },
     {
-      "descendants": 60,
+      "descendants": 61,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -4868,6 +4928,14 @@
       "descendants": 0,
       "id": "kneemri.embedding_cache",
       "label": "embedding_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift",
+      "label": "encoder_drift",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -5415,6 +5483,14 @@
       "level": "class",
       "parent": "kneemri.embedding_cache",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift",
+      "label": "EncoderDrift",
+      "level": "class",
+      "parent": "kneemri.encoder_drift",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -6614,6 +6690,78 @@
       "label": "mask_path",
       "level": "method",
       "parent": "kneemri.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.blocks",
+      "label": "blocks",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.concentration",
+      "label": "concentration",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.grouped",
+      "label": "grouped",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.repository",
+      "label": "repository",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.trained",
+      "label": "trained",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.EncoderDrift.variant",
+      "label": "variant",
+      "level": "method",
+      "parent": "kneemri.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.encoder_drift.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.encoder_drift",
       "role": null
     },
     {
