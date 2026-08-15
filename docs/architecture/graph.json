@@ -128,54 +128,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "core.paths",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.evaluation.scores",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.inference.ensemble",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.inference.members",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.kaggle.submission",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.labels.targets",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.models.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.dry_run",
-      "target": "kneemri.models.model",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.corpus.laterality",
       "target": "kneemri.corpus.acquisition",
       "weight": 1
@@ -232,42 +184,6 @@
       "kind": "import",
       "source": "kneemri.corpus.slots",
       "target": "kneemri.corpus.acquisition",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "core.paths",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "kneemri.evaluation.oof_oracle",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "kneemri.evaluation.scores",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "kneemri.inference.ensemble",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "kneemri.labels.targets",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.corpus.stack_coverage",
-      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -716,6 +632,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.evaluation.oof_oracle",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.inference.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.tie_divergence",
       "target": "core.paths",
       "weight": 1
@@ -921,6 +873,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.members",
+      "target": "core.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.members",
       "target": "kneemri.corpus.crop_centre",
       "weight": 1
     },
@@ -940,12 +898,6 @@
       "kind": "import",
       "source": "kneemri.inference.members",
       "target": "kneemri.corpus.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.members",
-      "target": "kneemri.kaggle.mounts",
       "weight": 1
     },
     {
@@ -974,6 +926,60 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.inference.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.kaggle.submission",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.kernel_run",
+      "target": "core.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
       "target": "kneemri.inference.ensemble",
       "weight": 1
@@ -982,12 +988,6 @@
       "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
       "target": "kneemri.inference.members",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.kernel_run",
-      "target": "kneemri.kaggle.mounts",
       "weight": 1
     },
     {
@@ -1501,6 +1501,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.mounts.Mounts.every",
+      "target": "core.mounts.Mounts.walk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.mounts.Mounts.one",
+      "target": "core.mounts.Mounts.every",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.paths.DataRoot",
       "target": "core.paths.DataRoot",
@@ -1885,132 +1897,6 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.corpus.dry_run.DryRun",
-      "target": "core.paths.DataRoot",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.corpus.dry_run.DryRun",
-      "target": "kneemri.inference.members.MemberPackage",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "core.paths.DataRoot.processed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "core.paths.DataRoot.raw",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.corpus.dry_run.DryRun.tables",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.inference.ensemble.Ensemble",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.inference.members.MemberPackage.load",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.kaggle.submission.Split",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.kaggle.submission.Submission",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun._table",
-      "target": "kneemri.kaggle.submission.Submission.run",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun.scored",
-      "target": "core.paths.DataRoot.raw",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.DryRun.scored",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun.scored",
-      "target": "kneemri.evaluation.scores.LabelScores.mean",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun.scored",
-      "target": "kneemri.evaluation.scores.LabelScores.per_label",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun.scored",
-      "target": "kneemri.labels.targets.Targets.load",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.DryRun.tables",
-      "target": "core.paths.DataRoot.raw",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.main",
-      "target": "kneemri.corpus.dry_run.DryRun",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.main",
-      "target": "kneemri.corpus.dry_run.DryRun._table",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.dry_run.main",
-      "target": "kneemri.corpus.dry_run.DryRun.scored",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.dry_run.main",
-      "target": "kneemri.inference.members.MemberPackage",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.corpus.laterality.Laterality",
       "target": "kneemri.corpus.acquisition.Acquisition",
@@ -2266,84 +2152,6 @@
       "kind": "calls",
       "source": "kneemri.corpus.slots.SlotScheme.assign",
       "target": "kneemri.corpus.slots.SlotScheme.won",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.corpus.stack_coverage.StackCoverage",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.stack_coverage.StackCoverage.__init__",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.StackCoverage.trend",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage._delta",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage.acquired",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage.bands",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.corpus.stack_coverage.StackCoverage.trend",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.corpus",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.inference.ensemble.Ensemble.combine",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.corpus.stack_coverage.main",
-      "target": "kneemri.labels.targets.Targets.load",
       "weight": 1
     },
     {
@@ -3836,6 +3644,84 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_coverage.StackCoverage.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage._delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.corpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage.acquired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage.bands",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.inference.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.tie_divergence.TieDivergence",
       "target": "kneemri.corpus.acquisition.Acquisition",
       "weight": 1
@@ -4539,6 +4425,12 @@
     {
       "kind": "references",
       "source": "kneemri.inference.members.MemberPackage",
+      "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.members.MemberPackage",
       "target": "kneemri.inference.members.Member",
       "weight": 1
     },
@@ -4546,12 +4438,6 @@
       "kind": "references",
       "source": "kneemri.inference.members.MemberPackage",
       "target": "kneemri.inference.members.MemberPackage",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.inference.members.MemberPackage",
-      "target": "kneemri.kaggle.mounts.Mounts",
       "weight": 1
     },
     {
@@ -4587,7 +4473,7 @@
     {
       "kind": "construct",
       "source": "kneemri.inference.members.MemberPackage.find",
-      "target": "kneemri.kaggle.mounts.Mounts",
+      "target": "core.mounts.Mounts",
       "weight": 1
     },
     {
@@ -4639,6 +4525,138 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.kaggle.dry_run.DryRun",
+      "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.dry_run.DryRun",
+      "target": "kneemri.inference.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "core.paths.DataRoot.processed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.inference.ensemble.Ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.inference.members.MemberPackage.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.kaggle.dry_run.DryRun.tables",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.kaggle.submission.Split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.kaggle.submission.Submission",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun._table",
+      "target": "kneemri.kaggle.submission.Submission.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun.scored",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.DryRun.scored",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun.scored",
+      "target": "kneemri.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.DryRun.tables",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.main",
+      "target": "kneemri.inference.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.dry_run.main",
+      "target": "kneemri.kaggle.dry_run.DryRun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.main",
+      "target": "kneemri.kaggle.dry_run.DryRun._table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.dry_run.main",
+      "target": "kneemri.kaggle.dry_run.DryRun.scored",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.kernel_run.KernelRun",
+      "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.kernel_run.KernelRun",
       "target": "kneemri.inference.members.Member",
@@ -4653,19 +4671,13 @@
     {
       "kind": "references",
       "source": "kneemri.kaggle.kernel_run.KernelRun",
-      "target": "kneemri.kaggle.mounts.Mounts",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.kaggle.kernel_run.KernelRun",
       "target": "kneemri.models.backbone.Encoder",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.kaggle.kernel_run.KernelRun.__init__",
-      "target": "kneemri.kaggle.mounts.Mounts",
+      "target": "core.mounts.Mounts",
       "weight": 1
     },
     {
@@ -4786,18 +4798,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kit_check.main",
       "target": "kneemri.kaggle.mounted_kit.MountedKit.recorded",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.mounts.Mounts.every",
-      "target": "kneemri.kaggle.mounts.Mounts.walk",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.mounts.Mounts.one",
-      "target": "kneemri.kaggle.mounts.Mounts.every",
       "weight": 1
     },
     {
@@ -6543,11 +6543,19 @@
   ],
   "nodes": [
     {
-      "descendants": 1,
+      "descendants": 2,
       "id": "core",
       "label": "core",
       "level": "module",
       "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.mounts",
+      "label": "mounts",
+      "level": "module",
+      "parent": "core",
       "role": null
     },
     {
@@ -6559,7 +6567,7 @@
       "role": null
     },
     {
-      "descendants": 83,
+      "descendants": 82,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6567,7 +6575,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 17,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -6640,14 +6648,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.dry_run",
-      "label": "dry_run",
-      "level": "module",
-      "parent": "kneemri.corpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.folds",
       "label": "folds",
       "level": "module",
@@ -6690,14 +6690,6 @@
       "descendants": 0,
       "id": "kneemri.corpus.slots",
       "label": "slots",
-      "level": "module",
-      "parent": "kneemri.corpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage",
-      "label": "stack_coverage",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -6759,7 +6751,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -6880,6 +6872,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage",
+      "label": "stack_coverage",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.tie_divergence",
       "label": "tie_divergence",
       "level": "module",
@@ -6968,6 +6968,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.dry_run",
+      "label": "dry_run",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_run",
       "label": "kernel_run",
       "level": "module",
@@ -6986,14 +6994,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.mounted_kit",
       "label": "mounted_kit",
-      "level": "module",
-      "parent": "kneemri.kaggle",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts",
-      "label": "mounts",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -7232,6 +7232,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.mounts.Mounts",
+      "label": "Mounts",
+      "level": "class",
+      "parent": "core.mounts",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.paths.DataRoot",
       "label": "DataRoot",
       "level": "class",
@@ -7352,14 +7360,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.dry_run.DryRun",
-      "label": "DryRun",
-      "level": "class",
-      "parent": "kneemri.corpus.dry_run",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.folds.ReportFolds",
       "label": "ReportFolds",
       "level": "class",
@@ -7444,14 +7444,6 @@
       "label": "SlotScheme",
       "level": "class",
       "parent": "kneemri.corpus.slots",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage",
-      "label": "StackCoverage",
-      "level": "class",
-      "parent": "kneemri.corpus.stack_coverage",
       "role": "primary"
     },
     {
@@ -7728,6 +7720,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "label": "StackCoverage",
+      "level": "class",
+      "parent": "kneemri.evaluation.stack_coverage",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.tie_divergence.SlotDivergence",
       "label": "SlotDivergence",
       "level": "class",
@@ -7864,6 +7864,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.DryRun",
+      "label": "DryRun",
+      "level": "class",
+      "parent": "kneemri.kaggle.dry_run",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_run.KernelRun",
       "label": "KernelRun",
       "level": "class",
@@ -7884,14 +7892,6 @@
       "label": "MountedKit",
       "level": "class",
       "parent": "kneemri.kaggle.mounted_kit",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts.Mounts",
-      "label": "Mounts",
-      "level": "class",
-      "parent": "kneemri.kaggle.mounts",
       "role": "primary"
     },
     {
@@ -8221,6 +8221,38 @@
       "level": "class",
       "parent": "kneemri.training.trainer",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.mounts.Mounts.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.mounts.Mounts.every",
+      "label": "every",
+      "level": "method",
+      "parent": "core.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.mounts.Mounts.one",
+      "label": "one",
+      "level": "method",
+      "parent": "core.mounts.Mounts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.mounts.Mounts.walk",
+      "label": "walk",
+      "level": "method",
+      "parent": "core.mounts.Mounts",
+      "role": null
     },
     {
       "descendants": 0,
@@ -8584,46 +8616,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.dry_run.DryRun.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.corpus.dry_run.DryRun",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.dry_run.DryRun._table",
-      "label": "_table",
-      "level": "method",
-      "parent": "kneemri.corpus.dry_run.DryRun",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.dry_run.DryRun.scored",
-      "label": "scored",
-      "level": "method",
-      "parent": "kneemri.corpus.dry_run.DryRun",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.dry_run.DryRun.tables",
-      "label": "tables",
-      "level": "method",
-      "parent": "kneemri.corpus.dry_run.DryRun",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.dry_run.main",
-      "label": "main",
-      "level": "method",
-      "parent": "kneemri.corpus.dry_run",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.folds.ReportFolds.__init__",
       "label": "__init__",
       "level": "method",
@@ -8956,62 +8948,6 @@
       "label": "won",
       "level": "method",
       "parent": "kneemri.corpus.slots.SlotScheme",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage._delta",
-      "label": "_delta",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage.acquired",
-      "label": "acquired",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage.bands",
-      "label": "bands",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage.report",
-      "label": "report",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.StackCoverage.trend",
-      "label": "trend",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage.StackCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.stack_coverage.main",
-      "label": "main",
-      "level": "method",
-      "parent": "kneemri.corpus.stack_coverage",
       "role": null
     },
     {
@@ -10384,6 +10320,62 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage._delta",
+      "label": "_delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.acquired",
+      "label": "acquired",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.bands",
+      "label": "bands",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "label": "trend",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.tie_divergence.SlotDivergence.identical",
       "label": "identical",
       "level": "method",
@@ -11000,6 +10992,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.DryRun.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.DryRun._table",
+      "label": "_table",
+      "level": "method",
+      "parent": "kneemri.kaggle.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.DryRun.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.kaggle.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.DryRun.tables",
+      "label": "tables",
+      "level": "method",
+      "parent": "kneemri.kaggle.dry_run.DryRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.dry_run.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.dry_run",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_run.KernelRun.__init__",
       "label": "__init__",
       "level": "method",
@@ -11116,38 +11148,6 @@
       "label": "recorded",
       "level": "method",
       "parent": "kneemri.kaggle.mounted_kit.MountedKit",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts.Mounts.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.kaggle.mounts.Mounts",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts.Mounts.every",
-      "label": "every",
-      "level": "method",
-      "parent": "kneemri.kaggle.mounts.Mounts",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts.Mounts.one",
-      "label": "one",
-      "level": "method",
-      "parent": "kneemri.kaggle.mounts.Mounts",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.mounts.Mounts.walk",
-      "label": "walk",
-      "level": "method",
-      "parent": "kneemri.kaggle.mounts.Mounts",
       "role": null
     },
     {
