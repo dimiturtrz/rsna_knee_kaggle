@@ -12,14 +12,24 @@ def test_best(tmp_path: Path):
     """
     scored = tmp_path / "a.metrics.jsonl"
     scored.write_text(
-        "\n".join(json.dumps({"epoch": e, "auc": auc}) for e, auc in enumerate([0.81, 0.8473, 0.84])),
+        "\n".join(
+            [
+                json.dumps({"recipe": {"epochs": "3"}}),
+                *(json.dumps({"epoch": e, "auc": auc}) for e, auc in enumerate([0.81, 0.8473, 0.84])),
+            ]
+        ),
         encoding="utf-8",
     )
     empty = tmp_path / "b.metrics.jsonl"
     empty.write_text("", encoding="utf-8")
+    unscored = tmp_path / "c.metrics.jsonl"
+    unscored.write_text(json.dumps({"epoch": 0, "auc": float("nan")}), encoding="utf-8")
 
-    assert LedgerCheck(tmp_path / "absent.md").best(scored) == 0.8473
+    assert LedgerCheck(tmp_path / "absent.md").best(scored) == 0.8473, "the recipe line is not an epoch"
     assert LedgerCheck(tmp_path / "absent.md").best(empty) is None
+    assert LedgerCheck(tmp_path / "absent.md").best(unscored) is None, (
+        "a final fit records NaN by design, and 'nan' quoted in a ledger is never found again"
+    )
 
 
 def test_unrecorded(tmp_path: Path):

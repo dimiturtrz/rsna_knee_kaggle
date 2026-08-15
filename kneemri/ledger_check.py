@@ -17,9 +17,10 @@ interpretation stale — which is the other half of what went wrong that day, an
 """
 
 import argparse
-import json
 import logging
 from pathlib import Path
+
+from kneemri.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,16 @@ class LedgerCheck:
         self.text = ledger.read_text(encoding="utf-8") if ledger.exists() else ""
 
     def best(self, metrics: Path) -> float | None:
-        """The best holdout mean AUC a run recorded, or None if it never scored an epoch."""
-        rows = [json.loads(line) for line in metrics.read_text(encoding="utf-8").splitlines() if line.strip()]
-        scored = [row["auc"] for row in rows if row.get("auc") is not None]
-        return max(scored) if scored else None
+        """The best holdout mean AUC a run recorded, or None if it never scored an epoch.
+
+        Through `RunMetrics` rather than parsing the JSONL again, because that file now holds two row
+        shapes — epochs and the recipe line — and a second reader is a second place to learn that. It
+        also drops NaN, which a hand-rolled `is not None` does not: a final fit (`--fold -1`) records
+        NaN by design, and `max()` over it can return NaN, quoted as "nan" and reported UNRECORDED for
+        as long as the run exists.
+        """
+        best = RunMetrics(metrics).best()
+        return best["auc"] if best else None
 
     def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
         """The runs whose best score appears nowhere in the ledger.
