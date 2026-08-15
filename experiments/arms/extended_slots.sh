@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Route the three sequences the canonical six slots cannot express. Nine slots instead of six.
 #
-# THE LOSS, measured over all 4,407 studies by kneemri.slot_ties --lost, one DICOM header per series
+# THE LOSS, measured over all 4,407 studies by kneemri.corpus.slot_ties --lost, one DICOM header per series
 # and no pixels: 2,421 of 24,371 series (9.9%) match NO slot predicate, so nothing can ever route them.
 # Three sequences are 96% of that:
 #

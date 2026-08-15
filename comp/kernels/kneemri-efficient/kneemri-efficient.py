@@ -1,7 +1,7 @@
 """The Efficiency Prize entry: two members, no overlapping windows.
 
 Identical to the accuracy kernel except for two arguments, which is the whole point of putting the work
-in `kneemri.kernel_run`.
+in `kneemri.kaggle.kernel_run`.
 
 WHY TWO AND NOT ONE, which is what this kernel shipped until 2026-08-13. It said "our own member curve is
 flat" and cited a SEED ensemble's holdout, where members two and three bought +0.0018 and +0.0007. The
@@ -32,7 +32,7 @@ The same fingerprint check guards these members as guards the published ones: a 
 different reading than it was fitted under loads cleanly and predicts from the wrong image, and nothing
 else in the run would say so.
 
-Everything below the bootstrap lives in `kneemri.kernel_run`, shared with the efficiency kernel. Only
+Everything below the bootstrap lives in `kneemri.kaggle.kernel_run`, shared with the efficiency kernel. Only
 the bootstrap — finding the mounted kit and installing its wheels — has to be here, because it runs
 BEFORE the package it is finding can be imported.
 """
@@ -56,7 +56,7 @@ turns an unbounded walk into a bounded one even if a mount arrives with a name t
 def find_kit() -> Path:
     """The directory to put on `sys.path`, found WITHOUT walking the competition data.
 
-    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/model.py")` — cost **248 seconds** on
+    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/__init__.py")` — cost **248 seconds** on
     2026-08-14, four minutes before a single line of ours ran. It descends into the competition mount,
     which holds one directory per study and one per series beneath that, and stats every DICOM on the
     way. The efficiency board scores total runtime, so this was our largest single expense and it was
@@ -70,12 +70,12 @@ def find_kit() -> Path:
         here = Path(parent)
         depth = len(here.relative_to(root).parts)
         directories[:] = [] if depth >= KIT_DEPTH else [name for name in directories if name not in SERIES]
-        if here.name == "kneemri" and (here / "model.py").exists():
+        if here.name == "kneemri" and (here / "__init__.py").exists():
             return here.parent
         archive = here / "kneemri_src.zip"
         if archive.exists():
             zipfile.ZipFile(archive).extractall("/tmp/kit")  # our own kit, built by build_kit.py
-            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/__init__.py")))).parent.parent
     raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
@@ -84,7 +84,7 @@ def install_wheels(kit: Path) -> None:
 
     The runtime probe checked the libraries the PIPELINE needs (pydicom, timm, transformers…) and found
     them all present — but not the ones our own modules import. `jaxtyping` is not in Kaggle's image and
-    `kneemri.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
+    `kneemri.models.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
     not only what you plan to use.
 
     Names what it installs, because a kit shipped without the wheel it needed fails much later, inside
@@ -110,7 +110,7 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from kneemri.kernel_run import KernelRun  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
     KernelRun(members=2, overlap=False).run()
 

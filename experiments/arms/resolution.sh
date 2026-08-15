@@ -29,7 +29,7 @@
 #   and be near zero for Effusion and Baker's, which are large fluid collections a coarse model
 #   already sees.
 # A uniform lift across all twelve REFUTES the resolution story and points at capacity or
-# optimisation instead. Read the per-label table, not the mean - kneemri.scores already reports it.
+# optimisation instead. Read the per-label table, not the mean - kneemri.evaluation.scores already reports it.
 #
 # control  the same recipe at 336 px on the same fold.
 # cost     bytes and step time both grow with the SQUARE of the side: ~1.8x.#

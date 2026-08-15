@@ -17,13 +17,13 @@ from pathlib import Path
 import pytest
 import torch
 
-from kneemri import train as train_module
-from kneemri.backbone import Encoder
-from kneemri.model import StudyDesign, StudyModel
-from kneemri.train import TrainingOptions
-from kneemri.trainer import Trainer
+from kneemri.models.backbone import Encoder
+from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.training import train as train_module
+from kneemri.training.train import TrainingOptions
+from kneemri.training.trainer import Trainer
 
-from ..unit.kneemri.model import DIM, SLOTS, _FakeBackbone
+from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 
 SLICES = 6
 SIZE = 14

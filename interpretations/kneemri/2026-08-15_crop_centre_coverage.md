@@ -1,6 +1,6 @@
 # Which crop centre keeps more knee — measured, and it is not enough to rebuild a cache for
 
-`python -m kneemri.crop_coverage --sample 400 --workers 20`, 2026-08-15.
+`python -m kneemri.corpus.crop_coverage --sample 400 --workers 20`, 2026-08-15.
 
 ## What was asked, and why not an AUC
 

@@ -138,7 +138,7 @@ of the data is a mistake this project has already made once.
 
 ## The lower bound was measured, and it was the tool
 
-2026-08-13, same day, no GPU: `python -m kneemri.report_language`. The caution above was right and the
+2026-08-13, same day, no GPU: `python -m kneemri.labels.report_language`. The caution above was right and the
 correction is larger than the caution implied.
 
 The corpus is not English with a tail. **English is 40.1% of it**, and the rest is a set of complete
@@ -182,7 +182,7 @@ It also makes the negation defect worth re-measuring. That was sized on located 
 
 ## And the reader is not measurably worse in any of those languages
 
-`python -m kneemri.reader_agreement`, same day, no GPU. Branch (a) of `knee-mxj` assumes the reader
+`python -m kneemri.labels.reader_agreement`, same day, no GPU. Branch (a) of `knee-mxj` assumes the reader
 struggles outside English. Measured against the 58 annotated studies — the only ground truth that is not
 the reader's own output — it does not:
 
@@ -221,7 +221,7 @@ reader built for a language has to close that language's gap.
 
 ## MCL is the one label whose weakness is real, and Fracture is the one that taught us to doubt it
 
-2026-08-13, no GPU: `python -m kneemri.label_stability`, reading the per-label AUCs every run has been
+2026-08-13, no GPU: `python -m kneemri.labels.label_stability`, reading the per-label AUCs every run has been
 writing since the first epoch and which nothing had ever read ACROSS runs.
 
 The project's plan was once "track per-label AUC and treat the worst label as the work item". It was
@@ -263,7 +263,7 @@ that mild collateral injury is faint in the image and unreliable in the label.
 
 ### And MCL is where the ruler is least trustworthy, which makes it the worst thing to optimise locally
 
-Same day, `python -m kneemri.reader_agreement`. Agreement on the reader's POSITIVE calls, per finding:
+Same day, `python -m kneemri.labels.reader_agreement`. Agreement on the reader's POSITIVE calls, per finding:
 
 | | calls | radiologist agrees | mean AUC (3 folds) |
 |---|---:|---:|---:|

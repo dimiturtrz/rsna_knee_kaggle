@@ -20,18 +20,18 @@ from typing import cast
 import numpy as np
 import torch
 
-from kneemri.backbone import Encoder
-from kneemri.ensemble import Ensemble
-from kneemri.fitting import Fitting, Fold, RunPlan
-from kneemri.member_record import MemberRecord
-from kneemri.members import MemberPackage
-from kneemri.model import TARGETS, StudyDesign, StudyModel
-from kneemri.package_members import MemberManifest, PackagedMember
-from kneemri.study_cache import CachedCorpus
-from kneemri.targets import Targets
-from kneemri.train import TrainingOptions
+from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.evaluation.member_record import MemberRecord
+from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.members import MemberPackage
+from kneemri.kaggle.package_members import MemberManifest, PackagedMember
+from kneemri.labels.targets import Targets
+from kneemri.models.backbone import Encoder
+from kneemri.models.model import TARGETS, StudyDesign, StudyModel
+from kneemri.training.fitting import Fitting, Fold, RunPlan
+from kneemri.training.train import TrainingOptions
 
-from ..unit.kneemri.model import DIM, SLOTS, _FakeBackbone
+from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 
 SEED = 2026
 STUDIES = 8

@@ -33,7 +33,7 @@ _REQUIRED_WHEELS = ("jaxtyping", "wadler_lindig")
 """Third-party imports our own source makes that Kaggle's base image does not carry.
 
 Probed from a kernel, not guessed: pydicom, timm, transformers, polars, cv2, SimpleITK, einops and
-sklearn are all present offline, and `jaxtyping` is not — which `kneemri.model` imports at module top,
+sklearn are all present offline, and `jaxtyping` is not — which `kneemri.models.model` imports at module top,
 so the kernel dies at import without it. `wadler_lindig` is jaxtyping's own dependency.
 
 Checked here because `build_kit.py` rebuilds the kit directory from scratch: running it without

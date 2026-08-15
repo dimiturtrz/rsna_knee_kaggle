@@ -86,7 +86,7 @@ def probe_runtime() -> None:
         logger.info(f"ram     unreadable ({exc})")
 
     try:
-        import torch  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+        import torch  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     except ImportError as exc:
         logger.info(f"torch   ABSENT ({exc})")
         return
@@ -192,7 +192,7 @@ def probe_one_series() -> None:
     """Read cost off the mount, and whether the geometry tags the ordering depends on are actually there."""
     section("7. ONE SERIES OFF THE MOUNT (read cost + geometry tags — knee-7ve, knee-b0c, knee-e5e)")
     try:
-        import pydicom  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+        import pydicom  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     except ImportError:
         logger.info("pydicom ABSENT — it must ship as a wheel in the kit")
         return

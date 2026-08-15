@@ -60,7 +60,7 @@ quality.
 | 2026-08-10 | `kneemri-probe` | 2 | passthrough `sample_submission` | — | not submitted | environment + corpus probe |
 | 2026-08-10 | `kneemri-graft-verify` | 6 | fingerprint check only | 20/20 @ 4.65e-06 | not submitted | proves the architecture port |
 | 2026-08-10 | `kneemri-graft` | 1 | **GRAFT** — 20 published CC0 members, our data layer, rank-averaged | their holdout 0.8398 | **0.888** | **their result, not ours** |
-| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.train` on report-derived labels | holdout mean 0.8162 | **0.868** | trained with augmentation silently disabled |
+| 2026-08-10 | `kneemri-trained` | 1 | **OURS** — 5 folds fitted by `kneemri.training.train` on report-derived labels | holdout mean 0.8162 | **0.868** | trained with augmentation silently disabled |
 | 2026-08-11 | `kneemri-trained` | 3 | **OURS v2** — augmentation actually applied + OneCycle + overlap TTA | holdout mean **0.8269** | **0.888** | **equals the 20-member graft with 5 of our own** |
 | 2026-08-11 | `kneemri-trained` | 4 | **OURS** — 2 whole-stack members (fold 0 + fold 1) | 0.8481 | **0.882** | +0.021 per member on the holdout, −0.006 on the board |
 | 2026-08-12 | `kneemri-trained` | 5 | **OURS** — 3 whole-stack members | 0.8493 | **0.882** | a third member of the same recipe bought NOTHING |
@@ -159,7 +159,7 @@ set twice.
 `crop_mm 130.0`, `band 0.20,0.80`, `img 336`, `slices 12`, `group 3`, `pool cls_mean`, the identical slot
 ORDER, and byte-for-byte the `rules` dict `member_record.py` hardcodes. So the residual lives in the
 IMPLEMENTATION of those rules — decode, percentile normalisation, resize — not in any recorded policy.
-`kneemri.oof_oracle` is rebuilt and pointed at exactly that, reporting per-study residuals against free
+`kneemri.evaluation.oof_oracle` is rebuilt and pointed at exactly that, reporting per-study residuals against free
 covariates so a defect that concentrates says so.
 
 ## What the six scored entries say, read together
@@ -232,7 +232,7 @@ things and neither implies the other:
 
 - **Fingerprint** (`kneemri-graft-verify`) — each member's output on a seeded synthetic bag. Proves the
   ARCHITECTURE is the function those weights were fitted to. Blind to the pixels: it feeds noise.
-- **Out-of-fold agreement** (`python -m kneemri.oof_oracle`) — our pipeline against the member's own
+- **Out-of-fold agreement** (`python -m kneemri.evaluation.oof_oracle`) — our pipeline against the member's own
   stored predictions on the studies it held out. Proves the PIXELS: routing, order, laterality, crop,
   percentile, resize. Last measured max|diff| 0.025, per-study correlation 0.99, under disjoint windows.
 

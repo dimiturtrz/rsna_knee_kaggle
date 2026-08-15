@@ -31,9 +31,9 @@ from transformers import AutoModel
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS
-from kneemri.ensemble import Ensemble
-from kneemri.members import Member, MemberPackage
+from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.members import Member, MemberPackage
+from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)
 

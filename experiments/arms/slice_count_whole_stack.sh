@@ -27,7 +27,7 @@
 # PREDICTION, written before the run: if depth coverage is the live axis, this lands above 0.846 and
 # the gain shows up broadly rather than in one label - unlike the resolution arm, which predicts a
 # gain CONCENTRATED in MCL, ACL and the menisci. The two arms are therefore distinguishable by their
-# per-label tables even if their means move alike, and kneemri.scores already reports per-label.
+# per-label tables even if their means move alike, and kneemri.evaluation.scores already reports per-label.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 SLICES="${1:-16}"

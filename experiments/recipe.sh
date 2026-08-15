@@ -1,6 +1,6 @@
 # The fitting recipe every arm shares, in ONE place. Sourced by lib.sh AND stub_lib.sh.
 #
-# WHY IT IS ITS OWN FILE. `kneemri.arm_check` sources each arm against stub_lib.sh, so anything defined
+# WHY IT IS ITS OWN FILE. `kneemri.evaluation.arm_check` sources each arm against stub_lib.sh, so anything defined
 # only in lib.sh would be EMPTY under the check - and an unset variable expands to nothing, which means
 # the checker would validate an invocation missing exactly the flags it was meant to prove. Both libs
 # source this, so there is one definition and the check sees what the run sees.

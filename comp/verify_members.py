@@ -21,8 +21,8 @@ from transformers import AutoModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from kneemri.backbone import ENCODERS
-from kneemri.members import MemberPackage
+from kneemri.inference.members import MemberPackage
+from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)
 

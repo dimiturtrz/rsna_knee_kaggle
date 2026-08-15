@@ -19,14 +19,14 @@ import pytest
 import torch
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS, SMALL
-from kneemri.ensemble import Ensemble
-from kneemri.holdout_predictions import HoldoutPredictions, Window
-from kneemri.holdout_slab import HoldoutSlab
-from kneemri.model import TARGETS
-from kneemri.slot_reader import GROUP, IMAGE_SIZE
-from kneemri.slots import SLOTS
-from kneemri.study_cache import StudyCache
+from kneemri.corpus.slot_reader import GROUP, IMAGE_SIZE
+from kneemri.corpus.slots import SLOTS
+from kneemri.corpus.study_cache import StudyCache
+from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
+from kneemri.inference.holdout_slab import HoldoutSlab
+from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.model import TARGETS
 
 STUDIES = 4
 PATHS = Path("paths.yaml")

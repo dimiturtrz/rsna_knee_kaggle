@@ -16,11 +16,11 @@ import pandas as pd
 import pytest
 
 from core.paths import COMPETITION
-from kneemri import build_cache
-from kneemri.crop_centre import Crop
-from kneemri.slot_reader import Band, Reading
-from kneemri.slots import Routing
-from kneemri.study_cache import StudyCache
+from kneemri.corpus import build_cache
+from kneemri.corpus.crop_centre import Crop
+from kneemri.corpus.slot_reader import Band, Reading
+from kneemri.corpus.slots import Routing
+from kneemri.corpus.study_cache import StudyCache
 
 SLICES = 12
 
@@ -40,7 +40,7 @@ def root(tmp_path: Path) -> Path:
 
 
 def _key(root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], *flags: str) -> str:
-    """What a shell would capture from `$(python -m kneemri.build_cache --print-key …)`: stdout alone."""
+    """What a shell would capture from `$(python -m kneemri.corpus.build_cache --print-key …)`: stdout alone."""
     argv = ["build_cache", "--print-key", "--paths", str(root / "paths.yaml"), *flags]
     monkeypatch.setattr("sys.argv", argv)
     build_cache.main()

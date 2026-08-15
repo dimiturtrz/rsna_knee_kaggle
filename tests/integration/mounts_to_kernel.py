@@ -22,17 +22,17 @@ from typing import cast
 import pytest
 import torch
 
-from kneemri import kernel_run as kernel_module
-from kneemri.backbone import ENCODERS, SMALL
-from kneemri.ensemble import Ensemble
-from kneemri.kernel_run import KernelRun
-from kneemri.member_record import MemberRecord
-from kneemri.model import StudyModel
-from kneemri.mounts import Mounts
-from kneemri.package_members import MemberManifest, PackagedMember
-from kneemri.train import TrainingOptions
+from kneemri.evaluation.member_record import MemberRecord
+from kneemri.inference.ensemble import Ensemble
+from kneemri.kaggle import kernel_run as kernel_module
+from kneemri.kaggle.kernel_run import KernelRun
+from kneemri.kaggle.mounts import Mounts
+from kneemri.kaggle.package_members import MemberManifest, PackagedMember
+from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.model import StudyModel
+from kneemri.training.train import TrainingOptions
 
-from ..unit.kneemri.model import DIM, SLOTS, _FakeBackbone
+from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 
 SIZE = 28
 SLICES = 4

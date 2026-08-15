@@ -13,7 +13,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 CHECKPOINT="${1:-$PROCESSED/rankbase24_s2026.pt}"
 require "$LABELS" "$CHECKPOINT"
 
-uv run python -u -m kneemri.attribution \
+uv run python -u -m kneemri.evaluation.attribution \
   --checkpoint "$CHECKPOINT" --labels "$LABELS" --studies 400 2>&1 | tee "$LOGS/attribution.full.log"
 status="${PIPESTATUS[0]}"
 [ "$status" -eq 0 ] || { echo "ARM FAILED attribution (exit $status)"; exit "$status"; }

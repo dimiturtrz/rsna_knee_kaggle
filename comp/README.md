@@ -45,7 +45,7 @@ be compared against it. An external input with no fetch step is not a dependency
 
 ## Spending a submission
 
-**Every entry is justified OFFLINE first.** `kneemri.member_curve` scores every subset of members on
+**Every entry is justified OFFLINE first.** `kneemri.evaluation.member_curve` scores every subset of members on
 the shared fold-0 holdout and costs no slot; every arm is fitted on that same split, so any candidate
 ensemble is rankable before it is submitted. A slot is spent only when the offline number predicts a
 gain over **the best entry already on the board (0.894)**, or when the question cannot be answered
@@ -84,7 +84,7 @@ cd comp && kaggle datasets version -p kit -m "<message>" --dir-mode zip
 ```
 
 **Rebuild the kit whenever `kneemri/` changes, not only when the weights change.** A kernel run was
-lost to `ModuleNotFoundError: No module named 'kneemri.submission'`: the kernels had been refactored
+lost to `ModuleNotFoundError: No module named 'kneemri.kaggle.submission'`: the kernels had been refactored
 to import a newly extracted module, the MEMBERS dataset was pushed, and the kit was not.
 `verify_kit.py` compares the kit against the repo and catches this in a second — it was skipped
 because the change felt like it was "only in the kernels", which is backwards. The kernels are a
@@ -223,7 +223,7 @@ track costs us nothing but a submission slot. Get both leaderboards with
   pipeline the CPU count, not the GPU, is the binding constraint.
 - **Almost nothing needs to ship as a wheel — but "almost" is not "nothing".** Present offline: pydicom
   3.0.2, timm 1.0.26, transformers 5.0.0, polars, cv2, SimpleITK, nibabel, einops, sklearn, scipy, PIL.
-  Absent: monai, zarr, **and `jaxtyping`** — which `kneemri.model` imports at module top, so the kit
+  Absent: monai, zarr, **and `jaxtyping`** — which `kneemri.models.model` imports at module top, so the kit
   ships `jaxtyping` + `wadler_lindig` wheels and the kernel `pip install --no-index --no-deps`s them
   before importing anything of ours. The probe asked which libraries the *pipeline* needs and missed the
   ones *our own source* imports: **probe what you import, not only what you plan to use.**

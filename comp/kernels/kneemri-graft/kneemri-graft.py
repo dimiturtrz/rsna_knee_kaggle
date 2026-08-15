@@ -7,7 +7,7 @@ Two oracles stand behind it: the fingerprint proves the architecture is the func
 fitted to, and the authors' own out-of-fold predictions prove the pixels (max deviation 0.025, per-study
 correlation 0.99).
 
-Everything below the bootstrap lives in `kneemri.submission`, shared with the graft kernel. Only the
+Everything below the bootstrap lives in `kneemri.kaggle.submission`, shared with the graft kernel. Only the
 bootstrap — finding the mounted kit and installing its wheels — has to be here, because it runs BEFORE
 the package it is finding can be imported.
 """
@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     # The kit is not on sys.path when this module is imported, so the finder is a name to the
     # type checker and an argument at runtime.
-    from kneemri.mounts import Mounts
+    from kneemri.kaggle.mounts import Mounts
 
 import torch
 
@@ -43,7 +43,7 @@ turns an unbounded walk into a bounded one even if a mount arrives with a name t
 def find_kit() -> Path:
     """The directory to put on `sys.path`, found WITHOUT walking the competition data.
 
-    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/model.py")` — cost **248 seconds** on
+    The obvious spelling — `Path("/kaggle/input").rglob("kneemri/__init__.py")` — cost **248 seconds** on
     2026-08-14, four minutes before a single line of ours ran. It descends into the competition mount,
     which holds one directory per study and one per series beneath that, and stats every DICOM on the
     way. The efficiency board scores total runtime, so this was our largest single expense and it was
@@ -57,12 +57,12 @@ def find_kit() -> Path:
         here = Path(parent)
         depth = len(here.relative_to(root).parts)
         directories[:] = [] if depth >= KIT_DEPTH else [name for name in directories if name not in SERIES]
-        if here.name == "kneemri" and (here / "model.py").exists():
+        if here.name == "kneemri" and (here / "__init__.py").exists():
             return here.parent
         archive = here / "kneemri_src.zip"
         if archive.exists():
             zipfile.ZipFile(archive).extractall("/tmp/kit")  # our own kit, built by build_kit.py
-            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/model.py")))).parent.parent
+            return next(iter(sorted(Path("/tmp/kit").rglob("kneemri/__init__.py")))).parent.parent
     raise FileNotFoundError("no kneemri package under /kaggle/input")
 
 
@@ -71,7 +71,7 @@ def install_wheels(kit: Path) -> None:
 
     The runtime probe checked the libraries the PIPELINE needs (pydicom, timm, transformers…) and found
     them all present — but not the ones our own modules import. `jaxtyping` is not in Kaggle's image and
-    `kneemri.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
+    `kneemri.models.model` imports it at module top, so the kit needs wheels after all. Probe what you import,
     not only what you plan to use.
 
     Names what it installs, because a kit shipped without the wheel it needed fails much later, inside
@@ -109,12 +109,12 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from transformers import AutoModel  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from transformers import AutoModel  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
-    from kneemri.ensemble import Ensemble  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
-    from kneemri.members import MemberPackage  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
-    from kneemri.mounts import Mounts  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
-    from kneemri.submission import Submission  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from kneemri.kaggle.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from kneemri.kaggle.submission import Submission  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
     # ONE finder for the whole run: it caches, and each of these lookups used to walk the whole
     # competition mount on its own.

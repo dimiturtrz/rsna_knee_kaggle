@@ -32,7 +32,7 @@ Synovitis lose.** A uniform shift would have said "worse model". This is not tha
 
 CALIBRATED AFTERWARDS, and it is the reason this section is allowed to carry an argument. Each label's
 AUC has its own sampling error, from how many positives carry it — Fracture's 62 positives give a 95%
-interval of ±0.061 where Effusion's 533 give ±0.025 (`kneemri.label_power`). Against those intervals
+interval of ±0.061 where Effusion's 533 give ±0.025 (`kneemri.labels.label_power`). Against those intervals
 exactly four of v3-S's twelve deltas clear their own: **Baker's, Lateral Meniscus, Medial Meniscus and
 Contusion** — the four this argument rests on. The rest, Fracture's −0.025 included, are smaller than
 the instrument that produced them and are not evidence of anything. The same calibration deletes a
@@ -100,7 +100,7 @@ Failing differently is the one property measured to pay on this competition (fiv
 LB 0.888; two members 0.021 better EACH scored 0.882). v3's per-label profile is reordered, not
 merely lowered, which is the definition of a differently-failing member — and it costs no extra decode,
 because it reads 224 off the 336 cache every other member already needs. Whether that earns a seat is
-`kneemri.member_curve`'s call, not this document's.
+`kneemri.evaluation.member_curve`'s call, not this document's.
 
 ## The decision
 

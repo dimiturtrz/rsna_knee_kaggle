@@ -1,6 +1,6 @@
 # Shared plumbing for the training arms. Source it; do not run it.
 #
-# An arm is a hypothesis, a control number, and one `kneemri.train` invocation. Everything an arm
+# An arm is a hypothesis, a control number, and one `kneemri.training.train` invocation. Everything an arm
 # needs that is not the hypothesis itself lives here, so an arm file is only ever the interesting part.
 #
 # Two rules are encoded rather than remembered:
@@ -115,7 +115,7 @@ require() {
 }
 
 run_train() {
-  # $1 is the arm's name; the rest are kneemri.train flags.
+  # $1 is the arm's name; the rest are kneemri.training.train flags.
   #
   # The FULL output is kept out of the repo under processed/experiments, and only the epoch and best
   # lines reach the terminal. Earlier arms piped straight into grep, which discarded any traceback
@@ -139,7 +139,7 @@ run_train() {
   # 14:03 ran the pre-push hook's `uv run pytest`, uv rewrote uv.lock at 14:05, and the arm died mid
   # epoch 4 with exit 127 and no traceback. run_snapshot protects the SOURCE from edits mid-run; this
   # protects the ENVIRONMENT, which is the other half and was missing.
-  (cd "${ARM_SRC:-$REPO}" && uv run --no-sync --project "$REPO" python -u -m kneemri.train "$@") 2>&1 \
+  (cd "${ARM_SRC:-$REPO}" && uv run --no-sync --project "$REPO" python -u -m kneemri.training.train "$@") 2>&1 \
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
@@ -209,7 +209,7 @@ wait_for_cache() {
   # prevent, so the reading goes to the builder that names it, in full.
   local size="$1" slices="${2:-12}" scheme="${3:-canonical}" crop="${4:-130}" centre="${5:-image}"
   local key
-  key="$(uv run python -m kneemri.build_cache --print-key     --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
+  key="$(uv run python -m kneemri.corpus.build_cache --print-key     --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
   [ -n "$key" ] || { echo "wait_for_cache: the builder named no key"; return 1; }
   until [ -f "$PROCESSED/mask_${key}.npy" ]; do sleep 60; done
 }

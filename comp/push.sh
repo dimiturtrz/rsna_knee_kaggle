@@ -8,7 +8,7 @@
 # check at all. So the guarded path was the one nobody ran.
 #
 # That is not hypothetical: a kernel run was lost to `ModuleNotFoundError: No module named
-# 'kneemri.submission'` because the members dataset was pushed while the kit lagged the repo. The gate
+# 'kneemri.kaggle.submission'` because the members dataset was pushed while the kit lagged the repo. The gate
 # was written after that, onto the transport that had already stopped being used.
 #
 # The gate covers EVERY subcommand rather than only the kit's own push, and for the same reason

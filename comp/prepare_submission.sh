@@ -16,7 +16,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
 echo "=== 1. package the members ==="
-uv run python -m kneemri.package_members --out comp/members --pattern "$PATTERN"
+uv run python -m kneemri.kaggle.package_members --out comp/members --pattern "$PATTERN"
 
 echo
 echo "=== 2. verify every member loads and fingerprints under its OWN reading ==="

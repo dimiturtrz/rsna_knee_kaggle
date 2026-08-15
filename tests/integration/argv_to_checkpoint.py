@@ -24,18 +24,18 @@ import pytest
 import torch
 
 from core.paths import COMPETITION
-from kneemri import train as train_module
-from kneemri.backbone import ENCODERS, SMALL
-from kneemri.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
-from kneemri.folds import ReportFolds
-from kneemri.members import Member, MemberConfig
-from kneemri.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
-from kneemri.slot_head import AVERAGED
-from kneemri.slot_reader import IMAGE_SIZE, Band, Reading
-from kneemri.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
-from kneemri.study_cache import StudyCache
+from kneemri.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
+from kneemri.corpus.folds import ReportFolds
+from kneemri.corpus.slot_reader import IMAGE_SIZE, Band, Reading
+from kneemri.corpus.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
+from kneemri.corpus.study_cache import StudyCache
+from kneemri.inference.members import Member, MemberConfig
+from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
+from kneemri.models.slot_head import AVERAGED
+from kneemri.training import train as train_module
 
-from ..unit.kneemri.model import DIM, _BlockedBackbone, _FakeBackbone
+from ..unit.kneemri.models.model import DIM, _BlockedBackbone, _FakeBackbone
 
 STUDIES = 8
 SLICES = 4

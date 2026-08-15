@@ -82,6 +82,6 @@ MEMBERS=(
 )
 require "${MEMBERS[@]}"
 
-uv run python -u -m kneemri.member_curve --overlap --labels "$LABELS" --checkpoints "${MEMBERS[@]}" 2>&1 \
+uv run python -u -m kneemri.evaluation.member_curve --overlap --labels "$LABELS" --checkpoints "${MEMBERS[@]}" 2>&1 \
   | tee "$LOGS/diversity_curve.log"
 echo "ARM DONE diversity_curve"
