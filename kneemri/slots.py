@@ -107,6 +107,9 @@ patches at 14 px, making a tear a fraction of ONE token. 80 mm at the same grid 
 finer for identical compute, and still wider than the 70-80 mm the joint itself spans (knee-1nn).
 """
 
+MULTISCALE_SCHEME = "multiscale"
+"""The scheme name that selects the two-extent slot axis, and the suffix its caches carry."""
+
 MULTISCALE_SLOTS: tuple[Slot, ...] = (
     *SLOTS,
     *(replace(slot, name=f"{slot.name}@{DETAIL_MM:g}", crop_mm=DETAIL_MM) for slot in SLOTS),
@@ -129,7 +132,7 @@ wide one already produced, so scale costs encoder passes and not I/O.
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
-    "multiscale": MULTISCALE_SLOTS,
+    MULTISCALE_SCHEME: MULTISCALE_SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""

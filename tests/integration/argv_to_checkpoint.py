@@ -28,7 +28,7 @@ from kneemri import train as train_module
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.folds import ReportFolds
 from kneemri.model import TARGETS
-from kneemri.slots import LAST_MAXIMAL, SCHEMES, Routing
+from kneemri.slots import DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
 
 from ..unit.kneemri.model import DIM, _FakeBackbone
@@ -153,6 +153,26 @@ def test_the_command_line_reaches_the_checkpoint(corpus: Path, monkeypatch: pyte
     assert config["train_size"] == SIZE, "0 means the cache's own size, and the member must state which that was"
     assert payload["fingerprint"], "a member without one cannot be verified, so it cannot be submitted"
     assert _nested(payload, "fingerprint_config")["n_slot"] == len(SCHEMES[StudyCache.CANONICAL])
+
+
+def test_the_scheme_reaches_the_model_and_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """`--scheme` decides three things at once, and each is a separate chance to drop it.
+
+    It selects the CACHE (the key carries a routing suffix), the SLOT COUNT the model is built with,
+    and the slot NAMES recorded on the member — which is what `Member.scheme` matches back to find the
+    cache at serving time. A run whose model kept six slots while its member claimed twelve loads
+    without complaint and reads half the pixels it says it does.
+
+    Multiscale is the case worth driving because it is the newest and the only one where the slot axis
+    carries two physical extents rather than two sequences.
+    """
+    _corpus(corpus, Routing(scheme=MULTISCALE_SCHEME))
+    payload = _run(corpus, monkeypatch, "--scheme", MULTISCALE_SCHEME)
+
+    expected = [slot.name for slot in SCHEMES[MULTISCALE_SCHEME]]
+    assert _nested(payload, "fingerprint_config")["n_slot"] == len(expected), "the MODEL's own slot axis"
+    assert _nested(payload, "config")["slots"] == expected
+    assert [name for name in expected if name.endswith(f"@{DETAIL_MM:g}")], "the tight half is what it is for"
 
 
 def test_the_run_keeps_an_epoch_and_saves_it(corpus: Path, monkeypatch: pytest.MonkeyPatch):
