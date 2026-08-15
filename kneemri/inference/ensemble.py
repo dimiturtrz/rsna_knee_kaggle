@@ -15,8 +15,9 @@ disjoint windows, probability pooling, 0.025 max deviation against ours).
 
 import logging
 import time
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Hashable, Iterable
 from dataclasses import dataclass
+from typing import TypeVar
 
 import numpy as np
 import torch
@@ -34,6 +35,9 @@ from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyModel
 
 logger = logging.getLogger(__name__)
+
+Decision = TypeVar("Decision", bound=Hashable)
+"""A field the whole decode has to share — the slot list, the tie rule — not one member's own setting."""
 
 IMAGE_BUDGET = 864
 """Images per forward for a 384-wide encoder — the largest that has ever completed on a Kaggle T4.
@@ -196,21 +200,29 @@ class Ensemble:
         Refused rather than resolved when members disagree, for the same reason as resolution — a
         different slot list is a different decode, not a subset of one.
         """
-        lists = {tuple(member.config["slots"]) for member in (members or self.package.members)}
-        if len(lists) != 1:
-            message = f"members disagree on the slot list ({len(lists)} distinct) — that is two decodes, not one"
-            raise ValueError(message)
-        names = lists.pop()
+        decoding = members or self.package.members
+        names = self.agreed(decoding, "slot list", lambda member: tuple(member.config["slots"]))
         known = {slot.name: slot for scheme in SCHEMES.values() for slot in scheme}
         missing = [name for name in names if name not in known]
         if missing:
             message = f"members name slots this build does not define: {missing}"
             raise ValueError(message)
-        ties = {member.tie for member in (members or self.package.members)}
-        if len(ties) != 1:
-            message = f"members disagree on the tie rule ({sorted(ties)}) — that is two decodes, not one"
+        tie = self.agreed(decoding, "tie rule", lambda member: member.tie)
+        return SlotScheme(tuple(known[name] for name in names), tie=tie)
+
+    def agreed(self, members: list[Member], what: str, decide: Callable[[Member], Decision]) -> Decision:
+        """The one value every member decodes under, or a refusal — never a majority, never the first.
+
+        A decode is shared: one stack is read, routed and bagged, then shown to every member. So a field
+        that differs between members is not a disagreement to resolve, it is two decodes asked for at
+        once, and picking either silently serves the other member's weights an input they were never
+        fitted on. Refusing here is cheap; the same mismatch found by a score is a submission.
+        """
+        distinct = {decide(member) for member in members}
+        if len(distinct) != 1:
+            message = f"members disagree on the {what} ({len(distinct)} distinct) — that is two decodes, not one"
             raise ValueError(message)
-        return SlotScheme(tuple(known[name] for name in names), tie=ties.pop())
+        return distinct.pop()
 
     def arithmetic(self, member: Member) -> torch.dtype:
         """The dtype this DEVICE can actually run, which is not always the one the member was fitted in.
@@ -396,24 +408,43 @@ class Ensemble:
             for member in members:
                 if member.identifier in failed:
                     continue
-                images, mask = sized[member.image_size]
-                started = time.time()
-                try:
-                    per_member[member.identifier].append(self.predict_member(member, images, mask, overlap=overlap))
-                    self.spent[member.identifier] = self.spent.get(member.identifier, 0.0) + time.time() - started
-                # ONE MEMBER MUST NOT COST THE ENTRY. Three submissions died because any single failure
-                # anywhere took the whole run down, and a run that fails writes no submission at all. An
-                # ensemble is the one structure that does not need every part: dropping a member costs a
-                # little accuracy, and dropping the entry costs a slot and a day.
-                except Exception:
-                    logger.exception("member %s failed mid-prediction — dropping it from this entry", member.identifier)
+                predicted = self.attempt(member, sized, overlap=overlap)
+                if predicted is None:
                     failed.add(member.identifier)
+                else:
+                    per_member[member.identifier].append(predicted)
             self.afford(members, failed)
         survived = [member for member in members if member.identifier not in failed and per_member[member.identifier]]
         if not survived:
             message = f"every member of this group failed: {sorted(failed)}"
             raise RuntimeError(message)
         return [np.concatenate(per_member[member.identifier]) for member in survived]
+
+    def attempt(
+        self,
+        member: Member,
+        sized: dict[int, tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]],
+        *,
+        overlap: bool,
+    ) -> NDArray[np.float64] | None:
+        """One member's pass over one chunk, timed — or None, because ONE MEMBER MUST NOT COST THE ENTRY.
+
+        Three submissions died because any single failure anywhere took the whole run down, and a run
+        that fails writes no submission at all. An ensemble is the one structure that does not need
+        every part: dropping a member costs a little accuracy, dropping the entry costs a slot and a day.
+
+        The seconds are banked only on the way out through success, since a member that raised part-way
+        did not pay for a prediction and must not be charged for one — `afford` divides by this.
+        """
+        images, mask = sized[member.image_size]
+        started = time.time()
+        try:
+            predicted = self.predict_member(member, images, mask, overlap=overlap)
+        except Exception:
+            logger.exception("member %s failed mid-prediction — dropping it from this entry", member.identifier)
+            return None
+        self.spent[member.identifier] = self.spent.get(member.identifier, 0.0) + time.time() - started
+        return predicted
 
     def afford(self, members: list[Member], failed: set[str]) -> None:
         """Give up the weakest surviving member when the run is projected past its ceiling.
@@ -459,7 +490,10 @@ class Ensemble:
             self.budget.seconds / SECONDS_PER_HOUR,
             weakest.identifier,
             weakest.holdout,
-            self.spent[weakest.identifier],
+            # .get, because this line runs INSIDE the mitigation for runs that die: a member the loop
+            # has not timed yet is exactly the case `worth` is built to handle, and a KeyError raised
+            # while logging the give-up would take down the entry the give-up exists to save.
+            self.spent.get(weakest.identifier, 0.0),
             self.worth(weakest),
             len(surviving) - 1,
         )

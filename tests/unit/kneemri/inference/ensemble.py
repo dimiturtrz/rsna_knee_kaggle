@@ -259,6 +259,22 @@ def test_decoded_scheme(tmp_path: Path):
         ensemble.decoded_scheme()
 
 
+def test_agreed(tmp_path: Path):
+    """One shared value passes; two are refused by name, whatever field disagreed."""
+    ensemble = _ensemble(tmp_path / "agreed")
+    member = ensemble.package.members[0]
+    other = replace(member, identifier="other")
+
+    assert ensemble.agreed([member, other], "depth", lambda each: each.slices) == member.slices
+
+    with pytest.raises(ValueError, match="depth"):
+        ensemble.agreed(
+            [member, replace(other, config={**other.config, "slices": member.slices + 1})],
+            "depth",
+            lambda each: each.slices,
+        )
+
+
 def test_predict_members(tmp_path: Path):
     """One array per member, uncombined — groups must be rank-averaged together, not group by group."""
     ensemble = _ensemble(tmp_path / "members")
@@ -269,6 +285,24 @@ def test_predict_members(tmp_path: Path):
     arrays = ensemble.predict_members([member], [{member.image_size: (images, mask)}], overlap=False)
     assert len(arrays) == 1
     assert arrays[0].shape == (2, len(TARGETS))
+
+
+def test_attempt(tmp_path: Path):
+    """A pass that lands is banked as seconds; one that raises returns None and is charged nothing."""
+    ensemble = _ensemble(tmp_path / "attempt")
+    member = ensemble.package.members[0]
+    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    sized = {member.image_size: (images, torch.ones(2, len(SLOTS)))}
+
+    predicted = ensemble.attempt(member, sized, overlap=False)
+    assert predicted is not None
+    assert predicted.shape == (2, len(TARGETS))
+    assert ensemble.spent[member.identifier] > 0
+
+    banked = ensemble.spent[member.identifier]
+    del ensemble.models[member.identifier]
+    assert ensemble.attempt(member, sized, overlap=False) is None, "a failed member drops, it does not raise"
+    assert ensemble.spent[member.identifier] == banked, "and pays for no prediction it did not make"
 
 
 def test_predict_groups(tmp_path: Path):

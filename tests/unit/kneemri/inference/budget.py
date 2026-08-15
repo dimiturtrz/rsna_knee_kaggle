@@ -89,6 +89,16 @@ def test_overrunning():
     assert not roomy.overrunning(), "a second against nine hours is not"
 
 
+def test_report():
+    """A measured budget names both hours; an unmeasured one prints nothing rather than infinity."""
+    budget = _spent(3600)
+    assert budget.report() == "", "no chunk done yet — there is no projection to print"
+
+    budget.begin(2)
+    budget.group(1)
+    assert budget.report() == "projecting 2.0h of 9.0h, "
+
+
 def test_margin():
     """The ceiling a run aims at is under the real one, because the tail is not in the projection."""
     assert Budget(seconds=1000, margin=0.85).seconds == pytest.approx(850)

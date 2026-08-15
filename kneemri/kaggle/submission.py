@@ -27,7 +27,6 @@ from torch import Tensor
 
 from kneemri.corpus.slot_reader import SlotReader
 from kneemri.corpus.study import SlotPipeline, Study
-from kneemri.inference.budget import SECONDS_PER_HOUR
 from kneemri.inference.ensemble import Ensemble, Read
 from kneemri.models.model import TARGETS
 
@@ -240,12 +239,7 @@ class Submission:
                 budget = self.ensemble.budget
                 if budget:
                     budget.chunk(index, len(groups))
-                projection = (
-                    f"projecting {budget.projected() / SECONDS_PER_HOUR:.1f}h "
-                    f"of {budget.seconds / SECONDS_PER_HOUR:.1f}h, "
-                    if budget and budget.measured()
-                    else ""
-                )
+                projection = budget.report() if budget else ""
                 logger.info(
                     f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
                     f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s, "

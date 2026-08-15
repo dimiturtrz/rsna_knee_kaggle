@@ -17,7 +17,15 @@ READERS = 2
 
 
 class WindowReader(Protocol):
-    """The one thing a reader does: hand back `width` slices of every slot for a batch of positions."""
+    """The one thing a reader does: hand back `width` slices of every slot for a batch of positions.
+
+    `(batch, start, width)` travels as three parameters rather than one request object DELIBERATELY. It
+    is a slicing expression, not a noun the rest of the codebase says anything about: nothing stores
+    one, nothing returns one, and nothing decides anything from one — `Prefetch` already holds the
+    schedule that produces them, and `Window` in `inference.members` is a different thing (a member's
+    read plan). A value object here would add a type to name an argument list, on the inner loop, and
+    would still be unpacked in the same two places.
+    """
 
     def read(self, batch: NDArray[np.int64], start: int, width: int) -> NDArray[np.uint8]: ...
 

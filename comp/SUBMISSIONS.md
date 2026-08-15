@@ -333,6 +333,9 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   entry was still `PENDING` at 22:30, and Kaggle reruns the notebook on the hidden test set before
   scoring, so the wait is HOURS, not minutes. Consequence for slot planning: the five daily slots are
   not spendable in an evening. If a day's slots matter, submit the first entry early and treat the
-  scoring queue — not the kernel queue and not the daily quota — as the binding constraint.
+  scoring queue — not the kernel queue and not the daily quota — as the binding constraint. The block is
+  per COMPETITION, not per kernel: with fusion pending, a submit of `kneemri-trained v8` — a different
+  kernel, COMPLETE, never submitted today — returned the same 400 (22:39 UTC). So queueing a second
+  kernel while the first is pending is not a way around it.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.
