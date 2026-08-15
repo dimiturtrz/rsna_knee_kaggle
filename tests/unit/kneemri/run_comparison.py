@@ -59,6 +59,7 @@ def test_report(tmp_path: Path):
     report = comparison.report()
     assert "0.8400" in report and "epoch 1" in report
     assert report.index("MCL") < report.index("Effusion"), "the widest delta is read first"
+    assert "by structure scale" in report, "the crop gate is a pattern across labels, not twelve numbers by eye"
 
 
 def test_report_names_what_else_moved(tmp_path: Path):

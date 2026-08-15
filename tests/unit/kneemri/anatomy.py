@@ -4,7 +4,11 @@ These assert radiology, not arithmetic. If a change makes the ACL prefer an axia
 sagittal one, the table is wrong however cleanly it computes.
 """
 
-from kneemri.anatomy import ANATOMY, PRIMARY, SECONDARY, FindingAnatomy, SlotAffinity
+import math
+
+import pytest
+
+from kneemri.anatomy import ANATOMY, PRIMARY, SECONDARY, Extent, FindingAnatomy, ScaleProfile, SlotAffinity
 from kneemri.model import TARGETS
 from kneemri.slots import SLOTS, Slot
 
@@ -49,3 +53,46 @@ def test_matrix_gives_an_unknown_finding_a_flat_row():
     """A thirteenth target must not be silently masked out of every slot."""
     row = SlotAffinity(ANATOMY).matrix(("Chondrocalcinosis",), SLOTS)
     assert float(row.min()) == float(row.max()) == 0.0
+
+
+def test_of():
+    """The deltas split by structure scale, and MEAN — not a finding — is not averaged into either."""
+    profile = ScaleProfile.of({"ACL": 0.02, "Medial Meniscus": 0.04, "Effusion": -0.02, "MEAN": 0.9})
+
+    assert profile.focal == pytest.approx(0.03)
+    assert profile.regional == pytest.approx(-0.02)
+
+
+def test_of_reports_a_side_no_arm_scored_as_nan():
+    """An empty side is nan rather than zero: unread is not 'moved nothing'."""
+    profile = ScaleProfile.of({"ACL": 0.02})
+
+    assert math.isnan(profile.regional)
+
+
+def test_verdict():
+    """Each of the four patterns is named, and only the two-sided one supports the multi-scale build."""
+    assert "TRADED" in ScaleProfile(focal=0.02, regional=-0.01).verdict()
+    assert "UNIFORM" in ScaleProfile(focal=0.02, regional=0.01).verdict()
+    assert "INVERTED" in ScaleProfile(focal=-0.02, regional=0.01).verdict()
+    assert "REFUTED" in ScaleProfile(focal=-0.02, regional=-0.01).verdict()
+
+
+def test_line():
+    """The printable form carries both means and the pattern, so a log holds the whole verdict."""
+    line = ScaleProfile(focal=0.02, regional=-0.01).line()
+
+    assert "focal +0.0200" in line
+    assert "regional -0.0100" in line
+    assert "TRADED" in line
+
+
+def test_extent_is_assigned_from_the_structure_and_not_from_a_measured_result():
+    """The millimetre-scale structures are focal and the fluid collections are regional.
+
+    Cartilage is asserted focal DELIBERATELY: our annotation study found osteoarthritis
+    label-bottlenecked, and a grouping edited to match that would agree with any future arm.
+    """
+    focal = {name for name, finding in ANATOMY.items() if finding.extent is Extent.FOCAL}
+
+    assert focal == {"ACL", "MCL", "Medial Meniscus", "Lateral Meniscus", "Medial OA", "Lateral OA", "PF OA"}

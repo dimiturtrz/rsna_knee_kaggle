@@ -4,6 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 
+from kneemri.anatomy import ScaleProfile
 from kneemri.label_power import FOLDS, LabelPower
 from kneemri.run_metrics import RunMetrics
 
@@ -90,6 +91,7 @@ class RunComparison:
             lines.append(
                 f"\n{arm.path.stem}  " + "  ".join(f"{label} {self._marked(label, v)}" for label, v in ordered)
             )
+            lines.append(ScaleProfile.of(deltas).line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
         if self.errors:
             lines.append(

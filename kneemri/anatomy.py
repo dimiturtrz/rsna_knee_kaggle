@@ -22,12 +22,39 @@ seventy-two numbers:
 """
 
 from dataclasses import dataclass
+from enum import Enum
 
 import torch
 from jaxtyping import Float
 from torch import Tensor
 
 from kneemri.slots import Plane, Slot
+
+
+class Extent(Enum):
+    """How big the abnormality being called physically is — the axis a crop or a resolution trades on.
+
+    Two classes and not a millimetre per finding, because the split is what a reading has to survive:
+    a structure whose abnormality is a few voxels across is lost to sampling long before one that
+    spans centimetres, and no arm we can run resolves the difference between 2 mm and 3 mm.
+
+    Assigned from the STRUCTURE, never from a measured per-label result. Cartilage sits on the focal
+    side because it is 2-4 mm thick and its loss is read at the joint line, even though our own
+    annotation study found osteoarthritis label-bottlenecked rather than model-bottlenecked. Fitting
+    the classes to that observation would make every subsequent per-label pattern unfalsifiable —
+    the grouping would then agree with any result by construction.
+    """
+
+    FOCAL = "focal"
+    """Millimetre-scale and at the joint centre: a meniscal tear is 1-2 mm, which at 0.387 mm/px is
+    three to five pixels — a fraction of one 14 px DINOv2 patch. These are the findings a tighter,
+    finer crop can only help."""
+
+    REGIONAL = "regional"
+    """Centimetre-scale, and often reaching past the joint centre: an effusion spreads into the
+    suprapatellar pouch, a Baker's cyst sits posteriorly, marrow oedema covers a condyle. Resolution
+    buys these nothing, and a crop tight enough to help the focal findings should COST them."""
+
 
 PRIMARY = 1.0
 """The plane a finding is normally read on."""
@@ -57,6 +84,10 @@ class FindingAnatomy:
     primary: tuple[Plane, ...]
     secondary: tuple[Plane, ...] = ()
     needs_fluid: bool = True
+    extent: Extent = Extent.REGIONAL
+    """How big the thing being called is. Read by the analysis that decides whether a tighter crop
+    bought detail, and by nothing in training — `affinity` never sees it, so adding this axis cannot
+    move a single logit of the attention prior."""
     needs_fat_sat: bool = False
     """Marrow oedema is invisible without fat suppression, whatever the plane and whatever the
     weighting — so a bone finding on a non-fat-saturated sequence is not merely less conspicuous, it is
@@ -78,27 +109,91 @@ class FindingAnatomy:
 
 
 ANATOMY: dict[str, FindingAnatomy] = {
-    "ACL": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.CORONAL,)),
-    "MCL": FindingAnatomy(primary=(Plane.CORONAL,)),
+    "ACL": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.CORONAL,), extent=Extent.FOCAL),
+    "MCL": FindingAnatomy(primary=(Plane.CORONAL,), extent=Extent.FOCAL),
     # The meniscal body is coronal and its horns are sagittal, so a tear is genuinely read on both.
-    "Medial Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL)),
-    "Lateral Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL)),
+    "Medial Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
+    "Lateral Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
     # Cartilage loss, joint-space narrowing and osteophytes are morphology: T1 shows them well.
-    "Medial OA": FindingAnatomy(primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
-    "Lateral OA": FindingAnatomy(primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
-    "PF OA": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False),
-    "Effusion": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL)),
-    "Synovitis": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,)),
+    "Medial OA": FindingAnatomy(
+        primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
+    ),
+    "Lateral OA": FindingAnatomy(
+        primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
+    ),
+    "PF OA": FindingAnatomy(
+        primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
+    ),
+    "Effusion": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL), extent=Extent.REGIONAL),
+    "Synovitis": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), extent=Extent.REGIONAL),
     # A Baker's cyst sits posteromedially, and its NECK - the part that identifies it as a cyst rather
     # than a fluid collection - runs between the semimembranosus tendon and the medial head of
     # gastrocnemius, which is an axial relationship. Axial was demoted to secondary in the first version
     # of this table and it was the single worst row in it: the prior cost 0.0589 of AUC on this finding
     # alone, against a mean of -0.0009 across the other eleven, six of which improved.
-    "Baker's": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL), secondary=(Plane.CORONAL,)),
+    "Baker's": FindingAnatomy(
+        primary=(Plane.AXIAL, Plane.SAGITTAL), secondary=(Plane.CORONAL,), extent=Extent.REGIONAL
+    ),
     # Marrow oedema is invisible without fat suppression and fluid weighting, whatever the plane.
-    "Contusion": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
-    "Fracture": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True),
+    "Contusion": FindingAnatomy(
+        primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True, extent=Extent.REGIONAL
+    ),
+    "Fracture": FindingAnatomy(
+        primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True, extent=Extent.REGIONAL
+    ),
 }
+
+
+@dataclass(frozen=True)
+class ScaleProfile:
+    """A set of per-label deltas summed up the one axis a crop or a resolution actually trades on.
+
+    The 80 mm arm gates a 99 GB cache rebuild, and its prediction is TWO-SIDED — focal findings up,
+    regional ones down — because a uniform lift is a confound and a uniform fall refutes resolution
+    outright. Stated that way in prose it is unfalsifiable in practice: twelve deltas read by eye
+    always contain a subset that agrees with whichever story is being told. So the split is computed
+    from a table written before the arm ran, and the pattern is named rather than narrated.
+    """
+
+    focal: float
+    regional: float
+
+    @classmethod
+    def of(cls, deltas: dict[str, float], anatomy: dict[str, FindingAnatomy] | None = None) -> "ScaleProfile":
+        """The mean delta on each side of the scale split; anything not a finding (MEAN) is ignored."""
+        table = anatomy if anatomy is not None else ANATOMY
+        sides = {
+            extent: [
+                value for label, value in deltas.items() if table.get(label, None) and table[label].extent is extent
+            ]
+            for extent in Extent
+        }
+        return cls(focal=cls._mean(sides[Extent.FOCAL]), regional=cls._mean(sides[Extent.REGIONAL]))
+
+    @staticmethod
+    def _mean(values: list[float]) -> float:
+        """The average of one side, or nan when the arm scored nothing on it."""
+        return sum(values) / len(values) if values else float("nan")
+
+    def verdict(self) -> str:
+        """Which of the four patterns this arm produced, said outright.
+
+        Only the first is the mechanism the multi-scale build is predicated on. The other three each
+        mean something different and none of them is 'a bit of a win': a uniform move is a story about
+        the recipe rather than about the field of view, and an inverted one says the crop removed what
+        the findings needed.
+        """
+        if self.focal > 0 > self.regional:
+            return "TRADED detail for context — the two-sided prediction, and the case for multi-scale"
+        if self.focal > 0:
+            return "UNIFORM LIFT — both sides up, so something other than the field of view moved this"
+        if self.regional > 0:
+            return "INVERTED — the tighter view helped exactly the findings it should have cost"
+        return "REFUTED — nothing gained at either scale, so resolution was not the bottleneck"
+
+    def line(self) -> str:
+        """The profile as one printable line, the two means beside the pattern they make."""
+        return f"  by structure scale: focal {self.focal:+.4f}  regional {self.regional:+.4f}  -> {self.verdict()}"
 
 
 class SlotAffinity:
