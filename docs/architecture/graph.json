@@ -9,6 +9,18 @@
     {
       "kind": "import",
       "source": "kneemri.arm_check",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.arm_check",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.arm_check",
       "target": "kneemri.train",
       "weight": 1
     },
@@ -1357,6 +1369,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.arm_check.ArmCheck",
+      "target": "kneemri.train.TrainingOptions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.arm_check.ArmCheck._parsed",
+      "target": "kneemri.train.TrainingOptions.parse",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.arm_check.ArmCheck.invocations",
       "target": "kneemri.arm_check.ArmCheck._environment",
@@ -1365,7 +1389,25 @@
     {
       "kind": "calls",
       "source": "kneemri.arm_check.ArmCheck.refused",
-      "target": "kneemri.train.TrainingOptions.parse",
+      "target": "kneemri.arm_check.ArmCheck._parsed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.arm_check.ArmCheck.uncached",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.arm_check.ArmCheck.uncached",
+      "target": "kneemri.arm_check.ArmCheck._parsed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.arm_check.ArmCheck.uncached",
+      "target": "kneemri.study_cache.StudyCache",
       "weight": 1
     },
     {
@@ -1384,6 +1426,12 @@
       "kind": "calls",
       "source": "kneemri.arm_check.main",
       "target": "kneemri.arm_check.ArmCheck.refused",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.arm_check.main",
+      "target": "kneemri.arm_check.ArmCheck.uncached",
       "weight": 1
     },
     {
@@ -7082,6 +7130,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.arm_check.ArmCheck._parsed",
+      "label": "_parsed",
+      "level": "method",
+      "parent": "kneemri.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.arm_check.ArmCheck.invocations",
       "label": "invocations",
       "level": "method",
@@ -7092,6 +7148,14 @@
       "descendants": 0,
       "id": "kneemri.arm_check.ArmCheck.refused",
       "label": "refused",
+      "level": "method",
+      "parent": "kneemri.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.arm_check.ArmCheck.uncached",
+      "label": "uncached",
       "level": "method",
       "parent": "kneemri.arm_check.ArmCheck",
       "role": null
