@@ -120,26 +120,6 @@ class Ensemble:
         # are the one test-time axis a whole-stack member has not already spent (knee-eeo).
         self.views = views
 
-    def groups(self) -> list[list[Member]]:
-        """Members needing identical pixels, gathered so ONE decode serves each group.
-
-        `pixel_group` has existed since the first package and inference never asked: the whole test set
-        was decoded once, at whatever the default happened to be, and every member was fed it. That was
-        harmless only while every member wanted the same pixels.
-
-        It stopped being harmless the moment resolution paid off. Our best recipe reads a 448 px cache
-        at 392, so it records img=448, while every other member records 336 — and `decoded_size`
-        correctly refuses to serve both from one decode. Without grouping, the two things that actually
-        work here (a better recipe, and ensembling) could not be used together.
-
-        The cost is honest and worth naming: N groups is N decodes of the test set, which is the
-        dominant cost of a submission. Grouping keeps it at one decode PER GROUP rather than per member.
-        """
-        gathered: dict[str, list[Member]] = {}
-        for member in self.package.members:
-            gathered.setdefault(member.pixel_group, []).append(member)
-        return list(gathered.values())
-
     def reads(self) -> list[list[Member]]:
         """Members that can share ONE read of the corpus, whatever resolutions they then want.
 
@@ -185,33 +165,10 @@ class Ensemble:
         """
         return max(member.slices for member in (members or self.package.members))
 
-    def decoded_size(self, members: list[Member] | None = None) -> int:
-        """The resolution the test set must be DECODED at — the members', never a default.
-
-        `run()` already derives the slice depth this way, after a member fitted on a deeper stack was
-        silently scored on twelve. Resolution and the slot list were left behind on that lesson: the
-        decode used `SlotReader()`'s default 336 whatever `img` said, and `pixel_group` — which exists
-        precisely to say which members can share one decode — was computed by `verify_members` and
-        consulted nowhere at inference.
-
-        It matters as soon as a member is fitted on another cache. A member trained by reading a 448 px
-        cache at 392 would be handed 336 px pixels here and UPSAMPLED to 392, where training
-        DOWNSAMPLED from 448. Same tensor shape, different image, nothing raised.
-
-        A single value rather than a maximum, because unlike depth this cannot be windowed down: two
-        members wanting different resolutions need two decodes, so disagreement is refused loudly here
-        rather than silently resolved in favour of one of them.
-        """
-        sizes = {member.image_size for member in (members or self.package.members)}
-        if len(sizes) != 1:
-            message = f"members disagree on decode resolution {sorted(sizes)} — that is two decodes, not one"
-            raise ValueError(message)
-        return sizes.pop()
-
     def decoded_scheme(self, members: list[Member] | None = None) -> SlotScheme:
         """The slot scheme the test set must be DECODED under — the members', never a default.
 
-        The sibling of `decoded_size`, and the last of the four fields that travelled in a checkpoint
+        The sibling of `slices`, and the last of the four fields that travelled in a checkpoint
         and were read by a default somewhere. `Submission.decode` built `SlotPipeline()` with no
         scheme, so a nine-slot member would have been routed and bagged under the canonical six: the
         head's slot embedding expects nine positions, would receive six, and the three it never saw are

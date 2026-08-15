@@ -219,7 +219,7 @@ def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     members = submission.ensemble.package.members
     pipeline = SlotPipeline(
         scheme=submission.ensemble.decoded_scheme(members),
-        reader=SlotReader(image_size=submission.ensemble.decoded_size(members)),
+        reader=SlotReader(image_size=members[0].image_size),
     )
 
     with caplog.at_level(logging.ERROR):

@@ -7282,24 +7282,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.ensemble.Ensemble.decoded_size",
-      "label": "decoded_size",
-      "level": "method",
-      "parent": "kneemri.ensemble.Ensemble",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.ensemble.Ensemble.forwarded",
       "label": "forwarded",
-      "level": "method",
-      "parent": "kneemri.ensemble.Ensemble",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.ensemble.Ensemble.groups",
-      "label": "groups",
       "level": "method",
       "parent": "kneemri.ensemble.Ensemble",
       "role": null

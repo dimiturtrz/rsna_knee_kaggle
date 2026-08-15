@@ -233,23 +233,6 @@ def test_predict_member_still_windows_a_member_that_is_not_whole_stack(tmp_path:
     )
 
 
-def test_decoded_size(tmp_path: Path):
-    """The decode resolution comes from the members, and disagreement is refused rather than resolved.
-
-    A single value, not a maximum: depth can be windowed down at inference but resolution cannot, so
-    two members wanting different sizes genuinely need two decodes. Silently picking one would hand the
-    other an image it never saw — 336 px upsampled to 392 where training downsampled from 448.
-    """
-    ensemble = _ensemble(tmp_path / "one")
-    assert ensemble.decoded_size() == 14
-
-    member = ensemble.package.members[0]
-    coarser: MemberConfig = {**member.config, "img": 28}
-    ensemble.package.members = [member, replace(member, identifier="other", config=coarser)]
-    with pytest.raises(ValueError, match="two decodes"):
-        ensemble.decoded_size()
-
-
 def test_decoded_scheme(tmp_path: Path):
     """The slot list comes from the members, and an unknown or conflicting one is refused.
 
@@ -273,23 +256,6 @@ def test_decoded_scheme(tmp_path: Path):
     ensemble.package.members = [replace(member, identifier="bad", config=unknown)]
     with pytest.raises(ValueError, match="does not define"):
         ensemble.decoded_scheme()
-
-
-def test_groups(tmp_path: Path):
-    """Members needing identical pixels share a group; a different resolution is a different decode."""
-    ensemble = _ensemble(tmp_path / "grouped")
-    member = ensemble.package.members[0]
-    assert len(ensemble.groups()) == 1
-
-    coarser: MemberConfig = {**member.config, "img": 28}
-    ensemble.package.members = [member, replace(member, identifier="big", config=coarser)]
-    grouped = ensemble.groups()
-    assert len(grouped) == 2, "336 and 448 cannot share one decode"
-    assert [len(members) for members in grouped] == [1, 1]
-
-    twin = replace(member, identifier="twin")
-    ensemble.package.members = [member, twin]
-    assert len(ensemble.groups()) == 1, "same pixels, one decode"
 
 
 def test_predict_members(tmp_path: Path):
