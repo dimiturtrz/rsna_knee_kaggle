@@ -13,6 +13,7 @@ from torch import Tensor
 from kneemri.corpus.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.corpus.slot_reader import Band, SlotReader
 from kneemri.corpus.study import SlotPipeline
+from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Read
 from kneemri.inference.members import MemberPackage
 from kneemri.kaggle.submission import Split, Submission
@@ -70,43 +71,44 @@ def _competition(root: Path) -> Path:
     return root
 
 
-def _submission(tmp_path: Path) -> Submission:
+def _submission(tmp_path: Path, *, depths: tuple[int, ...] = (3,), budget: Budget | None = None) -> Submission:
+    """A miniature submission over `depths` — one member per entry, members of equal depth sharing a read.
+
+    Depth rather than a member count, because the slice depth is a key `Ensemble.reads` groups by: two
+    members at the same depth are one decode and one give-up decision, and a member at another depth is a
+    second read group. That is the only knob a test needs to build either shape.
+    """
     device = torch.device("cpu")
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, len(SLOT_NAMES))
     package_root = tmp_path / "weights"
     package_root.mkdir()
     torch.save(model.state_dict(), package_root / "m.pt")
-    config = {
-        "img": 32,
-        "slices": 3,
-        "group": 3,
-        "crop_mm": 130.0,
-        "band": [0.2, 0.8],
-        "slots": SLOT_NAMES,
-        "variant": "small",
-        "pool": "cls_mean",
-    }
-    (package_root / "manifest.json").write_text(
-        json.dumps(
-            {
-                "members": [
-                    {
-                        "id": "m",
-                        "file": "m.pt",
-                        "fold": 0,
-                        "config": config,
-                        "fingerprint": model.fingerprint(32, 3, device).tolist(),
-                        "holdout": 0.8,
-                        "annot": 0.8,
-                    }
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
+    identifiers = [f"m{index}" for index in range(len(depths))]
+    members = [
+        {
+            "id": identifiers[index],
+            "file": "m.pt",
+            "fold": 0,
+            "config": {
+                "img": 32,
+                "slices": depth,
+                "group": 3,
+                "crop_mm": 130.0,
+                "band": [0.2, 0.8],
+                "slots": SLOT_NAMES,
+                "variant": "small",
+                "pool": "cls_mean",
+            },
+            "fingerprint": model.fingerprint(32, 3, device).tolist(),
+            "holdout": 0.8 - 0.01 * index,
+            "annot": 0.8,
+        }
+        for index, depth in enumerate(depths)
+    ]
+    (package_root / "manifest.json").write_text(json.dumps({"members": members}), encoding="utf-8")
     package = MemberPackage(package_root)
-    ensemble = Ensemble(package, {"m": model}, device)
+    ensemble = Ensemble(package, dict.fromkeys(identifiers, model), device, budget=budget)
     working = tmp_path / "working"
     working.mkdir()
     return Submission(ensemble, _competition(tmp_path / "comp"), working)
@@ -206,6 +208,35 @@ def test_chunks(tmp_path: Path):
     serial = submission.decode(["study_a", "study_b"], {"sag": "Sagittal"}, read)
     assert torch.equal(images.cpu(), serial[IMAGE][0]), "the pooled path must be pixel-identical"
     assert torch.equal(mask.cpu(), serial[IMAGE][1]), "and mask-identical"
+
+
+def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    """The deadline mitigation, end to end — the WIRING, not the arithmetic.
+
+    Every part of this was unit-tested and none of it was tested joined up, which is this project's
+    dominant failure: a value recorded in one place while its consumer reads a constant. The budget only
+    works if the kernel hands one to the ensemble, the ensemble reports its read groups into it, the
+    decode loop reports its chunks into it, and `afford` reads the same object back. Any one of those
+    four missing leaves every unit test green and the run dies at nine hours with no submission.
+
+    Three members at two depths: the shallow pair share a read, so by the time that group is entered a
+    whole group has finished and the projection is measurable — which is exactly when a real run first
+    learns it is overrunning.
+    """
+    budget = Budget(seconds=1e-6, margin=1.0)
+    submission = _submission(tmp_path, depths=(4, 3, 3), budget=budget)
+
+    with caplog.at_level(logging.WARNING):
+        combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"})
+
+    assert combined.shape == (2, len(TARGETS))
+    assert budget.measured(), "the read groups reached the budget the kernel built"
+    assert budget.overrunning(), "and a microsecond ceiling is projected past"
+    # WHICH of the pair goes is not asserted: `worth` divides by seconds MEASURED in this run, and two
+    # members a hundredth of holdout apart are separated by timing jitter on a fixture this small. What
+    # must hold is that a member of the shared group leaves and the group still predicts.
+    assert "giving up m" in caplog.text and ", 1 members left" in caplog.text
+    assert set(submission.ensemble.spent) == {"m0", "m1", "m2"}, "and every member was timed while it ran"
 
 
 def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):

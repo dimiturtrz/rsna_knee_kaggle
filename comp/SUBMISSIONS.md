@@ -336,6 +336,9 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   scoring queue — not the kernel queue and not the daily quota — as the binding constraint. The block is
   per COMPETITION, not per kernel: with fusion pending, a submit of `kneemri-trained v8` — a different
   kernel, COMPLETE, never submitted today — returned the same 400 (22:39 UTC). So queueing a second
-  kernel while the first is pending is not a way around it.
+  kernel while the first is pending is not a way around it. The 21:06 entry was STILL pending at 22:58,
+  1h52 in, with two COMPLETE kernel versions waiting behind it — so four of that day's five slots expired
+  unspent at 00:00 UTC, and slots do not roll over. A day's slots are spent by submitting EARLY and
+  spacing entries by hours, never by having five entries ready in one evening.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.

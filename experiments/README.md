@@ -238,8 +238,11 @@ training-time advantage (+0.0147) are the same thing bought twice, and they do n
 
 **This partly re-prices whole-stack.** Its +0.0147 was measured against a control scored WITHOUT the
 TTA that control gets at inference. Where both are given their own best reading, `lr5x_d6` (0.8475)
-edges `wsfold0_e6` (0.8457). What survives untouched is resolution: `res392` scores 0.8523 with no TTA
-available to it at all. See `knee-eeo`.
+edges `wsfold0_e6` (0.8457). What this re-pricing does NOT touch is `res392` (0.8523), which is scored
+with no TTA available to it at all — but that member is not a resolution result either: it changed the
+encoder rate 5× as well, and the section above prices resolution alone at about +0.002 if the rate's
+independently measured +0.0044 transfers. So the highest number in the ledger stands as a number and
+stands CONFOUNDED as a cause. See `knee-eeo` and `knee-a8x`.
 
 ## What is ours, and what is grafted
 

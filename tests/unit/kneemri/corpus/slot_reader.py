@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import pydicom
 import torch
 
 from kneemri.corpus.acquisition import Acquisition
@@ -55,6 +56,31 @@ def test_cropped(tmp_path: Path):
         native = SlotReader(image_size=size).read(acquisition, 3)
         assert native is not None
         assert torch.equal(reader.sized(stack, size), native), f"one read must equal a native read at {size}"
+
+
+def test_cropped_lets_the_majority_shape_decide(tmp_path: Path):
+    """One odd-sized slice is dropped — it must not drop every OTHER slice by being sampled first.
+
+    Slices of one series can differ in matrix size (multi-echo, some reformats), and those are not
+    stackable, so the odd one out is zeroed. The authority for "odd" used to be the FIRST sampled plane,
+    which is a property of where the band happens to land and not of the series: a series whose first
+    sampled slice is the outlier had every other slice zeroed instead, and the presence mask still
+    reported the slot acquired — so the model was served a black slot as if it were a real one.
+    """
+    directory = write_series(tmp_path / "mixed", slices=10, size=64)
+    acquisition = Acquisition.probe("study", "series", directory)
+    odd = directory / acquisition.ordered_files()[1]
+    data = pydicom.dcmread(str(odd))
+    data.Rows, data.Columns = 32, 32
+    data.PixelData = np.full((32, 32), 500, np.uint16).tobytes()
+    data.save_as(str(odd))
+
+    stack = SlotReader(image_size=16).cropped(acquisition, slices=3)
+
+    assert stack is not None
+    assert stack.shape == (3, 64, 64), "the shape the SERIES mostly has, not the one sampled first"
+    assert not stack[0].any(), "the odd slice out is dropped"
+    assert stack[1].any() and stack[2].any(), "and it takes no good slice with it"
 
 
 def test_sized(tmp_path: Path):
