@@ -333,6 +333,12 @@
     {
       "kind": "import",
       "source": "kneemri.fitting",
+      "target": "kneemri.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.fitting",
       "target": "kneemri.member_record",
       "weight": 1
     },
@@ -999,6 +1005,12 @@
     {
       "kind": "import",
       "source": "kneemri.run_comparison",
+      "target": "kneemri.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.run_comparison",
       "target": "kneemri.label_power",
       "weight": 1
     },
@@ -1006,6 +1018,12 @@
       "kind": "import",
       "source": "kneemri.run_comparison",
       "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.run_comparison",
+      "target": "kneemri.scores",
       "weight": 1
     },
     {
@@ -2469,6 +2487,12 @@
     {
       "kind": "holds",
       "source": "kneemri.fitting.Fitting",
+      "target": "kneemri.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.fitting.Fitting",
       "target": "kneemri.member_record.MemberRecord",
       "weight": 1
     },
@@ -2499,6 +2523,12 @@
     {
       "kind": "construct",
       "source": "kneemri.fitting.Fitting.__init__",
+      "target": "kneemri.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.fitting.Fitting.__init__",
       "target": "kneemri.patience.Patience",
       "weight": 1
     },
@@ -2524,6 +2554,12 @@
       "kind": "construct",
       "source": "kneemri.fitting.Fitting.keep",
       "target": "kneemri.fitting.Fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.holdout_record.HoldoutRecord.write",
       "weight": 1
     },
     {
@@ -2818,6 +2854,30 @@
       "kind": "calls",
       "source": "kneemri.holdout_predictions.HoldoutPredictions.load",
       "target": "kneemri.model.StudyModel.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_record.HoldoutReading",
+      "target": "kneemri.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_record.HoldoutRecord",
+      "target": "kneemri.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -4489,6 +4549,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.run_comparison.RunComparison",
+      "target": "kneemri.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.__init__",
       "target": "kneemri.run_comparison.RunComparison._intervals",
@@ -4498,6 +4564,12 @@
       "kind": "construct",
       "source": "kneemri.run_comparison.RunComparison.__init__",
       "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.run_comparison.RunComparison.__init__",
+      "target": "kneemri.scores.LabelScores",
       "weight": 1
     },
     {
@@ -4532,6 +4604,30 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.floor",
+      "target": "kneemri.run_comparison.RunComparison.paired",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.run_comparison.RunComparison.paired",
+      "target": "kneemri.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.paired",
+      "target": "kneemri.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.paired",
+      "target": "kneemri.scores.LabelScores.paired_interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.report",
       "target": "kneemri.anatomy.ScaleProfile.of",
       "weight": 1
@@ -4546,6 +4642,12 @@
       "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.report",
       "target": "kneemri.run_comparison.RunComparison.deltas",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.run_comparison.RunComparison.report",
+      "target": "kneemri.run_comparison.RunComparison.floor",
       "weight": 1
     },
     {
@@ -6049,7 +6151,7 @@
       "role": null
     },
     {
-      "descendants": 72,
+      "descendants": 73,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6236,6 +6338,14 @@
       "descendants": 0,
       "id": "kneemri.holdout_predictions",
       "label": "holdout_predictions",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record",
+      "label": "holdout_record",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -6934,6 +7044,22 @@
       "label": "HoldoutPredictions",
       "level": "class",
       "parent": "kneemri.holdout_predictions",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutReading",
+      "label": "HoldoutReading",
+      "level": "class",
+      "parent": "kneemri.holdout_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord",
+      "label": "HoldoutRecord",
+      "level": "class",
+      "parent": "kneemri.holdout_record",
       "role": "primary"
     },
     {
@@ -8614,6 +8740,46 @@
       "label": "predict",
       "level": "method",
       "parent": "kneemri.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutReading.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord.exists",
+      "label": "exists",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutRecord",
       "role": null
     },
     {
@@ -10340,6 +10506,22 @@
       "descendants": 0,
       "id": "kneemri.run_comparison.RunComparison.deltas",
       "label": "deltas",
+      "level": "method",
+      "parent": "kneemri.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison.floor",
+      "label": "floor",
+      "level": "method",
+      "parent": "kneemri.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.RunComparison.paired",
+      "label": "paired",
       "level": "method",
       "parent": "kneemri.run_comparison.RunComparison",
       "role": null
