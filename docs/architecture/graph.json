@@ -8536,6 +8536,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.RunOptions.pool",
+      "label": "pool",
+      "level": "method",
+      "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.member_record.RunOptions.rank_weight",
       "label": "rank_weight",
       "level": "method",
