@@ -8,7 +8,7 @@ from torch import Tensor
 
 from kneemri.lora import LoRALinear
 from kneemri.model import POOL_PARTS, TARGETS, StudyDesign, StudyModel
-from kneemri.slot_head import REPORT_DIMS
+from kneemri.slot_head import REPORT_DIMS, SLOT_POOLINGS
 
 SEED = 2026
 DIM = 8
@@ -414,3 +414,19 @@ def test_tokens_reads_the_layer_the_design_asks_for():
 
     assert from_last.shape == from_middle.shape
     assert not torch.allclose(from_last, from_middle), "a different block must reach the head"
+
+
+def test_every_slot_pooling_name_builds_its_own_head():
+    """The name a member records must build the head it names — for every name, not just the default.
+
+    The dispatch was an `if` against one literal, so anything that was not exactly "mean" got the
+    attention head: a typo, a stale checkpoint, or a third pooling added later. Iterating the vocabulary
+    is the point — a name added to `SLOT_POOLINGS` without a head, or a head the builder cannot reach,
+    fails here rather than in a run that reports a plausible number for the wrong recipe.
+    """
+    for name, head in SLOT_POOLINGS.items():
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slot_pooling=name))
+        assert type(model.head) is head, name
+
+    with pytest.raises(KeyError):
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slot_pooling="attnd"))

@@ -22,6 +22,7 @@ from kneemri.member_record import MemberRecord
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
+from kneemri.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.slot_reader import IMAGE_SIZE
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
 from kneemri.study_cache import StudyCache
@@ -79,7 +80,7 @@ class TrainingOptions:
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
     slice_pooling: str = "channels"
-    slot_pooling: str = "attend"
+    slot_pooling: str = ATTENDED
     anatomical_prior: bool = False
     encoder_layer: int = -1
     variant: str = SMALL
@@ -273,8 +274,8 @@ class TrainingOptions:
         )
         parser.add_argument(
             "--slot-pooling",
-            choices=("attend", "mean"),
-            default="attend",
+            choices=tuple(SLOT_POOLINGS),
+            default=ATTENDED,
             help="how the twelve diagnoses read the six slots. 'attend' gives each diagnosis its own "
             "query over the present slots; 'mean' pools them uniformly and is the ABLATION - it exists "
             "to give the attention a denominator, since every number in the ledger was measured on a "

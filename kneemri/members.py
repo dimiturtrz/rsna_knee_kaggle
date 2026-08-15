@@ -26,6 +26,7 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.mounts import Mounts
+from kneemri.slot_head import ATTENDED
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 
 logger = logging.getLogger(__name__)
@@ -287,7 +288,7 @@ class Member:
         Defaults to "attend" — every member on disk was fitted that way, so the ledger's meaning is
         untouched.
         """
-        return str(self.config.get("slot_pooling", "attend"))
+        return str(self.config.get("slot_pooling", ATTENDED))
 
     @property
     def variant(self) -> str:

@@ -121,3 +121,19 @@ class MeanSlotHead(SlotHead):
         present = (mask >= _PRESENT).float()
         weights = present / present.sum(dim=1, keepdim=True).clamp(min=1.0)
         return weights.unsqueeze(1).expand(-1, self.query.shape[0], -1)
+
+
+ATTENDED = "attend"
+"""Per-diagnosis attention over the slots — what every member on disk was fitted with."""
+
+AVERAGED = "mean"
+"""The ablation: a uniform mean, so the attention has a denominator."""
+
+SLOT_POOLINGS: dict[str, type[SlotHead]] = {ATTENDED: SlotHead, AVERAGED: MeanSlotHead}
+"""The vocabulary AND the dispatch, in one object beside the heads it names.
+
+A name a member records is a head this builds, and there is no third place for the two to disagree. The
+dispatch was `MeanSlotHead if slot_pooling == "mean" else SlotHead`, which gave the attention head to a
+typo and to every future pooling — the same shape as the slice-axis bug `StudyDesign.per_slice`
+documents, where three sites branched on one word and adding a pooling left one of them refusing it.
+An unknown name now raises here instead of quietly fitting a recipe nobody asked for."""

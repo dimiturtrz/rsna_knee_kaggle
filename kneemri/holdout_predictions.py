@@ -20,6 +20,7 @@ from kneemri.holdout_slab import HoldoutSlab
 from kneemri.members import Member, Window
 from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.prediction_cache import PredictionCache
+from kneemri.slot_head import ATTENDED
 from kneemri.test_time import SpatialViews
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ class HoldoutPredictions:
         config = saved.get("config", {})
         design = StudyDesign(
             slice_pooling=str(config.get("slice_pooling", "channels")),
-            slot_pooling=str(config.get("slot_pooling", "attend")),
+            slot_pooling=str(config.get("slot_pooling", ATTENDED)),
             anatomical_prior=bool(config.get("anatomical_prior", False)),
             # Read back, not defaulted. A member fitted on an intermediate block and rebuilt on the last
             # one is a different function that loads cleanly - the shape that has cost nine defects.
