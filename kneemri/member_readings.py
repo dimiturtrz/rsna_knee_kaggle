@@ -1,0 +1,63 @@
+"""Members grouped by the cache each one names, so every member is read from its OWN pixels.
+
+Two analysis CLIs — the ensemble curve and the ruler check — ask different questions of the same set of
+checkpoints, and both had to solve the identical problem first: a member records the reading it was
+fitted under, several members usually share one, and decoding a 35 GB cache twice because two of them
+were listed out of order is minutes of wall-clock per run. Both had also got it wrong in the same way,
+loading one cache named by CLI flags and scoring every member from it.
+
+So the grouping lives here once. The order of the FIRST cache is the reference: any other cache that
+indexes the corpus differently is refused, because its rows would line up against the wrong studies and
+produce a wrong number rather than an error.
+"""
+
+from collections.abc import Iterator
+from pathlib import Path
+
+import numpy as np
+from numpy.typing import NDArray
+
+from kneemri.holdout_slab import HoldoutSlab
+from kneemri.members import Member
+from kneemri.study_cache import CachedCorpus, StudyCache
+
+
+class MemberReadings:
+    """Every member with the cache it names, grouped so each cache is loaded once."""
+
+    def __init__(self, members: list[Member], directory: Path) -> None:
+        self.members = members
+        self.caches: dict[str, StudyCache] = {}
+        self.owners: dict[str, list[Member]] = {}
+        for member in members:
+            cache = member.cache(directory)
+            self.caches.setdefault(cache.key, cache)
+            self.owners.setdefault(cache.key, []).append(member)
+
+    @property
+    def keys(self) -> list[str]:
+        """The distinct caches these members were fitted on, first-listed first."""
+        return list(self.caches)
+
+    def reference(self) -> tuple[CachedCorpus, list[str]]:
+        """The first member's cache and its study order — the order every other one must agree with."""
+        return self.caches[self.keys[0]].load()
+
+    def slabs(
+        self, holdout: NDArray[np.int64], identifiers: list[str], corpus: CachedCorpus
+    ) -> Iterator[tuple[Member, HoldoutSlab, CachedCorpus]]:
+        """Each member with the holdout of its own cache, one load and one slab per distinct cache.
+
+        The reference corpus is passed in rather than reloaded so the caller's own `load` is not paid
+        twice; every other cache is loaded here and checked against the reference order first.
+        """
+        for key in self.keys:
+            held = corpus
+            if key != self.keys[0]:
+                held, order = self.caches[key].load()
+                if order != identifiers:
+                    message = f"cache {key} indexes studies in a different order — its rows would not line up"
+                    raise ValueError(message)
+            slab = HoldoutSlab(held, holdout)
+            for member in self.owners[key]:
+                yield member, slab, held

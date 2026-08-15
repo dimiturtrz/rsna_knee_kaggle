@@ -26,16 +26,14 @@ from pathlib import Path
 import numpy as np
 import torch
 from jaxtyping import Bool, Float
-from transformers import AutoModel
 
 from core.paths import DataRoot
-from kneemri.backbone import ENCODERS, SMALL
-from kneemri.cache_flags import CacheFlags
 from kneemri.folds import ReportFolds
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions
+from kneemri.member_readings import MemberReadings
+from kneemri.members import Member
+from kneemri.prediction_cache import PredictionCache
 from kneemri.scores import LabelScores
-from kneemri.slot_reader import IMAGE_SIZE
-from kneemri.slots import SLOTS
 from kneemri.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -91,13 +89,27 @@ def main() -> None:
     parser.add_argument("--fold", type=int, default=0)
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--split-seed", type=int, default=2026)
-    CacheFlags.add_to(parser)
+    parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    parser.add_argument("--refresh", action="store_true", help="recompute rather than reuse stored predictions")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
-    corpus, identifiers = CacheFlags.cache(arguments, root.processed()).load()
+    # EACH MEMBER'S OWN READING, never one cache and one size for all of them. This CLI loaded whatever
+    # cache its flags named, rebuilt every checkpoint at the canonical six slots, passed IMAGE_SIZE as
+    # the read size, windowed by GROUP and predicted in the fp16 default — so a whole-stack member was
+    # scored three slices at a time, a 448 px member could not be scored at all and a bf16 member was
+    # ranked as a function it was never fitted as. `member_curve` carried the identical defect and was
+    # fixed; this is the other half of the same question, and it is the tool that decides whether the
+    # local ledger can rank recipes AT ALL — a wrong reading here does not lose a member, it invalidates
+    # the verdict about the ruler.
+    readings = MemberReadings([Member.from_checkpoint(path) for path in arguments.checkpoints], root.processed())
+
+    # The split is taken from the FIRST cache and reused, so every member is scored on the same studies
+    # in the same order; any other cache that disagrees about that order is refused rather than silently
+    # misaligned against the truth vector.
+    corpus, identifiers = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
 
@@ -110,18 +122,21 @@ def main() -> None:
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     predictions = HoldoutPredictions(device)
-    starts = list(range(arguments.slices - GROUP + 1))
-    images, mask = corpus.images[holdout], corpus.mask[holdout]
+
+    # The SAME store `member_curve` writes, keyed on the studies scored, so asking the ruler question
+    # about members already on the curve costs no encoder at all.
+    store = PredictionCache(
+        root.processed() / "holdout_predictions",
+        [identifiers[position] for position in holdout],
+        predictions.views,
+        refresh=arguments.refresh,
+    )
 
     scored: dict[str, Float[np.ndarray, "b o"]] = {}
-    for checkpoint in arguments.checkpoints:
-        saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
-        encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
-        model = predictions.load(checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, len(SLOTS))
-        scored[checkpoint.stem] = predictions.predict(
-            model, images, mask, Window(starts=starts, width=GROUP, size=IMAGE_SIZE)
-        )
-        logger.info("scored %s", checkpoint.stem)
+    for member, slab, held in readings.slabs(holdout, identifiers, corpus):
+        window = member.window(held.slices, overlap=arguments.overlap)
+        scored[member.file.stem] = predictions.cached(member, slab, store, window)
+        logger.info("scored %s", member.file.stem)
 
     check = RulerCheck()
     for line in check.report(check.under(scored, truth), check.under(scored, truth, kept), float(kept.mean())):
