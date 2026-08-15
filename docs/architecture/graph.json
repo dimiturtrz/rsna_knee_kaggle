@@ -1125,12 +1125,6 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.submission",
-      "target": "kneemri.inference.budget",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.submission",
       "target": "kneemri.inference.ensemble",
       "weight": 1
     },
@@ -4093,6 +4087,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.budget.Budget.report",
+      "target": "kneemri.inference.budget.Budget.measured",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.budget.Budget.report",
+      "target": "kneemri.inference.budget.Budget.projected",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.ensemble.Ensemble",
       "target": "kneemri.corpus.slots.SlotScheme",
@@ -4159,9 +4165,21 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.attempt",
+      "target": "kneemri.inference.ensemble.Ensemble.predict_member",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
       "target": "kneemri.corpus.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
+      "target": "kneemri.inference.ensemble.Ensemble.agreed",
       "weight": 1
     },
     {
@@ -4245,7 +4263,7 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.predict_members",
-      "target": "kneemri.inference.ensemble.Ensemble.predict_member",
+      "target": "kneemri.inference.ensemble.Ensemble.attempt",
       "weight": 1
     },
     {
@@ -10564,6 +10582,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.budget.Budget.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.inference.budget.Budget",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.ensemble.Ensemble.__init__",
       "label": "__init__",
       "level": "method",
@@ -10580,8 +10606,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.ensemble.Ensemble.agreed",
+      "label": "agreed",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.ensemble.Ensemble.arithmetic",
       "label": "arithmetic",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.ensemble.Ensemble.attempt",
+      "label": "attempt",
       "level": "method",
       "parent": "kneemri.inference.ensemble.Ensemble",
       "role": null
