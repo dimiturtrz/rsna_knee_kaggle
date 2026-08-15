@@ -30,8 +30,6 @@ from kneemri.study_cache import StudyCache
 from kneemri.targets import CONFIDENCE_FLOOR, Supervision, Targets
 from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
-GROUP = 3
-
 logger = logging.getLogger(__name__)
 
 

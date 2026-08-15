@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 from kneemri.backbone import Encoder
 from kneemri.crop_centre import Crop
 from kneemri.model import TARGETS, StudyModel
-from kneemri.slot_reader import Band
+from kneemri.slot_reader import GROUP, Band
 from kneemri.slots import Routing
 
 
@@ -91,7 +91,6 @@ class RunOptions(Protocol):
     def backbone_lr(self) -> float: ...
 
 
-GROUP = 3
 FINGERPRINT_SEED = 2026
 
 WITNESS_STUDIES = 8

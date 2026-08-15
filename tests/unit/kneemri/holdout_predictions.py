@@ -11,11 +11,12 @@ from typing import override
 import numpy as np
 import torch
 
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions, Window
 from kneemri.holdout_slab import HoldoutSlab
 from kneemri.members import Member
 from kneemri.model import CLS_MEAN_FOCAL, TARGETS, StudyDesign, StudyModel
 from kneemri.prediction_cache import PredictionCache
+from kneemri.slot_reader import GROUP
 from kneemri.study_cache import CachedCorpus
 from kneemri.test_time import SpatialViews
 

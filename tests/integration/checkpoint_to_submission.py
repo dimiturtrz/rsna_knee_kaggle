@@ -26,10 +26,11 @@ from torch import nn
 
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions, Window
 from kneemri.member_record import MemberRecord
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.slot_reader import GROUP
 from kneemri.train import TrainingOptions
 
 DIM = 12

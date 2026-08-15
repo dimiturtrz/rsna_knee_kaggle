@@ -95,7 +95,7 @@ def test_fitted_trainer(tmp_path: Path):
     from kneemri.ema import LiveWeights, WeightAverage  # noqa: PLC0415
     from kneemri.model import StudyDesign, StudyModel  # noqa: PLC0415
     from kneemri.report_supervision import NoReportSupervision, ReportSupervision  # noqa: PLC0415
-    from kneemri.trainer import GROUP  # noqa: PLC0415
+    from kneemri.slot_reader import GROUP  # noqa: PLC0415
 
     from .model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
 

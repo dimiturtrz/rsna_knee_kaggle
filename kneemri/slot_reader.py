@@ -34,6 +34,16 @@ SLICE_BAND = (0.20, 0.80)
 """The central band the samples spread over: the outermost slices of a knee series are mostly soft
 tissue outside the joint."""
 
+GROUP = 3
+"""How many slices one encoder feature covers — three, because a natural-image backbone takes three
+channels and the cheapest way to give it depth is to stack a slice in each.
+
+ONE home, because it is the train side, the recorded side and the serve side of a single number: the
+trainer reads windows this wide, `member_record` stamps it into the config, and every reader windows a
+member by what the config says. It was declared separately in all three (and a fourth, dead, copy in
+`train`), so moving one would have fitted a member at one depth, stamped another and served a third —
+with every fingerprint still passing, because each half is self-consistent."""
+
 
 @dataclass(frozen=True)
 class Band:

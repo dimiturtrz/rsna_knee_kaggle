@@ -11,9 +11,10 @@ from kneemri.model import TARGETS, StudyDesign, StudyModel
 from kneemri.objective import Objective, RankedObjective
 from kneemri.report_supervision import ReportSupervision
 from kneemri.slot_head import REPORT_DIMS
+from kneemri.slot_reader import GROUP
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
-from kneemri.trainer import GROUP, Adaptation, AugmentConfig, DeviceBudget, Trainer
+from kneemri.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
 SEED = 2026
 DIM = 8

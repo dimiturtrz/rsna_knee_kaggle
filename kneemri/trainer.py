@@ -33,6 +33,7 @@ from kneemri.model import StudyModel
 from kneemri.objective import Objective
 from kneemri.prefetch import Prefetch
 from kneemri.report_supervision import NoReportSupervision, ReportSupervision
+from kneemri.slot_reader import GROUP
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 
@@ -104,7 +105,6 @@ class Adaptation:
 ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
 
-GROUP = 3
 """Consecutive slices stacked as the encoder's three channels."""
 
 WHOLE_STACK = 0

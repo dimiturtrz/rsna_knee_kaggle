@@ -24,7 +24,6 @@ from kneemri.test_time import SpatialViews
 
 logger = logging.getLogger(__name__)
 
-GROUP = 3
 BATCH = 8
 
 

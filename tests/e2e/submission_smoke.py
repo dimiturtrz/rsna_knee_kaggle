@@ -21,9 +21,9 @@ import torch
 from core.paths import DataRoot
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
-from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.holdout_predictions import HoldoutPredictions, Window
 from kneemri.model import TARGETS
-from kneemri.slot_reader import IMAGE_SIZE
+from kneemri.slot_reader import GROUP, IMAGE_SIZE
 from kneemri.slots import SLOTS
 from kneemri.study_cache import StudyCache
 
