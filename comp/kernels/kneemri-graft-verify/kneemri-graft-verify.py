@@ -15,6 +15,12 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # The kit is not on sys.path when this module is imported, so the finder is a name to the
+    # type checker and an argument at runtime.
+    from kneemri.mounts import Mounts
 
 import pandas as pd
 import torch
@@ -84,14 +90,16 @@ def install_wheels(kit: Path) -> None:
     )
 
 
-def find_dinov2() -> Path:
-    """The mounted DINOv2 weights: a directory holding a config.json, under the model mounts."""
-    for config in sorted(Path("/kaggle/input").rglob("config.json")):
-        if {"train_series", "test_series"} & set(config.parts):
-            continue
-        if "dinov2" in str(config).lower():
-            return config.parent
-    raise FileNotFoundError("no DINOv2 model mount found")
+def find_dinov2(mounts: "Mounts") -> Path:
+    """The mounted DINOv2 weights: a config.json under the model mounts, not under the image trees.
+
+    The skip-list used to be applied to `rglob`'s results, which prunes nothing — the walk has already
+    descended into every study by then. `Mounts` skips those directories inside the traversal instead.
+    """
+    found = [mount for mount in mounts.every("config.json") if "dinov2" in str(mount).lower()]
+    if not found:
+        raise FileNotFoundError("no DINOv2 model mount")
+    return found[0]
 
 
 def main() -> None:
@@ -114,8 +122,10 @@ def main() -> None:
         WeightsError,
     )
     from kneemri.model import TARGETS  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
+    from kneemri.mounts import Mounts  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
-    package = MemberPackage.find()
+    mounts = Mounts()
+    package = MemberPackage.find(mounts)
     if package is None:
         raise FileNotFoundError("no weights package mounted")
     logger.info(f"package: {package.root} with {len(package.members)} members")
@@ -129,7 +139,7 @@ def main() -> None:
     section("2. FINGERPRINTS")
     from transformers import AutoModel  # noqa: PLC0415 - the kit is not on sys.path until install_wheels runs
 
-    weights = find_dinov2()
+    weights = find_dinov2(mounts)
     logger.info(f"dinov2: {weights}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

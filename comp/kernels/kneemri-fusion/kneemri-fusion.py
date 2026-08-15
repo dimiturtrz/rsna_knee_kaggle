@@ -103,11 +103,10 @@ def main() -> None:
         @override
         def package(self) -> MemberPackage:
             """Merge every mounted manifest into one package, refusing mixed pixel groups."""
-            roots = [
-                found.parent
-                for found in sorted(Path("/kaggle/input").rglob("manifest.json"))
-                if not {"train_series", "test_series"} & set(found.parts)
-            ]
+            # FILTERING IS NOT PRUNING, and this used to filter: `rglob` had already descended into
+            # every study and series directory by the time the skip-list saw the paths, which is the
+            # 248 seconds `find_kit` above exists to avoid. `Mounts` prunes inside the traversal.
+            roots = self.mounts.every("manifest.json")
             # THEIR ROUTER, WHICH THEIR MANIFEST DOES NOT DECLARE. The published members carry no
             # `tie` field, so they would be routed under OUR first-maximal rule — and they reproduce
             # their OWN recorded predictions markedly better under last-maximal: 4 of 4 members across
