@@ -5985,6 +5985,12 @@
     {
       "kind": "references",
       "source": "kneemri.train.TrainingOptions",
+      "target": "kneemri.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.train.TrainingOptions",
       "target": "kneemri.train.TrainingOptions",
       "weight": 1
     },
@@ -6157,6 +6163,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.train.TrainingOptions.supervision",
+      "target": "kneemri.targets.Supervision",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.train.main",
       "target": "core.paths.DataRoot.from_config",
@@ -6232,12 +6244,6 @@
       "kind": "calls",
       "source": "kneemri.train.main",
       "target": "kneemri.study_cache.StudyCache.load",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.train.main",
-      "target": "kneemri.targets.Supervision",
       "weight": 1
     },
     {
@@ -12092,6 +12098,14 @@
       "descendants": 0,
       "id": "kneemri.train.TrainingOptions.routing",
       "label": "routing",
+      "level": "method",
+      "parent": "kneemri.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.train.TrainingOptions.supervision",
+      "label": "supervision",
       "level": "method",
       "parent": "kneemri.train.TrainingOptions",
       "role": null
