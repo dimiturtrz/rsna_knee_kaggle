@@ -471,6 +471,12 @@
     {
       "kind": "import",
       "source": "kneemri.holdout_backfill",
+      "target": "kneemri.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
       "target": "kneemri.members",
       "weight": 1
     },
@@ -796,6 +802,12 @@
       "kind": "import",
       "source": "kneemri.metrics_recipe",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.metrics_recipe",
+      "target": "kneemri.member_record",
       "weight": 1
     },
     {
@@ -2869,21 +2881,15 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.of",
+      "target": "kneemri.member_record.StampedRun.of",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.holdout_backfill.Backfill.of",
       "target": "kneemri.run_metrics.RunMetrics",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.holdout_backfill.Backfill.of",
-      "target": "kneemri.run_metrics.RunMetrics.best",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.holdout_backfill.Backfill.of",
-      "target": "kneemri.run_metrics.RunMetrics.recipe",
       "weight": 1
     },
     {
@@ -3806,6 +3812,12 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.member_record.StampedRun",
+      "target": "kneemri.member_record.StampedRun",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.members.Member",
       "target": "kneemri.crop_centre.Crop",
       "weight": 1
@@ -4030,6 +4042,12 @@
       "kind": "calls",
       "source": "kneemri.metrics_recipe.MetricsRecipe.backfill",
       "target": "kneemri.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.metrics_recipe.MetricsRecipe.recipe_of",
+      "target": "kneemri.member_record.StampedRun.of",
       "weight": 1
     },
     {
@@ -7512,6 +7530,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.member_record.StampedRun",
+      "label": "StampedRun",
+      "level": "class",
+      "parent": "kneemri.member_record",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.members.Member",
       "label": "Member",
       "level": "class",
@@ -9868,6 +9894,14 @@
       "label": "whole_stack",
       "level": "method",
       "parent": "kneemri.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.member_record.StampedRun.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.member_record.StampedRun",
       "role": null
     },
     {
