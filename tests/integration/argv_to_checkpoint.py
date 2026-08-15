@@ -193,6 +193,23 @@ def test_the_run_keeps_an_epoch_and_saves_it(corpus: Path, monkeypatch: pytest.M
     assert payload["model"], "the weights the kept epoch produced"
 
 
+def test_an_undecoded_reading_fails_before_the_card_is_taken(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """A cache that does not exist must not cost the GPU to discover.
+
+    `--crop-mm` selects a different cache file, and nothing has been decoded at that extent here — the
+    same position `crop80_tissue` is in on disk. The device used to be selected first, so an arm queued
+    with an undecoded reading held the card and then raised on a memory map.
+    """
+
+    def refuse() -> torch.device:
+        raise AssertionError("the card was taken before the cache was mapped")
+
+    monkeypatch.setattr(train_module.DeviceBudget, "select", lambda self: refuse())
+
+    with pytest.raises(FileNotFoundError):
+        _run(corpus, monkeypatch, "--crop-mm", "80")
+
+
 def test_a_full_fit_holds_nothing_back(corpus: Path, monkeypatch: pytest.MonkeyPatch):
     """`--fold -1` is the final-fit mode: no fold is ever assigned -1, so the holdout is empty.
 

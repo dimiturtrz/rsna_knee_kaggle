@@ -466,8 +466,10 @@ def main() -> None:
     # The MODEL's initialisation. The data order is seeded from the same value inside `Fitting`, which
     # is where the only consumer of it lives.
     torch.manual_seed(arguments.seed)
-    device = DeviceBudget(arguments.vram_gb).select()
 
+    # THE CACHE BEFORE THE CARD. A reading nothing has decoded is a `FileNotFoundError` on a memory map,
+    # and taking the device first meant an arm held the GPU to discover it — the queue slot is spent
+    # either way, but the card need not be. Mapping is cheap: no pixels are read here.
     root = DataRoot.from_config(arguments.paths)
     cache = StudyCache(
         root.processed(),
@@ -477,6 +479,7 @@ def main() -> None:
         crop=arguments.crop,
     )
     corpus, identifiers = cache.load()
+    device = DeviceBudget(arguments.vram_gb).select()
     targets, evaluation = Targets.pair(
         arguments.labels,
         arguments.eval_labels,
