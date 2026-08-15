@@ -4,9 +4,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.holdout_record import HoldoutRecord
+from kneemri.holdout_record import DERIVED, TRAINED, HoldoutRecord
 from kneemri.model import TARGETS
-from kneemri.run_comparison import RunComparison
+from kneemri.run_comparison import PairedWidths, RunComparison
 from kneemri.run_metrics import EpochRow
 
 STUDIES = 40
@@ -105,7 +105,7 @@ def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
     assert "recipe unrecorded" in report
 
 
-def _predictions(checkpoint: Path, shift: float) -> None:
+def _predictions(checkpoint: Path, shift: float, source: str = TRAINED) -> None:
     """The per-study record a run has kept since knee-mx17, on labels that are actually separable."""
     truth = (np.random.default_rng(2026).random((STUDIES, len(TARGETS))) < 0.5).astype(np.float32)
     # The SAME ruler for both runs — that is what makes them pairable — and its own noise per run, or
@@ -114,10 +114,10 @@ def _predictions(checkpoint: Path, shift: float) -> None:
     scores = truth * 0.3 + noise * 0.7
     HoldoutRecord(checkpoint).write(
         [f"s{index}" for index in range(STUDIES)],
-        np.arange(STUDIES, dtype=np.int64),
         scores.astype(np.float64),
         truth,
         epoch=1,
+        source=source,
     )
 
 
@@ -131,8 +131,32 @@ def test_paired(tmp_path: Path):
     paired = comparison.paired(comparison.arms[0])
 
     assert paired is not None
-    assert set(paired) == set(TARGETS)
-    assert all(width > 0 for width in paired.values())
+    assert set(paired.widths) == set(TARGETS)
+    assert all(width > 0 for width in paired.widths.values())
+    assert paired.exact, "both runs kept the array their own numbers were read off"
+
+
+def test_named():
+    """A floor measured on a re-derivation says so: its own tolerance is wider than the width quoted."""
+    widths = {"MCL": 0.01, "ACL": 0.02}
+
+    assert "INDICATIVE" not in PairedWidths(widths, exact=True).named()
+    assert "INDICATIVE" in PairedWidths(widths, exact=False).named()
+    assert "0.0200" in PairedWidths(widths, exact=True).named(), "the widest label, not the first"
+
+
+def test_paired_is_indicative_when_either_run_was_back_filled(tmp_path: Path):
+    """The 65 runs already on disk can only be back-filled, and a back-fill is not the training array."""
+    control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)
+    _predictions(control, shift=0.0)
+    _predictions(arm, shift=0.05, source=DERIVED)
+
+    comparison = RunComparison(control, [arm])
+    paired = comparison.paired(comparison.arms[0])
+
+    assert paired is not None
+    assert not paired.exact
+    assert "INDICATIVE" in comparison.floor(comparison.arms[0])[1]
 
 
 def test_paired_is_none_when_a_run_kept_no_predictions(tmp_path: Path):

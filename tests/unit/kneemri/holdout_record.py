@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.holdout_record import HoldoutReading, HoldoutRecord
+from kneemri.holdout_record import DERIVED, HoldoutReading, HoldoutRecord
 
 LABELS = 12
 
@@ -36,7 +36,7 @@ def test_exists(tmp_path: Path):
     record = HoldoutRecord(tmp_path / "member.pt")
     assert not record.exists()
 
-    record.write(["a"], np.array([0], dtype=np.int64), np.zeros((1, LABELS)), np.zeros((1, LABELS), np.float32), 0)
+    record.write(["a"], np.zeros((1, LABELS)), np.zeros((1, LABELS), np.float32), 0)
 
     assert record.exists()
     assert HoldoutRecord(record.path).path == record.path
@@ -52,13 +52,20 @@ def test_write(tmp_path: Path):
     predictions = np.linspace(0, 1, 3 * LABELS).reshape(3, LABELS)
     truth = np.zeros((3, LABELS), dtype=np.float32)
 
-    record.write(["a", "b", "c", "d"], np.array([3, 1, 0], dtype=np.int64), predictions, truth, epoch=5)
+    studies = HoldoutRecord.named(["a", "b", "c", "d"], np.array([3, 1, 0], dtype=np.int64))
+    record.write(studies, predictions, truth, epoch=5, source=DERIVED)
     stored = record.read()
 
     assert stored is not None
     assert stored.studies == ["d", "b", "a"], "the holdout's own order, named"
     assert stored.epoch == 5
     assert stored.predictions == pytest.approx(predictions, abs=1e-6)
+    assert stored.source == DERIVED, "a back-fill is a re-derivation, and only the file can say so"
+
+
+def test_named():
+    """Positions belong to one corpus build; the file has to survive the next one, so it stores names."""
+    assert HoldoutRecord.named(["a", "b", "c", "d"], np.array([3, 1], dtype=np.int64)) == ["d", "b"]
 
 
 def test_aligned():

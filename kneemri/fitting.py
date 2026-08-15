@@ -138,8 +138,7 @@ class Fitting:
             # it become the witness; the other 873 are what any paired interval over this arm needs, and
             # re-deriving them later would land within a tolerance wider than the interval itself.
             self.predictions.write(
-                fold.targets.identifiers,
-                fold.holdout,
+                HoldoutRecord.named(fold.targets.identifiers, fold.holdout),
                 predicted,
                 fold.evaluation.scores[fold.holdout],
                 epoch,

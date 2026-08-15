@@ -32,6 +32,15 @@ one-line decision instead of a silent miss in whichever tool happens to hold tha
 RULER_TOLERANCE = 1e-6
 """Truth is stored as float32 and compared after a round trip; anything wider is a different table."""
 
+TRAINED = "trained"
+"""The array the ledger's per-label numbers were read off, kept whole. Exact, by construction."""
+
+DERIVED = "re-derived"
+"""A second inference pass over the same weights, for a run that finished before the record existed.
+It lands within the cross-precision tolerance (4x eps), which is WIDER than a paired half-width of
++/-0.016 — so an interval computed from one is indicative, and the file has to say so itself rather
+than leave the caller to remember which runs were back-filled."""
+
 
 @dataclass(frozen=True)
 class HoldoutReading:
@@ -41,6 +50,7 @@ class HoldoutReading:
     predictions: Float[NDArray[np.float64], "studies labels"]
     truth: Float[NDArray[np.float32], "studies labels"]
     epoch: int
+    source: str = TRAINED
 
     def aligned(
         self, other: "HoldoutReading"
@@ -90,26 +100,39 @@ class HoldoutRecord:
         """Whether this run left its per-study predictions. Older runs did not, and cannot be paired."""
         return self.path.exists()
 
+    @staticmethod
+    def named(identifiers: list[str], holdout: NDArray[np.int64]) -> list[str]:
+        """The holdout's study NAMES, in its own order — positions mean nothing outside one corpus build.
+
+        Separate from `write` because a back-fill already holds names and only a training loop holds
+        positions, and because the two spellings of "which studies" must not both be arguments to the
+        same call: whoever passes them can pair the wrong ones, and the file would still load.
+        """
+        return [identifiers[position] for position in holdout]
+
     def write(
         self,
-        identifiers: list[str],
-        holdout: NDArray[np.int64],
+        studies: list[str],
         predictions: Float[NDArray[np.float64], "studies labels"],
         truth: Float[NDArray[np.float32], "studies labels"],
         epoch: int,
+        source: str = TRAINED,
     ) -> None:
         """Record the kept epoch's predictions under the NAMES of the studies they belong to.
 
         Overwrites, because a later epoch that improves replaces the kept one and the file must say
         what the checkpoint beside it holds.
+
+        `source` travels with the array because a back-filled run's numbers are a re-derivation and a
+        trained run's are the array itself, and nothing downstream can tell them apart by looking.
         """
-        named = np.array([identifiers[position] for position in holdout])
         np.savez(
             self.path,
-            studies=named,
+            studies=np.array(studies),
             predictions=np.asarray(predictions, dtype=np.float32),
             truth=np.asarray(truth, dtype=np.float32),
             epoch=np.int64(epoch),
+            source=np.array(source),
         )
 
     def read(self) -> HoldoutReading | None:
@@ -122,4 +145,5 @@ class HoldoutRecord:
             predictions=stored["predictions"].astype(np.float64),
             truth=stored["truth"],
             epoch=int(stored["epoch"]),
+            source=str(stored["source"]),
         )

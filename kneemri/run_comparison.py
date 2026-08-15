@@ -2,10 +2,11 @@
 
 import argparse
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 from kneemri.anatomy import ScaleProfile
-from kneemri.holdout_record import HoldoutRecord
+from kneemri.holdout_record import TRAINED, HoldoutRecord
 from kneemri.label_power import FOLDS, LabelPower
 from kneemri.run_metrics import RunMetrics
 from kneemri.scores import LabelScores
@@ -17,6 +18,24 @@ NOT_AN_AXIS = {"out", "vram_gb", "paths", "labels", "eval_labels"}
 how much of the card it was allowed, and which files it read them from. Listed rather than inferred, so
 a genuinely confounding option can never be dropped by a heuristic — the whole value of this line is
 that everything it does NOT name is a difference somebody has to justify."""
+
+
+@dataclass(frozen=True)
+class PairedWidths:
+    """One pair's own per-label half-widths, and whether the arrays behind them are the exact ones.
+
+    The two travel together because the number alone cannot be read: a floor measured on a back-filled
+    run is a floor measured on a re-derivation, and the re-derivation's own tolerance (4x eps across
+    precisions) is wider than the half-widths being quoted.
+    """
+
+    widths: dict[str, float]
+    exact: bool
+
+    def named(self) -> str:
+        """The sentence the report prints under the arm, saying what marked it and how far to trust it."""
+        caveat = "" if self.exact else " - INDICATIVE, one of these runs had its predictions re-derived"
+        return f"paired floor, this pair's own: half-widths up to +/-{max(self.widths.values()):.4f}{caveat}"
 
 
 class RunComparison:
@@ -115,7 +134,7 @@ class RunComparison:
             )
         return "\n".join(lines)
 
-    def paired(self, arm: RunMetrics) -> dict[str, float] | None:
+    def paired(self, arm: RunMetrics) -> PairedWidths | None:
         """This pair's OWN per-label 95% half-widths, or None when either run kept no predictions.
 
         The unpaired bound is each label's sampling error from its positive count, and it is far too
@@ -132,15 +151,17 @@ class RunComparison:
             return None
         first, second, truth = control.aligned(theirs)
         interval = self.scores.paired_interval(first, second, truth)
-        return {label: (high - low) / 2 for label, (low, high) in interval.items()}
+        return PairedWidths(
+            widths={label: (high - low) / 2 for label, (low, high) in interval.items()},
+            exact=control.source == TRAINED and theirs.source == TRAINED,
+        )
 
     def floor(self, arm: RunMetrics) -> tuple[dict[str, float], str]:
         """The intervals this arm's deltas are marked against, and the sentence naming which they are."""
         paired = self.paired(arm)
         if paired is None:
             return self.errors, "UNPAIRED bound (one of these runs kept no per-study predictions)"
-        widest = max(paired.values())
-        return paired, f"paired floor, this pair's own: half-widths up to +/-{widest:.4f}"
+        return paired.widths, paired.named()
 
     def unmatched(self, arm: RunMetrics) -> str:
         """What this arm changed BESIDES the axis under test, read from both runs' recorded recipes.
