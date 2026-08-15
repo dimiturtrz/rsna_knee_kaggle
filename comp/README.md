@@ -48,13 +48,13 @@ be compared against it. An external input with no fetch step is not a dependency
 **Every entry is justified OFFLINE first.** `kneemri.evaluation.member_curve` scores every subset of members on
 the shared fold-0 holdout and costs no slot; every arm is fitted on that same split, so any candidate
 ensemble is rankable before it is submitted. A slot is spent only when the offline number predicts a
-gain over **the best entry already on the board (0.894)**, or when the question cannot be answered
+gain over **the best entry already on the board (0.895)**, or when the question cannot be answered
 offline at all — holdout-to-LB transfer for a recipe that has never been there.
 
 **Two different numbers, and conflating them spends slots backwards.** 0.888 is the best from OUR OWN
-weights and is the one to quote as ours; 0.894 is where the leaderboard actually has us, from the
-23-member fusion that is mostly grafted. A candidate that beats 0.888 and loses to 0.894 costs a slot
-to move us DOWN.
+weights and is the one to quote as ours; 0.895 is where the leaderboard actually has us (2026-08-14),
+from the 22-member fusion that is mostly grafted. A candidate that beats 0.888 and loses to 0.895 costs
+a slot to move us DOWN.
 
 One caveat on the tool itself: `member_curve`'s subset ranking was partly decided by corpus order until
 2026-08-13, because the AUC broke ties by array position and rank-averaging ties ~20% of studies at two
