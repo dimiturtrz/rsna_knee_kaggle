@@ -379,3 +379,21 @@ def test_select():
 
     assert device.type in {"cuda", "cpu"}
     assert DeviceBudget(vram_gb=8.0).select().type == device.type, "a budget must not change WHICH device"
+
+
+def test_plan():
+    """Drawing every window start up front yields exactly what drawing one per step yielded.
+
+    The prefetch reads ahead of the loop, so the schedule had to leave it — and this is the check that
+    the move cost nothing: same seed, same numbers, in the same order. If a draw is ever added between
+    the starts, this fails rather than silently retraining every arm on a different sequence.
+    """
+    corpus = CachedCorpus(np.zeros((8, 2, 6, 4, 4), dtype=np.uint8), np.ones((8, 2), dtype=np.float32))
+    trainer = _trainer()
+    batches = [np.array([0, 1]), np.array([2, 3]), np.array([4, 5])]
+
+    planned = trainer.plan(corpus, batches, np.random.default_rng(SEED))
+    per_step = np.random.default_rng(SEED)
+    for (batch, start), expected in zip(planned, batches, strict=True):
+        assert np.array_equal(batch, expected)
+        assert start == int(per_step.integers(0, corpus.slices - trainer.window + 1))

@@ -31,6 +31,7 @@ from kneemri.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.heartbeat import Heartbeat
 from kneemri.model import StudyModel
 from kneemri.objective import Objective
+from kneemri.prefetch import Prefetch
 from kneemri.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
@@ -380,6 +381,23 @@ class Trainer:
             batches.pop()
         return batches
 
+    def plan(
+        self,
+        corpus: CachedCorpus,
+        batches: list[NDArray[np.int64]],
+        generator: np.random.Generator,
+    ) -> list[tuple[NDArray[np.int64], int]]:
+        """Every step of the epoch decided before the first one runs: its positions and its window start.
+
+        The start is drawn per BATCH rather than per study, so a step is one window of the map rather than
+        a gather across depths, and the randomness across steps still covers the stack.
+
+        Drawing them all here rather than one per step is what lets the reader run ahead, and it draws the
+        SAME numbers: these were the only draws left in the loop, one after another with nothing between,
+        so pulling them forward reorders nothing.
+        """
+        return [(batch, int(generator.integers(0, corpus.slices - self.window + 1))) for batch in batches]
+
     def fit_epoch(
         self,
         corpus: CachedCorpus,
@@ -400,9 +418,9 @@ class Trainer:
         self.model.train()
         total, steps = 0.0, 0
         planned = len(positions) // max(size, 1)
-        for batch in self.batches(positions, size, generator, shuffle=True):
-            start = int(generator.integers(0, corpus.slices - self.window + 1))
-            pixels = torch.from_numpy(corpus.window(batch, start, self.window)).to(self.device)
+        plan = self.plan(corpus, self.batches(positions, size, generator, shuffle=True), generator)
+        for batch, fetched in Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda"):
+            pixels = fetched.to(self.device, non_blocking=True)
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
@@ -438,18 +456,23 @@ class Trainer:
         self.model.eval()
         middle = (corpus.slices - self.window) // 2
         chunks = []
+        # PADDED TO A FULL BATCH, then trimmed. The holdout cannot drop its remainder the way training
+        # does — that would score a different holdout than the ledger quotes — so the last batch is
+        # repeated up to size and the extra rows are discarded after the forward. The alternative is a
+        # second graph shape for the sake of one batch per epoch.
+        batches = self.batches(positions, size, generator, shuffle=False)
+        kept = [len(batch) for batch in batches]
+        plan = [
+            (batch if len(batch) == size else np.concatenate([batch, np.repeat(batch[-1:], size - len(batch))]), middle)
+            for batch in batches
+        ]
+        reader = Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda")
         with torch.no_grad(), torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
-            for batch in self.batches(positions, size, generator, shuffle=False):
-                # PADDED TO A FULL BATCH, then trimmed. The holdout cannot drop its remainder the way
-                # training does — that would score a different holdout than the ledger quotes — so the
-                # last batch is repeated up to size and the extra rows are discarded after the forward.
-                # The alternative is a second graph shape for the sake of one batch per epoch.
-                short = size - len(batch)
-                padded = batch if short == 0 else np.concatenate([batch, np.repeat(batch[-1:], short)])
-                pixels = torch.from_numpy(corpus.window(padded, middle, self.window)).to(self.device)
+            for (padded, fetched), rows in zip(reader, kept, strict=True):
+                pixels = fetched.to(self.device, non_blocking=True)
                 flags = torch.from_numpy(corpus.mask[padded]).to(self.device)
                 scored = self.model(pixels, flags, self.read_size or corpus.image_size).float()
-                chunks.append(torch.sigmoid(scored).cpu().numpy()[: len(batch)])
+                chunks.append(torch.sigmoid(scored).cpu().numpy()[:rows])
         return np.concatenate(chunks).astype(np.float64)
 
     def loss(

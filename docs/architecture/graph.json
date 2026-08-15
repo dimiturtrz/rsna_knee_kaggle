@@ -872,6 +872,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.prefetch",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.reader_agreement",
       "target": "core.paths",
       "weight": 1
@@ -1342,6 +1348,12 @@
       "kind": "import",
       "source": "kneemri.trainer",
       "target": "kneemri.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.trainer",
+      "target": "kneemri.prefetch",
       "weight": 1
     },
     {
@@ -3973,6 +3985,18 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.prefetch.Prefetch",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.prefetch.Prefetch.fetch",
+      "target": "kneemri.study_cache.CachedCorpus.window",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.reader_agreement.ReaderAgreement",
       "target": "kneemri.report_language.ReportLanguages",
@@ -5725,9 +5749,9 @@
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "kneemri.trainer.Trainer.fit_epoch",
-      "target": "kneemri.study_cache.CachedCorpus.window",
+      "target": "kneemri.prefetch.Prefetch",
       "weight": 1
     },
     {
@@ -5756,8 +5780,14 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.trainer.Trainer.fit_epoch",
+      "target": "kneemri.trainer.Trainer.plan",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.trainer.Trainer.predict",
-      "target": "kneemri.study_cache.CachedCorpus.window",
+      "target": "kneemri.prefetch.Prefetch",
       "weight": 1
     },
     {
@@ -5791,7 +5821,7 @@
       "role": null
     },
     {
-      "descendants": 69,
+      "descendants": 70,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6146,6 +6176,14 @@
       "descendants": 0,
       "id": "kneemri.prediction_cache",
       "label": "prediction_cache",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.prefetch",
+      "label": "prefetch",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -6868,6 +6906,14 @@
       "label": "PredictionCache",
       "level": "class",
       "parent": "kneemri.prediction_cache",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.prefetch.Prefetch",
+      "label": "Prefetch",
+      "level": "class",
+      "parent": "kneemri.prefetch",
       "role": "primary"
     },
     {
@@ -9560,6 +9606,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.prefetch.Prefetch.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.prefetch.Prefetch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.prefetch.Prefetch.__iter__",
+      "label": "__iter__",
+      "level": "method",
+      "parent": "kneemri.prefetch.Prefetch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.prefetch.Prefetch.fetch",
+      "label": "fetch",
+      "level": "method",
+      "parent": "kneemri.prefetch.Prefetch",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.reader_agreement.ReaderAgreement.__init__",
       "label": "__init__",
       "level": "method",
@@ -11026,6 +11096,14 @@
       "descendants": 0,
       "id": "kneemri.trainer.Trainer.one_cycle",
       "label": "one_cycle",
+      "level": "method",
+      "parent": "kneemri.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.trainer.Trainer.plan",
+      "label": "plan",
       "level": "method",
       "parent": "kneemri.trainer.Trainer",
       "role": null

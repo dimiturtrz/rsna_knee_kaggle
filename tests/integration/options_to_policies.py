@@ -38,6 +38,7 @@ THE_LOOP = {
     "evaluated",
     "fit_epoch",
     "loss",
+    "plan",
     "predict",
     "save_partial",
 }
