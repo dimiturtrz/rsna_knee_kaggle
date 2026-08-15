@@ -16,7 +16,7 @@ reading it was not fitted under is the defect that reached the leaderboard.
 import json
 from dataclasses import fields, replace
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 
 import numpy as np
 import pandas as pd
@@ -32,8 +32,9 @@ from kneemri.corpus.study_cache import StudyCache
 from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
-from kneemri.models.slot_head import AVERAGED
+from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.training import train as train_module
+from kneemri.training.train import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, _BlockedBackbone, _FakeBackbone
 
@@ -381,3 +382,56 @@ def test_a_full_fit_holds_nothing_back(corpus: Path, monkeypatch: pytest.MonkeyP
     payload = _run(corpus, monkeypatch, "--fold", "-1")
 
     assert _nested(payload, "config")["witness"] == {}, "a run with no holdout has nothing to witness"
+
+
+class _WatchedOptions(TrainingOptions):
+    """`TrainingOptions` that records which fields the run actually READ.
+
+    Not which it stamped. `metrics.recipe()` walks `vars(options)`, which reads `__dict__` directly and
+    so never reaches here — exactly the discrimination this needs, because a field that appears in every
+    ledger row and reaches no consumer is the shape of nine defects this repo has already paid for.
+    """
+
+    reads: ClassVar[set[str]] = set()
+
+    def __getattribute__(self, name: str) -> object:
+        if not name.startswith("_"):
+            _WatchedOptions.reads.add(name)
+        return super().__getattribute__(name)
+
+
+STAMPED_ONLY: set[str] = set()
+"""Fields whose whole job is to travel to the record; no consumer reads them, by design."""
+
+
+def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatch: pytest.MonkeyPatch):
+    """A parsed field nothing ever reads is a switch that changes the ledger row and not the run.
+
+    The sibling of `options_to_policies`, one level down: that walks the policy METHODS and asks each is
+    attached, this walks the FIELDS and asks each is consulted. A flag can pass that test by being
+    stamped — the recipe string is built from `vars()` — and still configure nothing at all.
+    """
+    identifiers = _corpus(corpus)
+    # Report supervision is the one term whose flag is read only when a SECOND flag turns it on, so the
+    # run has to ask for it — an argv that leaves it off would report its vectors field as dead.
+    vectors = corpus / "reports.npz"
+    np.savez(vectors, identifiers=np.array(identifiers), vectors=np.zeros((len(identifiers), REPORT_DIMS), np.float32))
+    _WatchedOptions.reads.clear()
+    monkeypatch.setattr(train_module, "TrainingOptions", _WatchedOptions)
+
+    _run(
+        corpus,
+        monkeypatch,
+        "--whole-stack",
+        "--slice-pooling",
+        "max",
+        "--report-weight",
+        "1.0",
+        "--report-vectors",
+        str(vectors),
+    )
+
+    declared = {field.name for field in fields(TrainingOptions)}
+    assert declared > STAMPED_ONLY, "a name exempted here is not a field any more — stale exemption"
+    unread = declared - _WatchedOptions.reads - STAMPED_ONLY
+    assert not unread, f"{sorted(unread)} is parsed and recorded and read by nothing"
