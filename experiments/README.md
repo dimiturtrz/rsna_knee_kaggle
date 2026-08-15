@@ -58,7 +58,11 @@ and the next planning pass read them as unstarted work. It found four more on it
 **`witness_check` — before a submission.** Re-derives what training predicted for eight named studies
 through the INFERENCE path and refuses the member if the numbers move. It is the only check that spans
 both paths, and it found three defects on first use — `torch.compile` renaming every state-dict key,
-bf16 members served in fp16, and its own tolerance being tighter than bf16's epsilon.
+bf16 members served in fp16, and its own tolerance being tighter than bf16's epsilon. A member trained
+before the witness has nothing to re-derive, so read the summary rather than the exit code: a run that
+verifies NOTHING says so out loud and still exits 0, because every packaged member predates the witness
+(knee-stp) and the fix is a card, not a flag. `--require-witness` makes the absent claim fail, for a
+caller that can demand the strong one.
 
 What none of them check is whether a SENTENCE is true. A number can be present and its interpretation
 stale; that still needs a reader.

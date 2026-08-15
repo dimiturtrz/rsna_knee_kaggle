@@ -139,6 +139,12 @@ def main() -> None:
     # verdict is device-independent: TOLERANCE is set above GPU noise precisely so a reading change is
     # what moves it, and cpu-vs-cuda is not a reading change.
     parser.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda"))
+    # A CHECK THAT CAN ONLY REFUSE CANNOT REQUIRE. Every member of the mounted kit predates the witness,
+    # so the summary read "0 ok, 3 unverified, 0 refused" and exited 0 — success-shaped output over a
+    # package nothing had been proven about. Re-fitting those members is the real fix (knee-stp) and it
+    # needs the card, so failing by default would leave the gate permanently red for a reason it cannot
+    # fix; an automated caller asks for the strong claim instead.
+    parser.add_argument("--require-witness", action="store_true", help="a member with no witness fails")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -155,13 +161,15 @@ def main() -> None:
 
     refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
     unverified = [name for name, verdict in verdicts.items() if verdict.startswith("UNVERIFIED")]
-    logger.info(
-        "%d ok, %d unverified, %d refused",
-        len(verdicts) - len(refused) - len(unverified),
-        len(unverified),
-        len(refused),
-    )
-    if refused:
+    verified = len(verdicts) - len(refused) - len(unverified)
+    logger.info("%d ok, %d unverified, %d refused", verified, len(unverified), len(refused))
+    if verdicts and not verified:
+        logger.info(
+            "NOTHING HERE IS VERIFIED: no member of %s carries a witness, so this run made no claim "
+            "about how inference reads them. Not a pass — an unanswered question.",
+            arguments.root,
+        )
+    if refused or (arguments.require_witness and unverified):
         sys.exit(1)
 
 
