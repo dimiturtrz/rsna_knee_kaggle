@@ -33,8 +33,13 @@ class Heartbeat:
         self._since = 0.0
         self._images = 0
 
-    def tick(self, step: int, steps: int, loss: float, images: int) -> None:
-        """Count one step's images, and report the rate if the interval has elapsed."""
+    def tick(self, step: int, steps: int, loss: Callable[[], float], images: int) -> None:
+        """Count one step's images, and report the rate if the interval has elapsed.
+
+        THE LOSS ARRIVES AS A CALLABLE because reading it costs a device synchronisation on the caller's
+        side, and this prints it about once in a thousand steps. Taking a float would have made every
+        step pay for a number that thirty seconds of them never use.
+        """
         self._images += images
         now = self.clock()
         if not self._since:
@@ -43,6 +48,6 @@ class Heartbeat:
         elapsed = now - self._since
         if elapsed < self.every_seconds:
             return
-        logger.info("  step %d/%d  loss %.4f  %.0f img/s", step, steps, loss, self._images / elapsed)
+        logger.info("  step %d/%d  loss %.4f  %.0f img/s", step, steps, loss(), self._images / elapsed)
         self._since = now
         self._images = 0

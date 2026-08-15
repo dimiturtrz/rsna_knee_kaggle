@@ -416,7 +416,14 @@ class Trainer:
         # the batch and slicing afterwards materialises all twelve (97.5 MB per batch) to discard three
         # quarters of them: measured 35 ms against 3.3 ms, ten seconds of every forty-second epoch.
         self.model.train()
-        total, steps = 0.0, 0
+        # THE RUNNING TOTAL STAYS ON THE DEVICE. Reading a loss back with float() synchronises: the host
+        # blocks until the backward that produced it has finished, so it cannot queue the next step while
+        # the card works on this one — which is most of what the prefetch in front of the loop just bought.
+        # The value is consumed twice, by the epoch mean and by a heartbeat line every thirty seconds, so
+        # neither consumer wanted a per-step read. float64 makes the sum the one the host loop computed:
+        # each float32 loss promoted and added, in step order.
+        total = torch.zeros((), dtype=torch.float64, device=self.device)
+        steps = 0
         planned = len(positions) // max(size, 1)
         plan = self.plan(corpus, self.batches(positions, size, generator, shuffle=True), generator)
         for batch, fetched in Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda"):
@@ -440,10 +447,18 @@ class Trainer:
             if self.schedule is not None:
                 self.schedule.step()
             self.average.update(self.model)
-            total += float(loss.detach())
+            total += loss.detach().double()
             steps += 1
-            self.heartbeat.tick(steps, planned, total / steps, int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]))
-        return total / max(steps, 1)
+            self.heartbeat.tick(
+                steps,
+                planned,
+                # Bound as defaults rather than captured: the closure outlives the iteration only in
+                # principle, but a loop variable read later is the classic way a log line reports the
+                # wrong step, and the linter is right to refuse it.
+                lambda accumulated=total, count=steps: float(accumulated) / count,
+                int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]),
+            )
+        return float(total) / max(steps, 1)
 
     def predict(
         self,
@@ -472,8 +487,11 @@ class Trainer:
                 pixels = fetched.to(self.device, non_blocking=True)
                 flags = torch.from_numpy(corpus.mask[padded]).to(self.device)
                 scored = self.model(pixels, flags, self.read_size or corpus.image_size).float()
-                chunks.append(torch.sigmoid(scored).cpu().numpy()[:rows])
-        return np.concatenate(chunks).astype(np.float64)
+                chunks.append(torch.sigmoid(scored)[:rows])
+        # ONE transfer after the loop rather than one per batch, for the reason the running total stays
+        # on the device: `.cpu()` blocks the host until that batch's forward has finished, so the reader
+        # thread and the card both wait on a copy of 12 floats per study. The whole holdout is 881x12.
+        return torch.cat(chunks).cpu().numpy().astype(np.float64)
 
     def loss(
         self,

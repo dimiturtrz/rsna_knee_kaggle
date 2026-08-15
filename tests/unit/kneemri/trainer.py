@@ -118,16 +118,26 @@ def test_fit_epoch():
     before = trainer.model.head.out.weight.detach().clone()
     loss = trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
     assert np.isfinite(loss)
+    assert isinstance(loss, float), "the epoch mean is a host number — the running total is what stays on device"
     assert not torch.allclose(before, trainer.model.head.out.weight), "a fitted epoch must change the head"
 
 
 def test_predict():
-    """Prediction returns one probability per target per study, in [0, 1]."""
+    """Prediction returns one probability per target per study, in [0, 1] — remainder included.
+
+    The last batch is padded up to the batch size and trimmed after the forward, so a count that is NOT
+    a multiple of the size is the case that proves the trim: a holdout short of its remainder scores a
+    different set of studies than the ledger quotes.
+    """
     trainer = _trainer()
     predictions = trainer.predict(_corpus(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
     assert predictions.shape == (6, len(TARGETS))
     assert predictions.min() >= 0.0
     assert predictions.max() <= 1.0
+
+    remainder = trainer.predict(_corpus(), np.arange(5, dtype=np.int64), 3, np.random.default_rng(SEED))
+    assert remainder.shape == (5, len(TARGETS))
+    assert np.allclose(remainder[:3], predictions[:3]), "padding the tail must not disturb the full batches"
 
 
 def test_augment_bag():
