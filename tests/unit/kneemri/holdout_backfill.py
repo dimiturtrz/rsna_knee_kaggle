@@ -95,7 +95,9 @@ def test_ruler(tmp_path: Path):
 
 
 def _member(checkpoint: Path) -> Member:
-    checkpoint.write_bytes(b"weights")
+    # A REAL torch file, not placeholder bytes: the cache key only stats it, but `Backfill.of` reads
+    # the stamp inside it, and a checkpoint this suite writes must be one our own loaders can open.
+    torch.save({"model": {}}, checkpoint)
     return Member(
         identifier=checkpoint.stem,
         file=checkpoint,
@@ -146,3 +148,27 @@ def test_derive(tmp_path: Path):
     assert stored.source == DERIVED, "a re-derivation is accurate to a tolerance wider than the interval"
     assert stored.studies == HoldoutRecord.named(STUDIES, held)
     assert stored.epoch == 1
+
+
+def test_of_reads_the_split_from_a_checkpoint_that_kept_no_metrics_file(tmp_path: Path):
+    """50 of the 69 members on disk wrote no metrics file, and 36 of those stamp the split anyway.
+
+    Refusing them read as "no recipe recorded" when the recipe was sitting inside the checkpoint the
+    command had already been handed — a whole ledger held unreadable for want of a file rather than a
+    fact.
+    """
+    checkpoint = tmp_path / "stamped.pt"
+    torch.save({"model": {}, "options": {**RECIPE, "epochs": "8"}, "epochs_done": 5}, checkpoint)
+
+    plan = Backfill.of(checkpoint)
+
+    assert plan.recipe["fold"] == "1", "its own split, taken from its own stamp"
+    assert plan.epoch == 4, "epochs_done counts the run; the epoch names the save"
+
+
+def test_of_prefers_the_metrics_file_when_a_run_kept_both(tmp_path: Path):
+    """The metrics file names the epoch that SCORED best; the stamp can only name how many ran."""
+    checkpoint = _metrics(tmp_path / "both.pt", RECIPE, [_epoch(0, 0.80), _epoch(1, 0.86), _epoch(2, 0.84)])
+    torch.save({"model": {}, "options": RECIPE, "epochs_done": 3}, checkpoint)
+
+    assert Backfill.of(checkpoint).epoch == 1, "under patience the last epoch's weights were thrown away"

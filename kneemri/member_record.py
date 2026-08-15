@@ -1,6 +1,7 @@
 """What a trained member records about itself, so a checkpoint can say what produced it."""
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 import numpy as np
@@ -268,3 +269,46 @@ class MemberRecord:
                 "seed": FINGERPRINT_SEED,
             },
         }
+
+
+@dataclass(frozen=True)
+class StampedRun:
+    """What a checkpoint says about the RUN that wrote it, read back out of `MemberRecord.payload`.
+
+    Beside the writer because it is the same statement read in the other direction, and because two
+    consumers had already started deriving it themselves: `metrics_recipe`, which moves the stamp into
+    a scores file, and `holdout_backfill`, which needs the split a finished arm used.
+
+    It exists at all because the stamp is the ONLY account most of the ledger kept. Of the 69 members
+    on disk 50 wrote no metrics file, and 36 of those carry the full split recipe here — so a reader
+    that looked only beside the checkpoint called three quarters of the ledger unreadable for want of
+    a file rather than a fact.
+    """
+
+    options: dict[str, str]
+    """The run's flags as strings, which is how `payload` had to store them: every loader here reads
+    with `weights_only=True`, and that refuses to unpickle a Path."""
+
+    kept_epoch: int
+    """The epoch whose weights were SAVED — not the last one run. Under patience those differ, and
+    predicting against the later number describes a model that was thrown away."""
+
+    @classmethod
+    def of(cls, checkpoint: Path) -> "StampedRun | None":
+        """The stamp, or None for a checkpoint written before runs recorded one.
+
+        `epochs_done` is the fallback for `epoch` rather than the other way round: the assembler has
+        always written it as the kept epoch plus one, while `epoch` itself is a later key that the
+        older half of the ledger does not carry.
+        """
+        if not checkpoint.exists():
+            return None
+        saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
+        options = saved.get("options")
+        if not options:
+            return None
+        done = int(saved.get("epochs_done", 1))
+        return cls(
+            options={name: str(value) for name, value in options.items()},
+            kept_epoch=int(saved.get("epoch", done - 1)),
+        )

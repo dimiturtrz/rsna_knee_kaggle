@@ -1,10 +1,11 @@
 from dataclasses import replace
+from pathlib import Path
 
 import torch
 
 from kneemri.backbone import Encoder
 from kneemri.crop_centre import CROP_MM
-from kneemri.member_record import MemberRecord
+from kneemri.member_record import MemberRecord, StampedRun
 from kneemri.train import TrainingOptions
 
 from .model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
@@ -127,3 +128,44 @@ def test_payload_records_the_runs_own_router():
 
     assert record.payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "last"
     assert _record().payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "first"
+
+
+def test_of(tmp_path: Path):
+    """The stamp read back from a checkpoint, round-tripped through the assembler that writes it.
+
+    Round-tripped rather than hand-written, because a hand-written payload only proves the copy agrees
+    with itself — and what this reader exists for is the OLDER half of the ledger, whose only account
+    of its own split is this block.
+    """
+    record = _record()
+    checkpoint = tmp_path / "arm.pt"
+    torch.save(record.payload({"w": torch.zeros(1)}, holdout=0.83, epoch=6), checkpoint)
+
+    stamped = StampedRun.of(checkpoint)
+
+    assert stamped is not None
+    assert stamped.options["whole_stack"] == "True", "the run's flags, as the recipe stores them"
+    assert stamped.kept_epoch == 6
+
+
+def test_of_reads_the_kept_epoch_from_a_checkpoint_that_predates_the_epoch_key(tmp_path: Path):
+    """`epochs_done` is the kept epoch plus one, and for most of the ledger it is the only one written."""
+    record = _record()
+    payload = record.payload({"w": torch.zeros(1)}, holdout=0.83, epoch=6)
+    del payload["epoch"]
+    checkpoint = tmp_path / "older.pt"
+    torch.save(payload, checkpoint)
+
+    stamped = StampedRun.of(checkpoint)
+
+    assert stamped is not None
+    assert stamped.kept_epoch == 6, "not epochs_done, which counts the run rather than naming the save"
+
+
+def test_of_returns_nothing_for_a_checkpoint_with_no_stamp(tmp_path: Path):
+    """14 members predate options entirely: name and score is all they have, and that must be said."""
+    checkpoint = tmp_path / "ancient.pt"
+    torch.save({"model": {"w": torch.zeros(1)}, "holdout": 0.81}, checkpoint)
+
+    assert StampedRun.of(checkpoint) is None
+    assert StampedRun.of(tmp_path / "absent.pt") is None

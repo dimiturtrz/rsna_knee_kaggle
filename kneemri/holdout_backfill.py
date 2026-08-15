@@ -36,6 +36,7 @@ from kneemri.folds import ReportFolds
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.holdout_record import DERIVED, HoldoutRecord
 from kneemri.holdout_slab import HoldoutSlab
+from kneemri.member_record import StampedRun
 from kneemri.members import Member
 from kneemri.prediction_cache import PredictionCache
 from kneemri.run_metrics import RunMetrics
@@ -69,24 +70,35 @@ class Backfill:
     def of(cls, checkpoint: Path) -> "Backfill":
         """Read a run's own account of itself, or refuse it with the reason.
 
-        The epoch is the BEST one, because that is the checkpoint sitting beside the metrics file —
-        under patience a later epoch exists in the ledger and its weights were thrown away, so
-        re-deriving against it would predict from a model that was never kept.
+        TWO PLACES HOLD THAT ACCOUNT, and reading only the first called three quarters of the ledger
+        unreadable for want of a FILE rather than a fact: of the 69 members on disk, 50 kept no metrics
+        file at all, and 36 of those stamp the whole split recipe into the checkpoint itself. The
+        metrics file still comes first where it exists, because it names the epoch that SCORED best
+        directly rather than deriving it from a count.
+
+        Either way the epoch is the KEPT one, never the last: under patience a later epoch exists in
+        the ledger and its weights were thrown away, so re-deriving against it would predict from a
+        model that was never saved.
         """
-        metrics = RunMetrics(checkpoint)
-        recipe, best = metrics.recipe(), metrics.best()
+        metrics, stamped = RunMetrics(checkpoint), StampedRun.of(checkpoint)
+        recorded, best = metrics.recipe(), metrics.best()
+        recipe = recorded if recorded is not None else (stamped.options if stamped else None)
         if recipe is None:
-            message = f"{checkpoint.stem}: no recipe recorded, so its split cannot be reconstructed"
+            message = (
+                f"{checkpoint.stem}: no recipe recorded in its metrics or its checkpoint, "
+                "so its split cannot be reconstructed"
+            )
             raise UnbackfillableError(message)
-        # BEFORE the scored-epoch check, because a full-data fit fails both and only one of the two
-        # reasons tells the reader anything: it records NaN AUCs precisely BECAUSE it held nothing out.
+        # BEFORE the epoch check, because a full-data fit fails both and only this reason tells the
+        # reader anything: it records NaN AUCs precisely BECAUSE it held nothing out.
         if int(recipe.get("fold", NO_HOLDOUT_FOLD)) == NO_HOLDOUT_FOLD:
             message = f"{checkpoint.stem}: a full-data fit held nothing out"
             raise UnbackfillableError(message)
-        if best is None:
+        epoch = int(best["epoch"]) if best is not None else (stamped.kept_epoch if stamped else None)
+        if epoch is None:
             message = f"{checkpoint.stem}: no scored epoch, so it holds no per-label claim to re-read"
             raise UnbackfillableError(message)
-        return cls(checkpoint=checkpoint, recipe=recipe, epoch=int(best["epoch"]))
+        return cls(checkpoint=checkpoint, recipe=recipe, epoch=epoch)
 
     def split(self, identifiers: list[str], train_table: Path) -> NDArray[np.int64]:
         """The studies THIS run held out, from its own recorded folds, split seed and fold index."""

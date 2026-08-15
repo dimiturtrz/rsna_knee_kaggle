@@ -13,9 +13,8 @@ import argparse
 import logging
 from pathlib import Path
 
-import torch
-
 from core.paths import DataRoot
+from kneemri.member_record import StampedRun
 from kneemri.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -38,14 +37,11 @@ class MetricsRecipe:
     def recipe_of(checkpoint: Path) -> dict[str, str] | None:
         """The options block the checkpoint recorded, or None when there is nothing to read it from.
 
-        `weights_only=True` because this opens files only to read a dictionary of strings out of them,
-        and the weights beside it are hundreds of megabytes nobody here wants materialised.
+        Through `StampedRun`, which lives beside the assembler that writes the stamp, so this module
+        and `holdout_backfill` read one description of it rather than two.
         """
-        if not checkpoint.exists():
-            return None
-        payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
-        options = payload.get("options")
-        return {name: str(value) for name, value in options.items()} if options else None
+        stamped = StampedRun.of(checkpoint)
+        return stamped.options if stamped else None
 
     def backfill(self, *, write: bool) -> tuple[list[str], list[str]]:
         """Every metrics file with no recipe, split into the ones recovered and the ones that cannot be."""
