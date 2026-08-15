@@ -28,6 +28,19 @@ def _record() -> MemberRecord:
     return MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
 
 
+def test_recipe():
+    """Both the checkpoint's `options` block and the metrics file read this, so it has one home.
+
+    Iterated from the options object rather than listed: a field added to a run reaches the recipe
+    without anyone remembering to add it here, which is the failure this project keeps paying for.
+    """
+    recipe = _record().recipe
+
+    assert recipe.keys() == vars(OPTIONS).keys(), "every option, not a chosen few"
+    assert recipe["backbone_lr"] == "4e-05", "as strings, because a recipe is read and diffed, not run"
+    assert recipe["whole_stack"] == "True"
+
+
 def test_payload():
     """A checkpoint carries the reading it was fitted under, not just its weights.
 

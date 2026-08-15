@@ -24,6 +24,12 @@ def _run(tmp_path: Path, name: str, rows: list[EpochRow]) -> Path:
     return checkpoint
 
 
+def _describe(checkpoint: Path, recipe: dict[str, str]) -> None:
+    """Prepend a recipe line, the way a real run writes one before its first epoch."""
+    path = checkpoint.with_suffix(".metrics.jsonl")
+    path.write_text(json.dumps({"recipe": recipe}) + "\n" + path.read_text(encoding="utf-8"), encoding="utf-8")
+
+
 def test_deltas(tmp_path: Path):
     """Deltas are taken against the control's BEST epoch, per label, and the mean comes with them.
 
@@ -53,3 +59,41 @@ def test_report(tmp_path: Path):
     report = comparison.report()
     assert "0.8400" in report and "epoch 1" in report
     assert report.index("MCL") < report.index("Effusion"), "the widest delta is read first"
+
+
+def test_report_names_what_else_moved(tmp_path: Path):
+    """A delta is a claim about ONE axis. What the arm changed besides it decides whether that holds."""
+    control = _run(tmp_path, "ctl", CONTROL)
+    arm = _run(tmp_path, "arm", ARM)
+    _describe(control, {"crop_mm": "130.0", "centre": "image", "epochs": "8"})
+    _describe(arm, {"crop_mm": "80.0", "centre": "tissue", "epochs": "8"})
+
+    report = RunComparison(control, [arm]).report()
+    assert "crop_mm 130.0→80.0" in report
+    assert "centre image→tissue" in report
+    assert "epochs" not in report.split("vs control:")[1], "an option both runs share is not a difference"
+
+
+def test_unmatched(tmp_path: Path):
+    """Only the arm recorded it, so the control ran the default of the day — a question, not a delta.
+
+    Kept apart because the two need different judgements: `train_size` was added after most of the
+    ledger ran and is a no-op, while a recorded `backbone_lr` that disagrees is a second axis.
+    """
+    control = _run(tmp_path, "ctl", CONTROL)
+    arm = _run(tmp_path, "arm", ARM)
+    _describe(control, {"crop_mm": "130.0"})
+    _describe(arm, {"crop_mm": "80.0", "train_size": "0"})
+
+    comparison = RunComparison(control, [arm])
+    said = comparison.unmatched(comparison.arms[0])
+
+    assert "crop_mm 130.0→80.0" in said
+    assert "control predates train_size=0" in said
+    assert "unset" not in said, "an absence is not a value the control held"
+
+
+def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
+    """Silence read as a match is the failure; every file predating the recipe is in that state."""
+    report = RunComparison(_run(tmp_path, "ctl", CONTROL), [_run(tmp_path, "arm", ARM)]).report()
+    assert "recipe unrecorded" in report

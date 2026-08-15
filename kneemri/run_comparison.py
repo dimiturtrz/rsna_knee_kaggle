@@ -9,6 +9,12 @@ from kneemri.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
+NOT_AN_AXIS = {"out", "vram_gb", "paths", "labels", "eval_labels"}
+"""Options that differ between any two runs without making them unmatched: where the member is written,
+how much of the card it was allowed, and which files it read them from. Listed rather than inferred, so
+a genuinely confounding option can never be dropped by a heuristic — the whole value of this line is
+that everything it does NOT name is a difference somebody has to justify."""
+
 
 class RunComparison:
     """Several runs read side by side, per label, against one control.
@@ -76,9 +82,15 @@ class RunComparison:
             message = f"control {self.control.path} recorded no scored epoch"
             raise ValueError(message)
         lines = [f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}"]
-        for name, deltas in table.items():
+        for arm in self.arms:
+            deltas = table.get(arm.path.stem)
+            if deltas is None:
+                continue
             ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
-            lines.append(f"\n{name}  " + "  ".join(f"{label} {self._marked(label, value)}" for label, value in ordered))
+            lines.append(
+                f"\n{arm.path.stem}  " + "  ".join(f"{label} {self._marked(label, v)}" for label, v in ordered)
+            )
+            lines.append(f"  vs control: {self.unmatched(arm)}")
         if self.errors:
             lines.append(
                 "\n* the delta exceeds that label's own 95% sampling interval; unmarked deltas are "
@@ -93,6 +105,30 @@ class RunComparison:
             )
         return "\n".join(lines)
 
+    def unmatched(self, arm: RunMetrics) -> str:
+        """What this arm changed BESIDES the axis under test, read from both runs' recorded recipes.
+
+        A per-label delta is a claim about one axis, and it is only that if nothing else moved. Two of
+        the arms in the ledger changed depth and encoder together and were read as capacity results.
+        Runs recorded before the recipe existed say so plainly rather than silently comparing as
+        matched — an unknown control is a worse failure than a mismatched one.
+        """
+        control, theirs = self.control.recipe(), arm.recipe()
+        if control is None or theirs is None:
+            return "recipe unrecorded, so nothing here can say the two runs are matched"
+        axes = [(name, value) for name, value in theirs.items() if name not in NOT_AN_AXIS]
+        # Two different statements, kept apart because they need different judgements. An option BOTH
+        # runs recorded and disagree on is a confound outright. An option only the arm recorded is a
+        # question — the control predates the flag, so it ran whatever the default was that day, which
+        # this cannot read. Merging them would let `train_size unset→0`, a no-op on every arm, sit in
+        # the same list as `backbone_lr 8e-06→4e-05`, which is a second axis on a resolution result.
+        moved = [
+            f"{name} {control[name]}→{value}" for name, value in axes if name in control and control[name] != value
+        ]
+        newer = [f"{name}={value}" for name, value in axes if name not in control]
+        said = ", ".join(moved) if moved else "matched on every option both runs recorded"
+        return said if not newer else f"{said}; control predates {', '.join(newer)}"
+
     def _marked(self, label: str, value: float) -> str:
         """A delta with a star when it clears its own label's 95% interval, and bare when it cannot."""
         interval = self.errors.get(label)
@@ -101,7 +137,7 @@ class RunComparison:
 
 
 def main() -> None:
-    """Compare arms per label: `python -m kneemri.run_metrics --control a.pt --arms b.pt c.pt`."""
+    """Compare arms per label: `python -m kneemri.run_comparison --control a.pt --arms b.pt c.pt`."""
     parser = argparse.ArgumentParser(description=RunComparison.__doc__)
     parser.add_argument("--control", type=Path, required=True, help="the checkpoint the arms are measured against")
     parser.add_argument("--arms", type=Path, nargs="+", required=True)

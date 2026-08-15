@@ -57,6 +57,18 @@ def _fitting(destination: Path, epochs: int = 1, patience: int = 0) -> Fitting:
     return Fitting(trainer, record, plan)
 
 
+def test_a_run_states_its_recipe_before_it_has_a_single_score(tmp_path: Path):
+    """Built, not fitted: a run killed in its first epoch still leaves a file saying what it tried.
+
+    Written where the metrics file is created rather than at the first scored epoch, because a metrics
+    file with no recipe is exactly the state that lets an unmatched arm read as a matched control.
+    """
+    fitting = _fitting(tmp_path / "member.pt")
+
+    assert fitting.metrics.recipe() == {name: str(value) for name, value in vars(OPTIONS).items()}
+    assert not fitting.metrics.rows(), "and it is not an epoch"
+
+
 def test_scored():
     """A fold with nothing held back cannot rank its epochs by a score, and must say so."""
     assert _fold().scored

@@ -61,3 +61,24 @@ def test_exists(tmp_path: Path):
     assert not metrics.exists()
     metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.5, seconds=1, per_label={"ACL": 0.5}))
     assert metrics.exists()
+
+
+def test_describe(tmp_path: Path):
+    """The recipe shares the file with the scores, so every reader of the scores must ignore it."""
+    metrics = RunMetrics(tmp_path / "run.pt")
+
+    metrics.describe({"crop_mm": "80.0", "centre": "tissue"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.5, seconds=1, per_label={"ACL": 0.5}))
+
+    assert [row["epoch"] for row in metrics.rows()] == [0], "the recipe line is not an epoch"
+    assert metrics.best() is not None, "and ranking epochs must not trip over it"
+
+
+def test_recipe(tmp_path: Path):
+    """A file of scores that cannot say which run produced them is what makes a control unverifiable."""
+    metrics = RunMetrics(tmp_path / "run.pt")
+    assert metrics.recipe() is None, "a run that has not described itself says so rather than guessing"
+
+    metrics.describe({"crop_mm": "80.0", "centre": "tissue"})
+
+    assert metrics.recipe() == {"crop_mm": "80.0", "centre": "tissue"}

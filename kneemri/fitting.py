@@ -95,6 +95,9 @@ class Fitting:
         self.record = record
         self.plan = plan
         self.metrics = RunMetrics(plan.destination)
+        # Written HERE rather than at the first scored epoch, so a run killed before it scores still
+        # leaves a file that says what it was trying.
+        self.metrics.describe(record.recipe)
         self.scores = LabelScores()
         # Built here rather than passed in: `main` seeded one generator and handed it to nothing else,
         # so owning it costs no behaviour and removes an argument that could be seeded twice.

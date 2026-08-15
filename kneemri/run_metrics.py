@@ -4,13 +4,16 @@ import json
 import logging
 import math
 from pathlib import Path
-from typing import NotRequired, TypedDict
+from typing import NotRequired, TypedDict, cast
 
 import torch
 
 logger = logging.getLogger(__name__)
 
 BYTES_PER_GB = 1024**3
+RECIPE = "recipe"
+"""The key a recipe line carries. An epoch row has no such key and a recipe line has no epoch, so the
+two are told apart by what they hold rather than by where they sit in the file."""
 
 
 class EpochRow(TypedDict):
@@ -62,6 +65,24 @@ class RunMetrics:
         """
         return self.path.exists()
 
+    def describe(self, recipe: dict[str, str]) -> None:
+        """Record WHICH RUN these epochs belong to, once, before the first of them.
+
+        A metrics file used to hold numbers and nothing else, so the only statement of the recipe that
+        produced them was the arm's shell script and the file's own name. `RunComparison` then subtracts
+        one run's per-label scores from another's with nothing able to say the two differ only in the
+        axis under test — and an unmatched control is not a control. This is the same failure this
+        project keeps paying for, in the analysis layer: the knowledge existed, and it did not reach
+        the place that needed it.
+        """
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({RECIPE: recipe}) + "\n")
+
+    def recipe(self) -> dict[str, str] | None:
+        """The recorded recipe, or None for a file written before runs recorded one."""
+        described = [cast(dict[str, str], entry[RECIPE]) for entry in self._entries() if RECIPE in entry]
+        return described[-1] if described else None
+
     def record(self, row: EpochRow) -> None:
         """Append one epoch's row, attach the VRAM peak, and report the per-label scores.
 
@@ -75,11 +96,19 @@ class RunMetrics:
             handle.write(json.dumps(row) + "\n")
         logger.info("    %s", {name: round(value, 3) for name, value in row["per_label"].items()})
 
-    def rows(self) -> list[EpochRow]:
-        """Everything recorded so far, for whoever is comparing runs."""
+    def _entries(self) -> list[dict[str, object]]:
+        """Every recorded line, epochs and recipe alike."""
         if not self.path.exists():
             return []
         return [json.loads(line) for line in self.path.read_text(encoding="utf-8").splitlines() if line]
+
+    def rows(self) -> list[EpochRow]:
+        """The EPOCH rows, for whoever is comparing runs.
+
+        Filtered by the presence of an epoch rather than by position: a recipe line is not an epoch,
+        and a reader that assumed the first line was one would rank the recipe as a score.
+        """
+        return [cast(EpochRow, entry) for entry in self._entries() if "epoch" in entry]
 
     def best(self) -> EpochRow | None:
         """The recorded epoch with the highest mean AUC, or None if the run recorded nothing.
