@@ -2,8 +2,8 @@
 
 import numpy as np
 
+from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
-from kneemri.labels.label_combine import LabelCombine
 from kneemri.models.model import TARGETS
 
 STUDIES = 120

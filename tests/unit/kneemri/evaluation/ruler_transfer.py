@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from kneemri.labels.ruler_transfer import RulerTransfer, Transfer
+from kneemri.evaluation.ruler_transfer import RulerTransfer, Transfer
 from kneemri.models.model import TARGETS
 
 STUDIES = 40

@@ -1,6 +1,6 @@
 # The two rulers return the same delta — and one permutation seed nearly said otherwise
 
-2026-08-15 · `python -m kneemri.labels.ruler_transfer --labels .../labels/report_labels_v2.csv` · no GPU, no
+2026-08-15 · `python -m kneemri.evaluation.ruler_transfer --labels .../labels/report_labels_v2.csv` · no GPU, no
 submission · knee-8g9, following knee-7d1
 
 ## The question

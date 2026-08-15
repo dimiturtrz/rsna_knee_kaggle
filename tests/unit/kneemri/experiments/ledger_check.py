@@ -3,7 +3,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.evaluation.ledger_check import LedgerCheck
+from kneemri.experiments.ledger_check import LedgerCheck
 
 
 def test_best(tmp_path: Path):

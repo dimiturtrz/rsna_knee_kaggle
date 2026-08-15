@@ -29,6 +29,7 @@ from numpy.typing import NDArray
 
 from core.paths import DataRoot
 from kneemri.corpus.folds import ReportFolds
+from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions
@@ -36,7 +37,6 @@ from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.labels.label_combine import LabelCombine
 from kneemri.labels.targets import Targets
 
 logger = logging.getLogger(__name__)

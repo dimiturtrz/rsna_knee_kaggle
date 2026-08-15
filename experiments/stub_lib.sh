@@ -1,7 +1,7 @@
 # A no-op stand-in for lib.sh, so an arm can be READ without being run.
 #
 # Same function names, none of the effects: no GPU, no lock, no data, no training. `run_train` prints
-# the flags it was handed instead of spending an hour proving them. That is what lets `kneemri.evaluation.arm_check`
+# the flags it was handed instead of spending an hour proving them. That is what lets `kneemri.experiments.arm_check`
 # hand every committed arm's invocation to the real argument parser before a queue is armed.
 #
 # It sources like the real thing because the arms `source "${ARM_LIB:-...}"` — the same seam

@@ -4,7 +4,7 @@ from core.paths import COMPETITION
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Reading
 from kneemri.corpus.study_cache import StudyCache
-from kneemri.evaluation.arm_check import ArmCheck
+from kneemri.experiments.arm_check import ArmCheck
 
 GOOD = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack --labels /tmp/labels.csv"
 SLICES = 4

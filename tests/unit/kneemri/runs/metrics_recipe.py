@@ -2,7 +2,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.evaluation.metrics_recipe import MetricsRecipe
+from kneemri.runs.metrics_recipe import MetricsRecipe
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
 

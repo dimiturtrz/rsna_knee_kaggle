@@ -55,7 +55,7 @@ run() { uv run python -u -m kneemri.training.train "$@" 2>&1 | grep --line-buffe
 
 ## chain14.sh
 ```bash
-uv run python -u -m kneemri.labels.ruler_check --labels "$L" --confident "$C" --checkpoints $CK 2>&1 | tail -22
+uv run python -u -m kneemri.evaluation.ruler_check --labels "$L" --confident "$C" --checkpoints $CK 2>&1 | tail -22
 ```
 
 ## chain15.sh

@@ -89,8 +89,8 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 ## Conventions
 
 - **Four checks, none needing a GPU, each for a failure that already happened**: `python -m
-  kneemri.evaluation.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
-  `python -m kneemri.evaluation.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
+  kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
+  `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running), `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
   submission (two slots went to code the repo had already fixed; `--mounted` asks Kaggle what it will
   actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a

@@ -1,4 +1,4 @@
-"""Does a DELTA between two arms survive changing the ruler? `python -m kneemri.labels.ruler_transfer`.
+"""Does a DELTA between two arms survive changing the ruler? `python -m kneemri.evaluation.ruler_transfer`.
 
 Every number this project reports is agreement with LLM-read report labels; the competition scores
 agreement with radiologist annotations. `supervision_gap` prices the two rulers by LEVEL and finds them
@@ -233,7 +233,7 @@ def main() -> None:
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.oof_oracle import OutOfFoldOracle  # noqa: PLC0415 - CLI-only
-    from kneemri.labels.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
+    from kneemri.evaluation.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
 
     root = DataRoot.from_config(arguments.paths)
     gap = SupervisionGap()

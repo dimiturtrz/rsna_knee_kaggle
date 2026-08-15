@@ -1,4 +1,4 @@
-"""Prove every committed arm's flags before a queue costs GPU: `python -m kneemri.evaluation.arm_check`.
+"""Prove every committed arm's flags before a queue costs GPU: `python -m kneemri.experiments.arm_check`.
 
 This project's most expensive failures are arms that fail SILENTLY or late. Arm U printed `ARM U DONE`
 after dying at epoch 7 of 24. A `str.replace` that matched nothing left `dinov3.sh` writing one name

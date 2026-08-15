@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from kneemri.labels.supervision_gap import SupervisionGap
+from kneemri.evaluation.supervision_gap import SupervisionGap
 from kneemri.models.model import TARGETS
 
 STUDIES = 8

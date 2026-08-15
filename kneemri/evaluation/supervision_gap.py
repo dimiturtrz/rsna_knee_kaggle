@@ -1,4 +1,4 @@
-"""Is a finding held back by its LABELS or by the MODEL? `python -m kneemri.labels.supervision_gap`.
+"""Is a finding held back by its LABELS or by the MODEL? `python -m kneemri.evaluation.supervision_gap`.
 
 Every local number in this project scores agreement with LLM-read report labels, while the competition
 scores agreement with radiologist annotations — and where the report says YES the radiologist agrees

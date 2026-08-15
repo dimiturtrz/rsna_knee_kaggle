@@ -16,7 +16,7 @@ differs by finding.
 
 Two numbers per finding against the same radiologist truth, on the 58 annotated studies, using the
 published members' out-of-fold predictions — the only predictions that never trained on those
-annotations (`python -m kneemri.labels.supervision_gap`):
+annotations (`python -m kneemri.evaluation.supervision_gap`):
 
 ```
 aggregate: labels 0.8639   model 0.8391

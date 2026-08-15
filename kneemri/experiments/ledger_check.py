@@ -1,4 +1,4 @@
-"""Every run that finished should appear in the ledger: `python -m kneemri.evaluation.ledger_check`.
+"""Every run that finished should appear in the ledger: `python -m kneemri.experiments.ledger_check`.
 
 The gates catch defects in code. NOTHING CHECKS A DOCUMENT, and on 2026-08-13 that turned out to be the
 larger exposure: five files were carrying conclusions that later measurement had overturned, and the

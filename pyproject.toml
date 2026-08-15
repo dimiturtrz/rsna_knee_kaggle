@@ -299,10 +299,45 @@ forbidden_modules = [
 ]
 
 [[tool.importlinter.contracts]]
+name = "labels are vocabulary, not a study of it (corpus and models below, nothing above)"
+type = "forbidden"
+source_modules = ["kneemri.labels"]
+forbidden_modules = [
+    "kneemri.embeddings",
+    "kneemri.runs",
+    "kneemri.training",
+    "kneemri.inference",
+    "kneemri.evaluation",
+    "kneemri.kaggle",
+]
+
+[[tool.importlinter.contracts]]
 name = "inference serves; it never imports the layer that scores it"
 type = "forbidden"
 source_modules = ["kneemri.inference"]
 forbidden_modules = ["kneemri.evaluation", "kneemri.training"]
+
+[[tool.importlinter.contracts]]
+name = "evaluation measures predictions; the queue's own preflights live in experiments"
+type = "forbidden"
+source_modules = ["kneemri.evaluation"]
+forbidden_modules = ["kneemri.training", "kneemri.experiments", "kneemri.kaggle"]
+
+[[tool.importlinter.contracts]]
+name = "experiments is a top layer with kaggle: nothing in the pipeline imports its preflights"
+type = "forbidden"
+source_modules = [
+    "kneemri.corpus",
+    "kneemri.models",
+    "kneemri.embeddings",
+    "kneemri.runs",
+    "kneemri.labels",
+    "kneemri.training",
+    "kneemri.inference",
+    "kneemri.evaluation",
+    "kneemri.kaggle",
+]
+forbidden_modules = ["kneemri.experiments"]
 
 [[tool.importlinter.contracts]]
 name = "kaggle is the top: nothing below it may import the submission layer"

@@ -5,7 +5,7 @@ recorder landed writes its scores to a JSONL beside it — but until now the two
 per-label comparison could not say whether its control was matched. The knowledge exists on disk; this
 moves it to where the comparison reads it, for the runs that predate `RunMetrics.describe`.
 
-`python -m kneemri.evaluation.metrics_recipe` fills in what it can and names what it cannot; `--check` writes
+`python -m kneemri.runs.metrics_recipe` fills in what it can and names what it cannot; `--check` writes
 nothing and reports.
 """
 

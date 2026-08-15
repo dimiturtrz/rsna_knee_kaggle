@@ -27,8 +27,8 @@ uv run python -m kneemri.kaggle.kit_check      # BEFORE shipping a kit (refuses 
 uv run python -m kneemri.kaggle.kit_check --mounted   # BEFORE a submission — asks KAGGLE what it will run
 # then push comp/kernels/kneemri-loadcheck and read it: loads, forwards and chunks every
 # member on a real T4, spends no submission, and answers what only the runtime knows
-uv run python -m kneemri.evaluation.arm_check      # BEFORE arming a queue (--require-caches: refuse an undecoded reading)
-uv run python -m kneemri.evaluation.ledger_check   # AFTER runs finish
+uv run python -m kneemri.experiments.arm_check      # BEFORE arming a queue (--require-caches: refuse an undecoded reading)
+uv run python -m kneemri.experiments.ledger_check   # AFTER runs finish
 uv run python comp/witness_check.py --root <members> --device cpu   # BEFORE a submission
 ```
 
@@ -109,7 +109,7 @@ so everything below is **directional**, and only the cumulative total clears the
 
 ## The eleven runs nothing had written down
 
-`python -m kneemri.evaluation.ledger_check` used to scan `*.metrics.jsonl` and report "15 finished runs, 0
+`python -m kneemri.experiments.ledger_check` used to scan `*.metrics.jsonl` and report "15 finished runs, 0
 unrecorded". There are **69 checkpoints** on disk and 21 metrics files, so that pass was computed over
 15 of 69 — the wrong denominator, inside the check whose whole job is catching exactly that. It now
 counts a run finished on its CHECKPOINT (each carries its own `holdout`), and reads the ledger *and*
@@ -175,7 +175,7 @@ This was found by hand, three days after the row was written. It is now mechanic
 its recipe beside its scores, and `python -m kneemri.evaluation.run_comparison --control <ctl> --arms <...>`
 prints a `vs control:` line naming every option the two disagree on — for this arm,
 `image_size 336→448, backbone_lr 8e-06→4e-05`. Runs older than the recorder were backfilled from their
-own checkpoints (`python -m kneemri.evaluation.metrics_recipe`); `lora_r8_small_336_s2026` and `wholestack_fold2`
+own checkpoints (`python -m kneemri.runs.metrics_recipe`); `lora_r8_small_336_s2026` and `wholestack_fold2`
 have no checkpoint left and can never be matched controls again.
 
 ## A peak is not a rate: OneCycle delivers half of the constant it replaced

@@ -1,6 +1,6 @@
 import numpy as np
 
-from kneemri.labels.ruler_check import RulerCheck
+from kneemri.evaluation.ruler_check import RulerCheck
 from kneemri.models.model import TARGETS
 
 STUDIES = 40

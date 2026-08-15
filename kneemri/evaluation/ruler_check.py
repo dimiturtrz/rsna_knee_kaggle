@@ -16,7 +16,7 @@ reader could not read sits at the 0.5 default, which binarises to zero, so scori
 without dropping those pairs would assert that every unknown finding was absent and produce a ruler
 that is more biased than the one it replaces, not less.
 
-`python -m kneemri.labels.ruler_check --checkpoints a.pt b.pt --labels full.csv --confident confident.csv`
+`python -m kneemri.evaluation.ruler_check --checkpoints a.pt b.pt --labels full.csv --confident confident.csv`
 """
 
 import argparse
