@@ -15,5 +15,5 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train compose_small \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 24 \
   --backbone-lr 4e-5 --slice-pooling max --labels "$LABELS" --out "$PROCESSED/compose_small_s2026.pt"

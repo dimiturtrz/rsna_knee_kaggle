@@ -11,6 +11,9 @@
 
 set -u
 
+# The shared recipe, so an arm and the checker see the same flags.
+source "$(dirname "${BASH_SOURCE[0]}")/recipe.sh"
+
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 

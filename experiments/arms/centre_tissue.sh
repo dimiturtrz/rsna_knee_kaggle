@@ -30,7 +30,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train centre_tissue \
-  --fold 0 --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 8 \
   --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
   --centre tissue \
   --labels "$LABELS" --out "$PROCESSED/centre_tissue_s2026.pt"

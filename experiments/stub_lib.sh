@@ -9,6 +9,9 @@
 
 set -u
 
+# The shared recipe, so an arm and the checker see the same flags.
+source "$(dirname "${BASH_SOURCE[0]}")/recipe.sh"
+
 REPO="$(pwd)"
 PROCESSED="/tmp/arm_check"
 LABELS="/tmp/arm_check/labels.csv"

@@ -41,7 +41,7 @@ require "$LABELS"
 wait_for_cache 336 12 extended
 
 run_train extended_slots \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --scheme extended \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/extended_ws_s2026.pt"

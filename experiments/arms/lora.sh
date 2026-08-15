@@ -106,8 +106,8 @@ require "$LABELS"
 NAME="lora_r${RANK}_${VARIANT}_${SIZE}"
 
 run_train "$NAME" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
   --variant "$VARIANT" --image-size "$CACHE" --train-size "$SIZE" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/${NAME}_s2026.pt"

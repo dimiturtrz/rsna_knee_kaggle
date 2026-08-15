@@ -19,5 +19,5 @@ FLAT="$PROCESSED/labels/flatyes_v2.csv"
 require "$LABELS" "$FLAT"
 
 run_train severity_flat \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 24 \
   --labels "$FLAT" --eval-labels "$LABELS" --out "$PROCESSED/flatyes_s2026.pt"

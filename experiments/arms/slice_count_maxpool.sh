@@ -17,9 +17,9 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train maxpool_12 \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 24 \
   --slice-pooling max --labels "$LABELS" --out "$PROCESSED/max12_s2026.pt"
 
 run_train maxpool_20 \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 24 \
   --slice-pooling max --slices 20 --labels "$LABELS" --out "$PROCESSED/max20_s2026.pt"

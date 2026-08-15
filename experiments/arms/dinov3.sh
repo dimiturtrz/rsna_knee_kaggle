@@ -78,8 +78,8 @@ export HF_TOKEN
 # while the 224 run was already going. A run that can destroy the run it is being compared against is
 # not an experiment.
 run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}" \
-  --fold 0 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
   --image-size "$CACHE" --train-size "$SIZE" --backbone-lr "$RATE" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_lr${RATE}_s2026.pt"

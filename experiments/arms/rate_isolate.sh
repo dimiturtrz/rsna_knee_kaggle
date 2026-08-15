@@ -12,5 +12,5 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train rate_isolate \
-  --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 24 \
   --backbone-lr 4e-5 --labels "$LABELS" --out "$PROCESSED/lr5x_d6_s2026.pt"

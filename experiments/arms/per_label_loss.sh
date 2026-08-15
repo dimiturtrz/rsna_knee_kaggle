@@ -27,7 +27,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train per_label_loss \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --per-label-loss \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/per_label_loss_s2026.pt"

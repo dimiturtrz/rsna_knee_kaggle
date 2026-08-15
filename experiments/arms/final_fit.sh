@@ -51,4 +51,4 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # twenty-fifth of the throughput while reporting 100% utilisation.
 EPOCHS="${1:-12}"
 require "$LABELS"
-run_train "final_fit_e${EPOCHS}"   --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0   --slice-pooling max --whole-stack --ema   --image-size 448 --train-size 392   --recompute-activations --compile-encoder --bf16 --vram-gb 22   --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 $THROUGHPUT --vram-gb 22 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"

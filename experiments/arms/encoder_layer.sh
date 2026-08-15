@@ -27,7 +27,7 @@ LAYER="${1:-9}"
 require "$LABELS"
 
 run_train "encoder_layer_${LAYER}" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 --patience 3 \
+  $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --encoder-layer "$LAYER" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/encoder_layer_${LAYER}_s2026.pt"

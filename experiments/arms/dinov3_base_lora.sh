@@ -29,8 +29,8 @@ export HF_TOKEN
 [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
 run_train "dinov3_base_lora" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 --patience 3 \
+  $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --lora-rank 8 --backbone-lr 5e-4 \
   --variant v3base --image-size 336 --train-size 224 \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/dinov3_base_lora_s2026.pt"

@@ -98,8 +98,8 @@ wait_for_cache "$CACHE_PX"
 # being a single-variable arm. If 22 GB does not hold it, Windows pages over PCIe rather than raising
 # OOM: watch img/s in the first minutes, not for a crash.
 run_train "resolution_${SIZE}" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr "$RATE" --patience 3   --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  --backbone-lr "$RATE" --patience 3 $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"

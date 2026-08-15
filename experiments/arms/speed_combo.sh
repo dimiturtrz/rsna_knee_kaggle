@@ -24,8 +24,8 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train speed_combo \
-  --fold 0 --epochs 1 --one-cycle --weight-floor --rank-weight 1.0 \
-  --slice-pooling max --whole-stack --compile-encoder --bf16 \
+  $RECIPE --epochs 1 \
+  --slice-pooling max --whole-stack --compile-encoder \
   --recompute-activations --vram-gb 22 \
   --labels "$LABELS" --out "$PROCESSED/speed_combo.pt"
 

@@ -38,7 +38,7 @@ require "$LABELS"
 wait_for_cache 448
 
 run_train intensity_392 \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --intensity-aug \
   --image-size 448 --train-size 392 \
   --backbone-lr 4e-5 --recompute-activations --vram-gb 28 \

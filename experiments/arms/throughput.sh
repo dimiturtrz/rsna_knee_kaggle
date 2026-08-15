@@ -23,7 +23,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-BASE=(--fold 0 --epochs 1 --one-cycle --weight-floor --rank-weight 1.0
+BASE=($RECIPE --epochs 1
       --slice-pooling max --whole-stack --recompute-activations --vram-gb 22
       --labels "$LABELS")
 
@@ -34,7 +34,7 @@ run_train throughput_compiled "${BASE[@]}" --compile-encoder --out "$PROCESSED/t
 # ANSWER IS 'no faster': bf16 and fp16 have the same matmul throughput on Blackwell, so this is here to
 # CONFIRM that, and to show the epoch-0 holdout is not moved by the precision change. What bf16 removes
 # is the loss scaler, and with it scale collapse - insurance, not speed.
-run_train throughput_bf16 "${BASE[@]}" --bf16 --out "$PROCESSED/throughput_bf16.pt"
+run_train throughput_bf16 "${BASE[@]}" --out "$PROCESSED/throughput_bf16.pt"
 
 # THE CHECKPOINTING TAX, which we have paid on every arm since 2026-08-11 and never priced. The
 # docstring claims 'about 30% compute' from the literature; that is a guess about our workload, and 30%
@@ -42,7 +42,7 @@ run_train throughput_bf16 "${BASE[@]}" --bf16 --out "$PROCESSED/throughput_bf16.
 # because that is exactly the batch that does not fit without checkpointing - so BOTH sides run at
 # batch 6, where both fit. The pair is comparable to each other, not to the rows above: a smaller batch
 # changes the ranking term's within-batch pairs, and img/s is per IMAGE, so the tax reads clean.
-HALF=(--fold 0 --epochs 1 --one-cycle --weight-floor --rank-weight 1.0
+HALF=($RECIPE --epochs 1
       --slice-pooling max --whole-stack --batch 6 --vram-gb 28 --labels "$LABELS")
 run_train throughput_ckpt_on "${HALF[@]}" --recompute-activations --out "$PROCESSED/throughput_ckpt_on.pt"
 run_train throughput_ckpt_off "${HALF[@]}" --out "$PROCESSED/throughput_ckpt_off.pt"

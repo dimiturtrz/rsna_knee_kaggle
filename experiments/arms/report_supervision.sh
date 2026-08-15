@@ -19,7 +19,7 @@ require "$LABELS" "$VECTORS"
 
 for weight in 0.3 1.0; do
   run_train "report_${weight}" \
-    --fold 0 --epochs 24 --one-cycle --weight-floor --rank-weight 1.0 \
+    $RECIPE --epochs 24 \
     --report-weight "$weight" --report-vectors "$VECTORS" \
     --labels "$LABELS" --out "$PROCESSED/report${weight}_s2026.pt"
 done

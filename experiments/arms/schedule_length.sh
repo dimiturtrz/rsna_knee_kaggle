@@ -31,7 +31,7 @@ require "$LABELS"
 # epoch fell from 365 s to 272 s. Leaving it off would make the arm ask its question 25% slower for a
 # difference the ledger cannot see.
 run_train "schedule_${EPOCHS}" \
-  --fold 0 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/schedule_${EPOCHS}_s2026.pt"

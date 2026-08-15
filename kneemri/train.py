@@ -224,13 +224,11 @@ class TrainingOptions:
             "bit-identical, so what a small noisy dataset can do to a 1.7B-image representation is "
             "bounded by the rank rather than by the learning rate.",
         )
-        # BOTH SPELLINGS, because bf16 became the default AFTER fourteen arms were written asking for
-        # it explicitly. Removing the flag refused every one of them — arm_check said so before a queue
-        # slot was spent, which is exactly what it exists for — and an arm that names the default it
-        # wants is not wrong, it is just redundant now.
-        parser.add_argument(
-            "--bf16", dest="bf16", action="store_true", default=True, help="the default; kept so older arms parse"
-        )
+        # `--bf16` is GONE, not deprecated. It existed only so fourteen arms written before bf16 became
+        # the default would still parse; those arms now take the recipe from experiments/recipe.sh and
+        # none of them names it. A flag that accepts the default and does nothing is a thing to keep in
+        # step forever, and this repository has one dev and no live system — the old invocation is in
+        # git if it is ever wanted.
         parser.add_argument(
             "--fp16",
             dest="bf16",

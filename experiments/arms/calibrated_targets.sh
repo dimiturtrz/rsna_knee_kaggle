@@ -39,7 +39,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train "calibrated_targets" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 --patience 3 \
+  $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --calibrated-targets \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/calibrated_targets_s2026.pt"

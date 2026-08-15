@@ -24,6 +24,6 @@ require "$LABELS"
 # well as the aggregation, and this arm's whole claim is that it varies one thing. 8 may well be the
 # better budget (both folds peaked at epoch 6), but that is a different arm.
 run_train slice_attention \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 \
+  $RECIPE --epochs 12 \
   --slice-pooling attend --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/sliceattn_s2026.pt"

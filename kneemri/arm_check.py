@@ -38,7 +38,12 @@ GIT_BASH = Path("C:/Program Files/Git/usr/bin/bash.exe")
 
 A bare `bash` resolves to WSL's on this machine, and WSL here is wedged often enough to have its own
 note — so every arm timed out and this lint reported "0 arms checked, 0 refused". A clean pass over
-nothing is the exact failure it was built to catch, produced by the tool itself on its first run."""
+nothing is the exact failure it was built to catch, produced by the tool itself on its first run.
+
+The SECOND time it produced that same pass was subtler: run from PowerShell rather than Git Bash, the
+inherited PATH carries no `/usr/bin`, so the stub lib's `dirname` and `mktemp` are not found and every
+arm prints nothing. Hence `bin` below — the interpreter's own directory goes on the PATH it is handed,
+so the shell is the same shell whatever launched python."""
 
 
 class ArmCheck:
@@ -47,6 +52,13 @@ class ArmCheck:
     def __init__(self, arms: Path = ARMS, stub: Path = STUB) -> None:
         self.arms = arms
         self.stub = stub
+
+    def _environment(self) -> dict[str, str]:
+        """The inherited environment, plus ARM_LIB, plus the shell's own coreutils on PATH."""
+        path = os.environ.get("PATH", "")
+        if GIT_BASH.exists():
+            path = f"{GIT_BASH.parent}{os.pathsep}{path}"
+        return os.environ | {"ARM_LIB": str(self.stub.resolve()), "PATH": path}
 
     def invocations(self) -> dict[str, str]:
         """Each arm's `run_train` flag line, by arm name. Arms that never call it are absent.
@@ -66,7 +78,7 @@ class ArmCheck:
                     # The INHERITED environment plus ARM_LIB. Replacing it outright leaves Git Bash
                     # without the PATH it needs to find its own coreutils, and every arm then produces
                     # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
-                    env=os.environ | {"ARM_LIB": str(self.stub.resolve())},
+                    env=self._environment(),
                     check=False,
                 )
             except subprocess.TimeoutExpired:
@@ -116,6 +128,12 @@ def main() -> None:
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)
     logger.info("%d arms checked, %d refused", len(invocations), len(refused))
+    # A CLEAN PASS OVER NOTHING IS A FAILURE, and this tool has produced one twice — once from WSL's
+    # bash, once from a PowerShell PATH with no coreutils. Both times it printed "0 arms checked, 0
+    # refused" and exited 0, which is what a lint says when everything is fine.
+    if not invocations:
+        logger.info("REFUSED: no arm printed an invocation — the shell, not the arms, is what failed")
+        sys.exit(1)
     if refused:
         sys.exit(1)
 

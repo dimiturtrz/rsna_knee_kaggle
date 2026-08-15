@@ -28,7 +28,7 @@ PEAK="${1:-1.6e-5}"
 require "$LABELS"
 
 run_train "peak_rate_${PEAK}" \
-  --fold 0 --epochs 12 --one-cycle --weight-floor --rank-weight 1.0 --patience 3 \
+  $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --backbone-lr "$PEAK" \
-  --recompute-activations --compile-encoder --bf16 --vram-gb 26 \
+  $THROUGHPUT --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/peak_rate_${PEAK}_s2026.pt"
