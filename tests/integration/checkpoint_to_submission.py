@@ -16,6 +16,7 @@ way the kernel loads it, predict, combine, and check the table that would be sub
 """
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import override
 
@@ -26,8 +27,10 @@ from torch import nn
 from kneemri.backbone import ENCODERS, SMALL
 from kneemri.ensemble import Ensemble
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
+from kneemri.member_record import MemberRecord
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.train import TrainingOptions
 
 DIM = 12
 SLOTS = 6
@@ -66,18 +69,26 @@ def _images() -> tuple[np.ndarray, np.ndarray]:
 
 
 def _save(tmp_path: Path, design: StudyDesign, name: str) -> tuple[Path, StudyModel]:
-    """Write a checkpoint in the shape train.py writes, and return it with its model."""
+    """Write a checkpoint through the ASSEMBLER a run writes with, and return it with its model.
+
+    This used to hand-write three keys under a docstring claiming it was the shape `train.py` writes.
+    It was not — the real save goes through `MemberRecord.payload`, which also stamps the fingerprint,
+    its config, the kept epoch and the witness — and a hand-written copy of a format can only ever prove
+    that the copy agrees with itself. The failure it hides is the one this file exists for: a change to
+    what a checkpoint carries leaves this chain green while every consumer of a real member breaks.
+    """
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, design).eval()
-    path = tmp_path / name
-    torch.save(
-        {
-            "model": model.state_dict(),
-            "holdout": 0.83,
-            "config": {"slice_pooling": design.slice_pooling, "anatomical_prior": design.anatomical_prior},
-        },
-        path,
+    options = TrainingOptions(
+        slice_pooling=design.slice_pooling,
+        anatomical_prior=design.anatomical_prior,
+        image_size=SIZE,
+        slices=GROUP + 3,
     )
+    encoder = replace(ENCODERS[SMALL], dim=DIM)
+    record = MemberRecord(options, encoder, model, torch.device("cpu"), [f"slot{index}" for index in range(SLOTS)])
+    path = tmp_path / name
+    torch.save(record.payload(model.state_dict(), holdout=0.83, epoch=0), path)
     return path, model
 
 
