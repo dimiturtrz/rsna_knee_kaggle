@@ -627,18 +627,6 @@
     {
       "kind": "import",
       "source": "kneemri.member_curve",
-      "target": "kneemri.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.member_curve",
-      "target": "kneemri.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.member_curve",
       "target": "kneemri.targets",
       "weight": 1
     },
@@ -716,6 +704,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.members",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.metrics_recipe",
       "target": "core.paths",
       "weight": 1
@@ -766,12 +760,6 @@
       "kind": "import",
       "source": "kneemri.oof_oracle",
       "target": "kneemri.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.oof_oracle",
-      "target": "kneemri.crop_centre",
       "weight": 1
     },
     {
@@ -3307,24 +3295,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.member_curve.main",
-      "target": "kneemri.study_cache.StudyCache.load",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.member_curve.main",
       "target": "kneemri.targets.Targets.load",
@@ -3411,7 +3381,19 @@
     {
       "kind": "references",
       "source": "kneemri.members.Member",
+      "target": "kneemri.slot_reader.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.members.Member",
       "target": "kneemri.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.members.Member",
+      "target": "kneemri.study_cache.StudyCache",
       "weight": 1
     },
     {
@@ -3430,6 +3412,12 @@
       "kind": "calls",
       "source": "kneemri.members.Member.band",
       "target": "kneemri.slot_reader.Band.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.Member.cache",
+      "target": "kneemri.study_cache.StudyCache",
       "weight": 1
     },
     {
@@ -3454,6 +3442,12 @@
       "kind": "calls",
       "source": "kneemri.members.Member.pool",
       "target": "kneemri.model.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.members.Member.reading",
+      "target": "kneemri.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -3745,6 +3739,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.oof_oracle.OutOfFoldOracle.agrees",
+      "target": "kneemri.slot_reader.Band.of",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.oof_oracle.OutOfFoldOracle.routing",
       "target": "kneemri.slots.SlotScheme",
@@ -3862,18 +3862,6 @@
       "kind": "calls",
       "source": "kneemri.oof_oracle.main",
       "target": "kneemri.slot_ties.SlotTies.disagreeing_order",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.oof_oracle.main",
-      "target": "kneemri.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.oof_oracle.main",
-      "target": "kneemri.study_cache.StudyCache.load",
       "weight": 1
     },
     {
@@ -9052,6 +9040,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.members.Member.cache",
+      "label": "cache",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.members.Member.crop",
       "label": "crop",
       "level": "method",
@@ -9126,6 +9122,14 @@
       "descendants": 0,
       "id": "kneemri.members.Member.read_size",
       "label": "read_size",
+      "level": "method",
+      "parent": "kneemri.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.members.Member.reading",
+      "label": "reading",
       "level": "method",
       "parent": "kneemri.members.Member",
       "role": null
