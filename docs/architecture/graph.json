@@ -3637,9 +3637,33 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.package_members.MemberManifest",
+      "target": "kneemri.package_members.PackagedMember",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.package_members.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.package_members.main",
+      "target": "kneemri.package_members.MemberManifest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.package_members.main",
+      "target": "kneemri.package_members.MemberManifest.document",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.package_members.main",
+      "target": "kneemri.package_members.PackagedMember",
       "weight": 1
     },
     {
@@ -6526,6 +6550,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.package_members.MemberManifest",
+      "label": "MemberManifest",
+      "level": "class",
+      "parent": "kneemri.package_members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members.PackagedMember",
+      "label": "PackagedMember",
+      "level": "class",
+      "parent": "kneemri.package_members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.paired_floor.PairedFloor",
       "label": "PairedFloor",
       "level": "class",
@@ -8954,6 +8994,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.oof_oracle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members.MemberManifest.document",
+      "label": "document",
+      "level": "method",
+      "parent": "kneemri.package_members.MemberManifest",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members.PackagedMember.entry",
+      "label": "entry",
+      "level": "method",
+      "parent": "kneemri.package_members.PackagedMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.package_members.PackagedMember.identifier",
+      "label": "identifier",
+      "level": "method",
+      "parent": "kneemri.package_members.PackagedMember",
       "role": null
     },
     {

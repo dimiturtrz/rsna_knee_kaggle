@@ -13,7 +13,6 @@ witness through `Ensemble.predict_member`. If the training and serving paths eve
 member is read, this fails here rather than on a submission slot.
 """
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
@@ -27,6 +26,7 @@ from kneemri.fitting import Fitting, Fold, RunPlan
 from kneemri.member_record import MemberRecord
 from kneemri.members import MemberPackage
 from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.package_members import MemberManifest, PackagedMember
 from kneemri.study_cache import CachedCorpus
 from kneemri.targets import Targets
 from kneemri.trainer import Trainer
@@ -104,22 +104,13 @@ def _trained(destination: Path) -> _Checkpoint:
 
 
 def _packaged(tmp_path: Path, path: Path, checkpoint: _Checkpoint) -> MemberPackage:
-    """The manifest `package_members` writes, so the member is read through the mounted path."""
-    manifest = {
-        "format": 2,
-        "members": [
-            {
-                "id": "fold0",
-                "file": path.name,
-                "fold": 0,
-                "config": checkpoint.config,
-                "fingerprint": np.asarray(checkpoint.payload["fingerprint"]).tolist(),
-                "holdout": float(cast(float, checkpoint.payload["holdout"])),
-                "annot": float("nan"),
-            }
-        ],
-    }
-    (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    """The manifest through the REAL producer, so this chain breaks when the shipped shape changes.
+
+    Hand-writing the rows here would freeze a copy of the format: `package_members` could rename a key
+    and this would keep passing against a package no kernel would ever be handed.
+    """
+    document = MemberManifest([PackagedMember(path, checkpoint.payload)]).document()
+    (tmp_path / "manifest.json").write_text(document, encoding="utf-8")
     return MemberPackage(tmp_path)
 
 

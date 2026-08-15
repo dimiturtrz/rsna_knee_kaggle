@@ -1,4 +1,5 @@
 import json
+import math
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import override
@@ -245,6 +246,22 @@ def test_strongest(tmp_path: Path):
 
     assert [member.holdout for member in package.strongest(2)] == [0.87, 0.84]
     assert len(package.strongest(9)) == 3
+
+
+def test_the_member_with_no_holdout_is_ranked_last_rather_than_compared(tmp_path: Path):
+    """A full-data fit records NaN by construction, and NaN sorts FIRST under a plain descending sort.
+
+    `strongest(1)` is what the solo kernel submits, so this decides which weights a slot runs: the
+    unranked member compares False against every number, keeps its place, and `reverse=True` puts it at
+    the front. Ranking it last keeps naming it a decision someone makes rather than one a sort makes.
+    """
+    package, _ = _package(tmp_path)
+    package.members = [
+        replace(package.members[0], identifier=str(score), holdout=score) for score in (float("nan"), 0.87, 0.84)
+    ]
+
+    assert [member.holdout for member in package.strongest(2)] == [0.87, 0.84]
+    assert math.isnan(package.strongest(3)[-1].holdout), "unranked, so last — never dropped silently"
 
 
 def test_variant(tmp_path: Path):

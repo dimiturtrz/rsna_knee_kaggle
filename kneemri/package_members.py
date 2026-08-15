@@ -9,13 +9,72 @@ import argparse
 import json
 import logging
 import shutil
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import torch
 
 from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
+
+FORMAT = 2
+"""The manifest version `MemberPackage` reads — ours and the published package share it."""
+
+
+@dataclass(frozen=True)
+class PackagedMember:
+    """A checkpoint on disk and the manifest row that addresses it.
+
+    A row callable without a data root, because the row is what INFERENCE reads: while it was assembled
+    inline in `main`, the only way to exercise it was to package 8 GB from a real processed root.
+    """
+
+    path: Path
+    checkpoint: Mapping[str, object]
+
+    @property
+    def identifier(self) -> str:
+        stem: str = self.path.stem
+        return stem.replace("member_", "")
+
+    def entry(self) -> dict[str, object]:
+        """The row, at the keys `Member` reads back."""
+        identifier = self.identifier
+        return {
+            "id": identifier,
+            "file": self.path.name,
+            "fold": int(identifier.removeprefix("fold")) if identifier.startswith("fold") else 0,
+            "config": self.checkpoint["config"],
+            "fingerprint": self.checkpoint["fingerprint"],
+            "holdout": float(cast(float, self.checkpoint["holdout"])),
+            # Our members are selected on the report-derived holdout; the annotation check is
+            # reported by the competition, not by us, so there is no honest number to put here.
+            "annot": float("nan"),
+        }
+
+
+@dataclass(frozen=True)
+class MemberManifest:
+    """The document a mounted package is read from, and the check that it addresses its own members."""
+
+    members: Sequence[PackagedMember]
+
+    def document(self) -> str:
+        """The manifest text, refusing a set of members that two rows would address as one.
+
+        Two patterns can match two files of the SAME name under different directories: the copy
+        overwrites and the second row wins, so the package would list a member whose weights are
+        another member's — which loads, fingerprints and predicts without a word.
+        """
+        identifiers = [member.identifier for member in self.members]
+        repeated = sorted({name for name in identifiers if identifiers.count(name) > 1})
+        if repeated:
+            message = f"two checkpoints package under one id, so one would overwrite the other: {repeated}"
+            raise ValueError(message)
+        return json.dumps({"format": FORMAT, "members": [member.entry() for member in self.members]}, indent=2)
 
 
 def main() -> None:
@@ -47,34 +106,24 @@ def main() -> None:
     for path in checkpoints:
         logger.info("  %s", path.name)
 
+    members = []
+    for checkpoint_path in checkpoints:
+        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+        member = PackagedMember(checkpoint_path, checkpoint)
+        members.append(member)
+        logger.info(f"  {member.identifier}: holdout {checkpoint['holdout']:.4f}  ({checkpoint_path.name})")
+    # Assembled before anything is copied, so a set that cannot address its own members is refused
+    # without first deleting the previous package and writing ~89 MB per checkpoint.
+    document = MemberManifest(members).document()
+
     destination = arguments.out
     if destination.exists():
         shutil.rmtree(destination)
     destination.mkdir(parents=True)
-
-    members = []
     for checkpoint_path in checkpoints:
-        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
-        identifier = checkpoint_path.stem.replace("member_", "")
         shutil.copy2(checkpoint_path, destination / checkpoint_path.name)
-        members.append(
-            {
-                "id": identifier,
-                "file": checkpoint_path.name,
-                "fold": int(identifier.replace("fold", "")) if identifier.startswith("fold") else 0,
-                "config": checkpoint["config"],
-                "fingerprint": checkpoint["fingerprint"],
-                "holdout": float(checkpoint["holdout"]),
-                # Our members are selected on the report-derived holdout; the annotation check is
-                # reported by the competition, not by us, so there is no honest number to put here.
-                "annot": float("nan"),
-            }
-        )
-        logger.info(f"  {identifier}: holdout {checkpoint['holdout']:.4f}  ({checkpoint_path.name})")
 
-    (destination / "manifest.json").write_text(
-        json.dumps({"format": 2, "members": members}, indent=2), encoding="utf-8"
-    )
+    (destination / "manifest.json").write_text(document, encoding="utf-8")
     (destination / "dataset-metadata.json").write_text(
         json.dumps(
             {"title": arguments.title, "id": f"{arguments.owner}/{arguments.title}", "licenses": [{"name": "CC0-1.0"}]},

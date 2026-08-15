@@ -11,6 +11,8 @@ move it by about 1e-5, which is why the tolerance sits between them rather than 
 """
 
 import json
+import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NotRequired, TypedDict
@@ -25,6 +27,8 @@ from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.mounts import Mounts
 from kneemri.slots import FIRST_MAXIMAL, SCHEMES, Routing
+
+logger = logging.getLogger(__name__)
 
 FINGERPRINT_TOLERANCE = 2e-3
 """Above GPU-to-GPU numeric noise (~1e-5), far below what any preprocessing change moves (order one)."""
@@ -433,8 +437,17 @@ class MemberPackage:
         Ranking by each member's OWN holdout is the only ordering available at submission time, and it
         is a weak one: those numbers come from different folds and, for anything trained before the
         label table was recovered, from different rulers. It picks a good member, not provably the best.
+
+        A member with NO recorded holdout is ranked LAST rather than compared, because a full-data fit
+        has none by construction and NaN compares False against every number — under a plain descending
+        sort it lands FIRST and `strongest(1)` returns the one member that was never scored. Naming an
+        unranked member for a submission stays a decision someone makes, not one a sort makes for them.
         """
-        return sorted(self.members, key=lambda member: member.holdout, reverse=True)[:count]
+        ranked = sorted(self.members, key=lambda member: (not math.isnan(member.holdout), member.holdout), reverse=True)
+        unranked = [member.identifier for member in ranked if math.isnan(member.holdout)]
+        if unranked and count > len(ranked) - len(unranked):
+            logger.warning("members with no recorded holdout, ranked last: %s", ", ".join(unranked))
+        return ranked[:count]
 
     @classmethod
     def find(cls, mounts: "Mounts | None" = None, name: str = "manifest.json") -> "MemberPackage | None":
