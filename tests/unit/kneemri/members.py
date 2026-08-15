@@ -14,7 +14,7 @@ from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.model import StudyModel
 from kneemri.mounts import Mounts
-from kneemri.slot_reader import Band
+from kneemri.slot_reader import Band, Reading
 from kneemri.slots import SCHEMES, Routing
 
 SEED = 2026
@@ -490,6 +490,30 @@ def test_crop():
     assert located.crop.centre == "tissue"
     assert _member().crop.centre == DEFAULT_CENTRE, "a manifest that does not say means the historic centre"
     assert located.pixel_group != _member().pixel_group, "different pixels cannot share one decode"
+
+
+def test_reading():
+    """Both geometry axes together, because the pair is what names the cache a member is served from."""
+    member = replace(_member(), config={**_config(), "crop_mm": 80.0, "band": [0.1, 0.9]})
+
+    assert member.reading == Reading(crop=member.crop, band=member.band)
+    assert member.reading.suffix() == "_80mm_0.1-0.9band", "either axis dropped here is a silent mismatch"
+    assert _member().reading == Reading(), "a historic manifest reads the arrays it was fitted on"
+
+
+def test_cache(tmp_path: Path):
+    """The cache a member is served from must be named by the WHOLE reading it records.
+
+    THE DEFECT THIS PINS: three call sites built this by hand from size, depth and router, so a member
+    recording any other crop or band resolved to the default arrays — which exist, load, and are the
+    wrong pixels. Nothing raises on that path; the fingerprint passes, because it is checked against the
+    member's own reading rather than against what it was fed.
+    """
+    tighter = replace(_member(), config={**_config(), "crop_mm": 80.0, "band": [0.1, 0.9]})
+
+    assert _member().cache(tmp_path).key == f"{IMAGE}px_12sl", "the historic reading keeps the historic name"
+    assert tighter.cache(tmp_path).key == f"{IMAGE}px_12sl_80mm_0.1-0.9band"
+    assert tighter.cache(tmp_path).images_path != _member().cache(tmp_path).images_path
 
 
 def test_from_checkpoint_reads_a_published_slot_list(tmp_path: Path):

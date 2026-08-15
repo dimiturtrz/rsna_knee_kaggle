@@ -34,7 +34,6 @@ from core.paths import DataRoot
 from kneemri.backbone import ENCODERS
 from kneemri.ensemble import Ensemble
 from kneemri.members import Member, MemberPackage
-from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +90,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     if not witness:
         return "UNVERIFIED - no witness (trained before the check existed, or a published member)"
 
-    cache = StudyCache(root, slices=member.slices, image_size=member.image_size, routing=member.routing)
-    corpus, identifiers = cache.load()
+    corpus, identifiers = member.cache(root).load()
     index = {name: position for position, name in enumerate(identifiers)}
     # `witness` is a dict[str, object] by declaration, so its members are narrowed before use rather
     # than suppressed per call site. A malformed witness is UNVERIFIED and never an empty study list:

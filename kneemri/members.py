@@ -26,8 +26,9 @@ from kneemri.backbone import ENCODERS, SMALL
 from kneemri.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.model import StudyDesign, StudyModel
 from kneemri.mounts import Mounts
-from kneemri.slot_reader import Band
+from kneemri.slot_reader import Band, Reading
 from kneemri.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
+from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,42 @@ class Member:
         return Crop(
             mm=float(self.config.get("crop_mm", CROP_MM)),
             centre=str(self.config.get("centre", DEFAULT_CENTRE)),
+        )
+
+    @property
+    def reading(self) -> Reading:
+        """The geometry this member was fitted under, in the shape `StudyCache` takes it.
+
+        The crop and the band were each recorded, each read back, and then each dropped on the way to
+        the cache: every member-driven load named its cache by size, depth and router alone, so it
+        resolved to the DEFAULT arrays whatever the member says it read. The build side could not
+        clobber the historic cache once the key carried these two; the serve side could still be handed
+        it, which is the same mismatch arriving from the other direction.
+
+        One property rather than two arguments at four call sites, because the pair is what names a
+        cache and a caller that remembers one and forgets the other is the defect itself.
+        """
+        return Reading(crop=self.crop, band=self.band)
+
+    def cache(self, directory: Path) -> StudyCache:
+        """The cache holding the pixels this member was fitted on, in a given data directory.
+
+        THREE call sites spelled this out by hand — the oracle, the witness check and the curve — and
+        each named the cache by size, depth and router while the member also records a crop and a band.
+        So any member that read anything else resolved to the DEFAULT arrays, which exist, load, and are
+        the wrong pixels: the mismatch the cache key was extended to prevent, arriving from the serve
+        side instead of the build side.
+
+        A method on the member because the set of fields that names a cache is not knowledge a consumer
+        should hold: the next axis is added here once, rather than remembered in three places by whoever
+        adds it.
+        """
+        return StudyCache(
+            directory,
+            slices=self.slices,
+            image_size=self.image_size,
+            routing=self.routing,
+            reading=self.reading,
         )
 
     @property

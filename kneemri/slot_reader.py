@@ -69,9 +69,16 @@ class Band:
         return [self.low, self.high]
 
     @classmethod
-    def of(cls, recorded: Sequence[float]) -> "Band":
-        """The band a manifest recorded, read back."""
-        return cls(low=float(recorded[0]), high=float(recorded[1]))
+    def of(cls, recorded: Sequence[float] | str) -> "Band":
+        """The band a manifest recorded, read back — ours as a pair, a published one as text.
+
+        Both spellings here rather than at the one call site that meets a published checkpoint, because
+        this is the only place that knows what a recorded band looks like. Indexing a `"0.2,0.8"` string
+        as a sequence reads the characters `0` and `.`, so the published spelling did not fail loudly:
+        it reached `float(".")` and raised somewhere that had nothing to do with a band.
+        """
+        parts: Sequence[str] | Sequence[float] = recorded.split(",") if isinstance(recorded, str) else recorded
+        return cls(low=float(parts[0]), high=float(parts[1]))
 
 
 _PERCENTILES = (1.0, 99.0)

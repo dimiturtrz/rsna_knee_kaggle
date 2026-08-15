@@ -36,8 +36,6 @@ from kneemri.label_combine import LabelCombine
 from kneemri.members import Member
 from kneemri.prediction_cache import PredictionCache
 from kneemri.scores import LabelScores
-from kneemri.slots import Routing
-from kneemri.study_cache import CachedCorpus, StudyCache
 from kneemri.targets import Targets
 from kneemri.test_time import SpatialViews
 
@@ -246,17 +244,19 @@ def main() -> None:
     # the member was - so a whole-stack member was scored on three slices at a time and a member fitted
     # on the 448 px cache could not be scored at all. It is the tool that decides WHICH members to
     # submit, so a wrong number here chooses the wrong ensemble.
-    readings = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
-    keys = list(dict.fromkeys((member.image_size, member.slices, member.scheme) for member in readings))
-
-    def cache_of(key: tuple[int, int, str]) -> tuple[CachedCorpus, list[str]]:
-        size, slices, scheme = key
-        return StudyCache(root.processed(), slices=slices, image_size=size, routing=Routing(scheme=scheme)).load()
+    # KEYED ON THE CACHE'S OWN NAME, which is the only thing that promises two members read the same
+    # pixels. This grouped by size, depth and scheme — three of the six fields that name a cache — so
+    # two members differing in crop, band or tie-break shared one decode, and the member built its own
+    # `StudyCache` from the three it happened to remember.
+    members = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
+    readings = [(member.cache(root.processed()), member) for member in members]
+    caches = {cache.key: cache for cache, _ in readings}
+    keys = list(caches)
 
     # The split is taken from the FIRST cache and reused, so every member is scored on the same studies
     # in the same order. Any other cache that disagrees about that order is refused: its rows would be
     # silently misaligned against the truth vector, which is a wrong number rather than an error.
-    corpus, reference = cache_of(keys[0])
+    corpus, reference = caches[keys[0]].load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
@@ -273,12 +273,12 @@ def main() -> None:
     names: list[str] = []
     for key in keys:
         if key != keys[0]:
-            corpus, identifiers = cache_of(key)
+            corpus, identifiers = caches[key].load()
             if identifiers != reference:
                 message = f"cache {key} indexes studies in a different order — its rows would not line up"
                 raise ValueError(message)
         slab = HoldoutSlab(corpus, holdout)
-        for reading in (item for item in readings if (item.image_size, item.slices, item.scheme) == key):
+        for reading in (member for cache, member in readings if cache.key == key):
             window = reading.window(corpus.slices, overlap=arguments.overlap)
             scored = predictions.cached(reading, slab, cache, window)
             per_member.append(scored)

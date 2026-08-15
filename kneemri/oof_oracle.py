@@ -46,11 +46,11 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
-from kneemri.crop_centre import CROP_MM
 from kneemri.holdout_predictions import HoldoutPredictions
 from kneemri.members import Member
+from kneemri.slot_reader import Band
 from kneemri.slot_ties import SlotTies
-from kneemri.slots import SLOTS
+from kneemri.slots import SCHEMES
 from kneemri.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
@@ -122,7 +122,7 @@ class OutOfFoldOracle:
         return names, [np.concatenate(rows) for rows in stacked]
 
     def agrees(self, member: Member, checkpoint: Path) -> list[str]:
-        """Whether the reading a member RECORDS matches the one this repository would give it.
+        """Whether the reading a published member RECORDS matches the one we will serve it under.
 
         Checked before any pixel is decoded, because a mismatch here explains a residual completely and
         costs nothing to find — and because the two beads that chased this residual for three days were
@@ -130,18 +130,29 @@ class OutOfFoldOracle:
         """
         saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
         config = saved["config"]
-        from kneemri.slot_reader import SLICE_BAND  # noqa: PLC0415 - the constants under test
-
-        band = tuple(float(part) for part in str(config["band"]).split(","))
+        served = member.reading
         differences = []
-        if float(config["crop_mm"]) != CROP_MM:
-            differences.append(f"crop_mm {config['crop_mm']} vs our {CROP_MM}")
-        if band != SLICE_BAND:
-            differences.append(f"band {band} vs our {SLICE_BAND}")
+        # AGAINST THE MEMBER, not against our module constants. This method took a `Member` and never
+        # touched it, comparing their config with CROP_MM and SLICE_BAND — which asked the same question
+        # as "does it match the reading we will serve it under" only while nothing of ours could differ
+        # from the default. The 80 mm cache on disk ended that.
+        #
+        # A recorded field the accessor DROPS is the failure this is really watching for: a member whose
+        # file states a reading and whose `reading` reports our default is exactly how the same value
+        # has gone missing nine times in this project, and here it would be charged to the reader as a
+        # residual nobody could explain.
+        if "crop_mm" not in config:
+            differences.append(f"they record no crop_mm; we will serve {served.crop.mm}")
+        elif float(config["crop_mm"]) != served.crop.mm:
+            differences.append(f"crop_mm {config['crop_mm']} vs the {served.crop.mm} we will serve")
+        if "band" not in config:
+            differences.append(f"they record no band; we will serve {served.band.recorded()}")
+        elif Band.of(config["band"]) != served.band:
+            differences.append(f"band {config['band']} vs the {served.band.recorded()} we will serve")
         # THEIR slot order against OURS, not against their own config: a published checkpoint records
         # its slots at the top level and not inside `config`, so comparing the two config fields asked a
         # question about their file rather than about the difference between their pipeline and ours.
-        ours = [slot.name for slot in SLOTS]
+        ours = [slot.name for slot in SCHEMES[member.scheme]]
         if list(saved["slots"]) != ours:
             differences.append(f"slot ORDER {saved['slots']} vs ours {ours}")
         return differences
@@ -241,9 +252,7 @@ def main() -> None:
     for difference in oracle.agrees(member, arguments.checkpoint):
         logger.info("READING DIFFERS: %s", difference)
 
-    corpus, reference = StudyCache(
-        root.processed(), slices=member.slices, image_size=member.image_size, routing=member.routing
-    ).load()
+    corpus, reference = member.cache(root.processed()).load()
     # THE STUDIES THEY SCORED, in THEIR order, and only those our cache holds — a row compared against
     # the wrong study's answer is a residual that no amount of staring at the reader will explain.
     position = {name: index for index, name in enumerate(reference)}
