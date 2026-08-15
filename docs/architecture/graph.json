@@ -434,6 +434,66 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.prediction_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_backfill",
+      "target": "kneemri.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.holdout_predictions",
       "target": "kneemri.backbone",
       "weight": 1
@@ -2559,6 +2619,12 @@
     {
       "kind": "calls",
       "source": "kneemri.fitting.Fitting.keep",
+      "target": "kneemri.holdout_record.HoldoutRecord.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.fitting.Fitting.keep",
       "target": "kneemri.holdout_record.HoldoutRecord.write",
       "weight": 1
     },
@@ -2770,6 +2836,210 @@
       "kind": "calls",
       "source": "kneemri.head_trial.main",
       "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_backfill.Backfill",
+      "target": "kneemri.holdout_backfill.Backfill",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_backfill.Backfill",
+      "target": "kneemri.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.Backfill.of",
+      "target": "kneemri.holdout_backfill.UnbackfillableError",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.Backfill.of",
+      "target": "kneemri.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.of",
+      "target": "kneemri.run_metrics.RunMetrics.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.of",
+      "target": "kneemri.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.ruler",
+      "target": "kneemri.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.Backfill.split",
+      "target": "kneemri.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.split",
+      "target": "kneemri.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.Backfill.split",
+      "target": "kneemri.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill",
+      "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill",
+      "target": "kneemri.holdout_backfill.Backfill",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill",
+      "target": "kneemri.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill",
+      "target": "kneemri.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.__init__",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "core.paths.DataRoot.processed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_backfill.Backfill.ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_backfill.Backfill.split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_predictions.HoldoutPredictions.cached",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_record.HoldoutRecord.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.members.Member.window",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "target": "kneemri.prediction_cache.PredictionCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.holdout_backfill.Backfill.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.holdout_backfill.HoldoutBackfill",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.holdout_backfill.main",
+      "target": "kneemri.members.Member.from_checkpoint",
       "weight": 1
     },
     {
@@ -4543,6 +4813,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.run_comparison.RunComparison",
+      "target": "kneemri.run_comparison.PairedWidths",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.run_comparison.RunComparison",
       "target": "kneemri.run_metrics.RunMetrics",
@@ -4618,6 +4894,12 @@
       "kind": "calls",
       "source": "kneemri.run_comparison.RunComparison.paired",
       "target": "kneemri.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.run_comparison.RunComparison.paired",
+      "target": "kneemri.run_comparison.PairedWidths",
       "weight": 1
     },
     {
@@ -6151,7 +6433,7 @@
       "role": null
     },
     {
-      "descendants": 73,
+      "descendants": 74,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -6330,6 +6612,14 @@
       "descendants": 0,
       "id": "kneemri.heartbeat",
       "label": "heartbeat",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill",
+      "label": "holdout_backfill",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -7040,6 +7330,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.holdout_backfill.Backfill",
+      "label": "Backfill",
+      "level": "class",
+      "parent": "kneemri.holdout_backfill",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.HoldoutBackfill",
+      "label": "HoldoutBackfill",
+      "level": "class",
+      "parent": "kneemri.holdout_backfill",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.UnbackfillableError",
+      "label": "UnbackfillableError",
+      "level": "class",
+      "parent": "kneemri.holdout_backfill",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.holdout_predictions.HoldoutPredictions",
       "label": "HoldoutPredictions",
       "level": "class",
@@ -7380,6 +7694,14 @@
       "label": "Transfer",
       "level": "class",
       "parent": "kneemri.ruler_transfer",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.PairedWidths",
+      "label": "PairedWidths",
+      "level": "class",
+      "parent": "kneemri.run_comparison",
       "role": "satellite"
     },
     {
@@ -8712,6 +9034,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.holdout_backfill.Backfill.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill.Backfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.Backfill.ruler",
+      "label": "ruler",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill.Backfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.Backfill.split",
+      "label": "split",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill.Backfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.HoldoutBackfill.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill.HoldoutBackfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.HoldoutBackfill.derive",
+      "label": "derive",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill.HoldoutBackfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_backfill.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.holdout_backfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.holdout_predictions.HoldoutPredictions.__init__",
       "label": "__init__",
       "level": "method",
@@ -8762,6 +9132,14 @@
       "descendants": 0,
       "id": "kneemri.holdout_record.HoldoutRecord.exists",
       "label": "exists",
+      "level": "method",
+      "parent": "kneemri.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.holdout_record.HoldoutRecord.named",
+      "label": "named",
       "level": "method",
       "parent": "kneemri.holdout_record.HoldoutRecord",
       "role": null
@@ -10476,6 +10854,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.ruler_transfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.run_comparison.PairedWidths.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.run_comparison.PairedWidths",
       "role": null
     },
     {
