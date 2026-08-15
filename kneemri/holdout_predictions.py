@@ -18,9 +18,8 @@ from transformers import AutoModel
 from kneemri.backbone import ENCODERS
 from kneemri.holdout_slab import HoldoutSlab
 from kneemri.members import Member, Window
-from kneemri.model import CHANNELS, TARGETS, StudyDesign, StudyModel
+from kneemri.model import TARGETS, StudyModel
 from kneemri.prediction_cache import PredictionCache
-from kneemri.slot_head import ATTENDED
 from kneemri.test_time import SpatialViews
 
 logger = logging.getLogger(__name__)
@@ -47,25 +46,21 @@ class HoldoutPredictions:
     def load(self, checkpoint: Path, backbone: torch.nn.Module, dim: int, slots: int) -> StudyModel:
         """One member, rebuilt in the shape its own config records.
 
-        `slice_pooling` is read from the checkpoint rather than assumed: a member trained with per-slice
-        max pooling is a different function from one trained with channel stacking, and loading either
-        under the wrong rule would silently produce a model whose weights no longer mean what they did.
+        The shape comes from the checkpoint's own config rather than from this method's assumptions: a
+        member trained with per-slice max pooling is a different function from one trained with channel
+        stacking, and loading either under the wrong rule would silently produce a model whose weights
+        no longer mean what they did.
 
         The backbone is passed in rather than fetched here. Constructing it internally would have meant
         this method could only run with a network and a 90 MB download, which is to say it could not be
         tested at all — the mirror gate said so, and it was right.
         """
         saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
-        config = saved.get("config", {})
-        design = StudyDesign(
-            slice_pooling=str(config.get("slice_pooling", CHANNELS)),
-            slot_pooling=str(config.get("slot_pooling", ATTENDED)),
-            anatomical_prior=bool(config.get("anatomical_prior", False)),
-            # Read back, not defaulted. A member fitted on an intermediate block and rebuilt on the last
-            # one is a different function that loads cleanly - the shape that has cost nine defects.
-            layer=int(config.get("encoder_layer", -1)),
-        )
-        model = StudyModel(backbone, dim, slots, design)
+        # THE SHARED REBUILD, not this method's own reading of the config. Every switch was read back
+        # here except the two that decide the head's WIDTH and whether the encoder carries adapters, so
+        # this could not load a focally pooled or a LoRA member at all - and the serve path, which read
+        # those two, was the half missing the prior. One rebuild has one set of blind spots.
+        model = StudyModel.from_config(saved.get("config", {}), backbone, dim, slots)
         model.load_trained(saved["model"])
         return model.to(self.device).eval()
 

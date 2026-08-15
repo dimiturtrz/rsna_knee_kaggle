@@ -6,6 +6,7 @@ load only into this shape. `MemberPackage` checks that faithfulness numerically 
 this module is what it checks.
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import override
 
@@ -123,6 +124,37 @@ class StudyDesign:
     work — and our findings are 1-3 mm while our head pools patch tokens, so this is the axis they live
     on. Untested for either encoder until now."""
 
+    @staticmethod
+    def lora_rank_of(config: Mapping[str, object]) -> int:
+        """The rank of a config's adapters, or zero — read WITH the design, though not a field of it.
+
+        Not a field because the rank changes which MODULES exist rather than how the forward pass reads
+        them: it has to be applied to the built model before any weights arrive. It lives here so the
+        two facts a config states about the network are read from one place.
+        """
+        return int(str(config.get("lora_rank", 0) or 0))
+
+    @classmethod
+    def from_config(cls, config: Mapping[str, object]) -> "StudyDesign":
+        """The design a checkpoint or manifest records, with every default spelled HERE and once.
+
+        Two places rebuilt a trained model out of a recorded config — the serve path and the tool that
+        ranks members — and each read its own subset with its own defaults. Their blind spots were
+        complementary rather than shared, which is why neither showed up as a disagreement: the serve
+        path forgot the prior, the ranking path forgot the pooling and the adapters, and a member
+        fitted with either simply could not be loaded by the half that had never heard of it.
+
+        A key the config does not carry means the value every member on disk was fitted with, so this
+        reads an old manifest as the model it actually is rather than refusing it.
+        """
+        return cls(
+            pool=str(config.get("pool", CLS_MEAN)),
+            slice_pooling=str(config.get("slice_pooling", CHANNELS)),
+            slot_pooling=str(config.get("slot_pooling", ATTENDED)),
+            anatomical_prior=bool(config.get("anatomical_prior", False)),
+            layer=int(str(config.get("encoder_layer", -1))),
+        )
+
 
 class StudyModel(nn.Module):
     """Encoder plus head over a study's bag of slot images.
@@ -177,6 +209,23 @@ class StudyModel(nn.Module):
         self.head = SLOT_POOLINGS[self.design.slot_pooling](head_width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
+
+    @classmethod
+    def from_config(cls, config: Mapping[str, object], backbone: nn.Module, dim: int, n_slot: int) -> "StudyModel":
+        """The model a recorded config describes, adapters included, with no weights loaded yet.
+
+        THE ONE REBUILD. Whatever a config says about the network belongs here, so a switch added to
+        the trainer reaches every path that reconstructs a member at once instead of reaching whichever
+        of them the author happened to be editing.
+
+        The adapters are applied BEFORE the caller loads anything, because a LoRA member's state dict
+        carries adapter keys that only exist once `low_rank` has wrapped the encoder's linears.
+        """
+        model = cls(backbone, dim, n_slot, StudyDesign.from_config(config))
+        rank = StudyDesign.lora_rank_of(config)
+        if rank:
+            model.low_rank(rank)
+        return model
 
     @property
     def per_slice(self) -> bool:

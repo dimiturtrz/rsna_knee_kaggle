@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 
 from kneemri.lora import LoRALinear
-from kneemri.model import ATTEND, POOL_PARTS, SLICE_POOLINGS, TARGETS, StudyDesign, StudyModel
+from kneemri.model import ATTEND, CLS_MEAN_FOCAL, POOL_PARTS, SLICE_POOLINGS, TARGETS, StudyDesign, StudyModel
 from kneemri.slot_head import REPORT_DIMS, SLOT_POOLINGS
 
 SEED = 2026
@@ -219,6 +219,58 @@ def test_low_rank():
     # unfreeze_last is IGNORED under adaptation: honouring it too would open six blocks' base weights
     # alongside the adapters and quietly make the run something else.
     assert not any(id(p) in {id(f) for f in frozen} for p in opened)
+
+
+def test_study_design_from_config():
+    """Every switch a run records comes back, with the defaults spelled in one place.
+
+    The equivalence classes a config falls into: empty (every published member, which predates all of
+    these keys and must come back as the design it was fitted under), and one that states each switch
+    away from its default. `pool` is in here because the ranking tool read every switch but that one.
+    """
+    assert StudyDesign.from_config({}) == StudyDesign(), "an old manifest means what it was fitted with"
+
+    stated = StudyDesign.from_config(
+        {
+            "pool": CLS_MEAN_FOCAL,
+            "slice_pooling": ATTEND,
+            "slot_pooling": "mean",
+            "anatomical_prior": True,
+            "encoder_layer": -4,
+        }
+    )
+    assert stated == StudyDesign(
+        pool=CLS_MEAN_FOCAL, slice_pooling=ATTEND, slot_pooling="mean", anatomical_prior=True, layer=-4
+    )
+
+
+def test_lora_rank_of():
+    """Zero for every manifest predating adaptation, and zero however the key spells "none".
+
+    Those members carry no adapter keys and must be built without them; a stored `null` or an empty
+    string means the same thing as an absent key, and reading either as a rank would wrap an encoder
+    whose weights have no adapters to load into.
+    """
+    assert StudyDesign.lora_rank_of({}) == 0
+    assert StudyDesign.lora_rank_of({"lora_rank": None}) == 0
+    assert StudyDesign.lora_rank_of({"lora_rank": 8}) == 8
+
+
+def test_study_model_from_config():
+    """THE ONE REBUILD: the width the config fixes, and the adapters it says the encoder carries.
+
+    Both are what the ranking path never read — it rebuilt a focal member two parts wide and a LoRA
+    member with no adapters, so neither could be loaded at all, let alone scored.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel.from_config({"pool": CLS_MEAN_FOCAL, "lora_rank": 2}, _BlockedBackbone(), DIM, SLOTS)
+    assert model.head.proj[1].in_features == DIM * POOL_PARTS[CLS_MEAN_FOCAL], "the recorded pooling fixes the width"
+    assert any(isinstance(module, LoRALinear) for module in model.backbone.modules()), (
+        "the adapters must exist before any weights arrive, or a LoRA member cannot be loaded at all"
+    )
+    assert not any(
+        isinstance(m, LoRALinear) for m in StudyModel.from_config({}, _BlockedBackbone(), DIM, SLOTS).backbone.modules()
+    )
 
 
 def test_low_rank_refuses_a_backbone_with_no_linears():

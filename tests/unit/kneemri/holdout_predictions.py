@@ -14,7 +14,7 @@ import torch
 from kneemri.holdout_predictions import GROUP, HoldoutPredictions, Window
 from kneemri.holdout_slab import HoldoutSlab
 from kneemri.members import Member
-from kneemri.model import TARGETS, StudyDesign, StudyModel
+from kneemri.model import CLS_MEAN_FOCAL, TARGETS, StudyDesign, StudyModel
 from kneemri.prediction_cache import PredictionCache
 from kneemri.study_cache import CachedCorpus
 from kneemri.test_time import SpatialViews
@@ -78,6 +78,27 @@ def test_load_honours_a_checkpoint_trained_with_per_slice_pooling(tmp_path: Path
     torch.manual_seed(SEED)
     loaded = HoldoutPredictions(torch.device("cpu")).load(checkpoint, _FakeBackbone(), DIM, SLOTS)
     assert loaded.slice_pooling == "max"
+
+
+def test_load_rebuilds_a_focally_pooled_member(tmp_path: Path):
+    """The tool that decides which members we submit has to be able to load the ones we can train.
+
+    `pool` fixes the head's WIDTH, and this path read every switch back except that one — so a member
+    fitted with `cls_mean_focal` came back two parts wide and died in `load_state_dict`, which is to
+    say it could not be ranked at all. Dropping `pool` from the rebuild makes this fail.
+    """
+    torch.manual_seed(SEED)
+    saved = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(pool=CLS_MEAN_FOCAL))
+    checkpoint = tmp_path / "focal.pt"
+    torch.save({"model": saved.state_dict(), "config": {"pool": CLS_MEAN_FOCAL}}, checkpoint)
+
+    loaded = HoldoutPredictions(torch.device("cpu")).load(checkpoint, _FakeBackbone(), DIM, SLOTS)
+
+    assert loaded.pool == CLS_MEAN_FOCAL
+    images = torch.randint(0, 256, (2, SLOTS, GROUP, SIZE, SIZE), dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+    with torch.no_grad():
+        assert torch.allclose(loaded.forward(images, mask, SIZE), saved.eval().forward(images, mask, SIZE))
 
 
 def test_predict():
