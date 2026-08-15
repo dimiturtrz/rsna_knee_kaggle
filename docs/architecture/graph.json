@@ -4964,6 +4964,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.KitCheck.__init__",
+      "target": "kneemri.kaggle.kit_check.KitCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kit_check.KitCheck.behind",
       "target": "kneemri.kaggle.kit_check.KitCheck.asked",
       "weight": 1
