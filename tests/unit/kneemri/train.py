@@ -61,6 +61,8 @@ def test_objective():
     assert ranked.weight == 0.5
 
     assert TrainingOptions(rank_weight=0.5, normalise_by_count=True).objective().normalise_by_count
+    assert TrainingOptions(per_label_loss=True).objective().per_label, "a per-label loss is a different objective"
+    assert TrainingOptions(rank_weight=0.5, per_label_loss=True).objective().per_label, "and it survives the ranking"
 
 
 def test_adaptation():
@@ -80,7 +82,7 @@ def test_adaptation():
     assert faster.head_lr == Adaptation().head_lr, "raising the encoder rate must not move the head's"
 
 
-def test_fitted_trainer():
+def test_fitted_trainer(tmp_path: Path):
     """Every optional policy a run asked for is attached, and nothing it did not ask for is.
 
     This is the function that replaced a run of `if arguments.x: trainer.y()` in `main`, and the
@@ -91,7 +93,7 @@ def test_fitted_trainer():
 
     from kneemri.ema import LiveWeights, WeightAverage  # noqa: PLC0415
     from kneemri.model import StudyDesign, StudyModel  # noqa: PLC0415
-    from kneemri.report_supervision import NoReportSupervision  # noqa: PLC0415
+    from kneemri.report_supervision import NoReportSupervision, ReportSupervision  # noqa: PLC0415
     from kneemri.trainer import GROUP  # noqa: PLC0415
 
     from .model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
@@ -114,6 +116,17 @@ def test_fitted_trainer():
     assert type(trainer.average) is WeightAverage, "the EMA is what `evaluated()` scores and the checkpoint keeps"
     assert trainer.autocast_dtype is torch.float16, "--fp16 is the only way back, so it must land"
     assert trainer.scaler is not None, "fp16 has a scale that can collapse, so the scaler comes with it"
+
+    import numpy as np  # noqa: PLC0415 - only this branch needs a vectors file on disk
+
+    vectors = tmp_path / "reports.npz"
+    np.savez(vectors, identifiers=np.array(["s0"]), vectors=np.zeros((1, 4), dtype=np.float32))
+    supervised = TrainingOptions(report_weight=0.3, report_vectors=vectors).fitted_trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS), device, ["s0"], 120
+    )
+    attached = supervised.reports
+    assert isinstance(attached, ReportSupervision), "the term the loop ADDS, so an unattached one is a plain run"
+    assert attached.weight == 0.3
 
 
 def test_reports(tmp_path: Path):
@@ -143,7 +156,10 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     a speed and a score belonging to two different models. The order is the reason this method exists,
     so the order is what the test pins.
     """
-    monkeypatch.setattr("sys.argv", ["train", "--labels", "a.csv", "--lora-rank", "4", "--recompute-activations"])
+    monkeypatch.setattr(
+        "sys.argv",
+        ["train", "--labels", "a.csv", "--lora-rank", "4", "--recompute-activations", "--compile-encoder"],
+    )
     options = TrainingOptions.parse()
     order: list[str] = []
 
@@ -164,7 +180,11 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     )
     options.fitted_model(ENCODERS[SMALL], 6, StudyDesign())
 
-    assert order == ["low_rank:4", "recompute"], "adaptation first, and compile only when asked"
+    assert order == ["low_rank:4", "recompute", "compile"], "adapters go in BEFORE the graph is frozen around them"
+
+    order.clear()
+    TrainingOptions().fitted_model(ENCODERS[SMALL], 6, StudyDesign())
+    assert order == [], "a plain run is the pretrained encoder, unwrapped and uncompiled"
 
 
 def test_crop():
