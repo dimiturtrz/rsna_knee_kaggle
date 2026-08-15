@@ -465,6 +465,12 @@
     {
       "kind": "import",
       "source": "kneemri.holdout_predictions",
+      "target": "kneemri.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.holdout_predictions",
       "target": "kneemri.test_time",
       "weight": 1
     },
@@ -694,6 +700,12 @@
       "kind": "import",
       "source": "kneemri.members",
       "target": "kneemri.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.members",
+      "target": "kneemri.slot_head",
       "weight": 1
     },
     {
@@ -1258,6 +1270,12 @@
       "kind": "import",
       "source": "kneemri.train",
       "target": "kneemri.report_supervision",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.train",
+      "target": "kneemri.slot_head",
       "weight": 1
     },
     {
