@@ -144,6 +144,16 @@ class HoldoutBackfill:
         studies = HoldoutRecord.named(identifiers, holdout)
 
         window = member.window(corpus.slices, overlap=self.overlap)
+        # ANNOUNCED BEFORE THE PASS RATHER THAN AFTER IT. A walk over 55 members costs hours on a CPU
+        # and printed nothing until one finished, so the only reading available part-way through was
+        # "no output yet" — which is what a hung process prints too.
+        logger.info(
+            "%s: deriving %d studies at %d px over %d window(s)",
+            backfill.checkpoint.stem,
+            len(studies),
+            member.read_size,
+            len(window.starts),
+        )
         store = PredictionCache(self.root.processed() / "holdout_predictions", studies, self.predictions.views)
         predicted = self.predictions.cached(member, HoldoutSlab(corpus, holdout), store, window)
 
