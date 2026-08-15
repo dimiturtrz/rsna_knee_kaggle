@@ -398,6 +398,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kit_check",
+      "target": "kneemri.mounted_kit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.label_combine",
       "target": "kneemri.ensemble",
       "weight": 1
@@ -2360,8 +2366,14 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.kit_check.KitCheck.drift",
+      "source": "kneemri.kit_check.KitCheck.behind",
       "target": "kneemri.kit_check.KitCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.KitCheck.drift",
+      "target": "kneemri.kit_check.KitCheck.behind",
       "weight": 1
     },
     {
@@ -2391,13 +2403,25 @@
     {
       "kind": "calls",
       "source": "kneemri.kit_check.main",
-      "target": "kneemri.kit_check.KitCheck.drift",
+      "target": "kneemri.kit_check.KitCheck.behind",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kit_check.main",
-      "target": "kneemri.kit_check.KitCheck.stamped",
+      "target": "kneemri.kit_check.KitCheck.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kit_check.main",
+      "target": "kneemri.mounted_kit.MountedKit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kit_check.main",
+      "target": "kneemri.mounted_kit.MountedKit.recorded",
       "weight": 1
     },
     {
@@ -4945,7 +4969,7 @@
       "role": null
     },
     {
-      "descendants": 62,
+      "descendants": 63,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -5212,6 +5236,14 @@
       "descendants": 0,
       "id": "kneemri.model",
       "label": "model",
+      "level": "module",
+      "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounted_kit",
+      "label": "mounted_kit",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -5838,6 +5870,14 @@
       "label": "StudyModel",
       "level": "class",
       "parent": "kneemri.model",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounted_kit.MountedKit",
+      "label": "MountedKit",
+      "level": "class",
+      "parent": "kneemri.mounted_kit",
       "role": "primary"
     },
     {
@@ -7202,6 +7242,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kit_check.KitCheck.behind",
+      "label": "behind",
+      "level": "method",
+      "parent": "kneemri.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kit_check.KitCheck.drift",
       "label": "drift",
       "level": "method",
@@ -8038,6 +8086,22 @@
       "label": "supervised",
       "level": "method",
       "parent": "kneemri.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounted_kit.MountedKit.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.mounted_kit.MountedKit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.mounted_kit.MountedKit.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.mounted_kit.MountedKit",
       "role": null
     },
     {
