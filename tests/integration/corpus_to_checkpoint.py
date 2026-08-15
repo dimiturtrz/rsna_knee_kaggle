@@ -13,16 +13,17 @@ witness through `Ensemble.predict_member`. If the training and serving paths eve
 member is read, this fails here rather than on a submission slot.
 """
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import cast
+from typing import cast, override
 
 import numpy as np
 import torch
 
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.inference.ensemble import Ensemble
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.members import MemberConfig, MemberPackage
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.labels.targets import Targets
 from kneemri.models.backbone import Encoder
@@ -200,3 +201,72 @@ def test_a_killed_run_leaves_a_member_that_can_still_be_packaged(tmp_path: Path)
     model = package.load(package.members[0], _FakeBackbone(), DIM, DEVICE)
 
     assert model is not None, "a partial carries everything a mounted package needs to run it"
+
+
+class _WatchedConfig(dict[str, object]):
+    """A member's config that records which keys the SERVE path actually looked at."""
+
+    def __init__(self, config: Mapping[str, object]) -> None:
+        super().__init__(config)
+        self.reads: set[str] = set()
+
+    @override
+    def __getitem__(self, key: str) -> object:
+        self.reads.add(key)
+        return super().__getitem__(key)
+
+    @override
+    def get(self, key: str, default: object = None) -> object:
+        self.reads.add(key)
+        return super().get(key, default)
+
+
+PROVENANCE_ONLY = {
+    "backbone_lr",
+    "ema",
+    "head_lr",
+    "img",
+    "rank_weight",
+    "report_weight",
+    "unfreeze_last",
+    "witness",
+}
+"""Keys serving is right not to consult, each for its own reason.
+
+The recipe half — the two rates, `ema`, `unfreeze_last`, `rank_weight`, `report_weight` — describes how
+the weights were FITTED, which no forward pass can act on; they exist so a member on the leaderboard can
+be traced back to the arm that made it. `img` is read only when `train_size` is absent, which is every
+member fitted before the read size could differ from the cache's. `witness` is `witness_check`'s to
+re-derive. Everything else a run stamps — the crop, the centre, the band, the tie rule, the slot list,
+the depth, the pooling, the precision — is asserted below to be read by the serve path itself.
+"""
+
+
+def test_every_key_a_member_stamps_is_read_when_it_is_served(tmp_path: Path):
+    """A key written into the manifest and read by nobody is the nine-defect class, serve side.
+
+    The training half of this claim is `argv_to_checkpoint`'s field walk. This is the other end: the
+    kernel decides a decode from the members (scheme, depth, pixel groups) and then predicts, so every
+    key a run stamps should be consulted by one of those steps or by a named tool. One that is consulted
+    by neither travels the whole chain describing a reading that nothing performs.
+    """
+    path = tmp_path / "member_fold0.pt"
+    checkpoint = _trained(path)
+    package = _packaged(tmp_path, path, checkpoint)
+    watched = _WatchedConfig(package.members[0].config)
+    member = replace(package.members[0], config=cast(MemberConfig, watched))
+    # Into the package, because the ensemble groups its reads from the members IT holds — a watched
+    # member the ensemble never sees would report every key of the grouping step as dead.
+    package.members[0] = member
+
+    ensemble = Ensemble(package, {member.identifier: package.load(member, _FakeBackbone(), DIM, DEVICE)}, DEVICE)
+    ensemble.reads()
+    ensemble.slices([member])
+    corpus = _fold().corpus
+    positions = np.array([int(name[1:]) for name in checkpoint.studies], dtype=np.int64)
+    images = torch.from_numpy(np.ascontiguousarray(corpus.images[positions]))
+    ensemble.predict_member(member, images, torch.from_numpy(corpus.mask[positions]), overlap=True)
+
+    assert set(watched) > PROVENANCE_ONLY, "a key exempted here is not stamped any more — stale exemption"
+    unread = set(watched) - watched.reads - PROVENANCE_ONLY
+    assert not unread, f"{sorted(unread)} is stamped on every member and read by no part of serving"
