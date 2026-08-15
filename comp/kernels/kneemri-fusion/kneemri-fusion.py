@@ -171,17 +171,20 @@ def main() -> None:
             # READ: a member wanting another slot scheme, depth or crop needs its own decode of the whole
             # test set. That is this kernel's single-decode design, not a fault of the member.
             #
-            # ENCODER: v3 members are excluded because their weights do not load against a v3 backbone
-            # rebuilt here — 178 unexpected keys under `backbone.model.layer.*`, a nesting the rebuilt
-            # model does not have (2026-08-14, this kernel's own run). Mounting dinov3-hf was necessary
-            # and NOT sufficient. The probe that was meant to settle this reported every member as
-            # failing because of a bug in the probe, so v3 remains unproven rather than refuted.
-            usable = [
-                m
-                for package in packages
-                for m in package.members
-                if (m.scheme, m.slices, m.crop) == serving and not m.variant.startswith("v3")
-            ]
+            # ENCODER: THIS EXCLUSION EXPIRED AT 11:08 ON THE DAY IT WAS WRITTEN. v3 members were dropped
+            # by name after a run whose weights would not load against the rebuilt backbone — 178
+            # unexpected keys under `backbone.model.layer.*`, a nesting our own model does not have. That
+            # nesting is what an OLDER transformers builds for DINOv3, and the kit gained a
+            # transformers 5.15.0 wheel (with safetensors) hours after that run: no scored entry has ever
+            # mounted the version the checkpoints were fitted under. Locally, on the SAME transformers the
+            # kit now ships, `lora_r8_v3small_224_s2026` loads and passes its witness on CPU
+            # (max|diff| 0.0119 of 0.0312) — so the refutation was about the runtime, not the member.
+            #
+            # Dropping by name is also the wrong instrument: `KernelRun.run` already loads each member in
+            # its own try and drops the ones that fail, so a v3 member that still cannot load costs this
+            # entry a load attempt and nothing else. A different backbone family is the diversity axis
+            # this ensemble does not otherwise have.
+            usable = [m for package in packages for m in package.members if (m.scheme, m.slices, m.crop) == serving]
             dropped = sum(len(package.members) for package in packages) - len(usable)
             if dropped:
                 logger.info("dropped %d member(s) that one decode cannot serve", dropped)
