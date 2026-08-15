@@ -14,26 +14,38 @@ are prose (`whole_stack`, `resolution`) while the files are outputs (`wholestack
 
 WHAT IT CANNOT CHECK: whether the surrounding sentence is true. A number can be present and its
 interpretation stale — which is the other half of what went wrong that day, and needs a reader.
+
+WHAT COUNTS AS A FINISHED RUN: a checkpoint, not a metrics file. Scanning metrics files alone reported
+"15 finished runs, 0 unrecorded" while 69 checkpoints sat beside them — a pass computed over 15 of 69,
+which is the same wrong-denominator mistake in the check that exists to catch it.
 """
 
 import argparse
 import logging
 from pathlib import Path
 
+import torch
+
 from kneemri.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
 LEDGER = Path("experiments/README.md")
+INTERPRETATIONS = Path("interpretations")
 THROUGHPUT = "throughput"
 """Speed probes write metrics too, and they have no score worth quoting in a results ledger."""
 
 
 class LedgerCheck:
-    """Runs on disk, against the scores the ledger quotes."""
+    """Runs on disk, against the scores the written record quotes.
 
-    def __init__(self, ledger: Path = LEDGER) -> None:
-        self.text = ledger.read_text(encoding="utf-8") if ledger.exists() else ""
+    The record is the ledger AND the interpretations, because the question is whether a run was written
+    down anywhere findable, not whether it reached one particular table. Twenty-four runs live only in
+    an interpretation; reporting those as missing would bury the eleven that are written down nowhere.
+    """
+
+    def __init__(self, *documents: Path) -> None:
+        self.text = "\n".join(d.read_text(encoding="utf-8") for d in documents if d.exists())
 
     def best(self, metrics: Path) -> float | None:
         """The best holdout mean AUC a run recorded, or None if it never scored an epoch.
@@ -47,39 +59,57 @@ class LedgerCheck:
         best = RunMetrics(metrics).best()
         return best["auc"] if best else None
 
-    def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
-        """The runs whose best score appears nowhere in the ledger.
+    def finished(self, processed: Path) -> dict[str, float]:
+        """Every run on disk that scored, by name, from its metrics file or else its checkpoint.
 
-        Rounded to four places because that is how the ledger quotes them, and a run whose score is
+        A metrics file wins where both exist: it holds every epoch, so it can say which was best, while
+        a checkpoint holds the one score belonging to the weights that were kept. A run that finished
+        before the metrics recorder existed, or whose file was never written, has only the checkpoint —
+        and 50 of the 69 runs here are in exactly that state.
+        """
+        scores: dict[str, float] = {}
+        for checkpoint in sorted(processed.glob("*.pt")):
+            holdout = torch.load(checkpoint, map_location="cpu", weights_only=True).get("holdout")
+            if holdout is not None and float(holdout) == float(holdout):
+                scores[checkpoint.stem] = float(holdout)
+        for metrics in sorted(processed.glob("*.metrics.jsonl")):
+            score = self.best(metrics)
+            if score is not None:
+                scores[metrics.name.removesuffix(".metrics.jsonl")] = score
+        return {name: score for name, score in scores.items() if THROUGHPUT not in name}
+
+    def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
+        """The runs whose best score appears nowhere in the written record.
+
+        Rounded to four places because that is how the record quotes them, and a run whose score is
         written to more digits elsewhere is still recorded.
         """
         return {name: score for name, score in runs.items() if f"{score:.4f}" not in self.text}
 
 
 def main() -> None:
-    """Report finished runs the ledger does not mention, and exit non-zero if any."""
+    """Report finished runs the written record does not mention, and exit non-zero if any."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger", type=Path, default=LEDGER)
+    parser.add_argument("--interpretations", type=Path, default=INTERPRETATIONS)
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
-    check = LedgerCheck(arguments.ledger)
-    processed = DataRoot.from_config(arguments.paths).processed()
-    runs: dict[str, float] = {}
-    for metrics in sorted(processed.glob("*.metrics.jsonl")):
-        name = metrics.name.removesuffix(".metrics.jsonl")
-        if THROUGHPUT in name:
-            continue
-        score = check.best(metrics)
-        if score is not None:
-            runs[name] = score
+    check = LedgerCheck(arguments.ledger, *sorted(arguments.interpretations.rglob("*.md")))
+    runs = check.finished(DataRoot.from_config(arguments.paths).processed())
 
     missing = check.unrecorded(runs)
     for name, score in missing.items():
-        logger.info("UNRECORDED %s: best %.4f appears nowhere in %s", name, score, arguments.ledger)
+        logger.info(
+            "UNRECORDED %s: best %.4f appears in neither %s nor %s",
+            name,
+            score,
+            arguments.ledger,
+            arguments.interpretations,
+        )
     logger.info("%d finished runs, %d unrecorded", len(runs), len(missing))
     if missing:
         raise SystemExit(1)

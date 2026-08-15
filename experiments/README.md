@@ -103,6 +103,46 @@ so everything below is **directional**, and only the cumulative total clears the
 | `dinov3` S+ 224 | wider small, 28.7M | 0.8012 | −0.0445 | capacity scaled the WRONG way inside the family |
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
 
+## The eleven runs nothing had written down
+
+`python -m kneemri.ledger_check` used to scan `*.metrics.jsonl` and report "15 finished runs, 0
+unrecorded". There are **69 checkpoints** on disk and 21 metrics files, so that pass was computed over
+15 of 69 — the wrong denominator, inside the check whose whole job is catching exactly that. It now
+counts a run finished on its CHECKPOINT (each carries its own `holdout`), and reads the ledger *and*
+`interpretations/` as the record, because a run written up in an interpretation is written down.
+
+That takes it to 65 finished runs and 11 whose number appeared in no document at all, recovered here
+2026-08-15 with no GPU:
+
+| run | holdout | what it was, from its own checkpoint |
+|---|---|---|
+| `nf7_fold0` | 0.8121 | noise-floor seed 7, 8 epochs — see the ruler note below |
+| `nf13_fold0` | 0.8158 | noise-floor seed 13, 8 epochs |
+| `member_fold1` | 0.8305 | five-fold ensemble member |
+| `member_fold3` | 0.8325 | five-fold ensemble member |
+| `member_fold4` | 0.8306 | five-fold ensemble member |
+| `deep24_s2026` | 0.8213 | unfreeze 12, **ranking off** |
+| `shallow24_s2026` | 0.8143 | unfreeze 3, **ranking off** |
+| `lr20x_s2026` | 0.7524 | backbone rate 1.6e-4 at depth 12 — the 20× arm, collapsed |
+| `base_s7_fold0` | 0.8180 | base encoder, 8 epochs, seed 7 |
+| `aug_fold0` | 0.8201 | options block EMPTY — predates option stamping, so name and score is all there is |
+| `labaug_fold0` | 0.8203 | options block EMPTY, same |
+
+Two readings that matter more than the rows:
+
+**The noise floor's own inputs were unrecorded.** `nf` is noisefloor: `nf2026`/`nf7`/`nf13` are the three
+seeds behind the **0.0062** spread every verdict in this ledger is read against. The interpretation
+records them at their **overlap-TTA** scores (0.8171 / 0.8209 / 0.8233); the checkpoints hold the raw
+ones (0.8081 / 0.8121 / 0.8158), whose spread is **0.0077**. Same three runs, two rulers, and only one
+of the pairs was ever written down. The 0.0062 stands — it is the TTA-scored spread and verdicts are
+read on TTA-scored numbers — but the check cannot tell "never recorded" from "recorded under the other
+ruler", and that limitation is why these eleven need a reader rather than an auto-appended row.
+
+**The five-fold members average to the number already quoted.** 0.8202 / 0.8305 / 0.8205 / 0.8325 /
+0.8306 has mean **0.8269**, which is the "five folds on the shipped recipe: 0.8269" figure — so the
+ensemble result was recorded while three of the five runs under it were not. Their options blocks are
+empty, so nothing on disk says what recipe produced them beyond the ensemble's own description.
+
 ## Our best single member changed TWO things, and the ledger credited one
 
 `res392_ws_s2026` is the best member this project has produced (0.8523) and its row has read

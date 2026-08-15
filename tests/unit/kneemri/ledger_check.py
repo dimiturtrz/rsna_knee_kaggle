@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import torch
+
 from kneemri.ledger_check import LedgerCheck
 
 
@@ -32,6 +34,29 @@ def test_best(tmp_path: Path):
     )
 
 
+def test_finished(tmp_path: Path):
+    """A run counts as finished on its checkpoint, and the metrics file refines the score.
+
+    Scanning metrics files alone was a pass computed over 15 of 69 runs: 50 checkpoints had no metrics
+    file, and 11 of those carried a score written down in no document at all.
+    """
+    torch.save({"holdout": 0.8143}, tmp_path / "checkpoint_only.pt")
+    torch.save({"holdout": 0.81}, tmp_path / "both.pt")
+    torch.save({"holdout": float("nan")}, tmp_path / "final_fit.pt")
+    torch.save({"holdout": 0.77}, tmp_path / "throughput_bf16.pt")
+    (tmp_path / "both.metrics.jsonl").write_text(
+        "\n".join(json.dumps({"epoch": e, "auc": auc}) for e, auc in enumerate([0.81, 0.8473])),
+        encoding="utf-8",
+    )
+
+    finished = LedgerCheck(tmp_path / "absent.md").finished(tmp_path)
+
+    assert finished["checkpoint_only"] == 0.8143, "a run with no metrics file still ran"
+    assert finished["both"] == 0.8473, "the metrics file knows the BEST epoch, the checkpoint only its own"
+    assert "final_fit" not in finished, "a final fit records NaN by design and never scored"
+    assert "throughput_bf16" not in finished, "speed probes have no score worth quoting in a results ledger"
+
+
 def test_unrecorded(tmp_path: Path):
     """A score the ledger quotes is recorded; one it does not is reported.
 
@@ -42,8 +67,13 @@ def test_unrecorded(tmp_path: Path):
     """
     ledger = tmp_path / "README.md"
     ledger.write_text("| `slice_attention` | attention over slices | 0.8473 | +0.0016 | kept |", encoding="utf-8")
+    interpretation = tmp_path / "2026-08-11_what-actually-moved.md"
+    interpretation.write_text("| + weight floor at 0.25 | 0.8221 | +0.0019 | kept |", encoding="utf-8")
 
-    missing = LedgerCheck(ledger).unrecorded({"sliceattn_s2026": 0.8473, "extended_ws_s2026": 0.8459})
+    missing = LedgerCheck(ledger, interpretation, tmp_path / "absent.md").unrecorded(
+        {"sliceattn_s2026": 0.8473, "floor_fold0": 0.8221, "extended_ws_s2026": 0.8459}
+    )
 
     assert "sliceattn_s2026" not in missing, "a score quoted in the ledger is recorded"
+    assert "floor_fold0" not in missing, "an interpretation is part of the written record, not a lesser one"
     assert missing == {"extended_ws_s2026": 0.8459}
