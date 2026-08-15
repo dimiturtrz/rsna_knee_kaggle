@@ -25,6 +25,10 @@ from numpy.typing import NDArray
 
 SUFFIX = ".holdout.npz"
 
+TWINS = (SUFFIX, ".metrics.jsonl")
+"""The other names one run answers to. Named here rather than derived, so a new sibling file is a
+one-line decision instead of a silent miss in whichever tool happens to hold that spelling."""
+
 RULER_TOLERANCE = 1e-6
 """Truth is stored as float32 and compared after a round trip; anything wider is a different table."""
 
@@ -74,10 +78,13 @@ class HoldoutRecord:
     """The holdout predictions file beside a run's checkpoint — the store, not the reading."""
 
     def __init__(self, destination: Path) -> None:
-        # IDEMPOTENT for the same reason `RunMetrics` is: the trainer passes its checkpoint path while
-        # an analysis passes the file it can see on disk, and appending the suffix blindly produced a
-        # `.holdout.holdout.npz` that then reported the run as having predicted nothing.
-        self.path = destination if destination.name.endswith(SUFFIX) else destination.with_suffix(SUFFIX)
+        # ANY OF A RUN'S OWN NAMES REACHES ITS PREDICTIONS. The trainer passes its checkpoint, an
+        # analysis passes the file it can see on disk, and `RunComparison` holds runs as their METRICS
+        # files — under a plain `with_suffix` that last one asks for `.metrics.holdout.npz`, finds
+        # nothing, and reports a run that predicted nothing. Which is a lie the caller cannot see.
+        name = destination.name
+        stripped = next((name[: -len(twin)] for twin in TWINS if name.endswith(twin)), None)
+        self.path = destination.with_name(stripped + SUFFIX) if stripped else destination.with_suffix(SUFFIX)
 
     def exists(self) -> bool:
         """Whether this run left its per-study predictions. Older runs did not, and cannot be paired."""

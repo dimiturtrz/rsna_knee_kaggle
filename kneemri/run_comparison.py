@@ -5,8 +5,10 @@ import logging
 from pathlib import Path
 
 from kneemri.anatomy import ScaleProfile
+from kneemri.holdout_record import HoldoutRecord
 from kneemri.label_power import FOLDS, LabelPower
 from kneemri.run_metrics import RunMetrics
+from kneemri.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,7 @@ class RunComparison:
         self.control = RunMetrics(control)
         self.arms = [RunMetrics(arm) for arm in arms]
         self.errors = self._intervals(labels) if labels else {}
+        self.scores = LabelScores()
 
     @staticmethod
     def _intervals(labels: Path) -> dict[str, float]:
@@ -88,9 +91,12 @@ class RunComparison:
             if deltas is None:
                 continue
             ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
+            intervals, named = self.floor(arm)
             lines.append(
-                f"\n{arm.path.stem}  " + "  ".join(f"{label} {self._marked(label, v)}" for label, v in ordered)
+                f"\n{arm.path.stem}  "
+                + "  ".join(f"{label} {self._marked(label, v, intervals)}" for label, v in ordered)
             )
+            lines.append(f"  marked against the {named}")
             lines.append(ScaleProfile.of(deltas).line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
         if self.errors:
@@ -101,11 +107,40 @@ class RunComparison:
                 "mechanisms all 'improved' it."
             )
             lines.append(
-                "  IT IS AN UNPAIRED BOUND, deliberately conservative: two arms scored on the SAME "
-                "studies share their sampling error, so a paired delta has a tighter floor than this. "
-                "An unmarked delta is not refuted, it is UNREAD - what it needs is the paired floor."
+                "  WHICH BOUND is stated per arm above. The unpaired one is deliberately conservative: "
+                "two arms scored on the SAME studies share their sampling error, so the paired floor is "
+                "tighter - 2.2x on a null pair of twins, and less than that on any real pair. A run has "
+                "kept its per-study predictions since knee-mx17 and is marked against its own paired "
+                "floor; an arm that predates them is UNREAD against the wide bound, not refuted by it."
             )
         return "\n".join(lines)
+
+    def paired(self, arm: RunMetrics) -> dict[str, float] | None:
+        """This pair's OWN per-label 95% half-widths, or None when either run kept no predictions.
+
+        The unpaired bound is each label's sampling error from its positive count, and it is far too
+        conservative to read a knob by: two arms scored on the same studies share that error almost
+        entirely, so the DIFFERENCE keeps only what is left. Measured on a null pair of seed twins the
+        paired interval came out 2.2x tighter — but twins are the most correlated pair that exists here,
+        which makes 2.2x a ceiling rather than this pair's number. This computes this pair's number.
+
+        None rather than a fallback, because "the floor could not be measured" and "the floor is wide"
+        are different statements and the report says which one it is printing.
+        """
+        control, theirs = HoldoutRecord(self.control.path).read(), HoldoutRecord(arm.path).read()
+        if control is None or theirs is None:
+            return None
+        first, second, truth = control.aligned(theirs)
+        interval = self.scores.paired_interval(first, second, truth)
+        return {label: (high - low) / 2 for label, (low, high) in interval.items()}
+
+    def floor(self, arm: RunMetrics) -> tuple[dict[str, float], str]:
+        """The intervals this arm's deltas are marked against, and the sentence naming which they are."""
+        paired = self.paired(arm)
+        if paired is None:
+            return self.errors, "UNPAIRED bound (one of these runs kept no per-study predictions)"
+        widest = max(paired.values())
+        return paired, f"paired floor, this pair's own: half-widths up to +/-{widest:.4f}"
 
     def unmatched(self, arm: RunMetrics) -> str:
         """What this arm changed BESIDES the axis under test, read from both runs' recorded recipes.
@@ -131,9 +166,10 @@ class RunComparison:
         said = ", ".join(moved) if moved else "matched on every option both runs recorded"
         return said if not newer else f"{said}; control predates {', '.join(newer)}"
 
-    def _marked(self, label: str, value: float) -> str:
+    @staticmethod
+    def _marked(label: str, value: float, intervals: dict[str, float]) -> str:
         """A delta with a star when it clears its own label's 95% interval, and bare when it cannot."""
-        interval = self.errors.get(label)
+        interval = intervals.get(label)
         star = "*" if interval is not None and abs(value) > interval else ""
         return f"{value:+.4f}{star}"
 

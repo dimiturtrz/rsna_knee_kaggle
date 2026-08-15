@@ -378,6 +378,13 @@ mean:
   at 0.784, is our BEST finding at 0.8923 over the corpus. The weakest is Lateral Meniscus at 0.7981,
   never named. The `+0.0173 from MCL and Fracture` target above is dead, exactly as `label_power`
   predicted from the standard error of 62 positives.
+- **A run kept eight of the 881 studies it predicted, and threw the rest away.** `Fitting.ranked`
+  already scores the whole holdout to rank each epoch, and that array is what every per-label number in
+  this ledger was read off; eight studies of it became the witness and 873 were dropped. They are now
+  written beside the checkpoint (42 KB, no extra compute), so `run_comparison` marks each arm against
+  **this pair's own paired interval** instead of the unpaired bound — and says in the arm's block which
+  of the two it used. Arms that predate the record still print against the wide bound and are UNREAD,
+  not refuted; back-filling them is an inference pass (`knee-j81m`), not a training slot.
 - **Six findings are held back by their LABELS and six by the MODEL**, and the split is by structure
   size. Measured against radiologist annotations, held out.
 - **Caching 12 slices of a median 36 shows no measurable cost** — one of `knee-jk3`'s four named causes,

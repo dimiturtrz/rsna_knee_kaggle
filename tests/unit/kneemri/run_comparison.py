@@ -1,10 +1,15 @@
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
+from kneemri.holdout_record import HoldoutRecord
+from kneemri.model import TARGETS
 from kneemri.run_comparison import RunComparison
 from kneemri.run_metrics import EpochRow
+
+STUDIES = 40
 
 CONTROL: list[EpochRow] = [
     {"epoch": 0, "loss": 1.0, "auc": 0.80, "seconds": 10, "per_label": {"MCL": 0.70, "Effusion": 0.90}},
@@ -98,3 +103,57 @@ def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
     """Silence read as a match is the failure; every file predating the recipe is in that state."""
     report = RunComparison(_run(tmp_path, "ctl", CONTROL), [_run(tmp_path, "arm", ARM)]).report()
     assert "recipe unrecorded" in report
+
+
+def _predictions(checkpoint: Path, shift: float) -> None:
+    """The per-study record a run has kept since knee-mx17, on labels that are actually separable."""
+    truth = (np.random.default_rng(2026).random((STUDIES, len(TARGETS))) < 0.5).astype(np.float32)
+    # The SAME ruler for both runs — that is what makes them pairable — and its own noise per run, or
+    # the two rank every study alike and the interval comes out exactly zero.
+    noise = np.random.default_rng(int(shift * 1000)).random((STUDIES, len(TARGETS)))
+    scores = truth * 0.3 + noise * 0.7
+    HoldoutRecord(checkpoint).write(
+        [f"s{index}" for index in range(STUDIES)],
+        np.arange(STUDIES, dtype=np.int64),
+        scores.astype(np.float64),
+        truth,
+        epoch=1,
+    )
+
+
+def test_paired(tmp_path: Path):
+    """This pair's OWN interval, not the 2.2x ceiling borrowed from a null pair of seed twins."""
+    control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)
+    _predictions(control, shift=0.0)
+    _predictions(arm, shift=0.05)
+
+    comparison = RunComparison(control, [arm])
+    paired = comparison.paired(comparison.arms[0])
+
+    assert paired is not None
+    assert set(paired) == set(TARGETS)
+    assert all(width > 0 for width in paired.values())
+
+
+def test_paired_is_none_when_a_run_kept_no_predictions(tmp_path: Path):
+    """Sixty-five runs predate the record, and 'could not be measured' is not 'is wide'."""
+    control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)
+    _predictions(control, shift=0.0)
+
+    comparison = RunComparison(control, [arm])
+    assert comparison.paired(comparison.arms[0]) is None
+
+
+def test_floor(tmp_path: Path):
+    """The report says WHICH bound each arm was marked against, because they differ several-fold."""
+    control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)
+    comparison = RunComparison(control, [arm])
+
+    assert "UNPAIRED" in comparison.floor(comparison.arms[0])[1]
+
+    _predictions(control, shift=0.0)
+    _predictions(arm, shift=0.05)
+
+    intervals, named = RunComparison(control, [arm]).floor(comparison.arms[0])
+    assert "paired floor" in named
+    assert set(intervals) == set(TARGETS)
