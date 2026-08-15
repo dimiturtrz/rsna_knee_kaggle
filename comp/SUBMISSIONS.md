@@ -327,5 +327,12 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   the sibling celltrack campaign, so kneemri runs serialised behind them: submissions are limited by
   SESSIONS, not by the five daily slots. A completed kernel version can be submitted at any later time,
   so a long run started before a machine sleeps is not wasted — it is submitted the next day.
+- **ONE code submission may be PENDING at a time, and pending lasts as long as the hidden rerun.** Every
+  `CreateCodeSubmission` while another is pending answers `400 Client Error` with no body — the same
+  status a missing `-v` gives, so the error does not name its cause. Measured 2026-08-15: the 21:06
+  entry was still `PENDING` at 22:30, and Kaggle reruns the notebook on the hidden test set before
+  scoring, so the wait is HOURS, not minutes. Consequence for slot planning: the five daily slots are
+  not spendable in an evening. If a day's slots matter, submit the first entry early and treat the
+  scoring queue — not the kernel queue and not the daily quota — as the binding constraint.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.
