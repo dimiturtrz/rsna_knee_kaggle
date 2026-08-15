@@ -31,10 +31,10 @@ SLICE_BAND = (0.20, 0.80)
 """The central band the samples spread over: the outermost slices of a knee series are mostly soft
 tissue outside the joint."""
 
-_MIN_CROP_PIXELS = 16
-"""Below this the crop is nonsense rather than a crop, so the series passes through uncropped."""
-
 _PERCENTILES = (1.0, 99.0)
+
+MIN_CROP_PIXELS = 16
+"""Below this the crop is not a knee at any spacing, and the spacing is the thing to disbelieve."""
 
 
 class SlotReader:
@@ -142,21 +142,36 @@ class SlotReader:
         intercept = float(getattr(data, "RescaleIntercept", 0) or 0)
         return pixels * slope + intercept
 
+    def window(
+        self, stack: NDArray[np.float32], spacing: float | None, crop_mm: float | None = None
+    ) -> tuple[slice, slice] | None:
+        """The rows and columns a crop of `crop_mm` takes from this stack, or None when it does not apply.
+
+        One home for the geometry because both crops here take it and a measurement that scores a box
+        the reader would not take is measuring the wrong thing.
+
+        None whenever the crop cannot be honoured: no spacing (the extent is not physical), or a window
+        wider than the frame (the acquisition is already tighter than the crop, so cropping does
+        nothing). Clamped INTO the frame rather than shortened, because a short crop is a different
+        mm/pixel and that is the one property this whole read exists to hold constant.
+        """
+        wanted = self.crop_mm if crop_mm is None else crop_mm
+        if spacing is None or not np.isfinite(spacing) or spacing <= 0:
+            return None
+        taken = round(wanted / spacing)
+        height, width = stack.shape[1], stack.shape[2]
+        if not MIN_CROP_PIXELS < taken < min(height, width):
+            return None
+        half = taken // 2
+        centre = self.centre.of(stack)
+        row = int(np.clip(centre[0], half, height - half))
+        column = int(np.clip(centre[1], half, width - half))
+        return slice(row - half, row + half), slice(column - half, column + half)
+
     def _crop(self, stack: NDArray[np.float32], spacing: float | None) -> NDArray[np.float32]:
         """Centre-crop to a constant physical extent, when the spacing is known and the crop fits."""
-        if spacing is None or not np.isfinite(spacing) or spacing <= 0:
-            return stack
-        wanted = round(self.crop_mm / spacing)
-        height, width = stack.shape[1:]
-        if not _MIN_CROP_PIXELS < wanted < min(height, width):
-            return stack
-        half = wanted // 2
-        centre_y, centre_x = self.centre.of(stack)
-        # CLAMPED INTO THE FRAME, so a centre near an edge still yields the full physical extent rather
-        # than a crop silently short on one side — which would be a different mm/pixel for that study.
-        centre_y = int(np.clip(centre_y, half, height - half))
-        centre_x = int(np.clip(centre_x, half, width - half))
-        return stack[:, max(0, centre_y - half) : centre_y + half, max(0, centre_x - half) : centre_x + half]
+        taken = self.window(stack, spacing)
+        return stack if taken is None else stack[:, taken[0], taken[1]]
 
     def narrowed(self, stack: NDArray[np.float32], spacing: float | None, crop_mm: float | None) -> NDArray[np.float32]:
         """A stack already cropped to this reader's extent, cropped again to a TIGHTER one.
@@ -169,17 +184,10 @@ class SlotReader:
         None, or an extent no tighter than our own, passes the stack through untouched: a slot that
         names no crop is a plain sequence slot and must be byte-identical to what it always was.
         """
-        if crop_mm is None or crop_mm >= self.crop_mm or spacing is None or not np.isfinite(spacing) or spacing <= 0:
+        if crop_mm is None or crop_mm >= self.crop_mm:
             return stack
-        wanted = round(crop_mm / spacing)
-        height, width = stack.shape[1:]
-        if not _MIN_CROP_PIXELS < wanted < min(height, width):
-            return stack
-        half = wanted // 2
-        centre_y, centre_x = self.centre.of(stack)
-        centre_y = int(np.clip(centre_y, half, height - half))
-        centre_x = int(np.clip(centre_x, half, width - half))
-        return stack[:, centre_y - half : centre_y + half, centre_x - half : centre_x + half]
+        taken = self.window(stack, spacing, crop_mm)
+        return stack if taken is None else stack[:, taken[0], taken[1]]
 
     def sized(self, stack: NDArray[np.float32], size: int) -> UInt8[Tensor, "s h w"]:
         """Percentile-normalise, resize to the encoder's grid, and store eight bits per pixel.

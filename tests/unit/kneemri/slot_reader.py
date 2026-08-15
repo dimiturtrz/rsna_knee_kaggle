@@ -77,6 +77,33 @@ def _offset_stack() -> np.ndarray:
     return stack
 
 
+def test_window():
+    """The extent it takes, clamped into the frame, and None whenever the crop does not apply."""
+    stack = np.zeros((2, 200, 200), np.float32)
+    reader = SlotReader(crop_mm=100.0)
+
+    taken = reader.window(stack, 1.0)
+    assert taken is not None
+    assert (taken[0].start, taken[0].stop, taken[1].start, taken[1].stop) == (50, 150, 50, 150)
+
+    edge = SlotReader(crop_mm=100.0, centre=TissueCentre()).window(_edge_stack(), 1.0)
+    assert edge is not None
+    assert edge[0].stop - edge[0].start == 100, "clamped rather than short — a short crop is a different mm/pixel"
+    assert edge[0].start == 0
+
+    assert reader.window(stack, None) is None, "unknown spacing is not a physical extent"
+    assert reader.window(stack, 0.0) is None
+    assert reader.window(stack, 1.0, 400.0) is None, "a crop wider than the frame does nothing"
+    assert reader.window(stack, 1.0, 4.0) is None, "and one below a handful of pixels is nonsense"
+
+
+def _edge_stack() -> np.ndarray:
+    """A stack whose tissue sits hard against the top edge, so an unclamped window would run off it."""
+    stack = np.zeros((2, 200, 200), np.float32)
+    stack[:, 0:20, 0:20] = 1.0
+    return stack
+
+
 def test_crop_centre_default_is_unchanged():
     """The default reader crops EXACTLY where it always did — 99 GB of caches depend on it.
 
