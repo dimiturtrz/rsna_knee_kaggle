@@ -771,6 +771,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.experiments.arm_smoke",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.training.train",
       "weight": 1
     },
@@ -3998,6 +4004,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck._environment",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck._parsed",
       "target": "kneemri.training.train.TrainingOptions.parse",
       "weight": 1
@@ -4054,6 +4066,30 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_check.ArmCheck.uncached",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke.reported",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke.failed",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke.command",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke.reported",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke.failed",
       "weight": 1
     },
     {
@@ -6747,7 +6783,7 @@
       "role": null
     },
     {
-      "descendants": 86,
+      "descendants": 87,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -7059,7 +7095,7 @@
       "role": null
     },
     {
-      "descendants": 2,
+      "descendants": 3,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -7070,6 +7106,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check",
       "label": "arm_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke",
+      "label": "arm_smoke",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -7928,6 +7972,14 @@
       "label": "ArmCheck",
       "level": "class",
       "parent": "kneemri.experiments.arm_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "label": "ArmSmoke",
+      "level": "class",
+      "parent": "kneemri.experiments.arm_smoke",
       "role": "primary"
     },
     {
@@ -10552,6 +10604,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.arm_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
+      "label": "_subprocess",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.command",
+      "label": "command",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.failed",
+      "label": "failed",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.reported",
+      "label": "reported",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
       "role": null
     },
     {
