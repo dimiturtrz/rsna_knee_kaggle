@@ -255,6 +255,12 @@
     {
       "kind": "import",
       "source": "kneemri.embeddings.build_embeddings",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_embeddings",
       "target": "kneemri.embeddings.embedding_cache",
       "weight": 1
     },
@@ -284,6 +290,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.report_embeddings",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "core.paths",
       "weight": 1
@@ -292,6 +304,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "kneemri.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution",
+      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -370,6 +388,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_curve",
       "target": "kneemri.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_curve",
+      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -550,6 +574,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.ruler_check",
       "target": "kneemri.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ruler_check",
+      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -861,6 +891,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.inference.holdout_predictions",
       "weight": 1
     },
@@ -1072,6 +1108,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
       "target": "core.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.kernel_run",
+      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -1510,6 +1552,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -2487,6 +2535,18 @@
     {
       "kind": "construct",
       "source": "kneemri.embeddings.build_embeddings.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_embeddings.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_embeddings.main",
       "target": "kneemri.embeddings.embedding_cache.EmbeddingCache",
       "weight": 1
     },
@@ -2560,6 +2620,18 @@
       "kind": "calls",
       "source": "kneemri.embeddings.report_embeddings.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.report_embeddings.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.report_embeddings.main",
+      "target": "kneemri.device.VisibleCards.device",
       "weight": 1
     },
     {
@@ -2698,6 +2770,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.attribution.main",
       "target": "kneemri.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution.main",
+      "target": "kneemri.device.VisibleCards.device",
       "weight": 1
     },
     {
@@ -3034,6 +3118,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.main",
       "target": "kneemri.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.main",
+      "target": "kneemri.device.VisibleCards.device",
       "weight": 1
     },
     {
@@ -3430,6 +3526,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.ruler_check.main",
       "target": "kneemri.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ruler_check.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ruler_check.main",
+      "target": "kneemri.device.VisibleCards.device",
       "weight": 1
     },
     {
@@ -4633,6 +4741,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.inference.holdout_backfill.Backfill.of",
@@ -5212,6 +5332,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_run.KernelRun.package",
       "target": "kneemri.inference.members.MemberPackage.find",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.device.VisibleCards.device",
       "weight": 1
     },
     {
@@ -6775,6 +6907,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.DeviceBudget.select",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.DeviceBudget.select",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.corpus.study_cache.CachedCorpus",
@@ -6987,7 +7131,7 @@
       "role": null
     },
     {
-      "descendants": 89,
+      "descendants": 90,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -7144,6 +7288,14 @@
       "label": "window_reader",
       "level": "module",
       "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.device",
+      "label": "device",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -8000,6 +8152,14 @@
       "label": "WindowReader",
       "level": "class",
       "parent": "kneemri.corpus.window_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.device.VisibleCards",
+      "label": "VisibleCards",
+      "level": "class",
+      "parent": "kneemri.device",
       "role": "primary"
     },
     {
@@ -9832,6 +9992,14 @@
       "label": "read",
       "level": "method",
       "parent": "kneemri.corpus.window_reader.WindowReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.device.VisibleCards.device",
+      "label": "device",
+      "level": "method",
+      "parent": "kneemri.device.VisibleCards",
       "role": null
     },
     {
