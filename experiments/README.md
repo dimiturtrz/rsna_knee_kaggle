@@ -166,6 +166,7 @@ so everything below is **directional**, and only the cumulative total clears the
 | `dinov3` S+ 224 | wider small, 28.7M | 0.8012 | −0.0445 | capacity scaled the WRONG way inside the family |
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
 | `crop80_tissue` | 80 mm about the tissue centre, 0.238 mm/px | 0.8345 | −0.0112 vs `whole_stack`, but see below | mean is the WRONG read — gate is per-label |
+| `pair_memory` | cross-step memory of 8 pairs in the ranking loss | 0.8353 @ e6 | −0.0104 vs `wsfold0_e6` | **refuted on the mean**; its own prediction is per-label and is untestable, see below |
 
 ### `crop80_tissue` — the control is not schedule-matched, and the mean was never the gate
 
@@ -187,6 +188,42 @@ slots buy: ≈ **+0.0016 on the mean** for a 71.6 GB cache and a training slot. 
 Resolution at CONSTANT field of view is untouched (`res392`, 0.8523, still our best single member); what
 failed is paying for sampling with context. See
 `interpretations/kneemri/2026-08-16_crop80_resolution_gate.md`.
+
+### `pair_memory` — refuted on the mean, and its own gate cannot be run
+
+Recipe-matched to `wsfold0_e6` on every axis the metrics line records except `pair_memory: 8` (336 px,
+12 slices, whole-stack, one-cycle, weight floor, backbone 8e-6, seed 2026, fold 0). The curve peaks
+mid-run and never recovers: e0 .7326 · e3 .8160 · **e6 .8353** · e8 .8347 · e11 .8338, against the
+control's **0.8457**. That is −0.0104, twice the noise floor, so the mechanism does not pay on the mean.
+
+**Its own prediction is refuted too, on its own instrument.** The arm predicted a gain concentrated on
+the RARE labels — Fracture (314 positives) and Synovitis (580) — which an unweighted 12-label mean
+averages away exactly as it did for `crop80_tissue`. The per-label read against `wholestack_s2026` at
+matched best epochs:
+
+| | delta |
+|---|---|
+| Lateral Meniscus | **−0.0426*** |
+| Medial Meniscus | **−0.0304*** |
+| Synovitis | −0.0144 |
+| Fracture | +0.0044 (interval ±0.061 — unreadable) |
+| everything else | −0.010 … −0.001 |
+
+`*` = clears that label's own 95% sampling interval. The predicted half is inside the noise; the
+damage is real and it lands on the two menisci, the labels with nothing to do with the mechanism.
+Cross-step pair memory does not trade the mean for the rare labels — it just costs. **Refuted.**
+
+The read was nearly not run at all, on a reading error worth recording: a scan of the metrics files for
+a recipe looked at the FIRST line of each and reported every older run as unrecorded, which read as
+"there is no matched control on disk". `kneemri.runs.metrics_recipe` backfills the recipe from the
+checkpoint's `options` block and APPENDS it, so the line it was looking for was at the end of every
+file it declared empty — and the tool had already been run. A missing-data conclusion drawn from a
+scan that only looked at one line of the file. The one confound the read does report is
+`compile_encoder False→True`. The cached `pair_memory_s2026.holdout.npz` was separately unusable: a
+second, truncated run (epochs 0–3) was appended to the same file, so the npz is epoch 3.
+
+One curiosity worth not losing: epoch 11 records **27,266 s** against ~234 s for every other epoch. That
+is the machine, not the model — but it means wall-clock from this file is unusable.
 
 ## The eleven runs nothing had written down
 
