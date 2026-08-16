@@ -273,6 +273,22 @@ def test_strongest(tmp_path: Path):
     assert len(package.strongest(9)) == 3
 
 
+def test_named(tmp_path: Path):
+    """The named members in the order asked for, and a REFUSAL when one is not mounted.
+
+    Skipping an absent name would ship a smaller ensemble than the one whose offline score justified
+    the slot, with nothing in the run's output naming which ensemble actually predicted.
+    """
+    package, _ = _package(tmp_path)
+    package.members = [
+        replace(package.members[0], identifier=str(score), holdout=score) for score in (0.81, 0.87, 0.84)
+    ]
+
+    assert [member.identifier for member in package.named(["0.84", "0.81"])] == ["0.84", "0.81"]
+    with pytest.raises(WeightsError, match="0.99"):
+        package.named(["0.84", "0.99"])
+
+
 def test_the_member_with_no_holdout_is_ranked_last_rather_than_compared(tmp_path: Path):
     """A full-data fit records NaN by construction, and NaN sorts FIRST under a plain descending sort.
 

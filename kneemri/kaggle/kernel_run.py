@@ -14,6 +14,7 @@ is worth having, because the two leaderboards reward opposite things and a team 
 
 import json
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 
 from core.mounts import Mounts
@@ -32,8 +33,16 @@ logger = logging.getLogger(__name__)
 class KernelRun:
     """One kernel's work: mount the weights, load the members it wants, write the submission."""
 
-    def __init__(self, members: int | None = None, *, overlap: bool = True, mounts: Mounts | None = None) -> None:
+    def __init__(
+        self,
+        members: int | None = None,
+        *,
+        names: Sequence[str] | None = None,
+        overlap: bool = True,
+        mounts: Mounts | None = None,
+    ) -> None:
         self.members = members
+        self.names = names
         self.overlap = overlap
         # One object for the whole run, because it caches: the cost this removes is a repeated walk,
         # and a fresh finder per call would keep paying it while looking like it did not.
@@ -64,7 +73,14 @@ class KernelRun:
         return found[0]
 
     def chosen(self, package: MemberPackage) -> list[Member]:
-        """Which members to run: all of them, or the strongest few for the efficiency entry."""
+        """Which members to run: the ones this entry NAMES, else the strongest few, else all of them.
+
+        Naming comes first because it is the only selection that can carry a joint offline score into a
+        kernel: `strongest` ranks members by what each scores alone, and an ensemble is not the sum of
+        marginal rankings (`MemberPackage.named` records the 0.0024 that costs on our own holdout).
+        """
+        if self.names is not None:
+            return package.named(self.names)
         return package.members if self.members is None else package.strongest(self.members)
 
     def package(self) -> MemberPackage:

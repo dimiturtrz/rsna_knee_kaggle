@@ -13,6 +13,7 @@ move it by about 1e-5, which is why the tolerance sits between them rather than 
 import json
 import logging
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NotRequired, TypedDict
@@ -503,6 +504,26 @@ class MemberPackage:
         if unranked and count > len(ranked) - len(unranked):
             logger.warning("members with no recorded holdout, ranked last: %s", ", ".join(unranked))
         return ranked[:count]
+
+    def named(self, wanted: Sequence[str]) -> list["Member"]:
+        """Exactly these members, in the order asked for, or a refusal naming what is not mounted.
+
+        WHY AN ENTRY NAMES ITS MEMBERS RATHER THAN ASKING FOR THE STRONGEST FEW. `strongest` sorts by
+        each member's own solo holdout, which is a MARGINAL ranking, and an ensemble is not marginal:
+        measured 2026-08-16 on the 909-study fold-0 holdout over eight of our cached members, the four
+        that sort strongest score 0.8588 together, while the best four chosen by their JOINT score
+        reach 0.8612 — the sort drops `intensity392_ws` (solo 0.8459) for `extended_ws` (solo 0.8462)
+        and loses 0.0024 doing it. A member earns its seat by what it adds, not by what it scores alone.
+
+        Missing names are FATAL rather than skipped. Dropping silently would ship a smaller entry than
+        the one whose offline score justified the slot, and nothing in the run's output would say which
+        ensemble actually predicted — the same class of failure the fingerprint check exists to stop.
+        """
+        available = {member.identifier: member for member in self.members}
+        absent = [name for name in wanted if name not in available]
+        if absent:
+            raise WeightsError(f"{self.root} holds {sorted(available)} and was asked for {absent}")
+        return [available[name] for name in wanted]
 
     @classmethod
     def find(cls, mounts: "Mounts | None" = None, name: str = "manifest.json") -> "MemberPackage | None":

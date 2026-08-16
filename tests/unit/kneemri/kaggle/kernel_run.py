@@ -22,12 +22,24 @@ class _Package:
         """Best holdout first, as MemberPackage does."""
         return sorted(self.members, key=lambda member: member.holdout, reverse=True)[:count]
 
+    def named(self, wanted: list[str]) -> list[object]:
+        """Exactly these, as MemberPackage does."""
+        available = {member.identifier: member for member in self.members}
+        return [available[name] for name in wanted]
+
 
 def test_chosen():
-    """The accuracy entry runs everything; the efficiency entry runs the strongest few."""
+    """Three selections: everything, the strongest few, and the ones an entry NAMES.
+
+    Naming wins over a count when both are given, because the joint-holdout choice is the one an
+    offline number was computed for and a solo ranking is not the same set (0.8612 against 0.8588 on
+    our own holdout).
+    """
     package = _Package([0.81, 0.87, 0.84])
     assert len(KernelRun().chosen(package)) == 3
     assert [member.holdout for member in KernelRun(members=1).chosen(package)] == [0.87]
+    assert [member.holdout for member in KernelRun(names=["0.81", "0.84"]).chosen(package)] == [0.81, 0.84]
+    assert [member.holdout for member in KernelRun(members=1, names=["0.84"]).chosen(package)] == [0.84]
 
 
 def test_find_encoder(tmp_path: Path):
