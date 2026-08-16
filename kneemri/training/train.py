@@ -10,7 +10,9 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 import torch
+from numpy.typing import NDArray
 from transformers import AutoModel
 
 from core.paths import DataRoot
@@ -76,6 +78,9 @@ class TrainingOptions:
     report_vectors: Path | None = None
     patience: int = 0
     """Epochs without holdout improvement before stopping; 0 runs the full schedule."""
+
+    studies: int = 0
+    """Corpus positions this run touches at all; 0 is every one of them. A SMOKE knob, never an arm."""
 
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
@@ -173,6 +178,15 @@ class TrainingOptions:
             help="resolution the model actually READS, resampled from the cache. 0 means the cache's "
             "own. Decouples resolution from decoding: a 448 px cache can be read at 392 without a "
             "second 45-minute build, and without changing the batch or the slice count to afford it.",
+        )
+        parser.add_argument(
+            "--studies",
+            type=int,
+            default=0,
+            help="cap the corpus positions this run touches (0 = all of them). A SMOKE knob: it proves "
+            "a recipe wires end to end — model built, loss stepped, checkpoint written — in minutes "
+            "instead of holding the card for forty to find out a flag was miswired. The holdout keeps "
+            "the fold's ratio so both halves of the loop run, and the score it reports means nothing.",
         )
         parser.add_argument("--seed", type=int, default=2026, help="model init and data order ONLY")
         parser.add_argument(
@@ -381,6 +395,29 @@ class TrainingOptions:
         """How the encoder adapts: which blocks move and how fast, which are one decision."""
         return Adaptation(head_lr=self.head_lr, backbone_lr=self.backbone_lr, unfreeze_last=self.unfreeze_last)
 
+    def sampled(
+        self, training: NDArray[np.int64], holdout: NDArray[np.int64]
+    ) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+        """The first `--studies` corpus positions, split in the ratio the fold already has.
+
+        A SMOKE, not an arm: it proves the recipe WIRES — cache mapped, encoder fetched, model built,
+        loss stepped, checkpoint written and reloaded — in a couple of minutes on the card rather than
+        the forty a real fit costs. Every flag combination this repository ships has at some point been
+        discovered miswired only after the GPU had already been held, which is the most expensive place
+        to find out.
+
+        The ratio is kept rather than a second flag added, so a smoke exercises BOTH halves of the loop:
+        a run with a holdout of zero never scores, never selects a best epoch and so never proves the
+        half of `Fitting` that writes the checkpoint. The score it produces is meaningless by
+        construction — a few dozen studies — and `main` says so in the log for the same reason
+        `--fold -1` says it cannot report one.
+        """
+        if not self.studies:
+            return training, holdout
+        share = len(training) / max(len(training) + len(holdout), 1)
+        kept = min(max(round(self.studies * share), 1), len(training))
+        return training[:kept], holdout[: max(self.studies - kept, 1)]
+
     def objective(self) -> Objective:
         """The loss policy these flags ask for.
 
@@ -509,6 +546,9 @@ def main() -> None:
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    training, holdout = arguments.sampled(training, holdout)
+    if arguments.studies:
+        logger.warning("SMOKE RUN: %d studies — the holdout it reports is not a result", arguments.studies)
     # ONE call, and %s rather than a second positional: logging treats extra positionals as %-format
     # arguments, so `logger.info("target coverage:", {...})` printed the label and silently dropped the
     # dict. Every run so far has logged the words "target coverage:" and none of the coverage.

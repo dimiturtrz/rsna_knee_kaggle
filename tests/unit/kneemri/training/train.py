@@ -1,6 +1,7 @@
 import dataclasses
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from kneemri.corpus.crop_centre import Crop
@@ -255,3 +256,24 @@ def test_routing():
     """The scheme and tie flags argparse lands as scalars, read back as the pair everything else wants."""
     assert TrainingOptions().routing == Routing()
     assert TrainingOptions(tie="last").routing.tie == "last"
+
+
+def test_sampled():
+    """A cap that keeps the fold's ratio, and NOTHING at all when no cap is asked for."""
+    training, holdout = np.arange(800), np.arange(800, 1000)
+    uncapped = TrainingOptions().sampled(training, holdout)
+
+    assert (uncapped[0] == training).all() and (uncapped[1] == holdout).all(), "no cap touches nothing"
+
+    few_training, few_holdout = TrainingOptions(studies=50).sampled(training, holdout)
+
+    assert (len(few_training), len(few_holdout)) == (40, 10), "the 4:1 the fold already has"
+    assert (few_training == training[:40]).all(), "the FIRST positions, so two smokes read the same studies"
+
+    one_training, one_holdout = TrainingOptions(studies=1).sampled(training, holdout)
+
+    assert (list(one_training), list(one_holdout)) == ([0], [800]), "both halves keep a study"
+
+    whole = TrainingOptions(studies=5000).sampled(training, holdout)
+
+    assert (whole[0] == training).all() and (whole[1] == holdout).all(), "a cap cannot invent"

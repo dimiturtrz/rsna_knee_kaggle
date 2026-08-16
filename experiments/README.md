@@ -17,10 +17,10 @@ stay in it.
 An arm file carries its hypothesis, its control number, and its result in the header. Reading the
 directory is meant to be the same as reading the ledger.
 
-## The four checks, and when to run them
+## The checks, and when to run them
 
-Each exists because the failure it catches happened, silently, and cost either a queue or a slot. None
-needs a GPU.
+Each exists because the failure it catches happened, silently, and cost either a queue or a slot. Only
+the last wants the card, and for two minutes.
 
 ```bash
 uv run python -m kneemri.kaggle.kit_check      # BEFORE shipping a kit (refuses stale or dirty)
@@ -40,6 +40,17 @@ would train the reader to ignore it. `--mounted` asks the question a slot actual
 uploading is a manual `kaggle datasets version` step: it downloads the published `kit.json` alone (46
 bytes, listed as its own file, so no weights move) and judges it by the same rule. On 2026-08-15 its first
 run refused the live dataset — mounted `4faac3d`, five shipped-package commits behind.
+
+**`--studies N` — the one check that DOES want the card, and wants it for two minutes.** `arm_check`
+proves an arm's flags parse; it cannot prove the recipe they select survives contact with the corpus,
+the encoder and the loss. `--studies 60` caps the corpus positions a run touches, keeping the fold's
+train:holdout ratio so both halves of the loop execute, and reports a score that means nothing by
+construction. Measured 2026-08-16: 48 train / 12 holdout, one epoch in **2 s**, checkpoint written and
+reloaded — against the forty minutes a real fit holds the GPU to reach the same first assertion.
+
+```bash
+uv run python -m kneemri.training.train --labels "$LABELS" --studies 60 --epochs 1 $RECIPE --out /tmp/smoke.pt
+```
 
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches

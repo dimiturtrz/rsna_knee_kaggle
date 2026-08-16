@@ -88,13 +88,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Four checks, none needing a GPU, each for a failure that already happened**: `python -m
+- **Five checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running), `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
   submission (two slots went to code the repo had already fixed; `--mounted` asks Kaggle what it will
   actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a
-  submission (it found three defects on first use). See `experiments/README.md`.
+  submission (it found three defects on first use). A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. See `experiments/README.md`.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint
