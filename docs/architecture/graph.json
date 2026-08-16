@@ -4087,9 +4087,27 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "target": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap.__init__",
       "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
+      "target": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.report",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
       "weight": 1
     },
     {
@@ -8484,6 +8502,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "label": "Bottleneck",
+      "level": "class",
+      "parent": "kneemri.evaluation.supervision_gap",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "label": "SupervisionGap",
       "level": "class",
@@ -11166,6 +11192,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
       "label": "annotated",
+      "level": "method",
+      "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
+      "label": "bottlenecked",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "role": null
