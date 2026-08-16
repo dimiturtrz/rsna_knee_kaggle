@@ -5241,6 +5241,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submission.Submission.chunks",
+      "target": "kneemri.kaggle.submission.Submission.peak_rss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submission.Submission.chunks",
       "target": "kneemri.kaggle.submission.Submission.peak_vram",
       "weight": 1
     },
@@ -11488,6 +11494,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.submission.Submission.decoded_at",
       "label": "decoded_at",
+      "level": "method",
+      "parent": "kneemri.kaggle.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submission.Submission.peak_rss",
+      "label": "peak_rss",
       "level": "method",
       "parent": "kneemri.kaggle.submission.Submission",
       "role": null
