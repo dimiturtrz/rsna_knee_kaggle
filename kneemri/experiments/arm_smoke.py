@@ -52,8 +52,19 @@ class ArmSmoke:
         return done.returncode, lines[-1] if lines else ""
 
     def command(self, flags: str, out: Path) -> list[str]:
-        """The invocation that runs one arm's recipe as a smoke rather than as an arm."""
-        overrides = ["--studies", str(self.studies), "--epochs", "1", "--out", str(out)]
+        """The invocation that runs one arm's recipe as a smoke rather than as an arm.
+
+        `--cache-studies` is what makes an UNTRIED reading smokeable: it names the truncated cache
+        `arm_check` decodes beforehand, so an arm whose full corpus is two hours away still gets the
+        one check that sees a recipe fail on the card. `--studies` alone would subsample a full cache
+        that, for exactly those arms, does not exist.
+        """
+        overrides = [
+            *("--cache-studies", str(self.studies)),
+            *("--studies", str(self.studies)),
+            *("--epochs", "1"),
+            *("--out", str(out)),
+        ]
         return [sys.executable, "-m", "kneemri.training.train", *shlex.split(flags), *overrides]
 
     def failed(self, invocations: dict[str, str], out: Path) -> dict[str, str]:

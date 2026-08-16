@@ -262,6 +262,15 @@ class StudyCache:
             )
             raise ValueError(message)
 
+    def decoded(self) -> bool:
+        """Whether this cache is on disk and usable — all three files, not just the pixels.
+
+        The mask is written LAST, after the build has judged it, so a cache missing only its mask is a
+        decode that died or produced nothing. Asking for the three together is what `arm_check` means by
+        UNCACHED and what the smoke means by "decode this first", and the two spelled it separately.
+        """
+        return self.images_path.is_file() and self.mask_path.is_file() and self.index_path.is_file()
+
     def load(self) -> tuple[CachedCorpus, list[str]]:
         """The cache, memory-mapped read-only, with its study order."""
         images = np.load(self.images_path, mmap_mode="r")
@@ -301,3 +310,31 @@ class StudyCache:
             # unreported decode failure is indistinguishable from a black knee.
             logger.info(f"  decode failed for {request.identifier}: {type(failure).__name__}: {failure}")
             return request.position, [0.0] * len(SCHEMES[request.routing.scheme])
+
+
+@dataclass(frozen=True)
+class CorpusSplit:
+    """The shipped tables a decode reads before it can build: which studies, and each series' plane.
+
+    Beside `StudyCache` because it is exactly the arguments `build` takes, and a dataclass rather than
+    three lines in a `main` because two callers now assemble them — the build CLI, and the smoke that
+    decodes a few dozen studies for a reading nothing has tried. Assembled twice they would drift on
+    the one thing that must not: which table names the split.
+    """
+
+    raw: Path
+    split: str = "train_series"
+
+    @property
+    def source(self) -> Path:
+        """The directory of DICOMs the decode walks."""
+        return self.raw / self.split
+
+    def identifiers(self) -> list[str]:
+        """Every study in the split, in the order the cache will index them by."""
+        table = "train.csv" if self.split == "train_series" else "test.csv"
+        return pd.read_csv(self.raw / table)["StudyInstanceUID"].tolist()
+
+    def planes(self) -> dict[str, str]:
+        """Series UID to anatomical plane, which is what the slot predicate routes on."""
+        return StudyCache.planes_of(self.raw / f"{self.split}.csv")

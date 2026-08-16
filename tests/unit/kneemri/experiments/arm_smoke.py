@@ -10,8 +10,13 @@ def test_command(tmp_path: Path):
     argv = ArmSmoke(studies=25).command("--fold 0 --epochs 12 --out real.pt", tmp_path / "smoke.pt")
 
     assert argv[1:3] == ["-m", "kneemri.training.train"], "the trainer itself, not a stub of it"
-    assert argv[-6:] == ["--studies", "25", "--epochs", "1", "--out", str(tmp_path / "smoke.pt")]
-    assert argv.index("--epochs") < len(argv) - 6, "the arm's own --epochs stays, and argparse keeps the last"
+    assert argv[-8:] == [
+        *("--cache-studies", "25"),
+        *("--studies", "25"),
+        *("--epochs", "1"),
+        *("--out", str(tmp_path / "smoke.pt")),
+    ], "the truncated CACHE as well as the subsample, or an untried reading has nothing to read"
+    assert argv.index("--epochs") < len(argv) - 8, "the arm's own --epochs stays, and argparse keeps the last"
 
 
 def test_failed(tmp_path: Path):

@@ -10,12 +10,10 @@ import logging
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 from core.paths import DataRoot
 from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.corpus.folds import ReportFolds
-from kneemri.corpus.study_cache import StudyCache
+from kneemri.corpus.study_cache import CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +37,8 @@ def main() -> None:
 
     root = DataRoot.from_config(arguments.paths)
     raw = root.raw()
-    table = "train.csv" if arguments.split == "train_series" else "test.csv"
-    identifiers = pd.read_csv(raw / table)["StudyInstanceUID"].tolist()
-    planes = StudyCache.planes_of(raw / arguments.split.replace("_series", "_series.csv"))
+    split = CorpusSplit(raw, arguments.split)
+    identifiers = split.identifiers()
 
     if arguments.holdout_fold is not None and arguments.out is None:
         # A FOLD RESTRICTION IS NOT IN THE KEY, unlike `--cache-studies`, so a fold cache written into
@@ -71,7 +68,7 @@ def main() -> None:
         sys.stdout.write(f"{cache.key}\n")
         return
     logger.info(f"building {cache.shape(len(cache.enrolled(identifiers)))} uint8 -> {cache.images_path}")
-    cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
+    cache.build(split.source, identifiers, split.planes(), workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")
 
 

@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import EXTENDED_SLOTS, SLOTS, Routing
-from kneemri.corpus.study_cache import CachedCorpus, DecodeRequest, StudyCache
+from kneemri.corpus.study_cache import CachedCorpus, CorpusSplit, DecodeRequest, StudyCache
 from kneemri.corpus.window_reader import FileReader, MappedReader
 
 from ..conftest import write_series
@@ -94,6 +94,43 @@ def test_build_truncated(tmp_path: Path):
     assert corpus.images.shape[0] == 2
     assert cache.key.endswith("_first2"), "the truncation is in the name, not only in the contents"
     assert cache.images_path != StudyCache(tmp_path / "cache", slices=2, image_size=8).images_path
+
+
+def test_decoded(tmp_path: Path):
+    """A cache is usable only with all THREE files, and the mask is the one a dead build never writes."""
+    cache = StudyCache(tmp_path, slices=2, image_size=8)
+    assert not cache.decoded(), "nothing on disk"
+
+    cache.images_path.write_text("pixels", encoding="utf-8")
+    cache.index_path.write_text("[]", encoding="utf-8")
+    assert not cache.decoded(), "the mask is written LAST, so pixels without it are a build that died"
+
+    cache.mask_path.write_text("mask", encoding="utf-8")
+    assert cache.decoded()
+
+
+def test_source(tmp_path: Path):
+    """The split names its own DICOM directory, so no caller spells it beside the table it reads."""
+    assert CorpusSplit(tmp_path).source == tmp_path / "train_series"
+    assert CorpusSplit(tmp_path, "test_series").source == tmp_path / "test_series"
+
+
+def test_identifiers(tmp_path: Path):
+    """Which studies the split holds — and the TABLE differs from the split's own name, which is the trap."""
+    pd.DataFrame({"StudyInstanceUID": ["s0", "s1"]}).to_csv(tmp_path / "train.csv", index=False)
+    pd.DataFrame({"StudyInstanceUID": ["t0"]}).to_csv(tmp_path / "test.csv", index=False)
+
+    assert CorpusSplit(tmp_path).identifiers() == ["s0", "s1"]
+    assert CorpusSplit(tmp_path, "test_series").identifiers() == ["t0"], "any other split reads test.csv"
+
+
+def test_planes(tmp_path: Path):
+    """The one thing the slot predicate takes from the shipped series table, read off the split."""
+    pd.DataFrame({"SeriesInstanceUID": ["e0"], "Anatomical_Plane": ["SAG"]}).to_csv(
+        tmp_path / "train_series.csv", index=False
+    )
+
+    assert CorpusSplit(tmp_path).planes() == {"e0": "SAG"}
 
 
 def test_load(tmp_path: Path):
