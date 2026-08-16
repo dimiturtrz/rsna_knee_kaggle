@@ -1413,6 +1413,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.head_trial",
+      "target": "kneemri.corpus.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.head_trial",
       "target": "kneemri.corpus.cache_flags",
       "weight": 1
     },
@@ -1420,6 +1426,12 @@
       "kind": "import",
       "source": "kneemri.training.head_trial",
       "target": "kneemri.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.head_trial",
+      "target": "kneemri.corpus.slots",
       "weight": 1
     },
     {
@@ -1444,6 +1456,12 @@
       "kind": "import",
       "source": "kneemri.training.head_trial",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.head_trial",
+      "target": "kneemri.models.slice_attention",
       "weight": 1
     },
     {
@@ -6680,6 +6698,48 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.head_trial.AxisConcordance",
+      "target": "kneemri.labels.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.head_trial.AxisConcordance",
+      "target": "kneemri.training.head_trial.HeadAxis",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.head_trial.AxisConcordance",
+      "target": "kneemri.training.head_trial.HeadTrial",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.head_trial.AxisConcordance.report",
+      "target": "kneemri.training.head_trial.AxisConcordance.proxy",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.head_trial.AxisConcordance.report",
+      "target": "kneemri.training.head_trial.HeadAxis.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.head_trial.HeadAxis",
+      "target": "kneemri.training.head_trial.HeadAxis",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.head_trial.HeadAxis",
+      "target": "kneemri.training.head_trial.TrialSettings",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.head_trial.HeadTrial",
       "target": "kneemri.labels.targets.Targets",
       "weight": 1
@@ -6703,15 +6763,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.head_trial.HeadTrial.run",
-      "target": "kneemri.models.slot_head.SlotHead",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.training.head_trial.HeadTrial.run",
       "target": "kneemri.training.head_trial.HeadTrial._batches",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.head_trial.HeadTrial.run",
+      "target": "kneemri.training.head_trial.TrialHead",
       "weight": 1
     },
     {
@@ -6730,6 +6790,24 @@
       "kind": "construct",
       "source": "kneemri.training.head_trial.HeadTrial.run",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.head_trial.TrialHead.__init__",
+      "target": "kneemri.corpus.anatomy.SlotAffinity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.head_trial.TrialHead.__init__",
+      "target": "kneemri.corpus.anatomy.SlotAffinity.matrix",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.head_trial.TrialHead.__init__",
+      "target": "kneemri.models.slice_attention.SliceAttention",
       "weight": 1
     },
     {
@@ -6795,13 +6873,25 @@
     {
       "kind": "construct",
       "source": "kneemri.training.head_trial.main",
+      "target": "kneemri.training.head_trial.AxisConcordance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.head_trial.main",
+      "target": "kneemri.training.head_trial.AxisConcordance.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.head_trial.main",
       "target": "kneemri.training.head_trial.HeadTrial",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.head_trial.main",
-      "target": "kneemri.training.head_trial.HeadTrial.pooled",
+      "target": "kneemri.training.head_trial.HeadTrial.features",
       "weight": 1
     },
     {
@@ -9272,8 +9362,40 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.head_trial.AxisConcordance",
+      "label": "AxisConcordance",
+      "level": "class",
+      "parent": "kneemri.training.head_trial",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.HeadAxis",
+      "label": "HeadAxis",
+      "level": "class",
+      "parent": "kneemri.training.head_trial",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.head_trial.HeadTrial",
       "label": "HeadTrial",
+      "level": "class",
+      "parent": "kneemri.training.head_trial",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.TrialHead",
+      "label": "TrialHead",
+      "level": "class",
+      "parent": "kneemri.training.head_trial",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.TrialSettings",
+      "label": "TrialSettings",
       "level": "class",
       "parent": "kneemri.training.head_trial",
       "role": "satellite"
@@ -13840,6 +13962,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.head_trial.AxisConcordance.proxy",
+      "label": "proxy",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.AxisConcordance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.AxisConcordance.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.AxisConcordance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.HeadAxis.fine_tuned",
+      "label": "fine_tuned",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.HeadAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.HeadAxis.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.HeadAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.HeadAxis.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.HeadAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.head_trial.HeadTrial._batches",
       "label": "_batches",
       "level": "method",
@@ -13848,8 +14010,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.head_trial.HeadTrial.pooled",
-      "label": "pooled",
+      "id": "kneemri.training.head_trial.HeadTrial.features",
+      "label": "features",
       "level": "method",
       "parent": "kneemri.training.head_trial.HeadTrial",
       "role": null
@@ -13860,6 +14022,22 @@
       "label": "run",
       "level": "method",
       "parent": "kneemri.training.head_trial.HeadTrial",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.TrialHead.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.TrialHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.head_trial.TrialHead.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.training.head_trial.TrialHead",
       "role": null
     },
     {

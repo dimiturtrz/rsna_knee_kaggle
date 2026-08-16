@@ -140,6 +140,13 @@ Control for the small arms is `rank24_s2026` = **0.8272**; for base arms, `rankb
 The noise floor on this ruler is **0.0062**, and this project's bar for a *result* is ~1.5% absolute —
 so everything below is **directional**, and only the cumulative total clears the bar.
 
+**The head-side rows have a second home, `head_axes.jsonl`**, which pairs each head-only axis with its
+control so the frozen-encoder proxy (`python -m kneemri.training.head_trial --correlate`) can rerun it in
+seconds and be checked against what the pixel arm measured. It scores only pairs this ruler RESOLVES —
+today exactly **one** (the anatomical prior, −0.0076), because the other two head-side pairs are inside the
+floor and a third is inexpressible over cached features. So the proxy is not yet shown to rank anything,
+and adding a pair there means running the pixel arm, not editing the file.
+
 | arm | change | score | Δ | verdict |
 |---|---|---|---|---|
 | `rate_isolate` | encoder rate 8e-6 → 4e-5, depth 6 | 0.8323 | +0.0051 | kept, single-variable |
