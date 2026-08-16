@@ -58,6 +58,10 @@ class MemberConfig(TypedDict):
     train_size: NotRequired[int]
     """Absent on every member fitted before the read size could differ from the cache's."""
 
+    cache_studies: NotRequired[int]
+    """How many studies the cache it was fitted on held; absent means the full corpus, as every member
+    fitted before a truncated cache could exist."""
+
     slices: int
     group: int
     crop_mm: float
@@ -195,7 +199,19 @@ class Member:
             image_size=self.image_size,
             routing=self.routing,
             reading=self.reading,
+            first=self.cache_studies,
         )
+
+    @property
+    def cache_studies(self) -> int:
+        """How many studies the cache this member was fitted on holds; 0 is the full corpus.
+
+        A smoke member is fitted on a truncated cache, which differs from the full one in its first
+        axis and in its index — the same pixels-per-position mismatch the crop and the band were added
+        here to prevent, on the one axis that changes WHICH studies a position names. Absent from every
+        manifest written before truncation existed, and those all read the full corpus.
+        """
+        return int(self.config.get("cache_studies", 0))
 
     @property
     def read_size(self) -> int:

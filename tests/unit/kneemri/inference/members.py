@@ -516,6 +516,19 @@ def test_cache(tmp_path: Path):
     assert tighter.cache(tmp_path).images_path != _member().cache(tmp_path).images_path
 
 
+def test_cache_studies(tmp_path: Path):
+    """A member fitted on a TRUNCATED cache resolves that cache, not the full one it is a prefix of.
+
+    The two differ in one axis length and in their index, so a smoke member re-read against the full
+    arrays is scored on another study's pixels per position — the crop-and-band defect on the one axis
+    that changes WHICH study a position names.
+    """
+    smoked = replace(_member(), config={**_config(), "cache_studies": 60})
+
+    assert _member().cache_studies == 0, "a manifest written before truncation existed read the full corpus"
+    assert smoked.cache(tmp_path).key == f"{IMAGE}px_12sl_first60", "it resolves the cache it was fitted on"
+
+
 def test_from_checkpoint_reads_a_published_slot_list(tmp_path: Path):
     """A published checkpoint records its slots at the TOP LEVEL, not inside config.
 

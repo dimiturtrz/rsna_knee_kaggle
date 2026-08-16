@@ -2365,13 +2365,13 @@
       "weight": 1
     },
     {
-      "kind": "references",
+      "kind": "holds",
       "source": "kneemri.corpus.study_cache.StudyCache",
       "target": "kneemri.corpus.slot_reader.Reading",
       "weight": 1
     },
     {
-      "kind": "references",
+      "kind": "holds",
       "source": "kneemri.corpus.study_cache.StudyCache",
       "target": "kneemri.corpus.slots.Routing",
       "weight": 1
@@ -2390,20 +2390,14 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.corpus.study_cache.StudyCache.__init__",
-      "target": "kneemri.corpus.slot_reader.Reading",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.corpus.study_cache.StudyCache.__init__",
-      "target": "kneemri.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
       "source": "kneemri.corpus.study_cache.StudyCache.build",
       "target": "kneemri.corpus.study_cache.DecodeRequest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.study_cache.StudyCache.build",
+      "target": "kneemri.corpus.study_cache.StudyCache.enrolled",
       "weight": 1
     },
     {
@@ -2428,6 +2422,18 @@
       "kind": "calls",
       "source": "kneemri.corpus.study_cache.StudyCache.decode_one",
       "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.study_cache.StudyCache.key",
+      "target": "kneemri.corpus.slot_reader.Reading.suffix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.study_cache.StudyCache.key",
+      "target": "kneemri.corpus.slots.Routing.suffix",
       "weight": 1
     },
     {
@@ -7860,7 +7866,7 @@
       "label": "StudyCache",
       "level": "class",
       "parent": "kneemri.corpus.study_cache",
-      "role": "primary"
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -9512,14 +9518,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.study_cache.StudyCache.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.corpus.study_cache.StudyCache",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.study_cache.StudyCache.build",
       "label": "build",
       "level": "method",
@@ -9530,6 +9528,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.study_cache.StudyCache.decode_one",
       "label": "decode_one",
+      "level": "method",
+      "parent": "kneemri.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.study_cache.StudyCache.enrolled",
+      "label": "enrolled",
       "level": "method",
       "parent": "kneemri.corpus.study_cache.StudyCache",
       "role": null
@@ -11178,6 +11184,14 @@
       "descendants": 0,
       "id": "kneemri.inference.members.Member.cache",
       "label": "cache",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.members.Member.cache_studies",
+      "label": "cache_studies",
       "level": "method",
       "parent": "kneemri.inference.members.Member",
       "role": null

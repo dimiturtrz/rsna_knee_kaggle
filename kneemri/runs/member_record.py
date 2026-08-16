@@ -48,6 +48,11 @@ class RunOptions(Protocol):
     def train_size(self) -> int: ...
 
     @property
+    def cache_studies(self) -> int:
+        """How many studies the cache the RUN read held — which cache, not just its shape."""
+        ...
+
+    @property
     def slices(self) -> int: ...
 
     @property
@@ -212,6 +217,11 @@ class MemberRecord:
                 "img": options.image_size,
                 "train_size": self.read_size,
                 "slices": options.slices,
+                # WHICH cache, not just its shape. A smoke run reads a truncated cache, whose arrays
+                # differ from the full ones only in their first axis and whose index is a different
+                # list of studies — so a member fitted on one and re-read against the other is scored
+                # on the wrong pixels per position, with the shape and every fingerprint agreeing.
+                "cache_studies": options.cache_studies,
                 "group": GROUP,
                 # THE RUN'S OWN CROP, not the module constant. Stamping the constant here would have
                 # recorded 130 mm about the image centre for an arm trained at 80 mm about the tissue,

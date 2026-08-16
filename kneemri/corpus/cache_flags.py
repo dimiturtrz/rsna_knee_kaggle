@@ -85,6 +85,16 @@ class CacheFlags:
             "historic cache name; the published members reproduce their own predictions better under "
             "'last' (knee-evn), so a graft-matching cache is built with it.",
         )
+        parser.add_argument(
+            "--cache-studies",
+            type=int,
+            default=0,
+            help="decode only the first N studies of the split (0 = all of them). The SMOKE knob for a "
+            "reading that has never been decoded: a full build is two hours, so a new axis could not be "
+            "smoked before it was queued. It is in the cache NAME (`_first{N}`), so a partial decode "
+            "can never overwrite the full arrays. Distinct from --studies, which subsamples a cache "
+            "that already exists.",
+        )
 
     @staticmethod
     def cache(arguments: argparse.Namespace, directory: Path) -> StudyCache:
@@ -98,4 +108,5 @@ class CacheFlags:
                 crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
                 band=Band(low=arguments.band_low, high=arguments.band_high),
             ),
+            first=arguments.cache_studies,
         )

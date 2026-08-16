@@ -56,7 +56,11 @@ WIDE_BAND = Band(0.10, 0.90)
 
 
 def _corpus(
-    root: Path, routing: Routing | None = None, crop: Crop | None = None, band: Band | None = None
+    root: Path,
+    routing: Routing | None = None,
+    crop: Crop | None = None,
+    band: Band | None = None,
+    first: int = 0,
 ) -> list[str]:
     """Write the three files `StudyCache.load` reads, under the key the argv below selects.
 
@@ -69,8 +73,9 @@ def _corpus(
         root / "processed" / COMPETITION,
         slices=SLICES,
         image_size=SIZE,
-        routing=routing,
+        routing=routing or Routing(),
         reading=Reading(crop=crop or Crop(), band=band or Band()),
+        first=first,
     )
     cache.directory.mkdir(parents=True, exist_ok=True)
     generator = np.random.default_rng(2026)
@@ -271,7 +276,13 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
     # The blocked stand-in, because `--lora-rank` wraps the Linears INSIDE a block and the plain one
     # has none — an encoder shape, not a preference, and adaptation refuses a backbone it cannot adapt.
     monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
-    _corpus(corpus, Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL), Crop(mm=TIGHT_MM, centre=TISSUE), WIDE_BAND)
+    _corpus(
+        corpus,
+        Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL),
+        Crop(mm=TIGHT_MM, centre=TISSUE),
+        WIDE_BAND,
+        first=STUDIES,
+    )
     payload = _run(
         corpus,
         monkeypatch,
@@ -282,6 +293,9 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
         *("--band-low", str(WIDE_BAND.low)),
         *("--band-high", str(WIDE_BAND.high)),
         *("--train-size", str(READ_SIZE)),
+        # A TRUNCATED cache, which is a different file and a different index — the axis a smoke run
+        # turns, and one a member re-read by a local tool has to answer for or it reads other pixels.
+        *("--cache-studies", str(STUDIES)),
         *("--pool", CLS_MEAN_FOCAL),
         *("--slice-pooling", MAXIMUM),
         *("--slot-pooling", AVERAGED),

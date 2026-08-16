@@ -30,6 +30,8 @@ def test_add_to():
         ]
     )
     assert CacheFlags.cache(every, Path(".")).key == "448px_6sl_80mm_tissue_0.1-0.9band_extended_last"
+    partial = CacheFlags.cache(parser.parse_args(["--cache-studies", "60"]), Path("."))
+    assert partial.key == "336px_12sl_first60", "a smoke cache is named for what it holds"
 
 
 def test_cache(tmp_path: Path):

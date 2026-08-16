@@ -159,6 +159,7 @@ class ArmCheck:
                 image_size=options.image_size,
                 routing=options.routing,
                 reading=options.reading,
+                first=options.cache_studies,
             )
             if not (cache.images_path.is_file() and cache.mask_path.is_file() and cache.index_path.is_file()):
                 uncached[name] = cache.key

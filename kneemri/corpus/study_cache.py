@@ -92,22 +92,23 @@ class DecodeRequest:
     reading: Reading = Reading()
 
 
+@dataclass(frozen=True)
 class StudyCache:
-    """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask."""
+    """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask.
 
-    def __init__(
-        self,
-        directory: Path,
-        slices: int = 12,
-        image_size: int = IMAGE_SIZE,
-        routing: Routing | None = None,
-        reading: Reading | None = None,
-    ) -> None:
-        self.directory = directory
-        self.slices = slices
-        self.image_size = image_size
-        self.routing = routing or Routing()
-        self.reading = reading or Reading()
+    A dataclass rather than a hand-written `__init__`, because every field here is a value that NAMES
+    the file — six of them once truncation joined the shape, the reading and the router, which is one
+    past the arg-count gate. The generated constructor is the same call the five call sites already
+    make by keyword, and it drops two `x or X()` defaults that only existed to let a caller pass None.
+    """
+
+    directory: Path
+    slices: int = 12
+    image_size: int = IMAGE_SIZE
+    routing: Routing = Routing()
+    reading: Reading = Reading()
+    first: int = 0
+    """How many studies of the split this cache holds; 0 is all of them."""
 
     @property
     def slots(self) -> int:
@@ -139,8 +140,16 @@ class StudyCache:
         to be sampled, so a wider band at the same size, slice count and scheme is a different array
         under the same shape and the same name — and it is the axis an unlabeled-corpus rebuild wants
         first. The historic band names nothing, exactly like the historic crop.
+
+        TRUNCATION IS THE FOURTH, and it is the one that makes a new reading axis smokeable at all. A
+        full decode is two hours, so an arm on a reading nothing has built could only be smoked by
+        paying for the whole corpus first — and a partial decode written under the FULL cache's name
+        would overwrite a 71.6 GB artifact every member on disk was fitted on, with a shape that
+        differs only in its first axis. `_first{N}` says so in the filename, so the two cannot collide
+        and a trainer pointed at a partial cache is reading something that admits what it is.
         """
-        return f"{self.image_size}px_{self.slices}sl{self.reading.suffix()}{self.routing.suffix()}"
+        truncation = f"_first{self.first}" if self.first else ""
+        return f"{self.image_size}px_{self.slices}sl{self.reading.suffix()}{self.routing.suffix()}{truncation}"
 
     @property
     def scheme_slots(self) -> list[str]:
@@ -162,6 +171,14 @@ class StudyCache:
         """The study order the two arrays are indexed by."""
         return self.directory / f"index_{self.key}.json"
 
+    def enrolled(self, identifiers: list[str]) -> list[str]:
+        """The studies this cache actually holds, given the split's full list.
+
+        The truncation is a property of the CACHE because it is in the cache's name, and a caller that
+        applied it itself could log one count and write another.
+        """
+        return identifiers[: self.first] if self.first else identifiers
+
     def shape(self, studies: int) -> tuple[int, int, int, int, int]:
         """The cache's dimensions for a given number of studies."""
         return (studies, self.slots, self.slices, self.image_size, self.image_size)
@@ -176,7 +193,12 @@ class StudyCache:
         and the scheme is what the workers route with, so the two cannot disagree. This briefly had a
         ValueError guarding exactly that mismatch, which the derivation then made unreachable — an
         invariant is better held by construction than by a check.
+
+        THE TRUNCATION IS APPLIED HERE, not by the caller, for the same reason: `first` is in the key,
+        so a caller that truncated its own list would be free to write 60 studies under the name that
+        promises 4407 — and the name is the only thing a later trainer has to go on.
         """
+        identifiers = self.enrolled(identifiers)
         self.directory.mkdir(parents=True, exist_ok=True)
         images = np.lib.format.open_memmap(
             self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))

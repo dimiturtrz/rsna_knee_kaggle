@@ -52,6 +52,21 @@ reloaded — against the forty minutes a real fit holds the GPU to reach the sam
 uv run python -m kneemri.training.train --labels "$LABELS" --studies 60 --epochs 1 $RECIPE --out /tmp/smoke.pt
 ```
 
+**`--cache-studies N` — the smoke for a recipe whose cache does not exist yet.** `--studies` subsamples a
+cache that is already on disk, so an arm on a reading nothing has decoded could not be smoked at all: the
+only way to reach the first assertion was a two-hour full build. `--cache-studies N` decodes the first N
+studies of the split, and it is in the cache NAME (`_first{N}`), so a partial decode can never be written
+over the full arrays every member on disk was fitted on — they differ only in one axis length, with no
+shape change to notice. Both CLIs take it, from `CacheFlags`, so the build and the run cannot disagree;
+the run stamps it, so a member fitted on a truncated cache re-reads its own 60 studies rather than the
+full 4407.
+
+```bash
+uv run python -m kneemri.corpus.build_cache --cache-studies 60 --band-low 0.1 --band-high 0.9 --workers 20
+uv run python -m kneemri.training.train --labels "$LABELS" --cache-studies 60 --studies 60 --epochs 1 \
+  --band-low 0.1 --band-high 0.9 --out /tmp/smoke.pt
+```
+
 It earned itself on first use, on the arm that could least afford it. `final_fit.sh` — the deliverable,
 `--fold -1`, no score to notice a problem by — asked for batch 12 of whole-stack 392 px inside
 `--vram-gb 22` **and** `--compile-encoder`, while the member it ships (`res392_ws_s2026`, holdout 0.8523)

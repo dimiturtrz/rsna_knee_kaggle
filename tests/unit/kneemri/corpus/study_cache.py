@@ -66,6 +66,36 @@ def test_build(tmp_path: Path):
     assert int(np.asarray(corpus.images[0, 0]).max()) > 0, "the filled slot carries pixels"
 
 
+def test_enrolled(tmp_path: Path):
+    """The cache decides which studies it holds, because the count is in its own name."""
+    identifiers = ["study0", "study1", "study2"]
+
+    assert StudyCache(tmp_path).enrolled(identifiers) == identifiers, "0 enrols the whole split"
+    assert StudyCache(tmp_path, first=2).enrolled(identifiers) == ["study0", "study1"]
+    assert StudyCache(tmp_path, first=9).enrolled(identifiers) == identifiers, "asking past the end is the whole split"
+
+
+def test_build_truncated(tmp_path: Path):
+    """A partial decode holds N studies AND says so in its name, so it cannot overwrite the full one.
+
+    THE DEFECT THIS PINS: a full build is two hours, so a reading nothing has decoded could not be
+    smoked before it was queued — and a truncated decode written under the full cache's name would
+    destroy 71.6 GB of arrays every member on disk was fitted on, differing only in one axis length.
+    """
+    source = tmp_path / "src"
+    for study in ("study0", "study1", "study2"):
+        write_series(source / study / "sag", slices=4, description="SAG PD FS", size=32)
+    cache = StudyCache(tmp_path / "cache", slices=2, image_size=8, first=2)
+
+    cache.build(source, ["study0", "study1", "study2"], {"sag": "Sagittal"}, workers=1)
+
+    corpus, identifiers = cache.load()
+    assert identifiers == ["study0", "study1"], "the cache enrols the first N, and its index says which"
+    assert corpus.images.shape[0] == 2
+    assert cache.key.endswith("_first2"), "the truncation is in the name, not only in the contents"
+    assert cache.images_path != StudyCache(tmp_path / "cache", slices=2, image_size=8).images_path
+
+
 def test_load(tmp_path: Path):
     """Loading maps the cache read-only rather than reading 35 GB into memory."""
     source = tmp_path / "src"

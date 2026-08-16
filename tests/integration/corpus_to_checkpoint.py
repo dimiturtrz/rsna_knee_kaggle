@@ -223,6 +223,7 @@ class _WatchedConfig(dict[str, object]):
 
 PROVENANCE_ONLY = {
     "backbone_lr",
+    "cache_studies",
     "ema",
     "head_lr",
     "img",
@@ -239,7 +240,10 @@ describes how
 the weights were FITTED, which no forward pass can act on; they exist so a member on the leaderboard can
 be traced back to the arm that made it. `img` is read only when `train_size` is absent, which is every
 member fitted before the read size could differ from the cache's. `witness` is `witness_check`'s to
-re-derive. Everything else a run stamps — the crop, the centre, the band, the tie rule, the slot list,
+re-derive. `cache_studies` names which CACHE the member was fitted on, and the kernel decodes DICOMs
+rather than reading one — it is read by `Member.cache`, which is the local tools' path (the oracle, the
+curve, the witness), so a smoke member re-read there gets its own 60 studies instead of the full 4407.
+Everything else a run stamps — the crop, the centre, the band, the tie rule, the slot list,
 the depth, the pooling, the precision — is asserted below to be read by the serve path itself.
 """
 

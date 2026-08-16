@@ -43,6 +43,14 @@ def main() -> None:
     identifiers = pd.read_csv(raw / table)["StudyInstanceUID"].tolist()
     planes = StudyCache.planes_of(raw / arguments.split.replace("_series", "_series.csv"))
 
+    if arguments.holdout_fold is not None and arguments.out is None:
+        # A FOLD RESTRICTION IS NOT IN THE KEY, unlike `--cache-studies`, so a fold cache written into
+        # the processed root lands on the full corpus's own filename and destroys it — 71.6 GB that
+        # cost two hours, differing only in one axis length. It cannot be named for itself either:
+        # `train.py` has no fold-restriction flag, so a suffix here would make the arrays it already
+        # reads unaddressable. So the directory is what separates them, and it is now required.
+        parser.error("--holdout-fold writes a partial corpus under the FULL cache's name: pass --out")
+
     if arguments.holdout_fold is not None:
         # A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's
         # holdout. Restricting to the studies actually being scored keeps it at 20 GB.
@@ -62,7 +70,7 @@ def main() -> None:
         # written all 4407 studies and its mask (2026-08-15).
         sys.stdout.write(f"{cache.key}\n")
         return
-    logger.info(f"building {cache.shape(len(identifiers))} uint8 -> {cache.images_path}")
+    logger.info(f"building {cache.shape(len(cache.enrolled(identifiers)))} uint8 -> {cache.images_path}")
     cache.build(raw / arguments.split, identifiers, planes, workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")
 

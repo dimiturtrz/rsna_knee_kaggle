@@ -88,6 +88,38 @@ def test_the_scheme_reaches_the_key(root: Path, monkeypatch: pytest.MonkeyPatch,
     assert "extended" in printed
 
 
+def test_a_truncated_decode_reaches_the_key(
+    root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """A partial decode is a different cache, so it is named for itself — the smoke path for a new axis.
+
+    Without this the only way to try a reading nothing has decoded was a two-hour full build, and a
+    truncated one written under the full name would destroy the arrays every member was fitted on.
+    """
+    printed = _key(root, monkeypatch, capsys, "--cache-studies", "60")
+
+    assert printed == StudyCache(root, slices=SLICES, first=60).key
+    assert printed.endswith("_first60")
+    assert printed != _key(root, monkeypatch, capsys), "a partial corpus cannot share the full one's name"
+
+
+def test_a_fold_restriction_is_refused_without_a_directory(root: Path, monkeypatch: pytest.MonkeyPatch):
+    """The truncation the key CANNOT carry has to be separated by directory, and that is now required.
+
+    `--holdout-fold` decodes one fold's holdout — a fifth of the corpus — and the key says nothing about
+    it, so into the processed root it lands on the full cache's own filename. It cannot be named for
+    itself either: `train.py` has no fold flag, so a suffix would make the arrays it already reads
+    unaddressable. So `--out` is the separation, and asking without it is refused rather than obeyed.
+    """
+    monkeypatch.setattr("sys.argv", ["build_cache", "--paths", str(root / "paths.yaml"), "--holdout-fold", "0"])
+
+    with pytest.raises(SystemExit) as refusal:
+        build_cache.main()
+
+    assert refusal.value.code == 2, "argparse's own usage error, so the shell sees a refusal not a traceback"
+    assert list((root / "processed" / COMPETITION).iterdir()) == [], "and nothing was decoded"
+
+
 def test_print_key_builds_nothing(root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
     """Asking for a name must not start a decode: the gate calls this before every build, and twice.
 

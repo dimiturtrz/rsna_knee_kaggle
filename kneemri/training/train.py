@@ -84,6 +84,9 @@ class TrainingOptions:
     studies: int = 0
     """Corpus positions this run touches at all; 0 is every one of them. A SMOKE knob, never an arm."""
 
+    cache_studies: int = 0
+    """How many studies the cache being READ holds; 0 is the full one. Names a different file (knee-35yc)."""
+
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
@@ -558,6 +561,7 @@ def main() -> None:
         image_size=arguments.image_size,
         routing=arguments.routing,
         reading=arguments.reading,
+        first=arguments.cache_studies,
     )
     corpus, identifiers = cache.load()
     device = DeviceBudget(arguments.vram_gb).select()
