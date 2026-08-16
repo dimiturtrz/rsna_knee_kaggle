@@ -35,6 +35,35 @@ on a difference smaller than the instrument can see, which is the failure mode t
 prevent in the other direction."""
 
 
+SUPERVISION_AXES = frozenset(
+    {
+        "labels",
+        "eval_labels",
+        "calibrated_targets",
+        "per_label_loss",
+        "rank_weight",
+        "report_weight",
+        "report_vectors",
+        "weight_floor",
+        "normalise_by_count",
+    }
+)
+"""The options that change what the model is TOLD. Everything else changes how it looks at the pixels.
+
+The split is exhaustive on that test rather than on a taxonomy of arms: a flag either alters the target
+or the weight attached to it, or it acts somewhere on the path from voxels to prediction. Resolution,
+depth, pooling, capacity, rate and schedule are all the second kind, which is why they are not listed —
+naming them would make this a list somebody has to keep complete, and it would silently misclassify the
+next flag nobody remembered to add. The named set is the small one, and the default is the safe one.
+
+WHY THE KIND MATTERS: `SupervisionGap` measures that half the findings are held back by the report
+reader and half by the model, and an arm is only allowed to be judged on the half it can move. Averaged
+over all twelve, either change is diluted by the six it cannot affect. The comparison INFERS this from
+the recorded recipes rather than having each arm declare it — the arms are shell scripts and a
+declaration would only cover runs made after it landed, while the recipes are already on disk for every
+run in the ledger."""
+
+
 @dataclass(frozen=True)
 class PairedWidths:
     """One pair's own per-label half-widths, and whether the arrays behind them are the exact ones.
@@ -133,6 +162,7 @@ class RunComparison:
             lines.append(f"  marked against the {named}")
             lines.append(ScaleProfile.of(deltas).line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
+            lines.append(f"  {self.reader_change(arm)}")
         if self.errors:
             lines.append(
                 "\n* the delta exceeds that label's own 95% sampling interval; unmarked deltas are "
@@ -201,6 +231,27 @@ class RunComparison:
         newer = [f"{name}={value}" for name, value in axes if name not in control]
         said = ", ".join(moved) if moved else "matched on every option both runs recorded"
         return said if not newer else f"{said}; control predates {', '.join(newer)}"
+
+    def reader_change(self, arm: RunMetrics) -> str:
+        """Which half of the pipeline this arm moved, read from the two recipes rather than declared.
+
+        NOT filtered through `NOT_AN_AXIS`: that list answers "is this pair matched", and a swapped
+        label table is the clearest reader change there is while being exactly the sort of option a
+        confound check waves through. Kind and confound are different questions asked of the same diff.
+
+        An arm that moves both is reported as a reader change, because the reader half is the one that
+        cannot be judged on the model-bottlenecked findings — the narrower claim is the honest one.
+        """
+        control, theirs = self.control.recipe(), arm.recipe()
+        if control is None or theirs is None:
+            return "kind unknown, one of these runs recorded no recipe"
+        moved = {name for name, value in theirs.items() if control.get(name) != value}
+        if not moved:
+            return "moves nothing, so there is no axis to judge it on"
+        supervision = sorted(moved & SUPERVISION_AXES)
+        if supervision:
+            return f"READER change ({', '.join(supervision)}); judge on the label-bottlenecked findings"
+        return "MODEL change (pixels to prediction); judge on the model-bottlenecked findings"
 
     @staticmethod
     def _marked(label: str, value: float, intervals: dict[str, float]) -> str:

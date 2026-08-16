@@ -115,6 +115,30 @@ def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
     assert "recipe unrecorded" in report
 
 
+def test_reader_change(tmp_path: Path):
+    """Which half moved decides which findings the arm may be judged on, so it is read, not declared.
+
+    A swapped label table is the clearest reader change there is AND is waived by the confound check —
+    the two questions read the same diff and must not share an answer.
+    """
+    control = _run(tmp_path, "ctl", CONTROL)
+    reader, imaging, idle = (_run(tmp_path, name, ARM) for name in ("reader", "imaging", "idle"))
+    _describe(control, {"labels": "v2.csv", "train_size": "392"})
+    _describe(reader, {"labels": "v3.csv", "train_size": "392"})
+    _describe(imaging, {"labels": "v2.csv", "train_size": "448"})
+    _describe(idle, {"labels": "v2.csv", "train_size": "392"})
+
+    comparison = RunComparison(control, [reader, imaging, idle])
+    said = [comparison.reader_change(arm) for arm in comparison.arms]
+
+    assert said[0].startswith("READER change (labels)"), "a label table is an axis here even if not a confound"
+    assert said[1].startswith("MODEL change"), "an unnamed option acts through the pixels by default"
+    assert "nothing" in said[2], "an arm identical to its control has no axis to be judged on"
+    undescribed = RunComparison(control, [_run(tmp_path, "bare", ARM)])
+    said_of_it = undescribed.reader_change(undescribed.arms[0])
+    assert "kind unknown" in said_of_it, "a run with no recipe is not silently called a model change"
+
+
 def _predictions(checkpoint: Path, shift: float, source: str = TRAINED) -> None:
     """The per-study record a run has kept since knee-mx17, on labels that are actually separable."""
     truth = (np.random.default_rng(2026).random((STUDIES, len(TARGETS))) < 0.5).astype(np.float32)
