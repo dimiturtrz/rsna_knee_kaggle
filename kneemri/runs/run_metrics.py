@@ -4,6 +4,7 @@ import json
 import logging
 import math
 from pathlib import Path
+from statistics import median
 from typing import NotRequired, TypedDict, cast
 
 import torch
@@ -109,6 +110,21 @@ class RunMetrics:
         and a reader that assumed the first line was one would rank the recipe as a score.
         """
         return [cast(EpochRow, entry) for entry in self._entries() if "epoch" in entry]
+
+    def epoch_seconds(self) -> float:
+        """The MEDIAN epoch's wall-clock, or 0.0 for a run that recorded none.
+
+        The median rather than the mean, because `seconds` is wall-clock and wall-clock counts hours the
+        card spent doing nothing. Two runs on disk each carry ONE ~8-hour epoch — `slices16_ws_s2026`
+        30,684 s among epochs of 404-530, `pair_memory_s2026` 27,266 s among epochs of 224-257 — and a
+        mean over those reports 2970 s and 2270 s. Read that way, `slices16_ws` looks 8.8x its control's
+        cost and `pair_memory` 5.7x, and BOTH readings are false: their real per-epoch costs are ~1.3x
+        and ~0.7x. The ledger's "33% slower" for `slices16_ws` was right and the arithmetic that
+        contradicted it was the broken instrument. One stalled epoch is enough to invert a throughput
+        verdict, so the robust statistic is the one this exposes.
+        """
+        recorded = sorted(row["seconds"] for row in self.rows())
+        return median(recorded) if recorded else 0.0
 
     def best(self) -> EpochRow | None:
         """The recorded epoch with the highest mean AUC, or None if the run recorded nothing.

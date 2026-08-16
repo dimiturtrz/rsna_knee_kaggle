@@ -25,6 +25,22 @@ def test_rows(tmp_path: Path):
     assert [row["epoch"] for row in metrics.rows()] == [0]
 
 
+def test_epoch_seconds(tmp_path: Path):
+    """One stalled epoch must not move the cost of a run, because on disk one already does.
+
+    The shape is `pair_memory_s2026`'s: eleven epochs near 233 s and a single 27,266 s stall. The mean
+    reads 2,690 s and would report the arm as 8x its control's cost; the median reads its real one.
+    """
+    metrics = RunMetrics(tmp_path / "stalled.pt")
+    assert metrics.epoch_seconds() == 0.0, "a run that recorded nothing has no cost, not a crash"
+
+    empty: dict[str, float] = {}
+    for epoch, seconds in enumerate([233, 234, 233, 27266, 235, 233, 234]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=0.8, seconds=seconds, per_label=empty))
+
+    assert metrics.epoch_seconds() == 234
+
+
 def test_best(tmp_path: Path):
     """The best scored epoch, not the last — that is the epoch whose weights the checkpoint holds.
 
