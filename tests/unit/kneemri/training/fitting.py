@@ -135,11 +135,15 @@ def test_an_unscored_run_reports_no_number_and_keeps_the_last_epoch(tmp_path: Pa
     Recording the standing-in index would have a final-fit member advertise `holdout 6.0`, beating
     every real member in `strongest()` and reading as a score in both the manifest and the ledger.
     """
-    kept = _fitting(tmp_path / "final.pt", epochs=3).run(_fold(holdout=False))
+    fitting = _fitting(tmp_path / "final.pt", epochs=3)
+    kept = fitting.run(_fold(holdout=False))
 
     assert np.isnan(kept.holdout), "a run with no holdout cannot report one by construction"
     assert kept.epoch == 2, "ranking by epoch number makes keep-the-best keep the LAST state"
     assert kept.witness is None, "there is no held-out study to witness"
+    # The LEDGER too, not only the checkpoint: the epoch index used to land in the `auc` column, where
+    # `ledger_check.best` reads the maximum and would quote a twelve-epoch final fit as scoring 11.0.
+    assert all(np.isnan(row["auc"]) for row in fitting.metrics.rows()), "three epochs, and not one score"
 
 
 def test_patience_ends_the_loop_after_stale_epochs(tmp_path: Path):

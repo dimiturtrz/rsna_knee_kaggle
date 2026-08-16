@@ -29,6 +29,7 @@ from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
 
@@ -68,6 +69,7 @@ class TrainingOptions:
     per_label_loss: bool = False
     calibrated_targets: bool = False
     rank_weight: float = 0.0
+    pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False
     bf16: bool = True
@@ -293,6 +295,16 @@ class TrainingOptions:
             "for pairs of studies ordered the wrong way round.",
         )
         parser.add_argument(
+            "--pair-memory",
+            type=int,
+            default=0,
+            help="keep this many past steps' readouts so the ranking term can form pairs ACROSS batches "
+            "(0 = within-batch only). The metric orders the whole test set, while a batch of 12 can only "
+            "ask for the ordering of the twelve studies that happened to be loaded together; batch size "
+            "here is set by VRAM, so without this the pair pool is chosen by the card. Requires "
+            "--rank-weight, since it changes that term and nothing else.",
+        )
+        parser.add_argument(
             "--slot-pooling",
             choices=tuple(SLOT_POOLINGS),
             default=ATTENDED,
@@ -425,6 +437,22 @@ class TrainingOptions:
         corpus or a downloaded encoder. The alternative is finding out that a queued arm was miswired
         after it has already waited forty minutes for the card.
         """
+        if self.pair_memory and not self.rank_weight:
+            # LOUD, for the reason `reports` gives below: a memory with no ranking term to feed is a
+            # silent no-op that trains the plain recipe under the arm's name, and would be read as a
+            # refutation of the mechanism rather than of the invocation.
+            message = (
+                f"--pair-memory {self.pair_memory} widens the ranking term's pair pool and no "
+                "--rank-weight was given, so there is no ranking term for it to widen"
+            )
+            raise ValueError(message)
+        if self.pair_memory:
+            return RememberedRanking(
+                self.rank_weight,
+                capacity=self.pair_memory,
+                normalise_by_count=self.normalise_by_count,
+                per_label=self.per_label_loss,
+            )
         if self.rank_weight:
             return RankedObjective(
                 self.rank_weight, normalise_by_count=self.normalise_by_count, per_label=self.per_label_loss

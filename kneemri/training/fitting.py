@@ -161,9 +161,14 @@ class Fitting:
                 if improved:
                     best, kept = ranked, self.keep(fold, epoch, ranked, predicted)
             seconds = round(time.time() - started)
-            logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f  (%ds)", epoch, loss, ranked, seconds)
+            # `ranked` is an epoch INDEX when there is no holdout, and it is only fit to rank epochs by.
+            # Reported as itself it becomes a score: the log reads "mean AUC 4.0000" and the ledger row
+            # carries 4.0, which `ledger_check` then quotes as the arm's best — its own docstring says a
+            # final fit records NaN, and until now only the checkpoint did.
+            scored = ranked if fold.scored else NO_HOLDOUT
+            logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f  (%ds)", epoch, loss, scored, seconds)
             # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
-            self.metrics.record(EpochRow(epoch=epoch, loss=loss, auc=ranked, seconds=seconds, per_label=per_label))
+            self.metrics.record(EpochRow(epoch=epoch, loss=loss, auc=scored, seconds=seconds, per_label=per_label))
             if self.patience.exhausted(improved=improved):
                 logger.info(
                     "stopping at epoch %d: %d epochs without improving on %.4f", epoch, self.patience.epochs, best

@@ -42,7 +42,7 @@ def test_cross_entropy_normalisation_modes_differ():
     assert by_weight > by_count
 
 
-def test_ranking():
+def test_ranked_objective_ranking():
     """A batch ordered the right way costs near nothing; the same batch reversed costs a lot."""
     objective = RankedObjective()
     correct = objective.ranking(_batch([6.0, 5.0, 4.0, -4.0, -5.0, -6.0]))
@@ -139,3 +139,12 @@ def test_cross_entropy_per_label_gives_every_label_the_same_say():
     pooled_even = float(Objective()(Predicted(logits, scores, even)))
     balanced_even = float(Objective(per_label=True)(Predicted(logits, scores, even)))
     assert abs(pooled_even - balanced_even) < 1e-6, "equal representation, equal answer — a reweighting, not a rescale"
+
+
+def test_pairs():
+    """The (numerator, denominator) split must still be the ratio `ranking` used to return on its own."""
+    batch = _batch([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])
+    misordered, pair_weight = RankedObjective().pairs(batch, batch)
+
+    assert float(pair_weight) > 0.0
+    assert torch.allclose(misordered / pair_weight, RankedObjective().ranking(batch))

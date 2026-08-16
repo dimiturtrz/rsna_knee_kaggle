@@ -36,6 +36,20 @@ measuring a method that has not yet shown signal.
 PAIR_FLOOR = 1e-6
 """Guards a batch in which every study carries the same reading for a label, so no pair separates."""
 
+PAIR_MEMORY = 8
+"""How many past steps' readouts a `RememberedRanking` keeps, when it is enabled at all.
+
+Set by the two quantities that actually trade here. UPWARD: pairs. A batch of 12 forms 66 unordered
+pairs per label and most of them separate by nothing, while eight remembered steps put 96 more studies
+on the other side of every comparison — about seventeen times the pair mass, which is the whole point.
+DOWNWARD: staleness. A remembered logit was produced by weights that have since taken up to eight
+steps, and a pair judged against a model that no longer exists is noise. Eight steps is under 3% of an
+epoch's 291 here, and the encoder moves at 8e-6, so the drift over the window is far below the gap
+`softplus` is measuring.
+
+It is a flag with an explicit default, not a swept hyper-parameter, for the reason RANK_WEIGHT gives.
+"""
+
 
 @dataclass(frozen=True)
 class Predicted:
@@ -116,20 +130,31 @@ class RankedObjective(Objective):
 
         Every ordered pair (i, j) within a label is formed at once — the batch is small and the labels
         are twelve, so the whole (b, b, o) comparison is one broadcast rather than a loop over labels.
+        """
+        misordered, pair_weight = self.pairs(batch, batch)
+        return misordered / pair_weight.clamp(min=PAIR_FLOOR)
+
+    def pairs(self, above: Predicted, below: Predicted) -> tuple[Float[Tensor, ""], Float[Tensor, ""]]:
+        """The misordering mass asking `above` to outrank `below`, and the pair mass it is out of.
+
+        Returned unreduced as a (numerator, denominator) pair rather than as their ratio, because a
+        caller pooling several populations of pairs must add the two sums BEFORE dividing. Averaging
+        ratios instead would give a handful of within-batch pairs the same say as a hundred remembered
+        ones, which is the opposite of the point.
 
         A pair counts in proportion to `w_i * w_j * relu(s_i - s_j)`: it is directional (only pairs the
         reports say should go one way are asked to go that way, and the reverse pair carries the mirror
         term), it vanishes when the two readings agree, and it vanishes when either reading is a guess.
-        Pairs a study forms with itself have `s_i - s_j = 0` and so drop out without a mask.
+        Pairs a study forms with itself have `s_i - s_j = 0` and so drop out without a mask — which is
+        also why passing the same batch as both sides forms every unordered pair exactly once.
 
         `softplus(-(l_i - l_j))` is the smooth stand-in for "is i above j": zero when i leads by a lot,
         linear in the gap when it trails. That is the surrogate an AUC's step function needs to become
         differentiable, and it is the same one the RankNet family uses.
         """
-        logits, scores, weights = batch.logits, batch.scores, batch.weights
-        gap = logits.unsqueeze(1) - logits.unsqueeze(0)
-        separation = (scores.unsqueeze(1) - scores.unsqueeze(0)).clamp(min=0.0)
-        confidence = weights.unsqueeze(1) * weights.unsqueeze(0)
+        gap = above.logits.unsqueeze(1) - below.logits.unsqueeze(0)
+        separation = (above.scores.unsqueeze(1) - below.scores.unsqueeze(0)).clamp(min=0.0)
+        confidence = above.weights.unsqueeze(1) * below.weights.unsqueeze(0)
         pair_weight = confidence * separation
         misordered = pair_weight * nn.functional.softplus(-gap)
-        return misordered.sum() / pair_weight.sum().clamp(min=PAIR_FLOOR)
+        return misordered.sum(), pair_weight.sum()
