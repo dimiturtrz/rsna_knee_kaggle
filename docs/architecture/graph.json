@@ -12764,6 +12764,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.train.TrainingOptions.sampled",
+      "label": "sampled",
+      "level": "method",
+      "parent": "kneemri.training.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.train.TrainingOptions.supervision",
       "label": "supervision",
       "level": "method",
