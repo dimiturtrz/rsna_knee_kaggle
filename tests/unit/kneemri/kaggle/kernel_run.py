@@ -115,10 +115,14 @@ def test_revision(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     Unknown is reported rather than guessed: a kit whose version cannot be named is exactly the state
     that spent a submission on 2026-08-13, when the mounted source was 54 commits behind HEAD.
+
+    The module sits at the depth the KIT puts it at — `kneemri_src/kneemri/kaggle/kernel_run.py` — because
+    this test used to flatten that by one directory, which made a two-`.parent` lookup pass here while
+    every real kernel run logged UNSTAMPED against a stamped kit.
     """
     source = tmp_path / "kneemri_src"
-    (source / "kneemri").mkdir(parents=True)
-    monkeypatch.setattr(kernel_run, "__file__", str(source / "kneemri" / "kernel_run.py"))
+    (source / "kneemri" / "kaggle").mkdir(parents=True)
+    monkeypatch.setattr(kernel_run, "__file__", str(source / "kneemri" / "kaggle" / "kernel_run.py"))
 
     assert "UNSTAMPED" in KernelRun().revision()
 

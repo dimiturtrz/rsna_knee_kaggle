@@ -102,11 +102,19 @@ class KernelRun:
 
         A kit built before the stamp existed carries no `kit.json`, and that is reported as UNSTAMPED
         rather than guessed at — an unknown version is exactly the state that cost a submission.
+
+        The stamp is SEARCHED FOR up the ancestors rather than addressed by a fixed number of `.parent`
+        hops. It sits at `kneemri_src/kit.json` while this module is `kneemri_src/kneemri/kaggle/…`, so
+        the two hops that the unit test's flattened layout made look right were one short of the real
+        one, and every kernel run since has logged UNSTAMPED while mounting a perfectly stamped kit —
+        the drift guard silently reporting the state it exists to detect.
         """
-        stamp = Path(__file__).resolve().parent.parent / "kit.json"
-        if not stamp.exists():
+        here = Path(__file__).resolve()
+        stamps = [parent / "kit.json" for parent in here.parents]
+        found = next((stamp for stamp in stamps if stamp.exists()), None)
+        if found is None:
             return "UNSTAMPED (built before build_kit recorded its commit)"
-        recorded = json.loads(stamp.read_text(encoding="utf-8"))
+        recorded = json.loads(found.read_text(encoding="utf-8"))
         return f"{recorded['commit']}{' DIRTY' if recorded.get('dirty') else ''}"
 
     def run(self) -> None:
