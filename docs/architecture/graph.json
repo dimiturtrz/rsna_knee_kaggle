@@ -6224,6 +6224,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.epoch_seconds",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.recipe",
       "target": "kneemri.runs.run_metrics.RunMetrics._entries",
       "weight": 1
@@ -13344,6 +13350,14 @@
       "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.describe",
       "label": "describe",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.epoch_seconds",
+      "label": "epoch_seconds",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
