@@ -30,6 +30,7 @@ so the radiologist labels are genuinely unseen by them. See `kneemri.evaluation.
 
 import argparse
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -47,7 +48,26 @@ PRESENT = 0.5
 CUTS = (0.5, 0.6, 0.75, 0.88)
 """The reader emits 0.08/0.28/0.68/0.82/0.94, so these cuts fall BETWEEN its levels: 0.5 admits the
 mild band, 0.75 excludes it, 0.88 keeps only the top level."""
-"""Where a graded value becomes a positive, matching `LabelScores.per_label`'s own binarisation."""
+
+
+@dataclass(frozen=True)
+class Bottleneck:
+    """Which half of the pipeline is the weaker one, per finding — the split, as data.
+
+    IT DECIDES WHAT AN ARM IS ALLOWED TO BE JUDGED ON, which is why it is a value and not a printed
+    line. A better label reader can only pay where the reader is the weak part; showing the model more
+    of the image can only pay where it is not. Averaged over all twelve, either change is diluted by
+    the six it cannot affect — six findings of noise added to six of signal, on a ruler whose floor is
+    already 0.0053. The rule ("a label-reader change is evaluated on `label_side`, an imaging change on
+    `model_side`") lived in a bead while the measurement lived here, which is the split this project
+    keeps paying for: the knowledge existed and did not reach the place that needed it.
+    """
+
+    label_side: tuple[str, ...]
+    """The model already beats its own labels here, so the READER is what holds these back."""
+
+    model_side: tuple[str, ...]
+    """The report describes these well and the model cannot reproduce it — a VISION failure."""
 
 
 class SupervisionGap:
@@ -139,6 +159,25 @@ class SupervisionGap:
             )
         return lines
 
+    def bottlenecked(self, reference: dict[str, float], achieved: dict[str, float]) -> Bottleneck:
+        """Split the findings by whether their LABELS or their MODEL is the weaker half.
+
+        Ordered by the gap rather than by either score, because the question is which side is weaker:
+        an ordering by score puts the findings we do well beside the findings whose labels are easy,
+        and those are not the same group.
+
+        A finding whose gap will not compare — either score missing or NaN — falls on the label side
+        rather than being dropped, because a finding silently absent from both groups is a finding no
+        arm is ever judged on.
+        """
+        shared = [target for target in reference if target in achieved]
+        ranked = sorted(shared, key=lambda target: achieved[target] - reference[target], reverse=True)
+        model_side = tuple(target for target in ranked if achieved[target] - reference[target] < 0)
+        return Bottleneck(
+            label_side=tuple(target for target in ranked if target not in set(model_side)),
+            model_side=model_side,
+        )
+
     def report(self, reference: dict[str, float], achieved: dict[str, float]) -> list[str]:
         """Every finding ordered by what holds it back, with the dividing line drawn explicitly.
 
@@ -147,19 +186,22 @@ class SupervisionGap:
         easy, and those are not the same group.
         """
         shared = [target for target in reference if target in achieved]
-        gaps = sorted(shared, key=lambda target: achieved[target] - reference[target], reverse=True)
+        split = self.bottlenecked(reference, achieved)
         lines = [
             f"aggregate: labels {np.nanmean([reference[t] for t in shared]):.4f}   "
             f"model {np.nanmean([achieved[t] for t in shared]):.4f}",
             f"{'finding':20s} {'labels':>8s} {'model':>8s} {'model-labels':>13s}",
         ]
-        divided = False
-        for target in gaps:
-            delta = achieved[target] - reference[target]
-            if delta < 0 and not divided:
-                lines.append("  --- above: the model beats its own labels, so the READER is the weak part ---")
-                divided = True
-            lines.append(f"{target:20s} {reference[target]:8.4f} {achieved[target]:8.4f} {delta:+13.4f}")
+
+        def row(target: str) -> str:
+            return (
+                f"{target:20s} {reference[target]:8.4f} {achieved[target]:8.4f} "
+                f"{achieved[target] - reference[target]:+13.4f}"
+            )
+
+        lines += [row(target) for target in split.label_side]
+        lines.append("  --- above: the model beats its own labels, so the READER is the weak part ---")
+        lines += [row(target) for target in split.model_side]
         return lines
 
 

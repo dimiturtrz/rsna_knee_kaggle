@@ -58,6 +58,23 @@ def test_against():
     assert inverted[TARGETS[0]] == 0.0, "the same measurement either way round, not an absolute value"
 
 
+def test_bottlenecked():
+    """The split an arm is judged on: a reader change is only allowed the findings a reader can move.
+
+    A finding whose gap cannot be computed must land on a side rather than vanish — a finding in
+    neither group is a finding no arm is ever evaluated on, which is the silent kind of exclusion.
+    """
+    reference = {TARGETS[0]: 0.80, TARGETS[1]: 0.95, TARGETS[2]: 0.70, TARGETS[3]: float("nan")}
+    achieved = {TARGETS[0]: 0.90, TARGETS[1]: 0.60, TARGETS[2]: 0.72, TARGETS[3]: 0.75}
+
+    split = SupervisionGap().bottlenecked(reference, achieved)
+
+    assert split.model_side == (TARGETS[1],), "only where the report beats the model"
+    assert split.label_side[:2] == (TARGETS[0], TARGETS[2]), "biggest model-over-label gain first"
+    assert set(split.label_side) | set(split.model_side) == set(reference), "every finding lands"
+    assert TARGETS[3] in split.label_side, "an incomparable gap is not silently dropped"
+
+
 def test_report():
     """Ordered by the GAP, with the dividing line drawn where the model stops beating its labels."""
     reference = {TARGETS[0]: 0.80, TARGETS[1]: 0.95, TARGETS[2]: 0.70}
