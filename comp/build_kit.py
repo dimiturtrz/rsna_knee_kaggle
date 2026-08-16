@@ -61,7 +61,17 @@ def main() -> None:
     if arguments.weights and arguments.processed is None:
         ap.error("--weights needs --processed to say where the files live")
 
-    out = arguments.out
+    out = arguments.out.resolve()
+    # The default is out of the repo; an --out that points back INTO it undoes that in one flag, and
+    # the cost is not a stray directory. A copy of `kneemri` under a checked path is type-checked as if
+    # it were source, so a protocol that grows a field fails the gate at a snapshot taken before the
+    # field existed — an error at a path nobody edits, unfixable by editing, and unexcludable because
+    # `pyrefly check <paths>` discards project_excludes. `comp/kit_staging/` was exactly that, and it
+    # cost a green gate to find. Refused rather than documented, because the comment above already said
+    # this and the directory existed anyway.
+    if out.is_relative_to(_REPO):
+        message = f"--out must be outside the repo ({_REPO}): a source snapshot under a checked path is type-checked"
+        raise SystemExit(message)
     if out.exists():
         shutil.rmtree(out)
     (out / _SOURCE_DIR).mkdir(parents=True)
