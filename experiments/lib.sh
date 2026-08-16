@@ -186,8 +186,25 @@ wait_for_pid() {
   # Gates on the PID rather than the checkpoint file, because torch.save is not atomic - the .pt
   # appears at the first byte written, and a queue that fires there hands the next arm a truncated
   # file.
+  # `kill -0` ALONE IS NOT A LIVENESS TEST ON THIS MACHINE. It only knows processes this bash session
+  # can signal, and a trainer launched from PowerShell — or from another bash — is a native Windows PID
+  # it has never heard of. It then reports that live process as DEAD, and the gate fails OPEN: on
+  # 2026-08-16 an arm queued behind a running final fit started immediately, five seconds later, onto a
+  # card holding 26 GB. `tasklist` asks the OS instead, and is the answer that is actually true here.
   local pid="$1"
-  while kill -0 "$pid" 2>/dev/null; do sleep 60; done
+  if ! _alive "$pid"; then
+    echo "WARNING: pid $pid is not running — either it already finished, or the number is wrong"
+  fi
+  while _alive "$pid"; do sleep 60; done
+}
+
+_alive() {
+  # Does this PID name a running process? Either answer counts; only "no" from BOTH means gone.
+  local pid="$1"
+  kill -0 "$pid" 2>/dev/null && return 0
+  # `//FI`, not `/FI`: git-bash rewrites a leading slash as a path and hands tasklist
+  # "C:/Program Files/Git/FI", which errors out — and an erroring liveness probe says "dead".
+  tasklist //FI "PID eq $pid" //NH 2>/dev/null | grep -qE "[[:space:]]$pid[[:space:]]"
 }
 
 wait_for_cache() {
