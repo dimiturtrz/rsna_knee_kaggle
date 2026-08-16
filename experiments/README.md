@@ -166,7 +166,7 @@ so everything below is **directional**, and only the cumulative total clears the
 | `dinov3` S+ 224 | wider small, 28.7M | 0.8012 | −0.0445 | capacity scaled the WRONG way inside the family |
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
 | `crop80_tissue` | 80 mm about the tissue centre, 0.238 mm/px | 0.8345 | −0.0112 vs `whole_stack`, but see below | mean is the WRONG read — gate is per-label |
-| `pair_memory` | cross-step memory of 8 pairs in the ranking loss | 0.8353 @ e6 | −0.0104 vs `wsfold0_e6` | **refuted on the mean**; its own prediction is per-label and is untestable, see below |
+| `pair_memory` | cross-step memory of 8 pairs in the ranking loss | 0.8155 @ e3 | −0.0302 vs `wsfold0_e6` | **refuted on the mean**; 0.8353 was a first run whose checkpoint was overwritten, see below |
 
 ### `crop80_tissue` — the control is not schedule-matched, and the mean was never the gate
 
@@ -192,9 +192,17 @@ failed is paying for sampling with context. See
 ### `pair_memory` — refuted on the mean, and its own gate cannot be run
 
 Recipe-matched to `wsfold0_e6` on every axis the metrics line records except `pair_memory: 8` (336 px,
-12 slices, whole-stack, one-cycle, weight floor, backbone 8e-6, seed 2026, fold 0). The curve peaks
-mid-run and never recovers: e0 .7326 · e3 .8160 · **e6 .8353** · e8 .8347 · e11 .8338, against the
-control's **0.8457**. That is −0.0104, twice the noise floor, so the mechanism does not pay on the mean.
+12 slices, whole-stack, one-cycle, weight floor, backbone 8e-6, seed 2026, fold 0).
+
+**The score is 0.8155, not the 0.8353 this ledger carried until 2026-08-16.** The file holds TWO runs:
+a twelve-epoch one peaking at .8353 @ e6 (e0 .7326 · e3 .8160 · e8 .8347 · e11 .8338), then a
+four-epoch one peaking at .8155 @ e3. A re-run to the same `--out` appends its rows and REPLACES the
+checkpoint, so the weights on disk are the second run's and the number quoted was the first run's.
+The oracle that caught it is the kept holdout record: it is `trained`, so exact by construction, and
+it scores 0.8155 at epoch 3. Fixed in `RunMetrics.rows`, which now answers for one run.
+
+Against the control's **0.8457** that is **−0.0302**, six times the noise floor. The verdict was
+already "does not pay on the mean" at −0.0104; the artefact that survived is worse still.
 
 **Its own prediction is refuted too, on its own instrument.** The arm predicted a gain concentrated on
 the RARE labels — Fracture (314 positives) and Synovitis (580) — which an unweighted 12-label mean
@@ -219,8 +227,10 @@ a recipe looked at the FIRST line of each and reported every older run as unreco
 checkpoint's `options` block and APPENDS it, so the line it was looking for was at the end of every
 file it declared empty — and the tool had already been run. A missing-data conclusion drawn from a
 scan that only looked at one line of the file. The one confound the read does report is
-`compile_encoder False→True`. The cached `pair_memory_s2026.holdout.npz` was separately unusable: a
-second, truncated run (epochs 0–3) was appended to the same file, so the npz is epoch 3.
+`compile_encoder False→True`. The cached `pair_memory_s2026.holdout.npz` was written off at the time as
+unusable, "a second, truncated run (epochs 0–3) was appended to the same file, so the npz is epoch 3" —
+which had it backwards. Epoch 3 of the second run is exactly what the checkpoint beside it holds; the
+npz was the only thing on disk telling the truth, and reading it is what corrected the score.
 
 One curiosity worth not losing: epoch 11 records **27,266 s** against ~234 s for every other epoch. That
 is the machine, not the model — but it means wall-clock from this file is unusable.
