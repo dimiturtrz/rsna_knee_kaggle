@@ -230,11 +230,19 @@ def main() -> None:
         "keys on the checkpoint's size and mtime, the scored studies and the whole reading policy, so a "
         "stale hit should not be possible - this is the escape hatch for when it is.",
     )
+    parser.add_argument(
+        "--device",
+        default="cuda" if torch.cuda.is_available() else "cpu",
+        choices=("cuda", "cpu"),
+        help="where to read misses. This analysis runs WHILE the card belongs to a trainer, so it needs "
+        "a way to say cpu that does not depend on the environment: CUDA_VISIBLE_DEVICES= still leaves "
+        "torch.cuda.is_available() true here, and the run dies on 'Invalid device id' several minutes in.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(arguments.device)
     views = SpatialViews() if arguments.tta else None
     predictions = HoldoutPredictions(device, views)
     scores = LabelScores()

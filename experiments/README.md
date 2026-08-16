@@ -144,6 +144,18 @@ so everything below is **directional**, and only the cumulative total clears the
 | `dinov3` 224 | v3-S at its own native read | 0.8057 | −0.0400 | read size is not the axis: 0.0023 from 441 patches to 196 |
 | `dinov3` S+ 224 | wider small, 28.7M | 0.8012 | −0.0445 | capacity scaled the WRONG way inside the family |
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
+| `crop80_tissue` | 80 mm about the tissue centre, 0.238 mm/px | 0.8345 | −0.0112 vs `whole_stack`, but see below | mean is the WRONG read — gate is per-label |
+
+### `crop80_tissue` — the control is not schedule-matched, and the mean was never the gate
+
+Two things have to be said before that −0.0112 is quoted anywhere. **First, the control is 12 epochs and this
+arm is 8** (`epochs_done` on both checkpoints). `schedule_length` above prices exactly that axis at
+−0.0028, so the crop itself costs about **−0.0084** on the mean, not −0.0112. The arm should have been run
+at 12 to match; it was not, and the adjustment is arithmetic over another arm rather than a measurement of
+this one. **Second, `crop80_tissue.sh` forbids reading the mean at all** — its prediction is two-sided (small
+structures up, diffuse findings down), so the mean averages the two halves of the prediction against each
+other and a null there is what you would expect whether the mechanism works or not. The decision belongs to
+the per-label paired read, which is what gates the multi-scale build (knee-1nn).
 
 ## The eleven runs nothing had written down
 
