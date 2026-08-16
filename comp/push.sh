@@ -31,9 +31,15 @@ uv run python verify_kit.py || {
 
 case "$WHAT" in
   dataset)
-    # --dir-mode zip, and from INSIDE comp/: `-p comp/<dir>` mangles the temp path on Windows into
-    # `comp/<dir>_manifest.json.json`.
-    uv run --with kaggle kaggle datasets version -p "$TARGET" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip
+    # --dir-mode zip, and from the target's PARENT with a bare directory name: the CLI pastes whatever
+    # `-p` says into its upload-temp path, so any path with a separator in it — `comp/kit`,
+    # `../../../data/.../kit`, or an absolute `D:/…` — becomes a temp filename with directories that do
+    # not exist, and every file fails with `[Errno 2] ... .kaggle/uploads\D_/data/...json`.
+    PARENT="$(cd "$(dirname "$TARGET")" && pwd)"
+    # --project, because `uv run` resolves its environment from the CWD and the CWD is now the kit's
+    # parent — out of the repo, where there is no pyproject.toml to resolve.
+    REPO="$(cd .. && pwd)"
+    (cd "$PARENT" && uv run --project "$REPO" --with kaggle kaggle datasets version -p "$(basename "$TARGET")" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip)
     ;;
   kernel)
     uv run --with kaggle kaggle kernels push -p "$TARGET"
