@@ -107,6 +107,21 @@ run_snapshot() {
   return "$status"
 }
 
+retired() {
+  # An arm whose GATE refuted it: the hypothesis stays readable, the run is refused.
+  #
+  # A refuted arm is not deleted — the file is the record of what was tried and why it lost, and the
+  # ledger links to it. But it must not be runnable: multiscale.sh asks for a 71.6 GB cache and a
+  # training slot for a build that crop80_tissue priced at about +0.0016 on the mean, and nothing in
+  # the file stopped a queue from picking it up.
+  #
+  # Exit 1, not 0. A retired arm reached by a queue is a mistake the queue should report; an arm that
+  # silently does nothing is the worst outcome available here, which is the same reason run_train
+  # reads PIPESTATUS rather than trusting a contented grep.
+  echo "RETIRED ARM: $1"
+  exit 1
+}
+
 require() {
   # Fail before spending GPU, not after. Every path an arm depends on goes through here.
   for path in "$@"; do

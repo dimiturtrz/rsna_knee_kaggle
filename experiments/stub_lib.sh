@@ -21,6 +21,12 @@ PROCESSED="${ARM_CHECK_PROCESSED:-/tmp/arm_check}"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$PROCESSED/experiments"
 
+# A retired arm is READ as documentation and never handed to the parser. Exiting here (0, because the
+# checker is not the queue and a retired arm is not a defect) means no invocation is captured, so a
+# refuted arm stops being reported UNCACHED forever — which is what a check has to avoid if it is to
+# stay trusted.
+retired() { exit 0; }
+
 require() { :; }
 hold_card() { :; }
 release_card() { :; }

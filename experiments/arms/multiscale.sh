@@ -30,6 +30,18 @@
 #   experiments/arms/build_cache.sh 336 12 multiscale 6 130 tissue
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+# THE GATE ABOVE RAN, AND IT REFUSED THIS BUILD (2026-08-16). crop80_tissue read 80 mm alone and its
+# two-sided prediction came back half-landed: the diffuse findings fell as predicted (Baker's -0.028,
+# Synovitis -0.019, Effusion -0.015) but the small structures the multi-scale case depends on did not
+# rise — Medial Meniscus went DOWN 0.012, ACL and MCL sat at the floor, and only Fracture lifted
+# (+0.019), on the finding with the worst label agreement. Multi-scale ADDS tight slots rather than
+# replacing the wide ones, so its value is exactly what those tight slots buy: about +0.0016 on the
+# mean, against a 1.5% bar, for a 71.6 GB cache that must be built alone and a training slot.
+# See interpretations/kneemri/2026-08-16_crop80_resolution_gate.md. Resolution at CONSTANT field of
+# view is untouched by this (res392 is still our best single member) — it is the crop that failed.
+retired "gated out by crop80_tissue: the tight slots buy ~+0.0016 on the mean, see interpretations/kneemri/2026-08-16_crop80_resolution_gate.md"
+
 require "$LABELS"
 
 # BATCH 6, NOT THE STANDING 12, and this is arithmetic rather than caution. whole_stack.sh measured its

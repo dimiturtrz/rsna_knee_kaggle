@@ -172,7 +172,13 @@ def test_invocations(tmp_path: Path):
         'source "${ARM_LIB}"\nrequire "$LABELS"\nrun_train "real" --fold 0 --epochs 8\n', encoding="utf-8"
     )
     (arms / "no_train.sh").write_text('source "${ARM_LIB}"\necho "this arm drives uv directly"\n', encoding="utf-8")
+    # An arm its own gate refuted: still committed as the record of what was tried, never run again.
+    (arms / "retired.sh").write_text(
+        'source "${ARM_LIB}"\nretired "gated out"\nrun_train "retired" --fold 0 --epochs 8\n', encoding="utf-8"
+    )
 
     found = ArmCheck(arms, Path("experiments/stub_lib.sh")).invocations()
 
-    assert found == {"real": "--fold 0 --epochs 8"}
+    assert found == {"real": "--fold 0 --epochs 8"}, (
+        "a retired arm reaches no parser, so it is never reported UNCACHED for a cache nobody should build"
+    )

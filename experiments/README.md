@@ -120,8 +120,14 @@ caller that can demand the strong one.
 What none of them check is whether a SENTENCE is true. A number can be present and its interpretation
 stale; that still needs a reader.
 
-## Two rules encoded in `lib.sh` rather than remembered
+## Three rules encoded in `lib.sh` rather than remembered
 
+- **`retired "<why>"` refuses a refuted arm.** An arm its gate declined stays committed — it is the
+  record of what was tried and why it lost — but it must not be runnable, and `multiscale.sh` was
+  runnable for a build priced at +0.0016. The declaration exits 1 under `lib.sh` (a queue that reaches
+  a retired arm should say so) and exits 0 under `stub_lib.sh`, so `arm_check` captures no invocation
+  and stops reporting a cache nobody should build. A check that reports work you have decided against
+  is a check people learn to skim.
 - **`wait_for` keys on a completion marker.** A gate that watches an output path fires when the
   producer *starts*. That once queued an arm against a 59.7 GB cache still mostly zeros; it would not
   have crashed, it would have produced a plausible wrong number.
@@ -171,6 +177,16 @@ this one. **Second, `crop80_tissue.sh` forbids reading the mean at all** — its
 structures up, diffuse findings down), so the mean averages the two halves of the prediction against each
 other and a null there is what you would expect whether the mechanism works or not. The decision belongs to
 the per-label paired read, which is what gates the multi-scale build (knee-1nn).
+
+**THE GATE RETURNED, 2026-08-16: multi-scale does NOT earn its build.** The per-label read at matched
+epoch 7 landed the diffuse half (Baker's −0.028, Synovitis −0.019, Effusion −0.015) and missed the half
+the build depended on — Medial Meniscus −0.012, ACL and MCL at the floor, only Fracture up (+0.019, and
+the worst-agreement label). Multi-scale adds tight slots to the wide ones, so its value is what those
+slots buy: ≈ **+0.0016 on the mean** for a 71.6 GB cache and a training slot. `multiscale.sh` is now
+`retired` in `experiments/lib.sh` terms — it refuses to run and the checker no longer reports its cache.
+Resolution at CONSTANT field of view is untouched (`res392`, 0.8523, still our best single member); what
+failed is paying for sampling with context. See
+`interpretations/kneemri/2026-08-16_crop80_resolution_gate.md`.
 
 ## The eleven runs nothing had written down
 
