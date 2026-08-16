@@ -3932,6 +3932,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.report",
       "target": "kneemri.corpus.anatomy.ScaleProfile.of",
       "weight": 1
@@ -3952,6 +3958,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.report",
       "target": "kneemri.evaluation.run_comparison.RunComparison.floor",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.report",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
       "weight": 1
     },
     {
@@ -11056,6 +11068,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.paired",
       "label": "paired",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
+      "label": "reader_change",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
