@@ -52,6 +52,14 @@ reloaded — against the forty minutes a real fit holds the GPU to reach the sam
 uv run python -m kneemri.training.train --labels "$LABELS" --studies 60 --epochs 1 $RECIPE --out /tmp/smoke.pt
 ```
 
+It earned itself on first use, on the arm that could least afford it. `final_fit.sh` — the deliverable,
+`--fold -1`, no score to notice a problem by — asked for batch 12 of whole-stack 392 px inside
+`--vram-gb 22` **and** `--compile-encoder`, while the member it ships (`res392_ws_s2026`, holdout 0.8523)
+records `vram_gb 28.0` and `compile_encoder False`. The smoke died in the attention backward with
+`Tried to allocate 1.03 GiB ... 22.00 GiB allowed`, two minutes in. Batch size is what sets that peak, not
+corpus size, so the forty-minute run would have died at the same step — and `arm_check` cannot see it,
+because the flags were valid. The cap is now 28 and the same smoke passes in 41 s.
+
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed

@@ -56,9 +56,16 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # --ema STAYS. It is the sanctioned variance reduction now that folds and seeds are banned: it averages
 # within a run rather than across runs, so it buys what a seed ensemble bought without a second fit.
 #
-# THE CAP LEAVES HEADROOM. 22 of 32.6, because --vram-gb bounds PyTorch's allocator and not the device -
-# set close to physical, Windows pages over PCIe instead of raising OOM and the run crawls at a
-# twenty-fifth of the throughput while reporting 100% utilisation.
+# THE CAP IS 28, WHICH IS THE ONE res392 ACTUALLY USED. It read 22 until 2026-08-16, and at 22 this arm
+# does not run at all: a --studies 60 smoke died in the attention backward with `Tried to allocate 1.03
+# GiB ... 22.00 GiB allowed`, and the corpus size does not enter it — batch 12 of whole-stack 392 px needs
+# what it needs, so the forty-minute deliverable would have died in the same place. The member's own
+# recorded options say vram_gb 28.0 and compile_encoder False; this arm asks for the same shape in six
+# fewer gigabytes AND adds compile on top, which was a configuration nobody had run. The same smoke
+# passes at 28 (one epoch, 41 s including compilation). 28 of 31.8 still leaves headroom, which the cap
+# needs for a reason worth keeping: --vram-gb bounds PyTorch's allocator and not the device, so set close
+# to physical, Windows pages over PCIe instead of raising OOM and the run crawls at a twenty-fifth of the
+# throughput while reporting 100% utilisation.
 EPOCHS="${1:-12}"
 require "$LABELS"
-run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --vram-gb 22 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --vram-gb 28 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
