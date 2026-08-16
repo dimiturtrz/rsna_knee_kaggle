@@ -104,12 +104,33 @@ class RunMetrics:
         return [json.loads(line) for line in self.path.read_text(encoding="utf-8").splitlines() if line]
 
     def rows(self) -> list[EpochRow]:
-        """The EPOCH rows, for whoever is comparing runs.
+        """The LAST run's epoch rows — the run this file's own `recipe()` describes.
 
         Filtered by the presence of an epoch rather than by position: a recipe line is not an epoch,
         and a reader that assumed the first line was one would rank the recipe as a score.
+
+        THE LAST RUN, because a re-run to the same `--out` appends and the checkpoint beside it holds
+        only the newest one. `pair_memory_s2026` is that file: twelve epochs peaking at 0.8353, then a
+        second run of four peaking at 0.8155, and reading both at once quotes 0.8353 for a checkpoint
+        that no longer exists. Its kept predictions — `trained`, so exact by construction — score
+        0.8155, which is the oracle: a trained record and its own recorded best cannot disagree.
+
+        THE LAST NON-EMPTY GROUP rather than whatever follows the last recipe, because a recipe does
+        not always precede the epochs it describes. Six files on disk had theirs BACK-FILLED, appended
+        after a run that had already finished, and a rule reading "the rows after the last recipe"
+        reports every one of them as having recorded nothing at all.
+
+        `recipe()` has always answered for the last run alone. Rows answering for all of them meant one
+        file described one run and scored another, which is the same failure as an unmatched control
+        wearing a matched one's name.
         """
-        return [cast(EpochRow, entry) for entry in self._entries() if "epoch" in entry]
+        groups: list[list[EpochRow]] = [[]]
+        for entry in self._entries():
+            if RECIPE in entry:
+                groups.append([])
+            elif "epoch" in entry:
+                groups[-1].append(cast(EpochRow, entry))
+        return next((group for group in reversed(groups) if group), [])
 
     def epoch_seconds(self) -> float:
         """The MEDIAN epoch's wall-clock, or 0.0 for a run that recorded none.

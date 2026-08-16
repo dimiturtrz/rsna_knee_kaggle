@@ -25,6 +25,41 @@ def test_rows(tmp_path: Path):
     assert [row["epoch"] for row in metrics.rows()] == [0]
 
 
+def test_rows_answers_for_the_run_the_recipe_describes(tmp_path: Path):
+    """A re-run to the same --out appends, and only the newest run's checkpoint survives beside it.
+
+    This is `pair_memory_s2026`: twelve epochs peaking at 0.8353, then four more peaking at 0.8155.
+    Reading both runs' rows quotes 0.8353 for a checkpoint that no longer exists — and its kept
+    predictions, which are `trained` and so exact, score 0.8155.
+    """
+    metrics = RunMetrics(tmp_path / "rerun.pt")
+    metrics.describe({"fold": "0", "epochs": "12"})
+    for epoch, auc in enumerate([0.73, 0.83, 0.81]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=auc, seconds=233, per_label={}))
+
+    metrics.describe({"fold": "0", "epochs": "12"})
+    for epoch, auc in enumerate([0.71, 0.79]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=auc, seconds=233, per_label={}))
+
+    assert [row["auc"] for row in metrics.rows()] == [0.71, 0.79], "the run the file's recipe describes"
+    best = metrics.best()
+    assert best is not None and best["auc"] == 0.79, "not the 0.83 belonging to a replaced checkpoint"
+
+
+def test_rows_reads_a_run_whose_recipe_was_back_filled(tmp_path: Path):
+    """A recipe does not always precede its epochs, so position cannot say which run a row belongs to.
+
+    Six files on disk carry theirs appended AFTER the run finished. Splitting at the last recipe line
+    reports every one of them as having recorded nothing — the same run, erased instead of misread.
+    """
+    metrics = RunMetrics(tmp_path / "backfilled.pt")
+    for epoch, auc in enumerate([0.73, 0.83]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=auc, seconds=233, per_label={}))
+    metrics.describe({"fold": "0", "epochs": "2"})
+
+    assert [row["auc"] for row in metrics.rows()] == [0.73, 0.83], "described late is still described"
+
+
 def test_epoch_seconds(tmp_path: Path):
     """One stalled epoch must not move the cost of a run, because on disk one already does.
 
