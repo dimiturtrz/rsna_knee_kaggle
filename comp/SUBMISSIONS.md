@@ -63,6 +63,13 @@ well, and the published CC0 members no longer clear the second half of that.
 
 ## Ledger
 
+The `local` and `LB` columns of the all-ours rows also live in `comp/board.jsonl`, in the form something
+can read — with the one field this table never carried, the SCOPE each local number was measured on.
+`python -m kneemri.evaluation.board_transfer` reads it and answers what the prose cannot: the holdout
+has not mis-ordered a single pair it can resolve, and it converts at a median 4.7 board points per
+holdout point. See `interpretations/kneemri/2026-08-16_board_transfer.md`. **A new scored entry gets a
+line there as well as a row here.**
+
 | date | kernel | v | method | local | LB | note |
 |---|---|---|---|---|---|---|
 | 2026-08-10 | `kneemri-probe` | 2 | passthrough `sample_submission` | — | not submitted | environment + corpus probe |
@@ -80,7 +87,7 @@ well, and the published CC0 members no longer clear the second half of that.
 | 2026-08-13 | `kneemri-efficient` | 2 | the same 2 members on the fixed kit | 0.8509 | *(no score returned)* | second of the three exceptions |
 | 2026-08-14 | `kneemri-fusion` | ~8 | 22 members, one decode, fp16 serving, a failing member drops itself | mixed | **0.895** | **best entry** — supersedes the 0.894 |
 | 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | **0.898** | superseded by the 0.919 efficient v4 — our own share doubled from 3 members to 6; +0.003 on the 22-member fusion, directional |
-| 2026-08-16 | `kneemri-fusion` | 11 | 25 members — the expired-v3 exclusion fixed, so `lora_r8_v3small_224` serves | mixed | *pending* | submitted 05:05 UTC |
+| 2026-08-16 | `kneemri-fusion` | 11 | 25 members — the expired-v3 exclusion fixed, so `lora_r8_v3small_224` serves | mixed | **0.898** | submitted 05:05 UTC. Restoring the twenty-fifth member changed NOTHING against the 24-member 0.898, while the two-member all-ours entry submitted the same hour scored 0.919. |
 | 2026-08-16 | `kneemri-trained` | 8 | **OURS** — the strongest five all-ours whole-stack members, no published weights | 0.8610 | **0.911** | **THE ARM THAT SETTLES THE 0.919.** Ours-only, five members, +0.013 on the 24-member fusion — so the jump belongs to the MEMBER POOL, not to the two-member configuration: two different all-ours entries both clear the mixed fusion by more than the 1.5% bar. Published CC0 members are now a COST, not a contribution. It also puts the ruler and the board on opposite sides: local holdout ranks these five ABOVE the pair (0.8610 vs 0.8581, +0.003) and the board ranks them BELOW it (0.911 vs 0.919, −0.008). |
 | 2026-08-16 | `kneemri-efficient` | 4 | **OURS** — `strongest(2)` whole-stack members, 2 passes/study, no overlap | — | **0.919** | **best entry, and the first that is entirely ours** — +0.021 on the 24-member fusion, so it clears the 1.5% bar as a RESULT, not a directional move. TWO of our own members beat twenty-four mixed ones at a twelfth of the forward passes, which inverts the diversity reading every earlier pair supported. Read it as a QUESTION before a finding: this kernel has never returned a valid score before (v1 scored 0.500 on a stale kit, v2 threw), so the 0.919 is the first measurement of the cell, and what changed underneath is the MEMBERS — `strongest(2)` now ranks over the post-LoRA pool, not the August-13 one. The comparison that settles it is the pending `kneemri-trained` v8 (all-ours, more members) against this. **SETTLED the same day: v8 scored 0.911.** The post-LoRA all-ours pool is what carries the jump — both all-ours entries clear the fusion — and the two-member configuration is worth a further −0.008 on top, which is directional, not a result. |
 

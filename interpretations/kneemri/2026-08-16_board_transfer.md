@@ -1,0 +1,67 @@
+# The holdout orders entries correctly; it just whispers
+
+2026-08-16, from `python -m kneemri.evaluation.board_transfer` over `comp/board.jsonl`.
+
+## The question
+
+Every recipe decision in this project is made on a 58-study holdout scored against LLM-read report
+labels, and only five submissions a day can check one against radiologist annotations. knee-7d1
+recorded the conversion as "the proxy appears to compress ~2x", fitted to two entries, with its limits
+stated. Nine entries now carry both numbers.
+
+## What was measured
+
+Pairs, not a regression. A line through the points would be a claim about the LEVEL of two scores that
+were never meant to agree; what a ruler is FOR is ordering candidates. So each pair of entries is asked
+the only question that decides a slot: the holdout preferred this one, did the board?
+
+**The denominator did most of the work, and getting it wrong produced a different result.** The first
+pass compared all nine entries and reported 7/34 inversions and a median ratio of 1.16. Four of those
+entries are not on the same scope: two quote the MEAN of their members' individual holdouts, which sits
+below the ensemble it describes by however much averaging bought, and two are a bare number the ledger
+never says the scope of. On paper a one-member entry at 0.8518 then outranks a five-member entry at
+0.8269 while the board has them the other way round — and that "inversion" is two denominators, not the
+board. Restricted to the five entries whose offline number is the holdout AUC of *what was submitted*:
+
+```
+5 entries on the ensemble scope, 9 orderable pairs (excluded: 2 member_mean, 2 unknown)
+compression: median +4.67 board points per holdout point
+inversions: 2/9 pairs the board ordered the other way, 0/5 of the pairs the holdout resolved at all
+  trained_v8 over efficient_v4: holdout +0.0029 (UNRESOLVED, under the floor), board -0.008
+  chosen_v2  over efficient_v4: holdout +0.0031 (UNRESOLVED, under the floor), board -0.001
+```
+
+## Two results
+
+**1. The ruler does not mis-order anything it can resolve. 0 of 5.** Both inversions are pairs the
+holdout separates by less than its own 0.0053 noise floor — two entries it called equal, which the
+board is free to order either way. The failure mode we feared (selecting the wrong recipe offline) has
+not happened once in the range where the holdout expresses a preference at all.
+
+**2. The compression is much larger than the ~2x on record.** The five resolved pairs convert at 1.2,
+2.4, 4.7, 5.3 and 8.1 board points per holdout point. So a holdout gap the ruler can *just* see, 0.0053,
+is worth roughly 0.01-0.04 on the board.
+
+Those two combine into the useful sentence: **the ruler's resolution floor and the competition's result
+bar are about the same line.** Anything the holdout can resolve is worth a submission; nothing it
+cannot resolve should be argued about from offline numbers.
+
+## What this does NOT say
+
+- **n=5 entries, and four of the five resolved pairs share `solo_v1` as one endpoint.** The
+  one-member entry is the low anchor of almost every ratio quoted; it is not five independent reads.
+- **The pairs are not matched.** They span six days and the kit changed underneath them — fp16 serving,
+  the image budget, overlap TTA, a member pool that doubled. Only the two 17:45 entries on 2026-08-16
+  are a same-day matched pair, and their ratio is 2.37.
+- **It does not license reading knob-sized offline deltas.** A ratio of ~4 applied to a delta the ruler
+  cannot resolve multiplies noise by four. The floor is what makes the conversion meaningful.
+- The earlier note on knee-7d1 — that the board charged 2.4x what the holdout did for collapsing to one
+  pixel group — survives this and is the same-day matched point above. What changes is the framing: that
+  is not the holdout *mis-ranking* diversity, it is the holdout ranking it correctly and quietly.
+
+## Consequence
+
+`comp/board.jsonl` is now the machine-readable half of `comp/SUBMISSIONS.md`, and every future scored
+entry adds a line. Two of the existing rows say `"scope": "unknown"` — the ledger recorded a number
+without recording what it was a number OF, which is the same failure this project keeps paying for.
+Recovering them is worth a bead, not a guess.
