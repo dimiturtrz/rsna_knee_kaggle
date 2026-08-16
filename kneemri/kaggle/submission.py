@@ -244,7 +244,7 @@ class Submission:
                 # chunks BEFORE this one have been forwarded and this one has only been decoded. Counting
                 # it as finished would credit the run with a forward pass it has not made yet, which
                 # under-projects exactly when the forward is the expensive half.
-                budget = self.ensemble.budget
+                budget = self.ensemble.serving.budget
                 if budget:
                     budget.chunk(index, len(groups))
                 projection = budget.report() if budget else ""

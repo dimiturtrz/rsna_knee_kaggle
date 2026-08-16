@@ -15,7 +15,7 @@ from kneemri.corpus.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.corpus.slot_reader import Band, SlotReader
 from kneemri.corpus.study import SlotPipeline
 from kneemri.inference.budget import Budget
-from kneemri.inference.ensemble import Ensemble, Read
+from kneemri.inference.ensemble import Ensemble, Read, Serving
 from kneemri.inference.members import MemberPackage
 from kneemri.kaggle.submission import Split, Submission
 from kneemri.models.model import TARGETS, StudyModel
@@ -109,7 +109,7 @@ def _submission(tmp_path: Path, *, depths: tuple[int, ...] = (3,), budget: Budge
     ]
     (package_root / "manifest.json").write_text(json.dumps({"members": members}), encoding="utf-8")
     package = MemberPackage(package_root)
-    ensemble = Ensemble(package, dict.fromkeys(identifiers, model), device, budget=budget)
+    ensemble = Ensemble(package, dict.fromkeys(identifiers, model), device, Serving(budget=budget))
     working = tmp_path / "working"
     working.mkdir()
     return Submission(ensemble, _competition(tmp_path / "comp"), working)

@@ -118,6 +118,31 @@ class Read:
     band: Band = Band()
 
 
+@dataclass(frozen=True)
+class Serving:
+    """How the members are RUN, as opposed to what any of them recorded about itself.
+
+    Three knobs that no member can answer and that every one of them is served under: the test-time
+    views, the wall-clock ceiling, and a forced arithmetic. They arrived as three more positional
+    arguments on an `__init__` that already had three, which is the long-arg-list smell exactly — and
+    a caller passing the wrong one of three same-shaped optionals is a defect that runs.
+    """
+
+    views: SpatialViews | None = None
+    """None means the identity view alone, which is what every entry so far has run. Spatial views are
+    the one test-time axis a whole-stack member has not already spent (knee-eeo)."""
+    budget: Budget | None = None
+    """None means no wall-clock ceiling, which is right for a dry run and a witness — only a Kaggle
+    batch session is killed for running long, and only the kernel knows it is inside one."""
+    precision: torch.dtype | None = None
+    """None means each member is served in the arithmetic it was FITTED in, which is what a submission
+    wants. A dtype forces one across every member, and the only caller that should want that is one
+    MEASURING what a precision costs: the loadcheck wrapped `predict_member` in an outer autocast to
+    compare three, but the inner autocast that `arithmetic` decides carries an explicit dtype and
+    overrides it — so all three arms ran the same arithmetic and reported max|diff| of exactly 0.0,
+    twelve times, which read as "fp16 is free". A knob that is not connected reports agreement."""
+
+
 class Ensemble:
     """A package's members, read over test-time windows and combined by rank."""
 
@@ -126,18 +151,12 @@ class Ensemble:
         package: MemberPackage,
         models: dict[str, StudyModel],
         device: torch.device,
-        views: SpatialViews | None = None,
-        budget: Budget | None = None,
+        serving: Serving | None = None,
     ) -> None:
         self.package = package
         self.models = models
         self.device = device
-        # None means no wall-clock ceiling, which is right for a dry run and a witness — only a Kaggle
-        # batch session is killed for running long, and only the kernel knows it is inside one.
-        self.budget = budget
-        # None means the identity view alone, which is what every entry so far has run. Spatial views
-        # are the one test-time axis a whole-stack member has not already spent (knee-eeo).
-        self.views = views
+        self.serving = serving or Serving()
         # Seconds each member has actually cost, which is what a give-up order under a deadline has to
         # divide by. A member's cost is not readable from its config: depth, resolution and encoder
         # width all multiply, and the run only learns the product by paying it.
@@ -247,12 +266,17 @@ class Ensemble:
         So this serves fp16 for the speed — a T4 has fp16 tensor cores and none for bf16, which is
         65 TFLOPS against 8.1 — and gives up nothing that was measured to matter. `predict_member`
         carries the belt: a non-finite logit redoes that pass in fp32.
+
+        A FORCED precision goes through the same guard rather than around it. The point of forcing one
+        is to measure what an arithmetic costs, and a bf16 arm that silently ran emulated on a T4 would
+        be measuring the emulation — so the downgrade still applies and still says so.
         """
+        asked = self.serving.precision or member.precision
         native = self.device.type == "cuda" and torch.cuda.get_device_capability() >= NATIVE_BF16
-        if member.precision is torch.bfloat16 and self.device.type == "cuda" and not native:
-            logger.warning("%s was fitted in bf16 and this device cannot run it — serving fp16", member.identifier)
+        if asked is torch.bfloat16 and self.device.type == "cuda" and not native:
+            logger.warning("%s asked for bf16 and this device cannot run it — serving fp16", member.identifier)
             return torch.float16
-        return member.precision
+        return asked
 
     def forwarded(
         self,
@@ -306,7 +330,7 @@ class Ensemble:
         model = self.models[member.identifier]
         model.eval()
         window = member.window(images.shape[2], overlap=overlap)
-        views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
+        views = self.serving.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         passes = 0
         # THE FORWARD IS SPLIT BY IMAGES, NOT BY STUDIES, and this cost a submission on 2026-08-12.
@@ -332,7 +356,12 @@ class Ensemble:
         # exponent range is float32's minus eight bits, which a bf16 model can overflow to inf on the
         # very T4 the submission runs on. The witness check found it; nothing else could have.
         precision = self.arithmetic(member)
-        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
+        # fp32 IS THE DISABLED AUTOCAST, not an autocast to float32 — that combination raises, and the
+        # non-finite fallback below has always spelled it the same way. Only a forced precision can
+        # reach here as float32 (no member is fitted in it), so this costs a comparison to make the
+        # reference arm of a precision measurement runnable at all.
+        casting = self.device.type == "cuda" and precision is not torch.float32
+        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=casting):
             for view in views.apply(images):
                 for start in window.starts:
                     read = view[:, :, start : start + window.width]
@@ -368,11 +397,12 @@ class Ensemble:
         """
         per_member: list[NDArray[np.float64]] = []
         groups = self.reads()
-        if self.budget:
-            self.budget.begin(len(groups))
+        budget = self.serving.budget
+        if budget:
+            budget.begin(len(groups))
         for index, members in enumerate(groups):
-            if self.budget:
-                self.budget.group(index)
+            if budget:
+                budget.group(index)
             read = Read(
                 slices=self.slices(members),
                 scheme=self.decoded_scheme(members),
@@ -476,7 +506,8 @@ class Ensemble:
         member and re-measuring converges on the smallest set that finishes, instead of over-cutting
         from a single early estimate made when the pool spawn and the first decode are still in it.
         """
-        if not self.budget or not self.budget.overrunning():
+        budget = self.serving.budget
+        if not budget or not budget.overrunning():
             return
         surviving = [member for member in members if member.identifier not in failed]
         if len(surviving) <= 1:
@@ -486,8 +517,8 @@ class Ensemble:
         logger.warning(
             "projecting %.1fh against a %.1fh ceiling — giving up %s (holdout %.4f, %.1fs spent, "
             "worth %.2e per second), %d members left",
-            self.budget.projected() / SECONDS_PER_HOUR,
-            self.budget.seconds / SECONDS_PER_HOUR,
+            budget.projected() / SECONDS_PER_HOUR,
+            budget.seconds / SECONDS_PER_HOUR,
             weakest.identifier,
             weakest.holdout,
             # .get, because this line runs INSIDE the mitigation for runs that die: a member the loop

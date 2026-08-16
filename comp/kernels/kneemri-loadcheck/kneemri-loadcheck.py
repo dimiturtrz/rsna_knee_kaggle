@@ -99,7 +99,7 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
     run: "KernelRun",
     package: "MemberPackage",
     loaded: "dict[str, StudyModel]",
-    ensemble_of: "Callable[[], Ensemble]",
+    ensemble_of: "Callable[..., Ensemble]",
     device: "torch_types.device",
     logger: logging.Logger,
 ) -> bool:
@@ -152,23 +152,38 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
     # here: it cannot overflow where the others might, so the diffs say what each precision costs.
     chunk = torch.zeros(STUDY_CHUNK, slots, member.slices, member.image_size, member.image_size, dtype=torch.uint8)
     reference = None
+    #
+    # THE KNOB IS THE ENSEMBLE'S, not an autocast wrapped around it. This loop used to set an OUTER
+    # autocast per dtype, but `predict_member` opens its own with an explicit dtype, and the inner one
+    # wins — so all three arms ran `arithmetic(member)` and reported max|diff| of exactly 0.0 twelve
+    # times over, which reads as "the precisions agree" when it means "the knob was never connected".
     for name, dtype in (("fp32", torch.float32), ("fp16", torch.float16), ("bf16", torch.bfloat16)):
+        ensemble = ensemble_of(dtype)
+        # WHAT IT RESOLVED TO, not what was asked: on a T4 a forced bf16 is legitimately downgraded to
+        # fp16, and unreported that makes two arms identical for a second time, by a different route.
+        served = ensemble.arithmetic(member)
         started = time.time()
         try:
-            with torch.autocast("cuda", dtype=dtype, enabled=device.type == "cuda" and dtype is not torch.float32):
-                scored = ensemble_of().predict_member(
-                    member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True
-                )
+            scored = ensemble.predict_member(
+                member, chunk.to(device), torch.ones(STUDY_CHUNK, slots).to(device), overlap=True
+            )
         except Exception as error:  # noqa: BLE001 - naming which member and which failure is the point
             logger.error("CHUNK FAILED %s in %s: %s", member.identifier, name, str(error)[:250])
             return False
         elapsed = time.time() - started
         if reference is None:
             reference = scored
-            logger.info("       chunk of %d in %s: %5.1fs (reference)", STUDY_CHUNK, name, elapsed)
+            logger.info("       chunk of %d in %s (%s): %5.1fs (reference)", STUDY_CHUNK, name, served, elapsed)
         else:
             worst = float(abs(scored - reference).max())
-            logger.info("       chunk of %d in %s: %5.1fs, max|diff| vs fp32 %.2e", STUDY_CHUNK, name, elapsed, worst)
+            logger.info(
+                "       chunk of %d in %s (%s): %5.1fs, max|diff| vs fp32 %.2e",
+                STUDY_CHUNK,
+                name,
+                served,
+                elapsed,
+                worst,
+            )
     return True
 
 
@@ -218,11 +233,17 @@ def main() -> None:
         # first few fail for a reason that has nothing to do with the member.
         loaded: "dict[str, StudyModel]" = {}
 
-        def ensemble_of(models: "dict[str, StudyModel]" = loaded) -> "Ensemble":
-            """Over whichever member is currently resident, bound at definition rather than by closure."""
-            from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - after the kit is on sys.path
+        def ensemble_of(
+            precision: "torch_types.dtype | None" = None, models: "dict[str, StudyModel]" = loaded
+        ) -> "Ensemble":
+            """Over whichever member is currently resident, bound at definition rather than by closure.
 
-            return Ensemble(package, models, device)
+            `precision` forces one arithmetic across the member instead of serving it in the one it was
+            fitted in — the only lever that makes a three-precision comparison compare anything.
+            """
+            from kneemri.inference.ensemble import Ensemble, Serving  # noqa: PLC0415 - after the kit is on sys.path
+
+            return Ensemble(package, models, device, Serving(precision=precision))
 
         if not check(member, run, package, loaded, ensemble_of, device, logger):
             failures += 1

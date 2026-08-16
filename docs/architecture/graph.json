@@ -1376,6 +1376,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.pair_memory",
+      "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.remembered_ranking",
+      "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.remembered_ranking",
+      "target": "kneemri.training.pair_memory",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.train",
       "target": "core.paths",
       "weight": 1
@@ -1456,6 +1474,12 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
+      "target": "kneemri.training.remembered_ranking",
       "weight": 1
     },
     {
@@ -4165,15 +4189,15 @@
       "weight": 1
     },
     {
-      "kind": "holds",
+      "kind": "references",
       "source": "kneemri.inference.ensemble.Ensemble",
-      "target": "kneemri.inference.budget.Budget",
+      "target": "kneemri.inference.ensemble.Read",
       "weight": 1
     },
     {
       "kind": "references",
       "source": "kneemri.inference.ensemble.Ensemble",
-      "target": "kneemri.inference.ensemble.Read",
+      "target": "kneemri.inference.ensemble.Serving",
       "weight": 1
     },
     {
@@ -4197,25 +4221,13 @@
     {
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Ensemble",
-      "target": "kneemri.inference.test_time.SpatialViews",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.inference.ensemble.Ensemble",
       "target": "kneemri.models.model.StudyModel",
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.afford",
-      "target": "kneemri.inference.budget.Budget.overrunning",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.afford",
-      "target": "kneemri.inference.budget.Budget.projected",
+      "kind": "construct",
+      "source": "kneemri.inference.ensemble.Ensemble.__init__",
+      "target": "kneemri.inference.ensemble.Serving",
       "weight": 1
     },
     {
@@ -4240,18 +4252,6 @@
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
       "target": "kneemri.inference.ensemble.Ensemble.agreed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
-      "target": "kneemri.inference.budget.Budget.begin",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
-      "target": "kneemri.inference.budget.Budget.group",
       "weight": 1
     },
     {
@@ -4348,6 +4348,18 @@
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Read",
       "target": "kneemri.corpus.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.budget.Budget",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.test_time.SpatialViews",
       "weight": 1
     },
     {
@@ -5107,6 +5119,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.inference.ensemble.Serving",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_run.KernelRun.run",
       "target": "kneemri.kaggle.kernel_run.KernelRun.chosen",
@@ -5841,6 +5859,12 @@
     {
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.best",
       "target": "kneemri.runs.run_metrics.RunMetrics.rows",
       "weight": 1
     },
@@ -6211,6 +6235,72 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.objective.RankedObjective.ranking",
+      "target": "kneemri.training.objective.RankedObjective.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pair_memory.PairMemory",
+      "target": "kneemri.training.objective.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pair_memory.PairMemory.pooled",
+      "target": "kneemri.training.objective.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pair_memory.PairMemory.remember",
+      "target": "kneemri.training.objective.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking",
+      "target": "kneemri.training.objective.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking",
+      "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking",
+      "target": "kneemri.training.pair_memory.PairMemory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
+      "target": "kneemri.training.pair_memory.PairMemory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
+      "target": "kneemri.training.objective.RankedObjective.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
+      "target": "kneemri.training.pair_memory.PairMemory.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
+      "target": "kneemri.training.pair_memory.PairMemory.remember",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.training.report_supervision.ReportSupervision",
       "target": "kneemri.training.report_supervision.NoReportSupervision",
@@ -6424,6 +6514,12 @@
       "kind": "construct",
       "source": "kneemri.training.train.TrainingOptions.objective",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.train.TrainingOptions.objective",
+      "target": "kneemri.training.remembered_ranking.RememberedRanking",
       "weight": 1
     },
     {
@@ -6783,7 +6879,7 @@
       "role": null
     },
     {
-      "descendants": 87,
+      "descendants": 89,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -7415,7 +7511,7 @@
       "role": null
     },
     {
-      "descendants": 8,
+      "descendants": 10,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -7456,8 +7552,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pair_memory",
+      "label": "pair_memory",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.patience",
       "label": "patience",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_ranking",
+      "label": "remembered_ranking",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -8016,6 +8128,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.ensemble.Serving",
+      "label": "Serving",
+      "level": "class",
+      "parent": "kneemri.inference.ensemble",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.holdout_backfill.Backfill",
       "label": "Backfill",
       "level": "class",
@@ -8448,10 +8568,26 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pair_memory.PairMemory",
+      "label": "PairMemory",
+      "level": "class",
+      "parent": "kneemri.training.pair_memory",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.patience.Patience",
       "label": "Patience",
       "level": "class",
       "parent": "kneemri.training.patience",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_ranking.RememberedRanking",
+      "label": "RememberedRanking",
+      "level": "class",
+      "parent": "kneemri.training.remembered_ranking",
       "role": "primary"
     },
     {
@@ -12392,6 +12528,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.pair_memory",
+      "label": "pair_memory",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.pool",
       "label": "pool",
       "level": "method",
@@ -12712,10 +12856,42 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.RankedObjective.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.training.objective.RankedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.RankedObjective.ranking",
       "label": "ranking",
       "level": "method",
       "parent": "kneemri.training.objective.RankedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pair_memory.PairMemory.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pair_memory.PairMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pair_memory.PairMemory.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.training.pair_memory.PairMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pair_memory.PairMemory.remember",
+      "label": "remember",
+      "level": "method",
+      "parent": "kneemri.training.pair_memory.PairMemory",
       "role": null
     },
     {
@@ -12732,6 +12908,22 @@
       "label": "exhausted",
       "level": "method",
       "parent": "kneemri.training.patience.Patience",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
+      "label": "ranking",
+      "level": "method",
+      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
       "role": null
     },
     {

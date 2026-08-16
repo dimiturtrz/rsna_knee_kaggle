@@ -9,7 +9,7 @@ import torch
 from torch import Tensor
 
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
-from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read
+from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
 from kneemri.inference.members import MemberConfig, MemberPackage, Window
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
@@ -395,6 +395,33 @@ def test_arithmetic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert ensemble.arithmetic(fitted_bf16) is torch.bfloat16, "off cuda there is no autocast to constrain"
 
 
+def test_a_forced_precision_overrides_the_member_but_not_the_card(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The knob a precision MEASUREMENT turns, and the guard it must not turn off.
+
+    The loadcheck compared three precisions by wrapping `predict_member` in an outer autocast, which
+    the inner explicit-dtype one overrides — so every arm ran the member's own arithmetic and reported
+    max|diff| of exactly 0.0 twelve times. That is the shape of a null result from a disconnected knob,
+    and only a test that the forced dtype actually ARRIVES can tell it from agreement.
+
+    The downgrade still applies on top, because a forced bf16 that silently ran emulated on a T4 would
+    make two arms identical again by a different route.
+    """
+    ensemble = _ensemble(tmp_path / "forced")
+    member = replace(ensemble.package.members[0], config={**ensemble.package.members[0].config, "bf16": False})
+    object.__setattr__(ensemble, "device", torch.device("cuda"))
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda: (8, 0))
+
+    assert ensemble.arithmetic(member) is torch.float16, "unforced, a member is served as it was fitted"
+    ensemble.serving = Serving(precision=torch.bfloat16)
+    assert ensemble.arithmetic(member) is torch.bfloat16, "the forced arithmetic is the one that reaches autocast"
+    ensemble.serving = Serving(precision=torch.float32)
+    assert ensemble.arithmetic(member) is torch.float32, "fp32 is the reference arm a comparison needs"
+
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda: (7, 5))
+    ensemble.serving = Serving(precision=torch.bfloat16)
+    assert ensemble.arithmetic(member) is torch.float16, "forcing an arithmetic the card emulates measures that"
+
+
 def test_reads(tmp_path: Path):
     """Resolution shares a read; scheme and depth do not.
 
@@ -518,10 +545,11 @@ def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):
 
 def _timed(ensemble: Ensemble, seconds: float, ceiling: float) -> None:
     """Put the ensemble on a budget that has already burned `seconds` of `ceiling`, one whole group done."""
-    ensemble.budget = Budget(seconds=ceiling, margin=1.0)
-    ensemble.budget.started -= seconds
-    ensemble.budget.begin(1)
-    ensemble.budget.chunk(1, 1)
+    budget = Budget(seconds=ceiling, margin=1.0)
+    ensemble.serving = Serving(budget=budget)
+    budget.started -= seconds
+    budget.begin(1)
+    budget.chunk(1, 1)
 
 
 def test_afford(tmp_path: Path):

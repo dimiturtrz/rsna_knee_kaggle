@@ -20,7 +20,7 @@ import torch
 
 from core.mounts import Mounts
 from kneemri.inference.budget import Budget
-from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.ensemble import Ensemble, Serving
 from kneemri.inference.members import Member, MemberPackage
 from kneemri.kaggle.submission import Submission
 from kneemri.models.backbone import ENCODERS, Encoder
@@ -137,6 +137,6 @@ class KernelRun:
         competition = self.mounts.one("sample_submission.csv", "competition data")
         # A BUDGET ONLY HERE. This is the one path that runs inside a Kaggle batch session, which is
         # the only place a run is killed for taking too long; a dry run and a witness are not.
-        ensemble = Ensemble(package, models, device, budget=Budget())
+        ensemble = Ensemble(package, models, device, Serving(budget=Budget()))
         frame = Submission(ensemble, competition, WORKING, overlap=self.overlap).run()
         logger.info("%s", frame.head())
