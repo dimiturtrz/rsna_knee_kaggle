@@ -5785,6 +5785,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.package_members.MemberRoster",
+      "target": "kneemri.kaggle.package_members.MemberRoster",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.package_members.MemberRoster.checkpoints",
+      "target": "kneemri.kaggle.package_members.MemberRoster.patterns",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.package_members.main",
       "target": "core.paths.DataRoot.from_config",
@@ -5800,6 +5812,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.package_members.main",
       "target": "kneemri.kaggle.package_members.MemberManifest.document",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.package_members.main",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
       "weight": 1
     },
     {
@@ -8984,6 +9002,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members.MemberManifest",
       "label": "MemberManifest",
+      "level": "class",
+      "parent": "kneemri.kaggle.package_members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster",
+      "label": "MemberRoster",
       "level": "class",
       "parent": "kneemri.kaggle.package_members",
       "role": "satellite"
@@ -12634,6 +12660,30 @@
       "label": "document",
       "level": "method",
       "parent": "kneemri.kaggle.package_members.MemberManifest",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.checkpoints",
+      "label": "checkpoints",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.patterns",
+      "label": "patterns",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
       "role": null
     },
     {
