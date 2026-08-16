@@ -117,6 +117,14 @@ class RunMetrics:
         train.py keeps the best state, so a comparison against the final epoch would report a number no
         saved member ever had.
         """
+        # NOTHING held back means nothing measured, whatever the rows say. Until 2026-08-16 the epoch
+        # INDEX was written into this column for an unscored run, so `final_ws_e12` and `final_fit_e12`
+        # sit on disk with auc = 0.0, 1.0, 2.0 ... 11.0 and `max()` quotes a twelve-epoch final fit as
+        # scoring 11.0 — beating every real member in the ledger. The recorder is fixed, but the files
+        # it already wrote are not, and asking the run's OWN recipe costs one lookup and is true for
+        # both: a run that held nothing back cannot have a best epoch, so it has no score to report.
+        if (recipe := self.recipe()) is not None and int(recipe.get("fold", 0)) < 0:
+            return None
         # An unscored run (--fold -1) records NaN, and NaN loses every comparison - an unguarded
         # max() would return whichever row happened to come first and call it the best.
         rows = [row for row in self.rows() if not math.isnan(row["auc"])]

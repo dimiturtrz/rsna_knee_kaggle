@@ -50,6 +50,26 @@ def test_best(tmp_path: Path):
     )
     assert RunMetrics(unscored).best() is None
 
+    # The rows a run WROTE can be wrong while the recipe stays right. Until 2026-08-16 an unscored run
+    # recorded the epoch INDEX in this column, and two such files sit on disk: `max()` reads a
+    # twelve-epoch final fit as scoring 11.0, which beats every real member in the ledger. The recipe
+    # says the run held nothing back, and that outranks any number in the rows.
+    indexed = tmp_path / "indexed.pt"
+    indexed.with_suffix(".metrics.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps({"recipe": {"fold": "-1", "epochs": "12"}}),
+                *(
+                    json.dumps({"epoch": e, "loss": 1.0, "auc": float(e), "seconds": 9, "per_label": {}})
+                    for e in range(3)
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    assert RunMetrics(indexed).best() is None, "an epoch index is not a score, whatever column it sits in"
+
 
 def test_exists(tmp_path: Path):
     """The recorder answers whether anything is there, so callers need not reach for its path.
