@@ -50,13 +50,19 @@ that costs a slot.
 
 
 ENSEMBLE = "ensemble"
-"""The only scope two offline numbers can be subtracted in: the holdout AUC of what was SUBMITTED.
+"""The default scope: the holdout AUC of the thing that was SUBMITTED.
 
-Four early entries are recorded otherwise, and dropping them is the whole difference between a result
-and an artefact. Two quote the MEAN of their members' individual holdouts, which is lower than the
-ensemble it describes by however much averaging bought - so a one-member entry at 0.8518 outranks a
-five-member entry at 0.8269 on paper while the board has them the other way round, and the "inversion"
-is the two denominators, not the board. Two more are a bare number the ledger never says the scope of.
+Two offline numbers can only be subtracted WITHIN one scope, and mixing them is the whole difference
+between a result and an artefact — a MEMBER_MEAN is lower than the ensemble it describes by however
+much averaging bought, so a one-member entry at 0.8518 outranks a five-member entry at 0.8269 on paper
+while the board has them the other way round, and the "inversion" is the two denominators, not the
+board.
+
+A scope is a PARAMETER rather than a filter hard-coded here, because the four member_mean entries are
+comparable to EACH OTHER even though they are comparable to nothing else. Read on their own they carry
+the reading this project's slot decisions turn on: the two whole-stack entries have member means 0.021
+ABOVE the five-fold entry and scored 0.006 BELOW it on the board, which is the member-count effect with
+member quality held against it.
 """
 
 
@@ -112,15 +118,16 @@ class BoardTransfer:
     needs it.
     """
 
-    def __init__(self, record: Path = RECORD) -> None:
+    def __init__(self, record: Path = RECORD, scope: str = ENSEMBLE) -> None:
         self.record = record
+        self.scope = scope
 
     def _rows(self) -> list[dict[str, object]]:
         """Every recorded line, the notes included, exactly as the file holds them."""
         return [json.loads(line) for line in self.record.read_text(encoding="utf-8").splitlines() if line]
 
     def entries(self) -> list[BoardEntry]:
-        """Every entry carrying both numbers ON THE ENSEMBLE SCOPE, weakest holdout first."""
+        """Every entry carrying both numbers ON THIS READING'S SCOPE, weakest holdout first."""
         found = [
             BoardEntry(
                 id=str(row["id"]),
@@ -129,13 +136,13 @@ class BoardTransfer:
                 members=int(str(row["members"])),
             )
             for row in self._rows()
-            if row.get("scope") == ENSEMBLE
+            if row.get("scope") == self.scope
         ]
         return sorted(found, key=lambda entry: entry.offline)
 
     def dropped(self) -> dict[str, int]:
         """How many entries each non-comparable scope cost, so the exclusion is never silent."""
-        scopes = [str(row["scope"]) for row in self._rows() if "scope" in row and row["scope"] != ENSEMBLE]
+        scopes = [str(row["scope"]) for row in self._rows() if "scope" in row and row["scope"] != self.scope]
         return {scope: scopes.count(scope) for scope in sorted(set(scopes))}
 
     def pairs(self) -> list[BoardPair]:
@@ -174,7 +181,7 @@ class BoardTransfer:
         inverted = self.inversions()
         excluded = ", ".join(f"{count} {scope}" for scope, count in self.dropped().items())
         lines = [
-            f"{len(self.entries())} entries on the ensemble scope, {len(pairs)} orderable pairs "
+            f"{len(self.entries())} entries on the {self.scope} scope, {len(pairs)} orderable pairs "
             f"(excluded: {excluded or 'none'})",
             f"compression: median {self.compression():+.2f} board points per holdout point",
             f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
@@ -195,9 +202,15 @@ def main() -> None:
     """Read the board against the holdout: `python -m kneemri.evaluation.board_transfer`."""
     parser = argparse.ArgumentParser(description=BoardTransfer.__doc__)
     parser.add_argument("--record", type=Path, default=RECORD, help="the scored-submission record")
+    parser.add_argument(
+        "--scope",
+        default=ENSEMBLE,
+        help="which denominator to read within. Entries on different scopes are not subtractable, so "
+        "each scope is its own reading rather than one mixed ranking.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("%s", BoardTransfer(arguments.record).report())
+    logger.info("%s", BoardTransfer(arguments.record, arguments.scope).report())
 
 
 if __name__ == "__main__":

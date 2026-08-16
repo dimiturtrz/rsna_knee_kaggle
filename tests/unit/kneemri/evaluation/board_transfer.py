@@ -31,6 +31,14 @@ def test_entries(tmp_path: Path):
     assert "averaged" not in {entry.id for entry in entries}, "a mean of members is not the ensemble"
 
 
+def test_entries_reads_within_whichever_scope_it_is_asked_for(tmp_path: Path):
+    """A scope other than the default is comparable to ITSELF — the four member_mean entries carry a
+    reading the ensemble scope cannot: member quality up and board down, at held member count."""
+    entries = BoardTransfer(_record(tmp_path), scope="member_mean").entries()
+
+    assert [entry.id for entry in entries] == ["averaged"]
+
+
 def test_dropped(tmp_path: Path):
     """A silent exclusion reads as 'everything was compared'; this names what was not."""
     assert BoardTransfer(_record(tmp_path)).dropped() == {"member_mean": 1, "unknown": 1}
