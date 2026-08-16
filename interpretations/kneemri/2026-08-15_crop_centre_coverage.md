@@ -75,3 +75,6 @@ The strategy stays in the code, opt-in, at zero cost. Two uses it might still ea
   for a better locator, not against locating;
 - an ensemble axis: two members reading the same series about two different centres are diverse in the
   input, and diversity has beaten member quality on this corpus six leaderboard entries running.
+  *(2026-08-16: that last clause no longer holds for GRAFTED members — two all-ours entries beat the
+  24-member mixed fusion. See `2026-08-16_the_grafted_members_became_a_cost.md`. Two members of ours
+  about two different centres is still a live diversity axis; twenty of theirs is not.)*

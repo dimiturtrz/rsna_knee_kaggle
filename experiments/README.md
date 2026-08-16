@@ -326,6 +326,14 @@ that our pipeline is good.
 **Our own best is 0.888.** Quote that one. The fused number's marginal gain from our three members is
 +0.006 over their twenty.
 
+> **SUPERSEDED 2026-08-16 — quote 0.919 now, and it is entirely ours.** `kneemri-efficient` v4 (two
+> post-LoRA whole-stack members, 2 passes/study, no CC0 weights) scored **0.919**, and `kneemri-trained`
+> v8 (five all-ours members) scored **0.911**. Both beat the 24-member mixed fusion's 0.898 — by +0.021
+> and +0.013 — so the grafted members are now a COST, not a contribution, and the fusion track no longer
+> carries the score. The table and the diversity paragraph below are kept as the record of what was true
+> at the earlier member quality; the reading of them changed when the pool did, not the mechanism.
+> See `interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md`.
+
 What IS ours and worth keeping is the FINDING: members that fail differently help, members that fail
 the same way do not. Our third whole-stack member bought 0.000; a different recipe bought +0.006. That
 is reproducible without anyone else's weights, and the all-ours ensemble is the test of it.
