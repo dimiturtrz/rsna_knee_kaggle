@@ -202,6 +202,24 @@ def test_paired_is_none_when_a_run_kept_no_predictions(tmp_path: Path):
     assert comparison.paired(comparison.arms[0]) is None
 
 
+def test_scored(tmp_path: Path):
+    """A control that predates the recorder is comparable again — its predictions state its scores.
+
+    This is not hypothetical: `wsfold0_e6` is the control knee-bot's argument rests on, it wrote no
+    metrics file, and the comparison refused it as "does not exist" while the arrays sat beside it.
+    """
+    control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)
+    control.with_suffix(".metrics.jsonl").unlink()
+    _predictions(control, shift=0.0)
+
+    comparison = RunComparison(control, [arm])
+    resolved = comparison.scored(comparison.control)
+
+    assert resolved is not None and resolved.reconstructed
+    assert "RECONSTRUCTED" in comparison.report(), "and the report never passes it off as a recorded run"
+    assert set(comparison.deltas()["arm.metrics"]) >= {"MCL", "Effusion", "MEAN"}
+
+
 def test_floor(tmp_path: Path):
     """The report says WHICH bound each arm was marked against, because they differ several-fold."""
     control, arm = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "arm", ARM)

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from kneemri.corpus.anatomy import ScaleProfile
+from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
@@ -100,6 +101,7 @@ class RunComparison:
         self.arms = [RunMetrics(arm) for arm in arms]
         self.errors = self._intervals(labels) if labels else {}
         self.scores = LabelScores()
+        self.holdout = HoldoutMetrics(self.scores)
 
     @staticmethod
     def _intervals(labels: Path) -> dict[str, float]:
@@ -118,25 +120,35 @@ class RunComparison:
             for target, total in power.positives().items()
         }
 
+    def scored(self, run: RunMetrics) -> ScoredEpoch | None:
+        """One run's best epoch from whichever of its two records can state it.
+
+        A run that predates the recorder still kept its predictions, and `wsfold0_e6` — the control
+        knee-bot's whole argument rests on — is exactly that run: this comparison used to refuse it as
+        "does not exist" while the arrays that answer it sat beside the checkpoint under another name.
+        """
+        return self.holdout.of(run)
+
     def deltas(self) -> dict[str, dict[str, float]]:
         """Per-arm, per-label difference against the control's best epoch."""
-        reference = self.control.best()
-        if reference is None:
+        control = self.scored(self.control)
+        if control is None:
             # Distinguished, because they need different fixes: a missing file is usually the wrong
             # path, and an empty one is a run that died before its first scored epoch.
-            missing = "recorded no scored epoch" if self.control.exists() else "does not exist"
+            missing = "recorded no scored epoch and kept no predictions" if self.control.exists() else "does not exist"
             message = f"control {self.control.path} {missing}"
             raise ValueError(message)
+        reference = control.row
         table: dict[str, dict[str, float]] = {}
         for arm in self.arms:
-            best = arm.best()
+            best = self.scored(arm)
             if best is None:
                 continue
             table[arm.path.stem] = {
                 label: round(score - reference["per_label"].get(label, float("nan")), 4)
-                for label, score in best["per_label"].items()
+                for label, score in best.row["per_label"].items()
             }
-            table[arm.path.stem]["MEAN"] = round(best["auc"] - reference["auc"], 4)
+            table[arm.path.stem]["MEAN"] = round(best.row["auc"] - reference["auc"], 4)
         return table
 
     def report(self) -> str:
@@ -144,11 +156,15 @@ class RunComparison:
         # deltas() raises on a control with no scored epoch, so it is called BEFORE the header is
         # formatted - reading `reference` first would crash on None instead of saying which run is empty.
         table = self.deltas()
-        reference = self.control.best()
-        if reference is None:  # pragma: no cover - deltas() has already raised
+        control = self.scored(self.control)
+        if control is None:  # pragma: no cover - deltas() has already raised
             message = f"control {self.control.path} recorded no scored epoch"
             raise ValueError(message)
-        lines = [f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}"]
+        reference = control.row
+        lines = [
+            f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}",
+            f"  {control.named()}",
+        ]
         for arm in self.arms:
             deltas = table.get(arm.path.stem)
             if deltas is None:
@@ -163,6 +179,9 @@ class RunComparison:
             lines.append(ScaleProfile.of(deltas).line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
             lines.append(f"  {self.reader_change(arm)}")
+            scored = self.scored(arm)
+            if scored is not None and scored.reconstructed:
+                lines.append(f"  {scored.named()}")
         if self.errors:
             lines.append(
                 "\n* the delta exceeds that label's own 95% sampling interval; unmarked deltas are "
