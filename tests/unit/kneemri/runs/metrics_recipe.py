@@ -14,11 +14,6 @@ def _run(root: Path, name: str, *, options: dict[str, object] | None) -> RunMetr
     return metrics
 
 
-def test_checkpoint_of():
-    """`.metrics.jsonl` is TWO suffixes, so the obvious `with_suffix` would produce `run.metrics.pt`."""
-    assert MetricsRecipe.checkpoint_of(Path("d/run.metrics.jsonl")).name == "run.pt"
-
-
 def test_backfill(tmp_path: Path):
     """The knowledge was always on disk — in the member, not beside the numbers that get compared."""
     metrics = _run(tmp_path, "arm", options={"crop_mm": 80.0, "centre": "tissue"})
@@ -46,10 +41,3 @@ def test_backfill_under_check_writes_nothing(tmp_path: Path):
 
     assert filled == ["arm.metrics.jsonl"]
     assert metrics.recipe() is None
-
-
-def test_recipe_of(tmp_path: Path):
-    """The oldest members predate the options stamp too; that is an absence, not an empty recipe."""
-    torch.save({"holdout": 0.8}, tmp_path / "old.pt")
-
-    assert MetricsRecipe.recipe_of(tmp_path / "old.pt") is None

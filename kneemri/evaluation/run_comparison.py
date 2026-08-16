@@ -10,6 +10,7 @@ from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
+from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -102,6 +103,10 @@ class RunComparison:
         self.errors = self._intervals(labels) if labels else {}
         self.scores = LabelScores()
         self.holdout = HoldoutMetrics(self.scores)
+        # CACHED because reading a run's account can cost a `torch.load` of the whole checkpoint, and
+        # the report asks each arm for its recipe twice — once to say whether the pair is matched and
+        # once to say which half of the pipeline it moved.
+        self._recorded: dict[Path, RecordedRun] = {}
 
     @staticmethod
     def _intervals(labels: Path) -> dict[str, float]:
@@ -128,6 +133,17 @@ class RunComparison:
         "does not exist" while the arrays that answer it sat beside the checkpoint under another name.
         """
         return self.holdout.of(run)
+
+    def recipe(self, run: RunMetrics) -> dict[str, str] | None:
+        """One run's recipe from whichever of its two records carries it.
+
+        Its metrics file OR its checkpoint stamp, the same rule the back-fill reads splits by. Reading
+        only the first is what made this comparison call `wsfold0_e6` unrecorded — the control the
+        whole extended-slots finding rests on, whose checkpoint stamps every option it ran under.
+        """
+        if run.path not in self._recorded:
+            self._recorded[run.path] = RecordedRun.of(run)
+        return self._recorded[run.path].recipe
 
     def deltas(self) -> dict[str, dict[str, float]]:
         """Per-arm, per-label difference against the control's best epoch."""
@@ -235,7 +251,7 @@ class RunComparison:
         Runs recorded before the recipe existed say so plainly rather than silently comparing as
         matched — an unknown control is a worse failure than a mismatched one.
         """
-        control, theirs = self.control.recipe(), arm.recipe()
+        control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return "recipe unrecorded, so nothing here can say the two runs are matched"
         axes = [(name, value) for name, value in theirs.items() if name not in NOT_AN_AXIS]
@@ -261,7 +277,7 @@ class RunComparison:
         An arm that moves both is reported as a reader change, because the reader half is the one that
         cannot be judged on the model-bottlenecked findings — the narrower claim is the honest one.
         """
-        control, theirs = self.control.recipe(), arm.recipe()
+        control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return "kind unknown, one of these runs recorded no recipe"
         moved = {name for name, value in theirs.items() if control.get(name) != value}

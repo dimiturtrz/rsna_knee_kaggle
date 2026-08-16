@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 from core.paths import DataRoot
-from kneemri.runs.member_record import StampedRun
+from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -28,30 +28,22 @@ class MetricsRecipe:
     def __init__(self, root: Path) -> None:
         self.root = root
 
-    @staticmethod
-    def checkpoint_of(metrics: Path) -> Path:
-        """The member these scores describe. `.metrics.jsonl` is two suffixes, so `with_suffix` cannot."""
-        return metrics.with_name(metrics.name.removesuffix(".metrics.jsonl") + ".pt")
-
-    @staticmethod
-    def recipe_of(checkpoint: Path) -> dict[str, str] | None:
-        """The options block the checkpoint recorded, or None when there is nothing to read it from.
-
-        Through `StampedRun`, which lives beside the assembler that writes the stamp, so this module
-        and `holdout_backfill` read one description of it rather than two.
-        """
-        stamped = StampedRun.of(checkpoint)
-        return stamped.options if stamped else None
-
     def backfill(self, *, write: bool) -> tuple[list[str], list[str]]:
-        """Every metrics file with no recipe, split into the ones recovered and the ones that cannot be."""
+        """Every metrics file with no recipe, split into the ones recovered and the ones that cannot be.
+
+        THIS COMMAND IS NO LONGER WHAT MAKES A RUN READABLE — `RecordedRun` answers from the checkpoint
+        stamp directly, so a run whose recipe lives only there compares as matched without being touched.
+        What it still buys is a metrics file that states its own recipe: greppable, diffable, and free of
+        a `torch.load` per read. It reaches only runs that HAVE a metrics file, which is why it could
+        never have fixed `wsfold0_e6` — that run has none, and the fix had to be in the reader.
+        """
         filled: list[str] = []
         orphaned: list[str] = []
         for path in sorted(self.root.glob(METRICS)):
             metrics = RunMetrics(path)
             if metrics.recipe() is not None:
                 continue
-            recipe = self.recipe_of(self.checkpoint_of(path))
+            recipe = RecordedRun.of(metrics).recipe
             if recipe is None:
                 orphaned.append(path.name)
                 continue

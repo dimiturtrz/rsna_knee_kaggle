@@ -66,6 +66,17 @@ class RunMetrics:
         """
         return self.path.exists()
 
+    def checkpoint(self) -> Path:
+        """The member these scores describe, beside them under the run's own name.
+
+        Here rather than at the caller because `.metrics.jsonl` is TWO suffixes: the obvious
+        `with_suffix` yields `run.metrics.pt`, a path nothing is written to and everything reads as a
+        run with no stamp. This class already resolves that spelling in the other direction, so it is
+        the one place that cannot get the pair wrong.
+        """
+        name = self.path.name
+        return self.path.with_name(name.removesuffix(".metrics.jsonl") + ".pt")
+
     def describe(self, recipe: dict[str, str]) -> None:
         """Record WHICH RUN these epochs belong to, once, before the first of them.
 

@@ -145,6 +145,17 @@ def test_describe(tmp_path: Path):
     assert metrics.best() is not None, "and ranking epochs must not trip over it"
 
 
+def test_checkpoint(tmp_path: Path):
+    """`.metrics.jsonl` is TWO suffixes, so the obvious `with_suffix` yields `run.metrics.pt`.
+
+    That path is one nothing writes and everything then reads as a run carrying no stamp — which is
+    how a checkpoint holding a full recipe reads as a run that recorded none. Both spellings of a run
+    resolve to the same pair, because both reach this class.
+    """
+    assert RunMetrics(tmp_path / "run.pt").checkpoint().name == "run.pt"
+    assert RunMetrics(tmp_path / "run.metrics.jsonl").checkpoint().name == "run.pt"
+
+
 def test_recipe(tmp_path: Path):
     """A file of scores that cannot say which run produced them is what makes a control unverifiable."""
     metrics = RunMetrics(tmp_path / "run.pt")

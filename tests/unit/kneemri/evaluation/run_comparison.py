@@ -109,6 +109,27 @@ def test_unmatched(tmp_path: Path):
     assert again.unmatched(again.arms[0]) == "matched on every option both runs recorded"
 
 
+def test_recipe(tmp_path: Path):
+    """A control that wrote no metrics file still recorded its recipe — in its checkpoint.
+
+    `wsfold0_e6` is that run and it is the control knee-bot's finding rests on. Reading the metrics
+    file alone reported the pair as uncertifiable while the stamp naming every option it ran under sat
+    beside it, so the one comparison the ledger most needed came back as "nothing here can say".
+    """
+    import torch  # noqa: PLC0415 - only this test writes a stamped checkpoint
+
+    control = _run(tmp_path, "ctl", CONTROL)
+    control.with_suffix(".metrics.jsonl").unlink()
+    torch.save({"options": {"scheme": "canonical"}, "epoch": 1, "holdout": 0.84}, control)
+    arm = _run(tmp_path, "arm", ARM)
+    _describe(arm, {"scheme": "extended"})
+
+    comparison = RunComparison(control, [arm])
+
+    assert comparison.recipe(comparison.control) == {"scheme": "canonical"}, "from the stamp, its only record"
+    assert comparison.unmatched(comparison.arms[0]) == "scheme canonical→extended", "the axis, and only it"
+
+
 def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
     """Silence read as a match is the failure; every file predating the recipe is in that state."""
     report = RunComparison(_run(tmp_path, "ctl", CONTROL), [_run(tmp_path, "arm", ARM)]).report()

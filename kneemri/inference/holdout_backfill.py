@@ -41,7 +41,7 @@ from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.labels.targets import Targets
 from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
-from kneemri.runs.member_record import StampedRun
+from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -69,24 +69,20 @@ class Backfill:
 
     @classmethod
     def of(cls, checkpoint: Path) -> "Backfill":
-        """Read a run's own account of itself, or refuse it with the reason.
+        """The run's own account of itself, or a refusal naming what cannot be reconstructed from it.
 
-        TWO PLACES HOLD THAT ACCOUNT, and reading only the first called three quarters of the ledger
-        unreadable for want of a FILE rather than a fact: of the 69 members on disk, 50 kept no metrics
-        file at all, and 36 of those stamp the whole split recipe into the checkpoint itself. The
-        metrics file still comes first where it exists, because it names the epoch that SCORED best
-        directly rather than deriving it from a count.
+        WHICH RECORD ANSWERS WHAT is `RecordedRun`'s judgement, not this one's — the same question is
+        asked by `run_comparison`, and the two used to answer it differently. What belongs here is only
+        what a RE-DERIVATION additionally needs: a split it can rebuild, and a run that held something
+        out to rebuild it for.
 
-        Either way the epoch is the KEPT one, never the last: under patience a later epoch exists in
-        the ledger and its weights were thrown away, so re-deriving against it would predict from a
-        model that was never saved. A run that recorded neither reads `UNKNOWN_EPOCH` and is still
-        back-filled — the epoch names WHICH weights predicted, and the weights are on disk regardless.
-        Refusing here would drop 36 re-derivable runs to protect a field nothing joins on yet, and
-        GUESSING here is what stamped `wsfold0_e6` as epoch 11.
+        A run that recorded no epoch reads `UNKNOWN_EPOCH` and is still back-filled — the epoch names
+        WHICH weights predicted, and the weights are on disk regardless. Refusing here would drop 36
+        re-derivable runs to protect a field nothing joins on yet, and guessing it is what stamped
+        `wsfold0_e6` as epoch 11.
         """
-        metrics, stamped = RunMetrics(checkpoint), StampedRun.of(checkpoint)
-        recorded, best = metrics.recipe(), metrics.best()
-        recipe = recorded if recorded is not None else (stamped.options if stamped else None)
+        recorded = RecordedRun.of(RunMetrics(checkpoint))
+        recipe = recorded.recipe
         if recipe is None:
             message = (
                 f"{checkpoint.stem}: no recipe recorded in its metrics or its checkpoint, "
@@ -98,8 +94,7 @@ class Backfill:
         if int(recipe.get("fold", NO_HOLDOUT_FOLD)) == NO_HOLDOUT_FOLD:
             message = f"{checkpoint.stem}: a full-data fit held nothing out"
             raise UnbackfillableError(message)
-        stamped_epoch = stamped.kept_epoch if stamped else None
-        epoch = int(best["epoch"]) if best is not None else stamped_epoch
+        epoch = recorded.kept_epoch
         return cls(checkpoint=checkpoint, recipe=recipe, epoch=UNKNOWN_EPOCH if epoch is None else epoch)
 
     def split(self, identifiers: list[str], train_table: Path) -> NDArray[np.int64]:
