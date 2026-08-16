@@ -5053,6 +5053,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.restamp",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab",
@@ -6262,6 +6268,18 @@
       "kind": "calls",
       "source": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord.restamp",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord.restamp",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
       "weight": 1
     },
     {
@@ -13304,6 +13322,14 @@
       "descendants": 0,
       "id": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "label": "read",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.restamp",
+      "label": "restamp",
       "level": "method",
       "parent": "kneemri.runs.holdout_record.HoldoutRecord",
       "role": null
