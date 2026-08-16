@@ -36,7 +36,9 @@ never spent on a cell that already has a number.
 | `ours×3×whole×3/study` | scored | 0.882 |
 | `ours×5×windowed×overlap` | scored | **0.888** |
 | `theirs×20×windowed×overlap` | scored | **0.888** |
-| `fusion×23×windowed×overlap` | scored | **0.894** — best |
+| `fusion×23×windowed×overlap` | scored | 0.894 |
+| `fusion×24×windowed×overlap` | scored | 0.898 |
+| `ours×2×whole×2/study` (post-LoRA pool) | scored | **0.919** — best |
 | `fusion×23×whole×n/study` | **null** — T4 OOM, sample table scored | 0.500 |
 | `ours×2×whole×2/study` (res392 + calibrated) | **null** — stale kit, no `Member.precision` | 0.500 |
 | `ours×5×whole×5/study` | submitted 2026-08-13, result not recorded here | — |
@@ -71,10 +73,10 @@ quality.
 | 2026-08-13 | `kneemri-trained` | 5* | **OURS** — strongest 5 whole-stack members, stamped kit | 0.8482 | *(no score returned)* | one of the three "Notebook Threw Exception" entries (knee-b6p) |
 | 2026-08-13 | `kneemri-efficient` | 2 | the same 2 members on the fixed kit | 0.8509 | *(no score returned)* | second of the three exceptions |
 | 2026-08-14 | `kneemri-fusion` | ~8 | 22 members, one decode, fp16 serving, a failing member drops itself | mixed | **0.895** | **best entry** — supersedes the 0.894 |
-| 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | **0.898** | **best entry** — our own share doubled from 3 members to 6; +0.003 on the 22-member fusion, directional |
+| 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | **0.898** | superseded by the 0.919 efficient v4 — our own share doubled from 3 members to 6; +0.003 on the 22-member fusion, directional |
 | 2026-08-16 | `kneemri-fusion` | 11 | 25 members — the expired-v3 exclusion fixed, so `lora_r8_v3small_224` serves | mixed | *pending* | submitted 05:05 UTC |
 | 2026-08-16 | `kneemri-trained` | 8 | all-ours whole-stack members, no published weights | — | *pending* | the ours-only number against the 0.898 fusion |
-| 2026-08-16 | `kneemri-efficient` | 4 | strongest few members, 2 passes/study | — | *pending* | the speed/score tradeoff arm |
+| 2026-08-16 | `kneemri-efficient` | 4 | **OURS** — `strongest(2)` whole-stack members, 2 passes/study, no overlap | — | **0.919** | **best entry, and the first that is entirely ours** — +0.021 on the 24-member fusion, so it clears the 1.5% bar as a RESULT, not a directional move. TWO of our own members beat twenty-four mixed ones at a twelfth of the forward passes, which inverts the diversity reading every earlier pair supported. Read it as a QUESTION before a finding: this kernel has never returned a valid score before (v1 scored 0.500 on a stale kit, v2 threw), so the 0.919 is the first measurement of the cell, and what changed underneath is the MEMBERS — `strongest(2)` now ranks over the post-LoRA pool, not the August-13 one. The comparison that settles it is the pending `kneemri-trained` v8 (all-ours, more members) against this. |
 
 ## What counts as ours
 
