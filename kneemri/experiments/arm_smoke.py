@@ -64,6 +64,10 @@ class ArmSmoke:
             code, complaint = self.runner(self.command(flags, checkpoint))
             if code:
                 broken[name] = complaint or f"exit {code} with nothing on stderr"
+            # SAID AS IT IS LEARNED, not collected and reported at the end: thirty-four arms is the
+            # better part of an hour, and a sweep that prints nothing until it finishes is one nobody
+            # can tell from a hang.
+            logger.info("%s %s%s", "BROKEN" if code else "ok", name, f": {broken.get(name, '')}" if code else "")
             # DELETED as soon as it has proved the write path, because a smoke checkpoint is a few
             # hundred megabytes and thirty-four of them is a disk problem this tool should not create.
             checkpoint.unlink(missing_ok=True)
@@ -78,7 +82,4 @@ class ArmSmoke:
         out.mkdir(parents=True, exist_ok=True)
         runnable = {name: flags for name, flags in invocations.items() if name not in refused}
         logger.info("smoking %d arms at %d studies — minutes, and the card", len(runnable), self.studies)
-        broken = self.failed(runnable, out)
-        for name, complaint in broken.items():
-            logger.info("BROKEN %s: %s", name, complaint)
-        return broken
+        return self.failed(runnable, out)

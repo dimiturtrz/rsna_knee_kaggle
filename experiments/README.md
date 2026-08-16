@@ -60,6 +60,21 @@ records `vram_gb 28.0` and `compile_encoder False`. The smoke died in the attent
 corpus size, so the forty-minute run would have died at the same step — and `arm_check` cannot see it,
 because the flags were valid. The cap is now 28 and the same smoke passes in 41 s.
 
+That one arm's rescue is now every arm's, under `arm_check --smoke <dir>`: each accepted invocation is
+run for one epoch at `--smoke-studies` (60), its checkpoint deleted as soon as it has proved the write
+path, and a `BROKEN` line printed the moment a recipe dies. It wants the card and the better part of an
+hour, so it is not the pre-queue check — it is what to run before a queue whose arms have been edited.
+
+```bash
+uv run python -m kneemri.experiments.arm_check --smoke /tmp/smoke_out
+```
+
+Its own first run reported all thirty-four arms broken on the same missing `labels.csv`: `stub_lib.sh`
+fabricates a `/tmp/arm_check` root, which proves flags parse and is what CI gets, but is not a file a
+trainer can read. The stub now takes the resolved processed root from the checker, which already holds
+`core.paths`, so no arm pays a subprocess to learn where the data is. A check whose own harness lies
+reports thirty-four defects and contains one.
+
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed
