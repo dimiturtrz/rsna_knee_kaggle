@@ -6,7 +6,10 @@ scripts are not code we run again — the arms that mattered were rewritten unde
 command is unrecoverable cannot be rerun, matched against, or refuted. `$D` is the processed data
 root and `$L` the label CSV, as `experiments/lib.sh` now resolves them through `core.paths`.
 
-A record, not a home: do not add to this file, add an arm.
+A record, not a home: do not add to this file, add an arm. Transcribed AS RUN, so a flag here may no
+longer exist — `package_members --pattern` below was replaced on 2026-08-16 by `--roster
+comp/members.roster`, after two local member directories stamped one live dataset id with different
+members. Copy a line from here to READ it, not to run it.
 
 ## armU.sh
 ```bash

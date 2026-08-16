@@ -1,0 +1,23 @@
+# The members `dimiturnt/kneemri-members` holds, one per line, read by
+# `python -m kneemri.kaggle.package_members`. THIS FILE IS THE PACKAGE'S ONLY DEFINITION: a kernel
+# names members out of what is mounted, so an entry that cannot be rebuilt from here is an entry
+# nothing can reproduce.
+#
+# Verified against the live package on 2026-08-16 (`kaggle datasets files dimiturnt/kneemri-members`,
+# six files uploaded 2026-08-13 22:33). Before this file there were two local directories — comp/members
+# with three members and comp/members_ours with four — both stamping this same dataset id, and neither
+# matching the six that were actually mounted.
+#
+# A name here is a glob under the processed root, so a member is added by NAMING it. Nothing is
+# packaged that is not written down.
+
+res392_ws_s2026.pt          # 0.8523 solo — our best single member
+calibrated_targets_s2026.pt # 0.8493
+sliceattn_s2026.pt          # 0.8473
+intensity392_ws_s2026.pt    # 0.8459
+# The four above are the offline peak: 0.8612 on the 909-study fold-0 holdout, best of all 511 subsets
+# of the nine candidates scored on 2026-08-16. The two below are mounted but not in that subset — they
+# are kept because a kernel that names its members costs nothing for an unused one, and dropping them
+# would need a dataset push to undo.
+extended_ws_s2026.pt        # 0.8462 — the best FIFTH member (four + this = 0.8610)
+lora_r8_v3small_224_s2026.pt # 0.8215 — the only non-DINOv2 member; the encoder-transfer question

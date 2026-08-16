@@ -5,18 +5,23 @@
 # spending a submission are not, so this prints those commands rather than running them — the last
 # step before a slot is spent should be a human reading what is about to happen.
 #
-#   bash comp/prepare_submission.sh 'wholestack_fold*.pt'
+#   bash comp/prepare_submission.sh [roster]
+#
+# WHICH members it packages comes from `comp/members.roster` — a committed file — rather than from a
+# glob typed here. The glob used to live in shell history while the package it produced did not, and
+# two local member directories ended up stamping one live dataset id with three members and four while
+# the live package held six.
 #
 # It fails rather than warns if the kit has drifted, because a kernel imports the kit and a stale kit
 # has already cost one run to ModuleNotFoundError.
 set -u
 
-PATTERN="${1:?usage: prepare_submission.sh '<checkpoint glob>'}"
+ROSTER="${1:-comp/members.roster}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
-echo "=== 1. package the members ==="
-uv run python -m kneemri.kaggle.package_members --out comp/members --pattern "$PATTERN"
+echo "=== 1. package the members named by $ROSTER ==="
+uv run python -m kneemri.kaggle.package_members --out comp/members --roster "$ROSTER"
 
 echo
 echo "=== 2. verify every member loads and fingerprints under its OWN reading ==="

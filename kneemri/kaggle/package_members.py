@@ -3,6 +3,13 @@
 Emits the same manifest shape the published package uses, so `MemberPackage` reads ours and theirs
 through one code path — including the fingerprint check, which is what stops a member being run under a
 reading it was not fitted under.
+
+WHICH members is read from a COMMITTED roster rather than passed as a glob, because the glob lived in
+shell history and the package it produced did not. On 2026-08-16 there were two local member
+directories — `comp/members` and `comp/members_ours` — both stamping the dataset id
+`dimiturnt/kneemri-members`, holding three members and four, while the LIVE package held six. Either
+one could be pushed over the live package, and nothing on disk said which set the leaderboard entries
+had actually run. The roster is the fix: one file, in git, that a `git log` can date.
 """
 
 import argparse
@@ -57,6 +64,44 @@ class PackagedMember:
 
 
 @dataclass(frozen=True)
+class MemberRoster:
+    """The committed statement of WHICH members the live package holds.
+
+    Lines, because a set of members chosen for their DIVERSITY shares no name prefix — whole-stack,
+    windowed, large, attention — and squeezing that into one glob means widening it until it matches
+    everything. `--pattern '*.pt'` once packaged all 54 checkpoints and 8 GB without a word.
+
+    A line that matches NOTHING is refused rather than skipped. A roster is edited by hand, so a typo is
+    the expected failure, and a silently-dropped name packages an ensemble one member short of the one
+    that was measured — which loads, fingerprints and scores without saying anything is missing.
+    """
+
+    text: str
+
+    COMMENT = "#"
+
+    @classmethod
+    def read(cls, path: Path) -> "MemberRoster":
+        return cls(path.read_text(encoding="utf-8"))
+
+    def patterns(self) -> list[str]:
+        """The named members, without the prose that says why each is in the package."""
+        lines = [line.split(self.COMMENT)[0].strip() for line in self.text.splitlines()]
+        return [line for line in lines if line]
+
+    def checkpoints(self, source: Path) -> list[Path]:
+        """Every named member, resolved under the processed root, in roster order."""
+        resolved = []
+        for pattern in self.patterns():
+            matched = sorted(source.glob(pattern))
+            if not matched:
+                message = f"roster names {pattern!r}, which matches nothing under {source}"
+                raise FileNotFoundError(message)
+            resolved.extend(matched)
+        return resolved
+
+
+@dataclass(frozen=True)
 class MemberManifest:
     """The document a mounted package is read from, and the check that it addresses its own members."""
 
@@ -81,14 +126,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=Path("comp/members"))
     parser.add_argument(
-        "--pattern",
-        nargs="+",
-        default=["member_fold*.pt"],
-        help="one or more globs under the processed root. SEVERAL because a set of members "
-        "chosen for their DIVERSITY shares no name prefix - whole-stack, windowed, large, "
-        "attention - and squeezing that into one glob means widening it until it matches "
-        "everything. `--pattern '*.pt'` once packaged all 54 checkpoints and 8 GB without "
-        "a word.",
+        "--roster",
+        type=Path,
+        default=Path("comp/members.roster"),
+        help="the committed list of members this package holds, one name or glob per line. A FILE "
+        "rather than a flag, because the glob that built the live package lived in shell history and "
+        "the package it produced did not: two local directories both stamped the live dataset id, "
+        "holding three members and four, while the live package held six.",
     )
     parser.add_argument("--title", default="kneemri-members")
     parser.add_argument("--owner", default="dimiturnt")
@@ -97,11 +141,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     source = DataRoot.from_config(arguments.paths).processed()
-    checkpoints = sorted({path for pattern in arguments.pattern for path in source.glob(pattern)})
-    if not checkpoints:
-        raise FileNotFoundError(f"no checkpoints matching {arguments.pattern} under {source}")
-    # Named, not counted: a glob that matched more than intended is invisible as a number and obvious
-    # as a list, and this copies ~89 MB per member.
+    checkpoints = MemberRoster.read(arguments.roster).checkpoints(source)
+    # Named, not counted: a roster line that matched more than intended is invisible as a number and
+    # obvious as a list, and this copies ~89 MB per member.
     logger.info("packaging %d checkpoint(s):", len(checkpoints))
     for path in checkpoints:
         logger.info("  %s", path.name)

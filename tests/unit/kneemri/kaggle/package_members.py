@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.kaggle.package_members import FORMAT, MemberManifest, PackagedMember
+from kneemri.kaggle.package_members import FORMAT, MemberManifest, MemberRoster, PackagedMember
 
 CONFIG = {"crop_mm": 140.0, "whole_stack": True}
 FINGERPRINT = [0.1, 0.2]
@@ -72,3 +72,49 @@ def test_two_checkpoints_sharing_one_id_are_refused_rather_than_overwriting_each
     """
     with pytest.raises(ValueError, match="one id"):
         MemberManifest([_member(f"{parent}/member_fold0.pt") for parent in ("a", "b")]).document()
+
+
+ROSTER = """
+# what the live package holds
+res392_ws_s2026.pt   # our best single member
+sliceattn_s2026.pt
+
+lora_r8_*.pt
+"""
+
+
+def _rostered(tmp_path: Path) -> MemberRoster:
+    (tmp_path / "roster").write_text(ROSTER, encoding="utf-8")
+    return MemberRoster.read(tmp_path / "roster")
+
+
+def test_read(tmp_path: Path):
+    """A roster is a file, so that `git log` can date the set of members a package holds."""
+    assert _rostered(tmp_path).text == ROSTER
+
+
+def test_patterns(tmp_path: Path):
+    """Names only: the prose saying WHY a member is in the package is not a filename."""
+    assert _rostered(tmp_path).patterns() == ["res392_ws_s2026.pt", "sliceattn_s2026.pt", "lora_r8_*.pt"]
+
+
+def test_checkpoints(tmp_path: Path):
+    """Resolved under the processed root, in roster order — a glob line may name more than one."""
+    source = tmp_path / "processed"
+    source.mkdir()
+    for name in ("res392_ws_s2026.pt", "sliceattn_s2026.pt", "lora_r8_v3small_224_s2026.pt", "unrostered.pt"):
+        (source / name).touch()
+    assert [path.name for path in _rostered(tmp_path).checkpoints(source)] == [
+        "res392_ws_s2026.pt",
+        "sliceattn_s2026.pt",
+        "lora_r8_v3small_224_s2026.pt",
+    ]
+
+
+def test_checkpoints_refuses_a_name_that_matches_nothing(tmp_path: Path):
+    """A typo drops a member SILENTLY otherwise, and an ensemble one member short still scores."""
+    source = tmp_path / "processed"
+    source.mkdir()
+    (source / "res392_ws_s2026.pt").touch()
+    with pytest.raises(FileNotFoundError, match="sliceattn_s2026.pt"):
+        _rostered(tmp_path).checkpoints(source)
