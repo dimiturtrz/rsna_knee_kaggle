@@ -77,6 +77,9 @@ class RunOptions(Protocol):
     def rank_weight(self) -> float: ...
 
     @property
+    def pair_memory(self) -> int: ...
+
+    @property
     def report_weight(self) -> float: ...
 
     @property
@@ -252,6 +255,7 @@ class MemberRecord:
                 # while a consumer reads a default, and the first one caught before it cost anything.
                 "lora_rank": options.lora_rank,
                 "rank_weight": options.rank_weight,
+                "pair_memory": options.pair_memory,
                 "report_weight": options.report_weight,
                 "whole_stack": options.whole_stack,
                 # The value this run USED, never the module constant. Recording the constant made the

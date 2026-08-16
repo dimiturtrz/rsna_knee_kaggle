@@ -58,6 +58,11 @@ def test_payload():
     assert config["slice_pooling"] == "max", "a member run under the other aggregation predicts from wrong pixels"
     assert config["whole_stack"] is True
     assert config["backbone_lr"] == 4e-5, "the value the run USED, never a module constant"
+    # The objective's own fields, because a member fitted on cross-step pairs and one fitted on
+    # batch-local pairs are otherwise indistinguishable on disk — and an arm that cannot prove which
+    # loss produced it cannot be read against a control.
+    assert config["rank_weight"] == OPTIONS.rank_weight
+    assert config["pair_memory"] == OPTIONS.pair_memory
     assert payload["fingerprint"], "without this the member cannot be verified, so it cannot be submitted"
     assert payload["fingerprint_config"]["n_slot"] == SLOTS
 
