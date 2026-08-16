@@ -259,8 +259,11 @@ def main() -> None:
         type=Path,
         default=None,
         help="also RUN every accepted arm for one epoch on --smoke-studies studies, writing throwaway "
-        "checkpoints to this directory. Wants the card, and minutes rather than seconds — it is the "
-        "only check that sees a recipe fail on memory, which no flag check can.",
+        "checkpoints to this directory. Minutes rather than seconds. It WANTS the card, because it is "
+        "the only check that sees a recipe fail on memory and no CPU run can answer that — but it does "
+        "not require one: measured 2026-08-16, one whole-stack arm decodes and trains an epoch on CPU "
+        "in about seven minutes, so a single arm can be smoked while the card belongs elsewhere. The "
+        "full sweep cannot: that is over the per-arm timeout times thirty-five.",
     )
     parser.add_argument("--smoke-studies", type=int, default=SMOKE_STUDIES)
     arguments = parser.parse_args()

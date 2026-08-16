@@ -34,6 +34,7 @@ from numpy.typing import NDArray
 from core.paths import DataRoot
 from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.device import VisibleCards
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
@@ -166,7 +167,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=HoldoutBackfill.__doc__)
     parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--device", default=VisibleCards().device().type)
     parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
     parser.add_argument("--refresh", action="store_true", help="re-derive runs that already kept a record")
     arguments = parser.parse_args()

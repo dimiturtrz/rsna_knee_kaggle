@@ -16,8 +16,9 @@ import logging
 import sys
 from pathlib import Path
 
-import torch
 from transformers import AutoModel
+
+from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -35,7 +36,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     package = MemberPackage(arguments.root)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = VisibleCards().device()
     failures = 0
     for member in package.members:
         encoder = ENCODERS[member.variant]

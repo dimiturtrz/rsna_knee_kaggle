@@ -18,6 +18,7 @@ from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.corpus.cache_flags import CacheFlags
+from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CLS_MEAN, MAXIMUM, POOL_PARTS, StudyDesign, StudyModel
@@ -56,7 +57,7 @@ def main() -> None:
     pixels = CacheFlags.cache(arguments, root)
     corpus, identifiers = pixels.load()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = VisibleCards().device()
     # Per-slice pooling, because the whole point is to keep each slice separate — the slot's own
     # aggregation is one of the choices this cache exists to make free.
     model = StudyModel(

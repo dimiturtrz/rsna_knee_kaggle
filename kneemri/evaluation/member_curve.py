@@ -29,6 +29,7 @@ from numpy.typing import NDArray
 
 from core.paths import DataRoot
 from kneemri.corpus.folds import ReportFolds
+from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.ensemble import Ensemble
@@ -232,11 +233,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--device",
-        default="cuda" if torch.cuda.is_available() else "cpu",
+        default=VisibleCards().device().type,
         choices=("cuda", "cpu"),
-        help="where to read misses. This analysis runs WHILE the card belongs to a trainer, so it needs "
-        "a way to say cpu that does not depend on the environment: CUDA_VISIBLE_DEVICES= still leaves "
-        "torch.cuda.is_available() true here, and the run dies on 'Invalid device id' several minutes in.",
+        help="where to read misses. This analysis runs WHILE the card belongs to a trainer, so saying "
+        "cpu explicitly stays available — but the default now answers it too, since `VisibleCards` "
+        "counts visible cards rather than asking whether CUDA is installed.",
     )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")

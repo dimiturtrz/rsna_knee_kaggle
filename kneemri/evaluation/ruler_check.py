@@ -24,11 +24,11 @@ import logging
 from pathlib import Path
 
 import numpy as np
-import torch
 from jaxtyping import Bool, Float
 
 from core.paths import DataRoot
 from kneemri.corpus.folds import ReportFolds
+from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
@@ -120,7 +120,7 @@ def main() -> None:
     # filtering at all.
     kept = Targets.load(arguments.confident, train_table, identifiers).weights[holdout] > 0
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = VisibleCards().device()
     predictions = HoldoutPredictions(device)
 
     # The SAME store `member_curve` writes, keyed on the studies scored, so asking the ruler question

@@ -122,7 +122,9 @@ def corpus(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     # is a shape error rather than a test of the wiring.
     monkeypatch.setattr(train_module, "ENCODERS", {SMALL: replace(ENCODERS[SMALL], dim=DIM)})
     # This suite never trains on the card, and `DeviceBudget` takes it whenever it is there.
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    # The count, not availability: `VisibleCards` asks how many cards are VISIBLE, so patching
+    # availability alone would leave the run on cuda while claiming to be on cpu.
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 0)
     return tmp_path
 
 

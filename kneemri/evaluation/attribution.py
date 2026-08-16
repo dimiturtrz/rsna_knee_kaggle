@@ -32,6 +32,7 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
+from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
@@ -411,7 +412,7 @@ def main() -> None:
     saved = torch.load(arguments.checkpoint, map_location="cpu", weights_only=True)
     encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
 
-    predictions = HoldoutPredictions(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    predictions = HoldoutPredictions(VisibleCards().device())
     model = predictions.load(
         arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, member.slot_count
     )

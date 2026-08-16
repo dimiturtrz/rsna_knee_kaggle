@@ -30,6 +30,7 @@ from torch import Tensor, nn
 from kneemri.corpus.prefetch import Prefetch
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import StudyModel
@@ -71,8 +72,12 @@ class DeviceBudget:
     """0 leaves the card uncapped."""
 
     def select(self) -> torch.device:
-        """The device to train on, already held to this budget."""
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        """The device to train on, already held to this budget.
+
+        The choice itself is `VisibleCards`'s — see there for why availability is the wrong question.
+        What stays here is the BUDGET, which is meaningless without a card.
+        """
+        device = VisibleCards().device()
         if self.vram_gb and device.type == "cuda":
             # An INDEX, not torch.device("cuda"): both torch calls reject an indexless device.
             card = torch.cuda.current_device()

@@ -104,7 +104,8 @@ def mounted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr(kernel_module, "ENCODERS", {SMALL: replace(ENCODERS[SMALL], dim=DIM)})
     monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda weights: _FakeBackbone())
     # The kernel takes the card whenever there is one, and this suite never trains or serves on it.
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    # The count, not availability — see `kneemri.device.VisibleCards`.
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 0)
     return tmp_path
 
 

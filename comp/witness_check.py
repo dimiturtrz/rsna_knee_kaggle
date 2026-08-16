@@ -28,6 +28,8 @@ import numpy as np
 import torch
 from transformers import AutoModel
 
+from kneemri.device import VisibleCards
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.paths import DataRoot
@@ -152,7 +154,7 @@ def main() -> None:
     root = DataRoot.from_config(arguments.paths).processed()
     selected = arguments.device
     if selected == "auto":
-        selected = "cuda" if torch.cuda.is_available() else "cpu"
+        selected = VisibleCards().device().type
     device = torch.device(selected)
 
     verdicts = {member.identifier: check(package, member, root, device) for member in package.members}

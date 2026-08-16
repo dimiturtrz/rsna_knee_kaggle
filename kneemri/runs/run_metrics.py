@@ -89,7 +89,7 @@ class RunMetrics:
         It logs as well as records so the caller has ONE statement per epoch rather than two that can
         drift apart — the log line and the stored row should never be able to disagree.
         """
-        if torch.cuda.is_available():
+        if torch.cuda.device_count():
             row["vram_peak_gb"] = round(torch.cuda.max_memory_allocated() / BYTES_PER_GB, 2)
             torch.cuda.reset_peak_memory_stats()
         with self.path.open("a", encoding="utf-8") as handle:

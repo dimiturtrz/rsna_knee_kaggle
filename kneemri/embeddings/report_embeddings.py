@@ -30,6 +30,7 @@ import torch
 from jaxtyping import Float
 
 from core.paths import DataRoot
+from kneemri.device import VisibleCards
 
 ENCODER = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 """384-wide, 50+ languages, and small enough to embed 4,407 reports on a CPU while the GPU trains."""
@@ -110,7 +111,7 @@ def main() -> None:
     reports = table["Report"].astype(str).tolist()
     logger.info("embedding %d reports with %s", len(reports), arguments.encoder)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = VisibleCards().device()
     embeddings = ReportEmbeddings(device)
     vectors = embeddings.encode(
         reports, AutoTokenizer.from_pretrained(arguments.encoder), AutoModel.from_pretrained(arguments.encoder)

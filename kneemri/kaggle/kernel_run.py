@@ -16,9 +16,8 @@ import json
 import logging
 from pathlib import Path
 
-import torch
-
 from core.mounts import Mounts
+from kneemri.device import VisibleCards
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Serving
 from kneemri.inference.members import Member, MemberPackage
@@ -107,7 +106,7 @@ class KernelRun:
         package = self.package()
         package.members = self.chosen(package)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = VisibleCards().device()
         models = {}
         usable = []
         for member in package.members:
