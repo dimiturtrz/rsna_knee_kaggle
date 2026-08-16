@@ -84,6 +84,9 @@ well, and the published CC0 members no longer clear the second half of that.
 | 2026-08-16 | `kneemri-trained` | 8 | **OURS** — the strongest five all-ours whole-stack members, no published weights | 0.8610 | **0.911** | **THE ARM THAT SETTLES THE 0.919.** Ours-only, five members, +0.013 on the 24-member fusion — so the jump belongs to the MEMBER POOL, not to the two-member configuration: two different all-ours entries both clear the mixed fusion by more than the 1.5% bar. Published CC0 members are now a COST, not a contribution. It also puts the ruler and the board on opposite sides: local holdout ranks these five ABOVE the pair (0.8610 vs 0.8581, +0.003) and the board ranks them BELOW it (0.911 vs 0.919, −0.008). |
 | 2026-08-16 | `kneemri-efficient` | 4 | **OURS** — `strongest(2)` whole-stack members, 2 passes/study, no overlap | — | **0.919** | **best entry, and the first that is entirely ours** — +0.021 on the 24-member fusion, so it clears the 1.5% bar as a RESULT, not a directional move. TWO of our own members beat twenty-four mixed ones at a twelfth of the forward passes, which inverts the diversity reading every earlier pair supported. Read it as a QUESTION before a finding: this kernel has never returned a valid score before (v1 scored 0.500 on a stale kit, v2 threw), so the 0.919 is the first measurement of the cell, and what changed underneath is the MEMBERS — `strongest(2)` now ranks over the post-LoRA pool, not the August-13 one. The comparison that settles it is the pending `kneemri-trained` v8 (all-ours, more members) against this. **SETTLED the same day: v8 scored 0.911.** The post-LoRA all-ours pool is what carries the jump — both all-ours entries clear the fusion — and the two-member configuration is worth a further −0.008 on top, which is directional, not a result. |
 
+| 2026-08-16 | `kneemri-chosen` | 2 | **OURS** — the four members chosen by their JOINT holdout (res392 + intensity392 + calibrated + sliceattn), disjoint windows | **0.8612** | *pending* | submitted 17:45 UTC. Selection, not tuning: `strongest(4)` scores 0.8588 and the subset behind the 0.919 scores 0.8581, so naming the members is +0.0031 for free — same weights, same decode, same runtime. Directional (under the 0.0053 floor), kept because it costs nothing. |
+| 2026-08-16 | `kneemri-onedecode` | 2 | **OURS** — three members of ONE pixel group (calibrated + sliceattn + extended_ws) | 0.8553 | *pending* | submitted 17:45 UTC, aimed at the efficiency board. Half the decoding for 0.0059 of holdout; the holdout carries no clock, so only the board can price that trade. |
+
 ## What counts as ours
 
 The graft row is the field's floor measured on our harness. It is **not a result**: the weights are
@@ -356,5 +359,17 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   What IS measured about the queue: Kaggle reruns the notebook on the hidden test set before scoring, so
   a `PENDING` entry stays pending for HOURS (the 21:06 entry scored at about 05:00, ~8 h). And three
   entries submitted back to back at 05:05 were all accepted, so a pending entry blocks nothing.
+- **A guard that reports its own alarm state is not a guard.** Every kernel run logged `kit UNSTAMPED
+  (built before build_kit recorded its commit)` — including runs on kits that carried a perfectly good
+  `kit.json`. `revision()` addressed the stamp with two `.parent` hops from `kneemri_src/kneemri/kaggle/`,
+  which lands one directory short of `kneemri_src/kit.json`. The unit test built the module one level
+  flatter than build_kit's real layout, so the wrong count was right in the test and nowhere else. Fixed
+  by searching the ancestors for the stamp — and by giving the test the layout the kit actually has.
+  The lesson generalises past this file: **a check whose failure branch is the one always taken looks
+  identical to a check that works**, because nobody reads a warning that is always there.
+- **`kaggle datasets version -p <path>` pastes the path into its upload-temp filename.** Any separator
+  in it produces `[Errno 2] ... .kaggle/uploads\D_/data/.../kit_<file>.json` and every file fails. Push
+  from the target's PARENT with a bare basename (`push.sh` does), which holds wherever the kit lives —
+  the old fix, cd-ing into `comp/`, died the moment the kit moved out of the repo.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.
