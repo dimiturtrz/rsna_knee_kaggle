@@ -75,6 +75,10 @@ trainer can read. The stub now takes the resolved processed root from the checke
 `core.paths`, so no arm pays a subprocess to learn where the data is. A check whose own harness lies
 reports thirty-four defects and contains one.
 
+Measured 2026-08-16 once the harness was honest: **34 arms, 0 refused, 0 uncached, 0 broken** — every
+committed recipe survives a real epoch on the card. That is the pipeline's readiness answered by
+execution rather than by inspection.
+
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed

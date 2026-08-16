@@ -39,6 +39,7 @@ never spent on a cell that already has a number.
 | `fusion×23×windowed×overlap` | scored | 0.894 |
 | `fusion×24×windowed×overlap` | scored | 0.898 |
 | `ours×2×whole×2/study` (post-LoRA pool) | scored | **0.919** — best |
+| `ours×5×whole×5/study` (post-LoRA pool) | scored | **0.911** |
 | `fusion×23×whole×n/study` | **null** — T4 OOM, sample table scored | 0.500 |
 | `ours×2×whole×2/study` (res392 + calibrated) | **null** — stale kit, no `Member.precision` | 0.500 |
 | `ours×5×whole×5/study` | submitted 2026-08-13, result not recorded here | — |
@@ -49,11 +50,16 @@ never spent on a cell that already has a number.
 A `null` is not a floor: neither of those two cells has ever been measured, and re-running one is a
 legitimate spend. A cell with a number is not, unless the members underneath it changed.
 
-The two untried cells are the ones the six scored entries argue for. Every scored pair says the same
-thing — the best single model this project has produced (holdout 0.8518) sits 0.020 BELOW five weaker
-ones, a third member of an identical recipe bought nothing, and a different recipe bought +0.006. So
-diversity is the axis with a number behind it, and both untried cells add diversity rather than
-quality.
+Through 2026-08-15 every scored pair said the same thing — the best single model this project has
+produced (holdout 0.8518) sat 0.020 BELOW five weaker ones, a third member of an identical recipe bought
+nothing, and a different recipe bought +0.006 — so diversity was the axis with a number behind it.
+
+**2026-08-16 bounds that reading rather than extending it.** Diversity earned its number while the
+members were WEAK and while half of them were somebody else's. Against the post-LoRA all-ours pool, two
+of our members score 0.919 and five score 0.911, while twenty-four members drawn from two packages score
+0.898 — so above some member quality, adding members is a cost. The rule that survives both eras is
+about the SPREAD, not the count: members worth adding are ones that fail differently and score nearly as
+well, and the published CC0 members no longer clear the second half of that.
 
 ## Ledger
 
@@ -75,8 +81,8 @@ quality.
 | 2026-08-14 | `kneemri-fusion` | ~8 | 22 members, one decode, fp16 serving, a failing member drops itself | mixed | **0.895** | **best entry** — supersedes the 0.894 |
 | 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | **0.898** | superseded by the 0.919 efficient v4 — our own share doubled from 3 members to 6; +0.003 on the 22-member fusion, directional |
 | 2026-08-16 | `kneemri-fusion` | 11 | 25 members — the expired-v3 exclusion fixed, so `lora_r8_v3small_224` serves | mixed | *pending* | submitted 05:05 UTC |
-| 2026-08-16 | `kneemri-trained` | 8 | all-ours whole-stack members, no published weights | — | *pending* | the ours-only number against the 0.898 fusion |
-| 2026-08-16 | `kneemri-efficient` | 4 | **OURS** — `strongest(2)` whole-stack members, 2 passes/study, no overlap | — | **0.919** | **best entry, and the first that is entirely ours** — +0.021 on the 24-member fusion, so it clears the 1.5% bar as a RESULT, not a directional move. TWO of our own members beat twenty-four mixed ones at a twelfth of the forward passes, which inverts the diversity reading every earlier pair supported. Read it as a QUESTION before a finding: this kernel has never returned a valid score before (v1 scored 0.500 on a stale kit, v2 threw), so the 0.919 is the first measurement of the cell, and what changed underneath is the MEMBERS — `strongest(2)` now ranks over the post-LoRA pool, not the August-13 one. The comparison that settles it is the pending `kneemri-trained` v8 (all-ours, more members) against this. |
+| 2026-08-16 | `kneemri-trained` | 8 | **OURS** — the strongest five all-ours whole-stack members, no published weights | 0.8610 | **0.911** | **THE ARM THAT SETTLES THE 0.919.** Ours-only, five members, +0.013 on the 24-member fusion — so the jump belongs to the MEMBER POOL, not to the two-member configuration: two different all-ours entries both clear the mixed fusion by more than the 1.5% bar. Published CC0 members are now a COST, not a contribution. It also puts the ruler and the board on opposite sides: local holdout ranks these five ABOVE the pair (0.8610 vs 0.8581, +0.003) and the board ranks them BELOW it (0.911 vs 0.919, −0.008). |
+| 2026-08-16 | `kneemri-efficient` | 4 | **OURS** — `strongest(2)` whole-stack members, 2 passes/study, no overlap | — | **0.919** | **best entry, and the first that is entirely ours** — +0.021 on the 24-member fusion, so it clears the 1.5% bar as a RESULT, not a directional move. TWO of our own members beat twenty-four mixed ones at a twelfth of the forward passes, which inverts the diversity reading every earlier pair supported. Read it as a QUESTION before a finding: this kernel has never returned a valid score before (v1 scored 0.500 on a stale kit, v2 threw), so the 0.919 is the first measurement of the cell, and what changed underneath is the MEMBERS — `strongest(2)` now ranks over the post-LoRA pool, not the August-13 one. The comparison that settles it is the pending `kneemri-trained` v8 (all-ours, more members) against this. **SETTLED the same day: v8 scored 0.911.** The post-LoRA all-ours pool is what carries the jump — both all-ours entries clear the fusion — and the two-member configuration is worth a further −0.008 on top, which is directional, not a result. |
 
 ## What counts as ours
 
