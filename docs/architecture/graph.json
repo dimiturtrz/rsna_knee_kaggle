@@ -699,6 +699,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
+      "target": "kneemri.runs.recorded_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
@@ -957,7 +963,7 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
-      "target": "kneemri.runs.member_record",
+      "target": "kneemri.runs.recorded_run",
       "weight": 1
     },
     {
@@ -1329,12 +1335,24 @@
     {
       "kind": "import",
       "source": "kneemri.runs.metrics_recipe",
-      "target": "kneemri.runs.member_record",
+      "target": "kneemri.runs.recorded_run",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.runs.metrics_recipe",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.recorded_run",
+      "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.recorded_run",
       "target": "kneemri.runs.run_metrics",
       "weight": 1
     },
@@ -3969,6 +3987,12 @@
     {
       "kind": "holds",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
+      "target": "kneemri.runs.recorded_run.RecordedRun",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.run_comparison.RunComparison",
       "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
@@ -4059,7 +4083,13 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
-      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
       "weight": 1
     },
     {
@@ -4113,7 +4143,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
-      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
       "weight": 1
     },
     {
@@ -4863,7 +4893,7 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.Backfill.of",
-      "target": "kneemri.runs.member_record.StampedRun.of",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
       "weight": 1
     },
     {
@@ -6333,13 +6363,7 @@
     {
       "kind": "calls",
       "source": "kneemri.runs.metrics_recipe.MetricsRecipe.backfill",
-      "target": "kneemri.runs.metrics_recipe.MetricsRecipe.checkpoint_of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.runs.metrics_recipe.MetricsRecipe.backfill",
-      "target": "kneemri.runs.metrics_recipe.MetricsRecipe.recipe_of",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
       "weight": 1
     },
     {
@@ -6362,12 +6386,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.runs.metrics_recipe.MetricsRecipe.recipe_of",
-      "target": "kneemri.runs.member_record.StampedRun.of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.runs.metrics_recipe.main",
       "target": "core.paths.DataRoot.from_config",
       "weight": 1
@@ -6382,6 +6400,42 @@
       "kind": "calls",
       "source": "kneemri.runs.metrics_recipe.main",
       "target": "kneemri.runs.metrics_recipe.MetricsRecipe.backfill",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.recorded_run.RecordedRun",
+      "target": "kneemri.runs.recorded_run.RecordedRun",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.recorded_run.RecordedRun",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.recorded_run.RecordedRun.of",
+      "target": "kneemri.runs.member_record.StampedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.recorded_run.RecordedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.recorded_run.RecordedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.recorded_run.RecordedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
       "weight": 1
     },
     {
@@ -7431,7 +7485,7 @@
       "role": null
     },
     {
-      "descendants": 92,
+      "descendants": 93,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -8047,7 +8101,7 @@
       "role": null
     },
     {
-      "descendants": 4,
+      "descendants": 5,
       "id": "kneemri.runs",
       "label": "runs",
       "level": "module",
@@ -8074,6 +8128,14 @@
       "descendants": 0,
       "id": "kneemri.runs.metrics_recipe",
       "label": "metrics_recipe",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.recorded_run",
+      "label": "recorded_run",
       "level": "module",
       "parent": "kneemri.runs",
       "role": null
@@ -9125,6 +9187,14 @@
       "level": "class",
       "parent": "kneemri.runs.metrics_recipe",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.recorded_run.RecordedRun",
+      "label": "RecordedRun",
+      "level": "class",
+      "parent": "kneemri.runs.recorded_run",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -11282,6 +11352,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
       "label": "reader_change",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "label": "recipe",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
@@ -13576,26 +13654,18 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.runs.metrics_recipe.MetricsRecipe.checkpoint_of",
-      "label": "checkpoint_of",
-      "level": "method",
-      "parent": "kneemri.runs.metrics_recipe.MetricsRecipe",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.runs.metrics_recipe.MetricsRecipe.recipe_of",
-      "label": "recipe_of",
-      "level": "method",
-      "parent": "kneemri.runs.metrics_recipe.MetricsRecipe",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.runs.metrics_recipe.main",
       "label": "main",
       "level": "method",
       "parent": "kneemri.runs.metrics_recipe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.recorded_run.RecordedRun.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.runs.recorded_run.RecordedRun",
       "role": null
     },
     {
@@ -13618,6 +13688,14 @@
       "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.best",
       "label": "best",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.checkpoint",
+      "label": "checkpoint",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
