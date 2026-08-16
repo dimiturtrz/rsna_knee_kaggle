@@ -13,11 +13,26 @@ from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
-NOT_AN_AXIS = {"out", "vram_gb", "paths", "labels", "eval_labels"}
+NOT_AN_AXIS = {
+    "out",
+    "vram_gb",
+    "paths",
+    "labels",
+    "eval_labels",
+    "compile_encoder",
+    "recompute_activations",
+}
 """Options that differ between any two runs without making them unmatched: where the member is written,
-how much of the card it was allowed, and which files it read them from. Listed rather than inferred, so
-a genuinely confounding option can never be dropped by a heuristic — the whole value of this line is
-that everything it does NOT name is a difference somebody has to justify."""
+how much of the card it was allowed, which files it read them from, and the two throughput flags. Listed
+rather than inferred, so a genuinely confounding option can never be dropped by a heuristic — the whole
+value of this line is that everything it does NOT name is a difference somebody has to justify.
+
+The throughput pair is here on a MEASUREMENT, not on the claim that recompute and compile are
+mathematically neutral. The `throughput` arm ran all four combinations for one epoch on the same fold:
+plain 0.7604, compiled 0.7606, checkpointing on 0.7612, off 0.7601 — a spread of 0.0011 against a
+0.0053 noise floor. Reporting them as confounds made every older run unmatched against every newer one
+on a difference smaller than the instrument can see, which is the failure mode this list exists to
+prevent in the other direction."""
 
 
 @dataclass(frozen=True)

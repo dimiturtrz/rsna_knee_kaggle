@@ -98,6 +98,16 @@ def test_unmatched(tmp_path: Path):
     assert "control predates train_size=0" in said
     assert "unset" not in said, "an absence is not a value the control held"
 
+    # The throughput flags are not axes: the `throughput` arm measured all four combinations at 0.7601
+    # to 0.7612 on one fold, a spread five times under the noise floor. Calling them confounds made
+    # every older run unmatched against every newer one on a difference the instrument cannot see.
+    older, newer = _run(tmp_path, "older", CONTROL), _run(tmp_path, "newer", ARM)
+    _describe(older, {"crop_mm": "130.0", "compile_encoder": "False", "recompute_activations": "False"})
+    _describe(newer, {"crop_mm": "130.0", "compile_encoder": "True", "recompute_activations": "True"})
+    again = RunComparison(older, [newer])
+
+    assert again.unmatched(again.arms[0]) == "matched on every option both runs recorded"
+
 
 def test_unmatched_says_so_when_a_run_recorded_no_recipe(tmp_path: Path):
     """Silence read as a match is the failure; every file predating the recipe is in that state."""
