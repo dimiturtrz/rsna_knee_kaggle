@@ -71,7 +71,10 @@ quality.
 | 2026-08-13 | `kneemri-trained` | 5* | **OURS** — strongest 5 whole-stack members, stamped kit | 0.8482 | *(no score returned)* | one of the three "Notebook Threw Exception" entries (knee-b6p) |
 | 2026-08-13 | `kneemri-efficient` | 2 | the same 2 members on the fixed kit | 0.8509 | *(no score returned)* | second of the three exceptions |
 | 2026-08-14 | `kneemri-fusion` | ~8 | 22 members, one decode, fp16 serving, a failing member drops itself | mixed | **0.895** | **best entry** — supersedes the 0.894 |
-| 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | *pending* | our own share of the fusion doubled from 3 members to 6 |
+| 2026-08-15 | `kneemri-fusion` | 10 | 24 members (our 6 + the published 20 less the v3 and the nine-slot member) | mixed | **0.898** | **best entry** — our own share doubled from 3 members to 6; +0.003 on the 22-member fusion, directional |
+| 2026-08-16 | `kneemri-fusion` | 11 | 25 members — the expired-v3 exclusion fixed, so `lora_r8_v3small_224` serves | mixed | *pending* | submitted 05:05 UTC |
+| 2026-08-16 | `kneemri-trained` | 8 | all-ours whole-stack members, no published weights | — | *pending* | the ours-only number against the 0.898 fusion |
+| 2026-08-16 | `kneemri-efficient` | 4 | strongest few members, 2 passes/study | — | *pending* | the speed/score tradeoff arm |
 
 ## What counts as ours
 
@@ -327,18 +330,23 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   the sibling celltrack campaign, so kneemri runs serialised behind them: submissions are limited by
   SESSIONS, not by the five daily slots. A completed kernel version can be submitted at any later time,
   so a long run started before a machine sleeps is not wasted — it is submitted the next day.
-- **ONE code submission may be PENDING at a time, and pending lasts as long as the hidden rerun.** Every
-  `CreateCodeSubmission` while another is pending answers `400 Client Error` with no body — the same
-  status a missing `-v` gives, so the error does not name its cause. Measured 2026-08-15: the 21:06
-  entry was still `PENDING` at 22:30, and Kaggle reruns the notebook on the hidden test set before
-  scoring, so the wait is HOURS, not minutes. Consequence for slot planning: the five daily slots are
-  not spendable in an evening. If a day's slots matter, submit the first entry early and treat the
-  scoring queue — not the kernel queue and not the daily quota — as the binding constraint. The block is
-  per COMPETITION, not per kernel: with fusion pending, a submit of `kneemri-trained v8` — a different
-  kernel, COMPLETE, never submitted today — returned the same 400 (22:39 UTC). So queueing a second
-  kernel while the first is pending is not a way around it. The 21:06 entry was STILL pending at 22:58,
-  1h52 in, with two COMPLETE kernel versions waiting behind it — so four of that day's five slots expired
-  unspent at 00:00 UTC, and slots do not roll over. A day's slots are spent by submitting EARLY and
-  spacing entries by hours, never by having five entries ready in one evening.
+- **READ THE ERROR BODY. The CLI throws it away, and a whole evening was spent on the theory it left
+  behind.** `kaggle competitions submit` prints `400 Client Error ... CreateCodeSubmission` and nothing
+  else. The body says:
+  `{"error":{"code":400,"message":"This competition requires an output FileName for Notebook Submissions."}}`
+  — the submit was missing `-f submission.csv`, which for a CODE submission names the notebook's OUTPUT
+  file, not a local path to upload. Every 400 on 2026-08-15/16 was that one argument.
+  I diagnosed it instead as "one code submission may be PENDING at a time, per competition" — the 400s
+  did coincide with a pending entry, a second kernel got the same 400, and the story explained every
+  observation. It was still wrong, and four of that day's five slots expired at 00:00 UTC (slots do not
+  roll over) waiting for a queue that was never blocking. Thirty retries at 110 s apart tested the same
+  wrong argument thirty times. **A retry loop is not a diagnosis** — if the first attempt fails without
+  naming a cause, get the cause before automating the attempt:
+  ```python
+  api.competition_submit_code(None, "probe", "<comp>", "<owner>/<kernel>", <version>)  # raises with .response.text
+  ```
+  What IS measured about the queue: Kaggle reruns the notebook on the hidden test set before scoring, so
+  a `PENDING` entry stays pending for HOURS (the 21:06 entry scored at about 05:00, ~8 h). And three
+  entries submitted back to back at 05:05 were all accepted, so a pending entry blocks nothing.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.

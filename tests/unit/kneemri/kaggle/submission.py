@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -366,3 +367,17 @@ def test_peak_vram(tmp_path: Path):
     submission = _submission(tmp_path)
 
     assert submission.peak_vram() == 0.0
+
+
+def test_peak_rss(tmp_path: Path):
+    """A number where the host can be asked and zero where it cannot — never a raised ImportError.
+
+    Windows has no `resource`, so the reading is unavailable exactly on the dev machine and available
+    exactly on the host that kills kernels. The chunk line must log either way.
+    """
+    submission = _submission(tmp_path)
+
+    held = submission.peak_rss()
+
+    assert held >= 0.0
+    assert (held > 0.0) == (sys.platform != "win32"), "measured where rusage exists, zero where it does not"

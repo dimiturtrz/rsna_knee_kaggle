@@ -10,9 +10,11 @@ happen before this module can be imported at all. That part stays in the kernel,
 part that should.
 """
 
+import importlib
 import logging
 import multiprocessing
 import os
+import sys
 import time
 from collections.abc import Iterator
 from concurrent.futures import Executor, Future, ProcessPoolExecutor, ThreadPoolExecutor
@@ -37,6 +39,12 @@ STUDY_CHUNK = 48
 336 pixels is about 390 MB, against a Kaggle host with 32 GB and four CPUs."""
 
 BYTES_PER_GB = 1024**3
+
+KIB_PER_GB = 1024**2
+"""`ru_maxrss` is kibibytes on Linux, which is the only host this instrument reports from."""
+
+rusage = importlib.import_module("resource") if sys.platform != "win32" else None
+"""The host-memory instrument, absent on the dev machine and present on every host that runs a kernel."""
 
 POOL_FLOOR = 20
 """Below this many studies, spawning the pool costs more than it saves. DERIVED, not picked: the Kaggle
@@ -243,7 +251,7 @@ class Submission:
                 logger.info(
                     f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
                     f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s, "
-                    f"{projection}peak {self.peak_vram():.1f} GB"
+                    f"{projection}peak {self.peak_vram():.1f} GB vram, {self.peak_rss():.1f} GB host"
                 )
                 yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
 
@@ -257,6 +265,25 @@ class Submission:
         if self.device.type != "cuda":
             return 0.0
         return torch.cuda.max_memory_allocated() / BYTES_PER_GB
+
+    def peak_rss(self) -> float:
+        """The highest HOST memory this process and its reaped decode workers have held, in GB.
+
+        The other ceiling, and the one `peak_vram` alone cannot see. A host out-of-memory kill is not
+        an exception the kernel can catch and log — the process is killed — so it leaves exactly the
+        trace three lost entries left: the last chunk line, then nothing. Reporting only the VRAM peak
+        answers the wrong half of "how close was it", since a chunk of 48 lives in host memory before
+        it reaches the card and the decode pool holds its own copies besides.
+
+        Children count because the pool is where the pixels are decoded, and `RUSAGE_CHILDREN` reports
+        only workers that have EXITED — a pool that lives for the whole read contributes nothing until
+        it is shut down. So this under-reports while the pool runs and is honest once it does not; it
+        is a floor on the true peak, never a ceiling.
+        """
+        if rusage is None:
+            return 0.0
+        held = rusage.getrusage(rusage.RUSAGE_SELF).ru_maxrss + rusage.getrusage(rusage.RUSAGE_CHILDREN).ru_maxrss
+        return held / KIB_PER_GB
 
     def pool(self, studies: int = POOL_FLOOR) -> Executor:
         """The decode pool: SPAWNED processes where they help, threads where they cannot be used.
