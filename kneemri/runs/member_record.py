@@ -303,26 +303,27 @@ class StampedRun:
     """The run's flags as strings, which is how `payload` had to store them: every loader here reads
     with `weights_only=True`, and that refuses to unpickle a Path."""
 
-    kept_epoch: int
+    kept_epoch: int | None
     """The epoch whose weights were SAVED — not the last one run. Under patience those differ, and
-    predicting against the later number describes a model that was thrown away."""
+    predicting against the later number describes a model that was thrown away.
+
+    None for the older half of the ledger, which wrote no such key. It is None rather than derived
+    from `epochs_done`: that read is what stamped `wsfold0_e6`'s predictions as epoch 11 when its
+    weights are the epoch-6 best. `epochs_done` is only the kept epoch plus one for a run that kept
+    its LAST epoch — on all three pre-`epoch` checkpoints checked it equals `options.epochs`, the
+    length the run was asked for, which under patience is a different epoch entirely."""
 
     @classmethod
     def of(cls, checkpoint: Path) -> "StampedRun | None":
-        """The stamp, or None for a checkpoint written before runs recorded one.
-
-        `epochs_done` is the fallback for `epoch` rather than the other way round: the assembler has
-        always written it as the kept epoch plus one, while `epoch` itself is a later key that the
-        older half of the ledger does not carry.
-        """
+        """The stamp, or None for a checkpoint written before runs recorded one."""
         if not checkpoint.exists():
             return None
         saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
         options = saved.get("options")
         if not options:
             return None
-        done = int(saved.get("epochs_done", 1))
+        kept = saved.get("epoch")
         return cls(
             options={name: str(value) for name, value in options.items()},
-            kept_epoch=int(saved.get("epoch", done - 1)),
+            kept_epoch=None if kept is None else int(kept),
         )

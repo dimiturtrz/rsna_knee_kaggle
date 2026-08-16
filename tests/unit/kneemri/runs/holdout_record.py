@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.runs.holdout_record import DERIVED, HoldoutReading, HoldoutRecord
+from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutReading, HoldoutRecord
 
 LABELS = 12
 
@@ -80,6 +80,28 @@ def test_write_commits_by_rename_so_a_kill_cannot_truncate_a_record(tmp_path: Pa
     assert stored is not None
     assert stored.epoch == 2, "the second write replaced the first whole"
     assert not list(tmp_path.glob("*.pending.npz")), "nothing is left half-committed beside the checkpoint"
+
+
+def test_restamp(tmp_path: Path):
+    """Seven records on disk name an epoch that was guessed, and the arrays beside it were never wrong.
+
+    Re-deriving them to repair one integer would cost 55 inference passes and re-introduce the
+    cross-precision tolerance into records already inside it. The predictions must come back untouched.
+    """
+    record = HoldoutRecord(tmp_path / "member.pt")
+    predictions = np.linspace(0, 1, 2 * LABELS).reshape(2, LABELS)
+    truth = np.zeros((2, LABELS), dtype=np.float32)
+    record.write(["a", "b"], predictions, truth, epoch=11, source=DERIVED)
+
+    assert record.restamp(UNKNOWN_EPOCH), "a stamp that moved says so, so a walk can report what it fixed"
+    assert not record.restamp(UNKNOWN_EPOCH), "and a record already right is not rewritten"
+
+    stored = record.read()
+    assert stored is not None
+    assert stored.epoch == UNKNOWN_EPOCH
+    assert stored.predictions == pytest.approx(predictions, abs=1e-6), "the arrays were never the defect"
+    assert stored.source == DERIVED, "nor was what produced them"
+    assert not HoldoutRecord(tmp_path / "absent.pt").restamp(2), "nothing to correct is not a crash"
 
 
 def test_named():

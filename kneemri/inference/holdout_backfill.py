@@ -40,7 +40,7 @@ from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.labels.targets import Targets
-from kneemri.runs.holdout_record import DERIVED, HoldoutRecord
+from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
 from kneemri.runs.member_record import StampedRun
 from kneemri.runs.run_metrics import RunMetrics
 
@@ -79,7 +79,10 @@ class Backfill:
 
         Either way the epoch is the KEPT one, never the last: under patience a later epoch exists in
         the ledger and its weights were thrown away, so re-deriving against it would predict from a
-        model that was never saved.
+        model that was never saved. A run that recorded neither reads `UNKNOWN_EPOCH` and is still
+        back-filled — the epoch names WHICH weights predicted, and the weights are on disk regardless.
+        Refusing here would drop 36 re-derivable runs to protect a field nothing joins on yet, and
+        GUESSING here is what stamped `wsfold0_e6` as epoch 11.
         """
         metrics, stamped = RunMetrics(checkpoint), StampedRun.of(checkpoint)
         recorded, best = metrics.recipe(), metrics.best()
@@ -95,11 +98,9 @@ class Backfill:
         if int(recipe.get("fold", NO_HOLDOUT_FOLD)) == NO_HOLDOUT_FOLD:
             message = f"{checkpoint.stem}: a full-data fit held nothing out"
             raise UnbackfillableError(message)
-        epoch = int(best["epoch"]) if best is not None else (stamped.kept_epoch if stamped else None)
-        if epoch is None:
-            message = f"{checkpoint.stem}: no scored epoch, so it holds no per-label claim to re-read"
-            raise UnbackfillableError(message)
-        return cls(checkpoint=checkpoint, recipe=recipe, epoch=epoch)
+        stamped_epoch = stamped.kept_epoch if stamped else None
+        epoch = int(best["epoch"]) if best is not None else stamped_epoch
+        return cls(checkpoint=checkpoint, recipe=recipe, epoch=UNKNOWN_EPOCH if epoch is None else epoch)
 
     def split(self, identifiers: list[str], train_table: Path) -> NDArray[np.int64]:
         """The studies THIS run held out, from its own recorded folds, split seed and fold index."""
@@ -170,6 +171,9 @@ def main() -> None:
     parser.add_argument("--device", default=VisibleCards().device().type)
     parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
     parser.add_argument("--refresh", action="store_true", help="re-derive runs that already kept a record")
+    parser.add_argument(
+        "--restamp", action="store_true", help="correct an existing record's epoch only, with no inference"
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -177,13 +181,19 @@ def main() -> None:
         DataRoot.from_config(arguments.paths), torch.device(arguments.device), overlap=arguments.overlap
     )
     for checkpoint in arguments.checkpoints:
-        if HoldoutRecord(checkpoint).exists() and not arguments.refresh:
+        # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
+        # reason a refresh does — the gate is there to keep a plain walk from re-deriving what is done.
+        if HoldoutRecord(checkpoint).exists() and not (arguments.refresh or arguments.restamp):
             logger.info("%s: already keeps its predictions", checkpoint.stem)
             continue
         try:
             plan = Backfill.of(checkpoint)
         except UnbackfillableError as refusal:
             logger.info("skipped %s", refusal)
+            continue
+        if arguments.restamp:
+            moved = HoldoutRecord(checkpoint).restamp(plan.epoch)
+            logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
             continue
         member = Member.from_checkpoint(checkpoint)
         corpus, identifiers = member.cache(backfill.root.processed()).load()

@@ -32,6 +32,16 @@ one-line decision instead of a silent miss in whichever tool happens to hold tha
 RULER_TOLERANCE = 1e-6
 """Truth is stored as float32 and compared after a round trip; anything wider is a different table."""
 
+UNKNOWN_EPOCH = -1
+"""The kept epoch, for a run that never recorded which one it was.
+
+A NEGATIVE value rather than a plausible integer, because the plausible integer is what went wrong:
+the back-fill used to fall back to `epochs_done`, which the older half of the ledger writes as the
+run's CONFIGURED LENGTH — `wsfold0_e6` stamps 11 for weights that are the epoch-6 best, and three of
+three pre-`epoch` checkpoints have `epochs_done == options.epochs`. The array is right either way, so
+the stamp is cosmetic until something joins two records BY it, at which point a wrong-but-plausible
+number is a silent mis-join and this one is a visible refusal."""
+
 TRAINED = "trained"
 """The array the ledger's per-label numbers were read off, kept whole. Exact, by construction."""
 
@@ -140,6 +150,20 @@ class HoldoutRecord:
             source=np.array(source),
         )
         pending.replace(self.path)
+
+    def restamp(self, epoch: int) -> bool:
+        """Correct which epoch an existing record claims, without re-deriving it. Says whether it moved.
+
+        The arrays are the expensive part and they were never wrong — a back-fill reads the weights on
+        disk whatever epoch they came from. Only the stamp was guessed, so re-running 55 inference
+        passes to repair one integer would cost hours and re-introduce the cross-precision tolerance
+        into records that already sit inside it.
+        """
+        reading = self.read()
+        if reading is None or reading.epoch == epoch:
+            return False
+        self.write(reading.studies, reading.predictions, reading.truth, epoch, source=reading.source)
+        return True
 
     def read(self) -> HoldoutReading | None:
         """What this run predicted, or None for a run that finished before this was written."""

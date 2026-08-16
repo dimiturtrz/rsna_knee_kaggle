@@ -14,7 +14,7 @@ from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
 from kneemri.models.model import TARGETS
-from kneemri.runs.holdout_record import DERIVED, HoldoutRecord
+from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
 
 STUDIES = ["s0", "s1", "s2", "s3", "s4", "s5"]
 
@@ -158,12 +158,16 @@ def test_of_reads_the_split_from_a_checkpoint_that_kept_no_metrics_file(tmp_path
     fact.
     """
     checkpoint = tmp_path / "stamped.pt"
-    torch.save({"model": {}, "options": {**RECIPE, "epochs": "8"}, "epochs_done": 5}, checkpoint)
+    torch.save({"model": {}, "options": {**RECIPE, "epochs": "8"}, "epochs_done": 8}, checkpoint)
 
     plan = Backfill.of(checkpoint)
 
     assert plan.recipe["fold"] == "1", "its own split, taken from its own stamp"
-    assert plan.epoch == 4, "epochs_done counts the run; the epoch names the save"
+    # `epochs_done` is NOT the kept epoch plus one on this half of the ledger — all three pre-`epoch`
+    # checkpoints checked write the run's configured length there, and reading it as a save stamped
+    # `wsfold0_e6`'s predictions epoch 11 when its weights are the epoch-6 best. The arrays are still
+    # re-derivable, so the run is not refused; only the stamp says it does not know.
+    assert plan.epoch == UNKNOWN_EPOCH, "a length is not a save, and a plausible guess is the worse answer"
 
 
 def test_of_prefers_the_metrics_file_when_a_run_kept_both(tmp_path: Path):

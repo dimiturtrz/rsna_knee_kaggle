@@ -153,18 +153,26 @@ def test_of(tmp_path: Path):
     assert stamped.kept_epoch == 6
 
 
-def test_of_reads_the_kept_epoch_from_a_checkpoint_that_predates_the_epoch_key(tmp_path: Path):
-    """`epochs_done` is the kept epoch plus one, and for most of the ledger it is the only one written."""
+def test_of_refuses_to_derive_a_kept_epoch_a_checkpoint_never_wrote(tmp_path: Path):
+    """`epochs_done` was read as the kept epoch plus one. On the older half it is the run's LENGTH.
+
+    That read stamped `wsfold0_e6`'s re-derived predictions as epoch 11 while its weights are the
+    epoch-6 best, and all three pre-`epoch` checkpoints inspected carry `epochs_done == options.epochs`.
+    Under patience those are different epochs, so the derivation is a guess that looks like a fact —
+    and a stamp nothing can distrust is worse than one that says it does not know.
+    """
     record = _record()
     payload = record.payload({"w": torch.zeros(1)}, holdout=0.83, epoch=6)
     del payload["epoch"]
+    payload["epochs_done"] = 12
     checkpoint = tmp_path / "older.pt"
     torch.save(payload, checkpoint)
 
     stamped = StampedRun.of(checkpoint)
 
     assert stamped is not None
-    assert stamped.kept_epoch == 6, "not epochs_done, which counts the run rather than naming the save"
+    assert stamped.options["whole_stack"] == "True", "the split it DOES record is still readable"
+    assert stamped.kept_epoch is None, "11 was the run's length wearing a save's name"
 
 
 def test_of_returns_nothing_for_a_checkpoint_with_no_stamp(tmp_path: Path):
