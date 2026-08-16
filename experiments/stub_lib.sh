@@ -13,9 +13,13 @@ set -u
 source "$(dirname "${BASH_SOURCE[0]}")/recipe.sh"
 
 REPO="$(pwd)"
-PROCESSED="/tmp/arm_check"
-LABELS="/tmp/arm_check/labels.csv"
-LOGS="/tmp/arm_check/experiments"
+# The REAL processed root when the checker could resolve one, a fabricated path when it could not.
+# A fabricated path is enough to prove the flags parse, and it is what CI gets — but `arm_check --smoke`
+# actually RUNS the invocation, and a labels file at /tmp is a FileNotFoundError in every arm at once.
+# The derivation below is lib.sh's, character for character, so the smoke reads the file the arm would.
+PROCESSED="${ARM_CHECK_PROCESSED:-/tmp/arm_check}"
+LABELS="$PROCESSED/labels/report_labels_v2.csv"
+LOGS="$PROCESSED/experiments"
 
 require() { :; }
 hold_card() { :; }

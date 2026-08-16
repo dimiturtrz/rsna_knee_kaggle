@@ -30,12 +30,14 @@ from pathlib import Path
 
 from core.paths import DataRoot
 from kneemri.corpus.study_cache import StudyCache
+from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.training.train import TrainingOptions
 
 logger = logging.getLogger(__name__)
 
 ARMS = Path("experiments/arms")
 STUB = Path("experiments/stub_lib.sh")
+PATHS = Path("paths.yaml")
 TIMEOUT_SECONDS = 30
 """An arm that has not printed its invocation by now is doing something a lint must not wait for."""
 
@@ -60,11 +62,19 @@ class ArmCheck:
         self.stub = stub
 
     def _environment(self) -> dict[str, str]:
-        """The inherited environment, plus ARM_LIB, plus the shell's own coreutils on PATH."""
+        """The inherited environment, plus ARM_LIB, the resolved data root, and coreutils on PATH.
+
+        The stub lib fabricates a processed root when it is handed none, which is enough to prove flags
+        parse and is what CI gets. `--smoke` RUNS those flags, so it needs the real one — resolved here
+        rather than by the stub, because the stub shadows `uv` and every arm would pay a subprocess.
+        """
         path = os.environ.get("PATH", "")
         if GIT_BASH.exists():
             path = f"{GIT_BASH.parent}{os.pathsep}{path}"
-        return os.environ | {"ARM_LIB": str(self.stub.resolve()), "PATH": path}
+        environment = os.environ | {"ARM_LIB": str(self.stub.resolve()), "PATH": path}
+        if PATHS.is_file():
+            environment["ARM_CHECK_PROCESSED"] = DataRoot.from_config(PATHS).processed().as_posix()
+        return environment
 
     def invocations(self) -> dict[str, str]:
         """Each arm's `run_train` flag line, by arm name. Arms that never call it are absent.
@@ -166,6 +176,15 @@ def main() -> None:
         help="also refuse an arm whose cache is not decoded yet. Off by default because a queue may "
         "legitimately build one in an earlier slot; on when arming a queue that builds nothing.",
     )
+    parser.add_argument(
+        "--smoke",
+        type=Path,
+        default=None,
+        help="also RUN every accepted arm for one epoch on --smoke-studies studies, writing throwaway "
+        "checkpoints to this directory. Wants the card, and minutes rather than seconds — it is the "
+        "only check that sees a recipe fail on memory, which no flag check can.",
+    )
+    parser.add_argument("--smoke-studies", type=int, default=SMOKE_STUDIES)
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -177,6 +196,8 @@ def main() -> None:
     uncached = check.uncached(invocations)
     for name, key in uncached.items():
         logger.info("UNCACHED %s: nothing decoded at %s", name, key)
+    smoke = ArmSmoke(arguments.smoke_studies)
+    broken: dict[str, str] = smoke.reported(invocations, refused, arguments.smoke) if arguments.smoke else {}
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     # A CLEAN PASS OVER NOTHING IS A FAILURE, and this tool has produced one twice — once from WSL's
     # bash, once from a PowerShell PATH with no coreutils. Both times it printed "0 arms checked, 0
@@ -184,7 +205,7 @@ def main() -> None:
     if not invocations:
         logger.info("REFUSED: no arm printed an invocation — the shell, not the arms, is what failed")
         sys.exit(1)
-    if refused or (uncached and arguments.require_caches):
+    if refused or broken or (uncached and arguments.require_caches):
         sys.exit(1)
 
 
