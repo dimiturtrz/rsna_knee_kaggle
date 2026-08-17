@@ -393,6 +393,18 @@ def test_select():
     assert DeviceBudget(vram_gb=8.0).select().type == device.type, "a budget must not change WHICH device"
 
 
+def test_headroom():
+    """Free VRAM is readable without a card, and free never exceeds the total.
+
+    The suite runs on CPU, where the honest answer is (0, 0) — the point is that asking costs nothing
+    and returns a pair rather than raising, since `select` reads it before every run on every machine.
+    """
+    free, whole = DeviceBudget().headroom()
+
+    assert free <= whole, "free VRAM cannot exceed the card"
+    assert (free, whole) == (0.0, 0.0) or whole > 0, "a visible card reports a positive total"
+
+
 def test_plan():
     """Drawing every window start up front yields exactly what drawing one per step yielded.
 

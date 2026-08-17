@@ -71,6 +71,21 @@ class DeviceBudget:
     vram_gb: float = 0.0
     """0 leaves the card uncapped."""
 
+    def headroom(self) -> tuple[float, float]:
+        """Free and total VRAM in GB, as the driver sees it right now — (0, 0) with no visible card.
+
+        What is FREE is not what the card HAS, and the difference is another process. On 2026-08-17 a
+        60-study smoke that normally takes seconds crawled at 12 img/s and then died at step 4 with no
+        traceback; the card was at 32052 MiB of 32607 because a second project was training on it, and
+        three `nvlddmkm` engine resets in four minutes took both runs down. Every line in this class's
+        docstring already described that failure and the run still had no way to SAY it, because a cap
+        is arithmetic against the total and the total does not move when someone else takes the card.
+        """
+        if not torch.cuda.device_count():
+            return 0.0, 0.0
+        free, whole = torch.cuda.mem_get_info(torch.cuda.current_device())
+        return free / BYTES_PER_GB, whole / BYTES_PER_GB
+
     def select(self) -> torch.device:
         """The device to train on, already held to this budget.
 
@@ -78,12 +93,23 @@ class DeviceBudget:
         What stays here is the BUDGET, which is meaningless without a card.
         """
         device = VisibleCards().device()
-        if self.vram_gb and device.type == "cuda":
+        if device.type != "cuda":
+            return device
+        free, whole = self.headroom()
+        # NAMED BEFORE THE FIRST BATCH, never inferred from the throughput afterwards. A run that starts
+        # into a card someone else holds does not fail, it pages over PCIe and looks like a slow recipe.
+        if free < (self.vram_gb or whole):
+            logger.warning(
+                "VRAM: %.1f GB free of %.1f GB — this run wants %.1f and another process holds the rest",
+                free,
+                whole,
+                self.vram_gb or whole,
+            )
+        if self.vram_gb:
             # An INDEX, not torch.device("cuda"): both torch calls reject an indexless device.
             card = torch.cuda.current_device()
-            whole = torch.cuda.get_device_properties(card).total_memory / BYTES_PER_GB
             torch.cuda.set_per_process_memory_fraction(min(self.vram_gb / whole, 1.0), card)
-            logger.info("VRAM capped at %.1f GB of %.1f GB", self.vram_gb, whole)
+            logger.info("VRAM capped at %.1f GB of %.1f GB, %.1f free", self.vram_gb, whole, free)
         return device
 
 
