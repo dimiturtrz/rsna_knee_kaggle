@@ -23,6 +23,7 @@ from kneemri.device import VisibleCards
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from kneemri.inference.members import MemberPackage
+from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)
@@ -32,10 +33,22 @@ def main() -> None:
     """Load every member in a packaged directory and verify it against its stored fingerprint."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("comp/members"))
+    parser.add_argument("--kernel", type=Path, help="a kernel-metadata.json whose mounts must cover this package")
+    parser.add_argument("--members", nargs="*", help="the members that kernel runs; default is the whole package")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     package = MemberPackage(arguments.root)
+    mounts = package.mounts(package.named(arguments.members) if arguments.members else None)
+    # BEFORE ANY WEIGHTS LOAD, because this costs a file read and the loop below costs a GPU minute per
+    # member — and because a kernel that cannot attach an encoder fails no matter how well its members
+    # verify. Only checked when a kernel is named: the package is also read by things that never ship.
+    if arguments.kernel:
+        undeclared = KernelSources(arguments.kernel).undeclared(mounts)
+        logger.info("%s needs %s", arguments.kernel.parent.name, ", ".join(mounts))
+        if undeclared:
+            logger.info("NOT DECLARED by the kernel: %s — do not submit", ", ".join(undeclared))
+            sys.exit(1)
     device = VisibleCards().device()
     failures = 0
     for member in package.members:

@@ -5,9 +5,14 @@ import pytest
 from kneemri.models.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL, V3_SMALL_PLUS, Encoder
 
 
-def test_mounted_name():
-    """A kernel has no internet, so each variant must name the Kaggle model it is mounted from."""
-    assert ENCODERS[SMALL].mounted_name == "metaresearch/dinov2/PyTorch/small/1"
+def test_mounted_source():
+    """A kernel has no internet, so each variant names the Kaggle source it is attached from.
+
+    The two kinds are both mounts and only one is a model: DINOv2 is Kaggle's, our DINOv3 snapshot is a
+    private dataset with a directory per variant.
+    """
+    assert ENCODERS[SMALL].mounted_source == "metaresearch/dinov2/PyTorch/small/1"
+    assert ENCODERS[V3_SMALL].mounted_source == "dimiturnt/dinov3-hf/vits16"
 
 
 def test_every_variant_states_its_own_width():
@@ -37,13 +42,13 @@ def test_mount_is_refused_when_there_is_none():
     weights are published as a private dataset — so the case is stated with an encoder that has none.
     """
     with pytest.raises(ValueError, match="no Kaggle mount"):
-        _ = Encoder("nowhere", "facebook/nothing", 384).mounted_name
+        _ = Encoder("nowhere", "facebook/nothing", 384).mounted_source
 
 
 def test_dinov3_is_mountable_from_our_own_dataset():
     """Kaggle's only DINOv3 is Keras's, in a preset format `AutoModel.from_pretrained` cannot read."""
-    assert ENCODERS[V3_SMALL].mounted_name == "dimiturnt/dinov3-hf/vits16"
-    assert ENCODERS[V3_BASE].mounted_name == "dimiturnt/dinov3-hf/vitb16"
+    assert ENCODERS[V3_SMALL].mounted_source == "dimiturnt/dinov3-hf/vits16"
+    assert ENCODERS[V3_BASE].mounted_source == "dimiturnt/dinov3-hf/vitb16"
     assert ENCODERS[V3_SMALL].patch == 16, "patch 16 decides which read sizes tile cleanly"
     assert ENCODERS[V3_BASE].dim == 768
 

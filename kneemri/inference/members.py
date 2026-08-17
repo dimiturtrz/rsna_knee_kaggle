@@ -512,6 +512,26 @@ class MemberPackage:
             logger.warning("members with no recorded holdout, ranked last: %s", ", ".join(unranked))
         return ranked[:count]
 
+    def mounts(self, members: Sequence["Member"] | None = None) -> list[str]:
+        """Every Kaggle source a kernel must attach to run THESE members, deduplicated and sorted.
+
+        WHICH members is an argument because a kernel need not run the package: an entry that names a
+        two-member subset needs those two encoders and nothing else, so asking about the whole package
+        would flag mounts it is right not to declare. Measured over the ten kernels in `comp/kernels`
+        on 2026-08-17: three of them run subsets and would read as undeclared against the full package.
+
+        The weights a member was fitted on are not in its checkpoint — only the head is, and the
+        backbone is reconstructed from `variant` at load time. So a package's real dependency is the set
+        of encoder mounts its members name, and that set is derived from the members rather than typed
+        into a kernel's metadata by hand.
+
+        A variant with no mount raises through `mounted_source`, which is the case worth catching here:
+        such a member can be TRAINED and cannot be submitted, and the sentence that says so should be
+        read while packaging rather than by a kernel that has already taken the slot.
+        """
+        chosen = self.members if members is None else members
+        return sorted({ENCODERS[member.variant].mounted_source for member in chosen})
+
     def named(self, wanted: Sequence[str]) -> list["Member"]:
         """Exactly these members, in the order asked for, or a refusal naming what is not mounted.
 

@@ -81,13 +81,18 @@ class Encoder:
         raise ValueError(message)
 
     @property
-    def mounted_name(self) -> str:
-        """The Kaggle model slug this variant is mounted under in a kernel.
+    def mounted_source(self) -> str:
+        """The Kaggle source a kernel must attach for this variant — and NOT always a model slug.
 
-        Every public notebook for this competition mounts `metaresearch/dinov2/PyTorch/<variant>/1`,
-        because the kernel has no internet and cannot fetch from the hub. DINOv3 has NO official
-        mirror there — only community re-uploads — so it is stated per encoder rather than derived,
-        and asking for a mount that does not exist raises here instead of failing inside a kernel.
+        Two kinds live in one field on purpose, because a kernel needs one answer to "what must be
+        attached". DINOv2 arrives as a Kaggle *model*, `metaresearch/dinov2/PyTorch/<variant>/1`, which
+        every public notebook mounts because a kernel has no internet. DINOv3 has no official mirror
+        there — only a KerasHub preset `AutoModel` cannot read — so ours arrives as a private *dataset*,
+        `dimiturnt/dinov3-hf/<leaf>`, and a kernel declares it under `dataset_sources` instead. Which
+        list it belongs in is the kernel metadata's business; that it must be declared at all is this.
+
+        Asking for a variant with no mount raises here rather than inside a kernel, where the answer
+        costs a submission slot.
         """
         if self.mount is None:
             message = (

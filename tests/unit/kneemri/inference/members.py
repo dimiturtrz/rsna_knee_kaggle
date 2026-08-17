@@ -105,6 +105,18 @@ def test_load(tmp_path: Path):
     assert isinstance(model, StudyModel)
 
 
+def test_mounts(tmp_path: Path):
+    """A package states the encoder sources a kernel must attach, derived from its members.
+
+    Derived rather than declared: the backbone is NOT in a checkpoint — only the head is — so a kernel
+    that was never told to mount `small` fails deep inside a load with the slot already spent.
+    """
+    package, _ = _package(tmp_path)
+    assert package.mounts() == ["metaresearch/dinov2/PyTorch/small/1"]
+    assert package.mounts(package.named(["test"])) == package.mounts(), "a subset states only what it needs"
+    assert package.mounts([]) == [], "no members need no encoder"
+
+
 def test_find(tmp_path: Path):
     """The manifest decides where the package is; absence is a path, not an error."""
     assert MemberPackage.find(Mounts(root=tmp_path / "nothing-here")) is None
