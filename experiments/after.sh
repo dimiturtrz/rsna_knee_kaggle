@@ -20,7 +20,11 @@
 # CHECK THAT ENTRY BEFORE QUEUEING IT, in the same spelling — arm_check runs the arm files bare, so an
 # argument-carrying rung is otherwise queued on flags nothing has parsed or smoked:
 #
-#   python -m kneemri.experiments.arm_check --as-queued "experiments/arms/resolution.sh 448"
+#   python -m kneemri.experiments.arm_check --as-queued "experiments/arms/resolution.sh 448 448 4e-5 9" --smoke <dir>
+#
+# That check earned itself on its first run: the entry spelled "resolution.sh 448" - this comment's own
+# example until 2026-08-17 - OOMed in seconds, because the arm kept batch 12 at a size knee-d2fc had
+# measured as needing 9.
 source "$(dirname "$0")/lib.sh"
 
 MARKER="$1"; WATCH="$2"; shift 2

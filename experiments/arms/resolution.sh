@@ -68,6 +68,25 @@ CACHE_PX="${2:-448}"
 # --patience 3 saves about 9% of wall-clock and cannot change the recorded best (measured by replaying
 # every arm in the ledger).
 RATE="${3:-4e-5}"
+
+# THE BATCH IS AN ARGUMENT NOW, because the rung this arm's own examples name does not fit without it.
+# `python -m kneemri.experiments.arm_check --as-queued "experiments/arms/resolution.sh 448 448" --smoke`
+# on 2026-08-17 died with `torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.35 GiB` -
+# the queued 448 rung was carrying batch 12, which knee-d2fc measured as an OOM in six seconds while
+# batch 9 holds 20.00 GB at 560 img/s. The default stays 12, so every committed invocation and the
+# member on disk are unchanged; 448 is queued as `resolution.sh 448 448 4e-5 9`.
+#
+# It costs the single variable, and the note at the run says so: 66 within-batch pairs at 12, 36 at 9.
+# --pair-memory forms pairs ACROSS batches and is the lever that would buy it back, which makes 448 a
+# TWO-variable arm until that is run at 392 first. 420 at batch 12 is the rung that stays single.
+BATCH="${4:-12}"
+
+# The batch goes in the NAME whenever it is not the default, because two rungs at one size would
+# otherwise write one checkpoint and one ledger row - the exact shape of the dinov3 scar, where a
+# rename that matched nothing had a second probe overwriting the run it was being compared against.
+# Empty at batch 12, so every existing name and `res392_ws_s2026.pt` are byte-identical.
+TAG=""
+[ "$BATCH" = "12" ] || TAG="_b${BATCH}"
 require "$LABELS"
 
 # Fragmentation, not capacity, wrote the last 2.54 GB of that OOM: 1.17 GB sat reserved-but-unallocated
@@ -97,9 +116,9 @@ wait_for_cache "$CACHE_PX"
 # batch - 66 at batch 12, 28 at batch 8 - so shrinking the batch changes the objective and this stops
 # being a single-variable arm. If 22 GB does not hold it, Windows pages over PCIe rather than raising
 # OOM: watch img/s in the first minutes, not for a crash.
-run_train "resolution_${SIZE}" \
+run_train "resolution_${SIZE}${TAG}" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr "$RATE" --patience 3 $THROUGHPUT --vram-gb 26 \
-  --labels "$LABELS" --out "$PROCESSED/res${SIZE}_ws_s2026.pt"
+  --backbone-lr "$RATE" --batch "$BATCH" --patience 3 $THROUGHPUT --vram-gb 26 \
+  --labels "$LABELS" --out "$PROCESSED/res${SIZE}${TAG}_ws_s2026.pt"
