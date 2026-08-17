@@ -66,6 +66,12 @@ never spent on a cell that already has a number.
 | `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
 | `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
 
+**`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
+"silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
+gives a whole-stack member one centred window and never reads the flag, so v3 and v4 predict
+identically and 0.914 is a clean count reading either way. The confound was read off a log line that
+printed the REQUEST rather than the decode — since fixed, and the only real defect in that episode.
+
 ## The member-count curve is complete, and it is not a curve
 
 | members | 1 | 2 | 3 | 4 | 6 |
