@@ -13,9 +13,10 @@ medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, 
 ours* — two of our own whole-stack members, no CC0 weights. A four-member entry chosen by joint holdout
 ties it at **0.918**. Both clear the 0.895 that the 22-member mostly-grafted fusion reached, so the
 published weights we started from are now a [**cost** rather than a
-contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). The rank was last
-measured at 0.894 on 2026-08-13 (**431 of 1,395**, leader 0.946, median 0.840) and has not been
-re-measured at 0.919. The full measured account, including what was refuted, is in
+contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). On 2026-08-17
+that 0.919 stands at **84 of 1,758** — the 95th percentile, against a leader at 0.951 and a median at
+0.874. Four days earlier we were 431 of 1,395 at the 31st, *losing ground while gaining*; the gap to the
+frontier went 0.054 → **0.032**. The full measured account, including what was refuted, is in
 [interpretations/kneemri/](interpretations/kneemri/) — what actually moved the number, what the
 leaderboard taught us, [what the labels
 contain](interpretations/kneemri/2026-08-13_what-the-labels-actually-contain.md), and [the day the
