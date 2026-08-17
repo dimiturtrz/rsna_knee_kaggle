@@ -174,6 +174,18 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `lora` v2 336 | rank-8 adapters on DINOv2 | 0.8127 @ e3 | behind at every matched epoch | **killed at epoch 3** — the arm's own predicted refutation for v2 |
 | `crop80_tissue` | 80 mm about the tissue centre, 0.238 mm/px | 0.8345 | −0.0112 vs `whole_stack`, but see below | mean is the WRONG read — gate is per-label |
 | `pair_memory` | cross-step memory of 8 pairs in the ranking loss | 0.8155 @ e3 | −0.0302 vs `wsfold0_e6` | **refuted on the mean**; 0.8353 was a first run whose checkpoint was overwritten, see below |
+| `dinov3_base_lora` | DINOv3-**base**/16 + rank-8 adapters, 224 | 0.8269 | +0.0052 vs `lora` v3small | best v3 member we have, and still **not a member** — see the oracle below |
+
+### The ceiling of combining what we have is the plain average (2026-08-17)
+
+`member_curve` over seven members reports `oracle 0.8590 vs plain average 0.8588 (headroom +0.0002)`.
+The oracle picks, per finding, whichever member scores that finding best ON THIS HOLDOUT — a choice made
+with the answers, so it bounds *every* per-label weighting scheme that could be written over these
+members. It sits two orders below the 0.0062 floor above the flat rank-average, so **per-label member
+weighting is worth nothing here**, and no more members of this kind will change that: the members do not
+disagree per label in a way any rule could exploit. The same run prices the DINOv3 diversity bet —
+`best 4` (0.8612) excludes both v3 members, `best 6` with them scores 0.8603, `best 7` 0.8588. Full
+reading: `interpretations/kneemri/2026-08-17_the-oracle-ceiling-is-the-average.md`.
 
 ### `crop80_tissue` — the control is not schedule-matched, and the mean was never the gate
 
