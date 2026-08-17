@@ -237,6 +237,30 @@ def test_geometric_only():
     assert float(ratio.flatten(1).std(1).max()) < 1e-3, "a pure gain scales every pixel identically"
 
 
+def test_geometric_only_does_not_compute_the_ops_it_disables():
+    """A disabled transform is SKIPPED, not computed and multiplied by zero.
+
+    Masked arithmetic gives the right answer either way, which is why this went unnoticed: every step
+    of every run in the ledger paid for a full-tensor `pow` and a `conv2d` blur whose outputs were
+    discarded — 15.5 ms and 3.23 GB of transient allocation a step against 2.0 ms and 1.29 GB, at
+    the whole-stack shape on a 5090.
+
+    Asserted through the GENERATOR, which is the only externally visible trace an op leaves when its
+    result is thrown away: gamma, blur and contrast each draw from it, so a config that disables all
+    three must advance it by exactly the gain's one draw. Comparing outputs cannot see this, and
+    timing it would be a flaky test.
+    """
+    trainer = _trainer()
+    trainer.augment_config = AugmentConfig.geometric_only()
+    images = torch.rand(4, 3, 16, 16)
+
+    gain_only = torch.Generator().manual_seed(7)
+    torch.rand((4, 1, 1, 1), generator=gain_only)
+    spent = torch.Generator().manual_seed(7)
+    trainer._intensity(images, spent)
+    assert torch.equal(spent.get_state(), gain_only.get_state()), "a disabled op still drew from the generator"
+
+
 def test_intensity_perturbs_and_stays_in_range():
     """The full config must actually bite, and must not leave [0, 1] — the cache is uint8."""
     trainer = _trainer()

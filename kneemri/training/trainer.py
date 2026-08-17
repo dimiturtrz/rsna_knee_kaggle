@@ -432,30 +432,56 @@ class Trainer:
         return nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
 
     def _intensity(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
-        """Gain, gamma, blur, contrast and noise — the scanner-variation axis, on [0, 1] inputs."""
+        """Gain, gamma, blur, contrast and noise — the scanner-variation axis, on [0, 1] inputs.
+
+        EACH OP IS SKIPPED WHEN ITS OWN CONFIG DISABLES IT, which `noise` already did and the other
+        three did not. A disabled op is not free: the mask arithmetic multiplies its result by zero,
+        but the result is computed first, over the whole batch. The default config is
+        `geometric_only`, so every step of every run in the ledger has paid for a full-tensor `pow`
+        and a `conv2d` blur whose outputs were then discarded.
+
+        MEASURED on a 5090 at the whole-stack shape (batch 12, six slots, twelve slices, 448 px):
+        15.5 ms a step against 2.0 ms, and 3.23 GB of transient allocation against 1.29. The time is
+        ~1.2% of a ~1.15 s step — directional, not a result; the allocation is freed before the
+        encoder runs, so it does not move the run's peak either. It is taken because computing a
+        value in order to multiply it by zero is dead work, not because either number is a lever.
+
+        The enabled path is unchanged (18.7 ms against 19.0 — one guard's worth of noise). The
+        disabled path differs by one ulp: dropping `(x - mean) * 1 + mean` is not bitwise identity,
+        and after requantisation to uint8 that shows as a 1 LSB difference on 1e-6 of pixels, at
+        rounding boundaries only.
+
+        A SKIPPED OP ALSO SKIPS ITS DRAWS, so `torch_generator` advances differently and a rerun of an
+        existing arm gets a different realisation of the same augmentation distribution. That is a
+        reproducibility cost with no distributional one, and it is the reason this is worth naming
+        rather than filing as a tidy-up: the pixels differ, the recipe does not.
+        """
         config, count, device = self.augment_config, images.shape[0], images.device
         shape = (count, 1, 1, 1)
 
         gain = 1 + (torch.rand(shape, generator=generator, device=device) * 2 - 1) * config.gain_jitter
         images = images * gain
 
-        low, high = config.gamma
-        exponent = torch.rand(shape, generator=generator, device=device) * (high - low) + low
-        apply_gamma = (torch.rand(shape, generator=generator, device=device) < config.gamma_probability).float()
-        images = apply_gamma * images.clamp(0, 1) ** exponent + (1 - apply_gamma) * images
+        if config.gamma_probability > 0:
+            low, high = config.gamma
+            exponent = torch.rand(shape, generator=generator, device=device) * (high - low) + low
+            apply_gamma = (torch.rand(shape, generator=generator, device=device) < config.gamma_probability).float()
+            images = apply_gamma * images.clamp(0, 1) ** exponent + (1 - apply_gamma) * images
 
-        apply_blur = (torch.rand(shape, generator=generator, device=device) < config.blur_probability).float()
-        channels = images.shape[1]
-        kernel = self._BLUR.to(device, images.dtype).view(1, 1, 3, 3).expand(channels, 1, 3, 3)
-        blurred = nn.functional.conv2d(images, kernel, padding=1, groups=channels)
-        images = apply_blur * blurred + (1 - apply_blur) * images
+        if config.blur_probability > 0:
+            apply_blur = (torch.rand(shape, generator=generator, device=device) < config.blur_probability).float()
+            channels = images.shape[1]
+            kernel = self._BLUR.to(device, images.dtype).view(1, 1, 3, 3).expand(channels, 1, 3, 3)
+            blurred = nn.functional.conv2d(images, kernel, padding=1, groups=channels)
+            images = apply_blur * blurred + (1 - apply_blur) * images
 
         low, high = config.contrast
-        contrast = torch.rand(shape, generator=generator, device=device) * (high - low) + low
-        # Contrast scales about the image's own mean, so it changes the SPREAD of intensities without
-        # also shifting the level — which `gain` above is already responsible for.
-        mean = images.mean(dim=(1, 2, 3), keepdim=True)
-        images = (images - mean) * contrast + mean
+        if (low, high) != (1.0, 1.0):
+            contrast = torch.rand(shape, generator=generator, device=device) * (high - low) + low
+            # Contrast scales about the image's own mean, so it changes the SPREAD of intensities without
+            # also shifting the level — which `gain` above is already responsible for.
+            mean = images.mean(dim=(1, 2, 3), keepdim=True)
+            images = (images - mean) * contrast + mean
 
         if config.noise > 0:
             images = images + torch.randn(images.shape, generator=generator, device=device) * config.noise
