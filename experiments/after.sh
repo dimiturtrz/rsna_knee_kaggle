@@ -17,6 +17,10 @@
 # process ended, never that it succeeded.
 #
 # An arm may carry its own arguments as ONE argv element: "experiments/arms/resolution.sh 448".
+# CHECK THAT ENTRY BEFORE QUEUEING IT, in the same spelling — arm_check runs the arm files bare, so an
+# argument-carrying rung is otherwise queued on flags nothing has parsed or smoked:
+#
+#   python -m kneemri.experiments.arm_check --as-queued "experiments/arms/resolution.sh 448"
 source "$(dirname "$0")/lib.sh"
 
 MARKER="$1"; WATCH="$2"; shift 2

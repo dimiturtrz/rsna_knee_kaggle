@@ -116,6 +116,20 @@ class ArmCheck:
             environment["ARM_CHECK_PROCESSED"] = DataRoot.from_config(PATHS).processed().as_posix()
         return environment
 
+    def queued(self, entries: list[str]) -> dict[str, str]:
+        """The flag lines of arms invoked AS A QUEUE WOULD invoke them — with their own arguments.
+
+        THE HALF THIS CHECK COULD NOT SEE. `after.sh` takes an arm as one argv element carrying its
+        arguments (`"experiments/arms/resolution.sh 448"`), and every check here runs the arm files
+        BARE. So an arm's non-default rungs — 448 px, a different LoRA rank, a longer schedule — were
+        queued on flags that nothing had ever parsed, which is exactly the flag-typo-costs-a-queue-slot
+        failure this module exists to prevent, at the one moment the arm is not the shipping one.
+
+        Takes the entry in `after.sh`'s spelling rather than a name plus a list, so what is checked is
+        the string that will be queued, character for character.
+        """
+        return self._printed([shlex.split(entry, posix=False) for entry in entries])
+
     def invocations(self) -> dict[str, str]:
         """Each arm's `run_train` flag line, by arm name. Arms that never call it are absent.
 
@@ -123,11 +137,15 @@ class ArmCheck:
         cache build — and have no flags to check. They time out or print nothing, and are skipped
         rather than reported: a lint that cries about files it cannot check gets ignored.
         """
+        return self._printed([[str(arm)] for arm in sorted(self.arms.glob("*.sh"))])
+
+    def _printed(self, commands: list[list[str]]) -> dict[str, str]:
+        """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints."""
         found: dict[str, str] = {}
-        for arm in sorted(self.arms.glob("*.sh")):
+        for command in commands:
             try:
                 done = subprocess.run(  # noqa: S603 - fixed argv, our own files, no shell
-                    [str(GIT_BASH) if GIT_BASH.exists() else "bash", str(arm)],
+                    [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
                     capture_output=True,
                     text=True,
                     timeout=TIMEOUT_SECONDS,
@@ -293,11 +311,23 @@ def main() -> None:
         "on the card; a single arm about to be queued is two minutes. Names are the ones the arms "
         "print, and a name that matches no arm is refused rather than quietly selecting nothing.",
     )
+    parser.add_argument(
+        "--as-queued",
+        nargs="+",
+        default=None,
+        metavar="ENTRY",
+        help="check the arms AS A QUEUE WOULD RUN THEM, each entry being one `after.sh` argv element "
+        "carrying its own arguments: --as-queued 'experiments/arms/resolution.sh 448'. Without this "
+        "every check here runs the arm bare, so a non-default rung is queued on flags nothing parsed, "
+        "cache-checked or smoked — the flag-typo-costs-a-slot failure, at the one invocation that is "
+        "not the shipping one. Composes with --smoke.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     check = ArmCheck(arguments.arms, arguments.stub)
-    invocations = check.selected(check.invocations(), arguments.only)
+    printed = check.queued(arguments.as_queued) if arguments.as_queued else check.invocations()
+    invocations = check.selected(printed, arguments.only)
     refused = check.refused(invocations)
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)

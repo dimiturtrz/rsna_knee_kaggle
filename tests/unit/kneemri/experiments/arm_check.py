@@ -198,3 +198,21 @@ def test_invocations(tmp_path: Path):
     assert found == {"real": "--fold 0 --epochs 8"}, (
         "a retired arm reaches no parser, so it is never reported UNCACHED for a cache nobody should build"
     )
+
+
+def test_queued(tmp_path: Path):
+    """An arm carrying ARGUMENTS is checked on the flags those arguments produce, not on its defaults.
+
+    `after.sh` queues an arm as one argv element with its own arguments, and every other check here runs
+    the arm bare — so a non-default rung was queued on flags nothing had parsed. Entries are taken in
+    that same spelling, so what is checked is the string that will be queued.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "rung.sh").write_text(
+        'source "${ARM_LIB}"\nrun_train "rung_${1:-8}" --fold 0 --epochs "${1:-8}"\n', encoding="utf-8"
+    )
+    check = ArmCheck(arms, Path("experiments/stub_lib.sh"))
+
+    assert check.queued([f"{(arms / 'rung.sh').as_posix()} 12"]) == {"rung_12": "--fold 0 --epochs 12"}
+    assert check.invocations() == {"rung_8": "--fold 0 --epochs 8"}, "bare stays bare — the default rung"
