@@ -105,8 +105,11 @@ def main() -> None:
 
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
-    # ONE model, no ensemble — see the module docstring.
-    KernelRun(members=1).run()
+    # ONE model, no ensemble — see the module docstring. `overlap=False` is NOT the default and is stated
+    # for that reason: every other point on the board's member-count curve passed it explicitly, and a
+    # bare KernelRun(members=1) inherits overlap=True, which would vary the decode alongside the count and
+    # leave this arm unreadable as a count.
+    KernelRun(members=1, overlap=False).run()
 
 
 if __name__ == "__main__":
