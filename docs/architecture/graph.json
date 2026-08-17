@@ -6691,6 +6691,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kit_wheels.KitWheels.missing",
+      "target": "kneemri.kaggle.kit_wheels.KitWheels.major",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.mount_check.MountCheck",
       "target": "kneemri.inference.members.MemberPackage",
@@ -8637,7 +8643,7 @@
       "role": null
     },
     {
-      "descendants": 101,
+      "descendants": 102,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -9117,7 +9123,7 @@
       "role": null
     },
     {
-      "descendants": 9,
+      "descendants": 10,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -9160,6 +9166,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kit_check",
       "label": "kit_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kit_wheels",
+      "label": "kit_wheels",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -10290,6 +10304,14 @@
       "label": "KitCheck",
       "level": "class",
       "parent": "kneemri.kaggle.kit_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kit_wheels.KitWheels",
+      "label": "KitWheels",
+      "level": "class",
+      "parent": "kneemri.kaggle.kit_wheels",
       "role": "primary"
     },
     {
@@ -14482,6 +14504,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.kit_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kit_wheels.KitWheels.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.kit_wheels.KitWheels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kit_wheels.KitWheels.major",
+      "label": "major",
+      "level": "method",
+      "parent": "kneemri.kaggle.kit_wheels.KitWheels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kit_wheels.KitWheels.missing",
+      "label": "missing",
+      "level": "method",
+      "parent": "kneemri.kaggle.kit_wheels.KitWheels",
       "role": null
     },
     {
