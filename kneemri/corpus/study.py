@@ -38,13 +38,6 @@ class SlotPipeline:
         """One acquisition per slot under this pipeline's slot predicate."""
         return self.scheme.assign(acquisitions, planes)
 
-    def slot_images(
-        self, acquisition: Acquisition, slices: int, slot: Slot, side: str | None
-    ) -> UInt8[Tensor, "s h w"] | None:
-        """Read one slot at this pipeline's size and normalise its laterality."""
-        sized = self.slot_sizes(acquisition, slices, slot, side, (self.image_size,))
-        return None if sized is None else sized[self.image_size]
-
     def slot_sizes(
         self, acquisition: Acquisition, slices: int, slot: Slot, side: str | None, sizes: "tuple[int, ...]"
     ) -> "dict[int, UInt8[Tensor, 's h w']] | None":

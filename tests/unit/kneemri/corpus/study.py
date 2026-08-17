@@ -61,18 +61,6 @@ def test_route(tmp_path: Path):
     assert set(chosen) == {"SAG_FLUID_FS", "COR_T1"}
 
 
-def test_slot_images(tmp_path: Path):
-    """Reading and laterality normalisation happen together — they are never useful apart."""
-    root, planes = _study(tmp_path)
-    study = Study.from_directory(root, planes)
-    pipeline = SlotPipeline(reader=SlotReader(image_size=16))
-    acquisition = pipeline.route(study.acquisitions, planes)["SAG_FLUID_FS"]
-    left = pipeline.slot_images(acquisition, 3, SLOTS[0], "L")
-    right = pipeline.slot_images(acquisition, 3, SLOTS[0], "R")
-    assert left is not None and right is not None
-    assert torch.equal(right, torch.flip(left, dims=[0])), "a right knee reverses the sagittal stack"
-
-
 def test_bag_widths_to_the_pipeline_scheme(tmp_path: Path):
     """A nine-slot scheme produces nine bags, because `route` already routes nine.
 
@@ -126,6 +114,10 @@ def test_slot_sizes(tmp_path: Path):
     assert sorted(sized) == [16, 32]
     assert sized[16].shape == (3, 16, 16)
     assert sized[32].dtype == torch.uint8
+
+    flipped = pipeline.slot_sizes(acquisition, 3, SLOTS[0], "R", (32, 16))
+    assert flipped is not None
+    assert torch.equal(flipped[16], torch.flip(sized[16], dims=[0])), "a right knee reverses the sagittal stack"
 
 
 def test_bags_reads_a_multiscale_scheme_at_two_extents(tmp_path: Path):
