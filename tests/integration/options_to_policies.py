@@ -122,6 +122,8 @@ def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.Mo
     wrappers = _policies(StudyModel, NOT_A_WRAPPER)
     called = _recorded(monkeypatch, StudyModel, wrappers)
 
-    _options().fitted_model(ENCODER, SLOTS, StudyDesign())
+    # A CUDA device, though nothing is moved onto one: `fitted_model` compiles only for a card, so a CPU
+    # device here would leave `compile_encoder` uncalled and read as a wrapper no run can turn on.
+    _options().fitted_model(ENCODER, SLOTS, StudyDesign(), torch.device("cuda"))
 
     assert set(wrappers) == called, f"{sorted(set(wrappers) - called)} is a wrapper no run can turn on"

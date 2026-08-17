@@ -16,7 +16,8 @@ lateral one and teaching the model that the distinction is noise.
 """
 
 import logging
-from collections.abc import Iterator
+import time
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -42,6 +43,15 @@ logger = logging.getLogger(__name__)
 
 BYTES_PER_GB = 1024**3
 """So a VRAM budget can be stated in the unit the card is sold in."""
+
+CONTENTION_POLL_SECONDS = 30.0
+"""How often to re-ask the driver. Coarse on purpose: the thing being waited on is another training
+run, which frees its card in one step at the end, not gradually."""
+
+CONTENTION_WAIT_SECONDS = 1800.0
+"""And how long that wait may last before the run starts anyway. Half an hour is longer than any epoch
+here and shorter than a night, so a queue can absorb a co-tenant's arm without a person, and cannot be
+held all night by one that hung."""
 
 WEIGHT_DECAY = 0.02
 SEED = 2026
@@ -86,6 +96,41 @@ class DeviceBudget:
         free, whole = torch.cuda.mem_get_info(torch.cuda.current_device())
         return free / BYTES_PER_GB, whole / BYTES_PER_GB
 
+    def await_headroom(self, sleep: Callable[[float], None] = time.sleep) -> tuple[float, float]:
+        """Wait, up to a bound, for the co-tenant to give the card back. Returns the headroom it starts on.
+
+        WAITING RATHER THAN REFUSING, because the other project on this card is not a fault to report —
+        it is a second real run belonging to the same person, and it finishes. A queue that refuses on
+        contention loses the arm; a queue that waits loses minutes. The bound is what keeps the second
+        case from becoming the first: after it, the run starts anyway and says what it is starting into,
+        so an overnight queue cannot be stalled indefinitely by a job nobody is watching.
+
+        WAITING RATHER THAN PROCEEDING, because proceeding is the failure this whole class documents.
+        Windows pages over PCIe instead of raising, so a run that starts into a held card does not fail
+        — it crawls at a tenth of the throughput, and the pair of us then draws enough to take the
+        driver down: three `nvlddmkm` engine resets in four minutes on 2026-08-17, which killed both
+        projects' processes, not just the one that was late.
+
+        ONLY A RUN THAT NAMED A BUDGET WAITS. An uncapped run's "need" is the whole card, and the whole
+        card is never free — the desktop alone holds a gigabyte — so waiting on it would stall every
+        such run for the full bound and buy nothing. `select` still warns there, as it did before.
+        """
+        waited = 0.0
+        free, whole = self.headroom()
+        needed = self.vram_gb
+        while free < needed and waited < CONTENTION_WAIT_SECONDS:
+            logger.info(
+                "waiting for VRAM: %.1f GB free, this run wants %.1f — %.0f s of %.0f",
+                free,
+                needed,
+                waited,
+                CONTENTION_WAIT_SECONDS,
+            )
+            sleep(CONTENTION_POLL_SECONDS)
+            waited += CONTENTION_POLL_SECONDS
+            free, whole = self.headroom()
+        return free, whole
+
     def select(self) -> torch.device:
         """The device to train on, already held to this budget.
 
@@ -95,9 +140,11 @@ class DeviceBudget:
         device = VisibleCards().device()
         if device.type != "cuda":
             return device
-        free, whole = self.headroom()
-        # NAMED BEFORE THE FIRST BATCH, never inferred from the throughput afterwards. A run that starts
-        # into a card someone else holds does not fail, it pages over PCIe and looks like a slow recipe.
+        free, whole = self.await_headroom()
+        # ONLY REACHABLE PAST THE WAIT'S BOUND, so this is no longer "the card is busy" — it is "the
+        # card stayed busy for half an hour and this run is starting into it anyway". Named before the
+        # first batch, never inferred from the throughput afterwards, because the symptom is not a
+        # failure: it pages over PCIe and reads as a slow recipe.
         if free < (self.vram_gb or whole):
             logger.warning(
                 "VRAM: %.1f GB free of %.1f GB — this run wants %.1f and another process holds the rest",

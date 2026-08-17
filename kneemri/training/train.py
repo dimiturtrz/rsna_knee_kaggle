@@ -74,7 +74,7 @@ class TrainingOptions:
     recompute_activations: bool = False
     bf16: bool = True
     lora_rank: int = 0
-    compile_encoder: bool = False
+    compile_encoder: bool = True
     vram_gb: float = 0.0
     report_weight: float = 0.0
     report_vectors: Path | None = None
@@ -230,12 +230,22 @@ class TrainingOptions:
             "that does not fit crawls at a quarter of the power budget while reporting 100%% "
             "utilisation. Under a cap, PyTorch raises OOM immediately instead.",
         )
+        # `--compile-encoder` is GONE the way `--bf16` went: compilation is the default, and the flag
+        # that used to switch it on now accepts a value nothing reads. Twenty-two of thirty-six arms
+        # were running eager for no reason but not naming `$THROUGHPUT` — 21% of every step, on the
+        # bulk of the arithmetic, thrown away by an omission rather than by a decision.
         parser.add_argument(
-            "--compile-encoder",
-            action="store_true",
-            help="torch.compile the encoder, shape-specialised. The encoder only, because training "
-            "calls supervised() rather than forward(). Measured -20%% per step; the partial last batch "
-            "costs one 22 s recompile per process, not per epoch. Needs Triton (triton-windows here).",
+            "--eager-encoder",
+            dest="compile_encoder",
+            action="store_false",
+            help="skip torch.compile on the encoder. THE DEFAULT IS COMPILED: measured -21%% per step "
+            "(150 ms eager against 119 ms) for one 2.2 s compilation per process, and score-neutral — "
+            "the throughput pair scored 0.7604 plain against 0.7606 compiled, a fifth of the noise "
+            "floor. Compiled in place (`nn.Module.compile`), so parameter names are unchanged and the "
+            "checkpoint loads through the inference path. This escape exists for the throughput "
+            "CONTROLS, which have to run eager to measure what compiling is worth, and for a machine "
+            "with no Triton — upstream ships it everywhere except Windows, where `triton-windows` is "
+            "pinned in pyproject for exactly this.",
         )
         parser.add_argument(
             "--lora-rank",
@@ -480,7 +490,7 @@ class TrainingOptions:
             raise ValueError(message)
         return ReportSupervision.from_file(self.report_vectors, identifiers, self.report_weight)
 
-    def fitted_model(self, encoder: Encoder, slots: int, design: StudyDesign) -> StudyModel:
+    def fitted_model(self, encoder: Encoder, slots: int, design: StudyDesign, device: torch.device) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
 
         The sibling of `fitted_trainer`, extracted for the same reason and by the same gate: `main` was
@@ -489,13 +499,20 @@ class TrainingOptions:
         THE ORDER IS THE WHOLE VALUE OF THIS METHOD. Adaptation first, because checkpointing and compile
         both WRAP what they are handed — adapters injected after compilation would sit outside the
         compiled graph, and the run would report a speed and a score belonging to two different models.
+
+        THE DEVICE IS HERE ONLY FOR COMPILATION, and it is not a hedge: inductor's whole gain here is
+        fused CUDA kernels, and asking for it on CPU pays a graph build for nothing. On this machine it
+        is worse than nothing — dynamo's own `has_triton()` probe indexes a CUDA worker cache that a
+        CPU-tensor trace never populated and raises `IndexError: list index out of range`, so a CPU
+        forward under compile does not merely go slow, it dies. The model itself is still moved by
+        `Trainer`, not here.
         """
         model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
         if self.lora_rank:
             logger.info("low-rank adaptation: %d layers at rank %d", model.low_rank(self.lora_rank), self.lora_rank)
         if self.recompute_activations:
             model.recompute_activations()
-        if self.compile_encoder:
+        if self.compile_encoder and device.type == "cuda":
             model.compile_encoder()
         return model
 
@@ -605,7 +622,7 @@ def main() -> None:
     # a configuration mistake, and the failure without this is either a crash deep in the encoder or a
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
-    model = arguments.fitted_model(encoder, len(SCHEMES[arguments.scheme]), design)
+    model = arguments.fitted_model(encoder, len(SCHEMES[arguments.scheme]), design, device)
     trainer = arguments.fitted_trainer(model, device, identifiers, len(training))
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")

@@ -14,7 +14,14 @@ from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.objective import Objective, Predicted, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
-from kneemri.training.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
+from kneemri.training.trainer import (
+    CONTENTION_POLL_SECONDS,
+    CONTENTION_WAIT_SECONDS,
+    Adaptation,
+    AugmentConfig,
+    DeviceBudget,
+    Trainer,
+)
 
 SEED = 2026
 DIM = 8
@@ -403,6 +410,39 @@ def test_headroom():
 
     assert free <= whole, "free VRAM cannot exceed the card"
     assert (free, whole) == (0.0, 0.0) or whole > 0, "a visible card reports a positive total"
+
+
+def test_await_headroom(monkeypatch: pytest.MonkeyPatch):
+    """A held card is waited out, and a card held by something stuck is waited out only so far.
+
+    THE CO-TENANT IS PERMANENT: a second project of the same owner trains on this same card, so
+    contention is a condition to schedule around rather than an incident to report. Waiting costs a
+    queued arm minutes; starting anyway cost, on 2026-08-17, three driver resets that killed BOTH
+    projects' processes.
+
+    The sleep is injected because this must not spend the wall clock it is describing.
+    """
+    readings = iter([(4.0, 32.0), (6.0, 32.0), (30.0, 32.0)])
+    monkeypatch.setattr(DeviceBudget, "headroom", lambda _: next(readings))
+    slept: list[float] = []
+
+    free, whole = DeviceBudget(vram_gb=22.0).await_headroom(slept.append)
+
+    assert (free, whole) == (30.0, 32.0), "it returns the headroom the run actually starts on"
+    assert slept == [CONTENTION_POLL_SECONDS] * 2, "and polls only while the card is short"
+
+    held = iter([(1.0, 32.0)] * 1000)
+    monkeypatch.setattr(DeviceBudget, "headroom", lambda _: next(held))
+    stalled: list[float] = []
+
+    assert DeviceBudget(vram_gb=22.0).await_headroom(stalled.append) == (1.0, 32.0), "it gives up and says so"
+    assert sum(stalled) == CONTENTION_WAIT_SECONDS, "a co-tenant that hung cannot hold the queue all night"
+
+    idle: list[float] = []
+    monkeypatch.setattr(DeviceBudget, "headroom", lambda _: (31.0, 32.0))
+
+    assert DeviceBudget().await_headroom(idle.append) == (31.0, 32.0)
+    assert not idle, "an uncapped run names no need, and the whole card is never free — it must not wait"
 
 
 def test_plan():

@@ -25,7 +25,7 @@ require "$LABELS"
 
 run_train speed_combo \
   $RECIPE --epochs 1 \
-  --slice-pooling max --whole-stack --compile-encoder \
+  --slice-pooling max --whole-stack \
   --recompute-activations --vram-gb 22 \
   --labels "$LABELS" --out "$PROCESSED/speed_combo.pt"
 

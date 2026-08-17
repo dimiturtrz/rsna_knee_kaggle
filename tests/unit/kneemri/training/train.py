@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Band, Reading
@@ -78,6 +79,20 @@ def test_parse_takes_every_default_from_the_dataclass(monkeypatch: pytest.Monkey
     parsed = TrainingOptions.parse()
 
     assert parsed == TrainingOptions(labels=Path("labels.csv"))
+
+
+def test_parse_compiles_the_encoder_unless_the_run_asks_for_eager(monkeypatch: pytest.MonkeyPatch):
+    """Compilation is what a run gets for saying nothing, and `--eager-encoder` is the only way out.
+
+    THE OMISSION THIS CLOSES: `--compile-encoder` was opt-in, and twenty-two of thirty-six accepted arms
+    never named it — 21% of every step on the bulk of the arithmetic, lost to a flag nobody typed rather
+    than to a choice anyone made. A default that must be asked for is a default in name only.
+    """
+    monkeypatch.setattr("sys.argv", ["train", "--labels", "labels.csv"])
+    assert TrainingOptions.parse().compile_encoder, "a run that says nothing about speed still gets it"
+
+    monkeypatch.setattr("sys.argv", ["train", "--labels", "labels.csv", "--eager-encoder"])
+    assert not TrainingOptions.parse().compile_encoder, "the throughput control can still measure eager"
 
 
 def test_parser():
@@ -203,7 +218,7 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     """
     monkeypatch.setattr(
         "sys.argv",
-        ["train", "--labels", "a.csv", "--lora-rank", "4", "--recompute-activations", "--compile-encoder"],
+        ["train", "--labels", "a.csv", "--lora-rank", "4", "--recompute-activations"],
     )
     options = TrainingOptions.parse()
     order: list[str] = []
@@ -223,13 +238,22 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         "kneemri.training.train.AutoModel", type("_Auto", (), {"from_pretrained": staticmethod(lambda name: None)})
     )
-    options.fitted_model(ENCODERS[SMALL], 6, StudyDesign())
+    card = torch.device("cuda")
+    options.fitted_model(ENCODERS[SMALL], 6, StudyDesign(), card)
 
     assert order == ["low_rank:4", "recompute", "compile"], "adapters go in BEFORE the graph is frozen around them"
 
     order.clear()
-    TrainingOptions().fitted_model(ENCODERS[SMALL], 6, StudyDesign())
-    assert order == [], "a plain run is the pretrained encoder, unwrapped and uncompiled"
+    TrainingOptions().fitted_model(ENCODERS[SMALL], 6, StudyDesign(), card)
+    assert order == ["compile"], "a plain run is the pretrained encoder unwrapped, and compiled since it is free"
+
+    order.clear()
+    TrainingOptions(compile_encoder=False).fitted_model(ENCODERS[SMALL], 6, StudyDesign(), card)
+    assert order == [], "and eager is reachable, for the control that has to measure what compiling buys"
+
+    order.clear()
+    TrainingOptions().fitted_model(ENCODERS[SMALL], 6, StudyDesign(), torch.device("cpu"))
+    assert order == [], "and a CPU run is never compiled: inductor's gain is CUDA kernels, and the trace dies"
 
 
 def test_crop():

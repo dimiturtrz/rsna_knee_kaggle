@@ -22,6 +22,10 @@
 #   --rank-weight   the pairwise term, the only loss change positive in 3 of 3 matched arms
 RECIPE="--fold 0 --one-cycle --weight-floor --rank-weight 1.0"
 
-# Free throughput, all measured on this card: gradient checkpointing trades 19% per-step for nearly all
-# the encoder's activation, and compile is -21% per step. Neither changes what is computed.
-THROUGHPUT="--recompute-activations --compile-encoder"
+# Free throughput, measured on this card: gradient checkpointing trades 19% per-step for nearly all the
+# encoder's activation. It does not change what is computed.
+#
+# COMPILE IS NO LONGER HERE because it is no longer optional: `--compile-encoder` was a flag twenty-two
+# of thirty-six arms simply forgot to name, paying 21% of every step for the omission, so the trainer
+# compiles by default and `--eager-encoder` is the escape.
+THROUGHPUT="--recompute-activations"

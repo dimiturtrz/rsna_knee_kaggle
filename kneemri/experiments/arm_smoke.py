@@ -8,7 +8,9 @@ died in the attention backward two minutes into a smoke, and would have died at 
 minutes into the real run.
 """
 
+import json
 import logging
+import math
 import shlex
 import subprocess
 import sys
@@ -23,8 +25,10 @@ SMOKE_STUDIES = 60
 SMOKE_TIMEOUT_SECONDS = 600
 """A smoke that has not finished one epoch on sixty studies in ten minutes has itself become the problem.
 
-Generous on purpose: the encoder is fetched on a cold HuggingFace cache and `--compile-encoder` pays
-inductor once, and a smoke that timed out on its own setup would report a healthy arm as broken."""
+Generous on purpose: the encoder is fetched on a cold HuggingFace cache and every arm now pays inductor
+once (compilation became the default on 2026-08-17), and a smoke that timed out on its own setup would
+report a healthy arm as broken. Measured across thirty-six arms: a compiled epoch on sixty studies takes
+21-49 s against 5-9 s eager, nearly all of it that one graph build."""
 
 
 class ArmSmoke:
@@ -67,21 +71,59 @@ class ArmSmoke:
         ]
         return [sys.executable, "-m", "kneemri.training.train", *shlex.split(flags), *overrides]
 
+    def learned(self, checkpoint: Path) -> str:
+        """What the arm's OWN metrics say about the epoch it ran — empty when there is nothing wrong.
+
+        AN EXIT CODE IS NOT A RECIPE THAT TRAINS. Everything this module checked until now was whether
+        the process died, and a recipe that diverges does not die: the scaler swallows a non-finite
+        gradient, the epoch mean comes out NaN, the run writes its checkpoint and returns 0, and the
+        sweep prints `ok`. That arm then takes a forty-minute slot to produce the same NaN.
+
+        The per-label AUCs are NOT read, deliberately. At sixty studies a rare finding lands in the
+        holdout with one class present and scores NaN by arithmetic rather than by fault — `Fracture`
+        does exactly that in every smoke run here. Only the two aggregates the trainer computes over
+        the whole epoch can distinguish a broken recipe from a small corpus.
+
+        AND THE AUC IS ONLY READ WHERE THERE IS A HOLDOUT TO SCORE. `--fold -1` fits every study and
+        keeps none back, so its mean AUC is NaN by design; on this check's first run it flagged
+        `final_fit_e12` — the deliverable arm — as broken on exactly that. A check that cries about a
+        recipe working as specified is one nobody reads by the third sweep. The LOSS is required
+        finite everywhere, because no fold arithmetic can produce a NaN there.
+        """
+        records = checkpoint.with_name(checkpoint.stem + ".metrics.jsonl")
+        if not records.exists():
+            return "exited 0 but recorded no metrics at all"
+        lines = [json.loads(line) for line in records.read_text(encoding="utf-8").splitlines()]
+        recipe: dict[str, str] = next((line["recipe"] for line in lines if "recipe" in line), {})
+        epochs = [line for line in lines if "epoch" in line]
+        if not epochs:
+            return "exited 0 without finishing an epoch"
+        last = epochs[-1]
+        scored = ("loss", "auc") if str(recipe.get("fold", "0")) != "-1" else ("loss",)
+        wrong = [key for key in scored if not math.isfinite(float(last[key]))]
+        return f"epoch {last['epoch']} recorded a non-finite {' and '.join(wrong)}" if wrong else ""
+
     def failed(self, invocations: dict[str, str], out: Path) -> dict[str, str]:
         """The arms whose recipe does not survive one epoch, by arm name and the last thing it said."""
         broken: dict[str, str] = {}
         for name, flags in invocations.items():
             checkpoint = out / f"{name}.pt"
             code, complaint = self.runner(self.command(flags, checkpoint))
-            if code:
-                broken[name] = complaint or f"exit {code} with nothing on stderr"
+            trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)
+            if trouble:
+                broken[name] = trouble
             # SAID AS IT IS LEARNED, not collected and reported at the end: thirty-four arms is the
             # better part of an hour, and a sweep that prints nothing until it finishes is one nobody
             # can tell from a hang.
-            logger.info("%s %s%s", "BROKEN" if code else "ok", name, f": {broken.get(name, '')}" if code else "")
+            logger.info("%s %s%s", "BROKEN" if trouble else "ok", name, f": {trouble}" if trouble else "")
             # DELETED as soon as it has proved the write path, because a smoke checkpoint is a few
             # hundred megabytes and thirty-four of them is a disk problem this tool should not create.
-            checkpoint.unlink(missing_ok=True)
+            # THE `.partial` TOO, and it is the bigger half: the periodic save writes one beside the
+            # checkpoint the moment the holdout improves, so deleting only the `.pt` left every arm's
+            # weights on disk under another suffix — 1.9 GB after seventeen arms, measured, in the very
+            # directory this line exists to keep empty.
+            for artifact in (checkpoint, checkpoint.with_suffix(".partial")):
+                artifact.unlink(missing_ok=True)
         return broken
 
     def reported(self, invocations: dict[str, str], refused: dict[str, str], out: Path) -> dict[str, str]:

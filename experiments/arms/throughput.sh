@@ -18,7 +18,9 @@
 # supervised() rather than forward(). If dynamic compilation still recompiles, img/s will be WORSE
 # than the control and the recompile churn will show as a stall in the heartbeat rather than a crash.
 #
-# control  the same command without --compile-encoder, run first in this same script.
+# control  the same command under --eager-encoder, run first in this same script. THE CONTROL IS THE
+#          FLAGGED ONE NOW: compiling became the default on 2026-08-17, so the arm that measures what
+#          compiling is worth is the one that has to ask for eager.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
@@ -27,8 +29,8 @@ BASE=($RECIPE --epochs 1
       --slice-pooling max --whole-stack --recompute-activations --vram-gb 22
       --labels "$LABELS")
 
-run_train throughput_plain "${BASE[@]}" --out "$PROCESSED/throughput_plain.pt"
-run_train throughput_compiled "${BASE[@]}" --compile-encoder --out "$PROCESSED/throughput_compiled.pt"
+run_train throughput_plain "${BASE[@]}" --eager-encoder --out "$PROCESSED/throughput_plain.pt"
+run_train throughput_compiled "${BASE[@]}" --out "$PROCESSED/throughput_compiled.pt"
 # bf16 rides along because the expensive part - a whole-stack epoch on an idle card - is already being
 # paid twice, and a third run answers a question that would otherwise need its own hour. THE EXPECTED
 # ANSWER IS 'no faster': bf16 and fp16 have the same matmul throughput on Blackwell, so this is here to
