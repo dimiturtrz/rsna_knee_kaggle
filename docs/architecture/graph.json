@@ -2361,13 +2361,13 @@
     {
       "kind": "calls",
       "source": "kneemri.corpus.slot_reader.SlotReader.cropped",
-      "target": "kneemri.corpus.slot_reader.SlotReader._nearest",
+      "target": "kneemri.corpus.slot_reader.SlotReader._sample_indices",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.corpus.slot_reader.SlotReader.cropped",
-      "target": "kneemri.corpus.slot_reader.SlotReader._sample_indices",
+      "target": "kneemri.corpus.slot_reader.SlotReader._stacked",
       "weight": 1
     },
     {
@@ -10968,6 +10968,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.slot_reader.SlotReader._sample_indices",
       "label": "_sample_indices",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_reader.SlotReader._stacked",
+      "label": "_stacked",
       "level": "method",
       "parent": "kneemri.corpus.slot_reader.SlotReader",
       "role": null
