@@ -735,6 +735,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
       "target": "kneemri.evaluation.oof_oracle",
       "weight": 1
     },
@@ -3703,9 +3709,15 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_oracle.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.main",
-      "target": "kneemri.corpus.study_cache.StudyCache.planes_of",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -4504,6 +4516,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.stack_coverage.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
       "weight": 1
     },
     {
@@ -10952,8 +10970,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.study_cache.CorpusSplit.series_table",
+      "label": "series_table",
+      "level": "method",
+      "parent": "kneemri.corpus.study_cache.CorpusSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.study_cache.CorpusSplit.source",
       "label": "source",
+      "level": "method",
+      "parent": "kneemri.corpus.study_cache.CorpusSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.study_cache.CorpusSplit.studies_table",
+      "label": "studies_table",
       "level": "method",
       "parent": "kneemri.corpus.study_cache.CorpusSplit",
       "role": null
