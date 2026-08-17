@@ -10,3 +10,4 @@
 {"id": "efficient_v4", "date": "2026-08-16", "offline": 0.8581, "board": 0.919, "members": 2, "scope": "ensemble", "what": "strongest(2) whole-stack, 2 passes/study"}
 {"id": "trained_v8", "date": "2026-08-16", "offline": 0.8610, "board": 0.911, "members": 5, "scope": "ensemble", "what": "the strongest five all-ours whole-stack members"}
 {"id": "chosen_v2", "date": "2026-08-16", "offline": 0.8612, "board": 0.918, "members": 4, "scope": "ensemble", "what": "the four members picked by their JOINT holdout"}
+{"id": "vote_v2", "date": "2026-08-17", "offline": 0.8583, "board": 0.919, "members": 2, "scope": "ensemble", "what": "efficient_v4's pair with vote=LogitAverage instead of RankAverage"}

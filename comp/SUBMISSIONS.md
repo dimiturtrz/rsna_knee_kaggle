@@ -63,7 +63,7 @@ never spent on a cell that already has a number.
 | `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
 | `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | queued 2026-08-17 | — |
 | `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | queued 2026-08-17 | — |
-| `ours×2×whole×vote=logit` — `kneemri-vote` | queued 2026-08-17 | — |
+| `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
 | `ours×2×whole×views=rot3` — `kneemri-views` | queued 2026-08-17 | — |
 
 **The four queued cells are one day's five slots spent on questions the holdout cannot answer, not on a
