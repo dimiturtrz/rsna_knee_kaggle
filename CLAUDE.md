@@ -62,10 +62,23 @@ the repo's current state. The linter is a bug-finder, not cosmetics.
 - **vulture** (pinned `2.16`) — dead-code at `min_confidence = 60`.
 - **coverage** — pytest-cov with a `--fail-under=90` floor.
 - **import-linter** — directional forbidden-import contracts (`[tool.importlinter]`); the layer axis graph.py can't express.
-- **arch-fitness** — `python -m devtools.graph --assert`: god-module (fan-in/out), god-file, import-cycle,
-  and test-mirror (a logic module needs its `tests/unit/<pkg>/…/test_<name>.py`); thresholds in
-  `[tool.structure]`. Advisory: line-floor (off) + chokepoint.
-- **archmap** (advisory / doc-gen) — `python -m devtools.archmap <packages>` emits
+- **arch-fitness** — `python -m devtools.graph.fitness kneemri core --assert`: god-module (fan-in/out),
+  god-file, import-cycle, and test-mirror (a logic module needs its `tests/unit/<pkg>/…/test_<name>.py`);
+  thresholds in `[tool.structure]`. Advisory: line-floor (off) + chokepoint. NOT `devtools.graph`, which is
+  a package and answers `No module named devtools.graph.__main__`.
+- **the batch runner** — every AST gate in ONE interpreter, which is how `nox -s lint` actually invokes them:
+  `python -m devtools.run kneemri core --gate graph.fitness,coupling.demeter,coupling.purity,
+  coupling.composition,coupling.envy,coupling.contracts,astgrep,hygiene.mirror,hygiene.small,shape_contracts`.
+  ALL ENFORCED. Beyond the four above: **demeter** (a call chained through a field into a stranger),
+  **purity** (a `@property` that assigns to `self`), **composition** (a `holds` cycle — the intra-file case
+  an import cycle cannot represent), **envy** (a method more interested in another class than its own),
+  **astgrep** (the packaged module-shape rules), **hygiene.mirror** (the METHOD-level mirror: each public
+  `A.a` needs a `test_a` that CALLS and ASSERTS — stricter than graph's file-level one), **hygiene.small**
+  (a UNIT test touches nothing it did not create: no data root, no network, no sleep, no unseeded RNG).
+  Swap `--gate` for `--report` to run an advisory engine (`cohesion.complexity`, `cohesion.lcom`,
+  `cohesion.data_clumps`).
+- **deptry** (pinned `0.25.1`) — undeclared (DEP001) / unused (DEP002) / transitive (DEP003) imports.
+- **archmap** (advisory / doc-gen) — `python -m devtools.graph.archmap <packages>` emits
   `docs/architecture/graph.json` (the committed, diffable architecture — nodes + weighted import edges) plus
   a self-contained interactive **cytoscape viewer** (`index.html`, regenerated + gitignored) that folds/expands
   packages to any depth and focuses a module's neighbourhood. Regenerate with `uvx nox -s archmap` and **commit the
