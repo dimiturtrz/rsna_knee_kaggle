@@ -21,6 +21,15 @@ ORACLE — best member per label, using the answers — scores 0.8590 against th
 and the split-half estimate of per-label selection peaks at 0.8603 against the same average. Per-label
 weighting is worth nothing here, which is why this entry is a plain rank-average of a chosen few.
 
+RE-SCORED 2026-08-17 over thirteen same-split checkpoints rather than nine, in case a wider pool moved
+the named four. It does not move them usefully: the best subset over thirteen is a FIVE at 0.8617, and
+it wants `deep24` — a member this package does not mount, whose solo 0.8352 is BELOW the pool's floor,
+and which joint selection nonetheless takes at every size from four up while never taking `crop80` at
+0.8345. Adding it buys 0.0005 over the four named below, an eighth of the 0.0062 noise floor, for a
+dataset push. The load-bearing half of that scoring is the shape, not the subset: the best subset falls
+monotonically past five, down to 0.8547 flat over all thirteen. Naming few is not a thrift here, it is
+the higher score.
+
 Windows are disjoint because every member here reads the whole stack, for which overlap TTA is worth
 exactly 0.0000 (knee-eeo). Rotation TTA was measured on the cache the same day: +0.0004 to +0.0020 for
 three times the forward passes, so it is not bought either.

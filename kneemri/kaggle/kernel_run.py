@@ -78,6 +78,11 @@ class KernelRun:
         Naming comes first because it is the only selection that can carry a joint offline score into a
         kernel: `strongest` ranks members by what each scores alone, and an ensemble is not the sum of
         marginal rankings (`MemberPackage.named` records the 0.0024 that costs on our own holdout).
+
+        And "else all of them" is a fallback, not a default worth taking. Over the thirteen checkpoints
+        sharing the corpus split, the best subset peaks at FIVE (0.8617) and every larger one scores
+        lower, down to 0.8547 flat over all thirteen — members past the fifth are negative returns, and
+        they cost a forward pass each inside the kernel's nine-hour budget to be so.
         """
         if self.names is not None:
             return package.named(self.names)

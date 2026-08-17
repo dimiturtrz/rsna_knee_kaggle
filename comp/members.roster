@@ -21,3 +21,11 @@ intensity392_ws_s2026.pt    # 0.8459
 # would need a dataset push to undo.
 extended_ws_s2026.pt        # 0.8462 — the best FIFTH member (four + this = 0.8610)
 lora_r8_v3small_224_s2026.pt # 0.8215 — the only non-DINOv2 member; the encoder-transfer question
+#
+# RE-SCORED 2026-08-17 over THIRTEEN same-split checkpoints, not nine. The best subset there is a five
+# — calibrated_targets + deep24 + extended_ws + intensity392_ws + res392_ws at 0.8617 — and it wants
+# `deep24_s2026`, which is not in this package. It is not added, for two reasons that both have to
+# hold: the gain over the mounted four is 0.0005, an eighth of the 0.0062 three-seed noise floor, and
+# closing it costs a dataset push. What the same scoring DID show is worth more than the subset: the
+# best subset falls monotonically past five, to 0.8547 flat over all thirteen, so "mount more, name
+# more" is negative return and this roster's six are already past the useful count.

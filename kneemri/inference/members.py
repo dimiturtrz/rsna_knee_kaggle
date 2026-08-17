@@ -494,6 +494,13 @@ class MemberPackage:
         is a weak one: those numbers come from different folds and, for anything trained before the
         label table was recovered, from different rulers. It picks a good member, not provably the best.
 
+        MEASURED 2026-08-17, and the ordering is not merely weak — it is not the right question. Over
+        the thirteen checkpoints that share the corpus split, `deep24` scores 0.8352 alone, BELOW the
+        pool's floor of 0.8459, and joint selection takes it at every subset size from four up; `crop80`
+        scores 0.8345, within 0.0007 of it, and joint selection takes it at none. Solo score does not
+        separate the two. Prefer `named` with a subset chosen jointly offline whenever one exists, and
+        read this sort as the fallback for when nobody has done that work.
+
         A member with NO recorded holdout is ranked LAST rather than compared, because a full-data fit
         has none by construction and NaN compares False against every number — under a plain descending
         sort it lands FIRST and `strongest(1)` returns the one member that was never scored. Naming an
