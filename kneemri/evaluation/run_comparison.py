@@ -283,11 +283,16 @@ class RunComparison:
         Read off the two recipes, like every other judgement here. A run whose recipe is unrecorded
         counts as NOT having moved the view: the verdict is the strong claim, and an unknown recipe is
         not grounds to make it.
+
+        BOTH runs must have recorded the axis. An option the control predates is `unmatched`'s
+        question, not a difference — most of the ledger predates `crop_mm` and `centre`, so counting
+        an absence as a disagreement said "the tighter view helped exactly the findings it should have
+        cost" under a schedule arm and a pair-memory arm, which is the same defect one layer in.
         """
         control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return False
-        return any(control.get(name) != value for name, value in theirs.items() if name in VIEW_AXES)
+        return any(name in control and control[name] != value for name, value in theirs.items() if name in VIEW_AXES)
 
     def reader_change(self, arm: RunMetrics) -> str:
         """Which half of the pipeline this arm moved, read from the two recipes rather than declared.

@@ -87,16 +87,18 @@ def test_moved_view(tmp_path: Path):
     was not its bottleneck — an axis that arm held fixed.
     """
     control = _run(tmp_path, "ctl", CONTROL)
-    view, schedule, silent = (_run(tmp_path, name, ARM) for name in ("view", "sched", "silent"))
+    view, schedule, silent, newer = (_run(tmp_path, name, ARM) for name in ("view", "sched", "silent", "newer"))
     _describe(control, {"crop_mm": "130.0", "epochs": "12"})
     _describe(view, {"crop_mm": "80.0", "epochs": "12"})
     _describe(schedule, {"crop_mm": "130.0", "epochs": "8"})
+    _describe(newer, {"epochs": "12", "read_size": "392"})
 
-    comparison = RunComparison(control, [view, schedule, silent])
+    comparison = RunComparison(control, [view, schedule, silent, newer])
 
     assert comparison.moved_view(comparison.arms[0]), "a tighter crop is a change of view"
     assert not comparison.moved_view(comparison.arms[1]), "a shorter schedule says nothing about the view"
     assert not comparison.moved_view(comparison.arms[2]), "an unrecorded recipe is not evidence of a move"
+    assert not comparison.moved_view(comparison.arms[3]), "an option the control predates is a question, not a move"
 
 
 def test_unmatched(tmp_path: Path):
