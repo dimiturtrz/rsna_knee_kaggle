@@ -1,8 +1,9 @@
 # kneemri — PLAN (source of truth)
 
-This is the canonical plan. Read it at session start before proposing work. Substance lives here;
-ordered execution status lives in `ROADMAP.md`. Work items live in beads (`bd ready`), and this file
-cites them by id.
+This is the canonical plan. Read it at session start before proposing work. Substance lives here and is
+cited by bead id; the ORDER and STATE of the work live in beads (`bd ready`, `bd list`), which is the one
+place they can be true. Measured results live in `experiments/README.md` and `interpretations/`; the
+build log is git history.
 
 ## Goal
 
@@ -27,10 +28,15 @@ of which removes a design choice rather than adding one:
 
 | metric | baseline | target | current |
 |---|---|---|---|
-| mean of 12 AUCs (public LB) | 0.5 (constant) · 0.819 median · 0.888 graft | 0.942 (leader) | **0.888** (ours, equalling the 20-member graft with 5 of our own) |
-| per-member holdout AUC (proxy ruler) | 0.8081 (small@8) | — | **0.8283** base+ranking · 0.8304 large+depth+ranking |
-| worst single-label AUC | 0.5 | — | 0.742 (Lateral Meniscus) |
+| mean of 12 AUCs (public LB) | 0.5 (constant) · 0.819 median · 0.888 graft | 0.942 (leader) | **0.919** (all-ours, two whole-stack members; rank 84 of 1758) |
+| per-member holdout AUC (proxy ruler) | 0.8081 (small@8) | — | **0.8523** (`res392_ws_s2026`, our best single member) |
+| fused holdout AUC | — | — | **0.8612** (`kneemri-chosen`, four members by joint holdout → 0.918 LB) |
+| worst single-label AUC | 0.5 | — | **0.7981** Lateral Meniscus (±0.0159, 1114 positives — on the PUBLISHED members' corpus-wide out-of-fold predictions, the only per-label ruler that spans all 4,407 studies) |
 | submission path works end to end | — | proven | proven (both scored) |
+
+**The pool, not the configuration, carries the 0.919**: five all-ours members scored 0.911 and two scored
+0.919, both clearing the 24-member mixed fusion (0.898) by more than the 1.5% bar, while restoring a
+twenty-fifth published member changed nothing. Grafted members are now a COST (`knee-k5kk`).
 
 Track the **worst label**, not only the mean — that is where the 1/12 is being forfeited.
 
@@ -43,9 +49,17 @@ Track the **worst label**, not only the mean — that is where the 1/12 is being
    in the ±0.17 Hanley-McNeil regime. **The local number decides WHICH recipe to submit; only the
    leaderboard decides whether it is better.** The two ledger rows carrying both numbers suggest the
    proxy COMPRESSES by ~2x (local +0.0107 → LB +0.020), on two confounded points.
-2. **A result needs ~1.5% absolute.** Nothing measured here has ever cleared that as a single change —
-   not base (+0.0085), not 8→24 epochs (+0.0068), not the ranking term (+0.0067/+0.0036/+0.0028). They
-   are *directional*. What clears the bar is the CUMULATIVE 0.8081 → 0.8283 = **+0.0202**.
+2. **A result needs ~1.5% absolute.** Almost nothing measured here has ever cleared that as a single
+   change — not base (+0.0085), not 8→24 epochs (+0.0068), not the ranking term (+0.0067/+0.0036/+0.0028).
+   They are *directional*. What clears the bar is the CUMULATIVE 0.8081 → **0.8523** = **+0.0442** on the
+   holdout, and on the BOARD the one change that cleared it alone: dropping the published members for an
+   all-ours pool, 0.898 → 0.919 (`knee-k5kk`).
+
+   **Which floor applies depends on the ruler.** One fold of 881 studies has a Hanley–McNeil floor of
+   0.0053; the published members' corpus-wide out-of-fold partition (4,407 studies) sits near 0.0024;
+   and a PAIRED comparison of two recipes on the same studies is about 2x tighter than the unpaired
+   bound, not the 11x an earlier estimate claimed (2026-08-15). Quote the floor belonging to the ruler
+   the number was measured on.
 
 ## Approach
 
@@ -147,19 +161,24 @@ Two rules follow, and they are the plan now:
 2. **Anything to be KEPT needs three seeds** — about twelve minutes at four minutes a run. Budget it
    up front rather than discovering afterwards that an arm cannot be read.
 
-The corollary for ensembling: members two and three buy +0.0018 and +0.0007, and the best single member
-beats the three-member ensemble. Stacking members is no longer a lever, it is only an
-Efficiency-Prize liability.
+The corollary drawn for ensembling — *"members two and three buy +0.0018 and +0.0007, the best single
+member beats the three-member ensemble, stacking is only an Efficiency-Prize liability"* — **is
+overturned and kept here only so it is not re-derived.** It was measured on a pool whose members varied
+by knobs. On the BOARD, a two-member all-ours fusion scored **0.919** against 0.898 for twenty-four mixed
+members, and the four-member `chosen` entry reached the best holdout this project has (0.8612) against
+0.8523 for its own best member. What is flat is the curve over members that resemble each other; the
+lever is pool COMPOSITION (`knee-k5kk`, `knee-nas5`), not member count.
 
 ## Open questions
 
-- **Is submission notebook-only?** (`knee-kca`) The entire kit-as-dataset design in `comp/` is contingent
-  on it. Unverified — the overview page is JS-rendered.
+- ~~**Is submission notebook-only?**~~ (`knee-kca`) ANSWERED by doing it: the kit-as-dataset design has
+  now scored repeatedly, most recently 0.919.
 - **Which wheels are missing** from Kaggle's image (pydicom? timm?) (`knee-61q`). Probe, don't guess:
   pushes are unlimited, submissions are 5/day.
 - **Efficiency Prize** (`knee-5bv`) — MEASURED: all 905 teams are ranked automatically, the best
-  accuracy on the board (0.940) sits at efficiency rank 638, and teams at exactly our 0.888 sit at
-  ranks 29–50. With the member curve flat, a one- or two-member entry is close to free. The remaining
+  accuracy on the board (0.940) sits at efficiency rank 638, and teams at the 0.888 we then held sat at
+  ranks 29–50. Our best entry IS a two-member one (0.919), so the cheap entry and the accurate one are
+  currently the same submission. The remaining
   unknown is whether the board scores a team's *selected* submissions, in which case a cheap entry
   competes with the accurate one instead of adding to it.
 - **DINOv2 vs medical-pretrained** (`knee-zkz`) — the field defaulted to DINOv2 with no visible
