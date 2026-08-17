@@ -4,6 +4,7 @@ import numpy as np
 
 from kneemri.evaluation.member_curve import MemberCurve
 from kneemri.evaluation.scores import LabelScores
+from kneemri.inference.ensemble import Ensemble
 from kneemri.models.model import TARGETS
 
 STUDIES = 40
@@ -147,3 +148,34 @@ def test_logged():
     assert not any("paired deltas" in line for line in lines)
 
     assert any("paired deltas" in line for line in curve.logged(members, truth, ["a.pt", "b.pt"], paired=True))
+
+
+def test_votes():
+    """Every rule is scored on the SAME members, and the shipped one reports the number it ships.
+
+    The comparison is only readable if the flat row IS `Ensemble.combine` — a row computed some other
+    way would make each difference below it partly a difference in the baseline, which is the error this
+    whole comparison exists to avoid.
+    """
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    truth = _truth()
+    lines = MemberCurve(LabelScores(), SEED).votes(members, truth)
+
+    assert [line.split()[0] for line in lines] == ["RankAverage", "LogitAverage", "QualityWeightedRank"]
+    shipped = LabelScores().mean(Ensemble.combine(members), truth)
+    assert lines[0].split()[1] == f"{shipped:.4f}", "the flat row is the rule a submission runs"
+
+
+def test_quality_weighted():
+    """The fitted rule reports a SPLIT-HALF number, and the report carries that same number.
+
+    Split-half because the weights come off the holdout they would otherwise be scored on — the in-sample
+    optimism that killed per-label selection. A number scored where it was fitted is not a result.
+    """
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    truth = _truth()
+    curve = MemberCurve(LabelScores(), SEED)
+
+    honest = curve.quality_weighted(members, truth)
+    assert 0.0 <= honest <= 1.0
+    assert curve.votes(members, truth)[2].split()[1] == f"{honest:.4f}", "the report prints the honest score"

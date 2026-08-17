@@ -38,7 +38,11 @@ Diversity, however, is not the same as *foreign* — which the board took until 
 all-ours members reached 0.911 and two reached 0.919, both above the mixed 22-member fusion by more than
 the 1.5% bar, so the gain belongs to the **member pool** and not to borrowed weights. And the holdout
 prices diversity too cheaply: collapsing three members into one pixel group cost 0.0059 offline and
-**0.014** on the board, 2.4x.
+**0.014** on the board, 2.4x. Of the [ensemble's six design
+axes](interpretations/kneemri/2026-08-17_the_ensemble_axes_and_which_are_levers.md), diversity is the
+only lever left: count saturates at four, per-label selection is dead (its *oracle* sits below the plain
+average), and the vote itself is flat — rank, logit and quality-weighted averaging land within 0.0005 of
+each other, an order below the board's noise floor.
 
 The changes that moved the number most were not ideas imported from anywhere; they were our own
 defects, and finding them is most of what this project has done. Augmentation was written,

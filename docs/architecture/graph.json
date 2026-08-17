@@ -465,6 +465,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.member_curve",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_curve",
       "target": "kneemri.labels.targets",
       "weight": 1
     },
@@ -886,6 +892,12 @@
       "kind": "import",
       "source": "kneemri.inference.ensemble",
       "target": "kneemri.inference.test_time",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.ensemble",
+      "target": "kneemri.inference.vote",
       "weight": 1
     },
     {
@@ -3302,6 +3314,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.oracle",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
@@ -3331,6 +3349,36 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "target": "kneemri.evaluation.label_combine.LabelCombine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "target": "kneemri.evaluation.label_combine.LabelCombine.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "target": "kneemri.inference.vote.QualityWeightedRank",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "target": "kneemri.inference.vote.QualityWeightedRank.combine",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.sizes",
       "target": "kneemri.evaluation.member_curve.MemberCurve.subsets",
@@ -3346,6 +3394,48 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.subsets",
       "target": "kneemri.inference.ensemble.Ensemble.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.inference.vote.LogitAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.inference.vote.LogitAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "target": "kneemri.inference.vote.Vote.named",
       "weight": 1
     },
     {
@@ -4015,6 +4105,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.run_comparison.RunComparison",
+      "target": "kneemri.runs.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
       "target": "kneemri.runs.run_metrics.RunMetrics",
@@ -4060,6 +4156,24 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison._intervals",
       "target": "kneemri.labels.label_power.LabelPower.standard_error",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._stalled",
+      "target": "kneemri.evaluation.run_comparison.RunComparison._began",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._stalled",
+      "target": "kneemri.runs.run_metrics.RunMetrics.epoch_seconds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._stalled",
+      "target": "kneemri.runs.run_metrics.RunMetrics.stalls",
       "weight": 1
     },
     {
@@ -4150,6 +4264,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.report",
       "target": "kneemri.evaluation.run_comparison.RunComparison._marked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.report",
+      "target": "kneemri.evaluation.run_comparison.RunComparison._stalled",
       "weight": 1
     },
     {
@@ -4822,6 +4942,18 @@
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.attempt",
       "target": "kneemri.inference.ensemble.Ensemble.predict_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.ensemble.Ensemble.combine",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.combine",
+      "target": "kneemri.inference.vote.RankAverage.combine",
       "weight": 1
     },
     {
@@ -5536,6 +5668,36 @@
       "kind": "calls",
       "source": "kneemri.inference.test_time.SpatialViews.apply",
       "target": "kneemri.inference.test_time.SpatialViews._warp",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.inference.vote.LogitAverage",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.inference.vote.QualityWeightedRank",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.QualityWeightedRank.combine",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.inference.vote.RankAverage",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.RankAverage.combine",
+      "target": "kneemri.inference.vote.Vote.ranks",
       "weight": 1
     },
     {
@@ -6562,6 +6724,18 @@
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.rows",
       "target": "kneemri.runs.run_metrics.RunMetrics._entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.stalls",
+      "target": "kneemri.runs.run_metrics.RunMetrics.epoch_seconds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.stalls",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
       "weight": 1
     },
     {
@@ -7647,7 +7821,7 @@
       "role": null
     },
     {
-      "descendants": 93,
+      "descendants": 94,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -8015,7 +8189,7 @@
       "role": null
     },
     {
-      "descendants": 9,
+      "descendants": 10,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -8090,6 +8264,14 @@
       "descendants": 0,
       "id": "kneemri.inference.test_time",
       "label": "test_time",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote",
+      "label": "vote",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -9109,6 +9291,38 @@
       "level": "class",
       "parent": "kneemri.inference.test_time",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.LogitAverage",
+      "label": "LogitAverage",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.QualityWeightedRank",
+      "label": "QualityWeightedRank",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.RankAverage",
+      "label": "RankAverage",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.Vote",
+      "label": "Vote",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -11200,6 +11414,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
+      "label": "quality_weighted",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.report",
       "label": "report",
       "level": "method",
@@ -11218,6 +11440,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.subsets",
       "label": "subsets",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.votes",
+      "label": "votes",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve.MemberCurve",
       "role": null
@@ -11520,6 +11750,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison._began",
+      "label": "_began",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison._intervals",
       "label": "_intervals",
       "level": "method",
@@ -11530,6 +11768,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison._marked",
       "label": "_marked",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison._stalled",
+      "label": "_stalled",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
@@ -12708,6 +12954,62 @@
       "label": "apply",
       "level": "method",
       "parent": "kneemri.inference.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.LogitAverage.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.LogitAverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.QualityWeightedRank.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.vote.QualityWeightedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.QualityWeightedRank.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.QualityWeightedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.RankAverage.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.RankAverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.Vote.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.Vote.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.Vote.ranks",
+      "label": "ranks",
+      "level": "method",
+      "parent": "kneemri.inference.vote.Vote",
       "role": null
     },
     {
@@ -14010,6 +14312,14 @@
       "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.rows",
       "label": "rows",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.stalls",
+      "label": "stalls",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null

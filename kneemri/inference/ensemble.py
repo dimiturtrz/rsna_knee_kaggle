@@ -31,6 +31,7 @@ from kneemri.corpus.slots import SCHEMES, SlotScheme
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.vote import RankAverage
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyModel
 
@@ -555,17 +556,13 @@ class Ensemble:
         how this ensemble votes. Analysis code needs exactly this rule without owning a package or a set
         of loaded models, and the alternative to saying so is calling it with a `None` self, which this
         repository has already done once with `Trainer.area_under_curve` and had to unpick.
+
+        DELEGATED to `RankAverage` rather than written here, because the vote is now a family and the
+        flat rule is one member of it. Written in both places, any measured difference between two rules
+        would be partly a difference in how they ranked — and this is the copy that would drift, since
+        this is the one a submission runs and the other is the one that gets varied.
         """
-        if len(per_member) == 1:
-            return per_member[0]
-        stacked = np.stack(per_member)
-        ranks = np.empty_like(stacked)
-        studies = stacked.shape[1]
-        for index in range(stacked.shape[0]):
-            for label in range(stacked.shape[2]):
-                order = stacked[index, :, label].argsort().argsort()
-                ranks[index, :, label] = order / max(studies - 1, 1)
-        return ranks.mean(0)
+        return RankAverage().combine(per_member)
 
     @staticmethod
     def submission(identifiers: list[str], predictions: NDArray[np.float64]) -> dict[str, list[object]]:

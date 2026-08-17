@@ -38,6 +38,7 @@ from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage
 from kneemri.labels.targets import Targets
 
 logger = logging.getLogger(__name__)
@@ -143,6 +144,49 @@ class MemberCurve:
             "best_single": max(self.scores.mean(member, truth) for member in per_member),
         }
 
+    def votes(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> list[str]:
+        """Every voting rule on the SAME members — the ensemble axis that has never been varied.
+
+        Count, which members, per-label selection and decode diversity have all been measured. The vote
+        itself has not: every number in the ledger came out of a flat per-label rank-average, chosen
+        because the metric reads rank order — which argues for RANKING and says nothing about weighting
+        six members equally when 0.031 separates the best from the worst.
+
+        The fitted rule is reported SPLIT-HALF, and that is the only column worth reading for it: its
+        weights come off the same studies it would otherwise be scored on, and per-label selection died
+        of exactly that — an in-sample gain that did not survive being chosen elsewhere.
+        """
+        flat = RankAverage()
+        lines = [f"{flat.named():22s} {self.scores.mean(flat.combine(per_member), truth):.4f}   (the shipped rule)"]
+        lines.append(
+            f"{LogitAverage().named():22s} {self.scores.mean(LogitAverage().combine(per_member), truth):.4f}"
+            "   (keeps the margin a rank discards; exposed to a miscalibrated member)"
+        )
+        lines.append(
+            f"{'QualityWeightedRank':22s} {self.quality_weighted(per_member, truth):.4f}   (split-half; weights "
+            "fitted on the studies it is NOT scored on)"
+        )
+        return lines
+
+    def quality_weighted(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> float:
+        """The weighted rule's HONEST score: weights fitted on one half, read on the other.
+
+        Its own method rather than three lines inside `votes`, because it is the only rule here that fits
+        anything and so the only one whose reported number depends on a split — which is a claim to state
+        once, in the place that makes it, rather than a nested comprehension inside a report builder.
+        """
+        halves = LabelCombine(self.scores).halves(len(truth), self.combine_seed)
+        honest = [
+            self.scores.mean(
+                QualityWeightedRank([self.scores.mean(member[fit], truth[fit]) for member in per_member]).combine(
+                    [member[report] for member in per_member]
+                ),
+                truth[report],
+            )
+            for fit, report in halves
+        ]
+        return float(np.mean(honest))
+
     def logged(
         self,
         per_member: list[NDArray[np.float64]],
@@ -176,7 +220,10 @@ class MemberCurve:
         # the answers were available; this says what is left once they are not. Its last row is the flat
         # rank-average under the same split-half estimator, so the two columns are a matched comparison
         # rather than a number beside a differently-measured number.
-        return lines + LabelCombine(self.scores).curve(per_member, truth, self.combine_seed)
+        lines += LabelCombine(self.scores).curve(per_member, truth, self.combine_seed)
+        # THE VOTE ITSELF, last, because every line above it was produced BY the flat rule and this
+        # is the one row that asks whether that rule was the right one to produce them with.
+        return lines + self.votes(per_member, truth)
 
     def report(self, by_size: dict[int, list[float]]) -> list[str]:
         """One line per ensemble size: its mean, its range, and what the member added."""
