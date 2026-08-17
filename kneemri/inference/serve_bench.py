@@ -71,6 +71,10 @@ class ServeBench:
         and dtypes, which are the member's own (`slot_count`, `slices`, `read_size`) — nothing in the
         graph branches on the values. Reading real studies would add a decode to both arms equally and
         make the bench need a corpus to answer a question about kernels.
+
+        WHICH IS WHY A RESOLUTION IS PRICED BY RESIZING THE MEMBER, not this tensor: `Member.resized`
+        moves the size the model resamples to as well as the shape allocated here, and only the pair
+        of them times what a member fitted at that size would cost (knee-d2fc).
         """
         shape = (studies, self.member.slot_count, self.member.slices, self.member.read_size, self.member.read_size)
         images = torch.randint(0, 256, shape, dtype=torch.uint8, device=self.device)
@@ -135,6 +139,14 @@ def main() -> None:
     parser.add_argument("--member", default="", help="which member to time (default: the strongest)")
     parser.add_argument("--studies", type=int, default=STUDIES)
     parser.add_argument("--repeats", type=int, default=REPEATS)
+    parser.add_argument(
+        "--read-size",
+        type=int,
+        default=0,
+        help="time the forward at THIS size instead of the member's own (`Member.resized`). The "
+        "predictions are then meaningless and the cost is not: it is what a member fitted at that "
+        "size would spend, which is how a resolution arm is priced before it is trained.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -145,11 +157,17 @@ def main() -> None:
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - CLI-only
 
     package = MemberPackage(arguments.root)
-    member = package.named([arguments.member])[0] if arguments.member else package.strongest(1)[0]
+    fitted = package.named([arguments.member])[0] if arguments.member else package.strongest(1)[0]
     device = VisibleCards().device()
-    encoder = ENCODERS[member.variant]
-    model = package.load(member, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
-    ensemble = Ensemble(package, {member.identifier: model}, device)
+    encoder = ENCODERS[fitted.variant]
+    # LOADED AS FITTED, PRICED AS ASKED. The fingerprint is computed at the member's own resolution, so
+    # loading a resized one raises `WeightsError` — correctly: at 420 px this member differs from its
+    # stored fingerprint by 0.086 against a tolerance of 0.002, which is the guard noticing exactly the
+    # meaningless predictions this bench is willing to buy. Resizing after the load keeps the guard
+    # honest for every other caller and still moves the size the encoder runs at.
+    model = package.load(fitted, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
+    ensemble = Ensemble(package, {fitted.identifier: model}, device)
+    member = fitted.resized(arguments.read_size) if arguments.read_size else fitted
 
     bench = ServeBench(device, member)
     images, mask = bench.pixels(arguments.studies)

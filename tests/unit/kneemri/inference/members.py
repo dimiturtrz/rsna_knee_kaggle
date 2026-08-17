@@ -174,6 +174,21 @@ def test_image_size():
     assert _member().image_size == IMAGE
 
 
+def test_resized():
+    """A priced resolution has to reach the WINDOW, which is the size the model resamples its input to.
+
+    Moving only the tensor times a bilinear resize followed by the encoder at the old resolution —
+    measured flat at 380 ms for 392, 420 and 448 alike. The original member is untouched, so nothing
+    that holds one is quietly re-priced.
+    """
+    original = _member()
+    bigger = original.resized(IMAGE * 2)
+
+    assert bigger.read_size == IMAGE * 2, "what the tensor is allocated at"
+    assert bigger.window(bigger.slices, overlap=False).size == IMAGE * 2, "and what the encoder is actually run at"
+    assert original.read_size == IMAGE, "the member handed in is not mutated"
+
+
 def test_lora_rank():
     """A member says whether its encoder was adapted, and every older manifest correctly says no.
 

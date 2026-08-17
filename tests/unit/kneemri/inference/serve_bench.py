@@ -18,7 +18,7 @@ SIZE = 8
 """A member's shape, small enough to allocate on a CPU and still exercise all five dimensions."""
 
 
-def bench() -> ServeBench:
+def bench(read_size: int = 0) -> ServeBench:
     """The harness under test, on a real member and pinned to the CPU so no test needs a free card."""
     member = Member(
         identifier="bench",
@@ -38,7 +38,7 @@ def bench() -> ServeBench:
         holdout=0.8,
         annot=0.8,
     )
-    return ServeBench(torch.device("cpu"), member)
+    return ServeBench(torch.device("cpu"), member.resized(read_size) if read_size else member)
 
 
 def test_pixels():
@@ -49,6 +49,18 @@ def test_pixels():
     assert images.dtype == torch.uint8, "the kernel sends bytes; a float read would time a different forward"
     assert mask.shape == (3, len(SLOTS))
     assert bool((mask == 1).all()), "a dropped slot would make the two arms forward different work"
+
+
+def test_pixels_for_a_resized_member():
+    """A resized member allocates the bigger tensor, which is half of what makes the price real.
+
+    The other half is `window(...).size` moving with it — see `test_resized` beside the member, since
+    a tensor the model resamples away times the member's OWN resolution and looks like no change.
+    """
+    images, _ = bench(read_size=SIZE * 2).pixels(studies=2)
+
+    assert images.shape[-2:] == (SIZE * 2, SIZE * 2), "the resized member is what gets allocated and forwarded"
+    assert bench().pixels(studies=2)[0].shape[-1] == SIZE, "and an un-resized member keeps its own size"
 
 
 def test_timed():

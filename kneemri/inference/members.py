@@ -14,7 +14,7 @@ import json
 import logging
 import math
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import NotRequired, TypedDict
 
@@ -223,6 +223,21 @@ class Member:
         against their stored fingerprints rather than being refused by a field they predate.
         """
         return int(self.config.get("train_size") or self.config["img"])
+
+    def resized(self, size: int) -> "Member":
+        """The same member READ at a different size — for pricing a resolution, never for predicting.
+
+        A ViT interpolates its position embeddings, so this member will forward the bigger tensor and
+        return a number that means nothing. What it spends getting there IS what a member fitted at
+        that size spends, which is how a resolution arm is priced before it exists (knee-d2fc).
+
+        THE SIZE HAS TO BE THE MEMBER'S, not the caller's tensor. `StudyModel.forward` resamples its
+        input to the `img_size` it is handed and that comes from `window(...).size` — feeding it 448 px
+        pixels while the member still says 392 measures a bilinear resize and an encoder running at the
+        old resolution, which times the same as not overriding anything at all. Measured 2026-08-17:
+        392, 420 and 448 all came back at 380 ms, and the flat line was the bug.
+        """
+        return replace(self, config={**self.config, "train_size": size})
 
     @property
     def whole_stack(self) -> bool:
