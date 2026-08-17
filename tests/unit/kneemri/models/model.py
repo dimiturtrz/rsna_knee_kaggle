@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import cast, override
 
 import numpy as np
@@ -73,6 +74,26 @@ def test_forward(study_model: StudyModel):
         one_absent = study_model.forward(imgs, partial, 14)
     assert every_slot.shape == (2, len(TARGETS))
     assert not torch.allclose(every_slot, one_absent), "the presence mask must reach the softmax"
+
+
+def test_study_model_refuses_a_shape_it_cannot_serve():
+    """Both constructor guards must raise at BUILD time, where the wrong number is still readable.
+
+    Each guards a mismatch whose other outcome is worse than a crash: a registry width that disagrees with
+    the loaded weights surfaces as a shape error deep in the head, or not at all if the head happens to
+    accept it; and a (12, 6) anatomical prior broadcast against a two-slot attention map is a silently
+    wrong prior rather than an error. A member that cannot be built is cheap; one that builds wrong is not.
+    """
+    # The WEIGHTS are the authority on the width, so the mismatch only exists for a backbone that says
+    # what it emits — a configless stand-in is taken at the registry's word and cannot trip this.
+    speaks_for_itself = _FakeBackbone()
+    speaks_for_itself.config = SimpleNamespace(hidden_size=DIM)
+
+    with pytest.raises(ValueError, match="registry says"):
+        StudyModel(speaks_for_itself, DIM + 1, SLOTS)
+
+    with pytest.raises(ValueError, match="anatomical prior covers"):
+        StudyModel(_FakeBackbone(), DIM, SLOTS - 1, design=StudyDesign(anatomical_prior=True))
 
 
 def test_forward_resizes_to_the_requested_size(study_model: StudyModel):
