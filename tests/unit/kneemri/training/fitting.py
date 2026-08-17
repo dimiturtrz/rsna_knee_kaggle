@@ -117,6 +117,35 @@ def test_run(tmp_path: Path):
     assert kept.holdout == pytest.approx(0.90)
 
 
+def test_the_epoch_line_states_its_denominator_when_a_label_is_undefined(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
+    """A mean over eleven labels and a mean over twelve are not comparable, and read identically.
+
+    `nanmean` drops a finding whose holdout holds only one class — which is normal on a smoke, on a
+    confidence-filtered ruler, and on any small split — so the headline silently changes denominator
+    while keeping its wording. Two runs' numbers then get subtracted from each other, which is the
+    denominator error this project has already paid for three times in one session.
+
+    Said ONLY when it differs from the full set: an every-epoch caveat is one nobody reads by epoch 3.
+    """
+    fitting = _fitting(tmp_path / "member.pt")
+    undefined = dict.fromkeys(TARGETS, 0.9)
+    undefined[TARGETS[0]] = float("nan")
+    fitting.ranked = lambda fold, epoch: (0.9, undefined, None)  # type: ignore[method-assign]
+
+    with caplog.at_level("INFO"):
+        fitting.run(_fold())
+    assert f"over {len(TARGETS) - 1} of {len(TARGETS)} labels" in caplog.text
+
+    caplog.clear()
+    fitting = _fitting(tmp_path / "full.pt")
+    fitting.ranked = lambda fold, epoch: (0.9, dict.fromkeys(TARGETS, 0.9), None)  # type: ignore[method-assign]
+    with caplog.at_level("INFO"):
+        fitting.run(_fold())
+    assert "labels" not in caplog.text, "the competition's own denominator needs no caveat"
+
+
 def test_the_improved_epoch_reaches_the_disk_before_the_next_one_runs(tmp_path: Path):
     """A killed run must leave a member that is submittable, not merely inspectable."""
     destination = tmp_path / "member.pt"

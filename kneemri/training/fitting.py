@@ -166,7 +166,13 @@ class Fitting:
             # carries 4.0, which `ledger_check` then quotes as the arm's best — its own docstring says a
             # final fit records NaN, and until now only the checkpoint did.
             scored = ranked if fold.scored else NO_HOLDOUT
-            logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f  (%ds)", epoch, loss, scored, seconds)
+            # THE DENOMINATOR, WHENEVER IT IS NOT THE COMPETITION'S. `nanmean` drops a finding with only
+            # one class present on this holdout, so the headline is a mean over however many survived —
+            # and two runs whose means are read against each other may not have averaged the same set.
+            # Only said when it differs from twelve, because a line printed every epoch stops being read.
+            defined = sum(1 for value in per_label.values() if not np.isnan(value))
+            over = "" if defined == len(per_label) else f" over {defined} of {len(per_label)} labels"
+            logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f%s  (%ds)", epoch, loss, scored, over, seconds)
             # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
             self.metrics.record(
                 EpochRow(
