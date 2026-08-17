@@ -21,6 +21,17 @@ intensity392_ws_s2026.pt    # 0.8459
 # would need a dataset push to undo.
 extended_ws_s2026.pt        # 0.8462 — the best FIFTH member (four + this = 0.8610)
 lora_r8_v3small_224_s2026.pt # 0.8215 — the only non-DINOv2 member; the encoder-transfer question
+crop80_tissue_s2026.pt      # 0.8345 — the only member reading a DIFFERENT physical crop
+# Added 2026-08-17 for the one axis this pool does not vary at all. Every other member reads the same
+# 130 mm field from the same centre, so the pool's diversity is recipe diversity and nothing else —
+# while the diversity that has actually TRANSFERRED is the decode path (0.0059 offline, 0.014 on the
+# board, a 2.4x understatement by our own ruler; knee-nas5).
+#
+# It is mounted on a NEGATIVE offline delta, deliberately: swapping it for sliceattn in the four that
+# scored 0.918 is 0.8604 against 0.8612, and adding it as a fifth is 0.8607 against 0.8612 (measured
+# 2026-08-17 over the same 909-study fold-0 holdout). Both are an eighth of the 0.0062 noise floor, so
+# offline this is a tie, and the axis it varies is the one our holdout has twice mispriced in the
+# direction that would make it worth having. Mounting costs a dataset push, not a submission slot.
 #
 # RE-SCORED 2026-08-17 over THIRTEEN same-split checkpoints, not nine. The best subset there is a five
 # — calibrated_targets + deep24 + extended_ws + intensity392_ws + res392_ws at 0.8617 — and it wants
