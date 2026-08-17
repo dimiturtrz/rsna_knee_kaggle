@@ -85,8 +85,14 @@ BATCH="${4:-12}"
 # otherwise write one checkpoint and one ledger row - the exact shape of the dinov3 scar, where a
 # rename that matched nothing had a second probe overwriting the run it was being compared against.
 # Empty at batch 12, so every existing name and `res392_ws_s2026.pt` are byte-identical.
+#
+# THE RATE GOES IN THE NAME FOR THE SAME REASON, and it was missing: the clean test this arm's own
+# comment prescribes — `resolution.sh 392 448 8e-6` — wrote `resolution_392` and `res392_ws_s2026.pt`,
+# the very name of the 4e-5 member it exists to be compared against. The confound-breaking run would
+# have overwritten its own control. Empty at 4e-5, so every committed invocation is unchanged.
 TAG=""
 [ "$BATCH" = "12" ] || TAG="_b${BATCH}"
+[ "$RATE" = "4e-5" ] || TAG="${TAG}_lr${RATE}"
 require "$LABELS"
 
 # Fragmentation, not capacity, wrote the last 2.54 GB of that OOM: 1.17 GB sat reserved-but-unallocated

@@ -326,7 +326,10 @@ rate's value under the current recipe is genuinely unknown. What is *not* uncert
 cannot be read as a resolution result.
 
 **The clean test is one arm**: 392 px at 8e-6, matched to the control's rate. Either resolution
-survives on its own or our best member is mostly a rate change we already knew about.
+survives on its own or our best member is mostly a rate change we already knew about. Run it as
+`bash experiments/arms/resolution.sh 392 448 8e-6`; it lands as `resolution_392_lr8e-6` /
+`res392_lr8e-6_ws_s2026.pt`, because a non-default rate now tags the name the way a non-default batch
+does — without that, the confound-breaking run wrote the name of the very member it is the control for.
 
 This was found by hand, three days after the row was written. It is now mechanical: every run records
 its recipe beside its scores, and `python -m kneemri.evaluation.run_comparison --control <ctl> --arms <...>`
