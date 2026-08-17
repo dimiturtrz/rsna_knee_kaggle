@@ -17,6 +17,7 @@ import subprocess
 from pathlib import Path
 
 from core.paths import DataRoot
+from kneemri.kaggle.kit_wheels import KitWheels
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,15 @@ def main() -> None:
     revision = asked("rev-parse", "--short", "HEAD")
     dirty = bool(asked("status", "--porcelain"))
     (out / _SOURCE_DIR / "kit.json").write_text(json.dumps({"commit": revision, "dirty": dirty}, indent=2))
+
+    # THE WHEELS DIRECTORY IS AN ARGUMENT, AND THE WRONG ONE BUILDS A KIT THAT PASSES EVERY OTHER CHECK.
+    # On 2026-08-17 this ran against a scratch directory holding two of the four wheels, so the kit lost
+    # transformers 5.15.0 — under which our DINOv3 checkpoints were fitted — and a v3 member was dropped
+    # inside the kernel. Refused at BUILD time rather than only by verify_kit, because a kit is uploaded
+    # by hand and the gate that is not on the path from build to push is the gate that is skipped.
+    lacking = KitWheels().missing(out)
+    if lacking:
+        raise SystemExit("the kit is missing wheels it cannot run without:\n  " + "\n  ".join(lacking))
 
     wheels = [w.name for w in out.glob("*.whl")]
     weights = list(arguments.weights)
