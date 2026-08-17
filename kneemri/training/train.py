@@ -27,11 +27,12 @@ from kneemri.models.backbone import ENCODERS, SMALL, Encoder
 from kneemri.models.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyDesign, StudyModel
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.runs.member_record import MemberRecord
+from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
-from kneemri.training.trainer import Adaptation, AugmentConfig, DeviceBudget, Trainer
+from kneemri.training.trainer import Adaptation, DeviceBudget, Trainer
 
 logger = logging.getLogger(__name__)
 

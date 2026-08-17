@@ -24,9 +24,9 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from jaxtyping import Float, UInt8
+from jaxtyping import UInt8
 from numpy.typing import NDArray
-from torch import Tensor, nn
+from torch import Tensor
 
 from kneemri.corpus.prefetch import Prefetch
 from kneemri.corpus.slot_reader import GROUP
@@ -35,6 +35,7 @@ from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import StudyModel
+from kneemri.training.augmentation import Augmentation, AugmentConfig
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.objective import Objective, Predicted
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
@@ -238,53 +239,8 @@ ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
 
 
-@dataclass(frozen=True)
-class AugmentConfig:
-    """How hard to perturb a training image, and which perturbations to apply at all.
-
-    The geometric widths are the public baseline's. The INTENSITY block is not: it comes from the
-    sibling cardiac-MRI project, where gamma / contrast / blur / noise were the transforms that
-    measurably closed a cross-vendor gap (`../cardiac-seg/core/data/dynamic/augment.py`). This corpus
-    has the same problem in a harder form — reports in nine languages means many countries and many
-    scanners — and the public baseline augments geometry only.
-
-    NO FLIPS, ever. A horizontal flip undoes the laterality normalisation that five of the twelve
-    targets depend on. The sibling project flips both axes freely because a cardiac label is not
-    side-defined; here it would teach the model that medial and lateral are the same thing.
-
-    One inherited finding does NOT transfer, and the reason is worth keeping: cardiac-seg measured
-    translation as NEUTRAL and turned it off, because a fully-convolutional U-Net is
-    translation-equivariant so absolute position barely matters. Our encoder is a ViT with position
-    embeddings and is NOT equivariant, so translation is kept on here.
-    """
-
-    rotation_degrees: float = 8.0
-    scale_jitter: float = 0.08
-    shift_jitter: float = 0.05
-    gain_jitter: float = 0.10
-    gamma: tuple[float, float] = (0.7, 1.5)
-    gamma_probability: float = 0.3
-    blur_probability: float = 0.2
-    contrast: tuple[float, float] = (0.85, 1.15)
-    noise: float = 0.02
-    """Noise is far below the sibling's 0.08: theirs acts on z-scored images, ours on [0, 1]."""
-
-    @classmethod
-    def geometric_only(cls) -> "AugmentConfig":
-        """The public baseline's augmentation: rigid jitter and one global gain, no intensity ops.
-
-        This is the DEFAULT, so that enabling the intensity block is an explicit, ablatable decision
-        rather than a silent change of recipe. It also keeps a run reproducible against members that
-        were fitted before the block existed.
-        """
-        return cls(gamma_probability=0.0, blur_probability=0.0, contrast=(1.0, 1.0), noise=0.0)
-
-
 class Trainer:
     """Fits a `StudyModel` on a cached corpus and scores it on a held-out fold."""
-
-    _BLUR = torch.tensor([[1.0, 2.0, 1.0], [2.0, 4.0, 2.0], [1.0, 2.0, 1.0]]) / 16.0
-    """A 3x3 Gaussian, normalised so a blur cannot change the image's overall level."""
 
     def __init__(
         self,
@@ -297,7 +253,7 @@ class Trainer:
         self.model = model.to(device)
         self.device = device
         self.adaptation = adaptation or Adaptation()
-        self.augment_config = augment_config or AugmentConfig.geometric_only()
+        self.augmentation = Augmentation(augment_config)
         self.objective = objective or Objective()
         groups = self.model.parameter_groups(
             self.adaptation.head_lr, self.adaptation.backbone_lr, self.adaptation.unfreeze_last
@@ -406,104 +362,9 @@ class Trainer:
             pct_start=ONE_CYCLE_WARMUP,
         )
 
-    def augment(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
-        """Rigid jitter, then intensity — never a flip, which laterality normalisation forbids.
-
-        Every transform is per-sample and vectorised: parameters come from one `torch.rand(n, ...)` and
-        probabilistic transforms are applied with a mask (`out = do*transformed + (1-do)*original`)
-        rather than a Python branch, so a batch costs one kernel per transform and not one per image.
-        """
-        warped = self._warp(images, generator)
-        return self._intensity(warped, generator)
-
-    def _warp(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
-        """Rotation, scale and translation as a single affine resample."""
-        config, count, device = self.augment_config, images.shape[0], images.device
-        angles = (torch.rand(count, generator=generator, device=device) * 2 - 1) * np.deg2rad(config.rotation_degrees)
-        scales = 1 + (torch.rand(count, generator=generator, device=device) * 2 - 1) * config.scale_jitter
-        shifts = (torch.rand(count, 2, generator=generator, device=device) * 2 - 1) * config.shift_jitter
-        cosine, sine = torch.cos(angles) / scales, torch.sin(angles) / scales
-        theta = torch.zeros(count, 2, 3, device=device)
-        theta[:, 0, 0], theta[:, 0, 1], theta[:, 0, 2] = cosine, -sine, shifts[:, 0]
-        theta[:, 1, 0], theta[:, 1, 1], theta[:, 1, 2] = sine, cosine, shifts[:, 1]
-        grid = nn.functional.affine_grid(theta, list(images.shape), align_corners=False)
-        # `border` rather than `zeros`: a rotated knee should run out into tissue-like values, not into a
-        # black wedge the encoder can use to infer how far the image was rotated.
-        return nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
-
-    def _intensity(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
-        """Gain, gamma, blur, contrast and noise — the scanner-variation axis, on [0, 1] inputs.
-
-        EACH OP IS SKIPPED WHEN ITS OWN CONFIG DISABLES IT, which `noise` already did and the other
-        three did not. A disabled op is not free: the mask arithmetic multiplies its result by zero,
-        but the result is computed first, over the whole batch. The default config is
-        `geometric_only`, so every step of every run in the ledger has paid for a full-tensor `pow`
-        and a `conv2d` blur whose outputs were then discarded.
-
-        MEASURED on a 5090 at the whole-stack shape (batch 12, six slots, twelve slices, 448 px):
-        15.5 ms a step against 2.0 ms, and 3.23 GB of transient allocation against 1.29. The time is
-        ~1.2% of a ~1.15 s step — directional, not a result; the allocation is freed before the
-        encoder runs, so it does not move the run's peak either. It is taken because computing a
-        value in order to multiply it by zero is dead work, not because either number is a lever.
-
-        The enabled path is unchanged (18.7 ms against 19.0 — one guard's worth of noise). The
-        disabled path differs by one ulp: dropping `(x - mean) * 1 + mean` is not bitwise identity,
-        and after requantisation to uint8 that shows as a 1 LSB difference on 1e-6 of pixels, at
-        rounding boundaries only.
-
-        A SKIPPED OP ALSO SKIPS ITS DRAWS, so `torch_generator` advances differently and a rerun of an
-        existing arm gets a different realisation of the same augmentation distribution. That is a
-        reproducibility cost with no distributional one, and it is the reason this is worth naming
-        rather than filing as a tidy-up: the pixels differ, the recipe does not.
-        """
-        config, count, device = self.augment_config, images.shape[0], images.device
-        shape = (count, 1, 1, 1)
-
-        gain = 1 + (torch.rand(shape, generator=generator, device=device) * 2 - 1) * config.gain_jitter
-        images = images * gain
-
-        if config.gamma_probability > 0:
-            low, high = config.gamma
-            exponent = torch.rand(shape, generator=generator, device=device) * (high - low) + low
-            apply_gamma = (torch.rand(shape, generator=generator, device=device) < config.gamma_probability).float()
-            images = apply_gamma * images.clamp(0, 1) ** exponent + (1 - apply_gamma) * images
-
-        if config.blur_probability > 0:
-            apply_blur = (torch.rand(shape, generator=generator, device=device) < config.blur_probability).float()
-            channels = images.shape[1]
-            kernel = self._BLUR.to(device, images.dtype).view(1, 1, 3, 3).expand(channels, 1, 3, 3)
-            blurred = nn.functional.conv2d(images, kernel, padding=1, groups=channels)
-            images = apply_blur * blurred + (1 - apply_blur) * images
-
-        low, high = config.contrast
-        if (low, high) != (1.0, 1.0):
-            contrast = torch.rand(shape, generator=generator, device=device) * (high - low) + low
-            # Contrast scales about the image's own mean, so it changes the SPREAD of intensities without
-            # also shifting the level — which `gain` above is already responsible for.
-            mean = images.mean(dim=(1, 2, 3), keepdim=True)
-            images = (images - mean) * contrast + mean
-
-        if config.noise > 0:
-            images = images + torch.randn(images.shape, generator=generator, device=device) * config.noise
-        return images.clamp(0, 1)
-
     def augment_bag(self, images: UInt8[Tensor, "b n g h w"]) -> UInt8[Tensor, "b n g h w"]:
-        """Augment a batch of slot bags, staying in uint8 so the model's own forward is untouched.
-
-        The warp needs floats, but `StudyModel.forward` owns the byte scaling and the ImageNet
-        normalisation — and its fingerprint is the identity check that stops a member being run under a
-        reading it was not fitted under. So the augmentation converts, warps and converts back rather
-        than handing the model a tensor in a different space. The requantisation is lossless in the
-        sense that matters: the cache is already uint8.
-
-        Each slot image is warped INDEPENDENTLY (the bag is folded into the batch axis). That is
-        deliberate — the six slots are separate acquisitions of the same knee, not one volume, so a
-        shared jitter would imply a registration between them that does not exist.
-        """
-        batch, slots = images.shape[:2]
-        flat = images.reshape(batch * slots, *images.shape[2:]).float().div(255.0)
-        warped = self.augment(flat, self.torch_generator)
-        return (warped * 255).round().clamp(0, 255).to(torch.uint8).reshape(images.shape)
+        """Perturb a batch of slot bags with this run's own generator — see `Augmentation`."""
+        return self.augmentation.bagged(images, self.torch_generator)
 
     def batches(
         self, positions: NDArray[np.int64], size: int, generator: np.random.Generator, *, shuffle: bool

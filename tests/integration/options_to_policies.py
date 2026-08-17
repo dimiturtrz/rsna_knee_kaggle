@@ -32,7 +32,6 @@ DEVICE = torch.device("cpu")
 ENCODER = Encoder("fake", "fake/encoder", DIM)
 
 THE_LOOP = {
-    "augment",
     "augment_bag",
     "batches",
     "evaluated",
