@@ -137,6 +137,20 @@ class SeriesHeader:
         return None if spacing is None or len(spacing) < 1 else float(spacing[0])
 
     @property
+    def slice_spacing(self) -> float | None:
+        """Through-plane mm per slice, which is what turns a slice band into a distance.
+
+        `SpacingBetweenSlices` before `SliceThickness`: a gapped stack advances by the former, and the
+        latter would then understate the extent by the gap. Absent both, the series has no physical
+        through-plane scale and says so rather than assuming a millimetre.
+        """
+        for tag in ("SpacingBetweenSlices", "SliceThickness"):
+            spacing = self._number(getattr(self.header, tag, None))
+            if spacing is not None and spacing > 0:
+                return spacing
+        return None
+
+    @property
     def laterality_tag(self) -> str | None:
         """'L' / 'R' from the tag, treating present-but-empty as absent — which it is."""
         value = str(getattr(self.header, "Laterality", "") or "").strip().upper()
@@ -185,6 +199,16 @@ class Acquisition:
     pixel_spacing: float | None
     laterality_tag: str | None
     centre_x: float | None
+    slice_spacing: float | None = None
+
+    @property
+    def through_plane_mm(self) -> float | None:
+        """How many mm the series spans along the axis a slice band cuts.
+
+        None where the spacing tag is absent: a share of an unknown extent is not a distance, and this
+        project has read a share as a physical quantity before.
+        """
+        return None if self.slice_spacing is None else self.slice_spacing * self.slice_count
 
     @property
     def fluid_sensitive(self) -> bool:
@@ -218,6 +242,7 @@ class Acquisition:
             pixel_spacing=header.pixel_spacing,
             laterality_tag=header.laterality_tag,
             centre_x=header.centre_x,
+            slice_spacing=header.slice_spacing,
         )
 
     def ordered_files(self) -> tuple[str, ...]:

@@ -63,12 +63,16 @@ def test_interval():
 
 def test_report():
     """The denominators lead, and each slot is one row — a share over what decoded is not a corpus share."""
-    measured = [("SAG_FLUID_FS", {"discarded": 0.3, "low_end": 0.1, "high_end": 0.2})] * 8
+    measured = [("SAG_FLUID_FS", {"discarded": 0.3, "low_end": 0.1, "high_end": 0.2, "span_mm": 100.0})] * 8
     lines = BandCoverage().report(measured, sampled=5, corpus=4407)
 
     assert lines[0] == "band 0.2-0.8 over 8 series from 5 studies sampled of 4407 in the corpus"
     assert sum(line.startswith("SAG_FLUID_FS") for line in lines) == 1
-    assert "0.3000" in next(line for line in lines if line.startswith("SAG_FLUID_FS"))
+    row = next(line for line in lines if line.startswith("SAG_FLUID_FS"))
+    assert "0.3000" in row
+    # A 100 mm span cut at 0.20 loses 20 mm from each end — the share restated as the distance the
+    # peripheral meniscus either does or does not sit inside.
+    assert "20.0" in row
 
 
 def test_measure_study(tmp_path: Path):

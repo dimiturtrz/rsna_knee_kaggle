@@ -86,13 +86,18 @@ class BandCoverage:
     band: Band = Band()
 
     def profile(self, stack: NDArray[np.float32]) -> NDArray[np.float64]:
-        """Tissue mass per slice, by the same per-slice Otsu rule `TissueCentre` locates with.
+        """Tissue mass per slice, against ONE Otsu threshold taken over the whole series.
 
-        The same rule rather than a second one, for the reason `crop_coverage` gives: a region judged by
-        one threshold and chosen by another measures the two thresholds.
+        Otsu is `TissueCentre`'s rule, but applied to the stack rather than to each slice, and the
+        difference is load-bearing here. `TissueCentre` judges slices independently because it asks a
+        WITHIN-slice question (where is this slice's centroid), and a near-empty slice abstains via
+        `MIN_TISSUE_PIXELS`. This asks a BETWEEN-slice one — is there more tissue here than there — and a
+        per-slice threshold makes that question unanswerable: an end slice holding only background gets
+        its own histogram split, so its noise is thresholded into "tissue" and the tail inflates. One
+        threshold for the series is the only reading under which an empty end weighs nothing.
         """
-        locator = TissueCentre()
-        return np.array([float((plane > locator.threshold(plane)).sum()) for plane in stack])
+        threshold = TissueCentre().threshold(stack)
+        return np.array([float((plane > threshold).sum()) for plane in stack])
 
     def discarded(self, stack: NDArray[np.float32]) -> dict[str, float]:
         """The share of tissue outside the band, and the share at each end separately.
@@ -128,17 +133,22 @@ class BandCoverage:
         lines = [
             f"band {self.band.low:g}-{self.band.high:g} over {len(measured)} series "
             f"from {sampled} studies sampled of {corpus} in the corpus",
-            f"{'slot':16s} {'discarded':>10s} {'95% CI':>18s} {'p90':>7s} {'low end':>8s} {'high end':>9s} {'n':>6s}",
+            f"uniform tissue along the axis would discard {1.0 - (self.band.high - self.band.low):.4f} — "
+            f"a share BELOW that is the constant's claim, at or above it is knee",
+            f"{'slot':16s} {'discarded':>10s} {'95% CI':>18s} {'p90':>7s} {'low end':>8s} {'high end':>9s} "
+            f"{'span mm':>8s} {'cut/end':>8s} {'n':>6s}",
         ]
         for slot in sorted({name for name, _ in measured}):
             shares = np.array([one["discarded"] for name, one in measured if name == slot])
             low_end = np.array([one["low_end"] for name, one in measured if name == slot])
             high_end = np.array([one["high_end"] for name, one in measured if name == slot])
+            spans = np.array([one["span_mm"] for name, one in measured if name == slot if one["span_mm"] > 0.0])
+            span = float(spans.mean()) if spans.size else 0.0
             low, high = self.interval(shares)
             lines.append(
                 f"{slot:16s} {shares.mean():10.4f} [{low:+.4f}, {high:+.4f}] "
                 f"{np.percentile(shares, PERCENTILE_HIGH):7.4f} {low_end.mean():8.4f} {high_end.mean():9.4f} "
-                f"{shares.size:6d}"
+                f"{span:8.1f} {span * self.band.low:8.1f} {shares.size:6d}"
             )
         return lines
 
@@ -156,12 +166,19 @@ class BandCoverage:
         try:
             study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
             routed = pipeline.route(study.acquisitions, study.planes)
-            read = [(slot, reader.cropped(acquisition, request.depth)) for slot, acquisition in routed.items()]
+            read = [
+                (slot, (acquisition, reader.cropped(acquisition, request.depth)))
+                for slot, acquisition in routed.items()
+            ]
         except (OSError, ValueError, RuntimeError, IndexError) as failure:
             logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
             return []
-        scored = [(slot, coverage.discarded(stack)) for slot, stack in read if stack is not None]
-        return [(slot, one) for slot, one in scored if one]
+        scored = [
+            (slot, coverage.discarded(stack) | {"span_mm": acquisition.through_plane_mm or 0.0})
+            for slot, (acquisition, stack) in read
+            if stack is not None
+        ]
+        return [(slot, one) for slot, one in scored if len(one) > 1]
 
 
 def main() -> None:

@@ -55,6 +55,29 @@ def test_pixel_spacing(tmp_path: Path):
     assert _header(write_series(tmp_path / "s")).pixel_spacing == 0.3
 
 
+def test_slice_spacing(tmp_path: Path):
+    """`SpacingBetweenSlices` wins over `SliceThickness`, and a series carrying neither says None.
+
+    A gapped stack advances by the spacing, so taking the thickness would understate the extent by
+    exactly the gap — which is the error that would make a slice band look narrower than it is.
+    """
+    assert _header(write_series(tmp_path / "s", slice_spacing=4.0)).slice_spacing == 4.0
+
+    thick = _header(write_series(tmp_path / "t", slice_spacing=None))
+    thick.header.SliceThickness = 2.5
+    assert thick.slice_spacing == 2.5
+
+    assert _header(write_series(tmp_path / "none", slice_spacing=None)).slice_spacing is None
+
+
+def test_through_plane_mm(tmp_path: Path):
+    """The distance a slice band cuts into: spacing times slices, or None where there is no scale."""
+    acquisition = _probe(write_series(tmp_path / "span", slices=8, slice_spacing=3.0))
+
+    assert acquisition.through_plane_mm == 24.0
+    assert _probe(write_series(tmp_path / "bare", slice_spacing=None)).through_plane_mm is None
+
+
 def test_laterality_tag(tmp_path: Path):
     """Present-but-empty is Type 2C's own case, and reads absent rather than as a side."""
     assert _header(write_series(tmp_path / "l", laterality="L")).laterality_tag == "L"

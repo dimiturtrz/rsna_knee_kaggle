@@ -21,6 +21,7 @@ def write_series(
     scan_options: str = "FS",
     laterality: str | None = "L",
     spacing: float = 0.3,
+    slice_spacing: float | None = 3.0,
     size: int = 64,
     normal: tuple[float, float, float] = (1.0, 0.0, 0.0),
     reversed_names: bool = True,
@@ -47,6 +48,9 @@ def write_series(
         if laterality is not None:
             data.Laterality = laterality
         data.PixelSpacing = [spacing, spacing]
+        # Matches the 3 mm stride the positions advance by, so the stack's physical extent is coherent.
+        if slice_spacing is not None:
+            data.SpacingBetweenSlices = slice_spacing
         data.Rows, data.Columns = size, size
         data.InstanceNumber = index + 1
         # Position advances along the given normal, so k = p.n is strictly increasing with `index`.
