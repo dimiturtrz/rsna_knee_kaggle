@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import override
@@ -492,6 +493,40 @@ def test_await_headroom(monkeypatch: pytest.MonkeyPatch):
 
     assert DeviceBudget().await_headroom(idle.append) == (31.0, 32.0)
     assert not idle, "a run that named nothing has no need to wait ON, and the whole card is never free"
+
+
+def test_headroom_without_a_card(monkeypatch: pytest.MonkeyPatch):
+    """No visible card answers (0, 0) rather than asking the driver, which would raise.
+
+    THE MACHINE THAT RUNS THIS SUITE HAS A CARD, so the branch that keeps a CPU box working is the one
+    nothing here exercises — and `select` reads it before every run, on every machine.
+    """
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 0)
+
+    assert DeviceBudget().headroom() == (0.0, 0.0), "asking costs nothing and returns a pair"
+
+
+def test_select_warns_when_it_starts_into_a_busy_card(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+):
+    """Past the wait's bound, a card that is short but not FATAL is started into — and says so.
+
+    The symptom is not a failure and cannot be read off the throughput afterwards: Windows pages over
+    PCIe and the run looks like a slow recipe. So the contention is named before the first batch,
+    which is the whole difference between this and the crawl that cost both projects on 2026-08-17.
+    """
+    monkeypatch.setattr(VisibleCards, "device", lambda _: torch.device("cuda", 0))
+    monkeypatch.setattr(DeviceBudget, "await_headroom", lambda _: (10.0, 32.0))
+    monkeypatch.setattr(torch.cuda, "current_device", lambda: 0)
+    fractions: list[float] = []
+    monkeypatch.setattr(torch.cuda, "set_per_process_memory_fraction", lambda fraction, _: fractions.append(fraction))
+
+    with caplog.at_level(logging.WARNING):
+        device = DeviceBudget().select()
+
+    assert device.type == "cuda", "short of the cap is not short of the floor, so the run starts"
+    assert "another process holds the rest" in caplog.text, "named before the first batch, not inferred after it"
+    assert fractions == [pytest.approx(0.8)], "and the cap it starts under is still applied"
 
 
 def test_capped():

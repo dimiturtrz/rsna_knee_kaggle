@@ -200,6 +200,32 @@ def test_report(caplog: pytest.LogCaptureFixture):
     assert "not yet shown to rank anything" in caplog.text
 
 
+def test_report_scores_a_resolved_pair(caplog: pytest.LogCaptureFixture):
+    """A pair the fine-tuned ruler COULD read is counted, and graded on direction rather than size.
+
+    Direction is the only thing a cheap head proxy is asked for: it exists to say which pixel arm is
+    worth a training slot, not to reproduce that arm's delta. So the log names the agreement and the
+    denominator moves — the half of `report` an all-unresolved record never reaches.
+    """
+    features, mask = _corpus()
+    truth = (np.random.default_rng(SEED).random((STUDIES, len(TARGETS))) > 0.5).astype(np.float32)
+    targets = Targets(truth, np.ones_like(truth), [str(i) for i in range(STUDIES)])
+    split = (np.arange(0, 160, dtype=np.int64), np.arange(160, STUDIES, dtype=np.int64))
+
+    with caplog.at_level("INFO"):
+        agreed = AxisConcordance(HeadTrial(epochs=1)).report(
+            HeadTrial().features(features),
+            torch.from_numpy(mask),
+            targets,
+            split,
+            (_axis(0.8081, 0.8005),),
+        )
+
+    assert agreed in {0, 1}, "one resolved pair either agrees or does not; the proxy's sign is not fixed here"
+    assert "1 of 1 resolved pair(s) agree" in caplog.text or "0 of 1 resolved pair(s) agree" in caplog.text
+    assert "direction" in caplog.text, "the pair is graded on direction, and said so"
+
+
 def test_batches():
     """Batches are shuffled and the partial last one is dropped, as the pixel trainer does.
 

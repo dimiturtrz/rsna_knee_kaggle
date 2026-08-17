@@ -451,26 +451,31 @@ class StudyModel(nn.Module):
         weights are all frozen, so what opens is exactly the adapters. Honouring `unfreeze_last` as well
         would open six blocks' base weights alongside them and quietly make the run something else.
         """
+        return [
+            {"params": list(self.head.parameters()), "lr": head_lr},
+            {"params": self._opened(unfreeze_last), "lr": backbone_lr},
+        ]
+
+    def _opened(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
+        """The backbone parameters this run fits, having frozen the rest.
+
+        WHAT IS OPEN DIFFERS BY ADAPTATION, what the optimiser is handed does not — the two branches
+        used to build the same pair of groups apiece, which is one place for the head's learning rate
+        to drift from the other's.
+        """
         adapters = [module for module in self.backbone.modules() if isinstance(module, LoRALinear)]
         if adapters:
-            opened = [parameter for parameter in self.backbone.parameters() if parameter.requires_grad]
-            return [
-                {"params": list(self.head.parameters()), "lr": head_lr},
-                {"params": opened, "lr": backbone_lr},
-            ]
+            return [parameter for parameter in self.backbone.parameters() if parameter.requires_grad]
         blocks = self._blocks()
         trainable = {id(parameter) for block in blocks[-unfreeze_last:] for parameter in block.parameters()}
         opened: list[torch.nn.Parameter] = []
-        frozen: list[torch.nn.Parameter] = []
         for parameter in self.backbone.parameters():
-            (opened if id(parameter) in trainable else frozen).append(parameter)
-        for parameter in frozen:
-            # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
-            parameter.requires_grad_(False)  # noqa: FBT003
-        return [
-            {"params": list(self.head.parameters()), "lr": head_lr},
-            {"params": opened, "lr": backbone_lr},
-        ]
+            if id(parameter) in trainable:
+                opened.append(parameter)
+            else:
+                # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
+                parameter.requires_grad_(False)  # noqa: FBT003
+        return opened
 
     def compile_encoder(self) -> None:
         """Fuse the encoder's kernels. The ENCODER only, and SHAPE-SPECIALISED, both measured.
