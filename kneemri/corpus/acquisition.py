@@ -66,6 +66,120 @@ _POSITION_VALUES = 3
 
 
 @dataclass(frozen=True)
+class SeriesHeader:
+    """One slice's DICOM header, read as the acquisition axes it implies.
+
+    SEPARATE FROM `Acquisition` because it answers a different question. An acquisition is the series
+    as the routing sees it — what it is, how many slices it holds, which way they run. This is the
+    vendor dialect: five parsers that share a header, touch none of the series' own fields, and each
+    exist because the tag they read is optional, multi-valued, or lies.
+
+    An EMPTY header is a legitimate one, and is what a series directory holding no DICOM produces. Every
+    axis then reads absent by the same rules rather than by a second hand-written branch — the branch
+    that used to sit in `probe` and had to be kept in step with these five by hand.
+    """
+
+    header: pydicom.Dataset
+
+    @classmethod
+    def of(cls, path: Path) -> "SeriesHeader":
+        """The header alone — `stop_before_pixels`, because a probe must not pay to decode pixel data."""
+        return cls(pydicom.dcmread(str(path), stop_before_pixels=True, force=True))
+
+    @property
+    def _described(self) -> str:
+        """Description and sequence name as one lowercase string, separators flattened to spaces.
+
+        Both the weighting and the fat-suppression rules read it, and they read it identically — it was
+        two copies of this expression, which is two places for a separator to be added to one of them.
+        """
+        return _SEPARATORS.sub(
+            " ",
+            f"{getattr(self.header, 'SeriesDescription', '') or ''} "
+            f"{getattr(self.header, 'SequenceName', '') or ''}".lower(),
+        )
+
+    @property
+    def weighting(self) -> str:
+        """T1 / T2 / PD / GRE / UNK, from the description where it says so and from TR-TE where it does not.
+
+        Gradient echo is settled first because its TR is short by design and would otherwise read as T1.
+        """
+        described = self._described
+        if _PD.search(described):
+            return "PD"
+        if _T2.search(described):
+            return "T2"
+        if _T1.search(described):
+            return "T1"
+        if "GR" in str(getattr(self.header, "ScanningSequence", "") or "").upper():
+            return "GRE"
+        repetition = self._number(getattr(self.header, "RepetitionTime", None))
+        echo = self._number(getattr(self.header, "EchoTime", None))
+        if repetition is None:
+            return "UNK"
+        if repetition < _LONG_TR_MS:
+            return "T1"
+        if echo is not None and echo > _LONG_TE_MS:
+            return "T2"
+        return "PD"
+
+    @property
+    def fat_suppressed(self) -> bool:
+        """Fat suppression is a preparation named in the description, the sequence name, or ScanOptions."""
+        raw = getattr(self.header, "ScanOptions", None) or ""
+        # ScanOptions is Type 1C multi-valued: pydicom hands back a MultiValue for "FS\\SAT_GEMS" and a
+        # plain str for "FS". Stringifying the first gives "['FS', 'SAT_GEMS']", whose tokens no longer
+        # match — so the two cases are separated here rather than papered over with a substring test.
+        multi_valued = isinstance(raw, (list, pydicom.multival.MultiValue))
+        tokens = [str(value) for value in raw] if multi_valued else str(raw).split("\\")
+        return bool(_FATSAT.search(self._described)) or any(
+            token.strip().upper() in _FATSAT_OPTIONS for token in tokens
+        )
+
+    @property
+    def pixel_spacing(self) -> float | None:
+        """In-plane mm per pixel, which with the crop extent fixes the effective resolution."""
+        spacing = getattr(self.header, "PixelSpacing", None)
+        return None if spacing is None or len(spacing) < 1 else float(spacing[0])
+
+    @property
+    def laterality_tag(self) -> str | None:
+        """'L' / 'R' from the tag, treating present-but-empty as absent — which it is."""
+        value = str(getattr(self.header, "Laterality", "") or "").strip().upper()
+        return value[0] if value[:1] in ("L", "R") else None
+
+    @property
+    def centre_x(self) -> float | None:
+        """The x of the image CENTRE in patient coordinates: +x is the patient's left.
+
+        The corner (`ImagePositionPatient` itself) sits half a field of view away, which is enough to
+        reverse the sign on a knee scanned near the midline.
+        """
+        position = getattr(self.header, "ImagePositionPatient", None)
+        orientation = getattr(self.header, "ImageOrientationPatient", None)
+        spacing = getattr(self.header, "PixelSpacing", None)
+        rows, columns = getattr(self.header, "Rows", None), getattr(self.header, "Columns", None)
+        if position is None or orientation is None or spacing is None or not rows or not columns:
+            return None
+        axes = np.asarray(orientation, dtype=float)
+        centre: NDArray[np.float64] = (
+            np.asarray(position, dtype=float)
+            + axes[:3] * float(spacing[1]) * float(columns) / 2
+            + axes[3:6] * float(spacing[0]) * float(rows) / 2
+        )
+        return float(centre[0])
+
+    @staticmethod
+    def _number(value: object) -> float | None:
+        """A DICOM numeric that may be absent, empty or unparsable."""
+        try:
+            return float(value)  # pyrefly: ignore[bad-argument-type]
+        except (TypeError, ValueError):
+            return None
+
+
+@dataclass(frozen=True)
 class Acquisition:
     """One series: its files, the header of a representative slice, and what that header implies."""
 
@@ -95,31 +209,22 @@ class Acquisition:
 
         The middle slice is read rather than the first: the ends of a knee stack are often outside the
         joint, and on some vendors the first slice is a scout or a duplicate.
+
+        A directory holding no DICOM is probed rather than skipped, and reads its axes off an EMPTY
+        header — the same five rules, not a second hand-written all-absent branch beside them.
         """
         files = tuple(sorted(entry.name for entry in directory.iterdir() if entry.name.endswith(".dcm")))
-        if not files:
-            return cls(
-                study=study,
-                series=series,
-                directory=directory,
-                files=(),
-                weighting="UNK",
-                fat_suppressed=False,
-                pixel_spacing=None,
-                laterality_tag=None,
-                centre_x=None,
-            )
-        header = pydicom.dcmread(str(directory / files[len(files) // 2]), stop_before_pixels=True, force=True)
+        header = SeriesHeader.of(directory / files[len(files) // 2]) if files else SeriesHeader(pydicom.Dataset())
         return cls(
             study=study,
             series=series,
             directory=directory,
             files=files,
-            weighting=cls._weighting(header),
-            fat_suppressed=cls._fat_suppressed(header),
-            pixel_spacing=cls._spacing(header),
-            laterality_tag=cls._laterality_tag(header),
-            centre_x=cls._centre_x(header),
+            weighting=header.weighting,
+            fat_suppressed=header.fat_suppressed,
+            pixel_spacing=header.pixel_spacing,
+            laterality_tag=header.laterality_tag,
+            centre_x=header.centre_x,
         )
 
     def ordered_files(self) -> tuple[str, ...]:
@@ -159,85 +264,3 @@ class Acquisition:
             return float(np.dot(np.asarray(position, dtype=float), np.cross(axes[:3], axes[3:6])))
         number = getattr(header, "InstanceNumber", None)
         return None if number is None else float(number)
-
-    @staticmethod
-    def _weighting(header: pydicom.Dataset) -> str:
-        """T1 / T2 / PD / GRE / UNK, from the description where it says so and from TR-TE where it does not.
-
-        Gradient echo is settled first because its TR is short by design and would otherwise read as T1.
-        """
-        described = _SEPARATORS.sub(
-            " ", f"{getattr(header, 'SeriesDescription', '') or ''} {getattr(header, 'SequenceName', '') or ''}".lower()
-        )
-        if _PD.search(described):
-            return "PD"
-        if _T2.search(described):
-            return "T2"
-        if _T1.search(described):
-            return "T1"
-        if "GR" in str(getattr(header, "ScanningSequence", "") or "").upper():
-            return "GRE"
-        repetition = Acquisition._number(getattr(header, "RepetitionTime", None))
-        echo = Acquisition._number(getattr(header, "EchoTime", None))
-        if repetition is None:
-            return "UNK"
-        if repetition < _LONG_TR_MS:
-            return "T1"
-        if echo is not None and echo > _LONG_TE_MS:
-            return "T2"
-        return "PD"
-
-    @staticmethod
-    def _fat_suppressed(header: pydicom.Dataset) -> bool:
-        """Fat suppression is a preparation named in the description, the sequence name, or ScanOptions."""
-        described = _SEPARATORS.sub(
-            " ", f"{getattr(header, 'SeriesDescription', '') or ''} {getattr(header, 'SequenceName', '') or ''}".lower()
-        )
-        raw = getattr(header, "ScanOptions", None) or ""
-        # ScanOptions is Type 1C multi-valued: pydicom hands back a MultiValue for "FS\\SAT_GEMS" and a
-        # plain str for "FS". Stringifying the first gives "['FS', 'SAT_GEMS']", whose tokens no longer
-        # match — so the two cases are separated here rather than papered over with a substring test.
-        multi_valued = isinstance(raw, (list, pydicom.multival.MultiValue))
-        tokens = [str(value) for value in raw] if multi_valued else str(raw).split("\\")
-        return bool(_FATSAT.search(described)) or any(token.strip().upper() in _FATSAT_OPTIONS for token in tokens)
-
-    @staticmethod
-    def _spacing(header: pydicom.Dataset) -> float | None:
-        """In-plane mm per pixel, which with the crop extent fixes the effective resolution."""
-        spacing = getattr(header, "PixelSpacing", None)
-        return None if spacing is None or len(spacing) < 1 else float(spacing[0])
-
-    @staticmethod
-    def _laterality_tag(header: pydicom.Dataset) -> str | None:
-        """'L' / 'R' from the tag, treating present-but-empty as absent — which it is."""
-        value = str(getattr(header, "Laterality", "") or "").strip().upper()
-        return value[0] if value[:1] in ("L", "R") else None
-
-    @staticmethod
-    def _centre_x(header: pydicom.Dataset) -> float | None:
-        """The x of the image CENTRE in patient coordinates: +x is the patient's left.
-
-        The corner (`ImagePositionPatient` itself) sits half a field of view away, which is enough to
-        reverse the sign on a knee scanned near the midline.
-        """
-        position = getattr(header, "ImagePositionPatient", None)
-        orientation = getattr(header, "ImageOrientationPatient", None)
-        spacing = getattr(header, "PixelSpacing", None)
-        rows, columns = getattr(header, "Rows", None), getattr(header, "Columns", None)
-        if position is None or orientation is None or spacing is None or not rows or not columns:
-            return None
-        axes = np.asarray(orientation, dtype=float)
-        centre: NDArray[np.float64] = (
-            np.asarray(position, dtype=float)
-            + axes[:3] * float(spacing[1]) * float(columns) / 2
-            + axes[3:6] * float(spacing[0]) * float(rows) / 2
-        )
-        return float(centre[0])
-
-    @staticmethod
-    def _number(value: object) -> float | None:
-        """A DICOM numeric that may be absent, empty or unparsable."""
-        try:
-            return float(value)  # pyrefly: ignore[bad-argument-type]
-        except (TypeError, ValueError):
-            return None

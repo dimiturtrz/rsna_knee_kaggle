@@ -2,13 +2,74 @@ from pathlib import Path
 
 import pydicom
 
-from kneemri.corpus.acquisition import Acquisition
+from kneemri.corpus.acquisition import Acquisition, SeriesHeader
 
 from ..conftest import write_series
 
 
 def _probe(directory: Path) -> Acquisition:
     return Acquisition.probe("study", "series", directory)
+
+
+def _header(directory: Path) -> SeriesHeader:
+    return SeriesHeader.of(directory / sorted(path.name for path in directory.glob("*.dcm"))[0])
+
+
+def test_of(series: Path):
+    """A header is read WITHOUT its pixels — a probe over 4,400 studies must not pay to decode them."""
+    header = SeriesHeader.of(series / sorted(path.name for path in series.glob("*.dcm"))[0])
+    assert header.header.SeriesDescription
+    assert "PixelData" not in header.header
+
+
+def test_of_a_file_that_is_not_dicom_reads_as_an_empty_header(tmp_path: Path):
+    """`force=True` means an unreadable file yields a header with nothing in it, not a raise.
+
+    Every axis then answers absent by the same five rules the empty-directory case uses, and the slot
+    predicates decline the series — which is what a series nothing can be said about deserves.
+    """
+    junk = tmp_path / "junk.dcm"
+    junk.write_bytes(b"not a dicom")
+
+    header = SeriesHeader.of(junk)
+
+    assert header.weighting == "UNK"
+    assert (header.pixel_spacing, header.laterality_tag, header.centre_x) == (None, None, None)
+    assert not header.fat_suppressed
+
+
+def test_weighting(tmp_path: Path):
+    """The description decides where it says so, and separators do not hide the word it says it with."""
+    assert _header(write_series(tmp_path / "d", description="SAG_PD-FSE")).weighting == "PD"
+    assert _header(write_series(tmp_path / "t2", description="ax t2 fse")).weighting == "T2"
+
+
+def test_fat_suppressed(tmp_path: Path):
+    """ScanOptions is matched as whole tokens: GE's SAT_GEMS is spatial saturation, not fat suppression."""
+    assert _header(write_series(tmp_path / "fs", description="knee", scan_options="FS")).fat_suppressed
+    assert not _header(write_series(tmp_path / "sat", description="knee", scan_options="SAT_GEMS")).fat_suppressed
+
+
+def test_pixel_spacing(tmp_path: Path):
+    """Row spacing in mm — the number that, with the crop extent, fixes the effective resolution."""
+    assert _header(write_series(tmp_path / "s")).pixel_spacing == 0.3
+
+
+def test_laterality_tag(tmp_path: Path):
+    """Present-but-empty is Type 2C's own case, and reads absent rather than as a side."""
+    assert _header(write_series(tmp_path / "l", laterality="L")).laterality_tag == "L"
+    assert _header(write_series(tmp_path / "blank", laterality="")).laterality_tag is None
+
+
+def test_centre_x(tmp_path: Path):
+    """The CENTRE, not the corner: half a field of view is enough to reverse the sign near the midline."""
+    # An AXIAL series, where the in-plane axes carry x: a sagittal one has no x component in either
+    # cosine, so the corner and the centre coincide there and the distinction cannot show.
+    header = _header(write_series(tmp_path / "c", normal=(0.0, 0.0, 1.0), spacing=0.3, size=64))
+    corner = float(header.header.ImagePositionPatient[0])
+
+    assert corner == 0.0
+    assert header.centre_x == 0.3 * 64 / 2, "half a 64-column field at 0.3 mm — the corner would say 0.0"
 
 
 def test_probe(series: Path):
