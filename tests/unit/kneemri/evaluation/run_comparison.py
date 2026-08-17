@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from kneemri.evaluation.run_comparison import PairedWidths, RunComparison
+from kneemri.evaluation.supervision_gap import Bottleneck
 from kneemri.models.model import TARGETS
 from kneemri.runs.holdout_record import DERIVED, TRAINED, HoldoutRecord
 from kneemri.runs.run_metrics import EpochRow
@@ -154,6 +155,50 @@ def test_moved_view(tmp_path: Path):
     assert comparison.moved_view(comparison.arms[0]), "a tighter crop is a change of view"
     assert not comparison.moved_view(comparison.arms[1]), "a loss change says nothing about the view"
     assert not comparison.moved_view(comparison.arms[2]), "an unrecorded reading is not evidence of a move"
+
+
+def test_moved(tmp_path: Path):
+    """Every option that differs, from the recipe AND from the view the two configs record.
+
+    Both sources, because a crop arm against a control whose flag list predates `crop_mm` moved the
+    view while neither recipe can say so — and the kind of change and the half it may be judged on are
+    two readings of this one set, which is why it has one home.
+    """
+    control, arm, silent = (_run(tmp_path, name, CONTROL) for name in ("ctl", "arm", "silent"))
+    _describe(control, {"per_label_loss": "False"})
+    _describe(arm, {"per_label_loss": "True"})
+    _stamp(control, {"img": 336, "crop_mm": 130.0})
+    _stamp(arm, {"img": 336, "crop_mm": 80.0})
+
+    comparison = RunComparison(control, [arm, silent])
+
+    assert comparison.moved(comparison.arms[0]) == {"per_label_loss", "crop_mm"}
+    assert comparison.moved(comparison.arms[1]) is None, "an unrecorded recipe is not an empty diff"
+
+
+def test_judged_on(tmp_path: Path):
+    """A reader change is restricted to the label half, an imaging change to the model half.
+
+    The point of the restriction: averaged over all twelve, either change is diluted by the six it
+    cannot affect, on a ruler whose floor is 0.0053. The line says it is the arm's CLAIM and not its
+    score, because the ledger number has to stay the twelve-label mean to stay comparable with itself.
+    """
+    split = Bottleneck(label_side=("Effusion",), model_side=("MCL",))
+    control, reader, imaging = (_run(tmp_path, name, CONTROL) for name in ("ctl", "reader", "imaging"))
+    _describe(control, {"per_label_loss": "False", "img": "336"})
+    _describe(reader, {"per_label_loss": "True", "img": "336"})
+    _describe(imaging, {"per_label_loss": "False", "img": "448"})
+
+    comparison = RunComparison(control, [reader, imaging], bottleneck=split)
+    deltas = {"MCL": 0.10, "Effusion": -0.06, "MEAN": 0.02}
+
+    read = "\n".join(comparison.judged_on(comparison.arms[0], deltas))
+    assert "on its own 1 label-bottlenecked: mean -0.0600 (Effusion)" in read
+    assert "not its score" in read, "the headline stays the twelve-label mean"
+    assert "on its own 1 model-bottlenecked: mean +0.1000 (MCL)" in "\n".join(
+        comparison.judged_on(comparison.arms[1], deltas)
+    )
+    assert RunComparison(control, [reader]).judged_on(comparison.arms[0], deltas) == [], "no split, no restriction"
 
 
 def test_report_names_an_arm_it_could_not_read(tmp_path: Path):

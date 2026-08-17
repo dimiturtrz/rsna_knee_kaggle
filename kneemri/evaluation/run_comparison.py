@@ -9,6 +9,7 @@ from pathlib import Path
 from kneemri.corpus.anatomy import ScaleProfile
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
 from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
 from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
@@ -113,10 +114,16 @@ class RunComparison:
     both stories while leaving the mean looking like a win, and a mean is exactly what hides that.
     """
 
-    def __init__(self, control: Path, arms: list[Path], labels: Path | None = None) -> None:
+    def __init__(
+        self, control: Path, arms: list[Path], labels: Path | None = None, bottleneck: Bottleneck | None = None
+    ) -> None:
         self.control = RunMetrics(control)
         self.arms = [RunMetrics(arm) for arm in arms]
         self.errors = self._intervals(labels) if labels else {}
+        # PASSED IN, never measured here: the split costs the published corpus and its alignment to the
+        # annotations, which is `SupervisionGap`'s subject and not this module's. Absent, every arm still
+        # reports which half it moved — it just does not get the deltas restricted to that half.
+        self.bottleneck = bottleneck
         self.scores = LabelScores()
         self.holdout = HoldoutMetrics(self.scores)
         # CACHED because reading a run's account can cost a `torch.load` of the whole checkpoint, and
@@ -241,6 +248,7 @@ class RunComparison:
             profile.judged() if self.moved_view(arm) else profile.line(),
             f"  vs control: {self.unmatched(arm)}",
             f"  {self.reader_change(arm)}",
+            *self.judged_on(arm, deltas),
             *self._stalled(arm),
             *([f"  {scored.named()}"] if scored is not None and scored.reconstructed else []),
         ]
@@ -363,6 +371,50 @@ class RunComparison:
             return False
         return bool(self.disagreements(control, {name: value for name, value in theirs.items() if name in VIEW_AXES}))
 
+    def moved(self, arm: RunMetrics) -> set[str] | None:
+        """Every option this arm changed against the control, or None when either recipe is unrecorded.
+
+        The recipe diff PLUS the view axes the two configs disagree on, because a crop arm against a
+        control that predates the crop flag moved the view without either recipe being able to say so.
+        One home, because the kind of change and the half it may be judged on are two readings of this
+        same set, and computing it twice is how they would come to disagree.
+        """
+        control, theirs = self.recipe(self.control), self.recipe(arm)
+        if control is None or theirs is None:
+            return None
+        seen, read = self.view(self.control), self.view(arm)
+        moved = set(self.disagreements(control, theirs))
+        if seen is not None and read is not None:
+            moved |= set(self.disagreements(seen, read)) & VIEW_AXES
+        return moved
+
+    def judged_on(self, arm: RunMetrics, deltas: dict[str, float]) -> list[str]:
+        """The same deltas, restricted to the findings this arm's kind of change could actually move.
+
+        NOT A NEW SCORE, and the line says so: the ledger number stays the twelve-label mean, or the
+        ledger stops being comparable with itself. This is the half that carries the arm's claim, printed
+        beside the headline rather than instead of it — a reader change diluted over the six findings
+        where the model already beats its own labels reads as noise at a floor of 0.0053, and that
+        dilution has been the standing objection to every label-side arm in the ledger.
+
+        Nothing at all without a measured `Bottleneck`: the split is a measurement over the published
+        held-out corpus, and a guessed one would be a grouping edited until it agreed with the arm.
+        """
+        moved = self.moved(arm)
+        if self.bottleneck is None or not moved:
+            return []
+        supervision = bool(moved & SUPERVISION_AXES)
+        side = self.bottleneck.label_side if supervision else self.bottleneck.model_side
+        scored = {label: deltas[label] for label in side if label in deltas}
+        if not scored:
+            return ["  its half of the findings is not among this run's labels, so there is nothing to restrict to"]
+        half = "label-bottlenecked" if supervision else "model-bottlenecked"
+        mean = sum(scored.values()) / len(scored)
+        return [
+            f"  on its own {len(scored)} {half}: mean {mean:+.4f} ({', '.join(sorted(scored))})",
+            "  — the arm's CLAIM, not its score; the ledger number stays the twelve-label mean above",
+        ]
+
     def reader_change(self, arm: RunMetrics) -> str:
         """Which half of the pipeline this arm moved, read from the two recipes rather than declared.
 
@@ -376,13 +428,9 @@ class RunComparison:
         The view is asked of the config as well as the recipe, so a crop arm against a control that
         predates the crop FLAG still reports the change it made rather than "moves nothing".
         """
-        control, theirs = self.recipe(self.control), self.recipe(arm)
-        if control is None or theirs is None:
+        moved = self.moved(arm)
+        if moved is None:
             return "kind unknown, one of these runs recorded no recipe"
-        seen, read = self.view(self.control), self.view(arm)
-        moved = set(self.disagreements(control, theirs))
-        if seen is not None and read is not None:
-            moved |= set(self.disagreements(seen, read)) & VIEW_AXES
         if not moved:
             return "moves nothing, so there is no axis to judge it on"
         supervision = sorted(moved & SUPERVISION_AXES)
@@ -404,9 +452,28 @@ def main() -> None:
     parser.add_argument("--control", type=Path, required=True, help="the checkpoint the arms are measured against")
     parser.add_argument("--arms", type=Path, nargs="+", required=True)
     parser.add_argument("--labels", type=Path, help="the label table, to print each delta's own error bar")
+    parser.add_argument(
+        "--split",
+        action="store_true",
+        help="also print each arm's deltas over the half of the findings its kind of change can move",
+    )
+    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logger.info("%s", RunComparison(arguments.control, arguments.arms, arguments.labels).report())
+    # OPT-IN, because the split costs the twenty published checkpoints and their alignment to the
+    # annotations — seconds, and a `--labels` table this comparison does not otherwise need. Asking for
+    # it without the table is REFUSED rather than silently skipped: a restriction that quietly did not
+    # happen reads as an arm whose claim was not worth printing.
+    split = None
+    if arguments.split:
+        if arguments.labels is None:
+            message = "--split measures the report labels against the annotations, so it needs --labels"
+            raise SystemExit(message)
+        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+
+        root = DataRoot.from_config(arguments.paths)
+        split = SupervisionGap().measured(arguments.labels, root.raw() / "train.csv", root.processed() / "published")
+    logger.info("%s", RunComparison(arguments.control, arguments.arms, arguments.labels, split).report())
 
 
 if __name__ == "__main__":

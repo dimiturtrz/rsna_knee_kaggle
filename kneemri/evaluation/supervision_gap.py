@@ -37,7 +37,9 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
+from kneemri.evaluation.oof_oracle import OutOfFoldOracle
 from kneemri.evaluation.scores import LabelScores
+from kneemri.inference.vote import RankAverage
 from kneemri.models.model import TARGETS
 
 logger = logging.getLogger(__name__)
@@ -159,6 +161,35 @@ class SupervisionGap:
             )
         return lines
 
+    def aligned(
+        self, labels: Path, train_table: Path, published: Path
+    ) -> tuple[Float[np.ndarray, "kept targets"], Float[np.ndarray, "kept targets"], Float[np.ndarray, "kept targets"]]:
+        """The report labels, the held-out predictions and the annotations, on one set of studies in one order.
+
+        Three files that each carry a different subset in a different order, and the alignment between
+        them is the part that can silently be wrong: a prediction row read against another study's
+        annotations produces a number rather than an error. It lives here, once, because both readers of
+        this measurement — the report and `run_comparison`'s split — would otherwise each write it.
+        """
+        identifiers, truth = self.annotated(train_table)
+        names, per_seed = OutOfFoldOracle().corpus(published)
+        combined = RankAverage().combine(per_seed)
+        position = {name: index for index, name in enumerate(names)}
+        keep = [index for index, name in enumerate(identifiers) if name in position]
+        rows = np.array([position[identifiers[index]] for index in keep], dtype=np.int64)
+        values = self.reported(labels, [identifiers[index] for index in keep])
+        return values, np.asarray(combined[rows], dtype=np.float32), truth[keep]
+
+    def measured(self, labels: Path, train_table: Path, published: Path) -> Bottleneck:
+        """The split itself, from the three files it is measured on — the value a comparison asks for.
+
+        `run_comparison` needs the Bottleneck and nothing else this module computes, and handing it the
+        three paths keeps the alignment on this side of the boundary rather than making every caller
+        reassemble it correctly.
+        """
+        values, predictions, annotations = self.aligned(labels, train_table, published)
+        return self.bottlenecked(self.against(values, annotations), self.against(predictions, annotations))
+
     def bottlenecked(self, reference: dict[str, float], achieved: dict[str, float]) -> Bottleneck:
         """Split the findings by whether their LABELS or their MODEL is the weaker half.
 
@@ -214,23 +245,15 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
-    from kneemri.evaluation.oof_oracle import OutOfFoldOracle  # noqa: PLC0415 - CLI-only
-    from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
 
     root = DataRoot.from_config(arguments.paths)
     gap = SupervisionGap()
-    identifiers, truth = gap.annotated(root.raw() / "train.csv")
+    values, predictions, annotations = gap.aligned(
+        arguments.labels, root.raw() / "train.csv", root.processed() / "published"
+    )
+    logger.info("%d annotated studies with a held-out prediction", len(values))
 
-    names, per_seed = OutOfFoldOracle().corpus(root.processed() / "published")
-    combined = RankAverage().combine(per_seed)
-    position = {name: index for index, name in enumerate(names)}
-    keep = [index for index, name in enumerate(identifiers) if name in position]
-    rows = np.array([position[identifiers[index]] for index in keep])
-    logger.info("%d annotated studies, %d of them with a held-out prediction", len(identifiers), len(keep))
-
-    values = gap.reported(arguments.labels, [identifiers[index] for index in keep])
-    annotations = truth[keep]
-    for line in gap.report(gap.against(values, annotations), gap.against(combined[rows], annotations)):
+    for line in gap.report(gap.against(values, annotations), gap.against(predictions, annotations)):
         logger.info(line)
     # WHERE the graded label becomes a positive, which decides the base rate our ruler scores against.
     for line in gap.thresholds(values, annotations):

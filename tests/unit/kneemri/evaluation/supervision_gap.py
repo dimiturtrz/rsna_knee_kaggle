@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 from kneemri.evaluation.supervision_gap import SupervisionGap
 from kneemri.models.model import TARGETS
@@ -21,6 +22,52 @@ def _train_table(path: Path, *, annotate: int) -> Path:
         rows.append(row)
     pd.DataFrame(rows).to_csv(path, index=False)
     return path
+
+
+def _corpus(tmp_path: Path, identifiers: list[str]) -> tuple[Path, Path]:
+    """A labels table that reads the truth exactly, and one published member that inverts every odd finding.
+
+    Chosen so each side of the split is unambiguous: the reference scores 1.0 everywhere, the model
+    matches it on the even findings and scores 0.0 on the odd ones, so odd is model-bottlenecked and
+    even is not. No ties anywhere, because a tie would put the answer at the mercy of a sort.
+    """
+    truth = np.array([[float((index + column) % 2) for column in range(len(TARGETS))] for index in range(STUDIES)])
+    labels = tmp_path / "labels.csv"
+    pd.DataFrame(
+        [{"StudyInstanceUID": f"s{index}"} | dict(zip(TARGETS, truth[index], strict=True)) for index in range(STUDIES)]
+    ).to_csv(labels, index=False)
+
+    published = tmp_path / "published"
+    published.mkdir()
+    rows = [
+        [value if column % 2 == 0 else 1.0 - value for column, value in enumerate(truth[int(name[1:])])]
+        for name in identifiers
+    ]
+    torch.save({"oof": {"ids": identifiers, "pred": rows}, "config": {"seed": 2026}}, published / "f0_s2026.pt")
+    return labels, published
+
+
+def test_aligned(tmp_path: Path):
+    """Only the studies with BOTH an annotation and a held-out prediction, on one order across all three."""
+    train = _train_table(tmp_path / "train.csv", annotate=STUDIES - 2)
+    labels, published = _corpus(tmp_path, ["s2", "s0", "s1"])
+
+    values, predictions, annotations = SupervisionGap().aligned(labels, train, published)
+
+    assert values.shape == predictions.shape == annotations.shape == (3, len(TARGETS))
+    assert values[:, 0].tolist() == annotations[:, 0].tolist(), "the report table follows the annotation order"
+    assert values[:, 1].tolist() != predictions[:, 1].tolist(), "and the odd finding is the inverted one"
+
+
+def test_measured(tmp_path: Path):
+    """The split, end to end from the three files: the findings the model inverts are the model's half."""
+    train = _train_table(tmp_path / "train.csv", annotate=STUDIES)
+    labels, published = _corpus(tmp_path, [f"s{index}" for index in range(STUDIES)])
+
+    split = SupervisionGap().measured(labels, train, published)
+
+    assert set(split.model_side) == set(TARGETS[1::2]), "the inverted findings, and only those"
+    assert set(split.label_side) == set(TARGETS[0::2])
 
 
 def test_annotated(tmp_path: Path):
