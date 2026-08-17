@@ -4425,6 +4425,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.switched_on",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.moved",
       "target": "kneemri.evaluation.run_comparison.RunComparison.view",
       "weight": 1
     },
@@ -12436,6 +12442,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.scored",
       "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.switched_on",
+      "label": "switched_on",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
