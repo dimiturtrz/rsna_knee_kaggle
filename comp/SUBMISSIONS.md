@@ -39,6 +39,20 @@ window and a byte-identical submission. A `kneemri-overlap` kernel was written o
 board about it and deleted before it ran, because the answer is not "0.0000 offline, unknown on the
 board" — it is that there is nothing to submit that differs.
 
+## One member of the pool is unverifiable, and it is the strongest one
+
+`witness_check --device cpu`, 2026-08-17: **6 ok, 1 unverified, 0 refused**. The unverified one is
+`res392_ws_s2026` — our best single member at 0.8523, fitted on 2026-08-12 before the witness existed,
+so there is nothing to re-derive. It is also the pool's ONLY resampling member (392 px off a 448 cache),
+which is the exact class the witness was built to catch. The fingerprint still pins its weights, image
+size and group, and both rebuilders read its recorded config rather than defaulting, so "rebuilt at the
+wrong resolution" is closed by construction; what is open is anything the fingerprint cannot see.
+
+**Say it in the submission note rather than discovering it afterwards**: any entry naming `res392` ships
+five verifiable members and one that is trusted. The fix is one training slot, and it pays twice —
+re-running res392 at the control's rate (knee-a8x) also disambiguates the +0.0066 this project currently
+credits to resolution but which changed the encoder rate 5× at the same time.
+
 ## Coverage grid
 
 Five slots expire unspent at 00:00 UTC daily; they cannot be banked. This grid exists so a slot is

@@ -69,6 +69,27 @@ pass costs little enough that test-time budget is a free axis.
 
 Gap to the board's leader (0.950) is 0.031.
 
+## Settled on the board, 2026-08-17
+
+The doubt this document could not remove was that the holdout under-prices diversity — the 2.4× transfer
+compression measured on `onedecode` said the board sometimes pays for what the holdout does not. If that
+were operating here, grafted members could have been a board GAIN read offline as a cost. A slot was
+spent to find out, on a deliberately negative prior.
+
+| all-ours ×2 | all-ours ×4 | fusion ×24 | fusion ×25 |
+|---|---|---|---|
+| **0.919** | 0.918 | 0.898 | **0.894** |
+
+**−0.025**, four times the 0.0062 noise floor. The board agrees with the holdout in sign and exceeds it
+in size (offline said 0.013–0.021). So the compression is not a general "the holdout under-reads
+diversity" — it under-reads some axes and reads this one straight. The CC0 pool is closed as a source of
+members, and it closes with a number rather than with a preference.
+
+What did NOT survive alongside it: member COUNT. The same day's curve on one pool, one kit,
+`overlap=False` throughout — 1: 0.914, 2: 0.919, 3: 0.913, 4: 0.918, 6: 0.911 — spans 0.008 and is not
+monotone in either direction. Count is not an axis; membership is. Both findings point the same way:
+adding members is not the lever, and the next gain has to come from what a member IS.
+
 ## Sources
 
 - `comp/SUBMISSIONS.md` rows for 2026-08-15 fusion v10 and 2026-08-16 trained v8 / efficient v4.
