@@ -44,6 +44,7 @@ def test_finished(tmp_path: Path):
     torch.save({"holdout": 0.81}, tmp_path / "both.pt")
     torch.save({"holdout": float("nan")}, tmp_path / "final_fit.pt")
     torch.save({"holdout": 0.77}, tmp_path / "throughput_bf16.pt")
+    torch.save({"holdout": 0.6562}, tmp_path / "smoke_v3base.pt")
     (tmp_path / "both.metrics.jsonl").write_text(
         "\n".join(json.dumps({"epoch": e, "auc": auc}) for e, auc in enumerate([0.81, 0.8473])),
         encoding="utf-8",
@@ -55,6 +56,7 @@ def test_finished(tmp_path: Path):
     assert finished["both"] == 0.8473, "the metrics file knows the BEST epoch, the checkpoint only its own"
     assert "final_fit" not in finished, "a final fit records NaN by design and never scored"
     assert "throughput_bf16" not in finished, "speed probes have no score worth quoting in a results ledger"
+    assert "smoke_v3base" not in finished, "a smoke scores 12 holdout studies; quoting it would put that in the table"
 
 
 def test_unrecorded(tmp_path: Path):

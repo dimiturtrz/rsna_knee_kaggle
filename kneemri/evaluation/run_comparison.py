@@ -37,6 +37,15 @@ on a difference smaller than the instrument can see, which is the failure mode t
 prevent in the other direction."""
 
 
+VIEW_AXES = frozenset({"crop_mm", "centre", "image_size", "train_size", "read_size"})
+"""The options that change HOW MUCH OF THE KNEE, and at what density, reaches the encoder.
+
+`ScaleProfile`'s four verdicts are all sentences about the view, so they may only be printed under an
+arm that moved one of these. Anything else — schedule, loss, depth, pooling, encoder — leaves the field
+of view and the pixel density exactly as the control had them, and its focal/regional split is then a
+description of where its deltas landed, not evidence about resolution."""
+
+
 SUPERVISION_AXES = frozenset(
     {
         "labels",
@@ -192,7 +201,8 @@ class RunComparison:
                 + "  ".join(f"{label} {self._marked(label, v, intervals)}" for label, v in ordered)
             )
             lines.append(f"  marked against the {named}")
-            lines.append(ScaleProfile.of(deltas).line())
+            profile = ScaleProfile.of(deltas)
+            lines.append(profile.judged() if self.moved_view(arm) else profile.line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
             lines.append(f"  {self.reader_change(arm)}")
             scored = self.scored(arm)
@@ -266,6 +276,18 @@ class RunComparison:
         newer = [f"{name}={value}" for name, value in axes if name not in control]
         said = ", ".join(moved) if moved else "matched on every option both runs recorded"
         return said if not newer else f"{said}; control predates {', '.join(newer)}"
+
+    def moved_view(self, arm: RunMetrics) -> bool:
+        """Whether this arm changed the field of view or the pixel density the control read at.
+
+        Read off the two recipes, like every other judgement here. A run whose recipe is unrecorded
+        counts as NOT having moved the view: the verdict is the strong claim, and an unknown recipe is
+        not grounds to make it.
+        """
+        control, theirs = self.recipe(self.control), self.recipe(arm)
+        if control is None or theirs is None:
+            return False
+        return any(control.get(name) != value for name, value in theirs.items() if name in VIEW_AXES)
 
     def reader_change(self, arm: RunMetrics) -> str:
         """Which half of the pipeline this arm moved, read from the two recipes rather than declared.

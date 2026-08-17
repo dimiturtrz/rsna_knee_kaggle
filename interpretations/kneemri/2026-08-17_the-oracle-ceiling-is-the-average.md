@@ -12,6 +12,11 @@ no TTA, cached readings. Log: the run of 06:16 UTC.
     extended_ws_s2026             0.8462
     intensity392_ws_s2026         0.8459
     dinov3_base_lora_s2026        0.8269   (new: DINOv3-base + LoRA, 12 epochs, 295 s/epoch)
+
+The column is `member_curve`'s own reading of each checkpoint. It is not the trainer's number: the arm
+recorded 0.8268 for the same weights, because the trainer scores its holdout as it goes and the curve
+re-reads every member through one shared cache and one shared study order. A 0.0001 gap between the
+two is the two rulers agreeing; a large one would mean the curve is not reading what the arm fitted.
     lora_r8_v3small_224_s2026     0.8215
 
     oracle 0.8590   plain average 0.8588   best single 0.8523   headroom +0.0002

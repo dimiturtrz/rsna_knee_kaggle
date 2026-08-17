@@ -192,8 +192,19 @@ class ScaleProfile:
         return "REFUTED — nothing gained at either scale, so resolution was not the bottleneck"
 
     def line(self) -> str:
-        """The profile as one printable line, the two means beside the pattern they make."""
-        return f"  by structure scale: focal {self.focal:+.4f}  regional {self.regional:+.4f}  -> {self.verdict()}"
+        """The two means, and NOT the verdict — the split of any arm's deltas, whatever it changed."""
+        return f"  by structure scale: focal {self.focal:+.4f}  regional {self.regional:+.4f}"
+
+    def judged(self) -> str:
+        """The means WITH the pattern named — only for an arm that moved the field of view.
+
+        Every one of the four verdicts is a sentence about the view ("the tighter view helped exactly
+        the findings it should have cost", "resolution was not the bottleneck"), so printing one under
+        an arm that changed the schedule or the loss states a conclusion about an axis that arm held
+        fixed. `run_comparison` printed it under all six arms of the 2026-08-17 re-read, which told a
+        pair-memory arm that resolution was not its bottleneck.
+        """
+        return f"{self.line()}  -> {self.verdict()}"
 
 
 class SlotAffinity:

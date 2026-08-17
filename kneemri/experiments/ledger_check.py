@@ -32,8 +32,16 @@ logger = logging.getLogger(__name__)
 
 LEDGER = Path("experiments/README.md")
 INTERPRETATIONS = Path("interpretations")
-THROUGHPUT = "throughput"
-"""Speed probes write metrics too, and they have no score worth quoting in a results ledger."""
+UNQUOTABLE = ("throughput", "smoke")
+"""Name fragments of runs whose scores no ledger should quote.
+
+Speed probes measure wall-clock, not accuracy. A smoke is the arm's own pre-flight — `--studies 60
+--epochs 1`, 48 train / 12 holdout — so its score is a number produced by a deliberately broken
+denominator, and `smoke_v3base` at 0.6562 was reported UNRECORDED for as long as it sat on disk. The
+only ways to clear that report are to delete the smoke, which throws away the evidence that the arm
+was smoked, or to quote 0.6562 in the ledger, which puts a 60-study number in a table of 3,000-study
+ones. Both are worse than naming the class here.
+"""
 
 
 class LedgerCheck:
@@ -76,7 +84,7 @@ class LedgerCheck:
             score = self.best(metrics)
             if score is not None:
                 scores[metrics.name.removesuffix(".metrics.jsonl")] = score
-        return {name: score for name, score in scores.items() if THROUGHPUT not in name}
+        return {name: score for name, score in scores.items() if not any(fragment in name for fragment in UNQUOTABLE)}
 
     def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
         """The runs whose best score appears nowhere in the written record.

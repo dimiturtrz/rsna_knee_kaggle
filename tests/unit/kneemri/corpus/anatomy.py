@@ -79,12 +79,20 @@ def test_verdict():
 
 
 def test_line():
-    """The printable form carries both means and the pattern, so a log holds the whole verdict."""
+    """The bare line carries both means and NO verdict — it describes any arm, whatever it moved."""
     line = ScaleProfile(focal=0.02, regional=-0.01).line()
 
     assert "focal +0.0200" in line
     assert "regional -0.0100" in line
-    assert "TRADED" in line
+    assert "TRADED" not in line, "the verdict is a claim about the view, and this line makes no claim"
+
+
+def test_judged():
+    """The judged form adds the pattern, for the arms that earned a statement about the view."""
+    judged = ScaleProfile(focal=0.02, regional=-0.01).judged()
+
+    assert "focal +0.0200" in judged
+    assert "TRADED" in judged
 
 
 def test_extent_is_assigned_from_the_structure_and_not_from_a_measured_result():

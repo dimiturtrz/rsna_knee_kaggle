@@ -80,6 +80,25 @@ def test_report_names_what_else_moved(tmp_path: Path):
     assert "epochs" not in report.split("vs control:")[1], "an option both runs share is not a difference"
 
 
+def test_moved_view(tmp_path: Path):
+    """Only an arm that changed the field of view earns a verdict about the field of view.
+
+    The 2026-08-17 re-read printed one under a pair-memory arm, telling a loss change that resolution
+    was not its bottleneck — an axis that arm held fixed.
+    """
+    control = _run(tmp_path, "ctl", CONTROL)
+    view, schedule, silent = (_run(tmp_path, name, ARM) for name in ("view", "sched", "silent"))
+    _describe(control, {"crop_mm": "130.0", "epochs": "12"})
+    _describe(view, {"crop_mm": "80.0", "epochs": "12"})
+    _describe(schedule, {"crop_mm": "130.0", "epochs": "8"})
+
+    comparison = RunComparison(control, [view, schedule, silent])
+
+    assert comparison.moved_view(comparison.arms[0]), "a tighter crop is a change of view"
+    assert not comparison.moved_view(comparison.arms[1]), "a shorter schedule says nothing about the view"
+    assert not comparison.moved_view(comparison.arms[2]), "an unrecorded recipe is not evidence of a move"
+
+
 def test_unmatched(tmp_path: Path):
     """Only the arm recorded it, so the control ran the default of the day — a question, not a delta.
 
