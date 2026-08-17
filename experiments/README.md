@@ -565,6 +565,26 @@ mean:
   band sampling, resize filter, slice order and window policy — several of them assumptions recorded in
   `comp/SUBMISSIONS.md` that had never been tested.
 
+## The six throughput arms had no row here at all (2026-08-17)
+
+Six one-epoch runs priced compiling, activation checkpointing, bf16 and a narrower unfreeze, and none of
+their numbers were written down anywhere until today. They are prices, not results — every arm lands
+between 0.7539 and 0.7612, inside the floor of every other — but they set what an hour of GPU buys:
+
+- **`torch.compile` is +47%** (815 → 1195 img/s) for 0.5 GB, holdout unmoved. A twelve-epoch whole-stack
+  arm costs ~55 min compiled against ~73 eager. This is the evidence for compiling being the default.
+- **Activation checkpointing costs 29% and buys 3.6x memory** (785 vs 1016 img/s at batch 6; 7.38 vs
+  26.24 GB). At the shipping batch of 12 the off-side would want ~52 GB on a 32 GB card, so the tax is
+  what buys the batch. The docstring's "about 30% from the literature" turns out to be right for us.
+- **bf16 is +7%**, not the reason it is on: the scaler falling away, not faster matmul.
+- **`--unfreeze-last 4` is +25% and −0.0065 at one epoch** — inside the floor, unreadable as a score, and
+  the only negative direction here. A question for a real arm, not an adopted default.
+
+Read the pairs as the RECIPES record them, not as `throughput.sh` now reads: the script was edited after
+these ran, and five of six recipes carry `compile_encoder False`, so every row except the compile pair is
+a comparison among the eager arms. Full write-up:
+`interpretations/kneemri/2026-08-17_what_the_throughput_arms_priced.md`.
+
 ## Almost every per-label delta that resolves is a LOSS (2026-08-17)
 
 Seven arms re-read against `wsfold0_e6` (0.8457) with each pair's own bootstrap interval, now that the

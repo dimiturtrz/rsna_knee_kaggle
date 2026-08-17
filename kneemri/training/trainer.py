@@ -589,7 +589,13 @@ class Trainer:
         size: int,
         generator: np.random.Generator,
     ) -> NDArray[np.float64]:
-        """Probabilities for a set of positions, read from the middle window of the stack."""
+        """Probabilities for a set of positions, read from the middle window of the stack.
+
+        WHOLE-STACK RUNS HAVE NO MIDDLE: `window` is then every slice, `middle` is 0, and this reads
+        exactly what the submission reads. That is what retired the epoch-selection mismatch — a windowed
+        run picks its best epoch under a one-window policy while deployment averages ten, worth a uniform
+        +0.0156 that no local number showed. For the members we ship the two policies are one policy.
+        """
         self.model.eval()
         middle = (corpus.slices - self.window) // 2
         chunks = []
