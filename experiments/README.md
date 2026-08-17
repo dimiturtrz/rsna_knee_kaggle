@@ -555,6 +555,25 @@ mean:
   band sampling, resize filter, slice order and window policy — several of them assumptions recorded in
   `comp/SUBMISSIONS.md` that had never been tested.
 
+## Almost every per-label delta that resolves is a LOSS (2026-08-17)
+
+Seven arms re-read against `wsfold0_e6` (0.8457) with each pair's own bootstrap interval, now that the
+back-fill has given them per-study predictions. Two results, and neither is the one the re-read was
+run to find:
+
+- **The Fracture rows above do not survive.** extended_ws (+0.0200), slices16 (+0.0120) and schedule_8
+  (+0.0158) are UNREAD against their own paired floors (0.0288 / 0.0190 / 0.0254) — a floor two to three
+  times TIGHTER than the unpaired bound that first flagged them. Only intensity392's +0.0372 clears its
+  0.0311. `res392` cannot be asked at all: it kept no per-study predictions, so its +0.0330 Fracture and
+  +0.0273 MCL still print against the wide bound.
+- **Across seven arms, exactly two positive deltas clear their pair's floor** (extended_ws PF OA +0.0156,
+  intensity392 Fracture +0.0372); every other resolvable per-label move is negative. These arms are not
+  lifting some findings and holding the others — they are trading, and the trades that resolve go the
+  wrong way. `pair_memory` is the extreme: eleven of twelve down, nine starred, MEAN −0.0302.
+
+All seven are marked INDICATIVE — the control's scores were reconstructed from its kept predictions.
+`interpretations/kneemri/2026-08-17_which-per-label-findings-survive-the-paired-floor.md`.
+
 Interpretation of the whole ledger, including what each refutation rules out, lives in
 `interpretations/kneemri/` — for the above, `2026-08-14_the-ruler-was-five-times-too-small.md`,
 `2026-08-14_labels-or-pixels.md` and `2026-08-14_their-router-not-ours.md`. The build log is git history.
