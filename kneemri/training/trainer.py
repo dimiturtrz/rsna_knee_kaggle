@@ -203,9 +203,6 @@ class Adaptation:
 ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
 
-WHOLE_STACK = 0
-"""`window=0` means read every cached slice at once — the whole stack rather than one window of it."""
-
 
 @dataclass(frozen=True)
 class AugmentConfig:
