@@ -37,8 +37,14 @@ on a difference smaller than the instrument can see, which is the failure mode t
 prevent in the other direction."""
 
 
-VIEW_AXES = frozenset({"crop_mm", "centre", "image_size", "train_size", "read_size"})
-"""The options that change HOW MUCH OF THE KNEE, and at what density, reaches the encoder.
+VIEW_AXES = frozenset({"crop_mm", "centre", "img", "train_size"})
+"""The keys that change HOW MUCH OF THE KNEE, and at what density, reaches the encoder.
+
+Spelled as the checkpoint's CONFIG spells them, not as the flags do, because the config is the only
+record that spans both eras of the ledger: `wsfold0_e6`'s options block carries no crop at all while its
+config states `crop_mm 130.0`. Read off the recipe instead, a crop arm against that control looked like
+an option the control merely predated, and got no verdict at all — the false negative that replaced the
+false positive.
 
 `ScaleProfile`'s four verdicts are all sentences about the view, so they may only be printed under an
 arm that moved one of these. Anything else — schedule, loss, depth, pooling, encoder — leaves the field
@@ -193,6 +199,12 @@ class RunComparison:
         for arm in self.arms:
             deltas = table.get(arm.path.stem)
             if deltas is None:
+                # NAMED, never skipped. A mistyped arm used to vanish from the report entirely, so the
+                # reader saw a shorter table and no reason for it — `intensity392` (the file is
+                # `intensity392_ws`) came back as a report of the control alone, which reads as an arm
+                # that moved nothing rather than as a path that matches no run.
+                why = "recorded no scored epoch and kept no predictions" if arm.exists() else "does not exist"
+                lines.append(f"\n{arm.path.stem}  NOT READ: {why}")
                 continue
             ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
             intervals, named = self.floor(arm)
@@ -253,6 +265,18 @@ class RunComparison:
             return self.errors, "UNPAIRED bound (one of these runs kept no per-study predictions)"
         return paired.widths, paired.named()
 
+    @staticmethod
+    def disagreements(control: dict[str, str], theirs: dict[str, str]) -> dict[str, str]:
+        """The keys BOTH records carry and state differently — the only kind of difference either can prove.
+
+        One home, because three judgements here ask the same question and two of them once answered it
+        differently. A key only the arm recorded is an option the control PREDATES: it ran whatever that
+        day's default was, which nothing on disk can read back. Counting that absence as a disagreement is
+        what made a schedule arm and a loss arm both print "READER change (calibrated_targets,
+        per_label_loss)" and collect a resolution verdict they had not earned.
+        """
+        return {name: value for name, value in theirs.items() if name in control and control[name] != value}
+
     def unmatched(self, arm: RunMetrics) -> str:
         """What this arm changed BESIDES the axis under test, read from both runs' recorded recipes.
 
@@ -264,35 +288,41 @@ class RunComparison:
         control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return "recipe unrecorded, so nothing here can say the two runs are matched"
-        axes = [(name, value) for name, value in theirs.items() if name not in NOT_AN_AXIS]
+        axes = {name: value for name, value in theirs.items() if name not in NOT_AN_AXIS}
         # Two different statements, kept apart because they need different judgements. An option BOTH
         # runs recorded and disagree on is a confound outright. An option only the arm recorded is a
         # question — the control predates the flag, so it ran whatever the default was that day, which
         # this cannot read. Merging them would let `train_size unset→0`, a no-op on every arm, sit in
         # the same list as `backbone_lr 8e-06→4e-05`, which is a second axis on a resolution result.
-        moved = [
-            f"{name} {control[name]}→{value}" for name, value in axes if name in control and control[name] != value
-        ]
-        newer = [f"{name}={value}" for name, value in axes if name not in control]
+        moved = [f"{name} {control[name]}→{value}" for name, value in self.disagreements(control, axes).items()]
+        newer = [f"{name}={value}" for name, value in axes.items() if name not in control]
         said = ", ".join(moved) if moved else "matched on every option both runs recorded"
         return said if not newer else f"{said}; control predates {', '.join(newer)}"
+
+    def view(self, run: RunMetrics) -> dict[str, str] | None:
+        """The reading one run was fitted under, from the checkpoint block that records it in both eras."""
+        if run.path not in self._recorded:
+            self._recorded[run.path] = RecordedRun.of(run)
+        return self._recorded[run.path].view
 
     def moved_view(self, arm: RunMetrics) -> bool:
         """Whether this arm changed the field of view or the pixel density the control read at.
 
-        Read off the two recipes, like every other judgement here. A run whose recipe is unrecorded
-        counts as NOT having moved the view: the verdict is the strong claim, and an unknown recipe is
-        not grounds to make it.
+        Read off the two CONFIGS rather than the two recipes. The recipe is the flag list, and the flag
+        list is era-dependent: most of the ledger's controls predate `crop_mm` and `centre` as flags, so
+        against a recipe every crop arm reads either as a difference the control cannot confirm (a
+        verdict it has not earned) or as an option the control merely predates (no verdict for an arm
+        that plainly moved the view). The config carries the DERIVED reading — `crop_mm 130.0` for a
+        control whose flags never mention a crop — so both runs can state the axis and the comparison is
+        real either way.
 
-        BOTH runs must have recorded the axis. An option the control predates is `unmatched`'s
-        question, not a difference — most of the ledger predates `crop_mm` and `centre`, so counting
-        an absence as a disagreement said "the tighter view helped exactly the findings it should have
-        cost" under a schedule arm and a pair-memory arm, which is the same defect one layer in.
+        A run whose config is unrecorded counts as NOT having moved the view: the verdict is the strong
+        claim, and an unknown reading is not grounds to make it.
         """
-        control, theirs = self.recipe(self.control), self.recipe(arm)
+        control, theirs = self.view(self.control), self.view(arm)
         if control is None or theirs is None:
             return False
-        return any(name in control and control[name] != value for name, value in theirs.items() if name in VIEW_AXES)
+        return bool(self.disagreements(control, {name: value for name, value in theirs.items() if name in VIEW_AXES}))
 
     def reader_change(self, arm: RunMetrics) -> str:
         """Which half of the pipeline this arm moved, read from the two recipes rather than declared.
@@ -303,11 +333,17 @@ class RunComparison:
 
         An arm that moves both is reported as a reader change, because the reader half is the one that
         cannot be judged on the model-bottlenecked findings — the narrower claim is the honest one.
+
+        The view is asked of the config as well as the recipe, so a crop arm against a control that
+        predates the crop FLAG still reports the change it made rather than "moves nothing".
         """
         control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return "kind unknown, one of these runs recorded no recipe"
-        moved = {name for name, value in theirs.items() if control.get(name) != value}
+        seen, read = self.view(self.control), self.view(arm)
+        moved = set(self.disagreements(control, theirs))
+        if seen is not None and read is not None:
+            moved |= set(self.disagreements(seen, read)) & VIEW_AXES
         if not moved:
             return "moves nothing, so there is no axis to judge it on"
         supervision = sorted(moved & SUPERVISION_AXES)

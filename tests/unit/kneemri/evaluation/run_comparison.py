@@ -80,25 +80,71 @@ def test_report_names_what_else_moved(tmp_path: Path):
     assert "epochs" not in report.split("vs control:")[1], "an option both runs share is not a difference"
 
 
+def _stamp(checkpoint: Path, config: dict[str, object]) -> None:
+    """The config block a run writes into its checkpoint — the reading, as both eras record it."""
+    import torch  # noqa: PLC0415 - only the stamped-checkpoint tests need it
+
+    torch.save({"options": {"epochs": "12"}, "config": config, "epoch": 1, "holdout": 0.84}, checkpoint)
+
+
+def test_disagreements():
+    """Only a key BOTH records carry can differ; one the control predates is a question, not a move.
+
+    The absence-as-difference reading is what let a schedule arm and a loss arm each print a resolution
+    verdict and a `READER change` they had not earned, on 2026-08-17.
+    """
+    control = {"crop_mm": "130.0", "epochs": "12"}
+
+    assert RunComparison.disagreements(control, {"crop_mm": "80.0", "epochs": "12"}) == {"crop_mm": "80.0"}
+    predates = RunComparison.disagreements(control, {"epochs": "12", "centre": "tissue"})
+    assert predates == {}, "an option only the arm recorded is a question, not a difference"
+    assert RunComparison.disagreements(control, control) == {}
+
+
+def test_view(tmp_path: Path):
+    """The reading comes from the config block, which records it for a control whose FLAGS do not.
+
+    `wsfold0_e6` is that control: its options block names no crop at all, while its config states
+    `crop_mm 130.0`. Read off the recipe, every crop arm measured against it looked unjudgeable.
+    """
+    control, bare = _run(tmp_path, "ctl", CONTROL), _run(tmp_path, "bare", ARM)
+    _stamp(control, {"img": 336, "crop_mm": 130.0})
+
+    comparison = RunComparison(control, [bare])
+
+    assert comparison.view(comparison.control) == {"img": "336", "crop_mm": "130.0"}
+    assert comparison.view(comparison.arms[0]) is None, "a run with no checkpoint states no reading"
+
+
 def test_moved_view(tmp_path: Path):
     """Only an arm that changed the field of view earns a verdict about the field of view.
 
     The 2026-08-17 re-read printed one under a pair-memory arm, telling a loss change that resolution
-    was not its bottleneck — an axis that arm held fixed.
+    was not its bottleneck — an axis that arm held fixed. The crop arm is the other half of the same
+    gate: it moved the view against a control whose flag list predates `crop_mm`, and must still be
+    judged, which is why this is read off the config and not the recipe.
     """
     control = _run(tmp_path, "ctl", CONTROL)
-    view, schedule, silent, newer = (_run(tmp_path, name, ARM) for name in ("view", "sched", "silent", "newer"))
-    _describe(control, {"crop_mm": "130.0", "epochs": "12"})
-    _describe(view, {"crop_mm": "80.0", "epochs": "12"})
-    _describe(schedule, {"crop_mm": "130.0", "epochs": "8"})
-    _describe(newer, {"epochs": "12", "read_size": "392"})
+    view, loss, silent = (_run(tmp_path, name, ARM) for name in ("view", "loss", "silent"))
+    _stamp(control, {"img": 336, "crop_mm": 130.0})
+    _stamp(view, {"img": 336, "crop_mm": 80.0, "centre": "tissue"})
+    _stamp(loss, {"img": 336, "crop_mm": 130.0, "pair_memory": True})
 
-    comparison = RunComparison(control, [view, schedule, silent, newer])
+    comparison = RunComparison(control, [view, loss, silent])
 
     assert comparison.moved_view(comparison.arms[0]), "a tighter crop is a change of view"
-    assert not comparison.moved_view(comparison.arms[1]), "a shorter schedule says nothing about the view"
-    assert not comparison.moved_view(comparison.arms[2]), "an unrecorded recipe is not evidence of a move"
-    assert not comparison.moved_view(comparison.arms[3]), "an option the control predates is a question, not a move"
+    assert not comparison.moved_view(comparison.arms[1]), "a loss change says nothing about the view"
+    assert not comparison.moved_view(comparison.arms[2]), "an unrecorded reading is not evidence of a move"
+
+
+def test_report_names_an_arm_it_could_not_read(tmp_path: Path):
+    """A path matching no run is NAMED, not dropped — a short table with no reason reads as a null arm.
+
+    `--arms intensity392_...` (the file is `intensity392_ws_...`) printed the control and nothing else.
+    """
+    report = RunComparison(_run(tmp_path, "ctl", CONTROL), [tmp_path / "absent.pt"]).report()
+
+    assert "absent.metrics  NOT READ: does not exist" in report
 
 
 def test_unmatched(tmp_path: Path):

@@ -32,6 +32,15 @@ class RecordedRun:
     options entirely, and for those "unrecorded" is the honest answer rather than an empty recipe that
     would compare as matched against anything."""
 
+    view: dict[str, str] | None
+    """The field of view and pixel density the run read at, from the checkpoint's config block.
+
+    A SECOND record rather than more of the recipe, because the two eras of the ledger spell the view
+    differently and only this one spans both: `wsfold0_e6`'s options block has `image_size` and no crop
+    at all, while its config states `crop_mm 130.0`. Filling the gap from today's parser defaults was
+    the tempting alternative and is not sound — `bf16` appears as both True and False across the arms'
+    predates lists, which proves some defaults moved. None when the checkpoint kept no config."""
+
     kept_epoch: int | None
     """The epoch whose weights are on disk — the BEST one, never the last. Under patience a later epoch
     exists in the metrics file and its weights were thrown away, so a reader that took the last one
@@ -50,5 +59,6 @@ class RecordedRun:
         recorded, best = metrics.recipe(), metrics.best()
         return cls(
             recipe=recorded if recorded is not None else (stamped.options if stamped else None),
+            view=stamped.config if stamped and stamped.config else None,
             kept_epoch=int(best["epoch"]) if best is not None else (stamped.kept_epoch if stamped else None),
         )

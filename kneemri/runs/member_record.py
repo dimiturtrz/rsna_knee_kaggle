@@ -303,6 +303,15 @@ class StampedRun:
     """The run's flags as strings, which is how `payload` had to store them: every loader here reads
     with `weights_only=True`, and that refuses to unpickle a Path."""
 
+    config: dict[str, str]
+    """The reading and architecture block, which records the FIELD OF VIEW for every era of the ledger.
+
+    Separate from `options` because the two disagree about what exists: `options` is `vars(RunOptions)`
+    at the time of the run, so `wsfold0_e6` — the whole-stack control — carries no `crop_mm` key at all,
+    while its config records `crop_mm 130.0` because the saver derived it from a nested `crop` object.
+    A reader that asks only `options` therefore cannot say what view the control read at, and has to
+    treat every crop arm as un-judgeable rather than as the view change it plainly is."""
+
     kept_epoch: int | None
     """The epoch whose weights were SAVED — not the last one run. Under patience those differ, and
     predicting against the later number describes a model that was thrown away.
@@ -325,5 +334,6 @@ class StampedRun:
         kept = saved.get("epoch")
         return cls(
             options={name: str(value) for name, value in options.items()},
+            config={name: str(value) for name, value in (saved.get("config") or {}).items()},
             kept_epoch=None if kept is None else int(kept),
         )
