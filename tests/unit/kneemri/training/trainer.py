@@ -199,6 +199,27 @@ def test_one_cycle():
     assert all(end < top / 100 for end, top in zip(ended, peak, strict=True)), "must decay far below the peak"
 
 
+def test_fit_epoch_steps_the_schedule():
+    """`fit_epoch` must advance the cycle once per optimiser step, or `--one-cycle` is a flag that does nothing.
+
+    The shipping recipe carries `--one-cycle`, and the only test of it drove the schedule BY HAND — the same
+    shape that let `augment` be written, tested and never called. Per STEP, not per epoch: `one_cycle` is
+    built with `total_steps`, so an epoch-rate schedule would sit at the warm-up rate for the whole run.
+    """
+    trainer = _trainer()
+    positions = np.arange(6, dtype=np.int64)
+    size = 3
+    trainer.one_cycle(total_steps=len(positions) // size)
+    assert trainer.schedule is not None
+    started = [group["lr"] for group in trainer.optimiser.param_groups]
+
+    trainer.fit_epoch(_corpus(), _targets(), positions, size, np.random.default_rng(SEED))
+
+    assert trainer.schedule.last_epoch == len(positions) // size, "one schedule step per batch, not per epoch"
+    ended = [group["lr"] for group in trainer.optimiser.param_groups]
+    assert ended != started, "a schedule the loop never steps leaves the rate where it started"
+
+
 def test_geometric_only():
     """The default must reproduce the pre-existing recipe exactly, or it silently changes members.
 

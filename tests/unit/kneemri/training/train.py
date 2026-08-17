@@ -12,6 +12,7 @@ from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign
 from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.train import TrainingOptions
 from kneemri.training.trainer import Adaptation
 
@@ -123,6 +124,22 @@ def test_objective():
     assert TrainingOptions(rank_weight=0.5, normalise_by_count=True).objective().normalise_by_count
     assert TrainingOptions(per_label_loss=True).objective().per_label, "a per-label loss is a different objective"
     assert TrainingOptions(rank_weight=0.5, per_label_loss=True).objective().per_label, "and it survives the ranking"
+
+
+def test_objective_pair_memory():
+    """A memory only exists to widen the ranking term, so asking for one without the term must REFUSE.
+
+    Same reason the rest of `objective` is checked here: the failure this guards is an arm that trains the
+    plain recipe under the memory arm's name and gets read as a refutation of the mechanism. A refusal at
+    flag-parse time costs nothing; the silent no-op costs a queue slot and a wrong conclusion.
+    """
+    remembered = TrainingOptions(rank_weight=0.5, pair_memory=64).objective()
+    assert isinstance(remembered, RememberedRanking)
+    assert remembered.memory.remembered.maxlen == 64, "the flag must reach the pool it sizes"
+    assert remembered.weight == 0.5
+
+    with pytest.raises(ValueError, match="no ranking term"):
+        TrainingOptions(pair_memory=64).objective()
 
 
 def test_adaptation():
