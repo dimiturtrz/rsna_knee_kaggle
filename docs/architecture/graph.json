@@ -681,6 +681,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.corpus.anatomy",
       "weight": 1
     },
@@ -694,6 +700,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
+      "target": "kneemri.evaluation.supervision_gap",
       "weight": 1
     },
     {
@@ -4227,6 +4239,12 @@
     {
       "kind": "holds",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
+      "target": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.run_comparison.RunComparison",
       "target": "kneemri.runs.recorded_run.RecordedRun",
       "weight": 1
     },
@@ -4288,6 +4306,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison._arm",
       "target": "kneemri.evaluation.run_comparison.RunComparison.floor",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._arm",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.judged_on",
       "weight": 1
     },
     {
@@ -4376,6 +4400,30 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.judged_on",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.view",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.moved_view",
       "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
       "weight": 1
@@ -4413,19 +4461,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
-      "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
-      "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
-      "target": "kneemri.evaluation.run_comparison.RunComparison.view",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.moved",
       "weight": 1
     },
     {
@@ -4483,6 +4519,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.run_comparison.RunComparison",
@@ -4492,6 +4534,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.run_comparison.RunComparison.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.run_comparison.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
       "weight": 1
     },
     {
@@ -4622,8 +4676,62 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.corpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.reported",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
       "target": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.against",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
       "weight": 1
     },
     {
@@ -4641,18 +4749,6 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.corpus",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.supervision_gap.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "weight": 1
     },
@@ -4665,7 +4761,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
       "weight": 1
     },
     {
@@ -4677,25 +4773,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.reported",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.supervision_gap.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.thresholds",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.inference.vote.RankAverage",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.supervision_gap.main",
-      "target": "kneemri.inference.vote.RankAverage.combine",
       "weight": 1
     },
     {
@@ -12270,6 +12348,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.judged_on",
+      "label": "judged_on",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.moved",
+      "label": "moved",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.moved_view",
       "label": "moved_view",
       "level": "method",
@@ -12446,6 +12540,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
       "label": "annotated",
       "level": "method",
@@ -12456,6 +12558,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
       "label": "bottlenecked",
+      "level": "method",
+      "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
+      "label": "measured",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "role": null
