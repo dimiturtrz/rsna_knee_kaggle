@@ -9,12 +9,13 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-**Where it stands** (2026-08-15). Seven entries scored. Our own best is **0.888**; the highest number on
-the board is **0.895**, and it is *mostly not ours* — all but three of its twenty-two models are CC0
-weights someone else trained. The rank was last measured at 0.894 on 2026-08-13: **431 of 1,395**,
-against a leader at 0.946 and a median at 0.840. The field is improving faster than we are: in two days
-the median rose 0.021 while our best rose 0.006, so we fell from the 34th percentile to the 31st *while
-gaining*. The full measured account, including what was refuted, is in
+**Where it stands** (2026-08-16). The highest number on the board is **0.919**, and it is now *entirely
+ours* — two of our own whole-stack members, no CC0 weights. A four-member entry chosen by joint holdout
+ties it at **0.918**. Both clear the 0.895 that the 22-member mostly-grafted fusion reached, so the
+published weights we started from are now a [**cost** rather than a
+contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). The rank was last
+measured at 0.894 on 2026-08-13 (**431 of 1,395**, leader 0.946, median 0.840) and has not been
+re-measured at 0.919. The full measured account, including what was refuted, is in
 [interpretations/kneemri/](interpretations/kneemri/) — what actually moved the number, what the
 leaderboard taught us, [what the labels
 contain](interpretations/kneemri/2026-08-13_what-the-labels-actually-contain.md), and [the day the
@@ -31,6 +32,12 @@ what an early three-member curve suggested. One member scored **0.868**; five we
 **0.888**. But it is DIVERSITY rather than count: a third member of our own recipe bought *nothing*
 (0.882 → 0.882), while adding our three to twenty differently-trained ones bought +0.006 over either
 component alone. Members that fail the same way do not help each other.
+
+Diversity, however, is not the same as *foreign* — which the board took until 2026-08-16 to say. Five
+all-ours members reached 0.911 and two reached 0.919, both above the mixed 22-member fusion by more than
+the 1.5% bar, so the gain belongs to the **member pool** and not to borrowed weights. And the holdout
+prices diversity too cheaply: collapsing three members into one pixel group cost 0.0059 offline and
+**0.014** on the board, 2.4x.
 
 The changes that moved the number most were not ideas imported from anywhere; they were our own
 defects, and finding them is most of what this project has done. Augmentation was written,

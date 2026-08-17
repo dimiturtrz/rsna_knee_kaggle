@@ -44,7 +44,9 @@ CENTRE_FRACTION = 0.5
 RING_WIDTHS = (0.05, 0.10, 0.15, 0.25)
 """Ring widths to try, as a fraction of the image side measured inward from the edge.
 
-`region_importance` measured border-only at 0.8006 against a whole-image 0.8448, which looks like the
+`region_importance` measured border-only at 0.8006 against a whole-image 0.8448 — a MATCHED pair from
+2026-08-11, so the 0.0442 between them is readable while neither absolute is comparable to a ledger
+number quoted since (the ruler was rebuilt on `report_labels_v2` that same day). It looks like the
 model reading the periphery — but its "border" is everything outside the central half, which is 75% of
 the AREA and still full of joint. A 0.05 ring on a 130 mm crop is the outer ~6 mm: skin, coil, air and
 whatever the scanner burned in. If THAT still scores, the periphery reading is real; if it collapses,

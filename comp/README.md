@@ -48,18 +48,20 @@ be compared against it. An external input with no fetch step is not a dependency
 **Every entry is justified OFFLINE first.** `kneemri.evaluation.member_curve` scores every subset of members on
 the shared fold-0 holdout and costs no slot; every arm is fitted on that same split, so any candidate
 ensemble is rankable before it is submitted. A slot is spent only when the offline number predicts a
-gain over **the best entry already on the board (0.895)**, or when the question cannot be answered
-offline at all — holdout-to-LB transfer for a recipe that has never been there.
+gain over **the best entry already on the board (0.919, 2026-08-16)**, or when the question cannot be
+answered offline at all — holdout-to-LB transfer for a recipe that has never been there.
 
-**Two different numbers, and conflating them spends slots backwards.** 0.888 is the best from OUR OWN
-weights and is the one to quote as ours; 0.895 is where the leaderboard actually has us (2026-08-14),
-from the 22-member fusion that is mostly grafted. A candidate that beats 0.888 and loses to 0.895 costs
-a slot to move us DOWN.
+**The two numbers have MERGED, and that is the finding.** Ours-best and board-best used to differ —
+0.888 from our own weights against 0.895 from a 22-member mostly-grafted fusion — so a candidate could
+beat ours and still move us down. Since 2026-08-16 the best entry on the board IS all-ours (0.919 from
+two members, 0.918 from four), and both clear the mixed fusion by more than the 1.5% bar. Published CC0
+members are now a COST, not a contribution; there is one bar to beat and it is 0.919.
 
 One caveat on the tool itself: `member_curve`'s subset ranking was partly decided by corpus order until
 2026-08-13, because the AUC broke ties by array position and rank-averaging ties ~20% of studies at two
-members. Fixed (midranks), but the curve has not been re-run since — so its previous output, including
-the 0.8601 five-member peak, should not be quoted until it is.
+members. Fixed (midranks) and re-run on 2026-08-16 over eight cached members, which is where the 0.8612
+four-member joint pick comes from. The pre-fix output, including the 0.8601 five-member peak, is dead —
+it was ranked on the broken tie-break and no number from it should be quoted.
 
 Two mechanics make this cheaper than it sounds:
 
@@ -180,7 +182,8 @@ publishes the leaderboard as a notebook output, and `kaggle kernels output` pull
 - **Runtime is weighted hard.** The best score anywhere on that board, **0.940, sits at efficiency rank
   638**; rank 1 scores 0.934 and rank 100 scores 0.836. It is not a re-sort of the accuracy leaderboard.
 - **Our accuracy is already worth a top-30 efficiency place if it runs cheaply.** The three teams scoring
-  exactly our 0.888 sit at ranks **29, 33 and 50**.
+  exactly the 0.888 we held at that snapshot sit at ranks **29, 33 and 50** — and we have since scored
+  0.919, above every one of them, so the placement that number buys has only gone up.
 
 So the decision is not "target it or not" — it is one number: what do members two through five actually
 buy? We currently pay 5 members x 10 TTA windows = 50 forward passes per study.
@@ -194,6 +197,9 @@ member-count curve was void — computed across split-seeds and leaked):
 | **whole-stack** | **2** | **2** | **0.882** |
 | whole-stack | 3 | 3 | 0.882 |
 | ours v2, windowed | 5 | 50 | 0.888 |
+| one pixel group, all-ours (2026-08-16) | 3 | 3 | 0.904 |
+| joint-chosen, disjoint windows (2026-08-16) | 4 | 4 | 0.918 |
+| **whole-stack pair, all-ours (2026-08-16)** | **2** | **2** | **0.919** |
 
 The curve is NOT flat at the bottom — one member costs −0.020 against five — so a one-member entry is
 out. But **two whole-stack members is the efficiency entry**, and it is already scored: 0.882, six
