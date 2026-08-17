@@ -53,6 +53,10 @@ CONTENTION_WAIT_SECONDS = 1800.0
 here and shorter than a night, so a queue can absorb a co-tenant's arm without a person, and cannot be
 held all night by one that hung."""
 
+DEFAULT_SHARE = 0.8
+"""Fraction of the card a run holds when it names no budget — read off the arms, not chosen: the
+accepted ones cap at 20, 26 and 28 GB of 31.8, and 26 is 0.82."""
+
 WEIGHT_DECAY = 0.02
 SEED = 2026
 
@@ -79,7 +83,23 @@ class DeviceBudget:
     """
 
     vram_gb: float = 0.0
-    """0 leaves the card uncapped."""
+    """What the run ASKED for. 0 means it named nothing, and then `DEFAULT_SHARE` of the card applies."""
+
+    def capped(self, whole: float) -> float:
+        """How much of a card this run may hold — what it asked for, or the default share of it.
+
+        THE DEFAULT USED TO BE NO CAP, which made the class's own worst failure mode the behaviour a run
+        got by saying nothing. Every accepted arm names `--vram-gb` (20, 26 or 28 of 31.8), so uncapped
+        was never what a measured run did — it was only what a smoke, a bisect or a one-off got, and
+        those are precisely the runs nobody watches the power draw of.
+
+        `DEFAULT_SHARE` is not a chosen number: it is where those arms landed. 26 of 31.8 is 0.82 and 28
+        is 0.88, and the cap bounds PYTORCH'S allocator rather than the device — driver context, the
+        desktop and the co-tenant all live outside it, which is why `lora.sh` measured 30 as WORSE than
+        26. So the default sits at the bottom of the band the arms converged on, where being wrong costs
+        an immediate OutOfMemoryError instead of a silent crawl.
+        """
+        return self.vram_gb or DEFAULT_SHARE * whole
 
     def headroom(self) -> tuple[float, float]:
         """Free and total VRAM in GB, as the driver sees it right now — (0, 0) with no visible card.
@@ -141,22 +161,22 @@ class DeviceBudget:
         if device.type != "cuda":
             return device
         free, whole = self.await_headroom()
+        budget = self.capped(whole)
         # ONLY REACHABLE PAST THE WAIT'S BOUND, so this is no longer "the card is busy" — it is "the
         # card stayed busy for half an hour and this run is starting into it anyway". Named before the
         # first batch, never inferred from the throughput afterwards, because the symptom is not a
         # failure: it pages over PCIe and reads as a slow recipe.
-        if free < (self.vram_gb or whole):
+        if free < budget:
             logger.warning(
                 "VRAM: %.1f GB free of %.1f GB — this run wants %.1f and another process holds the rest",
                 free,
                 whole,
-                self.vram_gb or whole,
+                budget,
             )
-        if self.vram_gb:
-            # An INDEX, not torch.device("cuda"): both torch calls reject an indexless device.
-            card = torch.cuda.current_device()
-            torch.cuda.set_per_process_memory_fraction(min(self.vram_gb / whole, 1.0), card)
-            logger.info("VRAM capped at %.1f GB of %.1f GB, %.1f free", self.vram_gb, whole, free)
+        # An INDEX, not torch.device("cuda"): both torch calls reject an indexless device.
+        card = torch.cuda.current_device()
+        torch.cuda.set_per_process_memory_fraction(min(budget / whole, 1.0), card)
+        logger.info("VRAM capped at %.1f GB of %.1f GB, %.1f free", budget, whole, free)
         return device
 
 
@@ -182,8 +202,6 @@ class Adaptation:
 
 ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
-
-"""Consecutive slices stacked as the encoder's three channels."""
 
 WHOLE_STACK = 0
 """`window=0` means read every cached slice at once — the whole stack rather than one window of it."""
@@ -229,12 +247,6 @@ class AugmentConfig:
         were fitted before the block existed.
         """
         return cls(gamma_probability=0.0, blur_probability=0.0, contrast=(1.0, 1.0), noise=0.0)
-
-
-ROTATION_DEGREES = 8.0
-SCALE_JITTER = 0.08
-SHIFT_JITTER = 0.05
-INTENSITY_JITTER = 0.10
 
 
 class Trainer:

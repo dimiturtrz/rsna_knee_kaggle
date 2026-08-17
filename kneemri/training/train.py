@@ -224,7 +224,9 @@ class TrainingOptions:
             "--vram-gb",
             type=float,
             default=0.0,
-            help="hard cap on this run's share of the card, in GB (0 = uncapped). Two reasons. It lets "
+            help="hard cap on this run's share of the card, in GB (0 = 80%% of it, the band the arms "
+            "converged on; naming a number also makes the run WAIT for that much to be free). Two "
+            "reasons for capping at all. It lets "
             "another project hold the rest of the GPU. And it converts the WORST failure mode we have "
             "into the best one: Windows pages GPU memory over PCIe rather than raising OOM, so a run "
             "that does not fit crawls at a quarter of the power budget while reporting 100%% "

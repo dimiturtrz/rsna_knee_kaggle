@@ -17,6 +17,7 @@ from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import (
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
+    DEFAULT_SHARE,
     Adaptation,
     AugmentConfig,
     DeviceBudget,
@@ -442,7 +443,21 @@ def test_await_headroom(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(DeviceBudget, "headroom", lambda _: (31.0, 32.0))
 
     assert DeviceBudget().await_headroom(idle.append) == (31.0, 32.0)
-    assert not idle, "an uncapped run names no need, and the whole card is never free — it must not wait"
+    assert not idle, "a run that named nothing has no need to wait ON, and the whole card is never free"
+
+
+def test_capped():
+    """A run that named a budget gets it; one that named nothing still gets a cap.
+
+    THE SECOND HALF IS THE POINT. Uncapped was the default until now, which made this class's own
+    worst failure — Windows paging VRAM over PCIe, so an over-committed run crawls at a reported 100%
+    utilisation instead of raising — the behaviour a run got by SAYING NOTHING. Every accepted arm
+    names its budget, so the default was never what a measured run did, only what a smoke or a
+    one-off got.
+    """
+    assert DeviceBudget(vram_gb=26.0).capped(31.8) == 26.0, "an explicit budget is used as asked"
+    assert DeviceBudget().capped(31.8) == pytest.approx(DEFAULT_SHARE * 31.8), "and silence still caps"
+    assert DeviceBudget().capped(31.8) < 31.8, "the driver context and the desktop live outside the allocator"
 
 
 def test_plan():
