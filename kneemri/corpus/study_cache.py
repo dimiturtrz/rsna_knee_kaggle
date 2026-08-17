@@ -317,9 +317,12 @@ class CorpusSplit:
     """The shipped tables a decode reads before it can build: which studies, and each series' plane.
 
     Beside `StudyCache` because it is exactly the arguments `build` takes, and a dataclass rather than
-    three lines in a `main` because two callers now assemble them — the build CLI, and the smoke that
-    decodes a few dozen studies for a reading nothing has tried. Assembled twice they would drift on
-    the one thing that must not: which table names the split.
+    three lines in a `main` because six callers now assemble them: the build CLI, the smoke that
+    decodes a few dozen studies, and the four audits (`crop_coverage`, `diagnose_laterality`,
+    `diagnose_matrix`, `decode_bench`) that each used to spell out `train.csv`, `StudyInstanceUID` and
+    `train_series` for themselves. Assembled six times they would drift on the one thing that must not:
+    which tables name the split — and an audit reading a different study list than the cache was built
+    from is a measurement about a corpus nobody trained on.
     """
 
     raw: Path

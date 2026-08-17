@@ -20,6 +20,7 @@ import pandas as pd
 from core.paths import DataRoot
 from kneemri.corpus.acquisition import Acquisition
 from kneemri.corpus.laterality import Laterality
+from kneemri.corpus.study_cache import CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +77,8 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    root = DataRoot.from_config(arguments.paths)
-    raw = root.raw()
-    identifiers = pd.read_csv(raw / "train.csv")["StudyInstanceUID"].tolist()
-    table = LateralityAudit().run(raw / "train_series", identifiers, arguments.workers)
+    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    table = LateralityAudit().run(split.source, split.identifiers(), arguments.workers)
     table.to_csv(arguments.out, index=False)
 
     logger.info(f"\nresolved {len(table)} studies -> {arguments.out}")

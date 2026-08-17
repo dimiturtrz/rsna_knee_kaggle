@@ -83,11 +83,10 @@ class DecodeBench:
         global PLANES
         from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
         from kneemri.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
-        from kneemri.corpus.study_cache import StudyCache  # noqa: PLC0415 - CLI-only
+        from kneemri.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
 
         if not PLANES:
-            raw = DataRoot.from_config(Path("paths.yaml")).raw()
-            PLANES = StudyCache.planes_of(raw / "train_series.csv")
+            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
         return Study.from_directory(Path(directory), PLANES, SlotPipeline()).bag(12)
 
     def report(self, measured: dict[str, float], studies: int) -> list[str]:
@@ -108,9 +107,10 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+    from kneemri.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
 
-    raw = DataRoot.from_config(arguments.paths).raw()
-    studies = [str(path) for path in sorted((raw / "train_series").iterdir()) if path.is_dir()]
+    source = CorpusSplit(DataRoot.from_config(arguments.paths).raw()).source
+    studies = [str(path) for path in sorted(source.iterdir()) if path.is_dir()]
     chosen = studies[: arguments.studies]
 
     bench = DecodeBench()

@@ -85,10 +85,11 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
+    from kneemri.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only, as above
 
-    raw = DataRoot.from_config(arguments.paths).raw()
-    identifiers = pd.read_csv(raw / "train.csv")["StudyInstanceUID"].tolist()[: arguments.studies]
-    table = MatrixAudit().run(raw / "train_series", identifiers, arguments.workers)
+    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    identifiers = split.identifiers()[: arguments.studies]
+    table = MatrixAudit().run(split.source, identifiers, arguments.workers)
     if arguments.out:
         table.to_csv(arguments.out, index=False)
 

@@ -30,7 +30,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
@@ -38,7 +37,7 @@ from kneemri.corpus.crop_centre import CENTRES, CROP_MM, TissueCentre
 from kneemri.corpus.slot_reader import SlotReader
 from kneemri.corpus.slots import Routing
 from kneemri.corpus.study import SlotPipeline, Study
-from kneemri.corpus.study_cache import StudyCache
+from kneemri.corpus.study_cache import CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -194,9 +193,9 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    raw = DataRoot.from_config(arguments.paths).raw()
-    identifiers = pd.read_csv(raw / "train.csv")["StudyInstanceUID"].tolist()
-    planes = StudyCache.planes_of(raw / "train_series.csv")
+    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    identifiers = split.identifiers()
+    planes = split.planes()
     # Every k-th rather than a random draw: the sample is then a property of the corpus order rather
     # than of a seed, and repeating the measurement cannot quietly answer with different studies.
     chosen = identifiers[:: max(1, len(identifiers) // arguments.sample)][: arguments.sample]
@@ -204,7 +203,7 @@ def main() -> None:
     extents = (CROP_MM, arguments.tight_mm)
     requests = [
         CoverageRequest(
-            identifier=name, source=str(raw / "train_series"), planes=planes, slices=arguments.slices, extents=extents
+            identifier=name, source=str(split.source), planes=planes, slices=arguments.slices, extents=extents
         )
         for name in chosen
     ]
