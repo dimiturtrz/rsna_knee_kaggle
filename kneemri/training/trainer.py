@@ -57,6 +57,14 @@ DEFAULT_SHARE = 0.8
 """Fraction of the card a run holds when it names no budget — read off the arms, not chosen: the
 accepted ones cap at 20, 26 and 28 GB of 31.8, and 26 is 0.82."""
 
+SMALLEST_RUN_GB = 5.5
+"""Free VRAM below which no run this repo has ever recorded could have fitted, so starting is futile.
+
+READ OFF OUR OWN RUNS rather than chosen: 224 epoch rows carry a `vram_peak_gb`, and they span 5.47 GB
+(`dinov3_v3small_224_s2026` — the shallowest encoder at the smallest resolution we have fitted) to
+26.24. A card with less free than the cheapest thing we know how to train cannot hold the dearest
+either, and on Windows that does not raise — it pages over PCIe."""
+
 WEIGHT_DECAY = 0.02
 SEED = 2026
 
@@ -100,6 +108,21 @@ class DeviceBudget:
         an immediate OutOfMemoryError instead of a silent crawl.
         """
         return self.vram_gb or DEFAULT_SHARE * whole
+
+    def floor(self) -> float:
+        """Free VRAM below which this run refuses to start at all — not the same number as its CAP.
+
+        THE CAP IS THE WRONG TEST for refusing. It defaults to 0.8 of the card, so refusing on `free <
+        capped` would refuse every time the co-tenant holds a fifth of the card — which is most of the
+        time, and mostly harmless: a 5.5 GB smoke does not care that 25 GB is unavailable. That test
+        belongs to the WARNING, and stays there.
+
+        What is fatal is free VRAM below what our cheapest run has ever needed, because then no recipe
+        fits and Windows will not say so. A run that named `--vram-gb` has stated its own need, and it
+        is taken as the floor when it is SMALLER than the corpus-derived one — a run claiming to fit in
+        3 GB is refused at 3, not at 5.5.
+        """
+        return min(self.vram_gb or SMALLEST_RUN_GB, SMALLEST_RUN_GB)
 
     def headroom(self) -> tuple[float, float]:
         """Free and total VRAM in GB, as the driver sees it right now — (0, 0) with no visible card.
@@ -161,6 +184,17 @@ class DeviceBudget:
         if device.type != "cuda":
             return device
         free, whole = self.await_headroom()
+        # REFUSING, PAST THE WAIT. The card has been short for the full bound and is short of the
+        # cheapest run on record, so there is no recipe left that fits — and the one thing this must not
+        # do is start, because Windows answers an over-commit by paging over PCIe rather than raising.
+        # That is what took three nvlddmkm engine resets and BOTH projects' processes down on
+        # 2026-08-17: the run did not fail, it crawled, and the pair of us drew enough to reset the card.
+        if free < self.floor():
+            message = (
+                f"{free:.1f} GB of {whole:.1f} GB VRAM free, below the {self.floor():.1f} GB this run "
+                f"needs — another process holds the card. Refusing rather than paging over PCIe."
+            )
+            raise RuntimeError(message)
         budget = self.capped(whole)
         # ONLY REACHABLE PAST THE WAIT'S BOUND, so this is no longer "the card is busy" — it is "the
         # card stayed busy for half an hour and this run is starting into it anyway". Named before the

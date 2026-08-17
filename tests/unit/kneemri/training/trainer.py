@@ -9,6 +9,7 @@ from torch import Tensor
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
@@ -18,6 +19,7 @@ from kneemri.training.trainer import (
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
+    SMALLEST_RUN_GB,
     Adaptation,
     AugmentConfig,
     DeviceBudget,
@@ -399,6 +401,31 @@ def test_select():
 
     assert device.type in {"cuda", "cpu"}
     assert DeviceBudget(vram_gb=8.0).select().type == device.type, "a budget must not change WHICH device"
+
+
+def test_floor():
+    """The refusal threshold is the cheapest run on record, or the run's own budget when that is lower.
+
+    IT IS DELIBERATELY NOT THE CAP. The cap defaults to 0.8 of the card, and refusing on that would
+    refuse whenever the co-tenant holds a fifth of it — common, and harmless to a 5.5 GB smoke.
+    """
+    assert DeviceBudget().floor() == SMALLEST_RUN_GB, "silence is refused only below our cheapest run"
+    assert DeviceBudget(vram_gb=26.0).floor() == SMALLEST_RUN_GB, "a big budget does not raise the floor"
+    assert DeviceBudget(vram_gb=3.0).floor() == 3.0, "a run that claims to fit in less is taken at its word"
+
+
+def test_select_refuses_a_card_that_stayed_held(monkeypatch: pytest.MonkeyPatch):
+    """Past the wait's bound, a card short of the cheapest run is refused rather than started into.
+
+    THE FAILURE THIS CLOSES cost both projects on 2026-08-17: starting into a held card does not raise
+    on Windows, it pages over PCIe and crawls, and the pair of us then drew enough to reset the driver.
+    A refusal is loud, immediate and re-runnable; the crawl was none of those.
+    """
+    monkeypatch.setattr(VisibleCards, "device", lambda _: torch.device("cuda", 0))
+    monkeypatch.setattr(DeviceBudget, "await_headroom", lambda _: (1.0, 32.0))
+
+    with pytest.raises(RuntimeError, match="Refusing rather than paging"):
+        DeviceBudget().select()
 
 
 def test_headroom():
