@@ -31,7 +31,25 @@ class MountedKit:
 
     def __init__(self, dataset: str = DATASET) -> None:
         self.dataset = dataset
-        self.kaggle = shutil.which("kaggle") or "kaggle"
+        self.kaggle = self._cli()
+
+    @staticmethod
+    def _cli() -> list[str]:
+        """How to invoke the Kaggle CLI here — bare if installed, else through uv as `comp/push.sh` does.
+
+        kaggle is NOT a project dependency: every real push runs `uv run --with kaggle kaggle …`, so
+        `shutil.which("kaggle")` is None on this machine and the old `or "kaggle"` fallback raised
+        `FileNotFoundError: [WinError 2]` — a check meant to say which code Kaggle holds instead saying
+        nothing, right before a submission (2026-08-17).
+        """
+        installed = shutil.which("kaggle")
+        if installed:
+            return [installed]
+        uv = shutil.which("uv")
+        if not uv:
+            message = "neither kaggle nor uv is on PATH, so the mounted kit cannot be asked about"
+            raise RuntimeError(message)
+        return [uv, "run", "--with", "kaggle", "kaggle"]
 
     def recorded(self) -> dict[str, object] | None:
         """Download the published stamp alone and read it; None when the dataset carries none.
@@ -41,7 +59,7 @@ class MountedKit:
         """
         with tempfile.TemporaryDirectory() as into:
             subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
-                [self.kaggle, "datasets", "download", "-f", STAMP, self.dataset, "-p", into, "--force"],
+                [*self.kaggle, "datasets", "download", "-f", STAMP, self.dataset, "-p", into, "--force"],
                 capture_output=True,
                 text=True,
                 check=True,
