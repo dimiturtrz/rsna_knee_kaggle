@@ -75,10 +75,11 @@ the repo's current state. The linter is a bug-finder, not cosmetics.
   `/architecture/preview/` = dev, `/` redirects). If the repo ALREADY deploys Pages, do NOT enable it; fold
   archmap into the existing workflow as an `/architecture/` subpath instead (see README: "Compose archmap into
   an existing Pages site"). Doc-gen, not enforcement — import-linter is the directional gate.
-- **shape-contracts** (advisory) — `python -m devtools.shape_contracts`: a public array/tensor boundary must
-  carry a **jaxtyping** shape (`Float[Tensor, "b c h w"]`), not a bare `np.ndarray`/`Tensor`. Aliases in
-  `[tool.shape_contracts]`; make shapes live at runtime with a `@shapecheck` decorator (jaxtyping+beartype,
-  see `devtools/README.md`). Migrate boundaries, then graduate to `--assert` to block.
+- **shape-contracts** (ENFORCED) — `python -m devtools.shape_contracts core kneemri --assert`: a public
+  array/tensor boundary must carry a **jaxtyping** shape (`Float[Tensor, "b c h w"]`), not a bare
+  `np.ndarray`/`Tensor`. Aliases in `[tool.shape_contracts]`; make shapes live at runtime with a
+  `@shapecheck` decorator (jaxtyping+beartype, see `devtools/README.md`). It graduated: nox, CI and
+  pre-commit all pass `--assert`, and the tree measures 0 bare boundaries, so a new one BLOCKS.
 ## Scaffolding
 
 Guardrails provisioned by **sdlc-scaffold** via copier — `.copier-answers.yml` pins the version. The gate
