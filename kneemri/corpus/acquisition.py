@@ -177,6 +177,20 @@ class SeriesHeader:
         )
         return float(centre[0])
 
+    @property
+    def column_axis_x(self) -> float | None:
+        """How much the patient's LEFT advances per step along the image's COLUMN axis: +x is left.
+
+        The SIGN is the whole content: it says which edge of a frame is the lateral side of the knee,
+        which no amount of pixel inspection recovers. Sagittally it is ~0 — there the medial-lateral
+        axis is through-plane — and a consumer must read a near-zero as 'this plane cannot answer'
+        rather than as a direction.
+        """
+        orientation = getattr(self.header, "ImageOrientationPatient", None)
+        if orientation is None or len(orientation) < _ORIENTATION_VALUES:
+            return None
+        return float(np.asarray(orientation, dtype=float)[0])
+
     @staticmethod
     def _number(value: object) -> float | None:
         """A DICOM numeric that may be absent, empty or unparsable."""
@@ -200,6 +214,7 @@ class Acquisition:
     laterality_tag: str | None
     centre_x: float | None
     slice_spacing: float | None = None
+    column_axis_x: float | None = None
 
     @property
     def through_plane_mm(self) -> float | None:
@@ -243,6 +258,7 @@ class Acquisition:
             laterality_tag=header.laterality_tag,
             centre_x=header.centre_x,
             slice_spacing=header.slice_spacing,
+            column_axis_x=header.column_axis_x,
         )
 
     def ordered_files(self) -> tuple[str, ...]:

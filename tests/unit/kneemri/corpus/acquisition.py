@@ -95,6 +95,24 @@ def test_centre_x(tmp_path: Path):
     assert header.centre_x == 0.3 * 64 / 2, "half a 64-column field at 0.3 mm — the corner would say 0.0"
 
 
+def test_column_axis_x(tmp_path: Path):
+    """Which edge of the frame is the patient's left, which is what names a crop's lateral side.
+
+    An axial series' columns run along +x, so the last column is the patient's left. A sagittal one
+    carries no x in its column axis at all — there the medial-lateral direction is through-plane, and a
+    consumer must read the zero as 'this plane cannot say' rather than as a side.
+    """
+    axial = _header(write_series(tmp_path / "ax", normal=(0.0, 0.0, 1.0)))
+    sagittal = _header(write_series(tmp_path / "sag"))
+
+    assert axial.column_axis_x == 1.0
+    assert sagittal.column_axis_x == 0.0
+
+    junk = tmp_path / "junk.dcm"
+    junk.write_bytes(b"not a dicom")
+    assert SeriesHeader.of(junk).column_axis_x is None
+
+
 def test_probe(series: Path):
     """The header yields the acquisition axes: PD is fluid-sensitive, ScanOptions FS is suppressed."""
     acquisition = _probe(series)
