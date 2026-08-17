@@ -163,38 +163,43 @@ class SlotReader:
         sizes. Measured at about one grey level in 255 against a native decode — small, but a needless
         change to members that already score.
 
-        Or None when nothing in the series decodes. A series where nothing decodes is reported ABSENT,
-        which the presence mask can express, rather than black, which it cannot. A single failed slice is
-        filled from the nearest slice that did decode — never from a zero plane, which would otherwise
-        become the authority for the stack's shape and blacken every good slice with it.
-
-        A series where nothing decodes is reported ABSENT, which the presence mask can express, rather
-        than black, which it cannot. A single failed slice is filled from the nearest slice that did
-        decode — never from a zero plane, which would otherwise become the authority for the stack's
-        shape and blacken every good slice with it.
+        Or None when the series has no files, or when nothing in the sampled band decodes — see
+        `_stacked` for what "nothing decodes" is allowed to mean and why it is not a black stack.
         """
         ordered = acquisition.ordered_files()
         if not ordered:
             return None
         planes = [self._decode(acquisition, ordered[index]) for index in self._sample_indices(len(ordered), slices)]
+        stack = self._stacked(planes)
+        return None if stack is None else self._crop(stack, acquisition.pixel_spacing)
+
+    @classmethod
+    def _stacked(cls, planes: list[NDArray[np.float32] | None]) -> NDArray[np.float32] | None:
+        """The sampled planes as one array — failures filled from a neighbour, odd matrix sizes dropped.
+
+        None when NOTHING decoded: such a series is reported ABSENT, which the presence mask can
+        express, rather than black, which it cannot. A single failed slice is filled from the nearest
+        slice that did decode — never from a zero plane, which would otherwise become a candidate for
+        the stack's shape and blacken every good slice with it.
+
+        Slices of one series can still differ in matrix size — multi-echo and some reformats do — and
+        those are genuinely not stackable, so an odd one out is dropped to zeros rather than resized.
+        THE MAJORITY SHAPE DECIDES, not the first sampled slice. With the first plane as authority, a
+        series whose FIRST sampled slice is the odd one out blackened every other slice — eleven good
+        planes zeroed by one — and the presence mask still called the slot acquired, so the model was
+        served a black slot as if it were real. Which slice the band happens to sample first is not a
+        property of the series. Measured worth on THIS corpus: zero — `diagnose_matrix` found 0 mixed
+        series in 1682 over 300 studies, so this is correctness insurance for the hidden test, not a
+        score change to expect.
+        """
         decoded = [index for index, plane in enumerate(planes) if plane is not None]
         if not decoded:
             return None
         filled: list[NDArray[np.float32]] = [
-            plane if plane is not None else self._nearest(planes, decoded, index) for index, plane in enumerate(planes)
+            plane if plane is not None else cls._nearest(planes, decoded, index) for index, plane in enumerate(planes)
         ]
-        # Slices of one series can still differ in matrix size — multi-echo and some reformats do — and
-        # those are genuinely not stackable, so an odd one out is dropped to zeros rather than resized.
-        # THE MAJORITY SHAPE DECIDES, not the first sampled slice. With the first plane as authority, a
-        # series whose FIRST sampled slice is the odd one out blackened every other slice — eleven good
-        # planes zeroed by one — and the presence mask still called the slot acquired, so the model was
-        # served a black slot as if it were real. Which slice the band happens to sample first is not a
-        # property of the series. Measured worth on THIS corpus: zero — `diagnose_matrix` found 0 mixed
-        # series in 1682 over 300 studies, so this is correctness insurance for the hidden test, not a
-        # score change to expect.
         shape = Counter(plane.shape for plane in filled).most_common(1)[0][0]
-        stack = np.stack([plane if plane.shape == shape else np.zeros(shape, np.float32) for plane in filled])
-        return self._crop(stack, acquisition.pixel_spacing)
+        return np.stack([plane if plane.shape == shape else np.zeros(shape, np.float32) for plane in filled])
 
     @staticmethod
     def _nearest(planes: list[NDArray[np.float32] | None], decoded: list[int], index: int) -> NDArray[np.float32]:
