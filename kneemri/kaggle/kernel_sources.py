@@ -8,7 +8,8 @@ for a directory when the submission slot is already spent.
 The declaration is hand-written per kernel while the requirement is derived from the members
 (`MemberPackage.mounts`), so the two can drift the moment a package gains a member on an encoder the
 kernel was never told about — which is exactly what adding a DINOv3 member to a DINOv2-only entry does.
-This module is the side that reads the declaration; comparing it to the requirement is `verify_members`.
+This module is the side that reads the declaration; `kernel_script` reads the members a kernel asks for,
+and `mount_check` compares the two over every entry at once.
 """
 
 import json

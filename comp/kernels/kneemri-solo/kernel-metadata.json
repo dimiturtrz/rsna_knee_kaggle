@@ -10,7 +10,8 @@
   "machine_shape": "NvidiaTeslaT4",
   "dataset_sources": [
     "dimiturnt/kneemri-kit",
-    "dimiturnt/kneemri-members"
+    "dimiturnt/kneemri-members",
+    "dimiturnt/dinov3-hf"
   ],
   "competition_sources": [
     "rsna-knee-abnormality-detection"
