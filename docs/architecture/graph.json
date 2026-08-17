@@ -128,6 +128,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.crop_coverage",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.decode_bench",
       "target": "core.paths",
       "weight": 2
@@ -2337,6 +2385,150 @@
     {
       "kind": "calls",
       "source": "kneemri.corpus.crop_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality",
+      "target": "kneemri.corpus.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality",
+      "target": "kneemri.corpus.crop_laterality.ClipRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality",
+      "target": "kneemri.corpus.crop_laterality.SideClip",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "target": "kneemri.corpus.crop_coverage.CropCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "target": "kneemri.corpus.crop_coverage.CropCoverage.tissue",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "target": "kneemri.corpus.crop_laterality.SideClip",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "target": "kneemri.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "target": "kneemri.corpus.slot_reader.SlotReader.window",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.crop_laterality.CropLaterality.lateral_column",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline.route",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "kneemri.corpus.crop_laterality.ClipRequest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "kneemri.corpus.crop_laterality.CropLaterality",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "kneemri.corpus.crop_laterality.CropLaterality.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.main",
       "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
@@ -8775,7 +8967,7 @@
       "role": null
     },
     {
-      "descendants": 103,
+      "descendants": 104,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -8783,7 +8975,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -8842,6 +9034,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.crop_coverage",
       "label": "crop_coverage",
+      "level": "module",
+      "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality",
+      "label": "crop_laterality",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -9748,6 +9948,30 @@
       "label": "CropCoverage",
       "level": "class",
       "parent": "kneemri.corpus.crop_coverage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.ClipRequest",
+      "label": "ClipRequest",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_laterality",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality",
+      "label": "CropLaterality",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_laterality",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.SideClip",
+      "label": "SideClip",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_laterality",
       "role": "satellite"
     },
     {
@@ -11056,6 +11280,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.column_axis_x",
+      "label": "column_axis_x",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.acquisition.SeriesHeader.fat_suppressed",
       "label": "fat_suppressed",
       "level": "method",
@@ -11356,6 +11588,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.corpus.crop_coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality.clipped",
+      "label": "clipped",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality.lateral_column",
+      "label": "lateral_column",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
+      "label": "measure_study",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLaterality.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.SideClip.asymmetry",
+      "label": "asymmetry",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality.SideClip",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_laterality",
       "role": null
     },
     {
