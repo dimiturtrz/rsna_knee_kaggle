@@ -7,6 +7,9 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from core.mounts import Mounts
+from kneemri.inference.ensemble import Serving
+from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.vote import LogitAverage
 from kneemri.kaggle import kernel_run
 from kneemri.kaggle.kernel_run import KernelRun
 from kneemri.models.backbone import BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
@@ -40,6 +43,25 @@ def test_chosen():
     assert [member.holdout for member in KernelRun(members=1).chosen(package)] == [0.87]
     assert [member.holdout for member in KernelRun(names=["0.81", "0.84"]).chosen(package)] == [0.81, 0.84]
     assert [member.holdout for member in KernelRun(members=1, names=["0.84"]).chosen(package)] == [0.84]
+
+
+def test_served():
+    """An entry's views and vote survive to the ensemble, and the budget is attached for it.
+
+    Both halves matter. The two axes an entry can vary WITHOUT retraining anything were reachable from
+    `member_curve` and from nothing that writes a submission, so their board transfer could not be
+    asked about at all; and a kernel that declared either used to lose the wall-clock ceiling with it,
+    which is a nine-hour kill rather than a wrong number.
+    """
+    default = KernelRun().served()
+    assert default.budget is not None
+    assert default.vote is None and default.views is None, "the shipped entry declares neither"
+
+    views, vote = SpatialViews(), LogitAverage()
+    declared = KernelRun(serving=Serving(views=views, vote=vote)).served()
+    assert declared.views is views
+    assert declared.vote is vote
+    assert declared.budget is not None, "declaring a vote must not cost the deadline"
 
 
 def test_find_encoder(tmp_path: Path):

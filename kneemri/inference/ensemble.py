@@ -31,7 +31,7 @@ from kneemri.corpus.slots import SCHEMES, SlotScheme
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
-from kneemri.inference.vote import RankAverage
+from kneemri.inference.vote import RankAverage, Vote
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyModel
 
@@ -123,10 +123,11 @@ class Read:
 class Serving:
     """How the members are RUN, as opposed to what any of them recorded about itself.
 
-    Three knobs that no member can answer and that every one of them is served under: the test-time
-    views, the wall-clock ceiling, and a forced arithmetic. They arrived as three more positional
-    arguments on an `__init__` that already had three, which is the long-arg-list smell exactly — and
-    a caller passing the wrong one of three same-shaped optionals is a defect that runs.
+    Four knobs that no member can answer and that every one of them is served under: the test-time
+    views, the wall-clock ceiling, a forced arithmetic, and how the members' tables become one. They
+    arrived as three more positional arguments on an `__init__` that already had three, which is the
+    long-arg-list smell exactly — and a caller passing the wrong one of three same-shaped optionals is
+    a defect that runs.
     """
 
     views: SpatialViews | None = None
@@ -142,6 +143,12 @@ class Serving:
     compare three, but the inner autocast that `arithmetic` decides carries an explicit dtype and
     overrides it — so all three arms ran the same arithmetic and reported max|diff| of exactly 0.0,
     twelve times, which read as "fp16 is free". A knob that is not connected reports agreement."""
+    vote: Vote | None = None
+    """None means `RankAverage`, the rule every number this project has published came out of. It sits
+    here because it is the same KIND of knob as the other three — something no member can answer,
+    decided once for the whole run — and because `member_curve` has been able to vary the vote offline
+    since the family existed while the SUBMISSION path could not vary it at all. An axis measurable
+    only offline is an axis whose board transfer cannot be asked about."""
 
 
 class Ensemble:
@@ -414,7 +421,7 @@ class Ensemble:
                 band=members[0].band,
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
-        return RankAverage().combine(per_member)
+        return (self.serving.vote or RankAverage()).combine(per_member)
 
     def predict_members(
         self,

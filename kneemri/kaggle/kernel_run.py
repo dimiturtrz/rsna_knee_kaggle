@@ -15,6 +15,7 @@ is worth having, because the two leaderboards reward opposite things and a team 
 import json
 import logging
 from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 
 from core.mounts import Mounts
@@ -39,11 +40,18 @@ class KernelRun:
         *,
         names: Sequence[str] | None = None,
         overlap: bool = True,
+        serving: Serving | None = None,
         mounts: Mounts | None = None,
     ) -> None:
         self.members = members
         self.names = names
         self.overlap = overlap
+        # HOW the members are served, which until now no kernel could say. `Serving` carries the two
+        # axes an entry can vary without retraining anything — the test-time views and the vote — and
+        # both were reachable from `member_curve` and from nothing that produces a submission. An axis
+        # measurable only offline is an axis whose board transfer cannot be asked about, and this
+        # project's last three surprises were all the board disagreeing with the offline ruler.
+        self.serving = serving or Serving()
         # One object for the whole run, because it caches: the cost this removes is a repeated walk,
         # and a fresh finder per call would keep paying it while looking like it did not.
         self.mounts = mounts or Mounts()
@@ -122,6 +130,16 @@ class KernelRun:
         recorded = json.loads(found.read_text(encoding="utf-8"))
         return f"{recorded['commit']}{' DIRTY' if recorded.get('dirty') else ''}"
 
+    def served(self) -> Serving:
+        """This entry's serving, with the wall-clock ceiling this path alone is subject to.
+
+        A BUDGET ONLY HERE: a Kaggle batch session is the one place a run is killed for taking too
+        long, and a dry run or a witness is not. Composed rather than constructed, so an entry that
+        declares views or a vote does not have to also remember to declare the budget — forgetting it
+        is a nine-hour kill, and the kernel is the only caller that knows it is inside one.
+        """
+        return replace(self.serving, budget=Budget())
+
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
         from transformers import AutoModel  # noqa: PLC0415 - only importable after the kit is on sys.path
@@ -163,8 +181,6 @@ class KernelRun:
         )
 
         competition = self.mounts.one("sample_submission.csv", "competition data")
-        # A BUDGET ONLY HERE. This is the one path that runs inside a Kaggle batch session, which is
-        # the only place a run is killed for taking too long; a dry run and a witness are not.
-        ensemble = Ensemble(package, models, device, Serving(budget=Budget()))
+        ensemble = Ensemble(package, models, device, self.served())
         frame = Submission(ensemble, competition, WORKING, overlap=self.overlap).run()
         logger.info("%s", frame.head())

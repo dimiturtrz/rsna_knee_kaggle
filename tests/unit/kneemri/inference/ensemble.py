@@ -12,6 +12,7 @@ from torch import Tensor
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
 from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window
+from kneemri.inference.vote import LogitAverage
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 
@@ -320,6 +321,39 @@ def test_predict_groups(tmp_path: Path):
 
     assert asked == [(6, (14, 28))], "ONE read serving both resolutions, not one decode per group"
     assert combined.shape == (2, len(TARGETS))
+
+
+def test_predict_groups_combines_by_the_rule_the_serving_names(tmp_path: Path):
+    """The vote is a served knob, and a submission built under `LogitAverage` must not be rank-averaged.
+
+    `RankAverage` was called directly here, so the whole family was reachable from `member_curve` and
+    from nothing that writes a submission — the offline ruler could vary an axis the board could never
+    be asked about. Asserted as a DIFFERENCE against the shipped rule rather than against fixed values,
+    because what matters is that the declared rule is the one that ran.
+    """
+    ensemble = _ensemble(tmp_path / "voted")
+    member = ensemble.package.members[0]
+    ensemble.package.members = [member, replace(member, identifier="second")]
+    ensemble.models["second"] = ensemble.models[member.identifier]
+
+    def chunks_for(read: Read):
+        torch.manual_seed(SEED)
+        return [
+            {
+                size: (
+                    torch.randint(0, 256, (2, len(SLOTS), read.slices, 14, 14), dtype=torch.uint8),
+                    torch.ones(2, len(SLOTS)),
+                )
+                for size in read.sizes
+            }
+        ]
+
+    ranked = ensemble.predict_groups(chunks_for, overlap=False)
+    ensemble.serving = replace(ensemble.serving, vote=LogitAverage())
+    logits = ensemble.predict_groups(chunks_for, overlap=False)
+
+    assert ranked.shape == logits.shape
+    assert not np.allclose(ranked, logits), "the declared rule never reached the combine"
 
 
 def test_forwarded():
