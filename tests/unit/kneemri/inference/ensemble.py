@@ -6,11 +6,12 @@ from typing import override
 import numpy as np
 import pytest
 import torch
+from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
-from kneemri.inference.members import MemberConfig, MemberPackage, Window
+from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 
@@ -351,6 +352,29 @@ def test_forwarded():
     assert calls == [6, 3, 1, 1, 1, 1, 1, 1], "halving, and each accepted size then runs every chunk"
 
 
+def test_forwarded_stops_halving_at_one_row():
+    """A card that cannot take a SINGLE study is a real failure, and must not be retried forever.
+
+    The halving has to bottom out somewhere, and one row is where retrying stops being a smaller ask —
+    the next halve is the same size. Raising here is what lets `attempt` drop the member and the run
+    continue with the rest; a loop that kept retrying would hang the kernel until Kaggle killed it.
+    """
+
+    class _Refuses(torch.nn.Module):
+        def forward(self, images: torch.Tensor, mask: torch.Tensor, size: int) -> torch.Tensor:
+            raise torch.OutOfMemoryError
+
+    with pytest.raises(torch.OutOfMemoryError):
+        Ensemble.forwarded(
+            Ensemble.__new__(Ensemble),
+            _Refuses(),
+            torch.zeros(2, 2, 3, 8, 8, dtype=torch.uint8),
+            torch.ones(2, 2),
+            Window(starts=[0], width=3, size=8),
+            rows=2,
+        )
+
+
 def test_arithmetic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """A bf16 member is served in fp16 on a card that cannot do bf16, and unchanged on one that can.
 
@@ -473,6 +497,38 @@ def test_predict_members_drops_a_member_that_fails_instead_of_the_entry(tmp_path
 
     assert len(arrays) == 1, "the working member still votes"
     assert arrays[0].shape == (2, len(TARGETS))
+
+
+def test_predict_members_does_not_retry_a_member_that_already_failed(tmp_path: Path):
+    """A member that failed on one chunk is not asked about the next, or the failure costs the whole run.
+
+    Dropping is per RUN, not per chunk. A card that ran out of memory on chunk one will do it again on
+    every chunk, and the corpus is thousands of studies: retrying is a fixed cost per chunk against a
+    member that can no longer vote, which is how a nine-hour kernel limit gets spent on nothing.
+    """
+    ensemble = _ensemble(tmp_path / "once")
+    good = ensemble.package.members[0]
+    bad = replace(good, identifier="doomed")
+    ensemble.package.members = [good, bad]
+
+    attempts: list[str] = []
+    original = ensemble.attempt
+
+    def counted(
+        member: Member, sized: dict[int, tuple[Tensor, Tensor]], *, overlap: bool
+    ) -> NDArray[np.float64] | None:
+        attempts.append(member.identifier)
+        return original(member, sized, overlap=overlap)
+
+    ensemble.attempt = counted  # type: ignore[method-assign]
+    ensemble.models["doomed"] = _broken()
+    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
+    chunk = {good.image_size: (images, torch.ones(2, len(SLOTS)))}
+
+    ensemble.predict_members([good, bad], [chunk, chunk, chunk], overlap=False)
+
+    assert attempts.count("doomed") == 1, "a member that failed is asked once, not once per chunk"
+    assert attempts.count(good.identifier) == 3, "and the survivors still see every chunk"
 
 
 def test_predict_members_raises_when_every_member_fails(tmp_path: Path):

@@ -97,6 +97,12 @@ def test_check(tmp_path: Path):
     with pytest.raises(WeightsError, match="fingerprint differs"):
         corrupt_package.check(model, corrupt_package.members[0], device)
 
+    # A DIFFERENT SHAPE IS A DIFFERENT ARCHITECTURE, and it must not reach the subtraction: numpy would
+    # broadcast a (2, 1) stored answer against a (2, 12) one and report a difference small enough to pass.
+    reshaped = replace(member, fingerprint=member.fingerprint[:, :1])
+    with pytest.raises(WeightsError, match="not the one these weights were fitted to"):
+        package.check(model, reshaped, device)
+
 
 def test_load(tmp_path: Path):
     """Loading returns a model whose weights are the member's and whose fingerprint agrees."""
