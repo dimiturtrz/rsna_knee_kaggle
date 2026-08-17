@@ -47,6 +47,14 @@ RATE="${3:-8e-6}"
 # one. At 224 px that puts a full DINOv3 answer at about ELEVEN MINUTES.
 EPOCHS="${4:-8}"
 
+# AND THE BUDGET GOES IN THE NAME, for the third time in this repo: the size did not (the 336 member
+# survives only because it was copied aside), the rate did not on resolution.sh, and the epochs do not
+# here — so `dinov3.sh v3small 224 8e-6 12` writes the eight-epoch run's checkpoint and log. OneCycle
+# anneals over the length it is given, so a twelve-epoch run is a DIFFERENT recipe and not a longer one.
+# Empty at eight, so `dinov3_v3small_336_lr8e-6` and every member on disk are unchanged.
+BUDGET=""
+[ "$EPOCHS" = "8" ] || BUDGET="_e${EPOCHS}"
+
 # READ SIZE IS THE SUSPECT, AND THE TWO ENCODERS DISAGREE ABOUT WHAT IS NATIVE.
 #   DINOv2-small  config image_size 518, patch 14 -> our 336 px read is INSIDE its training range
 #   DINOv3-S/16   config image_size 224, patch 16 -> our 336 px read is 1.5x BEYOND its native grid
@@ -77,9 +85,9 @@ export HF_TOKEN
 # checkpoint. The 336 member survives as dinov3_v3small_336_s2026.pt only because it was copied aside
 # while the 224 run was already going. A run that can destroy the run it is being compared against is
 # not an experiment.
-run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}" \
+run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}${BUDGET}" \
   $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
   --image-size "$CACHE" --train-size "$SIZE" --backbone-lr "$RATE" \
   $THROUGHPUT --vram-gb 26 \
-  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_lr${RATE}_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_lr${RATE}${BUDGET}_s2026.pt"

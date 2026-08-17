@@ -103,7 +103,14 @@ require "$LABELS"
 # THE ENCODER AND READ SIZE ARE IN THE NAME. dinov3.sh once wrote one name whatever size it read, so
 # launching a second probe began overwriting the first run's log and was about to take its checkpoint.
 # A run that can destroy the run it is being compared against is not an experiment.
-NAME="lora_r${RANK}_${VARIANT}_${SIZE}"
+#
+# AND SO IS THE RATE, which it was not: LoRA's whole point is that it tolerates a rate two orders above
+# full fine-tuning, so the rate is the axis this arm is most likely to be re-run on — and
+# `lora.sh 8 1e-4` wrote the 5e-4 run's checkpoint. Empty at 5e-4, so `lora_r8_small_336` and the
+# member on disk are unchanged.
+TAG=""
+[ "$RATE" = "5e-4" ] || TAG="_lr${RATE}"
+NAME="lora_r${RANK}_${VARIANT}_${SIZE}${TAG}"
 
 run_train "$NAME" \
   $RECIPE --epochs 12 \
