@@ -463,19 +463,18 @@ class StudyModel(nn.Module):
         used to build the same pair of groups apiece, which is one place for the head's learning rate
         to drift from the other's.
         """
-        adapters = [module for module in self.backbone.modules() if isinstance(module, LoRALinear)]
-        if adapters:
+        if any(isinstance(module, LoRALinear) for module in self.backbone.modules()):
             return [parameter for parameter in self.backbone.parameters() if parameter.requires_grad]
-        blocks = self._blocks()
-        trainable = {id(parameter) for block in blocks[-unfreeze_last:] for parameter in block.parameters()}
-        opened: list[torch.nn.Parameter] = []
+        return self._last_blocks(unfreeze_last)
+
+    def _last_blocks(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
+        """Everything outside the last `unfreeze_last` blocks frozen, and what is left returned."""
+        trainable = {id(parameter) for block in self._blocks()[-unfreeze_last:] for parameter in block.parameters()}
         for parameter in self.backbone.parameters():
-            if id(parameter) in trainable:
-                opened.append(parameter)
-            else:
+            if id(parameter) not in trainable:
                 # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
                 parameter.requires_grad_(False)  # noqa: FBT003
-        return opened
+        return [parameter for parameter in self.backbone.parameters() if id(parameter) in trainable]
 
     def compile_encoder(self) -> None:
         """Fuse the encoder's kernels. The ENCODER only, and SHAPE-SPECIALISED, both measured.

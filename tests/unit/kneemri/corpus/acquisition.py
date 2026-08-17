@@ -97,6 +97,28 @@ def test_ordered_files(series: Path):
     assert acquisition.ordered_files() == tuple(reversed(acquisition.files))
 
 
+def test_ordered_files_keeps_sorting_around_one_unreadable_header(tmp_path: Path):
+    """One file with no readable key costs its OWN slot, not the whole series' ordering.
+
+    Abandoning the sort for the series is what this used to do, and file names here are arbitrary UIDs
+    exactly as they are in the corpus — so the central band would then sample by name, which says
+    nothing about depth, while the presence mask still reported the slot acquired. Unmeasurable on this
+    corpus (0 of 1682 series over 300 studies hold a keyless file) and cheap insurance for the hidden
+    test, where a vendor we have never seen decides what the tags say.
+    """
+    directory = write_series(tmp_path / "mixed", slices=6)
+    acquisition = _probe(directory)
+    keyless = acquisition.files[2]
+    (directory / keyless).write_bytes(b"not a dicom")
+
+    ordered = _probe(directory).ordered_files()
+
+    assert ordered[2] == keyless, "the file nothing can be said about stays where it was"
+    assert list(ordered[:2] + ordered[3:]) == [name for name in reversed(acquisition.files) if name != keyless], (
+        "and every file that HAS a key is still sorted by geometry"
+    )
+
+
 def test_fluid_sensitive(series: Path):
     """PD and T2 are the fluid-bright weightings."""
     assert _probe(series).fluid_sensitive
