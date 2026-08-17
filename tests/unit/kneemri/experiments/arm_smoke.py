@@ -1,9 +1,13 @@
 """What the smoke sweep runs, and what it calls a failure."""
 
 import json
+import os
 from pathlib import Path
 
 from kneemri.experiments.arm_smoke import ArmSmoke
+
+LAST_SWEEP = 1_700_000_000
+"""A stamp from before this run, so "the smoke wrote it" is decided by the clock rather than by timing."""
 
 
 def test_command(tmp_path: Path):
@@ -52,6 +56,32 @@ def test_failed(tmp_path: Path):
     assert not list(tmp_path.glob("*.partial")), "the periodic save's weights are cleaned up, not only the .pt"
     assert not list(tmp_path.glob("*.npz")), "every sibling the arm wrote goes, not the suffixes someone listed"
     assert (tmp_path / "good.sh").exists(), "a file that was there BEFORE the arm ran is not the arm's output"
+
+
+def test_failed_cleans_a_leftover_it_rewrote(tmp_path: Path):
+    """A second sweep into the same directory must clean the artifacts it OVERWROTE, not only new names.
+
+    The cleanup used to skip every path that was there beforehand — which protects the arm file, and
+    protected the previous sweep's `.partial` too, since the trainer rewrites it under the same name.
+    Measured 2026-08-17: 3.5 GB of ninety-megabyte checkpoints sitting in the directory whose whole
+    point is to hold none. The stamp is what tells the two apart.
+    """
+    stale = tmp_path / "again.partial"
+    stale.write_bytes(b"the previous sweep's weights")
+    os.utime(stale, (LAST_SWEEP, LAST_SWEEP))
+    (tmp_path / "again.sh").write_text("run_train again\n", encoding="utf-8")
+    os.utime(tmp_path / "again.sh", (LAST_SWEEP, LAST_SWEEP))
+
+    def runner(argv: list[str]) -> tuple[int, str]:
+        name = Path(argv[-1]).stem
+        _record(tmp_path, name, loss=0.62, auc=0.55)
+        stale.write_bytes(b"this sweep's weights")
+        return 0, ""
+
+    ArmSmoke(runner=runner).failed({"again": "--fold 0"}, tmp_path)
+
+    assert not stale.exists(), "a leftover the smoke rewrote is this run's output, whatever its name was before"
+    assert (tmp_path / "again.sh").exists(), "and the arm file, which nothing touched, stays"
 
 
 def test_learned(tmp_path: Path):

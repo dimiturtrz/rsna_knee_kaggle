@@ -113,14 +113,21 @@ class ArmSmoke:
         checkpoint whenever the holdout improves, and left 1.9 GB after seventeen arms in the very
         directory the line existed to keep empty; it then missed `.holdout.npz` and `.metrics.jsonl`
         the same way. A cleanup that must be told each filename is one that is wrong again the next
-        time an output is added, so it is told the STEM instead — and only for files that were NOT
-        there before the arm ran, because `--smoke` takes a directory from the caller and one obvious
-        thing to hand it is `experiments/arms` itself, where `<name>.*` also matches `<name>.sh`.
+        time an output is added, so it is told the STEM instead — and only for files this run TOUCHED,
+        because `--smoke` takes a directory from the caller and one obvious thing to hand it is
+        `experiments/arms` itself, where `<name>.*` also matches `<name>.sh`.
+
+        TOUCHED, not new. Skipping every path that existed beforehand protects the arm file, and it
+        also protected the previous sweep's leftovers: a second smoke into the same directory REWRITES
+        `<name>.partial` under the same name, finds it in the before-set, and keeps it. Measured here
+        on 2026-08-17 — 3.5 GB of ninety-megabyte `.partial` files in a smoke directory the cleanup
+        exists to leave empty. The modification time separates the two: an arm the smoke did not write
+        keeps its stamp, and everything the trainer wrote this run does not.
         """
         broken: dict[str, str] = {}
         for name, flags in invocations.items():
             checkpoint = out / f"{name}.pt"
-            existing = set(out.glob(f"{name}.*"))
+            untouched = {path: path.stat().st_mtime_ns for path in out.glob(f"{name}.*")}
             code, complaint = self.runner(self.command(flags, checkpoint))
             trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)
             if trouble:
@@ -129,8 +136,9 @@ class ArmSmoke:
             # better part of an hour, and a sweep that prints nothing until it finishes is one nobody
             # can tell from a hang.
             logger.info("%s %s%s", "BROKEN" if trouble else "ok", name, f": {trouble}" if trouble else "")
-            for artifact in set(out.glob(f"{name}.*")) - existing:
-                artifact.unlink(missing_ok=True)
+            for artifact in out.glob(f"{name}.*"):
+                if untouched.get(artifact) != artifact.stat().st_mtime_ns:
+                    artifact.unlink(missing_ok=True)
         return broken
 
     def reported(self, invocations: dict[str, str], refused: dict[str, str], out: Path) -> dict[str, str]:
