@@ -2420,12 +2420,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.corpus.study.SlotPipeline.slot_images",
-      "target": "kneemri.corpus.study.SlotPipeline.slot_sizes",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.corpus.study.SlotPipeline.slot_sizes",
       "target": "kneemri.corpus.laterality.Laterality.normalise",
       "weight": 1
@@ -10768,14 +10762,6 @@
       "descendants": 0,
       "id": "kneemri.corpus.study.SlotPipeline.side_of",
       "label": "side_of",
-      "level": "method",
-      "parent": "kneemri.corpus.study.SlotPipeline",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.study.SlotPipeline.slot_images",
-      "label": "slot_images",
       "level": "method",
       "parent": "kneemri.corpus.study.SlotPipeline",
       "role": null
