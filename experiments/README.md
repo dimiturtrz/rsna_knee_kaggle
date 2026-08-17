@@ -366,10 +366,26 @@ still compose.
 | whole-stack reading | 0.8457 | +0.0185 | **+0.0185** |
 | + 392 px AND encoder rate 4e-5 | **0.8523** | +0.0066 | **+0.0251** (confounded — two changes, see above) |
 
-Both peak at epoch 6. 392 px is the last rung that fits: patch-14 needs multiples of 14, so the ladder
-is 336 (576 tokens) → 392 (784) → 420 (900) → 448 (1024), and 392 already holds 28.4 GB of a 32 GB card
-while 448 OOMed outright. Buying the next rung would mean a smaller batch, which changes the ranking
-term's within-batch pair count and stops it being one variable.
+Both peak at epoch 6. Patch-14 needs multiples of 14, so the ladder is 336 (576 tokens) → 392 (784) →
+420 (900) → 448 (1024). 392 was the last rung that fit while it held 28.4 GB of a 32 GB card and 448
+OOMed outright, and buying the next one then meant a smaller batch — which changes the ranking term's
+within-batch pair count and stops it being one variable.
+
+**That wall moved on 2026-08-17 and the ledger said so a day late** (knee-d2fc). Activation
+checkpointing took 392/batch-12 from 28.4 GB to 20.5, and the freed headroom buys the next rung at the
+SAME batch. Measured, one epoch on 400 studies, whole-stack + compile + checkpointing + bf16, `--vram-gb
+28` on a card another tenant already held ~2.8 GB of:
+
+| train size | batch | peak | throughput | epoch |
+|---|---|---|---|---|
+| 392 (shipping) | 12 | 20.46 GB | 733 img/s | 55 s |
+| **420** | **12** | **23.42 GB** | 618 img/s | 89 s |
+| 448 | 9 | 20.00 GB | 560 img/s | 88 s |
+| 448 | 12 | OOM in six seconds | — | — |
+
+420 px is therefore a ONE-VARIABLE arm at 1.6× the wall-clock, and it needs no decode: the cache is
+already 448 px, so `--train-size 420` reads what is on disk. 448 buys the rung after it and does move
+the batch, so it is only worth reading if 420 pays.
 
 **+0.0251 clears the 1.5% bar**, against a floor of 0.0053. No single arm did — whole-stack came
 closest at +0.0185 on its own control. Two things this does NOT license: reading the total as evidence
