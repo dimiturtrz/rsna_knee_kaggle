@@ -8,6 +8,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "kneemri.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "kneemri.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.build_cache",
       "target": "core.paths",
       "weight": 1
@@ -1802,6 +1838,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.corpus.acquisition.SeriesHeader.slice_spacing",
+      "target": "kneemri.corpus.acquisition.SeriesHeader._number",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.corpus.acquisition.SeriesHeader.weighting",
       "target": "kneemri.corpus.acquisition.SeriesHeader._number",
       "weight": 1
@@ -1858,6 +1900,156 @@
       "kind": "references",
       "source": "kneemri.corpus.anatomy.SlotAffinity",
       "target": "kneemri.corpus.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.band_coverage.BandCoverage",
+      "target": "kneemri.corpus.band_coverage.BandRequest",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.corpus.band_coverage.BandCoverage",
+      "target": "kneemri.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.discarded",
+      "target": "kneemri.corpus.band_coverage.BandCoverage.profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.band_coverage.BandCoverage.discarded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline.route",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.profile",
+      "target": "kneemri.corpus.crop_centre.TissueCentre",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.profile",
+      "target": "kneemri.corpus.crop_centre.TissueCentre.threshold",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.report",
+      "target": "kneemri.corpus.band_coverage.SlotShares.of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.band_coverage.SlotShares",
+      "target": "kneemri.corpus.band_coverage.BandCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.band_coverage.SlotShares",
+      "target": "kneemri.corpus.band_coverage.SlotShares",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.SlotShares.row",
+      "target": "kneemri.corpus.band_coverage.BandCoverage.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.band_coverage.BandCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.band_coverage.BandCoverage.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.band_coverage.BandRequest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -5324,12 +5516,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
-      "target": "kneemri.inference.vote.RankAverage.combine",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.predict_member",
       "target": "kneemri.inference.ensemble.Ensemble.arithmetic",
       "weight": 1
@@ -5398,6 +5584,12 @@
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Serving",
       "target": "kneemri.inference.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.vote.Vote",
       "weight": 1
     },
     {
@@ -6255,6 +6447,12 @@
     {
       "kind": "references",
       "source": "kneemri.kaggle.kernel_run.KernelRun",
+      "target": "kneemri.inference.ensemble.Serving",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.kernel_run.KernelRun",
       "target": "kneemri.inference.members.Member",
       "weight": 1
     },
@@ -6274,6 +6472,12 @@
       "kind": "construct",
       "source": "kneemri.kaggle.kernel_run.KernelRun.__init__",
       "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.__init__",
+      "target": "kneemri.inference.ensemble.Serving",
       "weight": 1
     },
     {
@@ -6315,19 +6519,7 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.kernel_run.KernelRun.run",
-      "target": "kneemri.inference.budget.Budget",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
       "target": "kneemri.inference.ensemble.Ensemble",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
-      "target": "kneemri.inference.ensemble.Serving",
       "weight": 1
     },
     {
@@ -6355,6 +6547,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.kaggle.kernel_run.KernelRun.served",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.kaggle.kernel_run.KernelRun.run",
       "target": "kneemri.kaggle.submission.Submission",
@@ -6364,6 +6562,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_run.KernelRun.run",
       "target": "kneemri.kaggle.submission.Submission.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.served",
+      "target": "kneemri.inference.budget.Budget",
       "weight": 1
     },
     {
@@ -8397,7 +8601,7 @@
       "role": null
     },
     {
-      "descendants": 100,
+      "descendants": 101,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -8405,7 +8609,7 @@
       "role": null
     },
     {
-      "descendants": 18,
+      "descendants": 19,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -8424,6 +8628,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.anatomy",
       "label": "anatomy",
+      "level": "module",
+      "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage",
+      "label": "band_coverage",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -9267,6 +9479,30 @@
       "level": "class",
       "parent": "kneemri.corpus.anatomy",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage",
+      "label": "BandCoverage",
+      "level": "class",
+      "parent": "kneemri.corpus.band_coverage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandRequest",
+      "label": "BandRequest",
+      "level": "class",
+      "parent": "kneemri.corpus.band_coverage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.SlotShares",
+      "label": "SlotShares",
+      "level": "class",
+      "parent": "kneemri.corpus.band_coverage",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -10574,6 +10810,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.acquisition.Acquisition.through_plane_mm",
+      "label": "through_plane_mm",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.acquisition.SeriesHeader._described",
       "label": "_described",
       "level": "method",
@@ -10624,6 +10868,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.acquisition.SeriesHeader.pixel_spacing",
       "label": "pixel_spacing",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.slice_spacing",
+      "label": "slice_spacing",
       "level": "method",
       "parent": "kneemri.corpus.acquisition.SeriesHeader",
       "role": null
@@ -10698,6 +10950,70 @@
       "label": "matrix",
       "level": "method",
       "parent": "kneemri.corpus.anatomy.SlotAffinity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage.discarded",
+      "label": "discarded",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage.measure_study",
+      "label": "measure_study",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage.profile",
+      "label": "profile",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.BandCoverage.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.SlotShares.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.SlotShares",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.SlotShares.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage.SlotShares",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.band_coverage.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.corpus.band_coverage",
       "role": null
     },
     {
@@ -13968,6 +14284,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kernel_run.KernelRun.run",
       "label": "run",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_run.KernelRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_run.KernelRun.served",
+      "label": "served",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_run.KernelRun",
       "role": null
