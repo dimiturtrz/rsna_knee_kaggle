@@ -165,6 +165,10 @@ class Ensemble:
         self.models = models
         self.device = device
         self.serving = serving or Serving()
+        # The views this run is CURRENTLY serving, which the frozen `Serving` cannot be: they are the
+        # first thing given up under a deadline, and giving them up is an edit to what the rest of the
+        # run does. `Serving` stays the entry's declaration; this is the run's state.
+        self.views = self.serving.views
         # Seconds each member has actually cost, which is what a give-up order under a deadline has to
         # divide by. A member's cost is not readable from its config: depth, resolution and encoder
         # width all multiply, and the run only learns the product by paying it.
@@ -338,7 +342,7 @@ class Ensemble:
         model = self.models[member.identifier]
         model.eval()
         window = member.window(images.shape[2], overlap=overlap)
-        views = self.serving.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
+        views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
         passes = 0
         # THE FORWARD IS SPLIT BY IMAGES, NOT BY STUDIES, and this cost a submission on 2026-08-12.
@@ -516,6 +520,24 @@ class Ensemble:
         """
         budget = self.serving.budget
         if not budget or not budget.overrunning():
+            return
+        # VIEWS GO FIRST, AND THEY GO WHOLE. `kneemri-views` came back COMPLETE with a blank public
+        # score on 2026-08-17: two members under rot3, the only entry tripling the forward, and the one
+        # thing this mitigation could not reach. Dropping a member of two saves at most a factor of two
+        # and turns the entry into a different entry; dropping rot3 saves exactly the factor the views
+        # cost — here three — and leaves the pair that scored 0.919 with the identity view alone.
+        # Ordering follows worth per second the same as members do: TTA has never been measured to buy
+        # anything on this pool (knee-eeo priced overlap at 0.0000 for whole-stack members), so its
+        # numerator is the smallest one on offer.
+        if self.views is not None:
+            logger.warning(
+                "projecting %.1fh against a %.1fh ceiling — giving up test-time views (%s), "
+                "which no member's holdout was measured with",
+                budget.projected() / SECONDS_PER_HOUR,
+                budget.seconds / SECONDS_PER_HOUR,
+                self.views,
+            )
+            self.views = None
             return
         surviving = [member for member in members if member.identifier not in failed]
         if len(surviving) <= 1:

@@ -12,6 +12,7 @@ from torch import Tensor
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
 from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window
+from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
@@ -649,6 +650,23 @@ def test_afford(tmp_path: Path):
 
     ensemble.afford([quick, slow], failed)
     assert failed == {"slow"}, "and the last survivor is kept even while overrunning — a run needs a vote"
+
+    # VIEWS BEFORE MEMBERS. `kneemri-views` scored blank on 2026-08-17 — two members under rot3, the
+    # only entry tripling the forward, and the one cost this mitigation could not reach. Shedding a
+    # member of two saves a factor of two and makes it a different entry; shedding the views saves the
+    # whole multiplier and leaves the pair that already scored 0.919.
+    served = _ensemble(tmp_path)
+    served.views = SpatialViews()
+    served.spent = {"quick": 10.0, "slow": 100.0}
+    _timed(served, 3600, 1.0)
+    dropped: set[str] = set()
+
+    served.afford([quick, slow], dropped)
+    assert served.views is None, "the unmeasured multiplier goes before any fitted member"
+    assert not dropped, "and no member is given up in the same chunk — one give-up, then re-measure"
+
+    served.afford([quick, slow], dropped)
+    assert dropped == {"slow"}, "still overrunning with no views left falls back to the member order"
 
 
 def test_worth(tmp_path: Path):
