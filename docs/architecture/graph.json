@@ -1766,14 +1766,32 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.corpus.acquisition.Acquisition._weighting",
-      "target": "kneemri.corpus.acquisition.Acquisition._number",
+      "source": "kneemri.corpus.acquisition.Acquisition.ordered_files",
+      "target": "kneemri.corpus.acquisition.Acquisition._through_plane_key",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.acquisition.Acquisition.probe",
+      "target": "kneemri.corpus.acquisition.SeriesHeader",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.corpus.acquisition.Acquisition.ordered_files",
-      "target": "kneemri.corpus.acquisition.Acquisition._through_plane_key",
+      "source": "kneemri.corpus.acquisition.Acquisition.probe",
+      "target": "kneemri.corpus.acquisition.SeriesHeader.of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.acquisition.SeriesHeader",
+      "target": "kneemri.corpus.acquisition.SeriesHeader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.acquisition.SeriesHeader.weighting",
+      "target": "kneemri.corpus.acquisition.SeriesHeader._number",
       "weight": 1
     },
     {
@@ -9148,6 +9166,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader",
+      "label": "SeriesHeader",
+      "level": "class",
+      "parent": "kneemri.corpus.acquisition",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.anatomy.Extent",
       "label": "Extent",
       "level": "class",
@@ -10420,56 +10446,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._centre_x",
-      "label": "_centre_x",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._fat_suppressed",
-      "label": "_fat_suppressed",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._laterality_tag",
-      "label": "_laterality_tag",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._number",
-      "label": "_number",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._spacing",
-      "label": "_spacing",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.acquisition.Acquisition._through_plane_key",
       "label": "_through_plane_key",
-      "level": "method",
-      "parent": "kneemri.corpus.acquisition.Acquisition",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.corpus.acquisition.Acquisition._weighting",
-      "label": "_weighting",
       "level": "method",
       "parent": "kneemri.corpus.acquisition.Acquisition",
       "role": null
@@ -10504,6 +10482,70 @@
       "label": "slice_count",
       "level": "method",
       "parent": "kneemri.corpus.acquisition.Acquisition",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader._described",
+      "label": "_described",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader._number",
+      "label": "_number",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.centre_x",
+      "label": "centre_x",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.fat_suppressed",
+      "label": "fat_suppressed",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.laterality_tag",
+      "label": "laterality_tag",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.pixel_spacing",
+      "label": "pixel_spacing",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.acquisition.SeriesHeader.weighting",
+      "label": "weighting",
+      "level": "method",
+      "parent": "kneemri.corpus.acquisition.SeriesHeader",
       "role": null
     },
     {
