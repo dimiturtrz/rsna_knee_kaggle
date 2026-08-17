@@ -80,6 +80,42 @@ class BandRequest:
 
 
 @dataclass(frozen=True)
+class SlotShares:
+    """One slot's measured series, as the columns a report row is made of."""
+
+    slot: str
+    discarded: NDArray[np.float64]
+    low_end: NDArray[np.float64]
+    high_end: NDArray[np.float64]
+    span_mm: float
+
+    @classmethod
+    def of(cls, slot: str, measured: list[tuple[str, dict[str, float]]]) -> "SlotShares":
+        """The rows belonging to one slot, gathered once rather than re-filtered per column."""
+        mine = [one for name, one in measured if name == slot]
+        spans = [one["span_mm"] for one in mine if one["span_mm"] > 0.0]
+        return cls(
+            slot=slot,
+            discarded=np.array([one["discarded"] for one in mine]),
+            low_end=np.array([one["low_end"] for one in mine]),
+            high_end=np.array([one["high_end"] for one in mine]),
+            # Zero where no series in this slot carried a spacing tag: an unknown extent reports as
+            # unknown rather than as a millimetre nobody measured.
+            span_mm=float(np.mean(spans)) if spans else 0.0,
+        )
+
+    def row(self, coverage: "BandCoverage") -> str:
+        """The formatted line, with the cut restated as the distance it removes from each end."""
+        low, high = coverage.interval(self.discarded)
+        return (
+            f"{self.slot:16s} {self.discarded.mean():10.4f} [{low:+.4f}, {high:+.4f}] "
+            f"{np.percentile(self.discarded, PERCENTILE_HIGH):7.4f} "
+            f"{self.low_end.mean():8.4f} {self.high_end.mean():9.4f} "
+            f"{self.span_mm:8.1f} {self.span_mm * coverage.band.low:8.1f} {self.discarded.size:6d}"
+        )
+
+
+@dataclass(frozen=True)
 class BandCoverage:
     """What share of a series' imaged tissue a central band throws away, per anatomical plane."""
 
@@ -130,7 +166,7 @@ class BandCoverage:
         A share computed over the series that happened to decode is not a share over the corpus, and this
         project has read one as the other three times in a single session.
         """
-        lines = [
+        header = [
             f"band {self.band.low:g}-{self.band.high:g} over {len(measured)} series "
             f"from {sampled} studies sampled of {corpus} in the corpus",
             f"uniform tissue along the axis would discard {1.0 - (self.band.high - self.band.low):.4f} — "
@@ -138,19 +174,8 @@ class BandCoverage:
             f"{'slot':16s} {'discarded':>10s} {'95% CI':>18s} {'p90':>7s} {'low end':>8s} {'high end':>9s} "
             f"{'span mm':>8s} {'cut/end':>8s} {'n':>6s}",
         ]
-        for slot in sorted({name for name, _ in measured}):
-            shares = np.array([one["discarded"] for name, one in measured if name == slot])
-            low_end = np.array([one["low_end"] for name, one in measured if name == slot])
-            high_end = np.array([one["high_end"] for name, one in measured if name == slot])
-            spans = np.array([one["span_mm"] for name, one in measured if name == slot if one["span_mm"] > 0.0])
-            span = float(spans.mean()) if spans.size else 0.0
-            low, high = self.interval(shares)
-            lines.append(
-                f"{slot:16s} {shares.mean():10.4f} [{low:+.4f}, {high:+.4f}] "
-                f"{np.percentile(shares, PERCENTILE_HIGH):7.4f} {low_end.mean():8.4f} {high_end.mean():9.4f} "
-                f"{span:8.1f} {span * self.band.low:8.1f} {shares.size:6d}"
-            )
-        return lines
+        slots = sorted({name for name, _ in measured})
+        return header + [SlotShares.of(slot, measured).row(self) for slot in slots]
 
     @staticmethod
     def measure_study(request: BandRequest) -> list[tuple[str, dict[str, float]]]:

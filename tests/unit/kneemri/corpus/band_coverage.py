@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kneemri.corpus.band_coverage import BandCoverage, BandRequest
+from kneemri.corpus.band_coverage import BandCoverage, BandRequest, SlotShares
 from kneemri.corpus.slot_reader import Band
 
 
@@ -59,6 +59,33 @@ def test_interval():
 
     spread_low, spread_high = BandCoverage().interval(np.linspace(0.0, 1.0, 200))
     assert spread_low < 0.5 < spread_high
+
+
+def test_of():
+    """One slot's rows gathered once — and a span nobody measured stays zero rather than averaging in."""
+    measured = [
+        ("SAG_T1", {"discarded": 0.3, "low_end": 0.1, "high_end": 0.2, "span_mm": 100.0}),
+        ("SAG_T1", {"discarded": 0.5, "low_end": 0.2, "high_end": 0.3, "span_mm": 0.0}),
+        ("COR_T1", {"discarded": 0.9, "low_end": 0.4, "high_end": 0.5, "span_mm": 50.0}),
+    ]
+
+    shares = SlotShares.of("SAG_T1", measured)
+
+    assert shares.discarded.tolist() == [0.3, 0.5], "the other slot's series belong to the other slot"
+    assert shares.span_mm == 100.0, "a series with no spacing tag abstains rather than pulling the mean to zero"
+    assert SlotShares.of("COR_T1", measured).high_end.tolist() == [0.5]
+
+
+def test_row():
+    """The share restated as the distance: a 100 mm span cut at 0.20 loses 20 mm from each end."""
+    shares = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 100.0)
+
+    row = shares.row(BandCoverage())
+
+    assert row.startswith("SAG_T1")
+    assert "0.3000" in row
+    assert "20.0" in row
+    assert row.endswith("     4"), "the row states how many series it averaged"
 
 
 def test_report():
