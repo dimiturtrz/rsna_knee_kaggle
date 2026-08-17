@@ -59,7 +59,7 @@ never spent on a cell that already has a number.
 | `ours×2×whole×2/study` (res392 + calibrated) | **null** — stale kit, no `Member.precision` | 0.500 |
 | `ours×5×whole×5/study` | submitted 2026-08-13, result not recorded here | — |
 | `ours×2×whole×2/study` re-run on kit `5ba86ee` | submitted 2026-08-13, result not recorded here | — |
-| `fusion×25×windowed×overlap` (our 5 + their 20) | **untried** | — |
+| `fusion×25×windowed×overlap` (our 5 + their 20) | 2026-08-17 | **0.894** |
 | `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
 | `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | 2026-08-17 | **0.914** |
 | `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | 2026-08-17 | **0.913** |
@@ -89,6 +89,23 @@ it is a different set. That is the same conclusion the joint-holdout subset sear
 (knee-2bly: every subset larger than five falls monotonically to 0.8547), now confirmed on the board,
 which is the ruler that matters. It also closes the question the four slots were spent on: adding or
 removing a member is worth nothing predictable, and the entry that ships should be a NAMED subset.
+
+## The graft is a cost on the board too, and it is the day's only result above the bar
+
+| all-ours ×2 | all-ours ×4 | fusion ×24 | fusion ×25 |
+|---|---|---|---|
+| **0.919** | 0.918 | 0.898 | **0.894** |
+
+The fifth slot fired `fusion×25` on a NEGATIVE offline prior, to find out whether the board disagrees
+with the holdout about grafted members. It does not: **−0.025 against the all-ours pair**, four times the
+0.0062 noise floor and the only 2026-08-17 delta that clears the 1.5% bar in either direction. Adding
+their twenty CC0 members to our five costs more than every method change this project has landed.
+
+That settles the largest uncertainty this file named. The 2.4× transfer compression measured on
+`onedecode` was the reason to doubt the offline verdict on grafted members — a holdout that under-prices
+diversity might have been under-pricing them too. It was not: knee-k5kk's offline 0.013–0.021 penalty
+lands on the board at 0.025, the same sign and a larger size. The holdout and the board agree, so the
+CC0 pool is closed as a source of members and every remaining entry is all-ours.
 
 **`views` returned no score at all.** The kernel ran clean on the visible three studies — valid 3×13 CSV,
 2/2 members fingerprint-checked — and the submission reached COMPLETE with a blank public score. rot3 is

@@ -14,3 +14,4 @@
 {"id": "trio_v1", "date": "2026-08-17", "offline": null, "board": 0.913, "members": 3, "scope": "ensemble", "what": "three all-ours whole-stack members, overlap=False - the count curve's 3-point"}
 {"id": "solo_v4", "date": "2026-08-17", "offline": null, "board": 0.914, "members": 1, "scope": "ensemble", "what": "ONE whole-stack member, overlap=False - the count curve's anchor"}
 {"id": "views_v1", "date": "2026-08-17", "offline": null, "board": null, "members": 2, "scope": "ensemble", "what": "the 0.919 pair under rot3 TTA - COMPLETE with a blank public score, most likely a hidden-rerun timeout"}
+{"id": "fusion25_v2", "date": "2026-08-17", "offline": null, "board": 0.894, "members": 25, "scope": "ensemble", "what": "our 5 + their 20 CC0 - the graft priced on the board, against 0.919 all-ours"}
