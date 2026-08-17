@@ -145,13 +145,26 @@ class KernelRun:
         """
         served = replace(self.serving, budget=Budget())
         logger.info(
-            "serving: vote=%s views=%s precision=%s overlap=%s",
+            "serving: vote=%s views=%s precision=%s",
             type(served.vote).__name__ if served.vote else "RankAverage (default)",
             served.views or "identity only (default)",
             served.precision or "each member's own (default)",
-            self.overlap,
         )
         return served
+
+    def decode(self, members: Sequence[Member]) -> str:
+        """What this entry's `overlap` will ACTUALLY do, member by member.
+
+        `overlap` is a request, not an outcome: `Member.window` hands a whole-stack member one centred
+        window and never reads the flag, so on an all-whole-stack pool the two values predict
+        identically. The log used to state the request — `overlap=%s` straight off the attribute — and
+        two entries whose only difference was that inert flag read as a confounded member-count curve,
+        which cost a re-push and a submission slot's worth of doubt to find out it had varied nothing.
+        """
+        windowed = [member.identifier for member in members if not member.whole_stack]
+        if not windowed:
+            return f"overlap={self.overlap} requested, INERT — all {len(members)} members are whole-stack"
+        return f"overlap={self.overlap} honoured by {len(windowed)} of {len(members)} windowed members: {windowed}"
 
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
@@ -192,6 +205,7 @@ class KernelRun:
         logger.info(
             "loaded and fingerprint-checked %d of %d members from %s", len(usable), len(models) or 0, package.root
         )
+        logger.info("%s", self.decode(usable))
 
         competition = self.mounts.one("sample_submission.csv", "competition data")
         ensemble = Ensemble(package, models, device, self.served())

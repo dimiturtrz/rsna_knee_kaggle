@@ -105,10 +105,11 @@ def main() -> None:
 
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
-    # ONE model, no ensemble — see the module docstring. `overlap=False` is NOT the default and is stated
-    # for that reason: every other point on the board's member-count curve passed it explicitly, and a
-    # bare KernelRun(members=1) inherits overlap=True, which would vary the decode alongside the count and
-    # leave this arm unreadable as a count.
+    # ONE model, no ensemble — see the module docstring. `overlap=False` is stated only to match every
+    # other point on the count curve in the LOG; it changes nothing here, because `Member.window` gives a
+    # whole-stack member one centred window and never reads the flag. v3 of this kernel inherited the
+    # True default and predicted identically — the flag is inert for this pool, and the log line reports
+    # what was REQUESTED rather than what any member did, which is what made it look like a confound.
     KernelRun(members=1, overlap=False).run()
 
 

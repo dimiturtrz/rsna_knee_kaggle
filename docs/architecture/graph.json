@@ -6531,6 +6531,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "target": "kneemri.kaggle.kernel_run.KernelRun.decode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_run.KernelRun.run",
       "target": "kneemri.kaggle.kernel_run.KernelRun.find_encoder",
       "weight": 1
     },
@@ -14252,6 +14258,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kernel_run.KernelRun.chosen",
       "label": "chosen",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_run.KernelRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_run.KernelRun.decode",
+      "label": "decode",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_run.KernelRun",
       "role": null

@@ -82,10 +82,24 @@ def test_served_states_the_serving_in_the_log(caplog: pytest.LogCaptureFixture):
     assert "LogitAverage" in caplog.text
     assert "SpatialViews" in caplog.text
 
-    caplog.clear()
-    with caplog.at_level("INFO"):
-        KernelRun(overlap=False).served()
-    assert "overlap=False" in caplog.text, "the passes axis is stated too — it varies per entry and is not in Serving"
+
+def test_decode():
+    """The log must say what the members DID with `overlap`, not what the entry asked for.
+
+    A whole-stack member never reads `overlap` — `Member.window` gives it one centred window — so on
+    the current all-whole-stack pool the flag is inert and two entries differing only in it predict
+    identically. The old line printed the request, and that difference was read as a confound in the
+    board's member-count curve. Inert has to be SAID, not inferred.
+    """
+    whole = [type("M", (), {"whole_stack": True, "identifier": "ws"})()]
+    mixed = [*whole, type("M", (), {"whole_stack": False, "identifier": "win"})()]
+
+    assert "INERT" in KernelRun(overlap=True).decode(whole)
+    assert "INERT" in KernelRun(overlap=False).decode(whole)
+
+    honoured = KernelRun(overlap=True).decode(mixed)
+    assert "INERT" not in honoured
+    assert "1 of 2" in honoured and "win" in honoured, "only the windowed member honours the flag"
 
 
 def test_find_encoder(tmp_path: Path):
