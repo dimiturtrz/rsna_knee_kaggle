@@ -80,6 +80,27 @@ difference in this file has so far been made without.
 A `null` is not a floor: neither of those two cells has ever been measured, and re-running one is a
 legitimate spend. A cell with a number is not, unless the members underneath it changed.
 
+**The fifth slot is decided by what the first four return, and the rule is written BEFORE they land** so
+the pick is not the day's last result read as a trend. The board already holds the count curve at 2
+(0.919), 4 (0.918) and 5 (0.911); `kneemri-solo` and `kneemri-trio` add its two missing points.
+
+- **If `views` gains over 0.919** — TTA is the only axis that moved, and the fifth slot extends it
+  (more views on the same pair). This is the one branch where a cell with a number is worth re-entering,
+  because the members underneath it would not have changed but the READING rule would.
+- **If `solo` scores at or near 0.919** — member count buys nothing anywhere on the curve from 1 to 4,
+  and the whole ensembling axis is priced out for this pool. The fifth slot then belongs to the only
+  untried cell that does not need a training run: `fusion×25×windowed×overlap`. Its offline prior is
+  NEGATIVE (knee-k5kk: all-ours beats the 24-member fusion by 0.013–0.021), so it is spent to bound how
+  far the board disagrees with the holdout on grafted members — the 2.4× transfer compression measured
+  on `onedecode` says that disagreement is the largest uncertainty in this file.
+- **If `solo` collapses and `trio` does not** — the curve has a knee below 2 rather than being flat, the
+  ensembling axis is alive after all, and the fifth slot re-enters the best-scoring member set at its
+  best count rather than opening a new axis.
+- **If nothing separates** — every arm inside ±0.002 — then the board's own noise is wider than every
+  offline delta this pool can produce, which is itself the day's result. The fifth slot is then NOT
+  spent on another arm: it is spent re-entering the 0.919 pair unchanged, because a third identical
+  entry is the only way to turn a two-point noise estimate into a spread.
+
 Through 2026-08-15 every scored pair said the same thing — the best single model this project has
 produced (holdout 0.8518) sat 0.020 BELOW five weaker ones, a third member of an identical recipe bought
 nothing, and a different recipe bought +0.006 — so diversity was the axis with a number behind it.
