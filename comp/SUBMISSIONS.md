@@ -61,10 +61,34 @@ never spent on a cell that already has a number.
 | `ours×2×whole×2/study` re-run on kit `5ba86ee` | submitted 2026-08-13, result not recorded here | — |
 | `fusion×25×windowed×overlap` (our 5 + their 20) | **untried** | — |
 | `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
-| `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | queued 2026-08-17 | — |
-| `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | queued 2026-08-17 | — |
+| `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | 2026-08-17 | **0.914** |
+| `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | 2026-08-17 | **0.913** |
 | `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
-| `ours×2×whole×views=rot3` — `kneemri-views` | queued 2026-08-17 | — |
+| `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
+
+## The member-count curve is complete, and it is not a curve
+
+| members | 1 | 2 | 3 | 4 | 6 |
+|---|---|---|---|---|---|
+| board | 0.914 | **0.919** | 0.913 | 0.918 | 0.911 |
+
+Four slots of 2026-08-17 bought this row, on ONE pool, ONE kit (`6f93554`) and `overlap=False` throughout,
+so count is the only thing that varies across it. **It is not monotone in either direction**: 1 ≈ 3 sit
+below 2 ≈ 4, and the whole span is 0.008 — about 1.3 of the 0.0062 measured noise floor. A count axis
+would have to be ordered to be an axis at all, and this one is not.
+
+**So member count is not the lever; membership is.** The two top cells (2 → 0.919, 4 → 0.918) are the
+subsets built from the strongest members, and the 3 that scores 0.913 is not a smaller version of them —
+it is a different set. That is the same conclusion the joint-holdout subset search reached offline
+(knee-2bly: every subset larger than five falls monotonically to 0.8547), now confirmed on the board,
+which is the ruler that matters. It also closes the question the four slots were spent on: adding or
+removing a member is worth nothing predictable, and the entry that ships should be a NAMED subset.
+
+**`views` returned no score at all.** The kernel ran clean on the visible three studies — valid 3×13 CSV,
+2/2 members fingerprint-checked — and the submission reached COMPLETE with a blank public score. rot3 is
+the only arm that triples decode, so a hidden-rerun timeout is the reading that fits; nothing else about
+it differed from the 0.919 pair. The TTA cell is therefore UNTESTED rather than measured, and re-firing
+it unchanged would most likely buy another blank.
 
 **The four queued cells are one day's five slots spent on questions the holdout cannot answer, not on a
 predicted gain.** Nothing in the current member pool predicts a gain over 0.919 offline: count, subset,
