@@ -106,7 +106,7 @@
       "kind": "import",
       "source": "kneemri.corpus.decode_bench",
       "target": "kneemri.corpus.study_cache",
-      "weight": 1
+      "weight": 2
     },
     {
       "kind": "import",
@@ -128,8 +128,20 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.diagnose_laterality",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.diagnose_matrix",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.diagnose_matrix",
+      "target": "kneemri.corpus.study_cache",
       "weight": 1
     },
     {
@@ -2011,9 +2023,21 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.corpus.crop_coverage.main",
-      "target": "kneemri.corpus.study_cache.StudyCache.planes_of",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_coverage.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -2035,9 +2059,15 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.corpus.decode_bench.DecodeBench._decode_one",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.corpus.decode_bench.DecodeBench._decode_one",
-      "target": "kneemri.corpus.study_cache.StudyCache.planes_of",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -2062,6 +2092,12 @@
       "kind": "calls",
       "source": "kneemri.corpus.decode_bench.main",
       "target": "kneemri.corpus.decode_bench.DecodeBench.timings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.decode_bench.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
       "weight": 1
     },
     {
@@ -2101,6 +2137,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.corpus.diagnose_laterality.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.diagnose_laterality.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.corpus.diagnose_matrix.main",
       "target": "core.paths.DataRoot.from_config",
@@ -2116,6 +2164,18 @@
       "kind": "calls",
       "source": "kneemri.corpus.diagnose_matrix.main",
       "target": "kneemri.corpus.diagnose_matrix.MatrixAudit.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.diagnose_matrix.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.diagnose_matrix.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
       "weight": 1
     },
     {
