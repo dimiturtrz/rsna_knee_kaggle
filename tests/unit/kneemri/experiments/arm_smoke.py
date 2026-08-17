@@ -39,8 +39,10 @@ def test_failed(tmp_path: Path):
         name = Path(argv[-1]).stem
         _record(tmp_path, name, loss=float("nan") if name == "diverged" else 0.62, auc=0.55)
         (tmp_path / f"{name}.partial").write_bytes(b"weights")
+        (tmp_path / f"{name}.holdout.npz").write_bytes(b"predictions")
         return said[name]
 
+    (tmp_path / "good.sh").write_text("run_train good\n", encoding="utf-8")
     broken = ArmSmoke(runner=runner).failed(dict.fromkeys(said, "--fold 0"), tmp_path)
 
     assert "good" not in broken, "an arm that survives an epoch is not reported"
@@ -48,6 +50,8 @@ def test_failed(tmp_path: Path):
     assert broken["oom"] == "torch.OutOfMemoryError: CUDA out of memory.", "the last thing it said"
     assert broken["mute"] == "exit 2 with nothing on stderr", "a silent failure is still a failure"
     assert not list(tmp_path.glob("*.partial")), "the periodic save's weights are cleaned up, not only the .pt"
+    assert not list(tmp_path.glob("*.npz")), "every sibling the arm wrote goes, not the suffixes someone listed"
+    assert (tmp_path / "good.sh").exists(), "a file that was there BEFORE the arm ran is not the arm's output"
 
 
 def test_learned(tmp_path: Path):

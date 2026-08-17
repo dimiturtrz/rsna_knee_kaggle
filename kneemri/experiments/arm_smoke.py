@@ -104,10 +104,23 @@ class ArmSmoke:
         return f"epoch {last['epoch']} recorded a non-finite {' and '.join(wrong)}" if wrong else ""
 
     def failed(self, invocations: dict[str, str], out: Path) -> dict[str, str]:
-        """The arms whose recipe does not survive one epoch, by arm name and the last thing it said."""
+        """The arms whose recipe does not survive one epoch, by arm name and the last thing it said.
+
+        EVERY ARTIFACT THE ARM WROTE IS DELETED, by globbing the name rather than by naming suffixes.
+        A smoke checkpoint is a few hundred megabytes and thirty-four of them is a disk problem this
+        tool should not create — but the enumerated list has now failed twice, once per new sibling the
+        trainer learned to write. It missed `.partial`, the periodic save the trainer drops beside the
+        checkpoint whenever the holdout improves, and left 1.9 GB after seventeen arms in the very
+        directory the line existed to keep empty; it then missed `.holdout.npz` and `.metrics.jsonl`
+        the same way. A cleanup that must be told each filename is one that is wrong again the next
+        time an output is added, so it is told the STEM instead — and only for files that were NOT
+        there before the arm ran, because `--smoke` takes a directory from the caller and one obvious
+        thing to hand it is `experiments/arms` itself, where `<name>.*` also matches `<name>.sh`.
+        """
         broken: dict[str, str] = {}
         for name, flags in invocations.items():
             checkpoint = out / f"{name}.pt"
+            existing = set(out.glob(f"{name}.*"))
             code, complaint = self.runner(self.command(flags, checkpoint))
             trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)
             if trouble:
@@ -116,13 +129,7 @@ class ArmSmoke:
             # better part of an hour, and a sweep that prints nothing until it finishes is one nobody
             # can tell from a hang.
             logger.info("%s %s%s", "BROKEN" if trouble else "ok", name, f": {trouble}" if trouble else "")
-            # DELETED as soon as it has proved the write path, because a smoke checkpoint is a few
-            # hundred megabytes and thirty-four of them is a disk problem this tool should not create.
-            # THE `.partial` TOO, and it is the bigger half: the periodic save writes one beside the
-            # checkpoint the moment the holdout improves, so deleting only the `.pt` left every arm's
-            # weights on disk under another suffix — 1.9 GB after seventeen arms, measured, in the very
-            # directory this line exists to keep empty.
-            for artifact in (checkpoint, checkpoint.with_suffix(".partial")):
+            for artifact in set(out.glob(f"{name}.*")) - existing:
                 artifact.unlink(missing_ok=True)
         return broken
 
