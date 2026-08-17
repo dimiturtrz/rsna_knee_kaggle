@@ -54,6 +54,12 @@ of view and the pixel density exactly as the control had them, and its focal/reg
 description of where its deltas landed, not evidence about resolution."""
 
 
+OFF_VALUES = frozenset({"False", "0", "0.0", "None", ""})
+"""What a recipe value reads as when the switch it names is not doing anything.
+
+Recipes are recorded as strings, so a flag that is off and a rate that is zero are the same statement in
+two spellings; grouping them here is what lets one rule read every axis."""
+
 SUPERVISION_AXES = frozenset(
     {
         "labels",
@@ -378,15 +384,35 @@ class RunComparison:
         control that predates the crop flag moved the view without either recipe being able to say so.
         One home, because the kind of change and the half it may be judged on are two readings of this
         same set, and computing it twice is how they would come to disagree.
+
+        PLUS the switches the control PREDATES and this arm turned on. `disagreements` refuses those on
+        purpose — a key only the arm recorded is usually an option that ran at the day's default, and
+        counting `train_size unset→0` as a change is what once handed a schedule arm a resolution
+        verdict. But an arm cannot turn a flag ON by default: `calibrated_targets=True` against a
+        control predating the flag IS the axis under test, and the blanket refusal printed this
+        project's canonical supervision arm as a MODEL change and judged it on the wrong six findings.
+        Only a non-off value counts, which is the same reading `switched_on` gives every flag.
         """
         control, theirs = self.recipe(self.control), self.recipe(arm)
         if control is None or theirs is None:
             return None
         seen, read = self.view(self.control), self.view(arm)
-        moved = set(self.disagreements(control, theirs))
+        moved = set(self.disagreements(control, theirs)) | self.switched_on(control, theirs)
         if seen is not None and read is not None:
             moved |= set(self.disagreements(seen, read)) & VIEW_AXES
         return moved
+
+    @staticmethod
+    def switched_on(control: dict[str, str], theirs: dict[str, str]) -> set[str]:
+        """The axes only the ARM recorded, and set to something other than off.
+
+        An option the control predates ran at that day's default, which nothing on disk can read back —
+        so it is normally not a difference either record can prove. The exception is a flag the arm set
+        to a non-default: no control, whatever its era, had `calibrated_targets` on before the flag
+        existed. `OFF_VALUES` is what a switch reads as when it is not doing anything, so the numeric
+        and boolean forms are one rule rather than two.
+        """
+        return {name for name, value in theirs.items() if name not in control and value not in OFF_VALUES}
 
     def judged_on(self, arm: RunMetrics, deltas: dict[str, float]) -> list[str]:
         """The same deltas, restricted to the findings this arm's kind of change could actually move.

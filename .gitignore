@@ -55,3 +55,12 @@ node_modules/
 # Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git — the manifest
 # beside them IS tracked, because it is the reproducible description of what was packaged.
 /comp/members/*.pt
+
+# A training run's own outputs, wherever it was pointed: the checkpoint, the periodic save beside it,
+# the held-out predictions and the epoch log. `arm_smoke --smoke <dir>` deletes what IT wrote, but the
+# obvious directory to hand it is `experiments/arms`, whose .sh recipes ARE tracked — so a `git add -A`
+# mid-sweep otherwise stages half a sweep's artifacts. Recipes in git, results out of it.
+*.pt
+*.partial
+*.holdout.npz
+*.metrics.jsonl

@@ -121,6 +121,22 @@ def test_disagreements():
     assert RunComparison.disagreements(control, control) == {}
 
 
+def test_switched_on():
+    """The one absence that IS a difference: a flag the arm turned on that no control of any era had.
+
+    `calibrated_targets_s2026` printed as a MODEL change judged on the model-bottlenecked six, although
+    it is the project's canonical supervision arm — because the flag is younger than its control's
+    recipe, so `disagreements` dropped it. Off reads in two spellings, boolean and numeric, and both are
+    still off.
+    """
+    control = {"crop_mm": "130.0"}
+    theirs = {"crop_mm": "130.0", "calibrated_targets": "True", "train_size": "0", "per_label_loss": "False"}
+
+    assert RunComparison.switched_on(control, theirs) == {"calibrated_targets"}
+    assert RunComparison.switched_on(control, {"crop_mm": "80.0"}) == set(), "a shared key is disagreements' job"
+    assert RunComparison.switched_on(control, {"lora_rank": "8"}) == {"lora_rank"}, "a rate off zero is on"
+
+
 def test_view(tmp_path: Path):
     """The reading comes from the config block, which records it for a control whose FLAGS do not.
 
@@ -165,15 +181,18 @@ def test_moved(tmp_path: Path):
     two readings of this one set, which is why it has one home.
     """
     control, arm, silent = (_run(tmp_path, name, CONTROL) for name in ("ctl", "arm", "silent"))
+    younger = _run(tmp_path, "younger", CONTROL)
     _describe(control, {"per_label_loss": "False"})
     _describe(arm, {"per_label_loss": "True"})
+    _describe(younger, {"per_label_loss": "False", "calibrated_targets": "True", "patience": "3"})
     _stamp(control, {"img": 336, "crop_mm": 130.0})
     _stamp(arm, {"img": 336, "crop_mm": 80.0})
 
-    comparison = RunComparison(control, [arm, silent])
+    comparison = RunComparison(control, [arm, silent, younger])
 
     assert comparison.moved(comparison.arms[0]) == {"per_label_loss", "crop_mm"}
     assert comparison.moved(comparison.arms[1]) is None, "an unrecorded recipe is not an empty diff"
+    assert comparison.moved(comparison.arms[2]) == {"calibrated_targets", "patience"}, "a flag the control predates"
 
 
 def test_judged_on(tmp_path: Path):
