@@ -145,6 +145,24 @@ class ArmCheck:
                     found[name] = flags
         return found
 
+    @staticmethod
+    def selected(invocations: dict[str, str], names: list[str] | None) -> dict[str, str]:
+        """The named arms alone, or all of them when nothing was named.
+
+        A NAME THAT MATCHES NOTHING IS AN ERROR, not an empty selection: the whole point of `--only` is
+        to smoke ONE arm when the card is scarce, and a typo that silently smokes zero arms exits 0
+        with "0 arms checked" — the clean-pass-over-nothing failure this module already carries two
+        scars from. Filtered on the name the arm PRINTS rather than its filename, because that is the
+        name the ledger, the checkpoint and the rest of this check all speak.
+        """
+        if names is None:
+            return invocations
+        missing = [name for name in names if name not in invocations]
+        if missing:
+            message = f"no arm printed an invocation named {', '.join(missing)}"
+            raise ValueError(message)
+        return {name: flags for name, flags in invocations.items() if name in names}
+
     def _parsed(self, flags: str) -> tuple[TrainingOptions | None, str]:
         """The options an arm's flags produce, or the parser's own complaint about them.
 
@@ -266,11 +284,20 @@ def main() -> None:
         "full sweep cannot: that is over the per-arm timeout times thirty-five.",
     )
     parser.add_argument("--smoke-studies", type=int, default=SMOKE_STUDIES)
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        default=None,
+        metavar="ARM",
+        help="check (and smoke) only the named arms. The full smoke is thirty-five arms times an epoch "
+        "on the card; a single arm about to be queued is two minutes. Names are the ones the arms "
+        "print, and a name that matches no arm is refused rather than quietly selecting nothing.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     check = ArmCheck(arguments.arms, arguments.stub)
-    invocations = check.invocations()
+    invocations = check.selected(check.invocations(), arguments.only)
     refused = check.refused(invocations)
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)

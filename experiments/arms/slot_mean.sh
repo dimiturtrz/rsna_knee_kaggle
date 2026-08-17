@@ -24,7 +24,10 @@ require "$LABELS"
 
 # 12 epochs to MATCH the control. One-cycle is defined over total_steps, so a shorter budget would vary
 # the rate trajectory alongside the pooling and the arm would price two things at once.
+# `--slice-pooling max` is the CONTROL's value and is not optional here: $RECIPE sets no slice pooling,
+# so the default 'channels' stacks slices before the encoder, which whole-stack refuses outright. Armed
+# without it, this arm died on that ValueError in its first smoke — a queue slot to discover.
 run_train slot_mean \
-  $RECIPE --epochs 12 \
+  $RECIPE --epochs 12 --slice-pooling max \
   --slot-pooling mean --whole-stack --recompute-activations --vram-gb 20 \
   --labels "$LABELS" --out "$PROCESSED/slotmean_s2026.pt"

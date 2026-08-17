@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from core.paths import COMPETITION
 from kneemri.corpus.crop_centre import Crop
@@ -33,6 +34,21 @@ def test_refused():
     assert "typo" in refused, "a misspelled flag is exactly what this exists to catch before a queue"
     assert "bad_value" in refused, "a value outside the choices is refused too"
     assert refused["typo"], "the parser's own complaint is reported, not a generic failure"
+
+
+def test_selected():
+    """`--only` narrows to the named arms, passes everything through when unset, and refuses a typo.
+
+    The refusal is the point: a name matching nothing would smoke zero arms and exit 0 saying "0 arms
+    checked", which is the failure this module already carries two scars from.
+    """
+    invocations = {"resolution": GOOD, "slot_mean": GOOD, "final_fit": GOOD}
+
+    assert ArmCheck.selected(invocations, ["slot_mean"]) == {"slot_mean": GOOD}
+    assert ArmCheck.selected(invocations, None) == invocations, "naming nothing means every arm"
+
+    with pytest.raises(ValueError, match="slot_men"):
+        ArmCheck.selected(invocations, ["slot_men"])
 
 
 def test_uncached(tmp_path: Path):
