@@ -4,6 +4,7 @@ from pathlib import Path
 import torch
 
 from kneemri.experiments.ledger_check import LedgerCheck
+from kneemri.runs.run_metrics import RunMetrics
 
 
 def test_best(tmp_path: Path):
@@ -45,6 +46,7 @@ def test_finished(tmp_path: Path):
     torch.save({"holdout": float("nan")}, tmp_path / "final_fit.pt")
     torch.save({"holdout": 0.77}, tmp_path / "throughput_bf16.pt")
     torch.save({"holdout": 0.6562}, tmp_path / "smoke_v3base.pt")
+    torch.save({"holdout": 0.5639, "options": {"studies": "60"}}, tmp_path / "member_fold0.pt")
     (tmp_path / "both.metrics.jsonl").write_text(
         "\n".join(json.dumps({"epoch": e, "auc": auc}) for e, auc in enumerate([0.81, 0.8473])),
         encoding="utf-8",
@@ -57,6 +59,25 @@ def test_finished(tmp_path: Path):
     assert "final_fit" not in finished, "a final fit records NaN by design and never scored"
     assert "throughput_bf16" not in finished, "speed probes have no score worth quoting in a results ledger"
     assert "smoke_v3base" not in finished, "a smoke scores 12 holdout studies; quoting it would put that in the table"
+    assert "member_fold0" not in finished, "the documented smoke writes the DEFAULT name and is caught by its recipe"
+
+
+def test_truncated(tmp_path: Path):
+    """A run that capped the corpus is a smoke by construction; one whose recipe is silent is real.
+
+    The documented pre-flight — `--studies 60 --epochs 1` with no `--out` — writes `member_fold0.pt`,
+    a name matching no exemption fragment, so the check exited 1 on a clean repo every time the
+    pipeline was smoked. An unrecorded recipe must NOT be read as a smoke: 14 members predate options
+    entirely and dropping them would shrink the denominator of the check that exists to police it.
+    """
+    torch.save({"holdout": 0.56, "options": {"studies": "60"}}, tmp_path / "member_fold0.pt")
+    torch.save({"holdout": 0.84, "options": {"studies": "0"}}, tmp_path / "full.pt")
+    torch.save({"holdout": 0.84}, tmp_path / "predates.pt")
+    check = LedgerCheck(tmp_path / "absent.md")
+
+    assert check.truncated(RunMetrics(tmp_path / "member_fold0.pt"))
+    assert not check.truncated(RunMetrics(tmp_path / "full.pt")), "0 is the whole corpus"
+    assert not check.truncated(RunMetrics(tmp_path / "predates.pt")), "an unrecorded recipe is not a smoke"
 
 
 def test_unrecorded(tmp_path: Path):

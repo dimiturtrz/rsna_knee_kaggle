@@ -18,6 +18,11 @@ interpretation stale — which is the other half of what went wrong that day, an
 WHAT COUNTS AS A FINISHED RUN: a checkpoint, not a metrics file. Scanning metrics files alone reported
 "15 finished runs, 0 unrecorded" while 69 checkpoints sat beside them — a pass computed over 15 of 69,
 which is the same wrong-denominator mistake in the check that exists to catch it.
+
+WHAT IS NOT A FINISHED RUN: a smoke. It is recognised by its RECIPE (`--studies` capped) and not only by
+its name, because the smoke this project documents takes no `--out` and lands on the default
+`member_fold0.pt` — so a routine pre-flight left this check exiting 1 on a clean repo, and a check that
+fails on correct behaviour is one the reader learns to skip.
 """
 
 import argparse
@@ -26,6 +31,7 @@ from pathlib import Path
 
 import torch
 
+from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -35,12 +41,10 @@ INTERPRETATIONS = Path("interpretations")
 UNQUOTABLE = ("throughput", "smoke")
 """Name fragments of runs whose scores no ledger should quote.
 
-Speed probes measure wall-clock, not accuracy. A smoke is the arm's own pre-flight — `--studies 60
---epochs 1`, 48 train / 12 holdout — so its score is a number produced by a deliberately broken
-denominator, and `smoke_v3base` at 0.6562 was reported UNRECORDED for as long as it sat on disk. The
-only ways to clear that report are to delete the smoke, which throws away the evidence that the arm
-was smoked, or to quote 0.6562 in the ledger, which puts a 60-study number in a table of 3,000-study
-ones. Both are worse than naming the class here.
+Speed probes measure wall-clock, not accuracy — and a run cannot state in its recipe that it was one,
+so this list is the only place that knows. A smoke names itself here too when it was given an `--out`
+that says so, which is where the whole exemption used to live; `truncated` is the half that catches the
+ones whose name says nothing.
 """
 
 
@@ -84,7 +88,28 @@ class LedgerCheck:
             score = self.best(metrics)
             if score is not None:
                 scores[metrics.name.removesuffix(".metrics.jsonl")] = score
-        return {name: score for name, score in scores.items() if not any(fragment in name for fragment in UNQUOTABLE)}
+        return {
+            name: score
+            for name, score in scores.items()
+            if not any(fragment in name for fragment in UNQUOTABLE)
+            and not self.truncated(RunMetrics(processed / f"{name}.pt"))
+        }
+
+    def truncated(self, run: RunMetrics) -> bool:
+        """Whether the run capped the corpus it touched — a SMOKE BY CONSTRUCTION, not by name.
+
+        The name test alone fails on exactly the smoke this project documents: `--studies 60 --epochs 1`
+        with no `--out` writes the default `member_fold0.pt`, whose name carries no fragment to match, so
+        every routine pre-flight left the ledger check exiting 1 on a clean repo. A check that fails on
+        its own documented correct behaviour teaches the reader to skip its output — which is the exact
+        failure it exists to prevent, and it had already started happening.
+
+        Read through `RecordedRun` because the field can be in either record, and because a run predating
+        the recipe records no `studies` and must count as a REAL run: an unrecorded recipe is not grounds
+        to drop a score from the ledger's denominator.
+        """
+        recipe = RecordedRun.of(run).recipe
+        return recipe is not None and recipe.get("studies", "0") not in ("0", "")
 
     def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
         """The runs whose best score appears nowhere in the written record.
