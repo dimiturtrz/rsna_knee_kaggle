@@ -42,7 +42,7 @@ class LabelScores:
         late in the corpus and 0.0 when they sat early, instead of the 0.5 it must score.
 
         Raw model outputs are float64 sigmoids and effectively never tie, so single-member numbers are
-        unaffected. RANK-AVERAGED ENSEMBLES ARE NOT: `Ensemble.combine` maps each member onto k/(n-1)
+        unaffected. RANK-AVERAGED ENSEMBLES ARE NOT: `RankAverage.combine` maps each member onto k/(n-1)
         and averages, so exact ties are common by construction — and that is precisely the number
         `member_curve` uses to choose which members to submit.
         """

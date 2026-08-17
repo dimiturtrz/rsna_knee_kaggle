@@ -4,7 +4,7 @@ import numpy as np
 
 from kneemri.evaluation.member_curve import MemberCurve
 from kneemri.evaluation.scores import LabelScores
-from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.vote import RankAverage
 from kneemri.models.model import TARGETS
 
 STUDIES = 40
@@ -153,7 +153,7 @@ def test_logged():
 def test_votes():
     """Every rule is scored on the SAME members, and the shipped one reports the number it ships.
 
-    The comparison is only readable if the flat row IS `Ensemble.combine` — a row computed some other
+    The comparison is only readable if the flat row IS `RankAverage.combine` — a row computed some other
     way would make each difference below it partly a difference in the baseline, which is the error this
     whole comparison exists to avoid.
     """
@@ -162,7 +162,7 @@ def test_votes():
     lines = MemberCurve(LabelScores(), SEED).votes(members, truth)
 
     assert [line.split()[0] for line in lines] == ["RankAverage", "LogitAverage", "QualityWeightedRank"]
-    shipped = LabelScores().mean(Ensemble.combine(members), truth)
+    shipped = LabelScores().mean(RankAverage().combine(members), truth)
     assert lines[0].split()[1] == f"{shipped:.4f}", "the flat row is the rule a submission runs"
 
 

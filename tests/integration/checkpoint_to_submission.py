@@ -29,6 +29,7 @@ from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import MemberPackage
+from kneemri.inference.vote import RankAverage
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
@@ -141,7 +142,7 @@ def test_members_combine_into_a_submission_table(tmp_path: Path):
         window = Window(starts=[0, 1], width=GROUP, size=SIZE)
         per_member.append(predictions.predict(model, HoldoutSlab.of(images, mask), window))
 
-    combined = Ensemble.combine(per_member)
+    combined = RankAverage().combine(per_member)
     identifiers = [f"study{index}" for index in range(STUDIES)]
     table = Ensemble.submission(identifiers, combined)
 

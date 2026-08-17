@@ -56,10 +56,10 @@ def test_applied():
     ranking = combine.ranking(members, truth)
     scores = LabelScores()
 
-    from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - the control this method must reproduce
+    from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - the control this method must reproduce
 
     everyone = combine.applied(members, ranking, SPECIALISTS)
-    assert scores.mean(everyone, truth) == scores.mean(Ensemble.combine(members), truth)
+    assert scores.mean(everyone, truth) == scores.mean(RankAverage().combine(members), truth)
 
     chosen = scores.per_label(combine.applied(members, ranking, 1), truth)
     flat = scores.per_label(everyone, truth)

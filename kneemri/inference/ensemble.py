@@ -414,7 +414,7 @@ class Ensemble:
                 band=members[0].band,
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
-        return self.combine(per_member)
+        return RankAverage().combine(per_member)
 
     def predict_members(
         self,
@@ -546,29 +546,10 @@ class Ensemble:
         return sum(timed) / len(timed) if timed else 0.0
 
     @staticmethod
-    def combine(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
-        """Rank-average across members, per label, normalised to [0, 1].
-
-        Ranking is per label because the metric ranks per label; ranking across labels would mix twelve
-        unrelated orderings into one and destroy exactly the information being scored.
-
-        Static because it reads no member state — it is arithmetic over arrays that happens to describe
-        how this ensemble votes. Analysis code needs exactly this rule without owning a package or a set
-        of loaded models, and the alternative to saying so is calling it with a `None` self, which this
-        repository has already done once with `Trainer.area_under_curve` and had to unpick.
-
-        DELEGATED to `RankAverage` rather than written here, because the vote is now a family and the
-        flat rule is one member of it. Written in both places, any measured difference between two rules
-        would be partly a difference in how they ranked — and this is the copy that would drift, since
-        this is the one a submission runs and the other is the one that gets varied.
-        """
-        return RankAverage().combine(per_member)
-
-    @staticmethod
     def submission(identifiers: list[str], predictions: NDArray[np.float64]) -> dict[str, list[object]]:
         """The submission table as plain columns: the study id, then one column per target in order.
 
-        Static for the same reason `combine` is: it reads no ensemble state, only the target order. A
+        Static because it reads no ensemble state, only the target order. A
         test or an analysis that has predictions and identifiers should not have to construct a package
         and a dict of loaded models to lay them out as columns.
         """

@@ -93,9 +93,9 @@ class RulerTransfer:
         subset of size k is the same arm up to noise, and a fixed prefix is the one a reader can
         recompute.
         """
-        from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - analysis-only; the trainer must not import it
+        from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - analysis-only; the trainer must not import it
 
-        return {size: Ensemble.combine(per_member[:size]) for size in sizes if size <= len(per_member)}
+        return {size: RankAverage().combine(per_member[:size]) for size in sizes if size <= len(per_member)}
 
     def weakened(self, arm: NDArray[np.float64], share: float, seed: int = BOOTSTRAP_SEED) -> NDArray[np.float64]:
         """The arm blended toward a permutation of itself — a quality drop of a size we choose.

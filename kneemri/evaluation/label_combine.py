@@ -1,7 +1,7 @@
 """Combine members PER LABEL, and say honestly what that is worth.
 
 The metric is the unweighted mean of twelve independent per-label AUCs, so the combine that matches it
-is per-label. What we ship is `Ensemble.combine` — one flat rank-average of every member, used for every
+is per-label. What we ship is `RankAverage.combine` — one flat rank-average of every member, used for every
 label. The only other thing in the repository is `member_curve.oracle`, which picks the best member per
 label USING THE ANSWERS: a ceiling that prices this work and can never be shipped. Between the flat
 average and the cheat there was nothing, and this module is that thing.
@@ -24,7 +24,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from kneemri.evaluation.scores import LabelScores
-from kneemri.inference.ensemble import Ensemble
+from kneemri.inference.vote import RankAverage
 from kneemri.models.model import TARGETS
 
 UNDEFINED = -np.inf
@@ -59,7 +59,7 @@ class LabelCombine:
     ) -> NDArray[np.float64]:
         """Rank-average the top `count` members of each label into one table.
 
-        Through `Ensemble.combine` rather than a second rank rule written here: the ensemble's voting is
+        Through `RankAverage.combine` rather than a second rank rule written here: the ensemble's voting is
         one decision with one home, and a per-label variant that ranked even slightly differently would
         report a number the submission path cannot reproduce. Each distinct subset is combined once and
         read for the labels that chose it, because twelve labels select from a handful of subsets.
@@ -69,7 +69,7 @@ class LabelCombine:
         for column, target in enumerate(TARGETS):
             chosen = tuple(ranking[target][:count])
             if chosen not in already:
-                already[chosen] = Ensemble.combine([per_member[index] for index in chosen])
+                already[chosen] = RankAverage().combine([per_member[index] for index in chosen])
             combined[:, column] = already[chosen][:, column]
         return combined
 

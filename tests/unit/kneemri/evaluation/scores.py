@@ -72,7 +72,7 @@ def test_area_under_curve_gives_ties_midranks():
     information at all, scored 1.0 when the positives happened to sit late in the corpus and 0.0 when
     they sat early. Both orders are asserted here because a fix that only handles one is not a fix.
 
-    Raw sigmoids effectively never tie, so single-member scores never moved. `Ensemble.combine` maps
+    Raw sigmoids effectively never tie, so single-member scores never moved. `RankAverage.combine` maps
     each member onto k/(n-1) and averages, which ties 20.5% of 881 studies at two members and 14.4% at
     five — and that is the number `member_curve` uses to choose what to submit.
     """

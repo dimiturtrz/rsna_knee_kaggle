@@ -18,9 +18,12 @@ how they are counted. The family stays because the question recurs and answering
 CLI flag rather than a re-implementation — and because keeping the rules side by side is what makes the
 next candidate rule a two-line addition instead of a fork of the submission path.
 
-`RankAverage` is not a copy of the shipped rule, it IS the shipped rule: `Ensemble.combine` delegates
-here, so exploring this family cannot leave the submission path behind and no measured difference between
-two rules can turn out to be a difference in how they ranked.
+`RankAverage` is not a copy of the shipped rule, it IS the shipped rule: `Ensemble.predict_groups` calls
+it directly and so does every analysis that reports an ensemble number, so exploring this family cannot
+leave the submission path behind and no measured difference between two rules can turn out to be a
+difference in how they ranked. There was an `Ensemble.combine` alias in front of it, which is gone: five
+analysis modules imported the ensemble — a package, a device and a dict of loaded models — to reach one
+pass-through to this class, which is most of what made that module a god-module.
 """
 
 from abc import ABC, abstractmethod

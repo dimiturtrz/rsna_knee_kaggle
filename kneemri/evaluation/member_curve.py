@@ -32,7 +32,6 @@ from kneemri.corpus.folds import ReportFolds
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
-from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
@@ -78,7 +77,7 @@ class MemberCurve:
         half its job.
         """
         return [
-            (self.scores.mean(Ensemble.combine([per_member[index] for index in subset]), truth), subset)
+            (self.scores.mean(RankAverage().combine([per_member[index] for index in subset]), truth), subset)
             for subset in itertools.combinations(range(len(per_member)), size)
         ]
 
@@ -137,7 +136,7 @@ class MemberCurve:
         per_label = [self.scores.per_label(member, truth) for member in per_member]
         labels = list(per_label[0])
         best = {label: max(scored[label] for scored in per_label) for label in labels}
-        combined = Ensemble.combine(per_member)
+        combined = RankAverage().combine(per_member)
         return {
             "oracle": float(np.nanmean(list(best.values()))),
             "average": self.scores.mean(combined, truth),

@@ -148,26 +148,6 @@ def test_predict_member(tmp_path: Path):
     assert float(predictions.max()) <= 1.0
 
 
-def test_combine():
-    """Members combine by RANK per label, because rank order is all the metric reads."""
-    ensemble = Ensemble.__new__(Ensemble)
-    first = np.array([[0.9, 0.1], [0.8, 0.2], [0.7, 0.3]])
-    # A wildly over-confident second member that AGREES on the ordering. Averaging probabilities would
-    # let its 0.999 swamp the first member's 0.9; averaging ranks keeps the ordering both agree on.
-    second = np.array([[0.999, 0.001], [0.998, 0.002], [0.997, 0.003]])
-    combined = ensemble.combine([first, second])
-    assert combined.shape == first.shape
-    assert combined[:, 0].argsort().tolist() == [2, 1, 0], "the shared ordering of column 0 survives"
-    assert combined.max() <= 1.0, "ranks are normalised, so no member's scale leaks through"
-
-
-def test_combine_returns_a_single_member_untouched():
-    """One member has nothing to combine with, and ranking it would discard its values for no gain."""
-    ensemble = Ensemble.__new__(Ensemble)
-    only = np.array([[0.4, 0.6]])
-    assert np.array_equal(ensemble.combine([only]), only)
-
-
 def test_submission():
     """The table is the study id followed by the twelve targets, in the order the metric expects."""
     ensemble = Ensemble.__new__(Ensemble)

@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.vote import CHANCE, LogitAverage, QualityWeightedRank, RankAverage, Vote
 
 STUDIES = 40
@@ -15,7 +14,7 @@ def _members(count: int, seed: int = 2026) -> list[NDArray[np.float64]]:
 
 
 def _historic(per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
-    """The rank-average EXACTLY as `Ensemble.combine` spelled it before the vote became a family.
+    """The rank-average EXACTLY as `Ensemble` spelled it inline before the vote became a family.
 
     Kept here rather than deleted, because "the shipped rule did not move" is the only claim that makes
     this refactor safe, and a claim about the old code needs the old code to check against.
@@ -41,7 +40,6 @@ def test_rank_average_combine():
         members = _members(count)
         combined = RankAverage().combine(members)
         assert np.array_equal(combined, _historic(members)), f"{count} member(s)"
-        assert np.array_equal(combined, Ensemble.combine(members)), "the submission path runs this rule"
 
     lone = _members(1)
     assert np.array_equal(RankAverage().combine(lone), lone[0]), "one member is returned untouched, not ranked"
