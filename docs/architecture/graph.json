@@ -1238,6 +1238,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.kaggle.kernel_script",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.kaggle.kernel_sources",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.package_members",
       "target": "core.paths",
       "weight": 1
@@ -6194,6 +6212,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_sources.KernelSources.undeclared",
       "target": "kneemri.kaggle.kernel_sources.KernelSources.covers",
       "weight": 1
@@ -6262,6 +6298,78 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kit_check.main",
       "target": "kneemri.kaggle.mounted_kit.MountedKit.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.mount_check.MountCheck",
+      "target": "kneemri.inference.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.inference.members.MemberPackage.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.inference.members.MemberPackage.named",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_script.KernelScript",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_sources.KernelSources",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_sources.KernelSources.undeclared",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.inference.members.MemberPackage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.kaggle.mount_check.MountCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.kaggle.mount_check.MountCheck.entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.kaggle.mount_check.MountCheck.verdict",
       "weight": 1
     },
     {
@@ -8097,7 +8205,7 @@
       "role": null
     },
     {
-      "descendants": 96,
+      "descendants": 98,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -8561,7 +8669,7 @@
       "role": null
     },
     {
-      "descendants": 7,
+      "descendants": 9,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -8586,6 +8694,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script",
+      "label": "kernel_script",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_sources",
       "label": "kernel_sources",
       "level": "module",
@@ -8596,6 +8712,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kit_check",
       "label": "kit_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check",
+      "label": "mount_check",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -9642,6 +9766,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript",
+      "label": "KernelScript",
+      "level": "class",
+      "parent": "kneemri.kaggle.kernel_script",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_sources.KernelSources",
       "label": "KernelSources",
       "level": "class",
@@ -9654,6 +9786,14 @@
       "label": "KitCheck",
       "level": "class",
       "parent": "kneemri.kaggle.kit_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck",
+      "label": "MountCheck",
+      "level": "class",
+      "parent": "kneemri.kaggle.mount_check",
       "role": "primary"
     },
     {
@@ -13490,6 +13630,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._assigned",
+      "label": "_assigned",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "label": "_strings",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "label": "call",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "label": "member_names",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_sources.KernelSources.__init__",
       "label": "__init__",
       "level": "method",
@@ -13566,6 +13746,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.kit_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check.MountCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck.entries",
+      "label": "entries",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check.MountCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check.MountCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check",
       "role": null
     },
     {
