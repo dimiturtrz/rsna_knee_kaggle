@@ -12,6 +12,16 @@ import torch
 logger = logging.getLogger(__name__)
 
 BYTES_PER_GB = 1024**3
+STALL_FACTOR = 4.0
+"""How many times the median an epoch must cost before it is a stall rather than a slow epoch.
+
+Derived from both sides of the gap it has to separate. The three stalls on disk are 161x, 116x and 69x
+their run's median; the widest NORMAL spread in the same files is 404-530 s (1.3x) and 224-257 s (1.15x),
+and a cold first epoch is the worst case above that. 4x sits an order of magnitude below the smallest
+real stall and three times above the largest honest epoch, so neither side can reach it.
+"""
+MINIMUM_FOR_A_MEDIAN = 3
+"""Rows below which a median cannot separate a stall from the run's own spread — see `stalls`."""
 RECIPE = "recipe"
 """The key a recipe line carries. An epoch row has no such key and a recipe line has no epoch, so the
 two are told apart by what they hold rather than by where they sit in the file."""
@@ -22,6 +32,11 @@ class EpochRow(TypedDict):
 
     `vram_peak_gb` is filled in by the recorder rather than the caller — the peak is only readable
     from the allocator, and only before it is reset.
+
+    `started` is UNIX seconds at the top of the epoch, and it is what turns a stall from something
+    inferred into something identifiable. `seconds` alone says an epoch took eight hours; it cannot say
+    WHEN, so it cannot be lined up against the suspend/resume the stall is suspected to be. Both fields
+    are `NotRequired` because files written before either existed are still read by everything here.
     """
 
     epoch: int
@@ -30,6 +45,7 @@ class EpochRow(TypedDict):
     seconds: int
     per_label: dict[str, float]
     vram_peak_gb: NotRequired[float]
+    started: NotRequired[int]
 
 
 class RunMetrics:
@@ -157,6 +173,25 @@ class RunMetrics:
         """
         recorded = sorted(row["seconds"] for row in self.rows())
         return median(recorded) if recorded else 0.0
+
+    def stalls(self) -> list[EpochRow]:
+        """The epochs that cost `STALL_FACTOR`x the median one — the run's lost hours, named.
+
+        `epoch_seconds` made a stall HARMLESS to a throughput comparison by reporting the median. That
+        left the stall itself invisible: three runs on disk carry one multi-hour epoch each, 20.8 hours
+        between them, and the only way to see them was to read all 24 metrics files by hand. This is
+        that reading, as an answer the file gives about itself.
+
+        A FACTOR over the median, not a fixed ceiling, because a normal epoch costs 104 s in one recipe
+        and 443 s in another and no single wall-clock separates them. Nothing is reported for a run of
+        fewer than three epochs: with two rows the median sits between them, so the slower one is always
+        above it, and a first epoch that pays a warm-up would report itself as a stall on every run.
+        """
+        rows = self.rows()
+        if len(rows) < MINIMUM_FOR_A_MEDIAN:
+            return []
+        ceiling = self.epoch_seconds() * STALL_FACTOR
+        return [row for row in rows if row["seconds"] > ceiling]
 
     def best(self) -> EpochRow | None:
         """The recorded epoch with the highest mean AUC, or None if the run recorded nothing.

@@ -67,6 +67,25 @@ def test_report(tmp_path: Path):
     assert "by structure scale" in report, "the crop gate is a pattern across labels, not twelve numbers by eye"
 
 
+def test_report_names_a_stalled_epoch(tmp_path: Path):
+    """A stalled arm says so IN the comparison, because this is where its cost gets read as a result.
+
+    `slices16_ws_s2026`'s shape: one 30,684 s epoch among epochs of ~440. Read from the total alone the
+    arm looks 8.8x its control; its real per-epoch cost is 1.3x, and the ledger's "33% slower" was right
+    while the arithmetic contradicting it was the broken instrument.
+    """
+    empty: dict[str, float] = {}
+    rows: list[EpochRow] = [
+        {"epoch": e, "loss": 1.0, "auc": 0.8, "seconds": s, "per_label": empty, "started": 1_760_000_000 + e}
+        for e, s in enumerate([440, 30684, 445, 438])
+    ]
+    comparison = RunComparison(_run(tmp_path, "ctl", CONTROL), [_run(tmp_path, "slow", rows)])
+    report = comparison.report()
+    assert "STALLED epoch 1" in report and "30684s" in report
+    assert "2025-10-09" in report, "the clock time is what lines the stall up against a suspend"
+    assert "STALLED epoch 0" not in report, "a 440 s epoch among 440 s epochs is a run, not a stall"
+
+
 def test_report_names_what_else_moved(tmp_path: Path):
     """A delta is a claim about ONE axis. What the arm changed besides it decides whether that holds."""
     control = _run(tmp_path, "ctl", CONTROL)

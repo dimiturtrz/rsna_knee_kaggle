@@ -76,6 +76,41 @@ def test_epoch_seconds(tmp_path: Path):
     assert metrics.epoch_seconds() == 234
 
 
+def test_stalls(tmp_path: Path):
+    """The median made the stall harmless; this makes it visible, which is the other half.
+
+    Same shape on disk as `pair_memory_s2026`. The run must name the 27,266 s epoch and NOTHING else —
+    a per-epoch spread of 233-235 s is what a normal run looks like, and a rule that called any of those
+    a stall would report one on every run in the directory.
+    """
+    metrics = RunMetrics(tmp_path / "stalled.pt")
+    assert metrics.stalls() == [], "a run that recorded nothing has no stall, not a crash"
+
+    empty: dict[str, float] = {}
+    for epoch, seconds in enumerate([233, 234, 233, 27266, 235, 233, 234]):
+        metrics.record(
+            EpochRow(epoch=epoch, loss=1.0, auc=0.8, seconds=seconds, per_label=empty, started=1_760_000_000 + epoch)
+        )
+
+    stalls = metrics.stalls()
+    assert [row["epoch"] for row in stalls] == [3]
+    assert stalls[0]["started"] == 1_760_000_003, "WHEN is what lines a stall up against a suspend"
+
+
+def test_stalls_needs_enough_epochs_to_have_a_median(tmp_path: Path):
+    """With two rows the median sits between them, so the slower one is always above any factor of it.
+
+    A first epoch that pays a warm-up would then report itself as a stall on every run that exists —
+    a detector that fires on everything says the same thing as one that fires on nothing.
+    """
+    metrics = RunMetrics(tmp_path / "short.pt")
+    empty: dict[str, float] = {}
+    for epoch, seconds in enumerate([600, 100]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=0.8, seconds=seconds, per_label=empty))
+
+    assert metrics.stalls() == []
+
+
 def test_best(tmp_path: Path):
     """The best scored epoch, not the last — that is the epoch whose weights the checkpoint holds.
 

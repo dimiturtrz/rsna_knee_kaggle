@@ -3,6 +3,7 @@
 import argparse
 import logging
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 from kneemri.corpus.anatomy import ScaleProfile
@@ -11,7 +12,7 @@ from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +196,7 @@ class RunComparison:
         lines = [
             f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}",
             f"  {control.named()}",
+            *self._stalled(self.control),
         ]
         for arm in self.arms:
             deltas = table.get(arm.path.stem)
@@ -217,6 +219,7 @@ class RunComparison:
             lines.append(profile.judged() if self.moved_view(arm) else profile.line())
             lines.append(f"  vs control: {self.unmatched(arm)}")
             lines.append(f"  {self.reader_change(arm)}")
+            lines.extend(self._stalled(arm))
             scored = self.scored(arm)
             if scored is not None and scored.reconstructed:
                 lines.append(f"  {scored.named()}")
@@ -235,6 +238,36 @@ class RunComparison:
                 "floor; an arm that predates them is UNREAD against the wide bound, not refuted by it."
             )
         return "\n".join(lines)
+
+    @staticmethod
+    def _stalled(run: RunMetrics) -> list[str]:
+        """One line per stalled epoch, or nothing at all for a run that has none.
+
+        Here because this report is where a run's cost is READ, and a stall is exactly the thing that
+        makes a cost line a lie: `slices16_ws_s2026` carries one 30,684 s epoch among epochs of 404-530,
+        and a reader who saw only the total would record the arm as 8.8x its control rather than 1.3x.
+        Three runs on disk lost 20.8 hours this way and none of them said so.
+
+        A LIST rather than a string, so the report appends it without asking whether there was anything
+        to append — a run with no stall contributes no line and needs no branch to say so.
+        """
+        return [
+            f"  STALLED epoch {row['epoch']}: {row['seconds']}s against a median of "
+            f"{run.epoch_seconds():.0f}s{RunComparison._began(row)} — wall-clock the card spent doing nothing"
+            for row in run.stalls()
+        ]
+
+    @staticmethod
+    def _began(row: EpochRow) -> str:
+        """When the epoch started, in UTC, or nothing for a run recorded before epochs carried the field.
+
+        The clock time is the whole point of naming the stall: `seconds` says an epoch took eight hours
+        and only a timestamp can line that up against the suspend/resume the machine is suspected of.
+        Runs that predate the field still report their stall — without the one thing that would explain
+        it, which is the state this change exists to end rather than to hide.
+        """
+        started = row.get("started")
+        return "" if started is None else f", from {datetime.fromtimestamp(started, tz=UTC):%Y-%m-%d %H:%M UTC}"
 
     def paired(self, arm: RunMetrics) -> PairedWidths | None:
         """This pair's OWN per-label 95% half-widths, or None when either run kept no predictions.

@@ -168,7 +168,16 @@ class Fitting:
             scored = ranked if fold.scored else NO_HOLDOUT
             logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f  (%ds)", epoch, loss, scored, seconds)
             # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
-            self.metrics.record(EpochRow(epoch=epoch, loss=loss, auc=scored, seconds=seconds, per_label=per_label))
+            self.metrics.record(
+                EpochRow(
+                    epoch=epoch,
+                    loss=loss,
+                    auc=scored,
+                    seconds=seconds,
+                    per_label=per_label,
+                    started=round(started),
+                )
+            )
             if self.patience.exhausted(improved=improved):
                 logger.info(
                     "stopping at epoch %d: %d epochs without improving on %.4f", epoch, self.patience.epochs, best
