@@ -317,10 +317,11 @@ class CorpusSplit:
     """The shipped tables a decode reads before it can build: which studies, and each series' plane.
 
     Beside `StudyCache` because it is exactly the arguments `build` takes, and a dataclass rather than
-    three lines in a `main` because six callers now assemble them: the build CLI, the smoke that
-    decodes a few dozen studies, and the four audits (`crop_coverage`, `diagnose_laterality`,
-    `diagnose_matrix`, `decode_bench`) that each used to spell out `train.csv`, `StudyInstanceUID` and
-    `train_series` for themselves. Assembled six times they would drift on the one thing that must not:
+    three lines in a `main` because eight callers now assemble them: the build CLI, the smoke that
+    decodes a few dozen studies, the four audits (`crop_coverage`, `diagnose_laterality`,
+    `diagnose_matrix`, `decode_bench`) and the two evaluations (`oof_oracle`, `stack_coverage`) that
+    each used to spell out `train.csv`, `StudyInstanceUID` and
+    `train_series` for themselves. Assembled eight times they would drift on the one thing that must not:
     which tables name the split — and an audit reading a different study list than the cache was built
     from is a measurement about a corpus nobody trained on.
     """
@@ -333,11 +334,25 @@ class CorpusSplit:
         """The directory of DICOMs the decode walks."""
         return self.raw / self.split
 
+    @property
+    def studies_table(self) -> Path:
+        """The per-STUDY table: one row per study, and where the labels join."""
+        return self.raw / ("train.csv" if self.split == "train_series" else "test.csv")
+
+    @property
+    def series_table(self) -> Path:
+        """The per-SERIES table: one row per series, carrying the plane a slot routes on.
+
+        Named apart from `studies_table` because reading the wrong one of the two is silent: both carry
+        `StudyInstanceUID`, so a study list taken from the series table is the same identifiers with
+        multiplicity, and anything that counts or indexes by position then quietly means something else.
+        """
+        return self.raw / f"{self.split}.csv"
+
     def identifiers(self) -> list[str]:
         """Every study in the split, in the order the cache will index them by."""
-        table = "train.csv" if self.split == "train_series" else "test.csv"
-        return pd.read_csv(self.raw / table)["StudyInstanceUID"].tolist()
+        return pd.read_csv(self.studies_table)["StudyInstanceUID"].tolist()
 
     def planes(self) -> dict[str, str]:
         """Series UID to anatomical plane, which is what the slot predicate routes on."""
-        return StudyCache.planes_of(self.raw / f"{self.split}.csv")
+        return StudyCache.planes_of(self.series_table)

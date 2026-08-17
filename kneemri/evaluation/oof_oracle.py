@@ -49,7 +49,7 @@ from core.paths import DataRoot
 from kneemri.corpus.slot_reader import Band
 from kneemri.corpus.slot_ties import SlotTies
 from kneemri.corpus.slots import SCHEMES
-from kneemri.corpus.study_cache import StudyCache
+from kneemri.corpus.study_cache import CorpusSplit
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.members import Member
 
@@ -278,14 +278,12 @@ def main() -> None:
     ours = predictions.predict(model, slab, member.window(corpus.slices, overlap=False), member.precision)
 
     chosen = [identifiers[index] for index in keep]
-    series = pd.read_csv(root.raw() / "train_series.csv")
-    covariates = oracle.covariates(chosen, series)
-    covariates.update(
-        oracle.routing(chosen, root.raw() / "train_series", StudyCache.planes_of(root.raw() / "train_series.csv"))
-    )
+    split = CorpusSplit(root.raw())
+    covariates = oracle.covariates(chosen, pd.read_csv(split.series_table))
+    covariates.update(oracle.routing(chosen, split.source, split.planes()))
     for line in oracle.report(chosen, ours, theirs[keep], covariates):
         logger.info(line)
-    logger.info("(contested-slot rate for context: %s)", SlotTies().disagreeing_order(root.raw() / "train_series.csv"))
+    logger.info("(contested-slot rate for context: %s)", SlotTies().disagreeing_order(split.series_table))
 
 
 if __name__ == "__main__":

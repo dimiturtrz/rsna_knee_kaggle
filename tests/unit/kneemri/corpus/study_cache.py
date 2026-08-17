@@ -115,6 +115,23 @@ def test_source(tmp_path: Path):
     assert CorpusSplit(tmp_path, "test_series").source == tmp_path / "test_series"
 
 
+def test_studies_table(tmp_path: Path):
+    """The per-study table, whose name does NOT follow the split's — which is the trap it exists to close."""
+    assert CorpusSplit(tmp_path).studies_table == tmp_path / "train.csv"
+    assert CorpusSplit(tmp_path, "test_series").studies_table == tmp_path / "test.csv"
+
+
+def test_series_table(tmp_path: Path):
+    """The per-series table, kept apart from the study one because reading the wrong of the two is silent.
+
+    Both carry `StudyInstanceUID`, so a study list taken from the series table is the same identifiers
+    with multiplicity — no error, and every count or positional index downstream then means something else.
+    """
+    assert CorpusSplit(tmp_path).series_table == tmp_path / "train_series.csv"
+    assert CorpusSplit(tmp_path, "test_series").series_table == tmp_path / "test_series.csv"
+    assert CorpusSplit(tmp_path).series_table != CorpusSplit(tmp_path).studies_table
+
+
 def test_identifiers(tmp_path: Path):
     """Which studies the split holds — and the TABLE differs from the split's own name, which is the trap."""
     pd.DataFrame({"StudyInstanceUID": ["s0", "s1"]}).to_csv(tmp_path / "train.csv", index=False)
