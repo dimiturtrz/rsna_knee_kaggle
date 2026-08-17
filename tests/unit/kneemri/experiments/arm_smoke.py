@@ -2,9 +2,12 @@
 
 import json
 import os
+import subprocess
 from pathlib import Path
 
-from kneemri.experiments.arm_smoke import ArmSmoke
+import pytest
+
+from kneemri.experiments.arm_smoke import SMOKE_TIMEOUT_SECONDS, ArmSmoke
 
 LAST_SWEEP = 1_700_000_000
 """A stamp from before this run, so "the smoke wrote it" is decided by the clock rather than by timing."""
@@ -56,6 +59,32 @@ def test_failed(tmp_path: Path):
     assert not list(tmp_path.glob("*.partial")), "the periodic save's weights are cleaned up, not only the .pt"
     assert not list(tmp_path.glob("*.npz")), "every sibling the arm wrote goes, not the suffixes someone listed"
     assert (tmp_path / "good.sh").exists(), "a file that was there BEFORE the arm ran is not the arm's output"
+
+
+def test_failed_reports_the_arm_that_hung(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A timeout is that arm's result, and the sweep goes on to the next one.
+
+    `subprocess.run(timeout=…)` RAISES, and nothing caught it: the hang the timeout exists to bound
+    took the whole sweep down instead of naming the arm that hung, and left that arm's artifacts
+    behind because the cleanup sits past the call.
+    """
+
+    def hangs(argv: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        if Path(argv[-1]).stem == "hangs":
+            (tmp_path / "hangs.partial").write_bytes(b"what it wrote before it stopped moving")
+            raise subprocess.TimeoutExpired(argv, SMOKE_TIMEOUT_SECONDS)
+        _record(tmp_path, "after", loss=0.62, auc=0.55)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr("kneemri.experiments.arm_smoke.subprocess.run", hangs)
+    stale = tmp_path / "hangs.partial"
+    stale.write_bytes(b"the previous sweep's weights")
+    os.utime(stale, (LAST_SWEEP, LAST_SWEEP))
+    broken = ArmSmoke().failed({"hangs": "--fold 0", "after": "--fold 0"}, tmp_path)
+
+    assert str(SMOKE_TIMEOUT_SECONDS) in broken["hangs"], "the arm that hung is named, with the bound it broke"
+    assert "after" not in broken, "and the arms queued behind it still run"
+    assert not list(tmp_path.glob("*.partial")), "a hung arm's artifacts are cleaned like any other's"
 
 
 def test_failed_cleans_a_leftover_it_rewrote(tmp_path: Path):

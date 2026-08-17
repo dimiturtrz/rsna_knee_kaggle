@@ -30,6 +30,10 @@ once (compilation became the default on 2026-08-17), and a smoke that timed out 
 report a healthy arm as broken. Measured across thirty-six arms: a compiled epoch on sixty studies takes
 21-49 s against 5-9 s eager, nearly all of it that one graph build."""
 
+TIMED_OUT = 124
+"""The exit code a timeout is reported under — `timeout(1)`'s, so the number in the log means the thing
+it means everywhere else. The process was killed, so it has no code of its own to report."""
+
 
 class ArmSmoke:
     """Every accepted arm actually RUN, and the ones the card refuses.
@@ -48,10 +52,20 @@ class ArmSmoke:
 
     @staticmethod
     def _subprocess(argv: list[str]) -> tuple[int, str]:
-        """Run one smoke to completion and return its exit code with whatever it last complained about."""
-        done = subprocess.run(  # noqa: S603 - fixed argv built from our own arm files, no shell
-            argv, capture_output=True, text=True, timeout=SMOKE_TIMEOUT_SECONDS, check=False
-        )
+        """Run one smoke to completion and return its exit code with whatever it last complained about.
+
+        A TIMEOUT IS AN ARM'S RESULT, NOT THE SWEEP'S DEATH. `subprocess.run(timeout=…)` raises, and
+        nothing caught it: one arm that hangs — the exact failure SMOKE_TIMEOUT_SECONDS exists to bound
+        — took the whole sweep down with it, after the arms already smoked had been reported and before
+        any of the remaining ones ran, leaving that arm's artifacts behind because the cleanup lives
+        past the call. The arm that hung is the one thing such a sweep must be able to name.
+        """
+        try:
+            done = subprocess.run(  # noqa: S603 - fixed argv built from our own arm files, no shell
+                argv, capture_output=True, text=True, timeout=SMOKE_TIMEOUT_SECONDS, check=False
+            )
+        except subprocess.TimeoutExpired:
+            return TIMED_OUT, f"still running after {SMOKE_TIMEOUT_SECONDS}s on {SMOKE_STUDIES} studies"
         lines = done.stderr.strip().splitlines()
         return done.returncode, lines[-1] if lines else ""
 

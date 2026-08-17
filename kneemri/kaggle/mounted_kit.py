@@ -25,6 +25,10 @@ DATASET = "dimiturnt/kneemri-kit"
 STAMP = "kneemri_src/kit.json"
 """Where the stamp sits inside a kit, and the only path this needs to download."""
 
+STAMP_TIMEOUT_SECONDS = 120
+"""Generous for 46 bytes, and it is not the download it bounds: the uv fallback resolves an environment
+first, which on a cold cache installs the kaggle CLI before a byte of the stamp moves."""
+
 
 class MountedKit:
     """What Kaggle will run, fetched rather than assumed from the local build."""
@@ -56,6 +60,11 @@ class MountedKit:
 
         None rather than a guess, matching a local kit that predates the stamp: a version that cannot
         be named is the state that spent the slot, and it is refused rather than assumed current.
+
+        BOUNDED, because this is the network. 46 bytes over a working connection is a second; without
+        a timeout an unreachable Kaggle hangs the LAST check before a submission, and the reflex when a
+        pre-submission check stops printing is to skip it. A timeout RAISES rather than returning None:
+        None means "the dataset carries no stamp", and "we could not ask" is a different answer.
         """
         with tempfile.TemporaryDirectory() as into:
             subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
@@ -63,6 +72,7 @@ class MountedKit:
                 capture_output=True,
                 text=True,
                 check=True,
+                timeout=STAMP_TIMEOUT_SECONDS,
             )
             stamp = Path(into) / Path(STAMP).name
             return dict(json.loads(stamp.read_text(encoding="utf-8"))) if stamp.exists() else None
