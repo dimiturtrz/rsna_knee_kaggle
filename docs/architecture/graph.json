@@ -13376,6 +13376,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.members.Member.resized",
+      "label": "resized",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.members.Member.routing",
       "label": "routing",
       "level": "method",
