@@ -193,6 +193,36 @@ def test_decode_one(tmp_path: Path):
     assert flags == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
+def test_decode_one_reports_a_study_it_cannot_decode_as_absent(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    """A study that will not decode comes back ABSENT in every slot, named in the log, and does not raise.
+
+    Absent rather than black because the mask can express "not acquired" and cannot express "this row is
+    zeros for a reason" — a black study the mask calls acquired is a lie the head has no way to detect.
+    Not raising because one bad study inside a process pool would otherwise kill a 4,400-study build; the
+    guard against that becoming silent is `report`, which refuses a mask that is empty everywhere.
+    """
+    cache = StudyCache(tmp_path / "cache", slices=2, image_size=8)
+    cache.directory.mkdir(parents=True, exist_ok=True)
+    np.lib.format.open_memmap(cache.images_path, mode="w+", dtype=np.uint8, shape=cache.shape(1))
+
+    with caplog.at_level("INFO"):
+        position, flags = StudyCache.decode_one(
+            DecodeRequest(
+                position=0,
+                identifier="missing",
+                source=str(tmp_path / "src"),
+                images_path=str(cache.images_path),
+                slices=2,
+                image_size=8,
+                planes={},
+            )
+        )
+
+    assert position == 0, "the row still has to be reported, or the pool's map loses a study"
+    assert flags == [0.0] * 6, "every slot absent — none of them black-but-acquired"
+    assert "decode failed for missing" in caplog.text, "and the reason is printed, not swallowed"
+
+
 def test_key(tmp_path: Path):
     """The canonical scheme keeps its historic name; any other slot count is named explicitly.
 
