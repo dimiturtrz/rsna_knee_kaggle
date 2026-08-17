@@ -30,8 +30,23 @@ two are told apart by what they hold rather than by where they sit in the file."
 class EpochRow(TypedDict):
     """One epoch as it is recorded. A TypedDict rather than `Any` because this IS the schema.
 
-    `vram_peak_gb` is filled in by the recorder rather than the caller — the peak is only readable
-    from the allocator, and only before it is reset.
+    `vram_peak_gb` and `vram_alloc_gb` are filled in by the recorder rather than the caller — the peak
+    is only readable from the allocator, and only before it is reset.
+
+    RESERVED IS THE ONE THAT ANSWERS "DOES IT FIT". `--vram-gb` sets
+    `set_per_process_memory_fraction`, which bounds what the allocator RESERVES from the device, and
+    Windows answers an over-commit by paging over PCIe rather than raising — so the number that decides
+    whether an arm crawls has to be the one the cap is compared against. This recorded
+    `max_memory_allocated` instead, which is the model's own demand and excludes every byte the
+    allocator holds but has not handed out. The 448 px OOM was written by exactly that gap: 1.17 GB sat
+    reserved-but-unallocated inside the cap, invisible to the recorded peak. Rows written before this
+    carry allocated under the `vram_peak_gb` name and therefore UNDERSTATE what their run held; the 420
+    px probe measured 23.33 GB allocated against a 26 GB cap, and how much of the remaining 2.67 was
+    real headroom was unanswerable from the ledger.
+
+    BOTH, because their DIFFERENCE is fragmentation and that is a separate diagnosis from capacity: a
+    run whose reserved sits far above its allocated is not short of memory, it is short of contiguous
+    memory, and the two have different fixes.
 
     `started` is UNIX seconds at the top of the epoch, and it is what turns a stall from something
     inferred into something identifiable. `seconds` alone says an epoch took eight hours; it cannot say
@@ -45,6 +60,7 @@ class EpochRow(TypedDict):
     seconds: int
     per_label: dict[str, float]
     vram_peak_gb: NotRequired[float]
+    vram_alloc_gb: NotRequired[float]
     started: NotRequired[int]
 
 
@@ -118,11 +134,22 @@ class RunMetrics:
         drift apart — the log line and the stored row should never be able to disagree.
         """
         if torch.cuda.device_count():
-            row["vram_peak_gb"] = round(torch.cuda.max_memory_allocated() / BYTES_PER_GB, 2)
+            row["vram_peak_gb"] = round(torch.cuda.max_memory_reserved() / BYTES_PER_GB, 2)
+            row["vram_alloc_gb"] = round(torch.cuda.max_memory_allocated() / BYTES_PER_GB, 2)
             torch.cuda.reset_peak_memory_stats()
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(row) + "\n")
         logger.info("    %s", {name: round(value, 3) for name, value in row["per_label"].items()})
+        if "vram_peak_gb" in row:
+            # SAID WHILE THE RUN IS GOING, not only left in the JSONL. An arm that does not fit crawls
+            # instead of failing, and the wording matters: `run_train` shows the terminal only lines
+            # matching `epoch |best |rror|emory`, so "memory" is what carries this past that filter to
+            # the person who can still kill the arm in its first minutes.
+            logger.info(
+                "    peak memory %.2f GB reserved, %.2f GB allocated",
+                row["vram_peak_gb"],
+                row["vram_alloc_gb"],
+            )
 
     def _entries(self) -> list[dict[str, object]]:
         """Every recorded line, epochs and recipe alike."""

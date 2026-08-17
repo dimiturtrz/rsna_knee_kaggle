@@ -64,7 +64,13 @@ SMALLEST_RUN_GB = 5.5
 READ OFF OUR OWN RUNS rather than chosen: 224 epoch rows carry a `vram_peak_gb`, and they span 5.47 GB
 (`dinov3_v3small_224_s2026` — the shallowest encoder at the smallest resolution we have fitted) to
 26.24. A card with less free than the cheapest thing we know how to train cannot hold the dearest
-either, and on Windows that does not raise — it pages over PCIe."""
+either, and on Windows that does not raise — it pages over PCIe.
+
+Those 224 rows recorded ALLOCATED under that name (see `EpochRow`), so 5.47 is the cheapest run's
+demand and not what its allocator reserved — the true floor is that plus its fragmentation, i.e. this
+number is low rather than high. Left at 5.5 until rows written under the corrected reading can say by
+how much: a floor that is slightly too low lets a doomed run start, which the cap then answers with an
+immediate OutOfMemoryError, where one guessed too high refuses runs that would have fitted."""
 
 WEIGHT_DECAY = 0.02
 SEED = 2026

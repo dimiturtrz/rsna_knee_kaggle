@@ -1,7 +1,13 @@
 import json
 from pathlib import Path
 
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+import pytest
+import torch
+
+from kneemri.runs.run_metrics import BYTES_PER_GB, EpochRow, RunMetrics
+
+RESERVED_GB = 26.0
+ALLOCATED_GB = 23.33
 
 
 def test_record(tmp_path: Path):
@@ -14,6 +20,27 @@ def test_record(tmp_path: Path):
     lines = metrics.path.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 2, "the CURVE is the point; a final score throws it away"
     assert json.loads(lines[1])["auc"] == 0.79
+
+
+def test_record_attaches_reserved_as_the_peak(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The peak the cap is compared against is RESERVED; allocated is recorded beside it, not as it.
+
+    `--vram-gb` bounds what the allocator reserves, so a row carrying allocated under `vram_peak_gb`
+    reports headroom a run does not have — the gap between the two is exactly the fragmentation that
+    wrote the 448 px OOM. Faked stats rather than a card: this asserts which reading lands in which
+    field, which is the part that was wrong, and it must hold on a machine with no GPU at all.
+    """
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 1)
+    monkeypatch.setattr(torch.cuda, "max_memory_reserved", lambda *_: RESERVED_GB * BYTES_PER_GB)
+    monkeypatch.setattr(torch.cuda, "max_memory_allocated", lambda *_: ALLOCATED_GB * BYTES_PER_GB)
+    monkeypatch.setattr(torch.cuda, "reset_peak_memory_stats", lambda *_: None)
+    metrics = RunMetrics(tmp_path / "capped.pt")
+
+    metrics.record(EpochRow(epoch=0, loss=1.3, auc=0.65, seconds=61, per_label={"ACL": 0.7}))
+
+    recorded = metrics.rows()[0]
+    assert recorded["vram_peak_gb"] == RESERVED_GB
+    assert recorded["vram_alloc_gb"] == ALLOCATED_GB
 
 
 def test_rows(tmp_path: Path):
