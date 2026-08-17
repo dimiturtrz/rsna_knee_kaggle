@@ -30,6 +30,12 @@ the first).
 `Session gates was successful`. Chain with `&&`, not `;`, so a missing binary short-circuits instead of
 handing the next command a fresh exit status to succeed with.
 
+**Verify a COMMIT the same way: by `git log`, not by the tail of its output.** The pre-commit hooks print
+twenty-odd Passed lines, so `git commit ... | tail -3` shows three of them whether the commit landed or
+not — the one Failed line is hundreds of lines above. It cost three silent no-op commits in one session
+(a `ruff format` disagreement, a pyrefly `NDArray` type argument, an E501). Write the commit's output to
+a log, then `git log --oneline -1`; on a failure grep that log for `Failed`.
+
 ## Package structure
 
 Your code lives in your declared packages: `core/`, `kneemri/` — organise modules however the project needs.
