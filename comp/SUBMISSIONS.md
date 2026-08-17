@@ -260,12 +260,16 @@ things and neither implies the other:
   ARCHITECTURE is the function those weights were fitted to. Blind to the pixels: it feeds noise.
 - **Out-of-fold agreement** (`python -m kneemri.evaluation.oof_oracle`) — our pipeline against the member's own
   stored predictions on the studies it held out. Proves the PIXELS: routing, order, laterality, crop,
-  percentile, resize. Last measured max|diff| 0.025, per-study correlation 0.99, under disjoint windows.
+  percentile, resize. Measured at max|diff| 0.025 under our `tie=first` routing; **0.0671 max / 0.0062
+  mean over 40 unselected studies once the tie rule is corrected to theirs** (see above).
 
-The residual 0.025 is an OPEN QUESTION, not a rounding error — a faithful pipeline would agree to about
-1e-6, as the fingerprint does. The tie-break explanation is **refuted** (above), and so is every
-recorded reading rule: the published checkpoints declare the same crop, band, slot order and rules we
-use. What is left is the IMPLEMENTATION of those rules.
+The residual is an OPEN QUESTION, not a rounding error — a faithful pipeline would agree to about 1e-6,
+as the fingerprint does. **The tie-break is a CONFIRMED contributor worth about a third of the mean**,
+not the refutation an earlier draft of this section recorded: only the ORDER half was refuted, and
+`tie=last` then beat `tie=first` on 4 of 4 published members across 3 seeds. Every DECLARED reading rule
+is ruled out — the published checkpoints declare the same crop, band, slot order and rules we use, and
+ten decode axes were swept without beating ours. What is left is the IMPLEMENTATION of those rules, and
+32 of 40 studies still disagree above 0.01.
 
 **This oracle was lost and rebuilt, which is why it is named as a module and not a script.** It lived in
 `scratchpad/oof_oracle.py`, was never committed, and vanished with the weights it ran on — so for three
