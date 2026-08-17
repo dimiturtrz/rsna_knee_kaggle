@@ -184,13 +184,13 @@ def main() -> None:
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
     from kneemri.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
-    from kneemri.evaluation.oof_oracle import OutOfFoldOracle  # noqa: PLC0415 - CLI-only
+    from kneemri.evaluation.published_ruler import PublishedRuler  # noqa: PLC0415 - CLI-only
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
     from kneemri.labels.targets import Targets  # noqa: PLC0415 - CLI-only
 
     root = DataRoot.from_config(arguments.paths)
     split = CorpusSplit(root.raw())
-    names, per_seed = OutOfFoldOracle().corpus(root.processed() / "published")
+    names, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     combined = RankAverage().combine(per_seed)
     truth = Targets.load(arguments.labels, split.studies_table, names).scores
 

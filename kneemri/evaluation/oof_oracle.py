@@ -64,7 +64,13 @@ WORST = 12
 
 
 class OutOfFoldOracle:
-    """A published member's own recorded predictions against what our pipeline produces."""
+    """A published member's own recorded predictions against what our pipeline produces.
+
+    THE RULER BUILT FROM THE SAME FILES IS NOT HERE — see `PublishedRuler`. Stacking the twenty
+    checkpoints into a whole-corpus, one-prediction-per-seed array reads the same `oof` blocks and
+    compares nothing, and four evaluations were constructing this comparison oracle in order to reach
+    it.
+    """
 
     def recorded(self, checkpoint: Path) -> tuple[list[str], Float[np.ndarray, "studies targets"]]:
         """The identifiers and probabilities the author's pipeline wrote into this checkpoint.
@@ -75,51 +81,6 @@ class OutOfFoldOracle:
         saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
         stored = saved["oof"]
         return list(stored["ids"]), np.asarray(stored["pred"], dtype=np.float64)
-
-    def corpus(self, published: Path) -> tuple[list[str], list[NDArray[np.float64]]]:
-        """Every study in the corpus, with one prediction per SEED, held out — a ruler that costs nothing.
-
-        The twenty published checkpoints are four seeds over five folds, and their `oof` id-sets
-        partition all 4,407 studies exactly. So stacking them by fold gives, for every study in the
-        corpus, four predictions from models that did not train on it.
-
-        WHY THIS MATTERS MORE THAN THE RESIDUAL IT SITS NEXT TO. Our own ruler is one fold — 881 studies,
-        62 Fracture positives, a sampling noise floor of 0.0053 that has decided what counts as a result
-        for this whole project. This one is the entire corpus: five times the studies, so about 0.0024.
-        Every question that is arithmetic over member predictions — per-label combining above all — can
-        be asked here at more than twice the resolution, on a CPU, today.
-
-        WHAT IT CANNOT DO: it holds only THEIR members. Ours were never fitted fold-wise over the whole
-        corpus, so a comparison between ours and theirs still belongs on the shared fold-0 holdout. This
-        ruler answers questions about combining, not about whose weights are better.
-
-        Returned as one array per seed, aligned to the returned identifiers, so the caller sees exactly
-        the shape `LabelCombine` and `MemberCurve` already take.
-        """
-        by_fold: dict[tuple[str, ...], list[tuple[int, list[str], NDArray[np.float64]]]] = {}
-        for checkpoint in sorted(published.glob("*.pt")):
-            saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
-            identifiers = list(saved["oof"]["ids"])
-            key = tuple(sorted(identifiers))
-            values = np.asarray(saved["oof"]["pred"], dtype=np.float64)
-            by_fold.setdefault(key, []).append((int(saved["config"]["seed"]), identifiers, values))
-
-        seeds = sorted({seed for fold in by_fold.values() for seed, _, _ in fold})
-        names: list[str] = []
-        stacked: list[list[NDArray[np.float64]]] = [[] for _ in seeds]
-        for fold in by_fold.values():
-            members = {seed: (identifiers, values) for seed, identifiers, values in fold}
-            if set(members) != set(seeds):
-                continue
-            order = members[seeds[0]][0]
-            names += order
-            for column, seed in enumerate(seeds):
-                identifiers, values = members[seed]
-                # REORDERED, never assumed: two members of one fold hold the same studies, and nothing
-                # promises they wrote them in the same order.
-                position = {name: index for index, name in enumerate(identifiers)}
-                stacked[column].append(values[[position[name] for name in order]])
-        return names, [np.concatenate(rows) for rows in stacked]
 
     def agrees(self, member: Member, checkpoint: Path) -> list[str]:
         """Whether the reading a published member RECORDS matches the one we will serve it under.

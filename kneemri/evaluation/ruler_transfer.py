@@ -232,13 +232,13 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
-    from kneemri.evaluation.oof_oracle import OutOfFoldOracle  # noqa: PLC0415 - CLI-only
+    from kneemri.evaluation.published_ruler import PublishedRuler  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
 
     root = DataRoot.from_config(arguments.paths)
     gap = SupervisionGap()
     identifiers, truth = gap.annotated(root.raw() / "train.csv")
-    names, per_member = OutOfFoldOracle().corpus(root.processed() / "published")
+    names, per_member = PublishedRuler(root.processed() / "published").per_seed()
 
     position = {name: index for index, name in enumerate(names)}
     keep = [index for index, name in enumerate(identifiers) if name in position]

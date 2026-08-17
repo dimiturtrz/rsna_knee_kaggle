@@ -25,7 +25,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
-from kneemri.evaluation.oof_oracle import OutOfFoldOracle
+from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import MIDPOINT, RESAMPLES, LabelScores
 from kneemri.labels.label_power import LabelPower
 from kneemri.labels.targets import Targets
@@ -128,7 +128,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     root = DataRoot.from_config(arguments.paths)
-    identifiers, per_seed = OutOfFoldOracle().corpus(root.processed() / "published")
+    identifiers, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores
     floor = PairedFloor(LabelPower(arguments.labels))
 

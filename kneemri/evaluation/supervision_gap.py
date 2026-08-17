@@ -37,7 +37,7 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
-from kneemri.evaluation.oof_oracle import OutOfFoldOracle
+from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import RankAverage
 from kneemri.models.model import TARGETS
@@ -172,7 +172,7 @@ class SupervisionGap:
         this measurement — the report and `run_comparison`'s split — would otherwise each write it.
         """
         identifiers, truth = self.annotated(train_table)
-        names, per_seed = OutOfFoldOracle().corpus(published)
+        names, per_seed = PublishedRuler(published).per_seed()
         combined = RankAverage().combine(per_seed)
         position = {name: index for index, name in enumerate(names)}
         keep = [index for index, name in enumerate(identifiers) if name in position]

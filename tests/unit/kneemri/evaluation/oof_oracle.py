@@ -15,13 +15,6 @@ from ..conftest import write_series
 TARGET_COUNT = 12
 CANONICAL = [slot.name for slot in SLOTS]
 """The published members use the canonical six, and `agrees` compares their order against OURS."""
-SEEDS = (2026, 7717)
-FOLDS = (
-    {"a", "b"},
-    {
-        "c",
-    },
-)
 
 
 def _checkpoint(path: Path, seed: int, identifiers: list[str], *, crop_mm: float = 130.0) -> Path:
@@ -46,31 +39,6 @@ def test_recorded(tmp_path: Path):
 
     assert identifiers == ["b", "a"], "their order, not a sorted one — the rows are aligned to it"
     assert values.shape == (2, TARGET_COUNT)
-
-
-def test_corpus(tmp_path: Path):
-    """Folds stacked into one full-corpus array per seed, with each fold's rows REORDERED to match.
-
-    The reordering is the part worth testing: two members of one fold hold the same studies and nothing
-    promises they wrote them in the same order, so a naive concatenation would misalign one seed against
-    another and produce a residual no amount of staring at the reader would explain.
-    """
-    published = tmp_path / "published"
-    published.mkdir()
-    _checkpoint(published / "f1_s1.pt", SEEDS[0], ["a", "b"])
-    _checkpoint(published / "f1_s2.pt", SEEDS[1], ["b", "a"])  # SAME fold, written the other way round
-    _checkpoint(published / "f2_s1.pt", SEEDS[0], ["c"])
-    _checkpoint(published / "f2_s2.pt", SEEDS[1], ["c"])
-
-    names, per_seed = OutOfFoldOracle().corpus(published)
-
-    assert sorted(names) == ["a", "b", "c"], "the folds partition the corpus and every study appears once"
-    assert len(per_seed) == len(SEEDS)
-    assert all(array.shape == (3, TARGET_COUNT) for array in per_seed)
-    first, second = (names.index("a"), names.index("b"))
-    # seed 2 wrote b first; row 'a' must still carry the values it wrote FOR a.
-    assert per_seed[1][first, 0] != per_seed[1][second, 0]
-    assert per_seed[1][names.index("a"), 0] == per_seed[0][names.index("b"), 0], "index 1 of its own list"
 
 
 def test_agrees(tmp_path: Path):
