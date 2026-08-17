@@ -58,6 +58,46 @@ def test_cropped(tmp_path: Path):
         assert torch.equal(reader.sized(stack, size), native), f"one read must equal a native read at {size}"
 
 
+def test_cropped_fills_a_failed_slice_from_its_neighbour(tmp_path: Path):
+    """A slice that will not decode is filled from the nearest one that did — never from zeros.
+
+    Never from zeros because a zero plane is a candidate for the majority shape, and a black slice served
+    behind a mask that says ACQUIRED is the failure this reader has already been bitten by twice. The
+    neighbour is what the model would have been shown anyway if the band had landed one file over.
+    """
+    directory = write_series(tmp_path / "torn", slices=10, size=64)
+    acquisition = Acquisition.probe("study", "series", directory)
+    # THE PIXELS ARE TORN, THE HEADER IS NOT — a file whose header is unreadable also loses the series
+    # its geometric order (`ordered_files` falls back to name order), which would move which slice the
+    # band samples and hide what this test is about.
+    torn = directory / acquisition.ordered_files()[4]
+    data = pydicom.dcmread(str(torn))
+    data.PixelData = data.PixelData[: len(data.PixelData) // 2]
+    data.save_as(str(torn))
+
+    stack = SlotReader(image_size=16).cropped(acquisition, slices=3)
+
+    assert stack is not None
+    assert stack.shape == (3, 64, 64), "one torn slice does not change the stack the slot is served at"
+    assert stack[1].any(), "the failed middle slice carries pixels, not a black plane"
+    assert np.array_equal(stack[1], stack[0]), "and they are its nearest decoded neighbour's"
+    assert not np.array_equal(stack[2], stack[0]), "the slices that did decode are still their own"
+
+
+def test_cropped_returns_none_when_no_sampled_slice_decodes(tmp_path: Path):
+    """A series with files that all fail is ABSENT, which the mask can say — not black, which it cannot.
+
+    Distinct from the empty-directory path: here the series HAS files and an `Acquisition` probed from
+    real headers, so the reader gets past `ordered_files` and only the decode loop can report the loss.
+    """
+    directory = write_series(tmp_path / "unreadable", slices=4, size=64)
+    acquisition = Acquisition.probe("study", "series", directory)
+    for name in acquisition.ordered_files():
+        (directory / name).write_bytes(b"not a dicom")
+
+    assert SlotReader(image_size=16).cropped(acquisition, slices=3) is None
+
+
 def test_cropped_lets_the_majority_shape_decide(tmp_path: Path):
     """One odd-sized slice is dropped — it must not drop every OTHER slice by being sampled first.
 
