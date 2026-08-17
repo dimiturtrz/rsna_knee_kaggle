@@ -4,10 +4,17 @@ THE QUESTION THIS ANSWERS. Every entry so far has been a rank-average of several
 seed ensembling are now out on purpose: they buy variance reduction rather than signal, and each
 member costs a full run on 80% of the corpus. What nobody here has measured is the PRICE of dropping
 them - if one model loses little, the whole ensembling apparatus can go and the GPU it consumes moves
-to mechanisms. `strongest(1)` picks by recorded holdout, which is fold 2 at 0.8518.
+to mechanisms. `strongest(1)` picks by recorded holdout, which on the post-LoRA pool is `res392_ws_s2026`
+at 0.8523.
 
 Read it against the three-member entry pushed alongside it: same members, same reading, same kit, so
 the only difference is how many models vote.
+
+THE POOL UNDERNEATH IT HAS CHANGED SINCE ITS 0.868, which is what makes this a cell and not a repeat.
+That number came from a pre-LoRA pool whose strongest member is not this one, so it is not a point on
+the current curve — and the current curve (2 -> 0.919, 4 -> 0.918, 5 -> 0.911) has no endpoint. The
+holdout cannot supply one: it has twice failed to price member COUNT, ranking four first where the
+board could not separate them from two, and ranking five above two where the board put them 0.008 below.
 
 
 Our weights, our data layer, our submission path. The members were fitted by `kneemri.training.train` on the

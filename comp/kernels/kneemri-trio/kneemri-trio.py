@@ -1,14 +1,17 @@
-"""The 0.919 pair with OVERLAPPING windows — the passes axis, which the holdout says is worth nothing.
+"""The strongest THREE members of the post-LoRA pool — the hole in the board's member-count curve.
 
-Measured on five whole-stack members: overlapping the windows changes the holdout by exactly 0.0000. A
-member that reads all twelve slices has one window, so sliding a window over it produces the same window
-again — the mechanism is understood and the offline number agrees with the mechanism to four decimals.
+The count axis is the one axis this project's holdout provably cannot price. It ranked four members
+first of every all-ours configuration and the board could not separate them from two (0.918 against
+0.919); it scored five at 0.8610 and the board put them 0.008 BELOW the two-member entry. So count is
+decided on the board or it is not decided.
 
-An axis whose offline answer is exactly zero is the cleanest transfer question available: it costs a
-slot to learn whether the board agrees with a number our ruler is certain about, and it is the same
-pair, the same weights and the same vote as the 0.919 entry. If it comes back different, the difference
-is board noise with no offline component at all — which is the same floor `kneemri-vote` measures, read
-off a second, independent axis.
+The board's curve on the post-LoRA pool currently reads 2 -> 0.919, 4 -> 0.918, 5 -> 0.911, and
+the only 3 it has ever seen was a PRE-LoRA pool at 0.882 — a different set of weights, so not a point on
+this curve at all. Three is the gap, and it is the gap that decides the shape: monotone decline from two
+means every member past the second is a cost, while a peak or a plateau at three or four means the
+2-vs-4 tie is the noise floor and the decline only starts at five.
+
+`kneemri-solo` takes the other end of the same curve.
 """
 
 import logging
@@ -86,7 +89,7 @@ def main() -> None:
 
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
-    KernelRun(members=2, overlap=True).run()
+    KernelRun(members=3, overlap=False).run()
 
 
 if __name__ == "__main__":

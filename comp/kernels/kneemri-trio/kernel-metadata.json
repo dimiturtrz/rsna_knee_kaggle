@@ -1,7 +1,7 @@
 {
-  "id": "dimiturnt/kneemri-overlap",
-  "title": "kneemri-overlap",
-  "code_file": "kneemri-overlap.py",
+  "id": "dimiturnt/kneemri-trio",
+  "title": "kneemri-trio",
+  "code_file": "kneemri-trio.py",
   "language": "python",
   "kernel_type": "script",
   "is_private": true,

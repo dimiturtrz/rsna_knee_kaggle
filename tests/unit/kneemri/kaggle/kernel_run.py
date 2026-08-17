@@ -64,6 +64,30 @@ def test_served():
     assert declared.budget is not None, "declaring a vote must not cost the deadline"
 
 
+def test_served_states_the_serving_in_the_log(caplog: pytest.LogCaptureFixture):
+    """The run's own log names the vote, because nothing downstream of the kernel can.
+
+    A submission's serving is invisible after the fact: the score comes back as one number and the
+    entry's own log is the only record of what produced it. The first `kneemri-vote` run logged the
+    kit, the members and the study count and never said which rule combined them — a slot spent on a
+    flag whose landing could not be asserted.
+    """
+    with caplog.at_level("INFO"):
+        KernelRun().served()
+    assert "RankAverage (default)" in caplog.text, "the default is stated, not left silent"
+
+    caplog.clear()
+    with caplog.at_level("INFO"):
+        KernelRun(serving=Serving(vote=LogitAverage(), views=SpatialViews())).served()
+    assert "LogitAverage" in caplog.text
+    assert "SpatialViews" in caplog.text
+
+    caplog.clear()
+    with caplog.at_level("INFO"):
+        KernelRun(overlap=False).served()
+    assert "overlap=False" in caplog.text, "the passes axis is stated too — it varies per entry and is not in Serving"
+
+
 def test_find_encoder(tmp_path: Path):
     """The mount is matched on the ENCODER, not merely found, across both families at once.
 

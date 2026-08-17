@@ -19,10 +19,25 @@ and the tuple — not the slug — is what the coverage grid below is indexed by
 | **members** | `1` · `2` · `3` · `5` · `20` · `23` | how many members are rank-averaged |
 | **read** | `windowed` · `whole` | one group of slices per pass, or the whole stack |
 | **passes** | `1/study` · `n/study` · `overlap` | test-time cost, and whether windows overlap |
+| **views** | `identity` · `rot3` | rigid test-time views averaged over, at that many times the passes |
+| **vote** | `rank` · `logit` · `quality` | how the members' tables become one |
 
 `ours×5×windowed×overlap` is a complete method. Any two entries differing in one coordinate are the
 only pair that isolates that coordinate, which is what makes a spend decision arguable rather than a
 preference.
+
+**The last two axes were added on 2026-08-17 and every entry above them is `identity`/`rank`.** They
+are the two things an entry can vary WITHOUT retraining anything, and until that date they were
+reachable from `member_curve` and from nothing that writes a submission — so the tuple had four axes
+because two of them could not be spent, not because they did not exist. Offline both are flat (vote:
+0.8581 rank against 0.8583 logit on the pair behind the 0.919; views: +0.0007 on the same pair), which
+is exactly why they are worth a slot and not a retrain: a flat offline axis is a pure transfer question.
+
+**`passes` is a no-op for a whole-stack member and is not a bet.** `Member.window` gives a whole-stack
+member ONE centred window of its full depth, so `overlap=True` and `overlap=False` produce the same
+window and a byte-identical submission. A `kneemri-overlap` kernel was written on 2026-08-17 to ask the
+board about it and deleted before it ran, because the answer is not "0.0000 offline, unknown on the
+board" — it is that there is nothing to submit that differs.
 
 ## Coverage grid
 
@@ -46,6 +61,21 @@ never spent on a cell that already has a number.
 | `ours×2×whole×2/study` re-run on kit `5ba86ee` | submitted 2026-08-13, result not recorded here | — |
 | `fusion×25×windowed×overlap` (our 5 + their 20) | **untried** | — |
 | `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
+| `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | queued 2026-08-17 | — |
+| `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | queued 2026-08-17 | — |
+| `ours×2×whole×vote=logit` — `kneemri-vote` | queued 2026-08-17 | — |
+| `ours×2×whole×views=rot3` — `kneemri-views` | queued 2026-08-17 | — |
+
+**The four queued cells are one day's five slots spent on questions the holdout cannot answer, not on a
+predicted gain.** Nothing in the current member pool predicts a gain over 0.919 offline: count, subset,
+per-label weighting and vote are all measured and flat or negative, and per-label weighting is dead
+outright (oracle 0.8590 against flat 0.8588). Under this file's own spend policy that leaves only the
+second clause — a question that cannot be answered offline at all. Two of the four complete the board's
+member-count curve on ONE pool (1 and 3, against the 2/4/5 it already holds), and two open axes the
+submission path could not reach until today. `kneemri-vote` doubles as the closest thing to a repeat
+this competition allows — same members, same weights, same decode, same runtime, +0.0002 offline — so
+whatever it scores against the 0.919 is the board's own noise, which every read of a 0.004 board
+difference in this file has so far been made without.
 
 A `null` is not a floor: neither of those two cells has ever been measured, and re-running one is a
 legitimate spend. A cell with a number is not, unless the members underneath it changed.

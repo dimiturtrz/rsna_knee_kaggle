@@ -137,8 +137,21 @@ class KernelRun:
         long, and a dry run or a witness is not. Composed rather than constructed, so an entry that
         declares views or a vote does not have to also remember to declare the budget — forgetting it
         is a nine-hour kill, and the kernel is the only caller that knows it is inside one.
+
+        AND IT SAYS WHAT IT SERVES UNDER, because the log is the only place a submission's serving is
+        visible after the fact. The first `kneemri-vote` run logged the kit, the members and the
+        studies and said nothing about the vote — so the one thing that entry was bought to vary was
+        the one thing its log could not confirm had landed, which is a slot spent on an unasserted flag.
         """
-        return replace(self.serving, budget=Budget())
+        served = replace(self.serving, budget=Budget())
+        logger.info(
+            "serving: vote=%s views=%s precision=%s overlap=%s",
+            type(served.vote).__name__ if served.vote else "RankAverage (default)",
+            served.views or "identity only (default)",
+            served.precision or "each member's own (default)",
+            self.overlap,
+        )
+        return served
 
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
