@@ -7651,6 +7651,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.DeviceBudget.select",
+      "target": "kneemri.training.trainer.DeviceBudget.capped",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.corpus.study_cache.CachedCorpus",
@@ -14794,6 +14800,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.DeviceBudget.await_headroom",
       "label": "await_headroom",
+      "level": "method",
+      "parent": "kneemri.training.trainer.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.DeviceBudget.capped",
+      "label": "capped",
       "level": "method",
       "parent": "kneemri.training.trainer.DeviceBudget",
       "role": null
