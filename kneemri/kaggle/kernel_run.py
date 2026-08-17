@@ -96,6 +96,31 @@ class KernelRun:
             return package.named(self.names)
         return package.members if self.members is None else package.strongest(self.members)
 
+    def identity(self, asked: Sequence[Member], usable: Sequence[Member]) -> str:
+        """What to say when the entry that ran is not the entry that was designed — empty when it is.
+
+        A DROPPED MEMBER IS A DIFFERENT EXPERIMENT WHEN THE MEMBERS WERE NAMED. `strongest(n)` asks for
+        a quality, so losing one leaves the same kind of entry; a NAMED list is a subset someone chose
+        jointly offline, and running three of its four is another entry entirely — on 2026-08-17
+        `kneemri-encoder`, whose whole design was one DINOv3 member the others do not share an encoder
+        with, dropped exactly that member and wrote the 0.8608 trio under the encoder entry's name. It
+        scored, so nothing looked wrong; the slot bought a control that had already been measured.
+
+        The submission is still written, because a run that refuses costs the slot outright and an
+        ensemble minus one member is a real entry. What must never happen is that it goes unrecorded.
+        """
+        if self.names is None:
+            return ""
+        survived = {member.identifier for member in usable}
+        lost = [member.identifier for member in asked if member.identifier not in survived]
+        if not lost:
+            return ""
+        return (
+            f"ENTRY IDENTITY CHANGED: named {[member.identifier for member in asked]} and ran "
+            f"{sorted(survived)} — {lost} would not load. Score this as the smaller ensemble, not as the "
+            f"entry that was designed."
+        )
+
     def package(self) -> MemberPackage:
         """The mounted weights package this kernel runs.
 
@@ -177,12 +202,13 @@ class KernelRun:
         logger.info("kit %s", self.revision())
 
         package = self.package()
-        package.members = self.chosen(package)
+        asked = self.chosen(package)
+        package.members = asked
 
         device = VisibleCards().device()
         models = {}
         usable = []
-        for member in package.members:
+        for member in asked:
             encoder = ENCODERS[member.variant]
             try:
                 weights = self.find_encoder(encoder)
@@ -202,9 +228,10 @@ class KernelRun:
             message = "no member loaded"
             raise RuntimeError(message)
         package.members = usable
-        logger.info(
-            "loaded and fingerprint-checked %d of %d members from %s", len(usable), len(models) or 0, package.root
-        )
+        logger.info("loaded and fingerprint-checked %d of %d members from %s", len(usable), len(asked), package.root)
+        changed = self.identity(asked, usable)
+        if changed:
+            logger.warning("%s", changed)
         logger.info("%s", self.decode(usable))
 
         competition = self.mounts.one("sample_submission.csv", "competition data")

@@ -29,17 +29,36 @@ _KIT = DataRoot.from_config(_REPO / "paths.yaml").processed() / "kit"
 directory nobody built — which is the failure this file just had in a different form, silently
 ignoring a --kit it was handed."""
 
-_REQUIRED_WHEELS = ("jaxtyping", "wadler_lindig")
-"""Third-party imports our own source makes that Kaggle's base image does not carry.
+_REQUIRED_WHEELS = {"jaxtyping": "", "wadler_lindig": "", "transformers": "5", "safetensors": ""}
+"""Wheel name → the major version the kit must carry at least, "" when any version does.
 
 Probed from a kernel, not guessed: pydicom, timm, transformers, polars, cv2, SimpleITK, einops and
 sklearn are all present offline, and `jaxtyping` is not — which `kneemri.models.model` imports at module top,
 so the kernel dies at import without it. `wadler_lindig` is jaxtyping's own dependency.
 
+TRANSFORMERS IS HERE FOR A VERSION, NOT FOR AN IMPORT, and it is the wheel this file learned about the
+expensive way. Kaggle's image carries transformers, but an OLDER one builds DINOv3 as `backbone.layer.*`
+where ours builds `backbone.model.layer.*`, so a v3 checkpoint loads into a nesting it was not fitted to
+and the member is dropped mid-run. On 2026-08-17 a kit rebuilt from a scratch wheels directory holding
+only the two jaxtyping wheels shipped without it, and `kneemri-encoder` — an entry whose whole design was
+one DINOv3 member — ran as its own three-member control instead. Nothing local could have said so: the
+source was in sync, the manifest carried `lora_rank: 8`, and the member loads on this machine.
+
 Checked here because `build_kit.py` rebuilds the kit directory from scratch: running it without
 `--wheels` produces a kit whose SOURCE is perfectly in sync and which still cannot import. That is
 exactly the failure this script exists to prevent, and it passed silently until the wheels were checked
 too."""
+
+
+def _wheel_problem(kit: Path, name: str, floor: str) -> str | None:
+    """What is wrong with the kit's copy of one required wheel, or None when it is there and new enough."""
+    found = sorted(kit.glob(f"{name.replace('_', '?')}-*.whl"))
+    if not found:
+        return f"missing wheel: {name} (kernel will fail at import or rebuild a member wrong; use --wheels)"
+    if floor and all(int(wheel.name.split("-")[1].split(".")[0]) < int(floor) for wheel in found):
+        carried = ", ".join(wheel.name for wheel in found)
+        return f"wheel too old: {name} needs major {floor}, kit carries {carried}"
+    return None
 
 
 def _sources(root: Path, package: str) -> dict[Path, Path]:
@@ -65,9 +84,9 @@ def drift(kit: Path = _KIT) -> list[str]:
             f"orphaned in kit (deleted from repo): {relative}" for relative in kit_files.keys() - repo_files.keys()
         )
     problems.extend(
-        f"missing wheel: {name} (kernel will fail at import; rebuild with --wheels)"
-        for name in _REQUIRED_WHEELS
-        if not list(kit.glob(f"{name.replace('_', '?')}-*.whl"))
+        problem
+        for problem in (_wheel_problem(kit, name, floor) for name, floor in _REQUIRED_WHEELS.items())
+        if problem is not None
     )
     return problems
 

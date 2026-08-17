@@ -45,6 +45,20 @@ def test_chosen():
     assert [member.holdout for member in KernelRun(members=1, names=["0.84"]).chosen(package)] == [0.84]
 
 
+def test_identity():
+    """A NAMED entry that loses a member says so; a ranked one has nothing to report."""
+    package = _Package([0.81, 0.87, 0.84])
+    asked = package.members
+    kept = [member for member in asked if member.identifier != "0.84"]
+
+    assert KernelRun(members=3).identity(asked, kept) == "", "a count asks for a quality, not for a set"
+    assert KernelRun(names=["0.81", "0.87", "0.84"]).identity(asked, asked) == "", "nothing lost, nothing to say"
+    changed = KernelRun(names=["0.81", "0.87", "0.84"]).identity(asked, kept)
+
+    assert "ENTRY IDENTITY CHANGED" in changed
+    assert "'0.84'" in changed, "the member that went is named, or the log cannot say which entry ran"
+
+
 def test_served():
     """An entry's views and vote survive to the ensemble, and the budget is attached for it.
 
