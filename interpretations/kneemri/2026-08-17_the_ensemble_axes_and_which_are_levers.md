@@ -24,6 +24,10 @@ All offline numbers below are fold 0 of `report_labels_v2`, six all-ours members
 The 1→2 step is bigger than every method change this project has landed except the augmentation fix
 (+0.0110). Past four, each member buys less than a fifth of the noise floor for a full inference budget.
 
+That is the MEAN over subsets, and it saturates. The BEST subset does not merely saturate — over the
+thirteen same-split checkpoints it peaks at five and then falls monotonically (see the closing section).
+"How many members" has an answer with a maximum in it, not just a plateau.
+
 This is also the answer to "what if we train just one?" — measured directly on the board, where a solo
 member scored **0.868** against five weaker ones at **0.888**. Offline, dropping from the 0.919 pair to
 the best single costs 0.0058, which is ~0.027 on the board: roughly 0.892, or rank ~710 of 1,758 instead
@@ -114,6 +118,34 @@ One lever (diversity of the decode path, underpriced offline by 2.4x), one free 
 we have — not a better vote, not a per-label rule, and not a seventh member of the same kind.
 
 And the lever is narrower than "read different pixels". The one differently-reading member we own
-subtracts, so what the axis needs is a member that fails differently AND scores in the pool's range —
-which crop80, at 0.8345 against a pool floor of 0.8459, does not. Diversity buys nothing from a member
-the ensemble has to carry.
+subtracts, so a member that merely fails differently is not automatically worth its forward pass.
+
+**It is not solo score that decides it, either — measured over thirteen members the same day.** Every
+checkpoint that shares the corpus split (`split_seed 2026`, fold 0 of 5, so one holdout none of them
+trained on) scored as one pool: the six all-ours plus `conf24`, `deep24`, `pair_memory`, `schedule_8`,
+`slices16_ws`, `dinov3_base_lora`, `dinov3_v3small_224`.
+
+```
+best 4  0.8615  calibrated_targets + deep24 + intensity392_ws + res392_ws
+best 5  0.8617  ... + extended_ws            <- the peak over all 8,191 subsets
+best 6  0.8616
+best 7  0.8608     every larger subset falls, monotonically, to 0.8547 at thirteen
+```
+
+`deep24` scores **0.8352 solo** — beneath the all-ours floor of 0.8459, and within 0.0007 of crop80's
+0.8345 — and yet joint selection takes it at every size from four up, while it never takes crop80 at any
+size. So "scores in the pool's range" is the wrong rule and this document said so an hour before this
+measurement. What separates them is not how good the member is; deep24 differs by training depth and
+`channels` pooling on a shared decode path, crop80 by the decode path itself, and only one of those two
+kinds of difference has ever paid here.
+
+The peak is +0.0005 over the six-member pool's best-4 (0.8612), which is a tenth of the board floor: take
+it because the checkpoints already exist and the choice is a sort, do not call it a finding. The more
+useful half is the shape — a pool of thirteen scores WORSE flat (0.8547) than a chosen five, and the fall
+is monotonic. Members past the fifth are not diminishing returns, they are negative ones, and the entry
+that ships is a chosen subset rather than everything on disk.
+
+One correction it forces on §5: with thirteen members, per-label top-5 reaches 0.8609 honest against the
+flat rule's 0.8547, which reads as per-label selection finally paying. It is not — a single fixed subset
+of five reaches 0.8617, above it. Per-label selection is only ever recovering what flat averaging over a
+bad pool threw away, and choosing the pool recovers more of it for twelve fewer decisions.
