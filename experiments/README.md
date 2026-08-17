@@ -208,6 +208,16 @@ Resolution at CONSTANT field of view is untouched (`res392`, 0.8523, still our b
 failed is paying for sampling with context. See
 `interpretations/kneemri/2026-08-16_crop80_resolution_gate.md`.
 
+**AND IT DOES NOT PAY AS A DIVERSITY MEMBER EITHER, 2026-08-17.** The remaining argument for it was that
+a member which fails differently can add more than it scores — it is the only member we own that reads a
+different pixel group, and the board prices decode diversity at 2.4x its offline size. Measured on cached
+probabilities, no slot: the six all-ours members score 0.8598 and the same six plus crop80 score
+**0.8595**. Joint selection never wants it — best-4 of the six is 0.8612, best-6 *including* crop80 is
+0.8607, best-7 is 0.8595, so every subset containing it sits below the best subset of the same size
+without it. Two independent routes, the same verdict. The caveat is stated rather than buried: this
+member ran 8 epochs against the pool's 12, so it prices an undertrained member of the crop family, not
+the crop axis — `centre_tissue` has still never run, and the slice band has never been varied at all.
+
 ### `pair_memory` — refuted on the mean, and its own gate cannot be run
 
 Recipe-matched to `wsfold0_e6` on every axis the metrics line records except `pair_memory: 8` (336 px,

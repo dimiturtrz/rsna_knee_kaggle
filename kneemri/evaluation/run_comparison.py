@@ -199,30 +199,7 @@ class RunComparison:
             *self._stalled(self.control),
         ]
         for arm in self.arms:
-            deltas = table.get(arm.path.stem)
-            if deltas is None:
-                # NAMED, never skipped. A mistyped arm used to vanish from the report entirely, so the
-                # reader saw a shorter table and no reason for it — `intensity392` (the file is
-                # `intensity392_ws`) came back as a report of the control alone, which reads as an arm
-                # that moved nothing rather than as a path that matches no run.
-                why = "recorded no scored epoch and kept no predictions" if arm.exists() else "does not exist"
-                lines.append(f"\n{arm.path.stem}  NOT READ: {why}")
-                continue
-            ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
-            intervals, named = self.floor(arm)
-            lines.append(
-                f"\n{arm.path.stem}  "
-                + "  ".join(f"{label} {self._marked(label, v, intervals)}" for label, v in ordered)
-            )
-            lines.append(f"  marked against the {named}")
-            profile = ScaleProfile.of(deltas)
-            lines.append(profile.judged() if self.moved_view(arm) else profile.line())
-            lines.append(f"  vs control: {self.unmatched(arm)}")
-            lines.append(f"  {self.reader_change(arm)}")
-            lines.extend(self._stalled(arm))
-            scored = self.scored(arm)
-            if scored is not None and scored.reconstructed:
-                lines.append(f"  {scored.named()}")
+            lines.extend(self._arm(arm, table.get(arm.path.stem)))
         if self.errors:
             lines.append(
                 "\n* the delta exceeds that label's own 95% sampling interval; unmarked deltas are "
@@ -238,6 +215,35 @@ class RunComparison:
                 "floor; an arm that predates them is UNREAD against the wide bound, not refuted by it."
             )
         return "\n".join(lines)
+
+    def _arm(self, arm: RunMetrics, deltas: dict[str, float] | None) -> list[str]:
+        """One arm's block of the table — its deltas, the floor they are marked against, and its stalls.
+
+        Its own method because `report` was doing two jobs at one indent: assembling the document, and
+        rendering a row of it. The row is the part that grows every time a run learns to record something
+        new, and growing it was pushing the assembler towards the complexity gate for reasons that had
+        nothing to do with assembling anything.
+        """
+        if deltas is None:
+            # NAMED, never skipped. A mistyped arm used to vanish from the report entirely, so the
+            # reader saw a shorter table and no reason for it — `intensity392` (the file is
+            # `intensity392_ws`) came back as a report of the control alone, which reads as an arm
+            # that moved nothing rather than as a path that matches no run.
+            why = "recorded no scored epoch and kept no predictions" if arm.exists() else "does not exist"
+            return [f"\n{arm.path.stem}  NOT READ: {why}"]
+        ordered = sorted(deltas.items(), key=lambda item: -abs(item[1]))
+        intervals, named = self.floor(arm)
+        profile = ScaleProfile.of(deltas)
+        scored = self.scored(arm)
+        return [
+            f"\n{arm.path.stem}  " + "  ".join(f"{label} {self._marked(label, v, intervals)}" for label, v in ordered),
+            f"  marked against the {named}",
+            profile.judged() if self.moved_view(arm) else profile.line(),
+            f"  vs control: {self.unmatched(arm)}",
+            f"  {self.reader_change(arm)}",
+            *self._stalled(arm),
+            *([f"  {scored.named()}"] if scored is not None and scored.reconstructed else []),
+        ]
 
     @staticmethod
     def _stalled(run: RunMetrics) -> list[str]:

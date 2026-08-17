@@ -54,6 +54,21 @@ to the member pool, and the CC0 weights we started from are now a cost rather th
 
 Diversity is not the same as *foreign*. It is the same as *failing differently*.
 
+**But failing differently is necessary, not sufficient — measured the same day.** The one member we own
+that reads a different pixel group, `crop80_tissue` (80 mm about the tissue centre, 0.238 mm/px), was
+built to fail differently and does. Added to the six as a seventh member it costs **−0.0003** (0.8598 →
+0.8595), and joint selection never wants it: best-4 of the six is 0.8612, best-6 *including* crop80 is
+0.8607, best-7 is 0.8595. Every subset containing it scores below the best subset of the same size
+without it. Its solo gate had already refuted the mechanism on 2026-08-16 — the diffuse half of the
+prediction landed and the small-structure half did not — and the marginal read reaches the same verdict
+by an independent route.
+
+That does not kill the axis. crop80 ran eight epochs against the pool's twelve (a mismatch priced
+elsewhere at −0.0028), so this measures an undertrained member of the crop family rather than the crop
+family; `centre_tissue` has never run; and the slice BAND has never been varied by anything. What it does
+kill is "a crop-diverse member is a free bet". The next one has to be schedule-matched before its number
+means anything.
+
 ## 4. Combiner form — measured 2026-08-17, FLAT
 
 The axis that had never been varied: every number this project produced came out of one rule, a flat
@@ -97,3 +112,8 @@ currently worth nothing — which is a fact about the pool, not about TTA.
 One lever (diversity of the decode path, underpriced offline by 2.4x), one free tweak (joint selection,
 +0.0024), and four axes measured out. The next real gain is a member that fails differently from the six
 we have — not a better vote, not a per-label rule, and not a seventh member of the same kind.
+
+And the lever is narrower than "read different pixels". The one differently-reading member we own
+subtracts, so what the axis needs is a member that fails differently AND scores in the pool's range —
+which crop80, at 0.8345 against a pool floor of 0.8459, does not. Diversity buys nothing from a member
+the ensemble has to carry.
