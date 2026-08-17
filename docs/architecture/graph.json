@@ -1653,6 +1653,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
+      "target": "kneemri.training.augmentation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
       "target": "kneemri.training.fitting",
       "weight": 1
     },
@@ -1720,6 +1726,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.augmentation",
       "weight": 1
     },
     {
@@ -7255,6 +7267,42 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.augmentation.AugmentConfig",
+      "target": "kneemri.training.augmentation.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.augmentation.Augmentation",
+      "target": "kneemri.training.augmentation.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation.__init__",
+      "target": "kneemri.training.augmentation.AugmentConfig.geometric_only",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation.applied",
+      "target": "kneemri.training.augmentation.Augmentation._intensity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation.applied",
+      "target": "kneemri.training.augmentation.Augmentation._warp",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation.bagged",
+      "target": "kneemri.training.augmentation.Augmentation.applied",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.fitting.Fitting",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -7879,6 +7927,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
+      "target": "kneemri.training.augmentation.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
+      "target": "kneemri.training.augmentation.AugmentConfig.geometric_only",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
       "target": "kneemri.training.train.TrainingOptions.adaptation",
@@ -7894,18 +7954,6 @@
       "kind": "calls",
       "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
       "target": "kneemri.training.train.TrainingOptions.reports",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
-      "target": "kneemri.training.trainer.AugmentConfig",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.train.TrainingOptions.fitted_trainer",
-      "target": "kneemri.training.trainer.AugmentConfig.geometric_only",
       "weight": 1
     },
     {
@@ -8107,12 +8155,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.trainer.AugmentConfig",
-      "target": "kneemri.training.trainer.AugmentConfig",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.training.trainer.DeviceBudget.await_headroom",
       "target": "kneemri.training.trainer.DeviceBudget.headroom",
@@ -8173,6 +8215,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.augmentation.AugmentConfig",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.augmentation.Augmentation",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.heartbeat.Heartbeat",
@@ -8203,15 +8257,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.trainer.Trainer",
-      "target": "kneemri.training.trainer.AugmentConfig",
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.models.ema.LiveWeights",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
-      "target": "kneemri.models.ema.LiveWeights",
+      "target": "kneemri.training.augmentation.Augmentation",
       "weight": 1
     },
     {
@@ -8240,26 +8294,8 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.__init__",
-      "target": "kneemri.training.trainer.AugmentConfig.geometric_only",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.augment",
-      "target": "kneemri.training.trainer.Trainer._intensity",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.augment",
-      "target": "kneemri.training.trainer.Trainer._warp",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.augment_bag",
-      "target": "kneemri.training.trainer.Trainer.augment",
+      "target": "kneemri.training.augmentation.Augmentation.bagged",
       "weight": 1
     },
     {
@@ -8361,7 +8397,7 @@
       "role": null
     },
     {
-      "descendants": 99,
+      "descendants": 100,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -9073,11 +9109,19 @@
       "role": null
     },
     {
-      "descendants": 10,
+      "descendants": 11,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation",
+      "label": "augmentation",
+      "level": "module",
+      "parent": "kneemri.training",
       "role": null
     },
     {
@@ -10234,6 +10278,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.AugmentConfig",
+      "label": "AugmentConfig",
+      "level": "class",
+      "parent": "kneemri.training.augmentation",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation",
+      "label": "Augmentation",
+      "level": "class",
+      "parent": "kneemri.training.augmentation",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.fitting.Fitted",
       "label": "Fitted",
       "level": "class",
@@ -10388,14 +10448,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Adaptation",
       "label": "Adaptation",
-      "level": "class",
-      "parent": "kneemri.training.trainer",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.AugmentConfig",
-      "label": "AugmentConfig",
       "level": "class",
       "parent": "kneemri.training.trainer",
       "role": "satellite"
@@ -15258,6 +15310,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.AugmentConfig.geometric_only",
+      "label": "geometric_only",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.AugmentConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation._intensity",
+      "label": "_intensity",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation._warp",
+      "label": "_warp",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.bagged",
+      "label": "bagged",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.__init__",
       "label": "__init__",
       "level": "method",
@@ -15658,14 +15758,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.AugmentConfig.geometric_only",
-      "label": "geometric_only",
-      "level": "method",
-      "parent": "kneemri.training.trainer.AugmentConfig",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.trainer.DeviceBudget.await_headroom",
       "label": "await_headroom",
       "level": "method",
@@ -15708,30 +15800,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.__init__",
       "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer._intensity",
-      "label": "_intensity",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer._warp",
-      "label": "_warp",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.augment",
-      "label": "augment",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
