@@ -6932,8 +6932,14 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.models.model.StudyModel._opened",
+      "source": "kneemri.models.model.StudyModel._last_blocks",
       "target": "kneemri.models.model.StudyModel._blocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel._opened",
+      "target": "kneemri.models.model.StudyModel._last_blocks",
       "weight": 1
     },
     {
@@ -14560,6 +14566,14 @@
       "descendants": 0,
       "id": "kneemri.models.model.StudyModel._blocks",
       "label": "_blocks",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.model.StudyModel._last_blocks",
+      "label": "_last_blocks",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
       "role": null
