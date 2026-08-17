@@ -29,6 +29,27 @@ uv run python verify_kit.py || {
   exit 1
 }
 
+# THE CLI RETURNS 0 ON A FAILED PUSH. Measured 2026-08-17: `kaggle kernels push` printed `Kernel push
+# error: Maximum batch GPU session count of 2 reached.` and exited 0. A caller that trusts the exit
+# code then submits a STALE kernel version and spends one of five daily slots on code Kaggle never
+# received. The CLI's own source (kaggle_api_extended.py:6467-6499, 5399-5408) prints the outcome and
+# swallows it, so the outcome is what has to be read — this is the same shape as bare `nox` reporting
+# the echo's status, and it is the third time in this repo that an exit code has lied.
+confirmed() {
+  local marker="$1"
+  shift
+  local output
+  output="$("$@" 2>&1)"
+  echo "$output"
+  case "$output" in
+    *"$marker"*) ;;
+    *)
+      echo "REFUSING to report success: Kaggle never said '$marker'. The push did NOT land — do not submit."
+      exit 3
+      ;;
+  esac
+}
+
 case "$WHAT" in
   dataset)
     # --dir-mode zip, and from the target's PARENT with a bare directory name: the CLI pastes whatever
@@ -39,10 +60,10 @@ case "$WHAT" in
     # --project, because `uv run` resolves its environment from the CWD and the CWD is now the kit's
     # parent — out of the repo, where there is no pyproject.toml to resolve.
     REPO="$(cd .. && pwd)"
-    (cd "$PARENT" && uv run --project "$REPO" --with kaggle kaggle datasets version -p "$(basename "$TARGET")" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip)
+    (cd "$PARENT" && confirmed "is being created" uv run --project "$REPO" --with kaggle kaggle datasets version -p "$(basename "$TARGET")" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip)
     ;;
   kernel)
-    uv run --with kaggle kaggle kernels push -p "$TARGET"
+    confirmed "successfully pushed" uv run --with kaggle kaggle kernels push -p "$TARGET"
     ;;
   *)
     echo "unknown target '$WHAT' — expected dataset or kernel"
