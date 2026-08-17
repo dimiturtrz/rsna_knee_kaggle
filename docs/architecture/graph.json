@@ -4083,7 +4083,13 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.moved_view",
-      "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.moved_view",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.view",
       "weight": 1
     },
     {
@@ -4113,7 +4119,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
       "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.reader_change",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.view",
       "weight": 1
     },
     {
@@ -4179,7 +4197,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
       "target": "kneemri.evaluation.run_comparison.RunComparison.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison.view",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
       "weight": 1
     },
     {
@@ -4630,6 +4660,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_check.ArmCheck.refused",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_check.ArmCheck.selected",
       "weight": 1
     },
     {
@@ -11508,6 +11544,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
+      "label": "disagreements",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.floor",
       "label": "floor",
       "level": "method",
@@ -11566,6 +11610,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
       "label": "unmatched",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.view",
+      "label": "view",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
@@ -11854,6 +11906,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.refused",
       "label": "refused",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.selected",
+      "label": "selected",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
