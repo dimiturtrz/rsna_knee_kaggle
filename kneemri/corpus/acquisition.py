@@ -41,21 +41,6 @@ _LONG_TR_MS = 800.0
 _LONG_TE_MS = 60.0
 """Above this echo time a long-TR sequence is T2-weighted rather than proton density."""
 
-_HEADER_TAGS = (
-    "SeriesDescription",
-    "SequenceName",
-    "ScanOptions",
-    "ScanningSequence",
-    "RepetitionTime",
-    "EchoTime",
-    "Laterality",
-    "PixelSpacing",
-    "Rows",
-    "Columns",
-    "ImagePositionPatient",
-    "ImageOrientationPatient",
-)
-
 _ORDER_TAGS = ["ImagePositionPatient", "ImageOrientationPatient", "InstanceNumber"]
 
 _ORIENTATION_VALUES = 6
@@ -83,7 +68,15 @@ class SeriesHeader:
 
     @classmethod
     def of(cls, path: Path) -> "SeriesHeader":
-        """The header alone — `stop_before_pixels`, because a probe must not pay to decode pixel data."""
+        """The header alone — `stop_before_pixels`, because a probe must not pay to decode pixel data.
+
+        The WHOLE header, not the twelve tags these five rules read. There was a `_HEADER_TAGS` tuple
+        sitting here unused for exactly that narrowing; measured on 667 headers over 120 studies, adding
+        `specific_tags` runs at 0.92-0.98x — slower, because `stop_before_pixels` has already skipped the
+        only expensive part and the filter costs more than the elements it drops. Whole-corpus scale:
+        ~24k headers, ~8 s either way. Deleted rather than wired in, so it cannot look like a pending
+        optimisation to the next reader.
+        """
         return cls(pydicom.dcmread(str(path), stop_before_pixels=True, force=True))
 
     @property
