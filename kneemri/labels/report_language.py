@@ -3,8 +3,8 @@
 Run as `python -m kneemri.labels.report_language`.
 
 The reports are not an English corpus with a non-English tail. English is 40% of them, and the rest is
-Spanish, Turkish, Greek, German, Bulgarian and Dutch — every one of them a full radiology report that
-grades its findings in its own vocabulary.
+Spanish, Turkish, Croatian, Greek, German, Bulgarian and Dutch — every one of them a full radiology
+report that grades its findings in its own vocabulary.
 
 THIS EXISTS BECAUSE A MEASUREMENT WAS TAKEN WITH THE WRONG RULER. `interpretations/kneemri/
 2026-08-13_what-the-labels-actually-contain.md` reported that 16.6% of non-English reports carry a
@@ -13,10 +13,17 @@ patterns against non-English text find little by construction. That caution was 
 is large: read in their own vocabularies, non-English reports carry severity markers 56-89% of the time.
 The 16.6% was a property of the tool.
 
-STATE THE DENOMINATOR, because this file exists to correct one. "Carries a severity marker" is measured
-over the reports CLASSIFIED as a language, and 9.3% of the corpus is classified as none. Nor does a
-marker being present mean it attaches to a particular finding — measured in English, per-finding regex
-extraction adds nothing a level does not already carry.
+STATE THE DENOMINATOR, because this file exists to correct one — and the first version of this file got
+it wrong in its own turn. "Carries a severity marker" is measured over the reports CLASSIFIED as a
+language, and 9.3% of the corpus was classified as none. That residue was not noise: all but six of the
+412 are CROATIAN, a full eighth radiology language, and the LONGEST reports in the corpus (median 1164
+characters against 945 for the classified ones). Read in its own words it grades 86.2% of the time and
+to English patterns 0.0% — the largest blind spot the English ruler had, and it sat inside the very
+denominator this docstring was warning about. An unclassified residue is a language you have not
+named until you have read it.
+
+Nor does a marker being present mean it attaches to a particular finding — measured in English,
+per-finding regex extraction adds nothing a level does not already carry.
 """
 
 import argparse
@@ -39,6 +46,7 @@ SIGNATURES: dict[str, tuple[str, ...]] = {
     "bg": ("на", "мр", "данни", "става", "няма", "се", "костите", "менискус"),
     "nl": ("van", "het", "een", "geen", "met", "knie", "mediaal", "rechts", "links", "meniscus"),
     "el": ("ΓΟΝΑΤΟΣ", "εξέταση", "χωρίς", "του", "της", "ευρηματα", "µε", "και"),
+    "hr": ("bez", "znakova", "meniska", "hrskavice", "ligamenta", "zgloba", "promjene", "signala", "intenziteta"),
 }
 """Function words and anatomy, never diacritics: a character class of accented letters scored ANY accented
 text as Turkish and reported the corpus 94% Turkish, which is the same blind-spot error this file corrects."""
@@ -51,6 +59,7 @@ SEVERITY: dict[str, tuple[str, ...]] = {
     "bg": (r"степен", r"\bлек", r"умерен", r"тежк", r"изразен", r"пълно", r"частичн"),
     "nl": (r"graad\s*[i1-4v]", r"\blicht", r"matig", r"ernstig", r"volledig", r"partieel", r"gering"),
     "el": (r"βαθμ", r"ήπι", r"μέτρι", r"σοβαρ", r"πλήρ", r"μερικ"),
+    "hr": (r"stupnj", r"stupanj", r"\bblag", r"umjeren", r"\btešk", r"izražen", r"potpun", r"parcijaln", r"djelomičn"),
 }
 """Each language's own grading words — the whole point, since the English set finds 1.7% of Spanish."""
 

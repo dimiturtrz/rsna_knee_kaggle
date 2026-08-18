@@ -6,6 +6,7 @@ SPANISH = "Técnica: RMN de la rodilla. Resultados: Rotura parcial del menisco i
 GERMAN = "Kniegelenk mit geringgradiger Chondropathie und ohne Nachweis einer Meniskusläsion im medialen Kompartiment."
 TURKISH = "Medial menisküs posterior hornu kesiminde grade III dejenerasyon izlendi ve hafif eklem sıvısı mevcut."
 ENGLISH = "There is a partial-thickness tear of the medial meniscus with mild joint effusion and normal signal."
+CROATIAN = "Bez znakova rupture medijalnog meniska. Hondromalacija patele 2. stupnja uz promjene signala hrskavice."
 
 
 def test_language():
@@ -21,6 +22,7 @@ def test_language():
     assert languages.language(GERMAN) == "de"
     assert languages.language(TURKISH) == "tr"
     assert languages.language("МР находка: МР данни за ставен излив. Костите се променени.") == "bg"
+    assert languages.language(CROATIAN) == "hr", "the residue that the first census reported as 9.3% unclassified"
     assert languages.language("Rapporto breve.") == UNKNOWN, "one word is not a language"
 
 
@@ -38,8 +40,11 @@ def test_graded():
     assert languages.graded(TURKISH, "tr")
     assert languages.graded(ENGLISH, "en")
 
+    assert languages.graded(CROATIAN, "hr"), "`stupnja` is a grade, and 86.2% of the Croatian block carries one"
+
     assert not languages.graded(SPANISH, "en"), "the English patterns are what under-counted Spanish"
     assert not languages.graded(GERMAN, "en")
+    assert not languages.graded(CROATIAN, "en"), "English patterns find 0.0% of it — the corpus's largest blind spot"
     assert not languages.graded("Menisco sin alteraciones.", "es"), "an ungraded report must not match"
 
 
