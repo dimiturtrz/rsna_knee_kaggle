@@ -42,7 +42,6 @@ from torch import Tensor, nn
 
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
 from kneemri.corpus.cache_flags import CacheFlags
-from kneemri.corpus.slots import SLOTS
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.targets import Targets
@@ -163,13 +162,7 @@ class TrialHead(nn.Module):
         if slice_pooling not in TRIAL_SLICE_POOLINGS:
             message = f"{slice_pooling!r} is not expressible over cached features: {TRIAL_SLICE_POOLINGS}"
             raise ValueError(message)
-        # The prior is defined over the canonical six slots, so asking for it with a different slot
-        # count is a mistake rather than something to broadcast quietly — the same refusal `StudyModel`
-        # makes, for the same reason.
-        if anatomical_prior and n_slot != len(SLOTS):
-            message = f"anatomical prior covers {len(SLOTS)} slots, trial has {n_slot}"
-            raise ValueError(message)
-        prior = SlotAffinity(ANATOMY).matrix(TARGETS, SLOTS) if anatomical_prior else None
+        prior = SlotAffinity(ANATOMY).requested(TARGETS, n_slot, wanted=anatomical_prior)
         self.slices = SliceAttention(dim) if slice_pooling == ATTEND else None
         self.head = SLOT_POOLINGS[slot_pooling](dim, n_slot, len(TARGETS), prior)
 

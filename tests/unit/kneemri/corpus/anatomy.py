@@ -55,6 +55,20 @@ def test_matrix_gives_an_unknown_finding_a_flat_row():
     assert float(row.min()) == float(row.max()) == 0.0
 
 
+def test_requested():
+    """The three answers a caller can get: the table, nothing, or a refusal — never a silent mismatch."""
+    affinity = SlotAffinity(ANATOMY)
+
+    asked = affinity.requested(TARGETS, len(SLOTS), wanted=True)
+    assert asked is not None
+    assert asked.shape == (len(TARGETS), len(SLOTS))
+
+    assert affinity.requested(TARGETS, len(SLOTS), wanted=False) is None
+
+    with pytest.raises(ValueError, match="slots"):
+        affinity.requested(TARGETS, len(SLOTS) - 1, wanted=True)
+
+
 def test_of():
     """The deltas split by structure scale, and MEAN — not a finding — is not averaged into either."""
     profile = ScaleProfile.of({"ACL": 0.02, "Medial Meniscus": 0.04, "Effusion": -0.02, "MEAN": 0.9})

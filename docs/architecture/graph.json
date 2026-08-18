@@ -1497,12 +1497,6 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.model",
       "target": "kneemri.models.lora",
       "weight": 1
     },
@@ -1648,12 +1642,6 @@
       "kind": "import",
       "source": "kneemri.training.head_trial",
       "target": "kneemri.corpus.folds",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.head_trial",
-      "target": "kneemri.corpus.slots",
       "weight": 1
     },
     {
@@ -2044,6 +2032,12 @@
       "kind": "references",
       "source": "kneemri.corpus.anatomy.SlotAffinity",
       "target": "kneemri.corpus.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.anatomy.SlotAffinity.requested",
+      "target": "kneemri.corpus.anatomy.SlotAffinity.matrix",
       "weight": 1
     },
     {
@@ -7647,7 +7641,7 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.__init__",
-      "target": "kneemri.corpus.anatomy.SlotAffinity.matrix",
+      "target": "kneemri.corpus.anatomy.SlotAffinity.requested",
       "weight": 1
     },
     {
@@ -8301,7 +8295,7 @@
     {
       "kind": "calls",
       "source": "kneemri.training.head_trial.TrialHead.__init__",
-      "target": "kneemri.corpus.anatomy.SlotAffinity.matrix",
+      "target": "kneemri.corpus.anatomy.SlotAffinity.requested",
       "weight": 1
     },
     {
@@ -11678,6 +11672,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.anatomy.SlotAffinity.matrix",
       "label": "matrix",
+      "level": "method",
+      "parent": "kneemri.corpus.anatomy.SlotAffinity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.anatomy.SlotAffinity.requested",
+      "label": "requested",
       "level": "method",
       "parent": "kneemri.corpus.anatomy.SlotAffinity",
       "role": null

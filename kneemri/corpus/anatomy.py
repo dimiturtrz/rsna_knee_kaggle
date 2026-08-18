@@ -28,7 +28,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.corpus.slots import Plane, Slot
+from kneemri.corpus.slots import SLOTS, Plane, Slot
 
 
 class Extent(Enum):
@@ -226,3 +226,23 @@ class SlotAffinity:
             for target in targets
         ]
         return torch.tensor(rows, dtype=torch.float32)
+
+    def requested(self, targets: tuple[str, ...], n_slot: int, *, wanted: bool) -> Float[Tensor, "o s"] | None:
+        """The prior a design ASKED for over `n_slot` slots, or nothing — the refusal, spelled once.
+
+        The table is defined over the canonical slots, so asking for it with a different slot count is
+        a mistake rather than something to broadcast quietly: a (12, 6) table against a (12, 2)
+        attention map either throws deep inside the head or, worse, does not.
+
+        `StudyModel` and `TrialHead` both made that refusal, four lines apiece, the second admitting in
+        a comment that it was the first one's rule. A rule spelled in two constructors is one the proxy
+        can drift out of while still sharing the flag's name — which is the drift `TrialHead` exists to
+        not have, since a head trial that answers a different question under `--anatomical-prior` is
+        worse than no proxy at all.
+        """
+        if not wanted:
+            return None
+        if n_slot != len(SLOTS):
+            message = f"anatomical prior covers {len(SLOTS)} slots, the head has {n_slot}"
+            raise ValueError(message)
+        return self.matrix(targets, SLOTS)

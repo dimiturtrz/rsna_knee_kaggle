@@ -17,7 +17,6 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
-from kneemri.corpus.slots import SLOTS
 from kneemri.models.lora import LoRALinear
 from kneemri.models.slice_attention import SliceAttention
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
@@ -198,13 +197,7 @@ class StudyModel(nn.Module):
             # error deep inside the head - or not at all, if the head happens to accept the width.
             message = f"encoder emits {width}-wide features and the registry says {dim}"
             raise ValueError(message)
-        # The prior is defined over the canonical six slots, so asking for it with a different slot
-        # count is a mistake rather than something to silently truncate — a (12, 6) table broadcast
-        # against a (12, 2) attention map would either throw deep inside the head or, worse, not.
-        if self.design.anatomical_prior and n_slot != len(SLOTS):
-            message = f"anatomical prior covers {len(SLOTS)} slots, model has {n_slot}"
-            raise ValueError(message)
-        prior = SlotAffinity(ANATOMY).matrix(TARGETS, SLOTS) if self.design.anatomical_prior else None
+        prior = SlotAffinity(ANATOMY).requested(TARGETS, n_slot, wanted=self.design.anatomical_prior)
         head_width = dim * POOL_PARTS[self.pool]
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
