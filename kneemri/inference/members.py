@@ -24,6 +24,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from core.mounts import Mounts
+from core.paths import DataRoot
 from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
@@ -449,8 +450,37 @@ class Member:
         return json.dumps(pixels, sort_keys=True)
 
 
+SHIPPED_PACKAGE = "all_ours"
+"""The directory under the processed root that `package_members` writes and `push.sh` uploads."""
+
+
 class MemberPackage:
     """A mounted weights package: the manifest, its members, and the check that they are trustworthy."""
+
+    @staticmethod
+    def shipped_root(paths: Path = Path("paths.yaml")) -> Path:
+        """Where the package that actually ships lives — the ONE directory allowed to carry its dataset id.
+
+        Five CLIs defaulted `--root` to `comp/members`, an in-repo mirror of the same package, and
+        `package_members --out` defaulted there too. Both directories stamped `dimiturnt/kneemri-members`
+        while only the other one was pushed, so the mirror silently aged: on 2026-08-18 it held seven
+        members against the live package's nine, and `mount_check`'s DEFAULT invocation refused a valid
+        kernel because the member it names was absent from the copy nobody uploads. A check whose default
+        answer is wrong teaches its operator to pass `--root` and stop reading the refusal.
+
+        The weights are gitignored, so the mirror was never version control's copy of anything — it was a
+        second home for a thing that can only have one.
+        """
+        return DataRoot.from_config(paths).processed() / SHIPPED_PACKAGE
+
+    @classmethod
+    def at(cls, root: Path | None, paths: Path = Path("paths.yaml")) -> "MemberPackage":
+        """The package a CLI was pointed at, or the one that ships when it was pointed nowhere.
+
+        Every `--root` defaults to None and resolves through here, so the fallback is written once
+        rather than as an `or` at each of four call sites that could each drift to a different home.
+        """
+        return cls(root if root is not None else cls.shipped_root(paths))
 
     def __init__(self, root: Path, tie: str | None = None) -> None:
         """A mounted package, optionally under a tie rule WE measured rather than one it declares.

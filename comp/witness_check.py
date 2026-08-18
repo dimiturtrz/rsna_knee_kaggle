@@ -133,7 +133,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
 def main() -> None:
     """Check every member's witness in a packaged directory."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("comp/members"))
+    parser.add_argument("--root", type=Path, default=None, help="a package to check; default is the one that ships")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     # A GATE THAT NEEDS THE GPU IS A GATE THAT GETS SKIPPED. This reads eight studies through one
     # small encoder — seconds of work — and defaulting to cuda meant it could not run at all while a
@@ -150,7 +150,7 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    package = MemberPackage(arguments.root)
+    package = MemberPackage.at(arguments.root, arguments.paths)
     root = DataRoot.from_config(arguments.paths).processed()
     selected = arguments.device
     if selected == "auto":

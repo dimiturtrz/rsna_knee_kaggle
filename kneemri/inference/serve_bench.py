@@ -135,7 +135,8 @@ class ServeBench:
 def main() -> None:
     """Time one member's serving forward eager against compiled, on synthetic pixels of its own shape."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("comp/members"))
+    parser.add_argument("--root", type=Path, default=None, help="a package to time; default is the one that ships")
+    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument("--member", default="", help="which member to time (default: the strongest)")
     parser.add_argument("--studies", type=int, default=STUDIES)
     parser.add_argument("--repeats", type=int, default=REPEATS)
@@ -156,7 +157,7 @@ def main() -> None:
     from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - CLI-only
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - CLI-only
 
-    package = MemberPackage(arguments.root)
+    package = MemberPackage.at(arguments.root, arguments.paths)
     fitted = package.named([arguments.member])[0] if arguments.member else package.strongest(1)[0]
     device = VisibleCards().device()
     encoder = ENCODERS[fitted.variant]

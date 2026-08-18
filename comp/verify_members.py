@@ -32,13 +32,14 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     """Load every member in a packaged directory and verify it against its stored fingerprint."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("comp/members"))
+    parser.add_argument("--root", type=Path, default=None, help="a package to verify; default is the one that ships")
+    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument("--kernel", type=Path, help="a kernel-metadata.json whose mounts must cover this package")
     parser.add_argument("--members", nargs="*", help="the members that kernel runs; default is the whole package")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    package = MemberPackage(arguments.root)
+    package = MemberPackage.at(arguments.root, arguments.paths)
     mounts = package.mounts(package.named(arguments.members) if arguments.members else None)
     # BEFORE ANY WEIGHTS LOAD, because this costs a file read and the loop below costs a GPU minute per
     # member — and because a kernel that cannot attach an encoder fails no matter how well its members

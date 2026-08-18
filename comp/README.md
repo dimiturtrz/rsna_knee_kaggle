@@ -112,7 +112,8 @@ reflexively, its value was the stale-kit refusal, not the transport.
 
 ```bash
 export KAGGLE_CONFIG_DIR="$HOME/.kaggle"
-bash comp/push.sh dataset members "<notes>"      # verify_kit gates it, then the CLI runs
+bash comp/push.sh dataset "$(uv run python -c \
+  "from kneemri.inference.members import MemberPackage; print(MemberPackage.shipped_root())")" "<notes>"
 bash comp/push.sh kernel  kernels/kneemri-trained
 cd comp && kaggle competitions submit rsna-knee-abnormality-detection \
   -k dimiturnt/kneemri-trained -v <version> -f submission.csv -m "<what changed>"
@@ -125,8 +126,15 @@ for a competition slug that does not exist, so check the slug before assuming a 
 ours is `rsna-knee-abnormality-detection`, and a wrong guess made `ListSubmissions` 403 and
 `kaggle competitions list -s <guess>` return "No competitions found" while the credential was fine.
 
-**Run it from inside `comp/`.** `-p comp/members` fails with a mangled temp path
-(`comp/members_manifest.json.json`) — the CLI concatenates directory and filename on Windows.
+**Never hand the dataset CLI a path with a separator in it.** `-p comp/members` failed with a mangled
+temp path (`comp/members_manifest.json.json`) — the CLI concatenates directory and filename on Windows.
+`push.sh` is why the absolute package path above is safe: its dataset branch `cd`s to the package's
+parent and passes the bare directory name.
+
+**There is exactly ONE members directory**, `MemberPackage.shipped_root()` — `<processed root>/all_ours`. The in-repo
+`comp/members` was deleted on 2026-08-18: two directories stamped the same dataset id, only one was ever
+uploaded, and the other aged to seven members while the live package held nine, which made
+`mount_check`'s default invocation refuse a valid kernel (knee-n0w0).
 
 **A member's SLICE AGGREGATION travels with it, and this was verified by breaking it (2026-08-11).**
 `members.py` reconstructed every member with `StudyDesign(pool=...)` and never passed `slice_pooling`,

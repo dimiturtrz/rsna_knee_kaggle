@@ -58,12 +58,13 @@ class MountCheck:
 def main() -> None:
     """Report every kernel's mount coverage and refuse if any entry could not run what it names."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("comp/members"))
+    parser.add_argument("--root", type=Path, default=None, help="a package to check; default is the one that ships")
+    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument("--kernels", type=Path, default=Path("comp/kernels"))
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    check = MountCheck(MemberPackage(arguments.root))
+    check = MountCheck(MemberPackage.at(arguments.root, arguments.paths))
     verdicts = {kernel.name: check.verdict(kernel) for kernel in check.entries(arguments.kernels)}
     for name, verdict in verdicts.items():
         logger.info("  %s: %s", name, verdict)

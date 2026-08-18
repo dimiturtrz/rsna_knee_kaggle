@@ -20,15 +20,21 @@ ROSTER="${1:-comp/members.roster}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
-echo "=== 1. package the members named by $ROSTER ==="
-uv run python -m kneemri.kaggle.package_members --out comp/members --roster "$ROSTER"
+# ONE HOME, RESOLVED ONCE. This script used to spell `--out comp/members` and hand the same path to
+# both checks, which is how the repo grew a second directory stamping the live dataset id: the package
+# that ships lives under the processed root, and the in-repo copy aged behind it until `mount_check`'s
+# default invocation refused a valid kernel (knee-n0w0). Every path below comes from this one line.
+PACKAGE="$(uv run python -c "from kneemri.inference.members import MemberPackage; print(MemberPackage.shipped_root())")"
+
+echo "=== 1. package the members named by $ROSTER into $PACKAGE ==="
+uv run python -m kneemri.kaggle.package_members --roster "$ROSTER"
 
 echo
 echo "=== 2. verify every member loads and fingerprints under its OWN reading ==="
 # The check that matters: a member fitted with --slice-pooling max and rebuilt with the default
 # channel stacking differs from its stored fingerprint by 2.25 against a 2e-3 tolerance. That is a
 # different function on different pixels, not numerical drift.
-uv run python comp/verify_members.py --root comp/members || {
+uv run python comp/verify_members.py || {
   echo "MEMBERS FAILED VERIFICATION - do not submit"
   exit 1
 }
@@ -39,7 +45,7 @@ echo "=== 2b. does INFERENCE read each member the way training did? ==="
 # instead of the member's own config - which is how whole-stack members were served three slices at a
 # time all the way onto the leaderboard. This re-derives each member's witness through the inference
 # path. UNVERIFIED is not a failure: members trained before the witness existed have nothing to check.
-uv run python comp/witness_check.py --root comp/members || {
+uv run python comp/witness_check.py || {
   echo "A MEMBER IS READ DIFFERENTLY BY INFERENCE THAN BY TRAINING - do not submit"
   exit 1
 }
@@ -51,6 +57,6 @@ uv run python comp/verify_kit.py || { echo "KIT STALE - do not submit"; exit 1; 
 
 echo
 echo "=== READY. The outward-facing steps are yours to run: ==="
-echo "  bash comp/push.sh dataset members '<what changed>'"
+echo "  bash comp/push.sh dataset '$PACKAGE' '<what changed>'"
 echo "  bash comp/push.sh kernel  kernels/<kernel>"
 echo "  then run the kernel on Kaggle and submit its output"

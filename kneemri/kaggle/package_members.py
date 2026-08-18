@@ -1,4 +1,4 @@
-"""Package our trained members for Kaggle: `python -m kneemri.kaggle.package_members --out comp/members`.
+"""Package our trained members for Kaggle: `python -m kneemri.kaggle.package_members`.
 
 Emits the same manifest shape the published package uses, so `MemberPackage` reads ours and theirs
 through one code path — including the fingerprint check, which is what stops a member being run under a
@@ -24,6 +24,7 @@ from typing import cast
 import torch
 
 from core.paths import DataRoot
+from kneemri.inference.members import MemberPackage
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +125,7 @@ class MemberManifest:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=Path("comp/members"))
+    parser.add_argument("--out", type=Path, default=None, help="where to write; default is the package that ships")
     parser.add_argument(
         "--roster",
         type=Path,
@@ -158,7 +159,7 @@ def main() -> None:
     # without first deleting the previous package and writing ~89 MB per checkpoint.
     document = MemberManifest(members).document()
 
-    destination = arguments.out
+    destination = arguments.out or MemberPackage.shipped_root(arguments.paths)
     if destination.exists():
         shutil.rmtree(destination)
     destination.mkdir(parents=True)

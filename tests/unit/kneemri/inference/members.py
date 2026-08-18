@@ -11,10 +11,18 @@ import torch
 from torch import Tensor
 
 from core.mounts import Mounts
+from core.paths import COMPETITION
 from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import SCHEMES, Routing
-from kneemri.inference.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
+from kneemri.inference.members import (
+    LEGACY_SLICES,
+    SHIPPED_PACKAGE,
+    Member,
+    MemberConfig,
+    MemberPackage,
+    WeightsError,
+)
 from kneemri.models.backbone import SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 
@@ -698,3 +706,32 @@ def test_every_recorded_field_is_either_consumed_or_declared_unread():
         member = replace(_member(), config={**_config(), name: probe})
 
         assert read(member) == expected, f"config[{name!r}] is recorded and its serve-side reader ignores it"
+
+
+def _shipped(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A paths.yaml naming a data root under tmp_path, with the env override that outranks it removed."""
+    monkeypatch.delenv("KNEEMRI_DATA", raising=False)
+    paths = tmp_path / "paths.yaml"
+    paths.write_text(f"data: {(tmp_path / 'data').as_posix()}\n", encoding="utf-8")
+    return paths
+
+
+def test_shipped_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The one home is under the PROCESSED root, not the repo — the mirror it replaced aged two members behind."""
+    root = MemberPackage.shipped_root(_shipped(tmp_path, monkeypatch))
+
+    assert root.name == SHIPPED_PACKAGE
+    assert root.parent == tmp_path / "data" / "processed" / COMPETITION
+
+
+def test_at(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """An explicit root wins; pointing a CLI nowhere resolves the package that ships, never the caller's cwd."""
+    paths = _shipped(tmp_path, monkeypatch)
+    (tmp_path / "named").mkdir()
+    named, _ = _package(tmp_path / "named")
+    shipped = MemberPackage.shipped_root(paths)
+    shipped.mkdir(parents=True, exist_ok=True)
+    (shipped / "manifest.json").write_text(json.dumps({"format": 2, "members": []}), encoding="utf-8")
+
+    assert MemberPackage.at(named.root, paths).root == named.root
+    assert MemberPackage.at(None, paths).root == shipped

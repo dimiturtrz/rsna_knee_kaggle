@@ -52,9 +52,10 @@ node_modules/
 # root, out of the repo - it is ~200 MB of weights and wheels, and while it lived at comp/kit it
 # put a stale copy of kneemri inside the type checker's scope. verify_kit.py keeps it honest.
 /comp/kit_staging/
-# Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git — the manifest
-# beside them IS tracked, because it is the reproducible description of what was packaged.
-/comp/members/*.pt
+# Trained member weights: 85 MB each. They belong in a Kaggle dataset, not in git. The manifest used to
+# be tracked beside them as the reproducible description of what was packaged — but the roster is that
+# description, and tracking the manifest meant tracking a second members directory inside the repo.
+# comp/members was deleted 2026-08-18 (knee-n0w0); the package lives under the processed root.
 
 # A training run's own outputs, wherever it was pointed: the checkpoint, the periodic save beside it,
 # the held-out predictions and the epoch log. `arm_smoke --smoke <dir>` deletes what IT wrote, but the
