@@ -205,6 +205,19 @@ class Ensemble:
             gathered.setdefault(key, []).append(member)
         return list(gathered.values())
 
+    def _asked(self, members: list[Member] | None) -> list[Member]:
+        """The subset a caller named, or the whole package when it named none — and NOT when it named zero.
+
+        `members or self.package.members` reads the same until the subset is empty, and then it answers a
+        question nobody asked: the decode fields of every member in the package, handed to a group that
+        holds none of them. Both callers here say "derived, never defaulted" in their own docstrings, and
+        a falsy default is exactly a default. `None` is the absence of an argument; `[]` is a subset that
+        came out empty, which is a caller's bug and should surface as one — `max()` refuses an empty
+        sequence and `agreed` refuses a set of zero distinct values, so the loud failure already exists
+        and only the fallback was hiding it.
+        """
+        return self.package.members if members is None else members
+
     def slices(self, members: list[Member] | None = None) -> int:
         """How deep a stack to decode: the deepest any member was fitted on.
 
@@ -217,7 +230,7 @@ class Ensemble:
         The MAX rather than each member's own, because a chunk is decoded once and shown to every
         member; a member that wants fewer simply windows over part of it.
         """
-        return max(member.slices for member in (members or self.package.members))
+        return max(member.slices for member in self._asked(members))
 
     def decoded_scheme(self, members: list[Member] | None = None) -> SlotScheme:
         """The slot scheme the test set must be DECODED under — the members', never a default.
@@ -231,7 +244,7 @@ class Ensemble:
         Refused rather than resolved when members disagree, for the same reason as resolution — a
         different slot list is a different decode, not a subset of one.
         """
-        decoding = members or self.package.members
+        decoding = self._asked(members)
         names = self.agreed(decoding, "slot list", lambda member: tuple(member.config["slots"]))
         known = {slot.name: slot for scheme in SCHEMES.values() for slot in scheme}
         missing = [name for name in names if name not in known]

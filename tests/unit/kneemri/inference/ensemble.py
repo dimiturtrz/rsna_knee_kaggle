@@ -173,6 +173,9 @@ def test_slices(tmp_path: Path):
     ensemble.package.members[0].config["slices"] = 20
     assert ensemble.slices() == 20, "a deeper member must raise the decode depth, not be truncated to it"
 
+    with pytest.raises(ValueError, match="empty"):
+        ensemble.slices([])
+
 
 def test_predict_member_reads_a_whole_stack_member_in_one_pass(tmp_path: Path):
     """A whole-stack member sees its ENTIRE stack at once, not `group` slices at a time.
@@ -240,6 +243,13 @@ def test_decoded_scheme(tmp_path: Path):
     ensemble.package.members = [replace(member, identifier="bad", config=unknown)]
     with pytest.raises(ValueError, match="does not define"):
         ensemble.decoded_scheme()
+
+    ensemble.package.members = [member]
+    with pytest.raises(ValueError, match="0 distinct"):
+        ensemble.decoded_scheme([])
+    assert [slot.name for slot in ensemble.decoded_scheme(None).slots] == SLOTS, (
+        "an EMPTY subset is a caller's bug and refuses; only the ABSENT one means the whole package"
+    )
 
 
 def test_agreed(tmp_path: Path):

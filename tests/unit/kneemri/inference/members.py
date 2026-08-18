@@ -1,5 +1,6 @@
 import json
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import cast, override
@@ -15,7 +16,10 @@ from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import SCHEMES, Routing
 from kneemri.inference.members import LEGACY_SLICES, Member, MemberConfig, MemberPackage, WeightsError
 from kneemri.models.backbone import SMALL
-from kneemri.models.model import StudyModel
+from kneemri.models.model import StudyDesign, StudyModel
+
+from ..runs.member_record import OPTIONS
+from ..runs.member_record import _config as _recorded_config  # the WRITER's own output, never a copy
 
 SEED = 2026
 DIM = 8
@@ -628,3 +632,69 @@ def test_member_package_takes_a_measured_tie_override(tmp_path: Path):
     overridden = MemberPackage(tmp_path, tie="last")
     assert overridden.members[0].tie == "last"
     assert overridden.members[0].pixel_group != plain.members[0].pixel_group, "different pixels"
+
+
+CONSUMED: dict[str, tuple[object, Callable[[Member], object], object]] = {
+    "img": (448, lambda member: member.image_size, 448),
+    "train_size": (392, lambda member: member.read_size, 392),
+    "slices": (20, lambda member: member.slices, 20),
+    "cache_studies": (60, lambda member: member.cache_studies, 60),
+    "group": (5, lambda member: member.group, 5),
+    "crop_mm": (80.0, lambda member: member.crop.mm, 80.0),
+    "centre": ("tissue", lambda member: member.crop.centre, "tissue"),
+    "tie": ("last", lambda member: member.tie, "last"),
+    "band": ([0.1, 0.9], lambda member: member.band, Band(low=0.1, high=0.9)),
+    "variant": ("base", lambda member: member.variant, "base"),
+    "pool": ("cls_mean_focal", lambda member: member.pool, "cls_mean_focal"),
+    "slice_pooling": ("max", lambda member: member.slice_pooling, "max"),
+    "slot_pooling": ("mean", lambda member: member.slot_pooling, "mean"),
+    "anatomical_prior": (True, lambda member: StudyDesign.from_config(member.config).anatomical_prior, True),
+    "encoder_layer": (-4, lambda member: member.layer, -4),
+    "lora_rank": (8, lambda member: member.lora_rank, 8),
+    "whole_stack": (True, lambda member: member.whole_stack, True),
+    "bf16": (True, lambda member: member.precision, torch.bfloat16),
+    "witness": ({"studies": ["A"]}, lambda member: member.witness, {"studies": ["A"]}),
+    "slots": (["SAG_T1", "COR_T1"], lambda member: member.slot_count, 2),
+}
+"""Every recorded field a SERVE-side reader must take from the member, as (probe, reader, expected).
+
+The probe is a second legal value, so a reader that quietly used its own default answers the first one.
+"""
+
+PROVENANCE_ONLY = {
+    "ema",
+    "rank_weight",
+    "pair_memory",
+    "report_weight",
+    "unfreeze_last",
+    "head_lr",
+    "backbone_lr",
+}
+"""Recorded so the ledger can say which arm produced a member, and read by NOTHING at serve time — a
+training rule leaves no trace in the forward pass. Listed rather than omitted, so a field that gains a
+consumer moves between the two sets deliberately."""
+
+
+def test_every_recorded_field_is_either_consumed_or_declared_unread():
+    """The mirror of the writer's one-hot walk, on the side that has cost this project nine defects.
+
+    All nine are the same shape: a value written faithfully into the config and a consumer reading a
+    module default instead — whole-stack reading windowed to three slices, the decode resolution and the
+    slot list each taken from a constant, every bf16 member served in fp16. Each was found by a witness,
+    a refused fingerprint or a lost submission, which is to say AFTER a run.
+
+    The writer is already guarded: `test_payload_takes_each_config_field_from_the_option_of_its_own_name`
+    moves one option and demands exactly one stamped field follow. Nothing guarded the other end, so a
+    key could be recorded correctly and read by nobody — which is precisely what happened, nine times.
+
+    Two claims, and the first is the one that does not rot: every key the writer stamps is classified,
+    so a NEW recorded field cannot arrive with no consumer and no stated reason for having none.
+    """
+    recorded = set(_recorded_config(OPTIONS))
+
+    assert recorded == set(CONSUMED) | PROVENANCE_ONLY, "a recorded field is consumed at serve time or declared unread"
+
+    for name, (probe, read, expected) in CONSUMED.items():
+        member = replace(_member(), config={**_config(), name: probe})
+
+        assert read(member) == expected, f"config[{name!r}] is recorded and its serve-side reader ignores it"
