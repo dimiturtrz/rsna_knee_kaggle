@@ -260,6 +260,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.fetch_bench",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.fetch_bench",
+      "target": "kneemri.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.fetch_bench",
+      "target": "kneemri.corpus.window_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.laterality",
       "target": "kneemri.corpus.acquisition",
       "weight": 1
@@ -2848,6 +2866,96 @@
       "kind": "calls",
       "source": "kneemri.corpus.diagnose_matrix.main",
       "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.fetch_bench.FetchBench",
+      "target": "kneemri.corpus.fetch_bench.Sweep",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.fetch_bench.FetchBench",
+      "target": "kneemri.corpus.window_reader.WindowReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.FetchBench.rate",
+      "target": "kneemri.corpus.fetch_bench.FetchBench.seconds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.FetchBench.rate",
+      "target": "kneemri.corpus.fetch_bench.Sweep.bytes_read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.FetchBench.seconds",
+      "target": "kneemri.corpus.window_reader.WindowReader.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.fetch_bench.Sweep",
+      "target": "kneemri.corpus.fetch_bench.Sweep",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.fetch_bench.FetchBench",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.fetch_bench.FetchBench.rate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.fetch_bench.FetchBench.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.fetch_bench.Sweep.over",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.window_reader.FileReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.fetch_bench.main",
+      "target": "kneemri.corpus.window_reader.MappedReader",
       "weight": 1
     },
     {
@@ -9417,7 +9525,7 @@
       "role": null
     },
     {
-      "descendants": 107,
+      "descendants": 108,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -9425,7 +9533,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 21,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -9516,6 +9624,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.diagnose_matrix",
       "label": "diagnose_matrix",
+      "level": "module",
+      "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench",
+      "label": "fetch_bench",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -10519,6 +10635,22 @@
       "level": "class",
       "parent": "kneemri.corpus.diagnose_matrix",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.FetchBench",
+      "label": "FetchBench",
+      "level": "class",
+      "parent": "kneemri.corpus.fetch_bench",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.Sweep",
+      "label": "Sweep",
+      "level": "class",
+      "parent": "kneemri.corpus.fetch_bench",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -12422,6 +12554,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.corpus.diagnose_matrix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.FetchBench.rate",
+      "label": "rate",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench.FetchBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.FetchBench.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench.FetchBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.FetchBench.seconds",
+      "label": "seconds",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench.FetchBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.Sweep.bytes_read",
+      "label": "bytes_read",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench.Sweep",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.Sweep.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench.Sweep",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.fetch_bench.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.corpus.fetch_bench",
       "role": null
     },
     {

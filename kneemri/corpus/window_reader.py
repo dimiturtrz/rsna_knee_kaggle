@@ -12,8 +12,17 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-READERS = 2
-"""Handles a batch is read through. Two is where the drive stops scaling; four is level, eight worse."""
+READERS = 4
+"""Handles a batch is read through.
+
+Two, until `fetch_bench` timed the branch the TRAINER actually reads. The original number came from a
+whole-stack read — one seek per study — where two handles already saturate: 336 px cache, whole stack,
+1.06 / 1.35 / 1.35 / 1.38 GB/s at 1 / 2 / 4 / 8. A member reads a NARROW WINDOW, which is one seek per
+slot instead, and a seek-bound pattern keeps scaling past two: 0.72 / 1.06 / 1.39 / 1.31 GB/s over the
+same handles, reproduced at 0.77 / 1.25 / 1.43 / 0.92 with the arms run in the opposite order over
+different rows. Four is the peak of the read the trainer performs and costs nothing on the read it does
+not, so it is the setting both branches want.
+"""
 
 
 class WindowReader(Protocol):
