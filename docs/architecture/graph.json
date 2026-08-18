@@ -5563,12 +5563,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.experiments.arm_check.ArmCheck.readings",
-      "target": "kneemri.corpus.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.readings",
       "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
@@ -8607,6 +8601,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.train.TrainingOptions",
+      "target": "kneemri.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.train.TrainingOptions",
       "target": "kneemri.labels.targets.Supervision",
       "weight": 1
     },
@@ -8674,6 +8674,12 @@
       "kind": "construct",
       "source": "kneemri.training.train.TrainingOptions.band",
       "target": "kneemri.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.train.TrainingOptions.cache",
+      "target": "kneemri.corpus.study_cache.StudyCache",
       "weight": 1
     },
     {
@@ -8860,18 +8866,6 @@
       "kind": "calls",
       "source": "kneemri.training.train.main",
       "target": "kneemri.corpus.folds.ReportFolds.holdout",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.corpus.study_cache.StudyCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.corpus.study_cache.StudyCache.load",
       "weight": 1
     },
     {
@@ -17084,6 +17078,14 @@
       "descendants": 0,
       "id": "kneemri.training.train.TrainingOptions.band",
       "label": "band",
+      "level": "method",
+      "parent": "kneemri.training.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.train.TrainingOptions.cache",
+      "label": "cache",
       "level": "method",
       "parent": "kneemri.training.train.TrainingOptions",
       "role": null

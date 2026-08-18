@@ -133,6 +133,23 @@ class TrainingOptions:
         """The geometry this run decodes under — its crop and its band, which together name its cache."""
         return Reading(crop=self.crop, band=self.band)
 
+    def cache(self, directory: Path) -> StudyCache:
+        """The arrays this run reads — six axes, resolved in ONE place instead of at every entrypoint.
+
+        `main` and `arm_check` each spelled this constructor out, agreeing with each other and with
+        `CacheFlags.cache` by inspection. A seventh axis added to the flags and forgotten in one of them
+        is not a crash: it is an arm that trains on pixels its recorded config does not describe, and a
+        holdout number filed under a reading nobody ran.
+        """
+        return StudyCache(
+            directory,
+            slices=self.slices,
+            image_size=self.image_size,
+            routing=self.routing,
+            reading=self.reading,
+            first=self.cache_studies,
+        )
+
     @property
     def supervision(self) -> Supervision:
         """What this run's two label switches mean, as the value `Targets.pair` takes.
@@ -611,14 +628,7 @@ def main() -> None:
     # and taking the device first meant an arm held the GPU to discover it — the queue slot is spent
     # either way, but the card need not be. Mapping is cheap: no pixels are read here.
     root = DataRoot.from_config(arguments.paths)
-    cache = StudyCache(
-        root.processed(),
-        slices=arguments.slices,
-        image_size=arguments.image_size,
-        routing=arguments.routing,
-        reading=arguments.reading,
-        first=arguments.cache_studies,
-    )
+    cache = arguments.cache(root.processed())
     corpus, identifiers = cache.load()
     device = DeviceBudget(arguments.vram_gb).select()
     targets, evaluation = Targets.pair(

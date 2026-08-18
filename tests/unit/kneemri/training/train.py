@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import torch
 
+from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import Routing
@@ -351,6 +352,34 @@ def test_routing():
     """The scheme and tie flags argparse lands as scalars, read back as the pair everything else wants."""
     assert TrainingOptions().routing == Routing()
     assert TrainingOptions(tie="last").routing.tie == "last"
+
+
+def test_cache():
+    """The arrays a run reads, resolved from the run — not respelled by each entrypoint that wants them.
+
+    `main` and `arm_check` each held their own six-axis `StudyCache(...)`, agreeing with `CacheFlags`
+    by inspection. A seventh axis added to the flags and forgotten in one of them is not a crash: it is
+    an arm that trains on pixels its recorded config does not describe, and a holdout number filed
+    under a reading nobody ran. The key is asserted whole, because the key IS the file name.
+    """
+    stated = TrainingOptions(
+        slices=6, image_size=448, crop_mm=80.0, centre="tissue", band_low=0.1, band_high=0.9, tie="last"
+    )
+    named = stated.cache(Path("."))
+
+    assert named.key == "448px_6sl_80mm_tissue_0.1-0.9band_last"
+    assert named.directory == Path(".")
+    assert named.reading == stated.reading, "the run's geometry, not the module default"
+    assert named.routing == stated.routing
+    assert TrainingOptions(cache_studies=60).cache(Path(".")).key.endswith("_first60"), (
+        "the smoke truncation is an axis of the NAME, so a partial decode cannot overwrite the full one"
+    )
+    argv = TrainingOptions.parser().parse_args(["--labels", "labels.csv"])
+
+    assert TrainingOptions().cache(Path(".")).key == CacheFlags.cache(argv, Path(".")).key, (
+        "the dataclass half and the namespace half of one rule, pinned equal on the reading every "
+        "member on disk was fitted under"
+    )
 
 
 def test_sampled():

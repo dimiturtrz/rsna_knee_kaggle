@@ -229,17 +229,7 @@ class ArmCheck:
             if options is None or not options.paths.is_file():
                 continue
             root = DataRoot.from_config(options.paths)
-            readings[name] = ArmReading(
-                root,
-                StudyCache(
-                    root.processed(),
-                    slices=options.slices,
-                    image_size=options.image_size,
-                    routing=options.routing,
-                    reading=options.reading,
-                    first=options.cache_studies,
-                ),
-            )
+            readings[name] = ArmReading(root, options.cache(root.processed()))
         return readings
 
     def uncached(self, invocations: dict[str, str]) -> dict[str, str]:

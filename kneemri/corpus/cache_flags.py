@@ -98,7 +98,13 @@ class CacheFlags:
 
     @staticmethod
     def cache(arguments: argparse.Namespace, directory: Path) -> StudyCache:
-        """The cache those flags name, with no axis left for the caller to remember."""
+        """The cache those flags name, with no axis left for the caller to remember.
+
+        The namespace-shaped half of one rule; `TrainingOptions.cache` is the dataclass-shaped half, and
+        `Member.cache` the serve-side one. The two argv halves are pinned equal on real argv by
+        `tests/integration/argv_to_cache_key.py`, since a namespace and a frozen dataclass cannot share
+        an accessor without a structural type this repo's fitness gate reads as a second subject.
+        """
         return StudyCache(
             directory,
             slices=arguments.slices,
