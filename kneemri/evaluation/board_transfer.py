@@ -126,6 +126,17 @@ class BoardTransfer:
         """Every recorded line, the notes included, exactly as the file holds them."""
         return [json.loads(line) for line in self.record.read_text(encoding="utf-8").splitlines() if line]
 
+    @staticmethod
+    def _carries_both(row: dict[str, object]) -> bool:
+        """Whether a row has BOTH numbers, which is what makes it an entry rather than a record.
+
+        A row may legitimately carry neither: an arm fired to answer a question the holdout cannot ask
+        has no offline number, and an entry that blanked has no board one. Both are worth recording and
+        neither can enter a pair — before this the reader called `float(str(None))` on them and died,
+        which took the whole reading down from 2026-08-17 onward rather than dropping three rows.
+        """
+        return row.get("offline") is not None and row.get("board") is not None
+
     def entries(self) -> list[BoardEntry]:
         """Every entry carrying both numbers ON THIS READING'S SCOPE, weakest holdout first."""
         found = [
@@ -136,9 +147,17 @@ class BoardTransfer:
                 members=int(str(row["members"])),
             )
             for row in self._rows()
-            if row.get("scope") == self.scope
+            if row.get("scope") == self.scope and self._carries_both(row)
         ]
         return sorted(found, key=lambda entry: entry.offline)
+
+    def unmeasured(self) -> list[str]:
+        """Rows on this scope that carry only one of the two numbers, named so the drop is never silent."""
+        return [
+            str(row["id"])
+            for row in self._rows()
+            if row.get("scope") == self.scope and "id" in row and not self._carries_both(row)
+        ]
 
     def dropped(self) -> dict[str, int]:
         """How many entries each non-comparable scope cost, so the exclusion is never silent."""
@@ -182,7 +201,8 @@ class BoardTransfer:
         excluded = ", ".join(f"{count} {scope}" for scope, count in self.dropped().items())
         lines = [
             f"{len(self.entries())} entries on the {self.scope} scope, {len(pairs)} orderable pairs "
-            f"(excluded: {excluded or 'none'})",
+            f"(excluded: {excluded or 'none'}; "
+            f"one-sided: {', '.join(self.unmeasured()) or 'none'})",
             f"compression: median {self.compression():+.2f} board points per holdout point",
             f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
             f"{sum(pair.inverted for pair in pairs if pair.resolved)}/"

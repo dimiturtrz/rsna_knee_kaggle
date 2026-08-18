@@ -13,6 +13,9 @@ RECORD = [
     {"id": "close", "offline": 0.8630, "board": 0.890, "members": 5, "scope": "ensemble"},
     {"id": "averaged", "offline": 0.8200, "board": 0.888, "members": 5, "scope": "member_mean"},
     {"id": "silent", "offline": 0.8400, "board": 0.882, "members": 2, "scope": "unknown"},
+    # An arm the holdout cannot ask, and an entry that blanked: one number each, no pair either way.
+    {"id": "unasked", "offline": None, "board": 0.905, "members": 3, "scope": "ensemble"},
+    {"id": "blanked", "offline": 0.8550, "board": None, "members": 2, "scope": "ensemble"},
 ]
 
 
@@ -133,3 +136,20 @@ def test_resolved():
     """A gap under the ruler's own noise floor is not a preference the board can contradict."""
     assert _pair(offline=0.01, board=0.02).resolved
     assert not _pair(offline=0.003, board=0.02).resolved
+
+
+def test_entries_drops_a_row_carrying_only_one_of_the_two_numbers(tmp_path: Path):
+    """A one-sided row is a legitimate record and never an entry.
+
+    Reading it as one is not a wrong pair, it is a crash: `float(str(None))` raised ValueError and took
+    the whole report down from the day the first blank was recorded until 2026-08-18.
+    """
+    transfer = BoardTransfer(_record(tmp_path))
+
+    assert {entry.id for entry in transfer.entries()} == {"weak", "strong", "close"}
+    assert transfer.report().startswith("3 entries")
+
+
+def test_unmeasured(tmp_path: Path):
+    """The dropped rows are NAMED, because a silent drop is how a blank submission stops being a result."""
+    assert BoardTransfer(_record(tmp_path)).unmeasured() == ["unasked", "blanked"]
