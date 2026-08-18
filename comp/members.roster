@@ -40,3 +40,10 @@ crop80_tissue_s2026.pt      # 0.8345 — the only member reading a DIFFERENT phy
 # closing it costs a dataset push. What the same scoring DID show is worth more than the subset: the
 # best subset falls monotonically past five, to 0.8547 flat over all thirteen, so "mount more, name
 # more" is negative return and this roster's six are already past the useful count.
+lr4e-5_ws_s2026.pt          # 0.8525 — ties res392 as our best member, at 336 px
+lr1e-4_ws_s2026.pt          # 0.8490 — the same lever 2.5x past its plateau
+# Added 2026-08-18. These two are the encoder-rate sweep (knee-wnkv): 8e-6 -> 4e-5 is +0.0068 and the
+# whole of what `res392` was credited to resolution for, since 392 px at the control's own rate scored
+# +0.0002 (knee-a8x). res392 and lr4e-5 therefore carry the SAME lever through different pixels, which
+# is why both are mounted rather than one replacing the other — the pool's question is whether the
+# 392 px read adds anything once the rate is held equal, and only a package holding both can ask it.
