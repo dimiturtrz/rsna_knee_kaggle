@@ -99,6 +99,22 @@ uncached, 0 broken**, in 14 minutes rather than the hour this section warns abou
 startup (weights, cache map, compile), not the 2 s epoch, so it is cheap enough to run after any change
 to `kneemri/training/`, not only before a queue.
 
+**`--switches` — the axis the arm sweep cannot see, because it only runs the paths the arms take.**
+Diffing `TrainingOptions` against every `--flag` under `experiments/**.sh` on 2026-08-18 found five real
+switches that were landed-checked, stamped and never once RUN: `--pool cls_mean_focal`,
+`--anatomical-prior`, `--normalise-by-count`, `--tie` and `--head-lr`. A break in one of those surfaces
+at a queue slot, after the card is held. `kneemri/experiments/switch_coverage.py` now holds one default
+recipe per uncovered switch and a written reason for every option that is not a method at all (`--seed`,
+`--folds`, `--paths`, …); a unit test asserts the partition is TOTAL, so a new knob has to be armed,
+covered or written off before it can merge. `--tie last` earns the integration: the router is a cache
+axis, so the truncated decode `arm_check` already does is the only way to smoke it.
+
+```bash
+uv run python -m kneemri.experiments.arm_check --switches --smoke /tmp/smoke_out
+```
+
+Measured 2026-08-18: all five reach a written checkpoint at 60 studies / 1 epoch.
+
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed

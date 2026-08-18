@@ -32,6 +32,7 @@ from pathlib import Path
 from core.paths import DataRoot
 from kneemri.corpus.study_cache import CorpusSplit, StudyCache
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
+from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.training.train import TrainingOptions
 
 logger = logging.getLogger(__name__)
@@ -322,12 +323,21 @@ def main() -> None:
         "cache-checked or smoked — the flag-typo-costs-a-slot failure, at the one invocation that is "
         "not the shipping one. Composes with --smoke.",
     )
+    parser.add_argument(
+        "--switches",
+        action="store_true",
+        help="also check the switches NO arm passes — one default recipe per uncovered option, from "
+        "`switch_coverage`. Composes with --smoke, which is where it earns itself: five switches were "
+        "landed-checked, stamped and never run, so a break in one surfaced at a queue slot.",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     check = ArmCheck(arguments.arms, arguments.stub)
     printed = check.queued(arguments.as_queued) if arguments.as_queued else check.invocations()
-    invocations = check.selected(printed, arguments.only)
+    # MERGED BEFORE the selection, so `--only switch_tie` names one of these the way it names an arm.
+    switches = SwitchCoverage().invocations(printed) if arguments.switches else {}
+    invocations = check.selected({**printed, **switches}, arguments.only)
     refused = check.refused(invocations)
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)
