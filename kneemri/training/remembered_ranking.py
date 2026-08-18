@@ -5,7 +5,14 @@ from typing import override
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.training.objective import PAIR_FLOOR, PAIR_MEMORY, RANK_WEIGHT, Predicted, RankedObjective
+from kneemri.training.objective import (
+    PAIR_FLOOR,
+    PAIR_MEMORY,
+    PAIR_POOL,
+    RANK_WEIGHT,
+    Predicted,
+    RankedObjective,
+)
 from kneemri.training.pair_memory import PairMemory
 
 
@@ -38,6 +45,11 @@ class RememberedRanking(RankedObjective):
     ) -> None:
         super().__init__(weight, normalise_by_count=normalise_by_count, per_label=per_label)
         self.memory = PairMemory(capacity)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The ranked account with the pool the memory really holds, asked of the memory itself."""
+        return {**super().settings(), PAIR_POOL: self.memory.capacity()}
 
     @override
     def ranking(self, batch: Predicted) -> Float[Tensor, ""]:

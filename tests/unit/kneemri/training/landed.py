@@ -8,6 +8,8 @@ from torch import nn
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, MAXIMUM, RECOMPUTING, StudyDesign, StudyModel
 from kneemri.training.landed import Landed, Request
+from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
+from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Trainer
 
 DIM = 8
@@ -58,6 +60,10 @@ PLAIN = Request(
     ema=False,
     one_cycle=False,
     reports=False,
+    rank_weight=0.0,
+    pair_memory=0,
+    per_label_loss=False,
+    normalise_by_count=False,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 
@@ -136,6 +142,27 @@ def test_missing() -> None:
     landed.trainer.one_cycle(10)
 
     assert landed.missing(wanted) == [], "a rank asks for adapters, not for a particular count of them"
+
+
+def test_missing_loss() -> None:
+    """A ranking arm whose objective is plain cross-entropy — the loss half of the same failure.
+
+    The chain of `if`s in `TrainingOptions.objective` has a working objective on every branch, so a
+    `--rank-weight` that never reached the constructor trains the plain recipe under the arm's name.
+    """
+    model = _model()
+    plain = Landed(model, Trainer(model, torch.device("cpu")))
+    ranked = replace(PLAIN, rank_weight=0.3, pair_memory=8, per_label_loss=True)
+
+    wrong = plain.missing(ranked)
+
+    assert [line.split(":")[0] for line in wrong] == [RANK_TERM, PAIR_POOL, PER_LABEL]
+
+    remembered = Landed(model, Trainer(model, torch.device("cpu"), objective=RememberedRanking(0.3, capacity=8)))
+
+    assert remembered.missing(ranked) == [f"{PER_LABEL}: asked True, the model shows False"], (
+        "the memory reports the pool it really holds, and the per-label flag it was not given"
+    )
 
 
 def test_wanted() -> None:

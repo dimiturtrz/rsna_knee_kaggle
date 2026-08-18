@@ -14,7 +14,15 @@ from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
-from kneemri.training.objective import Objective, Predicted, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    Objective,
+    Predicted,
+    RankedObjective,
+)
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import (
     AUTOCAST,
@@ -178,10 +186,19 @@ def test_policies():
     Each absence is a working no-op object rather than a crash — an EMA that was never asked for is a
     `LiveWeights`, and the run trains fine and reports a number for a recipe nobody asked for. The
     report flag reads the SUBCLASS, not a boolean, so it cannot be true while the no-op is in place.
+
+    The loss switches come from the objective rather than from here, so this asserts only that they are
+    PASSED THROUGH — `tests/unit/kneemri/training/objective.py` owns what each objective reports.
     """
-    trainer = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")), torch.device("cpu"))
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+        objective=RankedObjective(0.3),
+    )
+    loss = {RANK_TERM: 0.3, PAIR_POOL: 0, PER_LABEL: False, COUNT_NORMALISED: False}
 
     assert trainer.policies() == {
+        **loss,
         AUTOCAST: torch.float16,
         WINDOW: GROUP,
         READ_SIZE: None,
@@ -197,6 +214,7 @@ def test_policies():
     trainer.one_cycle(total_steps=40)
 
     assert trainer.policies() == {
+        **loss,
         AUTOCAST: torch.bfloat16,
         WINDOW: 6,
         READ_SIZE: 392,

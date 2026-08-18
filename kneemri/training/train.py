@@ -644,6 +644,10 @@ def main() -> None:
             ema=arguments.ema,
             one_cycle=arguments.one_cycle,
             reports=arguments.report_vectors is not None,
+            rank_weight=arguments.rank_weight,
+            pair_memory=arguments.pair_memory,
+            per_label_loss=arguments.per_label_loss,
+            normalise_by_count=arguments.normalise_by_count,
         )
     )
     if unlanded:

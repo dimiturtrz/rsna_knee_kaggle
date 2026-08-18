@@ -20,6 +20,7 @@ about only slightly, or that rests on a guess, pulls proportionally less.
 """
 
 from dataclasses import dataclass
+from typing import override
 
 from jaxtyping import Float
 from torch import Tensor, nn
@@ -35,6 +36,17 @@ measuring a method that has not yet shown signal.
 
 PAIR_FLOOR = 1e-6
 """Guards a batch in which every study carries the same reading for a label, so no pair separates."""
+
+RANK_TERM = "rank_weight"
+PAIR_POOL = "pair_memory"
+PER_LABEL = "per_label_loss"
+COUNT_NORMALISED = "normalise_by_count"
+"""The vocabulary an objective answers `settings()` in, so a run can check its loss switches landed.
+
+The loss is chosen by a chain of `if`s over four flags, and every branch of it is a working objective:
+a `--rank-weight` that never reached the constructor trains plain cross-entropy under a ranking arm's
+name and reports a number that reads as a refutation of the mechanism.
+"""
 
 PAIR_MEMORY = 8
 """How many past steps' readouts a `RememberedRanking` keeps, when it is enabled at all.
@@ -86,6 +98,20 @@ class Objective:
         """The scalar this step descends."""
         return self.cross_entropy(batch)
 
+    def settings(self) -> dict[str, object]:
+        """This objective's own account of the loss switches it carries.
+
+        The plain one reports the ranking term and the pair pool as OFF rather than omitting them: the
+        question asked before a run starts is whether a ranking arm got a ranking objective at all, and
+        a key the plain answer leaves out cannot answer it.
+        """
+        return {
+            RANK_TERM: 0.0,
+            PAIR_POOL: 0,
+            PER_LABEL: self.per_label,
+            COUNT_NORMALISED: self.normalise_by_count,
+        }
+
     def cross_entropy(self, batch: Predicted) -> Float[Tensor, ""]:
         """The weighted BCE term, which every objective here is built on top of."""
         elementwise = nn.functional.binary_cross_entropy_with_logits(batch.logits, batch.scores, reduction="none")
@@ -124,6 +150,11 @@ class RankedObjective(Objective):
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
         """Cross-entropy, plus the ranking term at its configured strength."""
         return self.cross_entropy(batch) + self.weight * self.ranking(batch)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The base account with the ranking term's real strength, not the flag that asked for it."""
+        return {**super().settings(), RANK_TERM: self.weight}
 
     def ranking(self, batch: Predicted) -> Float[Tensor, ""]:
         """A soft, confidence-weighted count of the pairs this batch ranks the wrong way round.

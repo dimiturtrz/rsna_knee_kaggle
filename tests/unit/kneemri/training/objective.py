@@ -1,6 +1,14 @@
 import torch
 
-from kneemri.training.objective import Objective, Predicted, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    Objective,
+    Predicted,
+    RankedObjective,
+)
 
 SEED = 2026
 STUDIES = 6
@@ -12,6 +20,30 @@ def _batch(order: list[float]) -> Predicted:
     logits = torch.tensor(order).reshape(-1, 1)
     scores = torch.tensor([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]).reshape(-1, 1)
     return Predicted(logits, scores, torch.ones_like(scores))
+
+
+def test_objective_settings():
+    """The plain objective's own account of its loss switches, which a run checks before it starts.
+
+    It reports the ranking term OFF rather than omitting the key: the question is whether a ranking arm
+    got a ranking objective at all, and a missing key cannot answer it.
+    """
+    assert Objective(per_label=True).settings() == {
+        RANK_TERM: 0.0,
+        PAIR_POOL: 0,
+        PER_LABEL: True,
+        COUNT_NORMALISED: False,
+    }
+
+
+def test_ranked_objective_settings():
+    """The ranked one reports the term's real strength, not the flag that asked for it."""
+    assert RankedObjective(0.3, normalise_by_count=True).settings() == {
+        RANK_TERM: 0.3,
+        PAIR_POOL: 0,
+        PER_LABEL: False,
+        COUNT_NORMALISED: True,
+    }
 
 
 def test_cross_entropy():

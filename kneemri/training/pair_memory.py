@@ -18,6 +18,15 @@ class PairMemory:
     def __init__(self, capacity: int = PAIR_MEMORY) -> None:
         self.remembered: deque[Predicted] = deque(maxlen=capacity)
 
+    def capacity(self) -> int:
+        """How many steps this memory holds, asked of the deque rather than of a remembered argument.
+
+        The number a run asked for is checked against THIS before the card is spent, so the authority
+        has to be the container that would actually drop a readout, not a copy of the constructor's
+        argument that agrees with the request by construction.
+        """
+        return self.remembered.maxlen or 0
+
     def pooled(self) -> Predicted | None:
         """Everything remembered as one readout, or None when nothing is — the first step of a run."""
         if not self.remembered:

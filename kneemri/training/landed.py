@@ -24,6 +24,7 @@ import torch
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, RECOMPUTING, StudyModel
+from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SCHEDULED, WINDOW, Trainer
 
 
@@ -82,6 +83,10 @@ class Request:
     ema: bool
     one_cycle: bool
     reports: bool
+    rank_weight: float
+    pair_memory: int
+    per_label_loss: bool
+    normalise_by_count: bool
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -100,4 +105,8 @@ class Request:
             AVERAGING: self.ema,
             SCHEDULED: self.one_cycle,
             REPORTS: self.reports,
+            RANK_TERM: self.rank_weight,
+            PAIR_POOL: self.pair_memory,
+            PER_LABEL: self.per_label_loss,
+            COUNT_NORMALISED: self.normalise_by_count,
         }

@@ -18,6 +18,11 @@ def test_pooled():
     assert PairMemory().pooled() is None
 
 
+def test_capacity():
+    """The deque is the authority, so a request checked against it is checked against what would drop."""
+    assert PairMemory(capacity=8).capacity() == 8
+
+
 def test_remember():
     """A remembered readout is a fixed target: keeping its graph would hold the whole step alive."""
     memory = PairMemory(capacity=2)

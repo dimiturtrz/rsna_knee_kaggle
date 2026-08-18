@@ -2,7 +2,14 @@
 
 import torch
 
-from kneemri.training.objective import Predicted, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    Predicted,
+    RankedObjective,
+)
 from kneemri.training.remembered_ranking import RememberedRanking
 
 
@@ -11,6 +18,16 @@ def _batch(order: list[float]) -> Predicted:
     logits = torch.tensor(order).reshape(-1, 1)
     scores = torch.tensor([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]).reshape(-1, 1)
     return Predicted(logits, scores, torch.ones_like(scores))
+
+
+def test_settings():
+    """The pool is read off the memory, so a run's `--pair-memory` is checked against what would drop."""
+    assert RememberedRanking(0.3, capacity=4).settings() == {
+        RANK_TERM: 0.3,
+        PAIR_POOL: 4,
+        PER_LABEL: False,
+        COUNT_NORMALISED: False,
+    }
 
 
 def test_remembered_ranking_ranking():

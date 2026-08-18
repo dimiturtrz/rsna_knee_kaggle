@@ -1701,6 +1701,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.training.trainer",
       "weight": 1
     },
@@ -8458,6 +8464,12 @@
       "kind": "calls",
       "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
       "target": "kneemri.training.pair_memory.PairMemory.remember",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking.settings",
+      "target": "kneemri.training.pair_memory.PairMemory.capacity",
       "weight": 1
     },
     {
@@ -16698,6 +16710,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.Objective.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.objective.Objective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.RankedObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -16730,8 +16750,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.RankedObjective.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.objective.RankedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.pair_memory.PairMemory.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pair_memory.PairMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pair_memory.PairMemory.capacity",
+      "label": "capacity",
       "level": "method",
       "parent": "kneemri.training.pair_memory.PairMemory",
       "role": null
@@ -16780,6 +16816,14 @@
       "descendants": 0,
       "id": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
       "label": "ranking",
+      "level": "method",
+      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_ranking.RememberedRanking.settings",
+      "label": "settings",
       "level": "method",
       "parent": "kneemri.training.remembered_ranking.RememberedRanking",
       "role": null

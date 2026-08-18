@@ -300,8 +300,13 @@ class Trainer:
         them is a working no-op rather than a crash — so a run missing one trains perfectly well and
         reports a number belonging to a recipe nobody asked for. `kneemri.training.landed` compares this
         against the request before the fitting starts.
+
+        The LOSS switches come from the objective's own `settings()` rather than being re-derived here:
+        which objective a run got is the objective's fact, and a trainer that inspected its type would
+        be a second copy of the rule that chose it, free to disagree with `TrainingOptions.objective`.
         """
         return {
+            **self.objective.settings(),
             AUTOCAST: self.autocast_dtype,
             WINDOW: self.window,
             READ_SIZE: self.read_size,
