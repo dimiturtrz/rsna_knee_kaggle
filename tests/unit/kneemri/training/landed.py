@@ -64,6 +64,7 @@ PLAIN = Request(
     pair_memory=0,
     per_label_loss=False,
     normalise_by_count=False,
+    intensity_aug=False,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 

@@ -17,6 +17,14 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+INTENSITY_AUGMENT = "intensity_aug"
+"""The key an augmentation answers under when a run checks its switches landed (`kneemri.training.landed`).
+
+The intensity block is chosen by which CONFIG the trainer was constructed with, not by a method a
+caller may forget to call — so its absence is `geometric_only`, a perfectly good recipe that is the one
+every earlier member was fitted under and the one an intensity arm would be silently compared against.
+"""
+
 
 @dataclass(frozen=True)
 class AugmentConfig:
@@ -59,6 +67,15 @@ class AugmentConfig:
         """
         return cls(gamma_probability=0.0, blur_probability=0.0, contrast=(1.0, 1.0), noise=0.0)
 
+    def intensity(self) -> bool:
+        """Whether the intensity block does ANYTHING, read off the widths rather than off a flag.
+
+        `geometric_only` disables it by zeroing every width, so there is no boolean to consult — and a
+        config assembled with the intensity fields left at their geometric values is the same recipe
+        whatever the run's flag said. Asking the widths is asking what the batch will actually get.
+        """
+        return bool(self.gamma_probability or self.blur_probability or self.noise or self.contrast != (1.0, 1.0))
+
 
 class Augmentation:
     """The perturbations one config asks for, applied to a batch of images or a batch of slot bags."""
@@ -68,6 +85,10 @@ class Augmentation:
 
     def __init__(self, config: AugmentConfig | None = None) -> None:
         self.config = config or AugmentConfig.geometric_only()
+
+    def intensity(self) -> bool:
+        """Whether this augmentation perturbs intensity, asked of the config it will actually use."""
+        return self.config.intensity()
 
     def applied(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
         """Rigid jitter, then intensity — never a flip, which laterality normalisation forbids.

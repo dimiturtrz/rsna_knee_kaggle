@@ -648,6 +648,7 @@ def main() -> None:
             pair_memory=arguments.pair_memory,
             per_label_loss=arguments.per_label_loss,
             normalise_by_count=arguments.normalise_by_count,
+            intensity_aug=arguments.intensity_aug,
         )
     )
     if unlanded:

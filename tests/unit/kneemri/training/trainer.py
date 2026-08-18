@@ -14,6 +14,7 @@ from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
+from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import (
     COUNT_NORMALISED,
     PAIR_POOL,
@@ -195,10 +196,16 @@ def test_policies():
         torch.device("cpu"),
         objective=RankedObjective(0.3),
     )
-    loss = {RANK_TERM: 0.3, PAIR_POOL: 0, PER_LABEL: False, COUNT_NORMALISED: False}
+    constructed = {
+        RANK_TERM: 0.3,
+        PAIR_POOL: 0,
+        PER_LABEL: False,
+        COUNT_NORMALISED: False,
+        INTENSITY_AUGMENT: False,
+    }
 
     assert trainer.policies() == {
-        **loss,
+        **constructed,
         AUTOCAST: torch.float16,
         WINDOW: GROUP,
         READ_SIZE: None,
@@ -214,7 +221,7 @@ def test_policies():
     trainer.one_cycle(total_steps=40)
 
     assert trainer.policies() == {
-        **loss,
+        **constructed,
         AUTOCAST: torch.bfloat16,
         WINDOW: 6,
         READ_SIZE: 392,

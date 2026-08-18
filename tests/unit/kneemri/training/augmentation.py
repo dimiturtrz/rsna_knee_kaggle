@@ -34,6 +34,21 @@ def test_bagged():
     assert not torch.equal(out, bag), "augmentation must actually perturb the bag"
 
 
+def test_augment_config_intensity():
+    """The block's presence is read off the WIDTHS, since `geometric_only` disables it by zeroing them."""
+    assert AugmentConfig().intensity() is True
+    assert AugmentConfig.geometric_only().intensity() is False
+    assert AugmentConfig(gamma_probability=0.0, blur_probability=0.0, noise=0.0).intensity() is True, (
+        "a contrast range wider than a point is still an intensity perturbation"
+    )
+
+
+def test_augmentation_intensity():
+    """A trainer asks its augmentation, not the config it thinks it passed — the default is geometric."""
+    assert Augmentation().intensity() is False
+    assert Augmentation(AugmentConfig()).intensity() is True
+
+
 def test_geometric_only():
     """The default must reproduce the pre-existing recipe exactly, or it silently changes members.
 

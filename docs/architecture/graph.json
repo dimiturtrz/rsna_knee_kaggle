@@ -1701,6 +1701,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.training.augmentation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -9052,6 +9058,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.trainer.Trainer.plan",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.policies",
+      "target": "kneemri.training.augmentation.Augmentation.intensity",
       "weight": 1
     },
     {
@@ -16470,6 +16482,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.AugmentConfig.intensity",
+      "label": "intensity",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.AugmentConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation.__init__",
       "label": "__init__",
       "level": "method",
@@ -16504,6 +16524,14 @@
       "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation.bagged",
       "label": "bagged",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.intensity",
+      "label": "intensity",
       "level": "method",
       "parent": "kneemri.training.augmentation.Augmentation",
       "role": null

@@ -24,6 +24,7 @@ import torch
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, RECOMPUTING, StudyModel
+from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SCHEDULED, WINDOW, Trainer
 
@@ -87,6 +88,7 @@ class Request:
     pair_memory: int
     per_label_loss: bool
     normalise_by_count: bool
+    intensity_aug: bool
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -109,4 +111,5 @@ class Request:
             PAIR_POOL: self.pair_memory,
             PER_LABEL: self.per_label_loss,
             COUNT_NORMALISED: self.normalise_by_count,
+            INTENSITY_AUGMENT: self.intensity_aug,
         }

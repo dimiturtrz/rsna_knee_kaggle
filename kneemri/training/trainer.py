@@ -35,7 +35,7 @@ from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import StudyModel
-from kneemri.training.augmentation import Augmentation, AugmentConfig
+from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.objective import Objective, Predicted
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
@@ -307,6 +307,7 @@ class Trainer:
         """
         return {
             **self.objective.settings(),
+            INTENSITY_AUGMENT: self.augmentation.intensity(),
             AUTOCAST: self.autocast_dtype,
             WINDOW: self.window,
             READ_SIZE: self.read_size,
