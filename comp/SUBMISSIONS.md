@@ -172,6 +172,12 @@ a rate that says membership-shuffling inside the existing pool is close to exhau
 has to come from a member that is DIFFERENT rather than better (knee-nas5's crop/band/centre axis, which
 is the one that transfers at 2.4×), or from supervision (knee-mxj, knee-jk3).
 
+That 0.925 entry is now pinned in `comp/champion.json` — its kernel, kit commit, four members, serving
+config, and the six principles it is evidence for — and `python -m kneemri.kaggle.champion_check` asserts
+it can still be rebuilt. The hidden set is the one number here that cannot be talked into existing, so the
+path that produced it is guarded rather than remembered: a roster line dropped while adding a member, or a
+`chosen` tuple edited in place instead of copied, leaves every other gate green and the entry unbuildable.
+
 It also kills the count curve's peak at two. The pair built from the better member scores 0.921 and the
 four holding that same member scores 0.924, so 2 > 4 was a statement about `sliceattn` being in the four,
 not about count. And `res392` is not dead weight: removing it from the four is what the 0.921 pair does,

@@ -108,7 +108,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Six checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Seven checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running), `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
@@ -116,7 +116,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a
   submission (it found three defects on first use), and `python -m kneemri.kaggle.mount_check` before a
   submission (it caught `kneemri-solo` ranking over a package that had gained a DINOv3 member while its
-  metadata still declared DINOv2 only — a kernel that loads every member and then cannot build one). A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. See `experiments/README.md`.
+  metadata still declared DINOv2 only — a kernel that loads every member and then cannot build one), and
+  `python -m kneemri.kaggle.champion_check` whenever the roster or a champion kernel is edited — the only
+  one that guards a RESULT rather than a shipment: it asserts the 0.925 entry pinned in `comp/champion.json`
+  can still be rebuilt (its members still named by its kernel's `chosen` tuple, still packaged by the
+  roster), because losing that path would leave every other gate green. A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. See `experiments/README.md`.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint

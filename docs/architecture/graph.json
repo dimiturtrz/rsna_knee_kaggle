@@ -1370,6 +1370,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.champion_check",
+      "target": "kneemri.kaggle.package_members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.dry_run",
       "target": "core.paths",
       "weight": 1
@@ -7069,6 +7075,30 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.champion_check.Champion",
+      "target": "kneemri.kaggle.champion_check.Champion",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.Champion.drift",
+      "target": "kneemri.kaggle.champion_check.Champion.named_by_kernel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.Champion.drift",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.kaggle.champion_check.Champion.recorded",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.dry_run.DryRun",
       "target": "core.paths.DataRoot",
@@ -9555,7 +9585,7 @@
       "role": null
     },
     {
-      "descendants": 108,
+      "descendants": 109,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -10067,11 +10097,19 @@
       "role": null
     },
     {
-      "descendants": 11,
+      "descendants": 12,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check",
+      "label": "champion_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
       "role": null
     },
     {
@@ -11369,6 +11407,14 @@
       "level": "class",
       "parent": "kneemri.inference.vote",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion",
+      "label": "Champion",
+      "level": "class",
+      "parent": "kneemri.kaggle.champion_check",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -15824,6 +15870,38 @@
       "label": "ranks",
       "level": "method",
       "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion.drift",
+      "label": "drift",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check.Champion",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion.named_by_kernel",
+      "label": "named_by_kernel",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check.Champion",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check.Champion",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check",
       "role": null
     },
     {
