@@ -79,6 +79,7 @@ never spent on a cell that already has a number.
 | `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | 2026-08-17 | **0.913** |
 | `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
 | `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
+| `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | submitted 17:48 UTC, pending |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
