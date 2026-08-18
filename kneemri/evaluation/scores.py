@@ -131,4 +131,14 @@ class LabelScores:
         caller reading only the mean should know how many labels were undefined, which `per_label`
         shows and this deliberately does not hide.
         """
-        return float(np.nanmean(list(self.per_label(predictions, targets).values())))
+        return self.mean_of(self.per_label(predictions, targets))
+
+    @staticmethod
+    def mean_of(per_label: dict[str, float]) -> float:
+        """The same aggregation, for a caller that already holds the per-label numbers.
+
+        Split out because `Attribution` scores under occlusion and then averaged the result itself, in
+        its own copy of this line. An occlusion delta is only a delta ON THE COMPETITION SCORE while
+        both sides aggregate the same way, and two copies of a rule are two rules waiting to differ.
+        """
+        return float(np.nanmean(list(per_label.values())))

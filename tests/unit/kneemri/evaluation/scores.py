@@ -39,6 +39,12 @@ def test_mean():
     assert LabelScores().mean(predictions, targets) == 1.0
 
 
+def test_mean_of():
+    """Unweighted, and an undefined label is skipped rather than dragging the score to nan."""
+    assert LabelScores().mean_of({"a": 0.2, "b": 0.8}) == 0.5
+    assert LabelScores().mean_of({"a": 0.2, "b": float("nan")}) == 0.2
+
+
 def test_per_label_selection_drops_pairs_rather_than_calling_them_negative():
     """An unreadable pair must be DROPPED, never scored as a negative.
 

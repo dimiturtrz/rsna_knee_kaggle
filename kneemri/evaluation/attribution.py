@@ -125,8 +125,12 @@ class Attribution:
         model: StudyModel,
         holdout: Holdout,
     ) -> float:
-        """The held-out mean AUC under whatever occlusion the caller has already applied."""
-        return float(np.nanmean(list(self._labels(model, holdout).values())))
+        """The held-out mean AUC under whatever occlusion the caller has already applied.
+
+        Aggregated by `LabelScores`, not here: a delta is a delta on the COMPETITION score only while
+        the occluded number is averaged the way the unoccluded one is.
+        """
+        return self.scores.mean_of(self._labels(model, holdout))
 
     def slot_importance(
         self,
