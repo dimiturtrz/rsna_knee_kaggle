@@ -8565,6 +8565,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.train.TrainingOptions",
+      "target": "kneemri.training.landed.Request",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.train.TrainingOptions",
       "target": "kneemri.training.objective.Objective",
       "weight": 1
     },
@@ -8750,6 +8756,12 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.training.train.TrainingOptions.requested",
+      "target": "kneemri.training.landed.Request",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.training.train.TrainingOptions.routing",
       "target": "kneemri.corpus.slots.Routing",
       "weight": 1
@@ -8854,12 +8866,6 @@
       "kind": "calls",
       "source": "kneemri.training.train.main",
       "target": "kneemri.training.landed.Landed.missing",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.training.landed.Request",
       "weight": 1
     },
     {
@@ -16996,6 +17002,14 @@
       "descendants": 0,
       "id": "kneemri.training.train.TrainingOptions.reports",
       "label": "reports",
+      "level": "method",
+      "parent": "kneemri.training.train.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.train.TrainingOptions.requested",
+      "label": "requested",
       "level": "method",
       "parent": "kneemri.training.train.TrainingOptions",
       "role": null
