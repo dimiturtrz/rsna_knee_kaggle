@@ -52,7 +52,11 @@ uv run python comp/witness_check.py || {
 
 echo
 echo "=== 3. kit must match the repo (a kernel imports it) ==="
-uv run python comp/build_kit.py --wheels "${WHEELS:-$TEMP/kneewheels}"
+# NO --wheels: build_kit's own default is the processed root's wheels/, which is the only directory
+# that holds all four. This line used to name a scratch dir under $TEMP that held two of them, and a
+# kit built from it loses transformers and safetensors — the exact failure build_kit's wheel check was
+# written for on 2026-08-17, re-introduced here by the flag that was supposed to make it configurable.
+uv run python comp/build_kit.py
 uv run python comp/verify_kit.py || { echo "KIT STALE - do not submit"; exit 1; }
 
 echo
