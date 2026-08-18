@@ -13,6 +13,7 @@ from kneemri.models.model import (
     ATTEND,
     CLS_MEAN_FOCAL,
     COMPILED_ENCODER,
+    OPENED_BLOCKS,
     POOL_PARTS,
     RECOMPUTING,
     SLICE_POOLINGS,
@@ -489,12 +490,42 @@ def test_applied():
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
 
-    assert model.applied() == {ADAPTERS: 0, RECOMPUTING: False, COMPILED_ENCODER: False}
+    assert model.applied() == {ADAPTERS: 0, RECOMPUTING: False, COMPILED_ENCODER: False, OPENED_BLOCKS: 12}
 
     model.low_rank(rank=2)
     model.recompute_activations()
 
-    assert model.applied() == {ADAPTERS: 36, RECOMPUTING: True, COMPILED_ENCODER: False}
+    assert model.applied() == {ADAPTERS: 36, RECOMPUTING: True, COMPILED_ENCODER: False, OPENED_BLOCKS: 0}, (
+        "adaptation freezes every base weight, so no block is open on the axis unfreeze_last moves — "
+        "counting trainable-anything would say twelve here and make the check unreadable under LoRA"
+    )
+
+
+def test_parameter_groups_at_zero_depth_opens_nothing():
+    """`blocks[-0:]` is the WHOLE list, so a head-only run trained the entire encoder.
+
+    Measured before the fix on this same backbone: asked 0 gave twelve open blocks and 2,592
+    parameters, byte-identical to asked 12. `unfreeze_depth.sh` takes its depth as an argument, so the
+    head-only rung of a depth sweep was one invocation from spending its slot on the deepest arm.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=0)
+
+    assert cast("list[torch.nn.Parameter]", groups[1]["params"]) == [], "nothing in the encoder may open"
+    assert model.applied()[OPENED_BLOCKS] == 0
+    assert not any(parameter.requires_grad for parameter in model.backbone.parameters())
+
+
+def test_parameter_groups_clamps_a_depth_past_the_encoder():
+    """More blocks than the encoder has opens every block, rather than reading as a negative slice."""
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+
+    model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=99)
+
+    assert model.applied()[OPENED_BLOCKS] == 12
 
 
 def test_recompute_activations(study_model: StudyModel):

@@ -297,7 +297,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 14, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 15, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = TrainingOptions().requested(cpu)
     for name in sorted(shared):

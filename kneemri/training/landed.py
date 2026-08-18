@@ -24,7 +24,7 @@ import torch
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Targets
-from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, RECOMPUTING, StudyModel
+from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SCHEDULED, WINDOW, Trainer
@@ -98,6 +98,7 @@ class Request:
     intensity_aug: bool
     weight_floor: bool
     calibrated_targets: bool
+    unfreeze_last: int
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -105,6 +106,12 @@ class Request:
         THE TRANSLATION LIVES HERE AND NOWHERE ELSE: `--whole-stack` means a window of `slices` and its
         absence means `GROUP`, and a caller that re-derived that would be a second copy of the rule,
         free to disagree with the trainer's and to report a mismatch that is only its own.
+
+        THE DEPTH IS MAPPED THROUGH THE ADAPTATION MODE, not read off the flag: under LoRA every block
+        carries an adapter and `parameter_groups` ignores `unfreeze_last` deliberately, so the honest
+        request there is zero open base blocks. Asking through the mode is what keeps this a strict
+        equality — the alternative was a second loose key, which is the thing `ADAPTERS` had to be and
+        which buys the check nothing anywhere else.
 
         THE ONE DELIBERATE EXCEPTION is the weight floor, whose bool-to-value rule `TrainingOptions`
         also spells. Taking the resolved `supervision.floor` instead would compare that property's
@@ -128,4 +135,5 @@ class Request:
             INTENSITY_AUGMENT: self.intensity_aug,
             WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             CALIBRATED: self.calibrated_targets,
+            OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
         }

@@ -452,6 +452,7 @@ class TrainingOptions:
             intensity_aug=self.intensity_aug,
             weight_floor=self.weight_floor,
             calibrated_targets=self.calibrated_targets,
+            unfreeze_last=self.unfreeze_last,
         )
 
     def adaptation(self) -> Adaptation:

@@ -6,7 +6,7 @@ load only into this shape. `MemberPackage` checks that faithfulness numerically 
 this module is what it checks.
 """
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from typing import override
 
@@ -77,6 +77,7 @@ COMPILED_PREFIX = "_orig_mod."
 ADAPTERS = "lora_adapters"
 RECOMPUTING = "recompute_activations"
 COMPILED_ENCODER = "compile_encoder"
+OPENED_BLOCKS = "opened_blocks"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
 
@@ -462,7 +463,37 @@ class StudyModel(nn.Module):
             ADAPTERS: sum(1 for module in self.modules() if isinstance(module, LoRALinear)),
             RECOMPUTING: bool(getattr(self.backbone, "is_gradient_checkpointing", False)),
             COMPILED_ENCODER: self.backbone._compiled_call_impl is not None,  # noqa: SLF001 - see above
+            OPENED_BLOCKS: self._opened_blocks(),
         }
+
+    def _opened_blocks(self) -> int:
+        """How many encoder blocks hold a trainable BASE weight — what `unfreeze_last` actually did.
+
+        BASE, not trainable-anything. Under LoRA every block carries an adapter whose parameters want
+        a gradient, so counting those would report twelve blocks open on a run that froze the encoder
+        completely. The adapters are reported under their own key; this answers the other question and
+        answers ZERO under adaptation, which is exactly what `parameter_groups` does with the depth
+        there — so the check over this needs no exception for LoRA rather than a third loose key.
+
+        Read AFTER the freezing, which the ordering already guarantees: `Trainer.__init__` builds the
+        optimiser through `parameter_groups`, and `landed` runs on the trainer that call returned.
+        """
+        # `next(..., None)`, not `any(...)`: the generator yields TENSORS, and `any` asks each for its
+        # truth value — which a multi-element tensor refuses. Emptiness is the question here.
+        return sum(1 for block in self._blocks() if next(self._base_parameters(block), None) is not None)
+
+    @staticmethod
+    def _base_parameters(block: nn.Module) -> Iterator[torch.nn.Parameter]:
+        """The block's trainable parameters that are not part of an adapter."""
+        adapted = {
+            id(parameter)
+            for module in block.modules()
+            if isinstance(module, LoRALinear)
+            for parameter in module.parameters()
+        }
+        return (
+            parameter for parameter in block.parameters() if parameter.requires_grad and id(parameter) not in adapted
+        )
 
     def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its own learning rate.
@@ -491,8 +522,22 @@ class StudyModel(nn.Module):
         return self._last_blocks(unfreeze_last)
 
     def _last_blocks(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
-        """Everything outside the last `unfreeze_last` blocks frozen, and what is left returned."""
-        trainable = {id(parameter) for block in self._blocks()[-unfreeze_last:] for parameter in block.parameters()}
+        """Everything outside the last `unfreeze_last` blocks frozen, and what is left returned.
+
+        COUNTED FROM THE FRONT, and that is the whole point of the arithmetic. `blocks[-n:]` reads as
+        "the last n" and is that for every n but ZERO, where `[-0:]` is `[0:]` — the entire encoder.
+        A head-only run therefore opened all twelve blocks and was byte-identical to `--unfreeze-last
+        12` (measured: 2,592 parameters either way), under a name saying the opposite.
+        `unfreeze_depth.sh` takes its depth as an argument, so the head-only rung of a depth sweep was
+        one invocation away from spending a queue slot on the deepest arm in the sweep.
+
+        The `min` is the same edit's other half: asking for more blocks than the encoder has now opens
+        every block rather than silently reading as a request for all of them, which is what
+        `applied` reports back and `landed` compares.
+        """
+        blocks = self._blocks()
+        opened = blocks[len(blocks) - min(unfreeze_last, len(blocks)) :]
+        trainable = {id(parameter) for block in opened for parameter in block.parameters()}
         for parameter in self.backbone.parameters():
             if id(parameter) not in trainable:
                 # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.

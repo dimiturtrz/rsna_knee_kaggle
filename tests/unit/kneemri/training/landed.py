@@ -8,11 +8,19 @@ from torch import nn
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Supervision, Targets
-from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, MAXIMUM, RECOMPUTING, StudyDesign, StudyModel
+from kneemri.models.model import (
+    ADAPTERS,
+    COMPILED_ENCODER,
+    MAXIMUM,
+    OPENED_BLOCKS,
+    RECOMPUTING,
+    StudyDesign,
+    StudyModel,
+)
 from kneemri.training.landed import Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.remembered_ranking import RememberedRanking
-from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Trainer
+from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Adaptation, Trainer
 
 DIM = 8
 SLOTS = 6
@@ -69,6 +77,10 @@ PLAIN = Request(
     intensity_aug=False,
     weight_floor=False,
     calibrated_targets=False,
+    # FOUR, not the trainer's default six: `_FakeBackbone` holds four blocks, so opening "the last
+    # six" of it opens four, and the request that matches an untouched encoder is the one that names
+    # what is there. The mismatch a real encoder would show is the point of the strict comparison.
+    unfreeze_last=4,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 
@@ -141,8 +153,12 @@ def test_missing() -> None:
     )
     wrong = landed.missing(wanted)
 
-    assert len(wrong) == 7, "every switch asked for is absent from a model nothing was applied to"
+    assert len(wrong) == 8, "every switch asked for is absent from a model nothing was applied to"
     assert any(line.startswith(f"{ADAPTERS}: asked 8, the model shows 0") for line in wrong)
+    assert any(line.startswith(f"{OPENED_BLOCKS}: asked 0, the model shows 4") for line in wrong), (
+        "the depth is the EIGHTH: a LoRA ask means no open base block, and this encoder has four — "
+        "the same reading that says the adapters never landed, from the other side"
+    )
 
     model.low_rank(8)
     model.recompute_activations()
@@ -200,6 +216,27 @@ def test_missing_labels() -> None:
     assert Landed(model, trainer, _targets(supervised)).missing(asked) == []
 
 
+def test_missing_depth() -> None:
+    """The depth axis, which had no check at all because LoRA legitimately ignores the flag.
+
+    A naive observed-vs-asked over open blocks false-positives on every adaptation arm, so the ask is
+    mapped through the mode instead — and what is left is a strict equality that catches the zero case
+    the slice arithmetic used to invert.
+    """
+    model = _model()
+    trainer = Trainer(model, torch.device("cpu"), adaptation=Adaptation(unfreeze_last=2))
+
+    assert Landed(model, trainer, _targets()).missing(replace(PLAIN, unfreeze_last=2)) == []
+    assert Landed(model, trainer, _targets()).missing(PLAIN) == [f"{OPENED_BLOCKS}: asked 4, the model shows 2"], (
+        "a run that opened two blocks under a four-block recipe is the arm nobody ran"
+    )
+
+    frozen = _model()
+    head_only = Trainer(frozen, torch.device("cpu"), adaptation=Adaptation(unfreeze_last=0))
+
+    assert Landed(frozen, head_only, _targets()).missing(replace(PLAIN, unfreeze_last=0)) == []
+
+
 def test_wanted() -> None:
     """The request is translated once — `--whole-stack` decides the window, and 0 read size means None."""
     stack = replace(PLAIN, compiling=True, bf16=True, whole_stack=True, slices=32).wanted()
@@ -214,3 +251,8 @@ def test_wanted() -> None:
     assert grouped[WINDOW] == GROUP, "the slice count is inert unless the run asked for the whole stack"
     assert grouped[READ_SIZE] == 420
     assert grouped[AUTOCAST] == torch.float16
+    assert grouped[OPENED_BLOCKS] == 0, (
+        "under adaptation `parameter_groups` ignores the depth deliberately, so the honest ask is no "
+        "open base blocks — asking through the flag would fail every LoRA arm"
+    )
+    assert replace(PLAIN, unfreeze_last=2).wanted()[OPENED_BLOCKS] == 2
