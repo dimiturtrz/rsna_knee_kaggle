@@ -432,10 +432,13 @@ class Ensemble:
                 slices=self.slices(members),
                 scheme=self.decoded_scheme(members),
                 sizes=tuple(sorted({member.image_size for member in members})),
-                # One value, because `reads` groups by it — a group spanning two crops would be a group
-                # whose members want different pixels, which is the thing that grouping exists to stop.
-                crop=members[0].crop,
-                band=members[0].band,
+                # ASKED, not taken from the first member. `reads` groups by both, so agreement holds by
+                # construction today — and that is exactly the guarantee a later edit to the grouping key
+                # would drop silently, serving every other member of the group under member[0]'s pixels.
+                # The other three fields of this Read are already refused on disagreement; these two were
+                # the ones a change elsewhere could break without a word.
+                crop=self.agreed(members, "crop", lambda member: member.crop),
+                band=self.agreed(members, "band", lambda member: member.band),
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return (self.serving.vote or RankAverage()).combine(per_member)

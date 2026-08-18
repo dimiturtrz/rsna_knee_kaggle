@@ -334,6 +334,26 @@ def test_predict_groups(tmp_path: Path):
     assert combined.shape == (2, len(TARGETS))
 
 
+def test_predict_groups_refuses_a_group_that_does_not_share_its_pixels(tmp_path: Path):
+    """A group whose members crop differently is refused, not served under the first one's crop.
+
+    `reads` groups by crop and band, so the read built from a group agrees with every member of it — by
+    construction, which is the guarantee an edit to that grouping key drops without a word. The group is
+    forced here rather than built, because that is precisely the state such an edit would produce: the
+    members' own recorded readings differ and only the key stopped noticing. Under `members[0]`, the
+    second member is then served pixels it was never fitted on, and every fingerprint still passes.
+    """
+    ensemble = _ensemble(tmp_path / "mixed")
+    member = ensemble.package.members[0]
+    cropped: MemberConfig = {**member.config, "crop_mm": member.crop.mm - 10.0}
+    mixed = [member, replace(member, identifier="tight", config=cropped)]
+    ensemble.models["tight"] = ensemble.models[member.identifier]
+    ensemble.reads = lambda: [mixed]
+
+    with pytest.raises(ValueError, match="crop"):
+        ensemble.predict_groups(lambda read: [], overlap=False)
+
+
 def test_predict_groups_combines_by_the_rule_the_serving_names(tmp_path: Path):
     """The vote is a served knob, and a submission built under `LogitAverage` must not be rank-averaged.
 

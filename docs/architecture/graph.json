@@ -6003,6 +6003,12 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
+      "target": "kneemri.inference.ensemble.Ensemble.agreed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
       "target": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
       "weight": 1
     },
