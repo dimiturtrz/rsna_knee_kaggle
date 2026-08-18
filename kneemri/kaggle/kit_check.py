@@ -12,7 +12,8 @@ in the arithmetic it was fitted under.
 
 Members are versioned, kernels are versioned, and the code between them was not. `build_kit` now stamps
 the commit into `kit.json` and `kernel_run` logs it, so the drift is VISIBLE. This makes it BLOCKING:
-what matters is not that the kit differs from HEAD, but that it differs in the packages a kernel runs.
+what matters is not that the kit differs from HEAD, but that it differs in the files a kernel LOADS —
+the entrypoint's import closure (`kernel_closure`), which is a fraction of the packages a kit ships.
 
 `--mounted` ASKS THE ONLY QUESTION A SLOT CARES ABOUT, and `MountedKit` fetches the answer. The kernel's
 log names the mounted commit, but only after the slot is spent — the same too-late that cost the first two.
@@ -25,16 +26,14 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from kneemri.kaggle.kernel_closure import KernelClosure
 from kneemri.kaggle.mounted_kit import DATASET, MountedKit
 
 logger = logging.getLogger(__name__)
 
-PACKAGES = ("kneemri", "core")
-"""What a kit ships. A commit that touches only tests or docs cannot change what a kernel computes."""
-
 
 class KitCheck:
-    """The built kit's commit against the working tree's, in the packages a kernel actually runs."""
+    """The built kit's commit against the working tree's, in the files a kernel actually loads."""
 
     def __init__(self, inside: Path) -> None:
         """Anchored at the repository ROOT, whatever path inside it is handed over.
@@ -48,6 +47,7 @@ class KitCheck:
         self.git = shutil.which("git") or "git"
         self.repo = inside
         self.repo = Path(self.asked("rev-parse", "--show-toplevel"))
+        self.loaded = KernelClosure(self.repo).files()
 
     def asked(self, *command: str) -> str:
         """One read-only git question, answered from this repo."""
@@ -70,14 +70,19 @@ class KitCheck:
         return dict(json.loads(stamp.read_text(encoding="utf-8"))) if stamp.exists() else None
 
     def drift(self, kit: Path) -> list[str]:
-        """Commits touching the shipped packages that the built kit does not have, newest first."""
+        """Commits touching the files a kernel loads that the built kit does not have, newest first."""
         return self.behind(self.recorded(kit))
 
     def behind(self, recorded: dict[str, object] | None) -> list[str]:
-        """The same judgement for any stamp, wherever it was read from — a build directory or Kaggle."""
+        """The same judgement for any stamp, wherever it was read from — a build directory or Kaggle.
+
+        The pathspec is the ENTRYPOINT'S IMPORT CLOSURE, not the shipped packages: a kit ships every
+        module under `kneemri` and `core`, but a kernel imports a fraction of them, and a commit to a
+        measurement module cannot change what the kernel computes any more than a commit to a test can.
+        """
         if recorded is None:
             return ["the kit carries no commit stamp — rebuild it before shipping"]
-        behind = self.asked("log", "--oneline", f"{recorded['commit']}..HEAD", "--", *PACKAGES).splitlines()
+        behind = self.asked("log", "--oneline", f"{recorded['commit']}..HEAD", "--", *self.loaded).splitlines()
         # A DIRTY KIT NAMES A COMMIT IT IS NOT. On 2026-08-14 one was uploaded and run from a tree with
         # uncommitted changes, so its stamp pointed at code that was never what shipped — which is the
         # same unnameable-version state the stamp exists to end, wearing a commit hash.
@@ -109,7 +114,9 @@ def main() -> None:
     for line in behind:
         logger.info("MISSING FROM THE KIT: %s", line)
     stamp = str(recorded["commit"]) if recorded else "UNSTAMPED"
-    logger.info("%s at %s, %d commit(s) behind in %s", where, stamp, len(behind), "/".join(PACKAGES))
+    logger.info(
+        "%s at %s, %d commit(s) behind in the %d files the kernel loads", where, stamp, len(behind), len(check.loaded)
+    )
     if behind:
         raise SystemExit(1)
 

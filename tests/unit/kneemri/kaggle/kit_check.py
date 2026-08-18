@@ -11,14 +11,20 @@ GIT = shutil.which("git") or "git"
 
 
 def _repo(tmp_path: Path) -> Path:
-    """A repository with one commit touching a shipped package, and one touching only docs."""
+    """A repository the check can resolve a kernel's import closure inside.
+
+    The entrypoint and the one module it imports are what a commit has to touch to matter; `analysis.py`
+    is imported by nothing and stands for every measurement module that used to refuse a kit.
+    """
     repo = tmp_path / "repo"
-    (repo / "kneemri").mkdir(parents=True)
+    (repo / "kneemri" / "kaggle").mkdir(parents=True)
     run = lambda *command: subprocess.run([GIT, "-C", str(repo), *command], check=True, capture_output=True)  # noqa: E731, S603
     run("init", "-q")
     run("config", "user.email", "t@t")
     run("config", "user.name", "t")
+    (repo / "kneemri" / "kaggle" / "kernel_run.py").write_text("from kneemri.model import Model\n", encoding="utf-8")
     (repo / "kneemri" / "model.py").write_text("first", encoding="utf-8")
+    (repo / "kneemri" / "analysis.py").write_text("first", encoding="utf-8")
     run("add", "-A")
     run("commit", "-qm", "first")
     return repo
@@ -47,10 +53,12 @@ def test_stamped(tmp_path: Path):
 
 
 def test_drift(tmp_path: Path):
-    """Commits the kit lacks IN THE SHIPPED PACKAGES, and silence when it is current.
+    """Commits the kit lacks IN THE FILES A KERNEL LOADS, and silence when it is current.
 
-    A docs-only commit must not fail the check: what matters is not that the kit differs from HEAD but
-    that it differs in code a kernel runs. Failing on every commit would train the reader to ignore it.
+    Neither a docs commit nor a commit to a module outside the import closure may fail the check: what
+    matters is not that the kit differs from HEAD but that it differs in code a kernel runs. Counting
+    over the whole package refused three purely additive measurement commits on 2026-08-17, and a check
+    that is always overridden is one that will be overridden the time it is right.
     """
     repo = _repo(tmp_path)
     check = KitCheck(repo)
@@ -65,6 +73,12 @@ def test_drift(tmp_path: Path):
     run("commit", "-qm", "docs only")
 
     assert check.drift(_kit(tmp_path / "after_docs", current)) == [], "a docs commit changes no kernel"
+
+    (repo / "kneemri" / "analysis.py").write_text("measured", encoding="utf-8")
+    run("add", "-A")
+    run("commit", "-qm", "a measurement no kernel imports")
+
+    assert check.drift(_kit(tmp_path / "after_analysis", current)) == [], "an unimported module ships inert"
 
     (repo / "kneemri" / "model.py").write_text("second", encoding="utf-8")
     run("add", "-A")
@@ -118,7 +132,7 @@ def test_a_path_inside_the_repo_answers_the_same_as_its_root(tmp_path: Path):
     """
     repo = _repo(tmp_path)
     behind_at = KitCheck(repo).asked("rev-parse", "--short", "HEAD")
-    (repo / "kneemri" / "later.py").write_text("second", encoding="utf-8")
+    (repo / "kneemri" / "model.py").write_text("second", encoding="utf-8")
     subprocess.run([GIT, "-C", str(repo), "add", "-A"], check=True, capture_output=True)  # noqa: S603
     subprocess.run([GIT, "-C", str(repo), "commit", "-qm", "second"], check=True, capture_output=True)  # noqa: S603
     kit = _kit(tmp_path / "behind", behind_at)
