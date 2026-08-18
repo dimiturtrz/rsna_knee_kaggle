@@ -19,6 +19,7 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
@@ -92,6 +93,50 @@ class DecodeRequest:
     reading: Reading = Reading()
 
 
+NAMED_BY = {
+    "slices": "slices",
+    "image_size": "image_size",
+    "routing": "routing",
+    "reading": "reading",
+    "first": "cache_studies",
+}
+"""Each cache field, against the name its namer states it under. Data rather than five keyword lines,
+so the axis list is one object a test can hold against `StudyCache`'s own fields."""
+
+
+class CacheNaming(Protocol):
+    """Whatever knows which arrays it reads — a run's options, or a member's recorded config.
+
+    Structural, so this module names neither: `training` and `inference` both import `corpus`, and a
+    concrete type here would close two cycles at once.
+
+    The two sides had each unified this constructor for themselves, and their docstrings tell the same
+    story from opposite ends — `main` and `arm_check` spelled it out on the train side, the oracle, the
+    witness check and the curve on the serve side. Five call sites, two homes, one axis list. The axis
+    that goes into one home and not the other is not a crash: it is a run whose weights were fitted on
+    pixels its own serve path resolves away from, both sides agreeing they read `the cache` and
+    resolving to different files. The cache key exists to make that impossible from the build side; this
+    protocol is the same guarantee from the reading side.
+    """
+
+    @property
+    def slices(self) -> int: ...
+
+    @property
+    def image_size(self) -> int: ...
+
+    @property
+    def routing(self) -> Routing: ...
+
+    @property
+    def reading(self) -> Reading: ...
+
+    @property
+    def cache_studies(self) -> int:
+        """How many studies of the split — `first` here, because a cache states it and a reader asks it."""
+        ...
+
+
 @dataclass(frozen=True)
 class StudyCache:
     """A memory-mapped `[studies, slots, slices, size, size]` uint8 array plus its presence mask.
@@ -109,6 +154,17 @@ class StudyCache:
     reading: Reading = Reading()
     first: int = 0
     """How many studies of the split this cache holds; 0 is all of them."""
+
+    @classmethod
+    def of(cls, naming: CacheNaming, directory: Path) -> "StudyCache":
+        """The cache a run wrote or a member was fitted on — the axis list, spelled ONCE for both.
+
+        A new axis is added to `NAMED_BY` and to `CacheNaming`, and every caller either supplies it or
+        fails to type-check. Written as two agreeing constructors — which is how it arrived, one on the
+        run's options and one on the member's config — the same addition is a silent divergence between
+        the pixels a run trained on and the pixels its own members resolve to at serve time.
+        """
+        return cls(directory, **{field: getattr(naming, stated) for field, stated in NAMED_BY.items()})
 
     @property
     def slots(self) -> int:

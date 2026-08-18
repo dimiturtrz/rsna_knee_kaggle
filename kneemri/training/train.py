@@ -139,16 +139,10 @@ class TrainingOptions:
         `main` and `arm_check` each spelled this constructor out, agreeing with each other and with
         `CacheFlags.cache` by inspection. A seventh axis added to the flags and forgotten in one of them
         is not a crash: it is an arm that trains on pixels its recorded config does not describe, and a
-        holdout number filed under a reading nobody ran.
+        holdout number filed under a reading nobody ran. The axis list is `StudyCache.of`'s, shared with
+        the serve side, so the same addition cannot land here and not there.
         """
-        return StudyCache(
-            directory,
-            slices=self.slices,
-            image_size=self.image_size,
-            routing=self.routing,
-            reading=self.reading,
-            first=self.cache_studies,
-        )
+        return StudyCache.of(self, directory)
 
     @property
     def supervision(self) -> Supervision:

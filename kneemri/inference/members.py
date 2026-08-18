@@ -192,16 +192,10 @@ class Member:
 
         A method on the member because the set of fields that names a cache is not knowledge a consumer
         should hold: the next axis is added here once, rather than remembered in three places by whoever
-        adds it.
+        adds it. The axis LIST itself lives in `StudyCache.of`, because the train side had unified the
+        same constructor for itself and the two unifications never met.
         """
-        return StudyCache(
-            directory,
-            slices=self.slices,
-            image_size=self.image_size,
-            routing=self.routing,
-            reading=self.reading,
-            first=self.cache_studies,
-        )
+        return StudyCache.of(self, directory)
 
     @property
     def cache_studies(self) -> int:

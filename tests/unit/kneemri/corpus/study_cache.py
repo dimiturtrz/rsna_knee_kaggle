@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +10,7 @@ from numpy.typing import NDArray
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import Band, Reading
 from kneemri.corpus.slots import EXTENDED_SLOTS, SLOTS, Routing
-from kneemri.corpus.study_cache import CachedCorpus, CorpusSplit, DecodeRequest, StudyCache
+from kneemri.corpus.study_cache import NAMED_BY, CachedCorpus, CorpusSplit, DecodeRequest, StudyCache
 from kneemri.corpus.window_reader import FileReader, MappedReader
 
 from ..conftest import write_series
@@ -221,6 +222,41 @@ def test_decode_one_reports_a_study_it_cannot_decode_as_absent(tmp_path: Path, c
     assert position == 0, "the row still has to be reported, or the pool's map loses a study"
     assert flags == [0.0] * 6, "every slot absent — none of them black-but-acquired"
     assert "decode failed for missing" in caplog.text, "and the reason is printed, not swallowed"
+
+
+@dataclass(frozen=True)
+class Naming:
+    """A `CacheNaming` with every axis set to something other than its default, so a dropped one shows."""
+
+    slices: int = 8
+    image_size: int = 224
+    routing: Routing = Routing(scheme="extended")
+    reading: Reading = Reading(crop=Crop(mm=90.0))
+    cache_studies: int = 40
+
+
+def test_of(tmp_path: Path):
+    """Every axis a namer states reaches the cache, and the axis LIST is this constructor's alone.
+
+    The run's options and the member's recorded config each built this by hand, agreeing by inspection
+    across two packages. The field-set assertion is what makes a seventh axis a failure here rather than
+    a silent divergence between the pixels a run trained on and the ones its members later resolve to.
+    """
+    naming = Naming()
+
+    cache = StudyCache.of(naming, tmp_path)
+
+    assert cache == StudyCache(
+        tmp_path,
+        slices=naming.slices,
+        image_size=naming.image_size,
+        routing=naming.routing,
+        reading=naming.reading,
+        first=naming.cache_studies,
+    )
+    assert set(vars(cache)) - {"directory"} == set(NAMED_BY), (
+        "a new cache axis: state it on `CacheNaming` and take it in `NAMED_BY`, or both sides drift again"
+    )
 
 
 def test_key(tmp_path: Path):
