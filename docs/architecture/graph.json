@@ -2,6 +2,12 @@
   "edges": [
     {
       "kind": "import",
+      "source": "core.wakelock",
+      "target": "core.sleep_policy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.anatomy",
       "target": "kneemri.corpus.slots",
       "weight": 1
@@ -1593,6 +1599,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.fitting",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
       "target": "kneemri.corpus.study_cache",
       "weight": 1
     },
@@ -1960,6 +1972,42 @@
       "kind": "references",
       "source": "core.paths.DataRoot",
       "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.sleep_policy.StaysAwake.hold",
+      "target": "core.sleep_policy.StaysAwake._kernel32",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.sleep_policy.StaysAwake.release",
+      "target": "core.sleep_policy.StaysAwake._kernel32",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.sleep_policy.ThisMachine",
+      "target": "core.sleep_policy.SleepPolicy",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.wakelock.Wakelock",
+      "target": "core.sleep_policy.SleepPolicy",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.wakelock.Wakelock.__init__",
+      "target": "core.sleep_policy.ThisMachine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.wakelock.Wakelock.__init__",
+      "target": "core.sleep_policy.ThisMachine.policy",
       "weight": 1
     },
     {
@@ -8173,6 +8221,48 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.runs.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.runs.run_metrics.RunMetrics.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.fitting.Fitting.keep",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.fitting.Fitting.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.patience.Patience.exhausted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.trainer.Trainer.evaluated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.trainer.Trainer.fit_epoch",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.keep",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.named",
@@ -8223,43 +8313,13 @@
     {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.runs.run_metrics.EpochRow",
+      "target": "core.wakelock.Wakelock",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.runs.run_metrics.RunMetrics.record",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.training.fitting.Fitting.keep",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.training.fitting.Fitting.ranked",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.training.patience.Patience.exhausted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.training.trainer.Trainer.evaluated",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.run",
-      "target": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.fitting.Fitting.epochs",
       "weight": 1
     },
     {
@@ -9249,7 +9309,7 @@
   ],
   "nodes": [
     {
-      "descendants": 3,
+      "descendants": 5,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -9276,6 +9336,22 @@
       "descendants": 0,
       "id": "core.paths",
       "label": "paths",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy",
+      "label": "sleep_policy",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.wakelock",
+      "label": "wakelock",
       "level": "module",
       "parent": "core",
       "role": null
@@ -10166,6 +10242,46 @@
       "label": "DataRoot",
       "level": "class",
       "parent": "core.paths",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.SleepPolicy",
+      "label": "SleepPolicy",
+      "level": "class",
+      "parent": "core.sleep_policy",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.Sleeps",
+      "label": "Sleeps",
+      "level": "class",
+      "parent": "core.sleep_policy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.StaysAwake",
+      "label": "StaysAwake",
+      "level": "class",
+      "parent": "core.sleep_policy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.ThisMachine",
+      "label": "ThisMachine",
+      "level": "class",
+      "parent": "core.sleep_policy",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.wakelock.Wakelock",
+      "label": "Wakelock",
+      "level": "class",
+      "parent": "core.wakelock",
       "role": "primary"
     },
     {
@@ -11630,6 +11746,94 @@
       "label": "raw",
       "level": "method",
       "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.SleepPolicy.hold",
+      "label": "hold",
+      "level": "method",
+      "parent": "core.sleep_policy.SleepPolicy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.SleepPolicy.release",
+      "label": "release",
+      "level": "method",
+      "parent": "core.sleep_policy.SleepPolicy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.Sleeps.hold",
+      "label": "hold",
+      "level": "method",
+      "parent": "core.sleep_policy.Sleeps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.Sleeps.release",
+      "label": "release",
+      "level": "method",
+      "parent": "core.sleep_policy.Sleeps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.StaysAwake._kernel32",
+      "label": "_kernel32",
+      "level": "method",
+      "parent": "core.sleep_policy.StaysAwake",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.StaysAwake.hold",
+      "label": "hold",
+      "level": "method",
+      "parent": "core.sleep_policy.StaysAwake",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.StaysAwake.release",
+      "label": "release",
+      "level": "method",
+      "parent": "core.sleep_policy.StaysAwake",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.sleep_policy.ThisMachine.policy",
+      "label": "policy",
+      "level": "method",
+      "parent": "core.sleep_policy.ThisMachine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.wakelock.Wakelock.__enter__",
+      "label": "__enter__",
+      "level": "method",
+      "parent": "core.wakelock.Wakelock",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.wakelock.Wakelock.__exit__",
+      "label": "__exit__",
+      "level": "method",
+      "parent": "core.wakelock.Wakelock",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.wakelock.Wakelock.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.wakelock.Wakelock",
       "role": null
     },
     {
@@ -16932,6 +17136,14 @@
       "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitting.Fitting.epochs",
+      "label": "epochs",
       "level": "method",
       "parent": "kneemri.training.fitting.Fitting",
       "role": null

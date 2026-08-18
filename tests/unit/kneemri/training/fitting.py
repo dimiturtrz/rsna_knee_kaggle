@@ -117,6 +117,19 @@ def test_run(tmp_path: Path):
     assert kept.holdout == pytest.approx(0.90)
 
 
+def test_epochs(tmp_path: Path):
+    """The loop itself, without the wakelock `run` wraps it in — same answer, so the hold is a property
+    of the RUN and not of what the epochs compute."""
+    fitting = _fitting(tmp_path / "member.pt", epochs=2)
+    ranked = iter([0.80, 0.60])
+    fitting.ranked = lambda fold, epoch: (next(ranked), {TARGETS[0]: 0.8}, None)  # type: ignore[method-assign]
+
+    kept = fitting.epochs(_fold())
+
+    assert kept.epoch == 0
+    assert kept.holdout == pytest.approx(0.80)
+
+
 def test_the_epoch_line_states_its_denominator_when_a_label_is_undefined(
     tmp_path: Path, caplog: pytest.LogCaptureFixture
 ):

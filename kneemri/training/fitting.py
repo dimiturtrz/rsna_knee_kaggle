@@ -28,6 +28,7 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from core.wakelock import Wakelock
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.evaluation.scores import LabelScores
 from kneemri.labels.targets import Targets
@@ -148,7 +149,18 @@ class Fitting:
         return kept
 
     def run(self, fold: Fold) -> Fitted:
-        """Fit every epoch, and return the one that is kept."""
+        """Fit every epoch, and return the one that is kept.
+
+        Held awake for the whole loop, because the idle timer counts INPUT and an unattended run
+        provides none: three runs suspended mid-epoch and reported the suspend as several hours of
+        epoch (knee-wyzj). Taken here rather than in `main` so it covers exactly the span that must not
+        be interrupted, and released by the context manager whether the loop returns or raises.
+        """
+        with Wakelock():
+            return self.epochs(fold)
+
+    def epochs(self, fold: Fold) -> Fitted:
+        """Every pass over the corpus, and the one whose weights are kept."""
         best, kept = -1.0, None
         for epoch in range(self.plan.epochs):
             started = time.time()
