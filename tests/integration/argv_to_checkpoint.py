@@ -4,7 +4,7 @@ Every piece of the run's setup is unit-tested and `corpus_to_checkpoint` fits a 
 setup methods — but `main` is the function that WIRES them, and it was executed by nothing. That is the
 half of this repo's failure class no unit test can see: nine times a value was recorded in a config
 while its consumer read its own default, and the way it happens is a flag that reaches the options
-object and then never reaches the thing it configures. `fitted_trainer` attaching a policy proves
+object and then never reaches the thing it configures. `RunSetup.trainer` attaching a policy proves
 nothing if `main` stops calling it.
 
 So this drives the real entry point from argv: cache load, label pairing, fold assignment, model build,
@@ -33,8 +33,9 @@ from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
+from kneemri.training import run_setup as build_module
 from kneemri.training import train as train_module
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, _BlockedBackbone, _FakeBackbone
 
@@ -117,7 +118,7 @@ def corpus(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     paths = tmp_path / "paths.yaml"
     paths.write_text(f"data: {tmp_path.as_posix()}\n", encoding="utf-8")
 
-    monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
+    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
     # The stand-in backbone is DIM wide, and the head is built at the ENCODER's width: a mismatch here
     # is a shape error rather than a test of the wiring.
     monkeypatch.setattr(train_module, "ENCODERS", {SMALL: replace(ENCODERS[SMALL], dim=DIM)})
@@ -179,7 +180,7 @@ def _nested(payload: dict[str, object], key: str) -> dict[str, object]:
 def test_the_command_line_reaches_the_checkpoint(corpus: Path, monkeypatch: pytest.MonkeyPatch):
     """The flags that decide WHICH PIXELS a member reads must arrive on the member.
 
-    Each of these travels through a different part of `main`: `--whole-stack` through `fitted_trainer`,
+    Each of these travels through a different part of `main`: `--whole-stack` through `RunSetup.trainer`,
     `--slice-pooling` through the `StudyDesign` built here, `--crop-mm`/`--tie` through the cache key
     and the record. A flag parsed and then dropped is this project's most expensive failure — it does
     not crash, it trains a recipe nobody asked for and reports a plausible number for it.
@@ -277,7 +278,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
     """
     # The blocked stand-in, because `--lora-rank` wraps the Linears INSIDE a block and the plain one
     # has none — an encoder shape, not a preference, and adaptation refuses a backbone it cannot adapt.
-    monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
+    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
     _corpus(
         corpus,
         Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL),

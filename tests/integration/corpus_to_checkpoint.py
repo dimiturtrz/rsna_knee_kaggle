@@ -30,7 +30,8 @@ from kneemri.models.backbone import Encoder
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitting, Fold, RunPlan
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
+from kneemri.training.run_setup import RunSetup
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 
@@ -91,7 +92,7 @@ def _trained(destination: Path) -> _Checkpoint:
     # here shared no code with the run it claims to reproduce, so a policy that stopped being attached
     # in `main` would leave this chain green.
     options = TrainingOptions(image_size=SIZE, slices=SLICES, whole_stack=True, slice_pooling="max")
-    trainer = options.fitted_trainer(model, DEVICE, [], STUDIES)
+    trainer = RunSetup(options).trainer(model, DEVICE, [], STUDIES)
     record = MemberRecord(
         options,
         Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM),

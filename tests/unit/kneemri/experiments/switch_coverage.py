@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from kneemri.experiments.switch_coverage import COVERAGE, NOT_A_RECIPE, SwitchCoverage
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 
 def test_armed(tmp_path: Path):

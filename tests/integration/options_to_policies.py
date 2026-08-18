@@ -1,7 +1,7 @@
 """A policy a run ASKED FOR must be attached, not merely recorded — the failure class with a correct config.
 
 `argv_to_checkpoint` proves the run's switches reach the manifest. That is one half. The other half is
-`TrainingOptions.fitted_trainer` and `fitted_model`, which are eight hand-written `if self.flag:
+`RunSetup.trainer` and `RunSetup.model`, which are eight hand-written `if self.flag:
 object.method()` lines: a switch parsed, recorded and never attached trains the OLD recipe under the
 NEW name, and every check downstream reads the config and agrees with itself. The report-supervision
 no-op was exactly this — a weight with no vectors skipped the attachment silently, and the arm would
@@ -19,8 +19,9 @@ import torch
 
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyDesign, StudyModel
-from kneemri.training import train as train_module
-from kneemri.training.train import TrainingOptions
+from kneemri.training import run_setup as build_module
+from kneemri.training.options import TrainingOptions
+from kneemri.training.run_setup import RunSetup
 from kneemri.training.trainer import Trainer
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
@@ -114,24 +115,24 @@ def _recorded(monkeypatch: pytest.MonkeyPatch, owner: type, names: list[str]) ->
 
 def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.MonkeyPatch):
     """A switch parsed and stamped but never attached is a run that trains the recipe before it."""
-    monkeypatch.setattr(train_module.ReportSupervision, "from_file", lambda *arguments: object())
+    monkeypatch.setattr(build_module.ReportSupervision, "from_file", lambda *arguments: object())
     policies = _policies(Trainer, THE_LOOP | TRAINER_REPORTER)
     called = _recorded(monkeypatch, Trainer, policies)
 
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign())
-    _options().fitted_trainer(model, DEVICE, ["study"], training_positions=16)
+    RunSetup(_options()).trainer(model, DEVICE, ["study"], training_positions=16)
 
     assert set(policies) == called, f"{sorted(set(policies) - called)} is a policy no run can turn on"
 
 
 def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.MonkeyPatch):
     """The model half of the same claim: adapters, checkpointing and compilation are run switches too."""
-    monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
+    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
     wrappers = _policies(StudyModel, NOT_A_WRAPPER | MODEL_REPORTER)
     called = _recorded(monkeypatch, StudyModel, wrappers)
 
-    # A CUDA device, though nothing is moved onto one: `fitted_model` compiles only for a card, so a CPU
+    # A CUDA device, though nothing is moved onto one: `RunSetup.model` compiles only for a card, so a CPU
     # device here would leave `compile_encoder` uncalled and read as a wrapper no run can turn on.
-    _options().fitted_model(ENCODER, SLOTS, StudyDesign(), torch.device("cuda"))
+    RunSetup(_options()).model(ENCODER, SLOTS, StudyDesign(), torch.device("cuda"))
 
     assert set(wrappers) == called, f"{sorted(set(wrappers) - called)} is a wrapper no run can turn on"

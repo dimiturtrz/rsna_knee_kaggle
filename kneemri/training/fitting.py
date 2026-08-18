@@ -1,6 +1,6 @@
 """The epoch loop: passes over the corpus, and the decision of which pass is KEPT.
 
-`TrainingOptions.fitted_model` and `fitted_trainer` were pulled out of `train.main` because a run's
+`RunSetup.model` and `RunSetup.trainer` were pulled out of `train.main` because a run's
 SETUP and a run's LOOP are two jobs and only the first grows with every new flag. The loop itself was
 left inside `main`, where nothing could call it — and it is the half that decides what a run
 PRODUCES rather than how it is configured:

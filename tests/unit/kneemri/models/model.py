@@ -565,7 +565,7 @@ def test_compile_encoder(study_model: StudyModel):
     tried to read one back. Identity is now asserted the other way, because the names are what a
     checkpoint carries and a submission needs.
 
-    THE FORWARD IS NO LONGER EXERCISED HERE, and that is the same fact `TrainingOptions.fitted_model`
+    THE FORWARD IS NO LONGER EXERCISED HERE, and that is the same fact `RunSetup.model`
     now encodes by refusing to compile off a card: a compiled CPU trace makes dynamo probe
     `has_triton()`, which indexes a CUDA worker cache the trace never filled and raises `IndexError:
     list index out of range`. Moving this fixture to a card instead only trades that for a device

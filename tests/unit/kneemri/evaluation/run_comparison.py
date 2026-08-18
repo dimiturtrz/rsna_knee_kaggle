@@ -117,7 +117,7 @@ def test_axes_name_options_that_still_exist():
     """
     import dataclasses  # noqa: PLC0415 - the field list is this test's whole subject
 
-    from kneemri.training.train import TrainingOptions  # noqa: PLC0415 - a test-only reach across layers
+    from kneemri.training.options import TrainingOptions  # noqa: PLC0415 - a test-only reach across layers
 
     recorded = {field.name for field in dataclasses.fields(TrainingOptions)}
 

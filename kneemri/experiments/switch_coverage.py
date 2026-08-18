@@ -20,7 +20,7 @@ import re
 from dataclasses import fields
 from pathlib import Path
 
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 SCRIPTS = Path("experiments")
 

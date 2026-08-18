@@ -30,7 +30,7 @@ from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 

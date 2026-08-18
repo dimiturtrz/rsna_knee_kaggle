@@ -16,7 +16,7 @@ import torch
 
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 from ..unit.kneemri.models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 

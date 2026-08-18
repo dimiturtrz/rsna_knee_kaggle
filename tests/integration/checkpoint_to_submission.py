@@ -33,7 +33,7 @@ from kneemri.inference.vote import RankAverage
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import TARGETS, StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 DIM = 12
 SLOTS = 6

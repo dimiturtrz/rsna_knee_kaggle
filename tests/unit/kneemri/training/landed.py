@@ -19,8 +19,8 @@ from kneemri.models.model import (
 )
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
+from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
-from kneemri.training.train import TrainingOptions
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Adaptation, Trainer
 
 DIM = 8

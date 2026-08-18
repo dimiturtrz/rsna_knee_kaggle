@@ -33,7 +33,7 @@ from core.paths import DataRoot
 from kneemri.corpus.study_cache import CorpusSplit, StudyCache
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 logger = logging.getLogger(__name__)
 

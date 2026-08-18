@@ -7,7 +7,7 @@ from kneemri.corpus.crop_centre import CROP_MM
 from kneemri.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
-from kneemri.training.train import TrainingOptions
+from kneemri.training.options import TrainingOptions
 
 from ..models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 
