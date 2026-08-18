@@ -32,6 +32,7 @@ import torch
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
+from core.wakelock import Wakelock
 from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.device import VisibleCards
@@ -175,25 +176,28 @@ def main() -> None:
     backfill = HoldoutBackfill(
         DataRoot.from_config(arguments.paths), torch.device(arguments.device), overlap=arguments.overlap
     )
-    for checkpoint in arguments.checkpoints:
-        # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
-        # reason a refresh does — the gate is there to keep a plain walk from re-deriving what is done.
-        if HoldoutRecord(checkpoint).exists() and not (arguments.refresh or arguments.restamp):
-            logger.info("%s: already keeps its predictions", checkpoint.stem)
-            continue
-        try:
-            plan = Backfill.of(checkpoint)
-        except UnbackfillableError as refusal:
-            logger.info("skipped %s", refusal)
-            continue
-        if arguments.restamp:
-            moved = HoldoutRecord(checkpoint).restamp(plan.epoch)
-            logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
-            continue
-        member = Member.from_checkpoint(checkpoint)
-        corpus, identifiers = member.cache(backfill.root.processed()).load()
-        written = backfill.derive(member, plan, corpus, identifiers)
-        logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
+    # The walk, not each member: a suspend between two members costs the same wall-clock as one inside
+    # a member, and the walk over 55 of them is what runs for hours unattended (knee-wyzj).
+    with Wakelock():
+        for checkpoint in arguments.checkpoints:
+            # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
+            # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
+            if HoldoutRecord(checkpoint).exists() and not (arguments.refresh or arguments.restamp):
+                logger.info("%s: already keeps its predictions", checkpoint.stem)
+                continue
+            try:
+                plan = Backfill.of(checkpoint)
+            except UnbackfillableError as refusal:
+                logger.info("skipped %s", refusal)
+                continue
+            if arguments.restamp:
+                moved = HoldoutRecord(checkpoint).restamp(plan.epoch)
+                logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
+                continue
+            member = Member.from_checkpoint(checkpoint)
+            corpus, identifiers = member.cache(backfill.root.processed()).load()
+            written = backfill.derive(member, plan, corpus, identifiers)
+            logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
 
 
 if __name__ == "__main__":

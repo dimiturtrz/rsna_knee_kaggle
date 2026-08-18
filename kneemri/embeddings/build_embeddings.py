@@ -17,6 +17,7 @@ import torch
 from transformers import AutoModel
 
 from core.paths import DataRoot
+from core.wakelock import Wakelock
 from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
@@ -71,7 +72,8 @@ def main() -> None:
     spec = EmbeddingSpec(variant=arguments.variant, source=pixels.key, read_size=read_size, pool=arguments.pool)
     cache = EmbeddingCache(root, spec)
     logger.info(f"encoding {len(identifiers)} studies -> {cache.features_path}")
-    with torch.no_grad():
+    # The encode pass is the same unattended hour-scale job the decode is, and suspends the same way.
+    with torch.no_grad(), Wakelock():
         written = cache.build(model.slice_features, corpus, identifiers, device, batch=arguments.batch)
     logger.info(f"EMBEDDINGS BUILD COMPLETE {written.features.shape} width={written.width}")
 

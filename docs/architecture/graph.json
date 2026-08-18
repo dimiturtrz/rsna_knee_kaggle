@@ -63,6 +63,12 @@
     {
       "kind": "import",
       "source": "kneemri.corpus.build_cache",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.build_cache",
       "target": "kneemri.corpus.cache_flags",
       "weight": 1
     },
@@ -364,6 +370,12 @@
       "kind": "import",
       "source": "kneemri.embeddings.build_embeddings",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_embeddings",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -1108,6 +1120,12 @@
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -2275,6 +2293,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.corpus.build_cache.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.corpus.build_cache.main",
       "target": "kneemri.corpus.cache_flags.CacheFlags.add_to",
@@ -3328,6 +3352,12 @@
       "kind": "calls",
       "source": "kneemri.embeddings.build_embeddings.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_embeddings.main",
+      "target": "core.wakelock.Wakelock",
       "weight": 1
     },
     {
@@ -6316,6 +6346,12 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "core.wakelock.Wakelock",
       "weight": 1
     },
     {

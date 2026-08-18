@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from core.paths import DataRoot
+from core.wakelock import Wakelock
 from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.study_cache import CorpusSplit
@@ -68,7 +69,10 @@ def main() -> None:
         sys.stdout.write(f"{cache.key}\n")
         return
     logger.info(f"building {cache.shape(len(cache.enrolled(identifiers)))} uint8 -> {cache.images_path}")
-    cache.build(split.source, identifiers, split.planes(), workers=arguments.workers)
+    # Held awake for the decode alone, not for the argument parsing or the key print: a full-corpus
+    # build runs for hours unattended, and the idle timer counts INPUT rather than load (knee-wyzj).
+    with Wakelock():
+        cache.build(split.source, identifiers, split.planes(), workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")
 
 
