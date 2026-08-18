@@ -11,6 +11,7 @@ from kneemri.corpus.slots import Routing
 from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign
+from kneemri.training.landed import Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.train import TrainingOptions
@@ -271,6 +272,59 @@ def test_fitted_model(monkeypatch: pytest.MonkeyPatch):
     order.clear()
     TrainingOptions().fitted_model(ENCODERS[SMALL], 6, StudyDesign(), torch.device("cpu"))
     assert order == [], "and a CPU run is never compiled: inductor's gain is CUDA kernels, and the trace dies"
+
+
+def _probe(default: object) -> object:
+    """A value of the field's own type that is NOT its default, so a field that did not move is visible."""
+    if isinstance(default, bool):
+        return not default
+    if isinstance(default, int):
+        return default + 7
+    return float(default) + 0.5  # type: ignore[arg-type]
+
+
+def test_requested():
+    """Every flag reaches the request field it NAMES, and moves no other one.
+
+    A one-hot walk rather than seventeen hand-written asserts, because the failure being guarded is a
+    CROSSED WIRE: `weight_floor=self.calibrated_targets` reads a real flag into a real field and every
+    type agrees, so the pre-flight check would then clear a run for a switch nobody asked for and refuse
+    it for one it did — the check itself failing in the exact shape it exists to catch. Only moving one
+    flag at a time and demanding that exactly one field follow can see that.
+    """
+    cpu = torch.device("cpu")
+    shared = {field.name for field in dataclasses.fields(Request)} & {
+        field.name for field in dataclasses.fields(TrainingOptions)
+    }
+
+    assert len(shared) == 14, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+
+    plain = TrainingOptions().requested(cpu)
+    for name in sorted(shared):
+        probe = _probe(getattr(TrainingOptions(), name))
+        moved = dataclasses.replace(TrainingOptions(), **{name: probe}).requested(cpu)
+
+        assert getattr(moved, name) == probe, f"--{name} does not reach the request field of its own name"
+        followed = {other for other in shared if getattr(moved, other) != getattr(plain, other)}
+        assert followed == {name}, f"--{name} also moved {followed - {name}}"
+
+
+def test_requested_resolves_the_three_fields_that_are_not_a_flag():
+    """Two are an argument's PRESENCE, and compiling is decided by the DEVICE rather than by the flag.
+
+    The device half is the one that bites on this machine: `fitted_model` compiles on CUDA only, so a
+    request built from the flag alone would report an un-landed compile on every CPU smoke run.
+    """
+    asked = TrainingOptions(recompute_activations=True, report_vectors=Path("vectors.npz")).requested(
+        torch.device("cpu")
+    )
+
+    assert asked.recompute is True
+    assert asked.reports is True, "the VECTORS decide it — a weight with no vectors is refused earlier"
+    assert TrainingOptions().requested(torch.device("cpu")).reports is False
+    assert TrainingOptions(compile_encoder=True).requested(torch.device("cpu")).compiling is False
+    assert TrainingOptions(compile_encoder=True).requested(torch.device("cuda")).compiling is True
+    assert TrainingOptions(compile_encoder=False).requested(torch.device("cuda")).compiling is False
 
 
 def test_crop():

@@ -420,6 +420,40 @@ class TrainingOptions:
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
 
+    def requested(self, device: torch.device) -> Request:
+        """These flags in the vocabulary the pre-flight check compares them in, transcribed ONCE.
+
+        The transcription was seventeen `field=arguments.field` lines inside `main`, and that is one
+        copy-paste away from the defect the check itself exists to catch: `weight_floor=
+        arguments.calibrated_targets` parses, type-checks, runs, and leaves the guard agreeing with the
+        wrong flag — a run would then be cleared for a switch nobody asked for and refused for one it
+        did. Here it is a method a test can walk field by field without a card or a corpus.
+
+        THE THREE NAMES THAT DO NOT MATCH are the three that are not a flag read straight off: two are
+        an argument's PRESENCE, and `compiling` is resolved against the DEVICE because `fitted_model`
+        compiles on CUDA only — on CPU the honest request is False, and a check reading the flag alone
+        would fail every smoke run on this machine.
+        """
+        return Request(
+            lora_rank=self.lora_rank,
+            recompute=self.recompute_activations,
+            compiling=self.compile_encoder and device.type == "cuda",
+            bf16=self.bf16,
+            whole_stack=self.whole_stack,
+            slices=self.slices,
+            train_size=self.train_size,
+            ema=self.ema,
+            one_cycle=self.one_cycle,
+            reports=self.report_vectors is not None,
+            rank_weight=self.rank_weight,
+            pair_memory=self.pair_memory,
+            per_label_loss=self.per_label_loss,
+            normalise_by_count=self.normalise_by_count,
+            intensity_aug=self.intensity_aug,
+            weight_floor=self.weight_floor,
+            calibrated_targets=self.calibrated_targets,
+        )
+
     def adaptation(self) -> Adaptation:
         """How the encoder adapts: which blocks move and how fast, which are one decision."""
         return Adaptation(head_lr=self.head_lr, backbone_lr=self.backbone_lr, unfreeze_last=self.unfreeze_last)
@@ -632,27 +666,7 @@ def main() -> None:
     # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once
     # matched an encoder's projections by name and wrapped nothing, so an arm trained a plain model
     # under a LoRA recipe and cost a queue slot to discover. Two seconds of attribute reads.
-    unlanded = Landed(model, trainer, targets).missing(
-        Request(
-            lora_rank=arguments.lora_rank,
-            recompute=arguments.recompute_activations,
-            compiling=arguments.compile_encoder and device.type == "cuda",
-            bf16=arguments.bf16,
-            whole_stack=arguments.whole_stack,
-            slices=arguments.slices,
-            train_size=arguments.train_size,
-            ema=arguments.ema,
-            one_cycle=arguments.one_cycle,
-            reports=arguments.report_vectors is not None,
-            rank_weight=arguments.rank_weight,
-            pair_memory=arguments.pair_memory,
-            per_label_loss=arguments.per_label_loss,
-            normalise_by_count=arguments.normalise_by_count,
-            intensity_aug=arguments.intensity_aug,
-            weight_floor=arguments.weight_floor,
-            calibrated_targets=arguments.calibrated_targets,
-        )
-    )
+    unlanded = Landed(model, trainer, targets).missing(arguments.requested(device))
     if unlanded:
         message = "the run asked for switches the built model does not show: " + "; ".join(unlanded)
         raise ValueError(message)
