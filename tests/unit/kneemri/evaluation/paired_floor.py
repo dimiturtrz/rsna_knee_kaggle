@@ -7,8 +7,8 @@ import pandas as pd
 import pytest
 
 from kneemri.evaluation.paired_floor import PairedFloor
+from kneemri.findings import TARGETS
 from kneemri.labels.label_power import LabelPower
-from kneemri.models.model import TARGETS
 
 STUDIES = 200
 RESAMPLES = 60

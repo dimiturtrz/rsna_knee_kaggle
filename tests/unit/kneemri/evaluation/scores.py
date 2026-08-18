@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from kneemri.evaluation.scores import LabelScores
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 
 def test_area_under_curve():

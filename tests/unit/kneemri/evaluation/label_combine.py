@@ -4,7 +4,7 @@ import numpy as np
 
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 STUDIES = 120
 SPECIALISTS = 2

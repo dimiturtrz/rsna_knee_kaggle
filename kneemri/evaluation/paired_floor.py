@@ -27,9 +27,9 @@ from numpy.typing import NDArray
 from core.paths import DataRoot
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import MIDPOINT, RESAMPLES, LabelScores
+from kneemri.findings import TARGETS
 from kneemri.labels.label_power import LabelPower
 from kneemri.labels.targets import Targets
-from kneemri.models.model import TARGETS
 
 logger = logging.getLogger(__name__)
 

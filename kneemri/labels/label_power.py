@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 logger = logging.getLogger(__name__)
 

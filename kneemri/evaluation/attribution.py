@@ -34,9 +34,10 @@ from numpy.typing import NDArray
 
 from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
+from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 CENTRE_FRACTION = 0.5
 """Side of the kept centre square as a fraction of the image — a quarter of the area, the joint itself."""

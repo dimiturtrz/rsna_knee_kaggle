@@ -6,7 +6,7 @@ import pytest
 
 from kneemri.evaluation.run_comparison import SUPERVISION_AXES, VIEW_AXES, PairedWidths, RunComparison
 from kneemri.evaluation.supervision_gap import Bottleneck
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 from kneemri.runs.holdout_record import DERIVED, TRAINED, HoldoutRecord
 from kneemri.runs.run_metrics import EpochRow
 

@@ -3,8 +3,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from kneemri.findings import TARGETS
 from kneemri.labels.label_power import LabelPower
-from kneemri.models.model import TARGETS
 
 
 def _labels(tmp_path: Path, positives: int, studies: int = 100) -> Path:

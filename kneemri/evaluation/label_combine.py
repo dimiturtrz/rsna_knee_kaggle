@@ -24,8 +24,8 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from kneemri.evaluation.scores import LabelScores
+from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
-from kneemri.models.model import TARGETS
 
 UNDEFINED = -np.inf
 """Where a label has one class present its AUC is nan, and a nan must sort LAST rather than compare

@@ -22,11 +22,11 @@ from core.paths import DataRoot
 from kneemri.corpus.slot_reader import GROUP, IMAGE_SIZE
 from kneemri.corpus.slots import SLOTS
 from kneemri.corpus.study_cache import StudyCache
+from kneemri.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import TARGETS
 
 STUDIES = 4
 PATHS = Path("paths.yaml")

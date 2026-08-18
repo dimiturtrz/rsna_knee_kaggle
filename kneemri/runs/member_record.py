@@ -11,8 +11,9 @@ from numpy.typing import NDArray
 from kneemri.corpus.crop_centre import Crop
 from kneemri.corpus.slot_reader import GROUP, Band
 from kneemri.corpus.slots import Routing
+from kneemri.findings import TARGETS
 from kneemri.models.backbone import Encoder
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 RECORDED_AS = {
     "image_size": "img",

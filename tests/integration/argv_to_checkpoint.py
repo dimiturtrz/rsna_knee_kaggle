@@ -29,9 +29,10 @@ from kneemri.corpus.folds import ReportFolds
 from kneemri.corpus.slot_reader import IMAGE_SIZE, Band, Reading
 from kneemri.corpus.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from kneemri.corpus.study_cache import StudyCache
+from kneemri.findings import TARGETS
 from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, TARGETS, StudyDesign
+from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, StudyDesign
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.training import run_setup as build_module
 from kneemri.training import train as train_module

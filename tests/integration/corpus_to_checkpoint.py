@@ -22,12 +22,13 @@ import numpy as np
 import torch
 
 from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.members import MemberConfig, MemberPackage
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.labels.targets import Targets
 from kneemri.models.backbone import Encoder
-from kneemri.models.model import TARGETS, StudyDesign, StudyModel
+from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.options import TrainingOptions

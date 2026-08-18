@@ -14,11 +14,12 @@ from torch import Tensor
 from kneemri.corpus.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
 from kneemri.corpus.slot_reader import Band, Reading, SlotReader
 from kneemri.corpus.study import SlotPipeline
+from kneemri.findings import TARGETS
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Read, Serving
 from kneemri.inference.members import MemberPackage
 from kneemri.kaggle.submission import Split, Submission
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 from ..conftest import write_series
 

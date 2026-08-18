@@ -477,6 +477,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.attribution",
+      "target": "kneemri.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution",
       "target": "kneemri.inference.holdout_predictions",
       "weight": 1
     },
@@ -549,13 +555,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.label_combine",
-      "target": "kneemri.inference.vote",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.label_combine",
-      "target": "kneemri.models.model",
+      "target": "kneemri.inference.vote",
       "weight": 1
     },
     {
@@ -705,7 +711,7 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ordinal_signal",
-      "target": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -735,6 +741,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.paired_floor",
+      "target": "kneemri.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.paired_floor",
       "target": "kneemri.labels.label_power",
       "weight": 1
     },
@@ -742,12 +754,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.paired_floor",
       "target": "kneemri.labels.targets",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.paired_floor",
-      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -777,13 +783,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.prevalence_match",
-      "target": "kneemri.inference.vote",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.prevalence_match",
-      "target": "kneemri.models.model",
+      "target": "kneemri.inference.vote",
       "weight": 1
     },
     {
@@ -927,7 +933,7 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.scores",
-      "target": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -963,6 +969,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.stack_coverage",
+      "target": "kneemri.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
       "target": "kneemri.inference.vote",
       "weight": 1
     },
@@ -970,12 +982,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.stack_coverage",
       "target": "kneemri.labels.targets",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.stack_coverage",
-      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -999,13 +1005,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.supervision_gap",
-      "target": "kneemri.inference.vote",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.supervision_gap",
-      "target": "kneemri.models.model",
+      "target": "kneemri.inference.vote",
       "weight": 1
     },
     {
@@ -1108,6 +1114,12 @@
       "kind": "import",
       "source": "kneemri.inference.ensemble",
       "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.ensemble",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -1222,6 +1234,12 @@
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_predictions",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -1389,6 +1407,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.dry_run",
+      "target": "kneemri.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.dry_run",
       "target": "kneemri.inference.ensemble",
       "weight": 1
     },
@@ -1414,12 +1438,6 @@
       "kind": "import",
       "source": "kneemri.kaggle.dry_run",
       "target": "kneemri.models.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.dry_run",
-      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -1521,25 +1539,25 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.submission",
-      "target": "kneemri.inference.ensemble",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.kaggle.submission",
-      "target": "kneemri.models.model",
+      "target": "kneemri.inference.ensemble",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.labels.confident_labels",
-      "target": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.labels.label_power",
-      "target": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -1557,13 +1575,13 @@
     {
       "kind": "import",
       "source": "kneemri.labels.reader_agreement",
-      "target": "kneemri.labels.report_language",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.labels.reader_agreement",
-      "target": "kneemri.models.model",
+      "target": "kneemri.labels.report_language",
       "weight": 1
     },
     {
@@ -1575,13 +1593,19 @@
     {
       "kind": "import",
       "source": "kneemri.labels.targets",
-      "target": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
       "target": "kneemri.corpus.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -1618,6 +1642,12 @@
       "kind": "import",
       "source": "kneemri.runs.member_record",
       "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -1750,6 +1780,12 @@
       "kind": "import",
       "source": "kneemri.training.head_trial",
       "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.head_trial",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -9687,7 +9723,7 @@
       "role": null
     },
     {
-      "descendants": 111,
+      "descendants": 112,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -10100,6 +10136,14 @@
       "label": "switch_coverage",
       "level": "module",
       "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.findings",
+      "label": "findings",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {

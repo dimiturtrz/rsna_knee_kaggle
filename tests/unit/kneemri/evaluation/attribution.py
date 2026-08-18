@@ -7,8 +7,9 @@ from torch import nn
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.evaluation.attribution import Attribution, Diagnostics, Holdout
+from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 SEED = 2026
 STUDIES = 8

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from kneemri.findings import TARGETS
 from kneemri.labels.targets import (
     ANNOTATED_WEIGHT,
     CALIBRATED,
@@ -12,7 +13,6 @@ from kneemri.labels.targets import (
     Supervision,
     Targets,
 )
-from kneemri.models.model import TARGETS
 
 
 def _tables(tmp_path: Path) -> tuple[Path, Path]:

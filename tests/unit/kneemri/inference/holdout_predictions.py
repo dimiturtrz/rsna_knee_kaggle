@@ -14,12 +14,13 @@ import torch
 
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
+from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.models.model import CLS_MEAN_FOCAL, TARGETS, StudyDesign, StudyModel
+from kneemri.models.model import CLS_MEAN_FOCAL, StudyDesign, StudyModel
 
 DIM = 12
 """At most SIZE: the double reads one feature per image ROW, so a wider feature than the image has

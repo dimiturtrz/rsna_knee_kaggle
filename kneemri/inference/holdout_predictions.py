@@ -15,12 +15,13 @@ from numpy.typing import NDArray
 from torch import Tensor
 from transformers import AutoModel
 
+from kneemri.findings import TARGETS
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member, Window
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 logger = logging.getLogger(__name__)
 

@@ -11,8 +11,9 @@ from torch import Tensor
 from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.device import VisibleCards
+from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import TARGETS, StudyDesign, StudyModel
+from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import (

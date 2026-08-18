@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 CONFIDENCE_FLOOR = 0.25
 """What a finding the report never mentions still pulls with, as a fraction of a fully-confident one.

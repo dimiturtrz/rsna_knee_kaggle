@@ -2,8 +2,8 @@
 
 import pandas as pd
 
+from kneemri.findings import TARGETS
 from kneemri.labels.confident_labels import ConfidentLabels
-from kneemri.models.model import TARGETS
 
 
 def _table() -> pd.DataFrame:

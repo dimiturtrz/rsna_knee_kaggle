@@ -17,25 +17,10 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
+from kneemri.findings import TARGETS
 from kneemri.models.lora import LoRALinear
 from kneemri.models.slice_attention import SliceAttention
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
-
-TARGETS: tuple[str, ...] = (
-    "ACL",
-    "MCL",
-    "Medial Meniscus",
-    "Lateral Meniscus",
-    "Medial OA",
-    "Lateral OA",
-    "PF OA",
-    "Effusion",
-    "Synovitis",
-    "Baker's",
-    "Contusion",
-    "Fracture",
-)
-"""The twelve findings, in the column order the submission and the trained members both use."""
 
 CLS_MEAN = "cls_mean"
 """Class token and patch mean — what every member on disk was fitted with."""

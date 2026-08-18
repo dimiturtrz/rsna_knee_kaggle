@@ -125,11 +125,11 @@ def main() -> None:
     logger.info(f"kit: {kit}")
 
     from core.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from kneemri.findings import TARGETS  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.inference.members import (  # noqa: PLC0415 - kit is on sys.path only after install_wheels
         MemberPackage,
         WeightsError,
     )
-    from kneemri.models.model import TARGETS  # noqa: PLC0415 - kit is on sys.path only after install_wheels
 
     mounts = Mounts()
     package = MemberPackage.find(mounts)

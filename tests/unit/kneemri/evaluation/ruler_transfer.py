@@ -3,7 +3,7 @@
 import numpy as np
 
 from kneemri.evaluation.ruler_transfer import RulerTransfer, Transfer
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 STUDIES = 40
 

@@ -44,8 +44,9 @@ from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
 from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.evaluation.scores import LabelScores
+from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import ATTEND, CLS_MEAN, MAXIMUM, POOL_PARTS, TARGETS
+from kneemri.models.model import ATTEND, CLS_MEAN, MAXIMUM, POOL_PARTS
 from kneemri.models.slice_attention import SliceAttention
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.training.objective import Objective, Predicted, RankedObjective

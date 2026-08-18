@@ -34,8 +34,8 @@ from jaxtyping import Float
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import BOOTSTRAP_SEED, MIDPOINT, RESAMPLES, LabelScores
 from kneemri.evaluation.supervision_gap import SupervisionGap
+from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
-from kneemri.models.model import TARGETS
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import pytest
 
 from kneemri.corpus.anatomy import ANATOMY, PRIMARY, SECONDARY, Extent, FindingAnatomy, ScaleProfile, SlotAffinity
 from kneemri.corpus.slots import SLOTS, Slot
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 SAG_FS = Slot("SAG_FLUID_FS", "Sagittal", fluid_sensitive=True, fat_suppressed=True)
 COR_T1 = Slot("COR_T1", "Coronal", fluid_sensitive=False, fat_suppressed=False)

@@ -6,8 +6,8 @@ import pandas as pd
 import torch
 
 from core.paths import DataRoot
+from kneemri.findings import TARGETS
 from kneemri.kaggle.dry_run import DryRun
-from kneemri.models.model import TARGETS
 
 
 def _root(base: Path) -> DataRoot:

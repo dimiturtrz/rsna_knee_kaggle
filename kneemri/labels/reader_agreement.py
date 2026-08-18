@@ -25,8 +25,8 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
+from kneemri.findings import TARGETS
 from kneemri.labels.report_language import ReportLanguages
-from kneemri.models.model import TARGETS
 
 logger = logging.getLogger(__name__)
 

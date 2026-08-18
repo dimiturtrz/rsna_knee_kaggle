@@ -28,8 +28,8 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from kneemri.corpus.study import SlotPipeline, Study
+from kneemri.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble, Read
-from kneemri.models.model import TARGETS
 
 logger = logging.getLogger(__name__)
 

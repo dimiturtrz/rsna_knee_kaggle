@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from kneemri.evaluation.ordinal_signal import CHANCE, OrdinalReading, OrdinalSignal, main
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 LEVELS = [0.68, 0.82, 0.94]

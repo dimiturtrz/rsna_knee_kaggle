@@ -31,7 +31,7 @@ from numpy.typing import NDArray
 
 from core.bootstrap import INTERVAL, RESAMPLE_SEED, RESAMPLES
 from kneemri.evaluation.scores import LabelScores
-from kneemri.models.model import TARGETS
+from kneemri.findings import TARGETS
 
 logger = logging.getLogger(__name__)
 

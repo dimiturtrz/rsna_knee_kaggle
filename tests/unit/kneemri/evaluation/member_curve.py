@@ -4,8 +4,8 @@ import numpy as np
 
 from kneemri.evaluation.member_curve import MemberCurve
 from kneemri.evaluation.scores import LabelScores
+from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
-from kneemri.models.model import TARGETS
 
 STUDIES = 40
 SEED = 2026

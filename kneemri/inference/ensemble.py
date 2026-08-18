@@ -27,12 +27,13 @@ from torch import Tensor
 
 from kneemri.corpus.slot_reader import Reading
 from kneemri.corpus.slots import SCHEMES, SlotScheme
+from kneemri.findings import TARGETS
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import RankAverage, Vote
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import TARGETS, StudyModel
+from kneemri.models.model import StudyModel
 
 logger = logging.getLogger(__name__)
 

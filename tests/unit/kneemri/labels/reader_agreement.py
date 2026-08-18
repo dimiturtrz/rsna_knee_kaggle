@@ -3,8 +3,8 @@
 import pandas as pd
 import pytest
 
+from kneemri.findings import TARGETS
 from kneemri.labels.reader_agreement import ReaderAgreement
-from kneemri.models.model import TARGETS
 
 ENGLISH = "There is a tear of the medial meniscus with mild joint effusion and normal signal throughout."
 SPANISH = "Técnica: RMN de la rodilla. Resultados: rotura parcial del menisco interno con derrame articular."
