@@ -179,3 +179,16 @@ def test_quality_weighted():
     honest = curve.quality_weighted(members, truth)
     assert 0.0 <= honest <= 1.0
     assert curve.votes(members, truth)[2].split()[1] == f"{honest:.4f}", "the report prints the honest score"
+
+
+def test_greedy():
+    """Forward selection takes the strongest member first and names what each step added."""
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    members = [_member(0.2, SEED), _member(2.0, SEED + 1), _member(0.3, SEED + 2)]
+
+    lines = curve.greedy(members, truth, ["weak.pt", "strong.pt", "middling.pt"])
+
+    assert len(lines) == 3, "every member is eventually taken, so the curve shows where it turned"
+    assert "+strong.pt" in lines[0], "the best single member is chosen first"
+    assert all(line.startswith(f"greedy {step}") for step, line in enumerate(lines, start=1))

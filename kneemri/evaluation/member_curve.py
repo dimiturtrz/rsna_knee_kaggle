@@ -82,6 +82,40 @@ class MemberCurve:
             for subset in itertools.combinations(range(len(per_member)), size)
         ]
 
+    def greedy(
+        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
+    ) -> list[str]:
+        """Forward selection: the member that adds most, added, until adding one stops paying.
+
+        `subsets` is exhaustive and therefore exponential — five members is 31 combinations and sixteen
+        is 65,535 — so the pool this project has actually accumulated cannot be searched that way at
+        all. Greedy is O(n^2) combines and answers the question the exhaustive search is run for: which
+        members to package, and where the count saturates.
+
+        It is a HEURISTIC and the ledger's own numbers say why that is tolerable here: the curve is
+        flat once past four members, so the difference between the greedy path and the best path is
+        inside the offline-to-board transfer error that already governs the decision. What it must not
+        be read as is a score — see this module's caller for the two reasons.
+        """
+        chosen: list[int] = []
+        lines = []
+        remaining = set(range(len(per_member)))
+        while remaining:
+            score, index = max(
+                (
+                    (
+                        self.scores.mean(RankAverage().combine([per_member[i] for i in [*chosen, candidate]]), truth),
+                        candidate,
+                    )
+                    for candidate in remaining
+                ),
+                key=lambda pair: pair[0],
+            )
+            chosen.append(index)
+            remaining.discard(index)
+            lines.append(f"greedy {len(chosen)}: {score:.4f}  +{names[index]}")
+        return lines
+
     def best(
         self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
     ) -> list[str]:

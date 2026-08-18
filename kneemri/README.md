@@ -40,6 +40,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.ordinal_signal` | Whether the graded YES levels in the report table carry ORDINAL information, or only certainty. |
 | `python -m kneemri.evaluation.paired_floor` | How tightly a per-label delta can be read when both arms saw the SAME studies. |
 | `python -m kneemri.evaluation.prevalence_match` | Is the medial-over-lateral deficit PREVALENCE, or is it vision? `python -m kneemri.evaluation.prevalence_match`. |
+| `python -m kneemri.evaluation.record_mix` | Score ensembles of members that are already on disk, with no card and no inference pass. |
 | `python -m kneemri.evaluation.ruler_check` | Does the choice of evaluation ruler change WHICH recipe wins? |
 | `python -m kneemri.evaluation.ruler_transfer` | Does a DELTA between two arms survive changing the ruler? `python -m kneemri.evaluation.ruler_transfer`. |
 | `python -m kneemri.evaluation.run_comparison` | Read several runs' metrics files side by side: `python -m kneemri.evaluation.run_comparison`. |
