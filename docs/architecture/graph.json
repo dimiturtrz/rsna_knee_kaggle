@@ -435,6 +435,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.attribution",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution",
       "target": "kneemri.corpus.folds",
       "weight": 1
     },
@@ -538,6 +544,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_curve",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_curve",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -3597,6 +3609,12 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.attribution.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution.main",
       "target": "kneemri.corpus.folds.ReportFolds",
       "weight": 1
     },
@@ -4222,6 +4240,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.main",
+      "target": "core.wakelock.Wakelock",
       "weight": 1
     },
     {

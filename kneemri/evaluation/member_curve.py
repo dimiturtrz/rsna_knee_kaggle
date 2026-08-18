@@ -28,6 +28,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.paths import DataRoot
+from core.wakelock import Wakelock
 from kneemri.corpus.folds import ReportFolds
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
@@ -323,12 +324,15 @@ def main() -> None:
 
     per_member: list[NDArray[np.float64]] = []
     names: list[str] = []
-    for member, slab, held in readings.slabs(holdout, reference, corpus):
-        window = member.window(held.slices, overlap=arguments.overlap)
-        scored = predictions.cached(member, slab, cache, window)
-        per_member.append(scored)
-        names.append(member.file.name)
-        logger.info("%s alone: %.4f", member.file.name, scores.mean(scored, truth))
+    # The walk is the long part — every member that is not already cached is a full inference pass, and
+    # a sweep over the pool runs unattended for hours past the idle timer (knee-wyzj).
+    with Wakelock():
+        for member, slab, held in readings.slabs(holdout, reference, corpus):
+            window = member.window(held.slices, overlap=arguments.overlap)
+            scored = predictions.cached(member, slab, cache, window)
+            per_member.append(scored)
+            names.append(member.file.name)
+            logger.info("%s alone: %.4f", member.file.name, scores.mean(scored, truth))
 
     for line in MemberCurve(scores, arguments.combine_seed).logged(per_member, truth, names, paired=arguments.paired):
         logger.info(line)

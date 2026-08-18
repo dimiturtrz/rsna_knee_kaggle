@@ -380,6 +380,7 @@ def main() -> None:
     from transformers import AutoModel  # noqa: PLC0415 - a 90 MB import only this entrypoint needs
 
     from core.paths import DataRoot  # noqa: PLC0415 - as above
+    from core.wakelock import Wakelock  # noqa: PLC0415 - as above
     from kneemri.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
     from kneemri.inference.members import Member  # noqa: PLC0415 - as above
     from kneemri.labels.targets import Targets  # noqa: PLC0415 - as above
@@ -431,15 +432,18 @@ def main() -> None:
     holdout_data = Holdout(images, mask, truth, window)
     logger.info("reading: %s", f"{len(window.starts)} window(s) of {window.width} at {window.size} px")
     logger.info("labels: %s", list(TARGETS))
-    by_label = attribution.depth_by_label(model, holdout_data)
-    diagnostics = Diagnostics(
-        slots=attribution.slot_importance(model, holdout_data),
-        regions=attribution.region_importance(model, holdout_data),
-        rings=attribution.ring_importance(model, holdout_data),
-        depth=attribution.averaged(by_label),
-        depth_by_label=by_label,
-        slices=attribution.slice_importance(model, holdout_data),
-    )
+    # Six occlusion sweeps over the holdout, each a full inference pass per occluded part: the run is
+    # hours long and unattended, which is exactly what the idle timer suspends (knee-wyzj).
+    with Wakelock():
+        by_label = attribution.depth_by_label(model, holdout_data)
+        diagnostics = Diagnostics(
+            slots=attribution.slot_importance(model, holdout_data),
+            regions=attribution.region_importance(model, holdout_data),
+            rings=attribution.ring_importance(model, holdout_data),
+            depth=attribution.averaged(by_label),
+            depth_by_label=by_label,
+            slices=attribution.slice_importance(model, holdout_data),
+        )
     for line in attribution.report(diagnostics):
         logger.info("%s", line)
 
