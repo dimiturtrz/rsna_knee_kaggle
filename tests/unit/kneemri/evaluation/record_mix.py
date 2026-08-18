@@ -22,14 +22,20 @@ def _record(path: Path, studies: list[str], *, shift: float = 0.0, truth: np.nda
 
 
 def test_readings(tmp_path: Path):
-    """A record that exists is read; a checkpoint without one is named and skipped, not raised on."""
+    """A record that exists is read; a checkpoint without one is named and skipped, not raised on.
+
+    Held after the first read, since `shared` and `per_member` both ask: an uncached read would name
+    the one missing member three times, which reads as three missing members.
+    """
     studies = [f"s{index}" for index in range(8)]
     _record(tmp_path / "a.pt", studies)
+    mix = RecordMix([tmp_path / "a.pt", tmp_path / "never_trained.pt"])
 
-    found = RecordMix([tmp_path / "a.pt", tmp_path / "never_trained.pt"]).readings()
+    found = mix.readings()
 
     assert [name for name, _ in found] == ["a.pt"], "the missing record is skipped, not fatal"
     assert found[0][1].studies == studies
+    assert mix.readings() is found, "read once, not once per caller"
 
 
 def test_shared(tmp_path: Path):

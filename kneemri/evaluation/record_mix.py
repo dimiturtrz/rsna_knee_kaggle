@@ -47,6 +47,7 @@ class RecordMix:
 
     def __init__(self, records: list[Path]) -> None:
         self.records = records
+        self._readings: list[tuple[str, HoldoutReading]] | None = None
 
     def readings(self) -> list[tuple[str, HoldoutReading]]:
         """Each record that exists, as (member name, its reading).
@@ -55,7 +56,13 @@ class RecordMix:
         so a sweep over every checkpoint in the processed directory would otherwise be decided by its
         oldest member. What must never be silent is a record that exists and disagrees, and that is
         `shared`'s refusal.
+
+        Read once and held: `shared` and `per_member` both want them, so an uncached read decodes every
+        npz three times and prints each skipped member's line three times, which reads as three
+        different missing records rather than one.
         """
+        if self._readings is not None:
+            return self._readings
         found = []
         for path in self.records:
             reading = HoldoutRecord(path).read()
@@ -63,6 +70,7 @@ class RecordMix:
                 logger.info("%s: no holdout record, skipped", path.name)
                 continue
             found.append((path.name, reading))
+        self._readings = found
         return found
 
     def shared(self) -> list[str]:
