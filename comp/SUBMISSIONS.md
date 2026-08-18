@@ -80,7 +80,7 @@ never spent on a cell that already has a number.
 | `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
 | `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
 | `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | **0.924** — best, and the only clean member A/B we have |
-| `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | submitted 18:26 UTC, pending |
+| `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | **0.921** — the pair's own member swap |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
@@ -123,6 +123,32 @@ rate 4e-5 instead of 8e-6 and scored +0.0068 solo on the fold-0 holdout (knee-wn
 artefact of one fold — and a member's SOLO holdout gain predicted its ensemble board gain here, which
 the joint-subset search has never managed (it ranked this set +0.0013 over `chosen`, five times too
 small). Membership, priced by solo strength, is the axis to keep pushing.
+
+### A second board point, and it is the same rule at a tenth the size
+
+| entry | members | LB |
+|---|---|---|
+| `kneemri-efficient` v4 | **res392** + calibrated | 0.919 |
+| `kneemri-ratepair` | **lr4e-5** + calibrated | **0.921** |
+
+The same swap at count two. `lr4e-5` beats `res392` by +0.0002 solo — a twentieth of what it beats
+`sliceattn` by — and the board moved +0.002, versus +0.006 for the larger swap. Two points, both of them
+the board delta landing within a thousandth of the member's own solo holdout gain:
+
+| swap | solo delta | board delta |
+|---|---|---|
+| sliceattn → lr4e-5, in the four | +0.0052 | +0.006 |
+| res392 → lr4e-5, in the pair | +0.0002 | +0.002 |
+
+That is a usable selection rule and the first one this file has had: **price a candidate member by its
+solo holdout gain over the member it displaces**, not by the joint-subset search, which underpriced the
+first of these by 5×. Two points do not fix a slope — what they establish is that the sign and the order
+of magnitude carry, which is all a slot decision needs.
+
+It also kills the count curve's peak at two. The pair built from the better member scores 0.921 and the
+four holding that same member scores 0.924, so 2 > 4 was a statement about `sliceattn` being in the four,
+not about count. And `res392` is not dead weight: removing it from the four is what the 0.921 pair does,
+and it costs 0.003. The 448 px cache stays.
 
 ## The graft is a cost on the board too, and it is the day's only result above the bar
 

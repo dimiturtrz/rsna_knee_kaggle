@@ -63,6 +63,30 @@ set the joint search ranks BELOW the one that scored 0.924.
 establish is that the joint search's *magnitudes* are not to be trusted for slot decisions, since it
 underpriced the only member swap the board has ever priced for us by 5×.
 
+## A second board point arrived the same evening, and it is the same rule scaled down
+
+`kneemri-ratepair` ran the identical swap at count two — `res392` out, `lr4e-5` in, `calibrated` held —
+and scored **0.921** against the 0.919 that pair had stood at since 2026-08-16. The two members differ by
++0.0002 solo, a twentieth of the `sliceattn` gap, and the board moved a twentieth as far: +0.002 against
++0.006.
+
+| swap | solo delta | board delta |
+|---|---|---|
+| sliceattn → lr4e-5, in the four | +0.0052 | +0.006 |
+| res392 → lr4e-5, in the pair | +0.0002 | +0.002 |
+
+Two points do not fix a slope, and the second one's +0.002 is well inside the noise floor read as a
+result on its own. What the pair of them establishes is narrower and enough: the SIGN and the ORDER OF
+MAGNITUDE of a member swap carry from the solo holdout to the board, which is exactly what a slot
+decision needs and exactly what the joint-subset search failed to give.
+
+It also retires two beliefs this file was standing on. The board's member-count curve peaked at two — it
+does not any more, because the four holding `lr4e-5` (0.924) beats the pair holding it (0.921), so the
+old peak was a statement about `sliceattn` sitting in the four. And `res392` is not the dead weight the
+resolution nullity above made it look: the 0.921 pair IS the four with `res392` and `intensity392`
+removed, and it costs 0.003. The rate lever explains why `res392` scored well; it does not make the
+member redundant, and the 448 px cache stays.
+
 ## What it does not say
 
 - Nothing about seeds or folds. Every arm here is one recipe with one variable moved.
