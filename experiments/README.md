@@ -182,6 +182,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
 | **`resolution`** | **336 → 392 px, 448 cache — AND encoder rate 8e-6 → 4e-5** | **0.8523** | **+0.0066** | **the RATE, not the pixels — see 2026-08-18 below** |
 | `resolution` 392 @ 8e-6 | 392 px at the control's own encoder rate | 0.8459 | +0.0002 | resolution alone is nothing (knee-a8x) |
+| **`rate_wholestack`** | **encoder rate 8e-6 → 4e-5, held at 336 px** | **0.8525** | **+0.0068** | **clears the floor — and matches res392 with no 448 cache** |
 | `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | kept as a member |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
@@ -457,6 +458,14 @@ that prices it under the current recipe; `rate_isolate`'s +0.0051 was measured i
 **Two claims elsewhere have to be read down.** `knee-jk3` lists "336 px for findings a few voxels
 across" among four causes that PAID — that one did not. And the 448 px cache's rungs (`knee-d2fc`) were
 bought as resolution rungs; they now need their own reason, because the axis they climb is flat.
+
+**And the rate confirmed it the same day.** `rate_wholestack` — 336 px, 4e-5, everything else the
+control — scored **0.8525, +0.0068**, over the floor and level with `res392`'s 0.8523. So the best
+single member this project has produced is reproducible at 336 px on the cache we already had: the
+64 GB of 448 px arrays bought the rate change, which was free. Two points do not make a curve, and both
+of ours are at the ends of a 5× step, so `rate_sweep` runs 1e-4 and 2e-4 to find which side of the
+maximum 4e-5 sits on. What this does NOT settle is whether the rate composes with 392 px or replaces
+it — `res392` at 4e-5 IS that combination and scores the same, which reads as one effect, not two.
 
 ## What is ours, and what is grafted
 
