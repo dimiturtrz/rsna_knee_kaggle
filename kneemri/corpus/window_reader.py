@@ -22,6 +22,12 @@ slot instead, and a seek-bound pattern keeps scaling past two: 0.72 / 1.06 / 1.3
 same handles, reproduced at 0.77 / 1.25 / 1.43 / 0.92 with the arms run in the opposite order over
 different rows. Four is the peak of the read the trainer performs and costs nothing on the read it does
 not, so it is the setting both branches want.
+
+Worth 9% of a STEP, not only of the fetch: a 448 px epoch over 476 studies ran 22 / 23 / 21 s at two
+handles against 20 / 20 / 20 s at four, the arms interleaved so page-cache warming could not name the
+winner, with the loss identical to four decimals in all of them. Prefetch does not hide it. That 9% is
+measured on studies small enough to be RESIDENT, so a full-corpus epoch — which reads colder — saves at
+least this much (knee-lky3).
 """
 
 
