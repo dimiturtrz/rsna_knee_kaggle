@@ -180,7 +180,8 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `compose_base` | rate + pooling on base | **lost at epoch 7/24** | — | not rerun |
 | **`whole_stack`** | **all 12 slices per step, 12 epochs** | **0.8457** | **+0.0147** | **largest change measured** |
 | `wholestack_folds` 1 | same recipe, fold 1 | **0.8505** | — | ensemble member |
-| **`resolution`** | **336 → 392 px, 448 cache — AND encoder rate 8e-6 → 4e-5** | **0.8523** | **+0.0066** | **CONFOUNDED, see below** |
+| **`resolution`** | **336 → 392 px, 448 cache — AND encoder rate 8e-6 → 4e-5** | **0.8523** | **+0.0066** | **the RATE, not the pixels — see 2026-08-18 below** |
+| `resolution` 392 @ 8e-6 | 392 px at the control's own encoder rate | 0.8459 | +0.0002 | resolution alone is nothing (knee-a8x) |
 | `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | kept as a member |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
@@ -441,6 +442,21 @@ with no TTA available to it at all — but that member is not a resolution resul
 encoder rate 5× as well, and the section above prices resolution alone at about +0.002 if the rate's
 independently measured +0.0044 transfers. So the highest number in the ledger stands as a number and
 stands CONFOUNDED as a cause. See `knee-eeo` and `knee-a8x`.
+
+### The confound came apart, and resolution is not the cause (2026-08-18)
+
+`resolution.sh 392 448 8e-6` — 392 px at the CONTROL's encoder rate, the one arm knee-a8x asked for —
+scored **0.8459**, against `wsfold0_e6`'s 0.8457. **Resolution alone is +0.0002.** Not inside the floor:
+an order below it. The estimate above (+0.002, if the rate's +0.0044 transfers) was generous by tenfold.
+
+So the whole +0.0066 of `res392` belongs to the encoder rate 8e-6 → 4e-5, and the rate is now the
+largest unpriced effect in the ledger — bigger, on this evidence, than anything else we have moved
+except whole-stack itself. `rate_wholestack` (336 px, 4e-5, everything else the control) is the arm
+that prices it under the current recipe; `rate_isolate`'s +0.0051 was measured in the windowed era.
+
+**Two claims elsewhere have to be read down.** `knee-jk3` lists "336 px for findings a few voxels
+across" among four causes that PAID — that one did not. And the 448 px cache's rungs (`knee-d2fc`) were
+bought as resolution rungs; they now need their own reason, because the axis they climb is flat.
 
 ## What is ours, and what is grafted
 
