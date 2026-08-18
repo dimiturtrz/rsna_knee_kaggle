@@ -2185,6 +2185,48 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.commands.Commands.rendered",
+      "target": "kneemri.commands.Commands.entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.commands.Commands.stale",
+      "target": "kneemri.commands.Commands.rendered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.commands.Commands.write",
+      "target": "kneemri.commands.Commands.rendered",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.commands.main",
+      "target": "kneemri.commands.Commands",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.commands.main",
+      "target": "kneemri.commands.Commands.entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.commands.main",
+      "target": "kneemri.commands.Commands.stale",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.commands.main",
+      "target": "kneemri.commands.Commands.write",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.corpus.acquisition.Acquisition",
       "target": "kneemri.corpus.acquisition.Acquisition",
@@ -9723,11 +9765,19 @@
       "role": null
     },
     {
-      "descendants": 112,
+      "descendants": 113,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
       "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands",
+      "label": "commands",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -10688,6 +10738,14 @@
       "label": "Wakelock",
       "level": "class",
       "parent": "core.wakelock",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands",
+      "label": "Commands",
+      "level": "class",
+      "parent": "kneemri.commands",
       "role": "primary"
     },
     {
@@ -12272,6 +12330,54 @@
       "label": "__init__",
       "level": "method",
       "parent": "core.wakelock.Wakelock",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.commands.Commands",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands.entries",
+      "label": "entries",
+      "level": "method",
+      "parent": "kneemri.commands.Commands",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands.rendered",
+      "label": "rendered",
+      "level": "method",
+      "parent": "kneemri.commands.Commands",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands.stale",
+      "label": "stale",
+      "level": "method",
+      "parent": "kneemri.commands.Commands",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.Commands.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.commands.Commands",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.commands.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.commands",
       "role": null
     },
     {

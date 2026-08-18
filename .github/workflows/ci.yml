@@ -70,6 +70,8 @@ jobs:
       # (a viewer-tree extra lint, an un-silenced advisory family, a repo-only static gate). The base gates
       # above are template-owned + regenerated; steps added in this region survive copier update. Empty by
       # default — mechanism identical across repos, only the CONTENTS are a per-repo FACT (bd skr GAP3).
+      - name: Command index — enforced (kneemri/README.md is generated from the modules)
+        run: uv run python -m kneemri.commands --check
       # <<< LOCAL-SLOT: ci-lint-steps
 
   tests:

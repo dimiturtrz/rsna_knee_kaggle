@@ -61,6 +61,8 @@ reports are a source of training targets, never an inference-time input.
 ## Layout
 
 - `core/`, `kneemri/` — your packages. The guardrails target all of them; organise modules however the project needs.
+  [`kneemri/README.md`](kneemri/README.md) indexes every `python -m` command the package has, generated from
+  the modules by `python -m kneemri.commands` and asserted current in CI.
 - `comp/` — Kaggle submission machinery (kit build, drift check, REST publish/survey). Named `comp/` rather
   than `kaggle/` because a top-level `kaggle/` shadows the installed `kaggle` package on `sys.path[0]`.
 - `tests/` — `unit/`, `integration/`, `e2e/`.
