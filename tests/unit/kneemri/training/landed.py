@@ -1,6 +1,6 @@
 """Whether a built model shows the switches its run asked for, on CPU-sized objects."""
 
-from dataclasses import replace
+from dataclasses import fields, replace
 
 import numpy as np
 import torch
@@ -17,9 +17,10 @@ from kneemri.models.model import (
     StudyDesign,
     StudyModel,
 )
-from kneemri.training.landed import Landed, Request
+from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.remembered_ranking import RememberedRanking
+from kneemri.training.train import TrainingOptions
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Adaptation, Trainer
 
 DIM = 8
@@ -235,6 +236,28 @@ def test_missing_depth() -> None:
     head_only = Trainer(frozen, torch.device("cpu"), adaptation=Adaptation(unfreeze_last=0))
 
     assert Landed(frozen, head_only, _targets()).missing(replace(PLAIN, unfreeze_last=0)) == []
+
+
+def test_not_a_switch() -> None:
+    """Every training option is compared here or written off here — the partition, asserted.
+
+    THE HOLE THIS CLOSES IS THE NEXT KNOB, not a current one. `Request` names seventeen of forty-eight
+    options and nothing forced the other thirty-one to be decided, so a switch added to the trainer
+    could reach the card with no check at all — which is the same shape as the five switches that were
+    landed-checked, stamped and never RUN until `switch_coverage` made that partition total too.
+
+    Both directions, because a stale write-off is the quieter failure: a name that leaves
+    `TrainingOptions` and stays here reads as a considered decision about a flag that no longer exists.
+    """
+    options = {field.name for field in fields(TrainingOptions)}
+    compared = {field.name for field in fields(Request)} & options
+
+    assert options - compared - set(NOT_A_SWITCH) == set(), (
+        "a training option that neither Landed compares nor NOT_A_SWITCH writes off — decide which, "
+        "because a switch nothing asks the model about is forty minutes of card under a recipe nobody ran"
+    )
+    assert set(NOT_A_SWITCH) - options == set(), "a write-off for a flag TrainingOptions no longer has"
+    assert compared & set(NOT_A_SWITCH) == set(), "a switch cannot be both compared and written off"
 
 
 def test_wanted() -> None:

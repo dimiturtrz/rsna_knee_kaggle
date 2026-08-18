@@ -29,6 +29,54 @@ from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SCHEDULED, WINDOW, Trainer
 
+NOT_A_SWITCH = {
+    "paths": "the data root, machine-specific and gitignored",
+    "labels": "the label table, an input rather than a policy",
+    "eval_labels": "the holdout table, same",
+    "out": "where the run writes, set per invocation",
+    "epochs": "run length, which nothing downstream can silently ignore",
+    "studies": "corpus truncation, visible in the split line every run logs",
+    "patience": "when to stop, read by the stopper each epoch rather than applied once",
+    "batch": "how many studies a step holds, a resource knob the loader obeys or raises on",
+    "vram_gb": "a memory cap set by the queue against the card it runs on",
+    "seed": "a seed is not a method; folds and seeds are banned as arms here",
+    "split_seed": "same, and it moves the split rather than the recipe",
+    "folds": "banned for the same reason",
+    "fold": "which split half is held out, chosen per invocation",
+    "image_size": "a cache axis — guarded by the cache FILE NAME, not by a policy object",
+    "crop_mm": "a cache axis",
+    "centre": "a cache axis",
+    "band_low": "a cache axis",
+    "band_high": "a cache axis",
+    "scheme": "a cache axis",
+    "tie": "a cache axis",
+    "cache_studies": "a cache axis — it is in the name as `_first{N}`",
+    "compile_encoder": "resolved into `Request.compiling`, which `main` decides on the device",
+    "recompute_activations": "resolved into `Request.recompute`",
+    "report_vectors": "resolved into `Request.reports`",
+    "report_weight": "resolved into `Request.reports` alongside it",
+    "variant": "chosen by CONSTRUCTION: the registry raises on a name it cannot build",
+    "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
+    "pool": "constructed — `POOL_PARTS[self.pool]` raises on a pooling that does not exist",
+    "slice_pooling": "constructed — `SLICE_POOLINGS[...]` raises before any weight is fetched",
+    "slot_pooling": "constructed — `SLOT_POOLINGS[...]` likewise",
+    "anatomical_prior": "constructed, and a slot count the prior does not cover RAISES rather than dropping it",
+    "head_lr": "a rate, not a switch: it is the group's `lr` and no path applies it partly",
+    "backbone_lr": "the same, and whether the group it names is EMPTY is what OPENED_BLOCKS already asks",
+}
+"""Every `TrainingOptions` field this check does NOT compare, each with WHY — a decision record.
+
+The partition is made TOTAL and asserted at the unit gate, because 'no `Request` field names it' is
+true both of a knob that cannot land silently and of one nobody has checked yet, and only the second
+is a hole. `switch_coverage.NOT_A_RECIPE` does the same for the arms; this is the same forcing move on
+the axis that matters at the card: a switch added to the trainer now decides here whether it can fail
+silently, rather than being discovered as forty minutes trained under a recipe nobody ran.
+
+Named by their `TrainingOptions` field, but SPELLED HERE rather than imported from it — that dataclass
+builds the model and the trainer this module compares, so importing it would close the import cycle
+`Request`'s primitive fields exist to keep open.
+"""
+
 
 class Landed:
     """What a built model, trainer and target table BECAME, against what the run asked them to be.
