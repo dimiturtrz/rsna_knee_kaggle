@@ -17,10 +17,16 @@ from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.objective import Objective, Predicted, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import (
+    AUTOCAST,
+    AVERAGING,
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
+    READ_SIZE,
+    REPORTS,
+    SCHEDULED,
     SMALLEST_RUN_GB,
+    WINDOW,
     Adaptation,
     DeviceBudget,
     Trainer,
@@ -164,6 +170,40 @@ def test_fit_epoch_augments():
     trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
     assert seen, "fit_epoch called no augmentation at all"
     assert seen[0].dtype == torch.uint8
+
+
+def test_policies():
+    """The trainer's own account of which optional policies are attached, before and after attaching.
+
+    Each absence is a working no-op object rather than a crash — an EMA that was never asked for is a
+    `LiveWeights`, and the run trains fine and reports a number for a recipe nobody asked for. The
+    report flag reads the SUBCLASS, not a boolean, so it cannot be true while the no-op is in place.
+    """
+    trainer = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")), torch.device("cpu"))
+
+    assert trainer.policies() == {
+        AUTOCAST: torch.float16,
+        WINDOW: GROUP,
+        READ_SIZE: None,
+        AVERAGING: False,
+        SCHEDULED: False,
+        REPORTS: False,
+    }
+
+    trainer.bfloat16()
+    trainer.whole_stack(6)
+    trainer.resample_to(392)
+    trainer.exponential_average()
+    trainer.one_cycle(total_steps=40)
+
+    assert trainer.policies() == {
+        AUTOCAST: torch.bfloat16,
+        WINDOW: 6,
+        READ_SIZE: 392,
+        AVERAGING: True,
+        SCHEDULED: True,
+        REPORTS: False,
+    }
 
 
 def test_one_cycle():

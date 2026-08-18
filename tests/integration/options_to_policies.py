@@ -56,6 +56,15 @@ NOT_A_WRAPPER = {
 }
 """`StudyModel` methods that are the model's own behaviour rather than something a run switches on."""
 
+TRAINER_REPORTER = {"policies"}
+MODEL_REPORTER = {"applied"}
+"""Each object's account of WHICH policies landed on it — read by `Landed` before the card is spent.
+
+They are the check this file makes at commit time, made again at run time, so they are the one kind of
+public method a builder must NOT call: attaching them would mean the builder answering its own question.
+The stale-exemption assert wants names the owner really has, so the two are named apart.
+"""
+
 
 def _options() -> TrainingOptions:
     """A run asking for EVERY optional policy at once, which is what makes one missing wire visible."""
@@ -106,7 +115,7 @@ def _recorded(monkeypatch: pytest.MonkeyPatch, owner: type, names: list[str]) ->
 def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.MonkeyPatch):
     """A switch parsed and stamped but never attached is a run that trains the recipe before it."""
     monkeypatch.setattr(train_module.ReportSupervision, "from_file", lambda *arguments: object())
-    policies = _policies(Trainer, THE_LOOP)
+    policies = _policies(Trainer, THE_LOOP | TRAINER_REPORTER)
     called = _recorded(monkeypatch, Trainer, policies)
 
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign())
@@ -118,7 +127,7 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
 def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.MonkeyPatch):
     """The model half of the same claim: adapters, checkpointing and compilation are run switches too."""
     monkeypatch.setattr(train_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
-    wrappers = _policies(StudyModel, NOT_A_WRAPPER)
+    wrappers = _policies(StudyModel, NOT_A_WRAPPER | MODEL_REPORTER)
     called = _recorded(monkeypatch, StudyModel, wrappers)
 
     # A CUDA device, though nothing is moved onto one: `fitted_model` compiles only for a card, so a CPU

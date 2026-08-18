@@ -245,6 +245,15 @@ ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
 
 
+AUTOCAST = "autocast_dtype"
+WINDOW = "slices_per_step"
+READ_SIZE = "train_size"
+AVERAGING = "weight_average"
+SCHEDULED = "one_cycle"
+REPORTS = "report_supervision"
+"""The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
+
+
 class Trainer:
     """Fits a `StudyModel` on a cached corpus and scores it on a held-out fold."""
 
@@ -283,6 +292,23 @@ class Trainer:
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
+
+    def policies(self) -> dict[str, object]:
+        """WHICH OPTIONAL POLICIES ARE ATTACHED, read off this trainer rather than off the run's flags.
+
+        Each is applied by a method that a caller may simply never call, and the absence of every one of
+        them is a working no-op rather than a crash — so a run missing one trains perfectly well and
+        reports a number belonging to a recipe nobody asked for. `kneemri.training.landed` compares this
+        against the request before the fitting starts.
+        """
+        return {
+            AUTOCAST: self.autocast_dtype,
+            WINDOW: self.window,
+            READ_SIZE: self.read_size,
+            AVERAGING: isinstance(self.average, WeightAverage),
+            SCHEDULED: self.schedule is not None,
+            REPORTS: isinstance(self.reports, ReportSupervision),
+        }
 
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""

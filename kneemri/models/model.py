@@ -73,6 +73,11 @@ function on different pixels and loaded without complaint. The lookup now happen
 BUILT, so it raises there instead."""
 
 COMPILED_PREFIX = "_orig_mod."
+
+ADAPTERS = "lora_adapters"
+RECOMPUTING = "recompute_activations"
+COMPILED_ENCODER = "compile_encoder"
+"""The keys `applied` reports under — named beside the model because the model is what they describe."""
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
 
 Spelled once, and read only by `load_trained`, which strips it so the five members written before
@@ -440,6 +445,24 @@ class StudyModel(nn.Module):
             message = f"{type(self.backbone).__name__} has no Linear layers inside its blocks to adapt"
             raise ValueError(message)
         return adapted
+
+    def applied(self) -> dict[str, object]:
+        """WHAT WAS ACTUALLY DONE to this model, read off the module tree rather than off a flag.
+
+        The model answers this because the model is the authority: `low_rank` picks layers by structure
+        and can find none, `recompute_activations` delegates to the backbone, and compilation happens
+        IN PLACE so nothing but the module records it. A caller that read the request instead would
+        agree with itself on an encoder that ignored all three — see `kneemri.training.landed`, which
+        compares this against what the run asked for before a card is spent.
+
+        `_compiled_call_impl` is the only place an in-place `compile()` leaves a mark, the module not
+        being rebound to an `OptimizedModule` so that parameter names stay loadable.
+        """
+        return {
+            ADAPTERS: sum(1 for module in self.modules() if isinstance(module, LoRALinear)),
+            RECOMPUTING: bool(getattr(self.backbone, "is_gradient_checkpointing", False)),
+            COMPILED_ENCODER: self.backbone._compiled_call_impl is not None,  # noqa: SLF001 - see above
+        }
 
     def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its own learning rate.

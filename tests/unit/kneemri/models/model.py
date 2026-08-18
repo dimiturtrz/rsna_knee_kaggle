@@ -8,7 +8,18 @@ import torch
 from torch import Tensor
 
 from kneemri.models.lora import LoRALinear
-from kneemri.models.model import ATTEND, CLS_MEAN_FOCAL, POOL_PARTS, SLICE_POOLINGS, TARGETS, StudyDesign, StudyModel
+from kneemri.models.model import (
+    ADAPTERS,
+    ATTEND,
+    CLS_MEAN_FOCAL,
+    COMPILED_ENCODER,
+    POOL_PARTS,
+    RECOMPUTING,
+    SLICE_POOLINGS,
+    TARGETS,
+    StudyDesign,
+    StudyModel,
+)
 from kneemri.models.slot_head import REPORT_DIMS, SLOT_POOLINGS
 
 SEED = 2026
@@ -38,10 +49,14 @@ class _FakeBackbone(torch.nn.Module):
         self.encoder = torch.nn.Module()
         self.encoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
         self.checkpointing: dict[str, object] | None = None
+        # The PUBLIC flag transformers exposes, which is what `applied` reads — a double that recorded
+        # only the call would let a check pass against an encoder that had ignored it.
+        self.is_gradient_checkpointing = False
 
     def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs: dict[str, object]) -> None:
         """Stand-in for the transformers hook, recording how it was asked."""
         self.checkpointing = gradient_checkpointing_kwargs
+        self.is_gradient_checkpointing = True
 
     @override
     def forward(self, *, pixel_values: Tensor, output_hidden_states: bool = False) -> _Output:
@@ -462,6 +477,24 @@ def test_supervised(study_model: StudyModel):
 
     assert torch.allclose(logits, plain, atol=1e-6), "training and inference must be the same function"
     assert report.shape == (2, REPORT_DIMS)
+
+
+def test_applied():
+    """The model's own account of what was done to it, before and after each wrapper.
+
+    Read off the module tree rather than off a flag, because the failure being guarded against is a
+    wrapper that runs and changes nothing: `low_rank` picks Linears by structure, so an encoder whose
+    blocks hold none adapts zero layers while the run's config still says rank 2.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+
+    assert model.applied() == {ADAPTERS: 0, RECOMPUTING: False, COMPILED_ENCODER: False}
+
+    model.low_rank(rank=2)
+    model.recompute_activations()
+
+    assert model.applied() == {ADAPTERS: 36, RECOMPUTING: True, COMPILED_ENCODER: False}
 
 
 def test_recompute_activations(study_model: StudyModel):

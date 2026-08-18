@@ -29,6 +29,7 @@ from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan
+from kneemri.training.landed import Landed, Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
@@ -627,6 +628,27 @@ def main() -> None:
     encoder.require_tiling(arguments.train_size or arguments.image_size)
     model = arguments.fitted_model(encoder, len(SCHEMES[arguments.scheme]), design, device)
     trainer = arguments.fitted_trainer(model, device, identifiers, len(training))
+    # BEFORE THE CARD IS SPENT, and this is the last moment it can be asked: from here on the only
+    # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once
+    # matched an encoder's projections by name and wrapped nothing, so an arm trained a plain model
+    # under a LoRA recipe and cost a queue slot to discover. Two seconds of attribute reads.
+    unlanded = Landed(model, trainer).missing(
+        Request(
+            lora_rank=arguments.lora_rank,
+            recompute=arguments.recompute_activations,
+            compiling=arguments.compile_encoder and device.type == "cuda",
+            bf16=arguments.bf16,
+            whole_stack=arguments.whole_stack,
+            slices=arguments.slices,
+            train_size=arguments.train_size,
+            ema=arguments.ema,
+            one_cycle=arguments.one_cycle,
+            reports=arguments.report_vectors is not None,
+        )
+    )
+    if unlanded:
+        message = "the run asked for switches the built model does not show: " + "; ".join(unlanded)
+        raise ValueError(message)
 
     destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])

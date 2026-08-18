@@ -1688,6 +1688,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.landed",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
+      "target": "kneemri.training.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.pair_memory",
       "target": "kneemri.training.objective",
       "weight": 1
@@ -1786,6 +1804,12 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.training.fitting",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
+      "target": "kneemri.training.landed",
       "weight": 1
     },
     {
@@ -8293,6 +8317,48 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.training.landed.Landed",
+      "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.landed.Landed",
+      "target": "kneemri.training.landed.Request",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.landed.Landed",
+      "target": "kneemri.training.trainer.Trainer",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.landed.Landed.missing",
+      "target": "kneemri.training.landed.Landed.observed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.landed.Landed.missing",
+      "target": "kneemri.training.landed.Request.wanted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.landed.Landed.observed",
+      "target": "kneemri.models.model.StudyModel.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.landed.Landed.observed",
+      "target": "kneemri.training.trainer.Trainer.policies",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.objective.Objective",
       "target": "kneemri.training.objective.Predicted",
@@ -8737,6 +8803,24 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.landed.Landed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.landed.Landed.missing",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.landed.Request",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.train.main",
       "target": "kneemri.training.train.TrainingOptions.parse",
@@ -8997,7 +9081,7 @@
       "role": null
     },
     {
-      "descendants": 105,
+      "descendants": 106,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -9749,7 +9833,7 @@
       "role": null
     },
     {
-      "descendants": 11,
+      "descendants": 12,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -9784,6 +9868,14 @@
       "descendants": 0,
       "id": "kneemri.training.heartbeat",
       "label": "heartbeat",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed",
+      "label": "landed",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -11091,6 +11183,22 @@
       "level": "class",
       "parent": "kneemri.training.heartbeat",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed.Landed",
+      "label": "Landed",
+      "level": "class",
+      "parent": "kneemri.training.landed",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed.Request",
+      "label": "Request",
+      "level": "class",
+      "parent": "kneemri.training.landed",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -15790,6 +15898,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.model.StudyModel.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.model.StudyModel.compile_encoder",
       "label": "compile_encoder",
       "level": "method",
@@ -16526,6 +16642,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.landed.Landed.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.landed.Landed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed.Landed.missing",
+      "label": "missing",
+      "level": "method",
+      "parent": "kneemri.training.landed.Landed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed.Landed.observed",
+      "label": "observed",
+      "level": "method",
+      "parent": "kneemri.training.landed.Landed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.landed.Request.wanted",
+      "label": "wanted",
+      "level": "method",
+      "parent": "kneemri.training.landed.Request",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.Objective.__call__",
       "label": "__call__",
       "level": "method",
@@ -16888,6 +17036,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.plan",
       "label": "plan",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.policies",
+      "label": "policies",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
