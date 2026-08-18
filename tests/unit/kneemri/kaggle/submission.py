@@ -12,7 +12,7 @@ import torch
 from torch import Tensor
 
 from kneemri.corpus.crop_centre import CROP_MM, Crop, ImageCentre, TissueCentre
-from kneemri.corpus.slot_reader import Band, SlotReader
+from kneemri.corpus.slot_reader import Band, Reading, SlotReader
 from kneemri.corpus.study import SlotPipeline
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Read, Serving
@@ -333,7 +333,7 @@ def test_pipeline(tmp_path: Path):
     default = submission.pipeline(Read(3, scheme, (IMAGE,)))
     assert default.reader.crop_mm == CROP_MM
 
-    tighter = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(mm=80.0)))
+    tighter = submission.pipeline(Read(3, scheme, (IMAGE,), Reading(crop=Crop(mm=80.0))))
     assert tighter.reader.crop_mm == 80.0, "the crop the member recorded reaches the reader"
     assert tighter.reader.image_size == IMAGE, "and the size is still the largest the group asked for"
 
@@ -346,7 +346,7 @@ def test_pipeline_honours_the_recorded_band(tmp_path: Path):
     default = submission.pipeline(Read(3, scheme, (IMAGE,)))
     assert default.reader.band == Band()
 
-    wider = submission.pipeline(Read(3, scheme, (IMAGE,), band=Band(0.1, 0.9)))
+    wider = submission.pipeline(Read(3, scheme, (IMAGE,), Reading(band=Band(0.1, 0.9))))
     assert wider.reader.band == Band(0.1, 0.9), "the band the member recorded reaches the reader"
 
 
@@ -358,7 +358,7 @@ def test_pipeline_honours_the_recorded_centre(tmp_path: Path):
     default = submission.pipeline(Read(3, scheme, (IMAGE,)))
     assert isinstance(default.reader.centre, ImageCentre)
 
-    located = submission.pipeline(Read(3, scheme, (IMAGE,), crop=Crop(centre="tissue")))
+    located = submission.pipeline(Read(3, scheme, (IMAGE,), Reading(crop=Crop(centre="tissue"))))
     assert isinstance(located.reader.centre, TissueCentre), "the recorded centre reaches the reader"
 
 

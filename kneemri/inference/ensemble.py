@@ -25,8 +25,7 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.crop_centre import Crop
-from kneemri.corpus.slot_reader import Band
+from kneemri.corpus.slot_reader import Reading
 from kneemri.corpus.slots import SCHEMES, SlotScheme
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
@@ -102,21 +101,23 @@ class Read:
     Sizes is a tuple rather than a number because that is the whole point: resolution is the one axis a
     single read CAN serve many of, and pretending otherwise cost a full decode per resolution.
 
-    `crop_mm` is here because it is the one reading rule that changes the PIXELS and was reaching the
-    reader as a module constant regardless of what a member recorded. A member fitted on an 80 mm crop
-    served under 130 mm is a different function, and nothing downstream would notice: every fingerprint
-    still passes, because each is checked against its own reading.
+    `reading` is here because it is what changes the PIXELS and was reaching the reader as module
+    constants regardless of what a member recorded. A member fitted on an 80 mm crop served under 130 mm
+    is a different function, and nothing downstream would notice: every fingerprint still passes,
+    because each is checked against its own reading. The band decides WHICH slices exist to be sampled,
+    so a member fitted on a wider band and served under a narrower one is the same defect one axis over.
 
-    `band` is here for the same reason and was the last recorded reading rule the decode ignored: it
-    decides WHICH slices exist to be sampled, so a member fitted on a wider band and served under a
-    narrower one sees a stack it was never fitted on, and no fingerprint covers it either.
+    It is the WHOLE `Reading`, not its two fields spelled out again, because `Reading.reader` is the one
+    place that turns a geometry into a decoder — carrying the fields separately meant `Submission`
+    assembled its own `SlotReader` from them, so a third reading axis would have been applied at cache
+    time and silently dropped at serve time. That is the shape `Member.reading` and `StudyCache.of`
+    already exist to close, arriving here from the third direction.
     """
 
     slices: int
     scheme: SlotScheme
     sizes: tuple[int, ...]
-    crop: Crop = Crop()
-    band: Band = Band()
+    reading: Reading = Reading()
 
 
 @dataclass(frozen=True)
@@ -199,9 +200,9 @@ class Ensemble:
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
         """
-        gathered: dict[tuple[str, int, Crop, str, Band], list[Member]] = {}
+        gathered: dict[tuple[str, int, str, Reading], list[Member]] = {}
         for member in self.package.members:
-            key = (member.scheme, member.slices, member.crop, member.tie, member.band)
+            key = (member.scheme, member.slices, member.tie, member.reading)
             gathered.setdefault(key, []).append(member)
         return list(gathered.values())
 
@@ -432,13 +433,11 @@ class Ensemble:
                 slices=self.slices(members),
                 scheme=self.decoded_scheme(members),
                 sizes=tuple(sorted({member.image_size for member in members})),
-                # ASKED, not taken from the first member. `reads` groups by both, so agreement holds by
-                # construction today — and that is exactly the guarantee a later edit to the grouping key
-                # would drop silently, serving every other member of the group under member[0]'s pixels.
-                # The other three fields of this Read are already refused on disagreement; these two were
-                # the ones a change elsewhere could break without a word.
-                crop=self.agreed(members, "crop", lambda member: member.crop),
-                band=self.agreed(members, "band", lambda member: member.band),
+                # ASKED, not taken from the first member. `reads` groups by the reading, so agreement
+                # holds by construction today — and that is exactly the guarantee a later edit to the
+                # grouping key would drop silently, serving every other member of the group under
+                # member[0]'s pixels. Every other field of this Read is already refused on disagreement.
+                reading=self.agreed(members, "reading", lambda member: member.reading),
             )
             per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
         return (self.serving.vote or RankAverage()).combine(per_member)

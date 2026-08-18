@@ -1053,12 +1053,6 @@
     {
       "kind": "import",
       "source": "kneemri.inference.ensemble",
-      "target": "kneemri.corpus.crop_centre",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.ensemble",
       "target": "kneemri.corpus.slot_reader",
       "weight": 1
     },
@@ -1444,12 +1438,6 @@
       "kind": "import",
       "source": "kneemri.kaggle.package_members",
       "target": "core.paths",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.submission",
-      "target": "kneemri.corpus.slot_reader",
       "weight": 1
     },
     {
@@ -6093,13 +6081,7 @@
     {
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Read",
-      "target": "kneemri.corpus.crop_centre.Crop",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.inference.ensemble.Read",
-      "target": "kneemri.corpus.slot_reader.Band",
+      "target": "kneemri.corpus.slot_reader.Reading",
       "weight": 1
     },
     {
@@ -7450,12 +7432,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submission.Submission.decoded_at",
       "target": "kneemri.corpus.study.Study.from_directory",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.submission.Submission.pipeline",
-      "target": "kneemri.corpus.slot_reader.SlotReader",
       "weight": 1
     },
     {

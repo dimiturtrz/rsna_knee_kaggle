@@ -27,7 +27,6 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.slot_reader import SlotReader
 from kneemri.corpus.study import SlotPipeline, Study
 from kneemri.inference.ensemble import Ensemble, Read
 from kneemri.models.model import TARGETS
@@ -133,17 +132,14 @@ class Submission:
         a member fitted on a different physical extent was served under 130 mm and nothing anywhere
         would have said so — every fingerprint still passes, because each is checked against its own
         reading. `Member.pixel_group` has always separated such members; `Ensemble.reads` now groups by
-        the crop too, and this is where that answer finally reaches the decode.
+        the reading too, and this is where that answer finally reaches the decode.
+
+        THROUGH `Reading.reader`, not by unpacking it here. This assembled its own `SlotReader` from the
+        read's crop and band, which is the axis list spelled a second time: a third reading rule would
+        have been applied when a cache was built and dropped when a submission was served, and the
+        member's own fingerprint — checked against its own reading — would still have passed.
         """
-        return SlotPipeline(
-            scheme=read.scheme,
-            reader=SlotReader(
-                crop_mm=read.crop.mm,
-                image_size=max(read.sizes),
-                centre=read.crop.located(),
-                band=read.band,
-            ),
-        )
+        return SlotPipeline(scheme=read.scheme, reader=read.reading.reader(max(read.sizes)))
 
     @staticmethod
     def decoded_at(

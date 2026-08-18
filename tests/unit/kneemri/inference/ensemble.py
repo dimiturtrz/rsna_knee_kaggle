@@ -337,7 +337,7 @@ def test_predict_groups(tmp_path: Path):
 def test_predict_groups_refuses_a_group_that_does_not_share_its_pixels(tmp_path: Path):
     """A group whose members crop differently is refused, not served under the first one's crop.
 
-    `reads` groups by crop and band, so the read built from a group agrees with every member of it — by
+    `reads` groups by the reading, so the read built from a group agrees with every member of it — by
     construction, which is the guarantee an edit to that grouping key drops without a word. The group is
     forced here rather than built, because that is precisely the state such an edit would produce: the
     members' own recorded readings differ and only the key stopped noticing. Under `members[0]`, the
@@ -350,7 +350,7 @@ def test_predict_groups_refuses_a_group_that_does_not_share_its_pixels(tmp_path:
     ensemble.models["tight"] = ensemble.models[member.identifier]
     ensemble.reads = lambda: [mixed]
 
-    with pytest.raises(ValueError, match="crop"):
+    with pytest.raises(ValueError, match="reading"):
         ensemble.predict_groups(lambda read: [], overlap=False)
 
 
