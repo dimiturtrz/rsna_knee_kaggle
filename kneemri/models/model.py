@@ -72,17 +72,20 @@ function on different pixels and loaded without complaint. The lookup now happen
 BUILT, so it raises there instead."""
 
 COMPILED_PREFIX = "_orig_mod."
+"""What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
+
+Spelled ONCE, here, beside the loader that strips it — the five members written before
+`compile_encoder` switched to in-place compilation carry it, and every arm that ran `--compile-encoder`
+saved its encoder under it. `EncoderDrift` had its own copy; a comparison that strips a stale spelling
+matches nothing and reports a drift of 0.000, which is the most reassuring possible way to write
+"measured nothing at all" and is exactly how that module's copy was found the first time.
+"""
 
 ADAPTERS = "lora_adapters"
 RECOMPUTING = "recompute_activations"
 COMPILED_ENCODER = "compile_encoder"
 OPENED_BLOCKS = "opened_blocks"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
-"""What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
-
-Spelled once, and read only by `load_trained`, which strips it so the five members written before
-`compile_encoder` switched to in-place compilation can still be loaded.
-"""
 
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
 IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)

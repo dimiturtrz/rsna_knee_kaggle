@@ -22,16 +22,11 @@ import torch
 from torch import Tensor
 
 from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.model import COMPILED_PREFIX
 
 logger = logging.getLogger(__name__)
 
 BACKBONE_PREFIX = "backbone."
-COMPILED_PREFIX = "_orig_mod."
-"""What `torch.compile` inserts into every key of the module it wraps.
-
-Every arm carrying `--compile-encoder` saved its encoder under this, so a comparison that strips only
-`backbone.` matches NOTHING against the stock weights — which this module first reported as a drift of
-0.000, the most reassuring possible spelling of "measured nothing at all"."""
 BLOCK_INDEX = re.compile(r"\.(\d+)\.")
 STEM = -1
 """The group for every encoder tensor outside the repeated blocks — patch embedding, class token,

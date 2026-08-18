@@ -5,7 +5,7 @@ from typing import cast, override
 import numpy as np
 import pytest
 import torch
-from torch import Tensor
+from torch import Tensor, nn
 
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
@@ -13,6 +13,7 @@ from kneemri.models.model import (
     ATTEND,
     CLS_MEAN_FOCAL,
     COMPILED_ENCODER,
+    COMPILED_PREFIX,
     OPENED_BLOCKS,
     POOL_PARTS,
     RECOMPUTING,
@@ -539,6 +540,20 @@ def test_recompute_activations(study_model: StudyModel):
 
     backbone = cast("_FakeBackbone", study_model.backbone)
     assert backbone.checkpointing == {"use_reentrant": False}
+
+
+def test_compiled_prefix_is_what_torch_actually_inserts():
+    """The constant is checked against torch, not against our memory of torch.
+
+    Wrapping alone is enough — compilation is lazy, so no forward runs and no inductor is invoked. The
+    failure this guards is silent in both readers: `load_trained` strips a prefix that is no longer
+    there and refuses the old members it exists to recover, and `EncoderDrift` matches no tensor at all
+    and reports a drift of 0.000 rather than raising.
+    """
+    keys = torch.compile(nn.Linear(2, 2)).state_dict()
+
+    assert keys, "an empty state dict would pass every assertion below without meaning anything"
+    assert all(key.startswith(COMPILED_PREFIX) for key in keys), f"torch now wraps under {list(keys)}"
 
 
 def test_compile_encoder(study_model: StudyModel):
