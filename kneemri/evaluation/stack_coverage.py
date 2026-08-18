@@ -29,6 +29,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core.bootstrap import INTERVAL, RESAMPLE_SEED, RESAMPLES
 from kneemri.evaluation.scores import LabelScores
 from kneemri.models.model import TARGETS
 
@@ -36,15 +37,6 @@ logger = logging.getLogger(__name__)
 
 CACHED_SLICES = 12
 """What the cache keeps per series, whatever was acquired."""
-
-RESAMPLES = 1500
-"""MEASURED, after the first version asserted 300 was "stable to about a thousandth" and was wrong.
-Across three resample seeds the Lateral Meniscus lower bound moved by 0.0063 at 300 — enough to flip
-whether it cleared zero, which is a verdict decided by the random seed. At 1500 the same spread is
-0.0015 and the sign is stable. An interval whose own Monte Carlo error is larger than the effect is not
-an interval."""
-
-RESAMPLE_SEED = 11
 
 PRESENT = 0.5
 """Where a graded target becomes a positive, matching LabelScores."""
@@ -126,7 +118,7 @@ class StackCoverage:
                 )
                 for _ in range(RESAMPLES)
             ]
-            low, high = float(np.nanpercentile(resampled, 2.5)), float(np.nanpercentile(resampled, 97.5))
+            low, high = (float(bound) for bound in np.nanpercentile(resampled, INTERVAL))
             measured[target] = (per_band, low, high)
         return measured
 

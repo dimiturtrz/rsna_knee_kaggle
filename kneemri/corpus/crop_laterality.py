@@ -33,6 +33,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.paths import DataRoot
 from kneemri.corpus.acquisition import Acquisition
 from kneemri.corpus.crop_centre import CROP_MM
@@ -61,10 +62,6 @@ SLICES = 12
 SAMPLE = 400
 """Studies to decode, matching `crop_coverage` and `band_coverage` — the same sampling error, and the
 same reason: the decode is the whole cost and a larger sample buys nothing this decision can use."""
-
-RESAMPLES = 1500
-RESAMPLE_SEED = 11
-INTERVAL = (2.5, 97.5)
 
 
 @dataclass(frozen=True)
@@ -152,10 +149,9 @@ class CropLaterality:
         ]
         if not measured:
             return lines
-        generator = np.random.default_rng(seed)
+        bootstrap = Bootstrap.seeded(seed)
         deltas = np.array([clip.asymmetry() for clip in measured])
-        resampled = [float(generator.choice(deltas, deltas.size).mean()) for _ in range(RESAMPLES)]
-        low, high = np.percentile(resampled, INTERVAL)
+        low, high = bootstrap.mean_interval(deltas)
         clips = "the crop clips one side harder" if low > 0.0 or high < 0.0 else "SYMMETRIC — refuted as the asymmetry"
         lines.append(
             f"discarded lateral {np.mean([clip.lateral for clip in measured]):.4f}  "

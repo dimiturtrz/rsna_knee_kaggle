@@ -32,6 +32,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.paths import DataRoot
 from kneemri.corpus.crop_centre import CENTRES, CROP_MM, TissueCentre
 from kneemri.corpus.slot_reader import SlotReader
@@ -60,13 +61,7 @@ SAMPLE = 400
 the effect they were used to argue for; 400 series-level observations put it near a hundredth, and the
 decode is the whole cost so a larger sample buys nothing this decision can use."""
 
-RESAMPLES = 1500
-"""Matching `stack_coverage`, where 300 was measured to move a bound by more than the effect."""
-
-RESAMPLE_SEED = 11
-
 PERCENTILE_LOW = 10
-INTERVAL = (2.5, 97.5)
 
 
 @dataclass(frozen=True)
@@ -124,7 +119,7 @@ class CropCoverage:
         spread across series is far larger than the difference between centres, so an unpaired
         comparison would drown a real effect in how much tissue each knee happens to show.
         """
-        generator = np.random.default_rng(seed)
+        bootstrap = Bootstrap.seeded(seed)
         lines = []
         for millimetres in self.extents:
             tissue, image = f"tissue@{millimetres:g}", f"image@{millimetres:g}"
@@ -132,8 +127,7 @@ class CropCoverage:
             if not both:
                 continue
             deltas = np.array([kept[tissue] - kept[image] for kept in both])
-            resampled = [float(generator.choice(deltas, deltas.size).mean()) for _ in range(RESAMPLES)]
-            low, high = np.percentile(resampled, INTERVAL)
+            low, high = bootstrap.mean_interval(deltas)
             star = "*" if low > 0.0 or high < 0.0 else ""
             lines.append(
                 f"tissue - image at {millimetres:g} mm: {deltas.mean():+.4f} "

@@ -35,6 +35,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.paths import DataRoot
 from kneemri.corpus.crop_centre import TissueCentre
 from kneemri.corpus.slot_reader import SLICE_BAND, Band, SlotReader
@@ -61,10 +62,6 @@ which is enough for the tail's mass to be a mean rather than one slice's luck.
 
 SAMPLE = 400
 """Studies to decode, matching `crop_coverage` — a sampling error near a hundredth of the effect."""
-
-RESAMPLES = 1500
-RESAMPLE_SEED = 11
-INTERVAL = (2.5, 97.5)
 
 PERCENTILE_HIGH = 90
 
@@ -155,10 +152,7 @@ class BandCoverage:
 
     def interval(self, values: NDArray[np.float64], seed: int = RESAMPLE_SEED) -> tuple[float, float]:
         """A bootstrap interval on the mean, so a share is never reported as a bare point estimate."""
-        generator = np.random.default_rng(seed)
-        resampled = [float(generator.choice(values, values.size).mean()) for _ in range(RESAMPLES)]
-        low, high = np.percentile(resampled, INTERVAL)
-        return float(low), float(high)
+        return Bootstrap.seeded(seed).mean_interval(values)
 
     def report(self, measured: list[tuple[str, dict[str, float]]], sampled: int, corpus: int) -> list[str]:
         """Discarded tissue per slot, with the DENOMINATORS on the first line rather than in a footnote.

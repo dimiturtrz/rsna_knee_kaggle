@@ -9,6 +9,12 @@
     {
       "kind": "import",
       "source": "kneemri.corpus.band_coverage",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.band_coverage",
       "target": "core.paths",
       "weight": 1
     },
@@ -93,6 +99,12 @@
     {
       "kind": "import",
       "source": "kneemri.corpus.crop_coverage",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_coverage",
       "target": "core.paths",
       "weight": 1
     },
@@ -124,6 +136,12 @@
       "kind": "import",
       "source": "kneemri.corpus.crop_coverage",
       "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_laterality",
+      "target": "core.bootstrap",
       "weight": 1
     },
     {
@@ -862,6 +880,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.scores",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_coverage",
+      "target": "core.bootstrap",
       "weight": 1
     },
     {
@@ -1927,6 +1951,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.bootstrap.Bootstrap",
+      "target": "core.bootstrap.Bootstrap",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.mounts.Mounts.every",
       "target": "core.mounts.Mounts.walk",
@@ -2062,6 +2092,12 @@
       "kind": "calls",
       "source": "kneemri.corpus.band_coverage.BandCoverage.discarded",
       "target": "kneemri.corpus.band_coverage.BandCoverage.profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.band_coverage.BandCoverage.interval",
+      "target": "core.bootstrap.Bootstrap.seeded",
       "weight": 1
     },
     {
@@ -2372,6 +2408,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.corpus.crop_coverage.CropCoverage.paired",
+      "target": "core.bootstrap.Bootstrap.seeded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.corpus.crop_coverage.CropCoverage.report",
       "target": "kneemri.corpus.crop_coverage.CropCoverage.paired",
       "weight": 1
@@ -2548,6 +2590,12 @@
       "kind": "calls",
       "source": "kneemri.corpus.crop_laterality.CropLaterality.measure_study",
       "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_laterality.CropLaterality.report",
+      "target": "core.bootstrap.Bootstrap.seeded",
       "weight": 1
     },
     {
@@ -9171,11 +9219,19 @@
   ],
   "nodes": [
     {
-      "descendants": 2,
+      "descendants": 3,
       "id": "core",
       "label": "core",
       "level": "module",
       "parent": null,
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap",
+      "label": "bootstrap",
+      "level": "module",
+      "parent": "core",
       "role": null
     },
     {
@@ -10057,6 +10113,14 @@
       "level": "module",
       "parent": "kneemri.training",
       "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.Bootstrap",
+      "label": "Bootstrap",
+      "level": "class",
+      "parent": "core.bootstrap",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -11425,6 +11489,22 @@
       "level": "class",
       "parent": "kneemri.training.trainer",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.Bootstrap.mean_interval",
+      "label": "mean_interval",
+      "level": "method",
+      "parent": "core.bootstrap.Bootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.Bootstrap.seeded",
+      "label": "seeded",
+      "level": "method",
+      "parent": "core.bootstrap.Bootstrap",
+      "role": null
     },
     {
       "descendants": 0,
