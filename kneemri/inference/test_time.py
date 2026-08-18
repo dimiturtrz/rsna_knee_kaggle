@@ -23,6 +23,23 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+WARP_CHUNK = 512
+"""How many single-channel images one `grid_sample` call may hold.
+
+TWO ENTRIES CAME BACK COMPLETE WITH A BLANK PUBLIC SCORE and this is the only explanation that fits
+both (knee-c9q4). The warp ran on the WHOLE chunk at once, so a 48-study batch (6 slots x 12 slices =
+3,456 images at 336 px) allocated the float copy, the sampling grid and the result together — about
+6.2 GB of transient on a 16 GB T4, on top of the model and the decoded batch. `Ensemble.forwarded`
+halves its rows on `torch.OutOfMemoryError`, but it wraps the FORWARD; an out-of-memory here is raised
+before the forward is reached and kills the kernel, and a hidden rerun that dies writes no submission
+at all — which is exactly what a COMPLETE entry with no score looks like from outside.
+
+The visible set is three studies, 216 images, a fifteenth of the memory. That is why every one of these
+runs looked clean in a log and cost a slot anyway: the arm was only ever tested at a size that fits.
+
+512 bounds the transient at ~230 MB regardless of chunk size. Views are averaged over, so this changes
+no arithmetic — `test_warp_is_indifferent_to_the_chunk_size` is what says so."""
+
 DEGREES = (0.0, -6.0, 6.0)
 SHIFTS = ((0.0, 0.0),)
 """Rotation is the cheap axis: three views is three forward passes, and shift is left at none until
@@ -65,12 +82,23 @@ class SpatialViews:
         the correspondence the head attends over.
         """
         batch, slots, depth, height, width = images.shape
-        flat: Float[Tensor, "n 1 h w"] = images.reshape(-1, 1, height, width).float()
+        flat: UInt8[Tensor, "n 1 h w"] = images.reshape(-1, 1, height, width)
         angle = torch.tensor(degrees * torch.pi / 180.0, device=images.device)
         cos, sin = torch.cos(angle), torch.sin(angle)
-        theta = torch.tensor(
-            [[cos, -sin, shift_x], [sin, cos, shift_y]], device=images.device, dtype=torch.float32
-        ).expand(flat.shape[0], 2, 3)
-        grid = nn.functional.affine_grid(theta, list(flat.shape), align_corners=False)
-        warped = nn.functional.grid_sample(flat, grid, mode="bilinear", padding_mode="zeros", align_corners=False)
-        return warped.round().clamp(0, 255).to(torch.uint8).reshape(batch, slots, depth, height, width)
+        theta = torch.tensor([[[cos, -sin, shift_x], [sin, cos, shift_y]]], device=images.device, dtype=torch.float32)
+        # ONE GRID FOR EVERY IMAGE, because the transform does not depend on the image. Built at the
+        # batch's own length it was a (n, h, w, 2) float32 tensor — 3.1 GB for the 3,456 images a
+        # 48-study chunk holds, which is the largest single allocation this serving path ever made.
+        grid = nn.functional.affine_grid(theta, [1, 1, height, width], align_corners=False)
+        warped = torch.empty_like(flat)
+        for begin in range(0, flat.shape[0], WARP_CHUNK):
+            piece: Float[Tensor, "c 1 h w"] = flat[begin : begin + WARP_CHUNK].float()
+            sampled = nn.functional.grid_sample(
+                piece,
+                grid.expand(piece.shape[0], height, width, 2),
+                mode="bilinear",
+                padding_mode="zeros",
+                align_corners=False,
+            )
+            warped[begin : begin + WARP_CHUNK] = sampled.round().clamp(0, 255).to(torch.uint8)
+        return warped.reshape(batch, slots, depth, height, width)

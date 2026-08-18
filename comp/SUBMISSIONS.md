@@ -82,6 +82,7 @@ never spent on a cell that already has a number.
 | `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | **0.924** — best, and the only clean member A/B we have |
 | `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | **0.921** — the pair's own member swap |
 | `ours×4×whole`, lr1e-4 for intensity392 — `kneemri-solotop` | 2026-08-18 | **0.925** — best; pre-registered 0.927, so the swap rule missed |
+| `ours×2×whole×views=rot2` — `kneemri-rateviews` | 2026-08-18 | **no score** — the second blank, and the one that named the cause |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
@@ -194,9 +195,23 @@ CC0 pool is closed as a source of members and every remaining entry is all-ours.
 
 **`views` returned no score at all.** The kernel ran clean on the visible three studies — valid 3×13 CSV,
 2/2 members fingerprint-checked — and the submission reached COMPLETE with a blank public score. rot3 is
-the only arm that triples decode, so a hidden-rerun timeout is the reading that fits; nothing else about
-it differed from the 0.919 pair. The TTA cell is therefore UNTESTED rather than measured, and re-firing
-it unchanged would most likely buy another blank.
+the only arm that triples decode, so a hidden-rerun timeout was the reading that fitted. **That reading was
+wrong, and a second blank on 2026-08-18 (`rateviews`) is what refuted it** — the visible run costs 2.9 s a
+study, so ~11,000 studies fit inside the 9 h ceiling and time was never the binding constraint.
+
+The mechanism is memory, in the one place the retry cannot see it. `SpatialViews._warp` warped a whole
+chunk in a single `grid_sample`, and it sits OUTSIDE `Ensemble.forwarded`'s row-halving
+`torch.OutOfMemoryError` retry, which wraps the FORWARD only. A 48-study chunk is 6 slots × 12 slices =
+3,456 images at 336 px: the float copy (1.56 GB), the `(n, h, w, 2)` sampling grid (3.12 GB) and the
+result (1.56 GB) are live together — ~6.2 GB of transient on a 16 GB T4, on top of the model and the
+decoded batch. The OOM kills the kernel, the hidden rerun writes no submission, and from outside that is
+exactly a COMPLETE entry with a blank score. The visible set is 3 studies, 216 images, a fifteenth of the
+memory — which is why every one of these runs looked clean in a log and cost a slot anyway.
+
+Fixed by chunking the warp at `WARP_CHUNK = 512` images with one grid expanded across the batch, bounding
+the transient at ~230 MB regardless of chunk size; `test_warp_is_indifferent_to_the_chunk_size` asserts the
+result is bit-identical to the unchunked path, so the fix moved memory and not arithmetic. The TTA cell
+remains UNTESTED, and a views entry is eligible again only from a kit that carries this fix.
 
 **The four queued cells are one day's five slots spent on questions the holdout cannot answer, not on a
 predicted gain.** Nothing in the current member pool predicts a gain over 0.919 offline: count, subset,

@@ -10,12 +10,14 @@ it pays, the question that decides a leaderboard entry is whether it still pays 
 actually score 0.925, and multi-view gains are exactly the kind that shrink as an ensemble already
 averages away the variance the views were adding.
 
-THE COST IS THE RISK, and it is the defect this whole line came from. `kneemri-views` returned COMPLETE
-with a BLANK public score (knee-c9q4) as the only arm that tripled decode. This runs two views over four
-members: the decode is 2x (views are shared across members within a pixel group), the forward is 8
-member-passes against that entry's 6. The kit's afford-sheds-views mitigation is what makes that
-acceptable — the worst case degrades to the identity view and reproduces 0.925, rather than returning
-another blank.
+THE RISK WAS NEVER THE COST. Two entries returned COMPLETE with a BLANK public score, and the reading
+that blamed decode time is refuted: the visible run costs 2.9 s a study, so ~11,000 studies fit inside
+the 9 h ceiling. The cause was an OOM in `SpatialViews._warp`, which warped a whole chunk in one
+`grid_sample` — ~6.2 GB of transient for a 48-study chunk on a 16 GB T4 — outside the row-halving retry
+that wraps the forward, so nothing caught it and the hidden rerun wrote no submission (knee-c9q4).
+`WARP_CHUNK` now bounds that at ~230 MB, bit-identically. The afford-sheds-views mitigation sheds on
+projected TIME, so it never protected against this and is not what makes the entry acceptable; the warp
+fix is, and this entry must only be fired from a kit that carries it.
 """
 
 import logging
