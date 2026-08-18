@@ -17,7 +17,6 @@ import logging
 from dataclasses import dataclass
 
 import torch
-from transformers import AutoModel
 
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyDesign, StudyModel
@@ -156,7 +155,7 @@ class RunSetup:
         `Trainer`, not here.
         """
         options = self.options
-        backbone = AutoModel.from_pretrained(encoder.repository)
+        backbone = encoder.load()
         if options.encoder_weights is not None:
             # BEFORE every wrapper, and that is the same argument the rest of this method makes: weights
             # written into a compiled or adapted backbone land under prefixed keys that the stock

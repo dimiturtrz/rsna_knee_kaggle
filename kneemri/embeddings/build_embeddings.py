@@ -14,7 +14,6 @@ import logging
 from pathlib import Path
 
 import torch
-from transformers import AutoModel
 
 from core.paths import DataRoot
 from core.wakelock import Wakelock
@@ -62,7 +61,7 @@ def main() -> None:
     # Per-slice pooling, because the whole point is to keep each slice separate — the slot's own
     # aggregation is one of the choices this cache exists to make free.
     model = StudyModel(
-        AutoModel.from_pretrained(encoder.repository),
+        encoder.load(),
         encoder.dim,
         len(corpus.mask[0]),
         StudyDesign(pool=arguments.pool, slice_pooling=MAXIMUM),

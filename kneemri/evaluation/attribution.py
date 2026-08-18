@@ -416,8 +416,6 @@ def main() -> None:
     import logging  # noqa: PLC0415 - as above
     from pathlib import Path  # noqa: PLC0415 - as above
 
-    from transformers import AutoModel  # noqa: PLC0415 - a 90 MB import only this entrypoint needs
-
     from core.paths import DataRoot  # noqa: PLC0415 - as above
     from core.wakelock import Wakelock  # noqa: PLC0415 - as above
     from kneemri.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
@@ -459,9 +457,7 @@ def main() -> None:
     encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
 
     predictions = HoldoutPredictions(VisibleCards().device())
-    model = predictions.load(
-        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, member.slot_count
-    )
+    model = predictions.load(arguments.checkpoint, encoder.load(), encoder.dim, member.slot_count)
     images, mask = corpus.images[holdout], corpus.mask[holdout]
     # `overlap=True` gives a windowed member every start and a whole-stack member the ONE centred window
     # of its full depth, which is the whole point of routing this through Member.window.

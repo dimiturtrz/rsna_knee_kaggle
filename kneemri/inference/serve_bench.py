@@ -168,8 +168,6 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    from transformers import AutoModel  # noqa: PLC0415 - CLI-only
-
     from kneemri.device import VisibleCards  # noqa: PLC0415 - CLI-only
     from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - CLI-only
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - CLI-only
@@ -183,7 +181,7 @@ def main() -> None:
     # stored fingerprint by 0.086 against a tolerance of 0.002, which is the guard noticing exactly the
     # meaningless predictions this bench is willing to buy. Resizing after the load keeps the guard
     # honest for every other caller and still moves the size the encoder runs at.
-    model = package.load(fitted, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
+    model = package.load(fitted, encoder.load(), encoder.dim, device)
     ensemble = Ensemble(package, {fitted.identifier: model}, device)
     member = fitted.resized(arguments.read_size) if arguments.read_size else fitted
 

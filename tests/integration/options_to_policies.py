@@ -128,7 +128,7 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
 
 def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.MonkeyPatch):
     """The model half of the same claim: adapters, checkpointing and compilation are run switches too."""
-    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _FakeBackbone())
     wrappers = _policies(StudyModel, NOT_A_WRAPPER | MODEL_REPORTER)
     called = _recorded(monkeypatch, StudyModel, wrappers)
 

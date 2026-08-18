@@ -34,7 +34,6 @@ from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, StudyDesign
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
-from kneemri.training import run_setup as build_module
 from kneemri.training import train as train_module
 from kneemri.training.options import TrainingOptions
 
@@ -119,7 +118,7 @@ def corpus(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     paths = tmp_path / "paths.yaml"
     paths.write_text(f"data: {tmp_path.as_posix()}\n", encoding="utf-8")
 
-    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _FakeBackbone())
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _FakeBackbone())
     # The stand-in backbone is DIM wide, and the head is built at the ENCODER's width: a mismatch here
     # is a shape error rather than a test of the wiring.
     monkeypatch.setattr(train_module, "ENCODERS", {SMALL: replace(ENCODERS[SMALL], dim=DIM)})
@@ -285,7 +284,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
     """
     # The blocked stand-in, because `--lora-rank` wraps the Linears INSIDE a block and the plain one
     # has none — an encoder shape, not a preference, and adaptation refuses a backbone it cannot adapt.
-    monkeypatch.setattr(build_module.AutoModel, "from_pretrained", lambda repository: _BlockedBackbone())
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _BlockedBackbone())
     _corpus(
         corpus,
         Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL),

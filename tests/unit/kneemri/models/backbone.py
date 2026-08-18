@@ -1,8 +1,38 @@
 """The encoder table: one variant, one repository, one width."""
 
-import pytest
+from typing import override
 
-from kneemri.models.backbone import BASE, ENCODERS, LARGE, SMALL, V3_BASE, V3_SMALL, V3_SMALL_PLUS, Encoder
+import pytest
+import torch
+from torch import Tensor, nn
+
+from kneemri.models.backbone import (
+    BASE,
+    CONVNEXT_BASE,
+    ENCODERS,
+    LARGE,
+    SMALL,
+    V3_BASE,
+    V3_SMALL,
+    V3_SMALL_PLUS,
+    Encoder,
+    MapAsTokens,
+    TokenOutput,
+)
+
+
+class _FeatureMap(nn.Module):
+    """A convolutional trunk's contract in three lines: `last_hidden_state` of shape (n, dim, h, w)."""
+
+    def __init__(self, dim: int, side: int) -> None:
+        super().__init__()
+        self.dim, self.side = dim, side
+
+    @override
+    def forward(self, pixel_values: Tensor) -> TokenOutput:
+        rows = torch.arange(self.side * self.side, dtype=torch.float32)
+        emitted = rows.view(1, 1, self.side, self.side).expand(len(pixel_values), self.dim, self.side, self.side)
+        return TokenOutput(emitted)
 
 
 def test_mounted_source():
@@ -75,6 +105,37 @@ def test_locates():
     assert not Encoder("nowhere", "facebook/nothing", 384).locates("/kaggle/input/anything"), (
         "an encoder that names no directory must match NOTHING rather than everything"
     )
+
+
+def test_forward():
+    """A feature map arrives as tokens with a class token in front, in row-major order.
+
+    The head slices `tokens[:, 1:]` to get the patch grid and pools it. If the flatten dropped the
+    prefix slot, that slice would silently eat the first spatial token and the model would train on a
+    grid missing its top-left corner — a defect with no shape error to announce it.
+    """
+    adapter = MapAsTokens(_FeatureMap(dim=4, side=3), 4)
+    emitted = adapter.forward(torch.zeros(2, 3, 96, 96)).last_hidden_state
+
+    assert emitted.shape == (2, 1 + 9, 4), "one prefix token, then the 3x3 grid, at the trunk's own width"
+    assert torch.equal(emitted[0, 1:, 0], torch.arange(9, dtype=torch.float32)), "row-major, like a ViT's patches"
+    assert emitted[0, 0, 0] == pytest.approx(4.0), "the prefix holds the map's mean, which is what a CNN pools"
+
+
+def test_load(monkeypatch: pytest.MonkeyPatch):
+    """A convolutional trunk is wrapped and a transformer is not — decided ONCE, here.
+
+    Eight call sites used to fetch their own weights and hand them straight to the head. That was right
+    while every encoder emitted token sequences; a family that does not would otherwise put the same
+    branch in all eight.
+    """
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda source: _FeatureMap(dim=1024, side=11))
+
+    adapted = ENCODERS[CONVNEXT_BASE].load()
+    assert isinstance(adapted, MapAsTokens), "a feature map needs the adapter"
+    assert adapted.config.hidden_size == 1024, "the head reads its width off the config"
+    assert adapted.config.num_register_tokens == 0, "a CNN has no registers to exclude"
+    assert not isinstance(ENCODERS[SMALL].load(), MapAsTokens), "a transformer already speaks the contract"
 
 
 def test_require_tiling():

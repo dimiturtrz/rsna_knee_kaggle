@@ -275,14 +275,11 @@ def main() -> None:
     slab = HoldoutSlab(corpus, rows)
     device = torch.device(arguments.device)
     predictions = HoldoutPredictions(device)
-    from transformers import AutoModel  # noqa: PLC0415 - CLI-only, and it downloads
 
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - CLI-only
 
     encoder = ENCODERS[member.variant]
-    model = predictions.load(
-        arguments.checkpoint, AutoModel.from_pretrained(encoder.repository), encoder.dim, member.slot_count
-    )
+    model = predictions.load(arguments.checkpoint, encoder.load(), encoder.dim, member.slot_count)
     ours = predictions.predict(model, slab, member.window(corpus.slices, overlap=False), member.precision)
 
     chosen = [identifiers[index] for index in keep]

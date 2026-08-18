@@ -13,7 +13,6 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
-from transformers import AutoModel
 
 from kneemri.findings import TARGETS
 from kneemri.inference.holdout_slab import HoldoutSlab
@@ -129,7 +128,7 @@ class HoldoutPredictions:
         # this store. Naming the member and the device turns that wait into a decision.
         logger.info("%s: cache MISS, computing on %s", reading.file.name, self.device)
         encoder = ENCODERS[reading.variant]
-        model = self.load(reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count)
+        model = self.load(reading.file, encoder.load(), encoder.dim, reading.slot_count)
         values = self.predict(model, slab, window, reading.precision)
         cache.write(entry, values)
         return values

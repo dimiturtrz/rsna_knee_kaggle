@@ -9025,6 +9025,36 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.models.backbone.Encoder.load",
+      "target": "kneemri.models.backbone.MapAsTokens",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.backbone.MapAsTokens",
+      "target": "kneemri.models.backbone.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.backbone.MapAsTokens",
+      "target": "kneemri.models.backbone.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.backbone.MapAsTokens.__init__",
+      "target": "kneemri.models.backbone.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.backbone.MapAsTokens.forward",
+      "target": "kneemri.models.backbone.TokenOutput",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.models.ema.WeightAverage",
       "target": "kneemri.models.ema.LiveWeights",
@@ -10390,6 +10420,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.adaptation",
       "target": "kneemri.training.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.model",
+      "target": "kneemri.models.backbone.Encoder.load",
       "weight": 1
     },
     {
@@ -13316,6 +13352,30 @@
       "descendants": 0,
       "id": "kneemri.models.backbone.Encoder",
       "label": "Encoder",
+      "level": "class",
+      "parent": "kneemri.models.backbone",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.MapAsTokens",
+      "label": "MapAsTokens",
+      "level": "class",
+      "parent": "kneemri.models.backbone",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.TokenConfig",
+      "label": "TokenConfig",
+      "level": "class",
+      "parent": "kneemri.models.backbone",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.TokenOutput",
+      "label": "TokenOutput",
       "level": "class",
       "parent": "kneemri.models.backbone",
       "role": "satellite"
@@ -19042,6 +19102,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.backbone.Encoder.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.backbone.Encoder.locates",
       "label": "locates",
       "level": "method",
@@ -19062,6 +19130,22 @@
       "label": "require_tiling",
       "level": "method",
       "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.MapAsTokens.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.backbone.MapAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.MapAsTokens.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.backbone.MapAsTokens",
       "role": null
     },
     {

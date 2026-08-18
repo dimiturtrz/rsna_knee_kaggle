@@ -16,8 +16,6 @@ import logging
 import sys
 from pathlib import Path
 
-from transformers import AutoModel
-
 from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -55,7 +53,7 @@ def main() -> None:
     for member in package.members:
         encoder = ENCODERS[member.variant]
         try:
-            model = package.load(member, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
+            model = package.load(member, encoder.load(), encoder.dim, device)
             difference = package.check(model, member, device)
         except (ValueError, RuntimeError) as failure:
             logger.info("  %s: REFUSED - %s", member.identifier, failure)

@@ -193,7 +193,6 @@ class KernelRun:
 
     def run(self) -> None:
         """Load, predict, write `/kaggle/working/submission.csv`."""
-        from transformers import AutoModel  # noqa: PLC0415 - only importable after the kit is on sys.path
 
         # WHICH CODE IS THIS? Members are versioned and kernels are versioned; the source between them
         # was not, and on 2026-08-13 a submission ran on a kit 54 commits stale — without
@@ -212,9 +211,7 @@ class KernelRun:
             encoder = ENCODERS[member.variant]
             try:
                 weights = self.find_encoder(encoder)
-                models[member.identifier] = package.load(
-                    member, AutoModel.from_pretrained(weights), encoder.dim, device
-                )
+                models[member.identifier] = package.load(member, encoder.load(weights), encoder.dim, device)
             # A MEMBER THAT WILL NOT LOAD IS A MEMBER, NOT AN ENTRY. A DINOv3 member cost a whole
             # submission this way: its weights did not match the class the runtime built, and the run
             # died with twenty-five other members loaded and ready.

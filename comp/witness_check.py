@@ -27,7 +27,6 @@ from pathlib import Path
 import numpy as np
 import torch
 from numpy.typing import NDArray
-from transformers import AutoModel
 
 from kneemri.device import VisibleCards
 
@@ -165,7 +164,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     mask = torch.from_numpy(corpus.mask[positions]).to(device)
 
     encoder = ENCODERS[member.variant]
-    model = package.load(member, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
+    model = package.load(member, encoder.load(), encoder.dim, device)
     ensemble = Ensemble(package, {member.identifier: model}, device)
     got = ensemble.predict_member(member, images, mask, overlap=True)[:kept]
     expected = np.asarray(witness["predictions"], dtype=np.float64)  # pyright: ignore[reportGeneralTypeIssues]

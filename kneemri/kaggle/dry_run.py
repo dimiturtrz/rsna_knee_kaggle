@@ -26,7 +26,6 @@ from pathlib import Path
 
 import pandas as pd
 import torch
-from transformers import AutoModel
 
 from core.paths import DataRoot
 from kneemri.evaluation.scores import LabelScores
@@ -84,7 +83,7 @@ class DryRun:
         models = {
             member.identifier: package.load(
                 member,
-                AutoModel.from_pretrained(ENCODERS[member.variant].repository),
+                ENCODERS[member.variant].load(),
                 ENCODERS[member.variant].dim,
                 self.device,
             )
