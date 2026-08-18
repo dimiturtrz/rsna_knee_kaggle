@@ -1371,6 +1371,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.kit_check",
+      "target": "kneemri.kaggle.kernel_closure",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.kit_check",
       "target": "kneemri.kaggle.mounted_kit",
       "weight": 1
     },
@@ -6781,6 +6787,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_closure.KernelClosure.files",
+      "target": "kneemri.kaggle.kernel_closure.KernelClosure.imported",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_closure.KernelClosure.files",
+      "target": "kneemri.kaggle.kernel_closure.KernelClosure.module_file",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.kernel_run.KernelRun",
       "target": "core.mounts.Mounts",
@@ -6946,6 +6964,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_sources.KernelSources.undeclared",
       "target": "kneemri.kaggle.kernel_sources.KernelSources.covers",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kit_check.KitCheck.__init__",
+      "target": "kneemri.kaggle.kernel_closure.KernelClosure",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.KitCheck.__init__",
+      "target": "kneemri.kaggle.kernel_closure.KernelClosure.files",
       "weight": 1
     },
     {
@@ -8967,7 +8997,7 @@
       "role": null
     },
     {
-      "descendants": 104,
+      "descendants": 105,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -9463,7 +9493,7 @@
       "role": null
     },
     {
-      "descendants": 10,
+      "descendants": 11,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -9474,6 +9504,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.dry_run",
       "label": "dry_run",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure",
+      "label": "kernel_closure",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -10652,6 +10690,14 @@
       "label": "DryRun",
       "level": "class",
       "parent": "kneemri.kaggle.dry_run",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure.KernelClosure",
+      "label": "KernelClosure",
+      "level": "class",
+      "parent": "kneemri.kaggle.kernel_closure",
       "role": "primary"
     },
     {
@@ -14812,6 +14858,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.dry_run",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure.KernelClosure.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_closure.KernelClosure",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure.KernelClosure.files",
+      "label": "files",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_closure.KernelClosure",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure.KernelClosure.imported",
+      "label": "imported",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_closure.KernelClosure",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_closure.KernelClosure.module_file",
+      "label": "module_file",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_closure.KernelClosure",
       "role": null
     },
     {
