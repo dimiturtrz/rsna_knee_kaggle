@@ -4,7 +4,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from kneemri.labels.targets import ANNOTATED_WEIGHT, CONFIDENCE_FLOOR, Supervision, Targets
+from kneemri.labels.targets import (
+    ANNOTATED_WEIGHT,
+    CALIBRATED,
+    CONFIDENCE_FLOOR,
+    WEIGHT_FLOOR,
+    Supervision,
+    Targets,
+)
 from kneemri.models.model import TARGETS
 
 
@@ -64,6 +71,21 @@ def test_load_applies_a_confidence_floor(tmp_path: Path):
     assert floored.weights[2, 0] == CONFIDENCE_FLOOR, "with a floor it keeps a quarter of the weight"
     # a fully-confident derived target is unchanged by the floor
     assert floored.weights[1, 0] > dropped.weights[1, 0]
+
+
+def test_supervised(tmp_path: Path):
+    """A loaded table answers for the switches it was built under, so the pre-flight check can ask it.
+
+    Asserted through `load` rather than the constructor because the path under test is the one that
+    defaults: a `load` that dropped its argument would report the plain recipe on a calibrated run.
+    """
+    derived_path, annotated_path = _tables(tmp_path)
+    supervision = Supervision(floor=CONFIDENCE_FLOOR, calibrated=True)
+
+    loaded = Targets.load(derived_path, annotated_path, ["a", "b", "c"], supervision)
+
+    assert loaded.supervised() == {WEIGHT_FLOOR: CONFIDENCE_FLOOR, CALIBRATED: True}
+    assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {WEIGHT_FLOOR: 0.0, CALIBRATED: False}
 
 
 def test_pair(tmp_path: Path):

@@ -2,10 +2,12 @@
 
 from dataclasses import replace
 
+import numpy as np
 import torch
 from torch import nn
 
 from kneemri.corpus.slot_reader import GROUP
+from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Supervision, Targets
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, MAXIMUM, RECOMPUTING, StudyDesign, StudyModel
 from kneemri.training.landed import Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
@@ -65,6 +67,8 @@ PLAIN = Request(
     per_label_loss=False,
     normalise_by_count=False,
     intensity_aug=False,
+    weight_floor=False,
+    calibrated_targets=False,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 
@@ -73,8 +77,14 @@ every call site and the override stays type-checked rather than an untyped `**kw
 """
 
 
+def _targets(supervision: Supervision | None = None) -> Targets:
+    """A table of the smallest shape that carries a supervision — no file, no labels, no pandas."""
+    scores = np.full((2, 12), 0.5, dtype=np.float32)
+    return Targets(scores, np.ones_like(scores), ["a", "b"], supervision)
+
+
 def _pair(model: StudyModel) -> Landed:
-    return Landed(model, Trainer(model, torch.device("cpu")))
+    return Landed(model, Trainer(model, torch.device("cpu")), _targets())
 
 
 def _model() -> StudyModel:
@@ -152,18 +162,42 @@ def test_missing_loss() -> None:
     `--rank-weight` that never reached the constructor trains the plain recipe under the arm's name.
     """
     model = _model()
-    plain = Landed(model, Trainer(model, torch.device("cpu")))
+    plain = Landed(model, Trainer(model, torch.device("cpu")), _targets())
     ranked = replace(PLAIN, rank_weight=0.3, pair_memory=8, per_label_loss=True)
 
     wrong = plain.missing(ranked)
 
     assert [line.split(":")[0] for line in wrong] == [RANK_TERM, PAIR_POOL, PER_LABEL]
 
-    remembered = Landed(model, Trainer(model, torch.device("cpu"), objective=RememberedRanking(0.3, capacity=8)))
+    remembered = Landed(
+        model, Trainer(model, torch.device("cpu"), objective=RememberedRanking(0.3, capacity=8)), _targets()
+    )
 
     assert remembered.missing(ranked) == [f"{PER_LABEL}: asked True, the model shows False"], (
         "the memory reports the pool it really holds, and the per-label flag it was not given"
     )
+
+
+def test_missing_labels() -> None:
+    """The two switches that map to a DATA argument instead of to a policy object.
+
+    `Targets.pair` and `Targets.load` both default their supervision, so a `main` that stopped passing
+    the run's own value would fit the plain table under a calibrated arm's name and every recorded
+    config would still agree with itself. The floor is compared as its VALUE, since that is what the
+    loss reads and what a broken bool-to-value rule would get wrong.
+    """
+    model = _model()
+    asked = replace(PLAIN, weight_floor=True, calibrated_targets=True)
+    trainer = Trainer(model, torch.device("cpu"))
+
+    unsupervised = Landed(model, trainer, _targets()).missing(asked)
+
+    assert [line.split(":")[0] for line in unsupervised] == [WEIGHT_FLOOR, CALIBRATED]
+    assert unsupervised[0] == f"{WEIGHT_FLOOR}: asked {CONFIDENCE_FLOOR!r}, the model shows 0.0"
+
+    supervised = Supervision(floor=CONFIDENCE_FLOOR, calibrated=True)
+
+    assert Landed(model, trainer, _targets(supervised)).missing(asked) == []
 
 
 def test_wanted() -> None:

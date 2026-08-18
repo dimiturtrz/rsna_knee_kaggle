@@ -46,6 +46,10 @@ ANNOTATED_WEIGHT = 3.0
 """Image-read annotations outweigh any derived row: they are the only labels read from the pixels rather
 than from text, and there are 58 of them."""
 
+WEIGHT_FLOOR = "weight_floor"
+CALIBRATED = "calibrated_targets"
+"""The two label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+
 
 @dataclass(frozen=True)
 class Supervision:
@@ -98,11 +102,35 @@ class Supervision:
 class Targets:
     """Per-study scores and weights, from the report-derived table and the few image annotations."""
 
-    def __init__(self, scores: NDArray[np.float32], weights: NDArray[np.float32], identifiers: list[str]) -> None:
+    def __init__(
+        self,
+        scores: NDArray[np.float32],
+        weights: NDArray[np.float32],
+        identifiers: list[str],
+        supervision: "Supervision | None" = None,
+    ) -> None:
         self.scores = scores
         self.weights = weights
         self.identifiers = identifiers
+        self.supervision = supervision or Supervision()
         self.position = {identifier: index for index, identifier in enumerate(identifiers)}
+
+    def supervised(self) -> dict[str, object]:
+        """The label switches this table was actually built under, for the pre-flight landed check.
+
+        WHAT THIS CATCHES is the wiring, which is where the whole class of defect lives: `pair` and
+        `load` both take `supervision` with a `or Supervision()` default, so a caller that forgot to
+        pass the run's own value trains on the plain table while the config records the ask — the same
+        no-op shape as the report supervision that was wired to nothing for a week. `applied` itself is
+        asserted directly in the unit tests; it is the path from the flag to here that nothing watched.
+
+        Recorded rather than re-derived from the arrays because the arrays cannot answer robustly: a
+        calibration is visible only as the ABSENCE of the five reader levels from the scores, so a
+        subset that happens to contain none of them would read as calibrated and fail a smoke run for a
+        property of the sample. A stored value that a smoke cannot false-positive on is worth more here
+        than a derivation that can.
+        """
+        return {WEIGHT_FLOOR: self.supervision.floor, CALIBRATED: self.supervision.calibrated}
 
     @classmethod
     def load(
@@ -147,7 +175,7 @@ class Targets:
                 read = ~np.isnan(truth)
                 scores[read, column] = truth[read]
                 weights[read, column] = ANNOTATED_WEIGHT
-        return cls(scores, weights, identifiers)
+        return cls(scores, weights, identifiers, supervision)
 
     @classmethod
     def pair(

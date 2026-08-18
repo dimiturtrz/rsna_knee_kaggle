@@ -23,6 +23,7 @@ from dataclasses import dataclass
 import torch
 
 from kneemri.corpus.slot_reader import GROUP
+from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Targets
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
@@ -30,15 +31,21 @@ from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SC
 
 
 class Landed:
-    """What a built model and trainer BECAME, against what the run asked them to be."""
+    """What a built model, trainer and target table BECAME, against what the run asked them to be.
 
-    def __init__(self, model: StudyModel, trainer: Trainer) -> None:
+    THE TARGETS ARE HERE because a switch that maps to a DATA argument rather than to a policy object
+    was outside every check this project has: `options_to_policies` walks the model and the trainer, so
+    the two label switches were the one pair of flags nothing downstream could contradict.
+    """
+
+    def __init__(self, model: StudyModel, trainer: Trainer, targets: Targets) -> None:
         self.model = model
         self.trainer = trainer
+        self.targets = targets
 
     def observed(self) -> dict[str, object]:
-        """Both objects' own accounts of themselves, in one dict."""
-        return {**self.model.applied(), **self.trainer.policies()}
+        """Each object's own account of itself, in one dict."""
+        return {**self.model.applied(), **self.trainer.policies(), **self.targets.supervised()}
 
     def missing(self, asked: "Request") -> list[str]:
         """Every switch whose effect the objects do not show, named with both sides of the mismatch.
@@ -89,6 +96,8 @@ class Request:
     per_label_loss: bool
     normalise_by_count: bool
     intensity_aug: bool
+    weight_floor: bool
+    calibrated_targets: bool
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -96,6 +105,11 @@ class Request:
         THE TRANSLATION LIVES HERE AND NOWHERE ELSE: `--whole-stack` means a window of `slices` and its
         absence means `GROUP`, and a caller that re-derived that would be a second copy of the rule,
         free to disagree with the trainer's and to report a mismatch that is only its own.
+
+        THE ONE DELIBERATE EXCEPTION is the weight floor, whose bool-to-value rule `TrainingOptions`
+        also spells. Taking the resolved `supervision.floor` instead would compare that property's
+        output against itself and pass on any value it produced; re-deriving from the FLAG is what
+        makes a broken `supervision` property visible here rather than only in the loss.
         """
         return {
             ADAPTERS: self.lora_rank,
@@ -112,4 +126,6 @@ class Request:
             PER_LABEL: self.per_label_loss,
             COUNT_NORMALISED: self.normalise_by_count,
             INTENSITY_AUGMENT: self.intensity_aug,
+            WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
+            CALIBRATED: self.calibrated_targets,
         }

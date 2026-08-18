@@ -632,7 +632,7 @@ def main() -> None:
     # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once
     # matched an encoder's projections by name and wrapped nothing, so an arm trained a plain model
     # under a LoRA recipe and cost a queue slot to discover. Two seconds of attribute reads.
-    unlanded = Landed(model, trainer).missing(
+    unlanded = Landed(model, trainer, targets).missing(
         Request(
             lora_rank=arguments.lora_rank,
             recompute=arguments.recompute_activations,
@@ -649,6 +649,8 @@ def main() -> None:
             per_label_loss=arguments.per_label_loss,
             normalise_by_count=arguments.normalise_by_count,
             intensity_aug=arguments.intensity_aug,
+            weight_floor=arguments.weight_floor,
+            calibrated_targets=arguments.calibrated_targets,
         )
     )
     if unlanded:

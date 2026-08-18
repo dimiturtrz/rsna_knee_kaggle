@@ -1695,6 +1695,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.models.model",
       "weight": 1
     },
@@ -7538,6 +7544,12 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.labels.targets.Targets.__init__",
+      "target": "kneemri.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.labels.targets.Targets.load",
       "target": "kneemri.labels.targets.Supervision",
       "weight": 1
@@ -8331,6 +8343,12 @@
     {
       "kind": "holds",
       "source": "kneemri.training.landed.Landed",
+      "target": "kneemri.labels.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.landed.Landed",
       "target": "kneemri.models.model.StudyModel",
       "weight": 1
     },
@@ -8356,6 +8374,12 @@
       "kind": "calls",
       "source": "kneemri.training.landed.Landed.missing",
       "target": "kneemri.training.landed.Request.wanted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.landed.Landed.observed",
+      "target": "kneemri.labels.targets.Targets.supervised",
       "weight": 1
     },
     {
@@ -15740,6 +15764,14 @@
       "descendants": 0,
       "id": "kneemri.labels.targets.Targets.rows",
       "label": "rows",
+      "level": "method",
+      "parent": "kneemri.labels.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.targets.Targets.supervised",
+      "label": "supervised",
       "level": "method",
       "parent": "kneemri.labels.targets.Targets",
       "role": null
