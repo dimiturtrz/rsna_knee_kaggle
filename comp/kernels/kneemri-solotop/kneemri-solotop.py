@@ -18,6 +18,13 @@ by `lr1e-4_ws_s2026`, the second rung of the encoder-rate sweep (0.8490 solo, +0
 inside the floor of 4e-5 and therefore its equal on the evidence — knee-wnkv). The result is exactly
 the top four by solo score, and it is the set the joint search ranks BELOW the one that scored 0.924.
 
+PRE-REGISTERED, AND WRITTEN AFTER `kneemri-ratepair` CAME BACK: **0.927**. That entry ran the same
+swap at count two (res392 out, lr4e-5 in) and scored 0.921 against the pair's 0.919 — a +0.0002 solo
+gap paying +0.002 on the board, next to the +0.0052 gap that paid +0.006. Two points, both landing
+within a thousandth of the displaced-vs-candidate solo gap, so this one's +0.0031 gap
+(intensity392 0.8459 -> lr1e-4 0.8490) predicts +0.003 over 0.924. A score at or below 0.924 says the
+decorrelation the joint search is buying is real and the rule does not survive its third point.
+
 WHAT EITHER ANSWER BUYS. Above 0.924: the joint-subset ruler is costing us score by keeping weak
 members for a decorrelation the board does not pay for, and every future entry is picked by solo
 strength. Below it: decorrelation is real, the 0.924 was the new member and not the selection rule, and
