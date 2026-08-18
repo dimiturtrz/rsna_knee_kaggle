@@ -94,6 +94,11 @@ Measured 2026-08-16 once the harness was honest: **34 arms, 0 refused, 0 uncache
 committed recipe survives a real epoch on the card. That is the pipeline's readiness answered by
 execution rather than by inspection.
 
+Re-measured 2026-08-18, after the landed-check rework and three new arms: **37 arms, 0 refused, 0
+uncached, 0 broken**, in 14 minutes rather than the hour this section warns about — the per-arm cost is
+startup (weights, cache map, compile), not the 2 s epoch, so it is cheap enough to run after any change
+to `kneemri/training/`, not only before a queue.
+
 **`arm_check` — before arming a queue.** Sources every arm against `stub_lib.sh`, whose `run_train`
 prints its flags instead of training, and hands each line to the real `TrainingOptions.parse`. Catches
 a flag typo in seconds rather than after the card has been held. It is sourced rather than parsed
