@@ -14,6 +14,63 @@ from kneemri.corpus.slots import Routing
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import TARGETS, StudyModel
 
+RECORDED_AS = {
+    "image_size": "img",
+    "band_low": "band",
+    "band_high": "band",
+    "scheme": "slots",
+}
+"""Run settings the config carries under a DIFFERENT name, so a name walk cannot see them.
+
+The walk in the unit gate moves one option and demands the config field of THAT NAME follow, which is
+the check that catches a value stamped from the wrong option. It can only see the fields whose names
+agree, and these four are the ones that do not: a band travels as the pair it was resolved into, a
+scheme as the slot list it names, and `image_size` under the `img` the serve path has always read.
+"""
+
+NOT_IN_CONFIG = {
+    "paths": "the data root, machine-specific and gitignored",
+    "labels": "the label table, an input rather than a property of the weights",
+    "eval_labels": "the holdout table, same",
+    "out": "where the run wrote, which the file's own location already answers",
+    "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
+    "patience": "when the run stopped, which the kept epoch already states",
+    "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",
+    "batch": "a resource knob: how many studies a step held changes no weight's meaning",
+    "vram_gb": "a memory cap read against the card the run had",
+    "seed": "seeds and folds are banned as arms here, and the recipe block still carries it",
+    "split_seed": "same, and it moves the split rather than the member",
+    "folds": "banned for the same reason",
+    "fold": "which half was held out — a property of the SCORE, and `holdout` is what serves it",
+    "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
+    "weight_floor": "supervision policy, same",
+    "calibrated_targets": "supervision policy, same",
+    "per_label_loss": "objective policy, same",
+    "normalise_by_count": "objective policy, same",
+    "intensity_aug": "an input augmentation applied while fitting, never while serving",
+    "recompute_activations": "a memory-for-compute trade inside the backward pass",
+    "compile_encoder": "a compilation of the same function — `load_trained` strips its prefix",
+    "report_vectors": "the report head is ALWAYS built, so no rebuild can ask whether it was trained",
+}
+"""Every run setting the config does NOT carry, each with WHY — a decision record.
+
+THE CONFIG IS THE REBUILD CONTRACT: `StudyDesign.from_config` and `Member`'s accessors read it to
+reconstruct the function these weights ARE, and a value that lands here while a consumer reads a module
+default is the shape that has cost this project nine defects. So the question a new knob has to answer
+is not "is it interesting" but "must a rebuild know it" — and everything above answers no, either
+because it describes how the weights were REACHED or because it describes the machine that reached
+them. None of it is lost: `payload["options"]` stamps the whole recipe, and `test_recipe` asserts that
+block holds every field.
+
+Made TOTAL and asserted at the unit gate, next to `Landed.NOT_A_SWITCH` and
+`switch_coverage.NOT_A_RECIPE`. A knob nothing records and nothing writes off is indistinguishable
+from one nobody has thought about yet, and the second is how a member gets rebuilt as a different
+function with every fingerprint still passing against its own reading.
+
+SPELLED HERE rather than imported from `TrainingOptions`, for the reason `RunOptions` is structural:
+train.py imports this module, so naming its dataclass would close the cycle.
+"""
+
 
 class RunOptions(Protocol):
     """The run settings a checkpoint has to record, as a shape rather than a named class.

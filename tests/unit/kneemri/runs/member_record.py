@@ -6,7 +6,7 @@ import torch
 from kneemri.corpus.crop_centre import CROP_MM
 from kneemri.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
-from kneemri.runs.member_record import MemberRecord, StampedRun
+from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
 from kneemri.training.train import TrainingOptions
 
 from ..models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
@@ -129,6 +129,35 @@ def test_payload_takes_each_config_field_from_the_option_of_its_own_name():
         assert stamped[name] == probe, f"--{name} does not reach the config field of its own name"
         followed = {other for other in shared if stamped[other] != plain[other]}
         assert followed == {name}, f"--{name} also moved {followed - {name}}"
+
+
+def test_every_option_is_recorded_or_written_off():
+    """The walk above is an INTERSECTION, so an option recorded NOWHERE escapes it. This closes that.
+
+    Three gates guard the same wire and each sees a different end of it. `Landed.NOT_A_SWITCH` demands
+    every option be compared or written off on the TRAIN side; `members.CONSUMED` demands every
+    RECORDED field be read or declared provenance-only on the SERVE side. Both walk what already
+    exists. Neither can see a knob that changes the rebuilt architecture and was simply never stamped —
+    it is absent from the config, so the serve gate has nothing to hold, and the name walk above
+    intersects the two sets and drops it.
+
+    Made total here: a new field on `TrainingOptions` lands in exactly one of three places — stamped
+    under its own name, stamped under another (`RECORDED_AS`), or written off with a reason
+    (`NOT_IN_CONFIG`) — or this fails. Nine defects in this project are a value recorded here and a
+    consumer reading a default, and the fingerprint cannot catch that class because it is checked
+    against the member's OWN reading: a member rebuilt as the wrong function verifies perfectly.
+    """
+    options = set(vars(OPTIONS))
+    recorded = set(_config(OPTIONS))
+    by_own_name = options & recorded
+
+    unaccounted = options - by_own_name - set(RECORDED_AS) - set(NOT_IN_CONFIG)
+    assert not unaccounted, f"{sorted(unaccounted)}: stamp it into the config, or write it off with WHY"
+
+    assert not set(RECORDED_AS) - options, "a rename entry for a field that no longer exists"
+    assert not set(NOT_IN_CONFIG) - options, "a write-off for a field that no longer exists"
+    assert not by_own_name & (set(RECORDED_AS) | set(NOT_IN_CONFIG)), "recorded AND declared unrecorded"
+    assert set(RECORDED_AS.values()) <= recorded, "a rename pointing at a config key nothing stamps"
 
 
 def test_read_size():
