@@ -4,6 +4,7 @@ from pathlib import Path
 import torch
 
 from kneemri.corpus.crop_centre import CROP_MM
+from kneemri.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import MemberRecord, StampedRun
 from kneemri.training.train import TrainingOptions
@@ -20,13 +21,20 @@ asserts is precisely that the checkpoint stamps the values the RUN used.
 """
 
 
-def _record() -> MemberRecord:
+def _record(options: TrainingOptions = OPTIONS) -> MemberRecord:
     from kneemri.models.model import StudyModel  # noqa: PLC0415 - keeps the fake backbone import local
 
     torch.manual_seed(2026)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
-    return MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+    return MemberRecord(options, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+
+
+def _config(options: TrainingOptions) -> dict[str, object]:
+    """The config block a run with these options stamps into its checkpoint."""
+    config = _record(options).payload({"w": torch.zeros(1)}, holdout=0.0, epoch=0)["config"]
+    assert isinstance(config, dict)
+    return config
 
 
 def test_recipe():
@@ -65,6 +73,62 @@ def test_payload():
     assert config["pair_memory"] == OPTIONS.pair_memory
     assert payload["fingerprint"], "without this the member cannot be verified, so it cannot be submitted"
     assert payload["fingerprint_config"]["n_slot"] == SLOTS
+
+
+ALTERNATES = {
+    "centre": "tissue",
+    "tie": LAST_MAXIMAL,
+    "pool": "cls_mean_focal",
+    "slice_pooling": "attend",
+    "slot_pooling": "mean",
+}
+"""A second legal value for each categorical option, taken from its own table rather than invented.
+
+Categorical because a probe cannot be derived for one: `centre + 0.5` is meaningless and `centre + "x"`
+would stamp a value no consumer can rebuild from, which is a worse test than none.
+"""
+
+DERIVED_ELSEWHERE = {"variant"}
+"""`config["variant"]` comes from the ENCODER, which is the authority on which one it is; the option of
+that name only chooses which encoder `main` builds. Excluded from the walk with the reason stated, not
+quietly, so a future crossing here is a deliberate decision rather than an omission."""
+
+
+def _probe(default: object, name: str) -> object:
+    """A second legal value for a field, so a stamp that did not follow its option is visible."""
+    if name in ALTERNATES:
+        return ALTERNATES[name]
+    if isinstance(default, bool):
+        return not default
+    if isinstance(default, int):
+        return default + 7
+    return float(default) + 0.5  # type: ignore[arg-type]
+
+
+def test_payload_takes_each_config_field_from_the_option_of_its_own_name():
+    """Move ONE option; exactly the config field of that name must follow.
+
+    THE NINE DEFECTS THIS CLASS'S OWN DOCSTRINGS COUNT are all a value recorded here and a consumer
+    reading a default. This guards the other end of the same wire — a value recorded here from the
+    WRONG option. `"ema": options.anatomical_prior` type-checks, runs, and passes every assertion in
+    `test_payload`, because both are False in the recipe those assertions were written against; the
+    member would then advertise a training rule it was not fitted under and be rebuilt to match.
+
+    Spot-checks cannot see that. Only moving one option at a time and demanding that exactly one
+    stamped field follow can.
+    """
+    shared = {name for name in _config(OPTIONS) if name in vars(OPTIONS)} - DERIVED_ELSEWHERE
+
+    assert len(shared) == 21, "pinned, so a renamed option cannot drop silently out of the walk"
+
+    plain = _config(OPTIONS)
+    for name in sorted(shared):
+        probe = _probe(getattr(OPTIONS, name), name)
+        stamped = _config(replace(OPTIONS, **{name: probe}))
+
+        assert stamped[name] == probe, f"--{name} does not reach the config field of its own name"
+        followed = {other for other in shared if stamped[other] != plain[other]}
+        assert followed == {name}, f"--{name} also moved {followed - {name}}"
 
 
 def test_read_size():
