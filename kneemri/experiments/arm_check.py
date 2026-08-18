@@ -331,7 +331,12 @@ def main() -> None:
     refused = check.refused(invocations)
     for name, complaint in refused.items():
         logger.info("REFUSED %s: %s", name, complaint)
-    uncached = check.uncached(invocations)
+    # A SMOKE-ONLY RECIPE IS NOT UNCACHED. A switch recipe exists to be RUN at sixty studies, and
+    # `decode_smoke_caches` builds exactly that truncation for it; no queue will ever ask for its full
+    # corpus, so `--tie last` reported "nothing decoded at 336px_12sl_last" on every sweep and always
+    # would have — and a check that cries about a recipe working as specified is one nobody reads by
+    # the third sweep. It also left --require-caches unable to pass alongside --switches at all.
+    uncached = check.uncached({name: flags for name, flags in invocations.items() if name not in switches})
     for name, key in uncached.items():
         logger.info("UNCACHED %s: nothing decoded at %s", name, key)
     broken: dict[str, str] = {}
