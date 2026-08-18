@@ -79,7 +79,8 @@ never spent on a cell that already has a number.
 | `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | 2026-08-17 | **0.913** |
 | `ours×2×whole×vote=logit` — `kneemri-vote` | 2026-08-17 | **0.919** — identical to the RankAverage pair |
 | `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
-| `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | submitted 17:48 UTC, pending |
+| `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | **0.924** — best, and the only clean member A/B we have |
+| `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | submitted 18:26 UTC, pending |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
@@ -104,6 +105,24 @@ it is a different set. That is the same conclusion the joint-holdout subset sear
 (knee-2bly: every subset larger than five falls monotonically to 0.8547), now confirmed on the board,
 which is the ruler that matters. It also closes the question the four slots were spent on: adding or
 removing a member is worth nothing predictable, and the entry that ships should be a NAMED subset.
+
+## Membership is the lever, and 2026-08-18 measured how much (0.924)
+
+| entry | members | LB |
+|---|---|---|
+| `kneemri-chosen` | res392 + intensity392 + calibrated + **sliceattn** | 0.918 |
+| `kneemri-rate` | res392 + intensity392 + calibrated + **lr4e-5** | **0.924** |
+
+Same count, same kit's 23 loaded files, same `overlap=False`, same `RankAverage`, one member swapped.
+**+0.006 on the board** — above the 0.0062 noise floor's own width, and it is the FIRST clean single-member
+A/B this competition has given us: every earlier board delta varied count or pool or both.
+
+It also transfers the offline number almost exactly. `lr4e-5_ws_s2026` is the control recipe at encoder
+rate 4e-5 instead of 8e-6 and scored +0.0068 solo on the fold-0 holdout (knee-wnkv); the board moved
++0.006 for putting it in. Two things follow. The rate lever is real on the ruler that pays, not an
+artefact of one fold — and a member's SOLO holdout gain predicted its ensemble board gain here, which
+the joint-subset search has never managed (it ranked this set +0.0013 over `chosen`, five times too
+small). Membership, priced by solo strength, is the axis to keep pushing.
 
 ## The graft is a cost on the board too, and it is the day's only result above the bar
 

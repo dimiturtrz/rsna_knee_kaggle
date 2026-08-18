@@ -92,10 +92,9 @@ def main() -> None:
     install_wheels(kit)
     sys.path.insert(0, str(kit))
 
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-
-    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
+    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - kit is on sys.path only after install_wheels
     from kneemri.inference.test_time import SpatialViews  # noqa: PLC0415 - same
+    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
 
     chosen = ("calibrated_targets_s2026", "lr4e-5_ws_s2026")
     views = SpatialViews(degrees=(0.0, -6.0))
