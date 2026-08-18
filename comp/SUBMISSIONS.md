@@ -81,6 +81,7 @@ never spent on a cell that already has a number.
 | `ours×2×whole×views=rot3` — `kneemri-views` | 2026-08-17 | **no score** — COMPLETE, blank public score |
 | `ours×4×whole`, rate member for sliceattn — `kneemri-rate` | 2026-08-18 | **0.924** — best, and the only clean member A/B we have |
 | `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | **0.921** — the pair's own member swap |
+| `ours×4×whole`, lr1e-4 for intensity392 — `kneemri-solotop` | 2026-08-18 | **0.925** — best; pre-registered 0.927, so the swap rule missed |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
@@ -144,6 +145,30 @@ That is a usable selection rule and the first one this file has had: **price a c
 solo holdout gain over the member it displaces**, not by the joint-subset search, which underpriced the
 first of these by 5×. Two points do not fix a slope — what they establish is that the sign and the order
 of magnitude carry, which is all a slot decision needs.
+
+### The third point was pre-registered and it broke the ordering
+
+`kneemri-solotop` — the four with `lr1e-4` displacing `intensity392`, a +0.0031 solo gap — was written
+with **0.927** on it before it ran, which is +0.003 over 0.924 by the rule above. It scored **0.925**.
+
+| swap | solo delta | board delta |
+|---|---|---|
+| sliceattn → lr4e-5, in the four | +0.0052 | +0.006 |
+| res392 → lr4e-5, in the pair | +0.0002 | +0.002 |
+| intensity392 → lr1e-4, in the four | +0.0031 | **+0.001** |
+
+The sign held for a third time; the ORDERING did not. The largest of the three solo gaps after the first
+bought the SMALLEST board move — less than the swap worth a fiftieth of it. So the rule survives only in
+the weak form it was stated in (a better solo member does not hurt the board) and fails in the form that
+would actually rank two candidates against each other. Every one of these three deltas is also inside the
+0.0053 noise floor on its own; the first is the only one that clears it, and a rule fitted to one point
+above the floor and two below it is a rule fitted to noise. **Do not price a slot with it.**
+
+What that leaves is a bar, not a mechanism: 0.925 is the best entry to date, and the three swaps that
+produced 0.918 → 0.924 → 0.925 have between them moved the board +0.007 for four member substitutions —
+a rate that says membership-shuffling inside the existing pool is close to exhausted. The next real move
+has to come from a member that is DIFFERENT rather than better (knee-nas5's crop/band/centre axis, which
+is the one that transfers at 2.4×), or from supervision (knee-mxj, knee-jk3).
 
 It also kills the count curve's peak at two. The pair built from the better member scores 0.921 and the
 four holding that same member scores 0.924, so 2 > 4 was a statement about `sliceattn` being in the four,
