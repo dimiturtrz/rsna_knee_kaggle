@@ -188,6 +188,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | kept as a member |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing |
+| **`band_wide`** | slice band 0.20–0.80 → **0.10–0.90**, 16 slices at the control's mm-per-slice | **0.8553** | **+0.0028 vs `rate_wholestack`** | best single member yet; directional on the mean, and the per-label pattern is the finding |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
