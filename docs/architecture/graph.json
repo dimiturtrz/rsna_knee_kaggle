@@ -4267,18 +4267,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
-      "target": "kneemri.inference.members.Member",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.agrees",
-      "target": "kneemri.corpus.slot_reader.Band.of",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
       "target": "kneemri.corpus.slots.SlotScheme",
@@ -4306,6 +4294,42 @@
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
       "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "target": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "target": "kneemri.evaluation.oof_oracle.PublishedPayload",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_oracle.PublishedCheckpoint.agrees",
+      "target": "kneemri.corpus.slot_reader.Band.of",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.oof_oracle.PublishedPayload",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldBlock",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.oof_oracle.PublishedPayload",
+      "target": "kneemri.inference.members.MemberConfig",
       "weight": 1
     },
     {
@@ -4347,19 +4371,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.agrees",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.oof_oracle.main",
       "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.covariates",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.oof_oracle.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.recorded",
       "weight": 1
     },
     {
@@ -4372,6 +4384,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.main",
       "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_oracle.main",
+      "target": "kneemri.evaluation.oof_oracle.PublishedCheckpoint.read",
       "weight": 1
     },
     {
@@ -10642,11 +10660,35 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.OutOfFoldBlock",
+      "label": "OutOfFoldBlock",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_oracle",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
       "label": "OutOfFoldOracle",
       "level": "class",
       "parent": "kneemri.evaluation.oof_oracle",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "label": "PublishedCheckpoint",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_oracle",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.PublishedPayload",
+      "label": "PublishedPayload",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_oracle",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -13458,24 +13500,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.agrees",
-      "label": "agrees",
-      "level": "method",
-      "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.covariates",
       "label": "covariates",
-      "level": "method",
-      "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.recorded",
-      "label": "recorded",
       "level": "method",
       "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
       "role": null
@@ -13494,6 +13520,30 @@
       "label": "routing",
       "level": "method",
       "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.PublishedCheckpoint.agrees",
+      "label": "agrees",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.PublishedCheckpoint.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.PublishedCheckpoint.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
       "role": null
     },
     {

@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 
 from kneemri.corpus.slots import SLOTS
-from kneemri.evaluation.oof_oracle import OutOfFoldOracle
+from kneemri.evaluation.oof_oracle import OutOfFoldOracle, PublishedCheckpoint
 from kneemri.inference.members import Member
 
 from ..conftest import write_series
@@ -35,7 +35,7 @@ def test_recorded(tmp_path: Path):
     """The author's own identifiers and probabilities, read back in their written order."""
     path = _checkpoint(tmp_path / "m.pt", 2026, ["b", "a"])
 
-    identifiers, values = OutOfFoldOracle().recorded(path)
+    identifiers, values = PublishedCheckpoint.read(path).recorded()
 
     assert identifiers == ["b", "a"], "their order, not a sorted one — the rows are aligned to it"
     assert values.shape == (2, TARGET_COUNT)
@@ -43,12 +43,11 @@ def test_recorded(tmp_path: Path):
 
 def test_agrees(tmp_path: Path):
     """Silence when the recorded reading matches ours, and a named difference when it does not."""
-    oracle = OutOfFoldOracle()
     member = Member.from_checkpoint(_checkpoint(tmp_path / "same.pt", 2026, ["a"]))
 
-    assert oracle.agrees(member, _checkpoint(tmp_path / "s.pt", 2026, ["a"])) == []
+    assert PublishedCheckpoint.read(_checkpoint(tmp_path / "s.pt", 2026, ["a"])).agrees(member) == []
 
-    differing = oracle.agrees(member, _checkpoint(tmp_path / "d.pt", 2026, ["a"], crop_mm=99.0))
+    differing = PublishedCheckpoint.read(_checkpoint(tmp_path / "d.pt", 2026, ["a"], crop_mm=99.0)).agrees(member)
     assert len(differing) == 1
     assert "crop_mm" in differing[0]
 
@@ -57,16 +56,29 @@ def test_agrees(tmp_path: Path):
     # ours could differ from the default — so a member fitted on the 80 mm cache was reported as
     # differing from the pipeline that was about to serve it correctly.
     tighter = _checkpoint(tmp_path / "t.pt", 2026, ["a"], crop_mm=80.0)
-    assert oracle.agrees(Member.from_checkpoint(tighter), tighter) == [], "a member matches its own reading"
+    assert PublishedCheckpoint.read(tighter).agrees(Member.from_checkpoint(tighter)) == [], (
+        "a member matches its own reading"
+    )
 
     # A field their file states and our accessor DROPS is the failure this really watches for: the
     # member would then be served our default and the difference charged to the reader as a residual.
     silent = torch.load(tmp_path / "same.pt", map_location="cpu", weights_only=False)
     del silent["config"]["band"]
     torch.save(silent, tmp_path / "silent.pt")
-    unstated = oracle.agrees(member, tmp_path / "silent.pt")
+    unstated = PublishedCheckpoint.read(tmp_path / "silent.pt").agrees(member)
     assert len(unstated) == 1
     assert "no band" in unstated[0], "an absent field is a difference from what we will serve, not a default"
+
+
+def test_read(tmp_path: Path):
+    """One deserialisation answers both questions — the point of holding the payload rather than the path."""
+    path = _checkpoint(tmp_path / "m.pt", 2026, ["a"])
+
+    published = PublishedCheckpoint.read(path)
+
+    assert set(published.saved) == {"oof", "config", "slots"}
+    assert published.recorded()[0] == ["a"], "the same object answers the oof question"
+    assert published.agrees(Member.from_checkpoint(path)) == [], "and the reading question, without re-reading"
 
 
 def test_covariates():

@@ -37,7 +37,9 @@ FETCHING THE INPUTS (out of the repo, as all data is):
 
 import argparse
 import logging
+from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
 import numpy as np
 import pandas as pd
@@ -51,7 +53,7 @@ from kneemri.corpus.slot_ties import SlotTies
 from kneemri.corpus.slots import SCHEMES
 from kneemri.corpus.study_cache import CorpusSplit
 from kneemri.inference.holdout_predictions import HoldoutPredictions
-from kneemri.inference.members import Member
+from kneemri.inference.members import Member, MemberConfig
 
 logger = logging.getLogger(__name__)
 
@@ -63,34 +65,58 @@ WORST = 12
 """How many disagreeing studies to name. Enough to look at, few enough to read."""
 
 
-class OutOfFoldOracle:
-    """A published member's own recorded predictions against what our pipeline produces.
+class OutOfFoldBlock(TypedDict):
+    """What the author's pipeline wrote about the studies it scored: their order, and a row for each."""
 
-    THE RULER BUILT FROM THE SAME FILES IS NOT HERE — see `PublishedRuler`. Stacking the twenty
-    checkpoints into a whole-corpus, one-prediction-per-seed array reads the same `oof` blocks and
-    compares nothing, and four evaluations were constructing this comparison oracle in order to reach
-    it.
+    ids: list[str]
+    pred: list[list[float]]
+
+
+class PublishedPayload(TypedDict):
+    """THEIR file's layout, named once. The weights sit beside these under keys this oracle never reads.
+
+    A TypedDict rather than an untyped mapping because the two facts worth stating about a published
+    checkpoint are exactly the ones that surprised us: the slots live at the TOP level while the reading
+    lives inside `config`, and both are absent from our own checkpoints' layout.
     """
 
-    def recorded(self, checkpoint: Path) -> tuple[list[str], Float[np.ndarray, "studies targets"]]:
-        """The identifiers and probabilities the author's pipeline wrote into this checkpoint.
+    oof: OutOfFoldBlock
+    config: MemberConfig
+    slots: list[str]
 
-        `weights_only=False` because the payload is a config and two plain lists rather than tensors —
-        and this reads files WE fetched from a named dataset and stored ourselves.
-        """
-        saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
-        stored = saved["oof"]
+
+@dataclass(frozen=True)
+class PublishedCheckpoint:
+    """One published member's file, read ONCE and then asked several questions.
+
+    The oracle read the same checkpoint twice — once for its `oof` block and once for the reading it
+    records — and a published member is the encoder's weights, so that is a second full deserialisation
+    of hundreds of megabytes to answer a question about two dictionary keys. Holding the loaded payload
+    also puts the two readers where the file's LAYOUT is described once, rather than each knowing
+    separately that the slots sit at the top level while the crop sits inside `config`.
+    """
+
+    saved: PublishedPayload
+
+    @classmethod
+    def read(cls, path: Path) -> "PublishedCheckpoint":
+        """`weights_only=False` because the payload is a config and two plain lists rather than tensors —
+        and this reads files WE fetched from a named dataset and stored ourselves."""
+        return cls(torch.load(path, map_location="cpu", weights_only=False))
+
+    def recorded(self) -> tuple[list[str], Float[np.ndarray, "studies targets"]]:
+        """The identifiers and probabilities the author's pipeline wrote into this checkpoint."""
+        stored = self.saved["oof"]
         return list(stored["ids"]), np.asarray(stored["pred"], dtype=np.float64)
 
-    def agrees(self, member: Member, checkpoint: Path) -> list[str]:
-        """Whether the reading a published member RECORDS matches the one we will serve it under.
+    def agrees(self, member: Member) -> list[str]:
+        """Whether the reading this member RECORDS matches the one we will serve it under.
 
         Checked before any pixel is decoded, because a mismatch here explains a residual completely and
         costs nothing to find — and because the two beads that chased this residual for three days were
         both answerable from these fields alone.
         """
-        saved = torch.load(checkpoint, map_location="cpu", weights_only=False)
-        config = saved["config"]
+        config = self.saved["config"]
         served = member.reading
         differences = []
         # AGAINST THE MEMBER, not against our module constants. This method took a `Member` and never
@@ -114,9 +140,19 @@ class OutOfFoldOracle:
         # its slots at the top level and not inside `config`, so comparing the two config fields asked a
         # question about their file rather than about the difference between their pipeline and ours.
         ours = [slot.name for slot in SCHEMES[member.scheme]]
-        if list(saved["slots"]) != ours:
-            differences.append(f"slot ORDER {saved['slots']} vs ours {ours}")
+        if list(self.saved["slots"]) != ours:
+            differences.append(f"slot ORDER {self.saved['slots']} vs ours {ours}")
         return differences
+
+
+class OutOfFoldOracle:
+    """A published member's own recorded predictions against what our pipeline produces.
+
+    THE RULER BUILT FROM THE SAME FILES IS NOT HERE — see `PublishedRuler`. Stacking the twenty
+    checkpoints into a whole-corpus, one-prediction-per-seed array reads the same `oof` blocks and
+    compares nothing, and four evaluations were constructing this comparison oracle in order to reach
+    it.
+    """
 
     def covariates(self, identifiers: list[str], series: pd.DataFrame) -> dict[str, NDArray[np.float64]]:
         """Per-study properties that cost nothing and can each explain a different defect.
@@ -207,10 +243,11 @@ def main() -> None:
 
     root = DataRoot.from_config(arguments.paths)
     oracle = OutOfFoldOracle()
-    identifiers, theirs = oracle.recorded(arguments.checkpoint)
+    published = PublishedCheckpoint.read(arguments.checkpoint)
+    identifiers, theirs = published.recorded()
     member = Member.from_checkpoint(arguments.checkpoint)
 
-    for difference in oracle.agrees(member, arguments.checkpoint):
+    for difference in published.agrees(member):
         logger.info("READING DIFFERS: %s", difference)
 
     corpus, reference = member.cache(root.processed()).load()
