@@ -213,6 +213,37 @@ run_snapshot() {
   return "$status"
 }
 
+# AN ARM SOURCING THIS FILE FROM THE REPO IS SNAPSHOTTING ITSELF, because asking every caller to
+# remember run_snapshot did not work and cannot.
+#
+# run_snapshot has existed since 2026-08-12 and every arm carries the comment naming it, yet
+# depth_regions_span ran unsnapshotted on 2026-08-19 and died mid-run: editing its header shifted the
+# byte offsets bash reads a script by, execution resumed inside a comment, and the arm re-entered
+# run_train for a second training run on a card it already held. The log named the REPO path, which is
+# how we know it was never copied. Two invocation paths bypassed the copy — queue.sh runs
+# `bash experiments/arms/<arm>.sh` directly, and so does a hand-launched arm, which is how most arms
+# start. after.sh was the only caller that remembered.
+#
+# THE GUARD GOES HERE, not in those callers, because `source lib.sh` is the one line every arm has and
+# every path crosses — the same argument that puts the card in run_train rather than in run_snapshot.
+# A new caller invented tomorrow inherits it for free.
+#
+# ARM_LIB IS THE SIGNAL, and it is exact rather than a heuristic: run_snapshot sets it when it hands the
+# copy to bash, and arm_check sets it to the stub. Unset means nobody has copied this arm. The $0 test
+# keeps after.sh and queue.sh themselves — which source this file with $0 pointing elsewhere — out of
+# the re-exec entirely.
+case "${ARM_LIB:-}" in
+  "")
+    case "$(cd "$(dirname "$0")" && pwd)/$(basename "$0")" in
+      "$REPO/experiments/arms/"*.sh)
+        echo "lib.sh: $(basename "$0") was launched from the repo tree; re-running it from a snapshot"
+        run_snapshot "$0" "$@"
+        exit $?
+        ;;
+    esac
+    ;;
+esac
+
 retired() {
   # An arm whose GATE refuted it: the hypothesis stays readable, the run is refused.
   #
