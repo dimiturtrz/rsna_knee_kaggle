@@ -9,6 +9,22 @@ logger = logging.getLogger(__name__)
 HEARTBEAT_SECONDS = 30.0
 """How often a run says where it is. Long enough to be quiet, short enough to catch a wedged step."""
 
+STALL_FRACTION = 0.5
+"""Below this share of the run's OWN peak rate, a report is a stall rather than a slow patch.
+
+Derived from the two regimes, not chosen: within one arm the rate varies by a few tens of percent
+(batch composition, an occasional checkpoint write), while the failure this catches — GPU memory paged
+over PCIe when two processes overflow the card — runs at a tenth to a fifteenth of the healthy rate and
+stays there. Half the peak sits an order of magnitude away from the pathology and well outside normal
+variation, so the constant does not have to be tuned to be right.
+"""
+
+STALL_REPORTS = 3
+"""Consecutive slow reports before saying so — 90 s at the default interval.
+
+One slow report is an eval, a checkpoint write or a cold cache page. A minute and a half of them is not.
+"""
+
 
 class Heartbeat:
     """Progress WITHIN an epoch, because one line per epoch cannot tell slow apart from wedged.
@@ -32,6 +48,9 @@ class Heartbeat:
         self.clock = clock
         self._since = 0.0
         self._images = 0
+        self._peak = 0.0
+        self._slow = 0
+        self._stalled = False
 
     def tick(self, step: int, steps: int, loss: Callable[[], float], images: int) -> None:
         """Count one step's images, and report the rate if the interval has elapsed.
@@ -48,6 +67,44 @@ class Heartbeat:
         elapsed = now - self._since
         if elapsed < self.every_seconds:
             return
-        logger.info("  step %d/%d  loss %.4f  %.0f img/s", step, steps, loss(), self._images / elapsed)
+        rate = self._images / elapsed
+        logger.info("  step %d/%d  loss %.4f  %.0f img/s", step, steps, loss(), rate)
+        self.watch(rate)
         self._since = now
         self._images = 0
+
+    def watch(self, rate: float) -> None:
+        """Say so when the run collapses against its own established rate.
+
+        On 2026-08-19 this run fell from ~1090 img/s to 30-170 and stayed there for the rest of the arm.
+        Nothing reported it: there was no error, no traceback, and `nvidia-smi` said 99% utilisation —
+        at 183 W of a 575 W limit, because a second project's trainer had taken the card to 31949 MiB of
+        32607 and Windows pages GPU memory over PCIe rather than failing. The card looked busy while
+        doing almost nothing, and the only visible symptom was in a number nobody was comparing to
+        itself.
+
+        Compared against the run's own PEAK rather than an absolute threshold, because step cost varies
+        by 20x across arms and any constant that fits a whole-stack read is silence for a windowed one.
+        The peak is what this arm demonstrably achieved on this card with this recipe, which is the only
+        honest reference available without a second run.
+
+        Latching, so a long stall says it once and its recovery says so too. A warning per report would
+        be the same wall of noise the heartbeat interval exists to avoid.
+        """
+        self._peak = max(self._peak, rate)
+        if rate < self._peak * STALL_FRACTION:
+            self._slow += 1
+            if self._slow >= STALL_REPORTS and not self._stalled:
+                self._stalled = True
+                logger.warning(
+                    "  STALLED: %.0f img/s against this run's own peak of %.0f. Check whether another "
+                    "process holds the card (nvidia-smi: near-full VRAM at 99%% utilisation and a low "
+                    "power draw is memory paging over PCIe, not compute)",
+                    rate,
+                    self._peak,
+                )
+            return
+        if self._stalled:
+            logger.info("  recovered: %.0f img/s, against a peak of %.0f", rate, self._peak)
+        self._slow = 0
+        self._stalled = False
