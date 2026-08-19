@@ -192,9 +192,13 @@ def test_witness():
     holdout = np.array([5, 7, 11], dtype=np.int64)
     predictions = np.arange(3 * 12, dtype=np.float64).reshape(3, 12) / 100.0
 
-    witness = record.witness(identifiers, holdout, predictions)
+    witness = record.witness(identifiers, holdout, predictions, batch=12)
     assert witness["studies"] == ["study-5", "study-7", "study-11"]
     assert len(witness["predictions"]) == 3
+    # The shape the numbers were produced under. Without it a checker feeds however many studies the
+    # witness happens to name, and a half-precision GEMM reduces a different-shaped batch differently —
+    # so the check compares two roundings and calls the gap a reading change.
+    assert witness["batch"] == 12
     assert record.payload({}, 0.8, 0, witness)["config"]["witness"] == witness
     assert record.payload({}, 0.8, 0)["config"]["witness"] == {}, "a run without a holdout has nothing to witness"
 

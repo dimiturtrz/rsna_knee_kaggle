@@ -86,8 +86,18 @@ def tolerance(precision: torch.dtype, device: torch.device) -> float:
     return CROSS_PRECISION_FACTOR * float(torch.finfo(precision).eps)
 
 
-def check(package: MemberPackage, member: Member, root: Path, device: torch.device) -> str:
-    """Re-derive one member's witness, returning a human-readable verdict."""
+def check(package: MemberPackage, member: Member, root: Path, device: torch.device, batch: int | None = None) -> str:
+    """Re-derive one member's witness, returning a human-readable verdict.
+
+    `batch` is the SHAPE the witness was produced under, and it is not decoration. Trainer.predict
+    scores the holdout in batches of the run's `--batch` (12 for every member on disk), so the eight
+    witnessed studies were the first eight rows of a twelve-row forward. This check feeds eight. A
+    half-precision GEMM tiles by shape, so the two paths reduce in different orders and each carries
+    its own rounding — which is the leading candidate for the 0.0135-0.0156 that CUDA reads on five
+    bf16 members while CPU, comparing against a single float32 re-derivation, reads 0.0022-0.0156.
+    Rows are independent here (per-token LayerNorm, attention within a study), so repeating the last
+    study up to the batch reproduces the GEOMETRY without needing the studies that padded it.
+    """
     witness = member.witness
     if not witness:
         return "UNVERIFIED - no witness (trained before the check existed, or a published member)"
@@ -106,6 +116,11 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
         return f"UNVERIFIED - {len(missing)} witnessed studies are absent from this cache"
 
     positions = np.array([index[name] for name in studies], dtype=np.int64)
+    kept = len(positions)
+    recorded = witness.get("batch")
+    shape = batch or (recorded if isinstance(recorded, int) else None)
+    if shape and shape > kept:
+        positions = np.concatenate([positions, np.repeat(positions[-1:], shape - kept)])
     # The MIDDLE window, exactly what Trainer.predict reads: a whole-stack member wants its whole
     # stack, a windowed one wants one group. Feeding precisely that makes predict_member take a single
     # pass in both cases, so the comparison is about the READING and not about window averaging.
@@ -117,17 +132,18 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     encoder = ENCODERS[member.variant]
     model = package.load(member, AutoModel.from_pretrained(encoder.repository), encoder.dim, device)
     ensemble = Ensemble(package, {member.identifier: model}, device)
-    got = ensemble.predict_member(member, images, mask, overlap=True)
+    got = ensemble.predict_member(member, images, mask, overlap=True)[:kept]
     expected = np.asarray(witness["predictions"], dtype=np.float64)  # pyright: ignore[reportGeneralTypeIssues]
 
     difference = float(np.abs(got - expected).max())
     bound = tolerance(member.precision, device)
+    geometry = f", batch {shape}" if shape else ", batch unrecorded"
     if difference > bound:
         return (
             "REFUSED - inference reads this member differently than training did "
-            f"(max|diff| {difference:.3g} > {bound:.3g})"
+            f"(max|diff| {difference:.3g} > {bound:.3g}{geometry})"
         )
-    return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies)"
+    return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies{geometry})"
 
 
 def main() -> None:
@@ -147,6 +163,11 @@ def main() -> None:
     # needs the card, so failing by default would leave the gate permanently red for a reason it cannot
     # fix; an automated caller asks for the strong claim instead.
     parser.add_argument("--require-witness", action="store_true", help="a member with no witness fails")
+    # THE SHAPE THE WITNESS WAS PRODUCED UNDER, for members recorded before the witness carried it.
+    # Every member on disk was scored at --batch 12, which is readable from its metrics.jsonl and not
+    # from the packaged member, so the geometry leg is runnable on them only by being told. New runs
+    # record it and need no flag.
+    parser.add_argument("--batch", type=int, default=None, help="feed this batch shape (default: as recorded)")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -157,7 +178,7 @@ def main() -> None:
         selected = VisibleCards().device().type
     device = torch.device(selected)
 
-    verdicts = {member.identifier: check(package, member, root, device) for member in package.members}
+    verdicts = {member.identifier: check(package, member, root, device, arguments.batch) for member in package.members}
     for identifier, verdict in verdicts.items():
         logger.info("  %s: %s", identifier, verdict)
 

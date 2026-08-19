@@ -220,17 +220,25 @@ class MemberRecord:
         identifiers: list[str],
         holdout: NDArray[np.int64],
         predictions: NDArray[np.float64],
+        batch: int,
     ) -> dict[str, object]:
         """What the TRAINING path predicted for a few named holdout studies.
 
         Named studies rather than positions, because a position means nothing without the same corpus
         index — and the whole point is to be checkable from a different process, against a cache built
         later, by code that never saw this run.
+
+        THE BATCH IS PART OF THE CLAIM. These eight are the first eight rows of a `batch`-row forward,
+        and a half-precision GEMM tiles by shape: a checker that feeds eight rows reduces in a different
+        order and carries a rounding of its own. The recipe records `batch` too, but the recipe does not
+        travel into a packaged member — only this dict does — so the checker could not ask for the one
+        number that would let it reproduce the shape.
         """
         chosen = holdout[:WITNESS_STUDIES]
         return {
             "studies": [identifiers[position] for position in chosen],
             "predictions": predictions[: len(chosen)].tolist(),
+            "batch": batch,
             "reading": "trainer.predict — the middle window of the stack, at the run's own read size",
         }
 

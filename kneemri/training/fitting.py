@@ -133,7 +133,11 @@ class Fitting:
         state = {name: value.detach().cpu().clone() for name, value in model.state_dict().items()}
         # NaN, not `ranked`: with no holdout that value is the epoch index standing in for a score.
         holdout = ranked if fold.scored else NO_HOLDOUT
-        witness = None if predicted is None else self.record.witness(fold.targets.identifiers, fold.holdout, predicted)
+        witness = (
+            None
+            if predicted is None
+            else self.record.witness(fold.targets.identifiers, fold.holdout, predicted, self.plan.batch)
+        )
         if predicted is not None:
             # The SAME array the ledger's per-label numbers were read off, kept whole. Eight studies of
             # it become the witness; the other 873 are what any paired interval over this arm needs, and
