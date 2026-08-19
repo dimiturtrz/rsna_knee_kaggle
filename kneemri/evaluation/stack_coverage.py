@@ -23,6 +23,7 @@ ASSOCIATION and says so; it cannot separate "we threw away more" from "these stu
 
 import argparse
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -137,13 +138,27 @@ class StackCoverage:
             predictions[shallow, column], (truth[shallow, column] > PRESENT).astype(np.int64)
         )
 
-    def report(self, measured: dict[str, tuple[list[float], float, float]], bands: list[list[int]]) -> list[str]:
+
+@dataclass(frozen=True)
+class StackCoverageReport:
+    """The measured trend as a table — the rendering half of what `StackCoverage` used to be.
+
+    Split for the reason the diagnostics were: measuring needs the series on disk and the published
+    predictions, rendering needs the two dicts they produced, and holding them together made the table
+    untestable without the corpus.
+    """
+
+    measured: dict[str, tuple[list[float], float, float]]
+    bands: list[list[int]]
+
+    def lines(self) -> list[str]:
         """Every finding's bands and its trend, starred only where the interval excludes zero.
 
         The count of stars is printed against what CHANCE predicts, because twelve intervals at 95%
         produce about one false positive by construction and a reader who forgets that will find a
         result in any table this shape.
         """
+        measured, bands = self.measured, self.bands
         ordered = sorted(TARGETS, key=lambda target: measured[target][0][-1] - measured[target][0][0])
         header = " ".join(f"{f'band{index + 1}':>8s}" for index in range(len(bands)))
         lines = [
@@ -197,7 +212,7 @@ def main() -> None:
         CACHED_SLICES,
     )
     bands = coverage.bands(depths, names, arguments.groups)
-    for line in coverage.report(coverage.trend(combined, truth, bands), bands):
+    for line in StackCoverageReport(coverage.trend(combined, truth, bands), bands).lines():
         logger.info(line)
 
 

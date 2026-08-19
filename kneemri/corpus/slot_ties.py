@@ -28,6 +28,7 @@ It reads one DICOM header per series and no pixels, so it is cheap and runs happ
 """
 
 from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
@@ -87,41 +88,6 @@ class SlotTies:
         lost["__series__"] += len(study.acquisitions)
         return lost
 
-    def lost_report(self, totals: Counter[str], studies: int) -> list[str]:
-        """The unrouted census, with the slice count that decides whether it matters."""
-        series = totals["__series__"]
-        lost = sum(count for key, count in totals.items() if not key.startswith("__"))
-        share = lost / max(series, 1) * PERCENT
-        lines = [f"{studies} studies, {series} series acquired, {lost} unrouted ({share:.1f}%)"]
-        for key, count in sorted(totals.items(), key=lambda item: -item[1]):
-            if not key.startswith("__"):
-                lines.append(f"  {key}: {count}")
-        lines.append(f"  slices in unrouted series: {totals['__slices__']}")
-        lines.append(
-            "  a discarded localiser is worth nothing and a discarded axial T1 may be worth a lot - "
-            "the SEQUENCE breakdown is the answer here, not the percentage"
-        )
-        return lines
-
-    def report(self, totals: Counter[str], studies: int) -> list[str]:
-        """The counts as lines, with the verdict each one supports stated rather than implied."""
-        lines = [f"contested slots over {studies} studies:"]
-        for slot in SLOTS:
-            count = totals[slot.name]
-            lines.append(f"  {slot.name}: {count} ({count / max(studies, 1) * PERCENT:.1f}% of studies)")
-        affected = totals["studies_with_any"]
-        rate = affected / max(studies, 1) * PERCENT
-        lines.append(f"  studies with at least one contested slot: {affected} ({rate:.1f}%)")
-        lines.append(
-            "  a LOW number kills the tie-break hypothesis for the 0.011 leaderboard gap - the two "
-            "pipelines would agree almost everywhere, and the residual must come from elsewhere"
-        )
-        lines.append(
-            "  a HIGH number does not prove it either: a tie only matters when the tied series differ "
-            "in what they show. That is the next measurement, not this one"
-        )
-        return lines
-
     @staticmethod
     def _lost_of(argument: tuple[Path, dict[str, str]]) -> Counter[str]:
         """Pool worker for the unrouted census."""
@@ -138,6 +104,56 @@ class SlotTies:
         """
         directory, planes = argument
         return SlotTies().of_study(directory, planes)
+
+
+@dataclass(frozen=True)
+class SlotTiesReport:
+    """The two censuses as prose — the rendering half of what `SlotTies` used to be.
+
+    Split for the reason the other reports were: counting walks every study's series on disk, and
+    rendering needs only the Counter it produced. Held together the class read as four unconnected
+    method clusters, and neither table could be exercised without a corpus to count.
+    """
+
+    totals: Counter[str]
+    studies: int
+
+    def unrouted(self) -> list[str]:
+        """The unrouted census, with the slice count that decides whether it matters."""
+        totals, studies = self.totals, self.studies
+        series = totals["__series__"]
+        lost = sum(count for key, count in totals.items() if not key.startswith("__"))
+        share = lost / max(series, 1) * PERCENT
+        lines = [f"{studies} studies, {series} series acquired, {lost} unrouted ({share:.1f}%)"]
+        for key, count in sorted(totals.items(), key=lambda item: -item[1]):
+            if not key.startswith("__"):
+                lines.append(f"  {key}: {count}")
+        lines.append(f"  slices in unrouted series: {totals['__slices__']}")
+        lines.append(
+            "  a discarded localiser is worth nothing and a discarded axial T1 may be worth a lot - "
+            "the SEQUENCE breakdown is the answer here, not the percentage"
+        )
+        return lines
+
+    def contested(self) -> list[str]:
+        """The counts as lines, with the verdict each one supports stated rather than implied."""
+        totals, studies = self.totals, self.studies
+        lines = [f"contested slots over {studies} studies:"]
+        for slot in SLOTS:
+            count = totals[slot.name]
+            lines.append(f"  {slot.name}: {count} ({count / max(studies, 1) * PERCENT:.1f}% of studies)")
+        affected = totals["studies_with_any"]
+        rate = affected / max(studies, 1) * PERCENT
+        lines.append(f"  studies with at least one contested slot: {affected} ({rate:.1f}%)")
+        lines.append(
+            "  a LOW number kills the tie-break hypothesis for the 0.011 leaderboard gap - the two "
+            "pipelines would agree almost everywhere, and the residual must come from elsewhere"
+        )
+        lines.append(
+            "  a HIGH number does not prove it either: a tie only matters when the tied series differ "
+            "in what they show. That is the next measurement, not this one"
+        )
+        return lines
 
 
 def main() -> None:
@@ -188,7 +204,8 @@ def main() -> None:
             if not arguments.lost:
                 totals["studies_with_any"] += int(any(counted.values()))
 
-    lines = ties.lost_report(totals, len(directories)) if arguments.lost else ties.report(totals, len(directories))
+    report = SlotTiesReport(totals, len(directories))
+    lines = report.unrouted() if arguments.lost else report.contested()
     for line in lines:
         logger.info("%s", line)
 

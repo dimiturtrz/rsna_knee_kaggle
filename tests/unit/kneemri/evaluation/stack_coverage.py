@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kneemri.evaluation.stack_coverage import StackCoverage
+from kneemri.evaluation.stack_coverage import StackCoverage, StackCoverageReport
 from kneemri.findings import TARGETS
 
 STUDIES = 9
@@ -70,12 +70,12 @@ def test_trend():
     assert measured[TARGETS[1]][1] < 0.0 < measured[TARGETS[1]][2], "and a coin must not"
 
 
-def test_report():
+def test_lines():
     """Ordered by trend, starred only on intervals excluding zero, with the chance rate stated."""
     measured = {target: ([0.80, 0.80], -0.05, 0.05) for target in TARGETS}
     measured[TARGETS[0]] = ([0.70, 0.90], 0.10, 0.30)
 
-    lines = StackCoverage().report(measured, [[0], [1]])
+    lines = StackCoverageReport(measured, [[0], [1]]).lines()
     text = "\n".join(lines)
 
     assert text.rstrip().endswith("chance alone predicts about 0.6")

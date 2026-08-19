@@ -1,7 +1,7 @@
 from collections import Counter
 from pathlib import Path
 
-from kneemri.corpus.slot_ties import SlotTies
+from kneemri.corpus.slot_ties import SlotTies, SlotTiesReport
 
 from ..conftest import write_series
 
@@ -32,9 +32,9 @@ def test_of_study_is_clear_when_one_series_is_denser(tmp_path: Path):
     assert contested["SAG_FLUID_FS"] == 0
 
 
-def test_report():
+def test_contested():
     """The report gives a rate per slot and states what a low count would and would not settle."""
-    lines = SlotTies().report(Counter({"SAG_FLUID_FS": 20, "studies_with_any": 25}), STUDIES)
+    lines = SlotTiesReport(Counter({"SAG_FLUID_FS": 20, "studies_with_any": 25}), STUDIES).contested()
     text = "\n".join(lines)
 
     assert "SAG_FLUID_FS: 20 (10.0% of studies)" in text
@@ -56,10 +56,10 @@ def test_lost_of_study(tmp_path: Path):
     assert lost["__series__"] == 2, "the denominator counts everything acquired, routed or not"
 
 
-def test_lost_report():
+def test_unrouted():
     """The census names the sequences the scheme cannot express, and refuses to read as a verdict."""
     totals = Counter({"Coronal|fluid|nofs": 1139, "Axial|t1|nofs": 621, "__series__": 24371, "__slices__": 83297})
-    lines = SlotTies().lost_report(totals, STUDIES)
+    lines = SlotTiesReport(totals, STUDIES).unrouted()
     text = "\n".join(lines)
 
     assert "1760 unrouted (7.2%)" in text, "the share counts only real sequence keys, not the bookkeeping ones"
