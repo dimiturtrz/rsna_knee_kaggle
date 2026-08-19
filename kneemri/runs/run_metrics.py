@@ -2,7 +2,6 @@
 
 import json
 import logging
-import math
 from pathlib import Path
 from statistics import median
 from typing import NotRequired, TypedDict, cast
@@ -32,6 +31,10 @@ and a cold first epoch is the worst case above that. 4x sits an order of magnitu
 real stall and three times above the largest honest epoch, so neither side can reach it.
 """
 MINIMUM_FOR_A_MEDIAN = 3
+
+# An AUC is a probability, so anything outside this is a recorder defect rather than a bad score.
+AUC_FLOOR = 0.0
+AUC_CEILING = 1.0
 """Rows below which a median cannot separate a stall from the run's own spread — see `stalls`."""
 RECIPE = "recipe"
 """The key a recipe line carries. An epoch row has no such key and a recipe line has no epoch, so the
@@ -273,7 +276,11 @@ class RunMetrics:
         # both: a run that held nothing back cannot have a best epoch, so it has no score to report.
         if (recipe := self.recipe()) is not None and int(recipe.get("fold", 0)) < 0:
             return None
-        # An unscored run (--fold -1) records NaN, and NaN loses every comparison - an unguarded
-        # max() would return whichever row happened to come first and call it the best.
-        rows = [row for row in self.rows() if not math.isnan(row["auc"])]
+        # AND THEN BY VALUE, because the guard above is a PROVENANCE lookup: it asks the recipe what the
+        # run was for, so a file corrupted the same way whose recipe does not happen to record fold < 0
+        # walks straight past it and `max()` quotes an epoch index as a score again. An AUC is a
+        # probability; 11.0 is not one, and refusing it costs one comparison and needs nothing from the
+        # recipe. NaN, which an unscored run records and which loses every comparison, fails this test
+        # too - an unguarded max() would otherwise return whichever row came first and call it the best.
+        rows = [row for row in self.rows() if AUC_FLOOR <= row["auc"] <= AUC_CEILING]
         return max(rows, key=lambda row: row["auc"]) if rows else None

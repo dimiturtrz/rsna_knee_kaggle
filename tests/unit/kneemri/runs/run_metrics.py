@@ -183,6 +183,28 @@ def test_best(tmp_path: Path):
     )
     assert RunMetrics(indexed).best() is None, "an epoch index is not a score, whatever column it sits in"
 
+    # THE EQUIVALENCE CLASS THE RECIPE GUARD CANNOT COVER: the same corruption in a file whose recipe
+    # does not say fold -1. The guard is a provenance lookup, so it answers nothing here and the value
+    # test is the only thing between an epoch index and the ledger. Row 0 survives it — 0.0 is a
+    # legitimate AUC — which is the point: the reading falls back to the worst real row rather than
+    # quoting the best fake one.
+    untagged = tmp_path / "untagged.pt"
+    untagged.with_suffix(".metrics.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps({"recipe": {"fold": "0", "epochs": "12"}}),
+                *(
+                    json.dumps({"epoch": e, "loss": 1.0, "auc": float(e), "seconds": 9, "per_label": {}})
+                    for e in range(3)
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    untagged_best = RunMetrics(untagged).best()
+    assert untagged_best is not None and untagged_best["auc"] == 1.0, "2.0 is not a probability and cannot win"
+
 
 def test_exists(tmp_path: Path):
     """The recorder answers whether anything is there, so callers need not reach for its path.
