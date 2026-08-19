@@ -32,7 +32,14 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# 18 RATHER THAN THE 28 ITS SIBLINGS ASK, because the co-tenant took the card while this arm waited.
+# biohub_kaggle started training at 19:37 and holds about 13 GB, so free at handoff is ~19 GB, not 31.
+# The ask is a cap on PYTORCH'S ALLOCATOR and not a batch size, so this changes no recipe and keeps the
+# arm matched to `depth_regions_narrow` - and that arm, the same recipe minus the band, actually peaked
+# at 16.24 GB reserved. The 28 was twelve gigabytes of slack it never used, which is harmless on an
+# empty card and is the PCIe-paging crawl when a co-tenant holds the difference (lora.sh measured 30 as
+# worse than 26 for this reason). 18 clears the measured peak and stays under what will be free.
 run_train depth_regions_span \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 28 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 18 \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --slice-regions 4 \
   --labels "$LABELS" --out "$PROCESSED/depth_regions_span_s2026.pt"
