@@ -19,8 +19,18 @@ require "$LABELS" "$CHECKPOINT"
 # this file were measured on rankbase24 and nothing in the file said so.
 MEMBER="$(basename "$CHECKPOINT" .pt)"
 
-uv run python -u -m kneemri.evaluation.attribution \
+# THE CARD IS TAKEN HERE, because this arm does not cross run_train and run_train is where every other
+# GPU path takes it. lib.sh states that run_train is "the ONE point every path that spends GPU crosses";
+# this arm is the counterexample, and it has been one since it was written on 2026-08-15. It spends no
+# gradient, but 400 studies of occlusion is 400 forward passes over the same encoder a trainer holds
+# 15 GB for, so a chain starting it under a running arm is the 31.9-GB PCIe-paging collapse the lock
+# exists to prevent — the serialiser simply could not see it. Queue order made this safe so far, not
+# design. Held around the reading only, and released before the exit checks, so a chain behind us
+# starts the moment the GPU work ends rather than when the shell does.
+hold_card
+uv run --no-sync --project "$REPO" python -u -m kneemri.evaluation.attribution \
   --checkpoint "$CHECKPOINT" --labels "$LABELS" --studies 400 2>&1 | tee "$LOGS/attribution.${MEMBER}.full.log"
 status="${PIPESTATUS[0]}"
+release_card
 [ "$status" -eq 0 ] || { echo "ARM FAILED attribution (exit $status)"; exit "$status"; }
 echo "ARM DONE attribution"
