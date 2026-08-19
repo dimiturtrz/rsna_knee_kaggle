@@ -899,3 +899,47 @@ It fires only because the slot is free at the 00:00Z reset and no better-argued 
 NEW member is what the evidence now asks for, and both arms that could produce one (`focal_dense`,
 `band_dense_long`) are still on the card. That is the honest reason, and it is a weaker one than the
 pre-registration above claims.
+
+### Slot 4 result: 0.929 — a new champion, and it refutes the rule slots 2 and 3 had just bought
+
+Submission 55632193, `kneemri-calibspan`, returned **0.929**. That is the first entry this project has
+put above 0.928, and `comp/champion.json` now pins it: `calibspan_v1`, kit `4bdf2a4`, members
+`band_dense` + `calib_span` + `calibrated_targets` + `lr4e-5_ws`, one swap off the previous champion
+(`lr1e-4_ws` out, `calib_span` in). `champion_check` confirms it rebuilds.
+
+**THE CORRECTION, and it is to a section written an hour before this score returned.** "Slots 2 and 3
+result" concluded that the board bears no relation to offline seat value inside the floor, and drew a
+rule from it: *an entry whose offline edge over the champion is inside 0.0062 is not worth a slot.* Slot
+4's edge was +0.0022 — a third of the floor — and it moved the board. **The rule is wrong as written and
+is withdrawn.** It was drawn from three points at the moment the fourth was still pending, which is the
+mistake, not the arithmetic.
+
+Four occupants of ONE seat, which is what the four slots were spent to get:
+
+| entry | member in the `lr1e-4_ws` seat | alone | offline seat | board |
+|---|---|---|---|---|
+| champion `band_v1` | `lr1e-4_ws` | — | 0.8648 | 0.928 |
+| slot 2 `oneswap` | `band_span` | 0.8565 | 0.8661 | 0.927 |
+| slot 3 `swapdrn` | `depth_regions_narrow` | 0.8554 | 0.8653 | 0.928 |
+| **slot 4 `calibspan`** | **`calib_span`** | **0.8545** | **0.8670** | **0.929** |
+
+**WHAT THE FOUR POINTS ACTUALLY SAY.** The offline ruler picks the WINNER and does not resolve the
+FIELD. Highest offline seat value took the highest board score; second-highest offline (`band_span`)
+came last on the board. So the ordering agrees at the top and inverts in the middle. That is a weaker
+tool than a full ordering — it cannot rank two candidates a thousandth apart — and a far stronger one
+than the "no relation" reading, which the very next data point contradicted.
+
+**THE OTHER INVERSION IS THE ONE WORTH KEEPING.** Ranked ALONE, `calib_span` is the WORST of the three
+challengers (0.8545 against 0.8565 and 0.8554), and this ledger wrote it up hours earlier as a failure
+against its own matched control (−0.0020 at the settled operating point). The member that failed its own
+control is the member that produced the best entry the project has. Member quality measured alone and
+seat value in a four-member vote are different quantities, and here they are ordered oppositely. Pinned
+into `champion.json` as a principle: never retire a member on its own control alone — score it in the
+seat.
+
+**WHAT IT DOES NOT SAY.** One board tick is this competition's reporting resolution, so 0.929 over 0.928
+is "better" and not "much better", and a single hidden-set read cannot separate a real +0.001 from a
+lucky one. The honest statement is that the entry is at worst equal to the previous champion and is the
+only one of four seat occupants that did not land at or below it. It also does not resurrect the
+one-swap rule: slot 2 was a single swap and returned 0.927, so single-vs-compound still is not the
+separator — WHICH member goes in the seat is.

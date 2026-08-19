@@ -1,14 +1,14 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "band_v1",
-  "kernel": "kneemri-band",
-  "submission": 55615886,
+  "entry": "calibspan_v1",
+  "kernel": "kneemri-calibspan",
+  "submission": 55632193,
   "date": "2026-08-19",
-  "board": 0.928,
+  "board": 0.929,
   "kit": "4bdf2a4",
   "members": [
     "band_dense_s2026",
-    "lr1e-4_ws_s2026",
+    "calib_span_s2026",
     "calibrated_targets_s2026",
     "lr4e-5_ws_s2026"
   ],
@@ -24,6 +24,7 @@
     "FOUR MEMBERS. The best subset falls monotonically past five over thirteen same-split checkpoints, to 0.8547 flat over all of them. Mounting more and naming more is negative return.",
     "EVERY SHIPPED MEMBER IS FINGERPRINT-CHECKED AND WITNESS-CHECKED. A member fitted with --slice-pooling max and rebuilt with default channel stacking differs by 2.25 against a 2e-3 tolerance: a different function on different pixels, which loads and scores without complaint.",
     "MEMBERSHIP WAS NOT EXHAUSTED, which the previous champion's own principles claimed. This entry is one named swap off that one - res392_ws out, band_dense in, same count and same two decode groups - and it moved 0.925 to 0.928. The claim was made after four swaps bought +0.007 with the third breaking the ordering rule; what was actually exhausted was the pool at the time, and band_dense is a member from an axis (the sampled BAND) that pool did not contain.",
-    "THE SWAP RULE PREDICTS AGAIN, to a thousandth. Pre-registered 0.929 on a joint-holdout delta of +0.0036, landed 0.928. Member quality DOES transfer to the board; the earlier reading that only decode diversity transfers was taken on swaps that held quality roughly fixed, so it was a statement about those swaps rather than about the board."
+    "A MEMBER THAT FAILED ITS OWN MATCHED CONTROL CAN STILL WIN A SEAT. calib_span was written up as a failure hours before this entry: -0.0020 against its control at the settled operating point, on the arm that PROVED a lever's sign is a property of its operating point. It is the member that took this entry past 0.928. Member quality measured alone and seat value in a four-member vote are different quantities, and the alone-ordering here is INVERTED against the seat-ordering: alone band_span 0.8565 > depth_regions_narrow 0.8554 > calib_span 0.8545, in this seat calib_span 0.8670 > band_span 0.8661 > depth_regions_narrow 0.8653. Never retire a member on its own control alone; score it in the seat.",
+    "AN OFFLINE EDGE INSIDE THE NOISE FLOOR CAN STILL MOVE THE BOARD, and four occupants of ONE seat is what shows it. calib_span (+0.0022 offline over the champion, a third of the 0.0062 floor) is the only one of four that moved the board, and it moved it up a tick. The order agrees at the TOP - highest offline seat value, highest board - and inverts in the MIDDLE: band_span ranked second offline and last on the board. So the offline ruler picks the winner and does not resolve the field, which is a weaker tool than a full ordering and a much stronger one than nothing."
   ]
 }
