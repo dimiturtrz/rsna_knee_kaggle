@@ -244,6 +244,44 @@ def test_begin(tmp_path: Path):
     assert (tmp_path / "run.metrics.2.jsonl").exists(), "a third run rotates to its own number"
 
 
+def test_begin_rotates_the_artefacts_with_the_epochs(tmp_path: Path):
+    """The weights and the predictions move aside under the SAME index as the epochs they belong to.
+
+    Rotating the epochs alone is what cost `depth_regions_span` its run-1 predictions on 2026-08-19: it
+    re-entered `run_train` mid-flight, trained again under its own name, and the ledger's row went on
+    quoting a best whose `.holdout.npz` had been overwritten under it. One index across the three files
+    is the whole point — an account without the weights it describes cannot be re-scored.
+    """
+    metrics = RunMetrics(tmp_path / "run.pt")
+    metrics.begin({"slices": "12"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.8505, seconds=1, per_label={"ACL": 0.5}))
+    (tmp_path / "run.pt").write_text("first weights", encoding="utf-8")
+    (tmp_path / "run.holdout.npz").write_text("first predictions", encoding="utf-8")
+
+    metrics.begin({"slices": "12"})
+
+    assert (tmp_path / "run_run1.pt").read_text(encoding="utf-8") == "first weights"
+    assert (tmp_path / "run_run1.holdout.npz").read_text(encoding="utf-8") == "first predictions"
+    assert not (tmp_path / "run.pt").exists(), "the live name is free for the run that is starting"
+    assert (tmp_path / "run.metrics.1.jsonl").exists(), "and its epochs carry the same index"
+
+
+def test_begin_rotates_what_a_killed_run_left(tmp_path: Path):
+    """A run that scored an epoch but never checkpointed still rotates, and takes no absent file with it.
+
+    The rotation number comes from the epochs because they are the one sibling every run writes; a
+    missing checkpoint must not shift the index and must not raise.
+    """
+    metrics = RunMetrics(tmp_path / "run.pt")
+    metrics.begin({"slices": "12"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.84, seconds=1, per_label={"ACL": 0.5}))
+
+    metrics.begin({"slices": "12"})
+
+    assert (tmp_path / "run.metrics.1.jsonl").exists()
+    assert not (tmp_path / "run_run1.pt").exists(), "nothing is invented for a run that never checkpointed"
+
+
 def test_begin_leaves_a_first_run_where_it_is(tmp_path: Path):
     """Nothing to move aside means no rotation — an empty file is not a run that happened."""
     metrics = RunMetrics(tmp_path / "run.pt")

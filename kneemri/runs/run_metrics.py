@@ -8,6 +8,8 @@ from typing import NotRequired, TypedDict, cast
 
 import torch
 
+from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
+
 logger = logging.getLogger(__name__)
 
 BYTES_PER_GB = 1024**3
@@ -120,8 +122,7 @@ class RunMetrics:
         run with no stamp. This class already resolves that spelling in the other direction, so it is
         the one place that cannot get the pair wrong.
         """
-        name = self.path.name
-        return self.path.with_name(name.removesuffix(METRICS_RECORD) + ".pt")
+        return self.path.with_name(self._stem() + ".pt")
 
     def describe(self, recipe: dict[str, str]) -> None:
         """Record WHICH RUN these epochs belong to, once, before the first of them.
@@ -137,7 +138,7 @@ class RunMetrics:
             handle.write(json.dumps({RECIPE: recipe}) + "\n")
 
     def begin(self, recipe: dict[str, str]) -> None:
-        """Start a run's record, moving any PREVIOUS run's epochs aside first.
+        """Start a run's record, moving any PREVIOUS run's epochs AND ARTEFACTS aside first.
 
         A re-run to the same `--out` used to append, which left one file describing two runs and one
         checkpoint beside it, and no way to say which run wrote the checkpoint. `rows()` guesses THE
@@ -149,19 +150,54 @@ class RunMetrics:
         Rotating rather than truncating, because a killed run's epochs are still the only account of
         what it did; and here rather than in `describe`, which `metrics_recipe` uses to BACK-FILL a
         recipe onto a finished run's file and must go on appending.
+
+        THE WEIGHTS AND THE PREDICTIONS ROTATE WITH THE EPOCHS, because rotating only the epochs is the
+        asymmetry that cost `depth_regions_span` its run-1 predictions on 2026-08-19: the arm re-entered
+        `run_train` mid-flight, trained a second time under its own name, and the ledger's row went on
+        quoting a best whose `.holdout.npz` had been overwritten under it — a number with no file behind
+        it, and nothing on disk saying so. Saving one run's epochs while dropping the weights they
+        describe preserves the account and destroys the evidence.
+
+        Under `_run<n>`, the spelling a human already reached for by hand that night, so the rotated
+        artefacts read as an ordinary run to every tool: `HoldoutRecord` resolves the pair, the ledger
+        check counts it in its denominator, and a comparison can pair it like any other member.
         """
         if any("epoch" in entry for entry in self._entries()):
-            self.path.replace(self._rotation())
+            run = self._rotation()
+            for live, aside in self._artefacts(run):
+                if live.exists():
+                    live.replace(aside)
+                    logger.info("    earlier run under this name kept as %s", aside.name)
+            self.path.replace(self._epochs_aside(run))
         self.describe(recipe)
 
-    def _rotation(self) -> Path:
-        """The next free `<run>.metrics.<n>.jsonl`, so no earlier run's epochs are ever overwritten."""
-        name = self.path.name
-        stem = name.removesuffix(METRICS_RECORD)
+    def _rotation(self) -> int:
+        """The next free rotation number, so no earlier run's record is ever overwritten.
+
+        Decided by the EPOCHS alone: they are the one sibling every run writes, so a run killed before
+        its first checkpoint still consumes a number and the three files of one run keep one index.
+        """
         run = 1
-        while (aside := self.path.with_name(f"{stem}{METRICS_SUFFIX}.{run}.jsonl")).exists():
+        while self._epochs_aside(run).exists():
             run += 1
-        return aside
+        return run
+
+    def _stem(self) -> str:
+        """The run's own name, with none of the three trailing spellings its files carry."""
+        name = self.path.name
+        return name.removesuffix(METRICS_RECORD)
+
+    def _epochs_aside(self, run: int) -> Path:
+        """Where an earlier run's `<run>.metrics.jsonl` goes — the numbering already on disk."""
+        return self.path.with_name(f"{self._stem()}{METRICS_SUFFIX}.{run}.jsonl")
+
+    def _artefacts(self, run: int) -> list[tuple[Path, Path]]:
+        """The weights and predictions of an earlier run, and where they go, as (live, aside) pairs."""
+        stem = self._stem()
+        return [
+            (self.checkpoint(), self.path.with_name(f"{stem}_run{run}.pt")),
+            (self.path.with_name(stem + HOLDOUT_SUFFIX), self.path.with_name(f"{stem}_run{run}{HOLDOUT_SUFFIX}")),
+        ]
 
     def recipe(self) -> dict[str, str] | None:
         """The recorded recipe, or None for a file written before runs recorded one."""
