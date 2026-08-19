@@ -1118,6 +1118,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.training.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.ledger_check",
       "target": "core.paths",
       "weight": 1
@@ -6422,6 +6428,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
+      "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
+      "target": "kneemri.training.trainer.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
+      "target": "kneemri.training.trainer.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.queued",
       "target": "kneemri.experiments.arm_check.ArmCheck._printed",
       "weight": 1
@@ -6538,6 +6562,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_check.ArmCheck.invocations",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_check.ArmCheck.overstated",
       "weight": 1
     },
     {
@@ -16050,6 +16080,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.invocations",
       "label": "invocations",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.overstated",
+      "label": "overstated",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null

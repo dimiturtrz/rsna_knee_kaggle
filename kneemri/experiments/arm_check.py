@@ -35,6 +35,7 @@ from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.training.options import TrainingOptions
+from kneemri.training.trainer import GB_PER_SLICE, DeviceBudget
 
 logger = logging.getLogger(__name__)
 
@@ -244,6 +245,33 @@ class ArmCheck:
         """
         return {name: reading.key for name, reading in self.readings(invocations).items() if not reading.decoded()}
 
+    def overstated(self, invocations: dict[str, str]) -> dict[str, float]:
+        """The arms asking for more VRAM than their own slice count needs, by how many GB.
+
+        A HAND-TYPED CAP IS A THIRD STATEMENT OF A FACT `--slices` ALREADY MAKES, and the third one goes
+        stale: `depth_regions_narrow` is `depth_regions` with the slices dropped to 12 and the 20-slice
+        cap of 28 copied along, 10 GB above what a 12-slice step reserves. That was free on an empty
+        card — `DeviceBudget.await_headroom` waits for `free >= vram_gb` and an overstatement just
+        passes — and stopped being free when `biohub_kaggle` took ~13 GB of the 32: the arm now polls
+        for memory it never needed, burns the wait, and starts into the PCIe-paging crawl the cap
+        exists to prevent. `depth_regions_span` was queued at 28 on a 12-slice recipe and caught by
+        hand; this is that catch, mechanised.
+
+        Measured against `DeviceBudget.needed`, which already carries one slice of slack, with one
+        further slice before anything is reported — a cap is a bound and not a prediction, so rounding
+        it up to the next round number is not a defect. Only OVERSTATEMENT is reported: asking under
+        the derived need is what `band_dense` does at 28 against 28.26, and it peaked at 26.92.
+        """
+        asked: dict[str, float] = {}
+        for name, flags in invocations.items():
+            options = self._parsed(flags)[0]
+            if options is None or not options.vram_gb:
+                continue
+            needed = DeviceBudget(slices=options.slices).needed()
+            if options.vram_gb > needed + GB_PER_SLICE:
+                asked[name] = round(options.vram_gb - needed, 2)
+        return asked
+
     def decode_smoke_caches(
         self,
         invocations: dict[str, str],
@@ -340,6 +368,11 @@ def main() -> None:
     uncached = check.uncached({name: flags for name, flags in invocations.items() if name not in switches})
     for name, key in uncached.items():
         logger.info("UNCACHED %s: nothing decoded at %s", name, key)
+    # ADVISORY, not a refusal: an overstated cap costs wall-clock and risks the crawl, but it mismatches
+    # no arm to its control and invalidates no past number. Refusing on it would block a queue over a
+    # throughput fix, which is how a pre-flight check earns a --no-verify.
+    for name, excess in check.overstated(invocations).items():
+        logger.info("OVERSTATED %s: --vram-gb is %.2f GB above what its --slices reserve; drop the flag", name, excess)
     broken: dict[str, str] = {}
     if arguments.smoke:
         # BEFORE the smoke, not as part of it: a smoke reads the truncated cache, and an arm on a

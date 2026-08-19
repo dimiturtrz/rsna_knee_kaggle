@@ -36,6 +36,28 @@ def test_refused():
     assert refused["typo"], "the parser's own complaint is reported, not a generic failure"
 
 
+def test_overstated():
+    """A cap copied off a bigger recipe is reported; one the slices justify, and one absent, are not.
+
+    `depth_regions_narrow` is the live case: `depth_regions` with the slices dropped to 12 and the
+    20-slice cap of 28 carried along, ten GB above what a 12-slice step reserves. Free on an empty card
+    and a wait-then-crawl once a co-tenant holds a third of it.
+    """
+    overstated = ArmCheck().overstated(
+        {
+            "stale_cap": GOOD + " --slices 12 --vram-gb 28",
+            "derived": GOOD + " --slices 20 --vram-gb 28",
+            "rounded_up": GOOD + " --slices 12 --vram-gb 18",
+            "no_cap": GOOD + " --slices 12",
+        }
+    )
+
+    assert round(overstated["stale_cap"]) == 10, "a 20-slice cap on a 12-slice recipe is what this catches"
+    assert "derived" not in overstated, "asking UNDER the derived need is not an overstatement"
+    assert "rounded_up" not in overstated, "a cap is a bound, so one slice of rounding is not a defect"
+    assert "no_cap" not in overstated, "an arm that names no cap gets the derived one and says nothing"
+
+
 def test_selected():
     """`--only` narrows to the named arms, passes everything through when unset, and refuses a typo.
 
