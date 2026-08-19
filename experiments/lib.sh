@@ -57,8 +57,25 @@ hold_card() {
     sleep 60
   done
   echo $$ > "$LOCK_DIR/pid"
-  trap "rm -rf '$LOCK_DIR'" EXIT
+  trap drop_own_card EXIT
   wait_for_free_card
+}
+
+drop_own_card() {
+  # Remove the lock ONLY if this shell is still the recorded holder.
+  #
+  # The trap used to be `rm -rf '<path>'`, which deletes whatever lock exists at exit — including one
+  # ANOTHER CHAIN IS HOLDING. Measured 2026-08-19: a shell that took the card, released it after its
+  # arm, and exited later wiped a lock a second chain had taken in between, leaving that chain running
+  # an arm with the lock gone and a third free to start on top of it. Two arms on one card is the
+  # 31.9-GB overflow that pages over PCIe at a tenth of the throughput, and the serialiser was the thing
+  # producing it. The empty gpu.lock observed at 06:40 with an arm mid-epoch was this.
+  #
+  # An ownership test rather than `trap - EXIT` in release_card, because that only fixes the shells that
+  # remember to release; this also covers a killed arm, which is the case the trap exists for.
+  local dir="$LOGS/gpu.lock"
+  [ "$(cat "$dir/pid" 2>/dev/null)" = "$$" ] && rm -rf "$dir"
+  return 0
 }
 
 ARM_NEEDS_MIB=18432
@@ -112,7 +129,7 @@ release_card() {
   # An `if` rather than `[ ... ] && rm`, because that construct returns non-zero when the guard fails
   # and this file runs under `set -e` — releasing a lock we do not hold would then kill the chain.
   if [ -n "${LOCK_DIR:-}" ]; then
-    rm -rf "$LOCK_DIR"
+    drop_own_card
   fi
   LOCK_DIR=""
 }
