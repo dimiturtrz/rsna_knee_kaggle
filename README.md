@@ -9,14 +9,15 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-**Where it stands** (2026-08-16). The highest number on the board is **0.919**, and it is now *entirely
-ours* — two of our own whole-stack members, no CC0 weights. A four-member entry chosen by joint holdout
-ties it at **0.918**. Both clear the 0.895 that the 22-member mostly-grafted fusion reached, so the
-published weights we started from are now a [**cost** rather than a
-contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). On 2026-08-17
-that 0.919 stands at **84 of 1,758** — the 95th percentile, against a leader at 0.951 and a median at
-0.874. Four days earlier we were 431 of 1,395 at the 31st, *losing ground while gaining*; the gap to the
-frontier went 0.054 → **0.032**. The full measured account, including what was refuted, is in
+**Where it stands** (2026-08-20). The highest number on the board is **0.929**, from a four-member
+entry that is *entirely ours* — no CC0 weights. It clears the 0.895 the 22-member mostly-grafted fusion
+reached, so the published weights we started from are now a [**cost** rather than a
+contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). The last
+measured RANK is older than the score: on 2026-08-17 an entry of **0.919** stood at **84 of 1,758** —
+the 95th percentile, against a leader at 0.951 and a median at 0.874, with the gap to the frontier down
+from 0.054 to **0.032**. The +0.010 since then has not been re-ranked, and is not claimed as one; four
+days before that measurement we were 431 of 1,395 at the 31st percentile, *losing ground while
+gaining*. The full measured account, including what was refuted, is in
 [interpretations/kneemri/](interpretations/kneemri/) — what actually moved the number, what the
 leaderboard taught us, [what the labels
 contain](interpretations/kneemri/2026-08-13_what-the-labels-actually-contain.md), and [the day the
