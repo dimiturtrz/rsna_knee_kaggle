@@ -797,3 +797,39 @@ score returned:
 Slots 2 and 3 put ONE member into ONE seat each and are already in the queue; slot 4 puts a third
 candidate in the same seat. Those three answer the question this one cannot: whether the board
 reproduces an offline ordering when only one thing moves.
+
+### Slot 5 pre-registration: `kneemri-greedy4` — the mounted maximum, and the one-swap rule at a second point
+
+`band_dense + calib_span + depth_regions_narrow + band_span`, offline **0.8679** against the champion
+four's 0.8648 over the same 909-study fold-0 holdout. Same count, same `overlap=false`, same
+`RankAverage`, one-line diff from `kneemri-best4`. Every member is already in `kneemri-members`, so no
+dataset re-upload was needed and the entry costs a kernel push.
+
+**HOW IT WAS FOUND, and why it is not the same search as slot 1's.** `record_mix --greedy` restricted to
+the SIXTEEN MOUNTED members — the 36-record and 43-record searches that produced earlier entries ranked
+members the kernel cannot load, which is how a candidate can look best offline and be unshippable. Slot
+5 was originally going to be `attend_dense` in the `lr1e-4_ws` seat (seat value +0.0019, second of four
+occupants) and was dropped for exactly that reason: it is not in the roster, its edge over `band_span`
+is 0.0001, and a members re-upload to buy a separation a thirtieth of the noise floor is not a trade.
+
+**THIS IS A THREE-MEMBER SWAP, WHICH IS THE POINT.** `lr1e-4_ws`, `calibrated_targets` and `lr4e-5_ws`
+all leave; `calib_span`, `depth_regions_narrow` and `band_span` all enter. Every board transfer this
+project has read is on ONE swap at a time, and the single compound reading it has — slot 1's two-member
+swap, offline 0.8666 — came back **0.927 against 0.928**. So the prior here is negative and explicit.
+
+**PREDICTION, written before the run.** The one-swap rule says this lands at or below 0.928 despite the
+largest offline edge any entry has carried (+0.0031, half the 0.0062 floor). That is the outcome I
+expect, and it is worth the slot because it confirms the rule at a SECOND point with a LARGER offline
+edge, which is a much stronger statement than n=1: it would say the offline ruler's advantage does not
+scale with how much of the roster moves, i.e. the holdout is pricing joint membership wrong rather than
+pricing one member wrong.
+
+**THE REFUTATION CONDITION, and it is the valuable half.** Above 0.928 refutes the one-swap rule
+outright. Slot 1 would then read not as "compound swaps do not transfer" but as "that particular
+compound swap did not transfer", and the offline greedy search becomes a tool this project can act on at
+full roster width instead of one seat at a time — which changes how every remaining submission is
+chosen, not just this one.
+
+Read it against slots 2, 3 and 4, which are three single swaps into ONE seat. If the single swaps
+transfer their ordering and this one does not, the failure is specifically in COMPOUNDING, and the two
+readings together separate that from "the offline ruler is broken", which neither can do alone.
