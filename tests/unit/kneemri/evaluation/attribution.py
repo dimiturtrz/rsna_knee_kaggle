@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from kneemri.corpus.slot_reader import GROUP
-from kneemri.evaluation.attribution import Attribution, Diagnostics, Holdout
+from kneemri.evaluation.attribution import Attribution, AttributionReport, Diagnostics, Holdout
 from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.models.model import StudyModel
@@ -54,6 +54,31 @@ def _fixture() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 def _attribution() -> Attribution:
     return Attribution(HoldoutPredictions(torch.device("cpu")))
+
+
+def _report(
+    slots: dict[str, float] | None = None,
+    regions: dict[str, float] | None = None,
+    rings: dict[str, float] | None = None,
+    depth: dict[str, float] | None = None,
+    depth_by_label: dict[str, dict[str, float]] | None = None,
+    slices: dict[str, dict[str, float]] | None = None,
+) -> AttributionReport:
+    """A report over stated diagnostics, the rest filled with a shape each section can render.
+
+    Every field defaults because each section reads its own: a depth test that has to spell out slot
+    and ring numbers is stating things the assertion does not depend on.
+    """
+    return AttributionReport(
+        Diagnostics(
+            slots=slots or {"0": 0.01, "2": 0.30},
+            regions=regions or {"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
+            rings=rings or {"0.05": 0.52, "0.25": 0.74},
+            depth=depth or {"0": 0.80, "3": 0.83},
+            depth_by_label=depth_by_label or {"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
+            slices=slices or {"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
+        )
+    )
 
 
 def test_slot_importance():
@@ -121,7 +146,7 @@ def test_slice_importance():
 def test_slice_cost_names_the_verdict():
     """One slice holding most of the cost, with every label agreeing, is the actionable combination."""
     concentrated = {"0": dict.fromkeys(TARGETS, 0.30), "1": dict.fromkeys(TARGETS, 0.01)}
-    lines = "\n".join(_attribution()._slice_cost(concentrated))
+    lines = "\n".join(_report(slices=concentrated)._slice_cost())
 
     assert "slice 0 carries 97% of the total cost over 2 slices" in lines
     assert "1 distinct depths over 12 labels" in lines
@@ -130,23 +155,21 @@ def test_slice_cost_names_the_verdict():
 
 def test_slice_cost_when_no_slice_costs_anything():
     """A redundant stack is reported as such rather than dividing by a zero total."""
-    lines = "\n".join(_attribution()._slice_cost({"0": dict.fromkeys(TARGETS, 0.0)}))
+    lines = "\n".join(_report(slices={"0": dict.fromkeys(TARGETS, 0.0)})._slice_cost())
 
     assert "carries the finding redundantly" in lines
 
 
-def test_report():
+def test_lines():
     """The report states the verdict each diagnostic supports rather than leaving numbers bare."""
-    lines = _attribution().report(
-        Diagnostics(
-            slots={"0": 0.01, "2": 0.30},
-            regions={"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
-            rings={"0.05": 0.52, "0.25": 0.74},
-            depth={"0": 0.80, "3": 0.83},
-            depth_by_label={"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
-            slices={"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
-        )
-    )
+    lines = _report(
+        slots={"0": 0.01, "2": 0.30},
+        regions={"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
+        rings={"0.05": 0.52, "0.25": 0.74},
+        depth={"0": 0.80, "3": 0.83},
+        depth_by_label={"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
+        slices={"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
+    ).lines()
     text = "\n".join(lines)
     assert "spread 0.2900" in text
     assert "ring 0.05: 0.5200" in text
@@ -163,24 +186,13 @@ def test_depth_refuses_a_single_window():
     of the sampled windows helps every label". A licence to act, from an n of one.
     """
     lines = "\n".join(
-        _attribution()._depth(
-            Diagnostics(
-                slots={"0": 0.01},
-                regions={"whole": 0.86, "centre_only": 0.81, "border_only": 0.76},
-                rings={"0.05": 0.63},
-                depth={"0": 0.8558},
-                depth_by_label={"0": dict.fromkeys(TARGETS, 0.8558)},
-                slices={"0": dict.fromkeys(TARGETS, 0.01)},
-            )
-        )
+        _report(
+            depth={"0": 0.8558},
+            depth_by_label={"0": dict.fromkeys(TARGETS, 0.8558)},
+        )._depth()
     )
 
     assert "not measured" in lines, "the axis says what it could not ask"
     assert "1 window(s)" in lines, "and names the reason"
     assert "distinct depths" not in lines, "the agreement verdict n=1 cannot support is absent"
     assert "best single window" not in lines, "so is the best-window claim"
-
-
-def test_targets():
-    """The diagnostics average over the competition's twelve labels, in their order."""
-    assert _attribution().targets() == list(TARGETS)

@@ -280,8 +280,22 @@ class Attribution:
             drops[str(index)] = {label: base[label] - scored[label] for label in base}
         return drops
 
-    def report(self, diagnostics: Diagnostics) -> list[str]:
+
+@dataclass(frozen=True)
+class AttributionReport:
+    """The measured diagnostics as prose — the second half of what `Attribution` used to be.
+
+    Split from the measurement because they share nothing: the occlusions need a model, a holdout and a
+    GPU, and the rendering needs the six dicts they produced. Held together, the class read as four
+    unconnected method clusters (LCOM4 4) and the report could not be exercised without constructing the
+    thing that runs inference.
+    """
+
+    diagnostics: Diagnostics
+
+    def lines(self) -> list[str]:
         """The diagnostics as lines, with the verdict each one supports stated rather than implied."""
+        diagnostics = self.diagnostics
         lines = ["slot importance (score lost when the slot is withheld):"]
         for slot, drop in sorted(diagnostics.slots.items(), key=lambda item: -item[1]):
             lines.append(f"  slot {slot}: {drop:+.4f}")
@@ -313,19 +327,20 @@ class Attribution:
         )
 
         lines.append("")
-        lines.extend(self._depth(diagnostics))
+        lines.extend(self._depth())
 
         lines.append("")
-        lines.extend(self._slice_cost(diagnostics.slices))
+        lines.extend(self._slice_cost())
         return lines
 
-    def _slice_cost(self, by_label: dict[str, dict[str, float]]) -> list[str]:
+    def _slice_cost(self) -> list[str]:
         """What each single slice was worth, and whether the labels wanted the same one.
 
         This is the diagnostic that still works on a whole-stack member, so it carries the verdict the
         depth profile can no longer give: concentrated AND agreeing is the only combination in which a
         non-uniform read has anything left to collect.
         """
+        by_label = self.diagnostics.slices
         cost = {index: float(np.nanmean(list(labels.values()))) for index, labels in by_label.items()}
         total = sum(value for value in cost.values() if value > 0)
         lines = ["slice cost (score lost when the slice is replaced by its neighbour):"]
@@ -350,7 +365,7 @@ class Attribution:
         lines.append(f"  {verdict}")
         return lines
 
-    def _depth(self, diagnostics: Diagnostics) -> list[str]:
+    def _depth(self) -> list[str]:
         """The depth profile, or the reason there is no profile to read.
 
         A WHOLE-STACK MEMBER SAMPLES ONE WINDOW, and this section used to report that case as its
@@ -363,7 +378,7 @@ class Attribution:
         The sweep is a comparison, so it needs something to compare. Below two windows the honest
         output is what the reading could not ask, not a verdict shaped like an answer.
         """
-        depth = diagnostics.depth
+        depth = self.diagnostics.depth
         if len(depth) < COMPARABLE:
             return [
                 f"depth: not measured — the reading samples {len(depth)} window(s), and this axis "
@@ -374,11 +389,12 @@ class Attribution:
         return [
             f"depth: best single window starts at slice {best} ({depth[best]:.4f})",
             f"  range {min(depth.values()):.4f} to {max(depth.values()):.4f} over {len(depth)} windows",
-            *self._depth_agreement(diagnostics.depth_by_label),
+            *self._depth_agreement(),
         ]
 
-    def _depth_agreement(self, by_label: dict[str, dict[str, float]]) -> list[str]:
+    def _depth_agreement(self) -> list[str]:
         """Whether the twelve labels want the same window, which is what gates acting on the profile."""
+        by_label = self.diagnostics.depth_by_label
         preferred = {
             label: max(by_label, key=lambda start: by_label[start][label]) for label in next(iter(by_label.values()))
         }
@@ -392,10 +408,6 @@ class Attribution:
             "several means the only correct answer is to read more of the stack"
         )
         return lines
-
-    def targets(self) -> list[str]:
-        """The label order these diagnostics are averaged over."""
-        return list(TARGETS)
 
 
 def main() -> None:
@@ -471,7 +483,7 @@ def main() -> None:
             depth_by_label=by_label,
             slices=attribution.slice_importance(model, holdout_data),
         )
-    for line in attribution.report(diagnostics):
+    for line in AttributionReport(diagnostics).lines():
         logger.info("%s", line)
 
 
