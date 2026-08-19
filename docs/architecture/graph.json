@@ -3415,15 +3415,21 @@
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "kneemri.corpus.slot_ties.main",
-      "target": "kneemri.corpus.slot_ties.SlotTies.lost_report",
+      "target": "kneemri.corpus.slot_ties.SlotTiesReport",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.corpus.slot_ties.main",
-      "target": "kneemri.corpus.slot_ties.SlotTies.report",
+      "target": "kneemri.corpus.slot_ties.SlotTiesReport.contested",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_ties.main",
+      "target": "kneemri.corpus.slot_ties.SlotTiesReport.unrouted",
       "weight": 1
     },
     {
@@ -6039,13 +6045,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.stack_coverage.main",
-      "target": "kneemri.evaluation.stack_coverage.StackCoverage.report",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_coverage.main",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverageReport",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.stack_coverage.main",
-      "target": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "target": "kneemri.evaluation.stack_coverage.StackCoverageReport.lines",
       "weight": 1
     },
     {
@@ -11522,6 +11534,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.slot_ties.SlotTiesReport",
+      "label": "SlotTiesReport",
+      "level": "class",
+      "parent": "kneemri.corpus.slot_ties",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.slots.Plane",
       "label": "Plane",
       "level": "class",
@@ -11943,6 +11963,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.stack_coverage",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_coverage.StackCoverageReport",
+      "label": "StackCoverageReport",
+      "level": "class",
+      "parent": "kneemri.evaluation.stack_coverage",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -13778,14 +13806,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.slot_ties.SlotTies.lost_report",
-      "label": "lost_report",
-      "level": "method",
-      "parent": "kneemri.corpus.slot_ties.SlotTies",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.corpus.slot_ties.SlotTies.of_study",
       "label": "of_study",
       "level": "method",
@@ -13794,10 +13814,18 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.slot_ties.SlotTies.report",
-      "label": "report",
+      "id": "kneemri.corpus.slot_ties.SlotTiesReport.contested",
+      "label": "contested",
       "level": "method",
-      "parent": "kneemri.corpus.slot_ties.SlotTies",
+      "parent": "kneemri.corpus.slot_ties.SlotTiesReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_ties.SlotTiesReport.unrouted",
+      "label": "unrouted",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_ties.SlotTiesReport",
       "role": null
     },
     {
@@ -15610,18 +15638,18 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.stack_coverage.StackCoverage.report",
-      "label": "report",
+      "id": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
+      "label": "trend",
       "level": "method",
       "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.stack_coverage.StackCoverage.trend",
-      "label": "trend",
+      "id": "kneemri.evaluation.stack_coverage.StackCoverageReport.lines",
+      "label": "lines",
       "level": "method",
-      "parent": "kneemri.evaluation.stack_coverage.StackCoverage",
+      "parent": "kneemri.evaluation.stack_coverage.StackCoverageReport",
       "role": null
     },
     {
