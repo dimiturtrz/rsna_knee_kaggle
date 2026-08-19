@@ -943,3 +943,30 @@ lucky one. The honest statement is that the entry is at worst equal to the previ
 only one of four seat occupants that did not land at or below it. It also does not resurrect the
 one-swap rule: slot 2 was a single swap and returned 0.927, so single-vs-compound still is not the
 separator — WHICH member goes in the seat is.
+
+#### Second amendment to slot 5, after slot 4 returned 0.929
+
+The first amendment said slot 5's hypothesis was dead and it would fire only because the slot was free.
+Slot 4 changes that, and in the direction that makes the entry better argued rather than worse: the
+offline ruler picked the winner among four seat occupants, so firing the offline MAXIMUM is now a
+supported move rather than a spare-slot move. `greedy4` is exactly that maximum over the mounted pool,
+and it contains `calib_span`, the member that just took the board.
+
+Two things must be restated honestly against the NEW champion rather than the old one.
+
+**Its edge shrank by two thirds.** `greedy4` is 0.8679; the champion is no longer 0.8648 but
+**0.8670** (`calibspan_v1`). The pre-registration's "+0.0031, the largest offline edge any entry has
+carried" is now **+0.0009** — a seventh of the noise floor, and smaller than any of the four seat
+separations the board has already failed to resolve. On the reading slot 4 itself supports (the ruler
+picks the top and not the field), a +0.0009 separation is inside the part the ruler cannot resolve.
+
+**It is a three-member swap off the OLD champion but a two-member swap off the new one.** `calib_span`
+and `band_dense` are now common to both; `calibrated_targets` and `lr4e-5_ws` leave, `depth_regions_narrow`
+and `band_span` enter. Slot 1's two-member swap returned 0.927, and `band_span` — the entering member —
+is the one that came LAST on the board among four seat occupants.
+
+**REVISED PREDICTION.** At or below 0.929. The offline edge is too small for the ruler to be speaking,
+and the entry compounds two swaps of which one brings the worst-transferring member of the four. The
+useful outcome is the refutation: **above 0.929** would say the greedy search over the mounted pool
+finds board-real improvements at separations the seat experiment says it cannot resolve, which would
+mean the seat comparison, not the greedy search, is the blunt instrument.
