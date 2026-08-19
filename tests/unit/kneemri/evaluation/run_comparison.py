@@ -429,3 +429,14 @@ def test_resolved(tmp_path: Path):
     assert RunComparison.resolved(Path("centre_tissue_s2026"), tmp_path) == tmp_path / "centre_tissue_s2026.pt"
     assert RunComparison.resolved(Path("runs/x.pt"), tmp_path) == Path("runs/x.pt")
     assert RunComparison.resolved(Path("x.pt"), tmp_path) == Path("x.pt")
+
+
+def test_resolved_accepts_the_name_the_tool_itself_prints(tmp_path: Path):
+    """The `.metrics` form is a NAME, not a path — and it is the spelling the report and ledger use.
+
+    The equivalence class a suffix rule gets wrong: `run.metrics` has a suffix and is still a bare name,
+    so the old rule sent it to the current directory and reported the run missing. Every arm line this
+    tool prints is in that spelling, which makes pasting one back the likeliest way to call it.
+    """
+    assert RunComparison.resolved(Path("lr4e-5_ws_s2026.metrics"), tmp_path) == tmp_path / "lr4e-5_ws_s2026.pt"
+    assert RunComparison.resolved(Path("runs/x.metrics"), tmp_path) == Path("runs/x.metrics"), "a path stays a path"

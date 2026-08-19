@@ -12,6 +12,17 @@ import torch
 logger = logging.getLogger(__name__)
 
 BYTES_PER_GB = 1024**3
+
+METRICS_SUFFIX = ".metrics"
+"""What a run's score record is called, between the run's name and the record's own extension.
+
+A name and an extension with a THIRD thing between them, which is why it is spelled once here: every
+`with_suffix` in reach yields `run.metrics.pt` or `run.metrics.metrics.jsonl`, and both have already
+been written to disk by code that reached for the obvious call.
+"""
+
+METRICS_RECORD = f"{METRICS_SUFFIX}.jsonl"
+"""The record's full trailing name, as it appears on disk."""
 STALL_FACTOR = 4.0
 """How many times the median an epoch must cost before it is a stall rather than a slow epoch.
 
@@ -87,7 +98,7 @@ class RunMetrics:
         # blindly turned the second into `.metrics.metrics.jsonl`, which then reported "recorded no
         # scored epoch" — an error that describes a real state and hides a typo.
         self.path = (
-            destination if destination.name.endswith(".metrics.jsonl") else destination.with_suffix(".metrics.jsonl")
+            destination if destination.name.endswith(METRICS_RECORD) else destination.with_suffix(METRICS_RECORD)
         )
 
     def exists(self) -> bool:
@@ -107,7 +118,7 @@ class RunMetrics:
         the one place that cannot get the pair wrong.
         """
         name = self.path.name
-        return self.path.with_name(name.removesuffix(".metrics.jsonl") + ".pt")
+        return self.path.with_name(name.removesuffix(METRICS_RECORD) + ".pt")
 
     def describe(self, recipe: dict[str, str]) -> None:
         """Record WHICH RUN these epochs belong to, once, before the first of them.
@@ -143,9 +154,9 @@ class RunMetrics:
     def _rotation(self) -> Path:
         """The next free `<run>.metrics.<n>.jsonl`, so no earlier run's epochs are ever overwritten."""
         name = self.path.name
-        stem = name.removesuffix(".metrics.jsonl")
+        stem = name.removesuffix(METRICS_RECORD)
         run = 1
-        while (aside := self.path.with_name(f"{stem}.metrics.{run}.jsonl")).exists():
+        while (aside := self.path.with_name(f"{stem}{METRICS_SUFFIX}.{run}.jsonl")).exists():
             run += 1
         return aside
 

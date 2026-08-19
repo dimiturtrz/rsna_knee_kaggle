@@ -13,7 +13,7 @@ from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
 from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import METRICS_SUFFIX, EpochRow, RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -147,12 +147,19 @@ class RunComparison:
         `centre_tissue_s2026.metrics.jsonl` in the CURRENT DIRECTORY and report "control does not
         exist", which reads as a missing run rather than as a path that was never going to resolve.
 
-        A name is anything with no directory part and no suffix. That leaves `./x.pt`, `x.pt` and an
-        absolute path working exactly as before, so nothing that already ran has to change.
+        A name is anything with no directory part and no suffix — plus the `.metrics` form, which is a
+        name wearing a suffix. THIS TOOL PRINTS THAT FORM: every arm in its own report and every row in
+        the ledger reads `lr4e-5_ws_s2026.metrics`, because that is the record the score was taken from.
+        Pasting a line of the output back in as a control resolved it against the CURRENT DIRECTORY and
+        reported "does not exist" — the same failure the paragraph above describes, surviving in the one
+        spelling a reader is most likely to have to hand.
+
+        That leaves `./x.pt`, `x.pt` and an absolute path working exactly as before, so nothing that
+        already ran has to change.
         """
-        if run.parent != Path() or run.suffix:
+        if run.parent != Path() or run.suffix not in ("", METRICS_SUFFIX):
             return run
-        return processed / f"{run.name}.pt"
+        return processed / f"{run.stem}.pt"
 
     @staticmethod
     def _intervals(labels: Path) -> dict[str, float]:
