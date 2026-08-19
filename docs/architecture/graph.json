@@ -8295,6 +8295,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.kaggle.seat_value.SeatValue.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.kaggle.seat_value.SeatValue.roster",
       "weight": 1
     },
@@ -17490,6 +17496,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value.SeatValue.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_value.SeatValue",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_value.SeatValue.named",
+      "label": "named",
       "level": "method",
       "parent": "kneemri.kaggle.seat_value.SeatValue",
       "role": null
