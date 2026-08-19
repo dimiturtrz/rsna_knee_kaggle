@@ -106,7 +106,15 @@ case "$WHAT" in
     (cd "$PARENT" && confirmed "is being created" "$UV" run --project "$REPO" --with kaggle kaggle datasets version -p "$(basename "$TARGET")" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip)
     ;;
   kernel)
-    confirmed "successfully pushed" "$UV" run --with kaggle kaggle kernels push -p "$TARGET"
+    # THE SAME PARENT-AND-BASENAME SHAPE AS THE DATASET BRANCH, for a different reason. The resolution
+    # above makes TARGET a POSIX absolute (`/d/personal_projects/...`) because that is what Git Bash's
+    # `pwd` prints, and the Kaggle CLI is a WINDOWS python: it cannot open `/d/...` and answers `Invalid
+    # folder` for a directory that exists (2026-08-19, kneemri-band, three spellings refused — a repo
+    # relative path, a POSIX absolute and a `D:\` absolute all normalise to the same POSIX string here).
+    # A bare directory name has no drive letter to disagree about.
+    PARENT="$(cd "$(dirname "$TARGET")" && pwd)"
+    REPO="$(cd .. && pwd)"
+    (cd "$PARENT" && confirmed "successfully pushed" "$UV" run --project "$REPO" --with kaggle kaggle kernels push -p "$(basename "$TARGET")")
     ;;
   *)
     echo "unknown target '$WHAT' — expected dataset or kernel"
