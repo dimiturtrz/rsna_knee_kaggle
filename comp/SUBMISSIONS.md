@@ -640,3 +640,26 @@ changed.
 
 Not submitted. `band_full` is still training and is on the same axis, so the roster question is worth
 asking once, after it lands, rather than twice.
+
+## Slot 1 of 2026-08-19: the searched best four, fired
+
+Pre-registered BEFORE the run, because the whole value of this entry is whether an offline membership
+search transfers at all.
+
+`kneemri-best4` is `kneemri-band` with one line changed — `chosen` goes from (`band_dense`, `lr1e-4_ws`,
+`calibrated_targets`, `lr4e-5_ws`) to (`band_dense`, `band_span`, `depth_regions_narrow`,
+`calibrated_targets`). Same member count, same `overlap=False`, same `RankAverage`, same kit. Offline it
+is 0.8666 against the champion's 0.8648 over the 909-study fold-0 holdout, greedy and exhaustive
+agreeing at every size.
+
+**THE PREDICTION IS A SIGN, NOT A NUMBER, and this file has earned that caution.** It is a TWO-member
+swap; every board-transfer reading here is on one swap at a time, and the third of those broke the
+ordering rule outright. So: **at or above 0.928**, and nothing in the record supports quoting a figure.
+A result BELOW 0.928 does not refute the search — it refutes the transfer of a two-swap, which is a
+different and more useful thing to learn, because it would say the holdout can rank single swaps and
+cannot rank compound ones.
+
+The dataset push that carries it mounts FOUR new members (`band_span`, `depth_regions_narrow`,
+`band_full`, `calib_span`) while the kernel names two of them. Mounting is reversible and a slot is not;
+the two unnamed ones exist so the next two roster questions today cost a kernel edit rather than a
+dataset push and the twenty minutes it takes.

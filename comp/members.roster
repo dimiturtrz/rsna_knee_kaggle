@@ -74,3 +74,21 @@ deep24_s2026.pt             # 0.8213 — the WEAKEST member here, and the only o
 # "mount more, name more" the note above refutes: mounting costs a dataset push, NAMING costs the
 # kernel's `chosen` tuple, and only the second decides a score. A mounted member a kernel does not name
 # costs nothing; an unmounted one a kernel wants costs a push and a slot.
+band_span_s2026.pt          # 0.8565 — the 0.10-0.90 band at 12 slices; the span WITHOUT the density
+depth_regions_narrow_s2026.pt # 0.8554 — three depth regions pooled separately inside the narrow band
+band_full_s2026.pt          # 0.8427 — the span taken to its limit; the fourth point on the band axis
+calib_span_s2026.pt         # 0.8545 — band_span + calibrated targets, NEGATIVE at this operating point
+# Added 2026-08-19 in ONE push, because mounting is reversible and a slot is not. The first two are
+# what the 36-record re-search names in the best four (band_dense + band_span + depth_regions_narrow +
+# calibrated_targets, 0.8666 against the shipped roster's 0.8648 under the same tool and vote); the
+# second two are mounted unnamed so the next two roster questions cost a kernel edit rather than a
+# dataset push. band_span is the member that is DIFFERENT rather than better — it reads the 0.10-0.90
+# pixel group, which no shipped member reads, and its second-pick jump (+0.0062) is the largest single
+# addition in the curve.
+#
+# calib_span is mounted DESPITE measuring -0.0020 against band_span, and the reason is the finding it
+# carries rather than its solo score: `calibrated_targets` scored +0.0038 at the default rate and the
+# 0.20-0.80 band, holds a seat in the 0.928 champion package on that number, and is NEGATIVE when
+# re-measured at the recipe we ship. A lever's sign is a property of its operating point. Whether the
+# mix still wants the OLD calibration once the new one is available is a question only a package
+# holding both can ask.
