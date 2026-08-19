@@ -605,3 +605,38 @@ capped at `strongest(5)` and `fusion` now drops variants whose weights are not m
   the old fix, cd-ing into `comp/`, died the moment the kit moved out of the repo.
 - **`machine_shape: NvidiaTeslaT4` gives two T4s and only four CPUs.** On a decode-bound pipeline the
   CPU count binds first: measured 12 ms per DICOM slice off the mount.
+
+## The pool grew from 13 records to 36, and the best four are no longer the shipped four
+
+Re-searched 2026-08-19 over every fold-0 holdout record on disk — 36 members, arithmetic only, no card,
+while `band_full` trained. Greedy and exhaustive agree on every size, which is worth stating because
+greedy is the only tractable reading past a dozen and this is the first time both were run:
+
+| size | best subset | mix |
+|---:|---|---|
+| 1 | `band_dense` | 0.8578 |
+| 2 | + `band_span` | **0.8640** |
+| 3 | + `depth_regions_narrow` | 0.8661 |
+| **4** | + `calibrated_targets` | **0.8666** |
+| 5 | + `depth_regions` | 0.8671 |
+| 8 | (flat) | 0.8674 |
+
+The shipped champion roster reads **0.8648** under the same tool and the same vote, so the best four now
+available is **+0.0018** over it at the same member count and the same serving cost. The count curve is
+unchanged in shape — flat past four, peaking at eight by 0.0008 — so this is a MEMBERSHIP result, not an
+argument for mounting more.
+
+**It is a TWO-member swap, which is why it is filed rather than fired.** Both learning-rate members
+(`lr1e-4_ws`, `lr4e-5_ws`) leave and `band_span` and `depth_regions_narrow` enter. Every board-transfer
+reading in this file is on ONE swap at a time, and the third of those broke the ordering rule outright,
+so the honest prediction here is a SIGN and not a number: 0.8666 > 0.8648 says the entry should not be
+worse, and nothing in the record supports quoting a board figure for it.
+
+It also does exactly what this file said the next move had to do. `band_span` is a member that is
+DIFFERENT rather than better — it reads the 0.10–0.90 pixel group, which no shipped member reads — and
+its second-pick jump (+0.0062, the noise floor to four decimals) is the largest single addition in the
+curve. Membership-shuffling inside the OLD pool was close to exhausted; the pool was the thing that
+changed.
+
+Not submitted. `band_full` is still training and is on the same axis, so the roster question is worth
+asking once, after it lands, rather than twice.
