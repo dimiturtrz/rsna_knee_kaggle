@@ -31,6 +31,7 @@ from pathlib import Path
 
 import torch
 
+from kneemri.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
@@ -132,7 +133,12 @@ def main() -> None:
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
     check = LedgerCheck(arguments.ledger, *sorted(arguments.interpretations.rglob("*.md")))
-    runs = check.finished(DataRoot.from_config(arguments.paths).processed())
+    processed = DataRoot.from_config(arguments.paths).processed()
+    runs = check.finished(processed)
+    # The data root is machine-local and gitignored, so an unmounted drive or a paths.yaml pointing at
+    # the wrong dataset produces "0 finished runs, 0 unrecorded" — the sentence a fully recorded ledger
+    # produces, from a check that read no run at all.
+    Denominator(len(runs), f"no finished run under {processed}").refuse_empty()
 
     missing = check.unrecorded(runs)
     for name, score in missing.items():

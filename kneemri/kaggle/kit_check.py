@@ -26,6 +26,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from kneemri.denominator import Denominator
 from kneemri.kaggle.kernel_closure import KernelClosure
 from kneemri.kaggle.mounted_kit import DATASET, MountedKit
 
@@ -105,6 +106,10 @@ def main() -> None:
 
     repo = Path(__file__).resolve().parent
     check = KitCheck(repo)
+    # The closure IS the pathspec, and an empty one is how this check passed 53 stale kits: git asked
+    # about files that matched nothing named no commit, so every kit read as current. A kernel that
+    # imports no module cannot exist, so zero here is the resolver failing, never a small closure.
+    Denominator(len(check.loaded), "the kernel's import closure is empty — the resolver failed").refuse_empty()
     if arguments.mounted:
         where, recorded = arguments.dataset, MountedKit(arguments.dataset).recorded()
     else:

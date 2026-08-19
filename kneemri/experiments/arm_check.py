@@ -31,6 +31,7 @@ from pathlib import Path
 
 from core.paths import DataRoot
 from kneemri.corpus.study_cache import CorpusSplit, StudyCache
+from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.training.options import TrainingOptions
@@ -347,12 +348,7 @@ def main() -> None:
         check.decode_smoke_caches(invocations, refused, arguments.smoke_studies)
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
-    # A CLEAN PASS OVER NOTHING IS A FAILURE, and this tool has produced one twice — once from WSL's
-    # bash, once from a PowerShell PATH with no coreutils. Both times it printed "0 arms checked, 0
-    # refused" and exited 0, which is what a lint says when everything is fine.
-    if not invocations:
-        logger.info("REFUSED: no arm printed an invocation — the shell, not the arms, is what failed")
-        sys.exit(1)
+    Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
     if refused or broken or (uncached and arguments.require_caches):
         sys.exit(1)
 

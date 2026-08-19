@@ -28,6 +28,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from kneemri.denominator import Denominator
 from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
@@ -111,6 +112,11 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     champion = Champion.recorded(arguments.record)
+    # A champion whose member tuple could not be parsed out of its kernel has no member to find missing,
+    # so `drift` comes back empty and this check reports the entry as rebuildable over an empty roster —
+    # the one thing it exists to make impossible.
+    empty = f"{champion.entry} names no member — the record or its kernel did not parse"
+    Denominator(len(champion.members), empty).refuse_empty()
     drift = champion.drift(arguments.roster, arguments.kernels)
     for complaint in drift:
         logger.error("%s", complaint)

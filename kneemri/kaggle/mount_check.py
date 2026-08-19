@@ -17,6 +17,7 @@ import logging
 import sys
 from pathlib import Path
 
+from kneemri.denominator import Denominator
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
@@ -105,6 +106,10 @@ def main() -> None:
     skipped = [name for name, verdict in verdicts.items() if verdict.startswith("skipped")]
     passed = len(verdicts) - len(skipped) - len(refused)
     logger.info("%d ok, %d skipped, %d refused", passed, len(skipped), len(refused))
+    # PASSED, not len(verdicts): a --kernels path that names nothing, and a root where every kernel
+    # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
+    empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
+    Denominator(passed, empty).refuse_empty()
     if refused:
         sys.exit(1)
 
