@@ -257,10 +257,19 @@ class ArmCheck:
         exists to prevent. `depth_regions_span` was queued at 28 on a 12-slice recipe and caught by
         hand; this is that catch, mechanised.
 
-        Measured against `DeviceBudget.needed`, which already carries one slice of slack, with one
-        further slice before anything is reported — a cap is a bound and not a prediction, so rounding
-        it up to the next round number is not a defect. Only OVERSTATEMENT is reported: asking under
-        the derived need is what `band_dense` does at 28 against 28.26, and it peaked at 26.92.
+        Measured against `DeviceBudget.needed`, which already carries one slice of slack. Only
+        OVERSTATEMENT is reported: asking under the derived need is what `band_dense` does at 28
+        against 28.26, and it peaked at 26.92.
+
+        IT REPORTS 38 OF 50 ARMS, AND THAT IS THE TRUE ANSWER RATHER THAN A LOOSE BAR. I first read the
+        count as noise and tried to legislate a threshold under which slack was "inside the 20 / 26 /
+        28 convention" — but that convention is exactly the defect: every one of those numbers was
+        picked as a fraction of the CARD, months before `DeviceBudget.needed` derived a cap from the
+        RECIPE, so 26 on a 12-slice arm is 8.4 GB over need for the same reason 28 is 10.4 — not
+        because one was copied and the other rounded. There is no honest line between them. So this
+        returns all of them and `main` says it once, in a sentence naming the worst, instead of
+        thirty-eight times: the flag is obsolete tree-wide, and the fix is to delete it tree-wide
+        (knee-ylp0), not to tune a bar until the report is quiet.
         """
         asked: dict[str, float] = {}
         for name, flags in invocations.items():
@@ -371,8 +380,17 @@ def main() -> None:
     # ADVISORY, not a refusal: an overstated cap costs wall-clock and risks the crawl, but it mismatches
     # no arm to its control and invalidates no past number. Refusing on it would block a queue over a
     # throughput fix, which is how a pre-flight check earns a --no-verify.
-    for name, excess in check.overstated(invocations).items():
-        logger.info("OVERSTATED %s: --vram-gb is %.2f GB above what its --slices reserve; drop the flag", name, excess)
+    overstated = check.overstated(invocations)
+    if overstated:
+        worst = max(overstated, key=lambda name: overstated[name])
+        logger.info(
+            "OVERSTATED: %d of %d arms name a --vram-gb above what their own --slices reserve, worst %s "
+            "by %.2f GB. The flag predates DeviceBudget.needed() and no arm needs it; drop it (knee-ylp0)",
+            len(overstated),
+            len(invocations),
+            worst,
+            overstated[worst],
+        )
     broken: dict[str, str] = {}
     if arguments.smoke:
         # BEFORE the smoke, not as part of it: a smoke reads the truncated cache, and an arm on a
