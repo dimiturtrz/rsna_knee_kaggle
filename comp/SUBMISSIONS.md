@@ -663,3 +663,40 @@ The dataset push that carries it mounts FOUR new members (`band_span`, `depth_re
 `band_full`, `calib_span`) while the kernel names two of them. Mounting is reversible and a slot is not;
 the two unnamed ones exist so the next two roster questions today cost a kernel edit rather than a
 dataset push and the twenty minutes it takes.
+
+## Slot 2 of 2026-08-19: the first half of that swap, alone
+
+Pre-registered BEFORE the run. Slot 1 is a TWO-member swap and cannot say which half carried, so this
+slot takes the half that is cheapest to interpret and holds everything else at the champion.
+
+`kneemri-oneswap` is `kneemri-band` with `chosen` going from (`band_dense`, `lr1e-4_ws`,
+`calibrated_targets`, `lr4e-5_ws`) to (`band_dense`, `band_span`, `calibrated_targets`, `lr4e-5_ws`).
+One member moves: `band_span` replaces `lr1e-4_ws`. `depth_regions_narrow` does not enter. Same count,
+same `overlap=False`, same `RankAverage`, same kit, all four already mounted — the kernel edit is the
+whole change.
+
+Offline, over the same 909-study fold-0 holdout and by the same rank average the kernel ships:
+
+| four | offline | vs champion |
+|---|---|---|
+| champion (`band_dense`, `lr1e-4_ws`, `calibrated_targets`, `lr4e-5_ws`) | 0.8648 | — |
+| **this slot** (`lr1e-4_ws` → `band_span`) | **0.8661** | **+0.0013** |
+| slot 1 (both swaps) | 0.8666 | +0.0018 |
+
+So the single swap carries 0.0013 of the compound's 0.0018 offline — three quarters of it — and
+`depth_regions_narrow` is the marginal quarter. Both numbers sit under the 0.0062 holdout noise floor,
+which is exactly why the board is the ruler here and the offline table is only the ORDERING.
+
+**PREDICTION, and it is again a sign.** At or above 0.928. The stronger claim this slot exists to test
+is the ORDERING one: if slot 1 also lands at or above 0.928, then a compound swap transfers and the
+holdout can rank more than one member at a time; if slot 1 lands below 0.928 and this one does not,
+that is the cleanest evidence yet that only single swaps survive the trip to the board, and every
+future roster question has to be asked one member at a time.
+
+**REFUTATION.** This entry below 0.928 with slot 1 at or above it inverts the offline ordering and
+would say the holdout cannot rank even a single swap on this pool — which retires offline membership
+search for roster decisions outright, rather than leaving another subset to try.
+
+These two numbers cost no card time. Both came from `record_mix`, which reads the per-study
+probabilities each run already wrote beside its checkpoint; `member_curve` answers the same question by
+re-deriving them through the pixel cache and would have needed the GPU a trainer is holding.
