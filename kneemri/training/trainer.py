@@ -72,6 +72,23 @@ number is low rather than high. Left at 5.5 until rows written under the correct
 how much: a floor that is slightly too low lets a doomed run start, which the cap then answers with an
 immediate OutOfMemoryError, where one guessed too high refuses runs that would have fitted."""
 
+GB_PER_SLICE = 1.335
+"""Reserved VRAM this recipe adds per slice — FITTED to our own epoch rows, not typed into an arm.
+
+Every arm logs its own peak, and read across the slice axis at 336 px the peaks are a line: 12 slices
+reserve 16.24 GB, 20 reserve 26.92. Those two give 1.335 a slice plus `RESIDENT_GB`, and the 16-slice
+arm — held out of the fit — measured 21.57 against the line's 21.58. A slice is a whole forward and
+backward through the encoder, so linearity in slice count is what the architecture predicts.
+
+IT IS A 336 px CONSTANT. No arm at 224, 392 or 448 recorded a peak at all (the log line postdates
+them), so the resolution axis here is DERIVATION, not measurement: activations scale with the patch
+grid, giving `k * slices * size**2 + RESIDENT_GB` with k = 1.1825e-5. Nothing consumes that form yet,
+and it stays out of the code until a run at a second resolution has logged a peak to check it against."""
+
+RESIDENT_GB = 0.22
+"""The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
+and the allocator's own blocks, none of which the slice loop multiplies."""
+
 WEIGHT_DECAY = 0.02
 SEED = 2026
 
@@ -98,7 +115,21 @@ class DeviceBudget:
     """
 
     vram_gb: float = 0.0
-    """What the run ASKED for. 0 means it named nothing, and then `DEFAULT_SHARE` of the card applies."""
+    """What the run ASKED for. 0 means it named nothing, and then the recipe's own need applies."""
+
+    slices: int = 0
+    """How many slices a step holds — the one field the reserved peak is a function of. 0 means the
+    caller did not say, and then only the card-fraction default is available."""
+
+    def needed(self) -> float:
+        """What this recipe will actually reserve, plus one slice of slack — 0 if the slices are unknown.
+
+        THE SLACK IS ONE SLICE rather than a round number, because that is the granularity at which
+        this quantity moves: nothing here can overshoot by less than a slice, so a margin below one is
+        a margin against nothing, and a margin above one is paying for a slice that cannot arrive. The
+        fit's own residual does not need covering — it is 0.01 GB on a held-out point.
+        """
+        return GB_PER_SLICE * (self.slices + 1) + RESIDENT_GB if self.slices else 0.0
 
     def capped(self, whole: float) -> float:
         """How much of a card this run may hold — what it asked for, or the default share of it.
@@ -113,8 +144,26 @@ class DeviceBudget:
         desktop and the co-tenant all live outside it, which is why `lora.sh` measured 30 as WORSE than
         26. So the default sits at the bottom of the band the arms converged on, where being wrong costs
         an immediate OutOfMemoryError instead of a silent crawl.
+
+        THE RECIPE'S OWN NEED COMES FIRST, and it is why an arm should stop naming a number at all. A
+        hand-typed cap is a THIRD statement of the same fact — the recipe says 12 slices, the run
+        reserves 16.24 GB, and the arm says 28 — and the third one goes stale silently: thirteen arms
+        overstate by 1 to 12 GB, `depth_regions_narrow` because it was `depth_regions` with the slices
+        dropped and the 20-slice cap copied along. Slack is not free once a co-tenant holds the card:
+        `await_headroom` blocks until `free >= vram_gb`, so an overstated ask makes a run poll for
+        memory it will never allocate, burn the wait bound, and then start into the PCIe crawl.
+
+        THE SHARE IS THE FALLBACK, NOT A CEILING OVER THE DERIVATION. Clamping the derived need to
+        `DEFAULT_SHARE` was the first version of this and it was wrong: 20 slices reserve 26.92 GB and
+        the share is 25.44, so every 20-slice arm — recipes this repo has RUN, at a named 28 — would
+        have been capped below its own measured demand and OOM'd on the spot. A cap under a measured
+        need prevents nothing and guarantees the failure. The share answers the different question of
+        what a run holds when NOTHING is known about it, which is the only case it now applies to.
+
+        A need above the card is left to raise. That is the documented preference of this whole class:
+        an immediate OutOfMemoryError over a silent PCIe crawl.
         """
-        return self.vram_gb or DEFAULT_SHARE * whole
+        return self.vram_gb or self.needed() or DEFAULT_SHARE * whole
 
     def floor(self) -> float:
         """Free VRAM below which this run refuses to start at all — not the same number as its CAP.
@@ -161,18 +210,21 @@ class DeviceBudget:
         driver down: three `nvlddmkm` engine resets in four minutes on 2026-08-17, which killed both
         projects' processes, not just the one that was late.
 
-        ONLY A RUN THAT NAMED A BUDGET WAITS. An uncapped run's "need" is the whole card, and the whole
-        card is never free — the desktop alone holds a gigabyte — so waiting on it would stall every
-        such run for the full bound and buy nothing. `select` still warns there, as it did before.
+        ONLY A RUN WITH A STATED NEED WAITS, and the recipe states one as well as the flag does. It
+        used to be the flag alone, on the reasoning that an uncapped run's "need" is the whole card and
+        the whole card is never free, so waiting would stall it for the full bound and buy nothing.
+        That holds for a run that named nothing at all and no longer holds for one whose slice count
+        says what it will reserve: 16.24 GB IS free most of the time, so waiting for it is a wait that
+        ends. A run with neither still does not wait; `select` warns there, as it did before.
         """
         waited = 0.0
         free, whole = self.headroom()
-        needed = self.vram_gb
-        while free < needed and waited < CONTENTION_WAIT_SECONDS:
+        wanted = self.vram_gb or self.needed()
+        while free < wanted and waited < CONTENTION_WAIT_SECONDS:
             logger.info(
                 "waiting for VRAM: %.1f GB free, this run wants %.1f — %.0f s of %.0f",
                 free,
-                needed,
+                wanted,
                 waited,
                 CONTENTION_WAIT_SECONDS,
             )

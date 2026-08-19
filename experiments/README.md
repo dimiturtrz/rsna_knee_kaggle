@@ -154,6 +154,17 @@ stale; that still needs a reader.
   have crashed, it would have produced a plausible wrong number.
 - **`run_train` tees before it greps.** Arms used to pipe straight into `grep`, so any traceback whose
   wording missed the filter vanished and the run looked merely empty.
+- **A NEW ARM SHOULD NOT NAME `--vram-gb` AT ALL** (2026-08-19, knee-ylp0). The reserved peak is a
+  function of the slice count and nothing else — 12 slices reserve 16.24 GB, 16 reserve 21.57, 20
+  reserve 26.92, and `band_density`, `band_full` and `depth_regions_span` land on their slice count's
+  value to the centibyte despite differing in band, pooling and region count. `DeviceBudget` now
+  derives the cap from `--slices` (1.335 GB a slice, plus a slice of slack), so a hand-typed number is
+  a THIRD statement of a fact the recipe already makes — and the third one goes stale silently:
+  thirteen arms overstate by 1 to 12 GB, `depth_regions_narrow` because it was `depth_regions` with
+  the slices dropped and the 20-slice cap copied along. Slack is not free once the other project holds
+  the card: `await_headroom` blocks until `free >= vram_gb`, so an overstated ask makes a run poll for
+  memory it will never allocate, burn the wait bound, and start into the PCIe crawl. Name a number
+  only to *contradict* the derivation, and say in the arm why.
 
 ## Ledger — fold 0, seed 2026, 24 epochs, one-cycle, weight floor, ranking on
 

@@ -42,7 +42,9 @@ def main() -> None:
     root = DataRoot.from_config(arguments.paths)
     cache = arguments.cache(root.processed())
     corpus, identifiers = cache.load()
-    device = DeviceBudget(arguments.vram_gb).select()
+    # The slice count as well as the flag: the reserved peak is a function of it, so an arm that names
+    # no --vram-gb still gets a cap fitted to what it will actually hold (knee-ylp0).
+    device = DeviceBudget(arguments.vram_gb, arguments.slices).select()
     targets, evaluation = Targets.pair(
         arguments.labels,
         arguments.eval_labels,

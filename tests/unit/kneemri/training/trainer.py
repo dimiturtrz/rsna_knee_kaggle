@@ -566,6 +566,28 @@ def test_capped():
     assert DeviceBudget(vram_gb=26.0).capped(31.8) == 26.0, "an explicit budget is used as asked"
     assert DeviceBudget().capped(31.8) == pytest.approx(DEFAULT_SHARE * 31.8), "and silence still caps"
     assert DeviceBudget().capped(31.8) < 31.8, "the driver context and the desktop live outside the allocator"
+    twelve = DeviceBudget(slices=12).capped(31.8)
+    assert 16.24 < twelve < DEFAULT_SHARE * 31.8, "a stated recipe caps at its own need, under the share"
+    assert DeviceBudget(vram_gb=28.0, slices=12).capped(31.8) == 28.0, "a named number still overrides it"
+    # THE SHARE MUST NOT CLAMP A DERIVED NEED. 20 slices reserve 26.92 GB measured and the share is
+    # 25.44, so the first version of `capped` — a `min` against the share — would have capped every
+    # 20-slice arm below its own measured demand. Those arms RAN, at a hand-typed 28. A cap under a
+    # measured need does not prevent the over-commit, it schedules it.
+    assert DeviceBudget(slices=20).capped(31.8) > DEFAULT_SHARE * 31.8, "a measured need outranks the blind default"
+    assert DeviceBudget(slices=20).capped(31.8) == pytest.approx(26.92 + 1.335, abs=0.02)
+
+
+def test_needed():
+    """The fitted line, checked at the point it was NOT fitted on.
+
+    12 and 20 slices (16.24 and 26.92 GB reserved) give the coefficients; 16 was held out and measured
+    21.57. The margin is one slice, so `needed` sits a slice above each measured peak rather than on it.
+    """
+    held_out_measured = 21.57
+    one_slice = 1.335
+    assert DeviceBudget(slices=16).needed() == pytest.approx(held_out_measured + one_slice, abs=0.02)
+    assert DeviceBudget(slices=20).needed() > DeviceBudget(slices=12).needed(), "more slices, more memory"
+    assert DeviceBudget().needed() == 0.0, "an unstated recipe predicts nothing rather than guessing"
 
 
 def test_plan():
