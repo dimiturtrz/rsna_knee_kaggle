@@ -566,6 +566,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.label_stability",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_stability",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.member_curve",
       "target": "core.paths",
       "weight": 1
@@ -1642,12 +1654,6 @@
       "kind": "import",
       "source": "kneemri.labels.label_power",
       "target": "kneemri.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.labels.label_stability",
-      "target": "core.paths",
       "weight": 1
     },
     {
@@ -4450,6 +4456,60 @@
       "kind": "calls",
       "source": "kneemri.evaluation.label_combine.LabelCombine.ranking",
       "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_stability.LabelStability.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.LabelStability.best",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.LabelStability.correlation",
+      "target": "kneemri.evaluation.label_stability.LabelStability._ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.LabelStability.report",
+      "target": "kneemri.evaluation.label_stability.LabelStability.correlation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.LabelStability.report",
+      "target": "kneemri.evaluation.label_stability.LabelStability.worst",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_stability.main",
+      "target": "kneemri.evaluation.label_stability.LabelStability",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.main",
+      "target": "kneemri.evaluation.label_stability.LabelStability.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_stability.main",
+      "target": "kneemri.evaluation.label_stability.LabelStability.report",
       "weight": 1
     },
     {
@@ -8431,48 +8491,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.LabelStability.correlation",
-      "target": "kneemri.labels.label_stability.LabelStability._ranked",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.LabelStability.report",
-      "target": "kneemri.labels.label_stability.LabelStability.correlation",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.LabelStability.report",
-      "target": "kneemri.labels.label_stability.LabelStability.worst",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.labels.label_stability.main",
-      "target": "kneemri.labels.label_stability.LabelStability",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.main",
-      "target": "kneemri.labels.label_stability.LabelStability.best",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.labels.label_stability.main",
-      "target": "kneemri.labels.label_stability.LabelStability.report",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.labels.reader_agreement.ReaderAgreement",
       "target": "kneemri.labels.report_language.ReportLanguages",
@@ -10533,7 +10551,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -10576,6 +10594,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.label_combine",
       "label": "label_combine",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability",
+      "label": "label_stability",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -10957,7 +10983,7 @@
       "role": null
     },
     {
-      "descendants": 6,
+      "descendants": 5,
       "id": "kneemri.labels",
       "label": "labels",
       "level": "module",
@@ -10976,14 +11002,6 @@
       "descendants": 0,
       "id": "kneemri.labels.label_power",
       "label": "label_power",
-      "level": "module",
-      "parent": "kneemri.labels",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability",
-      "label": "label_stability",
       "level": "module",
       "parent": "kneemri.labels",
       "role": null
@@ -11822,6 +11840,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability",
+      "label": "LabelStability",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_stability",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve",
       "label": "MemberCurve",
       "level": "class",
@@ -12426,14 +12452,6 @@
       "label": "LabelPower",
       "level": "class",
       "parent": "kneemri.labels.label_power",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability",
-      "label": "LabelStability",
-      "level": "class",
-      "parent": "kneemri.labels.label_stability",
       "role": "primary"
     },
     {
@@ -14874,6 +14892,54 @@
       "label": "ranking",
       "level": "method",
       "parent": "kneemri.evaluation.label_combine.LabelCombine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability._ranked",
+      "label": "_ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability.best",
+      "label": "best",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability.correlation",
+      "label": "correlation",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.LabelStability.worst",
+      "label": "worst",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability.LabelStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_stability.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_stability",
       "role": null
     },
     {
@@ -17634,54 +17700,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.labels.label_power",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability._ranked",
-      "label": "_ranked",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability.LabelStability",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability.best",
-      "label": "best",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability.LabelStability",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability.correlation",
-      "label": "correlation",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability.LabelStability",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability.report",
-      "label": "report",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability.LabelStability",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.LabelStability.worst",
-      "label": "worst",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability.LabelStability",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.labels.label_stability.main",
-      "label": "main",
-      "level": "method",
-      "parent": "kneemri.labels.label_stability",
       "role": null
     },
     {

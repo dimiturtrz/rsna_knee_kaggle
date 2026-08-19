@@ -1,4 +1,4 @@
-"""Which weak labels are reproducible and which are the holdout's noise: `python -m kneemri.labels.label_stability`.
+"""Which weak labels are reproducible and which are the holdout's noise: `python -m kneemri.evaluation.label_stability`.
 
 Every run writes a per-label AUC for every epoch, and nothing has ever read them ACROSS runs. That is
 the only cheap way to separate the two things a low label score can mean.
@@ -16,12 +16,13 @@ ACROSS-fold correlation is evidence about the model, and it is the smaller of th
 
 import argparse
 import itertools
-import json
 import logging
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
+
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +34,17 @@ class LabelStability:
     """Per-label scores from many runs, and how much their ORDER survives a change of holdout."""
 
     def best(self, metrics: Path) -> dict[str, float] | None:
-        """The per-label scores from the run's best epoch, or None if it never scored one."""
-        rows = [json.loads(line) for line in metrics.read_text(encoding="utf-8").splitlines() if line.strip()]
-        scored = [row for row in rows if row.get("auc") is not None and row.get("per_label")]
+        """The per-label scores from the run's best epoch, or None if it never scored one.
+
+        Rows come from `RunMetrics`, which answers for the LAST run in the file, because a re-run to the
+        same `--out` appends and the checkpoint beside it holds only the newest one. This method used to
+        parse the file itself and take a maximum over every line, so `pair_memory_s2026` — twelve epochs
+        peaking at 0.8353, then four more peaking at 0.8155 — contributed the profile of a checkpoint
+        that no longer exists to a correlation about which labels reproduce. A stability reading is
+        exactly where that lands unnoticed: the number it produces is a rank correlation, which stays
+        plausible whichever of the two runs it came from.
+        """
+        scored = [row for row in RunMetrics(metrics).rows() if row.get("auc") is not None and row.get("per_label")]
         return max(scored, key=lambda row: row["auc"])["per_label"] if scored else None
 
     def correlation(self, first: dict[str, float], second: dict[str, float]) -> float:

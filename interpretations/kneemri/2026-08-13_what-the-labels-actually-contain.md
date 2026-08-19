@@ -221,7 +221,7 @@ reader built for a language has to close that language's gap.
 
 ## MCL is the one label whose weakness is real, and Fracture is the one that taught us to doubt it
 
-2026-08-13, no GPU: `python -m kneemri.labels.label_stability`, reading the per-label AUCs every run has been
+2026-08-13, no GPU: `python -m kneemri.evaluation.label_stability`, reading the per-label AUCs every run has been
 writing since the first epoch and which nothing had ever read ACROSS runs.
 
 The project's plan was once "track per-label AUC and treat the worst label as the work item". It was

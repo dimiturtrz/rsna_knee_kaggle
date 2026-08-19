@@ -35,6 +35,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.attribution` | What is the model actually using — measured by taking things away, not by drawing heatmaps. |
 | `python -m kneemri.evaluation.board_transfer` | Does our holdout ORDER entries the way the leaderboard does? `python -m kneemri.evaluation.board_transfer`. |
 | `python -m kneemri.evaluation.encoder_drift` | How far supervision actually moved the encoder away from the weights it was pretrained with. |
+| `python -m kneemri.evaluation.label_stability` | Which weak labels are reproducible and which are the holdout's noise: `python -m kneemri.evaluation.label_stability`. |
 | `python -m kneemri.evaluation.member_curve` | What does each additional ensemble member actually buy? |
 | `python -m kneemri.evaluation.oof_oracle` | Does OUR pipeline hand a published member the same pixels its author did? |
 | `python -m kneemri.evaluation.ordinal_signal` | Whether the graded YES levels in the report table carry ORDINAL information, or only certainty. |
@@ -71,6 +72,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.kaggle.kit_check` | Is the kit we are about to ship the code we are running? `python -m kneemri.kaggle.kit_check`. |
 | `python -m kneemri.kaggle.mount_check` | Does every kernel declare the mounts its members need? `python -m kneemri.kaggle.mount_check`. |
 | `python -m kneemri.kaggle.package_members` | Package our trained members for Kaggle: `python -m kneemri.kaggle.package_members`. |
+| `python -m kneemri.kaggle.seat_value` | What a candidate member would add to the champion roster, card-free. |
 
 ### kneemri
 
@@ -84,7 +86,6 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 |---|---|
 | `python -m kneemri.labels.confident_labels` | Write a label table with the reader's unsure calls removed. |
 | `python -m kneemri.labels.label_power` | How precisely each label's AUC can be measured at all: `python -m kneemri.labels.label_power`. |
-| `python -m kneemri.labels.label_stability` | Which weak labels are reproducible and which are the holdout's noise: `python -m kneemri.labels.label_stability`. |
 | `python -m kneemri.labels.reader_agreement` | Does the label reader agree with the radiologist equally in every language? |
 | `python -m kneemri.labels.report_language` | What language each report is written in, and whether it grades its findings. |
 
