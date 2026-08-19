@@ -17,6 +17,23 @@ source "$(dirname "${BASH_SOURCE[0]}")/recipe.sh"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
+# WHICH lib.sh THIS SHELL IS RUNNING, captured where it can still be true: at source time.
+#
+# bash parses a sourced file ONCE, into function definitions held in this shell's memory. A chain is
+# one long-lived shell that sources this file at launch and then runs arm after arm, so every arm in a
+# chain runs the lib.sh that existed when the CHAIN started - not when the ARM started. run_snapshot
+# snapshots the arm and the package and points ARM_LIB at the LIVE file, which helps an editor and does
+# nothing for a chain already parsed.
+#
+# On 2026-08-19 that cost an hour: `_seat_value` was committed at 12:36, two arms launched from chains
+# started before it landed, and both finished with no SEAT VALUE line. The mechanism looked broken. It
+# was absent, which is a different bug with a different fix, and nothing in either log said so.
+#
+# The blob hash rather than HEAD: it is CONTENT, so an uncommitted edit reads differently from the
+# commit it will become, which is the case a chain is most likely to be stale against.
+LIB_PARSED="$(git -C "$REPO" hash-object "${BASH_SOURCE[0]}" 2>/dev/null || echo unknown)"
+LIB_PARSED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
 PROCESSED="$(uv run python -c 'from pathlib import Path
 from core.paths import DataRoot
 print(DataRoot.from_config(Path("paths.yaml")).processed().as_posix())')"
@@ -241,6 +258,10 @@ run_train() {
   # the queue behind it for as long as the chain lived, which is the failure the marker checks below
   # exist to make visible rather than one to add.
   release_card
+  # The provenance goes to the log on EVERY path out, before the verdict, so a missing mechanism is
+  # attributable in one grep instead of an hour. It cannot be written any earlier: `tee` without -a
+  # truncates, so anything stamped before the trainer runs is erased by the trainer's first line.
+  _mark "$name" "LIB $LIB_PARSED parsed $LIB_PARSED_AT (experiments/lib.sh as this shell holds it)"
   if [ "$status" -ne 0 ]; then
     _mark "$name" "ARM FAILED $name (trainer exit $status) - see $LOGS/$name.full.log"
     return "$status"
