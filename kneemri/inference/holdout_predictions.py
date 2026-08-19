@@ -121,6 +121,13 @@ class HoldoutPredictions:
         stored = cache.read(entry)
         if stored is not None:
             return stored
+        # A MISS SAYS SO. The hit path returns in milliseconds and the miss path is a full inference
+        # pass over the holdout — minutes on the card, hours on a CPU. Silent, the two are one
+        # unexplained wait, and on 2026-08-19 two CPU subset searches were killed as hung while they
+        # were computing: the pool's three best members have no cache entry, because the search that
+        # scored them was `record_mix`, which reads the arrays training already wrote and never fills
+        # this store. Naming the member and the device turns that wait into a decision.
+        logger.info("%s: cache MISS, computing on %s", reading.file.name, self.device)
         encoder = ENCODERS[reading.variant]
         model = self.load(reading.file, AutoModel.from_pretrained(encoder.repository), encoder.dim, reading.slot_count)
         values = self.predict(model, slab, window, reading.precision)
