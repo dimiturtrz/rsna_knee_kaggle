@@ -194,6 +194,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`depth_regions_narrow`** | the same region pooling on the band every OTHER member reads (0.20-0.80, 12 slices) | 0.8554 | +0.0029 vs `lr4e-5_ws` | the transfer question, ANSWERED IN TWO PARTS. The PF OA loss was the BAND: on a narrow band it does not merely vanish but reverses, **+0.0067**, confirming `depth_regions`' decomposition. The Lateral Meniscus gain does NOT transfer at strength: **+0.0056 [-0.0112, +0.0206]** here against +0.0165\* there, and read directly against `depth_regions` it is **-0.0112**. Both arms are flat on the mean, which is this arm's own pre-registered refutation condition for the pooled-budget argument. Seat value **+0.0006** against the shipped four. See below |
 | **`encoder_layer 9`** | the head reads ViT block 9 of 12 instead of the last one | 0.8230 | -0.0227 vs `wsfold0_e6` | 3.7x the floor, converged (flat over its last three epochs), flag verified in the recipe. Seat value **-0.0034**, the largest negative any same-split candidate has posted, so diversity does not rescue it. The linear-probe convention turns out to be right for this head. See below |
 | **`focal_pool`** | pooled vector gains a third part: the mean of the top eighth of each channel over the patch grid | 0.8432 | -0.0025 vs `whole_stack` | Flat (inside the floor). Seat value -0.0012. Pre-registered clause half-holds: focal group -0.0004 vs diffuse -0.0065, the predicted direction, but carried by the diffuse group losing rather than the focal group gaining. Fracture +0.020, directional only (one crossing in twelve). See below |
+| **`unfreeze_4`** | four of the encoder's twelve blocks adapt instead of six — the +25% throughput arm, run at length | 0.8320 | −0.0137 vs `wsfold0_e6` | **refuted**, 2.2x the floor, flag verified (`unfreeze_last 6→4`). Peaked at epoch 6 and flat for five epochs after, so it is converged, not short. Eleven of twelve labels negative, six clearing their interval; by structure scale **focal −0.0170 vs regional −0.0091**, which is the arm's own stated risk — the fine findings are the ones that needed the deeper blocks. Seat value **−0.0017**, so diversity does not rescue it either. The default stays six; the speed was real and is not worth 0.0137. See below |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
@@ -847,3 +848,36 @@ onto the pooled vector of a whole-stack member, where it widens a linear head's 
 number of studies and the tail statistic is noisier than the mean beside it. The arm named that risk
 first, and it is the reading the numbers support: the tail carries signal about focal findings (the
 direction is right) and the head cannot afford to estimate it here.
+
+## Unfreezing four blocks instead of six: the speed is real, and it costs the fine findings
+
+`throughput_unfreeze4` measured +25% img/s at four blocks against six (1019 vs 815, eager both ways,
+13.11 GB peak against 14.56) and left the score unsettled: its epoch-0 holdout was 0.7539 against
+0.7604, a 0.0065 gap sitting exactly ON the floor and read from the single weakest measurement in the
+ledger. 25% compounds across every arm that follows, which is worth more than most single-arm results,
+so knee-jvwu asked for one twelve-epoch arm to settle it. This is that arm.
+
+**0.8320 against the control's 0.8457, −0.0137** — 2.2x the floor. Flag verified in the recorded recipe,
+by the comparison itself: `unfreeze_last 6→4`, nothing else moved. It is CONVERGED, not short: it peaked
+at epoch 6 and spent its last five epochs between 0.8270 and 0.8294 while the loss kept falling from
+0.7552 to 0.6302, which is the shape of a model that has run out of representation to adapt rather than
+one that needed more schedule.
+
+WHERE THE LOSS SITS IS THE ARM'S OWN HYPOTHESIS. The file named two possibilities: a shallower adaptation
+could catch up, because our ledger says capacity is not the constraint (base over small was +0.0011), or
+it could fall behind, because the frozen blocks are the GENERIC ones and knee MRI is a long way from
+ImageNet. By structure scale the answer is the second: **focal −0.0170 against regional −0.0091**. The
+three biggest losses are Baker's −0.0360\*, Lateral Meniscus −0.0345\* and Medial Meniscus −0.0271\* —
+the fine structures — and eleven of twelve labels are negative. The intervals are INDICATIVE rather than
+paired-tight (the control's per-label scores are reconstructed from its kept predictions, half-widths up
+to ±0.0280), so the individual stars are soft; the mean and the consistent sign are the strong part.
+
+Seat value against the shipped four is **−0.0017**, so the second ruler agrees with the first — this is
+not a weak member that earns a seat on diversity. **The default stays six blocks.**
+
+WHAT THIS DOES NOT KILL: cheaper adaptation as a lever. What is refuted is spending the saving HERE, on
+the generic blocks a knee needs. The measurement says the specialisation reaches deeper than four blocks,
+which is a statement about where the encoder is wrong for this domain — the same direction knee-c5n
+(unlabelled adaptation of the encoder) attacks from the other side, and a cheaper adaptation that keeps
+depth (LoRA on all twelve rather than full fine-tuning on four) is untested and is not covered by this
+result.
