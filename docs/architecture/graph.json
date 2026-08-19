@@ -6681,6 +6681,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.ledger_check.main",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.reran",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.main",
       "target": "kneemri.experiments.ledger_check.LedgerCheck.unrecorded",
       "weight": 1
     },
@@ -16154,6 +16160,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.finished",
       "label": "finished",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.reran",
+      "label": "reran",
       "level": "method",
       "parent": "kneemri.experiments.ledger_check.LedgerCheck",
       "role": null
