@@ -46,3 +46,27 @@ def test_report(tmp_path: Path):
     assert lines[0].startswith("roster of 2:"), "the base every delta is against is stated"
     assert "+candidate.pt" in lines[1], "the candidate is named with its marginal contribution"
     assert "shipped" not in lines[1], "a roster member is never also priced as a candidate"
+
+
+def test_named(tmp_path: Path):
+    """A bare name is a member of the processed root, which is how every arm in this repo is spelled."""
+    seats = SeatValue(_champion(), tmp_path)
+
+    assert seats.named(Path("band_span_s2026.pt")) == tmp_path / "band_span_s2026.pt"
+    assert seats.named(tmp_path / "x.pt") == tmp_path / "x.pt", "a path given in full is left alone"
+
+
+def test_report_prices_a_candidate_given_by_name(tmp_path: Path):
+    """The equivalence class the existing test missed by always passing a full path.
+
+    A candidate that does not resolve carries no holdout record, and a missing record is *skipped* with
+    one log line rather than raised on — so an unpriced candidate reads exactly like one priced at
+    nothing, and the roster figure beside it still looks like a complete answer.
+    """
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    for name, shift in (("shipped.pt", 2.0), ("other.pt", 2.0), ("candidate.pt", 2.0)):
+        _member(tmp_path / name, truth, shift)
+
+    lines = SeatValue(_champion(), tmp_path).report([Path("candidate.pt")])
+
+    assert any("+candidate.pt" in line for line in lines), "a candidate named without a directory is priced"

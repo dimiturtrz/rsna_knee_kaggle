@@ -51,10 +51,24 @@ class SeatValue:
         """
         return [self.processed / f"{name}.pt" for name in self.champion.members]
 
+    def named(self, candidate: Path) -> Path:
+        """A candidate given by NAME becomes the checkpoint of that name; one given by path is left alone.
+
+        `roster` has always applied this rule to the champion's own members and nothing applied it to the
+        candidates beside them, so a candidate named the way every arm in this repository is named — and
+        the way this module's own usage line spells it, `--candidates a.pt b.pt` — resolved against the
+        CURRENT DIRECTORY. It is not there, so it carried no holdout record, so it was dropped with one
+        `no holdout record, skipped` line and the report still printed a complete-looking roster figure.
+        That is the failure mode worth the method: a silently unpriced candidate reads exactly like a
+        candidate priced at nothing, and `band_span_s2026` was read that way once before this existed.
+        """
+        return self.processed / candidate.name if candidate.parent == Path() else candidate
+
     def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED) -> list[str]:
         """Each candidate's marginal contribution to the champion, best first."""
         roster = self.roster()
-        mixed = RecordMix(list(dict.fromkeys([*roster, *candidates]))).per_member()
+        named = [self.named(candidate) for candidate in candidates]
+        mixed = RecordMix(list(dict.fromkeys([*roster, *named]))).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
         return MixReading(mixed, roster).lines(curve, greedy=False, paired=False)
 

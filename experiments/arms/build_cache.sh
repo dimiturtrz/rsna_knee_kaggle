@@ -28,15 +28,24 @@ WORKERS="${4:-6}"
 # the historic reading, which every cache on disk and every member fitted on one already means.
 CROP="${5:-130}"; CENTRE="${6:-image}"
 
+# THE BAND IS A READING AXIS AND IT WAS THE NEXT ONE THIS WRAPPER COULD NOT PASS, exactly as --scheme
+# was above: `kneemri.corpus.build_cache` has taken --band-low/--band-high since the wide band landed,
+# a trainer does not decode on demand, and so band_full - the whole 0.00-1.00 stack - smoked into
+# `FileNotFoundError: images_336px_12sl_0-1band.npy` with nothing in the tree able to write that file.
+# Defaults are the historic pair, so every existing call keeps its cache name.
+BAND_LOW="${7:-0.2}"; BAND_HIGH="${8:-0.8}"
+
 # ASKED FOR, never rebuilt here. This used to reassemble StudyCache's key in bash, so the completion
 # check below tested a filename the builder had stopped writing the moment a reading axis was
 # added - and the arm's own comment claimed the gate and the artefact could not drift. They could.
 KEY="$(uv run python -m kneemri.corpus.build_cache --print-key \
-  --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" --crop-mm "$CROP" --centre "$CENTRE")"
+  --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" --crop-mm "$CROP" --centre "$CENTRE" \
+  --band-low "$BAND_LOW" --band-high "$BAND_HIGH")"
 
 uv run python -u -m kneemri.corpus.build_cache \
   --image-size "$SIZE" --slices "$SLICES" --scheme "$SCHEME" \
-  --crop-mm "$CROP" --centre "$CENTRE" --workers "$WORKERS" 2>&1 \
+  --crop-mm "$CROP" --centre "$CENTRE" --band-low "$BAND_LOW" --band-high "$BAND_HIGH" \
+  --workers "$WORKERS" 2>&1 \
   | tee "$LOGS/cache_${KEY}.log"
 status="${PIPESTATUS[0]}"
 [ "$status" -eq 0 ] || { echo "ARM FAILED build_cache_${KEY} (exit $status)"; exit "$status"; }
