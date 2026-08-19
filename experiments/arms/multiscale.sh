@@ -27,7 +27,7 @@
 #
 # NEEDS ITS OWN CACHE, ~71.6 GB, which no other arm builds. Twelve slots against the canonical six, so
 # 2x that cache. RUN IT ALONE — build_cache.sh has no resume and once killed a trainer and itself:
-#   experiments/arms/build_cache.sh 336 12 multiscale 6 130 tissue
+#   experiments/arms/build_cache.sh --image-size 336 --slices 12 --scheme multiscale --centre tissue
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

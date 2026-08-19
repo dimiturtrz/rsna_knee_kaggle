@@ -24,7 +24,7 @@
 # control  the existing 130 mm image-centred member on the same fold, labels and epochs.
 #
 # NEEDS ITS OWN CACHE:
-#   experiments/arms/build_cache.sh 336 12 canonical 6 130 tissue
+#   experiments/arms/build_cache.sh --image-size 336 --slices 12 --centre tissue
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"

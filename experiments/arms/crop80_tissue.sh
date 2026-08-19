@@ -32,7 +32,7 @@
 #          mean alone — the mean averages the two halves of the prediction against each other.
 #
 # NEEDS ITS OWN CACHE, which no other arm builds:
-#   experiments/arms/build_cache.sh 336 12 canonical 6 80 tissue
+#   experiments/arms/build_cache.sh --image-size 336 --slices 12 --crop-mm 80 --centre tissue
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
