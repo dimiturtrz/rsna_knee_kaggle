@@ -5125,7 +5125,7 @@
       "weight": 1
     },
     {
-      "kind": "references",
+      "kind": "holds",
       "source": "kneemri.evaluation.record_mix.RecordMix",
       "target": "kneemri.runs.holdout_record.HoldoutReading",
       "weight": 1
@@ -8385,6 +8385,12 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.slot_features",
+      "target": "kneemri.models.model.StudyModel.over_depth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel.slot_features",
       "target": "kneemri.models.model.StudyModel.slice_features",
       "weight": 1
     },
@@ -9214,6 +9220,12 @@
       "kind": "calls",
       "source": "kneemri.training.options.TrainingOptions.parser",
       "target": "kneemri.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.options.TrainingOptions.parser",
+      "target": "kneemri.models.model.StudyDesign",
       "weight": 1
     },
     {
@@ -17456,6 +17468,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.model.StudyModel.over_depth",
+      "label": "over_depth",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.model.StudyModel.parameter_groups",
       "label": "parameter_groups",
       "level": "method",
@@ -17778,6 +17798,14 @@
       "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.slice_pooling",
       "label": "slice_pooling",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.slice_regions",
+      "label": "slice_regions",
       "level": "method",
       "parent": "kneemri.runs.member_record.RunOptions",
       "role": null
