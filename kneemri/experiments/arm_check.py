@@ -130,8 +130,24 @@ class ArmCheck:
 
         Takes the entry in `after.sh`'s spelling rather than a name plus a list, so what is checked is
         the string that will be queued, character for character.
+
+        AN ENTRY THAT IS NOT A SCRIPT IS AN ERROR HERE, where it can be attributed. Passing an arm's
+        NAME (`band_dense_long`) instead of its path is the natural mistake — every other flag on this
+        tool speaks names — and bash then runs nothing, prints nothing, and leaves the invocation set
+        empty. The failure surfaced downstream in `selected` as "no arm printed an invocation named
+        band_dense_long", which blames `--only` for a typo in `--as-queued` and reads as a missing arm
+        rather than a wrong spelling. Same rule as `selected`: a name matching nothing is an error, and
+        it belongs at the argument that was actually wrong.
         """
-        return self._printed([shlex.split(entry, posix=False) for entry in entries])
+        commands = [shlex.split(entry, posix=False) for entry in entries]
+        unscripted = [entry for entry, command in zip(entries, commands, strict=True) if not Path(command[0]).is_file()]
+        if unscripted:
+            message = (
+                f"--as-queued takes a queue entry, a SCRIPT PATH carrying its arguments "
+                f"('experiments/arms/resolution.sh 448'), and these name no file: {', '.join(unscripted)}"
+            )
+            raise ValueError(message)
+        return self._printed(commands)
 
     def invocations(self) -> dict[str, str]:
         """Each arm's `run_train` flag line, by arm name. Arms that never call it are absent.

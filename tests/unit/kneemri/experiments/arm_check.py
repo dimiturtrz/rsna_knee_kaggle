@@ -238,3 +238,8 @@ def test_queued(tmp_path: Path):
 
     assert check.queued([f"{(arms / 'rung.sh').as_posix()} 12"]) == {"rung_12": "--fold 0 --epochs 12"}
     assert check.invocations() == {"rung_8": "--fold 0 --epochs 8"}, "bare stays bare — the default rung"
+
+    # An arm's NAME where a queue entry belongs: bash runs nothing, the invocation set empties, and the
+    # complaint used to surface in `selected` as a missing arm — blaming `--only` for a `--as-queued` typo.
+    with pytest.raises(ValueError, match="SCRIPT PATH"):
+        check.queued(["rung"])
