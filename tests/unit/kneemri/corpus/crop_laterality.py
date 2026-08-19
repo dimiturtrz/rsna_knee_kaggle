@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 from kneemri.corpus.acquisition import Acquisition
-from kneemri.corpus.crop_laterality import ClipRequest, CropLaterality, SideClip
+from kneemri.corpus.crop_laterality import ClipRequest, CropLaterality, CropLateralityReport, SideClip
 
 SPACING = 1.0
 CROP_MM = 40.0
@@ -75,19 +75,19 @@ def test_asymmetry() -> None:
     assert SideClip(lateral=0.3, medial=0.1).asymmetry() == 0.3 - 0.1
 
 
-def test_report() -> None:
+def test_lines() -> None:
     """The denominators lead, and the verdict names symmetric as a refutation."""
-    even = CropLaterality().report([SideClip(0.2, 0.2), SideClip(0.1, 0.1)], sampled=2, corpus=4407)
-    skewed = CropLaterality().report([SideClip(0.3, 0.05)] * 8, sampled=8, corpus=4407)
+    even = CropLateralityReport([SideClip(0.2, 0.2), SideClip(0.1, 0.1)], sampled=2, corpus=4407).lines()
+    skewed = CropLateralityReport([SideClip(0.3, 0.05)] * 8, sampled=8, corpus=4407).lines()
 
     assert even[0].startswith("2 coronal/axial series measured, from 2 studies sampled of 4407")
     assert "SYMMETRIC" in even[1]
     assert "the crop clips one side harder" in skewed[1]
 
 
-def test_report_without_a_measurable_series_says_so_rather_than_dividing() -> None:
+def test_lines_without_a_measurable_series_say_so_rather_than_dividing() -> None:
     """An empty sample is a denominator of zero, not a mean."""
-    assert CropLaterality().report([], sampled=0, corpus=4407) == [
+    assert CropLateralityReport([], sampled=0, corpus=4407).lines() == [
         "0 coronal/axial series measured, from 0 studies sampled of 4407 in the corpus"
     ]
 

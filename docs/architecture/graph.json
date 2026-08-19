@@ -2935,8 +2935,14 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.corpus.crop_laterality.CropLateralityReport",
+      "target": "kneemri.corpus.crop_laterality.SideClip",
+      "weight": 1
+    },
+    {
       "kind": "calls",
-      "source": "kneemri.corpus.crop_laterality.CropLaterality.report",
+      "source": "kneemri.corpus.crop_laterality.CropLateralityReport.lines",
       "target": "core.bootstrap.Bootstrap.seeded",
       "weight": 1
     },
@@ -2955,13 +2961,13 @@
     {
       "kind": "construct",
       "source": "kneemri.corpus.crop_laterality.main",
-      "target": "kneemri.corpus.crop_laterality.CropLaterality",
+      "target": "kneemri.corpus.crop_laterality.CropLateralityReport",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.corpus.crop_laterality.main",
-      "target": "kneemri.corpus.crop_laterality.CropLaterality.report",
+      "target": "kneemri.corpus.crop_laterality.CropLateralityReport.lines",
       "weight": 1
     },
     {
@@ -6277,6 +6283,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.tie_divergence.TieDivergenceReport",
+      "target": "kneemri.evaluation.tie_divergence.SlotDivergence",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.tie_divergence.main",
       "target": "core.paths.DataRoot.from_config",
@@ -6291,13 +6303,13 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.tie_divergence.main",
-      "target": "kneemri.evaluation.tie_divergence.TieDivergence",
+      "target": "kneemri.evaluation.tie_divergence.TieDivergenceReport",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.tie_divergence.main",
-      "target": "kneemri.evaluation.tie_divergence.TieDivergence.report",
+      "target": "kneemri.evaluation.tie_divergence.TieDivergenceReport.lines",
       "weight": 1
     },
     {
@@ -11430,6 +11442,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.corpus.crop_laterality.CropLateralityReport",
+      "label": "CropLateralityReport",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_laterality",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.corpus.crop_laterality.SideClip",
       "label": "SideClip",
       "level": "class",
@@ -12003,6 +12023,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.tie_divergence",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tie_divergence.TieDivergenceReport",
+      "label": "TieDivergenceReport",
+      "level": "class",
+      "parent": "kneemri.evaluation.tie_divergence",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -13414,10 +13442,10 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.corpus.crop_laterality.CropLaterality.report",
-      "label": "report",
+      "id": "kneemri.corpus.crop_laterality.CropLateralityReport.lines",
+      "label": "lines",
       "level": "method",
-      "parent": "kneemri.corpus.crop_laterality.CropLaterality",
+      "parent": "kneemri.corpus.crop_laterality.CropLateralityReport",
       "role": null
     },
     {
@@ -15798,10 +15826,10 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.tie_divergence.TieDivergence.report",
-      "label": "report",
+      "id": "kneemri.evaluation.tie_divergence.TieDivergenceReport.lines",
+      "label": "lines",
       "level": "method",
-      "parent": "kneemri.evaluation.tie_divergence.TieDivergence",
+      "parent": "kneemri.evaluation.tie_divergence.TieDivergenceReport",
       "role": null
     },
     {

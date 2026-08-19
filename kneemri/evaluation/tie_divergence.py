@@ -117,9 +117,34 @@ class TieDivergence:
         """The candidate as the model would see it, at the depth the model reads."""
         return self.reader.read(acquisition, SAMPLED_SLICES)
 
-    def report(self, divergences: list[SlotDivergence], studies: int) -> list[str]:
+    @staticmethod
+    def _of(argument: tuple[Path, dict[str, str]]) -> list[SlotDivergence]:
+        """Pool worker: one study's contested-slot divergences.
+
+        A staticmethod rather than a module-level function because the house rule wants behaviour on
+        the class that owns it — and a staticmethod still pickles by qualified name, which is what the
+        child process needs.
+        """
+        directory, planes = argument
+        return TieDivergence().of_study(directory, planes)
+
+
+@dataclass(frozen=True)
+class TieDivergenceReport:
+    """The census as prose — the rendering half of what `TieDivergence` used to be.
+
+    Split for the reason the other reports were: measuring decodes two full stacks per contested slot
+    across the corpus, and rendering needs only the list they produced. Held together, the census could
+    not be exercised without a corpus of DICOMs to decode.
+    """
+
+    divergences: list[SlotDivergence]
+    studies: int
+
+    def lines(self) -> list[str]:
         """The census, with the verdict each outcome supports stated rather than implied."""
-        lines = [f"{len(divergences)} contested-slot rivalries over {studies} studies"]
+        divergences = self.divergences
+        lines = [f"{len(divergences)} contested-slot rivalries over {self.studies} studies"]
         if not divergences:
             return [*lines, "  nothing contested decoded - the hypothesis cannot be tested on this sample"]
         distances = np.array([divergence.distance for divergence in divergences])
@@ -141,17 +166,6 @@ class TieDivergence:
             "published member by construction rather than by measurement"
         )
         return lines
-
-    @staticmethod
-    def _of(argument: tuple[Path, dict[str, str]]) -> list[SlotDivergence]:
-        """Pool worker: one study's contested-slot divergences.
-
-        A staticmethod rather than a module-level function because the house rule wants behaviour on
-        the class that owns it — and a staticmethod still pickles by qualified name, which is what the
-        child process needs.
-        """
-        directory, planes = argument
-        return TieDivergence().of_study(directory, planes)
 
 
 def main() -> None:
@@ -184,7 +198,7 @@ def main() -> None:
         for found in pool.map(TieDivergence._of, work, chunksize=4):  # noqa: SLF001
             divergences.extend(found)
 
-    for line in TieDivergence().report(divergences, len(directories)):
+    for line in TieDivergenceReport(divergences, len(directories)).lines():
         logger.info("%s", line)
 
 

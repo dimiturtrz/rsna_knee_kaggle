@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kneemri.evaluation.tie_divergence import SlotDivergence, TieDivergence
+from kneemri.evaluation.tie_divergence import SlotDivergence, TieDivergence, TieDivergenceReport
 
 from ..conftest import write_series
 
@@ -47,12 +47,12 @@ def test_identical():
     assert not differing.identical
 
 
-def test_report():
+def test_lines():
     """The report states what each outcome settles, so a number cannot be quoted without its verdict."""
-    lines = TieDivergence().report(
+    lines = TieDivergenceReport(
         [SlotDivergence("s", "SAG_FLUID_FS", "a", "b", distance=DIFFERENT)],
         STUDIES,
-    )
+    ).lines()
     text = "\n".join(lines)
 
     assert "1 contested-slot rivalries over 200 studies" in text
@@ -60,8 +60,8 @@ def test_report():
     assert "NEAR ZERO kills the tie-break hypothesis" in text
 
 
-def test_report_says_so_when_nothing_decoded():
+def test_lines_say_so_when_nothing_decoded():
     """An empty census is reported as untestable, never as a near-zero result that kills the idea."""
-    text = "\n".join(TieDivergence().report([], STUDIES))
+    text = "\n".join(TieDivergenceReport([], STUDIES).lines())
 
     assert "cannot be tested" in text

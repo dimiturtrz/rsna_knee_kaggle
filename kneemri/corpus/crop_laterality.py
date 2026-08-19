@@ -133,33 +133,6 @@ class CropLaterality:
         after = float(mask[:, :, columns.stop :].sum()) / total
         return SideClip(lateral=after, medial=before) if lateral > 0 else SideClip(lateral=before, medial=after)
 
-    def report(self, measured: list[SideClip], sampled: int, corpus: int, seed: int = RESAMPLE_SEED) -> list[str]:
-        """The two discards, their paired difference with an interval, and WHAT IT WAS MEASURED ON.
-
-        Paired over the same series rather than compared as two populations: how much tissue a knee
-        shows outside its joint varies far more between patients than between the two sides of one
-        patient, and an unpaired interval would be that spread rather than this effect.
-
-        The denominators lead rather than trail, because the mistake this project has already paid for
-        three times is a share computed inside the subset that happened to parse, read as a share of the
-        corpus.
-        """
-        lines = [
-            f"{len(measured)} coronal/axial series measured, from {sampled} studies sampled of {corpus} in the corpus"
-        ]
-        if not measured:
-            return lines
-        bootstrap = Bootstrap.seeded(seed)
-        deltas = np.array([clip.asymmetry() for clip in measured])
-        low, high = bootstrap.mean_interval(deltas)
-        clips = "the crop clips one side harder" if low > 0.0 or high < 0.0 else "SYMMETRIC — refuted as the asymmetry"
-        lines.append(
-            f"discarded lateral {np.mean([clip.lateral for clip in measured]):.4f}  "
-            f"medial {np.mean([clip.medial for clip in measured]):.4f}  "
-            f"lateral - medial {deltas.mean():+.4f} [{low:+.4f}, {high:+.4f}]  {clips}"
-        )
-        return lines
-
     @staticmethod
     def measure_study(request: ClipRequest) -> list[SideClip]:
         """Every coronal or axial slot of one study, measured. A staticmethod so a pool can pickle it.
@@ -196,6 +169,49 @@ class CropLaterality:
         return [clip for clip in clips if clip is not None]
 
 
+@dataclass(frozen=True)
+class CropLateralityReport:
+    """The paired discard as prose — the rendering half of what `CropLaterality` used to be.
+
+    Split for the reason the other reports were: measuring decodes four hundred studies uncropped, and
+    rendering needs only the `SideClip` list they produced. Held together, the verdict line could not be
+    exercised without a corpus to decode.
+    """
+
+    measured: list[SideClip]
+    sampled: int
+    corpus: int
+    seed: int = RESAMPLE_SEED
+
+    def lines(self) -> list[str]:
+        """The two discards, their paired difference with an interval, and WHAT IT WAS MEASURED ON.
+
+        Paired over the same series rather than compared as two populations: how much tissue a knee
+        shows outside its joint varies far more between patients than between the two sides of one
+        patient, and an unpaired interval would be that spread rather than this effect.
+
+        The denominators lead rather than trail, because the mistake this project has already paid for
+        three times is a share computed inside the subset that happened to parse, read as a share of the
+        corpus.
+        """
+        measured = self.measured
+        lines = [
+            f"{len(measured)} coronal/axial series measured, "
+            f"from {self.sampled} studies sampled of {self.corpus} in the corpus"
+        ]
+        if not measured:
+            return lines
+        deltas = np.array([clip.asymmetry() for clip in measured])
+        low, high = Bootstrap.seeded(self.seed).mean_interval(deltas)
+        clips = "the crop clips one side harder" if low > 0.0 or high < 0.0 else "SYMMETRIC — refuted as the asymmetry"
+        lines.append(
+            f"discarded lateral {np.mean([clip.lateral for clip in measured]):.4f}  "
+            f"medial {np.mean([clip.medial for clip in measured]):.4f}  "
+            f"lateral - medial {deltas.mean():+.4f} [{low:+.4f}, {high:+.4f}]  {clips}"
+        )
+        return lines
+
+
 def main() -> None:
     """Decode a spread sample uncropped and price the crop's two edges against the knee's two sides."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -220,7 +236,7 @@ def main() -> None:
     ]
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         measured = [clip for study in pool.map(CropLaterality.measure_study, requests) for clip in study]
-    for line in CropLaterality(arguments.crop_mm).report(measured, len(sampled), len(identifiers)):
+    for line in CropLateralityReport(measured, len(sampled), len(identifiers)).lines():
         logger.info(line)
 
 
