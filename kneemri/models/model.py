@@ -100,6 +100,27 @@ class StudyDesign:
     slice_pooling: str = CHANNELS
     anatomical_prior: bool = False
 
+    slice_regions: int = 1
+    """How many depth regions `max` pooling takes a maximum within, before averaging across them.
+
+    A COUNT AND NOT A NEW POOLING NAME, because the behaviour is entirely the count: one region is a
+    single maximum over the band — the historic reading, the default, and what every member on disk was
+    fitted under — and any other value is the same operation applied per region. A second entry in
+    `SLICE_POOLINGS` would be a name that means "this field is not 1".
+
+    WHY IT EXISTS. One maximum over the whole band makes every slice compete for the same channel, so
+    the winner is whatever is loudest anywhere along the depth. Two arms measured what that costs.
+    `band_wide` widened the band and bought the collateral ligaments at the central compartment's
+    expense (MCL +0.0133, Medial OA -0.0088); `band_dense` restored the central density and bought the
+    centre back at the collaterals' expense (against `band_wide`: PF OA +0.0194 and Medial OA +0.0122,
+    both intervals clearing zero, against MCL -0.0111). Neither arm added or removed anatomy from the
+    half it lost — only that half's SHARE of one pooled representation. Regions give each part of the
+    depth its own maximum, so a quiet peripheral finding no longer competes with a loud central one.
+
+    It is a field of the design rather than an argument of the pooling because the serve path rebuilds a
+    member from the recorded config: a member fitted at four regions and served at one is a different
+    function of the same pixels, and no fingerprint below the design would catch it."""
+
     slot_pooling: str = ATTENDED
     """How the twelve diagnoses read the six slots: per-diagnosis attention, or a uniform `mean`.
 
@@ -145,6 +166,7 @@ class StudyDesign:
             slice_pooling=str(config.get("slice_pooling", CHANNELS)),
             slot_pooling=str(config.get("slot_pooling", ATTENDED)),
             anatomical_prior=bool(config.get("anatomical_prior", False)),
+            slice_regions=int(str(config.get("slice_regions", 1))),
             layer=int(str(config.get("encoder_layer", -1))),
         )
 
@@ -250,7 +272,24 @@ class StudyModel(nn.Module):
         stacked = self.slice_features(imgs, img_size)
         if not self.per_slice:
             return stacked[:, :, 0]
-        return self.slices(stacked) if self.slices is not None else stacked.amax(dim=2)
+        return self.slices(stacked) if self.slices is not None else self.over_depth(stacked)
+
+    def over_depth(self, stacked: Float[Tensor, "b s g w"]) -> Float[Tensor, "b s w"]:
+        """The slot's embedding from its slices: a maximum per depth region, averaged over regions.
+
+        `tensor_split` rather than a reshape because the slice count need not divide the region count —
+        20 slices over 4 regions is even, 20 over 3 is not, and a reshape would refuse the second
+        rather than give it a 7/7/6 split. One region is a single `amax` over the whole depth, which is
+        the historic pooling reproduced by the same code rather than branched around it.
+
+        The count is capped at the depth on hand, because a region thinner than a slice is an EMPTY
+        split and `amax` over nothing raises. The bag that first hit it was the fingerprint's — three
+        synthetic slices against four regions — which is a real reading and not a test artefact: the
+        fingerprint is taken on every save, so an uncapped split would have failed a twelve-epoch arm
+        at its first checkpoint rather than in the smoke.
+        """
+        regions = torch.tensor_split(stacked, min(self.design.slice_regions, stacked.shape[2]), dim=2)
+        return torch.stack([region.amax(dim=2) for region in regions]).mean(dim=0)
 
     def slice_features(
         self,

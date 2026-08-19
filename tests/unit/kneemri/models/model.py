@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import SimpleNamespace
 from typing import cast, override
 
@@ -461,6 +461,25 @@ def test_slot_features(study_model: StudyModel):
     features = study_model.slot_features(imgs, 14)
     assert features.shape[:2] == (2, SLOTS)
     assert torch.isfinite(features).all()
+
+
+def test_over_depth(study_model: StudyModel):
+    """One region is the historic maximum EXACTLY; more regions give each part of the depth its own.
+
+    The equality is the contract that lets this replace the old `amax` rather than branch around it —
+    every member on disk was fitted at one region, so any drift here is a silent refit of all of them.
+    """
+    stacked = torch.randn(2, SLOTS, 4, 8)
+
+    assert torch.equal(study_model.over_depth(stacked), stacked.amax(dim=2)), "one region is one max"
+
+    study_model.design = replace(study_model.design, slice_regions=2)
+    halves = torch.stack([stacked[:, :, :2].amax(dim=2), stacked[:, :, 2:].amax(dim=2)]).mean(dim=0)
+    assert torch.allclose(study_model.over_depth(stacked), halves)
+
+    study_model.design = replace(study_model.design, slice_regions=8)
+    thin = stacked[:, :, :3]
+    assert torch.equal(study_model.over_depth(thin), thin.mean(dim=2)), "a region is never thinner than a slice"
 
 
 def test_supervised(study_model: StudyModel):

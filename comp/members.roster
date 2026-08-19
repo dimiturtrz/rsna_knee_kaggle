@@ -49,7 +49,7 @@ lr1e-4_ws_s2026.pt          # 0.8490 — the same lever 2.5x past its plateau
 # 392 px read adds anything once the rate is held equal, and only a package holding both can ask it.
 band_dense_s2026.pt         # 0.8578 — the best single member we have; band 0.10-0.90 at 20 slices
 band_wide_s2026.pt          # 0.8553 — the same band at 16 slices
-deep24_s2026.pt             # 0.8465
+deep24_s2026.pt             # 0.8213 — the WEAKEST member here, and the only one trained with the ranking term off
 # Added 2026-08-19. The first two vary the axis no other member touches: every other entry above reads
 # the same 0.20-0.80 sagittal band, so the pool has never held a member that looks at the joint's
 # edges. They are not redundant with each other — measured against one another, band_dense wins the
@@ -62,6 +62,13 @@ deep24_s2026.pt             # 0.8465
 # SECOND, and plateaus at SEVEN members / 0.8661 (band_dense, band_wide, calibrated_targets, lr4e-5_ws,
 # intensity392_ws, deep24, lr1e-4_ws) against 0.8646 for the six before band_dense existed. deep24 is
 # mounted to complete that seven — it has been the named-but-missing member since 2026-08-17.
+#
+# deep24 solo is 0.8213, the worst number in this file and 0.037 under band_dense, and greedy takes it
+# anyway. It is the only member fitted with the RANKING TERM OFF, so it is the only one whose errors
+# are not shaped by the pairwise objective every other member shares — a diversity axis, not a weakness
+# the mix has to carry. This line read `# 0.8465` until 2026-08-19; that number is in neither the ledger
+# nor the checkpoint's own `holdout` and was a transcription error, corrected here rather than quietly
+# dropped, because a roster comment is what the next reader trusts about a member they cannot re-score.
 #
 # This roster now names twelve while the best subset is seven. That is deliberate and it is NOT the
 # "mount more, name more" the note above refutes: mounting costs a dataset push, NAMING costs the

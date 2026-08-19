@@ -238,12 +238,18 @@ def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch:
         *("--slice-pooling", MAXIMUM),
         *("--slot-pooling", AVERAGED),
         *("--encoder-layer", "-2"),
+        *("--slice-regions", "2"),
         "--anatomical-prior",
     )
 
     rebuilt = StudyDesign.from_config(_nested(payload, "config"))
     assert rebuilt == StudyDesign(
-        pool=CLS_MEAN_FOCAL, slice_pooling=MAXIMUM, slot_pooling=AVERAGED, anatomical_prior=True, layer=-2
+        pool=CLS_MEAN_FOCAL,
+        slice_pooling=MAXIMUM,
+        slot_pooling=AVERAGED,
+        anatomical_prior=True,
+        layer=-2,
+        slice_regions=2,
     )
     for field in fields(StudyDesign):
         assert getattr(rebuilt, field.name) != field.default, (

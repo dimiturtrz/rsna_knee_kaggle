@@ -21,7 +21,7 @@ from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from kneemri.corpus.study_cache import StudyCache
 from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS
+from kneemri.models.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyDesign
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.training.trainer import Adaptation
 
@@ -82,6 +82,7 @@ class TrainingOptions:
     backbone_lr: float = Adaptation().backbone_lr
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS
+    slice_regions: int = StudyDesign().slice_regions
     slot_pooling: str = ATTENDED
     anatomical_prior: bool = False
     encoder_layer: int = -1
@@ -348,6 +349,16 @@ class TrainingOptions:
             "does. 'attend' encodes each slice alone as 'max' does and then pools them by learned "
             "attention instead, which keeps WHICH slice mattered - the operation the post-MRNet "
             "literature uses. 'max' and 'attend' cost three encoder passes per group.",
+        )
+        parser.add_argument(
+            "--slice-regions",
+            type=int,
+            default=StudyDesign().slice_regions,
+            help="how many depth regions 'max' pooling takes its maximum within before averaging over "
+            "them. 1 is one maximum over the whole band, which is what every member on disk was fitted "
+            "with; higher values give each part of the depth its own maximum, so a quiet peripheral "
+            "finding stops competing with a loud central one (band_wide and band_dense each bought one "
+            "end of the band at the other's expense). Free - no parameters, no extra encoder passes.",
         )
         parser.add_argument("--labels", type=Path, required=True, help="label table to TRAIN on")
         parser.add_argument(

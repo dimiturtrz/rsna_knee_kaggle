@@ -119,7 +119,7 @@ def test_payload_takes_each_config_field_from_the_option_of_its_own_name():
     """
     shared = {name for name in _config(OPTIONS) if name in vars(OPTIONS)} - DERIVED_ELSEWHERE
 
-    assert len(shared) == 21, "pinned, so a renamed option cannot drop silently out of the walk"
+    assert len(shared) == 22, "pinned, so a renamed option cannot drop silently out of the walk"
 
     plain = _config(OPTIONS)
     for name in sorted(shared):

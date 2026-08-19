@@ -49,6 +49,7 @@ NOT_A_WRAPPER = {
     "forward",
     "from_config",
     "load_trained",
+    "over_depth",
     "parameter_groups",
     "per_slice",
     "slice_features",

@@ -59,6 +59,8 @@ NOT_A_SWITCH = {
     "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
     "pool": "constructed — `POOL_PARTS[self.pool]` raises on a pooling that does not exist",
     "slice_pooling": "constructed — `SLICE_POOLINGS[...]` raises before any weight is fetched",
+    "slice_regions": "constructed into `StudyDesign` and stamped into the manifest, where a rebuild that "
+    "defaults it moves the member's own fingerprint",
     "slot_pooling": "constructed — `SLOT_POOLINGS[...]` likewise",
     "anatomical_prior": "constructed, and a slot count the prior does not cover RAISES rather than dropping it",
     "head_lr": "a rate, not a switch: it is the group's `lr` and no path applies it partly",

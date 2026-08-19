@@ -122,6 +122,9 @@ class RunOptions(Protocol):
     def slice_pooling(self) -> str: ...
 
     @property
+    def slice_regions(self) -> int: ...
+
+    @property
     def slot_pooling(self) -> str: ...
 
     @property
@@ -303,6 +306,11 @@ class MemberRecord:
                 # weights — and, before this, no arm could select the focal pooling at all.
                 "pool": options.pool,
                 "slice_pooling": options.slice_pooling,
+                # Read back by `StudyDesign.from_config`, which is the only thing that knows a maximum
+                # is taken per region: the weights are identical either way, so a member fitted over
+                # four regions and rebuilt over one loads perfectly and predicts from a different
+                # function of the same pixels. Exactly the shape `slice_pooling` itself once had.
+                "slice_regions": options.slice_regions,
                 # Recorded AND read back by Member.slot_pooling and HoldoutPredictions.load. A head
                 # fitted with uniform slot pooling and rebuilt with attention is a different function
                 # whose weights load without complaint - the ninth instance of that shape is why the
