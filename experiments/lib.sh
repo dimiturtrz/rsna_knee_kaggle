@@ -160,14 +160,15 @@ run_snapshot() {
   rm -rf "$ARM_SRC"; mkdir -p "$ARM_SRC"
   cp -r "$REPO/kneemri" "$REPO/core" "$ARM_SRC/"
   cp "$REPO/paths.yaml" "$ARM_SRC/"
-  # Wait for the card BEFORE the arm starts, so a second chain queues instead of contending.
-  hold_card
+  # THE CARD IS NOT TAKEN HERE. It is taken by `run_train`, which is the one point EVERY path that
+  # spends GPU crosses — see the note there. Gating the snapshot instead left the documented smoke
+  # procedure ungated, and copying the package spends no GPU, so there is nothing to protect until the
+  # trainer starts.
   # "$@" is forwarded: an arm that takes arguments (which folds, which resolution) was being run with
   # none, so its loop iterated zero times and it exited 0 with an empty log. A silent no-op is the
   # worst failure available - the GPU simply sat idle and nothing reported anything.
   local status=0
   ARM_LIB="$REPO/experiments/lib.sh" bash "$snapshot" "$@" || status=$?
-  release_card
   return "$status"
 }
 
@@ -205,6 +206,20 @@ run_train() {
   # finished. That is exactly what arm U did on 2026-08-11: it died at epoch 7 of 24 and printed
   # 'ARM U DONE', the queue advanced on it, and the ledger would have recorded silence as a result.
   # Same family as knee-b02 - never let a wrapper's exit code speak for the work.
+  # THE CARD IS TAKEN HERE, because this is the ONE point every path that spends GPU crosses.
+  #
+  # It used to be taken in `run_snapshot`, which covers a queued arm and nothing else. The smoke
+  # procedure CLAUDE.md documents — source the lib, `run_train ... --studies 60 --epochs 1` — reaches
+  # the trainer without passing through run_snapshot, so it was ungated by construction, and so is any
+  # ad-hoc run. On 2026-08-19 a smoke launched that way onto a card already running an arm and died with
+  # `CUDA out of memory ... 4.84 GiB is free`. The incumbent survived because the NEWCOMER lost the
+  # allocation race, which is luck, not a design: the same collision at a smaller footprint is two arms
+  # sharing a card, which is the PCIe-paging collapse the lock exists to prevent.
+  #
+  # Per call rather than per arm, and released before returning: a sweep arm that calls this several
+  # times now lets another chain interleave between its runs instead of holding the card across all of
+  # them.
+  hold_card
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
   # trainer that is already going. `cd` rather than PYTHONPATH, because the working directory wins.
@@ -222,6 +237,10 @@ run_train() {
     | tee "$LOGS/$name.full.log" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
+  # Released on EVERY path out, including the failures. A crashed trainer that kept the lock would idle
+  # the queue behind it for as long as the chain lived, which is the failure the marker checks below
+  # exist to make visible rather than one to add.
+  release_card
   if [ "$status" -ne 0 ]; then
     _mark "$name" "ARM FAILED $name (trainer exit $status) - see $LOGS/$name.full.log"
     return "$status"
