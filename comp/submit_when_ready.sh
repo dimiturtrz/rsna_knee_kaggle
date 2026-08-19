@@ -20,7 +20,7 @@ PUSH_PATH="${4:-}"
 COMP=rsna-knee-abnormality-detection
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-kaggle() { uv run --with kaggle kaggle "$@"; }
+kaggle() { uv run --no-sync --with kaggle kaggle "$@"; }
 
 if [ -n "$PUSH_PATH" ]; then
   echo "waiting for a free GPU session before pushing $PUSH_PATH"

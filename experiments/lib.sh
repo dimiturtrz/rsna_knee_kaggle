@@ -43,7 +43,7 @@ _lib_is_stale() { [ "$(_lib_blob)" != "$LIB_PARSED" ]; }
 LIB_PARSED="$(_lib_blob)"
 LIB_PARSED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-PROCESSED="$(uv run python -c 'from pathlib import Path
+PROCESSED="$(uv run --no-sync python -c 'from pathlib import Path
 from core.paths import DataRoot
 print(DataRoot.from_config(Path("paths.yaml")).processed().as_posix())')"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
@@ -461,7 +461,7 @@ wait_for_cache() {
   # prevent, so the reading goes to the builder that names it, in full.
   local size="$1" slices="${2:-12}" scheme="${3:-canonical}" crop="${4:-130}" centre="${5:-image}"
   local key
-  key="$(uv run python -m kneemri.corpus.build_cache --print-key     --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
+  key="$(uv run --no-sync python -m kneemri.corpus.build_cache --print-key   --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
   [ -n "$key" ] || { echo "wait_for_cache: the builder named no key"; return 1; }
   until [ -f "$PROCESSED/mask_${key}.npy" ]; do sleep 60; done
 }
