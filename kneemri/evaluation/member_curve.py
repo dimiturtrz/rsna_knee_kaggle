@@ -87,8 +87,12 @@ class Pool:
             for name, member in zip(self.names, self.predictions, strict=True)
         ]
 
-    def split(self, roster: list[Path]) -> tuple[list[Float[np.ndarray, "studies targets"]], "Pool"]:
-        """The roster's predictions, and the rest as candidates against it.
+    def split(self, roster: list[Path]) -> tuple["Pool", "Pool"]:
+        """The roster as a pool, and the rest as candidates against it.
+
+        The roster comes back NAMED rather than as bare arrays. A swap has to say which incumbent it
+        displaces — `calib_span for calibrated_targets` is the whole content of the line — and a list of
+        arrays cannot say it. An add did not need the names, which is why they were dropped here.
 
         The roster is read through the SAME join as the candidates rather than scored on its own: the
         shared-study intersection and the label-table refusal are the reason this type exists, and a
@@ -104,9 +108,12 @@ class Pool:
             message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
             raise ValueError(message)
         paired = list(zip(self.names, self.predictions, strict=True))
-        held = [member for name, member in paired if name in wanted]
+        held = [(name, member) for name, member in paired if name in wanted]
         rest = [(name, member) for name, member in paired if name not in wanted]
-        return held, Pool([name for name, _ in rest], [member for _, member in rest], self.truth)
+        return (
+            Pool([name for name, _ in held], [member for _, member in held], self.truth),
+            Pool([name for name, _ in rest], [member for _, member in rest], self.truth),
+        )
 
 
 class MemberCurve:
@@ -166,7 +173,49 @@ class MemberCurve:
             lines.append(f"greedy {len(chosen)}: {score:.4f}  +{pool.names[index]}")
         return lines
 
-    def marginal(self, roster: list[Float[np.ndarray, "studies targets"]], candidates: Pool) -> list[str]:
+    def swap(self, roster: Pool, candidates: Pool) -> list[str]:
+        """What each candidate is worth in the best SEAT it could take, holding the member count fixed.
+
+        THE READING THE ROSTER POLICY ACTUALLY PERMITS, and the one nothing computed. `marginal` prices a
+        candidate as an ADDITIONAL member, and `comp/champion.json`'s FOUR MEMBERS principle says the best
+        subset falls monotonically past five — so every number `marginal` prints is the price of a move the
+        pin forbids. The champion's own history is swaps: `res392_ws` out and `band_dense` in took 0.925 to
+        0.928, and four different members occupying ONE seat is the experiment that produced the ruler
+        caveat that pin now carries. The tool that decides which member to ship could not express any of it.
+
+        The BEST seat, not every seat, because the decision is one line: whether this candidate belongs in
+        the package at all, and at whose expense. Reporting four rows per candidate turns a roster of four
+        against a dozen candidates into forty-eight numbers to eyeball, and the maximum is what a
+        submission would take.
+
+        A negative best-seat number is the honest answer that the roster should not be disturbed. Read it
+        as a SIGN like every other number off this holdout, and note the transfer error runs the other way
+        for diversity (knee-7d1): a small negative here is inside the region where this ruler is known
+        wrong.
+        """
+        truth = candidates.truth
+        base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
+        priced = []
+        for candidate, name in zip(candidates.predictions, candidates.names, strict=True):
+            seats = [
+                (
+                    self.scores.mean(
+                        RankAverage().combine([*roster.predictions[:seat], candidate, *roster.predictions[seat + 1 :]]),
+                        truth,
+                    ),
+                    roster.names[seat],
+                )
+                for seat in range(len(roster))
+            ]
+            score, displaced = max(seats, key=lambda pair: pair[0])
+            priced.append((score, name, displaced))
+        lines = [f"holding {len(roster)} members, the best seat each candidate could take:"]
+        return lines + [
+            f"  {name} for {displaced}: {score:.4f}  ({score - base:+.4f})"
+            for score, name, displaced in sorted(priced, key=lambda priced: -priced[0])
+        ]
+
+    def marginal(self, roster: Pool, candidates: Pool) -> list[str]:
         """What each candidate would add to the roster that already ships, best first.
 
         THE NUMBER AN ARM IS ACTUALLY DECIDED ON, and the one nothing here computed. Every arm is read
@@ -183,11 +232,15 @@ class MemberCurve:
         Distinct from `greedy`, which builds a roster from nothing and answers which members to
         package. This holds the roster FIXED, because the roster is a shipped artefact with a board
         number on it and the question an arm asks is whether to disturb it.
+
+        It prices a FIFTH member, which the pin's four-member principle says is negative return — so read
+        it as the diversity signal (does this member bring anything the four do not) and read `swap` for
+        the decision.
         """
         truth = candidates.truth
-        base = self.scores.mean(RankAverage().combine(roster), truth)
+        base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
         added = [
-            (self.scores.mean(RankAverage().combine([*roster, candidate]), truth), name)
+            (self.scores.mean(RankAverage().combine([*roster.predictions, candidate]), truth), name)
             for candidate, name in zip(candidates.predictions, candidates.names, strict=True)
         ]
         lines = [f"roster of {len(roster)}: {base:.4f}"]

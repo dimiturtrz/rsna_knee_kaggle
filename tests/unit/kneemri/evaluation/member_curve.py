@@ -254,11 +254,38 @@ def test_greedy():
     assert all(line.startswith(f"greedy {step}") for step, line in enumerate(lines, start=1))
 
 
+def test_swap():
+    """A candidate takes the seat of the member it can most afford to displace, and says whose it was."""
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    roster = Pool(["strong.pt", "weak.pt"], [_member(2.0, SEED), _member(0.05, SEED + 1)], truth)
+    candidates = Pool(["good.pt", "noise.pt"], [_member(2.0, SEED + 2), _member(0.05, SEED + 3)], truth)
+
+    lines = curve.swap(roster, candidates)
+
+    assert lines[0].startswith("holding 2 members"), "the count is held, which is what makes it a seat"
+    assert "good.pt for weak.pt" in lines[1], "the strong candidate displaces the weak incumbent, not the strong one"
+    assert lines[1].split("(")[1].startswith("+"), "replacing the roster's weakest member with a strong one pays"
+    assert "noise.pt" in lines[2], "the weaker candidate is priced too, and reported second"
+
+
+def test_split():
+    """Both halves come back NAMED, because a swap line has to say which incumbent it displaces."""
+    truth = _truth()
+    pool = Pool(["in.pt", "out.pt"], [_member(2.0, SEED), _member(2.0, SEED + 1)], truth)
+
+    held, candidates = pool.split([Path("in.pt")])
+
+    assert (held.names, candidates.names) == (["in.pt"], ["out.pt"])
+    with pytest.raises(ValueError, match="no holdout record"):
+        pool.split([Path("absent.pt")])
+
+
 def test_marginal():
     """A candidate is priced against a FIXED roster, best first, and a useless one reads negative."""
     curve = MemberCurve(LabelScores())
     truth = _truth()
-    roster = [_member(2.0, SEED), _member(2.0, SEED + 1)]
+    roster = Pool(["a.pt", "b.pt"], [_member(2.0, SEED), _member(2.0, SEED + 1)], truth)
     candidates = [_member(0.05, SEED + 2), _member(2.0, SEED + 3)]
 
     lines = curve.marginal(roster, Pool(["noise.pt", "good.pt"], candidates, truth))

@@ -162,7 +162,11 @@ class MixReading:
         """The reading this invocation asked for, as report lines."""
         if self.roster:
             held, candidates = self.pool.split(self.roster)
-            return curve.marginal(held, candidates)
+            # BOTH readings, because they answer different questions and only one of them is a decision:
+            # the add says whether a candidate brings anything the roster lacks, the swap says whether to
+            # ship it and at whose expense. Printing only the add is what let every seat number quoted in
+            # this repository be the price of a fifth member the pin forbids.
+            return curve.marginal(held, candidates) + curve.swap(held, candidates)
         if greedy:
             return curve.greedy(self.pool)
         return curve.logged(self.pool, paired=paired)
