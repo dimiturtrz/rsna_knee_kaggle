@@ -7,6 +7,19 @@
 # running levers inside the decode family, and this one is not in it — it buys wall-clock, and the score
 # is the price being checked rather than the thing being bought.
 #
+# ALREADY RUN AND REFUTED — 2026-08-19, `unfreeze4_s2026.pt`, ledger row `unfreeze_4`: 0.8320, which is
+# -0.0137 against wsfold0_e6, 2.2x the noise floor, converged (peaked at epoch 6 and flat for five after)
+# and negative on eleven of twelve labels. This arm is NOT queued and must not be re-armed casually: it
+# would overwrite that checkpoint and re-buy a refutation the ledger already holds. The re-basing below
+# was written on 2026-08-20 in the belief that the arm had never run — a name check on THIS FILE's name
+# returned nothing because the ledger indexes the run by its OUTPUT name, `unfreeze`. The re-based
+# control is still the right control; what was wrong was the premise that anything needed running.
+#
+# The one thing the refutation does NOT cover: it was measured at the stale operating point (the default
+# rate, band 0.20-0.80). Shallow adaptation could in principle behave differently at 4e-5 / 0.10-0.90.
+# That is a QUESTION, not a plan — 2.2x the floor with eleven of twelve labels negative is a decisive
+# kill, and knee-jk3 says stop running knobs. Re-run only if something else makes encoder depth live.
+#
 # THE SCORE IS NOT SETTLED, and the throughput arm cannot settle it. Its epoch-0 holdout was 0.7539
 # against 0.7600 - a 0.0061 gap sitting exactly ON the 0.0062 noise floor, read from the single weakest
 # measurement in the ledger. A shallower adaptation could catch up (the head has more epochs to use a
