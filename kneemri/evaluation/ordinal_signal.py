@@ -64,6 +64,31 @@ class OrdinalReading:
         return f"{self.label:<28} {self.concordance:>6.3f}  over {self.pairs:>7,d} pairs  [{levels}]"
 
 
+@dataclass(frozen=True)
+class OrdinalSummary:
+    """Both means over a member's labels, because the two answer different questions.
+
+    The tool printed twelve rows and no summary, so every consumer averaged them by hand — and the
+    numbers already quoted in `interpretations/` as "mean ordinal concordance" came from that arithmetic
+    with no record of which mean it was. The two differ a lot here: Effusion carries 79,925 pairs and
+    Fracture 1,122, so weighting by evidence is nearly a different statistic from weighting each label
+    alike. Reporting one without naming it is how a rate over a subset gets read as a rate over the
+    corpus, which this project has paid for three times in one session.
+    """
+
+    label_mean: float
+    pair_weighted: float
+    labels: int
+    pairs: int
+
+    def lines(self) -> list[str]:
+        """Both means, each carrying the denominator it was taken over — never one number called THE mean."""
+        return [
+            f"{'MEAN over labels':<28} {self.label_mean:>6.3f}  over {self.labels:>7,d} labels",
+            f"{'MEAN over pairs':<28} {self.pair_weighted:>6.3f}  over {self.pairs:>7,d} pairs",
+        ]
+
+
 class OrdinalSignal:
     """A member's holdout reading, asked whether its ranking respects the graded levels."""
 
@@ -82,6 +107,21 @@ class OrdinalSignal:
             if reading is not None:
                 readings.append(OrdinalReading(label, *reading))
         return readings
+
+    @staticmethod
+    def pooled(readings: list[OrdinalReading]) -> OrdinalSummary | None:
+        """Both means over the labels that could answer, taking the readings rather than recomputing them.
+
+        None when no label had two graded levels, which is the same silence `concordance` keeps: a mean
+        over an empty set is not chance, it is an absence of evidence, and printing 0.5 would read as a
+        refutation of the very thing this module exists to test.
+        """
+        if not readings:
+            return None
+        pairs = sum(reading.pairs for reading in readings)
+        weighted = sum(reading.concordance * reading.pairs for reading in readings) / pairs
+        label_mean = sum(reading.concordance for reading in readings) / len(readings)
+        return OrdinalSummary(label_mean, weighted, len(readings), pairs)
 
     @staticmethod
     def concordance(
@@ -132,8 +172,13 @@ def main() -> None:
         len(reading.studies),
     )
     logger.info("chance is %.2f; above it means the graded levels carry severity, not only certainty", CHANCE)
-    for label in OrdinalSignal(reading).per_label():
+    readings = OrdinalSignal(reading).per_label()
+    for label in readings:
         logger.info("%s", label.line())
+    summary = OrdinalSignal.pooled(readings)
+    if summary is not None:
+        for line in summary.lines():
+            logger.info("%s", line)
 
 
 if __name__ == "__main__":

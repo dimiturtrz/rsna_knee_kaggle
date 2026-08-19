@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.evaluation.ordinal_signal import CHANCE, OrdinalReading, OrdinalSignal, main
+from kneemri.evaluation.ordinal_signal import CHANCE, OrdinalReading, OrdinalSignal, OrdinalSummary, main
 from kneemri.findings import TARGETS
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
@@ -81,6 +81,29 @@ def test_line():
     assert "0.610" in printed
     assert "42" in printed
     assert "0.68" in printed
+
+
+def test_pooled():
+    """The two means come apart exactly when the evidence is unevenly spread, which is the normal case."""
+    readings = [OrdinalReading("common", 0.9, 900, LEVELS), OrdinalReading("rare", 0.5, 100, LEVELS)]
+
+    summary = OrdinalSignal.pooled(readings)
+
+    assert summary is not None
+    assert summary.label_mean == pytest.approx(0.7), "each label counts once"
+    assert summary.pair_weighted == pytest.approx(0.86), "each PAIR counts once, so the common label carries it"
+    assert (summary.labels, summary.pairs) == (2, 1000)
+
+    assert OrdinalSignal.pooled([]) is None, "no label could answer, and a mean of nothing is not chance"
+
+
+def test_lines():
+    """Neither mean is printed as THE mean: each row names the denominator it was taken over."""
+    printed = OrdinalSummary(0.7, 0.86, 2, 1000).lines()
+
+    assert len(printed) == 2, "one number called the mean is the reading error this exists to prevent"
+    assert "0.700" in printed[0] and "labels" in printed[0]
+    assert "0.860" in printed[1] and "pairs" in printed[1]
 
 
 def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture):
