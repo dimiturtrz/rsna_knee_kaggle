@@ -104,6 +104,10 @@ def spread(difference: NDArray[np.float64]) -> str:
 
     Counted against the widest label rather than against a fixed level, so the sentence reads the same
     whether the residual is 1e-3 or 1e-1: it answers "in how many places", never "how big".
+
+    Reported on the PASSING verdicts too, because a shape means nothing without its control: the same
+    member reads 0.0135 as a pass on cpu and as a refusal on cuda, and only the two shapes side by side
+    say whether those are the same residual seen through two bounds or two different residuals.
     """
     per_label = difference.max(axis=0)
     widest = float(per_label.max())
@@ -171,7 +175,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
             "REFUSED - inference reads this member differently than training did "
             f"(max|diff| {difference:.3g} > {bound:.3g}{geometry}; {spread(residual)})"
         )
-    return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies{geometry})"
+    return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies{geometry}; {spread(residual)})"
 
 
 def main() -> None:
