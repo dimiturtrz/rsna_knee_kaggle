@@ -86,3 +86,29 @@ comparison has two. PF OA's is not one of them — it reproduces `band_wide`'s �
 on a different arm, which is corroboration no chance star gets. Lateral Meniscus has no such second
 witness. So the honest state of it is ONE unexplained label, not a mechanism, and `depth_regions_narrow`
 is what turns it into either a reproduction or a coin flip.
+
+## The follow-up landed: the coin flip came up chance
+
+`depth_regions_narrow` ran and answered both halves of what this document left open.
+
+**PF OA was the BAND, confirmed.** On a 0.20–0.80 band the −0.0193 does not merely fail to appear, it
+reverses to **+0.0067**. That is the decomposition above holding on a band that shares nothing with the
+wide one but the pooling.
+
+**Lateral Meniscus does not reproduce at strength.** **+0.0056 [−0.0112, +0.0206]** against the narrow
+control, unstarred — and read directly against `depth_regions` it is **−0.0112**. Against its own paired
+floor this arm clears *zero* labels of twelve, on a pair `run_comparison` reports as "matched on every
+option both runs recorded". The single unexplained star had no second witness and did not acquire one.
+
+So the honest state of the mechanism is what this document already suspected of it: PF OA's reproduction
+was corroboration, Lateral Meniscus' was multiplicity. Region pooling protects nothing in particular.
+
+**What that does NOT settle**, per the project rule: this refutes region pooling as a *lateral-visibility*
+lever on these two bands. It is not a verdict on the aggregation, which stays a member-diversity asset —
+it costs no decode group beside `band_dense` and its errors are differently shaped. Record: the mechanism
+that failed is "a per-region maximum gives an off-centre structure its own voice"; what it does not rule
+out is region pooling anywhere the whole-band maximum is actually the binding constraint, which neither
+of these bands demonstrated it to be.
+
+Ledger rows: `experiments/README.md` — `depth_regions`, `depth_regions_narrow`. Bead: knee-yrg, whose
+last cheap lead this was.
