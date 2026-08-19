@@ -51,3 +51,40 @@ Three roster members — `res392_ws`, `sliceattn`, `lora_r8_v3small_224` — hav
 were skipped, so the card-free search runs over 10 of 13 same-split checkpoints. One of them is a member
 of the previous champion four. The tool that chooses what to submit cannot currently see it.
 `kneemri/inference/holdout_backfill.py` fixes this at one GPU pass per member (knee bead filed).
+
+## The gap is closed, and doubling the pool changed nothing (2026-08-19, later)
+
+The backfill ran. All three members now carry records, and the same-split pool the search can see is
+**22 checkpoints**, not 10 — the backfill plus every arm that has finished since. Re-running the greedy
+over all 22:
+
+| | best offline |
+|---|---|
+| the shipped 0.928 four | 0.8648 |
+| greedy at 4 | 0.8661 |
+| **greedy at 6–7 (the peak)** | **0.8665** |
+| greedy at 22 (everything) | 0.8589 |
+
+**Doubling the pool moved the reachable ceiling by +0.0004** — a fifteenth of the 0.0062 floor — and the
+peak is still +0.0017 over what already shipped, which is still inside it. The conclusion this document
+was written to state does not merely survive the larger pool; it gets stronger, because the twelve extra
+members were the test of it. **The subset search is spent, now measured over 22 rather than 10.**
+
+Two things the larger search says that the smaller one could not.
+
+**The first three greedy picks are all band-axis members** — `band_dense`, then `band_wide`, then
+`depth_regions` — and together they are worth +0.0070 before a single non-band member is chosen
+(0.8578 → 0.8648). Every other axis in the pool competes for the fourth seat onward at a few ten-thousandths
+each. That is an independent confirmation of the reading above, arrived at by an argmax that knows nothing
+about which axis a member came from: **the board paid for a new axis, and the offline search picks the same
+axis first.**
+
+**The three backfilled members do not earn a seat.** This was the whole point of the tooling gap, so it is
+worth stating plainly: `res392_ws` is picked ninth and is the first pick that does not raise the ensemble,
+`sliceattn` tenth at −0.0003, and `lora_r8_v3small_224` sixteenth, deep in the declining tail. `res392_ws`
+was a member of the 0.925 champion four. Now that the search can finally see it, it does not choose it.
+
+That is not an argument for removing it from anything that already shipped — the 0.928 entry is a measured
+board result and the offline ruler cannot arbitrate a 0.0017 difference. It is an argument that the seat
+`res392_ws` holds was never earned on this evidence, and that the pool's remaining value is in the band
+family rather than in any rearrangement of the rest.
