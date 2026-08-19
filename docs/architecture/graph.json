@@ -8000,6 +8000,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.KitCheck.asked",
+      "target": "kneemri.kaggle.kit_check.KitCheck.unhooked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kit_check.KitCheck.behind",
       "target": "kneemri.kaggle.kit_check.KitCheck.asked",
       "weight": 1
@@ -10048,6 +10054,18 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.DeviceBudget.await_headroom",
       "target": "kneemri.training.trainer.DeviceBudget.headroom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.DeviceBudget.await_headroom",
+      "target": "kneemri.training.trainer.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.DeviceBudget.capped",
+      "target": "kneemri.training.trainer.DeviceBudget.needed",
       "weight": 1
     },
     {
@@ -17302,6 +17320,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kit_check.KitCheck.unhooked",
+      "label": "unhooked",
+      "level": "method",
+      "parent": "kneemri.kaggle.kit_check.KitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kit_check.main",
       "label": "main",
       "level": "method",
@@ -19248,6 +19274,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.DeviceBudget.headroom",
       "label": "headroom",
+      "level": "method",
+      "parent": "kneemri.training.trainer.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.DeviceBudget.needed",
+      "label": "needed",
       "level": "method",
       "parent": "kneemri.training.trainer.DeviceBudget",
       "role": null
