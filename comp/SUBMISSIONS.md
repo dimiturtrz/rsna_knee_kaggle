@@ -700,3 +700,34 @@ search for roster decisions outright, rather than leaving another subset to try.
 These two numbers cost no card time. Both came from `record_mix`, which reads the per-study
 probabilities each run already wrote beside its checkpoint; `member_curve` answers the same question by
 re-deriving them through the pixel cache and would have needed the GPU a trainer is holding.
+
+## Slot 3 of 2026-08-19: the same seat, the other candidate
+
+Pre-registered BEFORE the run, and built as a MATCHED PAIR with slot 2 rather than as the leftover half
+of slot 1.
+
+`kneemri-swapdrn` puts `depth_regions_narrow` into the seat slot 2 gives to `band_span` — both replace
+`lr1e-4_ws`, both leave `band_dense`, `calibrated_targets` and `lr4e-5_ws` untouched, both keep the
+count, the kit, `overlap=False` and `RankAverage`. Two entries differing in ONE member each, from a
+common champion, is the only shape from which a board ordering can be read.
+
+| four | offline |
+|---|---|
+| champion | 0.8648 |
+| slot 2 — `band_span` in that seat | 0.8661 |
+| **slot 3 — `depth_regions_narrow` in that seat** | **0.8653** |
+| slot 1 — both swaps at once | 0.8666 |
+
+**THE QUESTION, stated as the pair.** The offline ruler orders these 0.8661 > 0.8653 > 0.8648, all
+three inside the 0.0062 noise floor of each other. Slot 2 and slot 3 ask the board the same ordering.
+If the board reproduces it, the holdout can rank single-member swaps even at sub-floor separations and
+offline membership search is a usable instrument. If the board inverts it, the offline ruler is
+measuring something that does not survive the trip, and roster decisions have to be bought one
+submission at a time from here on.
+
+**PREDICTION.** Both at or above 0.928, with slot 2 at or above slot 3. The refutation that matters is
+not a low score — it is slot 3 ABOVE slot 2, which would invert the ordering while both still look like
+wins, and is exactly the case a mean-only read would miss.
+
+Read this pair together with slot 1: if the compound (0.8666) does not beat the better single, the
+holdout is additive where the board is not.
