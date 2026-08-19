@@ -192,3 +192,17 @@ def test_greedy():
     assert len(lines) == 3, "every member is eventually taken, so the curve shows where it turned"
     assert "+strong.pt" in lines[0], "the best single member is chosen first"
     assert all(line.startswith(f"greedy {step}") for step, line in enumerate(lines, start=1))
+
+
+def test_marginal():
+    """A candidate is priced against a FIXED roster, best first, and a useless one reads negative."""
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    roster = [_member(2.0, SEED), _member(2.0, SEED + 1)]
+    candidates = [_member(0.05, SEED + 2), _member(2.0, SEED + 3)]
+
+    lines = curve.marginal(roster, candidates, truth, ["noise.pt", "good.pt"])
+
+    assert lines[0].startswith("roster of 2:"), "the base the deltas are against is stated, not implied"
+    assert "+good.pt" in lines[1], "the candidate that adds most is reported first"
+    assert lines[2].split("(")[1].startswith("-"), "a member that only adds noise reads as a negative seat"

@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from kneemri.evaluation.member_curve import MemberCurve
 from kneemri.evaluation.record_mix import MixedRecords, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -120,3 +121,45 @@ def test_mixed_records_holds_its_three_arrays_together(tmp_path: Path):
 
     assert isinstance(mixed, MixedRecords)
     assert len(mixed.names) == len(mixed.predictions)
+
+
+def test_split(tmp_path: Path):
+    """The roster is separated from the candidates AFTER the shared-study join, over one denominator."""
+    studies = [f"s{index}" for index in range(40)]
+    truth = (RNG.random((40, LABELS)) > 0.5).astype(np.float32)
+    for name in ("shipped.pt", "other.pt", "candidate.pt"):
+        _record(tmp_path / name, studies, shift=2.0, truth=truth)
+    mixed = RecordMix([tmp_path / name for name in ("shipped.pt", "other.pt", "candidate.pt")]).per_member()
+
+    held, candidates = mixed.split([tmp_path / "shipped.pt", tmp_path / "other.pt"])
+
+    assert len(held) == 2, "both named members are held out of the candidate list"
+    assert candidates.names == ["candidate.pt"], "everything not named is priced against the roster"
+    assert candidates.truth.shape == mixed.truth.shape, "candidates keep the join's truth, not their own"
+
+
+def test_split_refuses_a_roster_member_with_no_record(tmp_path: Path):
+    """A missing roster member would silently score a smaller roster and misprice every delta under it."""
+    studies = [f"s{index}" for index in range(40)]
+    truth = (RNG.random((40, LABELS)) > 0.5).astype(np.float32)
+    _record(tmp_path / "shipped.pt", studies, shift=2.0, truth=truth)
+    mixed = RecordMix([tmp_path / "shipped.pt"]).per_member()
+
+    with pytest.raises(ValueError, match="no holdout record"):
+        mixed.split([tmp_path / "shipped.pt", tmp_path / "absent.pt"])
+
+
+def test_reading(tmp_path: Path):
+    """A named roster wins the dispatch: nobody pins the members that ship and means `search subsets`."""
+    studies = [f"s{index}" for index in range(40)]
+    truth = (RNG.random((40, LABELS)) > 0.5).astype(np.float32)
+    for name in ("shipped.pt", "candidate.pt"):
+        _record(tmp_path / name, studies, shift=2.0, truth=truth)
+    mixed = RecordMix([tmp_path / "shipped.pt", tmp_path / "candidate.pt"]).per_member()
+    curve = MemberCurve(LabelScores())
+
+    priced = mixed.reading(curve, [tmp_path / "shipped.pt"], greedy=True, paired=False)
+    built = mixed.reading(curve, [], greedy=True, paired=False)
+
+    assert priced[0].startswith("roster of 1:"), "the roster is honoured even with --greedy also passed"
+    assert built[0].startswith("greedy 1:"), "with no roster the same call builds an ensemble instead"

@@ -116,6 +116,41 @@ class MemberCurve:
             lines.append(f"greedy {len(chosen)}: {score:.4f}  +{names[index]}")
         return lines
 
+    def marginal(
+        self,
+        roster: list[NDArray[np.float64]],
+        candidates: list[NDArray[np.float64]],
+        truth: Float[np.ndarray, "b t"],
+        names: list[str],
+    ) -> list[str]:
+        """What each candidate would add to the roster that already ships, best first.
+
+        THE NUMBER AN ARM IS ACTUALLY DECIDED ON, and the one nothing here computed. Every arm is read
+        against a MATCHED control — the same recipe with one field changed — which is the right ruler
+        for `did this knob do anything` and the wrong one for `does this earn a seat`. The two came
+        apart once the roster stopped being the control's family: a member can beat its control by a
+        clear margin and still be the pick that lowers the ensemble.
+
+        `res392_ws` is the case that forces this. It scores 0.8523 alone, it was a member of the four
+        that scored 0.925 on the board, and over 22 same-split members the greedy takes it NINTH — the
+        first pick that does not raise the mix. Solo score ranked it into a submission; marginal
+        contribution never would have.
+
+        Distinct from `greedy`, which builds a roster from nothing and answers which members to
+        package. This holds the roster FIXED, because the roster is a shipped artefact with a board
+        number on it and the question an arm asks is whether to disturb it.
+        """
+        base = self.scores.mean(RankAverage().combine(roster), truth)
+        added = [
+            (self.scores.mean(RankAverage().combine([*roster, candidate]), truth), name)
+            for candidate, name in zip(candidates, names, strict=True)
+        ]
+        lines = [f"roster of {len(roster)}: {base:.4f}"]
+        lines += [
+            f"  +{name}: {score:.4f}  ({score - base:+.4f})" for score, name in sorted(added, key=lambda pair: -pair[0])
+        ]
+        return lines
+
     def best(
         self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
     ) -> list[str]:

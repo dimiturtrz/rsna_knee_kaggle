@@ -191,6 +191,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`band_wide`** | slice band 0.20–0.80 → **0.10–0.90**, 16 slices at the control's mm-per-slice | **0.8553** | **+0.0028 vs `rate_wholestack`** | best single member yet; directional on the mean, and the per-label pattern is the finding |
 | **`band_dense`** | the wide band at restored central density: 0.10–0.90, **20 slices** | **0.8578** | **+0.0053 vs `rate_wholestack`**, +0.0025 vs `band_wide` | best single member; **PF OA and Synovitis resolve** — first per-label rows in this family whose intervals clear zero. Dilution confirmed and symmetric: the centre comes back, the collaterals `band_wide` bought largely go. Pairs with `band_wide` at 0.8633 |
 | **`depth_regions`** | region pooling (`--slice-regions 4`) on the wide dense band | 0.8549 | −0.0029 vs `band_dense` | mean is a non-result under the 0.0062 floor; the per-label read is the finding. Two labels clear their interval and disagree: **PF OA −0.0193\***, which is `band_wide`'s −0.0194 to four decimals (the patellofemoral loss is the BAND, not the pooling), and **Lateral Meniscus +0.0165\*** against `band_wide`'s +0.0007 (the only thing attributable to the pooling). Its own written prediction — centre holds, periphery recovers — is wrong on both clauses. [interpretation](../interpretations/kneemri/2026-08-19_depth_regions.md); `depth_regions_narrow` is the single-variable follow-up |
+| **`depth_regions_narrow`** | the same region pooling on the band every OTHER member reads (0.20-0.80, 12 slices) | 0.8554 | +0.0029 vs `lr4e-5_ws` | the transfer question, ANSWERED IN TWO PARTS. The PF OA loss was the BAND: on a narrow band it does not merely vanish but reverses, **+0.0067**, confirming `depth_regions`' decomposition. The Lateral Meniscus gain does NOT transfer at strength: **+0.0056 [-0.0112, +0.0206]** here against +0.0165\* there, and read directly against `depth_regions` it is **-0.0112**. Both arms are flat on the mean, which is this arm's own pre-registered refutation condition for the pooled-budget argument. Seat value **+0.0006** against the shipped four. See below |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
@@ -754,3 +755,36 @@ All seven are marked INDICATIVE — the control's scores were reconstructed from
 Interpretation of the whole ledger, including what each refutation rules out, lives in
 `interpretations/kneemri/` — for the above, `2026-08-14_the-ruler-was-five-times-too-small.md`,
 `2026-08-14_labels-or-pixels.md` and `2026-08-14_their-router-not-ours.md`. The build log is git history.
+
+## Region pooling: the patellofemoral loss was the band, and the meniscus gain does not transfer
+
+`depth_regions` starred on two labels out of twelve and they said opposite things — PF OA −0.0193 and
+Lateral Meniscus +0.0165 — so it was one arm carrying two candidate mechanisms and a multiple-comparison
+risk. `depth_regions_narrow` holds the reading at the pool's own band (0.20–0.80, 12 slices, 336 px,
+backbone 4e-5) and varies nothing but `--slice-regions 4`, against `lr4e-5_ws_s2026 = 0.8525`. The flag
+is verified in the recorded recipe rather than assumed: `slice_regions: 4`, `band_low: 0.2`,
+`band_high: 0.8`, `slices: 12`.
+
+**The PF OA clause is confirmed, and more strongly than predicted.** The wide-band arms both lost the
+patellofemoral centre by the same amount to four decimals; on a band that never adds the outer tenth
+there is nothing to pay, and PF OA reads **+0.0067**. The loss belongs to the BAND, not to the pooling.
+That was the useful half of the decomposition and it survives.
+
+**The Lateral Meniscus clause does not.** It reproduces in SIGN and not in size: +0.0056
+[−0.0112, +0.0206] against +0.0165* on the wide band, and read directly against `depth_regions` the
+narrow arm is **−0.0112** on that label. A single star out of twelve labels that returns at a third of
+its size with an interval spanning zero is what a multiple-comparison artefact looks like, and this arm
+named that risk as the second reason to run it.
+
+**On the mean, both arms are flat** — `depth_regions` −0.0029 against `band_dense`, this one +0.0029
+against `lr4e-5_ws`, both inside the 0.0062 floor. The arm pre-registered "flat in BOTH is the
+pooled-budget argument refuted", so that clause resolves against the argument by its own writing.
+
+What it is NOT: a verdict on region pooling as an idea. What is refuted is that one maximum per depth
+region buys a general gain over one maximum across the band, on this band and this depth. What remains
+open is the same treatment on a band wide enough that the regions have different anatomy in them, which
+is the case `depth_regions` was and where the mean also did not move. The asset is not dead; this use of
+it is.
+
+**Seat value +0.0006** against the shipped four, below `depth_regions`' +0.0010 and below every member
+already mounted. It does not get a slot.

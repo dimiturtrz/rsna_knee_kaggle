@@ -164,12 +164,54 @@ class MixedRecords:
             for name, member in zip(self.names, self.predictions, strict=True)
         ]
 
+    def split(self, roster: list[Path]) -> tuple[list[NDArray[np.float64]], "MixedRecords"]:
+        """The roster's predictions, and the rest as candidates against it.
+
+        The roster is read through the SAME join as the candidates rather than scored on its own: the
+        shared-study intersection and the label-table refusal are the reason this class exists, and a
+        roster loaded separately would be compared to candidates over a different denominator.
+
+        A named roster member that carries no record is an error, not a skip. Elsewhere a missing
+        record means an old checkpoint and skipping it costs one row; here it silently scores a
+        four-member roster as three and every delta below it is against the wrong base.
+        """
+        wanted = {path.name for path in roster}
+        found = {name for name in self.names if name in wanted}
+        if found != wanted:
+            message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
+            raise ValueError(message)
+        held = [member for name, member in zip(self.names, self.predictions, strict=True) if name in wanted]
+        rest = [(name, member) for name, member in zip(self.names, self.predictions, strict=True) if name not in wanted]
+        return held, MixedRecords([name for name, _ in rest], [member for _, member in rest], self.truth)
+
+    def reading(self, curve: MemberCurve, roster: list[Path], *, greedy: bool, paired: bool) -> list[str]:
+        """Which of the three questions this invocation is asking.
+
+        Ordered by how much is held fixed. A roster pins the members that already ship and prices the
+        rest against them; greedy pins nothing and builds an ensemble from scratch; the exhaustive
+        reading pins nothing and enumerates. The roster case is checked first because naming one is
+        unambiguous — nobody passes a shipped four-member roster and means `search every subset`.
+        """
+        if roster:
+            held, candidates = self.split(roster)
+            return curve.marginal(held, candidates.predictions, self.truth, candidates.names)
+        if greedy:
+            return curve.greedy(self.predictions, self.truth, self.names)
+        return curve.logged(self.predictions, self.truth, self.names, paired=paired)
+
 
 def main() -> None:
     """Score every subset of the given runs from their recorded holdout predictions, with no card."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, nargs="+", required=True, help="runs sharing ONE split")
     parser.add_argument("--paired", action="store_true", help="per-label deltas against the FIRST run")
+    parser.add_argument(
+        "--roster",
+        type=Path,
+        nargs="+",
+        default=(),
+        help="hold these members fixed and report what each OTHER record would add — the seat number",
+    )
     parser.add_argument(
         "--greedy",
         action="store_true",
@@ -180,17 +222,14 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     scores = LabelScores()
-    mixed = RecordMix(arguments.records).per_member()
+    roster = list(arguments.roster)
+    everything = list(dict.fromkeys([*arguments.records, *roster]))
+    mixed = RecordMix(everything).per_member()
     logger.info("%d members over %d shared studies", len(mixed.names), len(mixed.truth))
     for line in mixed.alone(scores):
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
-    reading = (
-        curve.greedy(mixed.predictions, mixed.truth, mixed.names)
-        if arguments.greedy
-        else curve.logged(mixed.predictions, mixed.truth, mixed.names, paired=arguments.paired)
-    )
-    for line in reading:
+    for line in mixed.reading(curve, roster, greedy=arguments.greedy, paired=arguments.paired):
         logger.info(line)
 
 
