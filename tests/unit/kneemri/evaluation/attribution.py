@@ -155,6 +155,32 @@ def test_report():
     assert "1 distinct depths over 12 labels" in text, "agreement across labels is what gates acting on depth"
 
 
+def test_depth_refuses_a_single_window():
+    """One window is not a depth profile, and the section used to report it as its strongest finding.
+
+    With `len(depth) == 1` the best window is the whole reading, the range is `x to x`, and every
+    label prefers the only start on offer — which printed as "one shared depth means a re-weighting
+    of the sampled windows helps every label". A licence to act, from an n of one.
+    """
+    lines = "\n".join(
+        _attribution()._depth(
+            Diagnostics(
+                slots={"0": 0.01},
+                regions={"whole": 0.86, "centre_only": 0.81, "border_only": 0.76},
+                rings={"0.05": 0.63},
+                depth={"0": 0.8558},
+                depth_by_label={"0": dict.fromkeys(TARGETS, 0.8558)},
+                slices={"0": dict.fromkeys(TARGETS, 0.01)},
+            )
+        )
+    )
+
+    assert "not measured" in lines, "the axis says what it could not ask"
+    assert "1 window(s)" in lines, "and names the reason"
+    assert "distinct depths" not in lines, "the agreement verdict n=1 cannot support is absent"
+    assert "best single window" not in lines, "so is the best-window claim"
+
+
 def test_targets():
     """The diagnostics average over the competition's twelve labels, in their order."""
     assert _attribution().targets() == list(TARGETS)

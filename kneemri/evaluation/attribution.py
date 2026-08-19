@@ -64,6 +64,9 @@ Half of everything the model loses to depth, sitting on one of twelve slices, is
 non-uniform read has something to collect. Below it the stack is being used broadly and there is
 nothing to re-weight toward."""
 
+COMPARABLE = 2
+"""Windows the depth sweep needs before it is a comparison rather than a restatement of the reading."""
+
 
 @dataclass(frozen=True)
 class Holdout:
@@ -310,11 +313,7 @@ class Attribution:
         )
 
         lines.append("")
-        depth = diagnostics.depth
-        best = max(depth, key=lambda start: depth[start])
-        lines.append(f"depth: best single window starts at slice {best} ({depth[best]:.4f})")
-        lines.append(f"  range {min(depth.values()):.4f} to {max(depth.values()):.4f} over {len(depth)} windows")
-        lines.extend(self._depth_agreement(diagnostics.depth_by_label))
+        lines.extend(self._depth(diagnostics))
 
         lines.append("")
         lines.extend(self._slice_cost(diagnostics.slices))
@@ -350,6 +349,33 @@ class Attribution:
         )
         lines.append(f"  {verdict}")
         return lines
+
+    def _depth(self, diagnostics: Diagnostics) -> list[str]:
+        """The depth profile, or the reason there is no profile to read.
+
+        A WHOLE-STACK MEMBER SAMPLES ONE WINDOW, and this section used to report that case as its
+        strongest possible finding. With a single window the best window IS the whole reading, the
+        range is `x to x`, every label prefers the only start there is, and `_depth_agreement` then
+        printed "one shared depth means a re-weighting of the sampled windows helps every label" —
+        a licence to act, derived from an n of one. Measured on band_dense_s2026, 2026-08-19: one
+        window of 20, range 0.8558 to 0.8558, twelve labels agreeing about nothing.
+
+        The sweep is a comparison, so it needs something to compare. Below two windows the honest
+        output is what the reading could not ask, not a verdict shaped like an answer.
+        """
+        depth = diagnostics.depth
+        if len(depth) < COMPARABLE:
+            return [
+                f"depth: not measured — the reading samples {len(depth)} window(s), and this axis "
+                "compares windows. A whole-stack member covers the depth in one pass; re-run against "
+                "a windowed reading if the profile is the question"
+            ]
+        best = max(depth, key=lambda start: depth[start])
+        return [
+            f"depth: best single window starts at slice {best} ({depth[best]:.4f})",
+            f"  range {min(depth.values()):.4f} to {max(depth.values()):.4f} over {len(depth)} windows",
+            *self._depth_agreement(diagnostics.depth_by_label),
+        ]
 
     def _depth_agreement(self, by_label: dict[str, dict[str, float]]) -> list[str]:
         """Whether the twelve labels want the same window, which is what gates acting on the profile."""
