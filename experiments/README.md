@@ -192,6 +192,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`band_dense`** | the wide band at restored central density: 0.10–0.90, **20 slices** | **0.8578** | **+0.0053 vs `rate_wholestack`**, +0.0025 vs `band_wide` | best single member; **PF OA and Synovitis resolve** — first per-label rows in this family whose intervals clear zero. Dilution confirmed and symmetric: the centre comes back, the collaterals `band_wide` bought largely go. Pairs with `band_wide` at 0.8633 |
 | **`depth_regions`** | region pooling (`--slice-regions 4`) on the wide dense band | 0.8549 | −0.0029 vs `band_dense` | mean is a non-result under the 0.0062 floor; the per-label read is the finding. Two labels clear their interval and disagree: **PF OA −0.0193\***, which is `band_wide`'s −0.0194 to four decimals (the patellofemoral loss is the BAND, not the pooling), and **Lateral Meniscus +0.0165\*** against `band_wide`'s +0.0007 (the only thing attributable to the pooling). Its own written prediction — centre holds, periphery recovers — is wrong on both clauses. [interpretation](../interpretations/kneemri/2026-08-19_depth_regions.md); `depth_regions_narrow` is the single-variable follow-up |
 | **`depth_regions_narrow`** | the same region pooling on the band every OTHER member reads (0.20-0.80, 12 slices) | 0.8554 | +0.0029 vs `lr4e-5_ws` | the transfer question, ANSWERED IN TWO PARTS. The PF OA loss was the BAND: on a narrow band it does not merely vanish but reverses, **+0.0067**, confirming `depth_regions`' decomposition. The Lateral Meniscus gain does NOT transfer at strength: **+0.0056 [-0.0112, +0.0206]** here against +0.0165\* there, and read directly against `depth_regions` it is **-0.0112**. Both arms are flat on the mean, which is this arm's own pre-registered refutation condition for the pooled-budget argument. Seat value **+0.0006** against the shipped four. See below |
+| **`encoder_layer 9`** | the head reads ViT block 9 of 12 instead of the last one | 0.8230 | -0.0227 vs `wsfold0_e6` | 3.7x the floor, converged (flat over its last three epochs), flag verified in the recipe. Seat value **-0.0034**, the largest negative any same-split candidate has posted, so diversity does not rescue it. The linear-probe convention turns out to be right for this head. See below |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
@@ -788,3 +789,26 @@ it is.
 
 **Seat value +0.0006** against the shipped four, below `depth_regions`' +0.0010 and below every member
 already mounted. It does not get a slot.
+
+## Reading block 9 instead of block 12 costs 0.023, and it is not rescued by diversity
+
+`encoder_layer 9` is the only arm this project has run on an axis nobody had varied for either encoder:
+which block of the ViT the head reads. The argument for it was not weak — the final block of a
+self-supervised ViT is the most specialised toward its pretraining objective, which is exactly why both
+DINOv2 and DINOv3 ship `get_intermediate_layers` for dense work, and our findings are 1–3 mm read off
+pooled PATCH tokens rather than an image-level embedding. It costs nothing extra:
+`output_hidden_states` returns every block from the same forward pass.
+
+It loses, and not by a margin that needs interpreting: **0.8230 against the control's 0.8457, −0.0227**,
+which is 3.7x the 0.0062 floor. The flag is verified in the recorded recipe (`encoder_layer: 9`), and
+the curve was flat over its last three epochs (0.8228 / 0.8230 / 0.8229), so it converged there rather
+than being cut short. Seat value against the shipped four is **−0.0034** — the largest negative any
+same-split candidate has posted — so the usual rescue for a weak-but-different member does not apply
+either. It is worse AND it is not usefully different.
+
+WHAT IS ACTUALLY REFUTED: that block 9 of 12 carries our findings better than block 12. Not that no
+intermediate layer does. But the gradient argues against spending a second slot: the endpoint we
+already use is the best number we have, and a drop of 0.023 nine blocks back means an interior peak at
+block 10 or 11 would have to be a sharp non-monotonicity rather than a gentle one. The convention the
+linear-probe literature uses turns out to be the right one for this head, which is worth knowing
+precisely because it was assumed rather than measured.
