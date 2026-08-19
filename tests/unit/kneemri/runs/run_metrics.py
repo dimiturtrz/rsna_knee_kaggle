@@ -196,6 +196,43 @@ def test_exists(tmp_path: Path):
     assert metrics.exists()
 
 
+def test_begin(tmp_path: Path):
+    """A re-run under the same name opens its own record; the previous run's epochs move aside.
+
+    The failure it removes is `slices16_ws_s2026`: a finished run peaking at 0.8452 followed by a
+    killed one peaking at 0.8411 in ONE file, whose checkpoint belongs to the finished run — so every
+    reader of `best` quoted the killed run's number for a member that scores four thousandths higher.
+    """
+    metrics = RunMetrics(tmp_path / "run.pt")
+    metrics.begin({"slices": "12"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.8452, seconds=1, per_label={"ACL": 0.5}))
+
+    metrics.begin({"slices": "16"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.8411, seconds=1, per_label={"ACL": 0.5}))
+
+    assert metrics.best() == {**metrics.rows()[0]}, "the live file holds this run alone"
+    assert [row["auc"] for row in metrics.rows()] == [0.8411]
+    assert metrics.recipe() == {"slices": "16"}
+    aside = (tmp_path / "run.metrics.1.jsonl").read_text(encoding="utf-8").splitlines()
+    assert [json.loads(line)["auc"] for line in aside if "auc" in line] == [0.8452], (
+        "the earlier run is kept beside the new one, not overwritten"
+    )
+
+    metrics.begin({"slices": "20"})
+    assert (tmp_path / "run.metrics.2.jsonl").exists(), "a third run rotates to its own number"
+
+
+def test_begin_leaves_a_first_run_where_it_is(tmp_path: Path):
+    """Nothing to move aside means no rotation — an empty file is not a run that happened."""
+    metrics = RunMetrics(tmp_path / "run.pt")
+
+    metrics.begin({"slices": "12"})
+    metrics.begin({"slices": "16"})
+
+    assert not (tmp_path / "run.metrics.1.jsonl").exists(), "a described-but-unscored run is not rotated"
+    assert metrics.recipe() == {"slices": "16"}
+
+
 def test_describe(tmp_path: Path):
     """The recipe shares the file with the scores, so every reader of the scores must ignore it."""
     metrics = RunMetrics(tmp_path / "run.pt")

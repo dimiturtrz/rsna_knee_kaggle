@@ -99,8 +99,9 @@ class Fitting:
         self.metrics = RunMetrics(plan.destination)
         self.predictions = HoldoutRecord(plan.destination)
         # Written HERE rather than at the first scored epoch, so a run killed before it scores still
-        # leaves a file that says what it was trying.
-        self.metrics.describe(record.recipe)
+        # leaves a file that says what it was trying — and it OPENS the record rather than appending to
+        # it, so this run's epochs cannot be read as a continuation of whatever ran under the name before.
+        self.metrics.begin(record.recipe)
         self.scores = LabelScores()
         # Built here rather than passed in: `main` seeded one generator and handed it to nothing else,
         # so owning it costs no behaviour and removes an argument that could be seeded twice.

@@ -122,6 +122,33 @@ class RunMetrics:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps({RECIPE: recipe}) + "\n")
 
+    def begin(self, recipe: dict[str, str]) -> None:
+        """Start a run's record, moving any PREVIOUS run's epochs aside first.
+
+        A re-run to the same `--out` used to append, which left one file describing two runs and one
+        checkpoint beside it, and no way to say which run wrote the checkpoint. `rows()` guesses THE
+        LAST group, and that guess is wrong exactly when the re-run was KILLED: `slices16_ws_s2026`
+        holds a finished run peaking at 0.8452 and a killed one peaking at 0.8411, its checkpoint is
+        the finished run's, and every reader quoted 0.8411 for a member that scores 0.8452 — a gap big
+        enough to reorder the ledger and small enough to read as a normal number.
+
+        Rotating rather than truncating, because a killed run's epochs are still the only account of
+        what it did; and here rather than in `describe`, which `metrics_recipe` uses to BACK-FILL a
+        recipe onto a finished run's file and must go on appending.
+        """
+        if any("epoch" in entry for entry in self._entries()):
+            self.path.replace(self._rotation())
+        self.describe(recipe)
+
+    def _rotation(self) -> Path:
+        """The next free `<run>.metrics.<n>.jsonl`, so no earlier run's epochs are ever overwritten."""
+        name = self.path.name
+        stem = name.removesuffix(".metrics.jsonl")
+        run = 1
+        while (aside := self.path.with_name(f"{stem}.metrics.{run}.jsonl")).exists():
+            run += 1
+        return aside
+
     def recipe(self) -> dict[str, str] | None:
         """The recorded recipe, or None for a file written before runs recorded one."""
         described = [cast(dict[str, str], entry[RECIPE]) for entry in self._entries() if RECIPE in entry]
