@@ -5863,6 +5863,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.main",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.resolved",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
@@ -15260,6 +15266,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison.resolved",
+      "label": "resolved",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison.RunComparison",
       "role": null
