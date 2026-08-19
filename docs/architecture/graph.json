@@ -4941,13 +4941,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.report",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_oracle.main",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracleReport",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_oracle.main",
-      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
+      "target": "kneemri.evaluation.oof_oracle.OutOfFoldOracleReport.lines",
       "weight": 1
     },
     {
@@ -7515,12 +7521,6 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.serve_bench.main",
-      "target": "kneemri.inference.serve_bench.ServeBench.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.serve_bench.main",
       "target": "kneemri.inference.serve_bench.ServeBench.synchronise",
       "weight": 1
     },
@@ -7528,6 +7528,18 @@
       "kind": "calls",
       "source": "kneemri.inference.serve_bench.main",
       "target": "kneemri.inference.serve_bench.ServeBench.timed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.serve_bench.main",
+      "target": "kneemri.inference.serve_bench.ServeBenchReport",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.serve_bench.main",
+      "target": "kneemri.inference.serve_bench.ServeBenchReport.lines",
       "weight": 1
     },
     {
@@ -11842,6 +11854,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracleReport",
+      "label": "OutOfFoldOracleReport",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_oracle",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.oof_oracle.PublishedCheckpoint",
       "label": "PublishedCheckpoint",
       "level": "class",
@@ -12207,6 +12227,14 @@
       "level": "class",
       "parent": "kneemri.inference.serve_bench",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.serve_bench.ServeBenchReport",
+      "label": "ServeBenchReport",
+      "level": "class",
+      "parent": "kneemri.inference.serve_bench",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -15002,18 +15030,18 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.report",
-      "label": "report",
+      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
+      "label": "routing",
       "level": "method",
       "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
-      "label": "routing",
+      "id": "kneemri.evaluation.oof_oracle.OutOfFoldOracleReport.lines",
+      "label": "lines",
       "level": "method",
-      "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracle",
+      "parent": "kneemri.evaluation.oof_oracle.OutOfFoldOracleReport",
       "role": null
     },
     {
@@ -16802,14 +16830,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.inference.serve_bench.ServeBench.report",
-      "label": "report",
-      "level": "method",
-      "parent": "kneemri.inference.serve_bench.ServeBench",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.inference.serve_bench.ServeBench.synchronise",
       "label": "synchronise",
       "level": "method",
@@ -16822,6 +16842,14 @@
       "label": "timed",
       "level": "method",
       "parent": "kneemri.inference.serve_bench.ServeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.serve_bench.ServeBenchReport.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.inference.serve_bench.ServeBenchReport",
       "role": null
     },
     {

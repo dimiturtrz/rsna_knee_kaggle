@@ -201,26 +201,36 @@ class OutOfFoldOracle:
             "contested_slots": np.array(contested),
         }
 
-    def report(
-        self,
-        identifiers: list[str],
-        ours: Float[np.ndarray, "studies targets"],
-        theirs: Float[np.ndarray, "studies targets"],
-        covariates: dict[str, NDArray[np.float64]],
-    ) -> list[str]:
+
+@dataclass(frozen=True)
+class OutOfFoldOracleReport:
+    """The residual as prose — the rendering half of what `OutOfFoldOracle` used to be.
+
+    Split for the reason the other reports were: measuring runs a published member's forward over the
+    cache on a card, and rendering needs only the two prediction arrays and the covariates it produced.
+    Held together, the residual table could not be exercised without a checkpoint and a GPU.
+    """
+
+    identifiers: list[str]
+    ours: Float[np.ndarray, "studies targets"]
+    theirs: Float[np.ndarray, "studies targets"]
+    covariates: dict[str, NDArray[np.float64]]
+
+    def lines(self) -> list[str]:
         """The residual, its shape across studies, and what it correlates with.
 
         The headline is `max|diff|` against 1e-6, and everything after it exists so the number can be
         acted on: a residual spread evenly over every study is a decode or normalisation difference,
         and one concentrated in a handful is a routing difference on those studies.
         """
-        per_study = np.abs(ours - theirs).max(axis=1)
+        identifiers = self.identifiers
+        per_study = np.abs(self.ours - self.theirs).max(axis=1)
         lines = [
             f"{len(identifiers)} studies, max|diff| {per_study.max():.6f}, mean {per_study.mean():.6f}",
             f"  faithful would be {FAITHFUL:.0e}; studies above 0.01: "
             f"{int((per_study > 0.01).sum())} of {len(identifiers)}",  # noqa: PLR2004 - a readable threshold, not a rule
         ]
-        for name, values in covariates.items():
+        for name, values in self.covariates.items():
             finite = np.isfinite(values) & np.isfinite(per_study)
             if finite.sum() > 1 and np.std(values[finite]) > 0:
                 correlation = float(np.corrcoef(values[finite], per_study[finite])[0, 1])
@@ -279,7 +289,7 @@ def main() -> None:
     split = CorpusSplit(root.raw())
     covariates = oracle.covariates(chosen, pd.read_csv(split.series_table))
     covariates.update(oracle.routing(chosen, split.source, split.planes()))
-    for line in oracle.report(chosen, ours, theirs[keep], covariates):
+    for line in OutOfFoldOracleReport(chosen, ours, theirs[keep], covariates).lines():
         logger.info(line)
     logger.info("(contested-slot rate for context: %s)", SlotTies().disagreeing_order(split.series_table))
 

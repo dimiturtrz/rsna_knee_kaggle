@@ -33,6 +33,7 @@ import argparse
 import logging
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 
 import torch
@@ -120,15 +121,31 @@ class ServeBench:
         """
         return int(torch._dynamo.utils.counters["stats"].get("unique_graphs", 0))  # noqa: SLF001 - the only reader
 
-    def report(self, eager: float, compiled: float, warmup: float, graphs: int) -> list[str]:
+
+@dataclass(frozen=True)
+class ServeBenchReport:
+    """The two timings as a table — the rendering half of what `ServeBench` used to be.
+
+    Split for the reason the other reports were: timing needs a card, a loaded member and a forward to
+    call, and rendering needs the four numbers they produced. Held together, the payback arithmetic —
+    the line the decision actually rests on — could not be exercised without loading a member.
+    """
+
+    eager: float
+    compiled: float
+    warmup: float
+    graphs: int
+
+    def lines(self) -> list[str]:
         """The two arms, what compilation cost to get there, and how many chunks pay that back."""
+        eager, compiled = self.eager, self.compiled
         saved = eager - compiled
-        payback = warmup / saved if saved > 0 else float("inf")
+        payback = self.warmup / saved if saved > 0 else float("inf")
         return [
             f"eager      {eager * 1000:8.1f} ms/pass",
             f"compiled   {compiled * 1000:8.1f} ms/pass   {(compiled / eager - 1) * 100:+.0f}%",
-            f"compilation{warmup:8.1f} s          pays back after {payback:.0f} passes",
-            f"graphs     {graphs:8d}              (>1 means a shape recompiled)",
+            f"compilation{self.warmup:8.1f} s          pays back after {payback:.0f} passes",
+            f"graphs     {self.graphs:8d}              (>1 means a shape recompiled)",
         ]
 
 
@@ -194,7 +211,7 @@ def main() -> None:
     warmup = time.perf_counter() - started
     compiled = bench.timed(forward, arguments.repeats)
 
-    for line in bench.report(eager, compiled, warmup, bench.graphs()):
+    for line in ServeBenchReport(eager, compiled, warmup, bench.graphs()).lines():
         logger.info(line)
 
 

@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 
 from kneemri.corpus.slots import SLOTS
-from kneemri.evaluation.oof_oracle import OutOfFoldOracle, PublishedCheckpoint
+from kneemri.evaluation.oof_oracle import OutOfFoldOracle, OutOfFoldOracleReport, PublishedCheckpoint
 from kneemri.inference.members import Member
 
 from ..conftest import write_series
@@ -90,7 +90,7 @@ def test_covariates():
     assert list(covariates["series_count"]) == [1.0, 2.0, 0.0], "aligned to the given order, absent means zero"
 
 
-def test_report():
+def test_lines():
     """The residual, its concentration, and the worst studies named so they can be looked at."""
     identifiers = ["quiet", "loud"]
     ours = np.zeros((2, TARGET_COUNT))
@@ -98,7 +98,7 @@ def test_report():
     theirs[1, 0] = 0.4
     covariates = {"series_count": np.array([1.0, 9.0])}
 
-    lines = OutOfFoldOracle().report(identifiers, ours, theirs, covariates)
+    lines = OutOfFoldOracleReport(identifiers, ours, theirs, covariates).lines()
     text = "\n".join(lines)
 
     assert "max|diff| 0.400000" in text

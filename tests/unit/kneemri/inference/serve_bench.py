@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from kneemri.inference.members import Member
-from kneemri.inference.serve_bench import ServeBench
+from kneemri.inference.serve_bench import ServeBench, ServeBenchReport
 
 SLOW = 0.020
 """Seconds of busy-work; only the ORDER of the timings matters to these tests."""
@@ -101,9 +101,9 @@ def test_graphs():
     assert bench().graphs() >= 0
 
 
-def test_report():
+def test_lines():
     """Both arms, what compilation cost, and how many passes pay that cost back."""
-    lines = bench().report(eager=0.100, compiled=0.080, warmup=2.0, graphs=1)
+    lines = ServeBenchReport(eager=0.100, compiled=0.080, warmup=2.0, graphs=1).lines()
 
     assert "100.0 ms/pass" in lines[0]
     assert "-20%" in lines[1], "a fifth off the pass is what the arm bought"
@@ -111,9 +111,9 @@ def test_report():
     assert "graphs" in lines[3]
 
 
-def test_report_when_compiling_loses():
+def test_lines_when_compiling_loses():
     """A compiled arm that is SLOWER never pays back, and the report says so rather than dividing."""
-    lines = bench().report(eager=0.080, compiled=0.100, warmup=2.0, graphs=3)
+    lines = ServeBenchReport(eager=0.080, compiled=0.100, warmup=2.0, graphs=3).lines()
 
     assert "+25%" in lines[1]
     assert "inf passes" in lines[2]
