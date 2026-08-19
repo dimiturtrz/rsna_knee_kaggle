@@ -26,6 +26,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from numpy.typing import NDArray
 from transformers import AutoModel
 
 from kneemri.device import VisibleCards
@@ -86,6 +87,32 @@ def tolerance(precision: torch.dtype, device: torch.device) -> float:
     return CROSS_PRECISION_FACTOR * float(torch.finfo(precision).eps)
 
 
+CONCENTRATION_FACTOR = 0.5
+"""A label counts as carrying the residual when its own max reaches this share of the widest label's."""
+
+
+def spread(difference: NDArray[np.float64]) -> str:
+    """How many of the twelve labels the residual actually lives in — the arithmetic/defect discriminator.
+
+    A max alone cannot tell the two apart, and on 2026-08-19 that left knee-djk8 stuck: seven members
+    refused at 0.00495-0.0193, the shape they were recorded under reproduced exactly, and two runs agreed
+    to every digit, so the residual is deterministic and unexplained. The bead's remaining question is
+    whether it SPREADS or CONCENTRATES. A rounding difference touches every column about equally, because
+    every column comes off the same GEMMs; the four reading defects this check exists for moved a FEW
+    findings by 0.05-0.5, because feeding a model the wrong slices changes what it can see about some
+    anatomy and not the rest.
+
+    Counted against the widest label rather than against a fixed level, so the sentence reads the same
+    whether the residual is 1e-3 or 1e-1: it answers "in how many places", never "how big".
+    """
+    per_label = difference.max(axis=0)
+    widest = float(per_label.max())
+    if widest == 0.0:
+        return "exact in every label"
+    carrying = int((per_label >= CONCENTRATION_FACTOR * widest).sum())
+    return f"{carrying} of {len(per_label)} labels carry it"
+
+
 def check(package: MemberPackage, member: Member, root: Path, device: torch.device, batch: int | None = None) -> str:
     """Re-derive one member's witness, returning a human-readable verdict.
 
@@ -135,13 +162,14 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     got = ensemble.predict_member(member, images, mask, overlap=True)[:kept]
     expected = np.asarray(witness["predictions"], dtype=np.float64)  # pyright: ignore[reportGeneralTypeIssues]
 
-    difference = float(np.abs(got - expected).max())
+    residual = np.abs(got - expected)
+    difference = float(residual.max())
     bound = tolerance(member.precision, device)
     geometry = f", batch {shape}" if shape else ", batch unrecorded"
     if difference > bound:
         return (
             "REFUSED - inference reads this member differently than training did "
-            f"(max|diff| {difference:.3g} > {bound:.3g}{geometry})"
+            f"(max|diff| {difference:.3g} > {bound:.3g}{geometry}; {spread(residual)})"
         )
     return f"ok (max|diff| {difference:.3g} of {bound:.3g} over {len(studies)} studies{geometry})"
 

@@ -210,6 +210,33 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `slot_mean` | uniform mean over present slots instead of learned slot attention | 0.8406 | −0.0051 vs `whole_stack` | attention is worth ONE floor-width — a knob, not a lever (knee-7gv) |
 | `per_label_loss` | loss normalised per column, so each of the twelve weighs one twelfth | 0.8414 | −0.0043 vs `wsfold0_e6` | **the arm's own null, and its falsifiable clause resolves with the WRONG SIGN** — see below |
 | `weight_average` | EMA of the weights, scored and saved in place of the live ones | 0.8460 | +0.0003 vs `wsfold0_e6` | flat where a holdout ranks epochs, exactly as written; the last-epoch case is +0.0013, directional — see below |
+| `centre_tissue` | the control's 130 mm extent held, the crop CENTRED ON THE TISSUE instead of the image | 0.8409 | −0.0048 vs `wsfold0_e6` | **null, as pre-registered** — inside the 0.0062 floor, flag verified (`crop_mm=130.0, centre=tissue` against a control that predates both). Seat value **−0.0016**. Two labels clear their paired interval and both are NEGATIVE (Contusion −0.0128\*, Medial Meniscus −0.0096\*); nothing positive resolves. This is the arm that licenses reading `crop80_tissue` as a RESOLUTION result rather than a centring one. See below |
+
+### Moving the crop's CENTRE, at the control's extent, does nothing — which is the point (2026-08-19)
+
+`centre_tissue` holds the 130 mm extent every canonical member reads and moves only where that extent is
+centred: from the image centre to the tissue centre `SlotReader` computes. The recorded recipe carries
+`crop_mm=130.0, centre=tissue` against a control that predates both keys, so the flag landed.
+
+**0.8409 against `wsfold0_e6`'s 0.8457, −0.0048** — inside the 0.0062 floor, and the arm pre-registered
+exactly this: *"a whole-corpus gain here would be surprising, and the honest expectation is roughly
+nothing"*. Seat value against the shipped four is **−0.0016**, so diversity does not rescue it either.
+
+The per-label read does not rescue it in the other direction. Marked against this pair's own paired floor
+(half-widths up to ±0.0290, INDICATIVE — the control's scores are reconstructed from its kept predictions),
+two labels clear their interval and **both are negative**: Contusion −0.0128\* and Medial Meniscus −0.0096\*.
+Nothing positive resolves; by structure scale, focal −0.0051 against regional −0.0044, i.e. flat.
+
+**What this arm buys is the READING OF ANOTHER ARM.** `crop80_tissue` (0.8345) changed two things at once —
+80 mm instead of 130 mm, and tissue-centred instead of image-centred — and its per-label table was credited
+to the tighter extent. That credit was a subtraction with an unmeasured term. This is the term: at the
+control's extent, centring alone is a null. So `crop80_tissue`'s pattern is attributable to the RESOLUTION
+change, and the centring is neither the gain nor the loss.
+
+One caveat stated rather than buried: epoch 4 took 1378 s against a median of 258 s, because a job from
+another project landed on the same card. The arm's own STALLED guard caught it and the epoch still scored
+(0.8374, on-trend between 0.8294 and 0.8390), so the curve is not distorted — but the wall-clock in the
+ledger is not this recipe's cost.
 
 ### Per-label loss weighting is refuted a second time, now from the training side (2026-08-19)
 
