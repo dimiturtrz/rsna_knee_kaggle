@@ -62,6 +62,27 @@ mechanism from "fixes the band trade" to "protects one focal structure from the 
 
 `depth_regions` is the only member in the pool with +0.0165 on Lateral Meniscus. Decode diversity is
 the one axis measured to transfer to the board (0.0059 offline → 0.014 there), so a member whose error
-is *differently shaped* is worth more than its solo mean suggests. It costs a decode group, though —
-its `pixel_group` is the wide band's, not the pool's — and the board cannot price member count. That
-makes it an ensemble candidate to weigh against a group budget, not a drop-in.
+is *differently shaped* is worth more than its solo mean suggests.
+
+IT COSTS NO DECODE GROUP ALONGSIDE `band_dense`, which an earlier draft of this section got wrong.
+Read off the checkpoints against `Member.pixel_group`'s key (band, crop mm + centre, tie, group, img,
+slices, slots — `members.py:432`), `depth_regions` is band 0.1–0.9 / 20 slices / 336 px / centre=image
+— every field identical to `band_dense`. Region pooling happens on features that are already computed,
+so it changes the model and not the pixels. The two share one decode, and the greedy four
+(`band_dense`, `band_wide`, `depth_regions`, `calibrated_targets`) is THREE groups, not four.
+
+## The lateral-edge explanation, proposed and refuted the same hour
+
+A sagittal slice index IS the medial–lateral axis, so a whole-band maximum lets the medial compartment
+— larger, and roughly twice as many positives — win a channel the lateral compartment is competing
+for, and lateral structures additionally sit nearest the band edge. That story explains +0.0165 on
+Lateral Meniscus, and it makes a second prediction on the same data: **Lateral OA must move too.**
+
+It does not. Lateral OA is −0.0019 [−0.0144, +0.0123] — flat, on 233 positives, a label with enough
+power to have shown a move of that size. The explanation is refuted by its own second clause.
+
+STATE THE MULTIPLICITY, too: twelve labels tested at 95% give roughly 0.6 stars by chance, and this
+comparison has two. PF OA's is not one of them — it reproduces `band_wide`'s −0.0194 to a thousandth
+on a different arm, which is corroboration no chance star gets. Lateral Meniscus has no such second
+witness. So the honest state of it is ONE unexplained label, not a mechanism, and `depth_regions_narrow`
+is what turns it into either a reproduction or a coin flip.
