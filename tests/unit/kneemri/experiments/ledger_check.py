@@ -80,6 +80,26 @@ def test_truncated(tmp_path: Path):
     assert not check.truncated(RunMetrics(tmp_path / "predates.pt")), "an unrecorded recipe is not a smoke"
 
 
+def test_reran(tmp_path: Path):
+    """Rotations left beside a run count the EARLIER runs that wrote to its name.
+
+    The checkpoint and the `.holdout.npz` are not rotated, so after a second run the ledger's row can
+    quote a best whose artefacts have been replaced — which is what `depth_regions_span` did on
+    2026-08-19 when it re-entered `run_train` mid-flight. The current record must not be counted, and a
+    run that shares a PREFIX with another must not be counted either: `x` and `x_run1` sit side by side
+    in this project precisely because a re-run was preserved by hand.
+    """
+    (tmp_path / "twice.metrics.jsonl").write_text("", encoding="utf-8")
+    (tmp_path / "twice.metrics.1.jsonl").write_text("", encoding="utf-8")
+    (tmp_path / "once.metrics.jsonl").write_text("", encoding="utf-8")
+    (tmp_path / "once_run1.metrics.jsonl").write_text("", encoding="utf-8")
+    check = LedgerCheck(tmp_path / "absent.md")
+
+    assert check.reran(tmp_path, "twice") == 1, "one rotation means one earlier run under this name"
+    assert check.reran(tmp_path, "once") == 0, "the live record is not a rotation"
+    assert check.reran(tmp_path, "absent") == 0, "a run that never wrote a metrics file never re-ran"
+
+
 def test_unrecorded(tmp_path: Path):
     """A score the ledger quotes is recorded; one it does not is reported.
 

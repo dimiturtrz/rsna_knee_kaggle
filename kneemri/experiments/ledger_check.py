@@ -33,7 +33,7 @@ import torch
 
 from kneemri.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +112,26 @@ class LedgerCheck:
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and recipe.get("studies", "0") not in ("0", "")
 
+    def reran(self, processed: Path, name: str) -> int:
+        """How many EARLIER runs wrote to this name, counted from the rotations left beside it.
+
+        A re-run to the same `--out` rotates the metrics file (`RunMetrics.open`, for the `slices16`
+        mix-up) but NOTHING rotates the checkpoint or the `.holdout.npz`. So after a second run the
+        epochs of both survive and the weights and per-study predictions of only the last one do, and a
+        ledger row quoting the FIRST run's best has no file behind it any more.
+
+        That is not hypothetical: on 2026-08-19 `depth_regions_span` re-entered `run_train` mid-flight
+        and trained a second time under its own name. Its row quotes 0.8505 from run 1; the checkpoint
+        and predictions on disk will be run 2's. Nothing on disk says so, and the shape it presents to
+        this check is a run reported UNRECORDED for a score the ledger plainly contains — a mystery
+        rather than a cause.
+
+        Counted rather than scored, deliberately. Reading the rotated file's own best would mean
+        teaching a second reader the rotation naming, and the actionable fact needs no number: this
+        name trained more than once, so the artefacts belong to the last of them.
+        """
+        return len(list(processed.glob(f"{name}{METRICS_SUFFIX}.*.jsonl")))
+
     def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
         """The runs whose best score appears nowhere in the written record.
 
@@ -149,6 +169,17 @@ def main() -> None:
             arguments.ledger,
             arguments.interpretations,
         )
+        # A re-run is the likeliest innocent cause, and it is the one the reader cannot see from disk:
+        # the epochs rotate, the checkpoint and predictions do not, so the ledger's row may quote a run
+        # whose artefacts have been replaced. Said here rather than as its own failure because running a
+        # recipe twice is legitimate — what is not legitimate is the number changing without a reason.
+        earlier = check.reran(processed, name)
+        if earlier:
+            logger.info(
+                "  ... and it trained %d time(s) before under this name: the checkpoint and .holdout.npz "
+                "belong to the LAST run, so a row quoting an earlier best no longer has a file behind it",
+                earlier,
+            )
     logger.info("%d finished runs, %d unrecorded", len(runs), len(missing))
     if missing:
         raise SystemExit(1)
