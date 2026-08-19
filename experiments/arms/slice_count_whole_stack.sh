@@ -41,5 +41,5 @@ wait_for_cache 336 "$SLICES"
 run_train "slices${SLICES}_ws" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --slices "$SLICES" \
-  --recompute-activations --vram-gb 26 \
+  --recompute-activations \
   --labels "$LABELS" --out "$PROCESSED/slices${SLICES}_ws_s2026.pt"

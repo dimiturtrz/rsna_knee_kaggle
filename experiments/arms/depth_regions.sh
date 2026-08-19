@@ -43,6 +43,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train depth_regions \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 28 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --slice-regions 4 \
   --labels "$LABELS" --out "$PROCESSED/depth_regions_s2026.pt"

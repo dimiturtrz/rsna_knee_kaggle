@@ -22,11 +22,12 @@
 #          rate_wholestack = 0.8525 at 12 slices in the old band.
 # cost     1.25x band_wide's step time (120 images a study against 96); 12 epochs, one cache build.
 #
-# WHY --vram-gb 28 AND NOT 26. The first launch OOMed at the 26 cap: band_wide peaked at 21.6 GB
-# reserved for 96 images a study, and 120 needs about 27. The BATCH is deliberately not the knob that
-# pays for it — the ranking term forms its pairs inside the batch, so shrinking it would change the
-# loss at the same time as the coverage and this arm would answer nothing. 28 of 31.8 leaves the ~2.9
-# GB the desktop holds.
+# WHY THIS ARM NAMES NO CAP, AND WHAT IT USED TO NAME. It ran at --vram-gb 28 after its first launch
+# OOMed at 26: band_wide peaked at 21.6 GB reserved for 96 images a study, and 120 needs about 27.
+# DeviceBudget now derives that from --slices alone — 20 slices reserve 28.26 GB — so the hand-typed
+# number is gone and the measurement above is what the derivation reproduces. The BATCH is deliberately
+# not the knob that pays for it: the ranking term forms its pairs inside the batch, so shrinking it
+# would change the loss at the same time as the coverage and this arm would answer nothing.
 #
 # PREDICTION, written before the run. If dilution is the mechanism: Medial OA recovers toward zero
 # against rate_wholestack while MCL/ACL/Fracture/Contusion keep their band_wide gains, and the mean
@@ -51,6 +52,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train band_dense \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 28 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --labels "$LABELS" --out "$PROCESSED/band_dense_s2026.pt"

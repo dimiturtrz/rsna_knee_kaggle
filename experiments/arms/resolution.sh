@@ -61,9 +61,10 @@ CACHE_PX="${2:-448}"
 # the rate alone measured +0.0044 in the windowed era (knee-3om). Run this at 8e-6 to find out whether
 # resolution survives on its own; the default stays 4e-5 so re-running reproduces the member on disk.
 #
-# THE CAP IS 26, not 28: --vram-gb bounds PyTorch's allocator and not the device, so a number close to
+# THE CAP IS NOW DERIVED, and this arm ran at a hand-typed 26 rather than 28 for the reason the
+# derivation inherits: --vram-gb bounds PyTorch's allocator and not the device, so a number close to
 # physical leaves the driver no room and Windows pages over PCIe instead of raising OOM - 40 img/s
-# against ~1000, measured 2026-08-13.
+# against ~1000, measured 2026-08-13. DeviceBudget reserves off --slices, which is where 26 came from.
 #
 # --patience 3 saves about 9% of wall-clock and cannot change the recorded best (measured by replaying
 # every arm in the ledger).
@@ -126,5 +127,5 @@ run_train "resolution_${SIZE}${TAG}" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr "$RATE" --batch "$BATCH" --patience 3 $THROUGHPUT --vram-gb 26 \
+  --backbone-lr "$RATE" --batch "$BATCH" --patience 3 $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}${TAG}_ws_s2026.pt"

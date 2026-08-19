@@ -26,5 +26,5 @@ require "$LABELS"
 run_train "unfreeze_${BLOCKS}" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --unfreeze-last "$BLOCKS" \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/unfreeze${BLOCKS}_s2026.pt"

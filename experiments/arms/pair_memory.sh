@@ -35,5 +35,5 @@ require "$LABELS"
 run_train pair_memory \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --pair-memory 8 \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/pair_memory_s2026.pt"

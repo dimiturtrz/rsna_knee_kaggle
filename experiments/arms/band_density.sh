@@ -49,6 +49,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train band_density \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 28 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 \
   --labels "$LABELS" --out "$PROCESSED/band_density_s2026.pt"

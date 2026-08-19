@@ -116,5 +116,5 @@ run_train "$NAME" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
   --variant "$VARIANT" --image-size "$CACHE" --train-size "$SIZE" \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/${NAME}_s2026.pt"

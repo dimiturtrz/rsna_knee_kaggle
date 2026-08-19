@@ -45,6 +45,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train band_full \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 26 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.0 --band-high 1.0 \
   --labels "$LABELS" --out "$PROCESSED/band_full_s2026.pt"

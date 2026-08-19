@@ -51,6 +51,6 @@ require "$LABELS"
 # the memory point is the known one and only the step count changes.
 run_train multiscale \
   $RECIPE --epochs 8 --batch 6 \
-  --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
+  --slice-pooling max --whole-stack --recompute-activations \
   --scheme multiscale --centre tissue \
   --labels "$LABELS" --out "$PROCESSED/multiscale_s2026.pt"

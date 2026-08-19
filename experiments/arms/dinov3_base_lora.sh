@@ -32,5 +32,5 @@ run_train "dinov3_base_lora" \
   $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --lora-rank 8 --backbone-lr 5e-4 \
   --variant v3base --image-size 336 --train-size 224 \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/dinov3_base_lora_s2026.pt"

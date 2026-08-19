@@ -33,5 +33,5 @@ require "$LABELS"
 run_train "schedule_${EPOCHS}" \
   $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/schedule_${EPOCHS}_s2026.pt"

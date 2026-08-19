@@ -30,5 +30,5 @@ require "$LABELS"
 run_train "peak_rate_${PEAK}" \
   $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --backbone-lr "$PEAK" \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/peak_rate_${PEAK}_s2026.pt"

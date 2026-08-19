@@ -39,6 +39,6 @@ require "$LABELS"
 
 run_train crop80_tissue \
   $RECIPE --epochs 8 \
-  --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
+  --slice-pooling max --whole-stack --recompute-activations \
   --crop-mm 80 --centre tissue \
   --labels "$LABELS" --out "$PROCESSED/crop80_tissue_s2026.pt"

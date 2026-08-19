@@ -25,6 +25,6 @@ require "$LABELS"
 for fold in "$@"; do
   run_train "wholestack_fold${fold}" \
     --fold "$fold" --epochs 8 --one-cycle --weight-floor --rank-weight 1.0 \
-    --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
+    --slice-pooling max --whole-stack --recompute-activations \
     --labels "$LABELS" --out "$PROCESSED/wholestack_fold${fold}.pt"
 done

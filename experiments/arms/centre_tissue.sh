@@ -31,6 +31,6 @@ require "$LABELS"
 
 run_train centre_tissue \
   $RECIPE --epochs 8 \
-  --slice-pooling max --whole-stack --recompute-activations --vram-gb 20 \
+  --slice-pooling max --whole-stack --recompute-activations \
   --centre tissue \
   --labels "$LABELS" --out "$PROCESSED/centre_tissue_s2026.pt"

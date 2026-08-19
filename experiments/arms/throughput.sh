@@ -26,7 +26,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 BASE=($RECIPE --epochs 1
-      --slice-pooling max --whole-stack --recompute-activations --vram-gb 22
+      --slice-pooling max --whole-stack --recompute-activations
       --labels "$LABELS")
 
 run_train throughput_plain "${BASE[@]}" --eager-encoder --out "$PROCESSED/throughput_plain.pt"
@@ -45,7 +45,7 @@ run_train throughput_bf16 "${BASE[@]}" --out "$PROCESSED/throughput_bf16.pt"
 # batch 6, where both fit. The pair is comparable to each other, not to the rows above: a smaller batch
 # changes the ranking term's within-batch pairs, and img/s is per IMAGE, so the tax reads clean.
 HALF=($RECIPE --epochs 1
-      --slice-pooling max --whole-stack --batch 6 --vram-gb 28 --labels "$LABELS")
+      --slice-pooling max --whole-stack --batch 6 --labels "$LABELS")
 run_train throughput_ckpt_on "${HALF[@]}" --recompute-activations --out "$PROCESSED/throughput_ckpt_on.pt"
 run_train throughput_ckpt_off "${HALF[@]}" --out "$PROCESSED/throughput_ckpt_off.pt"
 

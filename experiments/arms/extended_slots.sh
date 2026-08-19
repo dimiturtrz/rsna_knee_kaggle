@@ -43,5 +43,5 @@ wait_for_cache 336 12 extended
 run_train extended_slots \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --scheme extended \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/extended_ws_s2026.pt"

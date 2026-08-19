@@ -165,6 +165,13 @@ stale; that still needs a reader.
   the card: `await_headroom` blocks until `free >= vram_gb`, so an overstated ask makes a run poll for
   memory it will never allocate, burn the wait bound, and start into the PCIe crawl. Name a number
   only to *contradict* the derivation, and say in the arm why.
+  **NO ARM NAMES ONE NOW** (2026-08-19): `arm_check` grew an OVERSTATED report, it named 37 of 50 —
+  not thirteen — and the count is the finding. The 20 / 26 / 28 the arms had converged on were picked
+  as fractions of the CARD, months before a cap was derived from the RECIPE, so 26 on a 12-slice arm
+  is 8.4 GB over need for the same reason 28 is 10.4. There was no honest threshold between "copied"
+  and "rounded", which is what the first version of that report tried to legislate; the flag was
+  simply obsolete everywhere, and it is now stripped from all 36 arms that carried it. The three
+  headers that argued for a specific number keep the MEASUREMENT and drop the prescription.
 
 ## Ledger — fold 0, seed 2026, 24 epochs, one-cycle, weight floor, ranking on
 

@@ -29,5 +29,5 @@ require "$LABELS"
 # without it, this arm died on that ValueError in its first smoke — a queue slot to discover.
 run_train slot_mean \
   $RECIPE --epochs 12 --slice-pooling max \
-  --slot-pooling mean --whole-stack --recompute-activations --vram-gb 20 \
+  --slot-pooling mean --whole-stack --recompute-activations \
   --labels "$LABELS" --out "$PROCESSED/slotmean_s2026.pt"

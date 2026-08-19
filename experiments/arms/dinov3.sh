@@ -89,5 +89,5 @@ run_train "dinov3_${VARIANT}_${SIZE}_lr${RATE}${BUDGET}" \
   $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack --variant "$VARIANT" \
   --image-size "$CACHE" --train-size "$SIZE" --backbone-lr "$RATE" \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/dinov3_${VARIANT}_${SIZE}_lr${RATE}${BUDGET}_s2026.pt"

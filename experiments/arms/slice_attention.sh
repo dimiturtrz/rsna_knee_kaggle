@@ -25,5 +25,5 @@ require "$LABELS"
 # better budget (both folds peaked at epoch 6), but that is a different arm.
 run_train slice_attention \
   $RECIPE --epochs 12 \
-  --slice-pooling attend --whole-stack --recompute-activations --vram-gb 20 \
+  --slice-pooling attend --whole-stack --recompute-activations \
   --labels "$LABELS" --out "$PROCESSED/sliceattn_s2026.pt"

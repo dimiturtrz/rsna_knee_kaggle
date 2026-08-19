@@ -40,6 +40,6 @@ require "$LABELS"
 # empty card and is the PCIe-paging crawl when a co-tenant holds the difference (lora.sh measured 30 as
 # worse than 26 for this reason). 18 clears the measured peak and stays under what will be free.
 run_train depth_regions_span \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 18 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --slice-regions 4 \
   --labels "$LABELS" --out "$PROCESSED/depth_regions_span_s2026.pt"

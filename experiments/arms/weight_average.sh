@@ -25,5 +25,5 @@ require "$LABELS"
 run_train weight_average \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --ema \
-  --recompute-activations --vram-gb 22 \
+  --recompute-activations \
   --labels "$LABELS" --out "$PROCESSED/ema_ws_s2026.pt"

@@ -23,7 +23,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-BASE=($RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 26 --labels "$LABELS")
+BASE=($RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --labels "$LABELS")
 
 run_train rate_1e-4 "${BASE[@]}" --backbone-lr 1e-4 --out "$PROCESSED/lr1e-4_ws_s2026.pt"
 run_train rate_2e-4 "${BASE[@]}" --backbone-lr 2e-4 --out "$PROCESSED/lr2e-4_ws_s2026.pt"

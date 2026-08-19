@@ -62,10 +62,10 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # what it needs, so the forty-minute deliverable would have died in the same place. The member's own
 # recorded options say vram_gb 28.0 and compile_encoder False; this arm asks for the same shape in six
 # fewer gigabytes AND adds compile on top, which was a configuration nobody had run. The same smoke
-# passes at 28 (one epoch, 41 s including compilation). 28 of 31.8 still leaves headroom, which the cap
-# needs for a reason worth keeping: --vram-gb bounds PyTorch's allocator and not the device, so set close
-# to physical, Windows pages over PCIe instead of raising OOM and the run crawls at a twenty-fifth of the
-# throughput while reporting 100% utilisation.
+# passes at 28 (one epoch, 41 s including compilation). The arm no longer names that number — DeviceBudget
+# derives the cap from --slices — but the reason a cap exists at all is worth keeping: --vram-gb bounds
+# PyTorch's allocator and not the device, so set close to physical, Windows pages over PCIe instead of
+# raising OOM and the run crawls at a twenty-fifth of the throughput while reporting 100% utilisation.
 EPOCHS="${1:-12}"
 require "$LABELS"
-run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --vram-gb 28 --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"

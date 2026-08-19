@@ -41,5 +41,5 @@ require "$LABELS"
 run_train "calibrated_targets" \
   $RECIPE --epochs 12 --patience 3 \
   --slice-pooling max --whole-stack --calibrated-targets \
-  $THROUGHPUT --vram-gb 26 \
+  $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/calibrated_targets_s2026.pt"
