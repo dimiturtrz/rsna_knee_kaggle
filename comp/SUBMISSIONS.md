@@ -877,3 +877,25 @@ indistinguishable from it. It does not say `band_span` is worse than `depth_regi
 tick between two entries inside the floor is the same non-result in the other direction. And it does not
 retire `record_mix` — a ruler that correctly reports "these are the same" is working. It retires the
 practice of *acting* on its ordering below the floor.
+
+#### Amendment to slot 5's pre-registration, written after slots 2 and 3 returned and before it fires
+
+Slot 5 was pre-registered to test the ONE-SWAP RULE — "single swaps transfer, compound ones do not" —
+at a second point. Slots 2 and 3 dissolved that rule before slot 5 fired: a single swap returned 0.927
+and the compound returned 0.927, so member count was never the separator. **The hypothesis slot 5 was
+written to test no longer exists**, and honesty requires saying so here rather than reading its result
+against a clause its own evidence has retired.
+
+What it can still answer is narrower and worth stating exactly. `greedy4` is the **offline maximum over
+the mounted pool** (0.8679, +0.0031). Under the rule slots 2 and 3 just bought — an edge inside 0.0062
+is not worth a slot — this entry is *itself* inside the floor and should be expected to return 0.927 or
+0.928 like the other four. Firing it is therefore not a test of a live hypothesis; it is the cheapest
+available check that the pool's maximum behaves like the pool's middle, which is the last thing that
+could still show the offline ruler carrying signal below its own floor. If it too lands at 0.928, the
+roster-search axis is closed by five independent points rather than four, and every subsequent slot goes
+to a member that does not exist yet.
+
+It fires only because the slot is free at the 00:00Z reset and no better-argued candidate is ready — a
+NEW member is what the evidence now asks for, and both arms that could produce one (`focal_dense`,
+`band_dense_long`) are still on the card. That is the honest reason, and it is a weaker one than the
+pre-registration above claims.
