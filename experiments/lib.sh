@@ -254,6 +254,46 @@ run_train() {
   # The completion marker is emitted HERE, on success only, rather than by each arm. An arm that
   # prints its own marker prints it whatever happened - which is how a dead arm advanced the queue.
   _mark "$name" "ARM DONE $name"
+  _seat_value "$name"
+}
+
+_seat_value() {
+  # The SECOND ruler, printed beside the first rather than remembered.
+  #
+  # Every arm header names a matched control - the same recipe with one field changed - which answers
+  # "did this knob do anything" and not "does this earn a seat". The two came apart once the roster
+  # stopped being the control's family: res392_ws scores 0.8523 alone, shipped in the four that scored
+  # 0.925, and a greedy over 22 members takes it NINTH, the first pick that LOWERS the mix. Solo score
+  # ranked it into a submission; marginal contribution never would have.
+  #
+  # Here rather than in a convention, because a convention is a thing to forget at exactly the moment
+  # a number looks good. Both readings now land in the same log, at the same time, unasked.
+  #
+  # THE CHECKPOINT COMES FROM THE TRAINER'S OWN BEST LINE, not from the arm name. The kept epoch's
+  # file is the artefact the ledger quotes and the only one whose record matches the reported score;
+  # rebuilding the path from "$name_s2026.pt" would be a second naming rule to drift from the first.
+  #
+  # A FAILURE HERE IS REPORTED, NEVER PROPAGATED. The read joins on the shared holdout, so an arm on
+  # another fold or a smoke split raises rather than scores - correctly, that is `shared`'s refusal.
+  # But the arm TRAINED, and marking a finished arm failed because an after-the-fact reading could not
+  # join would throw away forty minutes of GPU over arithmetic that costs none.
+  local name="$1" best checkpoint
+  best="$(grep -m1 'best holdout' "$LOGS/$name.full.log")"
+  checkpoint="${best##*-> }"
+  checkpoint="${checkpoint%% |*}"
+  if [ ! -f "$checkpoint" ]; then
+    _mark "$name" "SEAT VALUE skipped: no checkpoint at '$checkpoint'"
+    return 0
+  fi
+  # --no-sync for the same reason run_train uses it: another chain may already be training, and a
+  # re-sync of .venv under its interpreter kills it mid-epoch.
+  local report
+  if ! report="$(uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value \
+      --candidates "$checkpoint" 2>&1)"; then
+    _mark "$name" "SEAT VALUE unavailable for $name: $report"
+    return 0
+  fi
+  _mark "$name" "$report"
 }
 
 _mark() {
