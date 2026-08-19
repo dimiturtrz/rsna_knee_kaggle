@@ -41,6 +41,13 @@ from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, Holdout
 
 logger = logging.getLogger(__name__)
 
+SHARED_FLOOR = 0.9
+"""How much of the widest member's holdout the shared set must keep before a mix is believed.
+
+Not a tolerance for disagreement — members on one split agree exactly, so the real values are 1.0 or a
+fraction near zero. It is a floor with room for a member whose record predates a handful of studies.
+"""
+
 
 class RecordMix:
     """The members' recorded holdout predictions, joined onto the studies all of them held out."""
@@ -80,6 +87,13 @@ class RecordMix:
         first record's own numbers were — and an empty intersection is an error, not an empty table:
         members from different folds produce exactly that, and their mix would otherwise report a mean
         over nothing.
+
+        A SMALL intersection is refused for the same reason an empty one is. A smoke run holds out
+        eleven studies; sweeping the processed directory put four of them beside twenty-three real
+        members, and the search silently reported a greedy ordering over those eleven — a number that
+        looked like every other number this tool prints. The denominator has to be checked, not
+        assumed, so a member that costs the shared set most of its studies is named and the mix is
+        refused rather than quietly reported over the survivors.
         """
         readings = self.readings()
         if not readings:
@@ -89,6 +103,14 @@ class RecordMix:
         studies = [name for name in readings[0][1].studies if name in common]
         if not studies:
             message = f"no study is held out by all {len(readings)} members — different folds or splits"
+            raise ValueError(message)
+        widest = max(len(reading.studies) for _, reading in readings)
+        if len(studies) < SHARED_FLOOR * widest:
+            narrow = sorted(name for name, reading in readings if len(reading.studies) < widest)
+            message = (
+                f"{len(studies)} shared studies against {widest} in the widest member — "
+                f"{', '.join(narrow)} hold out a different split (smoke runs and other folds do this)"
+            )
             raise ValueError(message)
         return studies
 

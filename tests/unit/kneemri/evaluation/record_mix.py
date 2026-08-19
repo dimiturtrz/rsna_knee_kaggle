@@ -40,18 +40,41 @@ def test_readings(tmp_path: Path):
 
 def test_shared(tmp_path: Path):
     """The intersection, in the FIRST member's order — and no intersection is a refusal."""
-    truth = (RNG.random((6, LABELS)) > 0.5).astype(np.float32)
-    _record(tmp_path / "a.pt", ["s2", "s1", "s0"], truth=truth[:3])
-    _record(tmp_path / "b.pt", ["s0", "s2"], truth=truth[[2, 0]])
+    order = [f"s{index}" for index in reversed(range(20))]
+    truth = (RNG.random((20, LABELS)) > 0.5).astype(np.float32)
+    _record(tmp_path / "a.pt", order, truth=truth)
+    _record(tmp_path / "b.pt", order[::-1][:19], truth=truth[::-1][:19])
 
-    assert RecordMix([tmp_path / "a.pt", tmp_path / "b.pt"]).shared() == ["s2", "s0"]
+    shared = RecordMix([tmp_path / "a.pt", tmp_path / "b.pt"]).shared()
+    assert shared == order[1:], "the first member's order, minus what b never held"
 
-    _record(tmp_path / "elsewhere.pt", ["s9"], truth=truth[3:4])
+    _record(tmp_path / "elsewhere.pt", [f"e{index}" for index in range(20)], truth=truth)
     with pytest.raises(ValueError, match="different folds or splits"):
         RecordMix([tmp_path / "a.pt", tmp_path / "elsewhere.pt"]).shared()
 
     with pytest.raises(ValueError, match="no member carries a holdout record"):
         RecordMix([tmp_path / "absent.pt"]).shared()
+
+
+def test_shared_refuses_a_narrow_member(tmp_path: Path):
+    """A smoke run beside real members is named, not silently made the denominator.
+
+    The failure this guards is the one that reports a plausible number: intersecting twenty-three
+    909-study members with an 11-study smoke record leaves eleven, and a greedy ordering over eleven
+    studies prints exactly like one over 909.
+    """
+    truth = (RNG.random((40, LABELS)) > 0.5).astype(np.float32)
+    studies = [f"s{index}" for index in range(40)]
+    _record(tmp_path / "real.pt", studies, truth=truth)
+    _record(tmp_path / "smoke.pt", studies[:4], truth=truth[:4])
+
+    with pytest.raises(ValueError, match="smoke.pt"):
+        RecordMix([tmp_path / "real.pt", tmp_path / "smoke.pt"]).shared()
+
+    _record(tmp_path / "one_short.pt", studies[:39], truth=truth[:39])
+    assert len(RecordMix([tmp_path / "real.pt", tmp_path / "one_short.pt"]).shared()) == 39, (
+        "a member missing a handful of studies is still a mix"
+    )
 
 
 def test_per_member(tmp_path: Path):

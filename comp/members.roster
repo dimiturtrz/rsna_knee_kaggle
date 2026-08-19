@@ -47,3 +47,23 @@ lr1e-4_ws_s2026.pt          # 0.8490 — the same lever 2.5x past its plateau
 # +0.0002 (knee-a8x). res392 and lr4e-5 therefore carry the SAME lever through different pixels, which
 # is why both are mounted rather than one replacing the other — the pool's question is whether the
 # 392 px read adds anything once the rate is held equal, and only a package holding both can ask it.
+band_dense_s2026.pt         # 0.8578 — the best single member we have; band 0.10-0.90 at 20 slices
+band_wide_s2026.pt          # 0.8553 — the same band at 16 slices
+deep24_s2026.pt             # 0.8465
+# Added 2026-08-19. The first two vary the axis no other member touches: every other entry above reads
+# the same 0.20-0.80 sagittal band, so the pool has never held a member that looks at the joint's
+# edges. They are not redundant with each other — measured against one another, band_dense wins the
+# centre (PF OA +0.0194 [+0.0043,+0.0355], Medial OA +0.0122 [+0.0004,+0.0239]) and band_wide wins the
+# periphery (MCL +0.0111, Contusion and Fracture +0.0052 each), which is a trade in the pooled
+# representation rather than a difference in what the series contains. Paired they read 0.8633 over
+# the 909-study fold-0 holdout, +0.0055 over the better of them.
+#
+# Greedy forward selection over all 23 same-split checkpoints now picks band_dense FIRST and band_wide
+# SECOND, and plateaus at SEVEN members / 0.8661 (band_dense, band_wide, calibrated_targets, lr4e-5_ws,
+# intensity392_ws, deep24, lr1e-4_ws) against 0.8646 for the six before band_dense existed. deep24 is
+# mounted to complete that seven — it has been the named-but-missing member since 2026-08-17.
+#
+# This roster now names twelve while the best subset is seven. That is deliberate and it is NOT the
+# "mount more, name more" the note above refutes: mounting costs a dataset push, NAMING costs the
+# kernel's `chosen` tuple, and only the second decides a score. A mounted member a kernel does not name
+# costs nothing; an unmounted one a kernel wants costs a push and a slot.
