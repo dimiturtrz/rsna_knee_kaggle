@@ -1083,6 +1083,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.experiments.arm_smoke",
       "weight": 1
     },
@@ -1102,6 +1108,12 @@
       "kind": "import",
       "source": "kneemri.experiments.ledger_check",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.ledger_check",
+      "target": "kneemri.denominator",
       "weight": 1
     },
     {
@@ -1407,6 +1419,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.champion_check",
+      "target": "kneemri.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_check",
       "target": "kneemri.kaggle.package_members",
       "weight": 1
     },
@@ -1509,6 +1527,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.kit_check",
+      "target": "kneemri.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.kit_check",
       "target": "kneemri.kaggle.kernel_closure",
       "weight": 1
     },
@@ -1516,6 +1540,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.kit_check",
       "target": "kneemri.kaggle.mounted_kit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.denominator",
       "weight": 1
     },
     {
@@ -1534,6 +1564,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.mount_check",
       "target": "kneemri.kaggle.kernel_sources",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.kaggle.live_dataset",
       "weight": 1
     },
     {
@@ -6381,6 +6417,18 @@
     {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_check.ArmCheck",
       "weight": 1
     },
@@ -6508,6 +6556,18 @@
       "kind": "calls",
       "source": "kneemri.experiments.ledger_check.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.ledger_check.main",
+      "target": "kneemri.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.main",
+      "target": "kneemri.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -7495,6 +7555,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.champion_check.main",
       "target": "kneemri.kaggle.champion_check.Champion.recorded",
@@ -7857,6 +7929,18 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.kit_check.main",
+      "target": "kneemri.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.main",
+      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kit_check.main",
       "target": "kneemri.kaggle.kit_check.KitCheck",
       "weight": 1
     },
@@ -7948,6 +8032,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
       "target": "kneemri.kaggle.mount_check.MountCheck.unpushed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -10155,7 +10251,7 @@
       "role": null
     },
     {
-      "descendants": 116,
+      "descendants": 117,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -10344,6 +10440,14 @@
       "label": "window_reader",
       "level": "module",
       "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.denominator",
+      "label": "denominator",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -11521,6 +11625,14 @@
       "level": "class",
       "parent": "kneemri.corpus.window_reader",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.denominator.Denominator",
+      "label": "Denominator",
+      "level": "class",
+      "parent": "kneemri.denominator",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -14120,6 +14232,14 @@
       "label": "read",
       "level": "method",
       "parent": "kneemri.corpus.window_reader.WindowReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.denominator.Denominator.refuse_empty",
+      "label": "refuse_empty",
+      "level": "method",
+      "parent": "kneemri.denominator.Denominator",
       "role": null
     },
     {
