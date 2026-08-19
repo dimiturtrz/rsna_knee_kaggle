@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-# queue.sh <sentinel.pt> <arm> [arm...] — run arms serially once the GPU frees up.
+# queue.sh <sentinel.pt> <entry> [entry...] — run arms serially once the GPU frees up.
+#
+# AN ENTRY IS AN ARM NAME PLUS THAT ARM'S ARGUMENTS, quoted as one word — `"resolution 420 448"`, the
+# same shape after.sh takes. It used to be a bare name and the arguments were dropped in silence, so
+# queueing a parameterised arm ran its DEFAULT: `resolution` spent a slot re-fitting a member we
+# already had and overwrote its checkpoint with a copy of itself, while the queue file read as if it
+# had asked for a rung (knee-8hu7). Splitting the entry is why `parts` exists rather than a loop over
+# "$@" directly. Snapshotting is not this script's job: lib.sh re-execs any arm launched from the repo
+# tree out of a snapshot copy and forwards the arguments it was given.
 #
 # WHY THIS EXISTS. Arms were launched one at a time, so the GPU sat idle for the whole gap between a
 # run finishing and someone noticing (four hours on 2026-08-19). The fix is not a longer chain typed
@@ -18,7 +26,7 @@
 # timeout that trips on a slow-but-healthy run destroys the arm and the slot both.
 set -u
 
-SENTINEL="${1:?usage: queue.sh <sentinel.pt> <arm> [arm...]}"
+SENTINEL="${1:?usage: queue.sh <sentinel.pt> <entry> [entry...]}"
 shift
 [ "$#" -gt 0 ] || { echo "queue.sh: no arms named"; exit 2; }
 
@@ -33,10 +41,13 @@ done
 # The checkpoint appears before the process has finished writing it and released the GPU.
 sleep 120
 
-for arm in "$@"; do
+entries=("$@")
+for entry in "${entries[@]}"; do
+  read -r -a parts <<< "$entry"
+  arm="${parts[0]}"
   script="experiments/arms/$arm.sh"
   [ -f "$script" ] || { echo "queue.sh: no such arm '$arm'"; exit 3; }
-  echo "=== $(date -u +%H:%M:%SZ) queue: $arm ==="
-  timeout "$ARM_TIMEOUT" bash "$script"
+  echo "=== $(date -u +%H:%M:%SZ) queue: $entry ==="
+  timeout "$ARM_TIMEOUT" bash "$script" "${parts[@]:1}"
   echo "=== $(date -u +%H:%M:%SZ) queue: $arm exited $? ==="
 done
