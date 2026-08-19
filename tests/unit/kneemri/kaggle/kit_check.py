@@ -5,9 +5,22 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from kneemri.kaggle.kit_check import KitCheck
 
 GIT = shutil.which("git") or "git"
+
+
+def _git_in(repo: Path):
+    """git, run against THIS directory — `env=KitCheck.unhooked()` because `-C` alone is not enough under a hook."""
+
+    def run(*command: str) -> None:
+        subprocess.run(  # noqa: S603
+            [GIT, "-C", str(repo), *command], check=True, capture_output=True, env=KitCheck.unhooked()
+        )
+
+    return run
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -18,7 +31,7 @@ def _repo(tmp_path: Path) -> Path:
     """
     repo = tmp_path / "repo"
     (repo / "kneemri" / "kaggle").mkdir(parents=True)
-    run = lambda *command: subprocess.run([GIT, "-C", str(repo), *command], check=True, capture_output=True)  # noqa: E731, S603
+    run = _git_in(repo)
     run("init", "-q")
     run("config", "user.email", "t@t")
     run("config", "user.name", "t")
@@ -67,7 +80,7 @@ def test_drift(tmp_path: Path):
     assert check.drift(_kit(tmp_path / "current", current)) == []
     assert "no commit stamp" in check.drift(_kit(tmp_path / "unstamped", None))[0]
 
-    run = lambda *command: subprocess.run([GIT, "-C", str(repo), *command], check=True, capture_output=True)  # noqa: E731, S603
+    run = _git_in(repo)
     (repo / "README.md").write_text("docs", encoding="utf-8")
     run("add", "-A")
     run("commit", "-qm", "docs only")
@@ -133,8 +146,28 @@ def test_a_path_inside_the_repo_answers_the_same_as_its_root(tmp_path: Path):
     repo = _repo(tmp_path)
     behind_at = KitCheck(repo).asked("rev-parse", "--short", "HEAD")
     (repo / "kneemri" / "model.py").write_text("second", encoding="utf-8")
-    subprocess.run([GIT, "-C", str(repo), "add", "-A"], check=True, capture_output=True)  # noqa: S603
-    subprocess.run([GIT, "-C", str(repo), "commit", "-qm", "second"], check=True, capture_output=True)  # noqa: S603
+    run = _git_in(repo)
+    run("add", "-A")
+    run("commit", "-qm", "second")
     kit = _kit(tmp_path / "behind", behind_at)
 
     assert KitCheck(repo).drift(kit) == KitCheck(repo / "kneemri").drift(kit) != []
+
+
+def test_unhooked(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The variables a git hook exports are dropped, and everything else survives.
+
+    THE POINT IS THE INHERITANCE, not the dictionary: `git -C <dir>` is overruled by an inherited
+    `GIT_DIR`, so a check that runs from pre-commit answers about the repository that invoked the hook
+    rather than the one it was handed. Found when these tests — which build their own repository in a
+    temp directory — failed inside a pre-push run and passed on their own.
+    """
+    monkeypatch.setenv("GIT_DIR", ".git")
+    monkeypatch.setenv("GIT_INDEX_FILE", "index")
+    monkeypatch.setenv("KNEEMRI_KEPT", "yes")
+
+    environment = KitCheck.unhooked()
+
+    assert "GIT_DIR" not in environment
+    assert "GIT_INDEX_FILE" not in environment
+    assert environment["KNEEMRI_KEPT"] == "yes", "only git's own hook variables are dropped"

@@ -1,7 +1,7 @@
 import json
 import logging
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import override
@@ -315,8 +315,14 @@ def test_pool(tmp_path: Path):
     3s serially, because four spawned interpreters cost more than three studies of decoding save.
     """
     submission = _submission(tmp_path)
+    # THE CHOICE IS ASSERTED, THE SPAWN IS NOT. This used to run work through the process pool, which
+    # starts four fresh interpreters — and on a machine already holding a training arm that start is
+    # slow enough to break the pool: it failed inside a pre-push run with `concurrent.futures` and
+    # passed on its own. What the method decides is which executor to hand back, and that is decidable
+    # without paying for one; whether spawned workers produce the same bag as the serial path is
+    # `test_chunks`, which measures exactly that equality.
     with submission.pool(studies=1000) as pool:
-        assert pool.submit(len, "abc").result() == 3
+        assert isinstance(pool, ProcessPoolExecutor), "a real run spawns rather than threads"
     with submission.pool(studies=3) as small:
         assert isinstance(small, ThreadPoolExecutor), "a three-study run must not spawn interpreters"
         assert small.submit(len, "abc").result() == 3

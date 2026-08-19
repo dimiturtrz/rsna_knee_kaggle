@@ -22,6 +22,7 @@ log names the mounted commit, but only after the slot is spent — the same too-
 import argparse
 import json
 import logging
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -35,6 +36,19 @@ logger = logging.getLogger(__name__)
 
 class KitCheck:
     """The built kit's commit against the working tree's, in the files a kernel actually loads."""
+
+    @staticmethod
+    def unhooked() -> dict[str, str]:
+        """This process's environment with git's hook variables removed.
+
+        `GIT_DIR`, `GIT_INDEX_FILE` and `GIT_WORK_TREE` are how a hook is told which repository invoked
+        it, and a git child inherits them: `git -C somewhere-else` then still answers about the hook's
+        repo. Any git call meant to be about a NAMED directory needs an environment without them.
+
+        STATIC because it is needed BEFORE a KitCheck can exist — `__init__` shells git itself, and
+        `build_kit` stamps a kit without constructing one at all.
+        """
+        return {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
 
     def __init__(self, inside: Path) -> None:
         """Anchored at the repository ROOT, whatever path inside it is handed over.
@@ -51,9 +65,25 @@ class KitCheck:
         self.loaded = KernelClosure(self.repo).files()
 
     def asked(self, *command: str) -> str:
-        """One read-only git question, answered from this repo."""
+        """One read-only git question, answered from this repo — and from THIS repo under a git hook.
+
+        `-C` IS NOT ENOUGH. Git exports `GIT_DIR`, `GIT_INDEX_FILE` and `GIT_WORK_TREE` into every hook
+        it runs, and an inherited `GIT_DIR` OUTRANKS `-C`: the child then answers about whatever
+        repository invoked the hook, no matter which directory it was pointed at. This check runs from
+        pre-commit and pre-push, which is exactly where those variables are set.
+
+        In this repo the two happen to be the same tree, so the wrong answer is the right one and
+        nothing said otherwise — until the unit tests, which build their own repository in a temp
+        directory, failed inside a pre-push run and passed everywhere else. A check that silently
+        reports on a different repository than the one it was handed is the failure `--mounted` exists
+        to prevent, so it is fixed here rather than in the tests that found it.
+        """
         return subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell, our own repo
-            [self.git, "-C", str(self.repo), *command], capture_output=True, text=True, check=True
+            [self.git, "-C", str(self.repo), *command],
+            capture_output=True,
+            text=True,
+            check=True,
+            env=self.unhooked(),
         ).stdout.strip()
 
     def stamped(self, kit: Path) -> str | None:

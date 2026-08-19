@@ -17,6 +17,7 @@ import subprocess
 from pathlib import Path
 
 from core.paths import DataRoot
+from kneemri.kaggle.kit_check import KitCheck
 from kneemri.kaggle.kit_wheels import KitWheels
 
 logger = logging.getLogger(__name__)
@@ -92,9 +93,13 @@ def main() -> None:
     # to fix. Stamped here and logged by kernel_run, so a run's own output names the code that made it.
     git = shutil.which("git") or "git"
 
+    # `env=KitCheck.unhooked()` because `-C` is overruled by an inherited GIT_DIR/GIT_INDEX_FILE, which git
+    # exports into every hook it runs. That matters most HERE: `status --porcelain` against a borrowed
+    # index would stamp the kit's `dirty` flag from a different tree, and that stamp is the ground truth
+    # `kit_check` compares every later kit against.
     def asked(*command: str) -> str:
         return subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell, our own repo
-            [git, "-C", str(_REPO), *command], capture_output=True, text=True, check=True
+            [git, "-C", str(_REPO), *command], capture_output=True, text=True, check=True, env=KitCheck.unhooked()
         ).stdout.strip()
 
     revision = asked("rev-parse", "--short", "HEAD")
