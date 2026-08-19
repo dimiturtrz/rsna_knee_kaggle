@@ -204,6 +204,70 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `pair_memory` | cross-step memory of 8 pairs in the ranking loss | 0.8155 @ e3 | −0.0302 vs `wsfold0_e6` | **refuted on the mean**; 0.8353 was a first run whose checkpoint was overwritten, see below |
 | `dinov3_base_lora` | DINOv3-**base**/16 + rank-8 adapters, 224 | **0.8268** | +0.0051 vs `lora` v3small | best v3 member we have, and still **not a member** — see the oracle below |
 | `slot_mean` | uniform mean over present slots instead of learned slot attention | 0.8406 | −0.0051 vs `whole_stack` | attention is worth ONE floor-width — a knob, not a lever (knee-7gv) |
+| `per_label_loss` | loss normalised per column, so each of the twelve weighs one twelfth | 0.8414 | −0.0043 vs `wsfold0_e6` | **the arm's own null, and its falsifiable clause resolves with the WRONG SIGN** — see below |
+| `weight_average` | EMA of the weights, scored and saved in place of the live ones | 0.8460 | +0.0003 vs `wsfold0_e6` | flat where a holdout ranks epochs, exactly as written; the last-epoch case is +0.0013, directional — see below |
+
+### Per-label loss weighting is refuted a second time, now from the training side (2026-08-19)
+
+`per_label_loss` normalised the loss per column so each finding weighs one twelfth, against a data
+mismatch it stated in numbers: Effusion is positive in 2,666 studies and Fracture in 314, so pooled
+cross-entropy spends about ten times more gradient on one than on the other while the score counts them
+the same. It scored **0.8414 against the control's 0.8457, −0.0043**.
+
+The mean is inside the 0.0062 floor and on its own would be a shrug. **The pre-registered falsifiable
+clause is what settles it**: the arm wrote that a gain must concentrate in the rare labels — Fracture
+(314 positives), Synovitis (580), MCL (767) — and that a uniform shift would mean something else moved
+it. Read against `weight_average`, which is the same recipe at the same epoch count and the closest
+per-label control we have printed (0.8460 vs the control's 0.8457, i.e. matched on the mean):
+
+| | Fracture | MCL | Synovitis | Lat Men | ACL | Med Men | Effusion |
+|---|---|---|---|---|---|---|---|
+| positives | 314 | 767 | 580 | — | — | 2,347 | 2,666 |
+| `weight_average` | 0.785 | 0.752 | 0.880 | 0.816 | 0.876 | 0.880 | 0.846 |
+| `per_label_loss` | 0.763 | 0.750 | 0.878 | 0.809 | 0.869 | 0.874 | 0.849 |
+| Δ | **−0.022** | −0.002 | −0.002 | −0.007 | −0.007 | −0.006 | +0.003 |
+
+It is not a uniform shift: eleven labels sit within −0.007 and one is three times further out. It
+concentrates exactly where the arm said it would — **and it is negative there.** The rarest label takes
+the largest loss, and it is the label the reweighting up-weighted most.
+
+That is a mechanism, not a coin flip. Up-weighting a 314-positive column multiplies the variance of its
+gradient without adding any information to it: the same handful of studies simply speak louder, so the
+encoder fits their noise. AUC being rank-based and invariant to the positive rate — which the arm named
+first as the reason this might do nothing — means there was no compensating gain to set against that.
+
+**Caveat on the denominator, which is the weakest part of this read:** 314 positives is the least stable
+AUC in the table, so −0.022 on Fracture carries a wider interval than any other cell and this is
+directional evidence, not a measured effect size. What is *not* soft is the sign and the ordering.
+
+This is now the second independent refutation of treating labels separately, and the two come from
+opposite ends of the pipeline: [the oracle line](#the-ceiling-of-combining-what-we-have-is-the-plain-average-2026-08-17)
+killed per-label weighting at the *ensembling* stage (−0.004 to −0.005 against plain averaging), and this
+kills it at the *objective*. Prevalence in this dataset is not a mismatch to be corrected; it is the
+budget that buys the common labels their scores. **Per-label treatment is closed on both sides.**
+
+### An EMA buys nothing where a holdout picks the epoch, and ~+0.0013 where it does not (2026-08-19)
+
+`weight_average` scored **0.8460 against 0.8457** — flat, and its written prediction is why that is the
+expected result rather than a disappointment: keeping the BEST epoch by holdout score is *itself* an
+average over the trajectory, so an EMA was predicted to help LEAST here and MOST in the final fit, where
+no holdout ranks epochs and the last one is kept by construction.
+
+So the mean is the wrong number to read this arm on. Its own stated targets were the best-to-last gap and
+the last-epoch value:
+
+| | best | last (e11) | gap |
+|---|---|---|---|
+| `wsfold0_e6` control | 0.8457 | 0.8394 | 0.0063 |
+| `weight_average` | 0.8460 | **0.8407** | **0.0053** |
+
+The gap shrinks by 0.0010 and the last epoch gains **+0.0013** — both far under the 0.0062 floor, so
+neither is a result. The verdict is the significance bar applied literally: **directional, mechanism-sound
+and free** (one weight copy, no extra step time, measured at no throughput cost), so it is kept for the
+final fit where there is no holdout to select on, and it is not a reason to spend a slot, rebuild a
+member, or plan anything around. It does NOT rescue the banned axis it was scouting for: an EMA damping
+the last few hundred steps recovers about a fifth of the 0.0062 three-seed spread, which is a knob-sized
+piece of a floor-sized problem.
 
 ### The ceiling of combining what we have is the plain average (2026-08-17)
 
