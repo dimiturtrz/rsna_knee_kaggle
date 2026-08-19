@@ -3866,6 +3866,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.attribution.Attribution._depth",
+      "target": "kneemri.evaluation.attribution.Attribution._depth_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.attribution.Attribution._labels",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "weight": 1
@@ -3897,7 +3903,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.attribution.Attribution.report",
-      "target": "kneemri.evaluation.attribution.Attribution._depth_agreement",
+      "target": "kneemri.evaluation.attribution.Attribution._depth",
       "weight": 1
     },
     {
@@ -14182,6 +14188,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution.Attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution.Attribution._depth",
+      "label": "_depth",
       "level": "method",
       "parent": "kneemri.evaluation.attribution.Attribution",
       "role": null
