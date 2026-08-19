@@ -31,7 +31,16 @@ cd "$REPO"
 #
 # The blob hash rather than HEAD: it is CONTENT, so an uncommitted edit reads differently from the
 # commit it will become, which is the case a chain is most likely to be stale against.
-LIB_PARSED="$(git -C "$REPO" hash-object "${BASH_SOURCE[0]}" 2>/dev/null || echo unknown)"
+# The file this shell parsed, named once so the blob check cannot drift from the thing it checks.
+LIB_SOURCE="${BASH_SOURCE[0]}"
+
+# The CONTENT hash of that file as the working tree holds it right now, and whether this shell is
+# behind it. Separated from the stamp because run_train has to ask the question again per arm.
+_lib_blob() { git -C "$REPO" hash-object "$LIB_SOURCE" 2>/dev/null || echo unknown; }
+
+_lib_is_stale() { [ "$(_lib_blob)" != "$LIB_PARSED" ]; }
+
+LIB_PARSED="$(_lib_blob)"
 LIB_PARSED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 PROCESSED="$(uv run python -c 'from pathlib import Path
@@ -236,6 +245,27 @@ run_train() {
   # Per call rather than per arm, and released before returning: a sweep arm that calls this several
   # times now lets another chain interleave between its runs instead of holding the card across all of
   # them.
+  # STALENESS IS FIXED HERE, not merely reported. LIB_PARSED made a chain's staleness legible (knee-yn6j
+  # option b); this is option (a), and it is what stops the arm in front of us from running the wrong
+  # lib. The re-source re-parses every function INCLUDING this one, and bash resolves a function at CALL
+  # time, so the recursive call below is the NEW run_train — the current arm gets the current mechanisms
+  # rather than the next arm getting them. `_LIB_REFRESHED` bounds it to one attempt, because a repo
+  # without git answers `unknown` forever and a loop here would spend the slot instead of the arm.
+  #
+  # queue.sh needs none of this: it runs each arm as `bash experiments/arms/<arm>.sh`, a fresh shell
+  # that sources this file fresh. The stale case is the hand-typed chain that sources once and then
+  # calls run_train arm after arm, which is how two arms finished with no SEAT VALUE line on 2026-08-19.
+  if _lib_is_stale && [ -z "${_LIB_REFRESHING:-}" ]; then
+    echo "run_train: this shell holds lib.sh $LIB_PARSED, the tree has $(_lib_blob) - re-sourcing before $1"
+    _LIB_REFRESHING=1
+    source "${BASH_SOURCE[0]}"
+    run_train "$@"
+    local refreshed=$?
+    # Cleared rather than left set: the guard bounds ONE call, so the arm after this one is checked
+    # again against whatever the tree holds by then.
+    unset _LIB_REFRESHING
+    return "$refreshed"
+  fi
   hold_card
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
