@@ -218,8 +218,13 @@ memory — which is why every one of these runs looked clean in a log and cost a
 
 Fixed by chunking the warp at `WARP_CHUNK = 512` images with one grid expanded across the batch, bounding
 the transient at ~230 MB regardless of chunk size; `test_warp_is_indifferent_to_the_chunk_size` asserts the
-result is bit-identical to the unchunked path, so the fix moved memory and not arithmetic. The TTA cell
-remains UNTESTED, and a views entry is eligible again only from a kit that carries this fix.
+result is bit-identical to the unchunked path, so the fix moved memory and not arithmetic.
+
+**The fix held, and the TTA cell is now MEASURED rather than untested.** `kneemri-topviews`, the first
+views entry from a kit carrying it, returned a real **0.925** — the identical number `solotop` scored on
+the identical four members without views. Two rigid views buy **0.000**. So the blank never was a bad
+score, as the caution insisted; it was no score, and the real one turns out to be flat. `rot3` — three
+views rather than two — was never re-fired, and this reading does not cover it.
 
 **The four queued cells are one day's five slots spent on questions the holdout cannot answer, not on a
 predicted gain.** Nothing in the current member pool predicts a gain over 0.919 offline: count, subset,
