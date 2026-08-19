@@ -9091,6 +9091,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.heartbeat.Heartbeat.tick",
+      "target": "kneemri.training.heartbeat.Heartbeat.watch",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.landed.Landed",
       "target": "kneemri.labels.targets.Targets",
@@ -18284,6 +18290,14 @@
       "descendants": 0,
       "id": "kneemri.training.heartbeat.Heartbeat.tick",
       "label": "tick",
+      "level": "method",
+      "parent": "kneemri.training.heartbeat.Heartbeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.heartbeat.Heartbeat.watch",
+      "label": "watch",
       "level": "method",
       "parent": "kneemri.training.heartbeat.Heartbeat",
       "role": null
