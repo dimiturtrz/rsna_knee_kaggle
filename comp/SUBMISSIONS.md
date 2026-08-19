@@ -771,3 +771,29 @@ made on this ruler.
 Note what this entry is NOT: it is not a rehabilitation of the calibration lever. `calib_span` is still
 worse than `band_span` as a member, and the ledger row that says so stands. A seat is a different
 question from a score, and tonight is the first time the two have been asked separately.
+
+### Slot 1 result: 0.927 — the compound swap does not transfer
+
+Submission 55631509, `kneemri-best4`, returned **0.927** against the champion's 0.928. Pre-registered
+condition was "at or above 0.928"; it is below, so the pre-registered reading stands as written: **the
+transfer of a TWO-member swap is refuted, not the search.**
+
+Read it at the right size. One board tick is the resolution this competition reports at, so 0.927 is
+"not better", not "much worse" — the entry did not collapse, it failed to move. What died is the
+inference that an offline four ranking 0.8666 over 0.8648 will rank the same way on the hidden test
+when TWO members changed at once. Every board transfer this ledger has read remains a single swap, and
+the one compound reading before tonight broke the ordering rule too. That is now twice.
+
+What it does NOT say, and the distinction is the whole reason slots 2 and 3 were fired before this
+score returned:
+
+- It does not say `band_span` is a bad member — it is in this entry together with a second change.
+- It does not say the offline ruler is broken. A +0.0018 offline separation is under a third of the
+  0.0062 noise floor; a ruler that cannot resolve that separation is a ruler being asked the wrong
+  question, not a broken one.
+- It does not say the champion four is optimal. It says this particular pair of moves is not an
+  improvement large enough to survive the trip.
+
+Slots 2 and 3 put ONE member into ONE seat each and are already in the queue; slot 4 puts a third
+candidate in the same seat. Those three answer the question this one cannot: whether the board
+reproduces an offline ordering when only one thing moves.
