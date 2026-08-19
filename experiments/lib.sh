@@ -72,6 +72,13 @@ hold_card() {
   # written as 'rm -rf "$lock"' the variable is read when the trap fires, by which time the function's
   # local is gone — under `set -u` that is "lock: unbound variable" and the lock is never removed.
   LOCK_DIR="$LOGS/gpu.lock"
+  # A PARKED ARM MUST SAY IT IS PARKED. This loop used to wait in total silence, so a queued arm's log
+  # sat at zero bytes whether it was blocked on a live sibling or had died at launch — and those are
+  # opposite states: one keeps the card busy next, the other leaves it idle. On 2026-08-19 a parked
+  # waiter died and the 0-byte log said nothing, so the idle was found only after the running arm
+  # finished. The heartbeat makes the distinction readable without asking the process table: an empty
+  # log now means DEAD, and a waiting arm names who it is waiting for and for how long.
+  local blocked=0
   until mkdir "$LOCK_DIR" 2>/dev/null; do
     local holder
     holder="$(cat "$LOCK_DIR/pid" 2>/dev/null)"
@@ -80,8 +87,12 @@ hold_card() {
       rm -rf "$LOCK_DIR"
       continue
     fi
+    [ $((blocked % WAIT_HEARTBEAT_MINUTES)) -eq 0 ] &&
+      echo "parked ${blocked}m behind arm ${holder:-unknown} — the card is held, this shell is alive"
+    blocked=$((blocked + 1))
     sleep 60
   done
+  [ "$blocked" -gt 0 ] && echo "took the card after ${blocked}m parked"
   echo $$ > "$LOCK_DIR/pid"
   trap drop_own_card EXIT
   wait_for_free_card
@@ -109,6 +120,10 @@ ARM_NEEDS_MIB=18432
 # 16.24 GB reserved, 15.03 GB allocated", and the driver context plus cuDNN's kernel workspaces sit ON
 # TOP of the caching allocator's reservation. 18 GB is the smallest figure that holds the measured peak
 # with that headroom, and it leaves 14 GB of a 32.6 GB card for anyone else.
+
+WAIT_HEARTBEAT_MINUTES=5
+# How often a parked arm repeats that it is still parked. Five minutes is short against the ~45-minute
+# arms it waits behind and long enough that an hour of parking costs twelve lines, not sixty.
 
 FOREIGN_WAITS=60
 # How many minutes to wait out a foreign tenant before starting anyway, loudly. Unbounded would let a
