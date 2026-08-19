@@ -1,13 +1,13 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "solotop_v1",
-  "kernel": "kneemri-solotop",
-  "submission": 55607054,
-  "date": "2026-08-18",
-  "board": 0.925,
-  "kit": "e4cffcf",
+  "entry": "band_v1",
+  "kernel": "kneemri-band",
+  "submission": 55615886,
+  "date": "2026-08-19",
+  "board": 0.928,
+  "kit": "4bdf2a4",
   "members": [
-    "res392_ws_s2026",
+    "band_dense_s2026",
     "lr1e-4_ws_s2026",
     "calibrated_targets_s2026",
     "lr4e-5_ws_s2026"
@@ -21,9 +21,9 @@
   "principles": [
     "ALL-OURS BEATS GRAFTED. Five of ours plus twenty CC0 members scored 0.894 against this entry's 0.925 on the same hidden set, and the offline holdout agreed in sign and under-priced the penalty. A published member fitted elsewhere is not a free member.",
     "WHOLE-STACK, overlap=False. Averaging overlapping three-slice windows is another way of showing the model every slice, which a whole-stack member already does in feature space: +0.0146 for a windowed member, nothing here.",
-    "THE ENCODER RATE IS THE LEVER, NOT THE RESOLUTION. 8e-6 to 4e-5 is +0.0068 solo; 392 px at the control's own rate is +0.0002. res392's credit belonged to its rate all along.",
     "FOUR MEMBERS. The best subset falls monotonically past five over thirteen same-split checkpoints, to 0.8547 flat over all of them. Mounting more and naming more is negative return.",
-    "MEMBERSHIP IS EXHAUSTED AS A LEVER. Four substitutions bought +0.007 total, and the third one broke the rule that predicted them. The next real move is a different member axis or better supervision, not another swap.",
-    "EVERY SHIPPED MEMBER IS FINGERPRINT-CHECKED AND WITNESS-CHECKED. A member fitted with --slice-pooling max and rebuilt with default channel stacking differs by 2.25 against a 2e-3 tolerance: a different function on different pixels, which loads and scores without complaint."
+    "EVERY SHIPPED MEMBER IS FINGERPRINT-CHECKED AND WITNESS-CHECKED. A member fitted with --slice-pooling max and rebuilt with default channel stacking differs by 2.25 against a 2e-3 tolerance: a different function on different pixels, which loads and scores without complaint.",
+    "MEMBERSHIP WAS NOT EXHAUSTED, which the previous champion's own principles claimed. This entry is one named swap off that one - res392_ws out, band_dense in, same count and same two decode groups - and it moved 0.925 to 0.928. The claim was made after four swaps bought +0.007 with the third breaking the ordering rule; what was actually exhausted was the pool at the time, and band_dense is a member from an axis (the sampled BAND) that pool did not contain.",
+    "THE SWAP RULE PREDICTS AGAIN, to a thousandth. Pre-registered 0.929 on a joint-holdout delta of +0.0036, landed 0.928. Member quality DOES transfer to the board; the earlier reading that only decode diversity transfers was taken on swaps that held quality roughly fixed, so it was a statement about those swaps rather than about the board."
   ]
 }

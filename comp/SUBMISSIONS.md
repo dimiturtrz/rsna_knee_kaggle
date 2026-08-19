@@ -84,7 +84,7 @@ never spent on a cell that already has a number.
 | `ours×4×whole`, lr1e-4 for intensity392 — `kneemri-solotop` | 2026-08-18 | **0.925** — best; pre-registered 0.927, so the swap rule missed |
 | `ours×2×whole×views=rot2` — `kneemri-rateviews` | 2026-08-18 | **no score** — the second blank, and the one that named the cause |
 | `ours×4×whole×views=rot2` — `kneemri-topviews` | 2026-08-18 | **0.925** — the SAME number as `solotop`, whose four members are identical and whose views are not. Two rigid views bought nothing here; the board prices decode DIVERSITY, not decode COUNT |
-| `ours×4×whole`, band_dense for res392 — `kneemri-band` | 2026-08-19 | pending — one named swap off the 0.925 four, offline 0.8648 vs 0.8612, pre-registered **0.929** |
+| `ours×4×whole`, band_dense for res392 — `kneemri-band` | 2026-08-19 | **0.928** — our best, and the first entry past the 0.925 plateau. Pre-registered 0.929 |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`
@@ -271,6 +271,16 @@ of our members score 0.919 and five score 0.911, while twenty-four members drawn
 0.898 — so above some member quality, adding members is a cost. The rule that survives both eras is
 about the SPREAD, not the count: members worth adding are ones that fail differently and score nearly as
 well, and the published CC0 members no longer clear the second half of that.
+
+**2026-08-19 adds the other half of that rule, from `kneemri-band`'s 0.928.** Four different member sets
+had all returned 0.925 and the reading forming around that plateau was that member quality does not
+transfer — that only decode diversity does. It does. `band_dense` for `res392_ws` is one named swap on
+the 0.925 four, holding count, decode groups and views fixed, so member quality is the only thing that
+moves: +0.0055 solo and +0.0036 joint offline, +0.003 on the board. The plateau was not the board's
+ceiling for this shape; it was four swaps that happened to trade roughly equal members. What made the
+difference here is that `band_dense` comes from an axis the pool did not previously contain — the sampled
+BAND rather than the learning rate or the read size — which is the same "fails differently" clause,
+arriving as a better member rather than as an extra one. Pre-registered 0.929, landed 0.928.
 
 ## Ledger
 
