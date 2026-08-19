@@ -58,6 +58,53 @@ hold_card() {
   done
   echo $$ > "$LOCK_DIR/pid"
   trap "rm -rf '$LOCK_DIR'" EXIT
+  wait_for_free_card
+}
+
+ARM_NEEDS_MIB=18432
+# The free VRAM an arm needs before it may start. DERIVED, not chosen: our arms log "peak memory
+# 16.24 GB reserved, 15.03 GB allocated", and the driver context plus cuDNN's kernel workspaces sit ON
+# TOP of the caching allocator's reservation. 18 GB is the smallest figure that holds the measured peak
+# with that headroom, and it leaves 14 GB of a 32.6 GB card for anyone else.
+
+FOREIGN_WAITS=60
+# How many minutes to wait out a foreign tenant before starting anyway, loudly. Unbounded would let a
+# process that parks 20 GB and never exits idle our whole queue in silence; an hour is longer than any
+# arm we run, so a real trainer on the other side clears well within it.
+
+wait_for_free_card() {
+  # Wait out a CUDA process this lock cannot see — one belonging to ANOTHER REPOSITORY.
+  #
+  # The mkdir lock above serialises kneemri arms against each other and is blind to everything else. On
+  # 2026-08-19 a second project's trainer took the card to 31949 MiB of 32607 while one of our arms was
+  # mid-epoch; Windows pages GPU memory over PCIe rather than failing, so the arm kept running at 30-170
+  # img/s against its own peak of 1090 for the rest of the run. `nvidia-smi` reported 99% utilisation
+  # throughout — at 183 W of a 575 W limit. Power draw is the tell; utilisation cannot see this at all.
+  #
+  # PREVENTION IS SEPARATE FROM DETECTION and both are needed. `kneemri.training.heartbeat` reports a
+  # collapse against the run's own peak, which is what saves an arm already underway. This stops the arm
+  # from starting into the overflow in the first place, which the heartbeat cannot do.
+  #
+  # NOT `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, which is the obvious reach and is dead here:
+  # torch prints "expandable_segments not supported on this platform" at startup on this machine, and
+  # three arms carried the flag without one of them being helped by it. Nor `--vram-gb`, which caps our
+  # allocator rather than the device — a cap only converts thrashing into a clean OOM when it leaves the
+  # driver room, and set above what the card can spare it PERMITS the thrashing it was meant to prevent.
+  local free waited=0
+  while :; do
+    free="$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -1)"
+    # No card, no driver, or a query that failed: this is a serialisation gate, not a hardware check.
+    # Refusing to run because we could not measure would turn a missing tool into a stalled queue.
+    case "$free" in ''|*[!0-9]*) return 0 ;; esac
+    [ "$free" -ge "$ARM_NEEDS_MIB" ] && return 0
+    if [ "$waited" -ge "$FOREIGN_WAITS" ]; then
+      echo "STARTING ANYWAY after ${waited}m: only ${free} MiB free, want ${ARM_NEEDS_MIB}. Expect PCIe paging" >&2
+      return 0
+    fi
+    [ "$waited" -eq 0 ] && echo "waiting for another process to release the card: ${free} MiB free, want ${ARM_NEEDS_MIB}"
+    waited=$((waited + 1))
+    sleep 60
+  done
 }
 
 release_card() {
