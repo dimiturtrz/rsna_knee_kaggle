@@ -731,3 +731,43 @@ wins, and is exactly the case a mean-only read would miss.
 
 Read this pair together with slot 1: if the compound (0.8666) does not beat the better single, the
 holdout is additive where the board is not.
+
+## Slot 4 of 2026-08-19: the member that lost to its own control, in the same seat
+
+Pre-registered BEFORE the run. Third entry into ONE seat — `lr1e-4_ws`'s — so all three read against
+each other and against the champion with a single variable between them.
+
+`kneemri-calibspan` puts `calib_span` there. That member is the one this ledger wrote up hours ago as a
+FAILURE: 0.8545 alone against its matched control `band_span`'s 0.8565, the calibration coming back
+negative at the shipped operating point after paying +0.0038 at the older one. It is also, by the
+seat-value sweep over all 42 same-split records, the best fifth member the project owns (+0.0022), and
+in this seat it is the best four the project has ever assembled offline:
+
+| four (all replace `lr1e-4_ws`) | offline | member's own alone score |
+|---|---|---|
+| champion, unchanged | 0.8648 | `lr1e-4_ws` 0.8490 |
+| slot 2 — `band_span` | 0.8661 | 0.8565 |
+| slot 3 — `depth_regions_narrow` | 0.8653 | 0.8554 |
+| **slot 4 — `calib_span`** | **0.8670** | **0.8545 — the worst of the three** |
+| slot 1 — two swaps at once (`band_span` + `depth_regions_narrow`) | 0.8666 | — |
+
+**WHAT THIS SLOT IS ACTUALLY TESTING, and it is not the mean.** The three candidates order one way
+alone (`band_span` 0.8565 > `depth_regions_narrow` 0.8554 > `calib_span` 0.8545) and the exact opposite
+in the seat (`calib_span` 0.8670 > `band_span` 0.8661 > `depth_regions_narrow` 0.8653). Member quality
+and seat value are ANTI-correlated across these three. This project has recorded that shape before —
+diversity beating member quality, six board entries built to isolate it — and has never tested it with
+a member whose quality deficit was MEASURED against its own matched control rather than inferred.
+
+**PREDICTION.** At or above 0.928, and at or above slot 2. The claim under test is that a member can be
+worse than its control and still be the right occupant, because what it contributes is the part the
+other three do not have.
+
+**REFUTATION.** Slot 4 below slot 2 on the board, with the offline table ordering them the other way,
+says the offline holdout systematically overprices decorrelation — that it rewards a member for being
+different in ways the hidden test set does not care about. That would be the single most useful thing
+to learn tonight, because every roster decision this project has made since the pool opened has been
+made on this ruler.
+
+Note what this entry is NOT: it is not a rehabilitation of the calibration lever. `calib_span` is still
+worse than `band_span` as a member, and the ledger row that says so stands. A seat is a different
+question from a score, and tonight is the first time the two have been asked separately.
