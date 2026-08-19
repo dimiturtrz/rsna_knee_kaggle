@@ -83,7 +83,8 @@ never spent on a cell that already has a number.
 | `ours×2×whole`, rate member for res392 — `kneemri-ratepair` | 2026-08-18 | **0.921** — the pair's own member swap |
 | `ours×4×whole`, lr1e-4 for intensity392 — `kneemri-solotop` | 2026-08-18 | **0.925** — best; pre-registered 0.927, so the swap rule missed |
 | `ours×2×whole×views=rot2` — `kneemri-rateviews` | 2026-08-18 | **no score** — the second blank, and the one that named the cause |
-| `ours×4×whole×views=rot2` — `kneemri-topviews` | 2026-08-18 | pending — first entry from a kit carrying the warp fix |
+| `ours×4×whole×views=rot2` — `kneemri-topviews` | 2026-08-18 | **0.925** — the SAME number as `solotop`, whose four members are identical and whose views are not. Two rigid views bought nothing here; the board prices decode DIVERSITY, not decode COUNT |
+| `ours×4×whole`, band_dense for res392 — `kneemri-band` | 2026-08-19 | pending — one named swap off the 0.925 four, offline 0.8648 vs 0.8612, pre-registered **0.929** |
 
 **`kneemri-solo`'s submission description is wrong and Kaggle will not let it be edited.** It says v3
 "silently ran overlap=True and would have varied decode alongside count". It did not: `Member.window`

@@ -2,6 +2,23 @@
 # The same region pooling as `depth_regions`, on the band every OTHER member reads: 0.20-0.80 at 12
 # slices. It is the transfer question, and it is only worth a slot if `depth_regions` moves.
 #
+# 2026-08-19, AFTER depth_regions RAN. Its MEAN did not move — 0.8549 against band_dense's 0.8578,
+# -0.0029, under the 0.0062 floor — but the mean is not what this arm was written to read. Per label,
+# depth_regions has exactly two moves that clear their own interval, and they say opposite things:
+# PF OA -0.0193*, which is band_wide's -0.0194* to the fourth decimal, and Lateral Meniscus +0.0165*,
+# where band_wide managed +0.0007. Read together: the WIDE BAND costs the patellofemoral centre
+# whatever the pooling does, and region pooling buys a mid-band focal structure the whole-band amax was
+# losing. The written prediction — centre holds AND periphery recovers — is wrong on both clauses
+# (MCL +0.0031 against band_wide's +0.0111 is not a recovery), so this is not a confirmation; it is a
+# different, unpredicted signature that the mean averaged away.
+#
+# So the premise stands on the per-label read rather than the mean one, and this arm becomes the
+# single-variable question that separates the two effects: on a 0.20-0.80 band there is no
+# patellofemoral loss to pay, so if the lateral-meniscus gain is REGION POOLING it survives here and
+# lands net-positive; if it was the wide band's extra depth it does not appear at all. Thirteen labels
+# and two stars is also a multiple-comparison risk, which is the second reason to run it — a
+# signature that reproduces on a different band is not the same claim as one that starred once.
+#
 # WHAT IT ASKS. `depth_regions` puts region pooling and a wide dense band together, so a gain there is
 # attributable to either. This arm holds the reading at the pool's own — 336 px, 12 slices, 0.20-0.80,
 # backbone rate 4e-5 — and changes nothing but the aggregation. Against `lr4e-5_ws_s2026` at 0.8525 it

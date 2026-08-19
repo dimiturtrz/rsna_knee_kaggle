@@ -53,8 +53,8 @@ echo "=== 2b. does INFERENCE read each member the way training did? ==="
 # differently) cannot land 0.26 eps apart. The same twelve on CPU: 10 ok, 2 unverified, 0 refused,
 # the widest at half its bound. So the gate names the regime whose bound is derived from the
 # arithmetic rather than the one whose bound was written for float16 and applied to both. Calibrating
-# the CUDA constant is knee-0nm1; it stays a constant until then, because a bound raised to admit an
-# unexplained 0.019 is the gate switching itself off.
+# the CUDA constant is its own bead; it stays a constant until then, because a bound raised to admit an
+# unexplained 0.019 is the gate switching itself off. The bead is knee-djk8.
 uv run python comp/witness_check.py --device cpu || {
   echo "A MEMBER IS READ DIFFERENTLY BY INFERENCE THAN BY TRAINING - do not submit"
   exit 1
