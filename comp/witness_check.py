@@ -40,11 +40,8 @@ from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)
 
-MATCHED_TOLERANCE = 2e-3
-"""The bound when both paths run the member's own arithmetic — the fingerprint's, for its reason."""
-
-CROSS_PRECISION_FACTOR = 4.0
-"""How many epsilons apart a half-precision witness and a float32 re-derivation legitimately land.
+EPS_FACTOR = 4.0
+"""How many epsilons apart a witness and its re-derivation legitimately land, on either device.
 
 MEASURED 2026-08-13, four members re-derived on CPU (float32) against their recorded witnesses:
 
@@ -57,10 +54,15 @@ The residual tracks the WITNESS's epsilon across two dtypes eight times apart, a
 which is why this is a factor on eps rather than a constant. One eps was the wrong model: eps is the
 spacing of a single rounding and a twelve-block transformer accumulates thousands. Four leaves margin
 over the widest observed without reaching the 0.05-0.5 that every real reading defect produced.
+
+MEASURED AGAIN 2026-08-19 on the card (knee-djk8 leg b), where the arithmetic MATCHES and the residual
+is only kernel nondeterminism: three float16 members land at EXACTLY 0, and the bf16 members land at
+0.63-2.47x bf16 eps. That is the same 1.6-2.4x band the cross-precision calibration measured, so the
+two regimes never needed two numbers — see `tolerance`.
 """
 
 
-def tolerance(precision: torch.dtype, device: torch.device) -> float:
+def tolerance(precision: torch.dtype) -> float:
     """How far the two paths may legitimately differ, from the ARITHMETIC rather than picked.
 
     This was a flat 2e-3, inherited from the fingerprint and documented as "above GPU noise" — true
@@ -69,12 +71,16 @@ def tolerance(precision: torch.dtype, device: torch.device) -> float:
     gate. The check refused the first bf16 member it ever saw, correctly by its own rule and wrongly in
     fact, and a gate that cries wolf is a gate someone switches off before a real refusal arrives.
 
-    TWO REGIMES, because the device decides which. On cuda the re-derivation runs under the member's
-    own autocast dtype, so the arithmetic MATCHES and any remaining difference is kernel
-    nondeterminism. On cpu autocast is off entirely, so a half-precision witness is being compared
-    against float32 and the gap is the dtype's, not the reading's — a weaker check, and worth having
-    because a gate that needs a free GPU is a gate that gets skipped exactly when a member is being
-    packaged.
+    ONE REGIME, and it took a second measurement to learn that. The device does decide what the
+    residual IS: on cuda the re-derivation runs under the member's own autocast dtype, so the
+    arithmetic matches and what is left is kernel nondeterminism, while on cpu autocast is off and a
+    half-precision witness is being compared against float32. That argued for two bounds, and the cuda
+    one was a flat 2e-3 on the premise that a matched arithmetic drifts by almost nothing. The premise
+    is true for float16 — three members re-derive at exactly 0 — and false for bfloat16, whose seven
+    mantissa bits put the same nondeterminism at 0.63-2.47x eps, so the gate refused bf16 members for
+    BEING bf16. Both regimes measured into the same 1.6-2.5x eps band, which is the finding: the
+    residual scales with the mantissa in both, the device branch was never carrying the information,
+    and the dtype alone sets the bound.
 
     IT STILL DISCRIMINATES, which is the only thing that makes a loosened bound acceptable. The four
     reading defects this check exists for moved predictions by 0.05 to 0.5, because feeding a model a
@@ -82,9 +88,7 @@ def tolerance(precision: torch.dtype, device: torch.device) -> float:
     adds. Those also CONCENTRATE in some labels while sparing others, where this residual moved all
     twelve about equally.
     """
-    if device.type == "cuda":
-        return MATCHED_TOLERANCE
-    return CROSS_PRECISION_FACTOR * float(torch.finfo(precision).eps)
+    return EPS_FACTOR * float(torch.finfo(precision).eps)
 
 
 CONCENTRATION_FACTOR = 0.5
@@ -168,7 +172,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
 
     residual = np.abs(got - expected)
     difference = float(residual.max())
-    bound = tolerance(member.precision, device)
+    bound = tolerance(member.precision)
     geometry = f", batch {shape}" if shape else ", batch unrecorded"
     if difference > bound:
         return (
