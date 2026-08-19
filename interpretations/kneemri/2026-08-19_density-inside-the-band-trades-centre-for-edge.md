@@ -79,3 +79,29 @@ the holdout prices diversity ~2.4× too cheap.
   the series contains.
 - **Not a licence to re-open the refuted knee-jk3 items.** Resolution, slot count and cache density on
   the mean stay where they were.
+
+## SUPERSEDED ON THE MECHANISM, 2026-08-19, by the fourth corner and then the third
+
+The title claim — that density inside a band TRADES the centre for the edge — was written from two
+corners of a square and it does not survive the other two.
+
+`band_density` (0.20–0.80 at 20 slices) and `band_span` (0.10–0.90 at 12 slices) complete it:
+
+| | 12 slices | 20 slices | density effect |
+|---|---|---|---|
+| **0.20–0.80** | `lr4e-5_ws` 0.8525 | `band_density` 0.8540 | +0.0014 |
+| **0.10–0.90** | `band_span` 0.8565 | `band_dense` 0.8578 | +0.0013 |
+| **span effect** | +0.0039 | +0.0038 | interaction ≈0.0001 |
+
+Each main effect reproduces at both levels of the other, so **on the mean the two levers are ADDITIVE
+and independent** — there is no fixed representational budget being re-spent, which is what "trades"
+asserted. `band_dense`'s +0.0053 is simply span +0.0039 plus density +0.0014.
+
+**What survives is the signature, and it is the better half of the finding.** The trade this document
+saw is real inside the LABELS, just not on the mean: widening the span buys REGIONAL findings
+(+0.0079 against focal +0.0011 — ACL, Contusion, Baker's, Effusion), and adding slices inside a span
+buys FOCAL ones (+0.0036 against regional −0.0019 — Synovitis, PF OA). Two levers that move different
+label populations and add on the mean are the diversity argument, not the budget argument.
+
+The remaining conclusions above stand: not a slice-count result, and not a licence to re-open the
+refuted knee-jk3 items. `band_full` (0.00–1.00 at 12 slices) tests where the span lever stops.
