@@ -193,6 +193,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`depth_regions`** | region pooling (`--slice-regions 4`) on the wide dense band | 0.8549 | −0.0029 vs `band_dense` | mean is a non-result under the 0.0062 floor; the per-label read is the finding. Two labels clear their interval and disagree: **PF OA −0.0193\***, which is `band_wide`'s −0.0194 to four decimals (the patellofemoral loss is the BAND, not the pooling), and **Lateral Meniscus +0.0165\*** against `band_wide`'s +0.0007 (the only thing attributable to the pooling). Its own written prediction — centre holds, periphery recovers — is wrong on both clauses. [interpretation](../interpretations/kneemri/2026-08-19_depth_regions.md); `depth_regions_narrow` is the single-variable follow-up |
 | **`depth_regions_narrow`** | the same region pooling on the band every OTHER member reads (0.20-0.80, 12 slices) | 0.8554 | +0.0029 vs `lr4e-5_ws` | the transfer question, ANSWERED IN TWO PARTS. The PF OA loss was the BAND: on a narrow band it does not merely vanish but reverses, **+0.0067**, confirming `depth_regions`' decomposition. The Lateral Meniscus gain does NOT transfer at strength: **+0.0056 [-0.0112, +0.0206]** here against +0.0165\* there, and read directly against `depth_regions` it is **-0.0112**. Both arms are flat on the mean, which is this arm's own pre-registered refutation condition for the pooled-budget argument. Seat value **+0.0006** against the shipped four. See below |
 | **`encoder_layer 9`** | the head reads ViT block 9 of 12 instead of the last one | 0.8230 | -0.0227 vs `wsfold0_e6` | 3.7x the floor, converged (flat over its last three epochs), flag verified in the recipe. Seat value **-0.0034**, the largest negative any same-split candidate has posted, so diversity does not rescue it. The linear-probe convention turns out to be right for this head. See below |
+| **`focal_pool`** | pooled vector gains a third part: the mean of the top eighth of each channel over the patch grid | 0.8432 | -0.0025 vs `whole_stack` | Flat (inside the floor). Seat value -0.0012. Pre-registered clause half-holds: focal group -0.0004 vs diffuse -0.0065, the predicted direction, but carried by the diffuse group losing rather than the focal group gaining. Fracture +0.020, directional only (one crossing in twelve). See below |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
@@ -812,3 +813,37 @@ already use is the best number we have, and a drop of 0.023 nine blocks back mea
 block 10 or 11 would have to be a sharp non-monotonicity rather than a gentle one. The convention the
 linear-probe literature uses turns out to be the right one for this head, which is worth knowing
 precisely because it was assumed rather than measured.
+
+## Focal pooling: the focal/diffuse split appears in the predicted direction, and buys nothing on the mean
+
+`focal_pool` concatenates a third part to the pooled vector — the mean of the top eighth of each channel
+over the 24x24 patch grid — so a 1-3 mm finding that lands in a handful of tokens is not divided by two
+orders of magnitude before the linear head sees it. Per channel rather than per patch, because selecting
+whole patches would commit every channel to one location and the twelve findings do not share one. The
+axis was unvaried for us and for every published member; `StudyModel._pool` had implemented it since the
+head was written and nothing had ever run it.
+
+**0.8432 against the control's 0.8457, -0.0025** — inside the 0.0062 floor, so flat. Flag verified in the
+recorded recipe (`pool: cls_mean_focal`, `whole_stack: True`, `encoder_layer: -1`, fold 0 / split 2026).
+Seat value against the shipped four is **-0.0012**, small enough to sit inside the region where this
+ruler is known to be wrong by 2.4x (knee-7d1), so it is not evidence of anything on its own.
+
+THE CLAUSE IS THE INTERESTING PART, and it did not fail the way a dead mechanism fails. The arm
+pre-registered that a real effect concentrates in the small focal findings (meniscus, ACL, MCL,
+Fracture) while the diffuse ones (Effusion, the three OA columns) hold or dip, and that a UNIFORM lift
+would mean the extra width helped rather than the tail. Read against `whole_stack` at the same epoch on
+the same split, the focal group means **-0.0004** and the diffuse group **-0.0065** — a 0.006 separation
+in exactly the predicted direction. The mechanism's signature is there. What is absent is the gain: the
+focal group held rather than rose, so the separation is the diffuse findings losing, not the focal ones
+winning, and the mean nets out flat.
+
+Fracture, the smallest and most focal of the twelve, is the one label that moves: **+0.020**. That is the
+mechanism's best case and it is also one crossing out of twelve labels, which is not surprising by
+chance — the same multiple-comparison trap `depth_regions_narrow` walked into with Lateral Meniscus and
+then failed to reproduce. DIRECTIONAL ONLY. Not a finding, and not worth a confirmation slot on its own.
+
+WHAT THIS DOES NOT KILL: focal pooling as an asset. What is refuted is this use — a third part bolted
+onto the pooled vector of a whole-stack member, where it widens a linear head's input by 50% on the same
+number of studies and the tail statistic is noisier than the mean beside it. The arm named that risk
+first, and it is the reading the numbers support: the tail carries signal about focal findings (the
+direction is right) and the head cannot afford to estimate it here.
