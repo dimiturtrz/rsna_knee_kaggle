@@ -45,7 +45,17 @@ echo "=== 2b. does INFERENCE read each member the way training did? ==="
 # instead of the member's own config - which is how whole-stack members were served three slices at a
 # time all the way onto the leaderboard. This re-derives each member's witness through the inference
 # path. UNVERIFIED is not a failure: members trained before the witness existed have nothing to check.
-uv run python comp/witness_check.py || {
+# --device cpu NAMED, not defaulted. The check has two tolerance regimes and this line used to pick
+# one by accident: CUDA compares under the member's own autocast dtype against a flat 2e-3, CPU runs
+# float32 and compares against 4x the WITNESS dtype's eps. The flat constant is 2 eps for a float16
+# member and 0.26 eps for a bfloat16 one, so on 2026-08-19 it refused 7 of 12 members and every
+# refusal was bf16 - two independent bf16 roundings (the witness's, and a re-derivation batched
+# differently) cannot land 0.26 eps apart. The same twelve on CPU: 10 ok, 2 unverified, 0 refused,
+# the widest at half its bound. So the gate names the regime whose bound is derived from the
+# arithmetic rather than the one whose bound was written for float16 and applied to both. Calibrating
+# the CUDA constant is knee-0nm1; it stays a constant until then, because a bound raised to admit an
+# unexplained 0.019 is the gate switching itself off.
+uv run python comp/witness_check.py --device cpu || {
   echo "A MEMBER IS READ DIFFERENTLY BY INFERENCE THAN BY TRAINING - do not submit"
   exit 1
 }
