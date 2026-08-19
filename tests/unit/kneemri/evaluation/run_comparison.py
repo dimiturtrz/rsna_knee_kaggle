@@ -422,3 +422,10 @@ def test_floor(tmp_path: Path):
     intervals, named = RunComparison(control, [arm]).floor(comparison.arms[0])
     assert "paired floor" in named
     assert set(intervals) == set(TARGETS)
+
+
+def test_resolved(tmp_path: Path):
+    """A run named the way the ledger names it finds its checkpoint; a path is left exactly as given."""
+    assert RunComparison.resolved(Path("centre_tissue_s2026"), tmp_path) == tmp_path / "centre_tissue_s2026.pt"
+    assert RunComparison.resolved(Path("runs/x.pt"), tmp_path) == Path("runs/x.pt")
+    assert RunComparison.resolved(Path("x.pt"), tmp_path) == Path("x.pt")

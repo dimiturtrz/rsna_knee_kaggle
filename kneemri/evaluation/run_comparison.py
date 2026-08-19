@@ -138,6 +138,23 @@ class RunComparison:
         self._recorded: dict[Path, RecordedRun] = {}
 
     @staticmethod
+    def resolved(run: Path, processed: Path) -> Path:
+        """A run given by NAME becomes the checkpoint of that name; a run given by path is left alone.
+
+        The ledger loop reads every arm through this tool, and the name is what the ledger, the arm
+        script and the log all call a run — the checkpoint's absolute path appears nowhere a reader
+        would have it to hand. Given a bare name this used to look for
+        `centre_tissue_s2026.metrics.jsonl` in the CURRENT DIRECTORY and report "control does not
+        exist", which reads as a missing run rather than as a path that was never going to resolve.
+
+        A name is anything with no directory part and no suffix. That leaves `./x.pt`, `x.pt` and an
+        absolute path working exactly as before, so nothing that already ran has to change.
+        """
+        if run.parent != Path() or run.suffix:
+            return run
+        return processed / f"{run.name}.pt"
+
+    @staticmethod
     def _intervals(labels: Path) -> dict[str, float]:
         """Each label's 95% sampling interval, so no delta is printed without its own precision.
 
@@ -473,7 +490,7 @@ class RunComparison:
 
 
 def main() -> None:
-    """Compare arms per label: `python -m kneemri.evaluation.run_comparison --control a.pt --arms b.pt c.pt`."""
+    """Compare arms per label: `python -m kneemri.evaluation.run_comparison --control a --arms b c`."""
     parser = argparse.ArgumentParser(description=RunComparison.__doc__)
     parser.add_argument("--control", type=Path, required=True, help="the checkpoint the arms are measured against")
     parser.add_argument("--arms", type=Path, nargs="+", required=True)
@@ -490,16 +507,18 @@ def main() -> None:
     # annotations — seconds, and a `--labels` table this comparison does not otherwise need. Asking for
     # it without the table is REFUSED rather than silently skipped: a restriction that quietly did not
     # happen reads as an arm whose claim was not worth printing.
+    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+
+    root = DataRoot.from_config(arguments.paths)
+    control = RunComparison.resolved(arguments.control, root.processed())
+    arms = [RunComparison.resolved(arm, root.processed()) for arm in arguments.arms]
     split = None
     if arguments.split:
         if arguments.labels is None:
             message = "--split measures the report labels against the annotations, so it needs --labels"
             raise SystemExit(message)
-        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
-
-        root = DataRoot.from_config(arguments.paths)
         split = SupervisionGap().measured(arguments.labels, root.raw() / "train.csv", root.processed() / "published")
-    logger.info("%s", RunComparison(arguments.control, arguments.arms, arguments.labels, split).report())
+    logger.info("%s", RunComparison(control, arms, arguments.labels, split).report())
 
 
 if __name__ == "__main__":
