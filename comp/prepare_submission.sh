@@ -73,4 +73,9 @@ echo
 echo "=== READY. The outward-facing steps are yours to run: ==="
 echo "  bash comp/push.sh dataset '$PACKAGE' '<what changed>'"
 echo "  bash comp/push.sh kernel  kernels/<kernel>"
+# AFTER the dataset push and BEFORE the run, because that is the only window where it can answer.
+# mount_check without --live reads the LOCAL package, so on 2026-08-19 it was green while a kernel died
+# on Kaggle with `holds [nine members] and was asked for ['band_dense_s2026']` - the package had been
+# rebuilt here and never pushed. --live asks Kaggle what it actually holds.
+echo "  uv run --with kaggle python -m kneemri.kaggle.mount_check --live"
 echo "  then run the kernel on Kaggle and submit its output"

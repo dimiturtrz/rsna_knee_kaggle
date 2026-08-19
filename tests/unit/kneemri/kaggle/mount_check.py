@@ -73,3 +73,24 @@ def test_verdict(tmp_path: Path):
 
     foreign = _kernel(tmp_path, "kneemri-foreign", "MemberPackage.find(mounts)\n", [])
     assert check.verdict(foreign).startswith("skipped"), "a kernel running someone else's package is not checkable"
+
+
+def test_unpushed(tmp_path: Path):
+    """The failure of 2026-08-19: a member packaged locally, named by a kernel, never pushed."""
+    package = _package(tmp_path)
+    assert MountCheck(package).unpushed(["v3member"]) == [], "without --live there is nothing to compare against"
+
+    check = MountCheck(package, live={"v2member"})
+    assert check.unpushed(["v3member"]) == ["v3member"]
+    assert check.unpushed(["v2member"]) == []
+    unnamed = "an unnamed selection ranks the whole package, so all of it must be live"
+    assert check.unpushed(None) == ["v3member"], unnamed
+
+
+def test_verdict_refuses_an_unpushed_member(tmp_path: Path):
+    """And it reads as a REFUSAL on the kernel, not as a mount problem — the mounts are fine."""
+    check = MountCheck(_package(tmp_path), live={"v2member"})
+    kernel = _kernel(tmp_path, "kneemri-unpushed", "KernelRun(names=('v3member',)).run()\n", [DINOV3])
+    verdict = check.verdict(kernel)
+    assert verdict.startswith("REFUSED")
+    assert "LIVE members dataset" in verdict

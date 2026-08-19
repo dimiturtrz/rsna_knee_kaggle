@@ -20,6 +20,7 @@ from pathlib import Path
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
+from kneemri.kaggle.live_dataset import LiveDataset
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,9 @@ METADATA = "kernel-metadata.json"
 class MountCheck:
     """Every kernel's declared sources, against the mounts the members it names actually need."""
 
-    def __init__(self, package: MemberPackage) -> None:
+    def __init__(self, package: MemberPackage, live: set[str] | None = None) -> None:
         self.package = package
+        self.live = live
 
     def entries(self, kernels: Path) -> list[Path]:
         """The kernel directories under a root, in a stable order."""
@@ -52,7 +54,21 @@ class MountCheck:
         undeclared = KernelSources(kernel / METADATA).undeclared(mounts)
         if undeclared:
             return f"REFUSED - needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"
+        unpushed = self.unpushed(names)
+        if unpushed:
+            return f"REFUSED - names {', '.join(unpushed)}, which the LIVE members dataset does not hold"
         return f"ok - declares all of {', '.join(mounts)}"
+
+    def unpushed(self, names: list[str] | None) -> list[str]:
+        """The members a kernel needs that the live dataset does not hold — empty when nothing was asked.
+
+        A kernel that names no members ranks the WHOLE package by recorded holdout, so every member the
+        package holds has to be live for it: the selection is made at run time from whatever mounted.
+        """
+        if self.live is None:
+            return []
+        needed = names if names else [member.identifier for member in self.package.members]
+        return [name for name in needed if name not in self.live]
 
 
 def main() -> None:
@@ -61,10 +77,26 @@ def main() -> None:
     parser.add_argument("--root", type=Path, default=None, help="a package to check; default is the one that ships")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument("--kernels", type=Path, default=Path("comp/kernels"))
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="also ask Kaggle what the members dataset actually holds (needs credentials)",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    check = MountCheck(MemberPackage.at(arguments.root, arguments.paths))
+    package = MemberPackage.at(arguments.root, arguments.paths)
+    # OPT-IN, because it needs credentials and a round trip, and REQUIRED before a submission: the
+    # local answer cannot see a package that leads the pushed one, which is exactly the failure that
+    # killed a kernel run on 2026-08-19. A pre-flight without --live checks the kernels; --live checks
+    # the SHIPMENT.
+    live = None
+    if arguments.live:
+        identifier = LiveDataset.identified(package.root)
+        live = LiveDataset(identifier).members()
+        logger.info("live %s holds %d members", identifier, len(live))
+
+    check = MountCheck(package, live)
     verdicts = {kernel.name: check.verdict(kernel) for kernel in check.entries(arguments.kernels)}
     for name, verdict in verdicts.items():
         logger.info("  %s: %s", name, verdict)
