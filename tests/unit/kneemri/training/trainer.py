@@ -589,6 +589,15 @@ def test_needed():
     assert DeviceBudget(slices=20).needed() > DeviceBudget(slices=12).needed(), "more slices, more memory"
     assert DeviceBudget().needed() == 0.0, "an unstated recipe predicts nothing rather than guessing"
 
+    at_336 = DeviceBudget(slices=12).needed()
+    assert DeviceBudget(slices=12, size=336).needed() == at_336, "the fit's own size is the default"
+    assert DeviceBudget(slices=12, size=420).needed() == pytest.approx(at_336 * (420 / 336) ** 2, abs=0.3), (
+        "a slice is a patch grid, so it costs the square of the side"
+    )
+    assert DeviceBudget(slices=12, size=420).needed() > 23.42, (
+        "the cap must clear the rung MEASURED at 420 px, or it forbids a recipe that fits"
+    )
+
 
 def test_plan():
     """Drawing every window start up front yields exactly what drawing one per step yielded.

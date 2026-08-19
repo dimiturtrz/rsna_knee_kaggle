@@ -43,8 +43,10 @@ def main() -> None:
     cache = arguments.cache(root.processed())
     corpus, identifiers = cache.load()
     # The slice count as well as the flag: the reserved peak is a function of it, so an arm that names
-    # no --vram-gb still gets a cap fitted to what it will actually hold (knee-ylp0).
-    device = DeviceBudget(arguments.vram_gb, arguments.slices).select()
+    # no --vram-gb still gets a cap fitted to what it will actually hold (knee-ylp0). The SIZE too, or
+    # the cap is a 336 px number handed to a run that encodes a bigger grid — the same `train_size or
+    # image_size` the record and the members already read, so the cap sees the size the step does.
+    device = DeviceBudget(arguments.vram_gb, arguments.slices, arguments.train_size or arguments.image_size).select()
     targets, evaluation = Targets.pair(
         arguments.labels,
         arguments.eval_labels,

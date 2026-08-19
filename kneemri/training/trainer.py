@@ -80,10 +80,19 @@ reserve 16.24 GB, 20 reserve 26.92. Those two give 1.335 a slice plus `RESIDENT_
 arm — held out of the fit — measured 21.57 against the line's 21.58. A slice is a whole forward and
 backward through the encoder, so linearity in slice count is what the architecture predicts.
 
-IT IS A 336 px CONSTANT. No arm at 224, 392 or 448 recorded a peak at all (the log line postdates
-them), so the resolution axis here is DERIVATION, not measurement: activations scale with the patch
-grid, giving `k * slices * size**2 + RESIDENT_GB` with k = 1.1825e-5. Nothing consumes that form yet,
-and it stays out of the code until a run at a second resolution has logged a peak to check it against."""
+IT IS A 336 px CONSTANT, and `FITTED_SIZE` is now where that says so in code rather than only in
+prose. No arm at 224, 392 or 448 recorded a peak (the log line postdates them), so the resolution axis
+is DERIVATION: activations scale with the patch grid, so the slice cost goes as `size ** 2`.
+
+The derivation is CONSUMED now, which it was not, and the reason is that leaving it in prose made the
+cap silently wrong off 336 px rather than merely unproven. `needed()` took slices alone while
+`--vram-gb` was being stripped from the arms, so `resolution.sh 420` would have asked for 16.28 GB
+against a rung MEASURED at 23.42 — a cap under a demand, which this class's own docstring calls the
+one thing that prevents nothing and guarantees the failure. The 420 arm could not have logged the peak
+that was supposed to license the form, because it would have OOM'd before writing one."""
+
+FITTED_SIZE = 336
+"""The pixel size `GB_PER_SLICE` was fitted at, so the scaling is exact there and only moves off it."""
 
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
@@ -118,8 +127,12 @@ class DeviceBudget:
     """What the run ASKED for. 0 means it named nothing, and then the recipe's own need applies."""
 
     slices: int = 0
-    """How many slices a step holds — the one field the reserved peak is a function of. 0 means the
+    """How many slices a step holds — the field the reserved peak is most of a function of. 0 means the
     caller did not say, and then only the card-fraction default is available."""
+
+    size: int = FITTED_SIZE
+    """The pixel size a step encodes at. Defaults to where `GB_PER_SLICE` was fitted, so every 336 px
+    caller is unchanged and only an arm that moves the resolution moves its own cap."""
 
     def needed(self) -> float:
         """What this recipe will actually reserve, plus one slice of slack — 0 if the slices are unknown.
@@ -127,9 +140,20 @@ class DeviceBudget:
         THE SLACK IS ONE SLICE rather than a round number, because that is the granularity at which
         this quantity moves: nothing here can overshoot by less than a slice, so a margin below one is
         a margin against nothing, and a margin above one is paying for a slice that cannot arrive. The
-        fit's own residual does not need covering — it is 0.01 GB on a held-out point.
+        fit's own residual does not need covering — it is 0.01 GB on a held-out point. It is one slice
+        AT THIS SIZE, which is what the square term gives for free.
+
+        A SLICE COSTS `size ** 2` because it is a patch grid, and the square is exact at `FITTED_SIZE`
+        by construction — it reduces to `GB_PER_SLICE` there, so no run at 336 px sees a different
+        number than before. Off it the term is a derivation the arms have not checked yet, and it is
+        still strictly better than the alternative it replaces: 420 px derives 27.34 GB against a rung
+        measured at 23.42, i.e. it OVERSTATES, where ignoring the size understated by 7 GB. An
+        overstated ask costs `await_headroom` polling; an understated one is an immediate OOM on a
+        recipe that fits.
         """
-        return GB_PER_SLICE * (self.slices + 1) + RESIDENT_GB if self.slices else 0.0
+        if not self.slices:
+            return 0.0
+        return GB_PER_SLICE * (self.slices + 1) * (self.size / FITTED_SIZE) ** 2 + RESIDENT_GB
 
     def capped(self, whole: float) -> float:
         """How much of a card this run may hold — what it asked for, or the default share of it.

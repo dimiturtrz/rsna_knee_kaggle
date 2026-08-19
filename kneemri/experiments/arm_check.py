@@ -276,7 +276,7 @@ class ArmCheck:
             options = self._parsed(flags)[0]
             if options is None or not options.vram_gb:
                 continue
-            needed = DeviceBudget(slices=options.slices).needed()
+            needed = DeviceBudget(slices=options.slices, size=options.train_size or options.image_size).needed()
             if options.vram_gb > needed + GB_PER_SLICE:
                 asked[name] = round(options.vram_gb - needed, 2)
         return asked
