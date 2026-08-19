@@ -352,7 +352,8 @@ the build depended on — Medial Meniscus −0.012, ACL and MCL at the floor, on
 the worst-agreement label). Multi-scale adds tight slots to the wide ones, so its value is what those
 slots buy: ≈ **+0.0016 on the mean** for a 71.6 GB cache and a training slot. `multiscale.sh` is now
 `retired` in `experiments/lib.sh` terms — it refuses to run and the checker no longer reports its cache.
-Resolution at CONSTANT field of view is untouched (`res392`, 0.8523, still our best single member); what
+Resolution at CONSTANT field of view was untouched here — but it was tested directly the next day and
+came back flat at both rates (see "The confound came apart", 2026-08-18); what
 failed is paying for sampling with context. See
 `interpretations/kneemri/2026-08-16_crop80_resolution_gate.md`.
 
@@ -573,6 +574,15 @@ stands CONFOUNDED as a cause. See `knee-eeo` and `knee-a8x`.
 `resolution.sh 392 448 8e-6` — 392 px at the CONTROL's encoder rate, the one arm knee-a8x asked for —
 scored **0.8459**, against `wsfold0_e6`'s 0.8457. **Resolution alone is +0.0002.** Not inside the floor:
 an order below it. The estimate above (+0.002, if the rate's +0.0044 transfers) was generous by tenfold.
+
+**The axis is flat at the OTHER rate too (2026-08-19).** The pair above is 336→392 at 8e-6. The same
+step at 4e-5 is already on disk and had never been read as a pair: `lr4e-5_ws_s2026` (which is what
+`rate_wholestack` is STORED as — the arm name is not the member name, and looking for the arm name
+costs two failed lookups) against `res392_ws_s2026` reads **MEAN −0.0002**, with the recipe diff the
+tool prints confirming the only change is `image_size 336→448, train_size 0→392`. So resolution at
+constant field of view is +0.0002 at one rate and −0.0002 at the other: flat twice, independently,
+against a 0.0062 floor. A 420 px rung is a knob inside a family measured flat — it does not get a
+queue slot, and `knee-d2fc`'s rungs are now refused on evidence rather than left needing a reason.
 
 So the whole +0.0066 of `res392` belongs to the encoder rate 8e-6 → 4e-5, and the rate is now the
 largest unpriced effect in the ledger — bigger, on this evidence, than anything else we have moved
