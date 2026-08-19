@@ -833,3 +833,47 @@ chosen, not just this one.
 Read it against slots 2, 3 and 4, which are three single swaps into ONE seat. If the single swaps
 transfer their ordering and this one does not, the failure is specifically in COMPOUNDING, and the two
 readings together separate that from "the offline ruler is broken", which neither can do alone.
+
+### Slots 2 and 3 result: 0.927 and 0.928 — the seat ordering does NOT reproduce, and the one-swap rule is not what separates them
+
+| entry | swap into the `lr1e-4_ws` seat | offline (fold-0, 909 studies) | board |
+|---|---|---|---|
+| champion `band_v1` | — | 0.8648 | **0.928** |
+| slot 1 `best4` | `band_span` + `depth_regions_narrow` (two at once) | 0.8666 | 0.927 |
+| slot 2 `oneswap` (55631756) | `band_span` | 0.8661 | **0.927** |
+| slot 3 `swapdrn` (55631811) | `depth_regions_narrow` | 0.8653 | **0.928** |
+| slot 4 `calibspan` (55632193) | `calib_span` | 0.8670 | pending |
+
+**BOTH PRE-REGISTERED CLAUSES FIRED, and they point the same way.** Slot 2's prediction was a sign — "at
+or above 0.928" — and it came back **below**. Slot 3's clause named the interesting case explicitly:
+"slot 3 above slot 2 inverts it while both still look like wins, which is the case a mean-only read would
+miss." That is precisely the shape returned. The member the offline ruler ranked HIGHER in this seat
+(`band_span`, 0.8661) scored LOWER on the board than the one it ranked lower (`depth_regions_narrow`,
+0.8653). The offline seat ordering did not transfer.
+
+**THE READING THAT SURVIVES ALL FOUR ENTRIES, and it is not the one slot 1 was written under.** Slot 1
+was read as "compound swaps do not transfer, single swaps might." Slot 2 is a SINGLE swap and it scored
+0.927 — identical to the compound. Slot 3 is a single swap and it scored 0.928 — identical to the
+champion it replaced a member of. So the number of members moved is **not** what separates these
+entries. What separates them is nothing: four entries, offline edges of +0.0005 to +0.0018 over the
+champion, and a board that reports 0.927 or 0.928 with no relation to the offline order.
+
+That is exactly what the noise floor predicts. **Every one of these offline edges is inside 0.0062** —
+the largest is under a third of it. A ruler asked to resolve a separation a third of its own resolution
+returns an ordering, because arithmetic always returns an ordering; it does not return a *finding*. The
+board is not contradicting the holdout here. Both are saying the same thing, which is that these four
+member sets are the same set as far as either can tell.
+
+**WHAT THIS COSTS AND WHAT IT BUYS.** It costs the working assumption that offline seat value picks
+submissions — within the floor it does not, and four slots were spent proving that at four points, which
+is a real answer to a question that was genuinely open. It buys a hard rule for the remaining
+submissions: **an entry whose offline edge over the champion is inside 0.0062 is not worth a slot.** The
+member pool has been searched to its maximum (0.8679, slot 5) and that maximum is +0.0031 — still inside
+the floor. Roster search is therefore exhausted as a source of board movement, and the next movement has
+to come from a member that does not exist yet, not from a rearrangement of the sixteen that do.
+
+**WHAT IT DOES NOT SAY.** It does not say the champion four is optimal — it says the alternatives are
+indistinguishable from it. It does not say `band_span` is worse than `depth_regions_narrow`; one board
+tick between two entries inside the floor is the same non-result in the other direction. And it does not
+retire `record_mix` — a ruler that correctly reports "these are the same" is working. It retires the
+practice of *acting* on its ordering below the floor.
