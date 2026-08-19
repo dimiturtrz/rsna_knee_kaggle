@@ -1,8 +1,11 @@
 """The member curve's arithmetic, on constructed predictions whose right answer is known by hand."""
 
-import numpy as np
+from pathlib import Path
 
-from kneemri.evaluation.member_curve import MemberCurve
+import numpy as np
+import pytest
+
+from kneemri.evaluation.member_curve import MemberCurve, Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
@@ -24,10 +27,65 @@ def _member(strength: float, seed: int) -> np.ndarray:
     return np.repeat((signal + generator.normal(0.0, 1.0, STUDIES))[:, None], len(TARGETS), axis=1)
 
 
+def _names(members: list[np.ndarray]) -> list[str]:
+    """Names for a pool whose test does not care which member is which."""
+    return [f"m{index}.pt" for index in range(len(members))]
+
+
+def test_pool_len():
+    """The member count every subset enumeration runs over."""
+    members = [_member(1.0, seed) for seed in (1, 2)]
+    assert len(Pool(_names(members), members, _truth())) == 2
+
+
+def test_pool_combined():
+    """A subset is combined under the shipped rule, and by INDEX rather than by a copied comprehension."""
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    pool = Pool(_names(members), members, _truth())
+    expected = RankAverage().combine([members[0], members[2]])
+    assert np.array_equal(pool.combined((0, 2)), expected)
+
+
+def test_pool_named():
+    """The subset reads as the names a submission would package, in the subset's order."""
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    assert Pool(["a.pt", "b.pt", "c.pt"], members, _truth()).named((2, 0)) == "c.pt + a.pt"
+
+
+def test_pool_alone():
+    """Every member's own score is reported beside its name, which is what a mix is read against."""
+    members = [_member(3.0, SEED), _member(0.05, SEED + 1)]
+    lines = Pool(["strong.pt", "weak.pt"], members, _truth()).alone(LabelScores())
+
+    assert [line.split(" alone")[0] for line in lines] == ["strong.pt", "weak.pt"]
+    assert float(lines[0].split()[-1]) > float(lines[1].split()[-1]), "the member that follows truth scores higher"
+
+
+def test_pool_split(tmp_path: Path):
+    """The roster is separated from the candidates over ONE join, so both are priced on one denominator."""
+    members = [_member(1.0, seed) for seed in (1, 2, 3)]
+    pool = Pool(["shipped.pt", "other.pt", "candidate.pt"], members, _truth())
+
+    held, candidates = pool.split([tmp_path / "shipped.pt", tmp_path / "other.pt"])
+
+    assert len(held) == 2, "both named members are held out of the candidate list"
+    assert candidates.names == ["candidate.pt"], "everything not named is priced against the roster"
+    assert candidates.truth.shape == pool.truth.shape, "candidates keep the join's truth, not their own"
+
+
+def test_pool_split_refuses_a_roster_member_with_no_record(tmp_path: Path):
+    """A missing roster member would silently score a smaller roster and misprice every delta under it."""
+    members = [_member(1.0, 1)]
+    pool = Pool(["shipped.pt"], members, _truth())
+
+    with pytest.raises(ValueError, match="no holdout record"):
+        pool.split([tmp_path / "shipped.pt", tmp_path / "absent.pt"])
+
+
 def test_sizes():
     """Three members give three singletons, three pairs and one triple."""
     members = [_member(1.0, seed) for seed in (1, 2, 3)]
-    by_size = MemberCurve(LabelScores()).sizes(members, _truth())
+    by_size = MemberCurve(LabelScores()).sizes(Pool(_names(members), members, _truth()))
     assert [len(by_size[size]) for size in (1, 2, 3)] == [3, 3, 1]
 
 
@@ -39,14 +97,14 @@ def test_sizes_shows_independent_members_helping():
     training data and are not, which is exactly why the real curve has to be run rather than assumed.
     """
     members = [_member(1.0, seed) for seed in (1, 2, 3)]
-    by_size = MemberCurve(LabelScores()).sizes(members, _truth())
+    by_size = MemberCurve(LabelScores()).sizes(Pool(_names(members), members, _truth()))
     assert np.mean(by_size[3]) > np.mean(by_size[1])
 
 
 def test_sizes_is_flat_for_duplicated_members():
     """A member added twice adds nothing — the guard against reading ensembling into a copy."""
     duplicated = [_member(1.0, 1)] * 3
-    by_size = MemberCurve(LabelScores()).sizes(duplicated, _truth())
+    by_size = MemberCurve(LabelScores()).sizes(Pool(_names(duplicated), duplicated, _truth()))
     assert np.mean(by_size[3]) == np.mean(by_size[1])
 
 
@@ -63,10 +121,10 @@ def test_subsets():
     truth = _truth()
     members = [_member(2.0, SEED), _member(0.5, SEED + 1)]
 
-    pairs = curve.subsets(members, truth, size=1)
+    pairs = curve.subsets(Pool(_names(members), members, truth), size=1)
     assert [subset for _, subset in pairs] == [(0,), (1,)], "one entry per member, each naming itself"
     assert all(np.isfinite(score) for score, _ in pairs)
-    assert [subset for _, subset in curve.subsets(members, truth, size=2)] == [(0, 1)]
+    assert [subset for _, subset in curve.subsets(Pool(_names(members), members, truth), size=2)] == [(0, 1)]
 
 
 def test_best():
@@ -79,7 +137,7 @@ def test_best():
     truth = _truth()
     members = [_member(2.0, SEED), _member(0.2, SEED + 1)]
 
-    lines = curve.best(members, truth, ["strong.pt", "weak.pt"])
+    lines = curve.best(Pool(["strong.pt", "weak.pt"], members, truth))
     assert len(lines) == 2
     assert "strong.pt" in lines[0] and "weak.pt" not in lines[0], "the best single member is the strong one"
     assert "strong.pt" in lines[1] and "weak.pt" in lines[1], "the only pair is both of them"
@@ -100,7 +158,7 @@ def test_oracle():
     second[:, 0] = first[::-1, 0]  # B is inverted on label 0
     first[:, 1] = second[::-1, 1].copy()  # A is inverted on label 1
 
-    ceiling = MemberCurve(LabelScores()).oracle([first, second], truth)
+    ceiling = MemberCurve(LabelScores()).oracle(Pool(["a.pt", "b.pt"], [first, second], truth))
 
     assert ceiling["oracle"] >= ceiling["average"], "a ceiling below the thing it bounds is not a ceiling"
     assert ceiling["oracle"] > ceiling["average"], "members that differ per label must show headroom"
@@ -118,7 +176,7 @@ def test_paired():
     # identically and would be no better at all. Extra TRUTH is what actually separates.
     better = (signal + truth * 2.0).astype(np.float64)
 
-    lines = MemberCurve(LabelScores()).paired([control, better], truth, ["control.pt", "better.pt"])
+    lines = MemberCurve(LabelScores()).paired(Pool(["control.pt", "better.pt"], [control, better], truth))
     text = "\n".join(lines)
 
     assert "paired deltas, better.pt against control.pt:" in text
@@ -139,7 +197,7 @@ def test_logged():
     members[0][:, 0] = truth[:, 0] * 0.5 + generator.random(80) * 0.1
 
     curve = MemberCurve(LabelScores(), combine_seed=5)
-    lines = curve.logged(members, truth, ["a.pt", "b.pt"], paired=False)
+    lines = curve.logged(Pool(["a.pt", "b.pt"], members, truth), paired=False)
 
     assert any(line.startswith("2 member(s):") for line in lines), "the size curve"
     assert any("a.pt + b.pt" in line for line in lines), "the subsets, named for packaging"
@@ -147,7 +205,7 @@ def test_logged():
     assert any("(= the flat rank-average)" in line for line in lines), "the reachable per-label curve"
     assert not any("paired deltas" in line for line in lines)
 
-    assert any("paired deltas" in line for line in curve.logged(members, truth, ["a.pt", "b.pt"], paired=True))
+    assert any("paired deltas" in line for line in curve.logged(Pool(["a.pt", "b.pt"], members, truth), paired=True))
 
 
 def test_votes():
@@ -159,7 +217,7 @@ def test_votes():
     """
     members = [_member(1.0, seed) for seed in (1, 2, 3)]
     truth = _truth()
-    lines = MemberCurve(LabelScores(), SEED).votes(members, truth)
+    lines = MemberCurve(LabelScores(), SEED).votes(Pool(_names(members), members, truth))
 
     assert [line.split()[0] for line in lines] == ["RankAverage", "LogitAverage", "QualityWeightedRank"]
     shipped = LabelScores().mean(RankAverage().combine(members), truth)
@@ -176,9 +234,11 @@ def test_quality_weighted():
     truth = _truth()
     curve = MemberCurve(LabelScores(), SEED)
 
-    honest = curve.quality_weighted(members, truth)
+    pool = Pool(_names(members), members, truth)
+
+    honest = curve.quality_weighted(pool)
     assert 0.0 <= honest <= 1.0
-    assert curve.votes(members, truth)[2].split()[1] == f"{honest:.4f}", "the report prints the honest score"
+    assert curve.votes(pool)[2].split()[1] == f"{honest:.4f}", "the report prints the honest score"
 
 
 def test_greedy():
@@ -187,7 +247,7 @@ def test_greedy():
     truth = _truth()
     members = [_member(0.2, SEED), _member(2.0, SEED + 1), _member(0.3, SEED + 2)]
 
-    lines = curve.greedy(members, truth, ["weak.pt", "strong.pt", "middling.pt"])
+    lines = curve.greedy(Pool(["weak.pt", "strong.pt", "middling.pt"], members, truth))
 
     assert len(lines) == 3, "every member is eventually taken, so the curve shows where it turned"
     assert "+strong.pt" in lines[0], "the best single member is chosen first"
@@ -201,7 +261,7 @@ def test_marginal():
     roster = [_member(2.0, SEED), _member(2.0, SEED + 1)]
     candidates = [_member(0.05, SEED + 2), _member(2.0, SEED + 3)]
 
-    lines = curve.marginal(roster, candidates, truth, ["noise.pt", "good.pt"])
+    lines = curve.marginal(roster, Pool(["noise.pt", "good.pt"], candidates, truth))
 
     assert lines[0].startswith("roster of 2:"), "the base the deltas are against is stated, not implied"
     assert "+good.pt" in lines[1], "the candidate that adds most is reported first"

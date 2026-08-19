@@ -28,7 +28,7 @@ from pathlib import Path
 
 from core.paths import DataRoot
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
-from kneemri.evaluation.record_mix import RecordMix
+from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.champion_check import Champion
 
@@ -56,7 +56,7 @@ class SeatValue:
         roster = self.roster()
         mixed = RecordMix(list(dict.fromkeys([*roster, *candidates]))).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
-        return mixed.reading(curve, roster, greedy=False, paired=False)
+        return MixReading(mixed, roster).lines(curve, greedy=False, paired=False)
 
 
 def main() -> None:

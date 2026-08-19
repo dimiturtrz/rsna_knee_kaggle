@@ -35,7 +35,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
+from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve, Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, HoldoutRecord
 
@@ -114,7 +114,7 @@ class RecordMix:
             raise ValueError(message)
         return studies
 
-    def per_member(self) -> "MixedRecords":
+    def per_member(self) -> Pool:
         """The members' names, their aligned predictions, and the one truth they are all scored against.
 
         Truth is checked against the first member's for every other member, which is the same refusal
@@ -133,7 +133,7 @@ class RecordMix:
                 raise ValueError(message)
             names.append(name)
             predictions.append(mine)
-        return MixedRecords(names, predictions, truth)
+        return Pool(names, predictions, truth)
 
     @staticmethod
     def _rows(
@@ -146,58 +146,26 @@ class RecordMix:
 
 
 @dataclass(frozen=True)
-class MixedRecords:
-    """What several members predicted for the same studies, ready for `MemberCurve` to read.
+class MixReading:
+    """Which of the three questions an invocation is asking of one pool.
 
-    A type beside its producer rather than a bare tuple: the three arrays are only meaningful together —
-    a name list reordered against a prediction list mislabels every row of the report and nothing fails.
+    Ordered by how much is held fixed. A roster pins the members that already ship and prices the rest
+    against them; greedy pins nothing and builds an ensemble from scratch; the exhaustive reading pins
+    nothing and enumerates. The roster case is checked first because naming one is unambiguous — nobody
+    passes a shipped four-member roster and means `search every subset`.
     """
 
-    names: list[str]
-    predictions: list[Float[NDArray[np.float64], "shared labels"]]
-    truth: Float[NDArray[np.float32], "shared labels"]
+    pool: Pool
+    roster: list[Path]
 
-    def alone(self, scores: LabelScores) -> list[str]:
-        """Each member's own mean score on the shared studies — the column every mix is read against."""
-        return [
-            f"{name} alone: {scores.mean(member, self.truth):.4f}"
-            for name, member in zip(self.names, self.predictions, strict=True)
-        ]
-
-    def split(self, roster: list[Path]) -> tuple[list[NDArray[np.float64]], "MixedRecords"]:
-        """The roster's predictions, and the rest as candidates against it.
-
-        The roster is read through the SAME join as the candidates rather than scored on its own: the
-        shared-study intersection and the label-table refusal are the reason this class exists, and a
-        roster loaded separately would be compared to candidates over a different denominator.
-
-        A named roster member that carries no record is an error, not a skip. Elsewhere a missing
-        record means an old checkpoint and skipping it costs one row; here it silently scores a
-        four-member roster as three and every delta below it is against the wrong base.
-        """
-        wanted = {path.name for path in roster}
-        found = {name for name in self.names if name in wanted}
-        if found != wanted:
-            message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
-            raise ValueError(message)
-        held = [member for name, member in zip(self.names, self.predictions, strict=True) if name in wanted]
-        rest = [(name, member) for name, member in zip(self.names, self.predictions, strict=True) if name not in wanted]
-        return held, MixedRecords([name for name, _ in rest], [member for _, member in rest], self.truth)
-
-    def reading(self, curve: MemberCurve, roster: list[Path], *, greedy: bool, paired: bool) -> list[str]:
-        """Which of the three questions this invocation is asking.
-
-        Ordered by how much is held fixed. A roster pins the members that already ship and prices the
-        rest against them; greedy pins nothing and builds an ensemble from scratch; the exhaustive
-        reading pins nothing and enumerates. The roster case is checked first because naming one is
-        unambiguous — nobody passes a shipped four-member roster and means `search every subset`.
-        """
-        if roster:
-            held, candidates = self.split(roster)
-            return curve.marginal(held, candidates.predictions, self.truth, candidates.names)
+    def lines(self, curve: MemberCurve, *, greedy: bool, paired: bool) -> list[str]:
+        """The reading this invocation asked for, as report lines."""
+        if self.roster:
+            held, candidates = self.pool.split(self.roster)
+            return curve.marginal(held, candidates)
         if greedy:
-            return curve.greedy(self.predictions, self.truth, self.names)
-        return curve.logged(self.predictions, self.truth, self.names, paired=paired)
+            return curve.greedy(self.pool)
+        return curve.logged(self.pool, paired=paired)
 
 
 def main() -> None:
@@ -229,7 +197,7 @@ def main() -> None:
     for line in mixed.alone(scores):
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
-    for line in mixed.reading(curve, roster, greedy=arguments.greedy, paired=arguments.paired):
+    for line in MixReading(mixed, roster).lines(curve, greedy=arguments.greedy, paired=arguments.paired):
         logger.info(line)
 
 

@@ -20,6 +20,7 @@ spread between the best and worst subset of a given size is the honest error bar
 import argparse
 import itertools
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -49,6 +50,65 @@ arbitrary-but-fixed partitions of the same corpus and a second free number would
 to accidentally vary."""
 
 
+@dataclass(frozen=True)
+class Pool:
+    """What several members predicted for the same studies, in one order — every reading's input.
+
+    A type rather than three parameters threaded through nine signatures. The arrays are only meaningful
+    TOGETHER: a name list reordered against a prediction list mislabels every row of every report and
+    nothing fails, and a truth vector from a different fold scores the wrong studies just as quietly.
+    Passed as one value, the three cannot come apart at a call site.
+
+    It carries the operations every reading repeated by hand — combine a subset, name a subset, score a
+    member alone — because `RankAverage().combine([predictions[i] for i in subset])` appeared in four
+    methods and each copy was a chance to combine one list while naming another.
+    """
+
+    names: list[str]
+    predictions: list[Float[np.ndarray, "studies targets"]]
+    truth: Float[np.ndarray, "studies targets"]
+
+    def __len__(self) -> int:
+        """How many members — the range every subset enumeration runs over."""
+        return len(self.predictions)
+
+    def combined(self, subset: tuple[int, ...] | list[int]) -> Float[np.ndarray, "studies targets"]:
+        """These members under the shipped rule, which is the flat per-label rank-average."""
+        return RankAverage().combine([self.predictions[index] for index in subset])
+
+    def named(self, subset: tuple[int, ...] | list[int]) -> str:
+        """The subset as the names a submission would package."""
+        return " + ".join(self.names[index] for index in subset)
+
+    def alone(self, scores: LabelScores) -> list[str]:
+        """Each member's own mean score on the shared studies — the column every mix is read against."""
+        return [
+            f"{name} alone: {scores.mean(member, self.truth):.4f}"
+            for name, member in zip(self.names, self.predictions, strict=True)
+        ]
+
+    def split(self, roster: list[Path]) -> tuple[list[Float[np.ndarray, "studies targets"]], "Pool"]:
+        """The roster's predictions, and the rest as candidates against it.
+
+        The roster is read through the SAME join as the candidates rather than scored on its own: the
+        shared-study intersection and the label-table refusal are the reason this type exists, and a
+        roster loaded separately would be compared to candidates over a different denominator.
+
+        A named roster member that carries no record is an error, not a skip. Elsewhere a missing
+        record means an old checkpoint and skipping it costs one row; here it silently scores a
+        four-member roster as three and every delta below it is against the wrong base.
+        """
+        wanted = {path.name for path in roster}
+        found = {name for name in self.names if name in wanted}
+        if found != wanted:
+            message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
+            raise ValueError(message)
+        paired = list(zip(self.names, self.predictions, strict=True))
+        held = [member for name, member in paired if name in wanted]
+        rest = [(name, member) for name, member in paired if name not in wanted]
+        return held, Pool([name for name, _ in rest], [member for _, member in rest], self.truth)
+
+
 class MemberCurve:
     """Mean score against ensemble size, over every subset of that size."""
 
@@ -56,20 +116,15 @@ class MemberCurve:
         self.scores = scores
         self.combine_seed = combine_seed
 
-    def sizes(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> dict[int, list[float]]:
+    def sizes(self, pool: Pool) -> dict[int, list[float]]:
         """Every subset's score, grouped by how many members it holds.
 
         All subsets rather than a sample: with five members that is 31 combinations and a few seconds of
         numpy, and the spread within a size is the only error bar available without retraining.
         """
-        return {
-            size: [score for score, _ in self.subsets(per_member, truth, size)]
-            for size in range(1, len(per_member) + 1)
-        }
+        return {size: [score for score, _ in self.subsets(pool, size)] for size in range(1, len(pool) + 1)}
 
-    def subsets(
-        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], size: int
-    ) -> list[tuple[float, tuple[int, ...]]]:
+    def subsets(self, pool: Pool, size: int) -> list[tuple[float, tuple[int, ...]]]:
         """Every subset of one size, as (score, member indices).
 
         The indices are the point. `sizes` reported that five members reach 0.8601 and never said WHICH
@@ -78,13 +133,11 @@ class MemberCurve:
         half its job.
         """
         return [
-            (self.scores.mean(RankAverage().combine([per_member[index] for index in subset]), truth), subset)
-            for subset in itertools.combinations(range(len(per_member)), size)
+            (self.scores.mean(pool.combined(subset), pool.truth), subset)
+            for subset in itertools.combinations(range(len(pool)), size)
         ]
 
-    def greedy(
-        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
-    ) -> list[str]:
+    def greedy(self, pool: Pool) -> list[str]:
         """Forward selection: the member that adds most, added, until adding one stops paying.
 
         `subsets` is exhaustive and therefore exponential — five members is 31 combinations and sixteen
@@ -99,30 +152,21 @@ class MemberCurve:
         """
         chosen: list[int] = []
         lines = []
-        remaining = set(range(len(per_member)))
+        remaining = set(range(len(pool)))
         while remaining:
             score, index = max(
                 (
-                    (
-                        self.scores.mean(RankAverage().combine([per_member[i] for i in [*chosen, candidate]]), truth),
-                        candidate,
-                    )
+                    (self.scores.mean(pool.combined([*chosen, candidate]), pool.truth), candidate)
                     for candidate in remaining
                 ),
                 key=lambda pair: pair[0],
             )
             chosen.append(index)
             remaining.discard(index)
-            lines.append(f"greedy {len(chosen)}: {score:.4f}  +{names[index]}")
+            lines.append(f"greedy {len(chosen)}: {score:.4f}  +{pool.names[index]}")
         return lines
 
-    def marginal(
-        self,
-        roster: list[NDArray[np.float64]],
-        candidates: list[NDArray[np.float64]],
-        truth: Float[np.ndarray, "b t"],
-        names: list[str],
-    ) -> list[str]:
+    def marginal(self, roster: list[Float[np.ndarray, "studies targets"]], candidates: Pool) -> list[str]:
         """What each candidate would add to the roster that already ships, best first.
 
         THE NUMBER AN ARM IS ACTUALLY DECIDED ON, and the one nothing here computed. Every arm is read
@@ -140,10 +184,11 @@ class MemberCurve:
         package. This holds the roster FIXED, because the roster is a shipped artefact with a board
         number on it and the question an arm asks is whether to disturb it.
         """
+        truth = candidates.truth
         base = self.scores.mean(RankAverage().combine(roster), truth)
         added = [
             (self.scores.mean(RankAverage().combine([*roster, candidate]), truth), name)
-            for candidate, name in zip(candidates, names, strict=True)
+            for candidate, name in zip(candidates.predictions, candidates.names, strict=True)
         ]
         lines = [f"roster of {len(roster)}: {base:.4f}"]
         lines += [
@@ -151,19 +196,15 @@ class MemberCurve:
         ]
         return lines
 
-    def best(
-        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
-    ) -> list[str]:
+    def best(self, pool: Pool) -> list[str]:
         """The winning subset at each size, named — the line a submission is built from."""
         lines = []
-        for size in range(1, len(per_member) + 1):
-            score, subset = max(self.subsets(per_member, truth, size), key=lambda pair: pair[0])
-            lines.append(f"best {size}: {score:.4f}  " + " + ".join(names[index] for index in subset))
+        for size in range(1, len(pool) + 1):
+            score, subset = max(self.subsets(pool, size), key=lambda pair: pair[0])
+            lines.append(f"best {size}: {score:.4f}  {pool.named(subset)}")
         return lines
 
-    def paired(
-        self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"], names: list[str]
-    ) -> list[str]:
+    def paired(self, pool: Pool) -> list[str]:
         """Each member's per-label delta against the FIRST, with the interval that says if it is real.
 
         Against the first because a paired interval is a two-arm statement and the caller names its
@@ -175,18 +216,19 @@ class MemberCurve:
         cleared, and its whole falsifiable claim was per-label.
         """
         lines = []
-        for index in range(1, len(per_member)):
-            control = self.scores.per_label(per_member[0], truth)
-            observed = self.scores.per_label(per_member[index], truth)
-            interval = self.scores.paired_interval(per_member[0], per_member[index], truth)
-            lines.append(f"paired deltas, {names[index]} against {names[0]}:")
+        truth = pool.truth
+        for index in range(1, len(pool)):
+            control = self.scores.per_label(pool.predictions[0], truth)
+            observed = self.scores.per_label(pool.predictions[index], truth)
+            interval = self.scores.paired_interval(pool.predictions[0], pool.predictions[index], truth)
+            lines.append(f"paired deltas, {pool.names[index]} against {pool.names[0]}:")
             for label, (low, high) in interval.items():
                 clears = "*" if low > 0.0 or high < 0.0 else ""
                 delta = observed[label] - control[label]
                 lines.append(f"  {label:18s} {delta:+.4f}  [{low:+.4f}, {high:+.4f}]{clears}")
         return lines
 
-    def oracle(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> dict[str, float]:
+    def oracle(self, pool: Pool) -> dict[str, float]:
         """The CEILING of combining these members, per label — against the best subset actually reachable.
 
         A ceiling by construction, and it must never be quoted as a score: it picks, for each of the
@@ -203,17 +245,17 @@ class MemberCurve:
         Reported beside the best PLAIN average so the two are read together — a ceiling alone tempts
         exactly the misreading it exists to prevent.
         """
-        per_label = [self.scores.per_label(member, truth) for member in per_member]
+        truth = pool.truth
+        per_label = [self.scores.per_label(member, truth) for member in pool.predictions]
         labels = list(per_label[0])
         best = {label: max(scored[label] for scored in per_label) for label in labels}
-        combined = RankAverage().combine(per_member)
         return {
             "oracle": float(np.nanmean(list(best.values()))),
-            "average": self.scores.mean(combined, truth),
-            "best_single": max(self.scores.mean(member, truth) for member in per_member),
+            "average": self.scores.mean(pool.combined(list(range(len(pool)))), truth),
+            "best_single": max(self.scores.mean(member, truth) for member in pool.predictions),
         }
 
-    def votes(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> list[str]:
+    def votes(self, pool: Pool) -> list[str]:
         """Every voting rule on the SAME members — the ensemble axis that has never been varied.
 
         Count, which members, per-label selection and decode diversity have all been measured. The vote
@@ -226,29 +268,31 @@ class MemberCurve:
         of exactly that — an in-sample gain that did not survive being chosen elsewhere.
         """
         flat = RankAverage()
-        lines = [f"{flat.named():22s} {self.scores.mean(flat.combine(per_member), truth):.4f}   (the shipped rule)"]
+        members, truth = pool.predictions, pool.truth
+        lines = [f"{flat.named():22s} {self.scores.mean(flat.combine(members), truth):.4f}   (the shipped rule)"]
         lines.append(
-            f"{LogitAverage().named():22s} {self.scores.mean(LogitAverage().combine(per_member), truth):.4f}"
+            f"{LogitAverage().named():22s} {self.scores.mean(LogitAverage().combine(members), truth):.4f}"
             "   (keeps the margin a rank discards; exposed to a miscalibrated member)"
         )
         lines.append(
-            f"{'QualityWeightedRank':22s} {self.quality_weighted(per_member, truth):.4f}   (split-half; weights "
+            f"{'QualityWeightedRank':22s} {self.quality_weighted(pool):.4f}   (split-half; weights "
             "fitted on the studies it is NOT scored on)"
         )
         return lines
 
-    def quality_weighted(self, per_member: list[NDArray[np.float64]], truth: Float[np.ndarray, "b t"]) -> float:
+    def quality_weighted(self, pool: Pool) -> float:
         """The weighted rule's HONEST score: weights fitted on one half, read on the other.
 
         Its own method rather than three lines inside `votes`, because it is the only rule here that fits
         anything and so the only one whose reported number depends on a split — which is a claim to state
         once, in the place that makes it, rather than a nested comprehension inside a report builder.
         """
+        members, truth = pool.predictions, pool.truth
         halves = LabelCombine(self.scores).halves(len(truth), self.combine_seed)
         honest = [
             self.scores.mean(
-                QualityWeightedRank([self.scores.mean(member[fit], truth[fit]) for member in per_member]).combine(
-                    [member[report] for member in per_member]
+                QualityWeightedRank([self.scores.mean(member[fit], truth[fit]) for member in members]).combine(
+                    [member[report] for member in members]
                 ),
                 truth[report],
             )
@@ -256,30 +300,23 @@ class MemberCurve:
         ]
         return float(np.mean(honest))
 
-    def logged(
-        self,
-        per_member: list[NDArray[np.float64]],
-        truth: Float[np.ndarray, "b t"],
-        names: list[str],
-        *,
-        paired: bool,
-    ) -> list[str]:
+    def logged(self, pool: Pool, *, paired: bool) -> list[str]:
         """Every reading of these members' arrays — the half of this CLI that needs no GPU and no corpus.
 
         Split from `main` because it is the whole analysis: `main` finds checkpoints, builds a holdout
         and fills a cache, and this reads what came back. Together they made one function that could
         only run with a card, a corpus and minutes, which is to say one that nothing could exercise.
         """
-        lines = list(self.report(self.sizes(per_member, truth)))
+        lines = list(self.report(self.sizes(pool)))
         # The subsets BY NAME, because the mean and the range describe the ensemble question while a
         # submission needs the answer: which members to package.
-        lines += self.best(per_member, truth, names)
+        lines += self.best(pool)
         if paired:
-            lines += self.paired(per_member, truth, names)
+            lines += self.paired(pool)
         # The CEILING beside the reachable numbers, never alone: it selects per label using the answers,
         # so quoting it as a score would be quoting a cheat. What it prices is whether per-label
         # weighting - or another member of the same kind - is worth anything before either is built.
-        ceiling = self.oracle(per_member, truth)
+        ceiling = self.oracle(pool)
         lines.append(
             f"oracle {ceiling['oracle']:.4f}  vs plain average {ceiling['average']:.4f}  "
             f"vs best single {ceiling['best_single']:.4f}  "
@@ -289,10 +326,10 @@ class MemberCurve:
         # the answers were available; this says what is left once they are not. Its last row is the flat
         # rank-average under the same split-half estimator, so the two columns are a matched comparison
         # rather than a number beside a differently-measured number.
-        lines += LabelCombine(self.scores).curve(per_member, truth, self.combine_seed)
+        lines += LabelCombine(self.scores).curve(pool.predictions, pool.truth, self.combine_seed)
         # THE VOTE ITSELF, last, because every line above it was produced BY the flat rule and this
         # is the one row that asks whether that rule was the right one to produce them with.
-        return lines + self.votes(per_member, truth)
+        return lines + self.votes(pool)
 
     def report(self, by_size: dict[int, list[float]]) -> list[str]:
         """One line per ensemble size: its mean, its range, and what the member added."""
@@ -403,7 +440,8 @@ def main() -> None:
             names.append(member.file.name)
             logger.info("%s alone: %.4f", member.file.name, scores.mean(scored, truth))
 
-    for line in MemberCurve(scores, arguments.combine_seed).logged(per_member, truth, names, paired=arguments.paired):
+    pool = Pool(names, per_member, truth)
+    for line in MemberCurve(scores, arguments.combine_seed).logged(pool, paired=arguments.paired):
         logger.info(line)
 
 
