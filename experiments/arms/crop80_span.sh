@@ -35,7 +35,12 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# 18, by the rule knee-ylp0 derived rather than by the 26 this line was written with. Peak reserved is a
+# function of SLICE COUNT and nothing else - 1.335 GB a slice plus 0.22, which every 12-slice arm confirms
+# at 16.24 - and --crop-mm changes the physical extent the 336 px covers, not the activations. So this
+# recipe needs what band_span needed. The number matters now that a co-tenant holds ~13 GB: an ask above
+# the need makes await_headroom poll for memory the run will never allocate, then start into the crawl.
 run_train crop80_span \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 26 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --vram-gb 18 \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --crop-mm 80 --centre tissue \
   --labels "$LABELS" --out "$PROCESSED/crop80_span_s2026.pt"
