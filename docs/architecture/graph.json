@@ -10215,7 +10215,19 @@
     {
       "kind": "calls",
       "source": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
+      "target": "kneemri.training.pretrained_encoder.PretrainedEncoder.upto",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
       "target": "kneemri.training.pretrained_encoder.PretrainedEncoder.variant",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrained_encoder.PretrainedEncoder.upto",
+      "target": "kneemri.training.pretrained_encoder.PretrainedEncoder._block",
       "weight": 1
     },
     {
@@ -20234,8 +20246,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder._block",
+      "label": "_block",
+      "level": "method",
+      "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
       "label": "into",
+      "level": "method",
+      "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder.upto",
+      "label": "upto",
       "level": "method",
       "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
       "role": null
