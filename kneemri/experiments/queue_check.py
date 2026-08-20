@@ -36,6 +36,50 @@ STARTED = "=== "
 
 
 @dataclass(frozen=True)
+class Probe:
+    """One way to ask this machine for its process table, as a resolved executable and a fixed argv."""
+
+    executable: str
+    argv: tuple[str, ...]
+
+    def read(self) -> str:
+        """This probe's output, or empty when the executable is absent or the call fails.
+
+        The decode is lossy on purpose: a process table here carries a shell snapshot's bytes in
+        whatever the console encoding is, and one undecodable byte in an unrelated process must not
+        cost the answer.
+        """
+        found = shutil.which(self.executable)
+        if not found:
+            return ""
+        completed = subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
+            [found, *self.argv], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        )
+        return completed.stdout
+
+
+PROBES = (
+    Probe("ps", ("-ef",)),
+    Probe(
+        "powershell",
+        ("-NoProfile", "-Command", "Get-CimInstance Win32_Process | ForEach-Object { $_.CommandLine }"),
+    ),
+)
+"""Ordered, first non-empty wins — and the second one is why this is a list rather than a call.
+
+MEASURED 2026-08-20: `ps -ef` lists the running arm correctly in the harness shell, and
+`shutil.which("ps")` from the interpreter this check runs in returns None. The MSYS `ps` lives in
+git-bash's `/usr/bin`, which is not on the PATH a Windows Python process inherits, so the check
+degraded to "liveness cannot be crossed" and returned success — the exact silent pass it exists to
+prevent, on the only machine it runs on.
+
+`Get-CimInstance Win32_Process` is the Windows counterpart and is strictly better here: it carries the
+FULL command line, which is what the crossing matches on, where `tasklist` carries only an image name
+and would match no watcher at all.
+"""
+
+
+@dataclass(frozen=True)
 class Watch:
     """One watcher log, read for the marker it waits on and the arms it has yet to start."""
 
@@ -126,21 +170,17 @@ class QueuedArms:
         return [*rows, verdict]
 
     @staticmethod
-    def listing() -> str:
-        """This machine's process table as one string, or empty when it cannot be read.
+    def listing(probes: tuple[Probe, ...] = PROBES) -> str:
+        """This machine's process table as one string, or empty when no probe could read it.
 
         An unreadable table must not read as "nothing is running" — that turns every queued arm into a
-        false strand — so the caller is told, and the check reports what it could not do instead. The
-        decode is lossy on purpose: `ps -ef` here carries a shell snapshot's bytes in whatever the
-        console encoding is, and one undecodable byte in an unrelated process must not cost the answer.
+        false strand — so the caller is told, and the check reports what it could not do instead.
         """
-        executable = shutil.which("ps")
-        if not executable:
-            return ""
-        found = subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
-            [executable, "-ef"], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
-        )
-        return found.stdout
+        for probe in probes:
+            found = probe.read()
+            if found:
+                return found
+        return ""
 
     @staticmethod
     def _age(path: Path) -> float:
@@ -155,7 +195,10 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     running = QueuedArms.listing()
     if not running:
-        logger.warning("no process listing: `ps -ef` returned nothing, so liveness cannot be crossed")
+        logger.warning(
+            "no process listing: none of %s could be read, so liveness cannot be crossed",
+            ", ".join(probe.executable for probe in PROBES),
+        )
         return
     for line in QueuedArms(arguments.directory, running).lines():
         logger.info(line)

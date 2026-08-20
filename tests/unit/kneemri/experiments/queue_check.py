@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kneemri.experiments.queue_check import QueuedArms, Watch
+from kneemri.experiments.queue_check import Probe, QueuedArms, Watch
 
 MARKER = "ARM DONE aug_long"
 ARMS = "experiments/arms/v3base_band.sh experiments/arms/aprior_dense.sh"
@@ -74,11 +74,32 @@ def test_lines(tmp_path: Path):
     assert stranded.startswith("STRANDED:") and "v3base_band" in stranded, "the verdict names the arms"
 
 
+def test_read():
+    """A probe whose executable is not on THIS interpreter's PATH answers empty rather than raising.
+
+    MEASURED 2026-08-20: `shutil.which("ps")` returns None from the Python process this check runs in
+    — the MSYS `ps` lives in git-bash's `/usr/bin`, off the Windows PATH — while `ps -ef` works fine in
+    the shell that launches it. That gap is what made the check silently pass on the only machine it
+    runs on, so the absent case is a test rather than an assumption.
+    """
+    assert Probe("no-such-executable-anywhere", ()).read() == ""
+
+
 def test_listing():
-    """An empty table reads as 'nothing is running' and would strand every queued arm, so it is checked."""
+    """An empty table reads as 'nothing is running' and would strand every queued arm, so it is checked.
+
+    Asserted on CONTENT, not on a header: the two probes print different tables, and the crossing only
+    ever matches command lines, so what must hold is that some process this test knows is running is
+    named in there.
+    """
     listing = QueuedArms.listing()
-    assert "PID" in listing.splitlines()[0], "the header `ps -ef` prints, so the table was actually read"
     assert len(listing.splitlines()) > 1, "a machine running this test has at least one process"
+    assert "python" in listing.lower(), "the interpreter running this test is a process and must be listed"
+
+
+def test_listing_no_probe_reads_empty():
+    """No probe means no answer — and the caller must be told, not handed a table with nothing in it."""
+    assert QueuedArms.listing((Probe("no-such-executable-anywhere", ()),)) == ""
 
 
 def test_lines_empty(tmp_path: Path):
