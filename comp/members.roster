@@ -102,3 +102,17 @@ band_dense_long_s2026.pt    # 0.8587 — band_dense's recipe at 24 epochs; the L
 # shape and it is the member that carried 0.929; here it is sharper, because the arm's PREMISE was
 # refuted and the checkpoint it dropped out is still the largest improvement available to the champion.
 # A run that answers "no" still produces a checkpoint, and the checkpoint is not bound by the answer.
+dinov3_base_lora_s2026.pt   # 0.8268 — the only DINOv3-BASE member, and the pool's only encoder diversity
+# Added 2026-08-20 for the axis the pool has never varied ON THE BOARD. Every one of the seven entries
+# scored so far is 100% DINOv2-small; `lora_r8_v3small_224` has been mounted since 2026-08-16 and no
+# kernel has ever named it. The encoder weights are already served — `dimiturnt/dinov3-hf/vitb16` has sat
+# in the mounted model dataset since 2026-08-12, so this costs a members push and no slot.
+#
+# It is mounted on a NEGATIVE offline reading, deliberately and with the number stated: added as a FIFTH
+# to the `longseat` four it is 0.8678 against 0.8691 (-0.0013), and swapped for that four's weakest seat
+# it is 0.8667 (-0.0025). Both are a fifth of the 0.0062 noise floor. The argument for spending a slot on
+# a member the holdout rejects is not that the holdout is noisy — it is that the holdout is BIASED on
+# exactly this quantity: collapsing three members into one pixel group cost 0.0059 offline and 0.014 on
+# the board, a 2.4x under-pricing of diversity (knee-nas5, knee-7d1), and an encoder change is a strictly
+# larger diversity step than a decode change. `calib_span` is the precedent — mounted at -0.0020, it
+# carried the 0.929 entry.
