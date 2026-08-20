@@ -1362,6 +1362,43 @@ the classifier a representation reshaped for reconstruction, and twelve epochs a
 blocks 6–8 moving 0.0205–0.0239 against control's 0.0167–0.0225, so the backbone received gradient and
 trained normally. The collapse is what the encoder was, not whether it was fitted.
 
+### encoder_adapt_lower — 0.7309, and the diagnosis it was built on is refuted (2026-08-20)
+
+**The flag landed.** `encoder initialised from adapt_small_e6_lr1e5.pt (113 tensors, 110 left stock)` —
+the stem and blocks 0–5 imported, blocks 6–11 and the final norm stock. Checked before the number was
+read, because a depth that silently loaded everything would have reproduced `encoder_adapt_gentle` under
+a new name.
+
+**The arm on its own.** Best holdout 0.7309 at epoch 11 against `band_dense` 0.8578 (−0.1269). Seat value
+into the roster of four: 0.8591 (−0.0089), 0 of 1 clearing +0.0015. No seat.
+
+**PRE-REGISTERED OUTCOME 3, and it costs me the mechanism I wrote yesterday.** The arm was built on
+"the rewritten TOP is the whole collapse" — block 11 moved 0.5510 and 0.2144 where supervision never
+moves it past 0.0080, so leaving the top stock should recover roughly control. It imported ONLY the
+bottom and still lost 0.1269. **So the damage is not in the top blocks. It is in the frozen bottom.**
+The recovery is real but small: +0.0407 over `encoder_adapt` (0.6902) and +0.0434 over
+`encoder_adapt_gentle` (0.6875). Dropping the reconstruction-shaped top bought about a quarter of what
+the axis lost, and three quarters of it came in through the six blocks the argument said were the safe
+part.
+
+**The instrument that says why is the TRAINING LOSS, not the AUC.** Control `band_dense` runs
+1.2162 → 0.5780 over twelve epochs. All three encoder arms floor near the control's epoch-ZERO loss:
+1.3452 → 1.1978, 1.3393 → 1.1960, and this one 1.2874 → 1.1073 — still falling at epoch 11, still above
+where the control started. **These arms are not fitting worse, they are barely fitting at all.** The
+head sits on frozen blocks 0–5 that were rewritten for spectral reconstruction, and the six blocks
+supervision CAN write cannot re-encode what the frozen half no longer represents. AUC alone said
+"worse"; the loss curve says "not training", which is a different failure and a different fix.
+
+**What this does NOT rule out.** The adaptation was six epochs and neither loss term had converged, and
+it was run on the DEFAULT 12-slice cache while every arm importing it trains on 20 slices at 0.10–0.90 —
+so the encoder is off-domain for the pixels it was imported into, which the stamp added on 2026-08-20
+now records. Both are cheap to remove and both point the same way: converge the MAE first, on the arm's
+own cache, and either do not freeze the adapted blocks or unfreeze deeper. The axis is not closed; the
+`--encoder-adapt-depth` mechanism is proven correct and the initialisation it was fed is not yet a fair
+test of it.
+
+**Prior version of this section, kept because it was wrong in a way worth seeing:**
+
 **Successor queued: `encoder_adapt_lower`, `--encoder-adapt-depth 6`.** New option, tested, that takes
 the patch embedding and blocks 0–5 from the adaptation and leaves blocks 6–11 and the final norm stock
 (the norm stays with the blocks it is calibrated to). This is the axis's original argument stated
