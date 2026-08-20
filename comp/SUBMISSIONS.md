@@ -1105,3 +1105,40 @@ The FOUR MEMBERS principle in `champion.json` is untouched by these entries and 
   loss on `crop80_tissue` and leaves the encoder verdict intact; the reverse ordering isolates the encoder.
 
 **THE CHAMPION PIN DOES NOT MOVE ON EITHER RESULT UNLESS ONE CLEARS 0.930.** A tie does not dethrone.
+
+**THE RESULT — BOTH REFUTED, AND THE REFUTATION IS THE CLEANEST THIS LEDGER HOLDS.**
+
+| entry | members | offline | board | vs `longseat` 0.930 |
+|---|---|---|---|---|
+| `longseat` | 4 | 0.8691 | **0.930** | — |
+| `crossenc` | 5 (+`dinov3_base_lora`) | 0.8678 | **0.926** | −0.004 |
+| `maxdiv` | 6 (+`crop80_tissue`) | 0.8668 | **0.925** | −0.005 |
+
+The pre-registered ≤0.929 clause fired on both, at both doses, on both axes. **The diversity-mispricing
+hypothesis is refuted.** The 2.4× under-pricing measured on the decode axis (knee-nas5, knee-7d1) does not
+extend past it, and no recombination of the mounted pool is worth a further slot.
+
+**THE SIGN IS THE PART WORTH KEEPING, AND IT IS THE OPPOSITE OF THE ARGUMENT THAT FIRED THESE.** The board
+ordering is monotone in the offline ordering — 0.8691 / 0.8678 / 0.8668 maps to 0.930 / 0.926 / 0.925 — so
+the holdout ranked these three entries correctly. What it got wrong is the MAGNITUDE, and in the direction
+that makes it dangerous rather than conservative: −0.0013 offline became −0.004 on the board, −0.0023
+became −0.005, a **~3× amplification of HARM**. The bias in this ruler is that it *understates what a weak
+member costs*, not that it understates what a diverse one is worth. Every entry fired on "the offline
+delta is inside the noise floor so the diversity is free" was fired on a misreading of the one measurement
+that motivated it.
+
+**THESE ARE THE FIRST TWO ENTRIES TO BREAK THE 0.927–0.930 BAND.** Eight scored entries had sat inside
+0.003 of each other across wildly different member sets, and that band was being read as the price of
+recombination — a floor. It is not a floor. It is the range spanned by recombinations of *members that are
+individually strong*. `dinov3_base_lora` scores 0.8268 alone, 0.032 below the pool's best, and adding it
+cost four ticks; adding `crop80_tissue` (0.8345) cost one more. **Member quality is priced on this board
+and the offline holdout hides three quarters of the bill.**
+
+**WHAT THIS CLOSES.** The DINOv3 line as a member source: four arms, never shipped, and now measured as
+strictly negative on the board. Adding members to the champion four on a "free because inside the floor"
+argument. The `crop80` crop axis at this quality level. **WHAT IT DOES NOT CLOSE**: whether a STRONG member
+of a different encoder helps — both pre-registrations named that as the surviving question, and the
+monotonicity here is what makes it answerable rather than idle, because it says the board reads member
+quality faithfully enough to reward it.
+
+**The champion pin does not move.** `greedy4_v1` at 0.930 stands.
