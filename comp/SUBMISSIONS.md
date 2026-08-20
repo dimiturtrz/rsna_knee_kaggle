@@ -970,3 +970,46 @@ and the entry compounds two swaps of which one brings the worst-transferring mem
 useful outcome is the refutation: **above 0.929** would say the greedy search over the mounted pool
 finds board-real improvements at separations the seat experiment says it cannot resolve, which would
 mean the seat comparison, not the greedy search, is the blunt instrument.
+
+#### Slot 5 `greedy4` landed 0.930 — the refutation this ledger wrote for itself, and it fired
+
+**0.930. New champion, pinned as `greedy4_v1` (submission 55633771, kernel `kneemri-greedy4`, kit
+`4bdf2a4` read from the kernel log's own line, members `band_dense` / `calib_span` /
+`depth_regions_narrow` / `band_span` read from the kernel's `chosen` tuple).** The revised prediction
+above was **at or below 0.929**, and the useful outcome it named was the one that happened: *above 0.929
+would say the greedy search over the mounted pool finds board-real improvements at separations the seat
+experiment says it cannot resolve.* That clause fires as written.
+
+**EVERY ARGUMENT AGAINST FIRING IT WAS TRUE, AND IT WON ANYWAY.** The edge had shrunk from +0.0031 to
++0.0009 when the champion improved under it — a seventh of the noise floor. It compounded two swaps
+where the one-swap entry had already returned 0.927. It brought in `band_span`, the member that came
+LAST on the board among four occupants of one seat. Three separate reasons to expect a flat or negative
+tick, all of them drawn from this ledger's own measurements, and the entry took the board.
+
+**THE FIVE-POINT TABLE IS NOW THE THING TO READ, not any single pair.**
+
+| entry | offline joint holdout | board |
+|---|---|---|
+| `band_v1` | 0.8648 | 0.928 |
+| `swapdrn` | 0.8653 | 0.928 |
+| `oneswap` | 0.8661 | **0.927** |
+| `calibspan_v1` | 0.8670 | 0.929 |
+| **`greedy4_v1`** | **0.8679** | **0.930** |
+
+Four of five are monotone in the offline score across a 0.003 offline spread. The single inversion is
+`oneswap` — and `band_span`, the member whose entry that was, is IN `greedy4_v1` and did not hurt it.
+So the inversion is a property of THAT four, not of the member, which is the second time this ledger has
+had to separate a member from the company it was measured in (the first was `calib_span`, written up as
+a control failure and then the best entry we had).
+
+**WHAT UPGRADES.** The standing principle — *the offline ruler picks the winner and does not resolve the
+field* — is now too weak as written. Over five points it orders the field at 4/5. It is a ranking tool
+with one known failure, and its maximum is worth firing rather than arguing down. Both statements are
+pinned into `champion.json`.
+
+**WHAT DOES NOT.** One board tick is this competition's reporting resolution, so 0.930 over 0.929 is
+"better" and not "much better", and five points with a 0.003 spread cannot establish a slope. The honest
+claim is a decision rule, not an effect size: **fire the offline maximum over the mounted pool and stop
+talking the margin down.** Total movement against the original baseline is 0.925 → 0.930, +0.005 over
+five entries, which is still a third of the 1.5% bar and a tenth of knee-jk3's 0.054 frontier gap. The
+entries are compounding; they are not yet a result.

@@ -1,16 +1,16 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "calibspan_v1",
-  "kernel": "kneemri-calibspan",
-  "submission": 55632193,
-  "date": "2026-08-19",
-  "board": 0.929,
+  "entry": "greedy4_v1",
+  "kernel": "kneemri-greedy4",
+  "submission": 55633771,
+  "date": "2026-08-20",
+  "board": 0.93,
   "kit": "4bdf2a4",
   "members": [
     "band_dense_s2026",
     "calib_span_s2026",
-    "calibrated_targets_s2026",
-    "lr4e-5_ws_s2026"
+    "depth_regions_narrow_s2026",
+    "band_span_s2026"
   ],
   "serving": {
     "overlap": false,
@@ -25,6 +25,8 @@
     "EVERY SHIPPED MEMBER IS FINGERPRINT-CHECKED AND WITNESS-CHECKED. A member fitted with --slice-pooling max and rebuilt with default channel stacking differs by 2.25 against a 2e-3 tolerance: a different function on different pixels, which loads and scores without complaint.",
     "MEMBERSHIP WAS NOT EXHAUSTED, which the previous champion's own principles claimed. This entry is one named swap off that one - res392_ws out, band_dense in, same count and same two decode groups - and it moved 0.925 to 0.928. The claim was made after four swaps bought +0.007 with the third breaking the ordering rule; what was actually exhausted was the pool at the time, and band_dense is a member from an axis (the sampled BAND) that pool did not contain.",
     "A MEMBER THAT FAILED ITS OWN MATCHED CONTROL CAN STILL WIN A SEAT. calib_span was written up as a failure hours before this entry: -0.0020 against its control at the settled operating point, on the arm that PROVED a lever's sign is a property of its operating point. It is the member that took this entry past 0.928. Member quality measured alone and seat value in a four-member vote are different quantities, and the alone-ordering here is INVERTED against the seat-ordering: alone band_span 0.8565 > depth_regions_narrow 0.8554 > calib_span 0.8545, in this seat calib_span 0.8670 > band_span 0.8661 > depth_regions_narrow 0.8653. Never retire a member on its own control alone; score it in the seat.",
-    "AN OFFLINE EDGE INSIDE THE NOISE FLOOR CAN STILL MOVE THE BOARD, and four occupants of ONE seat is what shows it. calib_span (+0.0022 offline over the champion, a third of the 0.0062 floor) is the only one of four that moved the board, and it moved it up a tick. The order agrees at the TOP - highest offline seat value, highest board - and inverts in the MIDDLE: band_span ranked second offline and last on the board. So the offline ruler picks the winner and does not resolve the field, which is a weaker tool than a full ordering and a much stronger one than nothing."
+    "AN OFFLINE EDGE INSIDE THE NOISE FLOOR CAN STILL MOVE THE BOARD, and four occupants of ONE seat is what shows it. calib_span (+0.0022 offline over the champion, a third of the 0.0062 floor) is the only one of four that moved the board, and it moved it up a tick. The order agrees at the TOP - highest offline seat value, highest board - and inverts in the MIDDLE: band_span ranked second offline and last on the board. So the offline ruler picks the winner and does not resolve the field, which is a weaker tool than a full ordering and a much stronger one than nothing.",
+    "THE OFFLINE MAXIMUM IS A SUPPORTED MOVE, and this entry is the point that earned it. greedy4 was pre-registered at or below 0.929 with a stated refutation - above 0.929 would mean the greedy search finds board-real improvements at separations the seat experiment says it cannot resolve - and it landed 0.930, so the refutation fired against the ledger's own prediction. Five entries now pair an offline joint-holdout score with a board score: 0.8648/0.928, 0.8653/0.928, 0.8661/0.927, 0.8670/0.929, 0.8679/0.930. Four of the five are monotone and the single inversion is oneswap, whose entering member band_span is IN this entry and did not hurt it - so that inversion was a property of that four, not of the member. The previous principle stands but is now too weak as written: the ruler does not merely pick the winner, it orders the field at 4/5 over a 0.003 offline spread. Read it as a ranking tool with one known failure, and keep firing its maximum.",
+    "THE EDGE THAT PRODUCED IT WAS +0.0009 OFFLINE, a seventh of the 0.0062 noise floor, and the ledger argued that away twice before the entry ran. Two swaps compounded, one of them bringing the worst-transferring member, an edge shrunk by two thirds when the champion improved under it - every one of those was true and the entry still took the board. One board tick is this competition's reporting resolution so 0.930 over 0.929 is 'better', not 'much better'; what does NOT survive is the habit of declining to fire an offline maximum because its margin is small."
   ]
 }
