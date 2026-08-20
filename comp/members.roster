@@ -116,3 +116,17 @@ dinov3_base_lora_s2026.pt   # 0.8268 — the only DINOv3-BASE member, and the po
 # the board, a 2.4x under-pricing of diversity (knee-nas5, knee-7d1), and an encoder change is a strictly
 # larger diversity step than a decode change. `calib_span` is the precedent — mounted at -0.0020, it
 # carried the 0.929 entry.
+base_dense_s2026.pt         # 0.8512 — the only DINOv2-BASE member; the encoder SIZE axis, never varied on the board
+# Added 2026-08-20. Every one of the eight scored entries is 100% DINOv2-SMALL, and the two pending ones
+# (`crossenc`, `maxdiv`) vary the encoder FAMILY with a weak member (`dinov3_base_lora`, 0.8268). This
+# varies the SIZE with a strong one: 768 wide against small's 384, twelve layers deeper, trained on the
+# settled band recipe with nothing else moved (`--variant base --batch 6`, halved only because 336 px at
+# 20 slices does not fit otherwise; 921 s an epoch against the control's ~370).
+#
+# It is the first member mounted on a reading that is NOT negative. Added as a fifth to the `longseat`
+# four it reads 0.8690 against 0.8691 — one ten-thousandth, a sixtieth of the 0.0062 floor, a tie — and
+# against the pinned champion `greedy4_v1` it is +0.0011. Its own arm reads it as a LOSS: 0.8512 against
+# the matched control `band_dense`'s 0.8578, -0.0066, just outside the floor, at 2.5x the epoch cost.
+# Those are the two rulers and they disagree in the way the ledger says they should — a member is bought
+# for what it ADDS, and a checkpoint 0.0066 behind the control on its own is level with the pool's best
+# four once mixed, which is what a genuinely different encoder is supposed to look like.
