@@ -1494,10 +1494,37 @@ that an offline delta inside the floor is a real board cost of roughly 3x its si
 a licence to switch the default; it is a statement that batch 6 is *available* when a member needs the VRAM,
 which is exactly the case `base_dense` was in.
 
-**Arm 2 (`small_accum`) is on the card now**, epoch 0 at 21:53Z. Its clause is already weakened by this
-result: `small_batch6` did **not** land below the control, so the branch that asked whether accumulation
-*buys the batch back* has nothing left to buy. What it still measures is the ranking-pair question — batch 6
-forms 15 pairs a step against batch 12's 66, and `--accumulate 2` does not restore them. If `small_accum`
-lands materially **above** `small_batch6`, something other than pairs is at work in the accumulation path
-and the `--accumulate` equality test needs re-reading at scale; if it tracks it, the pairs did not matter at
-this rank weight and `--pair-memory` is not urgent.
+### `batch_teardown` arm 2 — `small_accum`: three points inside one floor, and the axis closes — 2026-08-20
+
+`--batch 6 --accumulate 2`, everything else held. The arm's own clause was already weakened before it ran:
+`small_batch6` did **not** land below the control, so the branch asking whether accumulation *buys the batch
+back* had nothing left to buy. What remained was the ranking-pair question — batch 6 forms 15 pairs a step
+against batch 12's 66, and `--accumulate 2` does not restore them, by construction.
+
+```
+e0 .7412  e1 .7794  e2 .8161  e3 .8389  e4 .8418  e5 .8506
+e6 .8538  e7 .8553  e8 .8579(peak)  e9 .8562  e10 .8553  e11 .8551    (~365 s/epoch)
+```
+
+**Three arms, one floor, one conclusion.** Control `band_dense` (batch 12) **0.8578** · `small_batch6`
+(batch 6) **0.8598** · `small_accum` (batch 6 + accum 2) **0.8579**. All three peak at **epoch 8**, and the
+whole spread is **0.0020** against a **0.0062** floor. **The batch is not a lever, accumulation is not a
+lever, and the ranking-pair count is not a lever** at this operating point. The axis closes.
+
+**The pair question is answered in the negative, and that is a real finding.** `small_accum` restores the
+optimiser step of batch 12 while leaving the pairs at 15 a step. If pairs were what a larger batch bought,
+`small_accum` should have tracked `small_batch6` and both should have sat below the control. Instead all
+three are level, so at `--rank-weight 1.0` on this corpus the pair count between 15 and 66 does not matter.
+**`--pair-memory` is not urgent**, and the knee-55k8 accumulation equality now has a scale check behind its
+unit test rather than only a six-study CPU proof.
+
+**Seat value: none sought, for either arm.** Both are dinov2-small members of a pool already seven small
+members deep. Neither was sent to `member_curve`; neither is mounted. A `record_mix` swap of `small_accum`
+for `base_dense` in the champion five reads **0.8694 (+0.0004)**, 0 of 1 clearing +0.0015 — a correlated
+member, exactly as the arm predicted.
+
+**What the pair of arms bought.** Not a member and not a tick: a **correction**, and it landed exactly where
+it was needed. `base_dense` shipped with a named confound, `basedense_v1` scored 0.931 with that confound
+still open, and these two closed it inside three hours — the encoder reading stands, the champion is not a
+batch artefact. Also a standing operating fact: **batch 6 is free here**, at half the memory (13.56 GB vs
+~27) and under 3% wall-clock, which is what makes a 768-wide encoder affordable at 336 px in the first place.

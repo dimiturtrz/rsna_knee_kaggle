@@ -55,6 +55,22 @@
 #     That reintroduces the variable `small_batch6` just removed at 6 and not at 4. Take it to
 #     `--accumulate 2` at batch 3 only after `small_accum` has reported.
 #
+# THE VRAM REFUSAL FIRED ON THE FIRST RUN AND IT WAS THE CAP, NOT THE RECIPE (2026-08-20 22:55Z):
+# `Tried to allocate 946.00 MiB ... 9.17 GiB is free; 21.68 GiB allowed`. Nine gigabytes of the card sat
+# unused while the run was refused — the same shape knee-kwdh fixed for `v3base_band`, one term further
+# along. The derived cap is 1.335 x 20 slices x (441/576 tokens at patch 16) x (768/384 width) x (6/12
+# batch) + 0.22, which is 21.7. Every factor there is right except the intercept: `RESIDENT_GB` is 0.22,
+# fitted on DINOv2-SMALL, and it stands for weights plus gradients plus Adam state — quantities that
+# scale with PARAMETER COUNT (22M for small, 86M for either base, so ~1.4 GB rather than 0.22). The
+# slice term learned to read the encoder; the intercept did not.
+#
+# So the batch is NOT hand-tuned and the refusal clause above is honoured: the recipe is untouched and
+# `--vram-gb 27` states the run's own need explicitly, which is the escape the cap is documented to
+# provide for exactly this case. 27 is chosen against a MEASURED sibling rather than a formula —
+# `base_dense` peaked at 25.38 GB allocated under a 26.92 derived cap, and this run holds the same
+# weights at ~23% fewer tokens. The encoder-blind intercept is filed as its own fix; an arm is not the
+# place to repair a shared constant.
+#
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
@@ -65,5 +81,5 @@ export HF_TOKEN
 
 run_train v3base_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
-  --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --vram-gb 27 \
   --labels "$LABELS" --out "$PROCESSED/v3base_dense_s2026.pt"
