@@ -40,6 +40,9 @@ class TrainingOptions:
     folds: int = 5
     epochs: int = 8
     batch: int = 12
+    accumulate: int = 1
+    """Micro-batches per optimiser step: the EFFECTIVE batch is `batch * accumulate`, at the activation
+    memory of `batch` alone. 1 is the loop every arm in the ledger ran."""
     slices: int = 12
     image_size: int = IMAGE_SIZE
     train_size: int = 0
@@ -180,6 +183,16 @@ class TrainingOptions:
         parser.add_argument("--folds", type=int, default=5)
         parser.add_argument("--epochs", type=int, default=8)
         parser.add_argument("--batch", type=int, default=12)
+        parser.add_argument(
+            "--accumulate",
+            type=int,
+            default=1,
+            help="micro-batches summed into one optimiser step. The effective batch is --batch times "
+            "this, at the activation memory of --batch alone, which is what lets a wider encoder hold "
+            "the settled recipe's batch: dinov2-base at 336 px and 20 slices asks 56.3 GB at batch 12 "
+            "and 28.3 at 6. Costs one forward/backward per micro-batch, and restores the GRADIENT only "
+            "- anything pooled within a step still sees --batch studies.",
+        )
         # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
         # blocks here and eight more in `build_cache`, and the two had already diverged on the band.
         CacheFlags.add_to(parser)

@@ -77,6 +77,7 @@ class RunSetup:
             train_size=options.train_size,
             ema=options.ema,
             one_cycle=options.one_cycle,
+            accumulate=options.accumulate,
             reports=options.report_vectors is not None,
             rank_weight=options.rank_weight,
             pair_memory=options.pair_memory,
@@ -207,12 +208,20 @@ class RunSetup:
             trainer.report_supervision(reports)
         if options.ema:
             trainer.exponential_average()
+        # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
+        # and the trainer's own accumulation is what converts micro-batches into them.
+        trainer.accumulate(options.accumulate)
         if options.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR
             # raised on the very last step of the run — after every epoch had been logged and before the
             # checkpoint was written, the most expensive place to fail. Training now drops that batch so
             # the encoder's graph has ONE shape, and the step count must follow it exactly.
-            steps_per_epoch = max(training_positions // options.batch, 1)
+            # And in OPTIMISER steps, not micro-batches: under accumulation the loop steps once per
+            # group, so counting micro-batches would size the cycle `accumulate` times too long and the
+            # run would end mid-warmup-and-decay having never reached the low rate the schedule exists
+            # to finish at. Same class of failure as the ceil above, opposite sign.
+            micro_batches = max(training_positions // options.batch, 1)
+            steps_per_epoch = trainer.accumulation.groups(micro_batches)
             trainer.one_cycle(options.epochs * max(steps_per_epoch, 1))
         return trainer

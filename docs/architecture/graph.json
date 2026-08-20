@@ -2133,6 +2133,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.pretrained_encoder",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.remembered_ranking",
       "weight": 1
     },
@@ -2266,6 +2272,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.accumulation",
       "weight": 1
     },
     {
@@ -10473,6 +10485,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.accumulate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.bfloat16",
       "weight": 1
     },
@@ -10747,6 +10765,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.accumulation.Accumulation",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.augmentation.AugmentConfig",
@@ -10797,6 +10821,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.accumulation.Accumulation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.augmentation.Augmentation",
       "weight": 1
     },
@@ -10822,6 +10852,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.accumulate",
+      "target": "kneemri.training.accumulation.Accumulation",
       "weight": 1
     },
     {
@@ -10858,6 +10894,24 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.models.ema.LiveWeights.update",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.accumulation.Accumulation.closes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.accumulation.Accumulation.share",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.accumulation.Accumulation.whole",
       "weight": 1
     },
     {
@@ -10959,7 +11013,7 @@
       "role": null
     },
     {
-      "descendants": 123,
+      "descendants": 124,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11807,11 +11861,19 @@
       "role": null
     },
     {
-      "descendants": 17,
+      "descendants": 18,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.accumulation",
+      "label": "accumulation",
+      "level": "module",
+      "parent": "kneemri.training",
       "role": null
     },
     {
@@ -13381,6 +13443,14 @@
       "level": "class",
       "parent": "kneemri.runs.run_metrics",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.accumulation.Accumulation",
+      "label": "Accumulation",
+      "level": "class",
+      "parent": "kneemri.training.accumulation",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19752,6 +19822,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.accumulation.Accumulation.closes",
+      "label": "closes",
+      "level": "method",
+      "parent": "kneemri.training.accumulation.Accumulation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.accumulation.Accumulation.groups",
+      "label": "groups",
+      "level": "method",
+      "parent": "kneemri.training.accumulation.Accumulation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.accumulation.Accumulation.share",
+      "label": "share",
+      "level": "method",
+      "parent": "kneemri.training.accumulation.Accumulation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.accumulation.Accumulation.whole",
+      "label": "whole",
+      "level": "method",
+      "parent": "kneemri.training.accumulation.Accumulation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.AugmentConfig.geometric_only",
       "label": "geometric_only",
       "level": "method",
@@ -20562,6 +20664,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.accumulate",
+      "label": "accumulate",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

@@ -28,6 +28,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import (
+    ACCUMULATION,
     AUTOCAST,
     AVERAGING,
     CONTENTION_POLL_SECONDS,
@@ -139,6 +140,41 @@ def test_fit_epoch():
     assert not torch.allclose(before, trainer.model.head.out.weight), "a fitted epoch must change the head"
 
 
+def test_accumulate():
+    """Attaching the policy is visible in the trainer's own account of itself."""
+    trainer = _trainer()
+    assert trainer.policies()[ACCUMULATION] == 1, "the default loop steps on every micro-batch"
+    trainer.accumulate(4)
+    assert trainer.policies()[ACCUMULATION] == 4
+
+
+def test_fit_epoch_accumulation_matches_the_larger_batch():
+    """THE ORACLE FOR THE WHOLE FEATURE: two micro-batches of three must land where one batch of six does.
+
+    Accumulation exists to buy an effective batch the card cannot hold, and the only thing that claim
+    means is that the WEIGHTS after the step are the big batch's weights. Anything less — a missing
+    division, a zero_grad inside the group, a schedule stepped per micro-batch — moves them, and each
+    of those failures still trains, still logs, and still reports a number under the arm's name.
+
+    Two things are held fixed so the comparison is about the gradient and nothing else: the corpus is
+    exactly one window deep, so the per-batch window draw has one outcome and both arms read the same
+    pixels; and augmentation is bypassed, because it draws from the trainer's generator per batch and
+    two draws are not one.
+    """
+    weights = []
+    for size, every in ((6, 1), (3, 2)):
+        trainer = _trainer()
+        trainer.accumulate(every)
+        trainer.augment_bag = lambda images: images  # type: ignore[method-assign]
+        corpus = _corpus(slices=GROUP)
+        trainer.fit_epoch(corpus, _targets(), np.arange(6, dtype=np.int64), size, np.random.default_rng(SEED))
+        weights.append(trainer.model.head.out.weight.detach().clone())
+
+    assert torch.allclose(weights[0], weights[1], atol=1e-6), (
+        "accumulated micro-batches must step the optimiser exactly where the whole batch would"
+    )
+
+
 def test_predict():
     """Prediction returns one probability per target per study, in [0, 1] — remainder included.
 
@@ -216,6 +252,7 @@ def test_policies():
         AVERAGING: False,
         SCHEDULED: False,
         REPORTS: False,
+        ACCUMULATION: 1,
     }
 
     trainer.bfloat16()
@@ -232,6 +269,7 @@ def test_policies():
         AVERAGING: True,
         SCHEDULED: True,
         REPORTS: False,
+        ACCUMULATION: 1,
     }
 
 

@@ -27,7 +27,16 @@ from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
-from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, REPORTS, SCHEDULED, WINDOW, Trainer
+from kneemri.training.trainer import (
+    ACCUMULATION,
+    AUTOCAST,
+    AVERAGING,
+    READ_SIZE,
+    REPORTS,
+    SCHEDULED,
+    WINDOW,
+    Trainer,
+)
 
 NOT_A_SWITCH = {
     "paths": "the data root, machine-specific and gitignored",
@@ -156,6 +165,7 @@ class Request:
     calibrated_targets: bool
     severity_weight: bool
     unfreeze_last: int
+    accumulate: int
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -194,4 +204,5 @@ class Request:
             CALIBRATED: self.calibrated_targets,
             SEVERITY_WEIGHT: self.severity_weight,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
+            ACCUMULATION: self.accumulate,
         }

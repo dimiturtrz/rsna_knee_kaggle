@@ -38,6 +38,8 @@ NOT_IN_CONFIG = {
     "patience": "when the run stopped, which the kept epoch already states",
     "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",
     "batch": "a resource knob: how many studies a step held changes no weight's meaning",
+    "accumulate": "the same knob one level up — micro-batches per step trade memory for time and leave "
+    "the rebuilt function untouched; the recipe block carries it, which is where the landed-check reads",
     "vram_gb": "a memory cap read against the card the run had",
     "seed": "seeds and folds are banned as arms here, and the recipe block still carries it",
     "split_seed": "same, and it moves the split rather than the member",

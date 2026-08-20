@@ -35,6 +35,7 @@ from kneemri.device import VisibleCards
 from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import StudyModel
+from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.objective import Objective, Predicted
@@ -388,6 +389,7 @@ READ_SIZE = "train_size"
 AVERAGING = "weight_average"
 SCHEDULED = "one_cycle"
 REPORTS = "report_supervision"
+ACCUMULATION = "micro_batches_per_step"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 
@@ -424,6 +426,9 @@ class Trainer:
         # or may not want, and a sixth constructor argument trips the argument-count gate. The default
         # is a no-op object rather than None, so no call site has to test for one.
         self.average: LiveWeights = LiveWeights()
+        # Attached for the same reason, and a no-op by default: `every=1` steps on every micro-batch,
+        # which is the loop every number in the ledger was measured under.
+        self.accumulation = Accumulation()
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
         # None means "read the cache at its own resolution", which is what every run did before
@@ -451,6 +456,7 @@ class Trainer:
             AVERAGING: isinstance(self.average, WeightAverage),
             SCHEDULED: self.schedule is not None,
             REPORTS: isinstance(self.reports, ReportSupervision),
+            ACCUMULATION: self.accumulation.every,
         }
 
     def report_supervision(self, reports: ReportSupervision) -> None:
@@ -520,6 +526,10 @@ class Trainer:
         """
         with self.average.applied(self.model):
             yield
+
+    def accumulate(self, every: int) -> None:
+        """Update on `every` micro-batches at once — see `Accumulation` for what that does and does not buy."""
+        self.accumulation = Accumulation(every)
 
     def one_cycle(self, total_steps: int) -> None:
         """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
@@ -607,8 +617,16 @@ class Trainer:
         # each float32 loss promoted and added, in step order.
         total = torch.zeros((), dtype=torch.float64, device=self.device)
         steps = 0
-        planned = len(positions) // max(size, 1)
         plan = self.plan(corpus, self.batches(positions, size, generator, shuffle=True), generator)
+        # TRUNCATED TO COMPLETE GROUPS before the reader is started, so the prefetch never reads a
+        # micro-batch whose gradient the epoch will throw away. Without accumulation this is the
+        # identity and the loop is the one every arm in the ledger ran.
+        plan = plan[: self.accumulation.whole(len(plan))]
+        planned = len(plan)
+        # The gradient is zeroed ONCE per GROUP rather than per micro-batch, and that placement IS the
+        # feature: gradients accumulate in the leaves between steps, so zeroing here and again after
+        # each optimiser step is what makes a group sum instead of overwrite.
+        self.optimiser.zero_grad(set_to_none=True)
         for batch, fetched in Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda"):
             pixels = fetched.to(self.device, non_blocking=True)
             pixels = self.augment_bag(pixels)
@@ -624,15 +642,22 @@ class Trainer:
                     torch.from_numpy(weight).to(self.device),
                 )
                 loss = self.objective(judged) + self.reports(report.float(), batch)
-            self.optimiser.zero_grad(set_to_none=True)
-            self.scaler.scale(loss).backward()
-            self.scaler.step(self.optimiser)
-            self.scaler.update()
-            if self.schedule is not None:
-                self.schedule.step()
-            self.average.update(self.model)
-            total += loss.detach().double()
+            self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
+            # THE SCHEDULE AND THE WEIGHT AVERAGE MOVE WITH THE OPTIMISER, not with the reader. Stepping
+            # a one-cycle schedule per micro-batch would run it `every` times too fast and raise past its
+            # total mid-run, and an EMA updated between accumulations would average weights that never
+            # took a step.
+            if self.accumulation.closes(steps):
+                self.scaler.step(self.optimiser)
+                self.scaler.update()
+                self.optimiser.zero_grad(set_to_none=True)
+                if self.schedule is not None:
+                    self.schedule.step()
+                self.average.update(self.model)
+            # The UNSHARED loss, so the epoch mean is the same number at any accumulation and the ledger
+            # stays comparable across arms that accumulate and arms that do not.
+            total += loss.detach().double()
             self.heartbeat.tick(
                 steps,
                 planned,

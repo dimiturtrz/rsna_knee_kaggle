@@ -70,6 +70,7 @@ PLAIN = Request(
     train_size=0,
     ema=False,
     one_cycle=False,
+    accumulate=1,
     reports=False,
     rank_weight=0.0,
     pair_memory=0,
