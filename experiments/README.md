@@ -17,6 +17,38 @@ stay in it.
 An arm file carries its hypothesis, its control number, and its result in the header. Reading the
 directory is meant to be the same as reading the ledger.
 
+## What "seat value" means in a row below — and what it does NOT mean
+
+Eighteen rows quote one. **Every one of them is the price of an ADDITIONAL member**, computed by
+`MemberCurve.marginal`: the shipped roster plus this candidate, five members against four. That is the
+right number for *does this member bring anything the roster lacks* and the wrong one for *should this
+member ship*, because `comp/champion.json`'s FOUR MEMBERS principle says the best subset falls
+monotonically past five. A positive add-price is a diversity signal, not a seat.
+
+`MemberCurve.swap` (2026-08-20) prices the move the pin actually permits: hold the count at four,
+report the best seat a candidate could take and whose it was. **The two orderings differ**, so the
+distinction is not pedantry — over nine candidates against `calibspan_v1`:
+
+| candidate | add (5th member) | best swap (held at 4) | displaces |
+|---|---|---|---|
+| `attend_dense` | +0.0010 (1st) | **+0.0010 (1st)** | `lr4e-5_ws` |
+| `focal_dense` | +0.0007 (2nd) | +0.0003 (4th) | `lr4e-5_ws` |
+| `band_span` | +0.0006 (3rd) | +0.0001 (6th) | `lr4e-5_ws` |
+| `band_wide` | +0.0006 (4th) | +0.0004 (3rd) | `lr4e-5_ws` |
+| `depth_regions_narrow` | +0.0005 (5th) | +0.0007 (2nd) | `lr4e-5_ws` |
+| `depth_regions` | +0.0004 (6th) | +0.0001 (7th) | `lr4e-5_ws` |
+| `band_density` | +0.0001 (7th) | +0.0002 (5th) | `lr4e-5_ws` |
+| `res392_ws` | +0.0000 (8th) | −0.0002 (9th) | `lr4e-5_ws` |
+| `lr1e-4_ws` | +0.0000 (9th) | −0.0001 (8th) | `lr4e-5_ws` |
+
+The rows below are not restated: their numbers are correct as add-prices and re-running nine months of
+them would replace a labelled number with an unlabelled one. Read them as diversity signals.
+
+**The result in that table is the last column.** Every candidate's best seat is the SAME one, so
+`lr4e-5_ws` is the roster's weakest member by marginal contribution and no other seat is contestable by
+anything in the pool. The whole spread is 0.0012, a fifth of the 0.0062 floor — nine candidates the
+ruler cannot tell apart, queued for one seat.
+
 ## The checks, and when to run them
 
 Each exists because the failure it catches happened, silently, and cost either a queue or a slot. Only
