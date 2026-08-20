@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch import nn
 
-from kneemri.training.pretrained_encoder import ALL_BLOCKS, PretrainedEncoder
+from kneemri.training.pretrained_encoder import ALL_BLOCKS, UNSTAMPED, PretrainedEncoder
 
 DIM = 8
 SIDE = 12
@@ -23,6 +23,22 @@ def test_variant(tmp_path: Path):
     path = tmp_path / "adapted.pt"
     torch.save({"encoder": {}, "variant": "small", "config": {}}, path)
     assert PretrainedEncoder(path).variant() == "small"
+
+
+def test_cache(tmp_path: Path):
+    """The slice population an adaptation SAW, and an honest answer when the file predates the stamp.
+
+    A file with no key must not read as one whose cache matches: both adaptations on disk were run on
+    the default 12-slice cache while every arm importing them trains on 20 slices at 0.10-0.90, and the
+    only record of that was a line in a launch log.
+    """
+    stamped = tmp_path / "stamped.pt"
+    torch.save({"encoder": {}, "variant": "small", "cache": "336px_20sl_0.1-0.9band", "config": {}}, stamped)
+    assert PretrainedEncoder(stamped).cache() == "336px_20sl_0.1-0.9band"
+
+    older = tmp_path / "older.pt"
+    torch.save({"encoder": {}, "variant": "small", "config": {}}, older)
+    assert PretrainedEncoder(older).cache() == UNSTAMPED
 
 
 def test_into(tmp_path: Path):

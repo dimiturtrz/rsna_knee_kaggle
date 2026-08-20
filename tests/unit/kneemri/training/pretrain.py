@@ -120,9 +120,12 @@ def test_run():
 def test_save(tmp_path: Path):
     """The recipe travels with the weights, because the write-up's first question is whether it landed."""
     destination = tmp_path / "adapted.pt"
-    _trainer().save(destination, "small", epochs=3)
+    _trainer().save(destination, "small", epochs=3, cache="336px_20sl_0.1-0.9band")
     saved = torch.load(destination, map_location="cpu", weights_only=True)
     assert saved["variant"] == "small"
     assert saved["config"]["epochs"] == 3
+    # The slice population is part of the recipe: an adaptation is on-domain for the pixels it SAW, and
+    # without this the only record of which cache a run read was a line in its launch log.
+    assert saved["cache"] == "336px_20sl_0.1-0.9band"
     assert saved["config"]["spectral_weight"] == SpectralMaskConfig.spectral_weight
     assert saved["encoder"], "an empty encoder is the silent failure this file exists to make loud"

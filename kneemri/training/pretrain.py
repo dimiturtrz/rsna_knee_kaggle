@@ -175,17 +175,30 @@ class Pretrainer:
                 steps * self.sampling.slices_per_step / elapsed,
             )
 
-    def save(self, destination: Path, variant: str, epochs: int) -> None:
+    def save(self, destination: Path, variant: str, epochs: int, cache: str) -> None:
         """The adapted encoder plus the recipe that produced it, under one path.
 
         The recipe travels WITH the weights because a bare state dict cannot answer the question the
         write-up will ask first — whether the flag being credited actually landed. That has now cost this
         project enough arms to be a rule rather than a preference.
+
+        THE CACHE KEY IS PART OF THE RECIPE, and its absence was the gap this docstring did not cover.
+        The objective's own knobs were recorded and the SLICE POPULATION was not, so an adaptation could
+        not say which pixels it had seen. On 2026-08-20 both adaptations on disk turned out to have been
+        run on the DEFAULT cache — 12 slices, band 0.20-0.80 — while every arm importing them trains on
+        20 slices at 0.10-0.90, and the only place that fact survived was a line in a launch log. The key
+        names everything that decides the cache's contents, so recording it makes the mismatch a
+        checkable value rather than an archaeology problem.
         """
         torch.save(
             {
                 "encoder": self.objective.encoder_state(),
                 "variant": variant,
+                # Beside `variant`, not inside `config`: both are facts about the adaptation as a whole,
+                # where `config` holds the objective's knobs. Keeping it out of `config` also keeps it
+                # out of the vocabulary a MEMBER checkpoint's config is scraped against — a different
+                # file's key that happened to share the name would read there as an unstamped one.
+                "cache": cache,
                 "config": vars(self.objective.config)
                 | {"epochs": epochs, "slices_per_step": self.sampling.slices_per_step},
             },
@@ -270,7 +283,7 @@ def main() -> None:
     )
     with Wakelock():
         trainer.run(arguments.epochs, optimisation)
-    trainer.save(arguments.out, arguments.variant, arguments.epochs)
+    trainer.save(arguments.out, arguments.variant, arguments.epochs, cache.key)
 
 
 if __name__ == "__main__":

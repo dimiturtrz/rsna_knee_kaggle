@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 BLOCK_INDEX = re.compile(r"\.(\d+)\.")
 STEM_PREFIX = "embeddings."
+UNSTAMPED = "unrecorded"
+"""What the two adaptations written before 2026-08-20 report: they name no cache, and saying so is the
+point — a file that predates the stamp must not read as one whose cache happens to match."""
 ALL_BLOCKS = 0
 """`--encoder-adapt-depth 0`: take the whole adaptation, which is what a full load means."""
 PAST_EVERY_BLOCK = 1 << 16
@@ -33,6 +36,10 @@ class PretrainedEncoder:
     def variant(self) -> str:
         """Which encoder this file was adapted from, so a caller can refuse a mismatch."""
         return str(self.saved["variant"])
+
+    def cache(self) -> str:
+        """The cache key this encoder was adapted on, or that the file predates the stamp."""
+        return str(self.saved.get("cache", UNSTAMPED))
 
     def upto(self, depth: int) -> dict[str, Tensor]:
         """The patch embedding plus the first `depth` blocks, or everything when `depth` is ALL_BLOCKS.
@@ -92,7 +99,14 @@ class PretrainedEncoder:
                 f"{len(unexpected)} unrecognised (first: {(surprises + list(unexpected))[0]})"
             )
             raise ValueError(message)
+        # The cache is named because an adaptation is on-domain for the slice population it SAW, and the
+        # two on disk were adapted on the default cache while every arm importing them trains on another.
+        # Older files predate the stamp and say so rather than silently reading as a match.
         logger.info(
-            "encoder initialised from %s (%d tensors, %d left stock)", self.path.name, len(weights), len(withheld)
+            "encoder initialised from %s, adapted on cache %s (%d tensors, %d left stock)",
+            self.path.name,
+            self.cache(),
+            len(weights),
+            len(withheld),
         )
         return backbone
