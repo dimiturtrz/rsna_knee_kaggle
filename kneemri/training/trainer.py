@@ -102,6 +102,16 @@ the same number up to a constant and the distinction cost nothing. DINOv3 is pat
 identity: 224 px is 256 tokens under 14 and 196 under 16, so a pixel-only scaling overstates a v3 read
 by a third. Named here so the ratio below reduces to 1 at the point it was fitted."""
 
+FITTED_BATCH = 12
+"""The batch `GB_PER_SLICE` was fitted at, so every arm at the settled recipe derives what it derived
+before and only a run that moves the batch moves its own cap.
+
+The term is LINEAR because activations are: a step holds `batch` independent stacks and the encoder's
+weights are held once, and the weights are already the intercept (`RESIDENT_GB`). Like the size and
+width terms above it is a derivation no recorded peak has checked off the fitted point, and like them
+it is strictly better than the constant it replaces — a batch the caller lowered used to change the ask
+by nothing at all."""
+
 FITTED_DIM = 384
 """The feature width of the encoder `GB_PER_SLICE` was fitted on — `small`, and every arm behind it.
 
@@ -171,6 +181,14 @@ class DeviceBudget:
     """The encoder's feature width. Defaults to `small`'s 384, so every arm behind the fit is unchanged
     and only a run on a wider encoder moves its own cap."""
 
+    batch: int = FITTED_BATCH
+    """How many studies a step holds at once — the one factor the fit had baked in as a constant.
+
+    MEASURED 2026-08-20: `base_dense` at the settled recipe derived 56.3 GB against 30.3 free and parked
+    for the full contention bound without starting a step. Halving `--batch` to 6 derived 56.3 AGAIN,
+    because batch was invisible here — so the only lever a caller has against an overstated ask moved
+    nothing, and the larger-encoder axis was unreachable rather than expensive."""
+
     def needed(self) -> float:
         """What this recipe will actually reserve, plus one slice of slack — 0 if the slices are unknown.
 
@@ -195,7 +213,8 @@ class DeviceBudget:
         if not self.slices:
             return 0.0
         tokens = (self.size / self.patch) ** 2 / (FITTED_SIZE / FITTED_PATCH) ** 2
-        return GB_PER_SLICE * (self.slices + 1) * tokens * (self.dim / FITTED_DIM) + RESIDENT_GB
+        step = tokens * (self.dim / FITTED_DIM) * (self.batch / FITTED_BATCH)
+        return GB_PER_SLICE * (self.slices + 1) * step + RESIDENT_GB
 
     def capped(self, whole: float) -> float:
         """How much of a card this run may hold — what it asked for, or the default share of it.

@@ -51,7 +51,13 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# --batch 6 IS A SECOND VARIABLE, and it is forced. MEASURED 2026-08-20: base at 336 px and 20 slices
+# needs 56.3 GB at the control's batch of 12 against a 32 GB card, so there is no version of this arm
+# that holds the control's batch. 6 derives 28.25 and SMOKED at 27.14 GB peak. The proper fix is
+# gradient accumulation — the control's effective batch at half the activations — which does not exist
+# yet (knee-55k8). Until it does, a flat-to-down read here is confounded with the halved batch and the
+# follow-on is accumulation, not the abandonment of the encoder.
 run_train base_dense \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --labels "$LABELS" --out "$PROCESSED/base_dense_s2026.pt"

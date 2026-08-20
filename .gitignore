@@ -71,3 +71,8 @@ node_modules/
 *.partial
 *.holdout.npz
 *.metrics.jsonl
+
+# inbox/ is a runtime mailbox: letters and their archive are messages, not source. watch.sh and
+# the README are tracked; nothing that lands in the box ever is.
+/inbox/*.txt
+/inbox/read/

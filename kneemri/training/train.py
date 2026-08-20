@@ -56,6 +56,7 @@ def main() -> None:
         arguments.train_size or arguments.image_size,
         encoder.patch,
         encoder.dim,
+        arguments.batch,
     ).select()
     targets, evaluation = Targets.pair(
         arguments.labels,

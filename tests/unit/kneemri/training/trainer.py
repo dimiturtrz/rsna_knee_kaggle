@@ -33,6 +33,7 @@ from kneemri.training.trainer import (
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
+    FITTED_BATCH,
     READ_SIZE,
     REPORTS,
     RESIDENT_GB,
@@ -625,6 +626,28 @@ def test_needed_reads_the_encoder():
 
     patch14 = DeviceBudget(slices=20, size=224, dim=base.dim).needed()
     assert patch14 > wide, "224 px is 256 tokens at patch 14 and 196 at 16, so a pixel-only cap overstates v3"
+
+
+def test_needed_reads_the_batch():
+    """The batch is a factor of the ask, and every arm at the settled batch must be untouched by it.
+
+    MEASURED 2026-08-20: `base_dense` derived 56.3 GB against 30.3 free and parked for the whole
+    contention bound without starting a step. Lowering `--batch` to 6 derived 56.3 AGAIN — the one lever
+    a caller has against an overstated ask moved nothing, because batch was baked into `GB_PER_SLICE`
+    as a constant. That did not make the larger-encoder axis expensive, it made it unreachable.
+    """
+    settled = DeviceBudget(slices=20).needed()
+    assert DeviceBudget(slices=20, batch=FITTED_BATCH).needed() == settled, "the fit's own batch is the default"
+
+    halved = DeviceBudget(slices=20, batch=FITTED_BATCH // 2).needed()
+    assert halved == pytest.approx((settled - RESIDENT_GB) / 2 + RESIDENT_GB, abs=0.02), (
+        "activation bytes go linearly with batch above the intercept, where the weights are held once"
+    )
+
+    base = ENCODERS[V3_BASE]
+    wide = DeviceBudget(slices=20, patch=base.patch, dim=base.dim, batch=FITTED_BATCH).needed()
+    narrower_step = DeviceBudget(slices=20, patch=base.patch, dim=base.dim, batch=FITTED_BATCH // 2).needed()
+    assert narrower_step < wide, "a wider encoder must be reachable by asking for fewer studies at once"
 
 
 def test_plan():

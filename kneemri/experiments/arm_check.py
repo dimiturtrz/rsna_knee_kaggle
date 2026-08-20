@@ -299,6 +299,7 @@ class ArmCheck:
                 size=options.train_size or options.image_size,
                 patch=encoder.patch,
                 dim=encoder.dim,
+                batch=options.batch,
             ).needed()
             if options.vram_gb > needed + GB_PER_SLICE:
                 asked[name] = round(options.vram_gb - needed, 2)
