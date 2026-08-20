@@ -49,6 +49,36 @@ them would replace a labelled number with an unlabelled one. Read them as divers
 anything in the pool. The whole spread is 0.0012, a fifth of the 0.0062 floor — nine candidates the
 ruler cannot tell apart, queued for one seat.
 
+### That table is against a SUPERSEDED roster, and re-pricing it is the finding — 2026-08-20
+
+`greedy4_v1` scored 0.930 and took the pin, so the roster the table above prices against no longer
+ships. `lr4e-5_ws`, the seat every one of nine candidates was contesting, is not in the champion any
+more. Re-run against the new pin (`python -m kneemri.kaggle.seat_value --candidates <processed>/*_s2026.pt`,
+which reads the roster from `champion.json` rather than a typed list):
+
+| candidate | best swap against `greedy4_v1` | displaces |
+|---|---|---|
+| `attend_dense` | **+0.0002** | `depth_regions_narrow` |
+| `crop80_span` | +0.0001 | `band_span` |
+| `band_wide` | −0.0001 | `band_span` |
+| `focal_dense` | −0.0002 | `band_dense` |
+| `calibrated_targets` | −0.0003 | `band_span` |
+| `band_density` | −0.0003 | `band_span` |
+| everything below | −0.0007 or worse | mostly `band_span` |
+
+**THE MOUNTED POOL IS EXHAUSTED.** The best available move fell from +0.0010 to **+0.0002** — a
+thirtieth of the noise floor — and only two of the whole pool are positive at all. Against the old
+roster nine candidates were queued for one contestable seat; against this one there is effectively no
+contestable seat. `band_span` is now the most-displaced incumbent, so it is the champion's weakest link
+by marginal contribution, and nothing in the pool can beat it.
+
+**CONSEQUENCE, and it is a spending rule as much as a research one.** No submission on the current pool
+is worth a slot: the offline maximum has already been fired and it is the champion. The next board move
+needs a member that does not exist yet, which is exactly what `focal_dense`'s row predicted when it
+closed the decode/pooling family. It also re-reads the seat numbers quoted in the rows below one more
+time: they are add-prices against a roster that has now been replaced twice, so read them as diversity
+signal and re-run the tool before any of them is used as a decision.
+
 ## The checks, and when to run them
 
 Each exists because the failure it catches happened, silently, and cost either a queue or a slot. Only
