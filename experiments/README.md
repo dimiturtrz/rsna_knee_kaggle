@@ -1307,3 +1307,12 @@ frozen-half argument. The successor holds the objective, the data and the schedu
 the rate to 1e-5, with a **pre-registered gate that is now measurable: early-block drift must land in
 supervision's own range (≤ ~0.02) before the checkpoint is allowed to spend a training slot.** A drift
 profile is a one-minute CPU read; the arm it guards is seventy-five minutes of card.
+
+**Queued as the successor (2026-08-20): `encoder_adapt_gentle`, same objective at lr 1e-5.** It cleared
+the pre-registered drift gate before it was allowed a slot — stem 0.0174, blocks 0–5 between 0.0046 and
+0.0179, 0.821 of all drift in the top four blocks — while the spectral term still fell 1.4482 → 0.6196,
+so the adaptation happened and spent itself where a representation can afford to move. The clause is
+carried over unchanged, because the hypothesis was never tested; only the harness was broken. A third
+outcome is now reachable that the first arm could not produce: a result INDISTINGUISHABLE from control,
+which would bracket the axis (1e-4 destroys, 1e-5 does nothing, the answer if any lies between) rather
+than kill it.
