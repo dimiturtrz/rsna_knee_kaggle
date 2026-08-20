@@ -13,6 +13,7 @@ from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.device import VisibleCards
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
+from kneemri.models.backbone import ENCODERS, SMALL, V3_BASE, V3_SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
@@ -34,6 +35,7 @@ from kneemri.training.trainer import (
     DEFAULT_SHARE,
     READ_SIZE,
     REPORTS,
+    RESIDENT_GB,
     SCHEDULED,
     SMALLEST_RUN_GB,
     WINDOW,
@@ -597,6 +599,32 @@ def test_needed():
     assert DeviceBudget(slices=12, size=420).needed() > 23.42, (
         "the cap must clear the rung MEASURED at 420 px, or it forbids a recipe that fits"
     )
+
+
+def test_needed_reads_the_encoder():
+    """The cap is a function of the ENCODER too, and every arm behind the fit must be untouched by it.
+
+    `v3base_band` died in seconds on 2026-08-20 with `Tried to allocate 848.00 MiB ... 12.68 GiB
+    allowed` while 17.51 GiB of the card was free: a `small`-fitted cap handed to a 768-wide encoder.
+    The first assertion is the one that protects the ledger — the whole DINOv2 corpus is patch 14 and
+    384 wide, so the new terms must reduce to exactly the old number for every arm already recorded.
+    """
+    for size in (224, 336, 392, 420):
+        v2 = ENCODERS[SMALL]
+        assert DeviceBudget(slices=12, size=size, patch=v2.patch, dim=v2.dim).needed() == pytest.approx(
+            DeviceBudget(slices=12, size=size).needed()
+        ), "naming small's own width and patch cannot move a number the arms were fitted with"
+
+    small, base = ENCODERS[V3_SMALL], ENCODERS[V3_BASE]
+    narrow = DeviceBudget(slices=20, size=224, patch=base.patch, dim=small.dim).needed()
+    wide = DeviceBudget(slices=20, size=224, patch=base.patch, dim=base.dim).needed()
+    assert wide == pytest.approx(2 * (narrow - RESIDENT_GB) + RESIDENT_GB, abs=0.02), (
+        "activation bytes go linearly with width, so 768 costs twice 384 above the resident intercept"
+    )
+    assert wide > 12.68, "the derivation must clear the cap that OOM'd, or the fix forbids the same recipe"
+
+    patch14 = DeviceBudget(slices=20, size=224, dim=base.dim).needed()
+    assert patch14 > wide, "224 px is 256 tokens at patch 14 and 196 at 16, so a pixel-only cap overstates v3"
 
 
 def test_plan():

@@ -46,7 +46,17 @@ def main() -> None:
     # no --vram-gb still gets a cap fitted to what it will actually hold (knee-ylp0). The SIZE too, or
     # the cap is a 336 px number handed to a run that encodes a bigger grid — the same `train_size or
     # image_size` the record and the members already read, so the cap sees the size the step does.
-    device = DeviceBudget(arguments.vram_gb, arguments.slices, arguments.train_size or arguments.image_size).select()
+    # And the ENCODER, or the cap is a `small`-fitted number handed to a wider one: that is what killed
+    # v3base_band on 2026-08-20, capped at 12.68 GB with 17.51 free, and the variant is where both the
+    # width and the patch already live so neither is a second statement of the same fact.
+    encoder = ENCODERS[arguments.variant]
+    device = DeviceBudget(
+        arguments.vram_gb,
+        arguments.slices,
+        arguments.train_size or arguments.image_size,
+        encoder.patch,
+        encoder.dim,
+    ).select()
     targets, evaluation = Targets.pair(
         arguments.labels,
         arguments.eval_labels,

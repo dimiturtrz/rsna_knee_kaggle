@@ -94,6 +94,35 @@ that was supposed to license the form, because it would have OOM'd before writin
 FITTED_SIZE = 336
 """The pixel size `GB_PER_SLICE` was fitted at, so the scaling is exact there and only moves off it."""
 
+FITTED_PATCH = 14
+"""The patch the fit was taken at, because `size` is a proxy for TOKEN COUNT and not for pixels.
+
+Every arm behind the fit is DINOv2, which is patch 14, so `size ** 2` and `(size / patch) ** 2` were
+the same number up to a constant and the distinction cost nothing. DINOv3 is patch 16 and breaks the
+identity: 224 px is 256 tokens under 14 and 196 under 16, so a pixel-only scaling overstates a v3 read
+by a third. Named here so the ratio below reduces to 1 at the point it was fitted."""
+
+FITTED_DIM = 384
+"""The feature width of the encoder `GB_PER_SLICE` was fitted on — `small`, and every arm behind it.
+
+THE CAP WAS ENCODER-BLIND UNTIL 2026-08-20, and it cost a queued arm outright. `v3base_band` derived
+12.68 GB from 20 slices at 224 px and died in seconds with `Tried to allocate 848.00 MiB ... 12.68 GiB
+allowed` while 17.51 GiB of the card sat free. Nothing about that run was wrong except the cap: it was
+a `small`-fitted number handed to a 768-wide encoder. This is the same failure `train_size or
+image_size` fixed on the resolution axis (knee-ylp0), one axis further along — the cap saw the size the
+step encodes at and still could not see WHICH ENCODER was encoding it.
+
+Activation bytes go LINEARLY with width, which is why the term is a plain ratio rather than a fitted
+one: every per-token tensor in a transformer block is `dim` wide (the projections, the residual stream,
+the MLP's `4 * dim` hidden), and the attention matrix is `heads x tokens ** 2` with heads scaling with
+width too — small has 6 and base 12. Nothing in a block is width-independent, so 768 costs twice 384.
+
+It is a DERIVATION, exactly like the size term above and with the same standing: unchecked by any
+recorded peak, and strictly better than the encoder-blind number it replaces. It is also biased the
+safe way. Under LoRA the base weights are frozen and `--recompute-activations` discards most of what it
+counts, so this OVERSTATES a v3 arm's real demand — and an overstated ask costs `await_headroom`
+polling, where the understated one it replaces is an immediate OOM on a recipe that fits."""
+
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
 and the allocator's own blocks, none of which the slice loop multiplies."""
@@ -134,6 +163,14 @@ class DeviceBudget:
     """The pixel size a step encodes at. Defaults to where `GB_PER_SLICE` was fitted, so every 336 px
     caller is unchanged and only an arm that moves the resolution moves its own cap."""
 
+    patch: int = FITTED_PATCH
+    """The encoder's patch side, which turns the pixel size into the token count the cost is actually
+    a function of. Defaults to DINOv2's 14, so no v2 caller sees a different number than before."""
+
+    dim: int = FITTED_DIM
+    """The encoder's feature width. Defaults to `small`'s 384, so every arm behind the fit is unchanged
+    and only a run on a wider encoder moves its own cap."""
+
     def needed(self) -> float:
         """What this recipe will actually reserve, plus one slice of slack — 0 if the slices are unknown.
 
@@ -143,9 +180,13 @@ class DeviceBudget:
         fit's own residual does not need covering — it is 0.01 GB on a held-out point. It is one slice
         AT THIS SIZE, which is what the square term gives for free.
 
-        A SLICE COSTS `size ** 2` because it is a patch grid, and the square is exact at `FITTED_SIZE`
-        by construction — it reduces to `GB_PER_SLICE` there, so no run at 336 px sees a different
-        number than before. Off it the term is a derivation the arms have not checked yet, and it is
+        A SLICE COSTS ITS TOKEN COUNT TIMES ITS FEATURE WIDTH, and both ratios are exact at the fitted
+        point by construction — 336 px, patch 14, 384 wide reduces to `GB_PER_SLICE`, so no arm behind
+        the fit sees a different number than before, and neither does any other DINOv2 run at any size.
+        `(size / patch) ** 2` is the same quantity the old `size ** 2` was measuring, written so that
+        it stays true when the patch moves: it is the token count, and a pixel-only form silently
+        overstates a patch-16 read by (16/14)**2. Off the fitted point the term is a derivation the
+        arms have not checked yet, and it is
         still strictly better than the alternative it replaces: 420 px derives 27.34 GB against a rung
         measured at 23.42, i.e. it OVERSTATES, where ignoring the size understated by 7 GB. An
         overstated ask costs `await_headroom` polling; an understated one is an immediate OOM on a
@@ -153,7 +194,8 @@ class DeviceBudget:
         """
         if not self.slices:
             return 0.0
-        return GB_PER_SLICE * (self.slices + 1) * (self.size / FITTED_SIZE) ** 2 + RESIDENT_GB
+        tokens = (self.size / self.patch) ** 2 / (FITTED_SIZE / FITTED_PATCH) ** 2
+        return GB_PER_SLICE * (self.slices + 1) * tokens * (self.dim / FITTED_DIM) + RESIDENT_GB
 
     def capped(self, whole: float) -> float:
         """How much of a card this run may hold — what it asked for, or the default share of it.

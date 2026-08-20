@@ -34,6 +34,7 @@ from kneemri.corpus.study_cache import CorpusSplit, StudyCache
 from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
+from kneemri.models.backbone import ENCODERS
 from kneemri.training.options import TrainingOptions
 from kneemri.training.trainer import GB_PER_SLICE, DeviceBudget
 
@@ -292,7 +293,13 @@ class ArmCheck:
             options = self._parsed(flags)[0]
             if options is None or not options.vram_gb:
                 continue
-            needed = DeviceBudget(slices=options.slices, size=options.train_size or options.image_size).needed()
+            encoder = ENCODERS[options.variant]
+            needed = DeviceBudget(
+                slices=options.slices,
+                size=options.train_size or options.image_size,
+                patch=encoder.patch,
+                dim=encoder.dim,
+            ).needed()
             if options.vram_gb > needed + GB_PER_SLICE:
                 asked[name] = round(options.vram_gb - needed, 2)
         return asked
