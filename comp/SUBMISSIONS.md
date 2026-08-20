@@ -1013,3 +1013,50 @@ claim is a decision rule, not an effect size: **fire the offline maximum over th
 talking the margin down.** Total movement against the original baseline is 0.925 → 0.930, +0.005 over
 five entries, which is still a third of the 1.5% bar and a tenth of knee-jk3's 0.054 frontier gap. The
 entries are compounding; they are not yet a result.
+
+#### Slot 6 `longseat` landed 0.930 — the clause passes at its weakest possible value, and the ruler runs out of resolution
+
+**0.930. A TIE, not a win.** Submission 55637658, kernel `kneemri-longseat`, `band_dense_long` in for
+`band_span`, everything else held at `greedy4_v1`. Pre-registered at **0.930 or above** with the stated
+refutation that anything below refutes `champion.json`'s newest principle — *fire the offline maximum* —
+at the first chance it has had to fail. It did not fail. It also did not move.
+
+**READ THE PASS HONESTLY: it is the weakest value in the passing range.** The clause was written as an
+inequality because a tick is the board's reporting resolution and a one-tick prediction cannot be made
+sharper than that. But the entry carried **+0.0012 of offline seat value**, the largest single move
+available anywhere in the mounted pool — `python -m kneemri.kaggle.seat_value` over all 56 same-split
+checkpoints returns exactly three positive seats and this is six times the second (`attend_dense`,
++0.0002). So the best move the pool contains bought **zero board ticks**. That is a fact about the ruler,
+not a fault in the entry.
+
+**THE SIX-POINT TABLE, which is what the ledger should now be read on.**
+
+| entry | offline joint holdout | board |
+|---|---|---|
+| `band_v1` | 0.8648 | 0.928 |
+| `swapdrn` | 0.8653 | 0.928 |
+| `oneswap` | 0.8661 | **0.927** |
+| `calibspan_v1` | 0.8670 | 0.929 |
+| `greedy4_v1` | 0.8679 | **0.930** |
+| `longseat` | **0.8691** | **0.930** |
+
+Still 4/6 monotone with the one known `oneswap` inversion, and the new point is not an inversion — it is
+a **plateau**. The chain rises across the first 0.003 of offline spread and then stops responding over the
+next 0.0012. The simplest reading consistent with all six is that the offline ruler tracks the board while
+the offline gaps are large relative to the board's tick, and saturates once they are not.
+
+**WHAT THIS COSTS THE STANDING PRINCIPLE, precisely.** *Fire the offline maximum* survives — firing it has
+now never lost a tick across two consecutive chances. What does not survive is any expectation that a
+further offline maximum will KEEP paying: the pool's best remaining move was just spent and returned
+nothing, and the second-best is +0.0002, a thirtieth of the noise floor. **The mounted pool is exhausted
+as a source of board movement.** That is a stronger and more useful claim than the tie itself, and it is
+the argument for spending the card on an axis the pool does not contain rather than on another occupant of
+the same seat — which is what `v3base_band` (queued) is for.
+
+**THE CHAMPION PIN DOES NOT MOVE.** `comp/champion.json` stays on `greedy4_v1`. A tie does not dethrone,
+and re-pinning would trade a kit whose provenance is already verified by `champion_check` for one that
+would have to earn the same verification to sit at the same score. `longseat` is recorded here as an equal,
+not promoted.
+
+**Total against the original baseline: 0.925 → 0.930, +0.005 over six entries.** Unchanged by this entry,
+which is the point of writing it up as a tie.
