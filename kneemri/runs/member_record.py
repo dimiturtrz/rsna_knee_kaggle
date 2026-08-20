@@ -53,6 +53,8 @@ NOT_IN_CONFIG = {
     "recompute_activations": "a memory-for-compute trade inside the backward pass",
     "compile_encoder": "a compilation of the same function — `load_trained` strips its prefix",
     "report_vectors": "the report head is ALWAYS built, so no rebuild can ask whether it was trained",
+    "encoder_weights": "where the encoder STARTED, which the fitted weights have already absorbed — a "
+    "rebuild loads this member, not the initialisation it grew out of",
 }
 """Every run setting the config does NOT carry, each with WHY — a decision record.
 

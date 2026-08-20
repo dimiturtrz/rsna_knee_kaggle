@@ -65,6 +65,9 @@ NOT_A_SWITCH = {
     "anatomical_prior": "constructed, and a slot count the prior does not cover RAISES rather than dropping it",
     "head_lr": "a rate, not a switch: it is the group's `lr` and no path applies it partly",
     "backbone_lr": "the same, and whether the group it names is EMPTY is what OPENED_BLOCKS already asks",
+    "encoder_weights": "an INITIALISATION that cannot land silently: `PretrainedEncoder.into` raises on a "
+    "variant mismatch and on any key the target does not name, so a load that did nothing is an exception "
+    "rather than a control's score reported under the arm's name",
 }
 """Every `TrainingOptions` field this check does NOT compare, each with WHY — a decision record.
 
