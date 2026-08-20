@@ -67,6 +67,28 @@ def test_build(tmp_path: Path):
     assert int(np.asarray(corpus.images[0, 0]).max()) > 0, "the filled slot carries pixels"
 
 
+def test_build_spawns_nothing_for_one_worker(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """One worker decodes INLINE, because spawning is the step that fails on a loaded machine.
+
+    Pinned by making the pool unusable: if the build reaches for a process at `workers=1` this raises,
+    so the test fails for the reason it exists rather than by an assertion on a count.
+    """
+
+    def refuse(*_: object, **__: object) -> None:
+        raise AssertionError("workers=1 must not construct a process pool")
+
+    monkeypatch.setattr("kneemri.corpus.study_cache.ProcessPoolExecutor", refuse)
+    source = tmp_path / "src"
+    write_series(source / "study0" / "sag", slices=4, description="SAG PD FS", size=32)
+    cache = StudyCache(tmp_path / "cache", slices=2, image_size=8)
+
+    cache.build(source, ["study0"], {"sag": "Sagittal"}, workers=1)
+
+    corpus, identifiers = cache.load()
+    assert identifiers == ["study0"]
+    assert corpus.mask[0].tolist() == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0], "the inline path fills the same slot"
+
+
 def test_enrolled(tmp_path: Path):
     """The cache decides which studies it holds, because the count is in its own name."""
     identifiers = ["study0", "study1", "study2"]

@@ -15,6 +15,7 @@ resolution the expensive one.
 
 import json
 import logging
+from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import cached_property
@@ -277,18 +278,35 @@ class StudyCache:
             )
             for position, identifier in enumerate(identifiers)
         ]
-        done = 0
-        with ProcessPoolExecutor(max_workers=workers) as pool:
-            for position, flags in pool.map(StudyCache.decode_one, arguments, chunksize=8):
-                mask[position] = flags
-                done += 1
-                if done % 200 == 0:
-                    logger.info(f"  cached {done}/{len(identifiers)} studies")
+        for done, (position, flags) in enumerate(self._decode_all(arguments, workers), start=1):
+            mask[position] = flags
+            if done % 200 == 0:
+                logger.info(f"  cached {done}/{len(identifiers)} studies")
         self.report(mask)
         # LAST, and only once the mask has been judged: `wait_for_cache` keys on this file existing, so
         # writing it is the signal that the cache is usable. A build that decoded nothing must not get
         # that far.
         np.save(self.mask_path, mask)
+
+    @staticmethod
+    def _decode_all(arguments: list[DecodeRequest], workers: int) -> Iterator[tuple[int, list[float]]]:
+        """Every request decoded — through a pool, or INLINE when one worker was asked for.
+
+        A pool of one is a process that is spawned, paid for, and then used serially, and spawning is
+        exactly what fails under load: on 2026-08-20 fourteen tests died with exit status 3221225794
+        (0xC0000142, STATUS_DLL_INIT_FAILED) — Windows refusing to start any new process while a
+        training arm, a CPU witness and a gate session shared the machine — and the same tree passed
+        serially minutes later. `workers=1` is what the unit tests pass, so this is also the difference
+        between a suite that survives a busy machine and one that flakes on it.
+
+        `decode_one` is a staticmethod over a frozen request that writes through a memory map, so the
+        inline path computes the same thing by the same code; only the process boundary is gone.
+        """
+        if workers == 1:
+            yield from (StudyCache.decode_one(request) for request in arguments)
+            return
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            yield from pool.map(StudyCache.decode_one, arguments, chunksize=8)
 
     def report(self, mask: Float[np.ndarray, "studies slots"]) -> None:
         """Log what the build actually produced, and refuse a cache that decoded nothing.

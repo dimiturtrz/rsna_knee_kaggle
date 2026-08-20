@@ -3777,6 +3777,12 @@
     {
       "kind": "calls",
       "source": "kneemri.corpus.study_cache.StudyCache.build",
+      "target": "kneemri.corpus.study_cache.StudyCache.decoded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.study_cache.StudyCache.build",
       "target": "kneemri.corpus.study_cache.StudyCache.enrolled",
       "weight": 1
     },
@@ -3802,6 +3808,12 @@
       "kind": "calls",
       "source": "kneemri.corpus.study_cache.StudyCache.decode_one",
       "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.study_cache.StudyCache.decoded",
+      "target": "kneemri.corpus.study_cache.StudyCache.decode_one",
       "weight": 1
     },
     {
@@ -15048,6 +15060,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.study_cache.StudyCache.decode_one",
       "label": "decode_one",
+      "level": "method",
+      "parent": "kneemri.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.study_cache.StudyCache.decoded",
+      "label": "decoded",
       "level": "method",
       "parent": "kneemri.corpus.study_cache.StudyCache",
       "role": null
