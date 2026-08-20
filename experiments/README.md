@@ -1451,3 +1451,53 @@ premise was refuted produced the checkpoint that carried the 0.930.
 
 **Shipped.** Mounted in `comp/members.roster` and named by `comp/kernels/kneemri-basedense`, a one-member
 delta off the known 0.930 so its board reading attributes to this member alone.
+
+**BOARD RESULT: 0.931 — a new champion, and the third question above is now answered.** The entry took the
+board up a tick (55654130). So the member that lost its own matched control by 0.0066, *outside* the noise
+floor, is the member that produced this project's best entry. Question (3) resolved by `small_batch6`
+below: the batch is not the alibi, and this stays an encoder reading. Full ledger entry in
+`comp/SUBMISSIONS.md`.
+
+### `batch_teardown` arm 1 — `small_batch6`: the batch is not a lever, so `base_dense` has no alibi — 2026-08-20
+
+**The question, pre-registered in the arm script before the run.** `base_dense` ran at `--batch 6` because
+336 px x 20 slices on a 768-wide encoder asks 56.3 GB against a 32 GB card, so its -0.0066 carried a second
+variable it did not choose. This arm prices the batch **alone**, on the encoder where 12 *is* affordable:
+`band_dense`'s recipe byte-identical except `--batch 6`.
+
+**Flag landed.** `experiments/arms/batch_teardown.sh` passes `--batch 6` and nothing else off the control;
+`$RECIPE` and `$THROUGHPUT` unchanged from `band_dense`.
+
+```
+e0 .7514(419s)  e1 .7684  e2 .8084  e3 .8191  e4 .8345  e5 .8396
+e6 .8550  e7 .8553  e8 .8598(peak)  e9 .8575  e10 .8576  e11 .8577    (~366 s/epoch)
+control band_dense: e8 0.8578 (PEAK), e9 .8572, e10 .8556, e11 .8554
+peak memory 13.56 GB reserved, 12.61 GB allocated (vs the control's ~27 GB at batch 12)
+```
+
+**Read against its matched control.** Peak **0.8598** vs **0.8578**, **+0.0020** — a third of the 0.0062
+floor, and on the *positive* side. Both peak at epoch 8, so the schedule is not what separates them either.
+**The batch is not a lever at this operating point.** The first pre-registered branch fires: *"the batch is
+NOT a lever here and `base_dense`'s halved batch is not an alibi for whatever it read."*
+
+**What that settles, immediately.** `base_dense`'s -0.0066 is an **encoder** reading, not a batch artefact,
+and the 0.931 it went on to score is not one either. The confound named in the champion entry's own
+pre-registration is closed by measurement rather than by argument — which is the point of naming it there.
+
+**Seat value: none sought.** This is a dinov2-small member of a pool already seven small members deep, so a
+tie on the mean is a correlated member, not a vote the ensemble lacks. Not sent to `member_curve`, not
+mounted. The arm's product is the correction, not the checkpoint.
+
+**The bonus fact, and it is not free.** Batch 6 costs **half the memory** (13.56 GB vs ~27 GB) and **369 s
+an epoch vs the control's ~361** — under 3% slower — for a delta inside the floor. Under the standing rule
+that an offline delta inside the floor is a real board cost of roughly 3x its size, +0.0020 offline is not
+a licence to switch the default; it is a statement that batch 6 is *available* when a member needs the VRAM,
+which is exactly the case `base_dense` was in.
+
+**Arm 2 (`small_accum`) is on the card now**, epoch 0 at 21:53Z. Its clause is already weakened by this
+result: `small_batch6` did **not** land below the control, so the branch that asked whether accumulation
+*buys the batch back* has nothing left to buy. What it still measures is the ranking-pair question — batch 6
+forms 15 pairs a step against batch 12's 66, and `--accumulate 2` does not restore them. If `small_accum`
+lands materially **above** `small_batch6`, something other than pairs is at work in the accumulation path
+and the `--accumulate` equality test needs re-reading at scale; if it tracks it, the pairs did not matter at
+this rank weight and `--pair-memory` is not urgent.

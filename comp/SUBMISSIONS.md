@@ -1184,3 +1184,56 @@ fired for the answer, not for the tick.
   is a batch verdict, not an encoder verdict.
 
 **The champion pin does not move unless this clears 0.930.**
+
+##### Slot 9 result: **0.931** — a new champion, count is not what was priced, and the ruler misses UP for the first time
+
+`basedense` (55654130) returned **0.931**. It clears the pin, so `comp/champion.json` moves to `basedense_v1`
+(kernel `kneemri-basedense`, kit `e3c884e`, the five members read from the kernel's own `chosen` tuple).
+
+**THE PRE-REGISTERED CLAUSE RESOLVES ON ITS UPPER EDGE.** The band written before the score was
+*"0.930–0.931 (expected) separates quality from count"*, and 0.931 is the top of it. A **strong** fifth member
+holds the board and takes a tick where a **weak** fifth dropped four. So:
+
+- **The `FOUR MEMBERS` principle every champion since 2026-08-13 carried is REFUTED**, and it was never
+  measured — it was read off a board where count and quality were perfectly confounded. `crossenc` and
+  `maxdiv` did not lose four and five ticks for having five and six seats; they lost them for the members
+  they put in those seats (0.8268 and 0.8345, taken 16th and 15th by greedy). The champion pin now records
+  the refutation in place of the principle rather than dropping it.
+- **`0.932 or above` did not fire**, so encoder capacity is not a board lever this holdout is blind to. One
+  tick is this board's reporting resolution; 0.931 over 0.930 is *better*, not *much better*.
+- **`0.929 or below` did not fire**, so adding is not retired. The recombination line stays open — but the
+  greedy ceiling over all eighteen mounted members is 0.8692 against this entry's 0.8690, so what is open is
+  a door onto an empty room. **New members, not new subsets.**
+
+**THE NAMED CONFOUND WAS MEASURED, AND IT CLEARED.** This entry's own pre-registration warned that
+`base_dense` trained at `--batch 6` for VRAM, so a low reading would be a batch verdict rather than an
+encoder verdict. `batch_teardown` arm 1 (`small_batch6`) ran the control's recipe at batch 6 on the encoder
+where 12 fits: peak **0.8598** at epoch 8 against `band_dense`'s **0.8578** at epoch 8, **+0.0020** — inside
+the 0.0062 floor and on the *positive* side. The batch is not a lever at this operating point. `base_dense`'s
+−0.0066 is an **encoder** reading, and 0.931 is not a batch artefact. (Full curve in `experiments/README.md`.)
+
+**THE OFFLINE RULER MISSED, AND IN THE DIRECTION IT HAD NOT MISSED BEFORE.** Offline the five read 0.8690
+against the four's 0.8691 and the prediction, stated plainly before the run, was a tie shading −0.0003. The
+board paid **+0.001**. Seven pairs now exist:
+
+| offline | board |
+|---|---|
+| 0.8648 | 0.928 |
+| 0.8653 | 0.928 |
+| 0.8661 | 0.927 |
+| 0.8670 | 0.929 |
+| 0.8679 | 0.930 |
+| 0.8691 | 0.930 |
+| **0.8690** | **0.931** |
+
+The monotone reading holds across the whole spread and breaks only on the last pair, where a **0.0001**
+offline separation inverts. That is not a failure of the ranking claim — it is the resolution limit of a
+909-study holdout being reached. The operating rule tightens rather than reverses: **the holdout orders the
+field, does not resolve under ~0.001, and is least trustworthy precisely where a member is offline-flat but
+structurally different from the incumbents** — which is the only kind of member worth adding now.
+
+**WHAT THIS BUYS THE NEXT ARM.** The strongest single fact in the entry is that a member which *failed its
+own matched control outside the noise floor* took the board up a tick. `base_dense` is the only DINOv2-base
+in a pool seven small members deep. Encoder *diversity* — not encoder *capacity*, which 0.932 would have
+shown and did not — is the axis that paid. The follow-on is another member from an encoder family this pool
+does not contain, judged on seat value and never retired on its own control.
