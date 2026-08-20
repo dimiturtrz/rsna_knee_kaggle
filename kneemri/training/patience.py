@@ -7,13 +7,28 @@ whole-stack arm has this shape (wsfold0, res392, sliceattn, slices16, extended_w
 are thrown away: roughly nineteen minutes an arm, about 42% of its wall-clock.
 
 THAT 42% IS THE WASTE, NOT THE PRIZE, and the difference is most of it. Measured 2026-08-20 over all
-54 metrics files by `kneemri.experiments.stale_gap`: the longest non-improving stall any run RECOVERED
+55 metrics files by `kneemri.experiments.stale_gap`: the longest non-improving stall any run RECOVERED
 from is 3 epochs (`lora_r8_v3small_224`), so the smallest value that never truncates a run that was
 about to improve is 4 — and a stopper has to sit through its own patience before it fires. At 4, the
-corpus gives back 36 of its 157 discarded epochs, **23% of the waste**, because a twelve-epoch arm
+corpus gives back 42 of its 163 discarded epochs, **26% of the waste**, because a twelve-epoch arm
 that peaks at 6 wastes five and four of those five are spent waiting. The saving is concentrated in
-the three LONG runs (21, 18, 16 epochs), which are exactly the arms asking a question about the tail,
-where stopping deletes the measurement. Real, small, and pointed at the arms that can least use it.
+the LONG runs, which are exactly the arms asking a question about the tail, where stopping deletes the
+measurement. Real, small, and pointed at the arms that can least use it.
+
+AND `band_dense_long` IS THE CASE THAT PRICES THE TRADE INSTEAD OF ASSERTING IT. It is now the corpus's
+largest single waster — 24 epochs, peak at 6, **17 epochs run past it, about 103 minutes of card** — and
+it is also a shape arm, so it is precisely the run the paragraph above says a stopper would ruin. Work
+the counterfactual on its actual curve rather than on the category. After the peak (0.8587) it scores
+0.8479, 0.8554, 0.8581, 0.8521: four non-improving epochs, so patience 4 fires at epoch 10 and saves 13
+of the 17 — a third of the whole corpus saving from one run, and 79 minutes of card.
+
+WHAT THAT WOULD HAVE COST IS THE STRENGTH OF THE VERDICT, NOT THE VERDICT. Stopped at epoch 10 the arm
+still reads a decline of 0.0066 from its peak, which clears the 0.0062 floor — the overfitting call is
+reachable, at 1.06x the floor. Run to 24 it reads 0.0182, 2.9x the floor, which is the difference between
+a number that survives a sceptic and one that does not. So the honest rule is not "shape arms never stop"
+but: a stopper trades card time for CONFIDENCE in the tail, at roughly 6 minutes an epoch, and the arms
+worth paying that for are the ones whose conclusion is about the tail. `band_dense_long` was one and the
+79 minutes were well spent; a rate or pooling arm that peaks at 6 and is read on its peak is not.
 
 THIS IS NOT "RUN FEWER EPOCHS", which is a different and worse change. OneCycle is defined over
 `total_steps`, so asking for eight epochs COMPRESSES the whole schedule rather than truncating it —
