@@ -137,3 +137,11 @@ The pre-push hook runs `pytest tests/unit` so a change that lints clean but brea
 signature change a mirror test still calls the old way) is caught before the push, not after CI goes red. It
 is deliberately push-only (not every commit) and unit-only (no integration/e2e); the coverage floor stays a
 CI job. The default `pre-commit install` does **not** wire pre-push — run the second line once per clone.
+
+## Acknowledgements
+
+**DINOv3** (Meta AI, `facebook/dinov3-vitb16-pretrain-lvd1689m`) is used under the DINOv3 licence, which
+requires that the materials be acknowledged in any published result. A DINOv3-base member
+(`dinov3_base_lora`, rank-8 adapters over the frozen encoder) has been named by a submitted entry since
+2026-08-20, so the requirement is live rather than anticipated. **DINOv2** (Meta AI) is used under Apache
+2.0 and carries no such requirement; it is named here because every other member is built on it.
