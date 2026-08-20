@@ -11,13 +11,22 @@ the five read **0.8690** against the four's **0.8691** — one ten-thousandth, a
 three-seed noise floor. Against the pinned champion `greedy4_v1` (**0.8679**) the five are **+0.0011**.
 This is the first member this project has mounted whose add is not negative. Its best swap is -0.0006.
 
-WHY IT IS NOT THE SAME BET AS `crossenc`. That entry (fired the same day) varies the encoder FAMILY with a
-WEAK member: `dinov3_base_lora` scores 0.8268 alone, 0.032 below the pool's best, and reads -0.0013 as a
-fifth. This varies the encoder SIZE with a STRONG one: **0.8512** alone, level with the pool's own best
-checkpoints (`band_dense` 0.8578, `band_dense_long` 0.8587) and 0.024 above the DINOv3 member. Both of
-`crossenc`'s and `maxdiv`'s pre-registrations name this entry as the follow-up their tie outcome implies —
-*a weak member of a different encoder costs nothing, so a strong one is worth the card* — and it is here
-whether that tie happened or not, because the size axis is untested on the board independently of family.
+WHY IT IS NOT THE SAME BET AS `crossenc`, WHICH SCORED FOUR HOURS AGO AND LOST. `crossenc` (the same four
+plus `dinov3_base_lora`) landed **0.926** and `maxdiv` (that five plus `crop80_tissue`) landed **0.925**,
+against `longseat`'s 0.930. Both pre-registered ≤0.929 clauses fired. The board ordering matched the
+offline ordering exactly — 0.8691 / 0.8678 / 0.8668 to 0.930 / 0.926 / 0.925 — so this holdout RANKS
+correctly and errs only in magnitude, understating what a weak member COSTS by about 3x. That is the
+opposite of the bias those two entries were fired on, and it is stated here because it is the reason this
+entry is not the same bet.
+
+Under that corrected reading the prediction for this entry is a TIE, and it is fired anyway for one
+reason: it is the only candidate that is not weak. `dinov3_base_lora` scores 0.8268 alone, 0.032 below the
+pool's best, and greedy forward selection over all eighteen mounted members takes it SIXTEENTH;
+`crop80_tissue` (0.8345) fifteenth. `base_dense` scores **0.8512** and is taken **seventh**, inside the
+flat top where the curve reads 0.8691 / 0.8692 / 0.8692 / 0.8692 at four through seven. Both refuted
+entries named exactly this as their surviving question — *a weak member of a different encoder is priced,
+so is a strong one worth the card* — and tonight's monotonicity is what makes it answerable, because it
+says the board reads member quality faithfully enough to reward it.
 
 ITS OWN ARM READS IT AS A LOSS, AND THAT IS THE POINT. Against its matched control `band_dense` (0.8578,
 same recipe on DINOv2-small at batch 12) it is **-0.0066** — just outside the floor — at 921 s an epoch
@@ -27,20 +36,20 @@ that comes back level once mixed is the signature of an encoder whose errors are
 of the other four's. `band_dense_long` is the precedent: its arm's premise was refuted and its checkpoint
 carried the 0.930.
 
-PRE-REGISTERED, REFUTATION NAMED FIRST. **0.929 or below refutes it** and says the size axis is worse than
-free — that a member trained at half the batch on a recipe tuned for small is a liability on the board no
-matter how it mixes offline, and that the halved batch (which `batch_teardown` is measuring on the card
-right now) is the confound to blame before the encoder is. **0.932 or above** says encoder capacity is a
-board lever this holdout cannot see at all, and the next card-time goes to DINOv2-base trained at
-effective batch 12 by accumulation rather than to another small recipe. **0.930 or 0.931** is a tie at the
-reporting resolution and says the size axis is free but not profitable at this dose — which still buys the
-next decision, because it would make the third entry in this line (base at full effective batch, or a
-base/small pair replacing two smalls) the only version of the axis left untested.
+PRE-REGISTERED, WITH THE PREDICTION STATED HONESTLY AS A TIE. **0.930 or 0.931 is the expected outcome**
+and it is the one that buys the most: it would say a STRONG member of a different encoder holds the board
+where a weak one drops it four ticks, separating MEMBER QUALITY from MEMBER COUNT as the thing the board
+prices, and it would make DINOv2-base at effective batch 12 the next thing worth card-time. **0.932 or
+above** says encoder capacity is a board lever this holdout cannot see at all and the roster has been
+selected against the wrong objective. **0.929 or below refutes the size axis at this operating point**,
+and — read against `crossenc`'s 0.926 — would say adding ANY fifth member to these four is priced
+regardless of its quality, which retires adding members entirely and leaves only swaps and new recipes.
 
-WHAT WOULD MAKE THIS UNREADABLE, NAMED BEFORE THE FACT. If `crossenc` or `maxdiv` landed at 0.932 or above
-then encoder diversity is already established and this entry's marginal reading is about SIZE only; if
-they landed at 0.929 or below, a tie here would be the stronger result of the two, because it would say a
-STRONG different encoder holds the board where a weak one loses it.
+THE CONFOUND, NAMED BEFORE THE FACT. This member trained at `--batch 6`, not the recipe's 12, because 336
+px at 20 slices on a 768-wide encoder does not fit in 32 GB. `batch_teardown` is on the card right now
+measuring `band_dense`'s exact recipe at batch 6 and at batch 6 with `--accumulate 2`. If it shows batch 6
+costs materially on its own, a 0.929-or-below reading here is a batch verdict, not an encoder verdict, and
+the axis must be re-run at effective 12 before it is called closed.
 """
 
 import logging
