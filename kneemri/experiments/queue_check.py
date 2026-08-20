@@ -188,7 +188,14 @@ class QueuedArms:
 
 
 def main() -> None:
-    """Report any queued arm whose watcher is gone."""
+    """Report any queued arm whose watcher is gone.
+
+    EXITS NON-ZERO WHEN THE TABLE CANNOT BE READ, not only when an arm is stranded. A warning that
+    leaves the status at 0 reads, in a log tail, exactly like a pass — which is the shape that has now
+    cost this repo three times (bare `nox` exiting 127, a commit whose Failed line sat above the tail,
+    and on 2026-08-20 a process table that could not be spawned at all). "The check could not run" and
+    "the check ran and found nothing" must not share an exit code.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=Path("logs"), help="where the watcher logs live")
     arguments = parser.parse_args()
@@ -199,7 +206,7 @@ def main() -> None:
             "no process listing: none of %s could be read, so liveness cannot be crossed",
             ", ".join(probe.executable for probe in PROBES),
         )
-        return
+        raise SystemExit(1)
     for line in QueuedArms(arguments.directory, running).lines():
         logger.info(line)
 
