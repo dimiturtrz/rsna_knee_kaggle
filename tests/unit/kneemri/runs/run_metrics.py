@@ -323,3 +323,12 @@ def test_recipe(tmp_path: Path):
     metrics.describe({"crop_mm": "80.0", "centre": "tissue"})
 
     assert metrics.recipe() == {"crop_mm": "80.0", "centre": "tissue"}
+
+
+def test_name(tmp_path: Path):
+    """The run's own name, whichever of its two spellings the recorder was handed."""
+    from_checkpoint = RunMetrics(tmp_path / "band_dense_s2026.pt")
+    from_record = RunMetrics(tmp_path / "band_dense_s2026.metrics.jsonl")
+
+    assert from_checkpoint.name() == "band_dense_s2026"
+    assert from_record.name() == from_checkpoint.name(), "both spellings name the same run"

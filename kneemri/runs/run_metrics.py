@@ -122,7 +122,7 @@ class RunMetrics:
         run with no stamp. This class already resolves that spelling in the other direction, so it is
         the one place that cannot get the pair wrong.
         """
-        return self.path.with_name(self._stem() + ".pt")
+        return self.path.with_name(self.name() + ".pt")
 
     def describe(self, recipe: dict[str, str]) -> None:
         """Record WHICH RUN these epochs belong to, once, before the first of them.
@@ -182,18 +182,18 @@ class RunMetrics:
             run += 1
         return run
 
-    def _stem(self) -> str:
+    def name(self) -> str:
         """The run's own name, with none of the three trailing spellings its files carry."""
         name = self.path.name
         return name.removesuffix(METRICS_RECORD)
 
     def _epochs_aside(self, run: int) -> Path:
         """Where an earlier run's `<run>.metrics.jsonl` goes — the numbering already on disk."""
-        return self.path.with_name(f"{self._stem()}{METRICS_SUFFIX}.{run}.jsonl")
+        return self.path.with_name(f"{self.name()}{METRICS_SUFFIX}.{run}.jsonl")
 
     def _artefacts(self, run: int) -> list[tuple[Path, Path]]:
         """The weights and predictions of an earlier run, and where they go, as (live, aside) pairs."""
-        stem = self._stem()
+        stem = self.name()
         return [
             (self.checkpoint(), self.path.with_name(f"{stem}_run{run}.pt")),
             (self.path.with_name(stem + HOLDOUT_SUFFIX), self.path.with_name(f"{stem}_run{run}{HOLDOUT_SUFFIX}")),
