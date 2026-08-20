@@ -1407,3 +1407,47 @@ blocks it CAN rewrite were never the part the argument was about. Its three outc
 in the arm: a focal lift supports the spectral mechanism, a recovery to roughly control confirms this
 diagnosis and closes the axis honestly, and a third collapse near 0.687 refutes the diagnosis and sends
 the question back to the harness.
+
+### `base_dense` — a bigger encoder loses on its own ruler and comes back level on the other one — 2026-08-20
+
+**The arm.** `--variant base --batch 6`, everything else the settled band recipe: fold 0, one-cycle,
+`--weight-floor --rank-weight 1.0`, 12 epochs, 20 slices, band 0.10–0.90, whole-stack, 336 px,
+`--slice-pooling max`, `--backbone-lr 4e-5`, `--recompute-activations`. Verified from the checkpoint's own
+`options`, not from the invocation: `variant: base`, `batch: 6`, `slices: 20`, `band_low/high: 0.1/0.9`,
+`backbone_lr: 4e-05`, `whole_stack: True`, `slice_pooling: max`, `one_cycle: True`, `weight_floor: True`,
+`rank_weight: 1.0`. The batch is halved because 336 px at 20 slices on a 768-wide encoder does not fit
+otherwise — peak 27.85 GB reserved, 25.38 GB allocated, on a 32 GB card.
+
+**The curve, against its matched control `band_dense` (DINOv2-small, batch 12).**
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| base_dense | .7625 | .7759 | .8144 | .8232 | .8355 | .8371 | .8486 | .8459 | **.8512** | .8505 | .8490 | .8491 |
+
+Control `band_dense` peaks at **0.8578** (epoch 8) and finishes 0.8554. Both peak at the same epoch, so
+the schedule is not the difference. **-0.0066 at the bests, just outside the 0.0062 three-seed floor**,
+at **921 s an epoch against ~370** — 2.5× the card time for a member that reads worse alone.
+
+**Read as a member, it is the opposite.** Rank-averaged over the 909-study fold-0 holdout, added as a
+fifth to the `longseat` four (the current board maximum, 0.930) it reads **0.8690 against their 0.8691** —
+one ten-thousandth, a sixtieth of the floor — and **+0.0011 against the pinned champion `greedy4_v1`**
+(0.8679). Its best swap is -0.0006. **This is the first member this project has mounted whose add is not
+negative**: `calib_span` went in at -0.0020, `crop80_tissue` at -0.0005, `dinov3_base_lora` at -0.0013.
+
+**The pre-registration, judged.** The arm asked three things. (1) *Does a bigger encoder beat small on the
+settled recipe?* **No** — -0.0066, outside the floor, and the answer is unambiguous at 2.5× the price.
+(2) *Is it worth a seat anyway?* **Yes, on the seat ruler** — a checkpoint 0.0066 behind the control on
+its own that comes back level once mixed is the signature of an encoder whose errors are not a
+re-parameterisation of the other four's, which is precisely what the pool has never had. (3) *Is the
+halved batch the alibi?* **Not yet answerable, and it is being answered** — `batch_teardown` is on the
+card now running `band_dense`'s exact recipe at `--batch 6` and at `--batch 6 --accumulate 2`. If
+`small_batch6` lands materially below the 0.8578 control, base's -0.0066 is partly a batch effect and the
+encoder verdict must be re-read at effective 12.
+
+**What it does NOT say.** It does not say DINOv2-base is worse than DINOv2-small. It says base at batch 6
+on a recipe tuned for small at batch 12 is worse, which is a statement about an operating point, and the
+one confound in it is on the card. `band_dense_long` is the precedent for what happens next: an arm whose
+premise was refuted produced the checkpoint that carried the 0.930.
+
+**Shipped.** Mounted in `comp/members.roster` and named by `comp/kernels/kneemri-basedense`, a one-member
+delta off the known 0.930 so its board reading attributes to this member alone.
