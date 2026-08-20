@@ -329,6 +329,30 @@ another project landed on the same card. The arm's own STALLED guard caught it a
 (0.8374, on-trend between 0.8294 and 0.8390), so the curve is not distorted — but the wall-clock in the
 ledger is not this recipe's cost.
 
+### The shipped recipe is defended by two labels, and the mean ruler charges for it (2026-08-20)
+
+A free re-read — no card time — of every vision/decode arm with a surviving checkpoint, re-marked
+against the recipe we actually ship (`band_dense`, 0.8578) instead of against the control each was
+written for. Eleven arms × twelve labels. **PF OA is negative in 11 of 11 arms** (seven clearing their
+own pair's paired half-width) and Synovitis in 10 of 11, across levers with nothing in common — band
+span, band density, slice pooling, region pooling, crop geometry, augmentation schedule, epochs. The
+mean is negative in 11 of 11 as well, and in the flattest arms it is *made of those two rows*
+(`band_span`: focal −0.0036, regional +0.0019, MEAN −0.0013). So `band_dense` sits at a local optimum
+those two labels defend, and a flat mean on this control is not "the lever did nothing", it is "the
+lever paid the local-optimum tax and broke even elsewhere". Consequence for reading future arms:
+`band_dense` is not a neutral control for anything that moves the band, and an arm whose mechanism is
+not about the central compartment should be marked on the other ten rows before its mean is believed.
+
+**The positive side is chance and is reported as such.** Three cells clear their half-width upward
+(`band_density` Lateral Meniscus +0.0187\*, `depth_regions` Lateral Meniscus +0.0165\*, `aug_long` ACL
++0.0187\*); 132 cells at a two-sided ~5% rule predicts ≈3.3 per side. That is exactly what chance
+predicts, no label repeats with consistency, and none of it is a finding. Three arms
+(`resolution_420`, `extended_slots`, `multiscale`) could not be re-read at all — their checkpoints are
+gone from the data root. And the obvious follow-on, a per-label roster, is **prior art in this repo**:
+`kneemri/evaluation/label_combine.py` already combines members per label with a split-half estimator
+built specifically around the selection optimism such a table invites.
+[interpretation](../interpretations/kneemri/2026-08-20_per_label_reread.md)
+
 ### Per-label loss weighting is refuted a second time, now from the training side (2026-08-19)
 
 `per_label_loss` normalised the loss per column so each finding weighs one twelfth, against a data
