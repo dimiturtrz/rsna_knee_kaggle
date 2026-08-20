@@ -2042,6 +2042,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.training.spectral_mae",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.remembered_ranking",
       "target": "kneemri.training.objective",
       "weight": 1
@@ -2104,6 +2140,12 @@
       "kind": "import",
       "source": "kneemri.training.run_setup",
       "target": "kneemri.training.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.spectral_mae",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -10028,6 +10070,150 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.pretrain.Optimisation",
+      "target": "kneemri.training.pretrain.Optimisation",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.pretrain.Optimisation",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.pretrain.Sampling",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.spectral_mae.SpectralMae",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.run",
+      "target": "kneemri.training.pretrain.Pretrainer.step",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.run",
+      "target": "kneemri.training.pretrain.Pretrainer.steps_per_epoch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.save",
+      "target": "kneemri.training.spectral_mae.SpectralMae.encoder_state",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.step",
+      "target": "kneemri.training.pretrain.Optimisation.apply",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.step",
+      "target": "kneemri.training.pretrain.Pretrainer.batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.step",
+      "target": "kneemri.training.spectral_mae.SpectralMae.sample_mask",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pretrain.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Optimisation.one_cycle",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Pretrainer",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Pretrainer.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Pretrainer.save",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Pretrainer.steps_per_epoch",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.pretrain.Sampling",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.spectral_mae.SpectralMae",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
+      "target": "kneemri.training.pretrained_encoder.PretrainedEncoder.variant",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.remembered_ranking.RememberedRanking",
       "target": "kneemri.training.objective.Predicted",
       "weight": 1
@@ -10172,6 +10358,18 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.model",
+      "target": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.model",
+      "target": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.Objective",
       "weight": 1
@@ -10270,6 +10468,48 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.whole_stack",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.spectral_mae.SpectralMae",
+      "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.encode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.patchify",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.pixel_loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.unpatchify",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
+      "target": "kneemri.training.spectral_mae.SpectralMae.highpass",
       "weight": 1
     },
     {
@@ -10683,7 +10923,7 @@
       "role": null
     },
     {
-      "descendants": 120,
+      "descendants": 123,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11531,7 +11771,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 17,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -11612,6 +11852,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pretrain",
+      "label": "pretrain",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder",
+      "label": "pretrained_encoder",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.remembered_ranking",
       "label": "remembered_ranking",
       "level": "module",
@@ -11630,6 +11886,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup",
       "label": "run_setup",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae",
+      "label": "spectral_mae",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -13236,6 +13500,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pretrain.Optimisation",
+      "label": "Optimisation",
+      "level": "class",
+      "parent": "kneemri.training.pretrain",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer",
+      "label": "Pretrainer",
+      "level": "class",
+      "parent": "kneemri.training.pretrain",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Sampling",
+      "label": "Sampling",
+      "level": "class",
+      "parent": "kneemri.training.pretrain",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "label": "PretrainedEncoder",
+      "level": "class",
+      "parent": "kneemri.training.pretrained_encoder",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.remembered_ranking.RememberedRanking",
       "label": "RememberedRanking",
       "level": "class",
@@ -13264,6 +13560,22 @@
       "label": "RunSetup",
       "level": "class",
       "parent": "kneemri.training.run_setup",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae",
+      "label": "SpectralMae",
+      "level": "class",
+      "parent": "kneemri.training.spectral_mae",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMaskConfig",
+      "label": "SpectralMaskConfig",
+      "level": "class",
+      "parent": "kneemri.training.spectral_mae",
       "role": "satellite"
     },
     {
@@ -19828,6 +20140,102 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.pretrain.Optimisation.apply",
+      "label": "apply",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Optimisation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Optimisation.one_cycle",
+      "label": "one_cycle",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Optimisation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.batch",
+      "label": "batch",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.save",
+      "label": "save",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.step",
+      "label": "step",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer.steps_per_epoch",
+      "label": "steps_per_epoch",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.training.pretrain",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
+      "label": "into",
+      "level": "method",
+      "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrained_encoder.PretrainedEncoder.variant",
+      "label": "variant",
+      "level": "method",
+      "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
       "label": "__init__",
       "level": "method",
@@ -19928,6 +20336,86 @@
       "label": "trainer",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.encode",
+      "label": "encode",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.encoder_state",
+      "label": "encoder_state",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.highpass",
+      "label": "highpass",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.patchify",
+      "label": "patchify",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.pixel_loss",
+      "label": "pixel_loss",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.sample_mask",
+      "label": "sample_mask",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
+      "label": "spectral_loss",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.unpatchify",
+      "label": "unpatchify",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
       "role": null
     },
     {

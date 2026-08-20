@@ -206,17 +206,48 @@ finding at all. Over half the corpus carries nothing about fracture. That is a s
 larger than the 4% contest rate this pilot was built to measure, and it is invisible to a contest, which
 can only score cells where the reader made a call.
 
-**And then it declines to explain our scores, which is the part worth keeping.** If missingness capped
-performance, the ordering would show it. It inverts:
+**And then it declines to explain our scores** — but the two-label argument this section first made for
+that was wrong, and the correction is worth more than the claim. It read: *Synovitis has the worst
+coverage and scores 0.873, mid-pack; MCL has the third-best coverage and scores 0.788, the worst of the
+twelve.* Both of those are **report-ruler** numbers, and both **flip** when scored against the
+radiologist instead (`supervision_gap`, 58 annotated studies, 696 cells):
 
-- **Synovitis has the worst supervision coverage in the corpus and scores 0.873** — mid-pack, above
-  seven other labels.
-- **MCL has the third-best coverage and scores 0.788–0.793** — the worst of the twelve.
+| | UNK share | report holdout | annotation ruler |
+| --- | --- | --- | --- |
+| Synovitis | 84.2% | 0.873 | **0.7378** — 2nd worst of twelve |
+| MCL | 9.8% | 0.788–0.793 | **0.8798** — 4th best of twelve |
 
-So the hole is real, it is much bigger than the contest rate, and it is **not** what bounds us. It also
-has a mechanism for why it costs less than it looks: under `--weight-floor` an UNK cell is not dropped —
-it trains at value 0.28, weight 0.2875, a soft negative. Synovitis's 13.2% positives are learnable
-against a quiet negative background, which is what a 0.873 on 84% missing data looks like.
+So Synovitis's 0.873 does **not** survive the change of ruler; it falls 0.135, and it was in part an
+artefact of scoring against a holdout that inherits the same 84.2% silence. Picking the two extremes of
+a noisy 12-row table and reading an ordering off them was the error — on the ruler that counts, those
+same two points argue the opposite.
+
+**The conclusion survives on all twelve points, which is where it should have been argued from.** UNK
+share against annotation-ruler AUC:
+
+| label | UNK% | annot AUC | | label | UNK% | annot AUC |
+| --- | --- | --- | --- | --- | --- | --- |
+| Synovitis | 84.2 | 0.7378 | | PF OA | 18.5 | 0.8005 |
+| Fracture | 56.4 | 0.8861 | | Lateral Meniscus | 10.0 | **0.6497** |
+| Baker's | 45.9 | **0.9547** | | Effusion | 9.9 | 0.9453 |
+| Lateral OA | 33.1 | 0.7099 | | MCL | 9.8 | 0.8798 |
+| Medial OA | 25.5 | 0.9504 | | ACL | 8.1 | 0.8640 |
+| Contusion | 20.8 | 0.8421 | | Medial Meniscus | 5.7 | 0.8498 |
+
+Spearman **ρ = 0.014** (t = 0.04, df 10), Pearson r = −0.111. The best-scoring finding carries 45.9%
+silence; the worst carries 10.0%. There is no ordering to find.
+
+**What that is not.** ρ = 0.014 over twelve points, each AUC drawn from ~58 studies with a per-label SE
+near 0.04–0.06, *fails to detect* a relation — which is weaker than showing there is none, and cannot
+exclude a moderate one. No single row above should be read to better than a few points; the "2nd worst"
+and "4th best" ranks are themselves inside that noise. What survives is the absence of an ordering
+across all twelve together, which is the only claim twelve points of this quality can carry.
+
+It also has a mechanism for why the hole costs less than it looks, and this one is now measured on the
+annotation ruler rather than assumed: under `--weight-floor` an UNK cell is not dropped — it trains at
+value 0.28, weight 0.2875, a soft negative. Synovitis's report label predicts the radiologist at 0.6870
+and the model reaches 0.7378, **beating its own supervision by +0.0508 on a finding that is 84.2%
+silent**. Learnable positives against a quiet negative background is what that looks like.
 
 This does not make missingness harmless. It makes it a **ceiling question rather than a floor question**,
 and it is the one supervision axis this pilot did not price. Filed as its own bead rather than folded in

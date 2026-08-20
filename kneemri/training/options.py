@@ -88,6 +88,7 @@ class TrainingOptions:
     anatomical_prior: bool = False
     encoder_layer: int = -1
     variant: str = SMALL
+    encoder_weights: Path | None = None
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
     out: Path | None = None
@@ -433,6 +434,15 @@ class TrainingOptions:
             "is twelve numbers where the report has a median of 129 words in twelve languages; this "
             "term supervises the representation with the rest of it. Training-only - test.csv has no "
             "Report column, so inference is unchanged.",
+        )
+        parser.add_argument(
+            "--encoder-weights",
+            type=Path,
+            default=None,
+            help="start the encoder from a domain-adapted checkpoint written by "
+            "kneemri.training.pretrain instead of the stock natural-image weights. Everything else in "
+            "the recipe is unchanged, so a run with this flag and its matched control differ in one "
+            "variable: what the encoder knew before supervision began.",
         )
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
         parser.add_argument("--out", type=Path, default=None)

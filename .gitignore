@@ -13,8 +13,14 @@ __pycache__/
 # regenerated (template-identical, ~700KB of vendored libs) locally / in the Pages workflow — not committed.
 docs/architecture/index.html
 
-# Virtualenv
+# Virtualenv. `.venv-arm/` is the SECOND one, and it exists because a shared environment is mutable
+# state that a forty-minute run holds open: every pre-commit entry is `uv run --extra dev|devtools`, and
+# alternating extras makes uv rewrite `.venv` in place — under the interpreter an arm is already using.
+# That killed a run on 2026-08-13 (mid epoch 4) and again on 2026-08-20 (mid epoch 1, step 182), both
+# times as exit 127 with no traceback. `--no-sync` stops the ARM from syncing; it cannot stop a push
+# from syncing underneath it. Arms therefore run against their own environment.
 .venv/
+.venv-arm/
 
 # Logs / local DBs — anchored to root (`/logs/`, not `logs/`, so a source dir named logs/ isn't ignored)
 /logs/

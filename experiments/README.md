@@ -1194,3 +1194,71 @@ It is also the fourth consecutive knob on the decode/head family to return nothi
 −0.0009 (operator), `focal_dense` −0.0044 (pooled width), `band_density` +0.0014 (slice count at fixed
 span), `aprior_dense` −0.0021 (head initialisation). Four independent levers on one subsystem, none
 clearing a seventh of the floor, is evidence about the subsystem rather than about any of the four.
+
+### `severity_weight` — the knob fired, and moved the graded findings the WRONG way — 2026-08-20
+
+Scaling each label's loss by the severity of the finding, so an obvious-severe case counts for more than
+a borderline one. The argument was that a binary target throws away the grade the report actually
+carries, and that the graded findings — the osteoarthritis rows, the menisci — are where a recovered
+grade should pay.
+
+**The flag landed and the arm is single-variable.** `severity_weight = True` in the checkpoint's own
+options block, against a control that predates the flag; every other recorded option matches
+`band_dense`, and the one config difference is `slice_regions` absent from the control's record against
+`1` here — the `StudyDesign` default arriving in the manifest, not a behaviour change.
+
+**Both arms peak at epoch 8**, same twelve-epoch one-cycle, so this is a matched read:
+
+| epoch | 5 | 6 | 7 | **8** | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|
+| `band_dense` | 0.8540 | 0.8550 | 0.8554 | **0.8578** | 0.8572 | 0.8556 | 0.8554 |
+| `severity_weight` | 0.8452 | 0.8512 | 0.8503 | **0.8530** | 0.8529 | 0.8530 | 0.8528 |
+
+Mean −0.0048 against a 0.0062 floor: inside noise, wrong sign.
+
+**Which clause fired — and it is the refutation, on the ruler that was pre-registered rather than on the
+mean.** The arm predicted a gain CONCENTRATED in the graded rows: Medial and Lateral Meniscus, Medial
+and Lateral OA, PF OA. A uniform lift was pre-declared a refutation, and so was a lift concentrated in
+MCL. At matched epoch 8:
+
+| row | delta | predicted? |
+|---|---|---|
+| ACL | **+0.0153** | no |
+| Lateral Meniscus | +0.0064 | yes |
+| Medial Meniscus | −0.0010 | yes |
+| Medial OA | −0.0033 | yes |
+| PF OA | −0.0058 | yes |
+| Lateral OA | −0.0072 | yes |
+| MCL | −0.0035 | no |
+| Baker's | −0.0072 | no |
+| Fracture | −0.0109 | no |
+| Synovitis | −0.0116 | no |
+| Effusion | **−0.0144** | no |
+| Contusion | **−0.0148** | no |
+
+Four of the five predicted rows are NEGATIVE. The pattern is not uniform, so the mechanism did fire and
+did change the fit — this is not a no-op wearing an arm's name. It changed it against the prediction.
+
+**By structure scale the reversal is cleaner than any single row: focal +0.0001, regional −0.0118.** The
+graded, regional findings — exactly the ones a severity scale was supposed to serve — are the ones that
+lost, and the diffuse fluid rows (Effusion, Contusion, Synovitis) lost most. The honest reading is that
+up-weighting severe cases does not teach the grade; it spends the batch on the cases the model already
+gets right and starves the borderline ones, and the borderline cases are where a large-fluid AUC is
+actually decided. Paired-floor half-widths reach ±0.0238, so no single row above is a result on its own;
+the SIGN AGREEMENT across nine of twelve, and the focal/regional split, is what carries the read.
+
+**Seat value: none, on either ruler.** Into the roster of four, 0.8676 vs 0.8679 (−0.0003); the best seat
+it could take from any current member, 0.8669 (−0.0010). 0 of 1 clears the +0.0015 the board ruler has
+ever been shown to resolve.
+
+**What this does and does not retire.** It kills THIS use of severity scaling — a per-example multiplier
+on the existing binary loss. It does not touch the underlying observation that the reports carry a grade
+the targets discard; an ordinal target or a graded head consumes that information without reweighting
+the batch, and neither has been tried. Recorded so a later ordinal arm is re-tested rather than assumed
+dead by this row.
+
+**The axis stays open by the owner's call (2026-08-20): the grade is real information and the loss still
+throws it away.** What this row retires is the multiplier, not the signal. The successor is an ORDINAL
+target — the three YES levels as ordered classes with a cumulative-threshold head — which consumes the
+grade without touching any example's weight in the batch, so it cannot reproduce the starvation
+mechanism above. Filed rather than queued ahead of the encoder-adaptation arm, which holds the card.

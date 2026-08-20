@@ -17,6 +17,18 @@ source "$(dirname "${BASH_SOURCE[0]}")/recipe.sh"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
+# AN ARM RUNS IN ITS OWN ENVIRONMENT, and this is not a preference.
+#
+# `uv` syncs .venv to EXACTLY the extras a command asks for, in place, with no lock. Every pre-commit
+# hook alternates `--extra dev` and `--extra devtools`, so a commit made while an arm is fitting
+# rewrites the interpreter that arm is executing. The arm dies with exit 127 and NO traceback, which
+# reads as a crashed run rather than as a rewritten venv - it cost three arms before it was named.
+#
+# .venv-arm is a second, isolated environment nothing else ever syncs. Pointing UV_PROJECT_ENVIRONMENT
+# at it makes the isolation the DEFAULT for every arm instead of a flag each one has to remember.
+export UV_PROJECT_ENVIRONMENT="$REPO/.venv-arm"
+[ -d "$UV_PROJECT_ENVIRONMENT" ] || uv sync --extra dev
+
 # WHICH lib.sh THIS SHELL IS RUNNING, captured where it can still be true: at source time.
 #
 # bash parses a sourced file ONCE, into function definitions held in this shell's memory. A chain is

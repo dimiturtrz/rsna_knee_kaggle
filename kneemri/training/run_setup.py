@@ -25,6 +25,7 @@ from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.landed import Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
+from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import Adaptation, Trainer
@@ -154,7 +155,13 @@ class RunSetup:
         `Trainer`, not here.
         """
         options = self.options
-        model = StudyModel(AutoModel.from_pretrained(encoder.repository), encoder.dim, slots, design)
+        backbone = AutoModel.from_pretrained(encoder.repository)
+        if options.encoder_weights is not None:
+            # BEFORE every wrapper, and that is the same argument the rest of this method makes: weights
+            # written into a compiled or adapted backbone land under prefixed keys that the stock
+            # reference does not name, which is how a load that matched nothing once reported success.
+            backbone = PretrainedEncoder(options.encoder_weights).into(backbone, options.variant)
+        model = StudyModel(backbone, encoder.dim, slots, design)
         if options.lora_rank:
             logger.info(
                 "low-rank adaptation: %d layers at rank %d", model.low_rank(options.lora_rank), options.lora_rank
