@@ -28,7 +28,7 @@ PEAK="${1:-1.6e-5}"
 require "$LABELS"
 
 run_train "peak_rate_${PEAK}" \
-  $RECIPE --epochs 12 --patience 3 \
+  $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --backbone-lr "$PEAK" \
   $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/peak_rate_${PEAK}_s2026.pt"

@@ -66,8 +66,10 @@ CACHE_PX="${2:-448}"
 # physical leaves the driver no room and Windows pages over PCIe instead of raising OOM - 40 img/s
 # against ~1000, measured 2026-08-13. DeviceBudget reserves off --slices, which is where 26 came from.
 #
-# --patience 3 saves about 9% of wall-clock and cannot change the recorded best (measured by replaying
-# every arm in the ledger).
+# $PATIENCE saves wall-clock without changing a recorded best, and the value is derived in recipe.sh
+# rather than named here. It USED TO SAY 3, on a replay of every arm then in the ledger; the replay was
+# right when it was run and stopped being right when lora_r8_v3small_224 recovered from a 3-epoch stall
+# to its best at epoch 12. A constant copied out of a measurement ages the moment the corpus grows.
 RATE="${3:-4e-5}"
 
 # THE BATCH IS AN ARGUMENT NOW, because the rung this arm's own examples name does not fit without it.
@@ -127,5 +129,5 @@ run_train "resolution_${SIZE}${TAG}" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
-  --backbone-lr "$RATE" --batch "$BATCH" --patience 3 $THROUGHPUT \
+  --backbone-lr "$RATE" --batch "$BATCH" $PATIENCE $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/res${SIZE}${TAG}_ws_s2026.pt"

@@ -39,7 +39,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train "calibrated_targets" \
-  $RECIPE --epochs 12 --patience 3 \
+  $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --calibrated-targets \
   $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/calibrated_targets_s2026.pt"

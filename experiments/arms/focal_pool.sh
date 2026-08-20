@@ -32,7 +32,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train focal_pool \
-  $RECIPE --epochs 12 --patience 3 \
+  $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --pool cls_mean_focal \
   $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/focal_pool_s2026.pt"

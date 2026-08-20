@@ -56,7 +56,7 @@ export HF_TOKEN
 [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
 run_train "v3base_band" \
-  $RECIPE --epochs 12 --patience 3 \
+  $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --lora-rank 8 --backbone-lr 5e-4 \
   --variant v3base --image-size 336 --train-size 224 \
   --slices 20 --band-low 0.1 --band-high 0.9 \

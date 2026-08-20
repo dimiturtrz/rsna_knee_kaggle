@@ -27,7 +27,7 @@ LAYER="${1:-9}"
 require "$LABELS"
 
 run_train "encoder_layer_${LAYER}" \
-  $RECIPE --epochs 12 --patience 3 \
+  $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --encoder-layer "$LAYER" \
   $THROUGHPUT \
   --labels "$LABELS" --out "$PROCESSED/encoder_layer_${LAYER}_s2026.pt"

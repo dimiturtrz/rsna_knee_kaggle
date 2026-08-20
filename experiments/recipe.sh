@@ -29,3 +29,18 @@ RECIPE="--fold 0 --one-cycle --weight-floor --rank-weight 1.0"
 # of thirty-six arms simply forgot to name, paying 21% of every step for the omission, so the trainer
 # compiles by default and `--eager-encoder` is the escape.
 THROUGHPUT="--recompute-activations"
+
+# The early stopper, DERIVED rather than picked: `python -m kneemri.experiments.stale_gap` reads every
+# curve on disk for the longest NON-improving streak a run later recovered from, and patience must
+# EXCEED that or it stops a run that was about to get better. Across 56 runs that streak is 3 epochs
+# (lora_r8_v3small_224_s2026: 16 epochs, best at 12, survived 3), so the safe value is 4.
+#
+# SEVEN ARMS PASSED 3, which is exactly the value that fires on that run's third stale epoch — the one
+# before its best. resolution.sh carried a comment claiming 3 could not change a recorded best; that
+# replay was run before the curve that set the floor existed. One constant here so the next arm inherits
+# the measurement instead of copy-pasting a number that ages.
+#
+# NOT FOR EVERY ARM. An arm whose question IS the schedule (band_dense_long, aug_long) is measuring the
+# shape of the tail, and a stopper deletes the measurement; final_fit has no holdout under --fold -1, so
+# there is nothing for a stopper to read. Re-derive after a run with a longer recovered stall lands.
+PATIENCE="--patience 4"
