@@ -452,7 +452,8 @@ class TrainingOptions:
             default=ALL_BLOCKS,
             help="take only the patch embedding and the first N blocks from --encoder-weights, leaving "
             "the rest stock. 0 takes the whole adaptation. The argument for on-domain pretraining only "
-            "ever concerned the blocks --unfreeze-depth freezes, which supervision cannot write into and "
+            "ever concerned the blocks --unfreeze-last leaves frozen, which supervision cannot write into "
+            "and "
             "so cannot repair; the top blocks the head reads are the ones a reconstruction objective "
             "rewrites hardest, and two full loads measured on 2026-08-20 lost 0.17 with block 11 moved "
             "55% and 21% of its own norm.",

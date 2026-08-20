@@ -427,6 +427,27 @@ class _WatchedOptions(TrainingOptions):
 STAMPED_ONLY: set[str] = set()
 """Fields whose whole job is to travel to the record; no consumer reads them, by design."""
 
+ADAPT_DEPTH = 2
+"""Non-default, so the depth is a value the run acts on rather than a default it could ignore."""
+
+
+def _stock_adaptation(into: Path) -> Path:
+    """A pretraining output carrying the stand-in encoder's own weights, keyed as `Pretrainer.save` keys them.
+
+    The stand-in and not a real adaptation because the fixture has already replaced the backbone with
+    it: an adaptation of anything else would be a shape error rather than a test of the wiring. Its
+    twelve `encoder.layer.N` blocks are what give the depth something to actually cut.
+
+    The values are beside the point — what a depth keeps is unit-tested in `pretrained_encoder`. What
+    this buys is the WIRING, and it is the second instance of the same shape as report supervision:
+    `encoder_adapt_depth` is consulted only inside the branch `encoder_weights` opens, so an argv
+    giving neither reports the depth as a field nothing reads. Exempting it would have been a lie —
+    `STAMPED_ONLY` is for fields with no consumer, and this one has one.
+    """
+    path = into / "adapted.pt"
+    torch.save({"encoder": _FakeBackbone().state_dict(), "variant": SMALL, "config": {}}, path)
+    return path
+
 
 def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatch: pytest.MonkeyPatch):
     """A parsed field nothing ever reads is a switch that changes the ledger row and not the run.
@@ -436,8 +457,9 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
     stamped — the recipe string is built from `vars()` — and still configure nothing at all.
     """
     identifiers = _corpus(corpus)
-    # Report supervision is the one term whose flag is read only when a SECOND flag turns it on, so the
-    # run has to ask for it — an argv that leaves it off would report its vectors field as dead.
+    # Two terms are read only when a SECOND flag turns them on, so the run has to ask for both — an argv
+    # that leaves either off would report its dependent field as dead: report supervision's vectors, and
+    # the depth that scopes an encoder adaptation.
     vectors = corpus / "reports.npz"
     np.savez(vectors, identifiers=np.array(identifiers), vectors=np.zeros((len(identifiers), REPORT_DIMS), np.float32))
     _WatchedOptions.reads.clear()
@@ -453,6 +475,10 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
         "1.0",
         "--report-vectors",
         str(vectors),
+        "--encoder-weights",
+        str(_stock_adaptation(corpus)),
+        "--encoder-adapt-depth",
+        str(ADAPT_DEPTH),
     )
 
     declared = {field.name for field in fields(TrainingOptions)}

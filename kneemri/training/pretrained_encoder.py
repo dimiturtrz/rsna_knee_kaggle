@@ -44,10 +44,11 @@ class PretrainedEncoder:
         never moved it more than 0.8%. The head reads that block, so importing it hands the classifier a
         representation shaped for reconstruction.
 
-        The argument this axis was built on only ever concerned the BOTTOM — blocks `--unfreeze-depth`
-        freezes, which supervision provably cannot write into (drift exactly 0.0000) and therefore
-        cannot repair either. Taking those blocks and leaving the rest stock is that argument stated
-        exactly, instead of stated and then over-applied.
+        The argument this axis was built on only ever concerned the BOTTOM — the blocks
+        `--unfreeze-last` leaves frozen (6 by default, so blocks 0-5), which supervision provably
+        cannot write into (drift exactly 0.0000) and therefore cannot repair either. Taking those
+        blocks and leaving the rest stock is that argument stated exactly, instead of stated and then
+        over-applied.
 
         The final layernorm is left stock with the blocks it follows: it is calibrated to the activations
         of block 11, and an adapted norm over stock blocks is a mismatch neither side asked for.
