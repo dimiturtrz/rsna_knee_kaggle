@@ -267,6 +267,25 @@ def test_swap():
     assert "good.pt for weak.pt" in lines[1], "the strong candidate displaces the weak incumbent, not the strong one"
     assert lines[1].split("(")[1].startswith("+"), "replacing the roster's weakest member with a strong one pays"
     assert "noise.pt" in lines[2], "the weaker candidate is priced too, and reported second"
+    assert lines[-1].endswith("never been shown to pick a board tick"), "the resolution bound is stated"
+    assert lines[-1].startswith("2 of 2 clear +0.0015"), "both beat an incumbent that is pure noise"
+
+
+def test_swap_unresolvable():
+    """A candidate that cannot improve a healthy roster is counted OUT of the resolvable set, not filtered.
+
+    The count is the half of the trailing line that can be wrong in the direction that costs a slot: an
+    argmax reads like a submission whether or not the board could tell it apart from the incumbent.
+    """
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    roster = Pool(["a.pt", "b.pt"], [_member(2.0, SEED), _member(2.0, SEED + 1)], truth)
+    candidates = Pool(["noise.pt"], [_member(0.05, SEED + 2)], truth)
+
+    lines = curve.swap(roster, candidates)
+
+    assert "noise.pt" in lines[1], "it is still priced and still reported"
+    assert lines[-1].startswith("0 of 1"), "priced, ordered, and named as no move the board could read"
 
 
 def test_split():

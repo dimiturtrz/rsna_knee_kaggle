@@ -45,6 +45,8 @@ from kneemri.labels.targets import Targets
 logger = logging.getLogger(__name__)
 
 COMBINE_SEED = 2026
+
+BOARD_RESOLVABLE = 0.0015
 """Which studies fit the per-label choice and which report it — the corpus split seed, since both are
 arbitrary-but-fixed partitions of the same corpus and a second free number would only be a second thing
 to accidentally vary."""
@@ -192,6 +194,16 @@ class MemberCurve:
         as a SIGN like every other number off this holdout, and note the transfer error runs the other way
         for diversity (knee-7d1): a small negative here is inside the region where this ruler is known
         wrong.
+
+        `BOARD_RESOLVABLE` IS WHERE A POSITIVE STOPS MEANING ANYTHING, and the report says so rather than
+        leaving the reader to remember it. Six entries now pair an offline joint-holdout score with a board
+        score (knee-825t): the chain rises across the first 0.003 of offline spread and then stops, with
+        `longseat` carrying +0.0012 — the largest single move in a sweep of all 56 same-split checkpoints,
+        six times the runner-up — and TYING the board rather than moving it. 0.0015 is the value above
+        that plateau and below the smallest gap the chain does track; it is a floor on what has been
+        DEMONSTRATED, not a threshold anything is known to cross. So the trailing count is deliberately not
+        a filter: the ordering is this tool's product and stays whole, and the line only refuses to let an
+        argmax of +0.0002 read as a submission.
         """
         truth = candidates.truth
         base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
@@ -210,9 +222,15 @@ class MemberCurve:
             score, displaced = max(seats, key=lambda pair: pair[0])
             priced.append((score, name, displaced))
         lines = [f"holding {len(roster)} members, the best seat each candidate could take:"]
-        return lines + [
-            f"  {name} for {displaced}: {score:.4f}  ({score - base:+.4f})"
-            for score, name, displaced in sorted(priced, key=lambda priced: -priced[0])
+        resolvable = sum(1 for score, _, _ in priced if score - base >= BOARD_RESOLVABLE)
+        return [
+            *lines,
+            *(
+                f"  {name} for {displaced}: {score:.4f}  ({score - base:+.4f})"
+                for score, name, displaced in sorted(priced, key=lambda priced: -priced[0])
+            ),
+            f"{resolvable} of {len(priced)} clear +{BOARD_RESOLVABLE:.4f}, under which this ruler has "
+            f"never been shown to pick a board tick",
         ]
 
     def marginal(self, roster: Pool, candidates: Pool) -> list[str]:

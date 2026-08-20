@@ -19,7 +19,17 @@ copy that goes stale silently, and every delta under a stale roster is against t
 
 READ IT AS A SIGN. The holdout under-prices diversity against the board by 2.4x (knee-7d1), so a small
 negative here is inside the region where this ruler is known to be wrong — `dinov3_base_lora`, a
-genuinely different encoder, reads -0.0013. What transfers is the ordering, not the value.
+genuinely different encoder, reads -0.0025 against `greedy4_v1`. What transfers is the ordering, not the
+value. That number was -0.0013 against an earlier champion and moved without the member changing, which
+is the same shrinking-edge effect a rising champion produces everywhere: a seat value is a statement
+about a PAIR, and quoting one without its roster is quoting half of it.
+
+AND IT SATURATES, which bounds what a positive reading is worth (knee-825t). Six entries now pair an
+offline joint-holdout score with a board score and the chain rises over the first 0.003 of offline
+spread, then stops: `longseat` carried +0.0012 of seat value — the largest single move in a sweep of all
+56 same-split checkpoints, six times the second-best — and tied the board rather than moving it. So this
+tool answers `which of these is the best move` reliably and `is the best move worth a slot` not at all.
+Below roughly 0.0015 its winner and its runner-up are the same submission.
 """
 
 import argparse
