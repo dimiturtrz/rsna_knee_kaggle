@@ -170,6 +170,58 @@ And the converse holds at the sharpest point: MCL and ACL are the two labels wit
 and both are in the model half. The partition and the pilot name the same two findings as pure vision
 problems.
 
+## The objection that "0 contested" might just mean "never mentioned" — measured
+
+Agreement on ABSENCE is not evidence of correctness, and a label the reports simply never discuss would
+produce a clean contest score for the worst possible reason. That is failure mode 2 of this very pilot,
+so it deserved a measurement rather than an argument. **Denominator: all 4,406 corpus rows, and every
+one of the twelve columns is populated on every row**, so these are rates over the corpus and not over a
+subset that happened to parse.
+
+| label | UNK % | NO % | YES % |
+|---|---|---|---|
+| **Synovitis** | **84.2** | 2.6 | 13.2 |
+| **Fracture** | **56.4** | 36.5 | 7.1 |
+| Lateral OA | 33.1 | 42.3 | 24.7 |
+| Medial OA | 25.5 | 37.7 | 36.7 |
+| Contusion | 20.8 | 49.8 | 29.4 |
+| PF OA | 18.5 | 36.3 | 45.2 |
+| Lateral Meniscus | 10.0 | 64.5 | 25.4 |
+| Effusion | 9.9 | 29.6 | 60.5 |
+| **MCL** | **9.8** | 72.8 | 17.4 |
+| **ACL** | **8.1** | 64.1 | 27.8 |
+| Medial Meniscus | 5.7 | 41.1 | 53.3 |
+
+(Baker's Cyst is absent from this table on a column-name mismatch, not a missing measurement.)
+
+**For MCL and ACL the objection fails, and it fails at the sharpest point.** They are the two labels with
+ZERO contested cells and they carry the LOWEST UNK rates of all eleven — 9.8% and 8.1%. Their reports
+overwhelmingly say something definite. MCL's 72.8% NO rate is the highest in the corpus: the reports
+address the medial collateral ligament and call it intact. The reader agreeing with that is agreeing
+with a real statement, not with a silence.
+
+**But the objection RELOCATES and lands harder somewhere the write-up above never named.** 84.2% of
+Synovitis and 56.4% of Fracture cells are UNK — 3,710 and 2,485 studies with no information on that
+finding at all. Over half the corpus carries nothing about fracture. That is a supervision hole far
+larger than the 4% contest rate this pilot was built to measure, and it is invisible to a contest, which
+can only score cells where the reader made a call.
+
+**And then it declines to explain our scores, which is the part worth keeping.** If missingness capped
+performance, the ordering would show it. It inverts:
+
+- **Synovitis has the worst supervision coverage in the corpus and scores 0.873** — mid-pack, above
+  seven other labels.
+- **MCL has the third-best coverage and scores 0.788–0.793** — the worst of the twelve.
+
+So the hole is real, it is much bigger than the contest rate, and it is **not** what bounds us. It also
+has a mechanism for why it costs less than it looks: under `--weight-floor` an UNK cell is not dropped —
+it trains at value 0.28, weight 0.2875, a soft negative. Synovitis's 13.2% positives are learnable
+against a quiet negative background, which is what a 0.873 on 84% missing data looks like.
+
+This does not make missingness harmless. It makes it a **ceiling question rather than a floor question**,
+and it is the one supervision axis this pilot did not price. Filed as its own bead rather than folded in
+here, because pricing it needs a different measurement than a re-read.
+
 ## What this does NOT say
 
 It does not say the labels are correct — 93% conformance to a rulebook is not 93% correctness, and
