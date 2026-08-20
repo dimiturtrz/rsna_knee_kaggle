@@ -8887,6 +8887,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.labels.targets.Supervision.trusted",
+      "target": "kneemri.labels.targets.Supervision.reliability",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.labels.targets.Targets",
       "target": "kneemri.labels.targets.Supervision",
@@ -8917,9 +8923,21 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.labels.targets.Targets.load",
+      "target": "kneemri.labels.targets.Supervision.trusted",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.labels.targets.Targets.pair",
       "target": "kneemri.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.labels.targets.Targets.pair",
+      "target": "kneemri.labels.targets.Supervision.moves_the_ruler",
       "weight": 1
     },
     {
@@ -18484,6 +18502,30 @@
       "descendants": 0,
       "id": "kneemri.labels.targets.Supervision.applied",
       "label": "applied",
+      "level": "method",
+      "parent": "kneemri.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.targets.Supervision.moves_the_ruler",
+      "label": "moves_the_ruler",
+      "level": "method",
+      "parent": "kneemri.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.targets.Supervision.reliability",
+      "label": "reliability",
+      "level": "method",
+      "parent": "kneemri.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.targets.Supervision.trusted",
+      "label": "trusted",
       "level": "method",
       "parent": "kneemri.labels.targets.Supervision",
       "role": null
