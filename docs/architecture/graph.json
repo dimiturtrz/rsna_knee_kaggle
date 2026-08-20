@@ -6915,6 +6915,12 @@
     {
       "kind": "references",
       "source": "kneemri.experiments.queue_check.QueuedArms",
+      "target": "kneemri.experiments.queue_check.Probe",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.queue_check.QueuedArms",
       "target": "kneemri.experiments.queue_check.Watch",
       "weight": 1
     },
@@ -12818,6 +12824,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.Probe",
+      "label": "Probe",
+      "level": "class",
+      "parent": "kneemri.experiments.queue_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms",
       "label": "QueuedArms",
       "level": "class",
@@ -17030,6 +17044,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.progress",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.Probe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.Probe",
       "role": null
     },
     {
