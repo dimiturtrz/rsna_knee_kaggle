@@ -1060,3 +1060,48 @@ not promoted.
 
 **Total against the original baseline: 0.925 → 0.930, +0.005 over six entries.** Unchanged by this entry,
 which is the point of writing it up as a tie.
+
+#### Slots 7 and 8 `crossenc` and `maxdiv` — pre-registered, fired against our own ruler
+
+**WRITTEN BEFORE THE SCORES.** Slot 6's conclusion was that *the mounted pool is exhausted as a source of
+board movement*: the largest seat move the pool contained (+0.0012, six times the runner-up over all 56
+same-split checkpoints) bought zero ticks. Every entry since `chosen_v2` has been the offline maximum over
+that pool, and the offline maximum has stopped paying. These two entries stop optimising the ruler and
+start testing it.
+
+**THE ONE THING THE RULER IS KNOWN TO BE WRONG ABOUT.** Collapsing three members into a single pixel group
+cost **0.0059** on the 909-study fold-0 holdout and **0.014** on the board — our own holdout under-prices
+DIVERSITY by 2.4x (knee-nas5, knee-7d1). Every offline number below is produced by that same biased ruler,
+so a small negative reading on a member whose value IS its diversity is not independent evidence against
+it; it is the bias, quoted.
+
+| entry | members | offline joint holdout | vs `longseat` 0.8691 | vs pin `greedy4_v1` 0.8679 |
+|---|---|---|---|---|
+| `crossenc` | `longseat` four + `dinov3_base_lora` | 0.8678 | −0.0013 | −0.0001 |
+| `maxdiv` | that five + `crop80_tissue` | 0.8668 | −0.0023 | −0.0011 |
+
+Both costs are inside the 0.0062 three-seed noise floor — a fifth and a third of it. `dinov3_base_lora` is
+the pool's only DINOv3-**base** member and the first non-DINOv2 checkpoint any entry has ever named; all
+seven scored entries are 100% DINOv2-small. `crop80_tissue` is the only member reading a different
+physical crop. The entries are **nested**, so their difference isolates the crop axis and `crossenc`
+isolates the encoder axis.
+
+**COUNT IS NOT THE VARIABLE.** Greedy forward selection over the seventeen mounted members reads
+0.8691 / 0.8692 / 0.8692 / 0.8691 at four / five / six / seven, flat to a seventh of the floor. Moving from
+four to six costs nothing by itself, so all of the −0.0023 is attributable to WHICH members, not HOW MANY.
+The FOUR MEMBERS principle in `champion.json` is untouched by these entries and is not what they test.
+
+**PRE-REGISTERED, REFUTATION FIRST.**
+- **≤0.929 on both** refutes the diversity-mispricing hypothesis at two doses and two axes at once, and is
+  the outcome these entries exist to make available. It would promote slot 6's "exhausted" from a claim
+  about MOVES to a claim about the POOL, close the DINOv3 line as a member source (four arms, never
+  shipped), and make every future entry greedy-optimal by rule.
+- **≥0.932 on either** says diversity is a board lever the offline ruler cannot see, and the roster's whole
+  selection procedure has been fitted to the wrong objective. The next card-time then goes to a second
+  encoder trained properly, not to another DINOv2 recipe.
+- **0.930–0.931 on both** is the reporting resolution around a tie and still buys something: it says a WEAK
+  member of a different family costs nothing, which is the argument for spending the card on a STRONG one.
+- **A split result attributes by nesting**: `crossenc` at/above 0.930 with `maxdiv` below 0.929 puts the
+  loss on `crop80_tissue` and leaves the encoder verdict intact; the reverse ordering isolates the encoder.
+
+**THE CHAMPION PIN DOES NOT MOVE ON EITHER RESULT UNLESS ONE CLEARS 0.930.** A tie does not dethrone.
