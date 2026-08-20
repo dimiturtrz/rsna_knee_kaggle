@@ -142,6 +142,34 @@ What the pilot DOES settle, and it is worth the 62k tokens it cost:
   those two questions and neither needs a better model to fix.
 - **The reader's multilingual residue is one sentence shape**, not a language deficit.
 
+## The one thing this DOES confirm: knee-dtk's split is real
+
+knee-dtk partitioned the twelve findings on 2026-08-14 by whether the REPORT or the MODEL is the weak
+part, using the 58 image-read annotations: label-bottlenecked = Effusion, Contusion, Synovitis, Medial
+OA, Fracture, Baker's (the model already beats its own labels there); model-bottlenecked = ACL, MCL,
+Medial Meniscus, Lateral Meniscus, Lateral OA, PF OA.
+
+The pilot never saw that partition. Its errors fall across it **3:1**:
+
+| half | contested | rate over its own 600 cells |
+|---|---|---|
+| label-bottlenecked | 36 / 48 (75%) | **6.0%** |
+| model-bottlenecked | 12 / 48 (25%) | **2.0%** |
+
+Two independent measurements — 58 studies read against IMAGES, 100 studies read against a RULEBOOK —
+agree on which six findings carry weak supervision. That is worth more than either alone, because
+neither could produce this by construction: knee-dtk's split cannot see rulebook conformance, and the
+pilot was never shown an AUC.
+
+It also sharpens the verdict rather than softening it. The label errors sit **exactly where a better
+reader would pay** — and the whole axis still prices at +0.006. knee-dtk's rule ("a better label reader
+pays HERE and nowhere else") is confirmed and simultaneously shown to be worth very little, because the
+label half's findings are the ones we already score well on.
+
+And the converse holds at the sharpest point: MCL and ACL are the two labels with ZERO contested cells,
+and both are in the model half. The partition and the pilot name the same two findings as pure vision
+problems.
+
 ## What this does NOT say
 
 It does not say the labels are correct — 93% conformance to a rulebook is not 93% correctness, and
