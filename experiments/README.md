@@ -287,6 +287,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
 | **`aug_long`** | the same intensity block on the 24-epoch schedule `band_dense_long` proved long enough to overfit — the setting the old row could not see | 0.8511 | **−0.0076 vs `band_dense_long`** | **refuted, both clauses literally** (peak epoch 9 ≤ 10, and 1.2x the floor below control). Flag verified in the recorded recipe: `intensity_aug False→True` with all 46 other keys identical. **And the refutation is the informative kind — the regulariser demonstrably FIRED and the overfitting did not care:** train loss higher at every epoch past 4 (0.463 vs 0.454 at the end), so the fit was made harder, while the peak-to-finish decline is **unchanged at −0.0169 against the control's −0.0182**. The peak did move late (6 → 9), which is the only part of the prediction that held, and it bought nothing. The predicted regional concentration is refuted too: focal −0.0084 vs regional −0.0067, both down, the diffuse group slightly LESS hurt. Seat value **+0.0007** as a fifth and **+0.0000** as a swap — no seat. See below |
+| **`aprior_dense`** | `--anatomical-prior`: `SlotHead.prior` initialised from the 12x6 plane-by-finding table in `kneemri/corpus/anatomy.py` at PRIOR_STRENGTH 2.0 instead of zeros — the mapping the head otherwise has to discover from study-level labels alone | 0.8557 | **−0.0021 vs `band_dense`** | **THE REFUTATION CLAUSE LANDED LITERALLY, AND IT IS THE ONE THAT NARROWS THE MOST.** Flag verified in the CHECKPOINT config: `anatomical_prior false→true`, with `slices 20`, `slice_pooling max`, `whole_stack true`, `pool cls_mean`, `backbone_lr 4e-05` identical to the control (the only other diff, `slice_regions` absent vs `1`, is the recorded default and not a variable). Both arms peak at **epoch 8** on the same twelve-epoch cycle, so the comparison is at matched schedule position and the −0.0021 is not a truncation artefact. The PREDICTION needed the peak to clear 0.8578 by more than the 0.0062 floor; it came in below the control. The THIRD OUTCOME needed the per-label pattern to separate along the table's own peaked/flat split, and it does not usefully: **peaked rows (MCL, both OA, PF OA, Synovitis) −0.0008 against flat rows −0.0033**, a 0.0025 separation which is under half the floor, and inside it the largest single mover is Synovitis at **−0.010** — an axial-weighted, PEAKED row moving the wrong way. **MECHANISM, and the training loss is what says it: the warm start washed out rather than failed to land.** Train loss tracks the control to the fourth decimal at every epoch (1.2117/1.2162 at e0, 0.6508/0.6529 at e8 — the arm slightly LOWER), so 72 numbers of initialisation on an `nn.Parameter` the data may overrule are gone by the time the fit matters. Cost was as predicted: parameters, shapes, VRAM (26.92 GB reserved / 24.93 GB allocated) and 368 s an epoch all identical to `band_dense`. Seat value **+0.0009** as a fifth member and **+0.0004** as the best swap (displacing `band_dense`), 0 of 1 clearing +0.0015 — no seat on either ruler. **CONSEQUENCE, written into the arm before it ran and now owed:** the head had ALREADY recovered the plane-by-finding mapping from study-level supervision alone, so "supervision never says where" is wrong about THIS head, and the localisation argument has to buy a real localisation signal (knee-mxj) rather than a warm start. Fourth consecutive knob on the decode/head family returning nothing (−0.0009, −0.0044, +0.0014, −0.0021); the second of the five never-run switches to be spent. See below |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
 | `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
 | `lora` v3small 224 | rank-8 adapters, base frozen | **0.8217** | **+0.0160 vs v3 fine-tuned** | **recipe was damaging v3** |
@@ -1114,3 +1115,82 @@ WHAT THIS DOES NOT KILL: augmentation of a KIND this repository does not have. E
 is intensity-space (gamma, blur, contrast, noise) — a photometric perturbation on a modality whose
 findings are geometric. Nothing has tested a geometric or slice-space perturbation, and the parallel
 curves are evidence about the surface that exists, not about the idea of regularisation.
+
+### `aprior_dense` — the head already knew where to look, so a warm start had nothing to teach it — 2026-08-20
+
+`SlotHead` gives every diagnosis its own softmax over the six acquisition slots and initialises
+`self.prior` at zeros, so which sequence shows which finding is something 4,407 study-level label
+vectors — carrying no localisation at all — have to teach it. `--anatomical-prior` initialises that same
+12x6 parameter from `kneemri/corpus/anatomy.py` instead, generated from two facts per finding (which
+planes show the structure, whether it needs fluid weighting) at PRIOR_STRENGTH 2.0. It stays an
+`nn.Parameter`, so the data can overrule it; every entry is non-negative, so it is a preference over
+slots and never a mask.
+
+**The flag landed and the arm is single-variable.** Verified in the checkpoint config rather than the
+recorded recipe: `anatomical_prior false→true`, with `slices 20`, `slice_pooling max`, `whole_stack
+true`, `pool cls_mean` and `backbone_lr 4e-05` identical to `band_dense`. The one other config
+difference is `slice_regions` absent from the control's record against `1` in this one — that is the
+`StudyDesign` default arriving in the manifest, not a behaviour change.
+
+**Both arms peak at epoch 8**, on the same twelve-epoch one-cycle, which makes this a matched read
+rather than a comparison of two different points on two different schedules:
+
+| epoch | 5 | 6 | 7 | **8** | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|
+| `band_dense` | 0.8540 | 0.8550 | 0.8554 | **0.8578** | 0.8572 | 0.8556 | 0.8554 |
+| `aprior_dense` | 0.8490 | 0.8541 | 0.8532 | **0.8557** | 0.8526 | 0.8529 | 0.8525 |
+
+**Which clause fired.** The prediction required the peak to clear 0.8578 by more than the 0.0062 floor;
+it came in 0.0021 below the control. That is the REFUTATION clause, literally. The third outcome — mean
+flat but the per-label pattern moving along the table's peaked/flat split — is the one worth checking
+carefully, because it would have said the prior does what it claims while the ceiling sits elsewhere.
+At matched epoch 8:
+
+| row | control | arm | delta | prior row |
+|---|---|---|---|---|
+| MCL | 0.793 | 0.796 | +0.003 | PEAKED (coronal alone) |
+| Medial OA | 0.880 | 0.879 | −0.001 | PEAKED |
+| Lateral OA | 0.816 | 0.820 | +0.004 | PEAKED |
+| PF OA | 0.858 | 0.858 | +0.000 | PEAKED |
+| Synovitis | 0.876 | 0.866 | **−0.010** | PEAKED |
+| ACL | 0.874 | 0.877 | +0.003 | flat |
+| Medial Meniscus | 0.905 | 0.901 | −0.004 | flat |
+| Lateral Meniscus | 0.846 | 0.851 | +0.005 | flat |
+| Effusion | 0.860 | 0.853 | −0.007 | flat |
+| Baker's | 0.907 | 0.908 | +0.001 | flat |
+| Contusion | 0.871 | 0.863 | −0.008 | flat |
+| Fracture | 0.809 | 0.796 | −0.013 | flat |
+
+**peaked −0.0008, flat −0.0033.** The split is in the predicted direction and it is 0.0025 wide, under
+half the holdout floor, so it does not carry the third outcome; and the single largest mover in the
+whole table is Synovitis at −0.010, a PEAKED, axial-weighted row going the wrong way. Reading a 0.0025
+group separation as the mechanism working would be exactly the number-watching the earlier rows in this
+ledger were corrected for.
+
+**MECHANISM: the warm start washed out, and it did not merely fail to land.** Those are different
+failures and the training loss separates them. If the prior had never taken effect, the two runs would
+be identical; if it had fought the data, the arm's loss would sit above the control's. Neither happened —
+the losses track to the fourth decimal at every epoch (1.2117/1.2162 at e0, 0.7518/0.7524 at e6,
+0.6508/0.6529 at e8, with the ARM slightly lower), so the 72 numbers were absorbed and then overwritten
+by gradients that had already been finding the same structure. `landed.py` asserts the parameter was
+constructed and `switch_coverage` smokes it to a written checkpoint, so the plumbing was never the
+question here; the science was, and it answered.
+
+**Cost was exactly as the arm predicted, which is worth recording because it is the one clause that
+held.** 26.92 GB reserved / 24.93 GB allocated and 368 s an epoch, byte-identical to `band_dense`. A
+warm start on an existing parameter is free, and it bought nothing.
+
+**Seat value: +0.0009 as a fifth member, +0.0004 as the best swap** (it would displace `band_dense`,
+the member it is a variant of, which is the shape a low-diversity candidate makes). 0 of 1 clears the
++0.0015 the board ruler has ever been shown to resolve. No seat on either ruler.
+
+**CONSEQUENCE, and the arm pre-registered it so it is owed rather than invented.** The refutation branch
+says: the head had already recovered the plane-by-finding mapping from study-level supervision alone.
+"Supervision never says where" is wrong about THIS head. That retires the warm-start form of the
+localisation argument and hands the axis to a real localisation signal — knee-mxj — which is a different
+bead and a different kind of input, not another initialisation of an existing parameter.
+
+It is also the fourth consecutive knob on the decode/head family to return nothing: `attend_dense`
+−0.0009 (operator), `focal_dense` −0.0044 (pooled width), `band_density` +0.0014 (slice count at fixed
+span), `aprior_dense` −0.0021 (head initialisation). Four independent levers on one subsystem, none
+clearing a seventh of the floor, is evidence about the subsystem rather than about any of the four.
