@@ -68,6 +68,9 @@ NOT_A_SWITCH = {
     "encoder_weights": "an INITIALISATION that cannot land silently: `PretrainedEncoder.into` raises on a "
     "variant mismatch and on any key the target does not name, so a load that did nothing is an exception "
     "rather than a control's score reported under the arm's name",
+    "encoder_adapt_depth": "how much of `encoder_weights` is taken, so it is the same INITIALISATION "
+    "written off above rather than a second behaviour — and it is equally loud: the loader reports how "
+    "many tensors it left stock, and a depth past the last block simply loads everything",
 }
 """Every `TrainingOptions` field this check does NOT compare, each with WHY — a decision record.
 

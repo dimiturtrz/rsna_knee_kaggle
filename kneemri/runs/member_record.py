@@ -55,6 +55,8 @@ NOT_IN_CONFIG = {
     "report_vectors": "the report head is ALWAYS built, so no rebuild can ask whether it was trained",
     "encoder_weights": "where the encoder STARTED, which the fitted weights have already absorbed — a "
     "rebuild loads this member, not the initialisation it grew out of",
+    "encoder_adapt_depth": "how much of that starting point was taken — a fact about the run's history, "
+    "not about the function these weights are, and a rebuild loads the fitted encoder whole",
 }
 """Every run setting the config does NOT carry, each with WHY — a decision record.
 
