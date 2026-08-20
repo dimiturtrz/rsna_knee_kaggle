@@ -1142,3 +1142,45 @@ monotonicity here is what makes it answerable rather than idle, because it says 
 quality faithfully enough to reward it.
 
 **The champion pin does not move.** `greedy4_v1` at 0.930 stands.
+
+#### Slot 9 `basedense` — a STRONG member of a different encoder, and the un-confounding of count from quality
+
+**WRITTEN BEFORE THE SCORE, AND AFTER SLOTS 7 AND 8 HAD RETURNED.** `longseat`'s four plus
+`base_dense_s2026` — DINOv2-**base**, 768 wide against small's 384 — as a fifth. Same RankAverage vote,
+same `overlap=False`, same four incumbents, so this is a one-member delta off a known 0.930.
+
+| entry | members | offline | board |
+|---|---|---|---|
+| `longseat` | 4 strong | 0.8691 | 0.930 |
+| `crossenc` | 5 (weak fifth, 0.8268) | 0.8678 | 0.926 |
+| `maxdiv` | 6 (weak fifth + weak sixth, 0.8345) | 0.8668 | 0.925 |
+| **`basedense`** | **5 (strong fifth, 0.8512)** | **0.8690** | ? |
+
+**THE CONFOUND THIS ENTRY EXISTS TO BREAK.** Every entry that has ever scored at/above 0.927 named FOUR
+members. The only two entries with five and six members are the two that just lost four and five ticks —
+and both of them added members that are individually WEAK. So *member count* and *member quality* are
+perfectly confounded in everything this board has told us. This entry holds the count at five and moves
+the quality: 0.8512 against 0.8268, taken **seventh** by greedy forward selection over eighteen members
+where `dinov3_base_lora` is taken sixteenth, and sitting inside the flat top of the greedy curve
+(0.8691 / 0.8692 / 0.8692 / 0.8692 at four through seven).
+
+**THE PREDICTION IS A TIE AND IT IS STATED AS ONE.** Under the rule slots 7 and 8 just established — the
+holdout ranks correctly and multiplies harm by about three — this entry's −0.0001 offline reading predicts
+about −0.0003 on the board, which is under the resolution. Nothing in the mounted pool clears the +0.0015
+the board actually resolves; the greedy ceiling over all eighteen members is 0.8692 against the incumbent
+0.8691. **This is the last recombination that answers a question rather than re-shuffles**, and it is
+fired for the answer, not for the tick.
+
+- **0.930–0.931 (expected)** separates quality from count: a strong fifth holds the board where a weak
+  fifth drops it four ticks. Adding members is then not intrinsically priced, and DINOv2-base at effective
+  batch 12 becomes the next thing worth card-time.
+- **0.932 or above** says encoder capacity is a board lever this holdout cannot see, and the roster has
+  been selected against the wrong objective.
+- **0.929 or below** says a fifth member is priced regardless of quality, which retires ADDING entirely
+  and leaves only swaps and new recipes — the strongest possible closure of the recombination line.
+- **THE CONFOUND, NAMED FIRST.** This member trained at `--batch 6` (336 px × 20 slices × 768 wide does
+  not fit in 32 GB at 12). `batch_teardown` is on the card measuring `band_dense`'s recipe at batch 6 and
+  at batch 6 with `--accumulate 2`. If batch 6 costs materially on its own, a 0.929-or-below reading here
+  is a batch verdict, not an encoder verdict.
+
+**The champion pin does not move unless this clears 0.930.**
