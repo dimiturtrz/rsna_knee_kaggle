@@ -1007,3 +1007,52 @@ which is a statement about where the encoder is wrong for this domain — the sa
 (unlabelled adaptation of the encoder) attacks from the other side, and a cheaper adaptation that keeps
 depth (LoRA on all twelve rather than full fine-tuning on four) is untested and is not covered by this
 result.
+
+### `band_dense_long` — the schedule question is refuted and the checkpoint is still the best seat move on the card — 2026-08-20
+
+`band_dense` is a member of the shipped roster and it was fitted on the twelve-epoch OneCycle every arm
+in this ledger uses. The arm asked one thing: does the same recipe at **24 epochs** score higher, i.e. is
+the schedule a bound on the band members? Flag verified in the recorded recipe — `epochs 24`, everything
+else identical to `band_dense` (`slices 20`, band `0.1–0.9`, `backbone_lr 4e-05`, `slice_pooling max`,
+`whole_stack True`, `intensity_aug False`).
+
+**Pre-registered clause:** peak at epoch 16–20 confirms the long regimen; a peak still near 8 is scatter
+on the same trajectory. **It peaked at epoch 6 (0.8587) and never beat it in eighteen more epochs**, with
+a near-tie at epoch 9 (0.8581) and then a monotone slide to 0.8405 at epoch 23 while the training loss
+halved from 0.85 to 0.4536. That is the SCATTER limb, and stronger than the clause asked for: not a peak
+that failed to move late, but a decline of **0.0182 from peak to finish, 2.9x the 0.0062 floor**, which is
+memorisation rather than a schedule that wanted more room. **The long regimen is refuted for this recipe.**
+
+Against its matched control `band_dense` (0.8578) the peak is **+0.0009**, a seventh of the floor —
+directional at best, and the honest reading is that eighteen extra epochs bought a different draw of the
+same number.
+
+AND THE SEAT RULER DISAGREES WITH ALL OF THAT. Priced against `comp/champion.json`'s `greedy4_v1` roster:
+
+| ruler | reading |
+|---|---|
+| matched control | +0.0009 over `band_dense` — inside the floor |
+| its own curve | peak at 6 of 24, −0.0182 to the end — question refuted |
+| seat value | **+0.0012**, displacing `band_span`; best-four goes 0.8679 → 0.8691 |
+| as a fifth member | +0.0012 (0.8692), which the FOUR MEMBERS principle forbids |
+
+**+0.0012 is six times the best move the mounted pool had an hour ago** (+0.0002, `attend_dense`), and it
+comes from an arm whose own question failed. This is the `calib_span` principle again — a member's control
+and its seat are different quantities — but sharper: there the member merely lost its control, here the
+arm's PREMISE was refuted and the artefact it dropped out is still the largest available improvement to
+the champion. A run that answers "no" still produces a checkpoint, and the checkpoint is not bound by the
+answer.
+
+It also names `band_span` as the displaced incumbent for the third candidate running, which is now a
+finding about the roster rather than about any one candidate: `band_span` is the champion's weakest seat
+and everything positive in the pool is competing for it.
+
+**+0.0012 is still a fifth of the noise floor** and a fiftieth of knee-jk3's 0.054 frontier gap. It is a
+seat move worth holding for the next entry, not a result.
+
+WHAT THIS DOES NOT KILL: the long schedule anywhere else. What is refuted is 24 epochs on THIS recipe,
+which is exactly the setting `aug_long` was written to change — a regulariser that has no room to pay in
+twelve epochs, tested on the schedule this arm just proved is long enough to overfit without one. The
+decline measured here (0.0182) is nearly three times the whole gap `intensity_augment` originally lost by,
+which is the quantitative form of the argument that the old twelve-epoch refutation could not see this
+axis. `aug_long` launched on this arm's completion marker.
