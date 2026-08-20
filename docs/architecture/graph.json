@@ -6763,6 +6763,54 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.experiments.stale_gap.StaleGaps",
+      "target": "kneemri.experiments.stale_gap.StaleRun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.stale_gap.StaleGaps.lines",
+      "target": "kneemri.experiments.stale_gap.StaleGaps.runs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.stale_gap.StaleGaps.lines",
+      "target": "kneemri.experiments.stale_gap.StaleGaps.saving",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.stale_gap.StaleGaps.runs",
+      "target": "kneemri.experiments.stale_gap.StaleRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.stale_gap.StaleGaps.saving",
+      "target": "kneemri.experiments.stale_gap.StaleGaps.runs",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.stale_gap.StaleRun",
+      "target": "kneemri.experiments.stale_gap.StaleRun",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.stale_gap.main",
+      "target": "kneemri.experiments.stale_gap.StaleGaps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.stale_gap.main",
+      "target": "kneemri.experiments.stale_gap.StaleGaps.lines",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.switch_coverage.SwitchCoverage.invocations",
       "target": "kneemri.experiments.switch_coverage.SwitchCoverage.labels",
@@ -10455,7 +10503,7 @@
       "role": null
     },
     {
-      "descendants": 117,
+      "descendants": 118,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -10863,7 +10911,7 @@
       "role": null
     },
     {
-      "descendants": 4,
+      "descendants": 5,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -10890,6 +10938,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.ledger_check",
       "label": "ledger_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap",
+      "label": "stale_gap",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -12261,6 +12317,22 @@
       "level": "class",
       "parent": "kneemri.experiments.ledger_check",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleGaps",
+      "label": "StaleGaps",
+      "level": "class",
+      "parent": "kneemri.experiments.stale_gap",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleRun",
+      "label": "StaleRun",
+      "level": "class",
+      "parent": "kneemri.experiments.stale_gap",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -16348,6 +16420,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.ledger_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleGaps.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleGaps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleGaps.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleGaps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleGaps.runs",
+      "label": "runs",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleGaps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleGaps.saving",
+      "label": "saving",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleGaps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleRun._scores",
+      "label": "_scores",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleRun._survived",
+      "label": "_survived",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.StaleRun.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap.StaleRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.stale_gap.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.stale_gap",
       "role": null
     },
     {

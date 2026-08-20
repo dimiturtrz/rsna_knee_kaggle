@@ -6,6 +6,15 @@ whole-stack arm has this shape (wsfold0, res392, sliceattn, slices16, extended_w
 6 of 12). Because the run keeps its BEST epoch's weights, those five epochs produce checkpoints that
 are thrown away: roughly nineteen minutes an arm, about 42% of its wall-clock.
 
+THAT 42% IS THE WASTE, NOT THE PRIZE, and the difference is most of it. Measured 2026-08-20 over all
+54 metrics files by `kneemri.experiments.stale_gap`: the longest non-improving stall any run RECOVERED
+from is 3 epochs (`lora_r8_v3small_224`), so the smallest value that never truncates a run that was
+about to improve is 4 — and a stopper has to sit through its own patience before it fires. At 4, the
+corpus gives back 36 of its 157 discarded epochs, **23% of the waste**, because a twelve-epoch arm
+that peaks at 6 wastes five and four of those five are spent waiting. The saving is concentrated in
+the three LONG runs (21, 18, 16 epochs), which are exactly the arms asking a question about the tail,
+where stopping deletes the measurement. Real, small, and pointed at the arms that can least use it.
+
 THIS IS NOT "RUN FEWER EPOCHS", which is a different and worse change. OneCycle is defined over
 `total_steps`, so asking for eight epochs COMPRESSES the whole schedule rather than truncating it —
 measured head to head the eight-epoch cycle leads early (0.7510 against 0.7393 at epoch 0) and trails
