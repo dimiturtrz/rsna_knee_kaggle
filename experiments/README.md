@@ -286,6 +286,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`unfreeze_4`** | four of the encoder's twelve blocks adapt instead of six — the +25% throughput arm, run at length | 0.8320 | −0.0137 vs `wsfold0_e6` | **refuted**, 2.2x the floor, flag verified (`unfreeze_last 6→4`). Peaked at epoch 6 and flat for five epochs after, so it is converged, not short. Eleven of twelve labels negative, six clearing their interval; by structure scale **focal −0.0170 vs regional −0.0091**, which is the arm's own stated risk — the fine findings are the ones that needed the deeper blocks. Seat value **−0.0017**, so diversity does not rescue it either. The default stays six; the speed was real and is not worth 0.0137. See below |
 | `extended_slots` | nine slots, +1,139 coronal series | 0.8459 | +0.0002 | **refuted** on the mean |
 | `intensity_augment` | gamma/blur/contrast/noise at 392 | 0.8459 | −0.0064 vs res392 | **refuted**, behind at every epoch |
+| **`aug_long`** | the same intensity block on the 24-epoch schedule `band_dense_long` proved long enough to overfit — the setting the old row could not see | 0.8511 | **−0.0076 vs `band_dense_long`** | **refuted, both clauses literally** (peak epoch 9 ≤ 10, and 1.2x the floor below control). Flag verified in the recorded recipe: `intensity_aug False→True` with all 46 other keys identical. **And the refutation is the informative kind — the regulariser demonstrably FIRED and the overfitting did not care:** train loss higher at every epoch past 4 (0.463 vs 0.454 at the end), so the fit was made harder, while the peak-to-finish decline is **unchanged at −0.0169 against the control's −0.0182**. The peak did move late (6 → 9), which is the only part of the prediction that held, and it bought nothing. The predicted regional concentration is refuted too: focal −0.0084 vs regional −0.0067, both down, the diffuse group slightly LESS hurt. Seat value **+0.0007** as a fifth and **+0.0000** as a swap — no seat. See below |
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
 | `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
 | `lora` v3small 224 | rank-8 adapters, base frozen | **0.8217** | **+0.0160 vs v3 fine-tuned** | **recipe was damaging v3** |
@@ -1056,3 +1057,60 @@ twelve epochs, tested on the schedule this arm just proved is long enough to ove
 decline measured here (0.0182) is nearly three times the whole gap `intensity_augment` originally lost by,
 which is the quantitative form of the argument that the old twelve-epoch refutation could not see this
 axis. `aug_long` launched on this arm's completion marker.
+
+### `aug_long` — the regulariser fired, the overfitting did not care, and that is worth more than the number — 2026-08-20
+
+The arm asked whether the intensity block changes the SHAPE of the long curve, on the schedule
+`band_dense_long` had just proved long enough to overfit. Single variable, verified in the recorded
+recipe by diffing the two headers key by key: `intensity_aug False→True`, and all forty-six other keys
+identical (`epochs 24`, `slices 20`, band `0.1–0.9`, `backbone_lr 4e-05`, `head_lr 0.001`,
+`slice_pooling max`, `whole_stack True`, `batch 12`, same cache).
+
+**Both halves of the refutation clause fire literally.** It required the peak epoch still at or below 10
+AND the peak mean more than 0.0062 below control. **Peak epoch 9, peak mean 0.8511 against 0.8587 —
+−0.0076, 1.2x the floor.** Paired against its control, MEAN −0.0077 with three labels past their own
+95% interval and all three DOWN (MCL −0.0270, Baker's −0.0219, Lateral OA −0.0202); nothing rose past
+its interval.
+
+**THE PART THAT IS EVIDENCE RATHER THAN A VERDICT.** Before reading this as "augmentation doesn't work",
+check the flag actually did something — and it did, mechanically and visibly. `aug_long`'s training loss
+is higher than the control's at every epoch from 4 onward and finishes at 0.4633 against 0.4536: the
+perturbation made the fit measurably harder, which is exactly what a regulariser is supposed to do. What
+it did NOT do is change the decline:
+
+| | control `band_dense_long` | `aug_long` |
+|---|---|---|
+| peak | **0.8587** at epoch 6 | 0.8511 at epoch 9 |
+| epoch 23 | 0.8405 | 0.8342 |
+| peak → finish | **−0.0182** | **−0.0169** |
+| final train loss | 0.4536 | 0.4633 |
+
+The two curves are near-PARALLEL from epoch 5 on, `aug_long` sitting 0.006–0.008 under the control the
+whole way. So the arm's premise — that the tail decline is memorisation, and that perturbing the input is
+the cheapest thing here that makes memorising harder — is half confirmed and half refuted in the most
+useful possible way: **the input perturbation landed, and the decline did not move.** Whatever the tail
+decline is, it is not the kind of overfitting an input-space regulariser prevents.
+
+The one part of the PREDICTION that held is the peak epoch, 6 → 9, three epochs later. It bought nothing.
+The predicted concentration is refuted outright: gains were to land in the regional group, and by
+structure scale it went focal −0.0084, regional −0.0067 — both down, the diffuse group very slightly less
+hurt, which is not the shape argued for.
+
+**Seat value: +0.0007 as a fifth member, +0.0000 as the best swap.** Below the 0.0015 the board ruler has
+ever been shown to resolve, so unlike `band_dense_long` this checkpoint does not rescue itself on the
+second ruler either. Both rulers agree, which they have not always done here.
+
+**CONSEQUENCE, and it points somewhere specific.** The arm's own third outcome (peak moves late AND curve
+flattens AND mean does not rise) did not occur — the curve did not flatten — so this is not that branch.
+But the branch it IS on carries the same instruction more strongly: the third outcome would have said
+"the regulariser works and supervision is the bound"; what actually happened is that the regulariser
+worked *on the training loss* and the holdout decline was untouched, which rules out input perturbation
+as the lever without needing the flattening to argue it. The next arm on this axis should not be another
+input perturbation. `intensity_augment` is now refuted at twelve epochs AND at twenty-four, at two
+operating points, on the mean and on the curve shape — which retires augmentation on this corpus rather
+than on any one schedule, and is the strongest form the original row could have been given.
+
+WHAT THIS DOES NOT KILL: augmentation of a KIND this repository does not have. Everything measured here
+is intensity-space (gamma, blur, contrast, noise) — a photometric perturbation on a modality whose
+findings are geometric. Nothing has tested a geometric or slice-space perturbation, and the parallel
+curves are evidence about the surface that exists, not about the idea of regularisation.
