@@ -9,6 +9,7 @@ from kneemri.labels.targets import (
     ANNOTATED_WEIGHT,
     CALIBRATED,
     CONFIDENCE_FLOOR,
+    SEVERITY_WEIGHT,
     WEIGHT_FLOOR,
     Supervision,
     Targets,
@@ -84,8 +85,12 @@ def test_supervised(tmp_path: Path):
 
     loaded = Targets.load(derived_path, annotated_path, ["a", "b", "c"], supervision)
 
-    assert loaded.supervised() == {WEIGHT_FLOOR: CONFIDENCE_FLOOR, CALIBRATED: True}
-    assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {WEIGHT_FLOOR: 0.0, CALIBRATED: False}
+    assert loaded.supervised() == {WEIGHT_FLOOR: CONFIDENCE_FLOOR, CALIBRATED: True, SEVERITY_WEIGHT: False}
+    assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {
+        WEIGHT_FLOOR: 0.0,
+        CALIBRATED: False,
+        SEVERITY_WEIGHT: False,
+    }
 
 
 def test_pair(tmp_path: Path):
@@ -133,6 +138,68 @@ def test_applied():
     assert applied[5] == pytest.approx(0.5), "a value the reader never emits passes through"
     assert np.isnan(applied[6]), "a missing cell stays missing rather than becoming a rate"
     assert value[0] == pytest.approx(0.08), "the input must not be mutated"
+
+
+def test_reliability():
+    """A denial is graded on being right about ABSENCE, so its rate is read from the other side.
+
+    Derived from the same table `applied` spends on the value, which is the point: one measurement, two
+    uses, and no second copy of the numbers to fall out of date.
+    """
+    reliability = dict(Supervision().reliability())
+
+    assert reliability[0.08] == pytest.approx(1.0 - 0.041), "a NO is right when the finding is absent"
+    assert reliability[0.68] == pytest.approx(0.378)
+    assert reliability[0.82] == pytest.approx(0.688)
+    assert reliability[0.94] == pytest.approx(0.958)
+    assert 0.28 not in reliability, "the level that asserts nothing has no hit rate to compute"
+
+
+def test_trusted():
+    """Severity sets the weight; without the switch the reader's own confidence is untouched."""
+    value = np.array([0.08, 0.28, 0.68, 0.82, 0.94, 0.5], dtype=np.float32)
+    confidence = np.full(6, 0.95, dtype=np.float64)
+
+    graded = Supervision(severity=True).trusted(value, confidence)
+
+    assert graded.tolist() == pytest.approx([0.959, 0.95, 0.378, 0.688, 0.958, 0.95], abs=1e-6)
+    assert graded[2] < graded[3] < graded[4], "the three YES grades must separate, which is the mechanism"
+    assert confidence[2] == pytest.approx(0.95), "the input must not be mutated"
+    assert Supervision().trusted(value, confidence).tolist() == pytest.approx(confidence.tolist())
+
+
+def test_moves_the_ruler():
+    """Either label switch forces the holdout to be re-read plain; a floor alone does not."""
+    assert not Supervision().moves_the_ruler()
+    assert not Supervision(floor=CONFIDENCE_FLOOR).moves_the_ruler(), "applied identically to arm and control"
+    assert Supervision(calibrated=True).moves_the_ruler()
+    assert Supervision(severity=True).moves_the_ruler()
+
+
+def test_load_grades_the_weight_without_moving_the_target(tmp_path: Path):
+    """The whole mechanism in one assertion: same scores, three different weights where there was one."""
+    labels, train_table = _levelled(tmp_path)
+    identifiers = ["a", "b", "c"]
+
+    graded = Targets.load(labels, train_table, identifiers, Supervision(floor=CONFIDENCE_FLOOR, severity=True))
+    control = Targets.load(labels, train_table, identifiers, Supervision(floor=CONFIDENCE_FLOOR))
+
+    assert graded.scores.tolist() == control.scores.tolist(), "values are untouched — this is not a calibration"
+    assert control.weights[0, 0] == pytest.approx(control.weights[2, 0]), "mild and severe pull alike today"
+    assert graded.weights[0, 0] == pytest.approx(0.25 + 0.75 * 0.378, abs=1e-6)
+    assert graded.weights[2, 0] == pytest.approx(0.25 + 0.75 * 0.958, abs=1e-6)
+    assert graded.weights[0, 0] < graded.weights[1, 0] < graded.weights[2, 0]
+
+
+def test_pair_leaves_the_ruler_ungraded(tmp_path: Path):
+    """Grading the ruler too would change which holdout cells count, so the arm must not touch it."""
+    labels, train_table = _levelled(tmp_path)
+
+    training, ruler = Targets.pair(labels, None, train_table, ["a", "b", "c"], Supervision(severity=True))
+
+    assert training is not ruler, "one object for both would grade the holdout with the targets"
+    assert training.weights[0, 0] == pytest.approx(0.378), "the training table carries the graded weight"
+    assert ruler.weights[0, 0] == pytest.approx(0.95), "the ruler keeps the reader's own confidence"
 
 
 def test_pair_leaves_the_ruler_uncalibrated(tmp_path: Path):

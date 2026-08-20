@@ -46,6 +46,7 @@ NOT_IN_CONFIG = {
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
+    "severity_weight": "supervision policy, same — it grades the loss weight and leaves the head alone",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",

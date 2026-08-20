@@ -58,6 +58,7 @@ class TrainingOptions:
     normalise_by_count: bool = False
     per_label_loss: bool = False
     calibrated_targets: bool = False
+    severity_weight: bool = False
     rank_weight: float = 0.0
     pair_memory: int = 0
     whole_stack: bool = False
@@ -147,6 +148,7 @@ class TrainingOptions:
         return Supervision(
             floor=CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             calibrated=self.calibrated_targets,
+            severity=self.severity_weight,
         )
 
     @classmethod
@@ -295,6 +297,13 @@ class TrainingOptions:
         parser.add_argument("--intensity-aug", action="store_true", help="gamma/blur/contrast/noise too")
         parser.add_argument("--weight-floor", action="store_true", help="an unmentioned finding pulls at 0.25")
         parser.add_argument("--normalise-by-count", action="store_true", help="loss .mean() not /weight-sum")
+        parser.add_argument(
+            "--severity-weight",
+            action="store_true",
+            help="a cell pulls at how often its GRADE was confirmed against the image annotations "
+            "(0.378 mild / 0.688 moderate / 0.958 severe) rather than at the reader's __conf, which is "
+            "0.95 on all three. Values are untouched — this is the weight, not the target.",
+        )
         parser.add_argument(
             "--per-label-loss",
             action="store_true",

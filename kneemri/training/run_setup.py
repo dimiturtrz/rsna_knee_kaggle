@@ -84,6 +84,7 @@ class RunSetup:
             intensity_aug=options.intensity_aug,
             weight_floor=options.weight_floor,
             calibrated_targets=options.calibrated_targets,
+            severity_weight=options.severity_weight,
             unfreeze_last=options.unfreeze_last,
         )
 

@@ -46,9 +46,17 @@ ANNOTATED_WEIGHT = 3.0
 """Image-read annotations outweigh any derived row: they are the only labels read from the pixels rather
 than from text, and there are 58 of them."""
 
+ASSERTS_PRESENCE = 0.5
+"""Which side of this a level sits on decides what agreeing with it MEANS. A 0.94 cell is right when the
+radiologist finds the thing; a 0.08 cell is right when they do not."""
+
+UNCERTAIN_LEVEL = 0.28
+"""The one level that asserts nothing, so it has no reliability to compute — see `Supervision.trusted`."""
+
 WEIGHT_FLOOR = "weight_floor"
 CALIBRATED = "calibrated_targets"
-"""The two label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+SEVERITY_WEIGHT = "severity_weight"
+"""The three label switches, named where the object that answers for them lives. See `Targets.supervised`."""
 
 
 @dataclass(frozen=True)
@@ -83,7 +91,56 @@ class Supervision:
     calibrated: bool = False
     """Whether to replace each level with the rate it was measured at."""
 
+    severity: bool = False
+    """Whether a cell's WEIGHT comes from the grade the reader assigned rather than its `__conf`."""
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
+
+    def moves_the_ruler(self) -> bool:
+        """Whether this supervision would also change the table an arm is SCORED against.
+
+        Both switches do, by different routes — a calibration moves the VALUES a holdout AUC ranks
+        against, a severity weight moves which cells the holdout counts and how much. Either way the
+        ruler has to be re-read plain or the arm earns credit for the labels agreeing with themselves.
+        The floor alone does not: it is applied identically to every arm and the control.
+        """
+        return self.calibrated or self.severity
+
+    def reliability(self) -> tuple[tuple[float, float], ...]:
+        """Each asserting level beside how often that assertion held, which is not the same as its rate.
+
+        A 0.68 cell claims the finding is THERE and was right 37.8% of the time; a 0.08 cell claims it is
+        ABSENT and was right 95.9% of the time — the same table read from the other side. Derived from
+        `measured` rather than typed out again so the two cannot drift apart.
+
+        0.28 is dropped rather than mapped: it asserts neither side, so there is nothing for a
+        radiologist to have agreed WITH, and its 0.136 is a base rate rather than a hit rate. Those cells
+        keep the near-zero `__conf` the reader already gives them.
+        """
+        return tuple(
+            (level, rate if level > ASSERTS_PRESENCE else 1.0 - rate)
+            for level, rate in self.measured
+            if not np.isclose(level, UNCERTAIN_LEVEL)
+        )
+
+    def trusted(self, value: NDArray[np.float32], confidence: NDArray[np.float64]) -> NDArray[np.float64]:
+        """How hard each cell pulls, BEFORE the floor is applied.
+
+        WHY THE READER'S OWN COLUMN CANNOT ANSWER THIS: `__conf` is constant per verdict — 0.95 on all
+        52,872 populated cells at every one of the three YES grades — so mild, moderate and severe train
+        at identical weight today. The grade is per-study information the loss currently discards, and
+        the annotations say it separates: 0.378 / 0.688 / 0.958, three intervals that do not overlap.
+
+        DISTINCT FROM `applied`, which is the same table spent on the VALUE and lost 0.0020 as
+        `calib_span`. That moved 6,461 mild cells across 0.5 and inverted their sign; this leaves every
+        target where it is and only decides how loudly it speaks.
+        """
+        if not self.severity:
+            return confidence
+        trusted = confidence.copy()
+        for level, rate in self.reliability():
+            trusted[np.isclose(value, level)] = rate
+        return trusted
 
     def applied(self, value: NDArray[np.float32]) -> NDArray[np.float32]:
         """Each level replaced by what it was measured to be worth; anything else left alone.
@@ -130,7 +187,11 @@ class Targets:
         property of the sample. A stored value that a smoke cannot false-positive on is worth more here
         than a derivation that can.
         """
-        return {WEIGHT_FLOOR: self.supervision.floor, CALIBRATED: self.supervision.calibrated}
+        return {
+            WEIGHT_FLOOR: self.supervision.floor,
+            CALIBRATED: self.supervision.calibrated,
+            SEVERITY_WEIGHT: self.supervision.severity,
+        }
 
     @classmethod
     def load(
@@ -166,10 +227,15 @@ class Targets:
                 # confident": the reader either does not report confidence at all, or reported none
                 # for this row. Neither is evidence of doubt.
                 raw = derived[confidence].to_numpy(dtype=np.float64) if confidence in derived.columns else ones
+                # READ OFF THE LEVEL THE READER WROTE, which is why this precedes `applied`: a
+                # calibration rewrites 0.68 to 0.378 in place, and a grade looked up afterwards would
+                # match nothing and silently fall back to `__conf`. The two switches compose only in
+                # this order.
+                trust = supervision.trusted(value, np.nan_to_num(raw, nan=1.0))
                 value = supervision.applied(value)
                 said = ~np.isnan(value)
                 scores[said, column] = value[said]
-                weights[said, column] = floor + (1.0 - floor) * np.nan_to_num(raw, nan=1.0)[said]
+                weights[said, column] = floor + (1.0 - floor) * trust[said]
             if target in annotated.columns:
                 truth = annotated[target].to_numpy(dtype=np.float32)
                 read = ~np.isnan(truth)
@@ -203,7 +269,7 @@ class Targets:
         training = cls.load(labels, train_table, identifiers, supervision)
         if eval_labels is None:
             plain = Supervision(floor=supervision.floor)
-            ruler = cls.load(labels, train_table, identifiers, plain) if supervision.calibrated else training
+            ruler = cls.load(labels, train_table, identifiers, plain) if supervision.moves_the_ruler() else training
             return training, ruler
         return training, cls.load(eval_labels, train_table, identifiers)
 

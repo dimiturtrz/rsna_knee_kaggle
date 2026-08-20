@@ -23,7 +23,7 @@ from dataclasses import dataclass
 import torch
 
 from kneemri.corpus.slot_reader import GROUP
-from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Targets
+from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT, WEIGHT_FLOOR, Targets
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
@@ -148,6 +148,7 @@ class Request:
     intensity_aug: bool
     weight_floor: bool
     calibrated_targets: bool
+    severity_weight: bool
     unfreeze_last: int
 
     def wanted(self) -> dict[str, object]:
@@ -185,5 +186,6 @@ class Request:
             INTENSITY_AUGMENT: self.intensity_aug,
             WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             CALIBRATED: self.calibrated_targets,
+            SEVERITY_WEIGHT: self.severity_weight,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
         }

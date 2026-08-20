@@ -65,6 +65,7 @@ SUPERVISION_AXES = frozenset(
         "labels",
         "eval_labels",
         "calibrated_targets",
+        "severity_weight",
         "per_label_loss",
         "rank_weight",
         "report_weight",
