@@ -92,3 +92,13 @@ calib_span_s2026.pt         # 0.8545 — band_span + calibrated targets, NEGATIV
 # re-measured at the recipe we ship. A lever's sign is a property of its operating point. Whether the
 # mix still wants the OLD calibration once the new one is available is a question only a package
 # holding both can ask.
+band_dense_long_s2026.pt    # 0.8587 — band_dense's recipe at 24 epochs; the LONG-SCHEDULE checkpoint
+# Added 2026-08-20 on a SEAT value, against its own arm's verdict. The arm asked whether 24 epochs beat
+# 12 on the band recipe and the answer is no: it peaked at epoch 6 and slid 0.0182 to the finish while
+# the training loss halved, which is overfitting, and its +0.0009 over `band_dense` is a seventh of the
+# 0.0062 floor. What it is mounted for is the other ruler — priced against `greedy4_v1` it takes
+# `band_span`'s seat for +0.0012 (0.8679 -> 0.8691), six times the best move the rest of the mounted
+# pool could make (+0.0002, attend_dense) at the time it landed. The `calib_span` precedent is the same
+# shape and it is the member that carried 0.929; here it is sharper, because the arm's PREMISE was
+# refuted and the checkpoint it dropped out is still the largest improvement available to the champion.
+# A run that answers "no" still produces a checkpoint, and the checkpoint is not bound by the answer.
