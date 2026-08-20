@@ -23,6 +23,7 @@ from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CHANNELS, CLS_MEAN, POOL_PARTS, SLICE_POOLINGS, StudyDesign
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import Adaptation
 
 
@@ -89,6 +90,7 @@ class TrainingOptions:
     encoder_layer: int = -1
     variant: str = SMALL
     encoder_weights: Path | None = None
+    encoder_adapt_depth: int = ALL_BLOCKS
     labels: Path = Path("labels.csv")
     eval_labels: Path | None = None
     out: Path | None = None
@@ -443,6 +445,17 @@ class TrainingOptions:
             "kneemri.training.pretrain instead of the stock natural-image weights. Everything else in "
             "the recipe is unchanged, so a run with this flag and its matched control differ in one "
             "variable: what the encoder knew before supervision began.",
+        )
+        parser.add_argument(
+            "--encoder-adapt-depth",
+            type=int,
+            default=ALL_BLOCKS,
+            help="take only the patch embedding and the first N blocks from --encoder-weights, leaving "
+            "the rest stock. 0 takes the whole adaptation. The argument for on-domain pretraining only "
+            "ever concerned the blocks --unfreeze-depth freezes, which supervision cannot write into and "
+            "so cannot repair; the top blocks the head reads are the ones a reconstruction objective "
+            "rewrites hardest, and two full loads measured on 2026-08-20 lost 0.17 with block 11 moved "
+            "55% and 21% of its own norm.",
         )
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
         parser.add_argument("--out", type=Path, default=None)

@@ -160,7 +160,9 @@ class RunSetup:
             # BEFORE every wrapper, and that is the same argument the rest of this method makes: weights
             # written into a compiled or adapted backbone land under prefixed keys that the stock
             # reference does not name, which is how a load that matched nothing once reported success.
-            backbone = PretrainedEncoder(options.encoder_weights).into(backbone, options.variant)
+            backbone = PretrainedEncoder(options.encoder_weights).into(
+                backbone, options.variant, options.encoder_adapt_depth
+            )
         model = StudyModel(backbone, encoder.dim, slots, design)
         if options.lora_rank:
             logger.info(

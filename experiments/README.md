@@ -1316,3 +1316,33 @@ carried over unchanged, because the hypothesis was never tested; only the harnes
 outcome is now reachable that the first arm could not produce: a result INDISTINGUISHABLE from control,
 which would bracket the axis (1e-4 destroys, 1e-5 does nothing, the answer if any lies between) rather
 than kill it.
+
+### encoder_adapt_gentle — 0.6875, and the pair is what carries the finding (2026-08-20)
+
+**The arm on its own.** Best holdout 0.6875 at epoch 10 against `band_dense` 0.8578 (−0.1703). Into the
+roster of four 0.8616 (−0.0063). No seat.
+
+**THE PAIR IS THE RESULT, and it overturns yesterday's reading of the first arm.** lr 1e-4 gave 0.6902,
+lr 1e-5 gave 0.6875 — 0.0027 apart, well inside the 0.0062 floor — from two adaptations whose blocks 0–5
+differ FOURFOLD in drift (0.034–0.083 against 0.0046–0.0179). If the quality of the initialisation were
+the variable, those two numbers could not agree. **So the early-block damage I named as the mechanism
+was not the mechanism.** It was real, and it was not what cost the 0.17.
+
+**What the two arms actually share.** Block 11 moved 0.5510 and 0.2144 of its own norm; supervision has
+never moved that block more than 0.0080 (`band_dense`: stem and blocks 0–5 exactly 0.0000, top block
+0.0080, largest anywhere 0.0225). The head reads block 11 and the final norm. Both arms therefore handed
+the classifier a representation reshaped for reconstruction, and twelve epochs at 4e-5 cannot walk back
+21–55%.
+
+**Not a plumbing failure — checked before it was believed.** The fitted arm's own drift profile shows
+blocks 6–8 moving 0.0205–0.0239 against control's 0.0167–0.0225, so the backbone received gradient and
+trained normally. The collapse is what the encoder was, not whether it was fitted.
+
+**Successor queued: `encoder_adapt_lower`, `--encoder-adapt-depth 6`.** New option, tested, that takes
+the patch embedding and blocks 0–5 from the adaptation and leaves blocks 6–11 and the final norm stock
+(the norm stays with the blocks it is calibrated to). This is the axis's original argument stated
+exactly — supervision cannot write into the frozen six, so it cannot repair them either, and the top
+blocks it CAN rewrite were never the part the argument was about. Its three outcomes are pre-registered
+in the arm: a focal lift supports the spectral mechanism, a recovery to roughly control confirms this
+diagnosis and closes the axis honestly, and a third collapse near 0.687 refutes the diagnosis and sends
+the question back to the harness.
