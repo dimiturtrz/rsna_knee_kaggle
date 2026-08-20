@@ -2,6 +2,19 @@
 # final_fit.sh [epochs] — fit ONE model on EVERY study, which is what we submit now that fold and seed
 # ensembling are out.
 #
+# DO NOT RUN THIS UNTIL knee-5895 IS DECIDED. Audited 2026-08-20 by resolving the argv below rather than
+# reading the comments under it, and two of its choices no longer match the ledger they cite:
+#   - it names neither --slices nor --band-low/--band-high, so it takes the PARSER DEFAULTS of 12 slices
+#     and band 0.20-0.80 against a settled recipe of 20 and 0.10-0.90. The +0.0039 band widening is
+#     described elsewhere as "in the recipe every arm inherits"; this arm does not inherit it, because
+#     those are per-arm flags and not part of $RECIPE.
+#   - the 448/392 argument below rests on res392 = 0.8523 being our best single member. It is not, any
+#     more: all four members of the 0.930 champion are 336 px, res392 is in none of them, and band_dense
+#     at 336 scores 0.8578 — +0.0055 ABOVE the member this geometry is built around.
+# Adding the missing flags is NOT the fix: 392 px with 20 slices at 0.10-0.90 is a configuration nobody
+# has run, and the paragraph below rules out running an experiment here for exactly the right reason —
+# with --fold -1 there is no score, so a regression ships unseen. The options are in the bead.
+#
 # WHAT CHANGED AND WHY. Our leaderboard entries have been rank-averaged fold members: five at 0.888,
 # then two whole-stack ones. That is ensembling-by-k-fold, and it is banned here for a good reason -
 # it buys variance reduction rather than signal, and it costs one full run per member. It also has a
@@ -68,4 +81,11 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # raising OOM and the run crawls at a twenty-fifth of the throughput while reporting 100% utilisation.
 EPOCHS="${1:-12}"
 require "$LABELS"
-run_train "final_fit_e${EPOCHS}" --fold -1 --epochs "$EPOCHS" --one-cycle --weight-floor --rank-weight 1.0 --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+# $RECIPE ends with `--fold 0`; the `--fold -1` after it wins, which is argparse's documented last-one-
+# wins and was confirmed by parsing this exact argv. Sourcing the recipe rather than repeating its flags
+# is not cosmetic here: this is the arm that SHIPS, and it was the last one still holding a private copy
+# of the shared fitting flags — the drift recipe.sh exists to remove, and the drift its own header cites
+# knee-7tq needing four corrections for. The live case is `--rank-weight`, which rank0_dense is measuring
+# now: if the term is refuted the recipe drops it, and a private copy would keep fitting the deliverable
+# with a term the project had just removed, silently and with no holdout to notice.
+run_train "final_fit_e${EPOCHS}" $RECIPE --fold -1 --epochs "$EPOCHS" --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
