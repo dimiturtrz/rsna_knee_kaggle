@@ -1262,3 +1262,48 @@ throws it away.** What this row retires is the multiplier, not the signal. The s
 target — the three YES levels as ordered classes with a cumulative-threshold head — which consumes the
 grade without touching any example's weight in the batch, so it cannot reproduce the starvation
 mechanism above. Filed rather than queued ahead of the encoder-adaptation arm, which holds the card.
+
+### encoder_adapt — on-domain SSL init, 0.6902 vs 0.8578 control (2026-08-20)
+
+**The flag landed.** The checkpoint's `options` block records
+`encoder_weights=.../adapt_small_e6.pt`, and `PretrainedEncoder.into` raises on a variant mismatch or an
+unnamed key, so the load could not have been a silent no-op wearing the arm's name.
+
+**The number is not a knob-sized loss, it is a collapse.** Best holdout 0.6902 at epoch 11 against
+`band_dense` 0.8578 — **−0.1676**, twenty-seven times the 0.0062 noise floor, and the arm was still
+climbing when it stopped (0.6191 → 0.6902 over twelve epochs) rather than converging to a worse optimum.
+Seat value is moot at that distance: into the roster of four 0.8616 (−0.0063), best seat swap 0.8578
+(−0.0101).
+
+**The pre-registered clause reads UNIFORM, in the losing direction.** By structure scale the drop is
+focal −0.1680 / regional −0.1669 — identical to three decimal places, with every one of the twelve
+labels down between −0.11 and −0.24. The clause said a uniform lift would credit a better
+initialisation rather than the spectral term; a uniform loss says the same thing in reverse. **This arm
+did not test the spectral hypothesis.** It tested an initialisation, and the initialisation was broken.
+
+**The mechanism, measured rather than argued.** `kneemri.evaluation.encoder_drift` now reads an SSL
+adaptation as well as a fitted member (they key the encoder differently, which is why this check was
+missing while the arm ran). Against stock DINOv2-small, six epochs of masked reconstruction moved:
+
+```
+stem 0.0794 | b0 0.0712  b1 0.0601  b2 0.0792  b3 0.0340  b4 0.0832  b5 0.0620
+             b6 0.0476  b7 0.0432  b8 0.0351  b9 0.0441  b10 0.1812  b11 0.5510
+```
+
+Supervision, across every member ever shipped here, moves its most-adapted block by **2.1%** of that
+block's own norm and blocks 0–5 by **exactly 0.0000**. Self-supervision moved blocks 0–5 by **3.4–8.3%**
+— three to four times the largest movement supervision has ever produced anywhere — and block 11 by
+**55%**. Six epochs is nowhere near enough to rebuild a representation (published MAE recipes run
+hundreds), so what those numbers describe is a partially destroyed encoder, not an adapted one.
+
+**And the arm's own precondition is what makes the damage permanent.** `--unfreeze-depth 6` freezes
+blocks 0–5. The argument for this axis was that the fine-tune has no gradient to overwrite what SSL
+writes there; the same fact means it has no gradient to REPAIR it either. The precondition cuts both
+ways and only one direction was written down beforehand.
+
+**What is refuted and what is not.** Refuted: this pretraining RECIPE — 6 epochs at lr 1e-4 over the
+whole encoder. Not refuted, and not tested: the spectral loss, on-domain adaptation as an axis, and the
+frozen-half argument. The successor holds the objective, the data and the schedule fixed and lowers only
+the rate to 1e-5, with a **pre-registered gate that is now measurable: early-block drift must land in
+supervision's own range (≤ ~0.02) before the checkpoint is allowed to spend a training slot.** A drift
+profile is a one-minute CPU read; the arm it guards is seventy-five minutes of card.

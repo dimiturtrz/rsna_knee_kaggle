@@ -37,8 +37,32 @@ def _stock() -> dict[str, torch.Tensor]:
     }
 
 
+def _adapted(into: Path) -> Path:
+    """A checkpoint shaped like `kneemri.training.pretrain` writes: the encoder alone, stock-keyed."""
+    path = into / "adapted.pt"
+    torch.save({"variant": SMALL, "config": {}, "encoder": dict(_stock())}, path)
+    return path
+
+
 def test_variant(tmp_path: Path) -> None:
     assert EncoderDrift(_checkpoint(tmp_path)).variant() == SMALL
+    assert EncoderDrift(_adapted(tmp_path)).variant() == SMALL, "an adaptation records it at the top level"
+
+
+def test_source(tmp_path: Path) -> None:
+    """Both shapes reach the same arithmetic: a member behind `backbone.`, an adaptation behind nothing."""
+    member, prefix = EncoderDrift(_checkpoint(tmp_path)).source()
+    assert prefix == "backbone."
+    assert "backbone.encoder.layer.0.weight" in member
+
+    adapted, no_prefix = EncoderDrift(_adapted(tmp_path)).source()
+    assert no_prefix == ""
+    assert set(adapted) == set(_stock())
+
+
+def test_blocks_of_an_adaptation(tmp_path: Path) -> None:
+    """An SSL checkpoint measures against the same stock weights, with no prefix to strip."""
+    assert EncoderDrift(_adapted(tmp_path)).blocks(_stock()) == {STEM: 0.0, 0: 0.0, 1: 0.0}
 
 
 def test_repository(tmp_path: Path) -> None:

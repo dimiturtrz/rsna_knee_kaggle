@@ -27,6 +27,15 @@ from kneemri.models.model import COMPILED_PREFIX
 logger = logging.getLogger(__name__)
 
 BACKBONE_PREFIX = "backbone."
+MEMBER_KEY = "model"
+ADAPTED_KEY = "encoder"
+"""The two shapes an encoder reaches this module in.
+
+A fitted MEMBER holds the whole model — head included — with the encoder under `backbone.`. A
+self-supervised ADAPTATION (`kneemri.training.pretrain`) holds nothing but the encoder, keyed exactly as
+the stock model keys it. Reading only the first is how the SSL question — did pretraining write into the
+blocks the fine-tune cannot reach — stayed unmeasured while the arm that depended on it ran.
+"""
 BLOCK_INDEX = re.compile(r"\.(\d+)\.")
 STEM = -1
 """The group for every encoder tensor outside the repeated blocks — patch embedding, class token,
@@ -57,7 +66,14 @@ class EncoderDrift:
         Read back from the config for the same reason the design is: a member compared against the wrong
         backbone produces a drift profile that is entirely the difference between two architectures.
         """
-        return str(self.saved.get("config", {}).get("variant", SMALL))
+        recorded = self.saved.get("variant") or self.saved.get("config", {}).get("variant", SMALL)
+        return str(recorded)
+
+    def source(self) -> tuple[dict[str, Tensor], str]:
+        """The state dict holding the encoder, and the prefix its keys carry."""
+        if MEMBER_KEY in self.saved:
+            return self.saved[MEMBER_KEY], BACKBONE_PREFIX
+        return self.saved[ADAPTED_KEY], ""
 
     def repository(self) -> str:
         """The Hugging Face id of the stock weights this member was fitted from."""
@@ -69,10 +85,11 @@ class EncoderDrift:
         The head is dropped rather than compared: it has no pretrained counterpart, was initialised
         randomly, and its movement is not evidence about the representation.
         """
+        state, prefix = self.source()
         return {
-            name.removeprefix(BACKBONE_PREFIX).removeprefix(COMPILED_PREFIX): value.float()
-            for name, value in self.saved["model"].items()
-            if name.startswith(BACKBONE_PREFIX) and value.is_floating_point()
+            name.removeprefix(prefix).removeprefix(COMPILED_PREFIX): value.float()
+            for name, value in state.items()
+            if name.startswith(prefix) and value.is_floating_point()
         }
 
     def grouped(self, state: dict[str, Tensor]) -> dict[int, list[str]]:
