@@ -1,11 +1,16 @@
 """What each platform can be asked about its idle timer, and which policy this one gets.
 
 Windows' idle timer is driven by INPUT, not by load: a card held at 100% for eight hours resets
-nothing, so an unattended run on this machine's scheme (AC "sleep after" = 7200 s, read 2026-08-18)
-suspends mid-epoch and resumes hours later. Three runs lost 20.8 hours of wall-clock to exactly that
-shape — one epoch of several hours surrounded by normal ones (knee-wyzj) — and it reads as a stalled
-epoch rather than as a suspend, because an epoch records WALL-CLOCK and a suspended machine spends it
-without computing anything.
+nothing, so an unattended run on this machine's scheme (AC "sleep after" = 10800 s, re-read 2026-08-21;
+it was 7200 s on 2026-08-18) suspends mid-epoch and resumes hours later. Three runs lost 20.8 hours of
+wall-clock to exactly that shape — one epoch of several hours surrounded by normal ones (knee-wyzj) —
+and it reads as a stalled epoch rather than as a suspend, because an epoch records WALL-CLOCK and a
+suspended machine spends it without computing anything.
+
+THIS IS NOT YET FIXED, and `Wakelock`'s "held" is not proof that it is. On 2026-08-21 the machine
+idle-slept for 3.7 hours mid-epoch under a run that had logged `wakelock: held` (knee-hjoc). A nonzero
+return from `SetThreadExecutionState` says the CALL succeeded; it does not say the OS is holding a
+system-required request for this process, and only elevated `powercfg /requests` distinguishes those.
 
 A STRATEGY, not a platform check at the call site: the loop reads the same everywhere, and a platform
 gains a real policy by joining `POLICIES` rather than by growing an `if`. `Wakelock` is the consumer

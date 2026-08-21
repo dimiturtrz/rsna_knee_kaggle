@@ -1839,3 +1839,76 @@ labels and disagree in sign with each other, which is what a paired floor of tha
 This closes the target-SHAPE axis on its own pre-registered clause rather than opening a finer one. What
 survives is the loss-WEIGHT axis (`severity_weight`, knee-t1ho): reweighting which STUDIES the loss
 listens to is a different mechanism from reshaping what the target IS.
+
+### `band_dense_llrd` — the arm changed two things, and the training loss is what says so (2026-08-21)
+
+**Arm** `experiments/arms/band_dense_llrd.sh` (knee-a2q7), 12 epochs at ~580 s, 782 img/s, 1746 steps an
+epoch at `--batch 2 --accumulate 6`, peak 6.14 GB reserved. Control `band_dense` = **0.8578** at epoch 8.
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| holdout AUC | 0.7230 | 0.7615 | 0.7899 | 0.8104 | 0.8226 | 0.8353 | 0.8435 | 0.8407 | 0.8481 | 0.8478 | **0.8483** | 0.8481 |
+| train loss | 1.2527 | 1.1244 | 1.0480 | 0.9889 | 0.9232 | 0.8767 | 0.8419 | 0.8038 | 0.7699 | 0.7308 | 0.7146 | 0.7013 |
+
+Best **0.8483**, i.e. **−0.0095** against the control — past the 0.0062 floor and the wrong way. The arm's
+own READ-IT-ON ladder says a BELOW result means "the early blocks do not want to move at any rate, which
+closes the depth axis for good". **That reading is refused here, and the arm's own second instrument is
+why.**
+
+**The pre-registration named the training loss as the second instrument, and it fired against the arm.**
+The docstring says this arm's loss "should track `band_dense`'s 1.2162 -> 0.5780 curve". It does not:
+1.2527 -> 0.7146 at e10, still descending, against the control's 0.5898 at the same epoch. The two start
+level and diverge monotonically. A loss that floors ~0.13 high while still falling is the signature of
+too little rate, not of wrecked early blocks — the arm is UNDERFIT relative to its control, and the
+holdout gap is what underfitting looks like on the ruler.
+
+**The cause is a second variable the arm did not price.** `StudyModel.parameter_groups`
+(`kneemri/models/model.py:580`) anchors the ladder at the TOP opened block —
+`backbone_lr * layer_decay ** (len(opened) - 1 - depth)`. Under `--unfreeze-last 12` that makes blocks
+6-11 — **the exact six the control trains at a flat 4e-5** — run at 4e-5, 2.8e-5, 2.0e-5, 1.37e-5,
+9.6e-6, 6.7e-6: a geometric mean of `0.7^2.5` = **0.41 of the control's rate**. So the arm did not add six
+whisper blocks to the control. It added six whisper blocks AND cut the control's own six by 2.4x. The
+docstring saw the re-grading ("blocks 6-11 are re-graded by depth instead of sharing 4e-5") and then read
+the result as though only the depth had moved.
+
+**Link by link, before the verdict.** PLUMBING green, and mechanically so: `encoder_rate_decay`
+(`trainer.py:166`) is a `Landed`-compared field read off the optimiser's top two backbone groups rather
+than off the flag that asked, so the run could not have passed without the decay reaching the optimiser —
+the measured ratio is 0.7. DATA green: identical cache, band, slices, schedule, top-block rate. TEST
+green: same holdout, same ruler, delta well past the floor. The BATCH substitution is green and was
+priced in advance rather than discovered here (`small_accum` 0.8579 against the control's 0.8578, three
+points inside a 0.0020 spread); it also explains the 580 s epoch against the control's 361 s, since batch
+2 at accumulate 6 runs 6x the loader and optimiser iterations for the same effective batch. **TRAINING is
+the red link**, and it is red for a reason no gate could catch: both variables are legitimate values of
+flags that landed correctly.
+
+**What this does NOT rule out — which is most of what the arm was built to ask.** Layer-wise decay as a
+mechanism is untested by this run, and so is depth. `Adaptation`'s docstring should keep calling depth
+and rate ENTANGLED: this arm did not disentangle them, it entangled them a second way. The one-variable
+version anchors the ladder at block 6 so that blocks 6-11 keep the control's flat 4e-5 and only 0-5
+decay — control plus six whisper blocks, nothing else moved.
+
+**That clean arm is priced and DECLINED.** It needs an anchor argument in `parameter_groups` (small), a
+smoke, and 12 x 580 s = 1.93 h of card, so ~2.2 h all in. The flat 12-block bracket measured depth at
++0.0008; the hypothesis is that this figure is correction-minus-damage and the correction alone is
+bigger, but a generous ceiling is ~+0.005 — still under the project's 1.5% bar — at maybe one-in-five
+odds of clearing even the 0.0062 floor. 2.2 h for a one-in-five shot at a sub-bar number loses to
+`through_dense`'s 40 min, which is why `through_dense` takes the card instead. Re-testable, not dead.
+
+**One contamination to flag rather than hide.** The e4 (672 s) and e5 (599 s) epoch times are inflated by
+my own CPU inference job contending for the machine — I launched a `member_curve` seat read believing it
+would read saved predictions and it began a full CPU inference pass instead. AUC is unaffected, since
+contention changes the wall-clock and not the arithmetic, but those two epoch times are not the arm's.
+
+**The seat test agrees with the mean, so there is no roster rescue.** Against the shipped roster of five
+(0.8690): adding it reads 0.8682 (**−0.0008**), and the best seat it could take from any incumbent is
+0.8683 (**−0.0007**, displacing `base_dense`). Zero of one clears the +0.0015 this ruler can resolve, and
+a negative is charged at roughly 3x on the board (~−0.0020, knee-c0u9). Not a member, not a free look.
+
+**The wall-clock note, because it was not the queue.** The arm was suspended mid-epoch-11 when the
+machine entered sleep at 16:45 UTC and did not finish until 20:27:57 UTC on resume; the watcher fired 56 s
+later and `through_dense` started immediately. So ~3.7 h of card went to MACHINE SLEEP, not to a stalled
+gate — `queue_check` read `live` and `0/1 started` throughout and was right both times. The trainer logs
+`wakelock: held`, so a wakelock is taken and it did not prevent this; that gap is filed separately. Worth
+writing down because the failure looks exactly like a wedged watcher from the log side, and the second
+time I mistake one for the other it will cost more than the reading did.
