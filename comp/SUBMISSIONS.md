@@ -1237,3 +1237,60 @@ own matched control outside the noise floor* took the board up a tick. `base_den
 in a pool seven small members deep. Encoder *diversity* — not encoder *capacity*, which 0.932 would have
 shown and did not — is the axis that paid. The follow-on is another member from an encoder family this pool
 does not contain, judged on seat value and never retired on its own control.
+
+#### 2026-08-21 — slots 1 and 2: `sixstrong` (55677573) and `sixfresh` (55677575)
+
+Both are the champion `basedense` five plus ONE strong sixth, same RankAverage vote, same
+`overlap=False`, nothing else moved. They differ in one property of the sixth: whether its recipe is
+already seated. Fired in the same hour and read together, because neither alone separates "six is past
+the useful count" from "the sixth was redundant".
+
+| entry | sixth | solo | recipe distance | offline delta | **board** |
+|---|---|---|---|---|---|
+| `sixstrong` | `band_span_s2026` | 0.8565 | near-twin of incumbent `calib_span` | **+0.0002** | **0.930** |
+| `sixfresh` | `lr4e-5_ws_s2026` | 0.8525 | shares no recipe with the five | **−0.0003** | **0.931** |
+
+##### THEY SPLIT, AND THE SPLIT CLAUSE WAS PRE-REGISTERED
+
+`sixfresh`'s own docstring, written before either score existed: *"If they SPLIT, the count is not the cap
+and redundancy is: whichever sixth is the near-twin of an incumbent is the one that lost, and the next
+entry is a seventh chosen for recipe distance rather than for solo score."* That is exactly what
+happened, and in the predicted direction — the twin lost the tick, the stranger held the board maximum.
+
+- **MEMBER COUNT IS NOT THE CAP.** Six members ties the champion five at 0.931 when the sixth is
+  recipe-distant. `crossenc` (0.926) and `maxdiv` (0.925) did not lose four and five ticks for having
+  five and six seats; combined with `basedense`'s refutation of the FOUR-MEMBERS principle, the count
+  axis is now closed in both directions and no future entry should spend a slot on it.
+- **REDUNDANCY IS THE CAP.** `band_span` is the pool's third-best solo checkpoint, 0.0040 ABOVE the
+  sixth that tied — and it is the one that cost a tick, because `calib_span` (an incumbent) is its recipe
+  with calibrated targets. A seat is priced by what it adds to the mix, not by what it scores alone.
+- **NEITHER ENTRY BEAT 0.931**, so the champion pin does not move. The lane reopened is *how to choose*
+  the next member, not *how many*.
+
+##### THE OFFLINE RULER INVERTED FOR THE THIRD TIME, AND NOW THE MECHANISM IS NAMED
+
+The holdout ranked `sixstrong` ABOVE `sixfresh` (+0.0002 against −0.0003) and the board ranked them the
+other way. That is the third inversion at this margin — the champion itself scored 0.931 at offline
+0.8690, below `longseat`'s 0.8691 which scored 0.930 — and the three together stop being scatter:
+
+**RANK-AVERAGING A NEAR-TWIN BARELY MOVES A HOLDOUT RANKING, WHICH IS EXACTLY WHY THE HOLDOUT CANNOT SEE
+REDUNDANCY.** Two members that agree on the ordering contribute one ordering twice; the rank average
+shifts almost not at all, so the offline delta reads ~0 whether the sixth is a twin or a stranger. The
+board, scored on different studies, pays for the disagreement the twin does not supply. The blindness is
+not noise at the resolution limit — it is structural, and it points the wrong way *by construction* on
+the one axis that now decides a seat.
+
+Operating rule, tightened: **the holdout orders members by QUALITY and is blind to DISTANCE.** Use it to
+reject a weak candidate; never to rank two candidates of comparable solo score against each other. That
+is a ruler question, not a noise question, and no number of seeds fixes it.
+
+##### WHAT THIS BUYS THE NEXT ARM
+
+The pool holds seven small members, one base, and every one of them was fitted by this repo's own recipe
+family on the same pixels with the same objective. Recipe distance inside that family is nearly
+exhausted — `lr4e-5_ws` differs by a band, a rate and a pixel count, and that was enough for one tick.
+The largest distance still available is not another recipe: it is a member whose ENCODER never saw this
+family at all. That is `knee-jucq`'s volumetric trunk (V-JEPA 2, wired in `e291a4b`), which differs in
+pretraining domain, architecture family and depth handling simultaneously — and it is now backed by a
+measurement rather than by an argument about capacity, which is the argument `basedense`'s 0.932 clause
+already refuted.
