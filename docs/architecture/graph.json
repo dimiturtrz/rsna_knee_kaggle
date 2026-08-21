@@ -7184,19 +7184,55 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.queue_check.QueuedArms.lines",
-      "target": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "source": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "target": "kneemri.experiments.queue_check.QueuedArms._armed",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.queue_check.QueuedArms.lines",
+      "source": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.doubled",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.doubled",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "target": "kneemri.experiments.queue_check.QueuedArms.doubled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
       "target": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.lines",
+      "target": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.lines",
+      "target": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.lines",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
       "weight": 1
     },
@@ -7210,6 +7246,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "target": "kneemri.experiments.queue_check.QueuedArms._parentage",
       "weight": 1
     },
     {
@@ -7228,6 +7270,12 @@
       "kind": "construct",
       "source": "kneemri.experiments.queue_check.main",
       "target": "kneemri.experiments.queue_check.QueuedArms",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.main",
+      "target": "kneemri.experiments.queue_check.QueuedArms.faults",
       "weight": 1
     },
     {
@@ -17850,8 +17898,40 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._armed",
+      "label": "_armed",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._parentage",
+      "label": "_parentage",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.alive",
       "label": "alive",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.doubled",
+      "label": "doubled",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "label": "faults",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
@@ -17876,6 +17956,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "label": "stranded",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "label": "watchers",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
