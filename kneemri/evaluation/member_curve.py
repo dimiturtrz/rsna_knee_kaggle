@@ -52,6 +52,12 @@ to accidentally vary."""
 BOARD_RESOLVABLE = 0.0015
 """The offline seat delta below which this ruler has never been shown to pick a board tick.
 
+IT IS A SPENDING GUARD, NOT A TARGET, and the distinction is the one thing to keep straight about it.
+This project's bar for a RESULT is ~1.5% absolute and its noise floor is 0.0062; 0.0015 is under both by
+an order of magnitude. So nothing here is a number to chase or to plan an arm around — it exists to stop
+a slot being spent on a move the board cannot read, which is a question about a submission rather than
+about a method. An axis worth arming has to argue for 0.015, not for this.
+
 Six entries pair an offline joint-holdout score with a board score (knee-825t) and the chain rises across
 the first 0.003 of offline spread, then plateaus: `longseat` carried +0.0012 — the largest single move in
 a sweep of all 56 same-split checkpoints, six times the runner-up — and TIED the board. 0.0015 sits above
