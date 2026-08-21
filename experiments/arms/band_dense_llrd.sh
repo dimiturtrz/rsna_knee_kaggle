@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# bead: knee-a2q7
 # band_dense_llrd.sh — open the WHOLE encoder, but let only its top move fast.
 #
 # WHAT IS NEW HERE, and it is a mechanism this repo did not have until today. Every arm ever run gave
