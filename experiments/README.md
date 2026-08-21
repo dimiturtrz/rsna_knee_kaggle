@@ -1808,3 +1808,24 @@ the owner kept alive by explicit call and which `severity_weight` carries. A lad
 work the mean AUC averages away — this arm was read on the twelve-label mean only, and a per-label read
 of the graded labels (the OA triple, which is where a ladder should bite) is still owed and cheap: the
 checkpoint is written at `grade_ladder_s2026.pt`, so it costs an evaluation and no training.
+
+**The per-label read, run the same day: the mean was not hiding a win (knee-t607).** It cost neither a
+model load nor a GPU-second — both `.holdout.npz` were already on disk, so `run_comparison` read saved
+predictions:
+
+    Synovitis -0.0231*  ACL +0.0212*  Lateral OA -0.0115  Lateral Meniscus +0.0093  Medial OA -0.0092
+    Fracture +0.0089  PF OA -0.0065  Medial Meniscus -0.0036  Contusion +0.0029  Effusion -0.0024
+    Baker's -0.0019  MEAN -0.0013  MCL +0.0003
+    half-widths up to +/-0.0367 on this pair's own paired floor
+    by structure scale: focal +0.0000  regional -0.0031
+
+The OA triple is the whole test, and all three of it move NEGATIVE: Medial −0.0092, Lateral −0.0115,
+PF −0.0065. Every delta sits inside its own ±0.0367 half-width, so the honest claim is not that the
+ladder HURT those labels — it is that the ladder produced **no positive signal on the only labels whose
+target shape it changed**. A mechanism that works points the right way on three labels at once;
+three-for-three wrong-way is what an inert switch looks like. The two starred labels are not graded
+labels and disagree in sign with each other, which is what a paired floor of that width predicts.
+
+This closes the target-SHAPE axis on its own pre-registered clause rather than opening a finer one. What
+survives is the loss-WEIGHT axis (`severity_weight`, knee-t1ho): reweighting which STUDIES the loss
+listens to is a different mechanism from reshaping what the target IS.
