@@ -35,6 +35,59 @@ def test_index_path(tmp_path: Path):
     assert StudyCache(tmp_path, slices=4, image_size=16).index_path.name == "index_16px_4sl.json"
 
 
+def test_progress_path(tmp_path: Path):
+    assert StudyCache(tmp_path, slices=4, image_size=16).progress_path.name == "progress_16px_4sl.npz"
+
+
+def test_build_resumes(tmp_path: Path):
+    """A study the progress record calls done is not decoded again, and its pixels are left alone.
+
+    Proven by removing the finished study's SOURCE before the second build: a re-decode could only
+    write an empty mask row, so a row that survives is a study the pool was never handed.
+    """
+    source = tmp_path / "src"
+    for study in ("study0", "study1"):
+        write_series(source / study / "sag", slices=4, description="SAG PD FS", size=32)
+    cache = StudyCache(tmp_path / "cache", slices=2, image_size=8)
+    cache.build(source, ["study0", "study1"], {"sag": "Sagittal"}, workers=1)
+    assert not cache.progress_path.exists(), "a finished build leaves no record that says it stopped"
+
+    done = np.array([True, False])
+    mask = np.zeros((2, len(SLOTS)), dtype=np.float32)
+    mask[0] = 1.0
+    with cache.progress_path.open("wb") as handle:
+        np.savez(handle, mask=mask, done=done)
+    for path in sorted(path for path in (source / "study0").rglob("*") if path.is_file()):
+        path.unlink()
+
+    cache.build(source, ["study0", "study1"], {"sag": "Sagittal"}, workers=1)
+
+    corpus, _ = cache.load()
+    assert corpus.mask[0].tolist() == [1.0] * len(SLOTS), "the flushed study was carried over, not redecoded"
+    assert corpus.mask[1].tolist() == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0], "the unfinished study was decoded"
+    assert not cache.progress_path.exists()
+
+
+def test_build_ignores_progress_from_another_study_order(tmp_path: Path):
+    """A record whose index disagrees is discarded: resuming onto it would misplace every study.
+
+    The key fixes the array's SHAPE and not its order, so this is the one corruption a shape check
+    cannot see — study0's pixels written at study1's position under a name that promises otherwise.
+    """
+    source = tmp_path / "src"
+    for study in ("study0", "study1"):
+        write_series(source / study / "sag", slices=4, description="SAG PD FS", size=32)
+    cache = StudyCache(tmp_path / "cache", slices=2, image_size=8)
+    cache.build(source, ["study0", "study1"], {"sag": "Sagittal"}, workers=1)
+    with cache.progress_path.open("wb") as handle:
+        np.savez(handle, mask=np.ones((2, len(SLOTS)), dtype=np.float32), done=np.array([True, True]))
+
+    cache.build(source, ["study1", "study0"], {"sag": "Sagittal"}, workers=1)
+
+    _, identifiers = cache.load()
+    assert identifiers == ["study1", "study0"], "the new order is recorded, not the stale one"
+
+
 def test_planes_of(tmp_path: Path):
     """The plane is the one thing the slot predicate takes from the shipped series table."""
     table = tmp_path / "series.csv"

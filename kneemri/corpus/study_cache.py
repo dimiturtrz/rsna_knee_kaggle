@@ -34,6 +34,13 @@ from kneemri.corpus.window_reader import FileReader, MappedReader, WindowReader
 
 logger = logging.getLogger(__name__)
 
+FLUSH_EVERY = 200
+"""Studies between progress flushes — how much a killed build has to decode a second time.
+
+The record is a few hundred kilobytes against a decode of seconds per study, so the flush itself is
+free; this is set by how much work is acceptable to lose, not by what the write costs.
+"""
+
 
 @dataclass(frozen=True)
 class CachedCorpus:
@@ -228,6 +235,20 @@ class StudyCache:
         """The study order the two arrays are indexed by."""
         return self.directory / f"index_{self.key}.json"
 
+    @property
+    def progress_path(self) -> Path:
+        """The partial mask and its per-study done flags — what makes an interrupted build resumable.
+
+        A full decode is hours, and `open_memmap(mode="w+")` recreates the pixel file zeroed, so
+        without this a kill costs the entire run however far it had got. On 2026-08-11 a build sharing
+        the machine with a trainer was killed by the OS with neither process leaving an error; the cost
+        was the whole decode. This file bounds that cost to the studies since the last flush.
+
+        It is removed once `mask_path` is written, so its presence means "a build stopped here" and
+        never "this cache is finished".
+        """
+        return self.directory / f"progress_{self.key}.npz"
+
     def enrolled(self, identifiers: list[str]) -> list[str]:
         """The studies this cache actually holds, given the split's full list.
 
@@ -254,15 +275,14 @@ class StudyCache:
         THE TRUNCATION IS APPLIED HERE, not by the caller, for the same reason: `first` is in the key,
         so a caller that truncated its own list would be free to write 60 studies under the name that
         promises 4407 — and the name is the only thing a later trainer has to go on.
+
+        A BUILD THAT WAS INTERRUPTED RESUMES. Only studies missing from the progress record are put in
+        the pool, so the cost of a kill is the studies since the last flush rather than the whole
+        decode — see `progress_path` for what that cost used to be.
         """
         identifiers = self.enrolled(identifiers)
         self.directory.mkdir(parents=True, exist_ok=True)
-        images = np.lib.format.open_memmap(
-            self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))
-        )
-        del images
-        mask = np.zeros((len(identifiers), self.slots), dtype=np.float32)
-        self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
+        mask, done = self._resumed(identifiers) or self._started(identifiers)
 
         arguments = [
             DecodeRequest(
@@ -277,16 +297,61 @@ class StudyCache:
                 reading=self.reading,
             )
             for position, identifier in enumerate(identifiers)
+            if not done[position]
         ]
-        for done, (position, flags) in enumerate(self._decode_all(arguments, workers), start=1):
+        for decoded, (position, flags) in enumerate(self._decode_all(arguments, workers), start=1):
             mask[position] = flags
-            if done % 200 == 0:
-                logger.info(f"  cached {done}/{len(identifiers)} studies")
+            done[position] = True
+            if decoded % FLUSH_EVERY == 0:
+                logger.info(f"  cached {int(done.sum())}/{len(identifiers)} studies")
+                self._flush(mask, done)
         self.report(mask)
         # LAST, and only once the mask has been judged: `wait_for_cache` keys on this file existing, so
         # writing it is the signal that the cache is usable. A build that decoded nothing must not get
         # that far.
         np.save(self.mask_path, mask)
+        self.progress_path.unlink(missing_ok=True)
+
+    def _started(self, identifiers: list[str]) -> tuple[NDArray[np.float32], NDArray[np.bool_]]:
+        """A fresh build: the pixel file recreated zeroed, nothing decoded, the study order recorded."""
+        images = np.lib.format.open_memmap(
+            self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))
+        )
+        del images
+        self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
+        return np.zeros((len(identifiers), self.slots), dtype=np.float32), np.zeros(len(identifiers), dtype=np.bool_)
+
+    def _resumed(self, identifiers: list[str]) -> tuple[NDArray[np.float32], NDArray[np.bool_]] | None:
+        """What an interrupted build of exactly this cache left behind, or None to start from zero.
+
+        The study ORDER is compared study by study rather than trusted from the key, because the key
+        fixes the array's shape and not its index: resuming onto a different order would write each
+        study's pixels at another study's position, a corruption no shape check could ever see.
+
+        A study that was mid-decode when the kill landed has partial pixels and a false flag, so it is
+        simply decoded again over the top. Only a flushed study is believed.
+        """
+        if not (self.progress_path.exists() and self.images_path.exists() and self.index_path.exists()):
+            return None
+        if json.loads(self.index_path.read_text(encoding="utf-8")) != identifiers:
+            return None
+        saved = np.load(self.progress_path)
+        mask, done = saved["mask"], saved["done"]
+        if mask.shape != (len(identifiers), self.slots) or done.shape != (len(identifiers),):
+            return None
+        logger.info(f"  resuming: {int(done.sum())}/{len(identifiers)} studies already on disk")
+        return mask, done
+
+    def _flush(self, mask: NDArray[np.float32], done: NDArray[np.bool_]) -> None:
+        """The progress record written through a scratch file, so a kill mid-write cannot corrupt it.
+
+        A handle is passed rather than the path because `np.savez` appends `.npz` to a name that lacks
+        it, which would put the scratch write somewhere other than the file being replaced.
+        """
+        scratch = self.progress_path.with_name(f"{self.progress_path.name}.part")
+        with scratch.open("wb") as handle:
+            np.savez(handle, mask=mask, done=done)
+        scratch.replace(self.progress_path)
 
     @staticmethod
     def _decode_all(arguments: list[DecodeRequest], workers: int) -> Iterator[tuple[int, list[float]]]:

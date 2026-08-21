@@ -90,9 +90,18 @@ def test_read():
 def test_listing():
     """An empty table reads as 'nothing is running' and would strand every queued arm, so it is checked.
 
-    Asserted on CONTENT, not on a header: the two probes print different tables, and the crossing only
-    ever matches command lines, so what must hold is that some process this test knows is running is
-    named in there.
+    Asserted on ROW COUNT, because that is the only thing TRUE OF BOTH PROBES. `ps -ef` prints a
+    headed table of the MSYS process table; the PowerShell probe prints bare command lines with no
+    header at all, of every Windows process. Nothing else is common to the two.
+
+    It used to assert that `python` appeared, and that was wrong twice over. MSYS `ps` enumerates the
+    MSYS process table ONLY, and pytest runs as a native Windows process — so under the first probe the
+    assertion held exactly as long as something unrelated had launched a python through bash, and failed
+    the moment a gate session was started directly. A test measuring its own launcher, not the code.
+
+    The narrowness of the MSYS table is not a defect to route around, because it is the table the check
+    reads for real: the watchers it hunts are `after.sh` and `queue.sh`, which ARE bash. A native
+    trainer is never looked for here — it is found by its checkpoint.
 
     SKIPS RATHER THAN FAILS WHEN NO PROBE SPAWNS, and that is not a silent pass. On 2026-08-20 a
     pre-push hook running beside a training arm, a CPU witness over nineteen members and a full gate
@@ -106,8 +115,8 @@ def test_listing():
     listing = QueuedArms.listing()
     if not listing:
         pytest.skip("no probe could be spawned on this machine right now — see test_listing_no_probe_reads_empty")
-    assert len(listing.splitlines()) > 1, "a machine running this test has at least one process"
-    assert "python" in listing.lower(), "the interpreter running this test is a process and must be listed"
+    populated = [line for line in listing.splitlines() if line.strip()]
+    assert len(populated) > 1, "a machine running this test is running more than one process"
 
 
 def test_listing_no_probe_reads_empty():
