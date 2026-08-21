@@ -332,6 +332,53 @@ def test_parameter_groups(study_model: StudyModel):
     assert frozen, "the early blocks must be frozen"
 
 
+def test_parameter_groups_layer_decay():
+    """One group per opened block, the TOP one still at `backbone_lr`, everything below it divided down.
+
+    The top block holding the named rate is the property that matters: every ledger number was measured
+    with the whole opened stack at `backbone_lr`, so anchoring at the top makes the decayed arm a strict
+    SLOWING of the layers underneath rather than a run at a different rate throughout — which would move
+    two variables and read as neither.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4, layer_decay=0.5)
+
+    rates = [group["lr"] for group in groups]
+    assert rates == [1e-3, 8e-6 * 0.125, 8e-6 * 0.25, 8e-6 * 0.5, 8e-6], "bottom to top, halving upwards"
+    opened = [p for block in groups[1:] for p in cast("list[torch.nn.Parameter]", block["params"])]
+    assert all(parameter.requires_grad for parameter in opened)
+    assert [p for p in model.backbone.parameters() if not p.requires_grad], "the early blocks must freeze"
+
+
+def test_parameter_groups_flat_keeps_the_two_group_shape():
+    """The default must be the OLD two groups, not per-block groups that happen to share a rate.
+
+    A refactor that reproduces the ledger's shape only numerically is not one a score can confirm:
+    AdamW carries per-group state and weight decay, and "the same rates in more groups" is a different
+    optimiser configuration that no arm would ever be able to attribute the difference to.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+    flat = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+
+    assert len(flat) == 2, "head, then every opened block in ONE group"
+    assert [group["lr"] for group in flat] == [1e-3, 8e-6]
+
+
+def test_parameter_groups_refuses_layer_decay_under_lora():
+    """Under LoRA the base blocks a per-depth rate would scale are frozen, so the flag would be a no-op.
+
+    Same refusal as `--pair-memory` with no ranking term, for the same reason: the silent version trains
+    the flat recipe under the decayed arm's name and gets read as a refutation of the mechanism.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+    model.low_rank(rank=2)
+    with pytest.raises(ValueError, match="LoRA adapters"):
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4, layer_decay=0.5)
+
+
 class _V3ShapedBackbone(_FakeBackbone):
     """A backbone that keeps its blocks where a DINOv3 keeps them: `model.layer`, with no `encoder`."""
 

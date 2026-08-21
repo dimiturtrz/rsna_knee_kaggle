@@ -12,6 +12,7 @@ from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
     MAXIMUM,
+    NO_LAYER_DECAY,
     OPENED_BLOCKS,
     RECOMPUTING,
     StudyDesign,
@@ -84,6 +85,7 @@ PLAIN = Request(
     # six" of it opens four, and the request that matches an untouched encoder is the one that names
     # what is there. The mismatch a real encoder would show is the point of the strict comparison.
     unfreeze_last=4,
+    layer_decay=NO_LAYER_DECAY,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 

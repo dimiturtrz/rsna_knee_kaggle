@@ -11,7 +11,7 @@ from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.objective import (
@@ -28,6 +28,7 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    LAYER_DECAY,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
@@ -243,6 +244,7 @@ def test_policies():
         SCHEDULED: False,
         REPORTS: False,
         ACCUMULATION: 1,
+        LAYER_DECAY: NO_LAYER_DECAY,
     }
 
     trainer.bfloat16()
@@ -260,7 +262,27 @@ def test_policies():
         SCHEDULED: True,
         REPORTS: False,
         ACCUMULATION: 1,
+        LAYER_DECAY: NO_LAYER_DECAY,
     }
+
+
+def test_encoder_rate_decay():
+    """The ratio is MEASURED off the optimiser's groups, so a flag that never landed cannot report itself.
+
+    Flat has no pair for a ratio to be defined between and must answer `NO_LAYER_DECAY` rather than
+    raising on a one-element slice — that is the branch every arm in the ledger takes.
+    """
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
+    flat = Trainer(model, torch.device("cpu"), Adaptation(unfreeze_last=4))
+    assert flat.encoder_rate_decay() == NO_LAYER_DECAY
+
+    decayed = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+        Adaptation(unfreeze_last=4, layer_decay=0.5),
+    )
+    assert decayed.encoder_rate_decay() == pytest.approx(0.5)
+    assert decayed.policies()[LAYER_DECAY] == pytest.approx(0.5), "and it is what the pre-flight check reads"
 
 
 def test_one_cycle():

@@ -85,6 +85,7 @@ class TrainingOptions:
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
+    layer_decay: float = Adaptation().layer_decay
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS
     slice_regions: int = StudyDesign().slice_regions
@@ -432,6 +433,16 @@ class TrainingOptions:
             help="how fast the ENCODER adapts. The 125:1 ratio to the head was inherited, never "
             "measured, and at 8e-6 the encoder barely moves - which is why our depth bracket came out "
             "neutral: unfreezing more blocks cannot help at a rate where no block moves.",
+        )
+        parser.add_argument(
+            "--layer-decay",
+            type=float,
+            default=Adaptation().layer_decay,
+            help="scale the encoder rate DOWN by this factor per block below the top one (0.65-0.75 is "
+            "the usual range; 1.0, the default, is the flat rate every ledger number was measured at). "
+            "Without it depth and rate can only move together: --unfreeze-last 12 at the rate that makes "
+            "the top blocks move applies that same rate to the encoder's most general layers, so a "
+            "deeper arm is not a deeper version of the shallow one, it is a different perturbation.",
         )
         parser.add_argument(
             "--whole-stack",

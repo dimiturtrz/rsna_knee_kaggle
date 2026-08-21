@@ -58,13 +58,18 @@ NOT_A_WRAPPER = {
 }
 """`StudyModel` methods that are the model's own behaviour rather than something a run switches on."""
 
-TRAINER_REPORTER = {"policies"}
+TRAINER_REPORTER = {"policies", "encoder_rate_decay"}
 MODEL_REPORTER = {"applied"}
 """Each object's account of WHICH policies landed on it — read by `Landed` before the card is spent.
 
 They are the check this file makes at commit time, made again at run time, so they are the one kind of
 public method a builder must NOT call: attaching them would mean the builder answering its own question.
 The stale-exemption assert wants names the owner really has, so the two are named apart.
+
+`encoder_rate_decay` is one of them rather than a policy: layer-wise decay is decided when the optimiser
+is BUILT, out of `Adaptation`, so there is no method for a builder to call and nothing for it to attach.
+The method measures the ratio back off the optimiser's own groups, which is precisely what makes it a
+witness rather than a switch — a decay that never landed cannot report itself.
 """
 
 

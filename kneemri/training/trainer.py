@@ -32,7 +32,7 @@ from kneemri.corpus.slot_reader import GROUP
 from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
-from kneemri.models.model import StudyModel
+from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
 from kneemri.training.heartbeat import Heartbeat
@@ -65,6 +65,14 @@ class Adaptation:
     unfreeze_last: int = 6
     """Six of twelve blocks — inherited from the reference, and only meaningful beside the rate above."""
 
+    layer_decay: float = NO_LAYER_DECAY
+    """How much slower each block below the top one moves — the third member of the entangled triple.
+
+    Defaults to no decay, which is what every ledger number was measured under. It belongs here rather
+    than beside the schedule because it is the term that makes the OTHER two separable: at one flat rate
+    a depth result and a rate result are the same measurement read twice.
+    """
+
 
 ONE_CYCLE_WARMUP = 0.15
 """Fraction of the run spent warming up before the decay — protects the pretrained encoder early."""
@@ -77,7 +85,11 @@ AVERAGING = "weight_average"
 SCHEDULED = "one_cycle"
 REPORTS = "report_supervision"
 ACCUMULATION = "micro_batches_per_step"
+LAYER_DECAY = "encoder_rate_decay"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
+
+NEEDED_FOR_A_RATIO = 2
+"""Two backbone groups — below that there is no pair for a per-block ratio to be defined between."""
 
 
 class Trainer:
@@ -97,7 +109,10 @@ class Trainer:
         self.augmentation = Augmentation(augment_config)
         self.objective = objective or Objective()
         groups = self.model.parameter_groups(
-            self.adaptation.head_lr, self.adaptation.backbone_lr, self.adaptation.unfreeze_last
+            self.adaptation.head_lr,
+            self.adaptation.backbone_lr,
+            self.adaptation.unfreeze_last,
+            self.adaptation.layer_decay,
         )
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         # fp16 until a run says otherwise, because that is what every number in the ledger was measured
@@ -144,7 +159,25 @@ class Trainer:
             SCHEDULED: self.schedule is not None,
             REPORTS: isinstance(self.reports, ReportSupervision),
             ACCUMULATION: self.accumulation.every,
+            LAYER_DECAY: self.encoder_rate_decay(),
         }
+
+    def encoder_rate_decay(self) -> float:
+        """The per-block rate ratio MEASURED off the optimiser, not read back off the flag that asked.
+
+        This is the positive witness `--layer-decay` would otherwise lack. Everything else about the
+        flag is silent: a decay that never reached `Adaptation` builds the flat two groups, trains
+        perfectly well, and reports the flat recipe's number under the decayed arm's name — the exact
+        failure shape `landed` exists for. The optimiser's own groups cannot lie about it.
+
+        Read off the TOP TWO backbone groups because they are the pair the decay is defined between,
+        and because `unfreeze_last` is clamped to the trunk's depth: counting groups instead would
+        report a mismatch for `--unfreeze-last 24` that is only this check's own arithmetic.
+        """
+        backbone = self.optimiser.param_groups[1:]
+        if len(backbone) < NEEDED_FOR_A_RATIO:
+            return NO_LAYER_DECAY
+        return float(backbone[-2]["lr"]) / float(backbone[-1]["lr"])
 
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
@@ -226,10 +259,16 @@ class Trainer:
         is not training longer, it is training on a decaying learning rate. `pct_start=0.15` spends the
         first sixth warming up, which also protects the pretrained encoder from the first few hundred
         steps at full rate.
+
+        `max_lr` is read back OFF THE OPTIMISER rather than rebuilt from the two `Adaptation` rates it
+        used to name. Those two are the peak rates only while `parameter_groups` returns exactly two
+        groups; under `--layer-decay` it returns one per opened block, and a two-element `max_lr` against
+        seven groups is a ValueError at best and, had the count happened to match, a schedule that
+        annealed the wrong block to the wrong rate. The peaks the optimiser was built with ARE the peaks.
         """
         self.schedule = torch.optim.lr_scheduler.OneCycleLR(
             self.optimiser,
-            max_lr=[self.adaptation.head_lr, self.adaptation.backbone_lr],
+            max_lr=[group["lr"] for group in self.optimiser.param_groups],
             total_steps=max(total_steps, 1),
             pct_start=ONE_CYCLE_WARMUP,
         )

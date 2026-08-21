@@ -225,6 +225,7 @@ class _WatchedConfig(dict[str, object]):
 
 PROVENANCE_ONLY = {
     "backbone_lr",
+    "layer_decay",
     "cache_studies",
     "ema",
     "head_lr",

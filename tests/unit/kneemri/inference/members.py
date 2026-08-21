@@ -678,6 +678,7 @@ PROVENANCE_ONLY = {
     "unfreeze_last",
     "head_lr",
     "backbone_lr",
+    "layer_decay",
 }
 """Recorded so the ledger can say which arm produced a member, and read by NOTHING at serve time — a
 training rule leaves no trace in the forward pass. Listed rather than omitted, so a field that gains a

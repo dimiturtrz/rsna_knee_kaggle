@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import StudyDesign
+from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.landed import Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
@@ -68,6 +68,9 @@ def test_adaptation():
     assert faster.backbone_lr == 1e-4
     assert faster.unfreeze_last == 12
     assert faster.head_lr == Adaptation().head_lr, "raising the encoder rate must not move the head's"
+
+    assert _setup().adaptation().layer_decay == NO_LAYER_DECAY, "flat is the shape the ledger was measured in"
+    assert _setup(layer_decay=0.7).adaptation().layer_decay == 0.7, "the third member of the triple must land"
 
 
 def test_trainer(tmp_path: Path):
@@ -205,7 +208,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 17, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 18, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

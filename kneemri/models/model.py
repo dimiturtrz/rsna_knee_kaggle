@@ -72,6 +72,15 @@ COMPILED_ENCODER = "compile_encoder"
 OPENED_BLOCKS = "opened_blocks"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
 
+NO_LAYER_DECAY = 1.0
+"""The decay that means "do not decay" — and, more importantly, "keep the two-group shape EXACTLY".
+
+Every number in the ledger was measured with the head in one group and every opened block in a second.
+A refactor that emits one group per block at a shared rate reproduces that only NUMERICALLY, and an
+optimiser-state or weight-decay difference between the two shapes is not something a score can rule
+out afterwards. So the flat case returns the old two groups untouched and the decay is a branch.
+"""
+
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
 IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
@@ -515,8 +524,10 @@ class StudyModel(nn.Module):
             parameter for parameter in block.parameters() if parameter.requires_grad and id(parameter) not in adapted
         )
 
-    def parameter_groups(self, head_lr: float, backbone_lr: float, unfreeze_last: int) -> list[dict[str, object]]:
-        """Freeze the encoder except its last blocks, and give what remains its own learning rate.
+    def parameter_groups(
+        self, head_lr: float, backbone_lr: float, unfreeze_last: int, layer_decay: float = NO_LAYER_DECAY
+    ) -> list[dict[str, object]]:
+        """Freeze the encoder except its last blocks, and give what remains its learning rate — per DEPTH.
 
         The model owns this rather than the trainer: which blocks exist, and therefore which of them can
         be opened, is a fact about the encoder, not about the fitting procedure.
@@ -524,11 +535,52 @@ class StudyModel(nn.Module):
         UNDER LoRA the depth argument does not apply: every block carries an adapter and the base
         weights are all frozen, so what opens is exactly the adapters. Honouring `unfreeze_last` as well
         would open six blocks' base weights alongside them and quietly make the run something else.
+
+        WHY THE DEPTH ARGUMENT EXISTS AT ALL. With ONE flat rate over every opened block, depth and rate
+        can only be measured along a diagonal: raising the rate until the top blocks move necessarily
+        applies that same rate to the earliest blocks, which hold the most general features and are the
+        most damaging to disturb. `Adaptation` already records that entanglement and calls it unresolved
+        — its answer was to raise the rate, which is the move that cannot separate them. A per-depth
+        rate is the standard way the transfer literature separates them, and until now this repo did not
+        have one: `--unfreeze-last 12` at 4e-5 was not a deeper version of the six-block arm, it was the
+        six-block arm plus six of the encoder's most general layers being rewritten at full rate.
+
+        `NO_LAYER_DECAY` keeps the two-group shape EXACTLY, rather than emitting per-block groups that
+        all happen to share a rate. Every number in the ledger was measured under that shape, and a
+        refactor that reproduces it only numerically is not one an equality check can confirm.
         """
-        return [
-            {"params": list(self.head.parameters()), "lr": head_lr},
-            {"params": self._opened(unfreeze_last), "lr": backbone_lr},
+        head: dict[str, object] = {"params": list(self.head.parameters()), "lr": head_lr}
+        if layer_decay == NO_LAYER_DECAY:
+            flat: dict[str, object] = {"params": self._opened(unfreeze_last), "lr": backbone_lr}
+            return [head, flat]
+        if any(isinstance(module, LoRALinear) for module in self.backbone.modules()):
+            # LOUD, for the reason `objective` refuses a pair memory with no ranking term: under LoRA
+            # what trains is adapters spread over every block, so a per-depth rate over the BASE blocks
+            # would be applied to nothing and the run would train the flat recipe under this arm's name.
+            message = (
+                f"--layer-decay {layer_decay} scales a rate by BLOCK DEPTH and this encoder carries "
+                "LoRA adapters, so the base blocks it would scale are frozen"
+            )
+            raise ValueError(message)
+        self._last_blocks(unfreeze_last)
+        opened = self._open_blocks(unfreeze_last)
+        # The TOP block keeps `backbone_lr` and everything below it is divided down, rather than the
+        # bottom keeping it and the top scaled up: the rate in the ledger is the rate the top block was
+        # measured at, so this holds that fixed and only ever slows the layers underneath.
+        graded: list[dict[str, object]] = [
+            {"params": list(block.parameters()), "lr": backbone_lr * layer_decay ** (len(opened) - 1 - depth)}
+            for depth, block in enumerate(opened)
         ]
+        return [head, *graded]
+
+    def _open_blocks(self, unfreeze_last: int) -> list[nn.Module]:
+        """The last `unfreeze_last` blocks, counted FROM THE FRONT so that zero means zero.
+
+        Spelled once because two callers now need it, and the arithmetic is the one `_last_blocks`
+        documents as having read `[-0:]` — the whole encoder — under a head-only name.
+        """
+        blocks = self._blocks()
+        return blocks[len(blocks) - min(unfreeze_last, len(blocks)) :]
 
     def _opened(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
         """The backbone parameters this run fits, having frozen the rest.
@@ -555,8 +607,7 @@ class StudyModel(nn.Module):
         every block rather than silently reading as a request for all of them, which is what
         `applied` reports back and `landed` compares.
         """
-        blocks = self._blocks()
-        opened = blocks[len(blocks) - min(unfreeze_last, len(blocks)) :]
+        opened = self._open_blocks(unfreeze_last)
         trainable = {id(parameter) for block in opened for parameter in block.parameters()}
         for parameter in self.backbone.parameters():
             if id(parameter) not in trainable:

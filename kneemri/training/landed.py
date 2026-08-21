@@ -31,6 +31,7 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    LAYER_DECAY,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
@@ -166,6 +167,7 @@ class Request:
     severity_weight: bool
     unfreeze_last: int
     accumulate: int
+    layer_decay: float
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -205,4 +207,5 @@ class Request:
             SEVERITY_WEIGHT: self.severity_weight,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
+            LAYER_DECAY: self.layer_decay,
         }

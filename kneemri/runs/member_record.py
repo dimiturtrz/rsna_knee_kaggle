@@ -167,6 +167,9 @@ class RunOptions(Protocol):
     @property
     def backbone_lr(self) -> float: ...
 
+    @property
+    def layer_decay(self) -> float: ...
+
 
 FINGERPRINT_SEED = 2026
 
@@ -355,6 +358,7 @@ class MemberRecord:
                 "unfreeze_last": options.unfreeze_last,
                 "head_lr": options.head_lr,
                 "backbone_lr": options.backbone_lr,
+                "layer_decay": options.layer_decay,
             },
             "fingerprint": self.model.fingerprint(self.read_size, GROUP, self.device).tolist(),
             "fingerprint_config": {

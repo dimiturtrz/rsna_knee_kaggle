@@ -57,6 +57,7 @@ class RunSetup:
             head_lr=self.options.head_lr,
             backbone_lr=self.options.backbone_lr,
             unfreeze_last=self.options.unfreeze_last,
+            layer_decay=self.options.layer_decay,
         )
 
     def budget(self) -> DeviceBudget:
@@ -122,6 +123,7 @@ class RunSetup:
             calibrated_targets=options.calibrated_targets,
             severity_weight=options.severity_weight,
             unfreeze_last=options.unfreeze_last,
+            layer_decay=options.layer_decay,
         )
 
     def objective(self) -> Objective:
