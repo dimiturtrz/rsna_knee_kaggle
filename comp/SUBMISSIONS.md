@@ -1294,3 +1294,47 @@ family at all. That is `knee-jucq`'s volumetric trunk (V-JEPA 2, wired in `e291a
 pretraining domain, architecture family and depth handling simultaneously — and it is now backed by a
 measurement rather than by an argument about capacity, which is the argument `basedense`'s 0.932 clause
 already refuted.
+
+#### 2026-08-21 — slots 3 and 4: `sevengrade` (55678597) and `sixfresh` v2
+
+Both submitted at about 23:20 UTC; a code submission stays `PENDING` for hours (the ledger's own measured
+case is ~8 h), so neither scored the same day. Recorded here with the pre-registration so the readings
+are resolved against what was written before them, not after.
+
+| entry | seventh / change | what it asks | pre-registered reading |
+|---|---|---|---|
+| `kneemri-sevengrade` | `sixfresh`'s exact six + `grade_ladder_s2026` (solo 0.8565, offline **+0.0001**) | does DISTANCE keep paying past six, when the distance is in the OBJECTIVE? | **≥0.932** distance stacks, V-JEPA enters as an eighth · **0.931** ties, future members must DISPLACE · **≤0.930** seven is past the cap, count reopens |
+| `kneemri-sixfresh` v2 | nothing — identical code, identical members, **refreshed kit** (`cf6a99f`, was `e3c884e`) | is the kit refresh transparent to serving? | **0.931** reproduced = transparent, `through_dense_s2026` and every V-JEPA member become shippable · anything else = the refresh moved serving, measured on a KNOWN entry |
+
+`grade_ladder` is the seventh because the seated six vary the encoder, the band, the rate and the pixel
+count and **not one of them varies the loss** — the severity ladder is the only axis with distance left
+inside this recipe family. The offline +0.0001 is stated and set aside deliberately: the section above
+this one establishes that the holdout is structurally blind to distance, so a near-zero offline delta is
+uninformative about a seat, in either direction.
+
+##### THE KIT-STALENESS TRAP, and why it cost a slot to close
+
+The seventh was chosen on merit as `through_dense_s2026` and re-membered before shipping. `kit_check
+--mounted` — the only gate that asks Kaggle what it will actually run — returned exit 1: the mounted
+`dimiturnt/kneemri-kit` sat at `e3c884e`, **9 commits behind HEAD in the 30 files the kernel loads**, and
+one of the nine (`ba76fd1 through_plane`) *implements the read that member was fitted with*. Mounting it
+was a hard failure on the card, not a degraded score.
+
+The fix is the trap. Refreshing the kit rewrites `model.py` (198 lines), `kernel_run`, `live_dataset` and
+`study_cache` **under every member of the entry at once** — so the first entry shipped on a fresh kit
+carries two variables, and a bad reading could not be attributed. Hence the split: `sevengrade` ships
+against the SAME kit that produced the 0.931 (no severity or ladder commit is among the nine, so
+`grade_ladder` needs none of them), and the kit refresh is validated ALONE, on an entry whose score is
+already known. A slot spent on a control rather than on a candidate, because the control unblocks
+`through_dense` and every V-JEPA member that follows it.
+
+Named confound on `sevengrade`, recorded before the score: the ladder has never scored on the board, so a
+low reading admits the reading "the objective does not transfer" as well as "seven is past the cap".
+Those two separate only under the `through_dense` follow-up, which the kit refresh gates.
+
+##### SLOT 5 WAS NOT SPENT
+
+Every question ready to ship was gated on one of the two pending readings. The de-confounded
+`through_dense` entry needs `sixfresh` v2 to read 0.931 first, and the required gates plus a ~9 min kernel
+run did not fit the 26 minutes left before the slots expired. An expiring slot is worth zero; a slot spent
+on an uninterpretable entry is worth less than zero, because it also spends the next day's comparison.
