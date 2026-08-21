@@ -280,6 +280,8 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `rate_2e-4` | encoder rate 2e-4, same recipe | 0.7391 | −0.1066 | past the edge: loss RISES epoch 0→1 and plateaus at 1.07 |
 | `slice_attention` | attention over slices, not max | 0.8473 | +0.0016 | **MISLABELLED — IT MEASURED THE MEAN (knee-7gyw, found 2026-08-21).** `StudyModel.parameter_groups` built its head group as `self.head.parameters()`, and the aggregator is a SIBLING of the head, so the gate's tensors were in no param group and the optimiser never touched them. `SliceAttention`'s score layer is zero-initialised on purpose so that an untrained gate is exactly the arithmetic mean over slices — so this row is **mean pooling vs max pooling**, not attention vs max. The checkpoint and the 0.8473 are real; only the name is wrong. **RESOLVED 2026-08-21 by `attend_true`, the row below**, which ran the same recipe from the fixed snapshot and is the number this row was supposed to be |
 | `attend_true` | attention over slices with a gate the optimiser actually reaches — `slice_attention`'s recipe re-run after knee-7gyw | 0.8476 | +0.0019 vs max, **+0.0003 vs the mean** | **THE POOLING OPERATOR IS NOT A LEVER, and this is the first honest reading of that axis.** Plumbing verified BEFORE the verdict, which is the whole point of the re-run: `slices.gate.3.weight` reads absmax **8.596939e-02** in the epoch-5 checkpoint against exactly **0.000e+00** in `attend_dense`, so the gate trained. Converged and overfit — peak 0.8476 at epoch 5, then 0.8441 / 0.8451 / 0.8438 / 0.8428 / 0.8434 / 0.8432 while the loss falls 0.8031 → 0.6405. **Three operators on one recipe now span 0.0019**: elementwise max 0.8457, unweighted mean 0.8473, trained 64-wide gate 0.8476 — under a third of the 0.0062 floor, and the ordering is monotone but every gap is noise. Seat value **+0.0004** into the pinned five, 0 of 1 clearing +0.0015. **WHAT IT DOES NOT RULE OUT:** all three operators are permutation-blind, so slice ORDER is untested (`DepthAttention`, knee-tqn) — but the prior for it drops, because this row read against `knee-ezz` (20 cached slices vs 12 under max: **−0.0001**) and `extended_slots` (nine slots, 83,297 unseen slices: **+0.0002**) says the slice-AGGREGATION STAGE is saturated from both ends at once: neither more inputs to it nor a better rule for combining them moves the number. The limit is upstream, in what one slice's feature vector contains |
+| `depth_true` | `DepthAttention` — the ORDER-AWARE aggregator, slices mixed with their through-plane neighbours before the gate, re-run from the fixed snapshot after knee-7gyw | 0.8461 | **−0.0015 vs `attend_true`**, −0.0012 vs the mean, +0.0004 vs max | **SLICE ORDER IS NOT A LEVER EITHER, and this closes knee-tqn — the clause `attend_true` left open.** Peak 0.8461 at epoch 6, then 0.8431 / 0.8440 / 0.8439 / 0.8436 while the loss falls to 0.6387, the same converge-and-overfit shape as the row above. **Four operators on one recipe now span 0.0019** — max 0.8457, order-aware gate 0.8461, mean 0.8473, permutation-blind gate 0.8476 — and the order-aware one lands SECOND-WORST, so the extra structure is not merely flat but slightly costly. Seat value **−0.0002**, negative, which the board charges at about 3× → roughly −0.0005 (knee-c0u9): not a free look, so it does not mount. **The frozen-feature proxy called both signs in advance** — trained gate +0.0027, through-plane neighbour mixing −0.0007 — and the pixel model reproduced them, which is the first time that proxy has been checked against a full arm on this axis and makes it usable to gate future pooling work at ~2 min instead of ~45. **WHAT IT DOES NOT RULE OUT:** through-plane mixing at the FEATURE level is what died; a 3D encoder that sees the volume before any per-slice feature exists is a different mechanism and untouched. **What it confirms:** `attend_true`'s reading that the limit is upstream, in what one slice's feature vector contains — the aggregation stage is now saturated from three directions (more slices −0.0001, more slots +0.0002, every combining rule within 0.0019) |
+| `encoder_adapt_thawed` | the SSL-adapted encoder with **every block trainable** (`--unfreeze-last 12`) — the "unfreeze deeper" removal `encoder_adapt` named | 0.7162 | **−0.1416 vs `band_dense`**, +0.0260 vs the frozen case | **the third collapse, and it inverts the hypothesis it was built to test** — see below. Found unrecorded by `ledger_check`. No seat |
 | `slotmean` | pooling across SLOTS by mean instead of attention (`--slot-pooling mean`) | 0.8406 | −0.0051 vs `wholestack_s2026` | **found unledgered 2026-08-19** — a full 12-epoch arm on an axis this table records nowhere else, sitting on disk since it ran. Directional against attention, not a refutation, and the reasons are on the comparison rather than in it: the reading is on the **UNPAIRED** bound because the control kept no per-study predictions, and `run_comparison` reports the control as predating the `slot_pooling` option entirely — so "the control ran attend" is read off the era's default, not off its record. No label clears its interval; the largest rows are Lateral Meniscus −0.0187 and Baker's −0.0162, both regional and focal moving together (focal −0.0051, regional −0.0052), which is a uniformly slightly worse model rather than a redistribution. Attention over slots stays the default it already was; what this row buys is that the axis is now MEASURED once instead of assumed |
 | `wholestack_folds` 2 | same recipe, fold 2 | **0.8518** | — | best single member; epoch-5 partial |
 | `slices16_ws` | 16 cached slices, whole-stack | 0.8452 | −0.0005 | **refuted**, 33% slower for nothing. TWO runs share this name: the one quoted here (epochs 0–11, peak 0.8452 at epoch 11, and the checkpoint on disk is its epoch 11 at 0.84518) and a later re-run that was KILLED at epoch 8 having peaked at **0.8411**. Both sets of epochs are in one metrics file because runs used to append; every reader that took the last group quoted the dead run's 0.8411 for a member that scores 0.8452 (knee-1m2g). `RunMetrics.begin` now rotates a previous run's epochs aside, so no file written after 2026-08-19 can hold two runs |
@@ -1354,6 +1356,36 @@ carried over unchanged, because the hypothesis was never tested; only the harnes
 outcome is now reachable that the first arm could not produce: a result INDISTINGUISHABLE from control,
 which would bracket the axis (1e-4 destroys, 1e-5 does nothing, the answer if any lies between) rather
 than kill it.
+
+### encoder_adapt_thawed — the third collapse, and it says the adapted encoder is WORSE than what it started from (2026-08-21)
+
+**The arm.** Best holdout **0.7162** at epoch 10, twelve epochs, against `band_dense` 0.8578 (**−0.1416**).
+Recipe: the adapted encoder (`--encoder-weights $ADAPTED --encoder-adapt-depth 6`) with
+**`--unfreeze-last 12`** — every block trainable — at `backbone_lr 4e-5`, batch 2 × accumulate 6, 20 slices,
+band 0.1–0.9, 336 px. Roughly 800 s an epoch against the control's ~230, so ~2.7 h for the slot.
+
+**Found by `ledger_check`, not by a watcher.** It sat finished and unrecorded for the length of a session:
+`epochs_done 11` in the checkpoint while the tail of its own log still read mid-epoch. That is the exact
+failure the check exists for, and the second time it has paid.
+
+**The mechanism, and it is the informative part.** This is the *unfreeze-deeper* removal the
+`encoder_adapt` interpretation named as one of two ways the axis could still be wrong. It fired, and it
+moved the number the predicted direction: **0.6902 (freeze) → 0.6875 (gentle lr) → 0.7162 (all twelve
+blocks trainable)**, +0.0260 over the frozen case. But the reading that buys is not "unfreezing helps" —
+it is that **the score rises monotonically with how much of the SSL representation the fine-tune is
+allowed to ERASE**, and it is still 0.1416 short of a control that starts from stock DINOv2. The limit is
+therefore not that the fine-tune lacks gradient to overwrite the adaptation (the hypothesis this arm was
+built to test). It is that **the adapted representation is worse than the one it replaced**, and the best
+thing training can do with it is destroy it.
+
+**What it does NOT rule out.** The other named removal is untouched: the MAE converged on the DEFAULT
+12-slice cache while this arm reads a 20-slice 0.10–0.90 one, so the adaptation was fit on a different
+slice distribution than it is asked to serve. That is a data-plumbing suspect, not an idea suspect, and it
+has to be cleared before the SSL axis can be called refuted rather than three-times-failed. It also does
+not rule out a longer MAE — published recipes run far past six epochs, and `encoder_drift` measured the
+representation only 55% rebuilt.
+
+**Seat: none.** 0.1416 below the control is not a diversity argument, it is a broken member.
 
 ### encoder_adapt_gentle — 0.6875, and the pair is what carries the finding (2026-08-20)
 
