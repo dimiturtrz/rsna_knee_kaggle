@@ -24,12 +24,12 @@ import json
 import logging
 import os
 import shutil
-import subprocess
 from pathlib import Path
 
 from kneemri.denominator import Denominator
 from kneemri.kaggle.kernel_closure import KernelClosure
 from kneemri.kaggle.mounted_kit import DATASET, MountedKit
+from kneemri.spawn import Spawn
 
 logger = logging.getLogger(__name__)
 
@@ -78,13 +78,18 @@ class KitCheck:
         reports on a different repository than the one it was handed is the failure `--mounted` exists
         to prevent, so it is fixed here rather than in the tests that found it.
         """
-        return subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell, our own repo
-            [self.git, "-C", str(self.repo), *command],
-            capture_output=True,
-            text=True,
-            check=True,
-            env=self.unhooked(),
-        ).stdout.strip()
+        # resolved executable, fixed argv, no shell, our own repo
+        return (
+            Spawn()
+            .ran(
+                [self.git, "-C", str(self.repo), *command],
+                capture_output=True,
+                text=True,
+                check=True,
+                env=self.unhooked(),
+            )
+            .stdout.strip()
+        )
 
     def stamped(self, kit: Path) -> str | None:
         """The commit a built kit records, or None when it predates the stamp.

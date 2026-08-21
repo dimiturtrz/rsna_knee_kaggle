@@ -1125,6 +1125,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.spawn",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.training.device_budget",
       "weight": 1
     },
@@ -1132,6 +1138,12 @@
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "kneemri.training.options",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_smoke",
+      "target": "kneemri.spawn",
       "weight": 1
     },
     {
@@ -1168,6 +1180,12 @@
       "kind": "import",
       "source": "kneemri.experiments.progress",
       "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.queue_check",
+      "target": "kneemri.spawn",
       "weight": 1
     },
     {
@@ -1598,6 +1616,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.kit_check",
+      "target": "kneemri.spawn",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.live_dataset",
+      "target": "kneemri.spawn",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.mount_check",
       "target": "kneemri.denominator",
       "weight": 1
@@ -1624,6 +1654,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.mount_check",
       "target": "kneemri.kaggle.live_dataset",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.mounted_kit",
+      "target": "kneemri.spawn",
       "weight": 1
     },
     {
@@ -6607,6 +6643,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck._descriptions",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck._descriptions",
+      "target": "kneemri.spawn.Spawn.ran",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck._environment",
       "target": "core.paths.DataRoot.from_config",
@@ -6622,6 +6670,18 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck._printed",
       "target": "kneemri.experiments.arm_check.ArmCheck._environment",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck._printed",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck._printed",
+      "target": "kneemri.spawn.Spawn.ran",
       "weight": 1
     },
     {
@@ -6865,6 +6925,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
+      "target": "kneemri.spawn.Spawn.ran",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_smoke.ArmSmoke.failed",
       "target": "kneemri.experiments.arm_smoke.ArmSmoke.command",
@@ -7036,6 +7108,18 @@
       "kind": "construct",
       "source": "kneemri.experiments.progress.main",
       "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.queue_check.Probe.read",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.Probe.read",
+      "target": "kneemri.spawn.Spawn.ran",
       "weight": 1
     },
     {
@@ -8497,6 +8581,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kit_check.KitCheck.asked",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.KitCheck.asked",
+      "target": "kneemri.spawn.Spawn.ran",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.kit_check.KitCheck.behind",
       "target": "kneemri.kaggle.kit_check.KitCheck.asked",
@@ -8578,6 +8674,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.live_dataset.LiveDataset._cli",
       "target": "kneemri.kaggle.live_dataset.LiveDataset.entrypoint",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.live_dataset.LiveDataset._cli",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.live_dataset.LiveDataset._cli",
+      "target": "kneemri.spawn.Spawn.ran",
       "weight": 1
     },
     {
@@ -8692,6 +8800,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.mounted_kit.MountedKit.__init__",
       "target": "kneemri.kaggle.mounted_kit.MountedKit._cli",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.mounted_kit.MountedKit.recorded",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mounted_kit.MountedKit.recorded",
+      "target": "kneemri.spawn.Spawn.ran",
       "weight": 1
     },
     {
@@ -9670,6 +9790,18 @@
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.stalls",
       "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.spawn.Spawn.ran",
+      "target": "kneemri.spawn.Spawn.attempted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.spawn.Spawn.ran",
+      "target": "kneemri.spawn.Spawn.checked",
       "weight": 1
     },
     {
@@ -11253,7 +11385,7 @@
       "role": null
     },
     {
-      "descendants": 128,
+      "descendants": 129,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -12122,6 +12254,14 @@
       "label": "run_metrics",
       "level": "module",
       "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn",
+      "label": "spawn",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -13763,6 +13903,14 @@
       "level": "class",
       "parent": "kneemri.runs.run_metrics",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn",
+      "label": "Spawn",
+      "level": "class",
+      "parent": "kneemri.spawn",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -20354,6 +20502,30 @@
       "label": "stalls",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn.attempted",
+      "label": "attempted",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn.checked",
+      "label": "checked",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn.ran",
+      "label": "ran",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
       "role": null
     },
     {

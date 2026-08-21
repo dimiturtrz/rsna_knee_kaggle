@@ -13,9 +13,10 @@ Kaggle holds costs one small download rather than the weights.
 import json
 import logging
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
+
+from kneemri.spawn import Spawn
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,8 @@ class MountedKit:
         None means "the dataset carries no stamp", and "we could not ask" is a different answer.
         """
         with tempfile.TemporaryDirectory() as into:
-            subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
+            # resolved executable, fixed argv, no shell
+            Spawn().ran(
                 [*self.kaggle, "datasets", "download", "-f", STAMP, self.dataset, "-p", into, "--force"],
                 capture_output=True,
                 text=True,

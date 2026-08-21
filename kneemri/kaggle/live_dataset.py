@@ -1,10 +1,11 @@
 """What a Kaggle dataset actually holds, asked of Kaggle rather than of the directory it was built in."""
 
 import json
-import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
+
+from kneemri.spawn import Spawn
 
 DATASET_METADATA = "dataset-metadata.json"
 LIVE_TIMEOUT_SECONDS = 120
@@ -47,7 +48,8 @@ class LiveDataset:
 
     def _cli(self, identifier: str) -> str:
         """The CLI's own CSV listing, which is the read path that works without a bearer token."""
-        done = subprocess.run(  # noqa: S603 - fixed argv, a dataset id from our own metadata, no shell
+        # fixed argv, a dataset id from our own metadata, no shell
+        done = Spawn().ran(
             [self.entrypoint(), "datasets", "files", identifier, "--csv"],
             capture_output=True,
             text=True,

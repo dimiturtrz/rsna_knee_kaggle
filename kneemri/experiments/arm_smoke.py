@@ -17,6 +17,8 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+from kneemri.spawn import Spawn
+
 logger = logging.getLogger(__name__)
 
 SMOKE_STUDIES = 60
@@ -61,9 +63,8 @@ class ArmSmoke:
         past the call. The arm that hung is the one thing such a sweep must be able to name.
         """
         try:
-            done = subprocess.run(  # noqa: S603 - fixed argv built from our own arm files, no shell
-                argv, capture_output=True, text=True, timeout=SMOKE_TIMEOUT_SECONDS, check=False
-            )
+            # fixed argv built from our own arm files, no shell
+            done = Spawn().ran(argv, capture_output=True, text=True, timeout=SMOKE_TIMEOUT_SECONDS, check=False)
         except subprocess.TimeoutExpired:
             return TIMED_OUT, f"still running after {SMOKE_TIMEOUT_SECONDS}s on {SMOKE_STUDIES} studies"
         lines = done.stderr.strip().splitlines()

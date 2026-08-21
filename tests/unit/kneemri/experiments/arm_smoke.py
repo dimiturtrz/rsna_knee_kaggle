@@ -76,7 +76,7 @@ def test_failed_reports_the_arm_that_hung(tmp_path: Path, monkeypatch: pytest.Mo
         _record(tmp_path, "after", loss=0.62, auc=0.55)
         return subprocess.CompletedProcess(argv, 0, "", "")
 
-    monkeypatch.setattr("kneemri.experiments.arm_smoke.subprocess.run", hangs)
+    monkeypatch.setattr("kneemri.spawn.subprocess.run", hangs)
     stale = tmp_path / "hangs.partial"
     stale.write_bytes(b"the previous sweep's weights")
     os.utime(stale, (LAST_SWEEP, LAST_SWEEP))

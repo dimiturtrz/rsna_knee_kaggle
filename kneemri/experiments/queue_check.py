@@ -23,9 +23,10 @@ two strings and the unit test needs no process to kill.
 import argparse
 import logging
 import shutil
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from kneemri.spawn import Spawn
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,8 @@ class Probe:
         found = shutil.which(self.executable)
         if not found:
             return ""
-        completed = subprocess.run(  # noqa: S603 - resolved executable, fixed argv, no shell
+        # resolved executable, fixed argv, no shell
+        completed = Spawn().ran(
             [found, *self.argv], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
         )
         return completed.stdout

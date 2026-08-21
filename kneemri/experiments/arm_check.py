@@ -37,6 +37,7 @@ from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.models.backbone import ENCODERS
+from kneemri.spawn import Spawn
 from kneemri.training.device_budget import GB_PER_SLICE, DeviceBudget
 from kneemri.training.options import TrainingOptions
 
@@ -196,7 +197,8 @@ class ArmCheck:
         found: dict[str, str] = {}
         for command in commands:
             try:
-                done = subprocess.run(  # noqa: S603 - fixed argv, our own files, no shell
+                # fixed argv, our own files, no shell
+                done = Spawn().ran(
                     [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
                     capture_output=True,
                     text=True,
@@ -325,8 +327,9 @@ class ArmCheck:
         """
 
         def shown(bead: str) -> str:
-            done = subprocess.run(  # noqa: S603 - fixed argv, a bead id matched by BEAD_LINE, no shell
-                ["bd", "show", bead],  # noqa: S607 - `bd` off PATH, as every other command here resolves
+            # fixed argv, a bead id matched by BEAD_LINE, no shell
+            done = Spawn().ran(
+                ["bd", "show", bead],
                 capture_output=True,
                 text=True,
                 check=False,
