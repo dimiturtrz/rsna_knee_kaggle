@@ -63,6 +63,36 @@ SEVERITY: dict[str, tuple[str, ...]] = {
 }
 """Each language's own grading words — the whole point, since the English set finds 1.7% of Spanish."""
 
+HEDGES: dict[str, tuple[str, ...]] = {
+    "en": (
+        r"possib",
+        r"suspect",
+        r"cannot\s+(be\s+)?exclude",
+        r"can\s*not\s+exclude",
+        r"equivocal",
+        r"indetermin",
+        r"may\s+repres",
+        r"question\s+of",
+        r"differential",
+        r"\bquer(y|ie)",
+        r"\bvs\b",
+        r"versus",
+    ),
+}
+"""Words a report uses when it is NOT sure the finding is there — English only, and deliberately so.
+
+The other seven languages are missing because the measurement that would have justified writing them
+came back backwards. Split by this flag, the reader's positive calls agree with the radiologist MORE on
+hedged reports than on plain ones, at every verdict level (knee-mxj, 2026-08-21), and the reason is
+structural rather than a small sample: the reader has already READ the hedge. Its five verdict levels
+ARE its confidence in the text, so a regex over the same sentence re-derives a quantity the value column
+already carries, and re-derives it worse. Where a report equivocates the reader has already downgraded
+the cell, which leaves the residual assertion more reliable, not less.
+
+Kept, and kept English-only, because the flag is a legitimate ACCEPTANCE TEST for a future reader even
+though it is not a supervision signal: a replacement that claims to handle uncertainty better has to
+move this split, and the module cannot ask the question without the vocabulary."""
+
 UNKNOWN = "unknown"
 
 
@@ -74,8 +104,13 @@ class ReportLanguages:
             code: [re.compile(rf"(?<!\w){re.escape(word)}(?!\w)", re.IGNORECASE) for word in signature]
             for code, signature in SIGNATURES.items()
         }
-        self.markers = {
-            code: [re.compile(pattern, re.IGNORECASE) for pattern in patterns] for code, patterns in SEVERITY.items()
+        self.markers = self._compiled(SEVERITY)
+        self.hedges = self._compiled(HEDGES)
+
+    @staticmethod
+    def _compiled(vocabulary: dict[str, tuple[str, ...]]) -> dict[str, list[re.Pattern[str]]]:
+        return {
+            code: [re.compile(pattern, re.IGNORECASE) for pattern in patterns] for code, patterns in vocabulary.items()
         }
 
     def language(self, report: str) -> str:
@@ -92,6 +127,16 @@ class ReportLanguages:
         patterns find in it.
         """
         return any(marker.search(report) for marker in self.markers.get(language, []))
+
+    def hedged(self, report: str, language: str) -> bool:
+        """Whether the report qualifies its findings — "possible", "cannot exclude" — IN THE GIVEN LANGUAGE.
+
+        Returns False for every language but English, because only English vocabulary is written; see
+        `HEDGES` for the measurement that stopped the other seven from being written. A caller splitting
+        the corpus on this must therefore restrict itself to English reports rather than reading the
+        False side as "not hedged".
+        """
+        return any(hedge.search(report) for hedge in self.hedges.get(language, []))
 
     def census(self, reports: list[str]) -> list[str]:
         """One line per language: how many reports, what share, and how many grade their findings.

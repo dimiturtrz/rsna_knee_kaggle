@@ -48,6 +48,25 @@ def test_graded():
     assert not languages.graded("Menisco sin alteraciones.", "es"), "an ungraded report must not match"
 
 
+def test_hedged():
+    """A qualified finding is found in English and — deliberately — nowhere else.
+
+    `HEDGES` holds English only because the measurement that would have justified the other seven came
+    back backwards: split on this flag, the reader's positive calls agree with the radiologist MORE on
+    hedged reports, because the reader has already read the hedge and downgraded the cell. So the False
+    a Spanish report returns here means "no vocabulary", never "no hedging", and this test pins that
+    difference rather than letting a later reader mistake one for the other.
+    """
+    languages = ReportLanguages()
+
+    assert languages.hedged("Possible tear of the medial meniscus.", "en")
+    assert languages.hedged("Joint effusion cannot be excluded.", "en")
+    assert languages.hedged("Suspected chondral defect versus artefact.", "en")
+
+    assert not languages.hedged("There is a full-thickness tear of the medial meniscus.", "en"), "an assertion"
+    assert not languages.hedged("Posible rotura del menisco interno.", "es"), "hedged in Spanish, and unreadable here"
+
+
 def test_census():
     """One line per language, carrying both rates — what the corpus says and what English patterns see."""
     lines = ReportLanguages().census([ENGLISH, SPANISH, SPANISH, GERMAN])

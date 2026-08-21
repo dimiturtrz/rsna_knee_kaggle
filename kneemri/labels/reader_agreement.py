@@ -39,6 +39,10 @@ POSITIVE = "YES"
 MIDPOINT = 0.5
 """Where a graded annotation becomes a positive, matching `LabelScores`."""
 
+GRADED = "graded"
+HEDGED = "hedged"
+"""The two report-text flags, named where the split that reads them lives — see `signal_report`."""
+
 
 class ReaderAgreement:
     """How often the reader's verdict matches the radiologist, split by the report's language."""
@@ -56,13 +60,17 @@ class ReaderAgreement:
         merged = annotated.merge(read[["StudyInstanceUID", *verdicts]], on="StudyInstanceUID")
         rows = []
         for _, study in merged.iterrows():
-            language = self.languages.language(str(study["Report"]))
+            report = str(study["Report"])
+            language = self.languages.language(report)
+            # Read once per STUDY rather than per cell: both flags are properties of the report, and the
+            # inner loop runs twelve times over the same text.
+            flags = (self.languages.graded(report, language), self.languages.hedged(report, language))
             for target in TARGETS:
                 verdict, truth = study.get(f"{target}__verdict"), study.get(target)
                 if pd.isna(verdict) or pd.isna(truth):
                     continue
-                rows.append((study["StudyInstanceUID"], language, target, str(verdict).upper(), float(truth)))
-        return pd.DataFrame(rows, columns=["study", "language", "target", "verdict", "truth"])
+                rows.append((study["StudyInstanceUID"], language, *flags, target, str(verdict).upper(), float(truth)))
+        return pd.DataFrame(rows, columns=["study", "language", GRADED, HEDGED, "target", "verdict", "truth"])
 
     def errors(self, cells: pd.DataFrame) -> pd.DataFrame:
         """Every cell the reader got wrong, split by DIRECTION and by what it said.
@@ -123,6 +131,60 @@ class ReaderAgreement:
             "low": float(low),
             "high": float(high),
         }
+
+    def split(self, cells: pd.DataFrame, signal: str) -> dict[str, float]:
+        """Agreement on the reader's positive calls where `signal` fires, minus where it does not.
+
+        Same shape and same study-clustered interval as `gap`, because it is the same question asked of a
+        different column: is there a population of cells the reader is measurably worse on?
+
+        A flag that fires on every study or on none returns NaNs rather than raising. That is a real
+        input — `hedged` fires nowhere outside English for want of vocabulary — and the bootstrap draws
+        from an empty study array, so the alternative is a crash on a corpus that is merely homogeneous.
+        """
+        positives = cells[cells["verdict"] == POSITIVE]
+        fired, plain = positives[positives[signal]], positives[~positives[signal]]
+        if fired.empty or plain.empty:
+            return dict.fromkeys(("fired", "plain", "cells", "delta", "low", "high"), float("nan"))
+        deltas = self._resample(positives, fired["study"].unique(), plain["study"].unique())
+        low, high = np.percentile(deltas, INTERVAL)
+        return {
+            "fired": float(fired["truth"].mean()),
+            "plain": float(plain["truth"].mean()),
+            "cells": float(len(fired)),
+            "delta": float(fired["truth"].mean() - plain["truth"].mean()),
+            "low": float(low),
+            "high": float(high),
+        }
+
+    def signal_report(self, cells: pd.DataFrame) -> list[str]:
+        """Whether either report-text flag finds cells the reader is worse on — the weight-column question.
+
+        `Targets` multiplies every cell's loss by a weight, and the reader's `__conf` column takes exactly
+        one value per verdict level (std 0.0 over all 52,872 cells), so that weight is today a
+        deterministic function of the target it multiplies and carries no information of its own. The
+        obvious way to fill it is to read the report again: weight down the cells whose report hedges, or
+        weight up the cells whose report grades. This is the measurement that prices both.
+
+        IT CAME BACK BACKWARDS ON BOTH, which is why the flags live here as an acceptance test rather than
+        in the loss. A regex cannot supply an INDEPENDENT weight, because the reader has already read the
+        same sentence — its five levels ARE its confidence in the text — so where a report hedges the cell
+        has already been downgraded and the residual assertion is more reliable, not less. A replacement
+        reader that genuinely separates grade from certainty has to move these two numbers.
+
+        HEDGED IS SCORED ON ENGLISH REPORTS ONLY. `HEDGES` holds no other language, so elsewhere the flag
+        is False for want of vocabulary rather than for want of hedging, and pooling would compare English
+        against everything.
+        """
+        english = cells[cells["language"] == ENGLISH]
+        lines = []
+        for signal, population in ((GRADED, cells), (HEDGED, english)):
+            split = self.split(population, signal)
+            lines.append(
+                f"{signal:>7} {split['cells']:>5.0f} positive calls   agrees {split['fired']:.1%} against "
+                f"{split['plain']:.1%} plain: {split['delta']:+.3f} [{split['low']:+.3f}, {split['high']:+.3f}]"
+            )
+        return lines
 
     def _resample(
         self, positives: pd.DataFrame, english: NDArray[np.object_], other: NDArray[np.object_]
@@ -189,6 +251,10 @@ def main() -> None:
     # WHAT a replacement reader must do differently, beside how well this one agrees. The two are
     # separate questions and the second is the actionable one.
     for line in agreement.error_report(cells):
+        logger.info(line)
+    # And whether the report text holds a signal the reader's own verdict does not already carry, which
+    # is the only thing that could fill the empty weight column (knee-mxj).
+    for line in agreement.signal_report(cells):
         logger.info(line)
 
 

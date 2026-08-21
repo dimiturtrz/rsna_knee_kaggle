@@ -1,13 +1,19 @@
 """Reader-radiologist agreement per language, on constructed studies whose right answer is known by hand."""
 
+import math
+
 import pandas as pd
 import pytest
 
 from kneemri.findings import TARGETS
-from kneemri.labels.reader_agreement import ReaderAgreement
+from kneemri.labels.reader_agreement import GRADED, HEDGED, ReaderAgreement
 
 ENGLISH = "There is a tear of the medial meniscus with mild joint effusion and normal signal throughout."
 SPANISH = "Técnica: RMN de la rodilla. Resultados: rotura parcial del menisco interno con derrame articular."
+PLAIN = "There is a tear of the medial meniscus with joint effusion and normal signal throughout."
+"""The same English report with its one severity word removed, so `graded` separates the two."""
+HEDGED_REPORT = "There is possible tear of the medial meniscus; joint effusion cannot be excluded, signal normal."
+"""English, unhedged vocabulary absent from both others, and carrying no severity word of its own."""
 
 
 def _studies(reports: list[str], truths: list[list[float | None]]) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -91,6 +97,53 @@ def _cells() -> pd.DataFrame:
         ],
         columns=["study", "language", "target", "verdict", "truth"],
     )
+
+
+def test_split():
+    """The difference between the cells a report-text flag fires on and the rest, with its interval.
+
+    Built so the flagged studies never agree and the plain ones always do — a difference no honest
+    interval can report as absent, which is the guard against a measurement that always answers "no".
+    """
+    annotated, read = _studies([ENGLISH, ENGLISH, PLAIN, PLAIN], [[0.0, 0.0], [0.0, 0.0], [1.0, 1.0], [1.0, 1.0]])
+    cells = ReaderAgreement().cells(annotated, read)
+
+    split = ReaderAgreement().split(cells, GRADED)
+
+    assert split["cells"] == 4, "two graded studies, two annotated cells each"
+    assert split["fired"] == 0.0
+    assert split["plain"] == 1.0
+    assert split["delta"] == -1.0
+    assert split["low"] <= split["delta"] <= split["high"], "the interval must contain the observed difference"
+
+
+def test_split_needs_both_populations():
+    """A flag that fires everywhere or nowhere answers NaN rather than raising.
+
+    `hedged` fires on no language but English for want of vocabulary, so a homogeneous population is a
+    real input here and not a malformed one; the bootstrap would otherwise draw from an empty array.
+    """
+    annotated, read = _studies([PLAIN, PLAIN], [[1.0], [0.0]])
+
+    split = ReaderAgreement().split(ReaderAgreement().cells(annotated, read), GRADED)
+
+    assert all(math.isnan(value) for value in split.values()), "every field NaN, none of them a number"
+
+
+def test_signal_report():
+    """One line per flag: how many calls it fires on, both rates, and the interval between them.
+
+    HEDGED IS SCORED ON ENGLISH ONLY, so the Spanish study must not reach its line — outside English the
+    flag is False for want of vocabulary rather than for want of hedging.
+    """
+    annotated, read = _studies([HEDGED_REPORT, PLAIN, SPANISH], [[1.0], [0.0], [0.0]])
+
+    lines = ReaderAgreement().signal_report(ReaderAgreement().cells(annotated, read))
+
+    assert len(lines) == 2
+    assert lines[0].strip().startswith(GRADED) and "1 positive calls" in lines[0], "only the Spanish grades"
+    assert lines[1].strip().startswith(HEDGED) and "1 positive calls" in lines[1]
+    assert "agrees 100.0% against 0.0%" in lines[1], "the hedged study agrees, the plain English one does not"
 
 
 def test_errors():
