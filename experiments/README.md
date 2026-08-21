@@ -1297,6 +1297,16 @@ the targets discard; an ordinal target or a graded head consumes that informatio
 the batch, and neither has been tried. Recorded so a later ordinal arm is re-tested rather than assumed
 dead by this row.
 
+**That hatch was shut the next day, and the family closes with it (2026-08-21).** `grade_ladder` IS the
+ordinal target this paragraph names as untried. It was run, and on the OA triple — the only labels whose
+target shape it changes — it moves three for three negative, mean −0.0013. So the grade has now been
+spent three independent ways against this same control: the target VALUE (`calib_span`, −0.0020), the
+loss WEIGHT (this arm, −0.0048), and the target SHAPE (`grade_ladder`, −0.0013). Three parameterisations,
+three negatives, none clearing the floor in the right direction. What survives untouched is the
+observation itself — the reports carry a grade the binary targets discard. What the three arms jointly
+refute is that the grade is recoverable **by a supervision edit** at this corpus size. A graded HEAD (an
+output structure rather than a target rewrite) is a different mechanism and remains untried.
+
 **The axis stays open by the owner's call (2026-08-20): the grade is real information and the loss still
 throws it away.** What this row retires is the multiplier, not the signal. The successor is an ORDINAL
 target — the three YES levels as ordered classes with a cumulative-threshold head — which consumes the
