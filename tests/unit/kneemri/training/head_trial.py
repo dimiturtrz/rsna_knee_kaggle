@@ -4,7 +4,7 @@ import torch
 
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import ATTEND, MAXIMUM
+from kneemri.models.slice_pooling import ATTEND, MAXIMUM
 from kneemri.models.slot_head import ATTENDED, AVERAGED, MeanSlotHead, SlotHead
 from kneemri.training.head_trial import BATCH, AxisConcordance, HeadAxis, HeadTrial, TrialHead
 

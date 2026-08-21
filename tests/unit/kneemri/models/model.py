@@ -10,18 +10,17 @@ from torch import Tensor, nn
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
     ADAPTERS,
-    ATTEND,
     CLS_MEAN_FOCAL,
     COMPILED_ENCODER,
     COMPILED_PREFIX,
     OPENED_BLOCKS,
     POOL_PARTS,
     RECOMPUTING,
-    SLICE_POOLINGS,
     TARGETS,
     StudyDesign,
     StudyModel,
 )
+from kneemri.models.slice_pooling import ATTEND, SLICE_POOLINGS
 from kneemri.models.slot_head import REPORT_DIMS, SLOT_POOLINGS
 
 SEED = 2026
@@ -170,10 +169,11 @@ def test_every_slice_pooling_name_says_whether_a_slice_is_encoded_alone():
     different function on different pixels that loads without complaint.
     """
     torch.manual_seed(SEED)
-    for name, alone in SLICE_POOLINGS.items():
+    for name, pooling in SLICE_POOLINGS.items():
         model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=name))
-        assert model.per_slice is alone, name
-        assert (model.slices is not None) == (name == ATTEND), f"{name} builds only the module it uses"
+        assert model.per_slice is pooling.per_slice, name
+        built = type(model.slices) if model.slices is not None else None
+        assert built is pooling.aggregator, f"{name} builds the module its record names, and only that one"
 
     with pytest.raises(KeyError):
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="chanels"))
@@ -330,6 +330,27 @@ def test_parameter_groups(study_model: StudyModel):
     assert all(parameter.requires_grad for parameter in opened)
     frozen = [p for p in study_model.backbone.parameters() if not p.requires_grad]
     assert frozen, "the early blocks must be frozen"
+
+
+def test_parameter_groups_hold_every_trainable_tensor():
+    """NOTHING TRAINABLE MAY FALL OUTSIDE EVERY GROUP — the failure this test exists for already happened.
+
+    The head group was `self.head.parameters()`, and the slice aggregator is a SIBLING of the head. Its
+    tensors were therefore in no group and the optimiser never updated them, for as long as
+    `SliceAttention` existed. It never surfaced as a crash or even as a bad score: the gate is
+    zero-initialised so that an untrained pooling equals the mean over slices, so `attend` scored like a
+    mean because it was one (knee-7gyw). Asserted over EVERY pooling, since the whole point is that a
+    module added later must not be able to go missing the same way.
+    """
+    for name in SLICE_POOLINGS:
+        torch.manual_seed(SEED)
+        model = StudyModel(_BlockedBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=name))
+        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+
+        seen = [id(p) for group in groups for p in cast("list[torch.nn.Parameter]", group["params"])]
+        trainable = {id(p) for p in model.parameters() if p.requires_grad}
+        assert trainable <= set(seen), f"{name} leaves a trainable tensor outside every optimiser group"
+        assert len(seen) == len(set(seen)), f"{name} hands the same tensor to two groups"
 
 
 def test_parameter_groups_layer_decay():

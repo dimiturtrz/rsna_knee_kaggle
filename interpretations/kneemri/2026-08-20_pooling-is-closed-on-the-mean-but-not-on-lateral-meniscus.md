@@ -1,5 +1,14 @@
 # Pooling is closed on the mean, but not on Lateral Meniscus
 
+> **CORRECTION 2026-08-21 (knee-7gyw).** `attend_dense`'s gate was never trained — the aggregator is a
+> sibling of `self.head` and `parameter_groups` built the head group from `self.head.parameters()`, so
+> its tensors were in no param group, and a zero-initialised gate is exactly the mean over slices. That
+> arm compared **mean vs max**, so the pooling-OPERATOR half of the paragraph below is unmeasured and
+> the cell reopens. **The note's actual subject is untouched**: the Lateral Meniscus opening is a
+> per-label reading of two checkpoints that exist and predict what they predict, and the ordinal ruler
+> still agrees with the binary one on both. A correction to what an arm TESTED is not a correction to
+> what its predictions SAY.
+
 Two arms landed on 2026-08-19/20 asking the same question from opposite ends. `attend_dense` replaced
 the pooling OPERATOR — the elementwise max over slices — with a learned 64-wide gate. `focal_dense`
 left the operator alone and widened the pooled vector, concatenating a focal tail. Both are single-

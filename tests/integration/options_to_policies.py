@@ -12,19 +12,24 @@ that a run with every flag on call each one. A policy added tomorrow and never w
 commit that adds it, rather than on a 70-minute arm that reports a plausible number.
 """
 
+from collections.abc import Callable, Mapping
+from dataclasses import replace
 from pathlib import Path
+from typing import cast
 
 import pytest
 import torch
 
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.slice_pooling import SLICE_POOLINGS
+from kneemri.models.slot_head import SLOT_POOLINGS
 from kneemri.training import run_setup as build_module
 from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.trainer import Trainer
 
-from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
+from ..unit.kneemri.models.model import DIM, SLOTS, _BlockedBackbone, _FakeBackbone
 
 SLICES = 6
 SIZE = 14
@@ -129,6 +134,59 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
     RunSetup(_options()).trainer(model, DEVICE, ["study"], training_positions=16)
 
     assert set(policies) == called, f"{sorted(set(policies) - called)} is a policy no run can turn on"
+
+
+def _slice_arm(name: str) -> tuple[TrainingOptions, StudyDesign]:
+    return replace(_options(), slice_pooling=name), StudyDesign(slice_pooling=name)
+
+
+def _slot_arm(name: str) -> tuple[TrainingOptions, StudyDesign]:
+    return replace(_options(), slot_pooling=name), StudyDesign(slot_pooling=name)
+
+
+READOUT_VOCABULARIES = {"slice_pooling": (SLICE_POOLINGS, _slice_arm), "slot_pooling": (SLOT_POOLINGS, _slot_arm)}
+"""The design axes whose names build a module with WEIGHTS — the only ones that can fail silently.
+
+Ranked deliberately (knee-29s5): `scheme`, `centre` and `tie` are vocabularies too, and the integration
+suite pins one value of each the same way, but they decide WHICH PIXELS are read rather than what is
+trained. A mis-build there changes a reading, which `argv_to_checkpoint`'s design ratchet already
+catches; a mis-build here leaves a tensor that no optimiser moves, which nothing caught for two arms."""
+
+
+@pytest.mark.parametrize(("axis", "vocabulary_and_arm"), READOUT_VOCABULARIES.items())
+def test_every_readout_a_run_can_ask_for_reaches_the_optimiser(
+    axis: str,
+    vocabulary_and_arm: tuple[Mapping[str, object], Callable[[str], tuple[TrainingOptions, StudyDesign]]],
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A pooling a run can NAME must arrive as a module whose weights an optimiser will actually move.
+
+    THE PAIR THIS EXISTS FOR is `options.py` -> `model.py`, and it is the failure that already happened
+    (knee-7gyw): `--slice-pooling attend` parsed, stamped into the manifest, built the right module, and
+    then trained none of it, because the head group was `self.head.parameters()` and the aggregator is a
+    SIBLING of the head. The gate is zero-initialised on purpose so an untrained pooling is exactly the
+    mean over slices — so nothing crashed, nothing scored badly, and two ledger entries measured the mean
+    while claiming to measure attention.
+
+    Walks the VOCABULARY rather than naming the poolings that exist today: a name added to the table and
+    not wired into a param group fails at the commit that adds it. Asserted by exclusion — every
+    trainable tensor the model owns is in some group — because naming the modules is what failed.
+    """
+    # The BLOCKED stand-in, because `_options()` asks for LoRA and adaptation refuses a backbone with no
+    # Linear inside its blocks. Worth carrying rather than switching off: the adapters live INSIDE the
+    # encoder, so they must land in the backbone group, and this assertion is over every group at once.
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _BlockedBackbone())
+    vocabulary, arm = vocabulary_and_arm
+    for name in vocabulary:
+        options, design = arm(name)
+        model = RunSetup(options).model(ENCODER, SLOTS, design, DEVICE)
+
+        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+        grouped = [id(tensor) for group in groups for tensor in cast("list[torch.nn.Parameter]", group["params"])]
+        trainable = {id(tensor) for tensor in model.parameters() if tensor.requires_grad}
+
+        assert trainable <= set(grouped), f"{axis}={name} leaves a trainable tensor outside every group"
+        assert len(grouped) == len(set(grouped)), f"{axis}={name} hands one tensor to two groups"
 
 
 def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.MonkeyPatch):

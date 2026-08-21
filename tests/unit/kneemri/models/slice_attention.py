@@ -50,3 +50,23 @@ def test_forward_is_a_convex_combination_of_its_slices():
         "an untrained gate is EXACTLY the mean: the output layer is zero-initialised so the module starts "
         "with no opinion, rather than at an arbitrary one it has no evidence for"
     )
+
+
+def test_forward_cannot_see_slice_order():
+    """PINS THE LIMITATION, because it is a property of the operator and not a bug to be fixed here.
+
+    The gate scores each slice from that slice alone, so a permutation of the depth axis permutes the
+    weights along with the slices and the weighted sum is unchanged. On 3D data that means this module
+    cannot represent "the finding continues into the next slice" — the gap `DepthAttention` exists to
+    test. Asserted with a TRAINED-LOOKING gate rather than the zero-initialised one, so it is the
+    operator being measured and not the fact that an untrained pooling is a mean.
+    """
+    torch.manual_seed(2026)
+    pool = SliceAttention(DIM).eval()
+    torch.nn.init.normal_(pool.gate[-1].weight, std=1.0)
+    x = torch.randn(BATCH, SLOTS, GROUP, DIM)
+
+    with torch.no_grad():
+        assert torch.allclose(pool.forward(x), pool.forward(x.flip(dims=(2,))), atol=1e-6), (
+            "reversing the slice order changes nothing — this pooling is permutation-invariant over depth"
+        )

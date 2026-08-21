@@ -21,7 +21,8 @@ from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import CLS_MEAN, MAXIMUM, POOL_PARTS, StudyDesign, StudyModel
+from kneemri.models.model import CLS_MEAN, POOL_PARTS, StudyDesign, StudyModel
+from kneemri.models.slice_pooling import MAXIMUM
 
 logger = logging.getLogger(__name__)
 

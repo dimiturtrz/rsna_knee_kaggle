@@ -6,6 +6,14 @@ writing down, because any one of them alone is an arm that did not pay.
 
 ## The four lines
 
+> **CORRECTION 2026-08-21 (knee-7gyw).** One of the four lines below is void. `attend_dense`'s learned
+> gate sat outside every optimiser group — `parameter_groups` built its head group from
+> `self.head.parameters()` and the aggregator is a sibling of the head — and the gate is zero-initialised
+> to start as the mean, so the arm ran as a fixed MEAN over slices and compared mean vs max. The pooling
+> OPERATOR axis is therefore unmeasured and reopens. The other three lines (width, data, encoder) stand,
+> and so does the short list's conclusion that supervision is the live suspect; what changes is that
+> "decode closed on its own axes" is now one axis short of closed.
+
 **Decode closed on its own axes.** `attend_dense` replaced the pooling OPERATOR (elementwise max → a
 learned 64-wide gate): **−0.0009**. `focal_dense` held the operator and widened the pooled vector:
 **−0.0044**. Both are single-variable pairs against `band_dense` (0.8587), both verified in the

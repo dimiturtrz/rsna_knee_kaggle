@@ -46,8 +46,8 @@ from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.evaluation.scores import LabelScores
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import ATTEND, CLS_MEAN, MAXIMUM, POOL_PARTS
-from kneemri.models.slice_attention import SliceAttention
+from kneemri.models.model import CLS_MEAN, POOL_PARTS
+from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.training.objective import Objective, Predicted, RankedObjective
 
@@ -60,12 +60,15 @@ term scores pairs WITHIN a batch, so a wider one sees quadratically more of them
 HEAD_LR = 1e-3
 """The pixel trainer's head rate, unchanged — this is the same head on the same features."""
 
-TRIAL_SLICE_POOLINGS = (MAXIMUM, ATTEND)
+TRIAL_SLICE_POOLINGS = tuple(name for name, pooling in SLICE_POOLINGS.items() if pooling.per_slice)
 """The slice reductions expressible over CACHED features, which is not every one the model has.
 
-`channels` stacks three slices into an image's colour channels, so it happens BEFORE the encoder and
-changes the pixels it reads. Cached features cannot express it, and offering it here would answer a
-different question under the same name.
+DERIVED from the model's own registry rather than listed here, because a hand-written list is a second
+place to add a pooling to and the trial's parser would have gone on rejecting one added to the model.
+`per_slice` is exactly the property that decides it: a pooling that encodes each slice alone is a
+function of the cached per-slice features, and `channels` — which stacks three slices into an image's
+colour channels — happens BEFORE the encoder and changes the pixels it reads. Cached features cannot
+express that, and offering it here would answer a different question under the same name.
 """
 
 
@@ -164,7 +167,8 @@ class TrialHead(nn.Module):
             message = f"{slice_pooling!r} is not expressible over cached features: {TRIAL_SLICE_POOLINGS}"
             raise ValueError(message)
         prior = SlotAffinity(ANATOMY).requested(TARGETS, n_slot, wanted=anatomical_prior)
-        self.slices = SliceAttention(dim) if slice_pooling == ATTEND else None
+        aggregator = SLICE_POOLINGS[slice_pooling].aggregator
+        self.slices = aggregator(dim) if aggregator is not None else None
         self.head = SLOT_POOLINGS[slot_pooling](dim, n_slot, len(TARGETS), prior)
 
     @override

@@ -19,7 +19,7 @@ from torch import Tensor, nn
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
 from kneemri.findings import TARGETS
 from kneemri.models.lora import LoRALinear
-from kneemri.models.slice_attention import SliceAttention
+from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 
 CLS_MEAN = "cls_mean"
@@ -36,25 +36,6 @@ must match what it appends or the head is built for a width the forward pass doe
 strings had five more copies — the design's default, the branch in `_pool`, two argv defaults and the
 manifest's — and the manifest's was a LITERAL, so a run's own pooling could not reach the field the
 serve path rebuilds the design from."""
-
-ATTEND = "attend"
-"""The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
-
-CHANNELS = "channels"
-"""Three consecutive slices become the encoder's three channels — one forward per slot, and the group's
-physical thickness is coupled to the slice count."""
-
-MAXIMUM = "max"
-"""Each slice encoded ALONE, the slot taking the per-dimension maximum. Three forwards, no coupling."""
-
-SLICE_POOLINGS: dict[str, bool] = {CHANNELS: False, MAXIMUM: True, ATTEND: True}
-"""The vocabulary, mapped to whether a slice is encoded ALONE — the fact three call sites each decided.
-
-An unknown name USED to mean channel stacking, because `per_slice` asked `in {"max", "attend"}` and
-anything else fell through. `members.py` and `holdout_predictions.py` read this string out of a
-manifest and hand it straight to `StudyDesign`, so a stale or misspelled name rebuilt a different
-function on different pixels and loaded without complaint. The lookup now happens where the model is
-BUILT, so it raises there instead."""
 
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
@@ -222,8 +203,9 @@ class StudyModel(nn.Module):
         # and every published member would fail to load against it.
         # The lookup, not just a read: an unknown pooling raises HERE, before weights are fetched and
         # before a manifest's stale name can be served as channel stacking.
-        self._encodes_each_slice = SLICE_POOLINGS[self.slice_pooling]
-        self.slices = SliceAttention(head_width) if self.slice_pooling == ATTEND else None
+        pooling = SLICE_POOLINGS[self.slice_pooling]
+        self._encodes_each_slice = pooling.per_slice
+        self.slices = pooling.aggregator(head_width) if pooling.aggregator is not None else None
         self.head = SLOT_POOLINGS[self.design.slot_pooling](head_width, n_slot, len(TARGETS), prior)
         self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
@@ -549,7 +531,7 @@ class StudyModel(nn.Module):
         all happen to share a rate. Every number in the ledger was measured under that shape, and a
         refactor that reproduces it only numerically is not one an equality check can confirm.
         """
-        head: dict[str, object] = {"params": list(self.head.parameters()), "lr": head_lr}
+        head: dict[str, object] = {"params": self._readout_parameters(), "lr": head_lr}
         if layer_decay == NO_LAYER_DECAY:
             flat: dict[str, object] = {"params": self._opened(unfreeze_last), "lr": backbone_lr}
             return [head, flat]
@@ -572,6 +554,23 @@ class StudyModel(nn.Module):
             for depth, block in enumerate(opened)
         ]
         return [head, *graded]
+
+    def _readout_parameters(self) -> list[torch.nn.Parameter]:
+        """Every parameter OUTSIDE the encoder — the slot head, and whatever pools the slice axis.
+
+        Read this by EXCLUSION rather than by naming the modules, because naming them is what failed.
+        This group was `self.head.parameters()` for as long as `SliceAttention` existed, and the
+        aggregator is a SIBLING of the head, not a child of it — so its tensors sat in no param group
+        and the optimiser never updated them. The gate is zero-initialised on purpose so that an
+        untrained pooling is exactly the mean over slices, which is why the defect never showed up as a
+        crash or even as a bad score: it showed up as `attend` scoring like a mean, because it WAS one.
+        See knee-7gyw for which ledger entries that invalidates.
+
+        Exclusion also means the next sibling module cannot go missing the same way — under LoRA the
+        adapters live inside the backbone and are correctly left to the backbone group.
+        """
+        encoder = {id(parameter) for parameter in self.backbone.parameters()}
+        return [parameter for parameter in self.parameters() if id(parameter) not in encoder]
 
     def _open_blocks(self, unfreeze_last: int) -> list[nn.Module]:
         """The last `unfreeze_last` blocks, counted FROM THE FRONT so that zero means zero.

@@ -32,7 +32,8 @@ from kneemri.corpus.study_cache import StudyCache
 from kneemri.findings import TARGETS
 from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, StudyDesign
+from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, POOL_PARTS, StudyDesign
+from kneemri.models.slice_pooling import MAXIMUM
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.training import train as train_module
 from kneemri.training.device_budget import DeviceBudget

@@ -11,13 +11,13 @@ from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, S
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
-    MAXIMUM,
     NO_LAYER_DECAY,
     OPENED_BLOCKS,
     RECOMPUTING,
     StudyDesign,
     StudyModel,
 )
+from kneemri.models.slice_pooling import MAXIMUM
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.options import TrainingOptions

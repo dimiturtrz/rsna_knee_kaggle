@@ -5,8 +5,11 @@ from typing import override
 from jaxtyping import Float
 from torch import Tensor, nn
 
-_GATE = 64
-"""Width of the gating projection. Small on purpose — see the class docstring."""
+GATE = 64
+"""Width of the gating projection. Small on purpose — see the class docstring.
+
+Public because `DepthAttention` wraps this pooling and must default to the same width: a second copy of
+the number is a second thing to keep in step, and the two modules are compared to each other."""
 
 
 class SliceAttention(nn.Module):
@@ -31,7 +34,7 @@ class SliceAttention(nn.Module):
     slices is the obvious next step and is deliberately not taken until a shared one earns it.
     """
 
-    def __init__(self, dim: int, gate: int = _GATE) -> None:
+    def __init__(self, dim: int, gate: int = GATE) -> None:
         super().__init__()
         # Zeroed so every slice scores identically at step zero and this pooling IS the mean of the
         # slices, which it then learns to deviate from. Default init gives arbitrary scores, so the
@@ -46,6 +49,11 @@ class SliceAttention(nn.Module):
 
     @override
     def forward(self, x: Float[Tensor, "b s g d"]) -> Float[Tensor, "b s d"]:
-        """Weighted sum over the slice axis, weights summing to one per slot."""
+        """Weighted sum over the slice axis, weights summing to one per slot.
+
+        PERMUTATION-INVARIANT, and that is not an accident of this implementation: the gate scores each
+        slice from that slice alone, so shuffling the depth axis permutes the weights with the slices
+        and leaves the sum untouched. `test_forward_cannot_see_slice_order` pins it.
+        """
         weights = self.gate(x).softmax(dim=2)
         return (x * weights).sum(dim=2)

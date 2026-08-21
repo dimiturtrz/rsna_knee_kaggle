@@ -428,6 +428,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.build_embeddings",
+      "target": "kneemri.models.slice_pooling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.embeddings.embedding_cache",
       "target": "kneemri.corpus.study_cache",
       "weight": 1
@@ -1724,6 +1730,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.depth_attention",
+      "target": "kneemri.models.slice_attention",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.model",
       "target": "kneemri.corpus.anatomy",
       "weight": 1
@@ -1743,13 +1755,25 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.models.slice_attention",
+      "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
       "target": "kneemri.models.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_pooling",
+      "target": "kneemri.models.depth_attention",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_pooling",
+      "target": "kneemri.models.slice_attention",
       "weight": 1
     },
     {
@@ -1941,7 +1965,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.head_trial",
-      "target": "kneemri.models.slice_attention",
+      "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
     {
@@ -2038,6 +2062,12 @@
       "kind": "import",
       "source": "kneemri.training.options",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
+      "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
     {
@@ -9157,6 +9187,18 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.models.depth_attention.DepthAttention",
+      "target": "kneemri.models.slice_attention.SliceAttention",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.depth_attention.DepthAttention.__init__",
+      "target": "kneemri.models.slice_attention.SliceAttention",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.models.ema.WeightAverage",
       "target": "kneemri.models.ema.LiveWeights",
@@ -9202,12 +9244,6 @@
       "kind": "construct",
       "source": "kneemri.models.model.StudyModel.__init__",
       "target": "kneemri.models.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.models.model.StudyModel.__init__",
-      "target": "kneemri.models.slice_attention.SliceAttention",
       "weight": 1
     },
     {
@@ -9292,6 +9328,12 @@
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.parameter_groups",
       "target": "kneemri.models.model.StudyModel._opened",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel.parameter_groups",
+      "target": "kneemri.models.model.StudyModel._readout_parameters",
       "weight": 1
     },
     {
@@ -9994,12 +10036,6 @@
       "kind": "calls",
       "source": "kneemri.training.head_trial.TrialHead.__init__",
       "target": "kneemri.corpus.anatomy.SlotAffinity.requested",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.head_trial.TrialHead.__init__",
-      "target": "kneemri.models.slice_attention.SliceAttention",
       "weight": 1
     },
     {
@@ -11193,7 +11229,7 @@
       "role": null
     },
     {
-      "descendants": 126,
+      "descendants": 128,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11945,7 +11981,7 @@
       "role": null
     },
     {
-      "descendants": 6,
+      "descendants": 8,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -11956,6 +11992,14 @@
       "descendants": 0,
       "id": "kneemri.models.backbone",
       "label": "backbone",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.depth_attention",
+      "label": "depth_attention",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -11988,6 +12032,14 @@
       "descendants": 0,
       "id": "kneemri.models.slice_attention",
       "label": "slice_attention",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_pooling",
+      "label": "slice_pooling",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -13538,6 +13590,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.depth_attention.DepthAttention",
+      "label": "DepthAttention",
+      "level": "class",
+      "parent": "kneemri.models.depth_attention",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights",
       "label": "LiveWeights",
       "level": "class",
@@ -13583,6 +13643,14 @@
       "level": "class",
       "parent": "kneemri.models.slice_attention",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_pooling.SlicePooling",
+      "label": "SlicePooling",
+      "level": "class",
+      "parent": "kneemri.models.slice_pooling",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19418,6 +19486,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.depth_attention.DepthAttention.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.depth_attention.DepthAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.depth_attention.DepthAttention.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.depth_attention.DepthAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights.applied",
       "label": "applied",
       "level": "method",
@@ -19580,6 +19664,14 @@
       "descendants": 0,
       "id": "kneemri.models.model.StudyModel._pool",
       "label": "_pool",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.model.StudyModel._readout_parameters",
+      "label": "_readout_parameters",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
       "role": null
