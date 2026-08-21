@@ -18,21 +18,26 @@ however, the LARGEST move any of the twenty-four candidates makes in any seat: e
 priced as an add and as a swap and the whole distribution spans +0.0002 to -0.0019, so this is five times
 the best the mounted pool offered and the only candidate that moved the mix at all.
 
-THE MECHANISM THAT ARGUES THE OFFLINE NUMBER IS AN UNDERSTATEMENT. knee-nas5 measured what this holdout
-does to input diversity and found it UNDER-priced by **2.4x**: collapsing three members into one pixel
-group cost 0.0059 offline and **0.014** on the board. Rank-average voting pays for members that are wrong
-on *different studies*, and a 909-study holdout with ~90 positives per label resolves per-member ranking
-long before it resolves the covariance between members. Every prior application of that correction was at
-the DECODE — which slices a member reads out. This is the first candidate for which it applies at the
-INPUT, where two members' errors are decorrelated by the array itself rather than by a pooling choice.
-Carried at the measured 2.4x, +0.0010 offline is ~+0.0024 on the board, which clears.
+THE ARGUMENT I FIRST WROTE HERE WAS ALREADY REFUTED IN THIS REPO, AND THE RECORD IS KEPT RATHER THAN
+EDITED AWAY. I justified this entry by knee-nas5's measured **2.4x** under-pricing of diversity, carrying
++0.0010 offline to ~+0.0024 on the board. `seat_value`'s own docstring retires that move under knee-c0u9:
+the 2.4x came off the DECODE axis, by collapsing three members into one pixel group, and it does not
+generalise to a member SWAP — two entries were fired on exactly that theory and both were refuted. What
+three paired entries measure instead is that the holdout RANKS correctly and errs only in magnitude, in
+the direction of understating what a WEAK member costs. There is no measured licence to inflate a
+positive.
 
-THE CASE AGAINST, STATED SO THE READ IS HONEST. `through_dense`'s own arm answered NO: best-epoch 0.8558
-against control `band_dense`'s 0.8578, **-0.0020**, and its training loss sat within 0.009 of control at
-every epoch, meaning the depth window was very nearly invisible to the optimisation. If the window barely
-changed the fit, it may barely have changed the errors either — and then this swap trades a member that
-carried the 0.931 for one that is 0.002 weaker solo and no more decorrelated. That is the null branch and
-it is a real one.
+AND THE POSITIVE SATURATES (knee-825t). Six entries now pair an offline joint-holdout score with a board
+score, and the chain rises over the first ~0.003 of offline spread and then stops. `longseat` carried
+**+0.0012** — the largest single move in a sweep of all 56 same-split checkpoints, six times the
+second-best — and TIED the board. This entry reads +0.0010, below that. The precedent for a swap of this
+size is a tie, not a tick.
+
+SO THIS IS BUILT AND HELD, NOT QUEUED. Under the repo's settled rule a candidate earns a slot only by
+clearing `BOARD_RESOLVABLE` (+0.0015), and +0.0010 does not. It stays on disk because the pixel axis is
+the one axis no board entry has ever tested and because `sixstrong`/`sixfresh` may return an answer that
+changes what a fifth or sixth seat is worth; it is fired only if that answer supplies a reason the
+offline number cannot.
 
 PRE-REGISTERED. **0.932 or above** says the pixel axis pays and pays past the champion: the next entries
 push depth harder — a wider window needs a volume-pretrained trunk (knee-jucq), and that becomes the
