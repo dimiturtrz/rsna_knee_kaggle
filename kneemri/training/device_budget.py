@@ -3,8 +3,8 @@
 A cap looks like a restriction and is a throughput fix: Windows pages GPU memory over PCIe rather than
 raising OOM, so a run that does not fit does not fail — it crawls at full reported utilisation. The
 whole cost model lives here rather than beside the training loop because it is a model of the CARD, and
-because four separate arms have now died to a term of it being fitted on one configuration and handed
-to another (knee-ylp0, knee-kwdh, knee-bj90). It is the piece of this package that most wants reading
+because five separate arms have now died to a term of it being fitted on one configuration and handed
+to another (knee-ylp0, knee-kwdh, knee-bj90, knee-yt35). It is the piece of this package that most wants reading
 in one sitting.
 """
 
