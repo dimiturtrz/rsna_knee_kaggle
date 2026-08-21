@@ -17,12 +17,27 @@ THE ROSTER IS READ FROM THE PIN, not typed. `comp/champion.json` holds the membe
 actually scored, and `champion_check` is what keeps it true. A hand-listed roster in an arm header is a
 copy that goes stale silently, and every delta under a stale roster is against the wrong base.
 
-READ IT AS A SIGN. The holdout under-prices diversity against the board by 2.4x (knee-7d1), so a small
-negative here is inside the region where this ruler is known to be wrong — `dinov3_base_lora`, a
-genuinely different encoder, reads -0.0025 against `greedy4_v1`. What transfers is the ordering, not the
-value. That number was -0.0013 against an earlier champion and moved without the member changing, which
-is the same shrinking-edge effect a rising champion produces everywhere: a seat value is a statement
-about a PAIR, and quoting one without its roster is quoting half of it.
+READ IT AS A SIGN. What transfers is the ordering, not the value. `dinov3_base_lora` reads -0.0025
+against `greedy4_v1` and read -0.0013 against an earlier champion without the member changing, which is
+the shrinking-edge effect a rising champion produces everywhere: a seat value is a statement about a
+PAIR, and quoting one without its roster is quoting half of it.
+
+AND THE SIGN IS READ CONSERVATIVELY, WHICH IS THE OPPOSITE OF WHAT THIS DOC USED TO SAY (knee-c0u9).
+The old wording said the holdout under-prices diversity by 2.4x, so a small negative sat "inside the
+region where this ruler is known to be wrong" — a licence to spend a slot on a negative reading. Two
+entries were fired on exactly that theory and both were refuted. The 2.4x came off the DECODE axis, by
+collapsing three members into one pixel group, and it does not generalise to a member swap. What three
+paired entries measure instead is that the holdout RANKS correctly and gets only the magnitude wrong, in
+the direction of UNDERSTATING what a weak member costs: crossenc / maxdiv / longseat read 0.8691 /
+0.8678 / 0.8668 offline and 0.930 / 0.926 / 0.925 on the board, so -0.0013 offline became -0.004 and
+-0.0023 became -0.005. An offline delta inside the noise floor is therefore not free; it is a board cost
+of roughly three times its size, and "inside the floor" argues for NOT spending the slot.
+
+TAKEN TOGETHER those two bounds leave one usable rule, and the report states it rather than leaving it
+to be remembered: a candidate earns a slot only by clearing `BOARD_RESOLVABLE`, the delta the board
+actually resolves. Above that the reading is real but capped; between zero and it the ruler cannot tell
+the candidate from the incumbent; below zero the board charges about `BOARD_COST_MULTIPLE` times what is
+shown. `MemberCurve.swap` prints whichever of the three applies.
 
 AND IT SATURATES, which bounds what a positive reading is worth (knee-825t). Six entries now pair an
 offline joint-holdout score with a board score and the chain rises over the first 0.003 of offline

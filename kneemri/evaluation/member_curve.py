@@ -45,11 +45,28 @@ from kneemri.labels.targets import Targets
 logger = logging.getLogger(__name__)
 
 COMBINE_SEED = 2026
-
-BOARD_RESOLVABLE = 0.0015
 """Which studies fit the per-label choice and which report it — the corpus split seed, since both are
 arbitrary-but-fixed partitions of the same corpus and a second free number would only be a second thing
 to accidentally vary."""
+
+BOARD_RESOLVABLE = 0.0015
+"""The offline seat delta below which this ruler has never been shown to pick a board tick.
+
+Six entries pair an offline joint-holdout score with a board score (knee-825t) and the chain rises across
+the first 0.003 of offline spread, then plateaus: `longseat` carried +0.0012 — the largest single move in
+a sweep of all 56 same-split checkpoints, six times the runner-up — and TIED the board. 0.0015 sits above
+that plateau and below the smallest gap the chain does track, so it is a floor on what has been
+DEMONSTRATED, not a threshold anything is known to cross.
+
+It documents this constant rather than the seed above it, which is what it used to do — a copy-paste that
+left the number gating a submission decision described as a corpus partition."""
+
+BOARD_COST_MULTIPLE = 3
+"""What the board charges for a negative offline seat delta, as a multiple of the offline number.
+
+Three paired entries: -0.0013 offline became -0.004 and -0.0023 became -0.005 (knee-c0u9). The holdout
+ranks correctly and errs in magnitude, and only in the direction of understating a weak member's cost —
+so an offline delta inside the noise floor is not a free look, and this is the factor that says so."""
 
 
 @dataclass(frozen=True)
@@ -190,10 +207,16 @@ class MemberCurve:
         against a dozen candidates into forty-eight numbers to eyeball, and the maximum is what a
         submission would take.
 
-        A negative best-seat number is the honest answer that the roster should not be disturbed. Read it
-        as a SIGN like every other number off this holdout, and note the transfer error runs the other way
-        for diversity (knee-7d1): a small negative here is inside the region where this ruler is known
-        wrong.
+        A negative best-seat number is the honest answer that the roster should not be disturbed, and it
+        is read CONSERVATIVELY — the opposite of what this docstring used to say (knee-c0u9). The old
+        wording put a small negative "inside the region where this ruler is known wrong" on the 2.4x
+        diversity under-pricing of knee-7d1, which reads as a licence to ship one. Two entries were fired
+        on that theory and both were refuted. That 2.4x came off the DECODE axis, by collapsing three
+        members into one pixel group, and it does not carry to a member swap. Three paired entries measure
+        the opposite: the holdout RANKS correctly (0.8691 / 0.8678 / 0.8668 offline against 0.930 / 0.926
+        / 0.925 on the board) and errs only in MAGNITUDE, understating the cost — -0.0013 offline became
+        -0.004 and -0.0023 became -0.005. So `BOARD_COST_MULTIPLE` is what a negative is reported at, and
+        a delta inside the noise floor is an argument for NOT spending the slot rather than a free look.
 
         `BOARD_RESOLVABLE` IS WHERE A POSITIVE STOPS MEANING ANYTHING, and the report says so rather than
         leaving the reader to remember it. Six entries now pair an offline joint-holdout score with a board
@@ -223,6 +246,7 @@ class MemberCurve:
             priced.append((score, name, displaced))
         lines = [f"holding {len(roster)} members, the best seat each candidate could take:"]
         resolvable = sum(1 for score, _, _ in priced if score - base >= BOARD_RESOLVABLE)
+        best = max(score for score, _, _ in priced) - base
         return [
             *lines,
             *(
@@ -231,7 +255,27 @@ class MemberCurve:
             ),
             f"{resolvable} of {len(priced)} clear +{BOARD_RESOLVABLE:.4f}, under which this ruler has "
             f"never been shown to pick a board tick",
+            self.board_cost(best),
         ]
+
+    @staticmethod
+    def board_cost(best: float) -> str:
+        """What the board would charge for shipping the best candidate, when the best one is negative.
+
+        SAID ON THE REPORT rather than left in a docstring, because the reading it corrects is the one a
+        reader reaches for unprompted: a best seat of -0.0010 sits inside the 0.0062 noise floor and
+        looks free. It is not — three paired entries put the board cost at about `BOARD_COST_MULTIPLE`
+        times the offline number (knee-c0u9), which turns that -0.0010 into roughly -0.003, twice the
+        tick the same ruler needs +0.0015 to earn.
+        """
+        if best >= BOARD_RESOLVABLE:
+            return f"best clears +{BOARD_RESOLVABLE:.4f}; above that this ruler orders correctly but saturates"
+        if best >= 0:
+            return f"best is +{best:.4f}, inside +{BOARD_RESOLVABLE:.4f}: this ruler cannot tell it from the incumbent"
+        return (
+            f"best is {best:+.4f} and NEGATIVE, which the board charges at about {BOARD_COST_MULTIPLE}x, "
+            f"so roughly {best * BOARD_COST_MULTIPLE:+.4f} — not a free look (knee-c0u9)"
+        )
 
     def marginal(self, roster: Pool, candidates: Pool) -> list[str]:
         """What each candidate would add to the roster that already ships, best first.

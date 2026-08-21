@@ -267,8 +267,9 @@ def test_swap():
     assert "good.pt for weak.pt" in lines[1], "the strong candidate displaces the weak incumbent, not the strong one"
     assert lines[1].split("(")[1].startswith("+"), "replacing the roster's weakest member with a strong one pays"
     assert "noise.pt" in lines[2], "the weaker candidate is priced too, and reported second"
-    assert lines[-1].endswith("never been shown to pick a board tick"), "the resolution bound is stated"
-    assert lines[-1].startswith("2 of 2 clear +0.0015"), "both beat an incumbent that is pure noise"
+    assert lines[-2].endswith("never been shown to pick a board tick"), "the resolution bound is stated"
+    assert lines[-2].startswith("2 of 2 clear +0.0015"), "both beat an incumbent that is pure noise"
+    assert "saturates" in lines[-1], "a best that clears the bound is real but capped, and the line says so"
 
 
 def test_swap_unresolvable():
@@ -285,7 +286,20 @@ def test_swap_unresolvable():
     lines = curve.swap(roster, candidates)
 
     assert "noise.pt" in lines[1], "it is still priced and still reported"
-    assert lines[-1].startswith("0 of 1"), "priced, ordered, and named as no move the board could read"
+    assert lines[-2].startswith("0 of 1"), "priced, ordered, and named as no move the board could read"
+    assert "3x" in lines[-1], "a negative best is priced at what the board charges, not left looking free"
+    assert "not a free look" in lines[-1], "which is the reading knee-c0u9 refuted"
+
+
+def test_board_cost():
+    """The three bands a best-seat delta can fall in, each said in the words that decide a slot.
+
+    Read straight rather than through `swap`, because the branch is the rule and building three rosters
+    that land in three bands would test the fixture's noise as much as the rule.
+    """
+    assert "saturates" in MemberCurve.board_cost(0.0040), "above the bound, real but capped"
+    assert "cannot tell it from the incumbent" in MemberCurve.board_cost(0.0004), "a positive inside the bound"
+    assert "-0.0030" in MemberCurve.board_cost(-0.0010), "a negative is quoted at what the board charges"
 
 
 def test_split():
