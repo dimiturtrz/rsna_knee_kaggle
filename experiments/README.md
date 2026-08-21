@@ -1780,3 +1780,31 @@ sitting on exactly that question. Separating them needs 140 mm at a pixel budget
 which is a bigger grid, not a re-crop. Resolution is already priced at +0.0002 for 392 px, so that arm
 would be buying back a loss rather than reaching for a gain: it prices as an INSTRUMENT (it would close
 the FOV axis cleanly) and not as a lever, and it is not queued.
+
+### `grade_ladder` — ordinal supervision lands, and buys nothing the roster can see (2026-08-21)
+
+**Arm** `experiments/arms/grade_ladder.sh`, 12 epochs at 366 s, ~1265 img/s, 291 steps an epoch, peak
+26.92 GB reserved. Control `band_dense` @ e8 = 0.8578, the matched recipe with binary heads.
+
+| epoch | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|
+| holdout mean AUC | 0.8528 | **0.8565** | 0.8555 | 0.8563 | 0.8552 | 0.8556 | 0.8551 |
+
+**Result.** Best 0.8565 against a 0.8578 control — **−0.0013 solo**, on the wrong side and a fifth of the
+0.0062 noise floor. The seat test is the one that decides: over the five held members the best seat
+`grade_ladder` could take is **+0.0001**, inside the +0.0015 the ruler can resolve. It is not a member.
+
+**Which link broke.** Not plumbing — `GRADE_LADDER` is one of the switches `Landed` compares before the
+card is spent, and this run passed that check, so the ordinal targets reached the objective. Not data:
+the same cache and the same fold-0 split as the control, target coverage 1.0 on all twelve labels. Not
+the test: the seat test is the ruler five members were selected under. So the reading is about the IDEA,
+in this USE: an ordinal ladder over grades adds no signal that twelve binary heads did not already carry
+at this corpus size. The labels are already a severity encoding; laddering them re-expresses the same
+supervision rather than adding any.
+
+**What this does NOT rule out.** The severity AXIS is not this arm. `grade_ladder` changes how a grade is
+SUPERVISED; it does not change how the loss WEIGHTS a severe case against a mild one, which is the axis
+the owner kept alive by explicit call and which `severity_weight` carries. A ladder may also be doing
+work the mean AUC averages away — this arm was read on the twelve-label mean only, and a per-label read
+of the graded labels (the OA triple, which is where a ladder should bite) is still owed and cheap: the
+checkpoint is written at `grade_ladder_s2026.pt`, so it costs an evaluation and no training.
