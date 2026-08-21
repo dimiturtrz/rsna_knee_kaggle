@@ -10,11 +10,9 @@ from torch import Tensor, nn
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
     ADAPTERS,
-    CLS_MEAN_FOCAL,
     COMPILED_ENCODER,
     COMPILED_PREFIX,
     OPENED_BLOCKS,
-    POOL_PARTS,
     RECOMPUTING,
     TARGETS,
     StudyDesign,
@@ -22,6 +20,7 @@ from kneemri.models.model import (
 )
 from kneemri.models.slice_pooling import ATTEND, SLICE_POOLINGS
 from kneemri.models.slot_head import REPORT_DIMS, SLOT_POOLINGS
+from kneemri.models.token_pooling import CLS_MEAN_FOCAL, MEAN, POOL_PARTS
 
 SEED = 2026
 DIM = 8
@@ -217,6 +216,76 @@ def test_slice_features_through_plane_changes_pixels_and_nothing_else():
 
     assert neighboured.shape == plain.shape, "the slice axis, token count and width are the control's"
     assert not torch.allclose(neighboured, plain), "and the pixels reaching the trunk are not"
+
+
+TUBELET = 2
+TUBELET_PATCH = 4
+TUBELET_CROP = 8
+TUBELET_FRAMES = 4
+
+
+class _TubeletBackbone(torch.nn.Module):
+    """A stand-in VOLUME trunk: it reads `pixel_values_videos`, spans `TUBELET` frames per token, and
+    emits no class token.
+
+    Its grid is ADAPTIVE, which is the property the guard exists for. The real V-JEPA 2 derives its
+    position ids from the run-time token count rather than a learned table, so a read at the wrong
+    spatial size does not raise — it silently hands pretrained weights a grid they were never fitted
+    on and returns a plausible tensor. A double that raised on the wrong size would make the guard
+    untestable by making the hazard impossible.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.config = SimpleNamespace(patch_size=TUBELET_PATCH, crop_size=TUBELET_CROP, tubelet_size=TUBELET)
+        self.encoder = torch.nn.Module()
+        self.encoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+
+    @override
+    def forward(self, *, pixel_values_videos: Tensor, output_hidden_states: bool = False) -> _Output:
+        n, frames, _, height, width = pixel_values_videos.shape
+        count = (height // TUBELET_PATCH) * (width // TUBELET_PATCH) * (frames // TUBELET)
+        last = torch.arange(count, dtype=torch.float32).reshape(1, -1, 1).expand(n, count, DIM).clone()
+        states = tuple(last + index for index in range(13)) if output_hidden_states else None
+        return _Output(last_hidden_state=last, hidden_states=states)
+
+
+def _tubelet_model() -> StudyModel:
+    torch.manual_seed(SEED)
+    return StudyModel(_TubeletBackbone(), DIM, SLOTS, StudyDesign(pool=MEAN)).eval()
+
+
+def test_slice_features_reads_a_tubelet_trunk_as_frames():
+    """The whole point of the volume path: the group becomes DEPTH, not the trunk's three channels.
+
+    Asserted through the trunk's own token count, because that is the only witness that the frame axis
+    arrived as frames — a group folded into channels would emit one tubelet's worth of tokens, and a
+    group left flat would emit `group` times too many rows.
+    """
+    torch.manual_seed(SEED)
+    imgs = torch.randint(0, 256, (2, SLOTS, TUBELET_FRAMES, TUBELET_CROP, TUBELET_CROP), dtype=torch.uint8)
+    model = _tubelet_model()
+
+    with torch.no_grad():
+        features = model.slice_features(imgs, TUBELET_CROP)
+
+    assert features.shape == (2, SLOTS, 1, DIM), "a volume trunk keeps the (b, s, 1, w) contract untouched"
+    assert model.volume.tubelet == TUBELET, "the trunk's own config decides this, not our registry"
+    assert model.prefix_tokens == 0, "there is no class token to skip"
+
+    with pytest.raises(ValueError, match="fitted at"), torch.no_grad():
+        model.slice_features(imgs, TUBELET_CROP * 2)
+
+
+def test_study_model_refuses_a_pooling_a_tubelet_trunk_cannot_serve():
+    """`tokens[:, 0]` is a real row on a trunk with no class token — the top-left patch of the first
+    tubelet — so `cls_mean` would concatenate it, the head would accept the width, and the run would
+    score like a slightly noisy mean. Nothing downstream can see that, so it is refused here."""
+    with pytest.raises(ValueError, match="no class token"):
+        StudyModel(_TubeletBackbone(), DIM, SLOTS, StudyDesign(pool=CLS_MEAN_FOCAL))
+
+    with pytest.raises(ValueError, match="volumetric read"):
+        StudyModel(_TubeletBackbone(), DIM, SLOTS, StudyDesign(pool=MEAN, slice_pooling="max"))
 
 
 class _BlockedBackbone(_FakeBackbone):

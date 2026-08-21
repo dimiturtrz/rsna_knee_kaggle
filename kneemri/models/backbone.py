@@ -24,10 +24,12 @@ V3_SMALL = "v3small"
 V3_SMALL_PLUS = "v3splus"
 V3_BASE = "v3base"
 CONVNEXT_BASE = "cnxbase"
+VJEPA2_LARGE = "vjepa2l"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
 CONVNEXT = "convnext"
+VJEPA2 = "vjepa2"
 
 
 @dataclass(frozen=True)
@@ -379,5 +381,40 @@ ENCODERS: dict[str, Encoder] = {
         # run at. Stated rather than read from the loaded config because the cap has to be derived
         # BEFORE any weights are fetched — the whole point of it is to refuse a run that will not fit.
         stages=(Stage(3, 4, 128), Stage(3, 8, 256), Stage(27, 16, 512), Stage(3, 32, 1024)),
+    ),
+    # THE FIRST TRUNK THAT WAS NOT PRETRAINED ON FLAT IMAGES, added 2026-08-21 after `through_dense`
+    # answered the cheap version of this question and answered it flat. That arm put slices i-1, i, i+1
+    # into the three input channels and read -0.0020 against its control, and the mechanism its null
+    # leaves standing is precise: `Conv2d(3, D, k=14, s=14)` over three slices is IDENTICAL to
+    # `Conv3d(1, D, k=(3,14,14), s=(1,14,14))`, so a 2D stem at window 3 collapses the window to ONE
+    # linear projection per output dimension and emits ONE depth position. What it cannot do at any
+    # window size is emit SEVERAL. That is the residue, and a tubelet trunk is the only thing that buys
+    # it — which makes this the expensive version of a question already asked cheaply, not a new guess.
+    #
+    # PICKED ON LICENCE, NOT ON BENCHMARKS. The HF API says MCG-NJU/videomae-base and
+    # facebook/timesformer-base-finetuned-k400 are both cc-by-nc-4.0, while this is MIT. A
+    # non-commercial clause plausibly propagates to weights trained from it, which is a competition
+    # ELIGIBILITY question rather than a modelling one, and it is cheaper to answer with one API call
+    # than to discover after a member scores.
+    #
+    # THE RISK, STATED RATHER THAN DISCOVERED. It is pretrained on natural VIDEO, so this is natural-
+    # domain pretraining again — and our own cautionary instance is on the ledger, where DINOv3, a
+    # stronger natural-image encoder, scored ~0.04 WORSE than DINOv2 with the deficit in focal findings.
+    # Worse, video is genuinely TEMPORAL and MRI depth is SPATIAL; nothing measured anywhere here says a
+    # trunk pretrained on motion transfers to a spatial third axis. That is exactly why the first read
+    # is a frozen embedding pass plus a head fit rather than an arm.
+    #
+    # NO MOUNT, so this trains here and cannot be submitted until the weights are mirrored — a dataset
+    # upload, deferred until the probe says it is worth one.
+    VJEPA2_LARGE: Encoder(
+        VJEPA2_LARGE,
+        "facebook/vjepa2-vitl-fpc64-256",
+        1024,
+        patch=16,
+        family=VJEPA2,
+        leaf="vjepa2-vitl",
+        depth=24,
+        # Counted off the loaded weights once, here, rather than guessed from "ViT-L": 325.97M.
+        params_m=326.0,
     ),
 }

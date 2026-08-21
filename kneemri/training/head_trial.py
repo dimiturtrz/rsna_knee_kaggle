@@ -46,9 +46,9 @@ from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.evaluation.scores import LabelScores
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.model import CLS_MEAN, POOL_PARTS
 from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.training.grades import Predicted
 from kneemri.training.objective import Objective, RankedObjective
 

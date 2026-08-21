@@ -20,7 +20,8 @@ from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.models.model import CLS_MEAN_FOCAL, StudyDesign, StudyModel
+from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.token_pooling import CLS_MEAN_FOCAL
 
 DIM = 12
 """At most SIZE: the double reads one feature per image ROW, so a wider feature than the image has

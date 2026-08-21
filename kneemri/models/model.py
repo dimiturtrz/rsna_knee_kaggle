@@ -22,21 +22,8 @@ from kneemri.models.depth_window import DepthWindow
 from kneemri.models.lora import LoRALinear
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
-
-CLS_MEAN = "cls_mean"
-"""Class token and patch mean — what every member on disk was fitted with."""
-
-CLS_MEAN_FOCAL = "cls_mean_focal"
-"""Those two plus the per-channel upper tail, for findings that occupy a small part of the field."""
-
-POOL_PARTS: dict[str, int] = {CLS_MEAN: 2, CLS_MEAN_FOCAL: 3}
-"""How many `dim`-wide parts each pooling scheme concatenates, which fixes the head's input width.
-
-THE VOCABULARY as well as the widths: a name here is a name `_pool` builds parts for, and the count
-must match what it appends or the head is built for a width the forward pass does not produce. The two
-strings had five more copies — the design's default, the branch in `_pool`, two argv defaults and the
-manifest's — and the manifest's was a LITERAL, so a run's own pooling could not reach the field the
-serve path rebuilds the design from."""
+from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
+from kneemri.models.volume_read import VolumeRead
 
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
@@ -71,9 +58,6 @@ FINGERPRINT_SEED = 2026
 
 FINGERPRINT_BATCH = 2
 """Two studies, so the masked branch of the softmax is exercised alongside the unmasked one."""
-
-_FOCAL_FRACTION = 8
-"""The focal pooling keeps the top 1/8 of each channel's patch responses."""
 
 
 @dataclass(frozen=True)
@@ -215,7 +199,13 @@ class StudyModel(nn.Module):
         # only authority on what they emit. DINOv2 has one class token and no registers; DINOv3 adds
         # four registers, which must be excluded from the patch pooling below.
         config = getattr(backbone, "config", None)
-        self.prefix_tokens = 1 + int(getattr(config, "num_register_tokens", 0) or 0)
+        # A VOLUMETRIC TRUNK ANNOUNCES ITSELF BY ITS TUBELET; `VolumeRead` is None for an ordinary 2D
+        # one, and holds every fact the depth axis changes when it is not.
+        self.volume = VolumeRead.of(config, self.design.pool, self.design.slice_pooling)
+        # No class token to skip on a tubelet trunk, and no registers either — the first token is a
+        # patch. Getting this wrong is silent: the head accepts the width and the score comes out
+        # plausible, which is the failure `prefix_tokens` exists to prevent.
+        self.prefix_tokens = 0 if self.volume else 1 + int(getattr(config, "num_register_tokens", 0) or 0)
         width = int(getattr(config, "hidden_size", dim) or dim)
         if width != dim:
             # A registry that disagrees with the weights is a typo, and it surfaces otherwise as a shape
@@ -338,6 +328,13 @@ class StudyModel(nn.Module):
         elif per_slice:
             x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
             x = x.float().div(255.0)
+        elif self.volume:
+            # THE WINDOW IS FRAMES, NOT CHANNELS, and that is the whole difference this trunk buys —
+            # see `VolumeRead` for why no reshaping of a 2D stem reaches it. Each slice is greyscale
+            # replicated to the three channels the trunk was pretrained on; only the depth axis is new,
+            # and it is folded in after the resize and the normalisation so both lines are reused.
+            x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
+            x = x.float().div(255.0)
         else:
             x = imgs.reshape(batch * slots, *imgs.shape[2:]).float().div_(255.0)
         if img_size is not None and img_size != x.shape[-1]:
@@ -346,7 +343,11 @@ class StudyModel(nn.Module):
             # sampling grid rather than a different crop.
             x = nn.functional.interpolate(x, size=(img_size, img_size), mode="bilinear", align_corners=False)
         x = (x - self.mean) / self.std
+        if self.volume:
+            x = self.volume.frames(x, batch * slots)
         tokens = self._tokens(x)
+        if self.volume:
+            self.volume.check_tokens(x, tokens)
         pooled = self._pool(tokens)
         if not per_slice:
             return pooled.reshape(batch, slots, 1, -1)
@@ -709,30 +710,26 @@ class StudyModel(nn.Module):
         # __getattr__ is typed as returning Tensor, so any model-specific method reads as uncallable.
         self.backbone.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
 
-    def _tokens(self, x: Float[Tensor, "n c h w"]) -> Float[Tensor, "n t d"]:
+    def _tokens(self, x: Float[Tensor, "n *pixels"]) -> Float[Tensor, "n t d"]:
         """The block's tokens the design asks for, in one forward pass.
 
         `output_hidden_states` returns every block's output, so reading an intermediate layer costs no
         second pass — the tensors already exist and the last one is exactly `last_hidden_state`. The
         default therefore takes the cheap path and produces byte-identical results to before.
         """
+        # A VOLUMETRIC TRUNK TAKES A DIFFERENT KEYWORD, and passing the wrong one is not a silent
+        # failure — transformers rejects an unknown keyword — but it is a failure deep inside a fetched
+        # model rather than here, so the branch is stated where the shape is known.
+        keyword = "pixel_values_videos" if self.volume else "pixel_values"
         if self.design.layer == -1:
-            return self.backbone(pixel_values=x).last_hidden_state
-        return self.backbone(pixel_values=x, output_hidden_states=True).hidden_states[self.design.layer]
+            return self.backbone(**{keyword: x}).last_hidden_state
+        return self.backbone(**{keyword: x}, output_hidden_states=True).hidden_states[self.design.layer]
 
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
-        """Reduce patch tokens to one vector: the class token, the patch mean, optionally the tail."""
+        """Reduce this read's tokens to one vector, by the design's named pooling."""
         # PREFIX TOKENS, not "the first one". DINOv2 puts a single class token in front of the patches;
         # DINOv3 adds four REGISTER tokens, so `tokens[:, 1:]` would fold them into the patch mean —
         # and registers exist precisely to absorb high-norm outliers, which is the worst thing to
         # average and the worst thing to hand a top-k. The count comes off the backbone's own config,
         # so a v2 member is unchanged (no registers, prefix of one) and nothing re-fingerprints.
-        patch = tokens[:, self.prefix_tokens :]
-        parts = [tokens[:, 0], patch.mean(1)]
-        if self.pool == CLS_MEAN_FOCAL:
-            # The upper tail of each channel over the patch grid, taken per channel rather than by
-            # selecting whole patches: a finding occupies a small part of the field, so a plain mean
-            # over the patches dilutes it, and this keeps the top eighth of each channel's responses.
-            k = max(1, patch.shape[1] // _FOCAL_FRACTION)
-            parts.append(patch.topk(k, dim=1).values.mean(1))
-        return torch.cat(parts, dim=1)
+        return TOKEN_POOLINGS[self.pool].reduce(tokens, self.prefix_tokens)

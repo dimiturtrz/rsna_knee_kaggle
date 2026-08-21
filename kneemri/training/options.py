@@ -21,9 +21,10 @@ from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from kneemri.corpus.study_cache import StudyCache
 from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.model import CLS_MEAN, POOL_PARTS, StudyDesign
+from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import Adaptation
 
