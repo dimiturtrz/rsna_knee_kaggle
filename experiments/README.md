@@ -1494,6 +1494,54 @@ that an offline delta inside the floor is a real board cost of roughly 3x its si
 a licence to switch the default; it is a statement that batch 6 is *available* when a member needs the VRAM,
 which is exactly the case `base_dense` was in.
 
+### `v3base_dense` — "DINOv3 is weak" was an ADAPTATION finding wearing an encoder's name — 2026-08-21
+
+`base_dense`'s invocation with `--variant v3base` substituted for `--variant base`. Rate, slices, band,
+pooling, whole-stack, epochs, schedule and batch all held, so `base_dense` is the matched control and the
+only variable is the encoder family.
+
+```
+e0 .7563(720s)  e1 .7887  e2 .8167  e3 .8307  e4 .8367  e5 .8435
+e6 .8455(peak)  e7 .8428  e8 .8451  e9 .8439  e10 .8432  e11 .8429    (~680 s/epoch)
+control base_dense: e8 0.8512 (PEAK)   |   LoRA sibling dinov3_base_lora: 0.8268
+```
+
+**Against its matched control: 0.8455 vs 0.8512, −0.0057 — INSIDE the 0.0062 floor.** DINOv2-base and
+DINOv3-base are the same size at the same recipe and land level. The family, by itself, is worth nothing
+here either way.
+
+**Against its LoRA sibling: +0.0187, and that is the finding.** `dinov3_base_lora` read 0.8268 — the same
+encoder, the same 336 px, under LoRA r8 over a frozen trunk at 5e-4. Full adaptation at 4e-5 on the settled
+band recipe lifts it to 0.8455. The arm's PREDICTION branch fires almost exactly as written (it predicted
+"between 0.84 and 0.86" and "~0.02 separating adapted from adapted-frozen"), and the REFUTATION branch —
+solo at or below 0.8268 — does not.
+
+**So the pool's two DINOv3 members have been MIS-ATTRIBUTED since 2026-08-16.** Both are the roster's
+weakest (0.8215, 0.8268, taken 16th and 17th by greedy over eighteen), and the ledger has been reading that
+as evidence that DINOv3 does not transfer to this task. It is not. It is evidence that **LoRA over a frozen
+trunk costs ~0.019 here**, measured on the one encoder where both regimes now exist. Every sentence in this
+repo of the form "DINOv3 is weak on this task" needs its scope narrowed to the adaptation regime it was
+measured under.
+
+**It also re-reads `base_dense`.** That arm lost its own control by 0.0066 and then produced the 0.931
+champion, and the reading was "a different encoder FAMILY brings different errors". This arm holds the
+recipe and swaps only the family, and gets a **tie**. Two DINOv2-base and DINOv3-base checkpoints at the
+same size and recipe are not different in the way that mattered — which means the seat `base_dense` won may
+have been bought by its 768 WIDTH against a pool of 384-wide members, not by its pretraining corpus.
+
+**SEAT VALUE IS THE UNFINISHED HALF AND IT IS THE HALF THAT DECIDES.** `base_dense` is the standing proof
+that solo score does not predict seat value — it lost its control outside the floor and took the board. This
+member has not been through `member_readings` / `record_mix` against `basedense_v1` (0.8690, five members),
+so nothing here says whether it earns a seat. **Do not retire it on the −0.0057.** The arm's third branch
+(solo clears 0.84, seat value at or below zero) is live and unmeasured, and it is the branch that would say
+encoder diversity paid ONCE and not TWICE — which would make the next arm a genuinely different inductive
+bias (a CNN trunk), not a fourth ViT.
+
+**Cost note.** 680 s/epoch against `base_dense`'s ~920, at 25.9 GB — the patch-16 token discount (441 vs 576
+tokens at 336 px) is real and shows up in wall-clock as predicted. It ran only after `--vram-gb 27` was
+named explicitly; the derived cap refused it at 21.68 GB with 9.17 GB of the card free (see the arm header
+and the filed intercept bug).
+
 ### `batch_teardown` arm 2 — `small_accum`: three points inside one floor, and the axis closes — 2026-08-20
 
 `--batch 6 --accumulate 2`, everything else held. The arm's own clause was already weakened before it ran:
