@@ -62,6 +62,20 @@ LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$PROCESSED/experiments"
 mkdir -p "$LOGS"
 
+# The GPU lock is MACHINE-scoped, not project-scoped, because the card is.
+#
+# It used to live at "$LOGS/gpu.lock" -- inside this project's data root, where no other project can
+# see it. That serialises our own arms against each other and nothing else. Measured 2026-08-21:
+# band140 reserved 28934 MiB of the 32607 on the card while a sibling project's CUDA eval grew to
+# 11.4 GB, and free VRAM fell to 1923 MiB. Our arm sat in the free-VRAM gate for the better part of an
+# hour with a lock it held uncontested, because the process it was actually contending with was
+# holding a different lock in a directory ours does not exist in.
+#
+# $HOME rather than a data root: it is the one path both projects resolve identically without either
+# reading the other's config, and it is outside both repos. GPU_LOCK_DIR overrides it for a machine
+# where that is not true.
+GPU_LOCK_DIR="${GPU_LOCK_DIR:-$HOME/.gpu.lock}"
+
 hold_card() {
   # Block until this shell owns the GPU, then release it when the arm exits.
   #
@@ -83,7 +97,7 @@ hold_card() {
   # The trap is a safety net for a killed chain, and it must expand the path NOW rather than at exit:
   # written as 'rm -rf "$lock"' the variable is read when the trap fires, by which time the function's
   # local is gone — under `set -u` that is "lock: unbound variable" and the lock is never removed.
-  LOCK_DIR="$LOGS/gpu.lock"
+  LOCK_DIR="$GPU_LOCK_DIR"
   # A PARKED ARM MUST SAY IT IS PARKED. This loop used to wait in total silence, so a queued arm's log
   # sat at zero bytes whether it was blocked on a live sibling or had died at launch — and those are
   # opposite states: one keeps the card busy next, the other leaves it idle. On 2026-08-19 a parked
@@ -107,7 +121,31 @@ hold_card() {
   [ "$blocked" -gt 0 ] && echo "took the card after ${blocked}m parked"
   echo $$ > "$LOCK_DIR/pid"
   trap drop_own_card EXIT
+  wait_out_legacy_lock
   wait_for_free_card "$@"
+  # Explicit, because this function's status is whatever its last command left behind and an arm runs
+  # under `set -e`. wait_for_free_card ends on a test in one of its branches.
+  return 0
+}
+
+wait_out_legacy_lock() {
+  # TRANSITION GUARD, removable once no arm snapshotted before 2026-08-21 can still be running.
+  #
+  # An arm executes from a SNAPSHOT of this lib taken when it was launched, so moving the lock does not
+  # move it for anything already in flight: band140 was mid-epoch under "$LOGS/gpu.lock" when this
+  # landed, and the next arm in its chain snapshots the NEW lib and takes a lock the running arm has
+  # never heard of. Two arms on one card is exactly the 31.9-GB PCIe-paging overflow the lock exists to
+  # prevent, and the move would have produced it on its first use. The new lock is already held by the
+  # time this runs, so waiting here cannot deadlock -- nothing old looks at the new path.
+  local legacy="$LOGS/gpu.lock" holder waited=0
+  while [ -d "$legacy" ]; do
+    holder="$(cat "$legacy/pid" 2>/dev/null)"
+    [ -n "$holder" ] && kill -0 "$holder" 2>/dev/null || { rm -rf "$legacy"; break; }
+    [ "$waited" -eq 0 ] && echo "waiting out a pre-move lock held by $holder at $legacy"
+    waited=$((waited + 1))
+    sleep 60
+  done
+  return 0
 }
 
 drop_own_card() {
@@ -122,7 +160,7 @@ drop_own_card() {
   #
   # An ownership test rather than `trap - EXIT` in release_card, because that only fixes the shells that
   # remember to release; this also covers a killed arm, which is the case the trap exists for.
-  local dir="$LOGS/gpu.lock"
+  local dir="$GPU_LOCK_DIR"
   [ "$(cat "$dir/pid" 2>/dev/null)" = "$$" ] && rm -rf "$dir"
   return 0
 }
