@@ -23,9 +23,11 @@ import contextlib
 import io
 import logging
 import os
+import re
 import shlex
 import subprocess
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -39,6 +41,13 @@ from kneemri.training.device_budget import GB_PER_SLICE, DeviceBudget
 from kneemri.training.options import TrainingOptions
 
 logger = logging.getLogger(__name__)
+
+BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+)\s*$", re.MULTILINE)
+"""How an arm names the issue that priced it. One line, anywhere in the shell's header."""
+
+PRICE_MARKS = ("PRICE:", "P(clears")
+"""What a priced bead says: a cost AND the odds it clears the bar. Both, because a cost alone is the
+argument that let the 140 mm build run unpriced. knee-yuqf carries the format."""
 
 ARMS = Path("experiments/arms")
 STUB = Path("experiments/stub_lib.sh")
@@ -276,6 +285,84 @@ class ArmCheck:
         counted = ((path, path.read_bytes().count(b"\r")) for path in sorted(self.shells.glob("**/*.sh")))
         return {str(path.as_posix()): count for path, count in counted if count}
 
+    def beads(self, invocations: Mapping[str, str]) -> dict[str, str | None]:
+        """The bead each arm names in a `# bead:` line, or None where its shell names none.
+
+        The cheapest binding from an arm to the issue that PRICED it. There is no other link: an arm is a
+        shell, a bead is a row in a database, and nothing in the tree connects them, which is how a run
+        gets launched against a bead whose price was never computed.
+
+        Arms with no shell — the switch recipes `SwitchCoverage` synthesises — are absent rather than
+        None, because a recipe that exists to exercise one flag at sixty studies is not an experiment and
+        has nothing to price.
+        """
+        named = ((name, self.arms / f"{name}.sh") for name in invocations)
+        found = ((name, BEAD_LINE.search(path.read_text(encoding="utf-8"))) for name, path in named if path.exists())
+        return {name: match.group(1) if match else None for name, match in found}
+
+    @staticmethod
+    def unpriced(descriptions: Mapping[str, str]) -> list[str]:
+        """The beads whose text carries no wall-clock/gain price, given each bead's own description.
+
+        PURE, and that is why the `bd` call lives in `main()`: the unit gate refuses a test that shells
+        out, and this is the half holding the judgement. It takes the text rather than the id.
+
+        Two markers, not one. `PRICE:` alone would be satisfied by any bead that happens to use the word,
+        and the number that actually governs the decision is the odds — a bead saying "~1 h of card" with
+        no `P(clears 1.5%)` has stated a cost and no expected gain, which is exactly the argument I made
+        for the 140 mm build and exactly the one the rule exists to refuse (knee-qxse). knee-yuqf is the
+        format both markers were read off.
+        """
+        return sorted(bead for bead, text in descriptions.items() if not all(mark in text for mark in PRICE_MARKS))
+
+    @staticmethod
+    def _descriptions(beads: set[str]) -> dict[str, str]:
+        """Each bead's own text, read out of `bd`. The one place this tool talks to the tracker.
+
+        Kept apart from `unpriced` so that half stays pure and unit-testable — the gate refuses a unit
+        test that shells out. A bead `bd` cannot show comes back as empty text, which reads as unpriced:
+        an arm naming an id that does not resolve is exactly as unaccountable as one naming none.
+        """
+
+        def shown(bead: str) -> str:
+            done = subprocess.run(  # noqa: S603 - fixed argv, a bead id matched by BEAD_LINE, no shell
+                ["bd", "show", bead],  # noqa: S607 - `bd` off PATH, as every other command here resolves
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return done.stdout
+
+        return {bead: shown(bead) for bead in beads}
+
+    def report_prices(self, invocations: Mapping[str, str], *, arming: bool) -> bool:
+        """Log which arms name no bead or an unpriced one, and say whether that should REFUSE this run.
+
+        A refusal only when an arm is being ARMED (`--only`), and the asymmetry is the same one `unstated`
+        draws. Seventy arms predate the rule and nearly all of them already ran; refusing the full sweep
+        would fail every invocation of this tool from now until they are all back-filled, which is how a
+        pre-flight check earns a `--no-verify`. The rule exists to stop MOMENTUM at the moment of arming,
+        and the run that arms an arm is the run that names it (knee-qxse).
+        """
+        beads = self.beads(invocations)
+        named = {name: bead for name, bead in beads.items() if bead}
+        unpriced = set(self.unpriced(self._descriptions(set(named.values()))))
+        underpriced = {name: bead for name, bead in named.items() if bead in unpriced}
+        unbeaded = sorted(name for name, bead in beads.items() if bead is None)
+        if arming:
+            for name in unbeaded:
+                logger.info("UNBEADED %s: names no `# bead: knee-xxxx`, so nothing records what it expects", name)
+            for name, bead in sorted(underpriced.items()):
+                logger.info("UNPRICED %s: %s states no PRICE / P(clears ...) — a cost, no gain", name, bead)
+        elif unbeaded or underpriced:
+            logger.info(
+                "UNPRICED: of %d arms, %d name no bead and %d name an unpriced one; --only <arm> refuses them",
+                len(beads),
+                len(unbeaded),
+                len(underpriced),
+            )
+        return arming and bool(unbeaded or underpriced)
+
     def readings(self, invocations: dict[str, str]) -> dict[str, ArmReading]:
         """Where each arm's pixels would come from, by arm name — its data root and the cache it names.
 
@@ -508,6 +595,7 @@ def main() -> None:
     carriage_returns = check.carriage_returns()
     for path, count in sorted(carriage_returns.items()):
         logger.info("CRLF %s: %d carriage returns on disk — bash reads the file as it is (knee-rlg5)", path, count)
+    priceless = check.report_prices(invocations, arming=bool(arguments.only))
     broken: dict[str, str] = {}
     if arguments.smoke:
         # BEFORE the smoke, not as part of it: a smoke reads the truncated cache, and an arm on a
@@ -517,7 +605,7 @@ def main() -> None:
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
-    if refused or broken or carriage_returns or (uncached and arguments.require_caches):
+    if refused or broken or carriage_returns or priceless or (uncached and arguments.require_caches):
         sys.exit(1)
 
 

@@ -290,3 +290,75 @@ def test_queued(tmp_path: Path):
     # complaint used to surface in `selected` as a missing arm — blaming `--only` for a `--as-queued` typo.
     with pytest.raises(ValueError, match="SCRIPT PATH"):
         check.queued(["rung"])
+
+
+def test_beads(tmp_path: Path):
+    """ONE REP PER CLASS of how an arm can name the issue that priced it: named, unnamed, or absent.
+
+    The header line is the whole record — nothing else on disk ties an arm to the argument that bought
+    its card, and the 140 mm build ran forty minutes on a cost with no expected gain beside it. An arm
+    whose file does not exist is dropped rather than reported None, because `invocations` can carry a
+    queued rung (`rung_12`) whose SCRIPT is named `rung.sh`; reporting that as unbeaded would refuse
+    every parameterised arm for a file it was never going to have.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "priced.sh").write_text("#!/bin/bash\n# bead: knee-yuqf\nrun_train priced\n", encoding="utf-8")
+    (arms / "bare.sh").write_text("#!/bin/bash\nrun_train bare\n", encoding="utf-8")
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+
+    found = check.beads({"priced": "--epochs 8", "bare": "--epochs 8", "rung_12": "--epochs 12"})
+
+    assert found == {"priced": "knee-yuqf", "bare": None}, "a rung with no file of its own is not an unbeaded arm"
+
+
+def test_unpriced():
+    """The BOTH-MARKS boundary: a cost alone is exactly the argument that let an unpriced arm run.
+
+    Partitioned on which of the two marks a bead's text carries — neither, cost only, odds only, both.
+    Only the last is priced. `bd show` output is passed in as text rather than read here, so the detector
+    stays pure and this test shells out to nothing.
+    """
+    priced = "PRICE: 40 min of card. P(clears 1.5%) ~ 0.2, so the expected score is an instrument."
+
+    assert ArmCheck.unpriced(
+        {
+            "knee-both": priced,
+            "knee-cost": "PRICE: 40 min of card, and it is the obvious next thing to run.",
+            "knee-odds": "P(clears 1.5%) ~ 0.2 — worth it if the card is free.",
+            "knee-neither": "Try the deeper mixer and see what happens.",
+        }
+    ) == ["knee-cost", "knee-neither", "knee-odds"], "a cost with no expected gain is not a price"
+
+    assert ArmCheck.unpriced({"knee-both": priced}) == []
+
+
+def test_report_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The ASYMMETRY, which is the whole design: the same tree refuses while arming and only counts otherwise.
+
+    Seventy arms predate the rule and nearly all of them already ran, so refusing the full sweep would
+    fail every invocation of this tool until they are back-filled — which is how a pre-flight check earns
+    a `--no-verify`. The rule exists to stop momentum at the moment of arming, so `arming` is the only
+    thing that turns a report into a refusal.
+
+    The tracker read is stubbed rather than run: a unit test may not shell out, and what is under test is
+    the JOIN of the two detectors, not `bd`.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "priced.sh").write_text("# bead: knee-yuqf\nrun_train priced\n", encoding="utf-8")
+    (arms / "cheap.sh").write_text("# bead: knee-cost\nrun_train cheap\n", encoding="utf-8")
+    monkeypatch.setattr(
+        ArmCheck,
+        "_descriptions",
+        staticmethod(lambda beads: dict.fromkeys(beads, "PRICE: 40 min. P(clears 1.5%) ~ 0.2")),
+    )
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+    both = {"priced": "--epochs 8", "cheap": "--epochs 8"}
+
+    assert check.report_prices(both, arming=True) is False, "every arm named a bead and every bead is priced"
+
+    monkeypatch.setattr(ArmCheck, "_descriptions", staticmethod(lambda beads: dict.fromkeys(beads, "just run it")))
+
+    assert check.report_prices(both, arming=True) is True, "a bead with neither mark refuses the arm naming it"
+    assert check.report_prices(both, arming=False) is False, "the full sweep counts them and passes"

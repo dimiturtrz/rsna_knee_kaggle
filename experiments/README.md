@@ -103,6 +103,19 @@ uploading is a manual `kaggle datasets version` step: it downloads the published
 bytes, listed as its own file, so no weights move) and judges it by the same rule. On 2026-08-15 its first
 run refused the live dataset — mounted `4faac3d`, five shipped-package commits behind.
 
+**`# bead: knee-xxxx` — an arm may not be ARMED against an issue that never priced it.** The rule the
+project keeps breaking is its own: price an experiment as wall-clock ÷ expected gain *before* running it.
+The 140 mm cache build ran on a stated cost with no stated odds, which is the argument the rule exists to
+refuse. So an arm's shell carries one header line naming its bead, `arm_check` reads that bead's text out
+of `bd`, and it demands **both** marks — a `PRICE:` (what the card costs) and a `P(clears ...)` (the odds
+it clears the 1.5% bar). A cost alone is not a price. knee-yuqf is the format both were read off.
+
+It **refuses only under `--only`**, and the asymmetry is the same one `unstated` draws: seventy arms
+predate the rule and nearly all of them already ran, so refusing the full sweep would fail every
+invocation of this tool until they are back-filled — which is how a pre-flight check earns a
+`--no-verify`. The rule exists to stop momentum at the moment of arming, and the run that arms an arm is
+the run that names it. The full sweep prints one summary count instead.
+
 **`--studies N` — the one check that DOES want the card, and wants it for two minutes.** `arm_check`
 proves an arm's flags parse; it cannot prove the recipe they select survives contact with the corpus,
 the encoder and the loss. `--studies 60` caps the corpus positions a run touches, keeping the fold's
