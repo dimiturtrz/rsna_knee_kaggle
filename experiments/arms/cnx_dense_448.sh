@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 # cnx_dense_448.sh — the retry `cnx_dense` pre-registered for itself, and ONLY that.
 #
+# DO NOT ARM THIS. ITS GATE OPENED AND ITS MECHANISM CLOSED, in the same result (2026-08-21).
+# `cnx_dense` landed at 0.7927 solo, so the "under 0.80" trigger below DID fire — and everything else
+# that landed with it says the trigger is pointing at the wrong variable. Three independent readings,
+# none of them the mean, and any one of them is enough:
+#   1. The structure-scale split reads focal -0.0585 against regional -0.0585, equal to four decimals.
+#      A too-coarse grid predicts the FOCAL findings lose while the regional ones hold; they lose
+#      identically, which is a uniformly worse model. `run_comparison` prints its own verdict on that
+#      line: "nothing gained at either scale, so resolution was not the bottleneck".
+#   2. Resolution is already priced on this data and it is worth nothing. `resolution` at 392 px held at
+#      the control's own encoder rate scored 0.8459, +0.0002 (knee-a8x); the +0.0066 that row once
+#      claimed was the RATE, not the pixels.
+#   3. At MATCHED TRAIN LOSS rather than matched epoch, `base_dense` holds 0.8371 at loss 0.8456 and
+#      `cnx_dense` holds 0.7927 at loss 0.8332 — a 0.044 generalisation gap at equal fit. The trunk is
+#      not fitting less; it generalises worse from the same fit, and a 14x14 grid does not buy that back.
+# A pre-registered clause is a commitment against reading the result to taste, not a commitment to run
+# an arm whose mechanism the same result refuted. The clause is honoured by RECORDING that it fired and
+# why it is not being followed — which is here and in the ledger — rather than by spending forty minutes
+# on a hypothesis three readings already exclude. Encoder diversity closed as an axis with this arm;
+# the next member comes from the data side.
+#
+# The original text is kept below unchanged, because it is what the arm was for.
+#
 # ARM THIS ONLY IF `cnx_dense` READ OUT UNDER 0.80 SOLO. That is its own third clause, written before it
 # ran: "the head, the band and the slice pooling were all settled on token sequences from a patch-14 ViT;
 # a 121-token grid may simply be too coarse for the slot head's spatial pooling, in which case the reading

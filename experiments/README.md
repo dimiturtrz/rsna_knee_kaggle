@@ -1494,6 +1494,59 @@ that an offline delta inside the floor is a real board cost of roughly 3x its si
 a licence to switch the default; it is a statement that batch 6 is *available* when a member needs the VRAM,
 which is exactly the case `base_dense` was in.
 
+### `cnx_dense` — the first non-transformer trunk, and it closes encoder diversity as an axis — 2026-08-21
+
+**The flag landed.** `run_comparison` against `base_dense` names `variant base→cnxbase`, with
+`train_size 0→352` and `batch 6→2` — the two deviations the arm stated before it ran, both forced by a
+stride-32 trunk without gradient checkpointing, and the third (`accumulate 3`) invisible here only
+because the control predates the option. Slices, band, rate, pooling, whole-stack and schedule are the
+control's.
+
+**The arm on its own.** Best holdout **0.7927 at epoch 11** against `base_dense` 0.8512 (**−0.0585**) and
+`band_dense` 0.8578. Seat value into the pinned five: 0.8655 as a sixth (−0.0035), and 0.8648 as a swap
+for `base_dense` (−0.0042), 0 of 1 clearing +0.0015. At the measured 3× board cost that swap reads as
+roughly −0.0127.
+
+**TWO PRE-REGISTERED CLAUSES FIRE, and they are the two that close things.** REFUTATION asked for seat
+value at or below zero, like `v3base_dense`; it came in at −0.0042, six times more negative than
+`v3base_dense`'s −0.0005. THE EXPENSIVE NEGATIVE asked for solo below 0.80; 0.7927 is below 0.80. The
+arm's own text makes the second clause send it to 448 px before the trunk is judged, and **that retry
+should not be run** — see the next paragraph, which is the part of this row that generalises.
+
+**THE 448 RETRY IS DEAD ON THREE INDEPENDENT READINGS, and none of them is the mean.** (1) `run_comparison`'s
+structure-scale line reads **focal −0.0585 against regional −0.0585**, equal to four decimals: a
+uniformly worse model, not a redistribution, and it prints its own verdict — "nothing gained at either
+scale, so resolution was not the bottleneck". A coarse-grid hypothesis predicts the focal findings lose
+and the regional ones hold; they lose identically. (2) The resolution axis is already priced on this
+data: `resolution` at 392 px held at the control's own encoder rate scored **0.8459, +0.0002**
+(knee-a8x) — the +0.0066 that row used to claim was the RATE, not the pixels. (3) At MATCHED TRAIN LOSS
+rather than matched epoch, which is the comparison that removes "it just needed more steps":
+`base_dense` holds 0.8371 at loss 0.8456, this arm holds 0.7927 at loss 0.8332. **A 0.044 generalisation
+gap at equal fit** — it is not fitting less, it generalises far worse from the same fit. A 14×14 grid
+buying that back is not an arguable mechanism.
+
+**The per-label read does not rescue it and is not close.** Eleven of twelve labels are negative and
+**ten clear this pair's own paired half-widths** (up to ±0.0508): Baker's −0.1475\*, Lateral Meniscus
+−0.0927\*, Medial Meniscus −0.0863\*, Contusion −0.0804\*, MCL −0.0779\*, PF OA −0.0532\*, ACL −0.0437\*,
+Lateral OA −0.0370\*, Effusion −0.0232\*, Medial OA −0.0189\*. Synovitis is the sole positive at +0.0070
+and does not clear. This is the widest significant sweep any arm in this ledger has produced.
+
+**The trajectory is a generalisation gap, and the reading was revised twice while it ran — recorded here
+because both revisions predate the number.** Holdout 0.7050 / 0.7350 / 0.7495 / 0.7659 / 0.7681 / 0.7760
+/ 0.7858 / 0.7908 / 0.7921 / 0.7909 / 0.7927 / 0.7927 against loss 1.2612 → 0.8332. At epoch 6 it was
+climbing +0.0098 where the control had flattened to +0.0026, which read as UNDERFIT and made the
+schedule (knee-9otf) the likelier suspect than geometry. By epoch 8 that was wrong, and by epoch 11 the
+holdout is flat for three epochs while the loss falls another 0.05. **Loss still dropping and holdout
+already flat is a generalisation gap; more epochs or a larger rate buy more of the same fit.** knee-9otf
+was retitled off the refuted underfit claim on the strength of this.
+
+**CONSEQUENCE, which is what this arm actually bought.** Its own REFUTATION clause states it: with seat
+value at or below zero, "the fifth seat was bought by DINOv2-base's capacity and not by diversity of any
+kind, *encoder diversity* stops being an axis this project has evidence for, and the next member has to
+come from the DATA side rather than the encoder side." Three encoders now say it — `v3base_dense`
+−0.0005 within the transformer family, `cnx_dense` −0.0042 outside it entirely, against `base_dense`'s
+one paying seat. A different inductive bias is not a different error structure. **The axis closes.**
+
 ### `v3base_dense` — "DINOv3 is weak" was an ADAPTATION finding wearing an encoder's name — 2026-08-21
 
 `base_dense`'s invocation with `--variant v3base` substituted for `--variant base`. Rate, slices, band,
