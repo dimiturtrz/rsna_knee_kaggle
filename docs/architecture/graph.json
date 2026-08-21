@@ -4803,6 +4803,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.swap",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.board_cost",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.swap",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
@@ -15970,6 +15976,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.best",
       "label": "best",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.board_cost",
+      "label": "board_cost",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve.MemberCurve",
       "role": null
