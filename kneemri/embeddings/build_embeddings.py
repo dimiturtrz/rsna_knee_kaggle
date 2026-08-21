@@ -22,7 +22,7 @@ from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign, StudyModel
-from kneemri.models.slice_pooling import MAXIMUM
+from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,15 @@ def main() -> None:
         choices=tuple(POOL_PARTS),
         help="how patch tokens become one vector per slice. The name reaches the embedding cache KEY, "
         "so a pooling the model cannot build must fail here rather than after the backbone is fetched.",
+    )
+    parser.add_argument(
+        "--slice-read",
+        default=MAXIMUM,
+        choices=tuple(SLICE_POOLINGS),
+        help="how the slices of a slot reach the encoder. A per-slice reading keeps each slice separate "
+        "and stores a slice axis for a head trial to reduce; a whole-stack reading consumes the slices "
+        "inside the encoder and stores one vector per slot. It reaches the cache KEY, because the two "
+        "produce arrays of different rank from the same pixels.",
     )
     parser.add_argument("--batch", type=int, default=8, help="studies per forward")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
@@ -60,17 +69,25 @@ def main() -> None:
     corpus, identifiers = pixels.load()
 
     device = VisibleCards().device()
-    # Per-slice pooling, because the whole point is to keep each slice separate — the slot's own
-    # aggregation is one of the choices this cache exists to make free.
+    # Per-slice by DEFAULT, because keeping each slice separate makes the slot's own aggregation a free
+    # choice later. It is a flag rather than a constant because a volumetric trunk REFUSES a per-slice
+    # reading — it would spend the trunk's only advantage — so hard-coding it here put the one axis a
+    # volume-pretrained encoder needs beyond this CLI's reach.
     model = StudyModel(
         encoder.load(),
         encoder.dim,
         len(corpus.mask[0]),
-        StudyDesign(pool=arguments.pool, slice_pooling=MAXIMUM),
+        StudyDesign(pool=arguments.pool, slice_pooling=arguments.slice_read),
     )
     model.eval().to(device)
 
-    spec = EmbeddingSpec(variant=arguments.variant, source=pixels.key, read_size=read_size, pool=arguments.pool)
+    spec = EmbeddingSpec(
+        variant=arguments.variant,
+        source=pixels.key,
+        read_size=read_size,
+        pool=arguments.pool,
+        slice_read=arguments.slice_read,
+    )
     cache = EmbeddingCache(root, spec)
     logger.info(f"encoding {len(identifiers)} studies -> {cache.features_path}")
     # The encode pass is the same unattended hour-scale job the decode is, and suspends the same way.

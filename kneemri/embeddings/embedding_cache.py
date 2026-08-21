@@ -97,6 +97,16 @@ class EmbeddingSpec:
     """`StudyCache.key` of the pixels these features were encoded from."""
     read_size: int
     pool: str
+    slice_read: str
+    """The `slice_pooling` the ENCODER was built with, which decides the SHAPE of what is stored.
+
+    Distinct from the reduction a head trial later applies over these features, and named apart from it
+    for that reason. A `per_slice` reading encodes each slice alone and leaves a slice axis to reduce
+    later; a whole-stack reading (`channels`, or any volumetric trunk) consumes the slices INSIDE the
+    encoder and stores one vector per slot. Two files of different rank, describing different functions
+    of the same pixels — and before this field existed they shared a filename, so a volumetric build
+    would have silently written over the per-slice one.
+    """
 
 
 class EmbeddingCache:
@@ -122,7 +132,7 @@ class EmbeddingCache:
         here.
         """
         spec = self.spec
-        return "_".join([spec.variant, spec.source, f"r{spec.read_size}", spec.pool])
+        return "_".join([spec.variant, spec.source, f"r{spec.read_size}", spec.pool, spec.slice_read])
 
     @property
     def features_path(self) -> Path:
@@ -167,10 +177,8 @@ class EmbeddingCache:
         error, which this repository has already paid for once.
         """
         studies, slots = corpus.mask.shape
-        width = self._probe_width(encode, corpus, device)
-        features = open_memmap(
-            self.features_path, mode="w+", dtype=STORED, shape=(studies, slots, corpus.slices, width)
-        )
+        depth, width = self._probe_shape(encode, corpus, device)
+        features = open_memmap(self.features_path, mode="w+", dtype=STORED, shape=(studies, slots, depth, width))
         with torch.no_grad(), torch.autocast("cuda", enabled=device.type == "cuda"):
             for start in range(0, studies, batch):
                 stop = min(start + batch, studies)
@@ -186,16 +194,23 @@ class EmbeddingCache:
         logger.info("wrote %s: %s", self.features_path.name, features.shape)
         return EmbeddedCorpus(features, corpus.mask)
 
-    def _probe_width(self, encode: SliceFeatures, corpus: CachedCorpus, device: torch.device) -> int:
-        """The feature width, taken from the model rather than from a registry.
+    def _probe_shape(self, encode: SliceFeatures, corpus: CachedCorpus, device: torch.device) -> tuple[int, int]:
+        """How many vectors a slot yields and how wide they are, both taken from the model.
 
         Derived by encoding ONE study rather than by multiplying a registry's `dim` by a pooling's part
         count — those are two places that can disagree, and this file's whole value depends on the array
         on disk matching the model that will later read it.
+
+        THE DEPTH IS PROBED FOR THE SAME REASON THE WIDTH IS, and it did not used to be: the allocation
+        read `corpus.slices`, which is a fact about the PIXELS, while the array holds a fact about the
+        ENCODER'S OUTPUT. They agree for every per-slice reading and disagree for every whole-stack one,
+        where the slices are consumed inside the encoder and a slot yields ONE vector. The old form would
+        have tried to write a depth-1 encode into a depth-12 array on the first volumetric build.
         """
         with torch.no_grad(), torch.autocast("cuda", enabled=device.type == "cuda"):
             probe = torch.from_numpy(np.ascontiguousarray(corpus.images[:1])).to(device)
-            return int(encode(probe, self.spec.read_size).shape[-1])
+            encoded = encode(probe, self.spec.read_size)
+            return int(encoded.shape[2]), int(encoded.shape[-1])
 
     def load(self) -> tuple[EmbeddedCorpus, list[str]]:
         """The encoded corpus, memory-mapped read-only, with its study order."""

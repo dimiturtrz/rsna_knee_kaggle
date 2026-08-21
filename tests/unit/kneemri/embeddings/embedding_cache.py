@@ -17,7 +17,7 @@ SLICES = 2
 WIDTH = 5
 PIXELS = 8
 
-SPEC = EmbeddingSpec(variant="small", source=f"336px_{SLICES}sl", read_size=336, pool="cls_mean")
+SPEC = EmbeddingSpec(variant="small", source=f"336px_{SLICES}sl", read_size=336, pool="cls_mean", slice_read="max")
 
 
 class _FakeEncoder(torch.nn.Module):
@@ -58,20 +58,26 @@ def test_key():
     load into the same head and score differently for no discoverable reason. The read size is separate
     from the cache's own size because our best recipe holds 448 px and reads it at 392.
     """
-    assert EmbeddingCache(Path("."), SPEC).key == "small_336px_2sl_r336_cls_mean"
+    assert EmbeddingCache(Path("."), SPEC).key == "small_336px_2sl_r336_cls_mean_max"
 
     # THE SOURCE CACHE'S OWN NAME, so every axis that decides the pixels reaches the features. This
     # restated three of that cache's six axes, which left the crop, the band and the tie rule with
     # nowhere to land: features encoded from the 80 mm arrays would have overwritten features encoded
     # from the 130 mm ones, at the right shape, under the same name.
-    tighter = EmbeddingCache(Path("."), EmbeddingSpec("v3small", "448px_2sl_80mm_tissue", 384, "cls_mean"))
-    assert tighter.key == "v3small_448px_2sl_80mm_tissue_r384_cls_mean"
+    tighter = EmbeddingCache(Path("."), EmbeddingSpec("v3small", "448px_2sl_80mm_tissue", 384, "cls_mean", "max"))
+    assert tighter.key == "v3small_448px_2sl_80mm_tissue_r384_cls_mean_max"
+
+    # HOW THE SLICES REACHED THE ENCODER, because a whole-stack reading consumes them inside it and
+    # stores one vector per slot: an array of different RANK from the same pixels, under what used to
+    # be the same name.
+    volume = EmbeddingCache(Path("."), EmbeddingSpec("small", f"336px_{SLICES}sl", 336, "cls_mean", "channels"))
+    assert volume.key != EmbeddingCache(Path("."), SPEC).key
     assert EmbeddingCache(Path("."), SPEC).key != tighter.key
 
 
 def test_features_path(tmp_path: Path):
     """The features live under the key, so two configurations cannot overwrite each other."""
-    assert EmbeddingCache(tmp_path, SPEC).features_path == tmp_path / "features_small_336px_2sl_r336_cls_mean.npy"
+    assert EmbeddingCache(tmp_path, SPEC).features_path == tmp_path / "features_small_336px_2sl_r336_cls_mean_max.npy"
 
 
 def test_mask_path(tmp_path: Path):

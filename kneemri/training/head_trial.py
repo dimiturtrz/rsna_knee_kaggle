@@ -330,6 +330,13 @@ def main() -> None:
     parser.add_argument("--pool", default=CLS_MEAN, choices=tuple(POOL_PARTS))
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep")
+    parser.add_argument(
+        "--slice-read",
+        default=MAXIMUM,
+        choices=tuple(SLICE_POOLINGS),
+        help="which cache to read: how the slices reached the ENCODER when it was built. "
+        "Distinct from --slice-pooling, which reduces the slice axis this trial then finds.",
+    )
     parser.add_argument("--slice-pooling", default=MAXIMUM, choices=TRIAL_SLICE_POOLINGS)
     parser.add_argument("--slot-pooling", default=ATTENDED, choices=tuple(SLOT_POOLINGS))
     parser.add_argument("--anatomical-prior", action="store_true")
@@ -353,7 +360,13 @@ def main() -> None:
     # The features are named after the PIXELS they were encoded from, so this asks the same question
     # `build_embeddings` answered rather than restating three of that cache's six axes.
     source = CacheFlags.cache(arguments, root.processed()).key
-    spec = EmbeddingSpec(variant=arguments.variant, source=source, read_size=arguments.read_size, pool=arguments.pool)
+    spec = EmbeddingSpec(
+        variant=arguments.variant,
+        source=source,
+        read_size=arguments.read_size,
+        pool=arguments.pool,
+        slice_read=arguments.slice_read,
+    )
     corpus, identifiers = EmbeddingCache(root.processed(), spec).load()
     targets = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers)
     folds = ReportFolds(arguments.folds, arguments.split_seed)
