@@ -1912,3 +1912,66 @@ gate — `queue_check` read `live` and `0/1 started` throughout and was right bo
 `wakelock: held`, so a wakelock is taken and it did not prevent this; that gap is filed separately. Worth
 writing down because the failure looks exactly like a wedged watcher from the log side, and the second
 time I mistake one for the other it will cost more than the reading did.
+
+### `through_dense` — stem inflation at a depth window of 3, and the checkpoint outlived the answer (2026-08-21)
+
+**Arm** `experiments/arms/through_dense.sh` (knee-40wh), 12 epochs at ~379 s, ~1215 img/s, 291 steps an
+epoch. Matched to `band_dense` (0.8578) on every flag except `--through-plane`, which fills the encoder's
+three input channels with slices *i−1, i, i+1* clamped at the slot's depth ends and gathered strictly
+within a slot, instead of three copies of *i*. Same slice axis, same tokens, same parameters, same FLOPs —
+free by construction, differing from the control on `slices−2` of `slices` slices.
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| holdout AUC | 0.7403 | 0.7812 | 0.8141 | 0.8312 | 0.8457 | 0.8513 | **0.8558** | — | 0.8558 | 0.8534 | 0.8518 | 0.8526 |
+| train loss | 1.2205 | 1.0830 | 0.9899 | 0.9141 | 0.8475 | 0.8014 | 0.7488 | — | 0.6481 | 0.6082 | 0.5883 | 0.5733 |
+
+**The answer is no.** Best 0.8558 against the control's 0.8578: **−0.0020**, a third of the 0.0062
+three-seed floor. The pre-registered BELOW-or-FLAT branch fired. It peaked at epoch 6 and slid while the
+training loss fell by a further 0.18 — the same late-overfit shape `band_dense_long` showed on the same
+recipe.
+
+**The second instrument is the one that reads.** Matched-epoch training loss tracked the control within
+0.009 at every epoch (1.2205/1.0830/0.9899 against 1.2162/1.0743/0.9851). The input change was almost
+invisible to the optimisation: the model fits the training set at the same rate with neighbours in the
+channels as with three copies of one slice. That is a sharper statement than the flat AUC — it is not
+that the depth information hurt, it is that the trunk had no way to use it.
+
+**What it retires, stated narrowly, and it is narrower than the arm was filed as.** The arm's own
+mid-run correction establishes that `Conv2d(3, D, k=14, s=14)` over channels (*i−1, i, i+1*) is
+mathematically IDENTICAL to `Conv3d(1, D, k=(3,14,14), s=(1,14,14))` over that 3-slice volume — same
+parameters, same output, exactly. So this **is** stem inflation at a depth window of 3, not a cheap proxy
+for it, and the flat reading genuinely discharges the exclusion clause `depth_true` wrote into its own
+close, *at that window*.
+
+What it does **not** retire, and this is the honest residue:
+
+- a depth window **larger than 3**, which needs a real `Conv3d` because the channel trick is capped at 3
+  by the pretrained stem's channel count;
+- a stem that emits **several depth positions** instead of collapsing the window to one linear projection
+  per output dimension — the thing no reshaping of a 2D stem can do at any window size.
+
+Both are what a volume-pretrained trunk buys (knee-jucq), and the pre-registration named the mechanism
+before the number: the stem's three channel filters are distinct learned kernels, so it can express a
+depth derivative rather than only a smear, but there is one output token per patch and those weights were
+pretrained to mean **colour**. It has no capacity to carry "the slice at *i*" and "how it changes with
+depth" as separate quantities. A flat result is what that predicts, and it points harder at a trunk
+pretrained on volumes rather than away from one.
+
+**The checkpoint outlived the answer, and by the largest margin yet.** Priced against the 0.931 champion
+five, `through_dense` is **+0.0008** as an add and **+0.0010** taking `base_dense`'s seat — the best of all
+**twenty-four** candidates scored on 2026-08-21, mounted and unmounted, against a distribution whose next
+value is +0.0005 and whose mounted best is +0.0002. Five times the best move the rest of the mounted pool
+can make. It is still under the +0.0015 `BOARD_RESOLVABLE` threshold and is not claimed as an edge.
+
+The reason to believe the seat number over the arm number is mechanical rather than statistical: every
+other member in the pool reads the **same pixels**, and their disagreement is recipe, band, rate,
+resolution or encoder — all downstream of an identical input tensor. This is the only member that changes
+what the encoder is shown at the first op. knee-nas5 measured that axis as under-priced by this holdout by
+2.4× (0.0059 offline became 0.014 on the board), and that argument has never before applied at the input
+rather than at the decode.
+
+That makes three arms in a row whose premise was refuted and whose checkpoint the roster wanted anyway —
+`calib_span` (−0.0020 on its own arm, carried the 0.929), `band_dense_long` (premise refuted outright,
+carried the 0.930), and now this. A run that answers "no" still produces a checkpoint, and the checkpoint
+is not bound by the answer.

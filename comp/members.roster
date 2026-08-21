@@ -130,3 +130,52 @@ base_dense_s2026.pt         # 0.8512 — the only DINOv2-BASE member; the encode
 # Those are the two rulers and they disagree in the way the ledger says they should — a member is bought
 # for what it ADDS, and a checkpoint 0.0066 behind the control on its own is level with the pool's best
 # four once mixed, which is what a genuinely different encoder is supposed to look like.
+grade_ladder_s2026.pt       # 0.8565 — ties band_span as the pool's best solo; the SEVERITY axis, never mounted
+band140_s2026.pt            # 0.8556 — the 140 mm field; the crop-SIZE axis, never mounted
+aug_long_s2026.pt           # 0.8511 — level with base_dense, which carried the 0.931
+# Added 2026-08-21, the first push since the 0.931 champion landed. The reason is not any one of these
+# three: it is that `seat_value` over ALL fourteen mounted members not already named — as adds and as
+# swaps against the champion five — spans +0.0002 to -0.0019, so nothing mounted clears the +0.0015
+# BOARD_RESOLVABLE threshold and the mounted pool is offline-exhausted by its own ruler. A push is the
+# only way to put a candidate in front of the board at all.
+#
+# Priced against the champion five before the push: aug_long +0.0005 (the best add of the twenty
+# candidates scored tonight, mounted and unmounted), grade_ladder +0.0001, band140 -0.0001. All three
+# are inside the 0.0062 floor and none is claimed as an edge.
+#
+# What each one carries, which is what a push is actually bought for. `grade_ladder` is the SEVERITY
+# axis the pool has never held — kept alive by the owner's call after it failed to clear on its own arm,
+# and it is worth noting that it ties `band_span` for the best solo score in this file. `band140` is the
+# crop-SIZE axis at 140 mm against every other member's 130 mm; its seat read is +0.0000, a debt this
+# roster owed since it was trained. `aug_long` is the long-augmentation schedule, and its checkpoint is
+# the reason to read `.pt['holdout']` rather than a log tail: its FINAL epoch is 0.8342, deep in the
+# weak-member band that cost `crossenc` and `maxdiv` four and five board ticks, while its BEST epoch —
+# what the checkpoint actually stores and what inference actually runs — is 0.8511, level with
+# `base_dense`. Reading the last line of the log would have mounted it as a trap it is not.
+through_dense_s2026.pt      # 0.8558 — the ONLY member whose input PIXELS differ; its own arm read it as flat
+# Added 2026-08-21 in the same push. Its arm is knee-40wh and the arm's answer is no: matched to
+# `band_dense` (0.8578) on every flag except `--through-plane`, which puts slices i-1, i, i+1 into the
+# encoder's three input channels instead of three copies of i, it peaked at epoch 6 (0.8558) and slid to
+# 0.8526 by epoch 11 while training loss fell from 0.7488 to 0.5733. -0.0020 against control, a third of
+# the 0.0062 floor, with a late overfit. The pre-registered BELOW-or-FLAT branch fired.
+#
+# It is mounted because the OTHER ruler puts it first. Priced against the champion five it is +0.0008 as
+# an add and +0.0010 taking `base_dense`'s seat — the best of all TWENTY-FOUR candidates scored on
+# 2026-08-21, mounted and unmounted, where the rest of the distribution spans +0.0005 to -0.0019. Five
+# times the next-best mounted move. Still under the +0.0015 BOARD_RESOLVABLE threshold and not claimed as
+# an edge, but it is the top of the distribution by a clear margin rather than a coin-flip inside it.
+#
+# The mechanism says why, and it is the reason this is not just a good number. Every other member in this
+# file reads the SAME pixels — the disagreement between them is recipe, band, rate, resolution or
+# encoder, all downstream of an identical input tensor. This one changes what the encoder is shown at the
+# first op. That is the axis knee-nas5 measured as under-priced by our holdout by 2.4x (0.0059 offline
+# became 0.014 on the board), and it is the only member for which the argument applies at the input
+# rather than the decode.
+#
+# Its arm's own correction is what makes the flat result readable rather than just disappointing:
+# Conv2d(3, D, k=14, s=14) over channels (i-1, i, i+1) is mathematically IDENTICAL to Conv3d(1, D,
+# k=(3,14,14)) over that 3-slice volume, so this IS stem inflation at a depth window of 3, not a proxy
+# for it. What a flat reading retires is therefore sharp and small: it does NOT retire a depth window
+# larger than 3 (capped here by the pretrained stem's channel count), and it does NOT retire a stem that
+# emits SEVERAL depth positions instead of collapsing to one — which is what no reshaping of a 2D stem
+# can do at any window size, and what knee-jucq's volume-pretrained trunk actually buys.
