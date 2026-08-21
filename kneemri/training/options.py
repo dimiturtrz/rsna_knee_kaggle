@@ -91,6 +91,7 @@ class TrainingOptions:
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS
     slice_regions: int = StudyDesign().slice_regions
+    through_plane: bool = StudyDesign().through_plane
     slot_pooling: str = ATTENDED
     anatomical_prior: bool = False
     encoder_layer: int = -1
@@ -413,6 +414,15 @@ class TrainingOptions:
             "was fitted on. The final block of a self-supervised ViT is the most specialised toward its "
             "PRETRAINING objective, and our findings are 1-3 mm - both DINOv2 and DINOv3 ship "
             "get_intermediate_layers for dense work. Costs no extra forward pass.",
+        )
+        parser.add_argument(
+            "--through-plane",
+            action="store_true",
+            help="give each slice its two depth neighbours as the encoder's other two input channels "
+            "instead of three copies of itself. Same slice axis, same pooling, same token / parameter / "
+            "FLOP count as the control — the only change is what the three channels hold, so it is the "
+            "one arm that puts through-plane information INTO a slice's feature vector rather than "
+            "mixing depth after the encoder has already reduced each slice to one.",
         )
         parser.add_argument(
             "--anatomical-prior",

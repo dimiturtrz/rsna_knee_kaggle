@@ -134,6 +134,9 @@ class RunOptions(Protocol):
     def slice_regions(self) -> int: ...
 
     @property
+    def through_plane(self) -> bool: ...
+
+    @property
     def slot_pooling(self) -> str: ...
 
     @property
@@ -331,6 +334,10 @@ class MemberRecord:
                 # four regions and rebuilt over one loads perfectly and predicts from a different
                 # function of the same pixels. Exactly the shape `slice_pooling` itself once had.
                 "slice_regions": options.slice_regions,
+                # Read back by `StudyDesign.from_config` and consumed in `slice_features`: a member
+                # fitted on (i-1, i, i+1) and rebuilt on (i, i, i) loads perfectly and predicts from
+                # different pixels. The fingerprint is what catches it, and only if this is stamped.
+                "through_plane": options.through_plane,
                 # Recorded AND read back by Member.slot_pooling and HoldoutPredictions.load. A head
                 # fitted with uniform slot pooling and rebuilt with attention is a different function
                 # whose weights load without complaint - the ninth instance of that shape is why the

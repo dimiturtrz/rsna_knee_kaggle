@@ -18,6 +18,7 @@ from torch import Tensor, nn
 
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
 from kneemri.findings import TARGETS
+from kneemri.models.depth_window import DepthWindow
 from kneemri.models.lora import LoRALinear
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
@@ -111,6 +112,29 @@ class StudyDesign:
     member from the recorded config: a member fitted at four regions and served at one is a different
     function of the same pixels, and no fingerprint below the design would catch it."""
 
+    through_plane: bool = False
+    """Whether a slice reaches the encoder with its two depth NEIGHBOURS in the other two channels.
+
+    THE ONE MECHANISM THE AGGREGATION CHAPTER LEFT OPEN. `attend_true` and `depth_true` between them
+    saturated the slice-aggregation stage from three directions — more slices (-0.0001), more slots
+    (+0.0002), and all four combining rules within 0.0019 of each other — and both closed with the same
+    reading: the limit is UPSTREAM, in what one slice's feature vector contains. Every one of those arms
+    mixed depth AFTER the encoder had already reduced each slice to a vector, so none of them could put
+    through-plane information INTO that vector. This does, and it does it before any feature exists.
+
+    IT IS NOT `channels`, and the difference is the whole reason this is a separate field rather than a
+    revival. Channel stacking also feeds three slices to the three input channels, but it does so
+    INSTEAD of per-slice pooling — one forward per slot, no slice axis at all — which couples the group's
+    physical thickness to the slice count and is measurably why raising inference slices from 12 to 32
+    cost -0.018 there. So the pixel-level mixing was only ever measured bundled with the loss of the
+    slice axis, and the bundle is what lost. Here the slice axis, the pooling, the token count, the
+    parameter count and the FLOP count are all exactly the control's: the only thing that changes is
+    that the three channels hold (i-1, i, i+1) rather than three copies of i.
+
+    Free by construction. The trunk's patch-embedding convolution already takes three channels and was
+    pretrained on three that differ, so nothing is added, resized or initialised.
+    """
+
     slot_pooling: str = ATTENDED
     """How the twelve diagnoses read the six slots: per-diagnosis attention, or a uniform `mean`.
 
@@ -157,6 +181,7 @@ class StudyDesign:
             slot_pooling=str(config.get("slot_pooling", ATTENDED)),
             anatomical_prior=bool(config.get("anatomical_prior", False)),
             slice_regions=int(str(config.get("slice_regions", 1))),
+            through_plane=bool(config.get("through_plane", False)),
             layer=int(str(config.get("encoder_layer", -1))),
         )
 
@@ -308,7 +333,9 @@ class StudyModel(nn.Module):
         # -0.018 here while the recipe that pools per-slice can do it freely. It also means a finding
         # is only visible if it falls inside a sampled three-slice group.
         per_slice = self.per_slice
-        if per_slice:
+        if per_slice and self.design.through_plane:
+            x = DepthWindow.channels(imgs).reshape(batch * slots * group, 3, *imgs.shape[3:]).float().div(255.0)
+        elif per_slice:
             x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
             x = x.float().div(255.0)
         else:

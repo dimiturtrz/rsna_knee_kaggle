@@ -87,6 +87,7 @@ def main() -> None:
         pool=arguments.pool,
         slice_pooling=arguments.slice_pooling,
         slice_regions=arguments.slice_regions,
+        through_plane=arguments.through_plane,
         slot_pooling=arguments.slot_pooling,
         anatomical_prior=arguments.anatomical_prior,
         layer=arguments.encoder_layer,

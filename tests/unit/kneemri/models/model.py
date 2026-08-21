@@ -202,6 +202,23 @@ def test_slice_features():
         assert stacking.slice_features(imgs, 14).shape[2] == 1, "channel stacking has no per-slice axis"
 
 
+def test_slice_features_through_plane_changes_pixels_and_nothing_else():
+    """The arm's whole claim: same shape, same cost, different channels — so the control must not move."""
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+
+    torch.manual_seed(SEED)
+    control = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    torch.manual_seed(SEED)
+    windowed = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max", through_plane=True)).eval()
+
+    with torch.no_grad():
+        plain = control.slice_features(imgs, 14)
+        neighboured = windowed.slice_features(imgs, 14)
+
+    assert neighboured.shape == plain.shape, "the slice axis, token count and width are the control's"
+    assert not torch.allclose(neighboured, plain), "and the pixels reaching the trunk are not"
+
+
 class _BlockedBackbone(_FakeBackbone):
     """Blocks shaped like a real transformer's: a submodule holding several Linears, not a bare Linear.
 

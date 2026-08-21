@@ -1785,6 +1785,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.depth_window",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.lora",
       "weight": 1
     },
@@ -9579,6 +9585,12 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.slice_features",
+      "target": "kneemri.models.depth_window.DepthWindow.channels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel.slice_features",
       "target": "kneemri.models.model.StudyModel._pool",
       "weight": 1
     },
@@ -11553,7 +11565,7 @@
       "role": null
     },
     {
-      "descendants": 130,
+      "descendants": 131,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -12305,7 +12317,7 @@
       "role": null
     },
     {
-      "descendants": 8,
+      "descendants": 9,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -12324,6 +12336,14 @@
       "descendants": 0,
       "id": "kneemri.models.depth_attention",
       "label": "depth_attention",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.depth_window",
+      "label": "depth_window",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -13934,6 +13954,14 @@
       "label": "DepthAttention",
       "level": "class",
       "parent": "kneemri.models.depth_attention",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.depth_window.DepthWindow",
+      "label": "DepthWindow",
+      "level": "class",
+      "parent": "kneemri.models.depth_window",
       "role": "primary"
     },
     {
@@ -19938,6 +19966,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.depth_window.DepthWindow.channels",
+      "label": "channels",
+      "level": "method",
+      "parent": "kneemri.models.depth_window.DepthWindow",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights.applied",
       "label": "applied",
       "level": "method",
@@ -20540,6 +20576,14 @@
       "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.slot_pooling",
       "label": "slot_pooling",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.through_plane",
+      "label": "through_plane",
       "level": "method",
       "parent": "kneemri.runs.member_record.RunOptions",
       "role": null

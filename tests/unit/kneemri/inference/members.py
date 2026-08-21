@@ -658,6 +658,7 @@ CONSUMED: dict[str, tuple[object, Callable[[Member], object], object]] = {
     "slot_pooling": ("mean", lambda member: member.slot_pooling, "mean"),
     "anatomical_prior": (True, lambda member: StudyDesign.from_config(member.config).anatomical_prior, True),
     "slice_regions": (4, lambda member: StudyDesign.from_config(member.config).slice_regions, 4),
+    "through_plane": (True, lambda member: StudyDesign.from_config(member.config).through_plane, True),
     "encoder_layer": (-4, lambda member: member.layer, -4),
     "lora_rank": (8, lambda member: member.lora_rank, 8),
     "whole_stack": (True, lambda member: member.whole_stack, True),
