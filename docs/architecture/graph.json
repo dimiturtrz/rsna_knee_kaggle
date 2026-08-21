@@ -4503,7 +4503,7 @@
     {
       "kind": "calls",
       "source": "kneemri.embeddings.embedding_cache.EmbeddingCache.build",
-      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache._probe_width",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache._probe_shape",
       "weight": 1
     },
     {
@@ -16718,8 +16718,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.embeddings.embedding_cache.EmbeddingCache._probe_width",
-      "label": "_probe_width",
+      "id": "kneemri.embeddings.embedding_cache.EmbeddingCache._probe_shape",
+      "label": "_probe_shape",
       "level": "method",
       "parent": "kneemri.embeddings.embedding_cache.EmbeddingCache",
       "role": null
