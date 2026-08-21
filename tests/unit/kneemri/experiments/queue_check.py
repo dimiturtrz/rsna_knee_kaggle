@@ -49,6 +49,47 @@ def test_alive(tmp_path: Path):
     assert not QueuedArms(tmp_path, "").alive(watch), "an empty listing leaves nothing gating it"
 
 
+def test_alive_is_not_vouched_for_by_the_chain_that_replaced_it(tmp_path: Path):
+    """A superseded watcher's argv is a SUFFIX of the chain that took over — the 2026-08-21 hole.
+
+    The chain owes both arms; the dead log owes only the second. Matching the marker, or matching the
+    arms anywhere in the line, calls the dead watcher live and the queue healthy.
+    """
+    _log(tmp_path, "after_dead.log", MARKER, "experiments/arms/aprior_dense.sh")
+    dead = QueuedArms(tmp_path, LIVE).watches()[0]
+    assert not QueuedArms(tmp_path, LIVE).alive(dead), "a longer chain does not vouch for a killed watcher"
+
+
+def test_watchers(tmp_path: Path):
+    """Only `after.sh` lines gate; the arm's own process carries the same path and is not a second gate."""
+    running = LIVE + "User 1 1 ? bash experiments/arms/aprior_dense.sh\n"
+    assert QueuedArms(tmp_path, running).watchers() == [LIVE.rstrip()]
+
+
+def test_watchers_drops_the_launching_shell(tmp_path: Path):
+    """The harness shell's own `-c` string embeds the nohup line, so one queue shows up as two.
+
+    MEASURED 2026-08-21: this is what a naive count reported as DOUBLE-QUEUED on a healthy queue —
+    a false blocking verdict is as expensive as the miss it replaced.
+    """
+    wrapper = f"User 107663 1 ? bash -c cd repo && nohup bash experiments/after.sh {MARKER} /d/x.log {ARMS}\n"
+    assert QueuedArms(tmp_path, wrapper + LIVE).watchers() == [LIVE.rstrip()]
+
+
+def test_doubled(tmp_path: Path):
+    """Two live watchers each owing one arm — 2.5 h of slot, and two of that geometry overflow the card."""
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+    assert QueuedArms(tmp_path, LIVE).doubled() == [], "one watcher per arm is the healthy queue"
+    assert QueuedArms(tmp_path, LIVE + LIVE).doubled() == ARMS.split(), "both arms would start twice"
+
+
+def test_faults(tmp_path: Path):
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+    assert QueuedArms(tmp_path, LIVE).faults() == []
+    assert QueuedArms(tmp_path, LIVE + LIVE).faults()[0].startswith("DOUBLE-QUEUED:")
+    assert QueuedArms(tmp_path, "").faults()[0].startswith("STRANDED:")
+
+
 def test_stranded(tmp_path: Path):
     _log(tmp_path, "after_chain.log", MARKER, ARMS)
     assert QueuedArms(tmp_path, LIVE).stranded() == [], "a live watcher owes nothing to anyone else"
@@ -135,3 +176,13 @@ def test_main_exits_when_the_table_cannot_be_read(monkeypatch: pytest.MonkeyPatc
     with pytest.raises(SystemExit) as exit_code:
         main()
     assert exit_code.value.code == 1
+
+
+def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A stranded queue must not leave the status at 0 either — same trap, and it costs a card."""
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+    monkeypatch.setattr(QueuedArms, "listing", staticmethod(lambda *_: "bash nothing\n"))
+    monkeypatch.setattr("sys.argv", ["queue_check", "--directory", str(tmp_path)])
+    with pytest.raises(SystemExit) as exit_code:
+        main()
+    assert exit_code.value.code == 2

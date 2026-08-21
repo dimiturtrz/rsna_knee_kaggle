@@ -114,7 +114,9 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   two days after running),
   `python -m kneemri.experiments.queue_check` whenever a watcher is launched or a session ends (the card sat idle
   for five minutes because three `after.sh` watchers had died with the session that launched them, and their logs
-  still read `waiting for 'ARM DONE ...'` — the queue LOOKS armed either way, and only the process table knows), `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
+  still read `waiting for 'ARM DONE ...'` — the queue LOOKS armed either way, and only the process table knows;
+  it now also blocks the OPPOSITE hole, two live watchers owing one arm, which would run it twice on one card),
+  `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
   submission (two slots went to code the repo had already fixed; `--mounted` asks Kaggle what it will
   actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a
   submission (it found three defects on first use), and `python -m kneemri.kaggle.mount_check` before a
