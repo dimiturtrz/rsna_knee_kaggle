@@ -110,6 +110,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.crop_coverage",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.crop_alignment",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.crop_coverage",
       "target": "core.bootstrap",
       "weight": 1
@@ -2890,6 +2932,150 @@
       "kind": "construct",
       "source": "kneemri.corpus.cache_flags.CacheFlags.cache",
       "target": "kneemri.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment",
+      "target": "kneemri.corpus.crop_alignment.SlotOffset",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment",
+      "target": "kneemri.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline.route",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "target": "kneemri.corpus.crop_alignment.SlotOffset",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "target": "kneemri.corpus.crop_centre.ImageCentre",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "target": "kneemri.corpus.crop_centre.ImageCentre.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "target": "kneemri.corpus.crop_centre.TissueCentre",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "target": "kneemri.corpus.crop_centre.TissueCentre.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.report",
+      "target": "kneemri.corpus.crop_alignment.CropAlignment.plane_line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.CropAlignment.report",
+      "target": "kneemri.corpus.crop_alignment.CropAlignment.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.crop_alignment.CropAlignment",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.crop_alignment.CropAlignment.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.crop_alignment.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -11565,7 +11751,7 @@
       "role": null
     },
     {
-      "descendants": 131,
+      "descendants": 132,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11581,7 +11767,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 22,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -11624,6 +11810,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.cache_flags",
       "label": "cache_flags",
+      "level": "module",
+      "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment",
+      "label": "crop_alignment",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -12771,6 +12965,22 @@
       "level": "class",
       "parent": "kneemri.corpus.cache_flags",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment",
+      "label": "CropAlignment",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_alignment",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.SlotOffset",
+      "label": "SlotOffset",
+      "level": "class",
+      "parent": "kneemri.corpus.crop_alignment",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -14906,6 +15116,62 @@
       "label": "cache",
       "level": "method",
       "parent": "kneemri.corpus.cache_flags.CacheFlags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment.measure_study",
+      "label": "measure_study",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment.offset",
+      "label": "offset",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment.plane_line",
+      "label": "plane_line",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.CropAlignment.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.SlotOffset.magnitude",
+      "label": "magnitude",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment.SlotOffset",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.crop_alignment.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.corpus.crop_alignment",
       "role": null
     },
     {
