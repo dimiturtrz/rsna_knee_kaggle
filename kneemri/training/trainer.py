@@ -134,6 +134,20 @@ safe way. Under LoRA the base weights are frozen and `--recompute-activations` d
 counts, so this OVERSTATES a v3 arm's real demand — and an overstated ask costs `await_headroom`
 polling, where the understated one it replaces is an immediate OOM on a recipe that fits."""
 
+FITTED_DEPTH = 12
+"""How many blocks the fitted encoder runs. Every ViT this project has fitted is 12 deep — small, base
+and both DINOv3 siblings — which is exactly why depth could hide inside `GB_PER_SLICE` for four months
+and only announce itself when a 36-block convolutional trunk arrived."""
+
+FITTED_UNITS = FITTED_DEPTH * (FITTED_SIZE / FITTED_PATCH) ** 2 * FITTED_DIM
+"""The activation units of the fitted point — 12 blocks x 576 tokens x 384 wide.
+
+THE DENOMINATOR OF THE WHOLE MODEL, written as the product it is so that changing any one factor of
+the fitted point cannot leave a stale number behind. `needed()` is now a single ratio against this,
+and every DINOv2 and DINOv3 arm derives the identical cap it derived before, because a 12-deep trunk's
+units ARE `depth x (size / patch) ** 2 x dim` — the old formula, with the constant factor that used to
+be assumed now said out loud."""
+
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
 and the allocator's own blocks, none of which the slice loop multiplies."""
@@ -170,17 +184,17 @@ class DeviceBudget:
     """How many slices a step holds — the field the reserved peak is most of a function of. 0 means the
     caller did not say, and then only the card-fraction default is available."""
 
-    size: int = FITTED_SIZE
-    """The pixel size a step encodes at. Defaults to where `GB_PER_SLICE` was fitted, so every 336 px
-    caller is unchanged and only an arm that moves the resolution moves its own cap."""
+    units: float = FITTED_UNITS
+    """Summed tokens-times-width over every block of the trunk, at the size this run reads — what the
+    caller gets from `Encoder.activation_units`.
 
-    patch: int = FITTED_PATCH
-    """The encoder's patch side, which turns the pixel size into the token count the cost is actually
-    a function of. Defaults to DINOv2's 14, so no v2 caller sees a different number than before."""
-
-    dim: int = FITTED_DIM
-    """The encoder's feature width. Defaults to `small`'s 384, so every arm behind the fit is unchanged
-    and only a run on a wider encoder moves its own cap."""
+    IT REPLACED THREE FIELDS (size, patch, dim) THAT COULD NOT SAY WHAT THEY MEANT. Each of them was a
+    factor of the same quantity, and holding them separately forced this class to reassemble it with a
+    formula — `(size / patch) ** 2 * dim` — that silently assumed every block of every trunk sees the
+    final grid at the final width. That is true of a vision transformer and false of everything else,
+    which is why the axis had to move out of here and into the encoder, where the block structure
+    already lives. Defaults to the fitted encoder's own number, so a caller that says nothing derives
+    exactly what it derived before."""
 
     batch: int = FITTED_BATCH
     """How many studies a step holds at once — the one factor the fit had baked in as a constant.
@@ -213,8 +227,7 @@ class DeviceBudget:
         """
         if not self.slices:
             return 0.0
-        tokens = (self.size / self.patch) ** 2 / (FITTED_SIZE / FITTED_PATCH) ** 2
-        step = tokens * (self.dim / FITTED_DIM) * (self.batch / FITTED_BATCH)
+        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH)
         return GB_PER_SLICE * (self.slices + 1) * step + RESIDENT_GB
 
     def capped(self, whole: float) -> float:

@@ -296,9 +296,7 @@ class ArmCheck:
             encoder = ENCODERS[options.variant]
             needed = DeviceBudget(
                 slices=options.slices,
-                size=options.train_size or options.image_size,
-                patch=encoder.patch,
-                dim=encoder.dim,
+                units=encoder.activation_units(options.train_size or options.image_size),
                 batch=options.batch,
             ).needed()
             if options.vram_gb > needed + GB_PER_SLICE:

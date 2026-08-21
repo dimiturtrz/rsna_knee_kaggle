@@ -17,6 +17,7 @@ from kneemri.models.backbone import (
     V3_SMALL_PLUS,
     Encoder,
     MapAsTokens,
+    Stage,
     TokenOutput,
 )
 
@@ -136,6 +137,36 @@ def test_load(monkeypatch: pytest.MonkeyPatch):
     assert adapted.config.hidden_size == 1024, "the head reads its width off the config"
     assert adapted.config.num_register_tokens == 0, "a CNN has no registers to exclude"
     assert not isinstance(ENCODERS[SMALL].load(), MapAsTokens), "a transformer already speaks the contract"
+
+
+def test_units():
+    """A stage costs blocks x tokens x width, and the tokens are the square of the side over the stride."""
+    assert Stage(3, 4, 128).units(352) == 3 * 88 * 88 * 128, "88 = 352 / 4, and it is squared"
+    assert Stage(3, 8, 128).units(352) == Stage(3, 4, 128).units(352) / 4, "one halving of the grid is a quarter"
+    assert Stage(6, 4, 128).units(352) == 2 * Stage(3, 4, 128).units(352), "blocks are a plain multiplier"
+
+
+def test_activation_units():
+    """The memory proxy the VRAM cap is a function of — and the shorthand a transformer gets for free.
+
+    THIS IS WHAT FOUR DEAD ARMS HAD IN COMMON. The cap used to read the OUTPUT grid at the OUTPUT
+    width, which is every block's grid in a transformer and one block's grid in four in a ConvNeXt: the
+    smoke derived 2.84 GB and OOM'd against 28 GB of free card. The first assertion is the one that
+    protects the existing ledger — a 12-deep ViT must still reduce to the old form exactly, or every
+    recorded arm's cap moves.
+    """
+    small = ENCODERS[SMALL]
+    assert small.activation_units(336) == 12 * (336 / 14) ** 2 * 384, "one stage, depth blocks, patch stride"
+    assert small.activation_units(672) == 4 * small.activation_units(336), "tokens go as the square of the side"
+    assert ENCODERS[BASE].activation_units(336) == 2 * small.activation_units(336), "width is a plain factor"
+
+    convnext = ENCODERS[CONVNEXT_BASE]
+    assert convnext.activation_units(352) == sum(stage.units(352) for stage in convnext.stages), (
+        "a trunk that states its stages is priced by them and not by its patch and width"
+    )
+    assert convnext.activation_units(352) > 7 * (12 * (352 / 32) ** 2 * 1024), (
+        "and that is 7.75x what the output grid alone accounts for, which is the size of the defect"
+    )
 
 
 def test_require_tiling():

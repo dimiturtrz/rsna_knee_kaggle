@@ -13,7 +13,7 @@ from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.device import VisibleCards
 from kneemri.findings import TARGETS
 from kneemri.labels.targets import Targets
-from kneemri.models.backbone import ENCODERS, SMALL, V3_BASE, V3_SMALL
+from kneemri.models.backbone import CONVNEXT_BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
@@ -35,6 +35,8 @@ from kneemri.training.trainer import (
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
     FITTED_BATCH,
+    FITTED_DEPTH,
+    FITTED_UNITS,
     READ_SIZE,
     REPORTS,
     RESIDENT_GB,
@@ -630,14 +632,16 @@ def test_needed():
     assert DeviceBudget(slices=20).needed() > DeviceBudget(slices=12).needed(), "more slices, more memory"
     assert DeviceBudget().needed() == 0.0, "an unstated recipe predicts nothing rather than guessing"
 
+    fitted = ENCODERS[SMALL]
     at_336 = DeviceBudget(slices=12).needed()
-    assert DeviceBudget(slices=12, size=336).needed() == at_336, "the fit's own size is the default"
-    assert DeviceBudget(slices=12, size=420).needed() == pytest.approx(at_336 * (420 / 336) ** 2, abs=0.3), (
+    assert DeviceBudget(slices=12, units=fitted.activation_units(336)).needed() == at_336, (
+        "the fit's own encoder at the fit's own size is the default"
+    )
+    at_420 = DeviceBudget(slices=12, units=fitted.activation_units(420)).needed()
+    assert at_420 == pytest.approx(at_336 * (420 / 336) ** 2, abs=0.3), (
         "a slice is a patch grid, so it costs the square of the side"
     )
-    assert DeviceBudget(slices=12, size=420).needed() > 23.42, (
-        "the cap must clear the rung MEASURED at 420 px, or it forbids a recipe that fits"
-    )
+    assert at_420 > 23.42, "the cap must clear the rung MEASURED at 420 px, or it forbids a recipe that fits"
 
 
 def test_needed_reads_the_encoder():
@@ -648,22 +652,49 @@ def test_needed_reads_the_encoder():
     The first assertion is the one that protects the ledger — the whole DINOv2 corpus is patch 14 and
     384 wide, so the new terms must reduce to exactly the old number for every arm already recorded.
     """
+    v2 = ENCODERS[SMALL]
     for size in (224, 336, 392, 420):
-        v2 = ENCODERS[SMALL]
-        assert DeviceBudget(slices=12, size=size, patch=v2.patch, dim=v2.dim).needed() == pytest.approx(
-            DeviceBudget(slices=12, size=size).needed()
-        ), "naming small's own width and patch cannot move a number the arms were fitted with"
+        derived = DeviceBudget(slices=12, units=v2.activation_units(size)).needed()
+        assert derived == pytest.approx(DeviceBudget(slices=12, units=FITTED_UNITS * (size / 336) ** 2).needed()), (
+            "naming small's own structure cannot move a number the arms were fitted with"
+        )
 
     small, base = ENCODERS[V3_SMALL], ENCODERS[V3_BASE]
-    narrow = DeviceBudget(slices=20, size=224, patch=base.patch, dim=small.dim).needed()
-    wide = DeviceBudget(slices=20, size=224, patch=base.patch, dim=base.dim).needed()
+    narrow = DeviceBudget(slices=20, units=small.activation_units(224)).needed()
+    wide = DeviceBudget(slices=20, units=base.activation_units(224)).needed()
     assert wide == pytest.approx(2 * (narrow - RESIDENT_GB) + RESIDENT_GB, abs=0.02), (
         "activation bytes go linearly with width, so 768 costs twice 384 above the resident intercept"
     )
     assert wide > 12.68, "the derivation must clear the cap that OOM'd, or the fix forbids the same recipe"
 
-    patch14 = DeviceBudget(slices=20, size=224, dim=base.dim).needed()
+    patch14 = DeviceBudget(slices=20, units=FITTED_DEPTH * (224 / 14) ** 2 * base.dim).needed()
     assert patch14 > wide, "224 px is 256 tokens at patch 14 and 196 at 16, so a pixel-only cap overstates v3"
+
+
+def test_needed_reads_a_trunk_that_is_not_a_transformer():
+    """The final grid is not the bill for a hierarchical trunk, and reading it as one killed an arm.
+
+    `cnx_dense`'s smoke died with `Tried to allocate 1.77 GiB ... 2.84 GiB allowed` while 28.03 GiB of
+    the card sat free. The cap had priced a ConvNeXtV2 by its OUTPUT grid — 121 tokens at patch 32 —
+    when three quarters of its blocks run at 16x that grid or finer. This is the assertion that says
+    the model now sees them, and it is stated against the MEASURED peak rather than against itself.
+    """
+    convnext, fitted = ENCODERS[CONVNEXT_BASE], ENCODERS[SMALL]
+    output_grid_only = FITTED_DEPTH * (352 / convnext.patch) ** 2 * convnext.dim
+    assert convnext.activation_units(352) > 7 * output_grid_only, (
+        "the early stages dominate: the real bill is 7.75x what the output grid alone accounts for"
+    )
+
+    measured_peak_gb = 10.49
+    derived = DeviceBudget(slices=20, units=convnext.activation_units(352), batch=2).needed()
+    assert derived > measured_peak_gb, "a cap under the measured demand is the one failure this class exists to stop"
+    assert DeviceBudget(slices=20, units=output_grid_only, batch=2).needed() < measured_peak_gb, (
+        "and the old form is BELOW it, which is why the smoke OOM'd — the test would pass on the bug otherwise"
+    )
+
+    assert convnext.activation_units(352) > fitted.activation_units(352), (
+        "36 blocks of convolution cost more than 12 of attention at the same read size"
+    )
 
 
 def test_needed_reads_the_batch():
@@ -682,9 +713,9 @@ def test_needed_reads_the_batch():
         "activation bytes go linearly with batch above the intercept, where the weights are held once"
     )
 
-    base = ENCODERS[V3_BASE]
-    wide = DeviceBudget(slices=20, patch=base.patch, dim=base.dim, batch=FITTED_BATCH).needed()
-    narrower_step = DeviceBudget(slices=20, patch=base.patch, dim=base.dim, batch=FITTED_BATCH // 2).needed()
+    units = ENCODERS[V3_BASE].activation_units(336)
+    wide = DeviceBudget(slices=20, units=units, batch=FITTED_BATCH).needed()
+    narrower_step = DeviceBudget(slices=20, units=units, batch=FITTED_BATCH // 2).needed()
     assert narrower_step < wide, "a wider encoder must be reachable by asking for fewer studies at once"
 
 

@@ -47,15 +47,14 @@ def main() -> None:
     # the cap is a 336 px number handed to a run that encodes a bigger grid — the same `train_size or
     # image_size` the record and the members already read, so the cap sees the size the step does.
     # And the ENCODER, or the cap is a `small`-fitted number handed to a wider one: that is what killed
-    # v3base_band on 2026-08-20, capped at 12.68 GB with 17.51 free, and the variant is where both the
-    # width and the patch already live so neither is a second statement of the same fact.
+    # v3base_band on 2026-08-20, capped at 12.68 GB with 17.51 free. The encoder answers with ONE
+    # number rather than a patch and a width, because a trunk whose blocks do not all see the same grid
+    # cannot be described by that pair — which is what capped cnx_dense at 2.84 GB with 28 free.
     encoder = ENCODERS[arguments.variant]
     device = DeviceBudget(
         arguments.vram_gb,
         arguments.slices,
-        arguments.train_size or arguments.image_size,
-        encoder.patch,
-        encoder.dim,
+        encoder.activation_units(arguments.train_size or arguments.image_size),
         arguments.batch,
     ).select()
     targets, evaluation = Targets.pair(

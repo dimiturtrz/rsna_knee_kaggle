@@ -9025,6 +9025,18 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.models.backbone.Encoder",
+      "target": "kneemri.models.backbone.Stage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.backbone.Encoder.activation_units",
+      "target": "kneemri.models.backbone.Stage",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.models.backbone.Encoder.load",
       "target": "kneemri.models.backbone.MapAsTokens",
@@ -13363,6 +13375,14 @@
       "level": "class",
       "parent": "kneemri.models.backbone",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Stage",
+      "label": "Stage",
+      "level": "class",
+      "parent": "kneemri.models.backbone",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19102,6 +19122,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.backbone.Encoder.activation_units",
+      "label": "activation_units",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.backbone.Encoder.load",
       "label": "load",
       "level": "method",
@@ -19146,6 +19174,14 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.backbone.MapAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Stage.units",
+      "label": "units",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Stage",
       "role": null
     },
     {

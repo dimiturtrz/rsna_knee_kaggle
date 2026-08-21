@@ -86,6 +86,26 @@ class MapAsTokens(nn.Module):
 
 
 @dataclass(frozen=True)
+class Stage:
+    """A run of blocks at one stride and one width — the unit an activation bill is summed over.
+
+    A transformer has exactly one: every block sees the same token count at the same width, which is
+    why a memory model could get away with reading the OUTPUT grid and multiplying by the width. A
+    hierarchical convolutional trunk has four, each halving the grid twice over and doubling the width,
+    and its bill is dominated by the FIRST of them — 7,744 tokens at 128 wide against the last stage's
+    121 at 1024. Reading only the output grid there understates the demand by a factor of fifty.
+    """
+
+    blocks: int
+    stride: int
+    width: int
+
+    def units(self, size: int) -> float:
+        """Tokens times width times blocks — activation bytes up to one constant, at this read size."""
+        return self.blocks * (size / self.stride) ** 2 * self.width
+
+
+@dataclass(frozen=True)
 class Encoder:
     """One DINOv2 size: where to fetch it, and the width of the features it returns."""
 
@@ -101,6 +121,34 @@ class Encoder:
 
     family: str = ""
     """The encoder line, as it appears somewhere in the mounted path: `dinov2` or `dinov3`."""
+
+    depth: int = 12
+    """How many blocks the trunk runs, which is the factor a per-block activation bill is missing.
+
+    12 for every ViT this project has fitted — small, base and their DINOv3 siblings are all 12 deep,
+    which is why depth could sit inside `GB_PER_SLICE` as a constant without anyone noticing. A
+    hierarchical trunk states `stages` instead and this is ignored."""
+
+    stages: tuple[Stage, ...] = ()
+    """The block structure, for a trunk whose blocks do not all see the same grid at the same width.
+
+    Empty for a transformer, where `depth`, `patch` and `dim` already say it: one stage, `depth` blocks,
+    stride `patch`, width `dim`. Stated only where that shorthand is false."""
+
+    def activation_units(self, size: int) -> float:
+        """Summed tokens-times-width over every block, which is activation bytes up to one constant.
+
+        THIS IS THE QUANTITY A VRAM CAP IS ACTUALLY A FUNCTION OF, and the thing four dead arms had in
+        common is that the cap was a function of something else. It read the final grid — right for a
+        transformer by accident, because a transformer's every block sees that grid, and structurally
+        wrong for anything hierarchical.
+
+        It is exact at the point `GB_PER_SLICE` was fitted by construction (12 blocks, 336 px, patch 14,
+        384 wide) and returns the same ratio as the old form for EVERY vision transformer, since they
+        are all 12 deep — so no DINOv2 or DINOv3 arm derives a different cap than it did before. Only a
+        trunk with `stages` moves, which is the entire repair.
+        """
+        return sum(stage.units(size) for stage in self.stages or (Stage(self.depth, self.patch, self.dim),))
 
     leaf: str = ""
     """The directory named for THIS encoder, matched as a whole path segment and never as a substring.
@@ -298,5 +346,9 @@ ENCODERS: dict[str, Encoder] = {
         patch=32,
         family=CONVNEXT,
         leaf="convnextv2-base",
+        # `depths` and `hidden_sizes` off ConvNeXtV2-base's own config, at the strides the four stages
+        # run at. Stated rather than read from the loaded config because the cap has to be derived
+        # BEFORE any weights are fetched — the whole point of it is to refuse a run that will not fit.
+        stages=(Stage(3, 4, 128), Stage(3, 8, 256), Stage(27, 16, 512), Stage(3, 32, 1024)),
     ),
 }
