@@ -189,6 +189,9 @@ wait_for_free_card() {
   local free waited=0
   local needs
   needs="$(arm_needs_mib "$@")"
+  # SAY THE NUMBER even when the arm passes, or the gate is only legible when it blocks — and the whole
+  # defect being fixed here was a figure nobody had to read because it never appeared in a passing log.
+  echo "gate: this recipe reserves ${needs} MiB"
   while :; do
     free="$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -1)"
     # No card, no driver, or a query that failed: this is a serialisation gate, not a hardware check.
