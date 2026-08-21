@@ -41,8 +41,14 @@
 # another 1.19 GB — with `--recompute-activations` already on via $THROUGHPUT, so checkpointing was not
 # the escape. The fix is the one `cnx_dense`'s VRAM clause names: take ACCUMULATION up rather than slices
 # or resolution down, because slices and band are load-bearing (whole-stack reading is the +0.0147 lever)
-# and the batch is measured not to be. `--batch 4 --accumulate 3` holds the effective batch at the
-# control's 12 exactly. That substitution is MEASURED, not assumed: `small_accum` ran the recipe at a
+# and the batch is measured not to be. `--batch 2 --accumulate 6` holds the effective batch at the
+# control's 12 exactly. It is 2 and not 4 because of the CO-TENANT rather than this run: the cap itself
+# had to be fixed first — it was trainable-depth-blind and refused the arm at its own number, 9.56 GB
+# allowed with 9.55 free (knee-yt35) — and once fixed it derives 18.91 GB at batch 4, against the 16 GB
+# the other project on this card was holding. The arm parked in `await_headroom` for a wait bound longer
+# than the epoch it was waiting to start. Halving again derives ~9.6 GB and fits beside them; the steps
+# are smaller and the epoch slower, which is the price of sharing a card and cheaper than a thirty
+# minute poll that ends by starting anyway. That substitution is MEASURED, not assumed: `small_accum` ran the recipe at a
 # reduced batch with accumulation and landed 0.8579 against `small_batch6`'s 0.8598 and the control's
 # 0.8578 — three points inside a 0.0020 spread. So it is a second variable of about a third of the noise
 # floor, and it is named here rather than discovered in the delta.
@@ -55,7 +61,7 @@ ADAPTED="$PROCESSED/adapt_small_e6_lr1e5.pt"
 require "$LABELS" "$ADAPTED"
 
 run_train encoder_adapt_thawed \
-  $RECIPE --epochs 12 --batch 4 --accumulate 3 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --batch 2 --accumulate 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --unfreeze-last 12 \
   --encoder-weights "$ADAPTED" --encoder-adapt-depth 6 \
   --labels "$LABELS" --out "$PROCESSED/encoder_adapt_thawed_s2026.pt"
