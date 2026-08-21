@@ -203,6 +203,11 @@ def main() -> None:
     # from the packaged member, so the geometry leg is runnable on them only by being told. New runs
     # record it and need no flag.
     parser.add_argument("--batch", type=int, default=None, help="feed this batch shape (default: as recorded)")
+    # THE MEMBERS ONE ENTRY ACTUALLY MOUNTS, because the package holds every member ever fitted and an
+    # entry seats a handful. On CPU the whole package takes longer than the timeout it is run under, so
+    # the gate that the conventions require before every submission could not finish while the card was
+    # busy — which is exactly when it is needed. Naming the entry's members turns it back into a check.
+    parser.add_argument("--members", nargs="+", default=None, help="check only these identifiers")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -213,9 +218,23 @@ def main() -> None:
         selected = VisibleCards().device().type
     device = torch.device(selected)
 
-    verdicts = {member.identifier: check(package, member, root, device, arguments.batch) for member in package.members}
-    for identifier, verdict in verdicts.items():
-        logger.info("  %s: %s", identifier, verdict)
+    wanted = set(arguments.members or ())
+    members = [member for member in package.members if not wanted or member.identifier in wanted]
+    missing = sorted(wanted - {member.identifier for member in members})
+    if missing:
+        # A NAME THE PACKAGE DOES NOT HOLD IS THE FAILURE THIS FLAG COULD OTHERWISE HIDE: a typo would
+        # silently narrow the check to nothing and report "0 ok, 0 refused", which exits clean.
+        message = f"not in the package: {', '.join(missing)}"
+        raise SystemExit(message)
+
+    # REPORTED AS EACH ONE LANDS, not after the last. On CPU this takes minutes per member, and the
+    # dictionary comprehension that used to wrap it meant a run killed by a timeout printed NOTHING —
+    # every verdict it had already computed died with it, so fifteen minutes of work read as no output
+    # at all rather than as most of an answer.
+    verdicts: dict[str, str] = {}
+    for member in members:
+        verdicts[member.identifier] = check(package, member, root, device, arguments.batch)
+        logger.info("  %s: %s", member.identifier, verdicts[member.identifier])
 
     refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
     unverified = [name for name, verdict in verdicts.items() if verdict.startswith("UNVERIFIED")]
