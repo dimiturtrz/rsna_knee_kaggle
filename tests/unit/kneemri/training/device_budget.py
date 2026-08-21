@@ -18,6 +18,7 @@ from kneemri.training.device_budget import (
     FITTED_BATCH,
     FITTED_DEPTH,
     FITTED_PARAMS_M,
+    FITTED_TRAINABLE,
     FITTED_UNITS,
     GB_PER_SLICE,
     OPTIMISER_GB_PER_MPARAM,
@@ -288,4 +289,28 @@ def test_needed_reads_the_parameter_count():
     assert smaller == fitted, (
         "below the fitted point the intercept is MEASURED and holds — it carries the allocator's own "
         "blocks, which scale with nothing, so extrapolating it downwards would understate a real cost"
+    )
+
+
+def test_needed_reads_how_many_blocks_supervision_opened():
+    """Retention goes with the TRAINABLE blocks, and holding it at six refused a run at its own number.
+
+    `encoder_adapt_thawed` asks for `--unfreeze-last 12`, derived 9.56 GB at batch 4 and died with
+    `Tried to allocate 204.00 MiB ... 9.56 GiB allowed` while 9.55 GiB of the card sat free. A cap that
+    had already scaled itself down correctly for the batch and then refused the run anyway is the
+    signature of a MISSING term rather than a mis-fitted one: a frozen block's activations are freed as
+    soon as the next block consumes them, a trainable block's must survive to its backward.
+    """
+    fitted = DeviceBudget(slices=20).needed()
+    assert DeviceBudget(slices=20, trainable_blocks=FITTED_TRAINABLE).needed() == fitted, (
+        "the default `unfreeze_last` is the fitted point, so every arm in the ledger is untouched"
+    )
+
+    thawed = DeviceBudget(slices=20, trainable_blocks=2 * FITTED_TRAINABLE).needed()
+    assert thawed == pytest.approx(2 * (fitted - RESIDENT_GB) + RESIDENT_GB, abs=1e-6), (
+        "twice the blocks in the graph is twice the retained stack, above an intercept held once"
+    )
+
+    assert DeviceBudget(slices=20, batch=FITTED_BATCH // 3, trainable_blocks=2 * FITTED_TRAINABLE).needed() < fitted, (
+        "and the batch stays the lever against it — thirding the studies must outweigh doubling the depth"
     )

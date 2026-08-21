@@ -56,7 +56,14 @@ def main() -> None:
         arguments.slices,
         encoder.activation_units(arguments.train_size or arguments.image_size),
         arguments.batch,
-        encoder.params_m,
+        params_m=encoder.params_m,
+        # And how many blocks SUPERVISION OPENED, or the cap is a six-block number handed to a run that
+        # opened twelve: that is what killed encoder_adapt_thawed on 2026-08-21, refused at 9.56 GB with
+        # 9.55 free. A frozen block's activations are freed as soon as the next block consumes them; a
+        # trainable block's must survive to its backward, so the retained stack goes with what is open
+        # and not with the trunk's depth. Under LoRA every block carries an adapter, so every block
+        # retains — `unfreeze_last` describes base weights there and would understate by the full depth.
+        trainable_blocks=(encoder.depth if arguments.lora_rank else min(arguments.unfreeze_last, encoder.depth)),
     ).select()
     targets, evaluation = Targets.pair(
         arguments.labels,

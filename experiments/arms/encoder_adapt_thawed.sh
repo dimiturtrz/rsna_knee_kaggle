@@ -19,7 +19,8 @@
 #
 # ONE VARIABLE against `encoder_adapt_lower` (0.7309): `--unfreeze-last` 6 -> 12, same checkpoint, same
 # depth, same cache, same rate, same schedule. It is TWO variables against `band_dense`, which is why
-# the primary control here is the adaptation arm and not the shipped recipe.
+# the primary control here is the adaptation arm and not the shipped recipe. The batch split below is a
+# forced second variable and it is priced in COST; the EFFECTIVE batch is the control's own 12.
 #
 # THE INTERPRETIVE TRAP, named before the run because after it it is a rationalisation. Unfreezing every
 # block also lets supervision OVERWRITE the imported weights, so a recovery to roughly control does NOT
@@ -35,8 +36,16 @@
 #     unconverged epochs, the DEFAULT 12-slice cache against an arm that trains 20 slices at 0.10-0.90),
 #     and no further fine-tune arm should run until a converged, on-cache adaptation exists.
 #
-# COST NOTED HONESTLY: twelve trainable blocks instead of six raises activation and optimizer memory
-# over `band_dense`'s 26.92 GB peak, and the card is shared. Smoked before it is queued.
+# COST, MEASURED RATHER THAN GUESSED, and the smoke is what measured it. Twelve trainable blocks instead
+# of six OOMed at the control's default batch 12 — 26.45 GB allocated of a 28.25 GB budget, asking for
+# another 1.19 GB — with `--recompute-activations` already on via $THROUGHPUT, so checkpointing was not
+# the escape. The fix is the one `cnx_dense`'s VRAM clause names: take ACCUMULATION up rather than slices
+# or resolution down, because slices and band are load-bearing (whole-stack reading is the +0.0147 lever)
+# and the batch is measured not to be. `--batch 4 --accumulate 3` holds the effective batch at the
+# control's 12 exactly. That substitution is MEASURED, not assumed: `small_accum` ran the recipe at a
+# reduced batch with accumulation and landed 0.8579 against `small_batch6`'s 0.8598 and the control's
+# 0.8578 — three points inside a 0.0020 spread. So it is a second variable of about a third of the noise
+# floor, and it is named here rather than discovered in the delta.
 #
 # control  encoder_adapt_lower = 0.7309 (best epoch 11), byte-identical but --unfreeze-last 6.
 # reference band_dense = 0.8578 (best epoch 8), the shipped recipe with no adaptation at all.
@@ -46,7 +55,7 @@ ADAPTED="$PROCESSED/adapt_small_e6_lr1e5.pt"
 require "$LABELS" "$ADAPTED"
 
 run_train encoder_adapt_thawed \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --batch 4 --accumulate 3 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --unfreeze-last 12 \
   --encoder-weights "$ADAPTED" --encoder-adapt-depth 6 \
   --labels "$LABELS" --out "$PROCESSED/encoder_adapt_thawed_s2026.pt"

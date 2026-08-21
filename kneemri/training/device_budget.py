@@ -124,6 +124,26 @@ and every DINOv2 and DINOv3 arm derives the identical cap it derived before, bec
 units ARE `depth x (size / patch) ** 2 x dim` — the old formula, with the constant factor that used to
 be assumed now said out loud."""
 
+FITTED_TRAINABLE = 6
+"""How many blocks carried a gradient at the fitted point — `Adaptation.unfreeze_last`'s default, and
+every arm behind `GB_PER_SLICE`.
+
+THE CAP WAS TRAINABLE-DEPTH-BLIND UNTIL 2026-08-21, and it is the FIFTH time a number fitted on one
+configuration was handed to another. `encoder_adapt_thawed` asks for `--unfreeze-last 12`, derived 9.56
+GB at batch 4 and died with `Tried to allocate 204.00 MiB ... 9.56 GiB allowed` while 9.55 GiB of the
+card sat free — a cap that had scaled itself down correctly for the batch and then refused the run at
+its own number, which is the signature of a term that is MISSING rather than mis-fitted.
+
+Activation retention goes with the TRAINABLE blocks, not with the depth. A frozen block's activations
+are freed the moment the next block has consumed them, because nothing downstream will ask for them
+again; a trainable block's must survive until its backward. Under `--recompute-activations` what
+survives is the checkpoint boundary rather than the whole block, but the count of boundaries is still
+the count of blocks in the graph. So six blocks open and twelve open differ by a factor of two in the
+term the slice loop multiplies, and `depth` cannot say it — `cnx_dense` runs 36 blocks with 6 open.
+
+Like the size, width and batch terms it is a DERIVATION rather than a fit, and it reproduces the fitted
+point exactly: a run that names nothing gets `unfreeze_last` 6 and a ratio of 1."""
+
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
 and the allocator's own blocks, none of which the slice loop multiplies.
@@ -201,6 +221,13 @@ class DeviceBudget:
     because batch was invisible here — so the only lever a caller has against an overstated ask moved
     nothing, and the larger-encoder axis was unreachable rather than expensive."""
 
+    trainable_blocks: int = FITTED_TRAINABLE
+    """How many encoder blocks carry a gradient — `unfreeze_last`, clamped to the trunk's own depth.
+
+    It is the axis `units` cannot express. `units` is a property of the TRUNK at a size; this is a
+    property of what the RECIPE opened, and the two move independently — a 36-block ConvNeXt with six
+    blocks open holds less than a 12-block ViT with all twelve open. See `FITTED_TRAINABLE`."""
+
     params_m: float = FITTED_PARAMS_M
     """The trunk's parameter count in millions — what the OPTIMISER's share of the bill is a function of.
 
@@ -231,7 +258,7 @@ class DeviceBudget:
         """
         if not self.slices:
             return 0.0
-        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH)
+        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH) * (self.trainable_blocks / FITTED_TRAINABLE)
         optimiser = RESIDENT_GB + OPTIMISER_GB_PER_MPARAM * max(0.0, self.params_m - FITTED_PARAMS_M)
         return GB_PER_SLICE * (self.slices + 1) * step + optimiser
 

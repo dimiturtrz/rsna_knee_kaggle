@@ -1502,6 +1502,12 @@ stride-32 trunk without gradient checkpointing, and the third (`accumulate 3`) i
 because the control predates the option. Slices, band, rate, pooling, whole-stack and schedule are the
 control's.
 
+**One number in that line is `base_dense`'s and not the recipe's, and the distinction cost a smoke the
+next day.** `base_dense` itself ran at batch 6, so `batch 6→2` with `accumulate 3` holds THAT control's
+effective batch. The DEFAULT is 12 (`options.py:42`), which is what every arm naming no `--batch` runs
+at — `band_dense` and `encoder_adapt_lower` among them. So an arm matched against one of those has to
+multiply back to 12, not 6, or the batch stops being held and starts being a second variable.
+
 **The arm on its own.** Best holdout **0.7927 at epoch 11** against `base_dense` 0.8512 (**−0.0585**) and
 `band_dense` 0.8578. Seat value into the pinned five: 0.8655 as a sixth (−0.0035), and 0.8648 as a swap
 for `base_dense` (−0.0042), 0 of 1 clearing +0.0015. At the measured 3× board cost that swap reads as
