@@ -20,6 +20,7 @@ from flags into that vocabulary.
 
 from dataclasses import dataclass
 
+import numpy as np
 import torch
 
 from kneemri.corpus.slot_reader import GROUP
@@ -39,6 +40,10 @@ from kneemri.training.trainer import (
     WINDOW,
     Trainer,
 )
+
+FLOAT_TOLERANCE = 1e-6
+"""How far a derived float may drift from the value asked for and still count as landed. A switch that
+did not land misses by its whole magnitude; a switch that did misses by the last bits of a multiply."""
 
 NOT_A_SWITCH = {
     "paths": "the data root, machine-specific and gitignored",
@@ -127,12 +132,27 @@ class Landed:
         """
         observed = self.observed()
         wanted = asked.wanted()
-        loose = {ADAPTERS}
         return [
             f"{key}: asked {want!r}, the model shows {observed[key]!r}"
             for key, want in wanted.items()
-            if not (bool(observed[key]) == bool(want) if key in loose else observed[key] == want)
+            if not self.agrees(key, observed[key], want)
         ]
+
+    def agrees(self, key: str, observed: object, want: object) -> bool:
+        """Whether one switch landed, compared the way that switch's own type can honestly be compared.
+
+        A FLOAT IS NEVER COMPARED EXACTLY. `band_dense_llrd` died in its first second on
+        `encoder_rate_decay: asked 0.7, the model shows 0.7000000000000004` — the decay is recovered from
+        a per-layer rate the trainer computed by repeated multiplication, so the observed value is the
+        asked one after a round trip through arithmetic, and exact equality reads that round trip as an
+        unlanded switch. The gate is right to exist and its ruler was wrong: it cost a queue slot to a
+        run whose switch had in fact landed, which is the same class of loss it was built to prevent.
+        """
+        if key in {ADAPTERS}:
+            return bool(observed) == bool(want)
+        if isinstance(want, float) and isinstance(observed, (int, float)) and not isinstance(observed, bool):
+            return bool(np.isclose(float(observed), want, rtol=FLOAT_TOLERANCE, atol=FLOAT_TOLERANCE))
+        return observed == want
 
 
 @dataclass(frozen=True)

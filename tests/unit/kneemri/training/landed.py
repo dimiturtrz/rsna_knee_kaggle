@@ -22,7 +22,16 @@ from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
-from kneemri.training.trainer import AUTOCAST, AVERAGING, READ_SIZE, SCHEDULED, WINDOW, Adaptation, Trainer
+from kneemri.training.trainer import (
+    AUTOCAST,
+    AVERAGING,
+    LAYER_DECAY,
+    READ_SIZE,
+    SCHEDULED,
+    WINDOW,
+    Adaptation,
+    Trainer,
+)
 
 DIM = 8
 SLOTS = 6
@@ -175,6 +184,23 @@ def test_missing() -> None:
     landed.trainer.one_cycle(10)
 
     assert landed.missing(wanted) == [], "a rank asks for adapters, not for a particular count of them"
+
+
+def test_agrees() -> None:
+    """A float that survived a round trip through arithmetic landed; one that missed by its size did not.
+
+    The exact case that cost a queue slot: `band_dense_llrd` asked for a 0.7 layer rate decay and the
+    trainer recovered 0.7000000000000004 from its per-layer rates, which an equality test called unlanded.
+    """
+    landed = _pair(_model())
+
+    assert landed.agrees(LAYER_DECAY, 0.7000000000000004, 0.7) is True, "the last bits of a multiply"
+    assert landed.agrees(LAYER_DECAY, 0.75, 0.7) is False, "a switch that did not land misses by its size"
+    assert landed.agrees(LAYER_DECAY, 1.0, 0.7) is False, "the default, which is what unlanded looks like"
+    assert landed.agrees(ADAPTERS, 12, 8) is True, "a rank asks for adapters, not a count of them"
+    assert landed.agrees(ADAPTERS, 0, 8) is False
+    assert landed.agrees(WINDOW, 24, 24) is True, "an int still compares exactly"
+    assert landed.agrees(AUTOCAST, torch.bfloat16, torch.bfloat16) is True
 
 
 def test_missing_loss() -> None:
