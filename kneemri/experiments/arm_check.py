@@ -49,6 +49,22 @@ TIMEOUT_SECONDS = 30
 SMOKE_DECODE_WORKERS = 8
 """Fewer than a corpus build takes, because a smoke decode may share the machine with a live arm."""
 
+OPERATING_POINT_FLAGS = ("--slices", "--band-low", "--band-high")
+"""The flags whose PARSER DEFAULTS are the pre-settlement operating point, so silence about them is a
+recipe rather than an omission.
+
+`TrainingOptions` defaults to 12 slices and `SLICE_BAND` 0.20-0.80. That is not a neutral starting
+point — it is the operating point every arm was read at BEFORE the span and density work settled on 20
+slices and 0.10-0.90, and knee-aixw is the bead recording that a lever's sign is a property of the
+operating point it was measured at. calib_span is the proof: `calibrated_targets` measured +0.0038 at
+the old point, earned a seat in a champion package on that number, and re-measured -0.0020 at the one
+we ship with its per-label clause inverted.
+
+So an arm that names neither takes the old point in SILENCE, and the run's log says nothing a reader
+could catch it by. knee-5895 is that defect on a live script: `final_fit.sh` states no slice count and
+no band, so it would fit the final model at 12 slices in 0.20-0.80 — and at `--fold -1` there is no
+score, so nothing downstream would have caught it either."""
+
 GIT_BASH = Path("C:/Program Files/Git/usr/bin/bash.exe")
 """The interpreter the arms are written for, named explicitly.
 
@@ -304,6 +320,25 @@ class ArmCheck:
                 asked[name] = round(options.vram_gb - needed, 2)
         return asked
 
+    @staticmethod
+    def unstated(invocations: dict[str, str]) -> dict[str, list[str]]:
+        """The arms that never say what operating point they run at, by which flags they leave silent.
+
+        IT ASKS THE FLAG LINE, NOT THE PARSED OPTIONS, and that is the whole check. After parsing, an
+        arm that asked for 12 slices and an arm that asked for nothing are the same object — which is
+        exactly why this defect survives every gate the project already runs. Only the text distinguishes
+        a stated operating point from an inherited one.
+
+        NOT A VALUE CHECK. An arm may legitimately run at 12 slices or a narrow band; `band_span` does,
+        on purpose, and reading it as wrong would make this a rule against experiments. What it may not
+        do is arrive there by silence, because a lever measured at a point nobody wrote down cannot be
+        read against anything later — see `OPERATING_POINT_FLAGS` for the case that cost a champion seat.
+        """
+        silent = {
+            name: [flag for flag in OPERATING_POINT_FLAGS if flag not in flags] for name, flags in invocations.items()
+        }
+        return {name: missing for name, missing in silent.items() if missing}
+
     def decode_smoke_caches(
         self,
         invocations: dict[str, str],
@@ -413,6 +448,32 @@ def main() -> None:
             len(invocations),
             worst,
             overstated[worst],
+        )
+    # ADVISORY for the same reason: silence about the operating point invalidates no flag and mismatches
+    # no cache, so it must not block a queue.
+    #
+    # PER ARM ONLY UNDER `--only`, and the asymmetry is the point rather than a volume control. Forty-one
+    # of the seventy arms are silent and nearly all of them ALREADY RAN — their numbers are in the ledger
+    # with whatever point they took, and forty-one unchanging lines would bury the REFUSED and OVERSTATED
+    # lines that cost a queue slot. The defect is only actionable on an arm about to be ARMED, which is
+    # exactly the run that names `--only`. The full sweep still says the count, because a number that
+    # never falls is the erosion record.
+    unstated = check.unstated(invocations)
+    if unstated and arguments.only:
+        for name, missing in sorted(unstated.items()):
+            logger.info(
+                "UNSTATED %s: says nothing about %s, so it inherits the pre-settlement 12 slices / "
+                "0.20-0.80 in silence (knee-aixw)",
+                name,
+                ", ".join(missing),
+            )
+    elif unstated:
+        logger.info(
+            "UNSTATED: %d of %d arms name none of %s, so they inherit the pre-settlement 12 slices / "
+            "0.20-0.80 in silence; --only <arm> names them (knee-aixw)",
+            len(unstated),
+            len(invocations),
+            ", ".join(OPERATING_POINT_FLAGS),
         )
     broken: dict[str, str] = {}
     if arguments.smoke:

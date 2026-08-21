@@ -64,12 +64,19 @@
 # scale with PARAMETER COUNT (22M for small, 86M for either base, so ~1.4 GB rather than 0.22). The
 # slice term learned to read the encoder; the intercept did not.
 #
-# So the batch is NOT hand-tuned and the refusal clause above is honoured: the recipe is untouched and
-# `--vram-gb 27` states the run's own need explicitly, which is the escape the cap is documented to
-# provide for exactly this case. 27 is chosen against a MEASURED sibling rather than a formula —
-# `base_dense` peaked at 25.38 GB allocated under a 26.92 derived cap, and this run holds the same
-# weights at ~23% fewer tokens. The encoder-blind intercept is filed as its own fix; an arm is not the
-# place to repair a shared constant.
+# So the batch was NOT hand-tuned and the refusal clause above was honoured: the recipe stayed untouched
+# and `--vram-gb 27` stated the run's own need explicitly, the escape the cap is documented to provide
+# for exactly this case. 27 was chosen against a MEASURED sibling rather than a formula — `base_dense`
+# peaked at 25.38 GB allocated under a 26.92 derived cap, and this run holds the same weights at ~23%
+# fewer tokens.
+#
+# THE FLAG IS GONE AND THE PARAGRAPH ABOVE IS WHY, kept in the past tense because it is the record of a
+# run that happened. The encoder-blind intercept it worked around was filed as its own fix and that fix
+# LANDED (knee-kwdh): `RESIDENT_GB` is no longer asked to stand for an 86M-parameter optimiser state, so
+# the derived cap now prices this shape at 22.7 GB on its own and the hand-typed 27 became the
+# overstatement knee-ylp0 closed — the last one in the tree, and the only reason `arm_check` still
+# reported a non-zero count. A workaround that outlives its cause is a wrong number with a citation
+# attached, and this one would have been read by the next arm that copies this header.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -81,5 +88,5 @@ export HF_TOKEN
 
 run_train v3base_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
-  --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --vram-gb 27 \
+  --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --labels "$LABELS" --out "$PROCESSED/v3base_dense_s2026.pt"

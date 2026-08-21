@@ -46,13 +46,21 @@
 # cost     ~1.6x the parent per step at half the batch, so expect the epoch to run longer than 663 s.
 #
 # THE CONFOUND THIS ARM DOES NOT REMOVE, NAMED BEFORE IT RUNS, because after the fact it is an excuse.
-# At epoch 6 the parent sits at loss 0.9419 against the control's 0.8038 and is still climbing +0.010 an
-# epoch where the control had flattened to +0.0026. That is the signature of a trunk that is UNDERFIT at
-# twelve epochs, not one that is starved of spatial resolution — and 4e-5 was settled on DINOv2, so a
-# ConvNeXt inheriting it is a recipe suspect in its own right. This arm holds the schedule fixed on
-# purpose, so it separates GRID from PIXELS and separates NEITHER from the schedule. A flat result here
-# therefore reads as "resolution is exonerated", never as "the trunk is finished": the rate-and-epochs
-# question is a different arm (knee-9otf) and it has to be asked before ConvNeXtV2 is judged as a family.
+# 4e-5 was settled on DINOv2, so a ConvNeXt inheriting it is a recipe suspect in its own right. This arm
+# holds the schedule fixed on purpose, so it separates GRID from PIXELS and separates NEITHER from the
+# schedule. A flat result here therefore reads as "resolution is exonerated", never as "the trunk is
+# finished": the rate-and-epochs question is a different arm (knee-9otf) and it has to be asked before
+# ConvNeXtV2 is judged as a family.
+#
+# HOW STRONG THAT SUSPECT IS CHANGED WHILE THE PARENT RAN, and the correction is recorded here rather
+# than quietly dropped. At epoch 6 the parent was climbing +0.0098 an epoch where the control had
+# flattened to +0.0026, which read as UNDERFIT and made knee-9otf the likelier explanation than geometry.
+# Two epochs later that reading is wrong: the holdout went +0.0050 then +0.0013 to 0.7921 while the train
+# loss kept falling hard, 0.9419 -> 0.9088 -> 0.8833. Loss still dropping and holdout already flat is a
+# GENERALISATION gap, not a trunk short of steps — more epochs or a larger rate would buy more of the
+# same fit. So the schedule suspect weakens, geometry survives as the live one, and THIS arm is the
+# honest next question rather than knee-9otf. Both are still confounded with each other; only the
+# ordering changed, on data taken before either arm's number existed.
 #
 # PRE-REGISTERED, three outcomes. Floor 0.0062, board resolution 0.0015.
 #   THE GRID WAS THE PROBLEM — solo clears the parent by more than 0.0062. Then the ConvNeXt was never

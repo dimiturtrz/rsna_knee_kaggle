@@ -58,6 +58,28 @@ def test_overstated():
     assert "no_cap" not in overstated, "an arm that names no cap gets the derived one and says nothing"
 
 
+def test_unstated():
+    """An arm that names its operating point passes whatever the values are; one that is silent is named.
+
+    The pre-settlement values are NOT what this reports — `narrow_on_purpose` asks for exactly the
+    defaults and is clean, because it wrote them down. What it reports is silence, which is the only
+    thing that makes a recorded delta unreadable against a later one.
+    """
+    unstated = ArmCheck().unstated(
+        {
+            "settled": GOOD + " --slices 20 --band-low 0.1 --band-high 0.9",
+            "narrow_on_purpose": GOOD + " --slices 12 --band-low 0.2 --band-high 0.8",
+            "half_stated": GOOD + " --slices 20",
+            "silent": GOOD,
+        }
+    )
+
+    assert "settled" not in unstated
+    assert "narrow_on_purpose" not in unstated, "the old values, STATED, are a choice rather than a defect"
+    assert unstated["half_stated"] == ["--band-low", "--band-high"], "only the flags it left silent"
+    assert unstated["silent"] == ["--slices", "--band-low", "--band-high"]
+
+
 def test_selected():
     """`--only` narrows to the named arms, passes everything through when unset, and refuses a typo.
 
