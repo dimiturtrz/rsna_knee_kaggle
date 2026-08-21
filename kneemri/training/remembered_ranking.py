@@ -5,14 +5,8 @@ from typing import override
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.training.objective import (
-    PAIR_FLOOR,
-    PAIR_MEMORY,
-    PAIR_POOL,
-    RANK_WEIGHT,
-    Predicted,
-    RankedObjective,
-)
+from kneemri.training.grades import Grades, Predicted
+from kneemri.training.objective import PAIR_FLOOR, PAIR_MEMORY, PAIR_POOL, RANK_WEIGHT, RankedObjective
 from kneemri.training.pair_memory import PairMemory
 
 
@@ -42,8 +36,9 @@ class RememberedRanking(RankedObjective):
         capacity: int = PAIR_MEMORY,
         normalise_by_count: bool = False,
         per_label: bool = False,
+        grades: Grades | None = None,
     ) -> None:
-        super().__init__(weight, normalise_by_count=normalise_by_count, per_label=per_label)
+        super().__init__(weight, normalise_by_count=normalise_by_count, per_label=per_label, grades=grades)
         self.memory = PairMemory(capacity)
 
     @override

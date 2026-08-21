@@ -1946,6 +1946,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.grades",
+      "target": "kneemri.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.head_trial",
       "target": "core.paths",
       "weight": 1
@@ -2013,6 +2019,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.head_trial",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.head_trial",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -2043,6 +2055,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -2050,6 +2068,12 @@
       "kind": "import",
       "source": "kneemri.training.landed",
       "target": "kneemri.training.trainer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.objective",
+      "target": "kneemri.training.grades",
       "weight": 1
     },
     {
@@ -2127,6 +2151,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.pair_memory",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pair_memory",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -2169,6 +2199,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.remembered_ranking",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.remembered_ranking",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -2200,6 +2236,12 @@
       "kind": "import",
       "source": "kneemri.training.run_setup",
       "target": "kneemri.training.device_budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.grades",
       "weight": 1
     },
     {
@@ -2362,6 +2404,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.augmentation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.grades",
       "weight": 1
     },
     {
@@ -10088,6 +10136,42 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.grades.Grades",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.grades.OrdinalGrades",
+      "target": "kneemri.training.grades.Grades",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.grades.OrdinalGrades",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.grades.OrdinalGrades.spread",
+      "target": "kneemri.training.grades.OrdinalGrades.boundaries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.grades.OrdinalGrades.spread",
+      "target": "kneemri.training.grades.OrdinalGrades.thresholds",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.grades.OrdinalGrades.spread",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.head_trial.AxisConcordance",
       "target": "kneemri.labels.targets.Targets",
       "weight": 1
@@ -10153,6 +10237,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.head_trial.HeadTrial.run",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.head_trial.HeadTrial.run",
       "target": "kneemri.training.head_trial.HeadTrial._batches",
@@ -10168,12 +10258,6 @@
       "kind": "construct",
       "source": "kneemri.training.head_trial.HeadTrial.run",
       "target": "kneemri.training.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.head_trial.HeadTrial.run",
-      "target": "kneemri.training.objective.Predicted",
       "weight": 1
     },
     {
@@ -10347,7 +10431,13 @@
     {
       "kind": "references",
       "source": "kneemri.training.objective.Objective",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Grades",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.Objective",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
@@ -10357,15 +10447,27 @@
       "weight": 1
     },
     {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.objective.Objective",
+      "kind": "construct",
+      "source": "kneemri.training.objective.Objective.__init__",
+      "target": "kneemri.training.grades.Grades",
       "weight": 1
     },
     {
       "kind": "references",
       "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Grades",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.RankedObjective",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.objective.RankedObjective",
+      "target": "kneemri.training.objective.Objective",
       "weight": 1
     },
     {
@@ -10485,19 +10587,19 @@
     {
       "kind": "holds",
       "source": "kneemri.training.pair_memory.PairMemory",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.training.pair_memory.PairMemory.pooled",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.training.pair_memory.PairMemory.remember",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
@@ -10665,7 +10767,13 @@
     {
       "kind": "references",
       "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.grades.Grades",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
@@ -10834,6 +10942,18 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.model",
       "target": "kneemri.training.pretrained_encoder.PretrainedEncoder.into",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.grades.Grades",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.grades.OrdinalGrades",
       "weight": 1
     },
     {
@@ -11281,15 +11401,15 @@
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.heartbeat.Heartbeat.tick",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.objective.Predicted",
+      "target": "kneemri.training.heartbeat.Heartbeat.tick",
       "weight": 1
     },
     {
@@ -11385,7 +11505,7 @@
       "role": null
     },
     {
-      "descendants": 129,
+      "descendants": 130,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -12265,7 +12385,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -12300,6 +12420,14 @@
       "descendants": 0,
       "id": "kneemri.training.fitting",
       "label": "fitting",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades",
+      "label": "grades",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -13978,6 +14106,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.grades.Grades",
+      "label": "Grades",
+      "level": "class",
+      "parent": "kneemri.training.grades",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades",
+      "label": "OrdinalGrades",
+      "level": "class",
+      "parent": "kneemri.training.grades",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.Predicted",
+      "label": "Predicted",
+      "level": "class",
+      "parent": "kneemri.training.grades",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.head_trial.AxisConcordance",
       "label": "AxisConcordance",
       "level": "class",
@@ -14047,14 +14199,6 @@
       "level": "class",
       "parent": "kneemri.training.objective",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.Predicted",
-      "label": "Predicted",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -20718,6 +20862,62 @@
       "label": "scored",
       "level": "method",
       "parent": "kneemri.training.fitting.Fold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.Grades.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.grades.Grades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.Grades.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.training.grades.Grades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.grades.OrdinalGrades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades.boundaries",
+      "label": "boundaries",
+      "level": "method",
+      "parent": "kneemri.training.grades.OrdinalGrades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.grades.OrdinalGrades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.training.grades.OrdinalGrades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.grades.OrdinalGrades.thresholds",
+      "label": "thresholds",
+      "level": "method",
+      "parent": "kneemri.training.grades.OrdinalGrades",
       "role": null
     },
     {

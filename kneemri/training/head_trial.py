@@ -49,7 +49,8 @@ from kneemri.labels.targets import Targets
 from kneemri.models.model import CLS_MEAN, POOL_PARTS
 from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
-from kneemri.training.objective import Objective, Predicted, RankedObjective
+from kneemri.training.grades import Predicted
+from kneemri.training.objective import Objective, RankedObjective
 
 logger = logging.getLogger(__name__)
 

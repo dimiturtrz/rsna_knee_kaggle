@@ -64,6 +64,7 @@ class TrainingOptions:
     per_label_loss: bool = False
     calibrated_targets: bool = False
     severity_weight: bool = False
+    grade_ladder: bool = False
     rank_weight: float = 0.0
     pair_memory: int = 0
     whole_stack: bool = False
@@ -321,6 +322,15 @@ class TrainingOptions:
             help="a cell pulls at how often its GRADE was confirmed against the image annotations "
             "(0.378 mild / 0.688 moderate / 0.958 severe) rather than at the reader's __conf, which is "
             "0.95 on all three. Values are untouched — this is the weight, not the target.",
+        )
+        parser.add_argument(
+            "--grade-ladder",
+            action="store_true",
+            help="read the reader's five levels as four ORDERED THRESHOLDS crossed by one latent score "
+            "rather than as five values a logit must land on. Order is all an AUC scores, so the plain "
+            "loss spends the axis it reads on absolute probabilities the metric never sees. Thresholds "
+            "are derived from the measured agreement rates, and nothing downstream changes: the same "
+            "per-label logit is stored and served.",
         )
         parser.add_argument(
             "--per-label-loss",

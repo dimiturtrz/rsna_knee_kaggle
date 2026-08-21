@@ -22,6 +22,7 @@ from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.device_budget import DeviceBudget
+from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.landed import Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
@@ -122,6 +123,7 @@ class RunSetup:
             weight_floor=options.weight_floor,
             calibrated_targets=options.calibrated_targets,
             severity_weight=options.severity_weight,
+            grade_ladder=options.grade_ladder,
             unfreeze_last=options.unfreeze_last,
             layer_decay=options.layer_decay,
         )
@@ -143,20 +145,23 @@ class RunSetup:
                 "--rank-weight was given, so there is no ranking term for it to widen"
             )
             raise ValueError(message)
+        grades: Grades = OrdinalGrades() if options.grade_ladder else Grades()
         if options.pair_memory:
             return RememberedRanking(
                 options.rank_weight,
                 capacity=options.pair_memory,
                 normalise_by_count=options.normalise_by_count,
                 per_label=options.per_label_loss,
+                grades=grades,
             )
         if options.rank_weight:
             return RankedObjective(
                 options.rank_weight,
                 normalise_by_count=options.normalise_by_count,
                 per_label=options.per_label_loss,
+                grades=grades,
             )
-        return Objective(normalise_by_count=options.normalise_by_count, per_label=options.per_label_loss)
+        return Objective(normalise_by_count=options.normalise_by_count, per_label=options.per_label_loss, grades=grades)
 
     def reports(self, identifiers: list[str]) -> ReportSupervision | None:
         """The report-embedding supervision this run asked for, or None — and never half of it.

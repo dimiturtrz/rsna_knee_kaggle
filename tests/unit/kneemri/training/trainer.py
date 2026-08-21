@@ -14,15 +14,8 @@ from kneemri.labels.targets import Targets
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
-from kneemri.training.objective import (
-    COUNT_NORMALISED,
-    PAIR_POOL,
-    PER_LABEL,
-    RANK_TERM,
-    Objective,
-    Predicted,
-    RankedObjective,
-)
+from kneemri.training.grades import GRADE_LADDER, Predicted
+from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import (
     ACCUMULATION,
@@ -232,6 +225,7 @@ def test_policies():
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: False,
+        GRADE_LADDER: False,
         INTENSITY_AUGMENT: False,
     }
 

@@ -2,14 +2,8 @@
 
 import torch
 
-from kneemri.training.objective import (
-    COUNT_NORMALISED,
-    PAIR_POOL,
-    PER_LABEL,
-    RANK_TERM,
-    Predicted,
-    RankedObjective,
-)
+from kneemri.training.grades import GRADE_LADDER, Predicted
+from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, RankedObjective
 from kneemri.training.remembered_ranking import RememberedRanking
 
 
@@ -27,6 +21,7 @@ def test_settings():
         PAIR_POOL: 4,
         PER_LABEL: False,
         COUNT_NORMALISED: False,
+        GRADE_LADDER: False,
     }
 
 

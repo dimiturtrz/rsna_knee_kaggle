@@ -26,6 +26,7 @@ from kneemri.corpus.slot_reader import GROUP
 from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT, WEIGHT_FLOOR, Targets
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
+from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.trainer import (
     ACCUMULATION,
@@ -165,6 +166,7 @@ class Request:
     weight_floor: bool
     calibrated_targets: bool
     severity_weight: bool
+    grade_ladder: bool
     unfreeze_last: int
     accumulate: int
     layer_decay: float
@@ -205,6 +207,7 @@ class Request:
             WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             CALIBRATED: self.calibrated_targets,
             SEVERITY_WEIGHT: self.severity_weight,
+            GRADE_LADDER: self.grade_ladder,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,

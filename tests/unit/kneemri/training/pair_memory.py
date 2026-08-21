@@ -2,7 +2,7 @@
 
 import torch
 
-from kneemri.training.objective import Predicted
+from kneemri.training.grades import Predicted
 from kneemri.training.pair_memory import PairMemory
 
 

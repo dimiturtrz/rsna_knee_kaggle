@@ -1,14 +1,7 @@
 import torch
 
-from kneemri.training.objective import (
-    COUNT_NORMALISED,
-    PAIR_POOL,
-    PER_LABEL,
-    RANK_TERM,
-    Objective,
-    Predicted,
-    RankedObjective,
-)
+from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
+from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
 
 SEED = 2026
 STUDIES = 6
@@ -33,6 +26,7 @@ def test_objective_settings():
         PAIR_POOL: 0,
         PER_LABEL: True,
         COUNT_NORMALISED: False,
+        GRADE_LADDER: False,
     }
 
 
@@ -43,6 +37,7 @@ def test_ranked_objective_settings():
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: True,
+        GRADE_LADDER: False,
     }
 
 
@@ -180,3 +175,16 @@ def test_pairs():
 
     assert float(pair_weight) > 0.0
     assert torch.allclose(misordered / pair_weight, RankedObjective().ranking(batch))
+
+
+def test_ordinal_grades_leave_the_ranking_term_alone():
+    """The ladder is a cross-entropy policy, and the ranking term still compares the twelve latents.
+
+    THIS IS THE SEPARATION THE DESIGN RESTS ON: applied in `__call__` instead, a ranking arm would be
+    ordering forty-eight threshold crossings against each other, which is a different experiment
+    wearing this one's name.
+    """
+    batch = _batch([1.0, 0.5, 0.0, -0.5, -1.0, -1.5])
+    plain, laddered = RankedObjective(), RankedObjective(grades=OrdinalGrades())
+    assert torch.isclose(plain.ranking(batch), laddered.ranking(batch))
+    assert not torch.isclose(plain.cross_entropy(batch), laddered.cross_entropy(batch))

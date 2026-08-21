@@ -19,11 +19,12 @@ separate the two studies and how confident both of those readings were. A pair t
 about only slightly, or that rests on a guess, pulls proportionally less.
 """
 
-from dataclasses import dataclass
 from typing import override
 
 from jaxtyping import Float
 from torch import Tensor, nn
+
+from kneemri.training.grades import Grades, Predicted
 
 RANK_WEIGHT = 1.0
 """How hard the ranking term pulls relative to cross-entropy when it is enabled at all.
@@ -63,21 +64,6 @@ It is a flag with an explicit default, not a swept hyper-parameter, for the reas
 """
 
 
-@dataclass(frozen=True)
-class Predicted:
-    """One step's readout beside the weighted reading that judges it.
-
-    The three travelled as three arguments through every method here and through the trainer, which is
-    what makes a fourth one — an ordinal grade, say — a change to five signatures rather than a field.
-    They are also inseparable by construction: a logit judged against another batch's score is not a
-    smaller mistake than a missing one.
-    """
-
-    logits: Float[Tensor, "b o"]
-    scores: Float[Tensor, "b o"]
-    weights: Float[Tensor, "b o"]
-
-
 class Objective:
     """Confidence-weighted cross-entropy, normalised either by total weight or by element count.
 
@@ -90,9 +76,12 @@ class Objective:
     schedule, so the pair has to be measured together rather than one at a time.
     """
 
-    def __init__(self, *, normalise_by_count: bool = False, per_label: bool = False) -> None:
+    def __init__(
+        self, *, normalise_by_count: bool = False, per_label: bool = False, grades: Grades | None = None
+    ) -> None:
         self.normalise_by_count = normalise_by_count
         self.per_label = per_label
+        self.grades = grades or Grades()
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
         """The scalar this step descends."""
@@ -110,12 +99,19 @@ class Objective:
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
+            **self.grades.settings(),
         }
 
     def cross_entropy(self, batch: Predicted) -> Float[Tensor, ""]:
-        """The weighted BCE term, which every objective here is built on top of."""
-        elementwise = nn.functional.binary_cross_entropy_with_logits(batch.logits, batch.scores, reduction="none")
-        weights = batch.weights
+        """The weighted BCE term, which every objective here is built on top of.
+
+        The grade policy is applied HERE and not in `__call__`, so a ranking term keeps comparing the
+        twelve latent scores rather than the forty-eight threshold crossings a ladder restates them as.
+        The two questions are separable and only one of them is about grades.
+        """
+        graded = self.grades.spread(batch)
+        elementwise = nn.functional.binary_cross_entropy_with_logits(graded.logits, graded.scores, reduction="none")
+        weights = graded.weights
         weighted = elementwise * weights
         if self.per_label:
             # EACH OF THE TWELVE CONTRIBUTES EQUALLY, because that is what the metric does. Pooling the
@@ -142,9 +138,14 @@ class RankedObjective(Objective):
     """
 
     def __init__(
-        self, weight: float = RANK_WEIGHT, *, normalise_by_count: bool = False, per_label: bool = False
+        self,
+        weight: float = RANK_WEIGHT,
+        *,
+        normalise_by_count: bool = False,
+        per_label: bool = False,
+        grades: Grades | None = None,
     ) -> None:
-        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label)
+        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, grades=grades)
         self.weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:

@@ -4,7 +4,8 @@ from collections import deque
 
 import torch
 
-from kneemri.training.objective import PAIR_MEMORY, Predicted
+from kneemri.training.grades import Predicted
+from kneemri.training.objective import PAIR_MEMORY
 
 
 class PairMemory:

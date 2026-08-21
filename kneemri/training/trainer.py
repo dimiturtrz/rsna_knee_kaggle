@@ -35,8 +35,9 @@ from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
+from kneemri.training.grades import Predicted
 from kneemri.training.heartbeat import Heartbeat
-from kneemri.training.objective import Objective, Predicted
+from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 
 logger = logging.getLogger(__name__)
