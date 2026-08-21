@@ -6739,6 +6739,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_check.ArmCheck.unstated",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_smoke.ArmSmoke",
@@ -17060,6 +17066,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.uncached",
       "label": "uncached",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.unstated",
+      "label": "unstated",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
