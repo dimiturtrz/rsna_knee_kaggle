@@ -8912,6 +8912,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.labels.reader_agreement.ReaderAgreement.signal_report",
+      "target": "kneemri.labels.reader_agreement.ReaderAgreement.split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.labels.reader_agreement.ReaderAgreement.split",
+      "target": "kneemri.labels.reader_agreement.ReaderAgreement._resample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.labels.reader_agreement.main",
       "target": "core.paths.DataRoot.from_config",
       "weight": 1
@@ -8938,6 +8950,18 @@
       "kind": "calls",
       "source": "kneemri.labels.reader_agreement.main",
       "target": "kneemri.labels.reader_agreement.ReaderAgreement.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.labels.reader_agreement.main",
+      "target": "kneemri.labels.reader_agreement.ReaderAgreement.signal_report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.labels.report_language.ReportLanguages.__init__",
+      "target": "kneemri.labels.report_language.ReportLanguages._compiled",
       "weight": 1
     },
     {
@@ -19002,6 +19026,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.labels.reader_agreement.ReaderAgreement.signal_report",
+      "label": "signal_report",
+      "level": "method",
+      "parent": "kneemri.labels.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.reader_agreement.ReaderAgreement.split",
+      "label": "split",
+      "level": "method",
+      "parent": "kneemri.labels.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.labels.reader_agreement.main",
       "label": "main",
       "level": "method",
@@ -19018,6 +19058,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.labels.report_language.ReportLanguages._compiled",
+      "label": "_compiled",
+      "level": "method",
+      "parent": "kneemri.labels.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.labels.report_language.ReportLanguages.census",
       "label": "census",
       "level": "method",
@@ -19028,6 +19076,14 @@
       "descendants": 0,
       "id": "kneemri.labels.report_language.ReportLanguages.graded",
       "label": "graded",
+      "level": "method",
+      "parent": "kneemri.labels.report_language.ReportLanguages",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.labels.report_language.ReportLanguages.hedged",
+      "label": "hedged",
       "level": "method",
       "parent": "kneemri.labels.report_language.ReportLanguages",
       "role": null
