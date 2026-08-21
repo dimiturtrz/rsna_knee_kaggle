@@ -35,6 +35,7 @@ from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import CLS_MEAN, CLS_MEAN_FOCAL, MAXIMUM, POOL_PARTS, StudyDesign
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.training import train as train_module
+from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.options import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, _BlockedBackbone, _FakeBackbone
@@ -389,7 +390,7 @@ def test_an_undecoded_reading_fails_before_the_card_is_taken(corpus: Path, monke
     def refuse() -> torch.device:
         raise AssertionError("the card was taken before the cache was mapped")
 
-    monkeypatch.setattr(train_module.DeviceBudget, "select", lambda self: refuse())
+    monkeypatch.setattr(DeviceBudget, "select", lambda self: refuse())
 
     with pytest.raises(FileNotFoundError):
         _run(corpus, monkeypatch, "--crop-mm", "80")

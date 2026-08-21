@@ -1172,6 +1172,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.vram_need",
+      "target": "kneemri.training.options",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.vram_need",
+      "target": "kneemri.training.run_setup",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.inference.ensemble",
       "target": "kneemri.corpus.slot_reader",
       "weight": 1
@@ -2121,6 +2133,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.device_budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.landed",
       "weight": 1
     },
@@ -2206,12 +2224,6 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.runs.member_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.train",
-      "target": "kneemri.training.device_budget",
       "weight": 1
     },
     {
@@ -7082,6 +7094,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.vram_need.main",
+      "target": "kneemri.training.options.TrainingOptions.parse",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.vram_need.main",
+      "target": "kneemri.training.run_setup.RunSetup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.vram_need.main",
+      "target": "kneemri.training.run_setup.RunSetup.budget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.inference.budget.Budget.overrunning",
       "target": "kneemri.inference.budget.Budget.measured",
       "weight": 1
@@ -10479,6 +10509,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.device_budget.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.landed.Request",
       "weight": 1
     },
@@ -10516,6 +10552,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.adaptation",
       "target": "kneemri.training.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.budget",
+      "target": "kneemri.training.device_budget.DeviceBudget",
       "weight": 1
     },
     {
@@ -10761,18 +10803,6 @@
     {
       "kind": "construct",
       "source": "kneemri.training.train.main",
-      "target": "kneemri.training.device_budget.DeviceBudget",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.training.device_budget.DeviceBudget.select",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.train.main",
       "target": "kneemri.training.fitting.Fitting",
       "weight": 1
     },
@@ -10816,6 +10846,12 @@
       "kind": "construct",
       "source": "kneemri.training.train.main",
       "target": "kneemri.training.run_setup.RunSetup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.run_setup.RunSetup.budget",
       "weight": 1
     },
     {
@@ -11109,7 +11145,7 @@
       "role": null
     },
     {
-      "descendants": 125,
+      "descendants": 126,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11517,7 +11553,7 @@
       "role": null
     },
     {
-      "descendants": 7,
+      "descendants": 8,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -11576,6 +11612,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.switch_coverage",
       "label": "switch_coverage",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.vram_need",
+      "label": "vram_need",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -17470,6 +17514,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.vram_need.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.vram_need",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.budget.Budget.__init__",
       "label": "__init__",
       "level": "method",
@@ -20760,6 +20812,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.adaptation",
       "label": "adaptation",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.budget",
+      "label": "budget",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null

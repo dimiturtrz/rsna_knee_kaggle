@@ -231,3 +231,29 @@ def test_requested_resolves_the_three_fields_that_are_not_a_flag():
     assert _setup(compile_encoder=True).requested(torch.device("cpu")).compiling is False
     assert _setup(compile_encoder=True).requested(torch.device("cuda")).compiling is True
     assert _setup(compile_encoder=False).requested(torch.device("cuda")).compiling is False
+
+
+def test_budget():
+    """The cap is a function of the RECIPE, and two callers now need that answer rather than one.
+
+    The trainer caps its own allocator with it; the queue's free-VRAM gate asks the same question before
+    it will start an arm, and asked a hard-coded 18432 MiB instead — a 12-slice arm's figure handed to
+    every arm. `encoder_adapt_thawed` reserves 9.6 GB at batch 2 and parked behind it with 15.8 GB free.
+    """
+    encoder = ENCODERS[SMALL]
+
+    budget = _setup(slices=20, batch=2, unfreeze_last=12).budget()
+    assert budget.slices == 20
+    assert budget.batch == 2
+    assert budget.trainable_blocks == min(12, encoder.depth), "clamped to the trunk the run actually names"
+    assert budget.params_m == encoder.params_m
+
+    assert _setup(slices=20, train_size=448).budget().units == encoder.activation_units(448), (
+        "--train-size is the grid the step encodes, so the cap must read it over --image-size"
+    )
+    assert _setup(slices=20, unfreeze_last=12).budget().needed() > _setup(slices=20).budget().needed(), (
+        "opening twice the blocks retains twice the stack, which is the term that refused the arm"
+    )
+    assert _setup(slices=20, unfreeze_last=0, lora_rank=8).budget().trainable_blocks == encoder.depth, (
+        "under LoRA the base weights are frozen and every block still carries a retaining adapter"
+    )

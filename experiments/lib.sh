@@ -107,7 +107,7 @@ hold_card() {
   [ "$blocked" -gt 0 ] && echo "took the card after ${blocked}m parked"
   echo $$ > "$LOCK_DIR/pid"
   trap drop_own_card EXIT
-  wait_for_free_card
+  wait_for_free_card "$@"
 }
 
 drop_own_card() {
@@ -128,10 +128,36 @@ drop_own_card() {
 }
 
 ARM_NEEDS_MIB=18432
-# The free VRAM an arm needs before it may start. DERIVED, not chosen: our arms log "peak memory
-# 16.24 GB reserved, 15.03 GB allocated", and the driver context plus cuDNN's kernel workspaces sit ON
-# TOP of the caching allocator's reservation. 18 GB is the smallest figure that holds the measured peak
-# with that headroom, and it leaves 14 GB of a 32.6 GB card for anyone else.
+# The free VRAM an arm needs before it may start, WHEN ITS OWN FLAGS CANNOT BE READ. Derived, not
+# chosen: our arms log "peak memory 16.24 GB reserved, 15.03 GB allocated", and the driver context plus
+# cuDNN's kernel workspaces sit ON TOP of the caching allocator's reservation. 18 GB is the smallest
+# figure that holds THAT arm's measured peak with that headroom.
+#
+# IT USED TO BE THE ONLY ANSWER, AND IT WAS WRONG IN BOTH DIRECTIONS. A 12-slice arm's number handed to
+# every arm is the same fitted-on-one-configuration failure `DeviceBudget` has recorded five times, one
+# layer out where the class could not see it. It OVERSTATES a small recipe — `encoder_adapt_thawed`
+# reserves 9.6 GB at batch 2 and parked behind an 18 GB gate on 2026-08-21 with 15.8 GB of the card
+# free, against an hour-long wait bound. And it UNDERSTATES the shipped one: the settled 20-slice recipe
+# derives 28.3 GB, so those arms were cleared to start with ten gigabytes less free than they go on to
+# reserve, which is precisely the PCIe paging this gate exists to prevent.
+#
+# THE STRICTER GATE IS A REAL CHANGE IN THE QUEUE'S CHARACTER and is named rather than slipped in. A
+# 20-slice arm now wants 28.3 GB of a 32.6 GB card, which a co-tenant of any size denies — so those arms
+# will reach `FOREIGN_WAITS` and start anyway, loudly, where before they started immediately and
+# silently. That is the honest reading of the physics either way; what changes is that the log now says
+# the arm is starting into contention instead of implying it fitted.
+
+arm_needs_mib() {
+  # What THIS recipe reserves, from the same cost model the trainer caps itself with — one home for it.
+  #
+  # `--no-sync` for the reason run_train names: a gate or a push running alongside must not re-sync the
+  # environment under a live arm. A failed derivation (an unparseable flag set, a missing interpreter,
+  # or a recipe whose slices are unknown, which `DeviceBudget.needed` answers with 0) falls back to the
+  # constant rather than to zero — a gate that cannot measure must not become a gate that permits.
+  local derived
+  derived="$(cd "$REPO" && uv run --no-sync python -m kneemri.experiments.vram_need "$@" 2>/dev/null | tail -1)"
+  case "$derived" in ''|0|*[!0-9]*) echo "$ARM_NEEDS_MIB" ;; *) echo "$derived" ;; esac
+}
 
 WAIT_HEARTBEAT_MINUTES=5
 # How often a parked arm repeats that it is still parked. Five minutes is short against the ~45-minute
@@ -161,17 +187,19 @@ wait_for_free_card() {
   # allocator rather than the device — a cap only converts thrashing into a clean OOM when it leaves the
   # driver room, and set above what the card can spare it PERMITS the thrashing it was meant to prevent.
   local free waited=0
+  local needs
+  needs="$(arm_needs_mib "$@")"
   while :; do
     free="$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -1)"
     # No card, no driver, or a query that failed: this is a serialisation gate, not a hardware check.
     # Refusing to run because we could not measure would turn a missing tool into a stalled queue.
     case "$free" in ''|*[!0-9]*) return 0 ;; esac
-    [ "$free" -ge "$ARM_NEEDS_MIB" ] && return 0
+    [ "$free" -ge "$needs" ] && return 0
     if [ "$waited" -ge "$FOREIGN_WAITS" ]; then
-      echo "STARTING ANYWAY after ${waited}m: only ${free} MiB free, want ${ARM_NEEDS_MIB}. Expect PCIe paging" >&2
+      echo "STARTING ANYWAY after ${waited}m: only ${free} MiB free, want ${needs}. Expect PCIe paging" >&2
       return 0
     fi
-    [ "$waited" -eq 0 ] && echo "waiting for another process to release the card: ${free} MiB free, want ${ARM_NEEDS_MIB}"
+    [ "$waited" -eq 0 ] && echo "waiting for another process to release the card: ${free} MiB free, want ${needs}"
     waited=$((waited + 1))
     sleep 60
   done
@@ -324,7 +352,9 @@ run_train() {
     unset _LIB_REFRESHING
     return "$refreshed"
   fi
-  hold_card
+  # THE ARM'S OWN FLAGS, minus its name: the free-VRAM gate derives what THIS recipe reserves rather
+  # than asking every arm for the same 18 GB. See `arm_needs_mib`.
+  hold_card "${@:2}"
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
   # trainer that is already going. `cd` rather than PYTHONPATH, because the working directory wins.

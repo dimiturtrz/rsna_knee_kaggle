@@ -18,9 +18,10 @@ from dataclasses import dataclass
 
 import torch
 
-from kneemri.models.backbone import Encoder
+from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.augmentation import AugmentConfig
+from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.landed import Request
 from kneemri.training.objective import Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
@@ -30,6 +31,13 @@ from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.trainer import Adaptation, Trainer
 
 logger = logging.getLogger(__name__)
+
+ENCODER_FULLY_OPEN = 1_000
+"""More blocks than any trunk here runs, so `min` with the encoder's depth opens all of them.
+
+Under LoRA `unfreeze_last` describes BASE weights, which are frozen, while the adapters it says nothing
+about sit in every block and retain their activations. So the honest trainable count is the whole trunk,
+and this is how the clamp says that without naming a depth that would go stale."""
 
 
 @dataclass(frozen=True)
@@ -49,6 +57,33 @@ class RunSetup:
             head_lr=self.options.head_lr,
             backbone_lr=self.options.backbone_lr,
             unfreeze_last=self.options.unfreeze_last,
+        )
+
+    def budget(self) -> DeviceBudget:
+        """What this run will hold, assembled from the flags and the encoder they name.
+
+        IT LIVES HERE BECAUSE TWO CALLERS NEED THE SAME ANSWER and only one of them is the trainer. The
+        other is the queue: `lib.sh` refuses to start an arm until the card has room for it, and it did
+        that against a hard-coded 18432 MiB — a figure derived from a 12-slice arm and then handed to
+        every arm, which is the same fitted-on-one-configuration failure `DeviceBudget` itself has now
+        recorded five times. A batch-2 arm that reserves 9.6 GB waited for 18.
+
+        `Encoder` answers the two questions the cap cannot ask a flag: how many activation units the
+        trunk holds at this run's size, and how many parameters the optimiser has to carry. And
+        `trainable_blocks` is what supervision OPENED, which is `unfreeze_last` clamped to the trunk's
+        depth — except under LoRA, where every block carries an adapter and retains, so the base-weight
+        count would understate it by the full depth.
+        """
+        encoder = ENCODERS[self.options.variant]
+        size = self.options.train_size or self.options.image_size
+        opened = ENCODER_FULLY_OPEN if self.options.lora_rank else self.options.unfreeze_last
+        return DeviceBudget(
+            self.options.vram_gb,
+            self.options.slices,
+            encoder.activation_units(size),
+            self.options.batch,
+            trainable_blocks=min(opened, encoder.depth),
+            params_m=encoder.params_m,
         )
 
     def requested(self, device: torch.device) -> Request:

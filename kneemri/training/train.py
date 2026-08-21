@@ -19,7 +19,6 @@ from kneemri.labels.targets import Targets
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.landed import Landed
 from kneemri.training.options import TrainingOptions
@@ -50,21 +49,12 @@ def main() -> None:
     # v3base_band on 2026-08-20, capped at 12.68 GB with 17.51 free. The encoder answers with ONE
     # number rather than a patch and a width, because a trunk whose blocks do not all see the same grid
     # cannot be described by that pair — which is what capped cnx_dense at 2.84 GB with 28 free.
-    encoder = ENCODERS[arguments.variant]
-    device = DeviceBudget(
-        arguments.vram_gb,
-        arguments.slices,
-        encoder.activation_units(arguments.train_size or arguments.image_size),
-        arguments.batch,
-        params_m=encoder.params_m,
-        # And how many blocks SUPERVISION OPENED, or the cap is a six-block number handed to a run that
-        # opened twelve: that is what killed encoder_adapt_thawed on 2026-08-21, refused at 9.56 GB with
-        # 9.55 free. A frozen block's activations are freed as soon as the next block consumes them; a
-        # trainable block's must survive to its backward, so the retained stack goes with what is open
-        # and not with the trunk's depth. Under LoRA every block carries an adapter, so every block
-        # retains — `unfreeze_last` describes base weights there and would understate by the full depth.
-        trainable_blocks=(encoder.depth if arguments.lora_rank else min(arguments.unfreeze_last, encoder.depth)),
-    ).select()
+    # And how many blocks SUPERVISION OPENED, or the cap is a six-block number handed to a run that
+    # opened twelve: that is what refused encoder_adapt_thawed on 2026-08-21 at 9.56 GB with 9.55 free.
+    # All of it assembled in `RunSetup.budget`, because the QUEUE needs the same answer before it will
+    # start an arm and was using a constant for it.
+    setup = RunSetup(arguments)
+    device = setup.budget().select()
     targets, evaluation = Targets.pair(
         arguments.labels,
         arguments.eval_labels,
@@ -106,7 +96,6 @@ def main() -> None:
     # a configuration mistake, and the failure without this is either a crash deep in the encoder or a
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
-    setup = RunSetup(arguments)
     model = setup.model(encoder, len(SCHEMES[arguments.scheme]), design, device)
     trainer = setup.trainer(model, device, identifiers, len(training))
     # BEFORE THE CARD IS SPENT, and this is the last moment it can be asked: from here on the only
