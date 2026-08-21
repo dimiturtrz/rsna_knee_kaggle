@@ -1119,13 +1119,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.device_budget",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.training.trainer",
+      "target": "kneemri.training.options",
       "weight": 1
     },
     {
@@ -1814,6 +1814,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.device_budget",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.fitting",
       "target": "core.wakelock",
       "weight": 1
@@ -2205,6 +2211,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
+      "target": "kneemri.training.device_budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
       "target": "kneemri.training.fitting",
       "weight": 1
     },
@@ -2228,12 +2240,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.training.train",
-      "target": "kneemri.training.trainer",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.corpus.prefetch",
       "weight": 1
@@ -2248,12 +2254,6 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.corpus.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.trainer",
-      "target": "kneemri.device",
       "weight": 1
     },
     {
@@ -6579,13 +6579,13 @@
     {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.trainer.DeviceBudget",
+      "target": "kneemri.training.device_budget.DeviceBudget",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.trainer.DeviceBudget.needed",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
       "weight": 1
     },
     {
@@ -9535,6 +9535,54 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.await_headroom",
+      "target": "kneemri.training.device_budget.DeviceBudget.headroom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.await_headroom",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.capped",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.device_budget.DeviceBudget.select",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.select",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.select",
+      "target": "kneemri.training.device_budget.DeviceBudget.await_headroom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.select",
+      "target": "kneemri.training.device_budget.DeviceBudget.capped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.device_budget.DeviceBudget.select",
+      "target": "kneemri.training.device_budget.DeviceBudget.floor",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.fitting.Fitting",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -10677,6 +10725,18 @@
     {
       "kind": "construct",
       "source": "kneemri.training.train.main",
+      "target": "kneemri.training.device_budget.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.device_budget.DeviceBudget.select",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.train.main",
       "target": "kneemri.training.fitting.Fitting",
       "weight": 1
     },
@@ -10738,66 +10798,6 @@
       "kind": "calls",
       "source": "kneemri.training.train.main",
       "target": "kneemri.training.run_setup.RunSetup.trainer",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.training.trainer.DeviceBudget",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.train.main",
-      "target": "kneemri.training.trainer.DeviceBudget.select",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.await_headroom",
-      "target": "kneemri.training.trainer.DeviceBudget.headroom",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.await_headroom",
-      "target": "kneemri.training.trainer.DeviceBudget.needed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.capped",
-      "target": "kneemri.training.trainer.DeviceBudget.needed",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.trainer.DeviceBudget.select",
-      "target": "kneemri.device.VisibleCards",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.select",
-      "target": "kneemri.device.VisibleCards.device",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.select",
-      "target": "kneemri.training.trainer.DeviceBudget.await_headroom",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.select",
-      "target": "kneemri.training.trainer.DeviceBudget.capped",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.DeviceBudget.select",
-      "target": "kneemri.training.trainer.DeviceBudget.floor",
       "weight": 1
     },
     {
@@ -11073,7 +11073,7 @@
       "role": null
     },
     {
-      "descendants": 124,
+      "descendants": 125,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11921,7 +11921,7 @@
       "role": null
     },
     {
-      "descendants": 18,
+      "descendants": 19,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -11940,6 +11940,14 @@
       "descendants": 0,
       "id": "kneemri.training.augmentation",
       "label": "augmentation",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget",
+      "label": "device_budget",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -13562,6 +13570,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget",
+      "label": "DeviceBudget",
+      "level": "class",
+      "parent": "kneemri.training.device_budget",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.fitting.Fitted",
       "label": "Fitted",
       "level": "class",
@@ -13788,14 +13804,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Adaptation",
       "label": "Adaptation",
-      "level": "class",
-      "parent": "kneemri.training.trainer",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget",
-      "label": "DeviceBudget",
       "level": "class",
       "parent": "kneemri.training.trainer",
       "role": "satellite"
@@ -20058,6 +20066,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.await_headroom",
+      "label": "await_headroom",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.capped",
+      "label": "capped",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.floor",
+      "label": "floor",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.headroom",
+      "label": "headroom",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.needed",
+      "label": "needed",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.device_budget.DeviceBudget.select",
+      "label": "select",
+      "level": "method",
+      "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.__init__",
       "label": "__init__",
       "level": "method",
@@ -20750,54 +20806,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.training.train",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.await_headroom",
-      "label": "await_headroom",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.capped",
-      "label": "capped",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.floor",
-      "label": "floor",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.headroom",
-      "label": "headroom",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.needed",
-      "label": "needed",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.DeviceBudget.select",
-      "label": "select",
-      "level": "method",
-      "parent": "kneemri.training.trainer.DeviceBudget",
       "role": null
     },
     {

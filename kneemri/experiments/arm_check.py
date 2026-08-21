@@ -35,8 +35,8 @@ from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.models.backbone import ENCODERS
+from kneemri.training.device_budget import GB_PER_SLICE, DeviceBudget
 from kneemri.training.options import TrainingOptions
-from kneemri.training.trainer import GB_PER_SLICE, DeviceBudget
 
 logger = logging.getLogger(__name__)
 
@@ -298,6 +298,7 @@ class ArmCheck:
                 slices=options.slices,
                 units=encoder.activation_units(options.train_size or options.image_size),
                 batch=options.batch,
+                params_m=encoder.params_m,
             ).needed()
             if options.vram_gb > needed + GB_PER_SLICE:
                 asked[name] = round(options.vram_gb - needed, 2)

@@ -19,11 +19,11 @@ from kneemri.labels.targets import Targets
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.runs.member_record import MemberRecord
+from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.landed import Landed
 from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
-from kneemri.training.trainer import DeviceBudget
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ def main() -> None:
         arguments.slices,
         encoder.activation_units(arguments.train_size or arguments.image_size),
         arguments.batch,
+        encoder.params_m,
     ).select()
     targets, evaluation = Targets.pair(
         arguments.labels,

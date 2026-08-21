@@ -135,6 +135,19 @@ class Encoder:
     Empty for a transformer, where `depth`, `patch` and `dim` already say it: one stage, `depth` blocks,
     stride `patch`, width `dim`. Stated only where that shorthand is false."""
 
+    params_m: float = 22.0
+    """Trunk parameters in millions — the quantity the OPTIMISER's memory is a function of.
+
+    Activations scale with tokens and width; weights, gradients and the two Adam moments scale with
+    parameter count, and the VRAM cap held that second term as the constant `RESIDENT_GB = 0.22`
+    fitted on this 22M trunk. That constant refused `v3base_dense` outright with nine gigabytes of the
+    card free (knee-bj90): a ViT-B is four times the parameters and its optimiser state is four times
+    the bytes, and the cap could not see it.
+
+    Stated per encoder rather than counted off the loaded weights for the same reason `stages` is: the
+    cap has to be derived BEFORE anything is fetched, since refusing a run that will not fit is what it
+    is for."""
+
     def activation_units(self, size: int) -> float:
         """Summed tokens-times-width over every block, which is activation bytes up to one constant.
 
@@ -254,7 +267,13 @@ ENCODERS: dict[str, Encoder] = {
     # Left here rather than deleted because the stale claim nearly bought a 90-minute arm: it reads as
     # evidence FOR capacity, and our own current numbers say capacity is not the constraint (knee-7u5).
     BASE: Encoder(
-        BASE, "facebook/dinov2-base", 768, mount="metaresearch/dinov2/PyTorch/base/1", family="dinov2", leaf="base"
+        BASE,
+        "facebook/dinov2-base",
+        768,
+        mount="metaresearch/dinov2/PyTorch/base/1",
+        family="dinov2",
+        leaf="base",
+        params_m=86.6,
     ),
     # 300M parameters, 1024-wide. The rung ABOVE the public frontier: every strong notebook here stops
     # at base, and the reason is the scored kernel's T4 rather than anything about the task. That
@@ -267,7 +286,13 @@ ENCODERS: dict[str, Encoder] = {
     # floor. The lever that HAS cleared the floor since is whole-stack reading (+0.0147), which is a
     # data question, not a capacity one.
     LARGE: Encoder(
-        LARGE, "facebook/dinov2-large", 1024, mount="metaresearch/dinov2/PyTorch/large/1", family="dinov2", leaf="large"
+        LARGE,
+        "facebook/dinov2-large",
+        1024,
+        mount="metaresearch/dinov2/PyTorch/large/1",
+        family="dinov2",
+        leaf="large",
+        params_m=304.0,
     ),
     # DINOv3, authorised 2026-08-12. Patch 16 rather than 14, so the read sizes that tile cleanly are
     # multiples of 16: 336 (441 tokens), 384 (576), 448 (784). Note 392 - our best DINOv2 read size -
@@ -296,6 +321,7 @@ ENCODERS: dict[str, Encoder] = {
         patch=16,
         family="dinov3",
         leaf="vits16",
+        params_m=21.6,
     ),
     # ViT-S+/16: the SAME 384-wide, 12-layer, 6-head, patch-16 shape as vits16 with a wider MLP —
     # 28.7M parameters against 21.6M. A drop-in for the head, and the apples-to-apples partner for the
@@ -308,6 +334,7 @@ ENCODERS: dict[str, Encoder] = {
         patch=16,
         family="dinov3",
         leaf="vits16plus",
+        params_m=29.0,
     ),
     V3_BASE: Encoder(
         V3_BASE,
@@ -317,6 +344,7 @@ ENCODERS: dict[str, Encoder] = {
         patch=16,
         family="dinov3",
         leaf="vitb16",
+        params_m=86.6,
     ),
     # THE FIRST NON-TRANSFORMER, added 2026-08-21 because the transformer axis closed. `base_dense`
     # (DINOv2-base among seven DINOv2-small members) took the board from 0.930 to 0.931; `v3base_dense`
@@ -346,6 +374,7 @@ ENCODERS: dict[str, Encoder] = {
         patch=32,
         family=CONVNEXT,
         leaf="convnextv2-base",
+        params_m=87.7,
         # `depths` and `hidden_sizes` off ConvNeXtV2-base's own config, at the strides the four stages
         # run at. Stated rather than read from the loaded config because the cap has to be derived
         # BEFORE any weights are fetched — the whole point of it is to refuse a run that will not fit.
