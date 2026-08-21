@@ -1537,6 +1537,31 @@ so nothing here says whether it earns a seat. **Do not retire it on the −0.005
 encoder diversity paid ONCE and not TWICE — which would make the next arm a genuinely different inductive
 bias (a CNN trunk), not a fourth ViT.
 
+**SEAT VALUE, measured 2026-08-21 — flat, and the third branch fires on the letter of its wording.**
+`record_mix` over the 909-study shared holdout, roster held at the champion five:
+
+```
+roster of 5:                        0.8690
+  +v3base_dense (sixth seat):       0.8683   (-0.0007)
+  v3base_dense FOR base_dense:      0.8684   (-0.0005)
+0 of 1 clear +0.0015
+```
+
+Both readings are negative and both are an order of magnitude inside the ~0.001 the holdout resolves at,
+so what this measures is a TIE, not a loss. The arm's `THE INTERESTING NEGATIVE` branch — "solo clears
+0.84 and seat value is at or below zero" — fires as written, and its consequence stands: **a second ViT
+of a different family does not buy a second diversity seat.** `base_dense` paid once. The next member has
+to be a different INDUCTIVE BIAS (a CNN trunk), not a fourth ViT.
+
+But read the sign, not the magnitude, and note what this arm cannot settle. `base_dense` also read as an
+offline tie (−0.0001) against the incumbent four and then paid a board tick — the holdout's one recorded
+miss in the UP direction, and it happened on exactly this shape: offline-flat, structurally different.
+This is the same shape again. **The −0.0007 is not evidence that a v3base seat would cost a tick; it is
+evidence that this ruler cannot tell.** Only a slot can, and a slot is worth more spent on a member the
+ruler can actually see. So: the member stays on disk and mounted-eligible, the axis is closed as a
+*source of new seats*, and the finding that carries forward is the adaptation re-attribution above, not
+the seat number.
+
 **Cost note.** 680 s/epoch against `base_dense`'s ~920, at 25.9 GB — the patch-16 token discount (441 vs 576
 tokens at 336 px) is real and shows up in wall-clock as predicted. It ran only after `--vram-gb 27` was
 named explicitly; the derived cap refused it at 21.68 GB with 9.17 GB of the card free (see the arm header
