@@ -1713,3 +1713,38 @@ it was needed. `base_dense` shipped with a named confound, `basedense_v1` scored
 still open, and these two closed it inside three hours — the encoder reading stands, the champion is not a
 batch artefact. Also a standing operating fact: **batch 6 is free here**, at half the memory (13.56 GB vs
 ~27) and under 3% wall-clock, which is what makes a 768-wide encoder affordable at 336 px in the first place.
+
+### band140 — the FOV axis closes, and MCL is why (2026-08-21)
+
+**The mean said nothing, nine epochs running.** Matched-epoch holdout against `band_dense`: +0.0058,
+−0.0016, −0.0011, +0.0015, +0.0069, −0.0081, +0.0006, −0.0068, −0.0037 (e0–e8). Scatter around zero with
+no drift, against a 0.0062 floor, at matched loss (e8 0.6585 vs 0.6529). Best 0.8556 at e6 vs 0.8578.
+
+**The pre-registered clause was PER-LABEL on the MCL / ACL / Baker's periphery group, and it reads
+negative on the label the hypothesis was actually about.**
+
+| label | e6 | e7 | e8 |
+|---|---|---|---|
+| MCL | −0.016 | −0.021 | −0.017 |
+| ACL | −0.000 | −0.013 | +0.007 |
+| Baker's | −0.003 | −0.002 | +0.002 |
+
+MCL is negative at every matched epoch, by the largest margins in the twelve-label table, all clearing
+the floor. ACL and Baker's scatter around zero. A group that was supposed to move together did not.
+
+**THE MECHANISM, AND IT IS A CONFOUND THIS ARM COULD NOT SEPARATE.** 140 mm of span across the SAME
+pixel grid is coarser mm/px than 120 mm. Sampling density is what thin structures spend first, and MCL
+is the thinnest label on the sheet — while the thick ones held flat (Medial Meniscus +0.004, Baker's
++0.002, Medial OA −0.006). So the arm did not measure "does peripheral anatomy carry signal"; it
+measured that against a resolution loss on the same knob. The reading that survives is: whatever the
+extra 20 mm contains, it does not pay for the density it costs.
+
+**THE knee-n3yx GATE DOES NOT FIRE.** Its PASS branch required periphery POSITIVE with the mean flat
+before a 140 mm @ 362 px re-run was allowed a slot. Periphery is negative on its own deciding label, so
+that arm is NOT run, and ~75 min of card stays in the queue.
+
+**What this does NOT rule out.** It does not say peripheral anatomy is signal-free — the confound is
+sitting on exactly that question. Separating them needs 140 mm at a pixel budget that holds mm/px fixed,
+which is a bigger grid, not a re-crop. Resolution is already priced at +0.0002 for 392 px, so that arm
+would be buying back a loss rather than reaching for a gain: it prices as an INSTRUMENT (it would close
+the FOV axis cleanly) and not as a lever, and it is not queued.
