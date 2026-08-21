@@ -1362,6 +1362,45 @@ the classifier a representation reshaped for reconstruction, and twelve epochs a
 blocks 6–8 moving 0.0205–0.0239 against control's 0.0167–0.0225, so the backbone received gradient and
 trained normally. The collapse is what the encoder was, not whether it was fitted.
 
+### encoder_adapt_thawed — KILLED at epoch 4 of 12, on the ratio rather than on the number (2026-08-21)
+
+**Not a result. A schedule decision, recorded so the arm is re-runnable rather than assumed dead.**
+
+The arm was `encoder_adapt_lower`'s recipe with the imported blocks THAWED — `--unfreeze-last 12
+--backbone-lr 4e-5` over an encoder initialised from `adapt_small_e6_lr1e5.pt` at depth 6, testing the
+"do not freeze the adapted blocks" half of what `encoder_adapt_lower` said it did not rule out.
+
+**Five epochs, five behind its own matched control**, at 780–863 s an epoch against the control's ~365 s:
+
+| epoch | thawed | loss | `encoder_adapt_lower` |
+|---|---|---|---|
+| 0 | 0.6651 | 1.3041 | |
+| 1 | 0.6533 | 1.3136 | |
+| 2 | 0.6456 | 1.2963 | |
+| 3 | 0.6739 | 1.2908 | 0.6906 (loss 1.2193) |
+| 4 | 0.6600 | 1.2739 | |
+
+The loss reads the same story the whole encoder-adaptation family reads: floored near the control's
+epoch-ZERO 1.2162 and still above where `band_dense` starts.
+
+**WHY IT WAS KILLED RATHER THAN FINISHED.** Seven epochs remained, ~1.6 h of card, and the best case was
+a number near `encoder_adapt_lower`'s 0.7309 — i.e. a NULL on an axis already 0.13 below the shipped
+`band_dense` 0.8578. Under the standing rule (price wall-clock over expected gain BEFORE running, and
+justify a predicted-null run as an instrument or not at all) that was the worst ratio on the board, so
+the hour went back to the queue. The kill is the honest application of the rule to our OWN work: this
+arm was ours, argued, and running.
+
+**WHAT IT DOES AND DOES NOT SAY.** It does not refute thawing — 5 of 12 epochs under a one-cycle
+schedule is before the decay tail where these arms do most of their recovering, so no verdict is
+written here. What it does say is that thawing does not RESCUE the axis EARLY: the flat-rate 12-block
+arm is behind the frozen-6 control at every matched epoch, not ahead of it, so there is no early signal
+that unfreezing is the missing piece.
+
+**A CONFOUND THE SUCCESSOR MUST REMOVE, and it is the reason to re-run rather than to conclude.** This
+arm gave all twelve blocks ONE flat 4e-5, which is peak rate on blocks 0–5 — exactly the SSL-imported
+blocks the whole axis is about. `--layer-decay` (built 2026-08-21) is what removes it. A re-run at
+`--layer-decay 0.7` is a different experiment, not a repeat, and it is the one the axis is owed.
+
 ### encoder_adapt_lower — 0.7309, and the diagnosis it was built on is refuted (2026-08-20)
 
 **The flag landed.** `encoder initialised from adapt_small_e6_lr1e5.pt (113 tensors, 110 left stock)` —

@@ -36,6 +36,31 @@ def test_refused():
     assert refused["typo"], "the parser's own complaint is reported, not a generic failure"
 
 
+def test_carriage_returns(tmp_path: Path):
+    """A CR on disk is reported with its count, and a clean tree is silent.
+
+    Written as BYTES, because the defect only exists on disk: every text-mode write on this platform
+    would put the CRs back and every git layer takes them out again, which is exactly why the check
+    reads the file rather than the diff.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (tmp_path / "lib.sh").write_bytes(b"echo one\n[ -f x ] || { echo two; exit 1; }\n")
+    (arms / "windows.sh").write_bytes(b"echo one\r\n[ -f x ] || { echo two; exit 1; }\r\n")
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+
+    found = check.carriage_returns()
+
+    assert set(found) == {(arms / "windows.sh").as_posix()}, (
+        "only the file with CRs on disk is named, and the sourced lib is walked alongside the arms"
+    )
+    assert found[(arms / "windows.sh").as_posix()] == 2, "the count is reported, so a partial file is visible"
+
+    (arms / "windows.sh").write_bytes(b"echo one\n")
+
+    assert check.carriage_returns() == {}
+
+
 def test_overstated():
     """A cap copied off a bigger recipe is reported; one the slices justify, and one absent, are not.
 

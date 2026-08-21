@@ -42,6 +42,12 @@ logger = logging.getLogger(__name__)
 
 ARMS = Path("experiments/arms")
 STUB = Path("experiments/stub_lib.sh")
+SHELLS = Path("experiments")
+"""Every shell file an arm's run touches, arms and the libs they source alike — the CR check's subject.
+
+Named apart from `ARMS` because the file that has actually cost a decode is `lib.sh`, which no arm is
+but every arm sources.
+"""
 PATHS = Path("paths.yaml")
 TIMEOUT_SECONDS = 30
 """An arm that has not printed its invocation by now is doing something a lint must not wait for."""
@@ -117,9 +123,10 @@ class ArmReading:
 class ArmCheck:
     """Every committed arm's train invocation, and whether the trainer would accept it."""
 
-    def __init__(self, arms: Path = ARMS, stub: Path = STUB) -> None:
+    def __init__(self, arms: Path = ARMS, stub: Path = STUB, shells: Path = SHELLS) -> None:
         self.arms = arms
         self.stub = stub
+        self.shells = shells
 
     def _environment(self) -> dict[str, str]:
         """The inherited environment, plus ARM_LIB, the resolved data root, and coreutils on PATH.
@@ -247,6 +254,27 @@ class ArmCheck:
         """
         complaints = ((name, self._parsed(flags)[1]) for name, flags in invocations.items())
         return {name: complaint for name, complaint in complaints if complaint}
+
+    def carriage_returns(self) -> dict[str, int]:
+        """The shell files carrying a CR on disk, by path, with the count — the defect git cannot show.
+
+        A CR inside a brace group or a subshell is a bash syntax error, and `.gitattributes` normalises
+        line endings ON THE WAY TO THE INDEX. So a CRLF working copy produces no diff, no status entry
+        and no warning at review time, while the shell reads the file as it is on disk and dies. Every
+        layer anyone checks agrees the tree is clean.
+
+        It surfaces where it costs most. On 2026-08-19 `build_cache.sh` decoded all 4407 studies and
+        THEN died on its own epilogue — so `ARM DONE build_cache_<key>` was never echoed, the
+        mask-written post-condition never ran, and anything gated on that marker would have waited
+        forever behind a cache already on disk (knee-rlg5). Twelve of the tree's shell files were in
+        that state, `experiments/lib.sh` among them.
+
+        The whole file is read rather than the parsed invocation, because the constructs a CR breaks
+        are the ERROR HANDLING and the completion markers — the lines that only run when something
+        notable happened, and so the lines a smoke never reaches.
+        """
+        counted = ((path, path.read_bytes().count(b"\r")) for path in sorted(self.shells.glob("**/*.sh")))
+        return {str(path.as_posix()): count for path, count in counted if count}
 
     def readings(self, invocations: dict[str, str]) -> dict[str, ArmReading]:
         """Where each arm's pixels would come from, by arm name — its data root and the cache it names.
@@ -475,6 +503,11 @@ def main() -> None:
             len(invocations),
             ", ".join(OPERATING_POINT_FLAGS),
         )
+    # A REFUSAL, not an advisory: unlike an overstated cap this one silently destroys a completion
+    # marker, and the arm it destroys it for has already spent the machine.
+    carriage_returns = check.carriage_returns()
+    for path, count in sorted(carriage_returns.items()):
+        logger.info("CRLF %s: %d carriage returns on disk — bash reads the file as it is (knee-rlg5)", path, count)
     broken: dict[str, str] = {}
     if arguments.smoke:
         # BEFORE the smoke, not as part of it: a smoke reads the truncated cache, and an arm on a
@@ -484,7 +517,7 @@ def main() -> None:
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
-    if refused or broken or (uncached and arguments.require_caches):
+    if refused or broken or carriage_returns or (uncached and arguments.require_caches):
         sys.exit(1)
 
 
