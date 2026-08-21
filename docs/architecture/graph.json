@@ -338,6 +338,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.crop_coverage",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.corpus.slot_geometry",
+      "target": "kneemri.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.corpus.slot_reader",
       "target": "kneemri.corpus.acquisition",
       "weight": 1
@@ -3646,6 +3688,162 @@
       "kind": "calls",
       "source": "kneemri.corpus.prefetch.Prefetch.fetch",
       "target": "kneemri.corpus.study_cache.CachedCorpus.window",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.slot_geometry.SlotFrame",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotFrame.covers",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame.through_plane_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotFrame.in_plane_to",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame.offset_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotFrame.in_plane_to",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame.through_plane_to",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "target": "kneemri.corpus.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "target": "kneemri.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.frame",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.placed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.frame",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.study.SlotPipeline.route",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "kneemri.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.placed",
+      "target": "kneemri.corpus.slot_geometry.SlotFrame",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.placed",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.triple",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.report",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.coverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.SlotGeometry.report",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.slot_geometry.SlotGeometry.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.corpus.slot_geometry.main",
+      "target": "kneemri.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -11751,7 +11949,7 @@
       "role": null
     },
     {
-      "descendants": 132,
+      "descendants": 133,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -11767,7 +11965,7 @@
       "role": null
     },
     {
-      "descendants": 22,
+      "descendants": 23,
       "id": "kneemri.corpus",
       "label": "corpus",
       "level": "module",
@@ -11898,6 +12096,14 @@
       "descendants": 0,
       "id": "kneemri.corpus.prefetch",
       "label": "prefetch",
+      "level": "module",
+      "parent": "kneemri.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry",
+      "label": "slot_geometry",
       "level": "module",
       "parent": "kneemri.corpus",
       "role": null
@@ -13125,6 +13331,22 @@
       "level": "class",
       "parent": "kneemri.corpus.prefetch",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame",
+      "label": "SlotFrame",
+      "level": "class",
+      "parent": "kneemri.corpus.slot_geometry",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "label": "SlotGeometry",
+      "level": "class",
+      "parent": "kneemri.corpus.slot_geometry",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -15532,6 +15754,110 @@
       "label": "fetch",
       "level": "method",
       "parent": "kneemri.corpus.prefetch.Prefetch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame.angle_to",
+      "label": "angle_to",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame.covers",
+      "label": "covers",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame.in_plane_to",
+      "label": "in_plane_to",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame.offset_to",
+      "label": "offset_to",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotFrame.through_plane_to",
+      "label": "through_plane_to",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.frame",
+      "label": "frame",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.measure_study",
+      "label": "measure_study",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.placed",
+      "label": "placed",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.SlotGeometry.triple",
+      "label": "triple",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.corpus.slot_geometry.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.corpus.slot_geometry",
       "role": null
     },
     {
