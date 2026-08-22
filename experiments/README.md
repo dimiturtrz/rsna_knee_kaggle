@@ -306,6 +306,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`aprior_dense`** | `--anatomical-prior`: `SlotHead.prior` initialised from the 12x6 plane-by-finding table in `kneemri/corpus/anatomy.py` at PRIOR_STRENGTH 2.0 instead of zeros — the mapping the head otherwise has to discover from study-level labels alone | 0.8557 | **−0.0021 vs `band_dense`** | **THE REFUTATION CLAUSE LANDED LITERALLY, AND IT IS THE ONE THAT NARROWS THE MOST.** Flag verified in the CHECKPOINT config: `anatomical_prior false→true`, with `slices 20`, `slice_pooling max`, `whole_stack true`, `pool cls_mean`, `backbone_lr 4e-05` identical to the control (the only other diff, `slice_regions` absent vs `1`, is the recorded default and not a variable). Both arms peak at **epoch 8** on the same twelve-epoch cycle, so the comparison is at matched schedule position and the −0.0021 is not a truncation artefact. The PREDICTION needed the peak to clear 0.8578 by more than the 0.0062 floor; it came in below the control. The THIRD OUTCOME needed the per-label pattern to separate along the table's own peaked/flat split, and it does not usefully: **peaked rows (MCL, both OA, PF OA, Synovitis) −0.0008 against flat rows −0.0033**, a 0.0025 separation which is under half the floor, and inside it the largest single mover is Synovitis at **−0.010** — an axial-weighted, PEAKED row moving the wrong way. **MECHANISM, and the training loss is what says it: the warm start washed out rather than failed to land.** Train loss tracks the control to the fourth decimal at every epoch (1.2117/1.2162 at e0, 0.6508/0.6529 at e8 — the arm slightly LOWER), so 72 numbers of initialisation on an `nn.Parameter` the data may overrule are gone by the time the fit matters. Cost was as predicted: parameters, shapes, VRAM (26.92 GB reserved / 24.93 GB allocated) and 368 s an epoch all identical to `band_dense`. Seat value **+0.0009** as a fifth member and **+0.0004** as the best swap (displacing `band_dense`), 0 of 1 clearing +0.0015 — no seat on either ruler. **CONSEQUENCE, written into the arm before it ran and now owed:** the head had ALREADY recovered the plane-by-finding mapping from study-level supervision alone, so "supervision never says where" is wrong about THIS head, and the localisation argument has to buy a real localisation signal (knee-mxj) rather than a warm start. Fourth consecutive knob on the decode/head family returning nothing (−0.0009, −0.0044, +0.0014, −0.0021); the second of the five never-run switches to be spent. See below |
 | **`half_data`** | `band_dense` fitted on HALF the training studies (`--train-fraction 0.5`), everything else identical — an instrument, not a candidate | 0.8344 | **−0.0234 vs `band_dense`** | **data volume is the binding constraint, and it is the only axis that has cleared the bar.** 3.8× the 0.0062 floor, and ~0.019 of it survives the registered schedule confound charged at its maximum (`schedule_length` prices step compression at 0.0028). Peak moved 8 → 6 as memorisation predicts; the peak-to-finish declines (−0.0024 vs −0.0006) are both sub-floor and unreadable. After its peak the curve PLATEAUS six epochs inside 0.0021 while the training loss keeps falling 0.8015 → 0.5973 — fitting continued, generalisation stopped. Slope: 1,763 → 3,526 studies buys ~0.020, so the bar needs ~1.7× the corpus. External data is PERMITTED (§2.6.a/b); `knee-ombx` promotes from backlog to the decision that gates the schedule. MRNet alone prices at ~+0.0095 and does NOT clear the bar. No seat — it is a handicapped control and was never a member. See below
 | `adapt_null` | the flag with NOTHING adapted: stock DINOv2-small written through `pretrain.py`'s own `save` at `--lr 0`, loaded via `--encoder-weights` | 0.8240 @ e3 | **+0.0008 vs control at matched epoch 3** | **the load path is clean.** Plumbing removed as a suspect for the whole SSL family; the four collapses are evidence about the adaptation, as the ledger already said. Drift on the null reads 0.0000 on the stem and all twelve blocks — the drift instrument's first negative control. 4 epochs, instrument only, no seat (−0.0029). The magnitude anomaly that bought the slot was already resolved at `encoder_adapt_gentle`; see below
+| `mae_matched` | `band_dense`'s recipe with `--encoder-weights` pointing at **`pretrain_small_matched_e8`** — DINOv2-small given 8 epochs of masked reconstruction over 402,600 knee-MRI slices, the only encoder on the board that has seen nothing but this domain | 0.6735 @ e3 | **−0.1505 vs `adapt_null` at matched epoch 3** | **the FIFTH collapse, and it closes the SSL-as-init family across two objectives and two import depths.** Every suspect worked before the verdict and every one clears: plumbing (`adapt_null` is the same `--encoder-weights` path and reads 0.8240), data (same cache key `336px_20sl_0.1-0.9band`, stamped in the checkpoint), variant (`PretrainedEncoder.into` RAISES on a mismatch and did not fire — checkpoint `small` equals the `TrainingOptions` default, and `band_dense` names no `--variant` either, so the byte-identity claim holds), test (matched epoch, both controls already on the ledger, neither re-run). **The fix I reached for was already run**: `pretrained_encoder.py:47-58` documents that pretraining rewrites the TOP block (block 11 moved 55% / 21% of its norm where supervision never moves it past 0.8%) and argues the axis only concerned blocks 0-5, which is exactly `--encoder-adapt-depth 6` — and that is `encoder_adapt_lower`, 0.7309, its diagnosis already recorded as refuted. The family now reads **0.6735 / 0.6875 / 0.6902 / 0.7162 / 0.7309**, every one 0.09-0.15 below a control that simply starts from stock. Nearest-neighbour 0.4333 against a seated spread of 0.88-0.89 — not diversity, a trunk predicting something nearly uncorrelated with everything, which is what a broken representation looks like. Seat −0.0041, 0 of 1 clearing +0.0015, no seat. **The pretrain was already spent, so running it was right on sunk cost — but it should have been priced as an INSTRUMENT retiring the axis, not as an improvement, because `knee-jk3`'s board re-read already listed SSL-as-init CLOSED and I flagged that prior before the arm started.** Does NOT rule out volume-native pretraining, which never passes through this repo's adapt-and-import path at all (`knee-rpkw`). See below
 | `quarter_data` | `band_dense` on a QUARTER of the training studies — the third point, so the data slope is fitted rather than assumed | 0.7907 @ e9 | −0.0671 vs `band_dense`, **+0.0437 over `half_data`** | **the slope is CONCAVE and log-linear is refuted.** 25→50 buys +0.0437 against 50→100's +0.0234, 1.87× steeper; charging the schedule confound per point (0.0048 and 0.0097, downward) makes it 2.09×, so flattening is not the schedule. Each doubling buys ~0.48 of the last, which prices the NEXT doubling — the whole external-data programme — at **~+0.009** and ALL remaining doublings at ~+0.017. Takes down `half_data`'s '1.7× the corpus' arithmetic and reprices `knee-ombx` (MRNet ~+0.004) and `knee-5895` (final_fit ~+0.0029). **No lever on this board is now priced above 1.5%.** Instrument, no seat (−0.0035). See below
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
 | `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
@@ -2316,3 +2317,68 @@ So the honest state of this axis is **not "volume pretraining is flat"** — it 
 flat on a frozen probe, taken through a reading that could not use the trunk's depth axis, and the
 harness holes that made that so are now closed."* The re-test is a fitted member at `--whole-stack
 --slices 20 --train-size 256`, which is armable for the first time as of this entry.
+
+### `mae_matched` — the fifth collapse, and the fix I reached for was already in this file (2026-08-22)
+
+`mae_matched` is `band_dense`'s recipe with one flag added: `--encoder-weights` pointing at
+`pretrain_small_matched_e8`, DINOv2-small given eight epochs of masked reconstruction over 4,407
+studies x 20 slices = 402,600 knee-MRI slices. Every other encoder on this board was pretrained on
+natural images. This one has seen nothing but the domain.
+
+It scored **0.6735 at epoch 3**, against `adapt_null` 0.8240 and `band_dense` 0.8232 at the same epoch.
+
+**The arm's own header said a null would not land here, and it did.** It reads: "Collapsed arms sit at
+0.63-0.73, so the floor that says 'the weights loaded and broke the trunk' is far below the band this
+lands in — a null here will not be that." 0.6735 is inside that band. So the pre-registration's
+`< 0.824` clause applies, and which link broke comes before any verdict.
+
+| suspect | verdict | what says so |
+|---|---|---|
+| plumbing | CLEARED | `adapt_null` is the same `--encoder-weights` path with a null adaptation and reads 0.8240 |
+| data | CLEARED | checkpoint stamps cache `336px_20sl_0.1-0.9band`, the control's own key |
+| training (variant) | CLEARED | `PretrainedEncoder.into` RAISES on a variant mismatch and did not fire; checkpoint `small` equals the `TrainingOptions` default, and `band_dense` names no `--variant` either, so byte-identity against the control holds |
+| test | CLEARED | matched epoch, both controls already on the ledger, neither re-run |
+
+**The remedy was already run, and it is documented eleven lines above the code that loads the weights.**
+`pretrained_encoder.py:47-58` records that a reconstruction objective rewrites the TOP block — block 11
+moved 55% and 21% of its own norm across two measured adaptations, where supervision has never moved it
+more than 0.8% — and that the head reads that block. It then argues the axis only ever concerned blocks
+0-5, which supervision provably cannot write (drift exactly 0.0000) and therefore cannot repair. That
+argument stated exactly is `--encoder-adapt-depth 6`, and that arm exists: `encoder_adapt_lower`,
+**0.7309**, with its diagnosis already recorded here as refuted.
+
+So the family now reads across TWO pretraining objectives and TWO import depths:
+
+| arm | objective | import | score |
+|---|---|---|---|
+| `mae_matched` | spectrally-shaped MAE | all blocks | 0.6735 |
+| `encoder_adapt_gentle` (1e-5) | SSL-adaptive | all blocks | 0.6875 |
+| `encoder_adapt_gentle` (1e-4) | SSL-adaptive | all blocks | 0.6902 |
+| `encoder_adapt_thawed` | SSL-adaptive | bottom six, thawed | 0.7162 |
+| `encoder_adapt_lower` | SSL-adaptive | bottom six, frozen | 0.7309 |
+
+Five arms, 0.09 to 0.15 below a control that simply starts from stock DINOv2. Importing less of the
+adapted trunk helps by about 0.05 and never closes the gap, so the damage is not confined to the top
+block the mechanism names — it is the representation, not the layer.
+
+The diversity numbers say the same thing from a second direction. `mae_matched`'s nearest seated
+neighbour is **0.4333** against a seated spread of 0.8801-0.8911. That is not a distant member, it is a
+model whose predictions are nearly uncorrelated with everything on the roster, which is what a broken
+representation looks like rather than a complementary one. Seat value **-0.0041**, 0 of 1 clearing
++0.0015. No seat.
+
+**MECHANISM.** An encoder adapted by any reconstruction-shaped objective in this repo hands the
+classifier a representation shaped for reconstruction, and the classifier does worse with it than with
+ImageNet features it has to adapt itself.
+
+**HONEST PRICING NOTE.** `knee-jk3`'s 2026-08-21 board re-read already listed SSL-as-init CLOSED, and
+that prior was flagged before this arm started. Running it was still the right call on sunk cost — the
+65-minute pretrain was already spent and the card was free — but it should have been queued as an
+INSTRUMENT retiring the axis, not written up as an improvement with a `>= 0.838` upside clause.
+
+**WHAT THIS DOES NOT RULE OUT, kept re-testable.** Volume-native pretraining is a different asset: the
+trunk is pretrained by someone else on video volumes and imported whole, so it never passes through this
+repo's adapt-and-import path at all, and none of the five collapses above is evidence about it
+(`knee-rpkw`). A pixel-weighted or much longer MAE is also untouched, but five collapses across two
+objectives and two depths makes it a poor bet, and it should not take a card ahead of anything on
+`knee-jk3`'s surviving list.

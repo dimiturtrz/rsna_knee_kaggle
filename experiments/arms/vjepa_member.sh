@@ -65,11 +65,16 @@
 # default `cls_mean` it says a tubelet trunk emits no class token. Hence `--pool mean`, which is not a
 # preference but the only pooling this trunk admits.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# bead: knee-rpkw
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
+# --band-low/--band-high stated rather than inherited: unnamed they fall to the pre-settlement
+# 0.20-0.80, while every control this arm is read against runs 0.1-0.9. arm_check caught it as UNSTATED,
+# and it would have been a second, unregistered variable on the one arm whose whole point is a clean read
+# of the pretraining domain.
 run_train vjepa_member \
   $RECIPE --epochs 12 --variant vjepa2l --pool mean --slice-pooling channels \
-  --whole-stack $THROUGHPUT --slices 20 --train-size 256 --batch 6 \
+  --whole-stack $THROUGHPUT --slices 20 --band-low 0.1 --band-high 0.9 --train-size 256 --batch 6 \
   --backbone-lr 4e-5 \
   --labels "$LABELS" --out "$PROCESSED/vjepa_member_s2026.pt"
