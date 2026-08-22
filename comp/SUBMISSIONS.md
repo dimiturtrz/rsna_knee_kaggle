@@ -1425,3 +1425,44 @@ and on the axis that decided the last split `through_dense` is LESS distant than
 candidate has (it is the only member whose input TENSOR differs), and the ruler proposing the change is
 unvalidated. It is recorded as a live alternative to be settled when `sevengrade` reads, since that
 reading is this ruler's own out-of-sample test.
+
+##### THE READINGS, 2026-08-22 00:48 UTC — both entries resolved, both on their middle branch
+
+| entry | pre-registered | scored | branch taken |
+|---|---|---|---|
+| `sixfresh` v2 (55678708) | 0.931 = the kit refresh is transparent | **0.931** | reproduced exactly |
+| `sevengrade` (55678597) | 0.931 = seven ties, future members must DISPLACE | **0.931** | the middle one |
+
+THE KIT REFRESH IS TRANSPARENT TO SERVING, measured on an entry whose score was already known. `cf6a99f`
+rewrites `model.py` (198 lines), `kernel_run`, `live_dataset` and `study_cache` under every member at once,
+and the same six members on the new kit return the same 0.931. That was the gate: `through_dense_s2026`
+and every V-JEPA member are now shippable, and a future bad reading on a fresh-kit entry may be attributed
+to the candidate rather than to the kit. This is the slot doing exactly what it was spent on.
+
+AND THE SEAT COUNT IS NOW SATURATED FROM A THIRD DIRECTION. Five seats scored 0.925, six scored 0.931 and
+0.930, seven scores 0.931. The seventh was not a weak pick — `grade_ladder` carries the ONLY axis no
+seated member varies (the objective), which is the largest distance the family had left to offer — and it
+bought nothing. Adding members is finished as a lever; the pre-registration's own words for the branch
+are the operative rule from here: **future members must DISPLACE, not join.**
+
+WHAT THE DISTANCE RULER ACTUALLY EARNED HERE, stated at the strength the evidence supports and no higher.
+Its registered prediction was that the LEAST distant candidate of the four should NOT exceed 0.931, and it
+did not. That is a survived prediction, not a validation, and the section above said so before the score
+existed: a tie was available to two other explanations (a seventh seat is past the cap; the severity
+objective does not transfer to the board), and only a BEAT would have cleanly refuted the ruler. So the
+ruler is still unvalidated as a PREDICTOR and is still confined to breaking ties `seat_value` has already
+declared. It has now made one out-of-sample call and not been wrong, which is the whole claim.
+
+AND THE SEVERITY AXIS HAS FINALLY SCORED. `grade_ladder` is the first member carrying the severity
+objective ever mounted on the board, and it ties. That does not kill the axis: it was seated as a SEVENTH
+member on a count that is saturated, so the entry cannot separate "the objective adds nothing" from "no
+seventh seat adds anything" — and the second is independently established by this very table. What it
+does rule out is the cheap version of the hypothesis, that severity buys a board tick simply by being
+mounted. A displacement entry is what would read it clean.
+
+CONSEQUENCE FOR `kneemri-sevenplane`, which was gated on this reading. It is a SEVENTH SEAT, and the
+reading above says a seventh seat is worth 0.000 regardless of which member fills it. Shipping it now
+would spend a slot to re-measure the axis this entry just closed. It is therefore **withdrawn as an
+addition and held as a displacement**: `through_dense` retains the mechanism argument no other candidate
+has (it is the only member whose input TENSOR differs), so the question worth a slot is whether it
+displaces a seated member at six, not whether it joins them at seven.
