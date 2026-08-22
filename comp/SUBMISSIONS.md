@@ -1551,3 +1551,44 @@ checkpoint that is BOTH — nearest neighbour under ~0.88 and solo at or above ~
 been aimed at that pair. `vjepa_member` is the only one in flight that could be: a video-pretrained trunk
 is the largest available step in what the encoder was fitted on, and its pre-registered pass bar (0.845)
 is within a whisker of the strength half. Its distance is unmeasured and measurable the moment it lands.
+
+### Correction, same morning: 79% of that distance column is solo score
+
+The section above ordered the pool by nearest-neighbour correlation and concluded no permutation was worth
+a slot. The ordering was confounded and the conclusion with it.
+
+Across all 23 same-split checkpoints, **pearson(nearest, solo) = 0.890**. A weaker member's ordering is
+noisier and therefore decorrelates from everything, so roughly four fifths of the distance column's
+variance is quality wearing distance's clothes. `MemberDistance`'s docstring argues it cannot restate a
+quality reading because it never opens the label table — that is true of the truth vector and not of the
+predictions, and the leak arrives through them.
+
+Regressing it out — `nearest = 2.270 * solo - 1.038`, residual sd 0.0133 — gives distance FOR STRENGTH,
+and the pool reorders sharply:
+
+| | raw nearest | residual |
+|---|---|---|
+| most redundant seated | `depth_regions_narrow` 0.9143 | `lr4e-5_ws` **+0.0173** |
+| most distant unseated | `lora_r8_v3small_224` 0.8235 | `crop80_tissue` -0.0140, `aug_long` -0.0134 |
+
+`lr4e-5_ws` and `depth_regions_narrow` read the same 0.9143 raw and are +0.0173 and +0.0107 residual. The
+four members the raw column called most distant — the two DINOv3 members, `crop80_tissue`, `deep24` — are
+also the four weakest, and three of them move to the middle once strength is removed. `dinov3_base_lora`
+drops from most-distant-but-one to -0.0101, ordinary.
+
+**WHAT THIS DOES NOT DO IS RESCUE THE RULER.** Neither form orders the three tested sevenths: raw gives
+`through_dense` 0.8922 → 0.932, `band_span` 0.9188 → 0.930, `grade_ladder` 0.9248 → 0.931, and residual
+gives -0.0123, +0.0127, +0.0187 for the same board scores. `grade_ladder` beats the more distant
+`band_span` under both. Worse for the correction specifically: the ONE paired observation `MemberDistance`
+was built to reproduce is `lr4e-5_ws` more distant than `band_span` (0.931 against 0.930), and the
+residual **inverts** it (+0.0173 against +0.0127). So correcting the confound costs the ruler its only
+supporting case. Both are unvalidated; they disagree; one slot separates them.
+
+**AND IT DOES CHANGE THE CONCLUSION ABOVE.** The claim was that every mounted member is either strong and
+a twin or distant and weak. On residual that is false: `aug_long` is -0.0134 at solo 0.8511, and it is
+simultaneously the best seat value of all sixteen — as an add (+0.0004) and as a swap for `lr4e-5_ws`
+(+0.0005). That is the profile of the member that took 0.932: `through_dense` was -0.0123 at 0.8558 with
++0.0008. `kneemri-twinswap` is built on it — `sevenplane`'s seven with `lr4e-5_ws` out and `aug_long` in,
+same kit `cf6a99f`, count held at seven — and it is the first entry that removes a twin rather than adding
+a stranger. **Held, not fired**: one slot is spent today already, it is early, and the entry is worth more
+once `vjepa_member` has been priced on the same two rulers and the two can be ranked against each other.
