@@ -1379,3 +1379,49 @@ board split at all.
 
 WHAT IT IS NOT. It ranks; it does not price. Nothing measures how many board ticks a unit of distance
 buys, one paired observation constrains it, and no slot should be spent on this number alone.
+
+##### The full-pool sweep, and the rule it forces: distance is a TIE-BREAKER, not a ranking
+
+All 119 same-split checkpoints run through both rulers at once (`logs/distance_sweep.log`; 8 smoke/other-fold
+checkpoints were REFUSED by `RecordMix.shared` rather than silently scored on 11 shared studies, which is
+the harness working).
+
+THE FIRST THING IT SAYS IS THAT DISTANCE ALONE IS USELESS, and it says it loudly enough to be worth the
+sweep on its own. The most distant candidates in the pool are the `encoder_adapt_*` family at nearest
+0.5050-0.6248 — and their seat values are -0.0037 to -0.0044, the WORST in the pool. They are distant
+because their orderings are close to broken, not because they carry new information. Across the extremes
+the two rulers are strongly ANTI-correlated, so anything that ranked members by distance would have
+proposed the four worst members available. Recorded because it is the failure mode this ruler will always
+have: a coin flip is maximally distant from everybody.
+
+SO THE USABLE RULE IS THE JOINT ONE, and the sweep is what makes it concrete. `seat_value` has a declared
+blind band — below `BOARD_RESOLVABLE` = 0.0015 it "cannot tell the candidate from the incumbent", and 0
+of 57 priced candidates clear it. Inside that band, where the quality ruler is by its own admission
+silent, distance varies from 0.8428 to 0.9248. That is the whole content of the 2026-08-21 split:
+`lr4e-5_ws` (-0.0003) and `band_span` (+0.0002) are both inside the blind band, and distance ordered them
+the way the board paid. Use distance ONLY to break a tie the quality ruler has already declared, never to
+rank across it.
+
+THE SHORTLIST THAT FALLS OUT, non-negative seat value ordered by distance:
+
+| candidate | seat value | nearest | mean |
+|---|---|---|---|
+| `deep24_s2026` | +0.0000 | 0.8428 | 0.8262 |
+| `crop80_span_s2026` | +0.0005 | 0.8717 | 0.8508 |
+| `attend_true_s2026` | +0.0004 | 0.8860 | 0.8583 |
+| `aug_long_s2026` | +0.0005 | 0.8804 | 0.8667 |
+| `through_dense_s2026` | +0.0008 | 0.8922 | 0.8740 |
+| `grade_ladder_s2026` | +0.0001 | 0.9248 | 0.8923 |
+
+`crop80_span` and `deep24` sit BELOW the roster's own best neighbour pair (0.8801), which is the scale
+line that says a candidate brings an ordering the roster does not already hold twice. Neither has ever
+been seated.
+
+AND IT UNSETTLES THE GATED ENTRY, which is why it is written down before that slot is spent.
+`kneemri-sevenplane` seats `through_dense` on the strength of its +0.0008 — the top seat value of
+twenty-four. But +0.0008 is inside the blind band, so that ranking is one `seat_value` cannot support,
+and on the axis that decided the last split `through_dense` is LESS distant than both `crop80_span` and
+`deep24`. This does NOT retract the entry: `through_dense` still has the mechanism argument no other
+candidate has (it is the only member whose input TENSOR differs), and the ruler proposing the change is
+unvalidated. It is recorded as a live alternative to be settled when `sevengrade` reads, since that
+reading is this ruler's own out-of-sample test.
