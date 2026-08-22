@@ -10723,6 +10723,54 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.backbone_state",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.merge_adapters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.merge_adapters",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.correction",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.backbone_state",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.cache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.variant",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.fitted_encoder.main",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitted_encoder.main",
+      "target": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.fitting.Fitting",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -12561,7 +12609,7 @@
       "role": null
     },
     {
-      "descendants": 108,
+      "descendants": 109,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13265,7 +13313,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 21,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -13292,6 +13340,14 @@
       "descendants": 0,
       "id": "kneemri.training.device_budget",
       "label": "device_budget",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder",
+      "label": "fitted_encoder",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -15079,6 +15135,14 @@
       "level": "class",
       "parent": "kneemri.training.device_budget",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder",
+      "label": "FittedEncoder",
+      "level": "class",
+      "parent": "kneemri.training.fitted_encoder",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -22302,6 +22366,78 @@
       "label": "select",
       "level": "method",
       "parent": "kneemri.training.device_budget.DeviceBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.backbone_state",
+      "label": "backbone_state",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.cache",
+      "label": "cache",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.correction",
+      "label": "correction",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.holdout",
+      "label": "holdout",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.merge_adapters",
+      "label": "merge_adapters",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.variant",
+      "label": "variant",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.FittedEncoder.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder.FittedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitted_encoder.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.training.fitted_encoder",
       "role": null
     },
     {
