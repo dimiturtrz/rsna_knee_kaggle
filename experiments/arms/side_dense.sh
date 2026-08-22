@@ -48,6 +48,26 @@
 # error on a MEAN of twelve, while the contrast's null is 0.50 by identity. A mean that moves 0.003 says
 # nothing; a Lateral OA column that moves from 0.5141 to 0.60 says the mechanism fired.
 #
+# THE DENOMINATOR THE TERM ACTUALLY SEES, counted before the arm ran rather than assumed from the
+# contrast's n. The contrast is strict — positive on EXACTLY one side — and finds 65 lateral-only vs 165
+# medial-only studies in the 909-study holdout. The training term is not strict: it counts any study the
+# reports GRADE differently on the two sides, which over the 4,406-study corpus is
+#
+#     Medial Meniscus / Lateral Meniscus   2,358 separating (53.5%), 1,894 medial-first / 464 lateral-first
+#     Medial OA       / Lateral OA         1,529 separating (34.7%), 1,087 medial-first /   442 lateral-first
+#
+# So the term is NOT starved on the pair we are weak on: 442 minority-direction studies is the same order
+# as Fracture's positive count, which this head learns. That is the arm's main upside argument and it is
+# measured, not hoped.
+#
+# THE NAMED RISK, and it falls straight out of the same count. Confidence-weighted, the pairs carry mass
+# 1,005 (meniscus) against 382 (OA) — 2.6x. `PairedSides` pools every pair before dividing, for the
+# reason `Objective.pairs` gives, so the gradient is spent in that ratio: MOST OF THE TERM GOES TO THE
+# PAIR THAT ALREADY RESOLVES. If the arm returns PARTIAL with Lateral Meniscus up and Lateral OA flat,
+# that is the mechanism, the fix is per-pair normalisation rather than a bigger weight, and it is a
+# follow-up arm rather than a refutation. Not pre-normalised here because pooling is what the sibling
+# term does and changing two things at once is what this arm exists not to do.
+#
 # PRE-REGISTERED, four outcomes, read with `python -m kneemri.evaluation.side_blindness`.
 #   CONFIRMED — Lateral OA's column clears 0.60 with an interval excluding 0.50, AND Lateral Meniscus
 #     does not fall. The objective was the bottleneck: the side was recoverable from a representation
