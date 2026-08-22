@@ -53,10 +53,17 @@
 # champion five. 0.83-0.845 is the tie again, now taken with the trunk's advantage actually spent —
 # which downgrades volume pretraining from "untested here" to "does not pay at this data scale", and
 # retires the axis rather than the trunk. Below 0.82, suspect the HARNESS before the idea, in this
-# order: did `--whole-stack` land (the trainer logs its window — 20, not 3), did the volumetric read
-# build at all (`VolumeRead.of` returns None silently when the config lacks `tubelet_size`, and the
-# model then reads as an ordinary 2D ViT-L at 256 px), and did six blocks actually open. Only with all
-# three clean does the number belong to the encoder.
+# order: did `--whole-stack` land (the trainer logs its window — 20, not 3), and did six blocks actually
+# open. Only with both clean does the number belong to the encoder.
+#
+# THE BUILD IS PRE-CLEARED ON CPU, 2026-08-22, so it is NOT on that list. Constructed through the real
+# `RunSetup.model` path with this arm's flags: `VolumeRead(tubelet=2, patch=16, native=256)`, `per_slice`
+# False, `check_whole_stack(20)` accepted and `check_whole_stack(3)` refused by the tubelet clause. The
+# silent-None branch this header used to name cannot fire here — it is the branch for a config with no
+# `tubelet_size`, and `facebook/vjepa2-vitl-fpc64-256` declares tubelet_size 2, patch_size 16,
+# crop_size 256. What `VolumeRead.of` does on a WRONG config is raise, not return None: asked for the
+# default `cls_mean` it says a tubelet trunk emits no class token. Hence `--pool mean`, which is not a
+# preference but the only pooling this trunk admits.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
