@@ -2,18 +2,28 @@
 # final_fit.sh [epochs] — fit ONE model on EVERY study, which is what we submit now that fold and seed
 # ensembling are out.
 #
-# DO NOT RUN THIS UNTIL knee-5895 IS DECIDED. Audited 2026-08-20 by resolving the argv below rather than
-# reading the comments under it, and two of its choices no longer match the ledger they cite:
-#   - it names neither --slices nor --band-low/--band-high, so it takes the PARSER DEFAULTS of 12 slices
+# knee-5895 IS DECIDED, 2026-08-22, AND THE DECISION IS OPTION (a): this arm is re-based onto
+# `band_dense` exactly — 336 px, 20 slices, band 0.10-0.90, --backbone-lr 4e-5. Audited 2026-08-20 by
+# resolving the argv rather than reading the comments, which found two defects:
+#   - it named neither --slices nor --band-low/--band-high, so it took the PARSER DEFAULTS of 12 slices
 #     and band 0.20-0.80 against a settled recipe of 20 and 0.10-0.90. The +0.0039 band widening is
-#     described elsewhere as "in the recipe every arm inherits"; this arm does not inherit it, because
+#     described elsewhere as "in the recipe every arm inherits"; this arm did not inherit it, because
 #     those are per-arm flags and not part of $RECIPE.
-#   - the 448/392 argument below rests on res392 = 0.8523 being our best single member. It is not, any
-#     more: all four members of the 0.930 champion are 336 px, res392 is in none of them, and band_dense
-#     at 336 scores 0.8578 — +0.0055 ABOVE the member this geometry is built around.
-# Adding the missing flags is NOT the fix: 392 px with 20 slices at 0.10-0.90 is a configuration nobody
-# has run, and the paragraph below rules out running an experiment here for exactly the right reason —
-# with --fold -1 there is no score, so a regression ships unseen. The options are in the bead.
+#   - the 448/392 argument rested on res392 = 0.8523 being our best single member. It is not, any more:
+#     all four members of the 0.930 champion are 336 px, res392 is in none of them, and band_dense at
+#     336 scores 0.8578 — +0.0055 ABOVE the member that geometry was built around.
+#
+# WHY (a) AND NOT (b), WHICH WAS THE STANDING RECOMMENDATION'S ONLY RIVAL. Option (b) was to measure
+# 392 px at the settled slices and band on fold 0 first and ship whichever won, because naming the
+# missing flags at 392 would otherwise ship a configuration nobody has run. That option was priced on
+# 2026-08-22 and it is not worth its card: 448 px exists on disk at TWELVE slices only
+# (`images_448px_12sl.npy`), so the arm needs a fresh ~106 GB cache built before its first step, which
+# turns a forty-minute measurement into something over an hour — spent deciding a question the
+# resolution axis has already answered flat twice at 336, for a member gain that would be under the bar
+# even if res392's +0.0066 transferred whole. Option (a) costs no card, ships the configuration that
+# MEASURED best and is seated in the champion, and changes nothing unmeasured. The coverage lever 392 px
+# was kept for is not discarded — it is left re-testable, and it becomes worth a slot again only if
+# something makes a 448 cache cheap or makes resolution look live at 336.
 #
 # WHAT CHANGED AND WHY. Our leaderboard entries have been rank-averaged fold members: five at 0.888,
 # then two whole-stack ones. That is ensembling-by-k-fold, and it is banned here for a good reason -
@@ -40,19 +50,15 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # EVERY CHOICE HERE IS NOW THE ONE THAT SURVIVED, and four of them were not on 2026-08-11.
 #
-# 392 px READ OFF THE 448 CACHE, AT THE RATE THAT MEMBER ACTUALLY USED. res392 is our best single
-# member at 0.8523, +0.0066 over the 336 control, and it is the one coverage lever that whole-stack
-# does not already contain. Fitting the deliverable at 336 would ship a model measurably worse than a
-# member we already have.
+# 336 px, 20 SLICES, BAND 0.10-0.90 — `band_dense`, COPIED RATHER THAN REASSEMBLED. This is the best
+# single member the project has (0.8578) and it is seated in the champion. The rule this arm's own
+# header states is that the deliverable may only ever run a recipe a fold-0 arm has already settled, and
+# copying a settled arm's flags verbatim is the only way to obey it: every reassembly, however sensible
+# each flag looks alone, is a configuration nobody ran.
 #
-# --backbone-lr 4e-5 IS PART OF THAT MEMBER AND WAS MISSING HERE UNTIL 2026-08-15. The default is
-# 8e-6 (trainer.py), and res392 was fitted at 4e-5 - five times the rate - so passing 392 px without
-# the rate builds a configuration NOBODY HAS RUN. It is precisely the arm the ledger calls the unrun
-# clean test ("392 px at 8e-6, matched to the control's rate"), and a deliverable is the wrong place
-# to run an experiment: with --fold -1 there is no score, so a regression would ship unseen.
-#
-# The rate and the resolution stay CONFOUNDED here, deliberately. Which of them carries the +0.0066 is
-# a measurement question and it is open; what ships is the configuration that scored.
+# --backbone-lr 4e-5 IS PART OF THAT MEMBER. The default is 8e-6 (trainer.py) and `band_dense` was
+# fitted at 4e-5 — five times the rate — so dropping it here would build one of those unrun
+# configurations in the one place with no holdout to catch it.
 #
 # TWELVE EPOCHS, NOT SEVEN. OneCycle is defined over total_steps, so seven is a COMPRESSED schedule
 # rather than a truncated one - measured, schedule_8 scored 0.8429 against the twelve-epoch 0.8457, so
@@ -69,13 +75,12 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # --ema STAYS. It is the sanctioned variance reduction now that folds and seeds are banned: it averages
 # within a run rather than across runs, so it buys what a seed ensemble bought without a second fit.
 #
-# THE CAP IS 28, WHICH IS THE ONE res392 ACTUALLY USED. It read 22 until 2026-08-16, and at 22 this arm
-# does not run at all: a --studies 60 smoke died in the attention backward with `Tried to allocate 1.03
-# GiB ... 22.00 GiB allowed`, and the corpus size does not enter it — batch 12 of whole-stack 392 px needs
-# what it needs, so the forty-minute deliverable would have died in the same place. The member's own
-# recorded options say vram_gb 28.0 and compile_encoder False; this arm asks for the same shape in six
-# fewer gigabytes AND adds compile on top, which was a configuration nobody had run. The same smoke
-# passes at 28 (one epoch, 41 s including compilation). The arm no longer names that number — DeviceBudget
+# THE CAP IS NOT NAMED HERE and does not need to be at 336 px: `band_dense` reserves 28934 MiB at these
+# exact flags (its own gate line) and ran twelve epochs at 368 s each without stalling. The history is
+# still worth keeping, because it is the failure this cap exists for: while this arm was at 392 px the
+# cap read 22 and the arm did not run at all — a --studies 60 smoke died in the attention backward with
+# `Tried to allocate 1.03 GiB ... 22.00 GiB allowed`, and the corpus size does not enter it, so the
+# forty-minute deliverable would have died in the same place. DeviceBudget
 # derives the cap from --slices — but the reason a cap exists at all is worth keeping: --vram-gb bounds
 # PyTorch's allocator and not the device, so set close to physical, Windows pages over PCIe instead of
 # raising OOM and the run crawls at a twenty-fifth of the throughput while reporting 100% utilisation.
@@ -88,4 +93,4 @@ require "$LABELS"
 # knee-7tq needing four corrections for. The live case is `--rank-weight`, which rank0_dense is measuring
 # now: if the term is refuted the recipe drops it, and a private copy would keep fitting the deliverable
 # with a term the project had just removed, silently and with no holdout to notice.
-run_train "final_fit_e${EPOCHS}" $RECIPE --fold -1 --epochs "$EPOCHS" --slice-pooling max --whole-stack --ema --image-size 448 --train-size 392 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" $RECIPE --fold -1 --epochs "$EPOCHS" --slice-pooling max --whole-stack --ema --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
