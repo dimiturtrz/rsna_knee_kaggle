@@ -2,6 +2,12 @@
   "edges": [
     {
       "kind": "import",
+      "source": "core.paths",
+      "target": "core.native_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.wakelock",
       "target": "core.sleep_policy",
       "weight": 1
@@ -2647,9 +2653,75 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.resolve",
+      "target": "core.native_path.NativePath.detect_wsl",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.resolve",
+      "target": "core.native_path.NativePath.mount_drive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.resolve",
+      "target": "core.native_path.NativePath.to_mount",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.resolve",
+      "target": "core.native_path.NativePath.to_windows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.resolve",
+      "target": "core.native_path.NativePath.win_drive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.to_mount",
+      "target": "core.native_path.NativePath.win_drive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.native_path.NativePath.to_windows",
+      "target": "core.native_path.NativePath.mount_drive",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.paths.DataRoot",
       "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.paths.DataRoot.from_config",
+      "target": "core.native_path.NativePath.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.paths.DataRoot.kind",
+      "target": "core.native_path.NativePath.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.paths.DataRoot.processed",
+      "target": "core.paths.DataRoot.kind",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.paths.DataRoot.raw",
+      "target": "core.paths.DataRoot.kind",
       "weight": 1
     },
     {
@@ -12177,7 +12249,7 @@
   ],
   "nodes": [
     {
-      "descendants": 5,
+      "descendants": 6,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -12196,6 +12268,14 @@
       "descendants": 0,
       "id": "core.mounts",
       "label": "mounts",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path",
+      "label": "native_path",
       "level": "module",
       "parent": "core",
       "role": null
@@ -13358,6 +13438,14 @@
       "label": "Mounts",
       "level": "class",
       "parent": "core.mounts",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath",
+      "label": "NativePath",
+      "level": "class",
+      "parent": "core.native_path",
       "role": "primary"
     },
     {
@@ -15290,6 +15378,54 @@
     },
     {
       "descendants": 0,
+      "id": "core.native_path.NativePath.detect_wsl",
+      "label": "detect_wsl",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath.mount_drive",
+      "label": "mount_drive",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath.resolve",
+      "label": "resolve",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath.to_mount",
+      "label": "to_mount",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath.to_windows",
+      "label": "to_windows",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.native_path.NativePath.win_drive",
+      "label": "win_drive",
+      "level": "method",
+      "parent": "core.native_path.NativePath",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.paths.DataRoot.__init__",
       "label": "__init__",
       "level": "method",
@@ -15300,6 +15436,14 @@
       "descendants": 0,
       "id": "core.paths.DataRoot.from_config",
       "label": "from_config",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.kind",
+      "label": "kind",
       "level": "method",
       "parent": "core.paths.DataRoot",
       "role": null

@@ -1,11 +1,19 @@
-"""Machine-local data locations.
+"""Machine-local data locations, adapted to the OS the process is actually running on.
 
 One data root per machine, recorded in the gitignored `paths.yaml`. `KNEEMRI_DATA` overrides it, so a
 runner with no dataset can point at an empty directory and the data-gated tests skip instead of erroring.
 
-Only `raw/` and `processed/` are modelled here. Accessors for the competition's own layout (studies,
-series tables, reports) belong beside the reader that walks them, and are added when that reader exists
-rather than guessed from the file listing.
+A KIND under that root (`raw`, `processed`, and any later one) resolves to `<data>/<kind>` unless
+paths.yaml names it as a top-level key, which redirects that kind alone:
+
+    data: D:/data/volumetric/mri
+    processed: E:/scratch/processed     # the cache moves; raw/ stays on the slow disk
+
+Accessors for the competition's own layout (studies, series tables, reports) belong beside the reader
+that walks them, and are added when that reader exists rather than guessed from the file listing.
+
+Every configured path — the root and any per-kind override — goes through `NativePath.resolve`, so a
+path written on one OS either means something here or raises. See `core.native_path` for why.
 """
 
 import os
@@ -13,33 +21,60 @@ from pathlib import Path
 
 import yaml
 
-_ENV_OVERRIDE = "KNEEMRI_DATA"
+from core.native_path import NativePath
+
+ENV_OVERRIDE = "KNEEMRI_DATA"
+"""Environment variable that replaces paths.yaml entirely. Named in the refusal `NativePath` raises."""
 
 COMPETITION = "rsna_knee_abnormality"
 """Directory name the competition download unzips into, under `raw/` and `processed/`."""
+
+RAW = "raw"
+"""The as-downloaded datasets. Never written to."""
+
+PROCESSED = "processed"
+"""Derived artefacts — caches, checkpoints, holdout records. Created on demand."""
 
 
 class DataRoot:
     """The data root. Datasets sit under `raw/` untouched; derived artefacts go to `processed/`."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, kinds: dict[str, str] | None = None) -> None:
         self._root = root
+        self._kinds = kinds or {}
 
     @classmethod
     def from_config(cls, config: Path) -> "DataRoot":
-        """Resolve the root: the `KNEEMRI_DATA` env var if set, else the `data:` entry of paths.yaml."""
-        override = os.environ.get(_ENV_OVERRIDE)
+        """Resolve the root: the `KNEEMRI_DATA` env var if set, else the `data:` entry of paths.yaml.
+
+        The rest of the file is kept rather than dropped: any top-level key is a per-kind override, and
+        which kinds exist is a question for `kind`, not for the reader.
+
+        The env override short-circuits the READ, not just the `data:` entry. A runner that sets it has
+        no paths.yaml to open, and reading one first would turn the escape hatch into a second thing to
+        provide.
+        """
+        override = os.environ.get(ENV_OVERRIDE)
         if override:
-            return cls(Path(override))
-        entries: dict[str, str] = yaml.safe_load(config.read_text(encoding="utf-8"))
-        return cls(Path(entries["data"]))
+            return cls(Path(NativePath.resolve(override, ENV_OVERRIDE)))
+        entries: dict[str, str] = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
+        return cls(Path(NativePath.resolve(str(entries["data"]), ENV_OVERRIDE)), entries)
+
+    def kind(self, name: str) -> Path:
+        """The root for one kind of data — `<data>/<name>`, or the path paths.yaml gave that name.
+
+        An override is resolved exactly like the root is: a redirected kind on a foreign machine has the
+        same silently-relative failure available to it, and no reason to be trusted more.
+        """
+        stated = self._kinds.get(name)
+        return Path(NativePath.resolve(stated, ENV_OVERRIDE)) if stated else self._root / name
 
     def raw(self, dataset: str = COMPETITION) -> Path:
         """Where an as-downloaded dataset lives. Never written to."""
-        return self._root / "raw" / dataset
+        return self.kind(RAW) / dataset
 
     def processed(self, dataset: str = COMPETITION) -> Path:
         """Where derived artefacts for a dataset go. Created on demand."""
-        destination = self._root / "processed" / dataset
+        destination = self.kind(PROCESSED) / dataset
         destination.mkdir(parents=True, exist_ok=True)
         return destination
