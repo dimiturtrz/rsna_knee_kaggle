@@ -42,6 +42,22 @@ def test_frames():
     assert torch.equal(folded.reshape(flat.shape), flat), "folding must not reorder the pixels"
 
 
+def test_probe_frames():
+    """The fingerprint's synthetic depth, rounded up to something the trunk can read.
+
+    The equivalence classes are the three residues that matter: already a whole number of tubelets
+    (unchanged), one short (the GROUP = 3 case that raised after a full training epoch had passed), and
+    the widths a run actually uses. What `check_tokens` accepts is the property under test, so the
+    result is fed straight back to it rather than compared to a literal.
+    """
+    assert VOLUME.probe_frames(4) == 4, "a whole number of tubelets must not move"
+    assert VOLUME.probe_frames(3) == 4
+    assert VOLUME.probe_frames(20) == 20
+    widened = VOLUME.probe_frames(3)
+    grid = (NATIVE // PATCH) ** 2 * (widened // VOLUME.tubelet)
+    VOLUME.check_tokens(torch.zeros(1, widened, 3, NATIVE, NATIVE), torch.zeros(1, grid, WIDTH))
+
+
 def test_check_tokens():
     """THE NEGATIVE CASE IS THE LOAD-BEARING HALF, and it is what killed the first version of this guard.
 

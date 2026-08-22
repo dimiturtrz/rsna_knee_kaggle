@@ -391,7 +391,8 @@ class StudyModel(nn.Module):
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
         """This model's answer to the one seeded question, as a portable identity — see `Fingerprint`."""
-        return FINGERPRINT.of(self, self.n_slot, image_size, group, device)
+        frames = self.volume.probe_frames(group) if self.volume else group
+        return FINGERPRINT.of(self, self.n_slot, image_size, frames, device)
 
     def load_trained(self, state: dict[str, Tensor]) -> None:
         """Load weights saved by any earlier version of this model.

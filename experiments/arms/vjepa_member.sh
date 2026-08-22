@@ -56,6 +56,13 @@
 # order: did `--whole-stack` land (the trainer logs its window — 20, not 3), and did six blocks actually
 # open. Only with both clean does the number belong to the encoder.
 #
+# READ A 3-FRAME TRACEBACK BEFORE BLAMING SUSPECT #1. The smoke raised exactly that message and the cause
+# was the FINGERPRINT, whose bag is `GROUP` = 3 by design — one and a half tubelets — written at the
+# epoch-1 checkpoint, which is downstream of a full epoch at the run's own window. `check_tokens` ORs
+# three clauses; only `frames % tubelet` fired, so it printed predicted 256 == emitted 256. Fixed in
+# `VolumeRead.probe_frames`. The trainer's own logged window is the thing to read, not the frame count in
+# a traceback.
+#
 # THE BUILD IS PRE-CLEARED ON CPU, 2026-08-22, so it is NOT on that list. Constructed through the real
 # `RunSetup.model` path with this arm's flags: `VolumeRead(tubelet=2, patch=16, native=256)`, `per_slice`
 # False, `check_whole_stack(20)` accepted and `check_whole_stack(3)` refused by the tubelet clause. The

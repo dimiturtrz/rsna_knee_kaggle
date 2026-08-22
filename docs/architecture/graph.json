@@ -21522,6 +21522,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.volume_read.VolumeRead.probe_frames",
+      "label": "probe_frames",
+      "level": "method",
+      "parent": "kneemri.models.volume_read.VolumeRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.holdout_record.HoldoutReading.aligned",
       "label": "aligned",
       "level": "method",

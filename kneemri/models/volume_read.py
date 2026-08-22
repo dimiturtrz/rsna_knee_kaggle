@@ -66,6 +66,22 @@ class VolumeRead:
         """
         return x.reshape(videos, x.shape[0] // videos, *x.shape[1:])
 
+    def probe_frames(self, group: int) -> int:
+        """The nearest frame count at or above `group` that this trunk can actually read.
+
+        Only the FINGERPRINT asks for this. Its bag is a synthetic identity probe, so its depth is a
+        constant of the question (`GROUP` = 3) rather than of the run — and three slices is one and a
+        half tubelets, which `check_tokens` refuses. The probe died there after a whole training epoch
+        had already succeeded, which reads in a traceback as "the training window is 3" and is not.
+
+        Rounding up rather than stamping the run's own window, because the window is not stored anywhere
+        the VERIFIER can reach: `Member.group` is the config's windowed width, it feeds `pixel_group`,
+        and a whole-stack member sharing pixels with an existing one must keep sharing its decode. Both
+        sides derive this from the loaded trunk instead, so writer and verifier cannot drift, and a 2D
+        trunk has no `VolumeRead` at all — every fingerprint already on disk is untouched.
+        """
+        return group + (-group % self.tubelet)
+
     def check_tokens(self, x: Float[Tensor, "n f c h w"], tokens: Float[Tensor, "n t d"]) -> None:
         """Assert the trunk read what we think it read — against its CONFIG, not against the input.
 
