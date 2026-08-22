@@ -306,6 +306,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | **`aprior_dense`** | `--anatomical-prior`: `SlotHead.prior` initialised from the 12x6 plane-by-finding table in `kneemri/corpus/anatomy.py` at PRIOR_STRENGTH 2.0 instead of zeros — the mapping the head otherwise has to discover from study-level labels alone | 0.8557 | **−0.0021 vs `band_dense`** | **THE REFUTATION CLAUSE LANDED LITERALLY, AND IT IS THE ONE THAT NARROWS THE MOST.** Flag verified in the CHECKPOINT config: `anatomical_prior false→true`, with `slices 20`, `slice_pooling max`, `whole_stack true`, `pool cls_mean`, `backbone_lr 4e-05` identical to the control (the only other diff, `slice_regions` absent vs `1`, is the recorded default and not a variable). Both arms peak at **epoch 8** on the same twelve-epoch cycle, so the comparison is at matched schedule position and the −0.0021 is not a truncation artefact. The PREDICTION needed the peak to clear 0.8578 by more than the 0.0062 floor; it came in below the control. The THIRD OUTCOME needed the per-label pattern to separate along the table's own peaked/flat split, and it does not usefully: **peaked rows (MCL, both OA, PF OA, Synovitis) −0.0008 against flat rows −0.0033**, a 0.0025 separation which is under half the floor, and inside it the largest single mover is Synovitis at **−0.010** — an axial-weighted, PEAKED row moving the wrong way. **MECHANISM, and the training loss is what says it: the warm start washed out rather than failed to land.** Train loss tracks the control to the fourth decimal at every epoch (1.2117/1.2162 at e0, 0.6508/0.6529 at e8 — the arm slightly LOWER), so 72 numbers of initialisation on an `nn.Parameter` the data may overrule are gone by the time the fit matters. Cost was as predicted: parameters, shapes, VRAM (26.92 GB reserved / 24.93 GB allocated) and 368 s an epoch all identical to `band_dense`. Seat value **+0.0009** as a fifth member and **+0.0004** as the best swap (displacing `band_dense`), 0 of 1 clearing +0.0015 — no seat on either ruler. **CONSEQUENCE, written into the arm before it ran and now owed:** the head had ALREADY recovered the plane-by-finding mapping from study-level supervision alone, so "supervision never says where" is wrong about THIS head, and the localisation argument has to buy a real localisation signal (knee-mxj) rather than a warm start. Fourth consecutive knob on the decode/head family returning nothing (−0.0009, −0.0044, +0.0014, −0.0021); the second of the five never-run switches to be spent. See below |
 | **`half_data`** | `band_dense` fitted on HALF the training studies (`--train-fraction 0.5`), everything else identical — an instrument, not a candidate | 0.8344 | **−0.0234 vs `band_dense`** | **data volume is the binding constraint, and it is the only axis that has cleared the bar.** 3.8× the 0.0062 floor, and ~0.019 of it survives the registered schedule confound charged at its maximum (`schedule_length` prices step compression at 0.0028). Peak moved 8 → 6 as memorisation predicts; the peak-to-finish declines (−0.0024 vs −0.0006) are both sub-floor and unreadable. After its peak the curve PLATEAUS six epochs inside 0.0021 while the training loss keeps falling 0.8015 → 0.5973 — fitting continued, generalisation stopped. Slope: 1,763 → 3,526 studies buys ~0.020, so the bar needs ~1.7× the corpus. External data is PERMITTED (§2.6.a/b); `knee-ombx` promotes from backlog to the decision that gates the schedule. MRNet alone prices at ~+0.0095 and does NOT clear the bar. No seat — it is a handicapped control and was never a member. See below
 | `adapt_null` | the flag with NOTHING adapted: stock DINOv2-small written through `pretrain.py`'s own `save` at `--lr 0`, loaded via `--encoder-weights` | 0.8240 @ e3 | **+0.0008 vs control at matched epoch 3** | **the load path is clean.** Plumbing removed as a suspect for the whole SSL family; the four collapses are evidence about the adaptation, as the ledger already said. Drift on the null reads 0.0000 on the stem and all twelve blocks — the drift instrument's first negative control. 4 epochs, instrument only, no seat (−0.0029). The magnitude anomaly that bought the slot was already resolved at `encoder_adapt_gentle`; see below
+| `quarter_data` | `band_dense` on a QUARTER of the training studies — the third point, so the data slope is fitted rather than assumed | 0.7907 @ e9 | −0.0671 vs `band_dense`, **+0.0437 over `half_data`** | **the slope is CONCAVE and log-linear is refuted.** 25→50 buys +0.0437 against 50→100's +0.0234, 1.87× steeper; charging the schedule confound per point (0.0048 and 0.0097, downward) makes it 2.09×, so flattening is not the schedule. Each doubling buys ~0.48 of the last, which prices the NEXT doubling — the whole external-data programme — at **~+0.009** and ALL remaining doublings at ~+0.017. Takes down `half_data`'s '1.7× the corpus' arithmetic and reprices `knee-ombx` (MRNet ~+0.004) and `knee-5895` (final_fit ~+0.0029). **No lever on this board is now priced above 1.5%.** Instrument, no seat (−0.0035). See below
 | `dinov3` | DINOv3-S/16 at 336, then 224, then S+ | 0.8080 | −0.0377 | **refuted**; deficit is focal findings |
 | `calibrated_targets` | each level set to its MEASURED agreement rate | 0.8495 | +0.0038 | directional, inside the floor |
 | `lora` v3small 224 | rank-8 adapters, base frozen | **0.8217** | **+0.0160 vs v3 fine-tuned** | **recipe was damaging v3** |
@@ -1980,6 +1981,12 @@ is not bound by the answer.
 
 ### `half_data` — data volume is the binding constraint, and it is the only axis that has cleared the bar — 2026-08-22
 
+> **PARTLY SUPERSEDED THE SAME DAY BY `quarter_data`, below.** The −0.0234 measurement stands. The
+> LOG-LINEAR EXTRAPOLATION built on it does not: a third point at 25% shows the curve is concave, so the
+> slope quoted here is the one BELOW us and every price computed forward from it (a doubling at ~+0.020,
+> the "~1.7× the corpus" bar, MRNet at +0.0095, `final_fit` at +0.0064) is an overestimate. Corrected
+> prices are in `quarter_data`. Read this section for the measurement, that one for the arithmetic.
+
 `half_data` is `band_dense` with `--train-fraction 0.5` and nothing else moved: same twelve-epoch
 OneCycle, `slices 20`, band `0.1–0.9`, `backbone_lr 4e-05`, `slice_pooling max`, `--whole-stack`. It was
 armed as an INSTRUMENT — it cannot raise the score, it can only say whether the corpus is the wall — and
@@ -2126,3 +2133,80 @@ The bottleneck measured today is data VOLUME — ~0.020 per doubling of training
 the same 4,407 studies adds no volume; it offers a better INITIALISATION, which is a different mechanism
 against a different failure. So the data finding does not price SSL up, and the two axes have to be
 argued separately rather than folded into one "representation" story.
+
+### `quarter_data` — the slope is CONCAVE, and it takes `half_data`'s headline down with it — 2026-08-22
+
+`quarter_data` is `band_dense` at `--train-fraction 0.25`, everything else identical. It exists because
+`half_data` priced three downstream decisions off a SINGLE interval, and one interval cannot tell a
+straight line from a curve.
+
+Curve: 0.7106 / 0.7062 / 0.7344 / 0.7540 / 0.7629 / 0.7623 / 0.7763 / 0.7861 / 0.7899 / **0.7907** /
+0.7898 / 0.7897, at 119 s an epoch. Best 0.7907 at epoch 9, then flat inside 0.0010 for three epochs
+while train loss keeps falling 0.7493 → 0.7113 — the same plateau signature `half_data` showed.
+
+**THE THREE POINTS, and the first branch is the one that landed.**
+
+| training studies | share | best holdout | interval gained |
+|---|---|---|---|
+| ~882 | 25% | 0.7907 | |
+| ~1,763 | 50% | 0.8344 | **+0.0437** |
+| ~3,526 | 100% | 0.8578 | **+0.0234** |
+
+**25→50 is 1.87× steeper than 50→100 on the raw numbers.** The pre-registered reading for that is
+explicit: *the curve is flattening, we sit past the steep part, and every extrapolation above is an
+overestimate.*
+
+**THE CONFOUND CORRECTION STRENGTHENS IT RATHER THAN EXPLAINING IT.** Fewer studies is fewer optimiser
+steps against a OneCycle spanning `total_steps`. `schedule_length` prices 0.67× the steps at 0.0028,
+which is 0.0048 per doubling of step-reduction, so 50% carries ~0.0048 and 25% ~0.0097, both downward.
+Adding those back:
+
+| share | corrected | interval |
+|---|---|---|
+| 25% | 0.8004 | |
+| 50% | 0.8392 | **+0.0388** |
+| 100% | 0.8578 | **+0.0186** |
+
+Ratio 2.09×. Flattening survives the correction and gets slightly sharper, so it is not the schedule.
+The correction is if anything UNDER-priced — the 25% arm ends at train loss 0.7113 against the control's
+0.5780 on the same twelve epochs, so it is underfitting, not overfitting, and any residual under-pricing
+pushes the curve flatter still. The direction of every uncertainty here is the same.
+
+**WHAT THAT PRICES, and it is the whole point of the arm.** Each doubling buys about 0.48 of the last
+one. The next doubling — 3,526 → 7,052 studies, which is the entire external-data programme — is
+therefore **~+0.009**, and the geometric sum of ALL remaining doublings is **~+0.017**. So infinite data
+barely reaches the 1.5% bar, and the first (and only affordable) doubling of it does not.
+
+**CORRECTIONS OWED TO `half_data`, written the same day it was committed.** That section reads "data is
+the binding constraint, and it is the only axis that has cleared the bar", with a slope of ~0.020 per
+doubling and a bar needing ~1.7× the corpus. **The first clause stands and the arithmetic does not.**
+Halving the corpus really does cost ~0.019–0.023 — that measurement is untouched — but it measures the
+slope BELOW us, on the steep part, and using it to price moves ABOVE us was the log-linear assumption
+this arm was built to test and has now refuted. Restated:
+
+* the corpus is genuinely a binding constraint at 3,526 studies, and this is still the largest
+  single-variable effect the project has measured;
+* **going FORWARD from where we sit, data does not clear the bar.** ~+0.009 for a doubling.
+* `knee-ombx`: MRNet at 0.39× the corpus is ~0.47 of a doubling, now **~+0.004** rather than +0.0095 —
+  a third estimate, the lowest of the three, and the one built on the most points.
+* `knee-5895`: `final_fit`'s 80→100% step is 0.32 of a doubling, now **~+0.0029** rather than +0.0064.
+  Still worth fixing — it is the deliverable running the wrong recipe — but it is a knob-sized gain and
+  must be reported as directional.
+
+**MECHANISM: THERE IS NOW NO LEVER ON THIS BOARD PRICED ABOVE 1.5%.** Every knob family measures flat
+inside the 0.0062 floor; capacity goes the wrong way at the rung above; the SSL axis is repriced as an
+initialisation argument with two unremoved suspects and no volume claim; and data — the one axis that
+looked like an exception this morning — is concave and prices its next affordable step at 0.009. That is
+a statement about the corpus and the label table, not a statement about any one method, and it is what
+`reader_agreement` predicted from the other end: the board's labels come from the same reports ours do.
+
+**WHAT THIS DOES NOT RULE OUT, and it is where the remaining hours should go.** Three points fix a
+curvature but not a functional form; the 0.48-per-doubling decay is a fitted choice, not a measurement,
+and the ~0.017 asymptote inherits that. It says nothing about data QUALITY or LABEL quality — a corpus
+twice as large is a different thing from a corpus half as noisy, and only the first was measured. And
+`CLAUDE.md` is explicit that increments below the bar still COMPOSE against the original baseline: with
+no single lever above 1.5% left, a chain of directional gains that sums past it is the only route the
+evidence supports, and it is a legitimate one.
+
+**NO SEAT, as declared.** Best seat into the five held members −0.0035, charged ~3× by the board. It was
+never a candidate.
