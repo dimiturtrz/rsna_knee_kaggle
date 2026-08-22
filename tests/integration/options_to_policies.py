@@ -50,6 +50,7 @@ THE_LOOP = {
 chooses them and no builder attaches them."""
 
 NOT_A_WRAPPER = {
+    "check_whole_stack",
     "fingerprint",
     "forward",
     "from_config",
@@ -61,7 +62,11 @@ NOT_A_WRAPPER = {
     "slot_features",
     "supervised",
 }
-"""`StudyModel` methods that are the model's own behaviour rather than something a run switches on."""
+"""`StudyModel` methods that are the model's own behaviour rather than something a run switches on.
+
+`check_whole_stack` is a REFUSAL, not a wrapper: `--whole-stack` is switched on by the trainer, and the
+model's part is to say at startup whether it can take the window at all. It attaches nothing, so a
+builder calling it would be attaching a policy that does not exist."""
 
 TRAINER_REPORTER = {"policies", "encoder_rate_decay"}
 MODEL_REPORTER = {"applied"}

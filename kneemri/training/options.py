@@ -500,8 +500,10 @@ class TrainingOptions:
         parser.add_argument(
             "--whole-stack",
             action="store_true",
-            help="read EVERY cached slice each step instead of one sampled 3-slice window. Requires "
-            "--slice-pooling max. A step currently sees 18 of a study's ~180 slices, while averaging "
+            help="read EVERY cached slice each step instead of one sampled 3-slice window. Needs a "
+            "per-slice pooling or a tubelet trunk, and for a tubelet trunk it is the only path that "
+            "reaches a window wider than 3 at all. A step currently sees 18 of a study's ~180 slices, "
+            "while averaging "
             "ten windows at INFERENCE is worth +0.0156 - the largest single effect measured here - so "
             "training was discarding information it already had. Costs about 4x a step.",
         )

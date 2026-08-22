@@ -21,6 +21,7 @@ from kneemri.models.model import (
 from kneemri.models.slice_pooling import ATTEND, SLICE_POOLINGS
 from kneemri.models.slot_head import REPORT_DIMS, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN_FOCAL, MEAN, POOL_PARTS
+from kneemri.models.volume_read import VolumeRead
 
 SEED = 2026
 DIM = 8
@@ -556,6 +557,27 @@ def test_per_slice():
     for mode in ("max", "attend"):
         assert StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=mode)).per_slice, mode
     assert not StudyModel(_FakeBackbone(), DIM, SLOTS).per_slice, "channel stacking reads three at once"
+
+
+def test_check_whole_stack():
+    """Which models can be handed the whole stack, and the two DIFFERENT reasons one can.
+
+    The equivalence classes are the guard's own history. Channel stacking is the genuine refusal — it
+    has three channels to stack into and no more. Per-slice pooling takes any width. A tubelet trunk
+    takes any width its tubelet divides, and is the class the previous `per_slice` guard rejected
+    while the model supported it exactly as it had rejected "attend" one trunk earlier.
+    """
+    StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).check_whole_stack(20)
+
+    stacked = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    with pytest.raises(ValueError, match="per-slice pooling or a tubelet trunk"):
+        stacked.check_whole_stack(20)
+
+    volumetric = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    volumetric.volume = VolumeRead(2, 16, 256)
+    volumetric.check_whole_stack(20)
+    with pytest.raises(ValueError, match="partial tubelet"):
+        volumetric.check_whole_stack(15)
 
 
 def test_forward_is_sensitive_to_its_pixels():

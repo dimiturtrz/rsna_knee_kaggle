@@ -19,6 +19,7 @@ from torch import Tensor, nn
 from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
 from kneemri.findings import TARGETS
 from kneemri.models.depth_window import DepthWindow
+from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.lora import LoRALinear
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
@@ -52,12 +53,6 @@ out afterwards. So the flat case returns the old two groups untouched and the de
 
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
 IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
-
-FINGERPRINT_SEED = 2026
-"""The seed of the synthetic bag. A constant of the question, not of the member that answers it."""
-
-FINGERPRINT_BATCH = 2
-"""Two studies, so the masked branch of the softmax is exercised alongside the unmasked one."""
 
 
 @dataclass(frozen=True)
@@ -254,6 +249,32 @@ class StudyModel(nn.Module):
         """
         return self._encodes_each_slice
 
+    def check_whole_stack(self, slices: int) -> None:
+        """Refuse, at STARTUP, a whole-stack read this model cannot take — and say which reason.
+
+        TWO DIFFERENT TRUNKS CAN TAKE ONE AND THEY TAKE IT FOR DIFFERENT REASONS. A per-slice pooling
+        encodes each slice alone, so the window may be any width. A tubelet trunk consumes the window
+        as FRAMES, so it may be any width that its tubelet divides. What can take no window at all is
+        channel stacking, which has exactly three channels to stack into.
+
+        The guard lives here rather than in the trainer because the trainer's version tested a PROXY —
+        first `!= "max"`, which silently rejected attention pooling the model supported, then
+        `per_slice`, which silently rejected the volumetric read whose window is the one thing it
+        exists to widen. Both are the same bug: a caller deciding what a model can be handed. The
+        model is the only thing that knows.
+        """
+        if self.volume is not None:
+            if slices % self.volume.tubelet:
+                message = (
+                    f"this trunk spans {self.volume.tubelet} slices per token, so a {slices}-slice "
+                    f"window leaves a partial tubelet; use a multiple of {self.volume.tubelet}"
+                )
+                raise ValueError(message)
+            return
+        if not self.per_slice:
+            message = f"whole-stack reading needs per-slice pooling or a tubelet trunk, not {self.slice_pooling!r}"
+            raise ValueError(message)
+
     @override
     def forward(
         self,
@@ -369,34 +390,8 @@ class StudyModel(nn.Module):
         return self.head(features, mask), self.head.report_vector(features, mask)
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
-        """This model's output on a fixed synthetic bag, as a portable identity.
-
-        Weights read through the wrong preprocessing produce predictions, not errors: the submission is
-        well formed, the log says nothing, and the difference is a number no output of the run reveals.
-        So the input is generated from a seed rather than read — identical on any machine — and pushed
-        through the whole forward path: byte scaling, ImageNet normalisation, resize, encoder, slot
-        attention. Any of those differing moves the output by order one.
-
-        float32 throughout: autocast would make the value depend on which device happened to run it,
-        and the point of the number is that it does not.
-        """
-        generator = torch.Generator().manual_seed(FINGERPRINT_SEED)
-        imgs = torch.randint(
-            0,
-            256,
-            (FINGERPRINT_BATCH, self.n_slot, group, image_size, image_size),
-            generator=generator,
-            dtype=torch.uint8,
-        ).to(device)
-        mask = torch.ones(FINGERPRINT_BATCH, self.n_slot, device=device)
-        mask[1, -1] = 0.0
-        was_training = self.training
-        self.eval()
-        with torch.no_grad():
-            out = self(imgs, mask, image_size).float().cpu().numpy()
-        if was_training:
-            self.train()
-        return out
+        """This model's answer to the one seeded question, as a portable identity — see `Fingerprint`."""
+        return FINGERPRINT.of(self, self.n_slot, image_size, group, device)
 
     def load_trained(self, state: dict[str, Tensor]) -> None:
         """Load weights saved by any earlier version of this model.

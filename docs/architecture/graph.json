@@ -1941,6 +1941,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.fingerprint",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.lora",
       "weight": 1
     },
@@ -2020,6 +2026,12 @@
       "kind": "import",
       "source": "kneemri.runs.member_record",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.member_record",
+      "target": "kneemri.models.fingerprint",
       "weight": 1
     },
     {
@@ -12213,7 +12225,7 @@
       "role": null
     },
     {
-      "descendants": 138,
+      "descendants": 139,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13005,7 +13017,7 @@
       "role": null
     },
     {
-      "descendants": 11,
+      "descendants": 12,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -13040,6 +13052,14 @@
       "descendants": 0,
       "id": "kneemri.models.ema",
       "label": "ema",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.fingerprint",
+      "label": "fingerprint",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -14746,6 +14766,14 @@
       "label": "WeightAverage",
       "level": "class",
       "parent": "kneemri.models.ema",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.fingerprint.Fingerprint",
+      "label": "Fingerprint",
+      "level": "class",
+      "parent": "kneemri.models.fingerprint",
       "role": "satellite"
     },
     {
@@ -21126,6 +21154,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.fingerprint.Fingerprint.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.models.fingerprint.Fingerprint",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.lora.LoRALinear.__init__",
       "label": "__init__",
       "level": "method",
@@ -21256,6 +21292,14 @@
       "descendants": 0,
       "id": "kneemri.models.model.StudyModel.applied",
       "label": "applied",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.model.StudyModel.check_whole_stack",
+      "label": "check_whole_stack",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
       "role": null

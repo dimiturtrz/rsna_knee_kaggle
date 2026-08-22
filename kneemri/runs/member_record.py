@@ -13,6 +13,7 @@ from kneemri.corpus.slot_reader import GROUP, Band
 from kneemri.corpus.slots import Routing
 from kneemri.findings import TARGETS
 from kneemri.models.backbone import Encoder
+from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.model import StudyModel
 
 RECORDED_AS = {
@@ -179,8 +180,6 @@ class RunOptions(Protocol):
     @property
     def layer_decay(self) -> float: ...
 
-
-FINGERPRINT_SEED = 2026
 
 WITNESS_STUDIES = 8
 """Enough to catch a reading difference, small enough to cost nothing — a mismatch moves every row."""
@@ -378,7 +377,7 @@ class MemberRecord:
                 "img": self.read_size,
                 "n_slot": self.model.n_slot,
                 "group": GROUP,
-                "seed": FINGERPRINT_SEED,
+                "seed": FINGERPRINT.seed,
             },
         }
 

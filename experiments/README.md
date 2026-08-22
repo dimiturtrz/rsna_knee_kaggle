@@ -2268,3 +2268,51 @@ and it does not kill CoPAS component (A). It RAISES (A)'s value: if the label ha
 of CoPAS's expected gain has to come from (A), which is what an instrument is for. knee-pq8u repriced.
 
 **NO SEAT, no submission, no card spent.**
+
+### vjepa_probe — volume pretraining is a TIE on frozen features, and the tubelet path was unarmable (2026-08-22)
+
+| arm | trunk | read | holdout mean AUC |
+| --- | --- | --- | --- |
+| control | DINOv2-**large**, 1024 wide, 24 blocks, 304M | 252 px, per-slice, mean pool | **0.7669** |
+| `vjepa_probe` | **V-JEPA 2** ViT-L, 1024 wide, 24 blocks, 326M, tubelet 2 | 256 px, whole 12-slice stack as frames | **0.7620** |
+
+**−0.0049, inside the holdout's 0.0062 floor.** The arm pre-registered three branches and this is the
+middle one, verbatim: *"WITHIN the floor — the trunk is not BETTER, which does not decide the seat
+question. A seat is bought by DISAGREEMENT and the holdout is structurally blind to it. Do not read a
+tie as a kill."* So the reading is a tie, not a refutation, and it licenses fitting ONE member priced by
+`seat_value` against the champion five.
+
+**The capacity confound was removed by construction and that is what makes the tie readable.** The
+obvious probe would have set a 1024-wide 24-block trunk against the 384-wide 12-block DINOv2-small cache
+already on disk, where a win reads "large beats small" — a lever `basedense` already refuted — and a
+loss reads as nothing. DINOv2-large was encoded here specifically so the surviving difference is
+PRETRAINING DOMAIN rather than capacity. 252 against 256 because patch 14 cannot tile 256 and patch 16
+was fitted at it; forcing either onto the other's grid means interpolated position embeddings, so each
+reads the nearest size its own grid tiles.
+
+**WHAT THE TIE DOES NOT RULE OUT, and this is the load-bearing half.** V-JEPA's objective is prediction
+in LATENT space, not linear separability, so a flat frozen probe is a known property of that objective
+rather than evidence about a fine-tuned member. The frozen reading is the cheap path; a tie blocks the
+cheap path only.
+
+**IT ALSO DOES NOT RULE OUT THE READING, because the tubelet trunk has never actually had a window wider
+than 3.** Audited the same day: `Trainer.whole_stack` is the only path to a window wider than `GROUP` = 3,
+and its guard demanded per-slice pooling — which a volumetric read is not, by definition. So the whole
+depth axis this trunk exists for was unreachable from any flag combination, and every number above was
+taken with the trunk's advantage partly spent. Two defects fixed the same day, both card-free:
+
+* `knee-2nxh` — the VRAM cap ignored the depth-axis stride. It OVERSTATED a tubelet trunk 2x (`units` is
+  per-slice; a tubelet trunk costs grid²/tubelet per slice). At the only read that exists — `VolumeRead
+  .check_tokens` asserts the native 256 crop — 20 slices, batch 6, 6 blocks open derives **38.3 GB
+  uncorrected against a 31.8 GB card, 21.7 GB corrected**. The encoder was never too big; the cap was
+  double-counting depth.
+* `Model.check_whole_stack` — the whole-stack guard moved off the caller and onto the model, which is the
+  only thing that knows what it can be handed. It now admits a tubelet trunk at any window its tubelet
+  divides, and refuses channel stacking, which genuinely has three channels and no more. This is the
+  same bug class the guard's own docstring already recorded once: it tested `!= "max"` and silently
+  rejected attention pooling the model supported.
+
+So the honest state of this axis is **not "volume pretraining is flat"** — it is *"volume pretraining is
+flat on a frozen probe, taken through a reading that could not use the trunk's depth axis, and the
+harness holes that made that so are now closed."* The re-test is a fitted member at `--whole-stack
+--slices 20 --train-size 256`, which is armable for the first time as of this entry.

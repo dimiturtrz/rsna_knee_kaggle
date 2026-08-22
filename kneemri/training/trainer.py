@@ -201,9 +201,11 @@ class Trainer:
     def whole_stack(self, slices: int) -> None:
         """Read the ENTIRE cached stack in one step instead of one sampled window of it.
 
-        Only meaningful with per-slice pooling, which encodes each slice alone and takes the
-        per-dimension maximum — so a slot's embedding stops depending on which window was drawn, and a
-        finding is no longer invisible unless it happens to fall inside the sampled three.
+        Meaningful for per-slice pooling, which encodes each slice alone and takes the per-dimension
+        maximum — so a slot's embedding stops depending on which window was drawn, and a finding is no
+        longer invisible unless it happens to fall inside the sampled three. And for a tubelet trunk,
+        where it is the ONLY path that reaches one at all: the window is otherwise `GROUP` = 3, which
+        no tubelet divides. `Model.check_whole_stack` owns which of the two applies.
 
         The evidence for trying it is the strongest single number in this project: averaging ten
         overlapping windows at INFERENCE is worth +0.0156, far more than any method change measured
@@ -211,9 +213,7 @@ class Trainer:
 
         Costs one encoder pass per slice rather than per group — about 4x a step at twelve slices.
         """
-        if not self.model.per_slice:
-            message = f"whole-stack reading needs per-slice pooling, not {self.model.slice_pooling!r}"
-            raise ValueError(message)
+        self.model.check_whole_stack(slices)
         self.window = slices
 
     def resample_to(self, size: int) -> None:
