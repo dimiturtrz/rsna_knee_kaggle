@@ -1466,3 +1466,37 @@ would spend a slot to re-measure the axis this entry just closed. It is therefor
 addition and held as a displacement**: `through_dense` retains the mechanism argument no other candidate
 has (it is the only member whose input TENSOR differs), so the question worth a slot is whether it
 displaces a seated member at six, not whether it joins them at seven.
+
+## `sevenplane` — 0.932, and it refutes the sentence directly above it (2026-08-22)
+
+Submission 55681546. `sixfresh`'s exact six plus `through_dense_s2026`, same kit (`cf6a99f`), one
+variable. **Public 0.932** — the first time any seventh seat has moved the board, and a new best.
+
+**WHAT IT REFUTES, and it is this file's own words.** The `sevengrade` section above concluded that "a
+seventh seat is worth 0.000 regardless of which member fills it", and on that basis withdrew `sevenplane`
+as an addition. That conclusion generalised from ONE seventh member to ALL of them, and the generalisation
+is wrong: which distance the seventh is bought on decides whether it pays.
+
+| entry | the seventh, and what makes it distant | public |
+|---|---|---|
+| `sixstrong` | `band_span`, a near-twin of a seated member | 0.930 |
+| `sixfresh` | `lr4e-5_ws`, shares no recipe with the five | 0.931 |
+| `sixfresh v2` | identical to `sixfresh`, refreshed kit only | 0.931 |
+| `sevengrade` | `grade_ladder` — distant in the OBJECTIVE (severity loss) | 0.931 |
+| `sevenplane` | `through_dense` — distant in the INPUT PIXELS | **0.932** |
+
+Objective distance ties. Pixel distance ticks. That is the cleanest separation this board has produced,
+because the six seated members, the kit and the blend are held fixed across the last two rows and only the
+seventh member's TYPE of distance differs.
+
+**THE SIZE, STATED HONESTLY BEFORE ANYONE BUILDS ON IT.** +0.001 is one board increment and roughly a sixth
+of the 0.0062 holdout floor; against the 1.5% house bar it is nothing, and against the 0.054 frontier gap
+it is noise. This is an INSTRUMENT reading that discriminates two axes, NOT a result, and it must not be
+planned around as though the axis were worth a percent. What it licenses is a direction — the decode-group
+argument in `knee-7d1` (2.4x transfer) is the thing pixel-distance points at — not a number.
+
+**IT ALSO PARTLY RE-OPENS THE SEVERITY READ.** `sevengrade`'s tie was explained two ways and this entry
+removes one of them: "no seventh seat adds anything" is now false, so `grade_ladder`'s tie is evidence
+about the SEVERITY OBJECTIVE's transfer to the board rather than about the count. That is a real
+narrowing, and it makes the displacement entry the severity axis has been owed more informative than it
+was an hour ago, not less.
