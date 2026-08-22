@@ -1626,3 +1626,43 @@ seat, which is the cheapest arbitration this board has been offered.
 **BOTH KERNELS ARE BUILT AND NEITHER IS FIRED.** One slot is spent today, it is early, and `vjepa_member`
 lands around 08:35 UTC — it will be priced on all three rulers and ranked against these two before any
 slot is spent.
+
+#### 2026-08-22 — slot 2: `gradeswap` (fired 08:07 UTC, kernel v1)
+
+Pushed as v1 and submitted the same minute; Kaggle reports 3 remaining today. The kernel ran the public
+3-study sample in 71 s and projected **7.7 h** over the hidden set, so the score is not due until roughly
+15:45 UTC. All seven members loaded and fingerprint-checked; `overlap=False` logged INERT because all
+seven are whole-stack, which is the expected no-op rather than a silent drop. Every member asked for bf16
+and the T4 cannot run it, so all seven served fp16 — the intended serving precision, logged per member.
+
+**Gates before firing, all four:** `mount_check` 33 ok / 0 refused (gradeswap declares both dinov2
+packages it loads); `champion_check` confirms `sevenplane` at 0.932 is still buildable; `witness_check
+--device cpu` verified all seven of this entry's members (21 ok / 2 unverified / 0 refused across the
+pool, and neither unverified member is seated here); `kit_check --mounted` reports 5 commits behind, which
+is deliberate — the kernel imports only `kneemri.kaggle.kernel_run`, which the mounted `cf6a99f` kit
+carries, and the five outstanding commits (the `core/data` rename, the paths config, and the three from
+2026-08-21) change nothing this kernel reaches.
+
+**WHY THIS FIRED BEFORE `vjepa_warm` LANDED, against the rule written at the top of this session.** The
+line above says rank the arm against both built kernels before spending a slot. Two things make that
+ordering wrong here rather than merely inconvenient:
+
+1. `gradeswap` is an INSTRUMENT about rulers, not a claim about the trunk, so its read does not depend on
+   the arm. It is the other way round — knowing which of the three rulers transfers is an INPUT to pricing
+   `vjepa_warm`, which will itself be read on all three. Firing it first makes the arm's own reading
+   interpretable; firing it second wastes that.
+2. `vjepa_warm` cannot take a slot today regardless. It is a member, not an entry. Seating it means a kit
+   rebuild, and the kit is five commits behind, so that is a refresh plus a full re-gate — hours, not
+   minutes. Waiting reserved nothing for it.
+
+Three slots remain, which is more than the arm can consume.
+
+The pre-registration is unchanged from the kernel docstring, restated here because it was written before
+the number: **above 0.932** confirms the ordinal ruler as the one that transfers and licenses re-ranking
+every seat by it; **0.932** is a tie saying a displacement cannot be resolved at seven either; **below
+0.932** refutes the ordinal forward test on its first honest trial and leaves the residual-distance ruler
+standing — that ruler calls `grade_ladder` the most redundant member of all 23 for its strength (+0.0187)
+and therefore predicts this entry LOSES a tick. Whichever way it reads, one ruler stops being quotable.
+
++0.001 is one board increment against a 1.5% house bar. This arbitrates three rulers; it is not a claimed
+improvement and must not be planned around as a number.
