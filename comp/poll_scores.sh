@@ -30,11 +30,19 @@ done
 
 for poll in $(seq 1 "$POLLS"); do
   echo "-- poll $poll --"
-  "$KAGGLE" competitions submissions -c "$COMPETITION" -v 2>/dev/null | tail -n +2 | head -6
+  # ONE query per poll, reused for both the log and the exit test. Two queries could disagree, and the
+  # one whose answer got printed was not the one the decision was taken on.
+  board="$("$KAGGLE" competitions submissions -c "$COMPETITION" -v 2>/dev/null | tail -n +2)"
+  echo "$board" | head -6
   # THE EXIT CONDITION IS THE POINT: stop as soon as nothing is pending, so the log's last poll is the
-  # one that carries the answer rather than the one that hit the cap.
-  if ! "$KAGGLE" competitions submissions -c "$COMPETITION" -v 2>/dev/null | tail -n +2 | grep -q "pending"; then
-    echo "ALL RESOLVED at poll $poll"
+  # one that carries the answer rather than the one that hit the cap. It matches the STATUS the CLI
+  # actually prints — `SubmissionStatus.PENDING`, upper case. It read `pending` until 2026-08-22, which
+  # matched nothing, so every launch announced ALL RESOLVED at poll 1 with a PENDING row in its own
+  # output; the cost is silent, because a poller exists precisely so nobody re-reads the board by hand.
+  if ! echo "$board" | grep -q "SubmissionStatus.PENDING"; then
+    # Name what resolved. A bare success line is what let the false positive pass for a real one.
+    echo "ALL RESOLVED at poll $poll:"
+    echo "$board" | head -6 | awk -F, '{print "  " $1 " -> " $(NF-1)}'
     exit 0
   fi
   sleep "$EVERY"
