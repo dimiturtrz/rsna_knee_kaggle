@@ -1592,3 +1592,37 @@ simultaneously the best seat value of all sixteen — as an add (+0.0004) and as
 same kit `cf6a99f`, count held at seven — and it is the first entry that removes a twin rather than adding
 a stranger. **Held, not fired**: one slot is spent today already, it is early, and the entry is worth more
 once `vjepa_member` has been priced on the same two rulers and the two can be ranked against each other.
+
+### The third ruler breaks the tie, and it kills `twinswap` (2026-08-22)
+
+`ordinal_signal` run over all 23 same-split members — severity concordance across 334,942 cross-level
+pairs, labels file never opened. It contradicts the swap the residual correction just recommended:
+
+| | ordinal (labels / pairs) | residual distance | seat value |
+|---|---|---|---|
+| `lr4e-5_ws` (seated) | 0.748 / 0.770 | +0.0173 | — |
+| `aug_long` (challenger) | 0.738 / 0.767 | -0.0134 | +0.0005 |
+
+The incumbent wins by 0.010 over labels, against a seat experiment whose resolvable spread was 0.007 to
+0.016. `knee-7d1` carries a pre-registration from 2026-08-20 — take the next single-member swap where the
+rulers disagree and decide it by the ordinal one — recorded there as UNRUN because no pool pair was
+separated by a margin either ruler could see. It is runnable now, and applied here it says **do not fire
+`kneemri-twinswap`**. The kernel stays built and unfired; a pre-registration that only ever confirms is
+not one.
+
+**AND THE SCAN FINDS THE PAIR THAT DOES EXECUTE IT.** Ordinal over the seated seven runs `calib_span`
+0.759, `band_dense` 0.751, `through_dense` 0.750, `base_dense` 0.748, `lr4e-5_ws` 0.748,
+`depth_regions_narrow` 0.743, `band_dense_long` 0.741. The highest-ordinal member NOT seated is
+`grade_ladder` at 0.750 / 0.780 — above two of the seven, and above `depth_regions_narrow` by +0.007 over
+labels and +0.011 over pairs, both inside what the ruler resolves.
+
+`kneemri-gradeswap` is that displacement: `sevenplane`'s seven with `depth_regions_narrow` out and
+`grade_ladder` in, same kit, count held at seven. It settles three things with one slot — the unrun
+ordinal forward test, the severity displacement `sevengrade` was owed once `sevenplane` removed its
+count confound, and the residual-distance ruler, which calls `grade_ladder` the most redundant member of
+all 23 (+0.0187) and therefore predicts this entry LOSES. The three rulers point three ways at the same
+seat, which is the cheapest arbitration this board has been offered.
+
+**BOTH KERNELS ARE BUILT AND NEITHER IS FIRED.** One slot is spent today, it is early, and `vjepa_member`
+lands around 08:35 UTC — it will be priced on all three rulers and ranked against these two before any
+slot is spent.
