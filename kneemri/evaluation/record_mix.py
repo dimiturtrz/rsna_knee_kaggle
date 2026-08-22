@@ -10,9 +10,17 @@ checkpoint, exact rather than re-derived. Forty-odd members are sitting there, a
 ensemble well has been costing inference passes over arrays that were already written.
 
 WHAT IT IS FOR: diversity is the only ensemble lever this project has left (six axes measured, count
-saturates at four, per-label selection is dead, the vote is flat), and diversity is a question about
+plateaus at eight, per-label selection is dead, the vote is flat), and diversity is a question about
 WHICH members, which means a subset search over as many trained members as possible. That search is
 arithmetic. It should not be gated on a card.
+
+COUNT PLATEAUS, IT DOES NOT SATURATE AT FOUR — this line said "four" until 2026-08-22, when the greedy
+was finally run over all 70 same-split records rather than 22. Four reads 0.8703, five 0.8710, the peak
+0.8717 at eight to ten, and twenty-two still 0.8711: five through twenty-two spans 0.0007, so four is
+0.0014 BELOW a seventeen-member-wide plateau. The board agrees from its own side (best entry per count
+0.930 / 0.931 / 0.931 / 0.932 for four through seven). Both earlier readings were true of the pool they
+were taken on, which is the failure mode to watch for here: this tool's answer moves as the pool grows,
+so quote the pool size with the number or the next reader inherits a stale constant.
 
 READ THE NUMBER AS A SIGN, NOT AS A SCORE. Two reasons, both recorded. A training-time record was
 produced by the TRAINER's reading of the holdout, so a member fitted under a different window is

@@ -41,9 +41,13 @@ the 1.5% bar, so the gain belongs to the **member pool** and not to borrowed wei
 prices diversity too cheaply: collapsing three members into one pixel group cost 0.0059 offline and
 **0.014** on the board, 2.4x. Of the [ensemble's six design
 axes](interpretations/kneemri/2026-08-17_the_ensemble_axes_and_which_are_levers.md), diversity is the
-only lever left: count saturates at four, per-label selection is dead (its *oracle* sits below the plain
-average), and the vote itself is flat — rank, logit and quality-weighted averaging land within 0.0005 of
-each other, an order below the board's noise floor.
+only lever left: [count plateaus at
+eight](interpretations/kneemri/2026-08-22_the_pool_is_exhausted.md), per-label selection is dead (its
+*oracle* sits below the plain average), and the vote itself is flat — rank, logit and quality-weighted
+averaging land within 0.0005 of each other, an order below the board's noise floor. Diversity is the
+lever left in principle and the pool no longer holds any: priced card-free over **63 candidates**, the
+best available eighth seat is **+0.0005**, and none clears the +0.0015 under which the board has never
+been seen to tick.
 
 The changes that moved the number most were not ideas imported from anywhere; they were our own
 defects, and finding them is most of what this project has done. Augmentation was written,
