@@ -2318,6 +2318,51 @@ flat on a frozen probe, taken through a reading that could not use the trunk's d
 harness holes that made that so are now closed."* The re-test is a fitted member at `--whole-stack
 --slices 20 --train-size 256`, which is armable for the first time as of this entry.
 
+### vjepa_warm — the re-test lands in the TIE band, and the finding is the DISTANCE, not the score (2026-08-22)
+
+The arm the entry above licensed: V-JEPA 2 ViT-L fitted as a member at `--whole-stack --slices 20
+--train-size 256 --batch 6 --backbone-lr 4e-5`, six epochs, warm-started from `vjepa_member_e5.encoder.pt`
+so the schedule is not spent re-learning what the cold run already learned.
+
+| ruler | `vjepa_warm` | reference |
+| --- | --- | --- |
+| solo holdout, best over schedule | **0.8337** (epoch 3) | roster members 0.8525-0.8578; cold `vjepa_member` 0.8313 |
+| seat value, add and best swap | **+0.0002** | 0 of 1 clears +0.0015 |
+| ordinal concordance, mean over pairs | 0.743 | `lr4e-5_ws` 0.748, `aug_long` 0.738 |
+| residual distance, nearest neighbour | **0.8210** (mean 0.8100) | roster's MOST DISTANT seated member is 0.8801 |
+
+**Solo lands in the pre-registered TIE band.** The arm registered ≥0.845 as licensing the
+volume-pretraining axis, 0.83-0.845 as the tie that retires it, <0.82 as "suspect the harness". 0.8337 is
+the middle branch, so the axis is retired for this use.
+
+**The warm start bought SPEED, not CEILING.** +0.0024 over the cold run's 0.8313 is a third of the 0.0062
+floor — not a number. What did move is where the schedule starts: epoch 0 scored 0.8247, above the cold
+run's epoch-4 endpoint of 0.8177. The bridge carried perfectly and then had nothing to carry the trunk
+past. That distinguishes the two claims cleanly: the warm-start asset works, the trunk's ceiling on this
+task is ~0.834.
+
+**THE ACTUAL FINDING IS THE DISTANCE.** Nearest seated neighbour 0.8210 against a seated spread whose
+most distant member sits at 0.8801 — this is the first genuinely different prediction family this project
+has produced, by 0.059, and it is not the broken-representation kind (`mae_matched`'s 0.4333 above is
+what uncorrelated-because-broken looks like; 0.82 is a working model that disagrees). It bought **+0.0002**.
+
+`knee-053z` asked for DISTANT-AND-STRONG: nearest under 0.88 and solo over 0.85. This clears the distance
+clause by a mile and misses the solo clause by 0.017. **Distant-and-weak buys nothing.** Distance is
+necessary and demonstrably not sufficient — the ruler's verdict was correct, what failed was the
+INFERENCE from distance to seat.
+
+**NAMED HARNESS SUSPECT: the regimen confound.** Six epochs against the roster's twelve. Argued against
+by the arm's own overfit signature rather than dismissed: train loss fell monotonically 0.9198 → 0.6189
+across all six epochs while holdout stopped improving at epoch 3 and drifted 0.8337 → 0.8311 → 0.8306. A
+schedule that is still generalising when it stops looks different from that. Not conclusive, but the
+cheap read points away from "it needed more epochs".
+
+**WHAT THIS DOES NOT RULE OUT.** (a) A twelve-epoch schedule closing the solo gap while keeping the
+distance — that is the one arm that would overturn the seat verdict, and it costs ~3.2 h of card.
+(b) The warm-start bridge asset itself: three witnesses, 587 tensors, 0 left stock, and it opened above
+the cold endpoint. It is re-testable against any trunk. (c) The distance ruler, whose reading was right.
+(d) V-JEPA at a larger read — every number on this axis was taken at 256 px with 20 slices.
+
 ### `mae_matched` — the fifth collapse, and the fix I reached for was already in this file (2026-08-22)
 
 `mae_matched` is `band_dense`'s recipe with one flag added: `--encoder-weights` pointing at
