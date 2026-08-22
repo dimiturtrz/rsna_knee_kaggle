@@ -1666,3 +1666,34 @@ and therefore predicts this entry LOSES a tick. Whichever way it reads, one rule
 
 +0.001 is one board increment against a 1.5% house bar. This arbitrates three rulers; it is not a claimed
 improvement and must not be planned around as a number.
+
+**RESULT, 09:34 UTC: 0.933.** Above 0.932, so the pre-registration reads PASS on its own terms: the
+ordinal ruler called this displacement correctly and re-ranking seats by it is licensed. A new best,
++0.001 over `sevenplane`.
+
+Read the disagreement, which is the whole point of the instrument — the three rulers pointed three
+different ways on ONE entry:
+
+| ruler | what it said about swapping `depth_regions_narrow` -> `grade_ladder` | verdict |
+| --- | --- | --- |
+| ordinal concordance | grade_ladder ahead by +0.007 over labels, +0.011 over pairs — swap | **right** |
+| binary seat value | +0.0001, a fifteenth of its own +0.0015 resolution — no signal | blind |
+| residual distance | most redundant of 23 for its strength (+0.0187, pearson 0.890) — predicts a LOSS | **wrong** |
+
+So the residual-distance ruler is now 0-for-2 in OPPOSITE directions on one day: it called `vjepa_warm`
+the most distant member this project has ever produced and that member priced +0.0001, and it called
+`grade_ladder` maximally redundant and that member bought a board tick. It measures what it claims
+(the residuals really are far apart, or close); the INFERENCE from residual geometry to seat value is
+what has failed twice. Stop quoting it as a selection rule.
+
+Carry the bead's own caveat rather than dropping it: one trial cannot separate "the ordinal ruler
+transfers" from "grade_ladder is simply a good member". A pass licenses re-ranking; it does not prove
+the ruler, and the next use of it is a RE-TEST, not an assumption.
+
+The second thing this settles is arithmetic, and it corrects a document filed two hours earlier. The
+seat scan priced 63 candidates at +0.0005 or less and `interpretations/kneemri/2026-08-22_the_pool_is_exhausted.md`
+concluded the pool was exhausted by comparing those offline numbers against the +0.0015 BOARD threshold.
+`gradeswap` refutes that comparison by instance: +0.0001 offline produced +0.001 on the board. Offline
+seats must be multiplied by the measured compression (`knee-7d1`, median +4.67 board points per holdout
+point) before they meet a board threshold, which puts the best available eighth seat at ~+0.002 board.
+The pool is flat, not empty. Both that interpretation and the root README are corrected.

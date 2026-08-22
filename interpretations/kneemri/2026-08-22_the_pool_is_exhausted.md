@@ -1,4 +1,7 @@
-# The pool is exhausted: 63 candidates, best eighth seat +0.0005
+# The pool is FLAT, not empty: 63 candidates, best eighth seat +0.0005
+
+*(Filed the same morning as "the pool is exhausted"; the title was corrected within the hour by a
+board result — see the CORRECTION section. The filename is left alone so links keep working.)*
 
 2026-08-22 · `python -m kneemri.evaluation.record_mix` over every same-split holdout record on disk,
 909 shared studies, card-free from recorded per-study probabilities. Logs: `logs/greedy_all.log`,
@@ -21,8 +24,30 @@ than averaging across a split boundary, which is the check working).
       ... 58 more, descending to -0.0025
 
 **63 candidates. Maximum +0.0005. Zero clear the +0.0015 under which this project has never seen the
-board tick.** The eighth seat is worth nothing, and it is worth nothing *regardless of who takes it* —
-that is a stronger statement than any previous closure, which priced one candidate at a time.
+board tick.**
+
+## CORRECTION, same day, 09:40 — the title of this document overclaims
+
+`gradeswap` scored **0.933** at 09:34, a new best past `sevenplane`'s 0.932. Its offline seat value on
+the very scan above is `+grade_ladder_s2026: +0.0001` — a fifteenth of the +0.0015 threshold this
+document just used to declare 63 candidates worthless. **A +0.0001 offline seat produced a board tick.**
+
+So the arithmetic in the paragraph above is wrong in the way this project's own instructions warn about
+most: it compared offline deltas against a threshold and read the result as a statement about the board,
+without applying the conversion that sits in `knee-7d1` — **median +4.67 board points per holdout
+point**, measured over the five pairs the holdout resolves. Run properly, the best available eighth seat
+is +0.0005 offline ≈ **+0.0023 on the board**, which is above the board's own resolution, not below it.
+`gradeswap` is the measured instance: +0.0001 offline, +0.001 board, a ratio in the same family.
+
+**What survives.** The seat spread across the whole pool really is 0.0005 to −0.0025, so no candidate is
+a *large* addition and the count plateau (below) is unaffected — that reading came from the greedy curve,
+not from the threshold. **What does not survive is the word "exhausted".** The pool is flat, not empty,
+and on a compression of ~4.7x a flat pool can still hold board ticks. The honest statement is that the
+BINARY SEAT RULER cannot tell which of the 63 carries one, since its whole live range is a third of its
+own stated resolution.
+
+That is also the third strike against reading a seat number as a board prediction, and the ruler that
+DID call `gradeswap` correctly was the ordinal one — see below.
 
 ## The count axis is a PLATEAU, not a peak, and both earlier readings were on a smaller pool
 
