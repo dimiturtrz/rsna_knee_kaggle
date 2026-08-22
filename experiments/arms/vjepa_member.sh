@@ -53,8 +53,15 @@
 # champion five. 0.83-0.845 is the tie again, now taken with the trunk's advantage actually spent —
 # which downgrades volume pretraining from "untested here" to "does not pay at this data scale", and
 # retires the axis rather than the trunk. Below 0.82, suspect the HARNESS before the idea, in this
-# order: did `--whole-stack` land (the trainer logs its window — 20, not 3), and did six blocks actually
-# open. Only with both clean does the number belong to the encoder.
+# order: did `--whole-stack` land, and did six blocks actually open. Only with both clean does the
+# number belong to the encoder.
+#
+# BOTH OF THOSE ARE ALREADY HARD PRECONDITIONS, so neither is a log to grep after the fact. `Landed`
+# compares the trainer's own `policies()` against what the flags asked — `WINDOW: slices if whole_stack
+# else GROUP`, `OPENED_BLOCKS` through the adaptation mode — and `train.py` RAISES before fitting on any
+# mismatch. A run that reaches epoch 1 has proved both. This trunk adds a second, independent witness:
+# `check_tokens` refuses any window `tubelet` does not divide, so a window of 3 cannot silently happen
+# here at all. The earlier header sent a reader to grep a line the trainer never writes.
 #
 # READ A 3-FRAME TRACEBACK BEFORE BLAMING SUSPECT #1. The smoke raised exactly that message and the cause
 # was the FINGERPRINT, whose bag is `GROUP` = 3 by design — one and a half tubelets — written at the
