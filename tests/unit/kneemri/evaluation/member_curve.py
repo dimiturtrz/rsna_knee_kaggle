@@ -165,6 +165,24 @@ def test_oracle():
     assert ceiling["average"] >= 0.0
 
 
+def test_labels():
+    """The mix's weakest label leads, and its headroom line prices exactly 1/12 of the lift it names."""
+    generator = np.random.default_rng(23)
+    truth = _truth()
+    strong = np.repeat((truth[:, 0].astype(np.float64) * 4.0)[:, None], len(TARGETS), axis=1)
+    # ONE label deliberately blinded to chance, which is the hole this reading exists to surface.
+    strong[:, 3] = generator.normal(0.0, 1.0, STUDIES)
+    members = [strong, strong + generator.normal(0.0, 0.01, strong.shape)]
+
+    lines = MemberCurve(LabelScores()).labels(Pool(_names(members), members, truth))
+
+    assert lines[0].startswith("mix of 2:")
+    assert lines[1].strip().startswith(TARGETS[3]), "the blinded label must be reported first"
+    weakest = float(lines[1].split("  n=")[0].split()[-1])
+    lifted = float(lines[1].split("(")[1].rstrip(")"))
+    assert lifted == pytest.approx((0.90 - weakest) / len(TARGETS), abs=5e-5)
+
+
 def test_paired():
     """Reports one block per member against the first, and stars only intervals that exclude zero."""
     generator = np.random.default_rng(11)

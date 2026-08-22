@@ -119,8 +119,10 @@ def test_lines(tmp_path: Path):
     mixed = RecordMix([tmp_path / "shipped.pt", tmp_path / "candidate.pt"]).per_member()
     curve = MemberCurve(LabelScores())
 
-    priced = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(curve, greedy=True, paired=False)
-    built = MixReading(mixed, []).lines(curve, greedy=True, paired=False)
+    priced = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(curve, greedy=True, paired=False, labels=False)
+    built = MixReading(mixed, []).lines(curve, greedy=True, paired=False, labels=False)
+    opened = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(curve, greedy=True, paired=False, labels=True)
 
     assert priced[0].startswith("roster of 1:"), "the roster is honoured even with --greedy also passed"
     assert built[0].startswith("greedy 1:"), "with no roster the same call builds an ensemble instead"
+    assert opened[0].startswith("mix of 1:"), "--labels opens the roster up rather than pricing against it"

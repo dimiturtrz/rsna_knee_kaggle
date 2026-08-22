@@ -113,7 +113,7 @@ class SeatValue:
         curve = MemberCurve(LabelScores(), combine_seed)
         held, rest = mixed.split(roster)
         return [
-            *MixReading(mixed, roster).lines(curve, greedy=False, paired=False),
+            *MixReading(mixed, roster).lines(curve, greedy=False, paired=False, labels=False),
             *MemberDistance(held, rest).report(),
         ]
 

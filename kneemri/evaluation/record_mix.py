@@ -166,8 +166,14 @@ class MixReading:
     pool: Pool
     roster: list[Path]
 
-    def lines(self, curve: MemberCurve, *, greedy: bool, paired: bool) -> list[str]:
+    def lines(self, curve: MemberCurve, *, greedy: bool, paired: bool, labels: bool) -> list[str]:
         """The reading this invocation asked for, as report lines."""
+        if labels:
+            # BEFORE the roster branch, because a label reading of the SHIPPED mix is the common case
+            # and it is named with the same `--roster` the seat scan is named with. A roster plus
+            # `--labels` means "open up the entry I ship", never "price candidates against it".
+            held, _ = self.pool.split(self.roster) if self.roster else (self.pool, None)
+            return curve.labels(held)
         if self.roster:
             held, candidates = self.pool.split(self.roster)
             # BOTH readings, because they answer different questions and only one of them is a decision:
@@ -197,6 +203,11 @@ def main() -> None:
         action="store_true",
         help="forward selection instead of every subset — the only tractable reading past a dozen members",
     )
+    parser.add_argument(
+        "--labels",
+        action="store_true",
+        help="the mix's own per-label AUCs, worst first, each priced in units of the final score",
+    )
     parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -209,7 +220,8 @@ def main() -> None:
     for line in mixed.alone(scores):
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
-    for line in MixReading(mixed, roster).lines(curve, greedy=arguments.greedy, paired=arguments.paired):
+    reading = MixReading(mixed, roster)
+    for line in reading.lines(curve, greedy=arguments.greedy, paired=arguments.paired, labels=arguments.labels):
         logger.info(line)
 
 

@@ -34,7 +34,7 @@ from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
@@ -73,6 +73,15 @@ BOARD_COST_MULTIPLE = 3
 Three paired entries: -0.0013 offline became -0.004 and -0.0023 became -0.005 (knee-c0u9). The holdout
 ranks correctly and errs in magnitude, and only in the direction of understating a weak member's cost —
 so an offline delta inside the noise floor is not a free look, and this is the factor that says so."""
+
+LABEL_HEADROOM = 0.90
+"""The per-label AUC a headroom column lifts one finding to, so twelve holes are priced on one ruler.
+
+Not a target and not a prediction. It is the level our BEST-scoring labels already reach on this same
+holdout, which makes it the one level a reader cannot dismiss as unreachable in principle: the mix
+demonstrably attains it somewhere, so a label sitting far below it is a gap in this design rather than a
+statement about how hard that finding is. A common level is what makes the twelve numbers comparable —
+lifting each label to its own plausible ceiling would price them against twelve different rulers."""
 
 
 @dataclass(frozen=True)
@@ -323,6 +332,44 @@ class MemberCurve:
         for size in range(1, len(pool) + 1):
             score, subset = max(self.subsets(pool, size), key=lambda pair: pair[0])
             lines.append(f"best {size}: {score:.4f}  {pool.named(subset)}")
+        return lines
+
+    def labels(self, pool: Pool) -> list[str]:
+        """The MIX's own per-label AUCs, worst first, each priced in units of the final score.
+
+        THE DENOMINATOR NOBODY ASKED THE ENSEMBLE. Every reading in this module collapses to a mean,
+        and the competition metric is the unweighted mean of twelve INDEPENDENT AUCs — so a mean that
+        will not move can still hide a label sitting near chance while eleven others are saturated.
+        Each label carries exactly 1/12 of the score, which makes the arithmetic a one-liner and makes
+        it decisive: a single finding moved 0.70 -> 0.78 is +0.0067 on the board, larger than every
+        ensemble rearrangement this project has measured put together.
+
+        The `to 0.90` column is the score this mix would post if that ONE label were lifted to 0.90 and
+        nothing else changed. It is a headroom, not a forecast: it says where the remaining score
+        physically lives, so that a label-side arm is aimed at the finding that can pay for it rather
+        than at whichever one is easiest to move.
+
+        `nan` is a label the shared holdout never saw both classes of — reported rather than dropped,
+        because an undefined AUC is a hole in the ruler at exactly the rare findings that carry the
+        most unrealised score.
+        """
+        combined = pool.combined(list(range(len(pool))))
+        per_label = self.scores.per_label(combined, pool.truth)
+        mean = float(np.nanmean(list(per_label.values())))
+        weight = 1.0 / len(per_label)
+        lines = [f"mix of {len(pool)}: {mean:.4f} over {len(per_label)} labels, each worth {weight:.4f}"]
+        # THE DENOMINATOR, ON THE SAME LINE AS THE NUMBER IT QUALIFIES. A low AUC on forty positives and
+        # a low AUC on four hundred are different findings — the first can be sampling, the second
+        # cannot — and this reading exists to aim an arm, so it must not let the two read alike.
+        positives = (pool.truth > MIDPOINT).sum(axis=0)
+        counts = dict(zip(per_label, (int(count) for count in positives), strict=True))
+        ordered = sorted(per_label.items(), key=lambda pair: (not np.isnan(pair[1]), pair[1]))
+        for label, auc in ordered:
+            lifted = mean + weight * (LABEL_HEADROOM - auc)
+            lines.append(
+                f"  {label:18s} {auc:.4f}  n={counts[label]:4d}   "
+                f"to {LABEL_HEADROOM:.2f}: {lifted:.4f}  ({lifted - mean:+.4f})"
+            )
         return lines
 
     def paired(self, pool: Pool) -> list[str]:
