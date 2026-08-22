@@ -1500,3 +1500,54 @@ removes one of them: "no seventh seat adds anything" is now false, so `grade_lad
 about the SEVERITY OBJECTIVE's transfer to the board rather than about the count. That is a real
 narrowing, and it makes the displacement entry the severity axis has been owed more informative than it
 was an hour ago, not less.
+
+## The eighth seat is not buyable from the mounted pool, and the reason is one sentence (2026-08-22)
+
+No submission. This section is what a slot was NOT spent on, and why that is a finding rather than a
+pause.
+
+**FIRST, THE PIN WAS THREE HOURS STALE.** `comp/champion.json` still named `basedense_v1` (0.931, five
+members) while `sevenplane` had held 0.932 since 02:45 UTC. `seat_value` reads its roster from that pin
+precisely so no arm header can hold a stale copy — so every candidate priced this morning would have been
+priced against a champion that no longer holds the board. `champion_check` passed throughout: it asserts
+the pinned entry can be REBUILT, and it cannot know the entry is no longer the best one. Pin corrected,
+principles carried forward, and the gap itself recorded there as a principle.
+
+**THEN, BOTH RULERS OVER ALL SIXTEEN MOUNTED-BUT-UNSEATED MEMBERS**, against the true seven (0.8695):
+
+| ruler | best candidate | reading |
+|---|---|---|
+| seat value, as an eighth | `aug_long` | +0.0004 |
+| seat value, as a displacement | `aug_long` for `lr4e-5_ws` | +0.0005 |
+| distance (nearest-neighbour) | `lora_r8_v3small_224` | 0.8235 |
+
+**0 of 16 clear +0.0015**, the threshold under which this ruler has never picked a board tick, and the
+best move is a third of it. That alone only repeats what 2026-08-21 said about a five-member champion.
+
+**WHAT IS NEW IS THAT THE TWO RULERS ARE ANTI-CORRELATED HERE, AND THAT IS THE BOTTLENECK.** Ordered by
+distance the four most distant candidates are `lora_r8_v3small_224` (0.8235), `dinov3_base_lora` (0.8286),
+`crop80_tissue` (0.8422) and `deep24` (0.8428) — all far outside the seated pool's own internal spread
+(0.8801–0.9143). Ordered by seat value those same four are the BOTTOM four (-0.0009, -0.0006, -0.0004,
++0.0001). Every mounted candidate is either **strong and a twin** or **distant and weak**, and the board
+has already priced both halves: `sixstrong` seated a strong twin and lost a tick, `crossenc` and `maxdiv`
+seated distant weak members (0.8268, 0.8345) and lost four and five. Under the 3x harm multiple an eighth
+seat from this pool prices at roughly -0.002. It is a NEGATIVE-expectation slot, not a coin flip.
+
+**THE ONE MEMBER THAT WAS BOTH IS THE ONE THAT WON.** `through_dense` sits at 0.8558 solo with a nearest
+neighbour of 0.8922 — distant enough to sit at the loose end of the seated seven, strong enough not to be
+charged for. That is the whole of what `sevenplane`'s +0.001 identifies, and it is a tighter statement
+than "pixel distance pays".
+
+**AND THE CORRELATION RULER DOES NOT EXPLAIN THE BOARD BY ITSELF** — stated because the previous section
+leaned on distance. Across the three tested sevenths the ordering is not monotone: `through_dense` 0.8922
+→ 0.932, `band_span` 0.9188 → 0.930, `grade_ladder` 0.9248 → 0.931. `grade_ladder` is the LEAST distant of
+all sixteen candidates by this metric and it beat the more distant `band_span`. So what `sevenplane`
+measured was distance in the MECHANISM (a different input tensor), and label-free correlation is at best a
+proxy for it on three points. Do not promote the column to a predictor.
+
+**CONSEQUENCE, AND IT IS A TARGET RATHER THAN A VERDICT.** The remaining slots are not held out of
+caution; there is no permutation of what is mounted that is worth one. What buys the next tick is a
+checkpoint that is BOTH — nearest neighbour under ~0.88 and solo at or above ~0.85 — and no arm has ever
+been aimed at that pair. `vjepa_member` is the only one in flight that could be: a video-pretrained trunk
+is the largest available step in what the encoder was fitted on, and its pre-registered pass bar (0.845)
+is within a whisker of the strength half. Its distance is unmeasured and measurable the moment it lands.
