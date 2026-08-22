@@ -52,6 +52,9 @@ NOT_A_SWITCH = {
     "out": "where the run writes, set per invocation",
     "epochs": "run length, which nothing downstream can silently ignore",
     "studies": "corpus truncation, visible in the split line every run logs",
+    "train_fraction": "which TRAINING studies were fitted on — the same kind of thing, and visible in "
+    "the same split line. No model, trainer or targets object holds it, so there is nothing here to "
+    "compare it against; what a landed-check would want is the study COUNT, and the run logs that",
     "patience": "when to stop, read by the stopper each epoch rather than applied once",
     "batch": "how many studies a step holds, a resource knob the loader obeys or raises on",
     "vram_gb": "a memory cap set by the queue against the card it runs on",

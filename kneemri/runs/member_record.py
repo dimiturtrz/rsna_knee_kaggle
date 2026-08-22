@@ -37,6 +37,10 @@ NOT_IN_CONFIG = {
     "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
     "patience": "when the run stopped, which the kept epoch already states",
     "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",
+    "train_fraction": "how much of the TRAINING half was fitted on — a property of the run's data, not "
+    "of the function a rebuild reconstructs, exactly as `fold` and `studies` are. The recipe block "
+    "carries it, which is where a scaling point's provenance is read from, and the run's own split line "
+    "prints the study count it produced",
     "batch": "a resource knob: how many studies a step held changes no weight's meaning",
     "accumulate": "the same knob one level up — micro-batches per step trade memory for time and leave "
     "the rebuilt function untouched; the recipe block carries it, which is where the landed-check reads",

@@ -11114,6 +11114,12 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.training.options.TrainingOptions._encoder_arguments",
+      "target": "kneemri.training.trainer.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.training.options.TrainingOptions.band",
       "target": "kneemri.corpus.slot_reader.Band",
       "weight": 1
@@ -11140,12 +11146,6 @@
       "kind": "construct",
       "source": "kneemri.training.options.TrainingOptions.parser",
       "target": "kneemri.models.model.StudyDesign",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.options.TrainingOptions.parser",
-      "target": "kneemri.training.trainer.Adaptation",
       "weight": 1
     },
     {
@@ -22176,6 +22176,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions._encoder_arguments",
+      "label": "_encoder_arguments",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.band",
       "label": "band",
       "level": "method",
@@ -22242,6 +22250,14 @@
       "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.supervision",
       "label": "supervision",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.thinned",
+      "label": "thinned",
       "level": "method",
       "parent": "kneemri.training.options.TrainingOptions",
       "role": null
