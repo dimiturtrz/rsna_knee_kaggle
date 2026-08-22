@@ -2427,3 +2427,62 @@ repo's adapt-and-import path at all, and none of the five collapses above is evi
 (`knee-rpkw`). A pixel-weighted or much longer MAE is also untouched, but five collapses across two
 objectives and two depths makes it a poor bet, and it should not take a card ahead of anything on
 `knee-jk3`'s surviving list.
+
+### the ordinal re-rank — the whole pool scored by the ruler that just passed (2026-08-22)
+
+`gradeswap` cleared its pre-registered band at 0.933, which per `knee-7d1` licenses re-ranking every
+seat by ordinal concordance. This is that re-ranking: `kneemri.evaluation.ordinal_signal --checkpoint`
+over all 67 same-split checkpoints, card-free, 334,942 cross-level pairs, chance 0.50.
+
+**PLUMBING BUG, named before the numbers, because the first run of this scan produced 67 blank rows.**
+`ordinal_signal` reports through `logging`, which writes to **stderr**, and my loop had `2>/dev/null` on
+it to suppress load warnings. Every number went to the null device and the scan returned a clean-looking
+list of names with nothing beside them — exit 0, 67 lines, no error anywhere. That is the failure mode
+this project's own instructions put under PLUMBING: the value was recorded where the consumer does not
+read. Re-run with `2>&1`, same command otherwise, and it filled in. A gate that returns the right SHAPE
+with no content is worse than one that crashes.
+
+Top of the pool, and the champion's own seats marked:
+
+    calib_span            0.791   <- seated
+    small_accum           0.784
+    severity_weight       0.783
+    base_dense            0.782   <- seated
+    small_batch6          0.781
+    grade_ladder          0.780   <- seated, the member that just bought the tick
+    band_dense            0.778   <- seated
+    aprior_dense          0.778
+    focal_dense           0.777
+    band_dense_long       0.776   <- seated
+    calibrated_targets    0.776
+    through_dense         0.774   <- seated
+    lr4e-5_ws             0.770   <- seated, and the WEAKEST seat in the champion
+    depth_regions_narrow  0.769   <- the member gradeswap displaced
+
+**The displacement gradeswap made is legible on this scale and small.** It took a 0.769 out for a 0.780,
++0.011, and the board moved one tick. That gives the ruler a rough exchange rate to test against.
+
+**The next licensed move is `lr4e-5_ws` out.** It is the champion's floor at 0.770, and the best
+available replacement is `small_accum` at 0.784 — **+0.014, a larger gap than the one that passed**. If
+the ruler transfers, that predicts at least the tick gradeswap bought.
+
+**But the ranking exposed a mounting bottleneck, which is the real finding here.** Of the members above
+the champion's floor, `small_accum`, `severity_weight`, `small_batch6`, `aprior_dense` and `focal_dense`
+are in NO Kaggle package. The best MOUNTED unseated candidate is `calibrated_targets` at 0.776 — only
++0.006 over the floor, half the gap that just bought a tick, which predicts a tie at board resolution
+and is therefore a useless instrument. **The mounted pool's ordinal top is already seated.** The
+licensed move was not costed as a kernel edit; it needed a dataset push first, and those five names went
+into `comp/members.roster` in one push for that reason.
+
+**Priced before running, out loud.** Path A, the mounted swap: ~20 min, ordinal gap +0.006, expect
++0.0005 board, most likely a tie that arbitrates nothing. Path B, push five and swap `small_accum`:
+~45-60 min, gap +0.014, expect a tick, and it re-tests the ruler at a LARGER separation than its first
+pass rather than a smaller one. B is three times the wall-clock for a bit over twice the predicted
+effect AND a decisive read instead of an ambiguous one, and it unblocks the pool's whole ordinal top
+permanently. B.
+
+**The caveat travels with the ruler, per the bead's own words.** One trial cannot separate "the ordinal
+ruler transfers" from "grade_ladder is simply a good member". This re-rank is the ruler's second use and
+it is a RE-TEST, not an application of a settled fact. If the `small_accum` swap ties or loses at a gap
+larger than the one that passed, the single pass was the coincidence and the ruler goes back in the
+box beside residual distance.

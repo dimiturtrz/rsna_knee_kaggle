@@ -1,15 +1,15 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "sevenplane",
-  "kernel": "kneemri-sevenplane",
-  "submission": 55681546,
+  "entry": "gradeswap",
+  "kernel": "kneemri-gradeswap",
+  "submission": 55686482,
   "date": "2026-08-22",
-  "board": 0.932,
+  "board": 0.933,
   "kit": "cf6a99f",
   "members": [
     "band_dense_s2026",
     "calib_span_s2026",
-    "depth_regions_narrow_s2026",
+    "grade_ladder_s2026",
     "band_dense_long_s2026",
     "base_dense_s2026",
     "lr4e-5_ws_s2026",
@@ -36,6 +36,8 @@
     "THE EDGE THAT PRODUCED IT WAS +0.0009 OFFLINE, a seventh of the 0.0062 noise floor, and the ledger argued that away twice before the entry ran. Two swaps compounded, one of them bringing the worst-transferring member, an edge shrunk by two thirds when the champion improved under it - every one of those was true and the entry still took the board. One board tick is this competition's reporting resolution so 0.930 over 0.929 is 'better', not 'much better'; what does NOT survive is the habit of declining to fire an offline maximum because its margin is small.",
     "THE SEAT COUNT IS NOT THE VARIABLE - THE SEVENTH MEMBER'S TYPE OF DISTANCE IS. Five entries hold the same six members, the same kit and the same blend and move only who sits seventh: a near-twin of a seated member scored 0.930, a recipe-distant member 0.931, an OBJECTIVE-distant member (grade_ladder, the severity loss) 0.931, and this entry's PIXEL-distant member (through_dense, the only one whose input tensor differs) 0.932. Objective distance ties, pixel distance ticks. The ledger had already concluded from the first four rows that 'a seventh seat is worth 0.000 regardless of which member fills it' and withdrawn this entry on that basis; the conclusion generalised from one seventh member to all of them and this entry refutes it. Buy a seat on the axis, not on the count and not on the solo score.",
     "+0.001 IS AN INSTRUMENT READING, NOT A RESULT, and this pin says so in its own record. One board increment is a sixth of the 0.0062 holdout floor and nothing against the 1.5% house bar or the 0.054 frontier gap. What it licenses is a DIRECTION - the decode-group argument of knee-7d1, whose 2.4x transfer is the same pixel axis measured offline - not a number to plan around.",
-    "A PIN THAT LAGS THE BOARD SILENTLY MISPRICES EVERY CANDIDATE UNDER IT. This entry scored at 02:45 UTC and the pin still named basedense_v1 three hours later, so seat_value - which reads the roster from here precisely so no arm header can hold a stale copy - would have priced the day's candidates against a five-member champion that no longer holds the board. champion_check asserts the pinned entry can be REBUILT; it cannot know the entry is still the best one. Update the pin in the same motion as reading the board."
+    "A PIN THAT LAGS THE BOARD SILENTLY MISPRICES EVERY CANDIDATE UNDER IT. This entry scored at 02:45 UTC and the pin still named basedense_v1 three hours later, so seat_value - which reads the roster from here precisely so no arm header can hold a stale copy - would have priced the day's candidates against a five-member champion that no longer holds the board. champion_check asserts the pinned entry can be REBUILT; it cannot know the entry is still the best one. Update the pin in the same motion as reading the board.",
+    "THE ORDINAL RULER IS THE ONE THAT TRANSFERS, and this entry is its first honest forward test. It is one named swap off sevenplane - depth_regions_narrow out, grade_ladder in - chosen because grade_ladder leads on ordinal concordance by +0.007 over labels and +0.011 over pairs, and pre-registered on knee-7d1 before the number: above 0.932 confirms the ordinal ruler, 0.932 ties, below refutes it. It read 0.933. The other two rulers pointed elsewhere on the SAME swap: binary seat value priced it +0.0001, a fifteenth of its own +0.0015 resolution, and residual distance called grade_ladder the most redundant member of all 23 for its strength and predicted a LOSS. Rank seats by ordinal concordance; stop using residual distance as a selection rule, which has now failed twice in one day in opposite directions. One trial cannot separate 'the ruler transfers' from 'grade_ladder is a good member', so the next use of it is a RE-TEST, not an assumption.",
+    "AN OFFLINE SEAT NUMBER IS NOT A BOARD NUMBER UNTIL IT IS MULTIPLIED. This entry's entering member priced +0.0001 offline and bought +0.001 on the board. Hours earlier the same seat scan priced 63 candidates at +0.0005 or less and an interpretation concluded from that that the trained pool was EXHAUSTED - by comparing offline deltas straight against the +0.0015 threshold at which the board has been seen to tick. That comparison is a units error: knee-7d1 measures a median +4.67 board points per holdout point over five resolved pairs, which puts the best available eighth seat at about +0.002 board. The pool is FLAT, not empty, and a seat ruler whose whole live range across 63 candidates is a third of its own resolution cannot say which candidate carries the tick. Never read an offline seat against a board threshold without the compression."
   ]
 }
