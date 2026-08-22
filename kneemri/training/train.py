@@ -69,6 +69,13 @@ def main() -> None:
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
     training, holdout = arguments.sampled(training, holdout)
+    training = arguments.thinned(training)
+    if arguments.train_fraction < 1.0:
+        logger.warning(
+            "DATA-SCALING RUN: %.2f of the training studies (%d), holdout untouched",
+            arguments.train_fraction,
+            len(training),
+        )
     if arguments.studies:
         logger.warning("SMOKE RUN: %d studies — the holdout it reports is not a result", arguments.studies)
     # ONE call, and %s rather than a second positional: logging treats extra positionals as %-format

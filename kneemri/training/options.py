@@ -57,6 +57,15 @@ class TrainingOptions:
     tie: str = FIRST_MAXIMAL
     seed: int = 2026
     split_seed: int = 2026
+    train_fraction: float = 1.0
+    """The share of the TRAINING studies actually fitted on; the holdout is never touched.
+
+    The knob a data-scaling point needs, and it is separate from `--studies` for the reason a scaling
+    point is not a smoke: `sampled` cuts BOTH halves so the loop still runs end to end on a few dozen
+    studies, and a holdout that moves with the training size makes the two points incomparable. This
+    cuts one side only, so the number it produces is scored on exactly the studies the ledger's
+    full-data rows were scored on and may be read straight against them.
+    """
     one_cycle: bool = False
     ema: bool = False
     intensity_aug: bool = False
@@ -407,6 +416,28 @@ class TrainingOptions:
             help="table to SCORE against (default: --labels). Hold this fixed across arms when the "
             "training labels are the variable, or the arms are measured with different rulers.",
         )
+        cls._encoder_arguments(parser)
+        parser.add_argument(
+            "--train-fraction",
+            type=float,
+            default=1.0,
+            help="share of the TRAINING studies to fit on, holdout untouched — the data-scaling knob. "
+            "Separate from --studies, which cuts both halves so a smoke still exercises the whole loop; "
+            "this cuts one side only, so the score is comparable to every full-data row in the ledger.",
+        )
+        parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
+        parser.add_argument("--out", type=Path, default=None)
+        parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+        return parser
+
+    @staticmethod
+    def _encoder_arguments(parser: argparse.ArgumentParser) -> None:
+        """What the encoder IS, what it reads, and what of it adapts — the trunk half of the recipe.
+
+        Split out of `parser` rather than left inline because that method crossed the statement ceiling,
+        and this is the group that comes out whole: every flag here is a statement about the trunk, and
+        none of them is read by anything that does not already hold an `Adaptation`.
+        """
         parser.add_argument(
             "--encoder-layer",
             type=int,
@@ -504,10 +535,6 @@ class TrainingOptions:
             "rewrites hardest, and two full loads measured on 2026-08-20 lost 0.17 with block 11 moved "
             "55% and 21% of its own norm.",
         )
-        parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
-        parser.add_argument("--out", type=Path, default=None)
-        parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-        return parser
 
     def sampled(
         self, training: NDArray[np.int64], holdout: NDArray[np.int64]
@@ -531,3 +558,26 @@ class TrainingOptions:
         share = len(training) / max(len(training) + len(holdout), 1)
         kept = min(max(round(self.studies * share), 1), len(training))
         return training[:kept], holdout[: max(self.studies - kept, 1)]
+
+    def thinned(self, training: NDArray[np.int64]) -> NDArray[np.int64]:
+        """A random `--train-fraction` share of the training studies, holdout untouched.
+
+        DRAWN AT RANDOM AND NOT SLICED OFF THE FRONT, which `sampled` above is free to do because a
+        smoke's score is meaningless anyway. Here it is the whole point: the corpus positions carry the
+        order `ReportFolds` assigned them, so a prefix is a systematically chosen half and any
+        difference it produces could be a property of that half rather than of its size.
+
+        SEEDED BY `--split-seed`, not `--seed`, for the same reason the fold is: which studies exist is
+        a property of the CORPUS and must not move when the model seed does. Two arms at the same
+        fraction therefore fit the same studies, so a scaling curve and a recipe comparison can be run
+        against each other without a second confound.
+
+        The kept positions are re-sorted so that a thinned run reads the cache in the same ascending
+        order a full one does — the loader's access pattern stays sequential rather than becoming a
+        random gather over a 99 GB memory-map.
+        """
+        if self.train_fraction >= 1.0:
+            return training
+        kept = max(round(len(training) * self.train_fraction), 1)
+        drawn = np.random.default_rng(self.split_seed).choice(len(training), size=kept, replace=False)
+        return training[np.sort(drawn)]

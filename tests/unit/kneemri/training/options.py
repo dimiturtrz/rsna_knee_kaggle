@@ -176,3 +176,29 @@ def test_sampled():
     whole = TrainingOptions(studies=5000).sampled(training, holdout)
 
     assert (whole[0] == training).all() and (whole[1] == holdout).all(), "a cap cannot invent"
+
+
+def test_thinned():
+    """The data-scaling knob: one side cut at random, reproducibly, in reading order."""
+    training = np.arange(800)
+
+    assert (TrainingOptions().thinned(training) == training).all(), "the default is not a scaling run"
+
+    half = TrainingOptions(train_fraction=0.5).thinned(training)
+
+    assert len(half) == 400, "the share asked for"
+    assert (np.sort(half) == half).all(), "ascending, so the loader still reads the cache sequentially"
+    assert not (half == training[:400]).all(), (
+        "drawn at random rather than sliced off the front — a prefix is a systematically chosen half, "
+        "and any difference it produced could be a property of that half rather than of its size"
+    )
+
+    again = TrainingOptions(train_fraction=0.5).thinned(training)
+
+    assert (again == half).all(), "seeded by --split-seed, so two arms at one fraction fit the same studies"
+
+    moved = TrainingOptions(train_fraction=0.5, seed=7).thinned(training)
+
+    assert (moved == half).all(), "and the MODEL seed does not move which studies exist, as with the fold"
+
+    assert len(TrainingOptions(train_fraction=0.0).thinned(training)) == 1, "a fraction cannot empty the fit"
