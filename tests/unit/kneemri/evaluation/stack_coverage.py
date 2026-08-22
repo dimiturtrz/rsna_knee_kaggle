@@ -4,8 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.stack_coverage import StackCoverage, StackCoverageReport
-from kneemri.findings import TARGETS
 
 STUDIES = 9
 

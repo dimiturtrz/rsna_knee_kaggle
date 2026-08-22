@@ -31,8 +31,8 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.bootstrap import INTERVAL, RESAMPLE_SEED, RESAMPLES
+from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -189,11 +189,11 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+    from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
+    from core.data.labels.targets import Targets  # noqa: PLC0415 - CLI-only
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
-    from kneemri.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.published_ruler import PublishedRuler  # noqa: PLC0415 - CLI-only
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
-    from kneemri.labels.targets import Targets  # noqa: PLC0415 - CLI-only
 
     root = DataRoot.from_config(arguments.paths)
     split = CorpusSplit(root.raw())

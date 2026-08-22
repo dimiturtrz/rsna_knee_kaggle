@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from kneemri.corpus.slots import SLOTS
+from core.data.corpus.slots import SLOTS
 from kneemri.evaluation.published_ruler import PublishedFold, PublishedRuler
 
 TARGET_COUNT = 12

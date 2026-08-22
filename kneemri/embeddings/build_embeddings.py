@@ -15,9 +15,9 @@ from pathlib import Path
 
 import torch
 
+from core.data.corpus.cache_flags import CacheFlags
 from core.paths import DataRoot
 from core.wakelock import Wakelock
-from kneemri.corpus.cache_flags import CacheFlags
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.models.backbone import ENCODERS, SMALL

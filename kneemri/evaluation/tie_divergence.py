@@ -26,10 +26,10 @@ import torch
 from jaxtyping import UInt8
 from torch import Tensor
 
-from kneemri.corpus.acquisition import Acquisition
-from kneemri.corpus.slot_reader import SlotReader
-from kneemri.corpus.slots import SLOTS, SlotScheme
-from kneemri.corpus.study import Study
+from core.data.corpus.acquisition import Acquisition
+from core.data.corpus.slot_reader import SlotReader
+from core.data.corpus.slots import SLOTS, SlotScheme
+from core.data.corpus.study import Study
 
 BYTE_RANGE = 255.0
 """What `SlotReader` quantises to, so a distance divided by it reads as a fraction of full scale."""
@@ -174,8 +174,8 @@ def main() -> None:
     import logging  # noqa: PLC0415 - as above
     from concurrent.futures import ProcessPoolExecutor  # noqa: PLC0415 - as above
 
+    from core.data.corpus.study_cache import StudyCache  # noqa: PLC0415 - as above
     from core.paths import DataRoot  # noqa: PLC0415 - as above
-    from kneemri.corpus.study_cache import StudyCache  # noqa: PLC0415 - as above
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--split", type=str, default="train_series")

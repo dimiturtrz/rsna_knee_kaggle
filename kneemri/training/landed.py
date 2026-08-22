@@ -23,8 +23,8 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT, WEIGHT_FLOOR, Targets
+from core.data.corpus.slot_reader import GROUP
+from core.data.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT, WEIGHT_FLOOR, Targets
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER

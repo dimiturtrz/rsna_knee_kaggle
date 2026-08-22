@@ -14,7 +14,7 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.findings import TARGETS
+from core.findings import TARGETS
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member, Window
 from kneemri.inference.prediction_cache import PredictionCache

@@ -48,7 +48,7 @@ class KernelClosure:
     def imported(self, path: str) -> list[str]:
         """Every dotted module named by an import anywhere in this file, ours or not.
 
-        `from kneemri.corpus import study` names two candidates — the package and the submodule — and
+        `from core.data.corpus import study` names two candidates — the package and the submodule — and
         which one it is cannot be told from the statement, so both are offered and `module_file`
         decides. Offering a name that resolves to nothing is free; missing a submodule is a file the
         closure would not carry.

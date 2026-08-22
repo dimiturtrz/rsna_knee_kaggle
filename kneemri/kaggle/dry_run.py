@@ -27,13 +27,13 @@ from pathlib import Path
 import pandas as pd
 import torch
 
+from core.data.labels.targets import Targets
+from core.findings import TARGETS
 from core.paths import DataRoot
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.members import MemberPackage
 from kneemri.kaggle.submission import Split, Submission
-from kneemri.labels.targets import Targets
 from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)

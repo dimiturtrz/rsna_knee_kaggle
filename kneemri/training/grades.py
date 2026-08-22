@@ -15,7 +15,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.labels.targets import MEASURED_AGREEMENT
+from core.data.labels.targets import MEASURED_AGREEMENT
 
 GRADE_LADDER = "grade_ladder"
 """Whether the loss reads the reader's five levels as an ordered ladder rather than as five values."""

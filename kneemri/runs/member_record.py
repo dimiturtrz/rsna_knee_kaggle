@@ -8,10 +8,10 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
-from kneemri.corpus.crop_centre import Crop
-from kneemri.corpus.slot_reader import GROUP, Band
-from kneemri.corpus.slots import Routing
-from kneemri.findings import TARGETS
+from core.data.corpus.crop_centre import Crop
+from core.data.corpus.slot_reader import GROUP, Band
+from core.data.corpus.slots import Routing
+from core.findings import TARGETS
 from kneemri.models.backbone import Encoder
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.model import StudyModel

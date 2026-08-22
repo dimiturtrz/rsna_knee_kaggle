@@ -18,11 +18,11 @@ import numpy as np
 import pytest
 import torch
 
+from core.data.corpus.slot_reader import GROUP, IMAGE_SIZE
+from core.data.corpus.slots import SLOTS
+from core.data.corpus.study_cache import StudyCache
+from core.findings import TARGETS
 from core.paths import DataRoot
-from kneemri.corpus.slot_reader import GROUP, IMAGE_SIZE
-from kneemri.corpus.slots import SLOTS
-from kneemri.corpus.study_cache import StudyCache
-from kneemri.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab

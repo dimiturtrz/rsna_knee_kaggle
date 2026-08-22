@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 import torch
 
+from core.data.corpus.study_cache import CachedCorpus
+from core.findings import TARGETS
 from core.paths import DataRoot
-from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.findings import TARGETS
 from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, UnbackfillableError
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache

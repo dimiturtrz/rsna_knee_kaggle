@@ -28,10 +28,10 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from core.data.corpus.study_cache import CachedCorpus
+from core.data.labels.targets import Targets
 from core.wakelock import Wakelock
-from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.evaluation.scores import LabelScores
-from kneemri.labels.targets import Targets
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics

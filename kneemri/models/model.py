@@ -16,8 +16,8 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
-from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
-from kneemri.findings import TARGETS
+from core.data.corpus.anatomy import ANATOMY, SlotAffinity
+from core.findings import TARGETS
 from kneemri.models.depth_window import DepthWindow
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.lora import LoRALinear

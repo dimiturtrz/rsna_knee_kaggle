@@ -4,11 +4,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.corpus.cache_flags import CacheFlags
-from kneemri.corpus.crop_centre import Crop
-from kneemri.corpus.slot_reader import Band, Reading
-from kneemri.corpus.slots import Routing
-from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
+from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.crop_centre import Crop
+from core.data.corpus.slot_reader import Band, Reading
+from core.data.corpus.slots import Routing
+from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.training.options import TrainingOptions
 
 

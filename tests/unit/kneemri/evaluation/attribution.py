@@ -5,9 +5,9 @@ import pytest
 import torch
 from torch import nn
 
-from kneemri.corpus.slot_reader import GROUP
+from core.data.corpus.slot_reader import GROUP
+from core.findings import TARGETS
 from kneemri.evaluation.attribution import Attribution, AttributionReport, Diagnostics, Holdout
-from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.models.model import StudyModel
 

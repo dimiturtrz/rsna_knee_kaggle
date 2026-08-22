@@ -5,9 +5,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from core.findings import TARGETS
 from kneemri.evaluation.member_curve import MemberCurve, Pool
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
 
 STUDIES = 40

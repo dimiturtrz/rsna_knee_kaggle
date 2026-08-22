@@ -40,12 +40,12 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
-from kneemri.corpus.anatomy import ANATOMY, SlotAffinity
-from kneemri.corpus.cache_flags import CacheFlags
+from core.data.corpus.anatomy import ANATOMY, SlotAffinity
+from core.data.corpus.cache_flags import CacheFlags
+from core.data.labels.targets import Targets
+from core.findings import TARGETS
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
-from kneemri.labels.targets import Targets
 from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
@@ -353,8 +353,8 @@ def main() -> None:
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+    from core.data.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
     from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
-    from kneemri.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
 
     root = DataRoot.from_config(arguments.paths)
     # The features are named after the PIXELS they were encoded from, so this asks the same question

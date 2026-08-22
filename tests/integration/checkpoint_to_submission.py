@@ -24,8 +24,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.findings import TARGETS
+from core.data.corpus.slot_reader import GROUP
+from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab

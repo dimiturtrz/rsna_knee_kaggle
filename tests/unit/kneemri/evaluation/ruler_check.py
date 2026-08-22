@@ -1,7 +1,7 @@
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.ruler_check import RulerCheck
-from kneemri.findings import TARGETS
 
 STUDIES = 40
 SEED = 2026

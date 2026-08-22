@@ -3,13 +3,12 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from core.data.corpus.crop_centre import Crop
+from core.data.corpus.slot_reader import Reading
+from core.data.corpus.study_cache import StudyCache
 from core.paths import COMPETITION
-from kneemri.corpus.crop_centre import Crop
-from kneemri.corpus.slot_reader import Reading
-from kneemri.corpus.study_cache import StudyCache
 from kneemri.experiments.arm_check import ArmCheck
-
-from ..conftest import write_series
+from tests.unit.conftest import write_series
 
 GOOD = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack --labels /tmp/labels.csv"
 SLICES = 4

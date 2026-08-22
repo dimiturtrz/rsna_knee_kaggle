@@ -12,10 +12,10 @@ import logging
 
 import torch
 
+from core.data.corpus.folds import ReportFolds
+from core.data.corpus.slots import SCHEMES
+from core.data.labels.targets import Targets
 from core.paths import DataRoot
-from kneemri.corpus.folds import ReportFolds
-from kneemri.corpus.slots import SCHEMES
-from kneemri.labels.targets import Targets
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.runs.member_record import MemberRecord

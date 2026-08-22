@@ -28,9 +28,10 @@ import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core.data.corpus.folds import ReportFolds
+from core.data.labels.targets import Targets
 from core.paths import DataRoot
 from core.wakelock import Wakelock
-from kneemri.corpus.folds import ReportFolds
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
@@ -40,7 +41,6 @@ from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage
-from kneemri.labels.targets import Targets
 
 logger = logging.getLogger(__name__)
 

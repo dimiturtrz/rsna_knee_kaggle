@@ -1,6 +1,6 @@
 # What the 0.20–0.80 slice band actually discards
 
-**Measured** 2026-08-17, `python -m kneemri.corpus.band_coverage --sample 400`, 400 studies sampled of
+**Measured** 2026-08-17, `python -m core.data.corpus.band_coverage --sample 400`, 400 studies sampled of
 4407 in the corpus, 1848 series decoded, 0 decode failures. Label-free, GPU-free. Denominator is the
 FULL series read at depth 24, which is the only denominator that can price what a narrower band removes.
 

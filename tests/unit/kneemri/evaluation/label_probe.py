@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from core.findings import TARGETS
 from kneemri.evaluation.label_probe import HeldOutProbe
-from kneemri.findings import TARGETS
 
 STUDIES = 40
 

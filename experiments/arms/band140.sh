@@ -7,7 +7,7 @@
 # crop80_tissue (80 mm) cost -0.0112 on the mean against its control, and centre_tissue since separated
 # that loss into the resolution change rather than the centring. So the axis has been measured in one
 # direction only, and the direction it was measured in is the one that throws tissue away. Corpus-wide
-# over 1822 series (kneemri.corpus.crop_coverage --sample 400 --tight-mm 140), the shipped 130 mm window
+# over 1822 series (core.data.corpus.crop_coverage --sample 400 --tight-mm 140), the shipped 130 mm window
 # discards a MEDIAN 15% of imaged tissue -- p10 27%, worst 55% -- and the discarded ring is the
 # periphery: the medial margin where MCL lives, the posterior where Baker's lives, the intercondylar
 # where ACL crosses.

@@ -203,9 +203,9 @@ source = ["core", "kneemri"]
 # end by the runs that produce the cache and the members, and their LOGIC lives in StudyCache and
 # Trainer, which are unit-tested. Covering them here would mean asserting on an argparse call.
 omit = [
-    "kneemri/corpus/build_cache.py",
+    "core/data/corpus/build_cache.py",
     "kneemri/kaggle/package_members.py",
-    "kneemri/corpus/diagnose_laterality.py",
+    "core/data/corpus/diagnose_laterality.py",
     # train.py is now NOTHING but that entrypoint: its flags live in options.py and what they build in
     # run_setup.py, both unit-tested, and `main` itself is walked end to end by argv_to_checkpoint.
     "kneemri/training/train.py",
@@ -252,20 +252,18 @@ forbidden_modules = ["kneemri"]
 # The subject packages, and the direction each may face. Only what the code ALREADY obeys is written
 # here — a contract stating an aspiration fails on the day it lands and gets deleted, so the ones we
 # do not yet obey (inference <-> evaluation, labels reaching up into both) are beads, not entries.
+#
+# The data layer (corpus, labels, findings) lives under `core`, so EVERY "it must not reach up into
+# the pipeline" rule for it is already the kernel contract above — one line covering the whole layer
+# instead of a hand-kept list per package that had to grow with each new kneemri subpackage. What is
+# left below is only what the kernel contract cannot say: the ordering WITHIN the data layer, and the
+# rules whose source is a kneemri package.
 
 [[tool.importlinter.contracts]]
-name = "corpus is the base layer (pixels and studies know nothing of models or scores)"
+name = "corpus is the base layer (pixels and studies know nothing of what labels them)"
 type = "forbidden"
-source_modules = ["kneemri.corpus"]
-forbidden_modules = [
-    "kneemri.models",
-    "kneemri.embeddings",
-    "kneemri.labels",
-    "kneemri.training",
-    "kneemri.inference",
-    "kneemri.evaluation",
-    "kneemri.kaggle",
-]
+source_modules = ["core.data.corpus"]
+forbidden_modules = ["core.data.labels"]
 
 [[tool.importlinter.contracts]]
 name = "models sit on corpus alone (a network reads pixels; it does not score, fit or submit)"
@@ -273,7 +271,7 @@ type = "forbidden"
 source_modules = ["kneemri.models"]
 forbidden_modules = [
     "kneemri.embeddings",
-    "kneemri.labels",
+    "core.data.labels",
     "kneemri.training",
     "kneemri.inference",
     "kneemri.evaluation",
@@ -285,7 +283,7 @@ name = "embeddings are a cache over corpus and models, not a consumer of what is
 type = "forbidden"
 source_modules = ["kneemri.embeddings"]
 forbidden_modules = [
-    "kneemri.labels",
+    "core.data.labels",
     "kneemri.training",
     "kneemri.inference",
     "kneemri.evaluation",
@@ -298,20 +296,7 @@ type = "forbidden"
 source_modules = ["kneemri.runs"]
 forbidden_modules = [
     "kneemri.embeddings",
-    "kneemri.labels",
-    "kneemri.training",
-    "kneemri.inference",
-    "kneemri.evaluation",
-    "kneemri.kaggle",
-]
-
-[[tool.importlinter.contracts]]
-name = "labels are vocabulary, not a study of it (corpus and models below, nothing above)"
-type = "forbidden"
-source_modules = ["kneemri.labels"]
-forbidden_modules = [
-    "kneemri.embeddings",
-    "kneemri.runs",
+    "core.data.labels",
     "kneemri.training",
     "kneemri.inference",
     "kneemri.evaluation",
@@ -334,11 +319,9 @@ forbidden_modules = ["kneemri.training", "kneemri.experiments", "kneemri.kaggle"
 name = "experiments is a top layer with kaggle: nothing in the pipeline imports its preflights"
 type = "forbidden"
 source_modules = [
-    "kneemri.corpus",
     "kneemri.models",
     "kneemri.embeddings",
     "kneemri.runs",
-    "kneemri.labels",
     "kneemri.training",
     "kneemri.inference",
     "kneemri.evaluation",
@@ -350,11 +333,9 @@ forbidden_modules = ["kneemri.experiments"]
 name = "kaggle is the top: nothing below it may import the submission layer"
 type = "forbidden"
 source_modules = [
-    "kneemri.corpus",
     "kneemri.models",
     "kneemri.embeddings",
     "kneemri.runs",
-    "kneemri.labels",
     "kneemri.training",
     "kneemri.inference",
     "kneemri.evaluation",
@@ -364,7 +345,7 @@ forbidden_modules = ["kneemri.kaggle"]
 [[tool.importlinter.contracts]]
 name = "training is fitting only — serving and packaging never import it"
 type = "forbidden"
-source_modules = ["kneemri.inference", "kneemri.kaggle", "kneemri.labels"]
+source_modules = ["kneemri.inference", "kneemri.kaggle"]
 forbidden_modules = ["kneemri.training"]
 # <<< LOCAL-SLOT: import-contracts
 

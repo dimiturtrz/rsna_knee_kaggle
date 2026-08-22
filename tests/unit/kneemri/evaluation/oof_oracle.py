@@ -6,11 +6,10 @@ import numpy as np
 import pandas as pd
 import torch
 
-from kneemri.corpus.slots import SLOTS
+from core.data.corpus.slots import SLOTS
 from kneemri.evaluation.oof_oracle import OutOfFoldOracle, OutOfFoldOracleReport, PublishedCheckpoint
 from kneemri.inference.members import Member
-
-from ..conftest import write_series
+from tests.unit.conftest import write_series
 
 TARGET_COUNT = 12
 CANONICAL = [slot.name for slot in SLOTS]

@@ -23,8 +23,8 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
 
 UNDEFINED = -np.inf

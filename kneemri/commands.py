@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 ENTRYPOINT = "main"
 GROUP_HEADING = "###"
 INDEX = Path("kneemri/README.md")
-NESTED = 2  # `kneemri.corpus.probe` — a module deeper than `kneemri.tool` groups under its subpackage.
+NESTED = 2  # `core.data.corpus.probe` — a module deeper than `kneemri.tool` groups under its subpackage.
 PACKAGE = Path("kneemri")
 
 PREAMBLE = """# kneemri — the commands

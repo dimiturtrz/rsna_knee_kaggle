@@ -25,9 +25,9 @@ from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.slot_reader import Reading
-from kneemri.corpus.slots import SCHEMES, SlotScheme
-from kneemri.findings import TARGETS
+from core.data.corpus.slot_reader import Reading
+from core.data.corpus.slots import SCHEMES, SlotScheme
+from core.findings import TARGETS
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.members import Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews

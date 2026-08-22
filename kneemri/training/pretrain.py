@@ -28,10 +28,10 @@ from jaxtyping import Float
 from torch import Tensor
 from torch.amp.autocast_mode import autocast
 
+from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.study_cache import CachedCorpus
 from core.paths import DataRoot
 from core.wakelock import Wakelock
-from kneemri.corpus.cache_flags import CacheFlags
-from kneemri.corpus.study_cache import CachedCorpus
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.training.spectral_mae import BYTE_RANGE, SpectralMae, SpectralMaskConfig
 

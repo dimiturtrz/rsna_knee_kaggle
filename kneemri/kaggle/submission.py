@@ -27,8 +27,8 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.study import SlotPipeline, Study
-from kneemri.findings import TARGETS
+from core.data.corpus.study import SlotPipeline, Study
+from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble, Read
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ seconds buys twenty studies. A real split is thousands and always wins; the thre
 a dry run are exactly the cases that would silently get slower."""
 
 DECODE_WORKERS = 0
-"""Decode processes; 0 means one per core. MEASURED, not assumed (`kneemri.corpus.decode_bench`, 96 studies,
+"""Decode processes; 0 means one per core. MEASURED, not assumed (`core.data.corpus.decode_bench`, 96 studies,
 warm, returning the real bags): serial 25.7s, threads(4) 19.0s, threads(8) 26.1s — the setting this
 replaces, SLOWER than no pool at all — processes(4) 11.2s, processes(8) 12.8s. pydicom parses headers in
 Python, so decode is GIL-bound and threads contend; processes reach 2.3x and peak at the core count,
@@ -206,7 +206,7 @@ class Submission:
         process spawn plus a torch import every 48 studies, which is how this optimisation turns into a
         pessimisation.
 
-        PROCESSES, NOT THREADS, and measured rather than assumed: `kneemri.corpus.decode_bench` puts 8 threads
+        PROCESSES, NOT THREADS, and measured rather than assumed: `core.data.corpus.decode_bench` puts 8 threads
         at 0.98x of running SERIALLY on 96 studies while 4 processes reach 2.29x. pydicom parses in
         Python, so decode is GIL-bound; the previous setting's stated reason — "dominated by waiting on
         the mount" — predicts the opposite of what happens.

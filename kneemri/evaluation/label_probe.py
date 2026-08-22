@@ -19,10 +19,10 @@ import numpy as np
 from jaxtyping import Bool, Float
 from numpy.typing import NDArray
 
+from core.findings import TARGETS
 from core.paths import DataRoot
 from kneemri.evaluation.residual_coupling import LabelCoupling
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
-from kneemri.findings import TARGETS
 from kneemri.runs.holdout_record import HoldoutRecord
 
 LOGGER = logging.getLogger(__name__)

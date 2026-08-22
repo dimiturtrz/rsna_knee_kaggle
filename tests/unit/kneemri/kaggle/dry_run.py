@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 import torch
 
+from core.findings import TARGETS
 from core.paths import DataRoot
-from kneemri.findings import TARGETS
 from kneemri.kaggle.dry_run import DryRun
 
 

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from kneemri.corpus.study_cache import CachedCorpus
+from core.data.corpus.study_cache import CachedCorpus
 from kneemri.inference.holdout_slab import HoldoutSlab
 
 STUDIES, SLOTS = 4, 3

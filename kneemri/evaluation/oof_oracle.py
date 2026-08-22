@@ -47,11 +47,11 @@ import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core.data.corpus.slot_reader import Band
+from core.data.corpus.slot_ties import SlotTies
+from core.data.corpus.slots import SCHEMES
+from core.data.corpus.study_cache import CorpusSplit
 from core.paths import DataRoot
-from kneemri.corpus.slot_reader import Band
-from kneemri.corpus.slot_ties import SlotTies
-from kneemri.corpus.slots import SCHEMES
-from kneemri.corpus.study_cache import CorpusSplit
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.members import Member, MemberConfig
 
@@ -182,8 +182,8 @@ class OutOfFoldOracle:
 
         Headers only, no pixels, so this costs seconds beside the forward pass it explains.
         """
-        from kneemri.corpus.slots import SlotScheme  # noqa: PLC0415 - CLI-side analysis, not the library path
-        from kneemri.corpus.study import Study  # noqa: PLC0415 - as above
+        from core.data.corpus.slots import SlotScheme  # noqa: PLC0415 - CLI-side analysis, not the library path
+        from core.data.corpus.study import Study  # noqa: PLC0415 - as above
 
         scheme = SlotScheme()
         unrouted: list[float] = []

@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from kneemri.corpus.study_cache import CachedCorpus, StudyCache
+from core.data.corpus.study_cache import CachedCorpus, StudyCache
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 

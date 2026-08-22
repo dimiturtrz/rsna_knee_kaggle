@@ -9,7 +9,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.findings import TARGETS
+from core.findings import TARGETS
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
 from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window

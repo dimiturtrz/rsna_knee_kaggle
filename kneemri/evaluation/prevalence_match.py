@@ -31,10 +31,10 @@ from pathlib import Path
 import numpy as np
 from jaxtyping import Float
 
+from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import BOOTSTRAP_SEED, MIDPOINT, RESAMPLES, LabelScores
 from kneemri.evaluation.supervision_gap import SupervisionGap
-from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
 
 logger = logging.getLogger(__name__)

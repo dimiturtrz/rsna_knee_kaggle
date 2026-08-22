@@ -2,8 +2,8 @@
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.ruler_transfer import RulerTransfer, Transfer
-from kneemri.findings import TARGETS
 
 STUDIES = 40
 

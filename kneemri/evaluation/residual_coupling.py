@@ -31,8 +31,8 @@ import numpy as np
 from jaxtyping import Bool, Float
 from numpy.typing import NDArray
 
+from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT
-from kneemri.findings import TARGETS
 
 UNKNOWN = "UNK"
 """The verdict column's value for a finding the report never decided. See the module docstring."""

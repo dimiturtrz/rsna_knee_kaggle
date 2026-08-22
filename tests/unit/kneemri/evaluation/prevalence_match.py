@@ -2,8 +2,8 @@
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.prevalence_match import MatchedGap, PrevalenceMatch
-from kneemri.findings import TARGETS
 
 RICH = "Medial Meniscus"
 POOR = "Lateral Meniscus"

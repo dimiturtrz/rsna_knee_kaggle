@@ -13,7 +13,7 @@ is invariant under any strictly increasing map, so such a step could only add a 
 import numpy as np
 from numpy.typing import NDArray
 
-from kneemri.findings import TARGETS
+from core.findings import TARGETS
 
 MIDPOINT = 0.5
 """Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""

@@ -12,9 +12,9 @@ import numpy as np
 import pytest
 import torch
 
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.findings import TARGETS
+from core.data.corpus.slot_reader import GROUP
+from core.data.corpus.study_cache import CachedCorpus
+from core.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member

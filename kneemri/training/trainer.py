@@ -27,10 +27,10 @@ from jaxtyping import UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.prefetch import Prefetch
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.labels.targets import Targets
+from core.data.corpus.prefetch import Prefetch
+from core.data.corpus.slot_reader import GROUP
+from core.data.corpus.study_cache import CachedCorpus
+from core.data.labels.targets import Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation

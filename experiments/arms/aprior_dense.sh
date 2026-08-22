@@ -14,7 +14,7 @@
 # softmax over the six acquisition slots and initialises `self.prior` at ZEROS, so which sequence shows
 # which finding is something 4,407 study-level label vectors — with no localisation in them at all —
 # have to teach it. `--anatomical-prior` initialises that same parameter from the 12x6 table in
-# `kneemri/corpus/anatomy.py` instead, generated from two facts per finding (which planes show the
+# `core/data/corpus/anatomy.py` instead, generated from two facts per finding (which planes show the
 # structure, whether it needs fluid weighting) at PRIOR_STRENGTH 2.0. It stays an `nn.Parameter`, so
 # the data can overrule it anywhere it disagrees; every entry is non-negative, so it is a preference
 # over slots and never a mask. Parameter count, shapes, compute, VRAM and wall-clock are unchanged —

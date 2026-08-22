@@ -37,9 +37,9 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
+from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 from kneemri.inference.vote import RankAverage
 
 logger = logging.getLogger(__name__)

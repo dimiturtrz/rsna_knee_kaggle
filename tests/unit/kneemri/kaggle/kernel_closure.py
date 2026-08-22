@@ -11,14 +11,14 @@ def _repo(root: Path) -> KernelClosure:
     """A miniature of the real layout: an entrypoint, what it reaches, and what nothing reaches."""
     written = {
         ENTRYPOINT: "import torch\nfrom core.mounts import Mounts\nfrom kneemri.inference import members\n",
-        "core/mounts.py": "from kneemri.corpus import study\n",
+        "core/mounts.py": "from core.data.corpus import study\n",
         "core/__init__.py": "",
         "kneemri/inference/__init__.py": "",
         "kneemri/inference/members.py": "def load():\n    from kneemri.models.model import Model\n",
-        "kneemri/corpus/__init__.py": "",
-        "kneemri/corpus/study.py": "",
+        "core/data/corpus/__init__.py": "",
+        "core/data/corpus/study.py": "",
         "kneemri/models/model.py": "",
-        "kneemri/corpus/band_coverage.py": "from kneemri.corpus import study\n",
+        "core/data/corpus/band_coverage.py": "from core.data.corpus import study\n",
     }
     for name, source in written.items():
         path = root / name
@@ -31,10 +31,10 @@ def test_module_file(tmp_path: Path) -> None:
     """A dotted name resolves to a module, a package to its `__init__`, and a dependency to nothing."""
     closure = _repo(tmp_path)
 
-    assert closure.module_file("kneemri.corpus.study") == "kneemri/corpus/study.py"
-    assert closure.module_file("kneemri.corpus") == "kneemri/corpus/__init__.py"
+    assert closure.module_file("core.data.corpus.study") == "core/data/corpus/study.py"
+    assert closure.module_file("core.data.corpus") == "core/data/corpus/__init__.py"
     assert closure.module_file("torch") is None
-    assert closure.module_file("kneemri.corpus.absent") is None
+    assert closure.module_file("core.data.corpus.absent") is None
 
 
 def test_imported(tmp_path: Path) -> None:
@@ -56,9 +56,9 @@ def test_files(tmp_path: Path) -> None:
     closure = _repo(tmp_path)
 
     assert closure.files() == [
+        "core/data/corpus/__init__.py",
+        "core/data/corpus/study.py",
         "core/mounts.py",
-        "kneemri/corpus/__init__.py",
-        "kneemri/corpus/study.py",
         "kneemri/inference/__init__.py",
         "kneemri/inference/members.py",
         "kneemri/kaggle/kernel_run.py",

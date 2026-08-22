@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import torch
 
+from core.findings import TARGETS
 from kneemri.evaluation.supervision_gap import SupervisionGap
-from kneemri.findings import TARGETS
 
 STUDIES = 8
 

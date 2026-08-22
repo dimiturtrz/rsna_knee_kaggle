@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from core.data.labels.label_power import LabelPower
+from core.findings import TARGETS
 from kneemri.evaluation.paired_floor import PairedFloor
-from kneemri.findings import TARGETS
-from kneemri.labels.label_power import LabelPower
 
 STUDIES = 200
 RESAMPLES = 60

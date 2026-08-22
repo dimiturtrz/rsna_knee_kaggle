@@ -32,9 +32,9 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
+from core.findings import TARGETS
 from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.models.model import StudyModel
@@ -416,11 +416,11 @@ def main() -> None:
     import logging  # noqa: PLC0415 - as above
     from pathlib import Path  # noqa: PLC0415 - as above
 
+    from core.data.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
+    from core.data.labels.targets import Targets  # noqa: PLC0415 - as above
     from core.paths import DataRoot  # noqa: PLC0415 - as above
     from core.wakelock import Wakelock  # noqa: PLC0415 - as above
-    from kneemri.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
     from kneemri.inference.members import Member  # noqa: PLC0415 - as above
-    from kneemri.labels.targets import Targets  # noqa: PLC0415 - as above
     from kneemri.models.backbone import ENCODERS, SMALL  # noqa: PLC0415 - as above
 
     parser = argparse.ArgumentParser(description=__doc__)

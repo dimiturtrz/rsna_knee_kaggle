@@ -1,8 +1,7 @@
 from pathlib import Path
 
 from kneemri.evaluation.tie_divergence import SlotDivergence, TieDivergence, TieDivergenceReport
-
-from ..conftest import write_series
+from tests.unit.conftest import write_series
 
 STUDIES = 200
 DIFFERENT = 0.5

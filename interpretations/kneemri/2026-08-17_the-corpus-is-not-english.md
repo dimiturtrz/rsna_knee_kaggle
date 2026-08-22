@@ -1,7 +1,7 @@
 # The corpus is not English, and a THIRD of it is invisible to the patterns we read it with
 
 **2026-08-17, corrected 2026-08-19.** CPU only, no training, no LLM pass:
-`python -m kneemri.labels.report_language` over all 4,407 reports. The census already existed; what it had
+`python -m core.data.labels.report_language` over all 4,407 reports. The census already existed; what it had
 never been read for is the size of what our extraction path cannot see.
 
 **The correction.** This document's own Limits section said of the 412 `unknown` reports that "nothing
@@ -75,6 +75,6 @@ path is closed because the expensive path is the only one that goes where the da
 
 ## Sources
 
-- `python -m kneemri.labels.report_language` (the census; `ReportLanguages.census`).
+- `python -m core.data.labels.report_language` (the census; `ReportLanguages.census`).
 - knee-mxj (the severity branch this sizes), knee-ttk (the negation defect and its denominator
   correction), knee-dbw (replace the rule engine with an actual reader).

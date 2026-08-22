@@ -7,10 +7,10 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.corpus.study_cache import CachedCorpus
-from kneemri.findings import TARGETS
-from kneemri.labels.targets import Targets
+from core.data.corpus.slot_reader import GROUP
+from core.data.corpus.study_cache import CachedCorpus
+from core.data.labels.targets import Targets
+from core.findings import TARGETS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT

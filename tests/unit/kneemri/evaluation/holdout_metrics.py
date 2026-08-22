@@ -5,8 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
-from kneemri.findings import TARGETS
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 

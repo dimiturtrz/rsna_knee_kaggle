@@ -11,8 +11,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from core.findings import TARGETS
 from kneemri.evaluation.residual_coupling import LabelCoupling
-from kneemri.findings import TARGETS
 
 STUDIES = 40
 

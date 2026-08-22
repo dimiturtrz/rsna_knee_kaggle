@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from kneemri.corpus.anatomy import ScaleProfile
+from core.data.corpus.anatomy import ScaleProfile
+from core.data.labels.label_power import FOLDS, LabelPower
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
-from kneemri.labels.label_power import FOLDS, LabelPower
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import METRICS_SUFFIX, EpochRow, RunMetrics

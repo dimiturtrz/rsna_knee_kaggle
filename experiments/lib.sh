@@ -544,7 +544,7 @@ wait_for_cache() {
   # prevent, so the reading goes to the builder that names it, in full.
   local size="$1" slices="${2:-12}" scheme="${3:-canonical}" crop="${4:-130}" centre="${5:-image}"
   local key
-  key="$(uv run --no-sync python -m kneemri.corpus.build_cache --print-key   --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
+  key="$(uv run --no-sync python -m core.data.corpus.build_cache --print-key   --image-size "$size" --slices "$slices" --scheme "$scheme" --crop-mm "$crop" --centre "$centre")"
   [ -n "$key" ] || { echo "wait_for_cache: the builder named no key"; return 1; }
   until [ -f "$PROCESSED/mask_${key}.npy" ]; do sleep 60; done
 }

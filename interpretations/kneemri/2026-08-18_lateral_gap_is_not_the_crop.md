@@ -1,6 +1,6 @@
 # The medial-over-lateral gap is not the in-plane crop either — the crop clips MEDIAL
 
-**2026-08-18.** `python -m kneemri.corpus.crop_laterality --sample 400 --workers 20`. 1,010 coronal and
+**2026-08-18.** `python -m core.data.corpus.crop_laterality --sample 400 --workers 20`. 1,010 coronal and
 axial series decoded uncropped, from 400 studies sampled of 4,407. Zero GPU, no label.
 
 This was knee-yrg's last cheap candidate: a 130 mm box centred on the middle of the frame could clip the
@@ -52,6 +52,6 @@ test on this axis is a training arm, not another decode.
 
 ## Sources
 
-- `kneemri/corpus/crop_laterality.py` (`CropLaterality.clipped`, paired bootstrap seeded 11, 1,500 draws).
-- `kneemri/corpus/acquisition.py` — `SeriesHeader.column_axis_x`, added for this.
+- `core/data/corpus/crop_laterality.py` (`CropLaterality.clipped`, paired bootstrap seeded 11, 1,500 draws).
+- `core/data/corpus/acquisition.py` — `SeriesHeader.column_axis_x`, added for this.
 - knee-yrg, knee-1v0n, knee-dtk.

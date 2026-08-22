@@ -14,12 +14,12 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from kneemri.corpus.cache_flags import CacheFlags
-from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
-from kneemri.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
-from kneemri.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
-from kneemri.corpus.study_cache import StudyCache
-from kneemri.labels.targets import CONFIDENCE_FLOOR, Supervision
+from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
+from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
+from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
+from core.data.corpus.study_cache import StudyCache
+from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS

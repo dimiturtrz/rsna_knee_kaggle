@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Decode a pixel cache: build_cache.sh [any kneemri.corpus.build_cache flag] [--workers N] [--dry-run].
+# Decode a pixel cache: build_cache.sh [any core.data.corpus.build_cache flag] [--workers N] [--dry-run].
 # RUN IT ALONE - it must not share the machine with a training arm.
 #
 # On 2026-08-11 this build ran beside a trainer and the OS killed BOTH silently: the arm died at epoch
@@ -43,13 +43,13 @@ READING=("${DEFAULTS[@]}" "${READING[@]}")
 # ASKED FOR, never rebuilt here. This used to reassemble StudyCache's key in bash, so the completion
 # check below tested a filename the builder had stopped writing the moment a reading axis was
 # added - and the arm's own comment claimed the gate and the artefact could not drift. They could.
-KEY="$(uv run python -m kneemri.corpus.build_cache --print-key "${READING[@]}")"
+KEY="$(uv run python -m core.data.corpus.build_cache --print-key "${READING[@]}")"
 
 # THE CHEAPEST CHECK THIS ARM HAS: it asks what cache a call would write without decoding one. Every
 # failure above announced itself as a wrong or missing filename after the machine had been committed.
 [ -z "$DRY_RUN" ] || { echo "would build ${KEY} with ${WORKERS} workers"; exit 0; }
 
-uv run python -u -m kneemri.corpus.build_cache "${READING[@]}" --workers "$WORKERS" 2>&1 \
+uv run python -u -m core.data.corpus.build_cache "${READING[@]}" --workers "$WORKERS" 2>&1 \
   | tee "$LOGS/cache_${KEY}.log"
 status="${PIPESTATUS[0]}"
 [ "$status" -eq 0 ] || { echo "ARM FAILED build_cache_${KEY} (exit $status)"; exit "$status"; }

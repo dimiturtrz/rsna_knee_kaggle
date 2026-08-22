@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from kneemri.corpus.study_cache import CachedCorpus
+from core.data.corpus.study_cache import CachedCorpus
 from kneemri.training.pretrain import PRESENT, Optimisation, Pretrainer, Sampling
 from kneemri.training.spectral_mae import SpectralMae, SpectralMaskConfig
 

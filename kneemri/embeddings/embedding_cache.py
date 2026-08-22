@@ -34,7 +34,7 @@ from numpy.lib.format import open_memmap
 from numpy.typing import NDArray
 from torch import Tensor
 
-from kneemri.corpus.study_cache import CachedCorpus
+from core.data.corpus.study_cache import CachedCorpus
 
 logger = logging.getLogger(__name__)
 

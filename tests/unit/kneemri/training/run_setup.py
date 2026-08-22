@@ -82,7 +82,7 @@ def test_trainer(tmp_path: Path):
     """
     import torch  # noqa: PLC0415 - the rest of this module needs no torch
 
-    from kneemri.corpus.slot_reader import GROUP  # noqa: PLC0415
+    from core.data.corpus.slot_reader import GROUP  # noqa: PLC0415
     from kneemri.models.ema import LiveWeights, WeightAverage  # noqa: PLC0415
     from kneemri.models.model import StudyDesign, StudyModel  # noqa: PLC0415
     from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision  # noqa: PLC0415

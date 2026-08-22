@@ -2,9 +2,9 @@
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.member_curve import Pool
 from kneemri.evaluation.member_distance import MemberDistance
-from kneemri.findings import TARGETS
 
 STUDIES = 60
 

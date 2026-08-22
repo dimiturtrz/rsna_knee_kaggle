@@ -8,7 +8,7 @@ import pytest
 import torch
 from torch import Tensor
 
-from kneemri.corpus.study_cache import CachedCorpus
+from core.data.corpus.study_cache import CachedCorpus
 from kneemri.embeddings.embedding_cache import EmbeddedCorpus, EmbeddingCache, EmbeddingSpec
 
 STUDIES = 4

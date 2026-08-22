@@ -23,13 +23,13 @@ import pandas as pd
 import pytest
 import torch
 
+from core.data.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
+from core.data.corpus.folds import ReportFolds
+from core.data.corpus.slot_reader import IMAGE_SIZE, Band, Reading
+from core.data.corpus.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
+from core.data.corpus.study_cache import StudyCache
+from core.findings import TARGETS
 from core.paths import COMPETITION
-from kneemri.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
-from kneemri.corpus.folds import ReportFolds
-from kneemri.corpus.slot_reader import IMAGE_SIZE, Band, Reading
-from kneemri.corpus.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
-from kneemri.corpus.study_cache import StudyCache
-from kneemri.findings import TARGETS
 from kneemri.inference.members import Member, MemberConfig
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign

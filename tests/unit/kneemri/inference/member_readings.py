@@ -5,11 +5,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.corpus.study_cache import StudyCache
+from core.data.corpus.study_cache import StudyCache
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
-
-from ..conftest import write_series
+from tests.unit.conftest import write_series
 
 
 def _member(directory: Path, name: str, *, crop_mm: float = 130.0) -> Member:

@@ -5,7 +5,7 @@ from collections.abc import Iterator
 import numpy as np
 from numpy.typing import NDArray
 
-from kneemri.corpus.study_cache import CachedCorpus
+from core.data.corpus.study_cache import CachedCorpus
 
 
 class HoldoutSlab:

@@ -11,15 +11,15 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 
 | command | what it answers |
 |---|---|
-| `python -m kneemri.corpus.band_coverage` | What the central slice band actually discards: `python -m kneemri.corpus.band_coverage`. |
-| `python -m kneemri.corpus.build_cache` | Build the decode-once training cache: `python -m kneemri.corpus.build_cache [--slices N] [--workers N]`. |
-| `python -m kneemri.corpus.crop_coverage` | Which crop centre actually keeps the knee: `python -m kneemri.corpus.crop_coverage`. |
-| `python -m kneemri.corpus.crop_laterality` | Does the 130 mm crop cut the LATERAL compartment? `python -m kneemri.corpus.crop_laterality`. |
-| `python -m kneemri.corpus.decode_bench` | Is decode I/O-bound or GIL-bound? `python -m kneemri.corpus.decode_bench --studies 96`. |
-| `python -m kneemri.corpus.diagnose_laterality` | How was each study's side decided? `python -m kneemri.corpus.diagnose_laterality --out <csv>`. |
-| `python -m kneemri.corpus.diagnose_matrix` | How many series hold slices of DIFFERENT matrix sizes? `python -m kneemri.corpus.diagnose_matrix`. |
-| `python -m kneemri.corpus.fetch_bench` | How fast a batch reaches the trainer, per reader and per handle count: |
-| `python -m kneemri.corpus.slot_ties` | How often two series compete for one slot — and whether that ambiguity is ever resolved differently. |
+| `python -m core.data.corpus.band_coverage` | What the central slice band actually discards: `python -m core.data.corpus.band_coverage`. |
+| `python -m core.data.corpus.build_cache` | Build the decode-once training cache: `python -m core.data.corpus.build_cache [--slices N] [--workers N]`. |
+| `python -m core.data.corpus.crop_coverage` | Which crop centre actually keeps the knee: `python -m core.data.corpus.crop_coverage`. |
+| `python -m core.data.corpus.crop_laterality` | Does the 130 mm crop cut the LATERAL compartment? `python -m core.data.corpus.crop_laterality`. |
+| `python -m core.data.corpus.decode_bench` | Is decode I/O-bound or GIL-bound? `python -m core.data.corpus.decode_bench --studies 96`. |
+| `python -m core.data.corpus.diagnose_laterality` | How was each study's side decided? `python -m core.data.corpus.diagnose_laterality --out <csv>`. |
+| `python -m core.data.corpus.diagnose_matrix` | How many series hold slices of DIFFERENT matrix sizes? `python -m core.data.corpus.diagnose_matrix`. |
+| `python -m core.data.corpus.fetch_bench` | How fast a batch reaches the trainer, per reader and per handle count: |
+| `python -m core.data.corpus.slot_ties` | How often two series compete for one slot — and whether that ambiguity is ever resolved differently. |
 
 ### embeddings
 
@@ -84,10 +84,10 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 
 | command | what it answers |
 |---|---|
-| `python -m kneemri.labels.confident_labels` | Write a label table with the reader's unsure calls removed. |
-| `python -m kneemri.labels.label_power` | How precisely each label's AUC can be measured at all: `python -m kneemri.labels.label_power`. |
-| `python -m kneemri.labels.reader_agreement` | Does the label reader agree with the radiologist equally in every language? |
-| `python -m kneemri.labels.report_language` | What language each report is written in, and whether it grades its findings. |
+| `python -m core.data.labels.confident_labels` | Write a label table with the reader's unsure calls removed. |
+| `python -m core.data.labels.label_power` | How precisely each label's AUC can be measured at all: `python -m core.data.labels.label_power`. |
+| `python -m core.data.labels.reader_agreement` | Does the label reader agree with the radiologist equally in every language? |
+| `python -m core.data.labels.report_language` | What language each report is written in, and whether it grades its findings. |
 
 ### runs
 

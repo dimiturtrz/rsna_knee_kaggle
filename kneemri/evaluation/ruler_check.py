@@ -26,15 +26,15 @@ from pathlib import Path
 import numpy as np
 from jaxtyping import Bool, Float
 
+from core.data.corpus.folds import ReportFolds
+from core.data.labels.targets import Targets
 from core.paths import DataRoot
-from kneemri.corpus.folds import ReportFolds
 from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
-from kneemri.labels.targets import Targets
 
 logger = logging.getLogger(__name__)
 

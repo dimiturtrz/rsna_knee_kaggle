@@ -1,6 +1,6 @@
 import torch
 
-from kneemri.findings import TARGETS
+from core.findings import TARGETS
 from kneemri.models.slot_head import REPORT_DIMS, MeanSlotHead, SlotHead
 
 SEED = 2026

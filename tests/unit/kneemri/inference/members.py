@@ -10,11 +10,11 @@ import pytest
 import torch
 from torch import Tensor
 
+from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
+from core.data.corpus.slot_reader import Band, Reading
+from core.data.corpus.slots import SCHEMES, Routing
 from core.mounts import Mounts
 from core.paths import COMPETITION
-from kneemri.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
-from kneemri.corpus.slot_reader import Band, Reading
-from kneemri.corpus.slots import SCHEMES, Routing
 from kneemri.inference.members import (
     LEGACY_SLICES,
     SHIPPED_PACKAGE,

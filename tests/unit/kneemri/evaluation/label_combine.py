@@ -2,9 +2,9 @@
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 
 STUDIES = 120
 SPECIALISTS = 2

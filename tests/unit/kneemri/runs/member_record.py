@@ -3,8 +3,8 @@ from pathlib import Path
 
 import torch
 
-from kneemri.corpus.crop_centre import CROP_MM
-from kneemri.corpus.slots import LAST_MAXIMAL
+from core.data.corpus.crop_centre import CROP_MM
+from core.data.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
 from kneemri.training.options import TrainingOptions

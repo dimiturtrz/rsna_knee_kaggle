@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
+from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
-from kneemri.findings import TARGETS
 
 
 def test_area_under_curve():

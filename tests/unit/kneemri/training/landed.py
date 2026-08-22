@@ -6,8 +6,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from kneemri.corpus.slot_reader import GROUP
-from kneemri.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Supervision, Targets
+from core.data.corpus.slot_reader import GROUP
+from core.data.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Supervision, Targets
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
