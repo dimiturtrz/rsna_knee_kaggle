@@ -752,6 +752,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.member_distance",
+      "target": "kneemri.evaluation.member_curve",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_distance",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.oof_oracle",
       "target": "core.paths",
       "weight": 1
@@ -1774,6 +1786,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "kneemri.evaluation.member_curve",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_value",
+      "target": "kneemri.evaluation.member_distance",
       "weight": 1
     },
     {
@@ -5593,6 +5611,42 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_distance.MemberDistance",
+      "target": "kneemri.evaluation.member_curve.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.agreement",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.spread",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.oof_oracle.OutOfFoldOracle.routing",
       "target": "kneemri.corpus.slots.SlotScheme",
@@ -9405,6 +9459,18 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.evaluation.member_distance.MemberDistance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.evaluation.record_mix.MixReading",
       "weight": 1
     },
@@ -12021,7 +12087,7 @@
       "role": null
     },
     {
-      "descendants": 135,
+      "descendants": 136,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -12277,7 +12343,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 21,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -12336,6 +12402,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve",
       "label": "member_curve",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance",
+      "label": "member_distance",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -13747,6 +13821,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.member_curve",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance",
+      "label": "MemberDistance",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_distance",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -17426,6 +17508,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_distance.MemberDistance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "label": "against",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_distance.MemberDistance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_distance.MemberDistance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_distance.MemberDistance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_distance.MemberDistance.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_distance.MemberDistance",
       "role": null
     },
     {

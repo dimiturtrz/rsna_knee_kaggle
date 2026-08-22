@@ -45,6 +45,14 @@ spread, then stops: `longseat` carried +0.0012 of seat value — the largest sin
 56 same-split checkpoints, six times the second-best — and tied the board rather than moving it. So this
 tool answers `which of these is the best move` reliably and `is the best move worth a slot` not at all.
 Below roughly 0.0015 its winner and its runner-up are the same submission.
+
+AND SINCE 2026-08-22 IT DOES NOT PRINT ALONE. Everything above is a statement about the QUALITY axis, and
+the board split that closed that day was decided on the other one: `lr4e-5_ws` priced -0.0003 here and
+took 0.931 while `band_span` priced +0.0002 and cost a tick, because the second was a near-twin of a
+seated member and a rank average cannot charge for contributing one ordering twice. `MemberDistance`
+appends the label-free distance reading to this report for that reason. The two columns disagree on that
+pair, deliberately visibly — quoting this one without the other is quoting the ruler that was wrong about
+the last decision it was asked to make.
 """
 
 import argparse
@@ -53,6 +61,7 @@ from pathlib import Path
 
 from core.paths import DataRoot
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
+from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.champion_check import Champion
@@ -90,12 +99,23 @@ class SeatValue:
         return self.processed / candidate.name if candidate.parent == Path() else candidate
 
     def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED) -> list[str]:
-        """Each candidate's marginal contribution to the champion, best first."""
+        """Each candidate's marginal contribution to the champion, best first — and its DISTANCE beside it.
+
+        The two are printed together because the 2026-08-21 split is a statement about the pair, not
+        about either alone: `lr4e-5_ws` priced -0.0003 here and took 0.931, `band_span` priced +0.0002
+        and cost a tick, and the distance column is the one that orders them the way the board did.
+        Quoting a seat value without it is quoting the ruler that was wrong about the last decision it
+        was asked to make.
+        """
         roster = self.roster()
         named = [self.named(candidate) for candidate in candidates]
         mixed = RecordMix(list(dict.fromkeys([*roster, *named]))).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
-        return MixReading(mixed, roster).lines(curve, greedy=False, paired=False)
+        held, rest = mixed.split(roster)
+        return [
+            *MixReading(mixed, roster).lines(curve, greedy=False, paired=False),
+            *MemberDistance(held, rest).report(),
+        ]
 
 
 def main() -> None:

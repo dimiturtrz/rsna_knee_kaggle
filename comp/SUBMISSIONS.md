@@ -1338,3 +1338,44 @@ Every question ready to ship was gated on one of the two pending readings. The d
 `through_dense` entry needs `sixfresh` v2 to read 0.931 first, and the required gates plus a ~9 min kernel
 run did not fit the 26 minutes left before the slots expired. An expiring slot is worth zero; a slot spent
 on an uninterpretable entry is worth less than zero, because it also spends the next day's comparison.
+
+#### 2026-08-22 — a third ruler, and a prediction registered before its score arrived
+
+`kneemri.evaluation.member_distance` exists because the 2026-08-21 split showed both existing rulers
+pointing the wrong way on the axis that decided a seat. It reads NO labels: per-label rank correlation
+(the same `Vote.ranks` the shipped vote applies) between a candidate and each seated member, summarised
+as NEAREST (the twin detector — a seat is lost to one redundant neighbour, not to an average) and MEAN.
+
+Against the pinned champion five, with the roster's own nearest-neighbour spread as the scale
+(0.8801 - 0.8911):
+
+| candidate | nearest | mean | seat_value | board |
+|---|---|---|---|---|
+| `through_dense_s2026` | 0.8922 | 0.8740 | +0.0008 (top of 24) | — |
+| `lr4e-5_ws_s2026` | 0.9143 | 0.8816 | **-0.0003** | **0.931** |
+| `band_span_s2026` | 0.9188 | 0.8925 | **+0.0002** | **0.930** |
+| `grade_ladder_s2026` | 0.9248 | 0.8923 | +0.0001 | PENDING |
+
+THE ORACLE IT HAD TO REPRODUCE, and did: `lr4e-5_ws` reads more distant than `band_span` on both
+summaries, which is the ordering the board paid out and the OPPOSITE of the ordering `seat_value` and
+solo score both gave. Reproducing the case a tool was designed from is not evidence, and this is stated
+as a sanity check rather than a validation.
+
+SO HERE IS THE PART THAT IS NOT CIRCULAR. `grade_ladder` reads the LEAST distant of all four — 0.9248
+nearest, further from the roster's own spread than any other candidate — and `sevengrade` (55678597) is
+still PENDING as this is written. If distance is what buys a seat, that entry should NOT exceed 0.931.
+Registered now, before the score exists, because a prediction written after the fact costs nothing and
+proves nothing. Note the confound already recorded above: `sevengrade` is a SEVENTH seat and also the
+first entry carrying the severity objective, so a null there has two available explanations and only a
+BEAT would cleanly refute this ruler.
+
+AND THE POOL IS MEASURABLY EXHAUSTED FOR DISTANCE, which is the reading that matters for planning rather
+than for one slot. Every candidate except `through_dense` sits CLOSER to some seated member (0.9143 -
+0.9248) than the roster's own worst neighbour pair (0.8911). Recipe distance inside this family is spent:
+band, rate, resolution, schedule and calibration all order the studies about the same way. That is the
+independent argument for the V-JEPA 2 probe (knee-jucq) — a trunk whose pretraining never saw this
+family is the only large distance left to buy, and this ruler now says so without appealing to the
+board split at all.
+
+WHAT IT IS NOT. It ranks; it does not price. Nothing measures how many board ticks a unit of distance
+buys, one paired observation constrains it, and no slot should be spent on this number alone.
