@@ -15,6 +15,7 @@ from kneemri.models.backbone import (
     V3_BASE,
     V3_SMALL,
     V3_SMALL_PLUS,
+    VJEPA2_LARGE,
     Encoder,
     MapAsTokens,
     Stage,
@@ -144,6 +145,9 @@ def test_units():
     assert Stage(3, 4, 128).units(352) == 3 * 88 * 88 * 128, "88 = 352 / 4, and it is squared"
     assert Stage(3, 8, 128).units(352) == Stage(3, 4, 128).units(352) / 4, "one halving of the grid is a quarter"
     assert Stage(6, 4, 128).units(352) == 2 * Stage(3, 4, 128).units(352), "blocks are a plain multiplier"
+    assert Stage(3, 4, 128, tubelet=2).units(352) == Stage(3, 4, 128).units(352) / 2, (
+        "the quantity is PER SLICE, so a token spanning two slices halves it — the direction knee-2nxh had backwards"
+    )
 
 
 def test_activation_units():
@@ -166,6 +170,11 @@ def test_activation_units():
     )
     assert convnext.activation_units(352) > 7 * (12 * (352 / 32) ** 2 * 1024), (
         "and that is 7.75x what the output grid alone accounts for, which is the size of the defect"
+    )
+
+    vjepa = ENCODERS[VJEPA2_LARGE]
+    assert vjepa.activation_units(336) == 24 * (336 / 16) ** 2 * 1024 / 2, (
+        "a tubelet trunk states no stages, so the depth-axis stride has to reach the shorthand"
     )
 
 

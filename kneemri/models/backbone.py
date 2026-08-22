@@ -102,9 +102,24 @@ class Stage:
     stride: int
     width: int
 
+    tubelet: int = 1
+    """How many SLICES one token spans, for a trunk that tokenises the depth axis as well as the plane.
+
+    1 for every trunk this project has fitted: a 2D trunk runs once per slice, so its token grid is a
+    per-slice quantity and the slice loop in `DeviceBudget.needed` supplies the depth factor. A tubelet
+    transformer tokenises `tubelet` slices at once, so the SAME window costs grid^2 / tubelet per slice —
+    the cap is a per-slice function and this is the only place the depth axis enters it.
+
+    THE DIRECTION MATTERS AND THE FIRST READING OF IT WAS BACKWARDS (knee-2nxh). A tubelet trunk emits
+    grid^2 * slices/tubelet tokens for the whole window, which reads as MORE than a 2D trunk's grid^2
+    only if the cap is per-STEP. It is not; it is per-slice, so the tubelet trunk costs LESS and an
+    uncorrected cap OVERSTATES it. That is knee-bj90's failure mode, not an OOM: the run parks in
+    `await_headroom` waiting on memory it would never have allocated, and never starts.
+    """
+
     def units(self, size: int) -> float:
-        """Tokens times width times blocks — activation bytes up to one constant, at this read size."""
-        return self.blocks * (size / self.stride) ** 2 * self.width
+        """Tokens times width times blocks, PER SLICE — activation bytes up to one constant."""
+        return self.blocks * (size / self.stride) ** 2 * self.width / self.tubelet
 
 
 @dataclass(frozen=True)
@@ -137,6 +152,12 @@ class Encoder:
     Empty for a transformer, where `depth`, `patch` and `dim` already say it: one stage, `depth` blocks,
     stride `patch`, width `dim`. Stated only where that shorthand is false."""
 
+    tubelet: int = 1
+    """How many slices one token spans — see `Stage.tubelet`, which is where it does its work.
+
+    Carried here as well because a tubelet transformer states no `stages`: `depth`, `patch` and `dim`
+    still describe it, and the depth-axis stride is the one thing that shorthand cannot say."""
+
     params_m: float = 22.0
     """Trunk parameters in millions — the quantity the OPTIMISER's memory is a function of.
 
@@ -163,7 +184,10 @@ class Encoder:
         are all 12 deep — so no DINOv2 or DINOv3 arm derives a different cap than it did before. Only a
         trunk with `stages` moves, which is the entire repair.
         """
-        return sum(stage.units(size) for stage in self.stages or (Stage(self.depth, self.patch, self.dim),))
+        return sum(
+            stage.units(size)
+            for stage in self.stages or (Stage(self.depth, self.patch, self.dim, tubelet=self.tubelet),)
+        )
 
     leaf: str = ""
     """The directory named for THIS encoder, matched as a whole path segment and never as a substring.
@@ -414,6 +438,10 @@ ENCODERS: dict[str, Encoder] = {
         family=VJEPA2,
         leaf="vjepa2-vitl",
         depth=24,
+        # The only tubelet trunk in the registry: `fpc64` tokenises TWO frames per token, so the same
+        # window costs half the per-slice activations a 2D ViT-L would. Without this the cap OVERSTATES
+        # it by 2x and parks the run in `await_headroom` on memory it would never allocate (knee-2nxh).
+        tubelet=2,
         # Counted off the loaded weights once, here, rather than guessed from "ViT-L": 325.97M.
         params_m=326.0,
     ),
