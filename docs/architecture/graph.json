@@ -662,6 +662,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.label_probe",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_probe",
+      "target": "kneemri.evaluation.residual_coupling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_probe",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_probe",
+      "target": "kneemri.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_probe",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.label_stability",
       "target": "core.paths",
       "weight": 1
@@ -928,6 +958,18 @@
       "kind": "import",
       "source": "kneemri.evaluation.record_mix",
       "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.residual_coupling",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.residual_coupling",
+      "target": "kneemri.findings",
       "weight": 1
     },
     {
@@ -5155,6 +5197,66 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.alone",
+      "target": "kneemri.evaluation.label_probe.HeldOutProbe.label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.label",
+      "target": "kneemri.evaluation.label_probe.HeldOutProbe.fit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.label",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "target": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.decided",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_probe.main",
+      "target": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.label_stability.LabelStability.best",
       "target": "kneemri.runs.run_metrics.RunMetrics",
@@ -6214,6 +6316,30 @@
       "kind": "construct",
       "source": "kneemri.evaluation.record_mix.main",
       "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "target": "kneemri.evaluation.residual_coupling.CouplingReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
+      "target": "kneemri.evaluation.residual_coupling.CouplingReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
+      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.correlation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pairs",
+      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
       "weight": 1
     },
     {
@@ -12087,7 +12213,7 @@
       "role": null
     },
     {
-      "descendants": 136,
+      "descendants": 138,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -12343,7 +12469,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 23,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -12386,6 +12512,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.label_combine",
       "label": "label_combine",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe",
+      "label": "label_probe",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -12458,6 +12592,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.record_mix",
       "label": "record_mix",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling",
+      "label": "residual_coupling",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -13800,6 +13942,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "label": "HeldOutProbe",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_probe",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.label_stability.LabelStability",
       "label": "LabelStability",
       "level": "class",
@@ -13948,6 +14098,22 @@
       "label": "RecordMix",
       "level": "class",
       "parent": "kneemri.evaluation.record_mix",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.CouplingReading",
+      "label": "CouplingReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.residual_coupling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "label": "LabelCoupling",
+      "level": "class",
+      "parent": "kneemri.evaluation.residual_coupling",
       "role": "primary"
     },
     {
@@ -17304,6 +17470,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe.alone",
+      "label": "alone",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe.fit",
+      "label": "fit",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe.label",
+      "label": "label",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.HeldOutProbe.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe.HeldOutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_probe.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_probe",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.label_stability.LabelStability._ranked",
       "label": "_ranked",
       "level": "method",
@@ -17868,6 +18082,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.record_mix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.correlation",
+      "label": "correlation",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.decided",
+      "label": "decided",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
+      "label": "pair",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
       "role": null
     },
     {

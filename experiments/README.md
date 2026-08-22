@@ -2210,3 +2210,61 @@ evidence supports, and it is a legitimate one.
 
 **NO SEAT, as declared.** Best seat into the five held members −0.0035, charged ~3× by the board. It was
 never a candidate.
+
+
+### `residual_coupling` / `label_probe` — the label-correlation head is REFUTED for zero card (2026-08-22)
+
+**COST: no GPU at all.** knee-w8h6 proposes CoPAS component (C), a learned interaction over the label
+axis, priced at ~1 h of build plus a fold-0 arm. The build was gated on a CPU measurement instead, and the
+measurement kills it. The rule that made this cheap is the distinction between the two questions: "do the
+labels correlate" (they do, hugely) and "does the correlation survive out of sample" (it does not).
+
+**WHY A HEAD COULD ONLY MINE THE RESIDUAL.** Our twelve sigmoids already read ONE pooled study feature, so
+every correlation the IMAGE predicts is already available to all twelve of them. Whatever a label-
+interaction block adds has to come from what the image did not explain.
+
+**RESIDUAL COUPLING IS NOT ZERO.** On `band_dense_s2026`, over DECIDED pairs only (7712 of 10908 — the
+UNK cells sit at the 0.28 default and a residual there is distance from a prior, not from a fact):
+
+| pair | truth r | residual r | studies |
+| --- | --- | --- | --- |
+| Medial OA / Lateral OA | 0.6071 | 0.3068 | 563 |
+| Contusion / Fracture | 0.4657 | 0.2742 | 358 |
+| Lateral OA / PF OA | 0.5663 | — | 570 |
+| Medial OA / PF OA | 0.5598 | — | 617 |
+
+**AND IT IS NOT USABLE.** The held-out probe IS the proposed head with its nonlinearity removed: fit a
+ridge from all twelve logits onto one label's truth on half the holdout, score it on the other half
+against that label's own raw logit, on the SAME rows. Every one of 15 cells loses AUC:
+
+| member | ridge 0.01 | 1.0 | 10 | 100 | 1000 |
+| --- | --- | --- | --- | --- | --- |
+| band_dense | −0.0128 | −0.0125 | −0.0129 | −0.0145 | −0.0285 |
+| base_dense | −0.0235 | −0.0227 | −0.0195 | −0.0165 | −0.0291 |
+| calib_span | −0.0149 | −0.0143 | −0.0133 | −0.0128 | −0.0257 |
+
+The penalty spans 10^5 and the sign never turns, so the null is not the regulariser's. Three different
+members, so it is not one run's.
+
+**THE HARNESS WAS SUSPECTED FIRST, AND CLEARED BY A NULL CONTROL.** `HeldOutProbe.alone` restricts the
+same machinery to the label's own logit; a ridge on one monotone feature is monotone, so it must reproduce
+raw AUC exactly. `null_control_max_abs` = **0.0** on all three members. The −0.0125 is mechanism, not
+arithmetic — the same question `adapt_null` had to answer before four collapses could be read as evidence
+about an idea rather than about a load path.
+
+**THE MECHANISM, NAMED.** What survives in the residual is SHARED STUDY-LEVEL ERROR: when a study is hard,
+all twelve logits are wrong in the same direction, so label A's logit points the same wrong way as B's and
+cannot correct it. Correlated errors are not recoverable errors. That is why a matrix with r = 0.31 in it
+still yields a probe that loses.
+
+**THE PRE-REGISTERED LEAK FIRED EXACTLY AS WRITTEN.** knee-w8h6 said in advance that "a gain that lives
+entirely in the RARE labels is the prior leaking, not correlation being used". The only two labels that
+improved are the rarest — Synovitis is 65 scored studies of 909.
+
+**WHAT THIS DOES NOT RULE OUT.** It kills the LINEAR label-interaction refinement on OUR twelve-head,
+one-pooled-feature architecture. It does not kill label structure as a supervision signal (a joint loss
+shapes the shared feature during fitting, which is a different intervention from refining frozen logits),
+and it does not kill CoPAS component (A). It RAISES (A)'s value: if the label half is worth ~0, the whole
+of CoPAS's expected gain has to come from (A), which is what an instrument is for. knee-pq8u repriced.
+
+**NO SEAT, no submission, no card spent.**
