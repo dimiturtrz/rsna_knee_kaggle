@@ -19,12 +19,46 @@ separate the two studies and how confident both of those readings were. A pair t
 about only slightly, or that rests on a guess, pulls proportionally less.
 """
 
+from dataclasses import dataclass, field
 from typing import override
 
 from jaxtyping import Float
 from torch import Tensor, nn
 
 from kneemri.training.grades import Grades, Predicted
+from kneemri.training.side_ranking import SideRanking
+
+
+@dataclass(frozen=True)
+class LabelStructure:
+    """The two policies that read STRUCTURE in the label set rather than treating the twelve as flat.
+
+    They travel together because they answer the same question from two directions. `grades` is the
+    ordering WITHIN one label — a report's severity ladder, which a binary target flattens. `sides` is
+    the ordering ACROSS two labels of one compartment pair — which side holds the finding, which twelve
+    independent binary problems throw away. Both default to the null policy, which is how every member
+    shipped to date was fitted, so an objective built without them descends the scalar it always did.
+
+    One held object rather than two parameters: the objective chain is three constructors deep and each
+    layer adds its own flag, so threading each policy separately puts `RememberedRanking` over the
+    argument count before the next policy is even written.
+    """
+
+    grades: Grades = field(default_factory=Grades)
+    sides: SideRanking = field(default_factory=SideRanking)
+
+    def settings(self) -> dict[str, object]:
+        """Both policies' accounts, merged, so a run can check either one landed."""
+        return {**self.grades.settings(), **self.sides.settings()}
+
+    def spread(self, batch: Predicted) -> Predicted:
+        """The batch as the grade policy restates it, which under the null policy is the batch itself."""
+        return self.grades.spread(batch)
+
+    def side_term(self, batch: Predicted) -> Float[Tensor, ""]:
+        """What the side policy adds to the descended scalar, a hard zero under the null policy."""
+        return self.sides.term(batch)
+
 
 RANK_WEIGHT = 1.0
 """How hard the ranking term pulls relative to cross-entropy when it is enabled at all.
@@ -77,15 +111,25 @@ class Objective:
     """
 
     def __init__(
-        self, *, normalise_by_count: bool = False, per_label: bool = False, grades: Grades | None = None
+        self,
+        *,
+        normalise_by_count: bool = False,
+        per_label: bool = False,
+        structure: LabelStructure | None = None,
     ) -> None:
         self.normalise_by_count = normalise_by_count
         self.per_label = per_label
-        self.grades = grades or Grades()
+        self.structure = structure or LabelStructure()
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
-        """The scalar this step descends."""
-        return self.cross_entropy(batch)
+        """The scalar this step descends.
+
+        The side term is added HERE rather than in each subclass, so it composes with all three
+        objectives without adding a fourth branch to the chain that builds them: a policy the objective
+        HOLDS, exactly as the grade ladder is. The null policy contributes a hard zero, so an arm that
+        did not ask for it descends the identical scalar it always did.
+        """
+        return self.cross_entropy(batch) + self.structure.side_term(batch)
 
     def settings(self) -> dict[str, object]:
         """This objective's own account of the loss switches it carries.
@@ -99,7 +143,7 @@ class Objective:
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
-            **self.grades.settings(),
+            **self.structure.settings(),
         }
 
     def cross_entropy(self, batch: Predicted) -> Float[Tensor, ""]:
@@ -109,7 +153,7 @@ class Objective:
         twelve latent scores rather than the forty-eight threshold crossings a ladder restates them as.
         The two questions are separable and only one of them is about grades.
         """
-        graded = self.grades.spread(batch)
+        graded = self.structure.spread(batch)
         elementwise = nn.functional.binary_cross_entropy_with_logits(graded.logits, graded.scores, reduction="none")
         weights = graded.weights
         weighted = elementwise * weights
@@ -143,14 +187,14 @@ class RankedObjective(Objective):
         *,
         normalise_by_count: bool = False,
         per_label: bool = False,
-        grades: Grades | None = None,
+        structure: LabelStructure | None = None,
     ) -> None:
-        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, grades=grades)
+        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
         self.weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
-        """Cross-entropy, plus the ranking term at its configured strength."""
-        return self.cross_entropy(batch) + self.weight * self.ranking(batch)
+        """Cross-entropy and the side term, plus the ranking term at its configured strength."""
+        return super().__call__(batch) + self.weight * self.ranking(batch)
 
     @override
     def settings(self) -> dict[str, object]:

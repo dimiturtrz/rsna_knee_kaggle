@@ -56,6 +56,8 @@ NOT_IN_CONFIG = {
     "severity_weight": "supervision policy, same — it grades the loss weight and leaves the head alone",
     "grade_ladder": "objective policy — the thresholds are subtracted INSIDE the loss, so the head still "
     "emits the one per-label logit a rebuild serves",
+    "side_weight": "objective policy — the term compares two of the twelve logits against each "
+    "other INSIDE the loss and adds no parameter, so the head a rebuild serves is byte-identical",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",

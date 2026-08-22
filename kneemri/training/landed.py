@@ -29,6 +29,7 @@ from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECO
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
+from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
@@ -193,6 +194,7 @@ class Request:
     calibrated_targets: bool
     severity_weight: bool
     grade_ladder: bool
+    side_weight: float
     unfreeze_last: int
     accumulate: int
     layer_decay: float
@@ -234,6 +236,7 @@ class Request:
             CALIBRATED: self.calibrated_targets,
             SEVERITY_WEIGHT: self.severity_weight,
             GRADE_LADDER: self.grade_ladder,
+            SIDE_TERM: self.side_weight,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,

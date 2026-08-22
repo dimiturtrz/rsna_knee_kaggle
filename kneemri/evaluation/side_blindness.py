@@ -56,25 +56,30 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.bootstrap import RESAMPLE_SEED, RESAMPLES
-from core.findings import TARGETS
+from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 
 logger = logging.getLogger(__name__)
 
-COMPARTMENT_PAIRS: tuple[tuple[str, str], ...] = (
-    ("Medial Meniscus", "Lateral Meniscus"),
-    ("Medial OA", "Lateral OA"),
-)
-"""The two findings this corpus annotates ONCE PER COMPARTMENT, which is what makes the contrast exist.
-
-Named as pairs rather than derived from the label strings. A prefix match on "Medial"/"Lateral" would
-also catch MCL — the medial COLLATERAL ligament, which has no lateral counterpart annotated here — and
-pair it with nothing or, worse, with whichever lateral label sorted next to it.
-"""
-
 CHANCE = 0.5
 """What a detector that cannot resolve the compartment scores on the discordant contrast, exactly."""
+
+CONTROL = "PF OA"
+"""The column read on every pair's contrast as a NEGATIVE control, because it belongs to neither side.
+
+THE CONFOUND THIS EXISTS TO KILL. The contrast assumes its two groups differ only in which compartment
+holds the finding. They need not: medial disease is both commoner and typically higher-grade here, so
+the medial-only studies may simply be sicker knees. A column that tracks overall burden would then
+separate the groups without knowing anything about sides, and the medial column's above-chance reading
+would be that artefact rather than the side-awareness it looks like.
+
+Patellofemoral OA is the third compartment. It is annotated on the same axis as the pair, it is present
+in both groups, and it is neither of the two sides being varied — so it cannot legitimately resolve this
+contrast, and whatever it scores is the confound's size measured directly. Near 0.50 licenses reading
+the pair's own columns as side information. Well above it means the pair's numbers are burden, and the
+honest conclusion is that NEITHER column resolves the side.
+"""
 
 
 @dataclass(frozen=True)
@@ -98,26 +103,35 @@ class Discordant:
 
     def contrast(
         self,
+        label: str,
         predictions: Float[NDArray[np.float64], "studies targets"],
         columns: dict[str, int],
         scores: LabelScores,
-        *,
-        lateral: bool,
     ) -> float:
-        """How well ONE of the pair's columns separates the studies that belong to it from the others.
+        """How well ANY column ranks this pair's lateral-only studies above its medial-only ones.
 
-        BOTH DIRECTIONS ARE READ, because only the pair of numbers distinguishes the two failures this
-        module exists to tell apart. A model emitting ONE signal for the finding and copying it into
-        both columns scores 0.50 twice — the column cannot depend on a side it never represented. A
-        model that resolves the majority compartment and misses the minority one scores well on the
-        medial column and 0.50 on the lateral. Reading only the lateral column cannot separate those,
-        and they call for different work: the first is a representation that has no side in it, the
-        second is a side that is represented but not learnt on the smaller class.
+        ONE fixed direction for every column, so the three readings share a scale and 0.50 means the
+        same thing in all of them. A caller that wants the medial column's own success reads it as
+        `1 - x`, which is what `oriented` is for.
+
+        ANY column and not just the pair's, because the pair's numbers are only interpretable beside a
+        column that cannot legitimately move: see CONTROL. And both of the pair's own columns are read
+        because one alone cannot tell apart a representation with no side in it (which fails on both)
+        from a side that was only learnt on the majority class (which fails on the minority column
+        while its partner reads well above chance) — and those call for different work.
         """
         selected = self.lateral_only | self.medial_only
-        wanted = self.lateral_only if lateral else self.medial_only
-        column = predictions[selected, columns[self.pair[1] if lateral else self.pair[0]]].astype(np.float64)
-        return scores.area_under_curve(column, wanted[selected].astype(np.int64))
+        column = predictions[selected, columns[label]].astype(np.float64)
+        return scores.area_under_curve(column, self.lateral_only[selected].astype(np.int64))
+
+    def oriented(self, label: str, value: float) -> float:
+        """`value` turned so that above-chance always means "this column found its own side".
+
+        The medial column succeeds by ranking lateral-only studies LOW, so its raw contrast runs
+        backwards; flipping it here rather than at each call site is what keeps one verdict rule
+        readable across all three columns.
+        """
+        return 1.0 - value if label == self.pair[0] else value
 
 
 class SideBlindness:
@@ -143,21 +157,33 @@ class SideBlindness:
                 report.append(f"  {pair[1]:18s} UNREADABLE - {lateral} lateral-only, {medial} medial-only")
                 continue
             report.append(f"  {pair[0]} / {pair[1]}: n={lateral} lateral-only vs {medial} medial-only")
-            for side in (True, False):
-                observed = groups.contrast(predictions, columns, self.scores, lateral=side)
-                low, high = self._interval(groups, predictions, columns, lateral=side)
-                verdict = "resolves the side" if low > CHANCE else "INDISTINGUISHABLE FROM SIDE-BLIND"
-                column = pair[1] if side else pair[0]
-                report.append(f"    {column:18s} column {observed:.4f}  [{low:.4f}, {high:.4f}]   {verdict}")
+            for label in (pair[1], pair[0], CONTROL):
+                observed = groups.oriented(label, groups.contrast(label, predictions, columns, self.scores))
+                low, high = sorted(
+                    groups.oriented(label, bound) for bound in self._interval(groups, label, predictions, columns)
+                )
+                verdict = self._verdict(label, low, high)
+                report.append(f"    {label:18s} column {observed:.4f}  [{low:.4f}, {high:.4f}]   {verdict}")
         return report
+
+    @staticmethod
+    def _verdict(label: str, low: float, high: float) -> str:
+        """What the interval licenses saying — and for the control, the OPPOSITE sentence.
+
+        The control's job is to fail. An interval that straddles chance is the result there, because it
+        says the two groups do not differ on a column that cannot know which side they differ on; a
+        control that separates them is the one outcome that invalidates the pair's numbers beside it.
+        """
+        if label == CONTROL:
+            return "control clean" if low <= CHANCE <= high else "CONFOUNDED - the groups differ on a neutral column"
+        return "resolves the side" if low > CHANCE else "INDISTINGUISHABLE FROM SIDE-BLIND"
 
     def _interval(
         self,
         groups: Discordant,
+        label: str,
         predictions: Float[NDArray[np.float64], "studies targets"],
         columns: dict[str, int],
-        *,
-        lateral: bool,
     ) -> tuple[float, float]:
         """A 95% bootstrap interval, resampling the two groups SEPARATELY.
 
@@ -166,9 +192,9 @@ class SideBlindness:
         different contrast with a different variance rather than a replicate of this one.
         """
         generator = np.random.default_rng(RESAMPLE_SEED)
-        wanted = np.flatnonzero(groups.lateral_only if lateral else groups.medial_only)
-        other = np.flatnonzero(groups.medial_only if lateral else groups.lateral_only)
-        column = columns[groups.pair[1] if lateral else groups.pair[0]]
+        wanted = np.flatnonzero(groups.lateral_only)
+        other = np.flatnonzero(groups.medial_only)
+        column = columns[label]
         labels = np.concatenate([np.ones(len(wanted), dtype=np.int64), np.zeros(len(other), dtype=np.int64)])
         draws = []
         for _ in range(self.resamples):

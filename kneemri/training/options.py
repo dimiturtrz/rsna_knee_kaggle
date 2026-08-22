@@ -76,6 +76,7 @@ class TrainingOptions:
     severity_weight: bool = False
     grade_ladder: bool = False
     rank_weight: float = 0.0
+    side_weight: float = 0.0
     pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False
@@ -368,6 +369,16 @@ class TrainingOptions:
             "ask for the ordering of the twelve studies that happened to be loaded together; batch size "
             "here is set by VRAM, so without this the pair pool is chosen by the card. Requires "
             "--rank-weight, since it changes that term and nothing else.",
+        )
+        parser.add_argument(
+            "--side-weight",
+            type=float,
+            default=0.0,
+            help="add a within-study term at this strength asking the two columns of a compartment pair "
+            "(medial/lateral meniscus, medial/lateral OA) to be ordered as the reports grade them. "
+            "Cross-entropy scores the twelve columns independently, so a head can minimise it on a pair "
+            "by emitting the pair's marginal twice; side_blindness measures the Lateral OA column doing "
+            "exactly that, at chance on every member.",
         )
         parser.add_argument(
             "--slot-pooling",

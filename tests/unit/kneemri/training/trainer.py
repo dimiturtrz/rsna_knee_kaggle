@@ -17,6 +17,7 @@ from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
+from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
@@ -226,6 +227,7 @@ def test_policies():
         PER_LABEL: False,
         COUNT_NORMALISED: False,
         GRADE_LADDER: False,
+        SIDE_TERM: 0.0,
         INTENSITY_AUGMENT: False,
     }
 

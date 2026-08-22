@@ -1,7 +1,17 @@
 import torch
 
+from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
-from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    LabelStructure,
+    Objective,
+    RankedObjective,
+)
+from kneemri.training.side_ranking import SIDE_TERM, PairedSides
 
 SEED = 2026
 STUDIES = 6
@@ -27,6 +37,7 @@ def test_objective_settings():
         PER_LABEL: True,
         COUNT_NORMALISED: False,
         GRADE_LADDER: False,
+        SIDE_TERM: 0.0,
     }
 
 
@@ -38,6 +49,7 @@ def test_ranked_objective_settings():
         PER_LABEL: False,
         COUNT_NORMALISED: True,
         GRADE_LADDER: False,
+        SIDE_TERM: 0.0,
     }
 
 
@@ -185,6 +197,39 @@ def test_ordinal_grades_leave_the_ranking_term_alone():
     wearing this one's name.
     """
     batch = _batch([1.0, 0.5, 0.0, -0.5, -1.0, -1.5])
-    plain, laddered = RankedObjective(), RankedObjective(grades=OrdinalGrades())
+    plain, laddered = RankedObjective(), RankedObjective(structure=LabelStructure(grades=OrdinalGrades()))
     assert torch.isclose(plain.ranking(batch), laddered.ranking(batch))
     assert not torch.isclose(plain.cross_entropy(batch), laddered.cross_entropy(batch))
+
+
+def _twelve() -> Predicted:
+    """A batch wide enough for the side policy, whose columns are found by name in the twelve."""
+    columns = {target: index for index, target in enumerate(TARGETS)}
+    scores = torch.zeros(4, len(TARGETS))
+    for medial, lateral in COMPARTMENT_PAIRS:
+        scores[:2, columns[lateral]] = 1.0
+        scores[2:, columns[medial]] = 1.0
+    return Predicted(torch.zeros(4, len(TARGETS)), scores, torch.ones(4, len(TARGETS)))
+
+
+def test_label_structure_settings():
+    """Both held policies are reported, so a run can check either one landed."""
+    assert LabelStructure().settings() == {GRADE_LADDER: False, SIDE_TERM: 0.0}
+    assert LabelStructure(grades=OrdinalGrades()).settings()[GRADE_LADDER] is True
+    assert LabelStructure(sides=PairedSides(0.5)).settings()[SIDE_TERM] == 0.5
+
+
+def test_label_structure_spread():
+    """The null grade policy hands the batch back untouched; the ladder restates it."""
+    batch = _twelve()
+
+    assert LabelStructure().spread(batch).logits.shape == batch.logits.shape
+    assert LabelStructure(grades=OrdinalGrades()).spread(batch).logits.shape[-1] > batch.logits.shape[-1]
+
+
+def test_label_structure_side_term():
+    """A hard zero under the null policy, so an objective built without it descends the old scalar."""
+    batch = _twelve()
+
+    assert float(LabelStructure().side_term(batch)) == 0.0
+    assert float(LabelStructure(sides=PairedSides(1.0)).side_term(batch)) > 0.0

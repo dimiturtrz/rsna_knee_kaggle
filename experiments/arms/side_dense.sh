@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# bead: knee-6u12
+# side_dense.sh — does asking the loss to ORDER a compartment pair put the side back into the column?
+#
+# THE MEASUREMENT THIS ARM ANSWERS, and why it is not another knob. `kneemri.evaluation.side_blindness`
+# scores each column of a compartment pair at ranking the studies positive on its OWN side above those
+# positive only on the other. Both groups have the finding and differ only in which compartment holds
+# it, so difficulty cancels and a column that does not depend on the side scores 0.50 BY IDENTITY. On
+# the shipped seven-member mix over 909 studies:
+#
+#     Lateral Meniscus 0.7646 [0.6757, 0.8417]   Medial Meniscus 0.8728 [0.8325, 0.9092]
+#     Medial OA        0.7583 [0.6926, 0.8183]   Lateral OA      0.5250 [0.4428, 0.6098]
+#
+# Three of four columns resolve their own side. The fourth is at chance, and it is at chance on ALL
+# EIGHT members read separately (0.5082 to 0.5588) across recipes that vary the loss, the schedule, the
+# augmentation and the input pixels. That is a property of the design, not of a member.
+#
+# THE CONFOUND IS DEAD. Medial disease is commoner and higher-grade here, so the medial-only studies
+# could simply be sicker knees and a column tracking overall burden would separate the groups while
+# knowing nothing about sides. PF OA is the third compartment — same axis, present in both groups,
+# belonging to NEITHER side — so it cannot legitimately resolve the contrast and whatever it scores IS
+# that confound. It reads 0.4731 and 0.4424, both straddling chance. The three above-chance readings are
+# side information.
+#
+# WHY THE LOSS AND NOT THE PIXELS. The meniscus pair resolves under the SAME encoder, pooling and field
+# of view, so the representation demonstrably carries which side a finding is on. knee-yrg separately
+# refuted four data-side explanations (laterality flip, slice band, prevalence, in-plane crop). What is
+# left is that nothing in the objective ever asks the two columns of a pair to differ: cross-entropy
+# scores the twelve independently, so a head minimises it on a pair by emitting the pair's marginal
+# twice, and `--rank-weight` does not close it either — `Objective.pairs` orders study against study
+# WITHIN one label and never one label against another. `--side-weight` is that missing comparison.
+#
+# SINGLE VARIABLE, AND THE CONTROL IS ALREADY ON DISK. This is `band_dense.sh`'s invocation with
+# `--side-weight 1.0` appended and nothing else touched. `band_dense` scored 0.8531 under exactly these
+# flags and its holdout record already reads Lateral Meniscus 0.7319 / Lateral OA 0.5141 on this
+# contrast, so no control run is needed and no control-side variable can drift.
+#
+# WEIGHT 1.0 IS THE NEUTRAL VALUE, NOT A TUNED ONE, for the reason `RANK_WEIGHT` gives: both terms are
+# means over their own populations and both sit at softplus(0) = 0.693 at initialisation. Sweeping it
+# before knowing the term does anything would be measuring a method that has not yet shown signal.
+#
+# cost     ~365 s/epoch x 12 = ~73 min, at `band_dense`'s measured 24.9 GB. No new parameters — the term
+#          compares two existing logits — so VRAM and step time should be indistinguishable from the
+#          control's, and a step time that MOVES is itself a defect report.
+#
+# READ IT ON THE CONTRAST, NOT ON THE MEAN. This is the whole reason the arm is worth a card when eleven
+# other axes died inside the 0.0062 three-seed floor (knee-jk3): that floor is the holdout's own sampling
+# error on a MEAN of twelve, while the contrast's null is 0.50 by identity. A mean that moves 0.003 says
+# nothing; a Lateral OA column that moves from 0.5141 to 0.60 says the mechanism fired.
+#
+# PRE-REGISTERED, four outcomes, read with `python -m kneemri.evaluation.side_blindness`.
+#   CONFIRMED — Lateral OA's column clears 0.60 with an interval excluding 0.50, AND Lateral Meniscus
+#     does not fall. The objective was the bottleneck: the side was recoverable from a representation
+#     that already held it, and nothing but the loss was stopping it. The follow-on is the weight sweep
+#     this arm deliberately did not run, then the term into the champion's recipe.
+#   PARTIAL — Lateral OA rises but its interval still straddles 0.50, or it rises while Lateral Meniscus
+#     falls by more. The term reaches the right quantity and is mis-scaled or is robbing the pair it
+#     already had. Follow-on is the weight, at 0.3 and 3.0, not abandonment.
+#   FLAT — Lateral OA stays inside [0.48, 0.56] with the term verifiably landed (`side_weight: 1.0` in
+#     the run's settings — CHECK IT, a flag that never reached the constructor trains the control under
+#     this arm's name and reports a null that reads as a refutation). Then the loss is NOT the missing
+#     link for OA specifically, and what it does NOT rule out is that the side is recoverable at all:
+#     the term cannot put position into a representation that lacks it, so the next suspect is the
+#     pooling stage or the field of view for the OA compartments, and the term stays re-testable on a
+#     head that sees position. It would ALSO not rule out the term itself — Medial OA is at 0.7583, so a
+#     flat reading here would say the pair's weaker column cannot be lifted by ordering alone.
+#   REGRESSION — the mean drops more than 0.0062 while the contrast does not move. The term is fighting
+#     cross-entropy rather than adding to it, and the honest read is that a within-study ordering costs
+#     the between-study one the metric actually scores.
+#
+# WHAT NONE OF THESE LICENSE. A solo score is not a seat. `base_dense` lost its matched control by
+# 0.0066 and then took the board from 0.930 to 0.931. Seat value against the champion is a separate read
+# and this arm does not predict it.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train side_dense \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --side-weight 1.0 \
+  --labels "$LABELS" --out "$PROCESSED/side_dense_s2026.pt"

@@ -25,3 +25,19 @@ TARGETS: tuple[str, ...] = (
     "Fracture",
 )
 """The twelve findings, in the column order the submission and the trained members both use."""
+
+COMPARTMENT_PAIRS: tuple[tuple[str, str], ...] = (
+    ("Medial Meniscus", "Lateral Meniscus"),
+    ("Medial OA", "Lateral OA"),
+)
+"""The findings this corpus annotates ONCE PER COMPARTMENT: the same lesion, located to one side.
+
+Structure in the label set rather than a fact about any model, which is why it sits beside TARGETS and
+not in the two places that read it. A pair is the only case where two of the twelve columns describe
+the SAME finding and differ only in where it is, so it is the only case where a study can be positive
+on exactly one of them and the difference between the two columns carries information.
+
+Named as pairs rather than derived by a prefix match on "Medial"/"Lateral". That match would also catch
+MCL — the medial COLLATERAL ligament, which has no lateral counterpart annotated here — and pair it
+with nothing or, worse, with whichever lateral label happened to sort beside it.
+"""

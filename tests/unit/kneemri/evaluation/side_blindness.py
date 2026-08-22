@@ -1,6 +1,7 @@
 """The discordant contrast, on predictions this test constructs to have a known side-blindness."""
 
 import numpy as np
+import pytest
 
 from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
@@ -55,12 +56,21 @@ def test_contrast():
     scores = LabelScores()
     # A ramp shared by both columns is not a constant, so a chance reading here is the contrast dividing
     # the side out rather than an AUC over ties.
-    for side in (True, False):
-        assert abs(groups.contrast(blind, columns, scores, lateral=side) - CHANCE) < 0.08
+    for label in pair:
+        raw = groups.contrast(label, blind, columns, scores)
+        assert abs(groups.oriented(label, raw) - CHANCE) < 0.08
 
     seeing = blind.copy()
     seeing[:, columns[pair[1]]] = groups.lateral_only.astype(np.float64)
-    assert groups.contrast(seeing, columns, scores, lateral=True) == 1.0
+    assert groups.contrast(pair[1], seeing, columns, scores) == 1.0
+
+
+def test_oriented():
+    """The medial column runs backwards, so its raw contrast is flipped and the lateral one is not."""
+    groups = Discordant.of(COMPARTMENT_PAIRS[0], _truth(_columns()), _columns())
+
+    assert groups.oriented(COMPARTMENT_PAIRS[0][0], 0.25) == pytest.approx(0.75)
+    assert groups.oriented(COMPARTMENT_PAIRS[0][1], 0.25) == pytest.approx(0.25)
 
 
 def test_lines():
