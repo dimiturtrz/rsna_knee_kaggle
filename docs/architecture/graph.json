@@ -6290,6 +6290,54 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalSummary",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.lines",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalScan.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalReading",
       "weight": 1
@@ -6314,6 +6362,18 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal.detail",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal.detail",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.evaluation.ordinal_signal.OrdinalSignal.per_label",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalReading",
       "weight": 1
@@ -6331,33 +6391,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.per_label",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.pooled",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.ordinal_signal.main",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.detail",
       "weight": 1
     },
     {
@@ -14654,6 +14696,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "label": "OrdinalScan",
+      "level": "class",
+      "parent": "kneemri.evaluation.ordinal_signal",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
       "label": "OrdinalSignal",
       "level": "class",
@@ -18854,6 +18904,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ordinal_signal.OrdinalScan.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ordinal_signal.OrdinalScan.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ordinal_signal.OrdinalScan.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.ordinal_signal.OrdinalScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ordinal_signal.OrdinalSignal.__init__",
       "label": "__init__",
       "level": "method",
@@ -18864,6 +18938,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.ordinal_signal.OrdinalSignal.concordance",
       "label": "concordance",
+      "level": "method",
+      "parent": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ordinal_signal.OrdinalSignal.detail",
+      "label": "detail",
       "level": "method",
       "parent": "kneemri.evaluation.ordinal_signal.OrdinalSignal",
       "role": null
