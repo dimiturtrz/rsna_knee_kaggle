@@ -474,13 +474,22 @@ ENCODERS: dict[str, Encoder] = {
     # radiology initialisation moves nothing against an EXACT control here, that conversion is not
     # worth buying; this is the cheap half of a cost-tiered pair.
     #
-    # LICENCE MIT, checked before the arm rather than after, the same way V-JEPA2's was. No mount yet,
-    # so it trains here and cannot be submitted until the weights are mirrored — and MIT permits a
-    # PUBLIC mirror, unlike DINOv3's, so that is a plain dataset upload deferred until a seat is earned.
+    # LICENCE MIT, checked before the arm rather than after, the same way V-JEPA2's was. MOUNTED on
+    # 2026-08-23, mid-arm and BEFORE the number: deferring the upload "until a seat is earned" had the
+    # ordering backwards, because an unmirrored encoder makes a WINNING member offline-only, so the
+    # deferred work was not the reward for a good number but the thing standing between one and a slot.
+    #
+    # A DATASET OF ITS OWN, FLAT, rather than a leaf under a shared one like `dinov3-hf`. The first
+    # attempt copied that layout and lost it: `kaggle datasets create --dir-mode zip` zips a subdirectory
+    # and Kaggle unpacks it into the ROOT, so `dimiturnt/raddino-hf` holds `config.json` at top level and
+    # the `rad-dino/` segment `locates` matches on does not exist. That was caught by listing `dinov3-hf`
+    # — which DOES report `vits16/...` prefixes — rather than by a kernel, which is where it was heading.
+    # Naming the dataset for the encoder makes the mount path its own leaf and needs no directory at all.
     RAD_DINO: Encoder(
         RAD_DINO,
         "microsoft/rad-dino",
         768,
+        mount="dimiturnt/rad-dino",
         family=RADDINO,
         leaf="rad-dino",
         params_m=86.6,

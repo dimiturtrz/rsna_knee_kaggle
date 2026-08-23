@@ -1928,6 +1928,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.package_members",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.paths",
       "weight": 1
@@ -9524,6 +9530,12 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.inference.members.MemberPackage.mounts",
+      "target": "kneemri.inference.members.WeightsError",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.inference.members.MemberPackage.named",
       "target": "kneemri.inference.members.WeightsError",
       "weight": 1
@@ -10282,6 +10294,12 @@
       "kind": "holds",
       "source": "kneemri.kaggle.package_members.MemberManifest",
       "target": "kneemri.kaggle.package_members.PackagedMember",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.package_members.MemberManifest.document",
+      "target": "kneemri.kaggle.package_members.MemberManifest.shippable",
       "weight": 1
     },
     {
@@ -22064,6 +22082,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberManifest.shippable",
+      "label": "shippable",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberManifest",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.package_members.MemberRoster.checkpoints",
       "label": "checkpoints",
       "level": "method",
@@ -22098,6 +22124,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members.PackagedMember.identifier",
       "label": "identifier",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.PackagedMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.PackagedMember.variant",
+      "label": "variant",
       "level": "method",
       "parent": "kneemri.kaggle.package_members.PackagedMember",
       "role": null

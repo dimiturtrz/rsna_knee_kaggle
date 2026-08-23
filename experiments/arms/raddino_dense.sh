@@ -51,9 +51,11 @@
 # DOES THE CONTROL, which is DINOv2-base under the same pipeline. The mismatch is common to both arms
 # rather than differential, so it cannot explain a gap in either direction.
 #
-# NOT SUBMITTABLE YET. `raddino` has no Kaggle mount, so this member trains here and cannot enter a
-# kit until the weights are mirrored as a dataset. MIT permits a public mirror; it is deferred until
-# this arm says a seat is worth one.
+# SUBMITTABLE, as of 2026-08-23 and mid-run. This said "not submittable yet, deferred until this arm
+# says a seat is worth one" and that deferral was the mistake: an unmirrored encoder makes a WINNING
+# member offline-only, so the deferred work was not the reward for a good number, it was the thing
+# standing between a good number and a slot. The mirror is `dimiturnt/rad-dino`, MIT, 330 MB, eighteen
+# seconds — priced against four hours of card it was never worth waiting on.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"

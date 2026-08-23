@@ -25,6 +25,7 @@ import torch
 
 from core.paths import DataRoot
 from kneemri.inference.members import MemberPackage
+from kneemri.models.backbone import ENCODERS, SMALL
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,16 @@ class PackagedMember:
     def identifier(self) -> str:
         stem: str = self.path.stem
         return stem.replace("member_", "")
+
+    @property
+    def variant(self) -> str:
+        """The encoder this member's head was fitted on, read the same way `Member.variant` reads it.
+
+        Defaults to small for a checkpoint written before variants existed, matching the manifest side
+        rather than guessing differently on the two ends of one round trip.
+        """
+        config = cast(Mapping[str, object], self.checkpoint["config"])
+        return str(config.get("variant", SMALL))
 
     def entry(self) -> dict[str, object]:
         """The row, at the keys `Member` reads back."""
@@ -115,12 +126,37 @@ class MemberManifest:
         overwrites and the second row wins, so the package would list a member whose weights are
         another member's — which loads, fingerprints and predicts without a word.
         """
+        self.shippable()
         identifiers = [member.identifier for member in self.members]
         repeated = sorted({name for name in identifiers if identifiers.count(name) > 1})
         if repeated:
             message = f"two checkpoints package under one id, so one would overwrite the other: {repeated}"
             raise ValueError(message)
         return json.dumps({"format": FORMAT, "members": [member.entry() for member in self.members]}, indent=2)
+
+    def shippable(self) -> None:
+        """Refuse a member whose encoder no Kaggle dataset mirrors, before any weights are copied.
+
+        THE CHECK EXISTED AND FIRED TOO LATE. `MemberPackage.mounts` already raises on an unmounted
+        variant, and every caller of it is a kernel-metadata check — which runs after this package has
+        been built, and after the card that trained the member has been spent. A check in the right
+        place at the wrong TIME is a receipt, not a check.
+
+        Packaging is the right time because it is where a member enters the shippable set: three of the
+        nine encoders carry no mount, two of them already have trained checkpoints on disk (`cnx_dense`,
+        the V-JEPA2 members), and a roster line naming one of those used to package and push without a
+        word. The fix for a refusal is a dataset upload, which is why the message names the variant
+        rather than the member alone.
+        """
+        unmounted = sorted({member.variant for member in self.members if ENCODERS[member.variant].mount is None})
+        if unmounted:
+            names = sorted(member.identifier for member in self.members if ENCODERS[member.variant].mount is None)
+            message = (
+                f"{names} sit on {unmounted}, which no Kaggle dataset mirrors: a kernel cannot attach "
+                "their encoder weights, so packaging them would ship an entry that cannot run. Publish "
+                "the weights as a dataset and give the variant a mount, or drop the roster line."
+            )
+            raise ValueError(message)
 
 
 def main() -> None:

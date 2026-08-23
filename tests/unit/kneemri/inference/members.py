@@ -135,6 +135,19 @@ def test_mounts(tmp_path: Path):
     assert package.mounts([]) == [], "no members need no encoder"
 
 
+def test_mounts_refuses_an_unmounted_variant_as_a_weights_error_not_a_traceback(tmp_path: Path):
+    """The refusal has to arrive as the error every caller already handles, or it checks nothing.
+
+    Both callers are pre-flight sweeps that answer per kernel and catch only `WeightsError`. While the
+    raise was `mounted_source`'s bare `ValueError`, an unmounted member did not produce a REFUSED line —
+    it escaped the sweep and left every REMAINING kernel unchecked.
+    """
+    package, _ = _package(tmp_path)
+    unmounted = replace(package.members[0], config={**package.members[0].config, "variant": "cnxbase"})
+    with pytest.raises(WeightsError, match="no Kaggle dataset mirrors"):
+        package.mounts([unmounted])
+
+
 def test_find(tmp_path: Path):
     """The manifest decides where the package is; absence is a path, not an error."""
     assert MemberPackage.find(Mounts(root=tmp_path / "nothing-here")) is None

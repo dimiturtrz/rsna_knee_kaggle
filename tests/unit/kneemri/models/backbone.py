@@ -11,6 +11,7 @@ from kneemri.models.backbone import (
     CONVNEXT_BASE,
     ENCODERS,
     LARGE,
+    RAD_DINO,
     SMALL,
     V3_BASE,
     V3_SMALL,
@@ -83,6 +84,20 @@ def test_dinov3_is_mountable_from_our_own_dataset():
     assert ENCODERS[V3_BASE].mounted_source == "dimiturnt/dinov3-hf/vitb16"
     assert ENCODERS[V3_SMALL].patch == 16, "patch 16 decides which read sizes tile cleanly"
     assert ENCODERS[V3_BASE].dim == 768
+
+
+def test_raddino_is_mountable_from_our_own_dataset():
+    """Mirrored mid-arm, because an unmirrored encoder makes a WINNING member offline-only.
+
+    A dataset of its own rather than a leaf under a shared one: `--dir-mode zip` unpacks a subdirectory
+    into the ROOT, so the layout `dinov3-hf` uses is not what that flag produces, and a mount whose leaf
+    segment does not exist fails inside a kernel with the slot already spent.
+    """
+    assert ENCODERS[RAD_DINO].mounted_source == "dimiturnt/rad-dino"
+    assert ENCODERS[RAD_DINO].locates("/kaggle/input/rad-dino")
+    assert not ENCODERS[RAD_DINO].locates("/kaggle/input/raddino-hf"), "the flattened first attempt"
+    assert not ENCODERS[RAD_DINO].locates("/kaggle/input/dinov3-hf/vitb16")
+    assert ENCODERS[RAD_DINO].dim == ENCODERS[BASE].dim, "the control it is measured against is DINOv2-base"
 
 
 def test_locates():

@@ -20,7 +20,7 @@ from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.models.backbone import ENCODERS
 
@@ -38,7 +38,13 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     package = MemberPackage.at(arguments.root, arguments.paths)
-    mounts = package.mounts(package.named(arguments.members) if arguments.members else None)
+    try:
+        mounts = package.mounts(package.named(arguments.members) if arguments.members else None)
+    except WeightsError as unusable:
+        # A refusal, not a traceback: this runs as a pre-flight before a submission, and the one line
+        # that says which member cannot ship is the whole output worth reading.
+        logger.info("REFUSED - %s", unusable)
+        sys.exit(1)
     # BEFORE ANY WEIGHTS LOAD, because this costs a file read and the loop below costs a GPU minute per
     # member — and because a kernel that cannot attach an encoder fails no matter how well its members
     # verify. Only checked when a kernel is named: the package is also read by things that never ship.

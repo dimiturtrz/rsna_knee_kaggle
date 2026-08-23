@@ -26,6 +26,35 @@ def test_identifier():
     assert _member("member_seed7_fold0.pt").identifier == "seed7_fold0"
 
 
+def test_variant():
+    """The encoder a member was fitted on, defaulting the same way the manifest side defaults it."""
+    assert _member("member_fold0.pt").variant == "small", "a checkpoint predating the field reads as small"
+    assert PackagedMember(Path("member_cnx.pt"), {"config": {"variant": "cnxbase"}}).variant == "cnxbase"
+
+
+def test_shippable():
+    """A packaged set on mounted encoders passes without a word."""
+    assert MemberManifest([_member("member_fold0.pt")]).shippable() is None
+
+
+def test_shippable_refuses_a_member_whose_encoder_no_dataset_mirrors():
+    """The check that used to fire at kernel-metadata time, i.e. after the card was already spent.
+
+    `cnxbase` has a trained checkpoint on disk and no Kaggle mount, so a roster line naming it used to
+    package and push clean; the refusal arrived from `MemberPackage.mounts` much later, as a traceback.
+    """
+    member = PackagedMember(Path("member_cnx.pt"), {"config": {"variant": "cnxbase"}})
+    with pytest.raises(ValueError, match="no Kaggle dataset mirrors"):
+        MemberManifest([member]).shippable()
+
+
+def test_document_refuses_an_unshippable_member_before_any_weights_are_copied():
+    """Packaging asks the question, because packaging is where a member enters the shippable set."""
+    member = PackagedMember(Path("member_cnx.pt"), {"config": {"variant": "cnxbase"}})
+    with pytest.raises(ValueError, match="no Kaggle dataset mirrors"):
+        MemberManifest([member]).document()
+
+
 def test_entry():
     """The row, at the keys `Member` reads back — fold parsed out of the id."""
     entry = _member("member_fold3.pt").entry()

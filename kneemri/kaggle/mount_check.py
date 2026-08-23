@@ -50,8 +50,11 @@ class MountCheck:
         names = script.member_names()
         try:
             mounts = self.package.mounts(self.package.named(names) if names else None)
-        except WeightsError as absent:
-            return f"REFUSED - names a member the package does not hold: {absent}"
+        except WeightsError as unusable:
+            # The message is passed through rather than framed, because there are now two ways to be
+            # unusable — a member the package does not hold, and a member on a variant no dataset
+            # mirrors — and only the raiser knows which one this is.
+            return f"REFUSED - {unusable}"
         undeclared = KernelSources(kernel / METADATA).undeclared(mounts)
         if undeclared:
             return f"REFUSED - needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"

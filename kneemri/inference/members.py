@@ -564,11 +564,24 @@ class MemberPackage:
         of encoder mounts its members name, and that set is derived from the members rather than typed
         into a kernel's metadata by hand.
 
-        A variant with no mount raises through `mounted_source`, which is the case worth catching here:
-        such a member can be TRAINED and cannot be submitted, and the sentence that says so should be
-        read while packaging rather than by a kernel that has already taken the slot.
+        A variant with no mount is refused HERE, as a `WeightsError` rather than the `ValueError`
+        `mounted_source` raises on its own. The distinction is not cosmetic: every caller of this method
+        is a pre-flight check that already handles `WeightsError` by returning a refusal and carrying on
+        to the next kernel, and handles nothing else at all — so an unmounted variant used to escape as
+        a traceback that left the REMAINING kernels unchecked. A shippability failure and a
+        weights-mismatch failure are the same kind of answer to the same question: these weights cannot
+        be trusted to run under this entry.
         """
         chosen = self.members if members is None else members
+        adrift = [member for member in chosen if ENCODERS[member.variant].mount is None]
+        if adrift:
+            unmounted = sorted({member.identifier for member in adrift})
+            variants = sorted({member.variant for member in adrift})
+            message = (
+                f"{unmounted} sit on {variants}, which no Kaggle dataset mirrors, so they can be trained "
+                "here and not submitted until their weights are published"
+            )
+            raise WeightsError(message)
         return sorted({ENCODERS[member.variant].mounted_source for member in chosen})
 
     def named(self, wanted: Sequence[str]) -> list["Member"]:
