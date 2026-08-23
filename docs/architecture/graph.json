@@ -1364,6 +1364,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.card_check",
+      "target": "kneemri.process_table",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.ledger_check",
       "target": "core.paths",
       "weight": 1
@@ -1401,7 +1407,7 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.queue_check",
-      "target": "kneemri.spawn",
+      "target": "kneemri.process_table",
       "weight": 1
     },
     {
@@ -2026,6 +2032,12 @@
       "kind": "import",
       "source": "kneemri.models.volume_read",
       "target": "kneemri.models.token_pooling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.process_table",
+      "target": "kneemri.spawn",
       "weight": 1
     },
     {
@@ -8066,6 +8078,120 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.experiments.card_check.CardHolders",
+      "target": "kneemri.experiments.card_check.CardHolders",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.card_check.CardHolders",
+      "target": "kneemri.experiments.card_check.DeviceReport",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.card_check.CardHolders",
+      "target": "kneemri.experiments.card_check.Holder",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.card_check.CardHolders",
+      "target": "kneemri.process_table.Probe",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.card_check.CardHolders",
+      "target": "kneemri.process_table.ProcessTable",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.card_check.CardHolders.crossed",
+      "target": "kneemri.process_table.ProcessTable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.faults",
+      "target": "kneemri.experiments.card_check.CardHolders.ours",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.holders",
+      "target": "kneemri.experiments.card_check.DeviceReport.compute_pids",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.card_check.CardHolders.holders",
+      "target": "kneemri.experiments.card_check.Holder",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.holders",
+      "target": "kneemri.process_table.ProcessTable.commands",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.lines",
+      "target": "kneemri.experiments.card_check.CardHolders.faults",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.lines",
+      "target": "kneemri.experiments.card_check.CardHolders.holders",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.lines",
+      "target": "kneemri.experiments.card_check.CardHolders.ours",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.named",
+      "target": "kneemri.experiments.card_check.CardHolders.holders",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.CardHolders.ours",
+      "target": "kneemri.experiments.card_check.CardHolders.holders",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.Holder.line",
+      "target": "kneemri.experiments.card_check.Holder.ours",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.Holder.ours",
+      "target": "kneemri.experiments.card_check.Holder.normalised",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.main",
+      "target": "kneemri.experiments.card_check.CardHolders.crossed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.card_check.main",
+      "target": "kneemri.experiments.card_check.DeviceReport",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.experiments.ledger_check.LedgerCheck",
       "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
@@ -8221,24 +8347,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.experiments.queue_check.Probe.read",
-      "target": "kneemri.spawn.Spawn",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.queue_check.Probe.read",
-      "target": "kneemri.spawn.Spawn.ran",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.experiments.queue_check.QueuedArms",
-      "target": "kneemri.experiments.queue_check.Probe",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.experiments.queue_check.QueuedArms",
       "target": "kneemri.experiments.queue_check.Watch",
@@ -8313,7 +8421,7 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.watchers",
-      "target": "kneemri.experiments.queue_check.QueuedArms._parentage",
+      "target": "kneemri.process_table.ProcessTable.parentage",
       "weight": 1
     },
     {
@@ -8349,7 +8457,7 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.main",
-      "target": "kneemri.experiments.queue_check.QueuedArms.listing",
+      "target": "kneemri.process_table.ProcessTable.read",
       "weight": 1
     },
     {
@@ -10510,6 +10618,42 @@
       "kind": "references",
       "source": "kneemri.models.volume_read.VolumeRead",
       "target": "kneemri.models.volume_read.VolumeRead",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.process_table.Probe.read",
+      "target": "kneemri.spawn.Spawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.process_table.Probe.read",
+      "target": "kneemri.spawn.Spawn.ran",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.process_table.ProcessTable",
+      "target": "kneemri.process_table.Probe",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.process_table.ProcessTable",
+      "target": "kneemri.process_table.ProcessTable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.process_table.ProcessTable.commands",
+      "target": "kneemri.process_table.ProcessTable.command",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.process_table.ProcessTable.commands",
+      "target": "kneemri.process_table.ProcessTable.parentage",
       "weight": 1
     },
     {
@@ -12837,7 +12981,7 @@
       "role": null
     },
     {
-      "descendants": 111,
+      "descendants": 113,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13101,7 +13245,7 @@
       "role": null
     },
     {
-      "descendants": 8,
+      "descendants": 9,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -13120,6 +13264,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_smoke",
       "label": "arm_smoke",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check",
+      "label": "card_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -13490,6 +13642,14 @@
       "label": "volume_read",
       "level": "module",
       "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table",
+      "label": "process_table",
+      "level": "module",
+      "parent": "kneemri",
       "role": null
     },
     {
@@ -14726,6 +14886,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders",
+      "label": "CardHolders",
+      "level": "class",
+      "parent": "kneemri.experiments.card_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.DeviceReport",
+      "label": "DeviceReport",
+      "level": "class",
+      "parent": "kneemri.experiments.card_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.Holder",
+      "label": "Holder",
+      "level": "class",
+      "parent": "kneemri.experiments.card_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck",
       "label": "LedgerCheck",
       "level": "class",
@@ -14739,14 +14923,6 @@
       "level": "class",
       "parent": "kneemri.experiments.progress",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.queue_check.Probe",
-      "label": "Probe",
-      "level": "class",
-      "parent": "kneemri.experiments.queue_check",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -15282,6 +15458,22 @@
       "label": "VolumeRead",
       "level": "class",
       "parent": "kneemri.models.volume_read",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.Probe",
+      "label": "Probe",
+      "level": "class",
+      "parent": "kneemri.process_table",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.ProcessTable",
+      "label": "ProcessTable",
+      "level": "class",
+      "parent": "kneemri.process_table",
       "role": "satellite"
     },
     {
@@ -19798,6 +19990,102 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.crossed",
+      "label": "crossed",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.faults",
+      "label": "faults",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.holders",
+      "label": "holders",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.CardHolders.ours",
+      "label": "ours",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.CardHolders",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.DeviceReport.compute_pids",
+      "label": "compute_pids",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.DeviceReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.Holder.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.Holder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.Holder.normalised",
+      "label": "normalised",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.Holder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.Holder.ours",
+      "label": "ours",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.Holder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.__init__",
       "label": "__init__",
       "level": "method",
@@ -19894,14 +20182,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.queue_check.Probe.read",
-      "label": "read",
-      "level": "method",
-      "parent": "kneemri.experiments.queue_check.Probe",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.__init__",
       "label": "__init__",
       "level": "method",
@@ -19920,14 +20200,6 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms._armed",
       "label": "_armed",
-      "level": "method",
-      "parent": "kneemri.experiments.queue_check.QueuedArms",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.queue_check.QueuedArms._parentage",
-      "label": "_parentage",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
@@ -19960,14 +20232,6 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.lines",
       "label": "lines",
-      "level": "method",
-      "parent": "kneemri.experiments.queue_check.QueuedArms",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.queue_check.QueuedArms.listing",
-      "label": "listing",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
@@ -22098,6 +22362,46 @@
       "label": "probe_frames",
       "level": "method",
       "parent": "kneemri.models.volume_read.VolumeRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.Probe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.process_table.Probe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.ProcessTable.command",
+      "label": "command",
+      "level": "method",
+      "parent": "kneemri.process_table.ProcessTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.ProcessTable.commands",
+      "label": "commands",
+      "level": "method",
+      "parent": "kneemri.process_table.ProcessTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.ProcessTable.parentage",
+      "label": "parentage",
+      "level": "method",
+      "parent": "kneemri.process_table.ProcessTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.process_table.ProcessTable.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.process_table.ProcessTable",
       "role": null
     },
     {

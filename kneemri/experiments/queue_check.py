@@ -27,11 +27,10 @@ two strings and the unit test needs no process to kill.
 
 import argparse
 import logging
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from kneemri.spawn import Spawn
+from kneemri.process_table import PROBES, ProcessTable
 
 logger = logging.getLogger(__name__)
 
@@ -44,56 +43,6 @@ STARTED = "=== "
 UNREADABLE = 1
 FOUND = 2
 """Distinct exit codes, because "the table could not be read" is not "the queue is broken"."""
-
-
-@dataclass(frozen=True)
-class Probe:
-    """One way to ask this machine for its process table, as a resolved executable and a fixed argv."""
-
-    executable: str
-    argv: tuple[str, ...]
-
-    def read(self) -> str:
-        """This probe's output, or empty when the executable is absent or the call fails.
-
-        The decode is lossy on purpose: a process table here carries a shell snapshot's bytes in
-        whatever the console encoding is, and one undecodable byte in an unrelated process must not
-        cost the answer.
-        """
-        found = shutil.which(self.executable)
-        if not found:
-            return ""
-        # resolved executable, fixed argv, no shell
-        completed = Spawn().ran(
-            [found, *self.argv], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
-        )
-        return completed.stdout
-
-
-PROBES = (
-    Probe("ps", ("-ef",)),
-    Probe(
-        "powershell",
-        (
-            "-NoProfile",
-            "-Command",
-            'Get-CimInstance Win32_Process | ForEach-Object { "$($_.ProcessId) $($_.ParentProcessId) '
-            '$($_.CommandLine)" }',
-        ),
-    ),
-)
-"""Ordered, first non-empty wins — and the second one is why this is a list rather than a call.
-
-MEASURED 2026-08-20: `ps -ef` lists the running arm correctly in the harness shell, and
-`shutil.which("ps")` from the interpreter this check runs in returns None. The MSYS `ps` lives in
-git-bash's `/usr/bin`, which is not on the PATH a Windows Python process inherits, so the check
-degraded to "liveness cannot be crossed" and returned success — the exact silent pass it exists to
-prevent, on the only machine it runs on.
-
-`Get-CimInstance Win32_Process` is the Windows counterpart and is strictly better here: it carries the
-FULL command line, which is what the crossing matches on, where `tasklist` carries only an image name
-and would match no watcher at all.
-"""
 
 
 @dataclass(frozen=True)
@@ -160,8 +109,8 @@ class QueuedArms:
         separate watchers — neither one's parent — both survive to be counted.
         """
         lines = [line for line in self.running.splitlines() if WATCHER in line]
-        parents = {self._parentage(line)[1] for line in lines} - {""}
-        return [line for line in lines if self._parentage(line)[0] not in parents]
+        parents = {ProcessTable.parentage(line)[1] for line in lines} - {""}
+        return [line for line in lines if ProcessTable.parentage(line)[0] not in parents]
 
     def alive(self, watch: Watch) -> bool:
         """Whether a live `after.sh` carries this watch's marker AND the exact arms it names.
@@ -239,31 +188,6 @@ class QueuedArms:
         return [*rows, *(self.faults() or ["OK: every arm still owed is gated by exactly one live process"])]
 
     @staticmethod
-    def listing(probes: tuple[Probe, ...] = PROBES) -> str:
-        """This machine's process table as one string, or empty when no probe could read it.
-
-        An unreadable table must not read as "nothing is running" — that turns every queued arm into a
-        false strand — so the caller is told, and the check reports what it could not do instead.
-        """
-        for probe in probes:
-            found = probe.read()
-            if found:
-                return found
-        return ""
-
-    @staticmethod
-    def _parentage(line: str) -> tuple[str, str]:
-        """This process line's own id and its parent's, or a pair of blanks when it carries neither.
-
-        Read as THE FIRST TWO WHOLE-NUMBER TOKENS, which is the one thing both probes agree on: `ps -ef`
-        prints them after the user and PowerShell is asked to print them first. A line they cannot be
-        read from keeps the process — a watcher dropped for an unparseable id would be a strand this
-        check invents.
-        """
-        numbers = [token for token in line.split() if token.isdigit()]
-        return (numbers[0], numbers[1]) if len(numbers) > 1 else ("", "")
-
-    @staticmethod
     def _armed(line: str) -> tuple[str, ...]:
         """The arms one `after.sh` process line carries, read the same way the log's header is read.
 
@@ -291,7 +215,7 @@ def main() -> None:
     parser.add_argument("--directory", type=Path, default=Path("logs"), help="where the watcher logs live")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    running = QueuedArms.listing()
+    running = ProcessTable.read().text
     if not running:
         logger.warning(
             "no process listing: none of %s could be read, so liveness cannot be crossed",

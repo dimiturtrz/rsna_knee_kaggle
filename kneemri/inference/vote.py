@@ -11,12 +11,29 @@ not an argument for weighting six members equally when 0.031 separates the best 
 
 MEASURED, 2026-08-17, and the axis is FLAT. On all six all-ours members: RankAverage 0.8598,
 LogitAverage 0.8603, QualityWeightedRank 0.8600 split-half. On the pair that scored 0.919: 0.8581 /
-0.8583 / 0.8580. Every spread is an order below the 0.0053 board floor, so the flat rule is not leaving
-anything on the table and neither margin-keeping nor quality-weighting is a lever here. That is the
-finding this module was written to get, and it is a negative one: the gains are in the MEMBERS, not in
-how they are counted. The family stays because the question recurs and answering it again now costs a
-CLI flag rather than a re-implementation — and because keeping the rules side by side is what makes the
-next candidate rule a two-line addition instead of a fork of the submission path.
+0.8583 / 0.8580.
+
+THAT FIRST RETIREMENT WAS ARGUED WRONGLY, and the correction matters more than the verdict it happened
+to preserve. It read those spreads as "an order below the 0.0053 board floor" — comparing an OFFLINE
+delta directly against a BOARD threshold, which is the units error knee-7d1 later corrected and
+comp/champion.json now forbids by name. At the measured 4.67 board points per holdout point, +0.0005
+offline is +0.0023 board, and a lever worth two ticks at zero card cost is not one to dismiss.
+
+RE-PRICED HONESTLY, 2026-08-23, on the champion seven — the pool this project ships, and the most
+DISAGREEING one it owns, being the only one holding both the DINOv2-base member and the different-pixels
+member. RankAverage 0.8694, LogitAverage 0.8696, QualityWeightedRank 0.8695. The pre-registered gate was
++0.0005 or no submission slot, and +0.0002 fails it.
+
+The mechanism is refuted rather than merely unconfirmed, which is why this axis is now closed instead of
+re-openable. The whole case for re-testing was that the effect GROWS with member disagreement; on the
+most-disagreeing pool it came out SMALLER (+0.0002) than on the six that share a recipe lineage
+(+0.0005). It shrinks. The gains are in the MEMBERS, not in how they are counted — the same conclusion
+as 2026-08-17, now resting on an argument that holds. See
+interpretations/kneemri/2026-08-23_the_ensemble_axis_is_exhausted.md.
+
+The family stays because the question recurs and answering it again now costs a CLI flag rather than a
+re-implementation — and because keeping the rules side by side is what makes the next candidate rule a
+two-line addition instead of a fork of the submission path.
 
 `RankAverage` is not a copy of the shipped rule, it IS the shipped rule: `Ensemble.predict_groups` calls
 it directly and so does every analysis that reports an ensemble number, so exploring this family cannot

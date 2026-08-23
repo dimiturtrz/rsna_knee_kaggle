@@ -94,6 +94,14 @@ votes are counted.
 Not ruled out: a stacked combiner fitted across folds, and a combiner over members that disagree far more
 than these six (which share a recipe lineage). Neither is worth building before the pool diversifies.
 
+> **Corrected 2026-08-23.** "Every spread is an order below the board floor" compares an OFFLINE delta
+> against a BOARD threshold — the units error `knee-7d1` later corrected. At 4.67 board points per
+> holdout point, +0.0005 offline is +0.0023 board, so the dismissal above was not earned. The axis was
+> re-priced on the champion seven, which IS the more-disagreeing pool this section asks for, and
+> LogitAverage bought +0.0002 there against +0.0005 here — it shrinks with disagreement rather than
+> growing. The verdict stands; the reasoning above does not. The second clause of "not ruled out" is now
+> spent. See [2026-08-23](2026-08-23_the_ensemble_axis_is_exhausted.md).
+
 ## 5. Per-label member selection — measured, DEAD
 
 Choosing a different subset for each of the twelve findings. Its **oracle sits 0.0008 BELOW** the plain

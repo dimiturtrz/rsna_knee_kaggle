@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.experiments.queue_check import Probe, QueuedArms, Watch, main
+from kneemri.experiments.queue_check import QueuedArms, Watch, main
+from kneemri.process_table import ProcessTable
 
 MARKER = "ARM DONE aug_long"
 ARMS = "experiments/arms/v3base_band.sh experiments/arms/aprior_dense.sh"
@@ -117,61 +118,13 @@ def test_lines(tmp_path: Path):
     assert stranded.startswith("STRANDED:") and "v3base_band" in stranded, "the verdict names the arms"
 
 
-def test_read():
-    """A probe whose executable is not on THIS interpreter's PATH answers empty rather than raising.
-
-    MEASURED 2026-08-20: `shutil.which("ps")` returns None from the Python process this check runs in
-    — the MSYS `ps` lives in git-bash's `/usr/bin`, off the Windows PATH — while `ps -ef` works fine in
-    the shell that launches it. That gap is what made the check silently pass on the only machine it
-    runs on, so the absent case is a test rather than an assumption.
-    """
-    assert Probe("no-such-executable-anywhere", ()).read() == ""
-
-
-def test_listing():
-    """An empty table reads as 'nothing is running' and would strand every queued arm, so it is checked.
-
-    Asserted on ROW COUNT, because that is the only thing TRUE OF BOTH PROBES. `ps -ef` prints a
-    headed table of the MSYS process table; the PowerShell probe prints bare command lines with no
-    header at all, of every Windows process. Nothing else is common to the two.
-
-    It used to assert that `python` appeared, and that was wrong twice over. MSYS `ps` enumerates the
-    MSYS process table ONLY, and pytest runs as a native Windows process — so under the first probe the
-    assertion held exactly as long as something unrelated had launched a python through bash, and failed
-    the moment a gate session was started directly. A test measuring its own launcher, not the code.
-
-    The narrowness of the MSYS table is not a defect to route around, because it is the table the check
-    reads for real: the watchers it hunts are `after.sh` and `queue.sh`, which ARE bash. A native
-    trainer is never looked for here — it is found by its checkpoint.
-
-    SKIPS RATHER THAN FAILS WHEN NO PROBE SPAWNS, and that is not a silent pass. On 2026-08-20 a
-    pre-push hook running beside a training arm, a CPU witness over nineteen members and a full gate
-    session failed fourteen tests with `exit status 3221225794` — Windows `STATUS_DLL_INIT_FAILED`,
-    the OS refusing to start any new process. The same tree passed serially minutes later. That is a
-    fact about the machine's load, not about this code, and a check that cannot spawn `ps` has not
-    measured that `ps` is broken. The condition this test guards is enforced where it matters instead:
-    `queue_check.main` now EXITS NON-ZERO on an unreadable table, so a genuinely broken probe fails the
-    check every time it is run for real, while a momentarily overloaded machine no longer blocks a push.
-    """
-    listing = QueuedArms.listing()
-    if not listing:
-        pytest.skip("no probe could be spawned on this machine right now — see test_listing_no_probe_reads_empty")
-    populated = [line for line in listing.splitlines() if line.strip()]
-    assert len(populated) > 1, "a machine running this test is running more than one process"
-
-
-def test_listing_no_probe_reads_empty():
-    """No probe means no answer — and the caller must be told, not handed a table with nothing in it."""
-    assert QueuedArms.listing((Probe("no-such-executable-anywhere", ()),)) == ""
-
-
 def test_lines_empty(tmp_path: Path):
     assert QueuedArms(tmp_path, LIVE).lines()[-1] == "OK: nothing is queued"
 
 
 def test_main_exits_when_the_table_cannot_be_read(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """An unreadable process table must not leave the status at 0 — that reads as a pass in a log tail."""
-    monkeypatch.setattr(QueuedArms, "listing", staticmethod(lambda *_: ""))
+    monkeypatch.setattr(ProcessTable, "read", classmethod(lambda *_: ProcessTable("")))
     monkeypatch.setattr("sys.argv", ["queue_check", "--directory", str(tmp_path)])
     with pytest.raises(SystemExit) as exit_code:
         main()
@@ -181,7 +134,7 @@ def test_main_exits_when_the_table_cannot_be_read(monkeypatch: pytest.MonkeyPatc
 def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """A stranded queue must not leave the status at 0 either — same trap, and it costs a card."""
     _log(tmp_path, "after_chain.log", MARKER, ARMS)
-    monkeypatch.setattr(QueuedArms, "listing", staticmethod(lambda *_: "bash nothing\n"))
+    monkeypatch.setattr(ProcessTable, "read", classmethod(lambda *_: ProcessTable("bash nothing\n")))
     monkeypatch.setattr("sys.argv", ["queue_check", "--directory", str(tmp_path)])
     with pytest.raises(SystemExit) as exit_code:
         main()

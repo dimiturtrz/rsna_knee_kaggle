@@ -108,7 +108,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Eight checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Nine checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -116,6 +116,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   for five minutes because three `after.sh` watchers had died with the session that launched them, and their logs
   still read `waiting for 'ARM DONE ...'` — the queue LOOKS armed either way, and only the process table knows;
   it now also blocks the OPPOSITE hole, two live watchers owing one arm, which would run it twice on one card),
+  `python -m kneemri.experiments.card_check` before putting anything on the GPU (two identical `member_curve`
+  scans ran on one card for twenty-five minutes after a `nohup` relaunch landed on a job that had NOT failed;
+  the cost was the READING, not the card — contention stretched one member from three minutes to eleven, one
+  step from being recorded as a fact about the member. It asks the DEVICE rather than guessing from argv, and
+  blocks only on TWO OF OURS, since the other project shares this card by arrangement),
   `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
   submission (two slots went to code the repo had already fixed; `--mounted` asks Kaggle what it will
   actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a
