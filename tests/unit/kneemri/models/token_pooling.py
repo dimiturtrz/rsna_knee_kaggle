@@ -7,15 +7,19 @@ from kneemri.models.token_pooling import (
     FOCAL_FRACTION,
     MEAN,
     POOL_PARTS,
+    SIDED,
     TOKEN_POOLINGS,
     ClassAndPatchMean,
     ClassAndPatchMeanAndTail,
+    ClassAndSidedMean,
     PatchMean,
     TokenPooling,
 )
 
 SEED = 2026
-TOKENS = 17
+TOKENS = 21
+"""Five prefix rows and a SQUARE sixteen-patch grid, because `SIDED` splits that grid on its
+midline column and a non-square count is refused rather than reshaped."""
 DIM = 8
 PREFIX = 5
 """A DINOv3-shaped prefix — one class token and four registers — because a prefix of one cannot tell
@@ -79,4 +83,50 @@ def test_every_pooling_emits_the_parts_it_declares():
         assert pooling.reduce(tokens, PREFIX).shape == (2, DIM * pooling.parts), name
         assert POOL_PARTS[name] == pooling.parts, name
 
-    assert set(POOL_PARTS) == {CLS_MEAN, CLS_MEAN_FOCAL, MEAN}, "the vocabulary four call sites speak"
+    assert set(POOL_PARTS) == {CLS_MEAN, CLS_MEAN_FOCAL, MEAN, SIDED}, "the vocabulary four call sites speak"
+
+
+def test_class_and_sided_mean_reduce():
+    """The two halves must SEPARATE the sides, and together must still be the mean the default emits.
+
+    Both halves matter. A pooling whose halves do not differ on a field that differs by column has not
+    given the head a side at all; a pair of halves that does not average back to the patch mean has
+    taken information away rather than adding the contrast to it.
+    """
+    tokens = _tokens()
+    pooled = ClassAndSidedMean().reduce(tokens, PREFIX)
+    patch = tokens[:, PREFIX:]
+
+    assert pooled.shape == (2, DIM * POOL_PARTS[SIDED])
+    assert torch.allclose(pooled[:, :DIM], tokens[:, 0]), "the class token comes first, as in every other pooling"
+    left, right = pooled[:, DIM : 2 * DIM], pooled[:, 2 * DIM :]
+    assert torch.allclose((left + right) / 2, patch.mean(1), atol=1e-6), "the halves partition the grid"
+    assert not torch.allclose(left, right), "halves that agree carry no side"
+
+
+def test_class_and_sided_mean_reduce_separates_the_columns():
+    """A field that is +1 on the left columns and -1 on the right must read as exactly that.
+
+    The property the whole pooling exists for, on an input where the answer is known by construction:
+    under any collapsing pooling this field averages to zero and is invisible.
+    """
+    side = 4
+    grid = torch.ones(1, side, side, DIM)
+    grid[:, :, side // 2 :] = -1.0
+    tokens = torch.cat([torch.zeros(1, PREFIX, DIM), grid.flatten(1, 2)], dim=1)
+
+    pooled = ClassAndSidedMean().reduce(tokens, PREFIX)
+
+    assert torch.allclose(pooled[:, DIM : 2 * DIM], torch.ones(1, DIM))
+    assert torch.allclose(pooled[:, 2 * DIM :], -torch.ones(1, DIM))
+    assert torch.allclose(tokens[:, PREFIX:].mean(1), torch.zeros(1, DIM)), "the mean this pooling replaces is blind"
+
+
+def test_class_and_sided_mean_reduce_refuses_a_non_square_grid():
+    """A token count with no square grid has no midline, so it must CRASH rather than reshape.
+
+    The silent alternative is the failure this project keeps paying for: a flag lands in the recorded
+    config, the head is built for the declared width, and the forward pass pools something else.
+    """
+    with pytest.raises(ValueError, match="not a square grid"):
+        ClassAndSidedMean().reduce(torch.randn(2, PREFIX + 12, DIM), PREFIX)

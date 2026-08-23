@@ -10850,6 +10850,12 @@
     },
     {
       "kind": "inherits",
+      "source": "kneemri.models.token_pooling.ClassAndSidedMean",
+      "target": "kneemri.models.token_pooling.TokenPooling",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
       "source": "kneemri.models.token_pooling.PatchMean",
       "target": "kneemri.models.token_pooling.TokenPooling",
       "weight": 1
@@ -15764,6 +15770,14 @@
       "descendants": 0,
       "id": "kneemri.models.token_pooling.ClassAndPatchMeanAndTail",
       "label": "ClassAndPatchMeanAndTail",
+      "level": "class",
+      "parent": "kneemri.models.token_pooling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.token_pooling.ClassAndSidedMean",
+      "label": "ClassAndSidedMean",
       "level": "class",
       "parent": "kneemri.models.token_pooling",
       "role": "satellite"
@@ -22814,6 +22828,14 @@
       "label": "reduce",
       "level": "method",
       "parent": "kneemri.models.token_pooling.ClassAndPatchMeanAndTail",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.token_pooling.ClassAndSidedMean.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.models.token_pooling.ClassAndSidedMean",
       "role": null
     },
     {

@@ -2526,3 +2526,19 @@ seven-member vote is free in both directions.** `gradeswap` and `accumseat` are 
 of a seven and both read 0.933. That is a statement about the ensemble's flatness at seven, and it points
 the remaining board budget at the count (an eighth seat, never tested) or at a member from an axis the
 roster does not contain — not at further one-for-one swaps.
+
+---
+
+## `raddino_dense` — a medical-report backbone at a natural-image recipe, killed at epoch 6 on its own slope (2026-08-23, `knee-vp8q`)
+
+| arm | what moved | best | vs control | reading |
+| --- | --- | --- | --- | --- |
+| **`raddino_dense`** | `band_dense`'s recipe with the trunk swapped to Microsoft **RAD-DINO** (a DINOv2-family ViT-B pretrained on chest radiographs with report supervision) instead of DINOv3 — everything else identical | **0.8137 at epoch 6 of 12** (killed) | **−0.0375 vs `base_dense_s2026` 0.8512 at e8** | **KILLED ON ITS OWN SLOPE, not on a landing number.** Epochs 0–6 read 0.7247 / 0.7439 / 0.7852 / 0.7944 / 0.8000 / 0.8119 / 0.8137 at ~990 s each. Per-epoch gains: +0.019, +0.041, +0.009, +0.006, +0.012, **+0.0018**. The pre-registered top band was ≥0.866, which needed +0.052 in the five remaining epochs while the arm was delivering two thousandths. The bottom band (≤0.845) was already unreachable-from-below in the other direction: it would have landed there or under. **PRICE that killed it:** 83 min of card to convert a near-certain bottom-band landing into a certain one, against 72 min for `sided_pool` on an axis no arm in this repo has ever touched. **Which link is suspect, before any verdict:** the trunk DID fire — loss falls monotonically 1.11 → 0.757 and VRAM/step-time are backbone-appropriate, so this is not a plumbing failure and not a frozen-encoder failure. **The confound this arm cannot separate is the RECIPE:** `--backbone-lr 4e-5` and the twelve-epoch schedule were tuned on DINOv3, and RAD-DINO is a different pretraining objective at a different scale. A slope this shallow is as consistent with an under-driven backbone as with a backbone that does not transfer. **What this kills: the DROP-IN swap** — RAD-DINO at DINOv3's recipe does not reach DINOv3's number and is not worth a seat. **What it does NOT rule out:** RAD-DINO at its own learning rate, RAD-DINO as a frozen feature extractor, or the wider premise that medical-domain pretraining transfers to knee MRI. Those are re-testable; this run says nothing about them. The asset stays on disk. |
+
+The wider reading is about the roster rather than the backbone. This is the **third** arm to fail the same way —
+a new trunk (`cnx_dense` 0.7927, `vjepa_member` 0.8343, `raddino_dense` ~0.82 extrapolated) plugged into a recipe
+that was fitted around DINOv3, and each landed below the DINOv3 control it was measured against. Either the
+recipe is genuinely DINOv3-shaped and every trunk swap needs its own tuning pass before it can be read at all,
+or the trunk is not where the remaining board budget lives. The greedy curve over the cleaned 68-member pool
+says the latter more cheaply: **the peak is 0.8717 at seats 8–10 and declines monotonically after**, so the
+ensemble does not want another member — it wants a member that can do something none of the existing ones can.
