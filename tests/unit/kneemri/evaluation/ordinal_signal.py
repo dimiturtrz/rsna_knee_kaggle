@@ -7,7 +7,14 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.ordinal_signal import CHANCE, OrdinalReading, OrdinalSignal, OrdinalSummary, main
+from kneemri.evaluation.ordinal_signal import (
+    CHANCE,
+    OrdinalReading,
+    OrdinalScan,
+    OrdinalSignal,
+    OrdinalSummary,
+    main,
+)
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 LEVELS = [0.68, 0.82, 0.94]
@@ -97,13 +104,59 @@ def test_pooled():
     assert OrdinalSignal.pooled([]) is None, "no label could answer, and a mean of nothing is not chance"
 
 
-def test_lines():
+def test_ordinal_summary_lines():
     """Neither mean is printed as THE mean: each row names the denominator it was taken over."""
     printed = OrdinalSummary(0.7, 0.86, 2, 1000).lines()
 
     assert len(printed) == 2, "one number called the mean is the reading error this exists to prevent"
     assert "0.700" in printed[0] and "labels" in printed[0]
     assert "0.860" in printed[1] and "pairs" in printed[1]
+
+
+def test_ordinal_signal_detail(tmp_path: Path):
+    """A member with no record says so as a line, rather than raising — 65 on disk predate the record."""
+    checkpoint = tmp_path / "member.pt"
+    assert "no holdout record" in OrdinalSignal.detail(checkpoint)[0]
+
+    reading = _reading(LEVELS, [0.1, 0.5, 0.9])
+    HoldoutRecord(checkpoint).write(reading.studies, reading.predictions, reading.truth, reading.epoch)
+    printed = OrdinalSignal.detail(checkpoint)
+    assert printed[0].startswith("member.pt")
+    assert any(TARGETS[0] in line for line in printed)
+    assert sum("MEAN" in line for line in printed) == 2, "both means, never one called THE mean"
+
+
+def test_ordinal_scan_of(tmp_path: Path):
+    """Members read off disk, and one with no record skipped rather than seated at chance."""
+    agreeing, inverted = tmp_path / "agreeing.pt", tmp_path / "inverted.pt"
+    for checkpoint, predictions in ((agreeing, [0.1, 0.5, 0.9]), (inverted, [0.9, 0.5, 0.1])):
+        reading = _reading(LEVELS, predictions)
+        HoldoutRecord(checkpoint).write(reading.studies, reading.predictions, reading.truth, reading.epoch)
+
+    scan = OrdinalScan.of([agreeing, inverted, tmp_path / "never_trained.pt"])
+
+    assert [name for name, _ in scan.scanned] == ["agreeing", "inverted"], "a recordless member is not chance"
+    assert scan.scanned[0][1].pair_weighted == pytest.approx(1.0)
+
+
+def test_ordinal_scan_ranked():
+    """Best first by PAIRS, which is the weighting a seat displacement is decided under."""
+    weak = OrdinalSummary(0.9, 0.60, 12, 1000)
+    strong = OrdinalSummary(0.5, 0.75, 12, 1000)
+
+    assert [name for name, _ in OrdinalScan([("weak", weak), ("strong", strong)]).ranked()] == ["strong", "weak"]
+
+
+def test_ordinal_scan_lines():
+    """The seated roster is marked, because outranking an unseated member is not a submission."""
+    ranked = [("candidate", OrdinalSummary(0.5, 0.75, 12, 1000)), ("seated", OrdinalSummary(0.9, 0.6, 12, 9))]
+    scan = OrdinalScan(ranked)
+
+    printed = scan.lines(seated=("seated",))
+
+    assert printed[1].startswith("candidate") and "SEAT" not in printed[1]
+    assert "SEAT" in printed[2], "the row that a displacement would have to beat is the marked one"
+    assert "0.900" in printed[2], "the label mean travels along, so a one-weighting-only ranking is visible"
 
 
 def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture):

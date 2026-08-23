@@ -1730,3 +1730,32 @@ arithmetic that prices either.
 **Two 22.08 slots lapsed unused.** The machine slept from ~22:40Z to ~10:20Z and the UTC day closed with
 them unspent. Recorded rather than glossed: the eighth-seat scan that would have chosen an entry was
 launched at 22:36Z and died in its first member when the host went down.
+
+## The eighth seat, scanned rather than submitted (2026-08-23 11:28Z, no slot spent)
+
+The `accumseat` entry above named the remaining budget as **member count — an eighth seat, which no
+entry has ever tested** — and recorded that the scan which would have chosen that entry died at 22:36Z
+when the host went down. It was rerun card-free over all 66 same-split records, champion seven held.
+
+**Flat.** Roster of seven reads 0.8694; the best eighth is `attend_true` at **+0.0004**, with
+`attend_dense`, `crop80_span` and `small_batch6` tied behind it, and **59 of 59 candidates sit inside
+the +0.0015 this ruler needs before it has ever picked a board tick**. `record_mix` prints the verdict
+itself: *"best is +0.0007, inside +0.0015: this ruler cannot tell it from the incumbent."*
+
+At knee-7d1's +4.67 board points per holdout point that prices at roughly **+0.002 board** — real, in
+`gradeswap`'s class, and a sixth of the +0.007 that 0.933 → 0.940 needs. **An eighth seat drawn from
+the existing pool is not the lever**, and no slot was spent finding that out.
+
+That leaves exactly one of the two named budget items standing: **a member from an axis the roster does
+not contain**. `final_fit` — 100% data, `--fold -1` — is on the card as this is written and is that
+member: data volume is the only axis that has ever cleared the bar (`half_data`, −0.0234, 3.8× the
+noise floor).
+
+Also recorded, because it re-derived a retired conclusion: the ordinal sweep is now a committed command
+(`python -m kneemri.evaluation.ordinal_signal --directory <processed> --seated <names>`) rather than a
+shell loop over the single-checkpoint CLI, which is how the 23- and 48-member scans were produced. Its
+first full run over 80 records reproduced the roster's annotated numbers exactly (`small_accum` 0.784,
+`severity_weight` 0.783, `small_batch6` 0.781, weakest seat `lr4e-5_ws` 0.770) and independently
+validates the measure — the smokes rank last at 0.41–0.55 and the five collapsed `--encoder-weights`
+members sit at the floor (`mae_matched` 0.617, `encoder_adapt*` 0.63–0.67). **The ruler is still retired
+as a SELECTION rule** by the entry above; the tool is kept as a diagnostic, not a chooser.

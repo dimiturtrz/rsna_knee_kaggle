@@ -89,6 +89,59 @@ class OrdinalSummary:
         ]
 
 
+@dataclass(frozen=True)
+class OrdinalScan:
+    """Many members ranked against each other by the one ruler that has beaten the binary holdout.
+
+    IT EXISTS BECAUSE THE SWEEP WAS BEING DONE BY HAND. The 23-member and 48-member scans quoted on
+    knee-7d1 were produced by looping this module's single-checkpoint CLI in a shell, which is the
+    REPL-session shape the project forbids for exactly the reason it bit here: the numbers reached the
+    beads and the interpretations with no committed command that reproduces them.
+
+    RANKED BY THE PAIR-WEIGHTED MEAN, with the label mean carried beside it rather than folded in.
+    `OrdinalSummary` refuses to name one of the two THE mean, and a ranking has to choose; pairs is the
+    right choice for a displacement question because a seat is decided by evidence, not by giving
+    Fracture's 1,122 pairs the same vote as Effusion's 79,925. The label mean travels in the row so a
+    ranking that only holds under one of the two weightings is visible as such.
+    """
+
+    scanned: list[tuple[str, OrdinalSummary]]
+
+    @classmethod
+    def of(cls, checkpoints: list[Path]) -> "OrdinalScan":
+        """Every member that HAS a record, read from disk and pooled.
+
+        A checkpoint with no holdout record is skipped rather than seated at chance, for the reason
+        `pooled` returns None: absence of evidence printed as 0.5 reads as a refutation. The count of
+        answering members is reported beside the table so the skips are visible rather than silent.
+        """
+        scanned = []
+        for checkpoint in checkpoints:
+            reading = HoldoutRecord(checkpoint).read()
+            if reading is None:
+                continue
+            summary = OrdinalSignal.pooled(OrdinalSignal(reading).per_label())
+            if summary is not None:
+                scanned.append((checkpoint.name.split(".")[0], summary))
+        return cls(scanned)
+
+    def ranked(self) -> list[tuple[str, OrdinalSummary]]:
+        """Best first, by pair-weighted concordance — the order a seat displacement is read from."""
+        return sorted(self.scanned, key=lambda scanned: -scanned[1].pair_weighted)
+
+    def lines(self, seated: tuple[str, ...] = ()) -> list[str]:
+        """The ranking, with seated members marked so a displacement is read rather than computed.
+
+        The mark is the whole point of passing the roster in: a candidate outranking a seated member is
+        the licensed move, and a candidate outranking only unseated ones is not a submission.
+        """
+        rows = [f"{'member':<34} {'pairs':>6} {'labels':>7}  {'seat':>4}"]
+        for name, summary in self.ranked():
+            seat = "SEAT" if name in seated else ""
+            rows.append(f"{name:<34} {summary.pair_weighted:>6.3f} {summary.label_mean:>7.3f}  {seat:>4}")
+        return rows
+
+
 class OrdinalSignal:
     """A member's holdout reading, asked whether its ranking respects the graded levels."""
 
@@ -107,6 +160,17 @@ class OrdinalSignal:
             if reading is not None:
                 readings.append(OrdinalReading(label, *reading))
         return readings
+
+    @classmethod
+    def detail(cls, checkpoint: Path) -> list[str]:
+        """One member's twelve rows and both means, as lines — the single-checkpoint report."""
+        reading = HoldoutRecord(checkpoint).read()
+        if reading is None:
+            return [f"{checkpoint.name} has no holdout record — train it or back-fill it first"]
+        header = f"{checkpoint.name}, epoch {reading.epoch}, {reading.source} over {len(reading.studies)} studies"
+        readings = cls(reading).per_label()
+        summary = cls.pooled(readings)
+        return [header, *(label.line() for label in readings), *(summary.lines() if summary else [])]
 
     @staticmethod
     def pooled(readings: list[OrdinalReading]) -> OrdinalSummary | None:
@@ -153,32 +217,28 @@ class OrdinalSignal:
 
 
 def main() -> None:
-    """Report one member's ordinal concordance, per label, from its holdout record alone."""
+    """Report ordinal concordance: per label for one member, or ranked across many."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, required=True, help="a member, its metrics file or its record")
+    parser.add_argument("--checkpoint", type=Path, nargs="+", help="a member, its metrics file or its record")
+    parser.add_argument("--directory", type=Path, help="scan every holdout record under it")
+    parser.add_argument("--seated", nargs="*", default=(), help="member names to mark, so a displacement is read")
     arguments = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    reading = HoldoutRecord(arguments.checkpoint).read()
-    if reading is None:
-        logger.info("%s has no holdout record — train it or back-fill it first", arguments.checkpoint.name)
-        return
-
-    logger.info(
-        "%s, epoch %d, %s over %d studies",
-        arguments.checkpoint.name,
-        reading.epoch,
-        reading.source,
-        len(reading.studies),
-    )
+    checkpoints = list(arguments.checkpoint or ())
+    if arguments.directory is not None:
+        checkpoints += sorted(arguments.directory.glob("*.holdout.npz"))
+    if not checkpoints:
+        parser.error("pass --checkpoint, --directory, or both")
     logger.info("chance is %.2f; above it means the graded levels carry severity, not only certainty", CHANCE)
-    readings = OrdinalSignal(reading).per_label()
-    for label in readings:
-        logger.info("%s", label.line())
-    summary = OrdinalSignal.pooled(readings)
-    if summary is not None:
-        for line in summary.lines():
+    if len(checkpoints) == 1:
+        for line in OrdinalSignal.detail(checkpoints[0]):
             logger.info("%s", line)
+        return
+    scan = OrdinalScan.of(checkpoints)
+    logger.info("%d of %d members answered", len(scan.scanned), len(checkpoints))
+    for line in scan.lines(tuple(arguments.seated)):
+        logger.info("%s", line)
 
 
 if __name__ == "__main__":
