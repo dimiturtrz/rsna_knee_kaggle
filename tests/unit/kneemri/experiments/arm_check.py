@@ -263,7 +263,7 @@ def test_invocations(tmp_path: Path):
 
     found = ArmCheck(arms, Path("experiments/stub_lib.sh")).invocations()
 
-    assert found == {"real": "--fold 0 --epochs 8"}, (
+    assert found == {"real": "'--fold' '0' '--epochs' '8'"}, (
         "a retired arm reaches no parser, so it is never reported UNCACHED for a cache nobody should build"
     )
 
@@ -282,8 +282,8 @@ def test_queued(tmp_path: Path):
     )
     check = ArmCheck(arms, Path("experiments/stub_lib.sh"))
 
-    assert check.queued([f"{(arms / 'rung.sh').as_posix()} 12"]) == {"rung_12": "--fold 0 --epochs 12"}
-    assert check.invocations() == {"rung_8": "--fold 0 --epochs 8"}, "bare stays bare — the default rung"
+    assert check.queued([f"{(arms / 'rung.sh').as_posix()} 12"]) == {"rung_12": "'--fold' '0' '--epochs' '12'"}
+    assert check.invocations() == {"rung_8": "'--fold' '0' '--epochs' '8'"}, "bare stays bare — the default rung"
 
     # An arm's NAME where a queue entry belongs: bash runs nothing, the invocation set empties, and the
     # complaint used to surface in `selected` as a missing arm — blaming `--only` for a `--as-queued` typo.

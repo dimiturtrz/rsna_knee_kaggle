@@ -49,7 +49,14 @@ export PATH
 
 run_train() {
   # The arm's name, a tab, then its flags — one line, so the caller can split it without a parser.
+  #
+  # SHELL-QUOTED (`${*@Q}`) rather than `$*`, because a flag VALUE may contain a space and `$*` throws
+  # the argument boundaries away. `--focus-label "Lateral Meniscus"` reached the real parser as two
+  # words and was REFUSED for an invalid choice of 'Lateral' — a checker rejecting an arm that would
+  # have run correctly, which is worse than not checking it, since the fix it invites is to break the
+  # arm. `@Q` emits each argument as one shell-quoted token and `shlex.split` on the other side
+  # reassembles exactly the argv the real `run_train` would pass.
   local name="$1"
   shift
-  printf '%s\t%s\n' "$name" "$*"
+  printf '%s\t%s\n' "$name" "${*@Q}"
 }

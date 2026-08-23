@@ -3,6 +3,7 @@
 import torch
 
 from kneemri.training.grades import GRADE_LADDER, Predicted
+from kneemri.training.label_focus import FOCUS
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, RankedObjective
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.side_ranking import SIDE_TERM
@@ -24,6 +25,7 @@ def test_settings():
         COUNT_NORMALISED: False,
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
+        FOCUS: "",
     }
 
 

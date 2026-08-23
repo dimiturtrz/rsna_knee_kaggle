@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 import torch
 
+from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.landed import Request
@@ -191,6 +192,11 @@ def _probe(default: object) -> object:
         return not default
     if isinstance(default, int):
         return default + 7
+    if default is None or isinstance(default, str):
+        # A NAMED FINDING and not an arbitrary string: `--focus-label` is validated against the twelve,
+        # so a probe of "x" would raise inside the policy rather than fail the wiring assert it is here
+        # to make. Its default is None, which is why the int/float branches above cannot reach it.
+        return TARGETS[3]
     return float(default) + 0.5  # type: ignore[arg-type]
 
 
@@ -208,7 +214,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 20, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 21, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

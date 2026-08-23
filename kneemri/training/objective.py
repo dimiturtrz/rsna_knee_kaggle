@@ -26,18 +26,22 @@ from jaxtyping import Float
 from torch import Tensor, nn
 
 from kneemri.training.grades import Grades, Predicted
+from kneemri.training.label_focus import LabelFocus
 from kneemri.training.side_ranking import SideRanking
 
 
 @dataclass(frozen=True)
 class LabelStructure:
-    """The two policies that read STRUCTURE in the label set rather than treating the twelve as flat.
+    """The policies that read STRUCTURE in the label set rather than treating the twelve as flat.
 
-    They travel together because they answer the same question from two directions. `grades` is the
-    ordering WITHIN one label — a report's severity ladder, which a binary target flattens. `sides` is
-    the ordering ACROSS two labels of one compartment pair — which side holds the finding, which twelve
-    independent binary problems throw away. Both default to the null policy, which is how every member
-    shipped to date was fitted, so an objective built without them descends the scalar it always did.
+    They travel together because they answer the same question from different directions. `grades` is
+    the ordering WITHIN one label — a report's severity ladder, which a binary target flattens. `sides`
+    is the ordering ACROSS two labels of one compartment pair — which side holds the finding, which
+    twelve independent binary problems throw away. `focus` is the narrower question underneath both:
+    WHETHER a label enters the loss at all, which is what separates a twelve-label panel from the
+    specialist models the published numbers come from. All default to the null policy, which is how
+    every member shipped to date was fitted, so an objective built without them descends the scalar it
+    always did.
 
     One held object rather than two parameters: the objective chain is three constructors deep and each
     layer adds its own flag, so threading each policy separately puts `RememberedRanking` over the
@@ -46,10 +50,15 @@ class LabelStructure:
 
     grades: Grades = field(default_factory=Grades)
     sides: SideRanking = field(default_factory=SideRanking)
+    focus: LabelFocus = field(default_factory=LabelFocus)
 
     def settings(self) -> dict[str, object]:
-        """Both policies' accounts, merged, so a run can check either one landed."""
-        return {**self.grades.settings(), **self.sides.settings()}
+        """Every policy's account, merged, so a run can check which of them landed."""
+        return {**self.grades.settings(), **self.sides.settings(), **self.focus.settings()}
+
+    def focused(self, batch: Predicted) -> Predicted:
+        """The batch as the focus policy narrows it, which under the null policy is the batch itself."""
+        return self.focus.focused(batch)
 
     def spread(self, batch: Predicted) -> Predicted:
         """The batch as the grade policy restates it, which under the null policy is the batch itself."""
@@ -128,8 +137,13 @@ class Objective:
         objectives without adding a fourth branch to the chain that builds them: a policy the objective
         HOLDS, exactly as the grade ladder is. The null policy contributes a hard zero, so an arm that
         did not ask for it descends the identical scalar it always did.
+
+        The focus mask is applied at the same place and for the same reason, and it is applied FIRST:
+        a zeroed weight has to be zero before any term reads it, and both terms below normalise by the
+        weights they were given, so the surviving label descends at its natural scale.
         """
-        return self.cross_entropy(batch) + self.structure.side_term(batch)
+        focused = self.structure.focused(batch)
+        return self.cross_entropy(focused) + self.structure.side_term(focused)
 
     def settings(self) -> dict[str, object]:
         """This objective's own account of the loss switches it carries.
@@ -193,8 +207,15 @@ class RankedObjective(Objective):
         self.weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
-        """Cross-entropy and the side term, plus the ranking term at its configured strength."""
-        return super().__call__(batch) + self.weight * self.ranking(batch)
+        """Cross-entropy and the side term, plus the ranking term at its configured strength.
+
+        The ranking term is handed the FOCUSED batch. Its pair mass is `weights_i * weights_j`, so a
+        zeroed column forms no pairs and contributes to neither the numerator nor the denominator —
+        which is what makes one mask on the weights enough to narrow the whole objective. `super()`
+        applies the same mask again to its own terms, harmlessly, because the mask is idempotent.
+        """
+        focused = self.structure.focused(batch)
+        return super().__call__(focused) + self.weight * self.ranking(focused)
 
     @override
     def settings(self) -> dict[str, object]:

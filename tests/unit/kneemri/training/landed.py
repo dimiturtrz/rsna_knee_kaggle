@@ -92,6 +92,7 @@ PLAIN = Request(
     severity_weight=False,
     grade_ladder=False,
     side_weight=0.0,
+    focus_label="",
     # FOUR, not the trainer's default six: `_FakeBackbone` holds four blocks, so opening "the last
     # six" of it opens four, and the request that matches an untouched encoder is the one that names
     # what is there. The mismatch a real encoder would show is the point of the strict comparison.

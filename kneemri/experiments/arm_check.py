@@ -213,7 +213,11 @@ class ArmCheck:
                 continue
             for line in done.stdout.splitlines():
                 name, tab, flags = line.partition("\t")
-                if tab and flags.startswith("--"):
+                # The stub SHELL-QUOTES what it prints, so a flag value containing a space keeps its
+                # argument boundary; the "is this an invocation" test therefore has to look at the
+                # first TOKEN rather than at the raw line, which now begins with a quote character.
+                first = shlex.split(flags)[:1]
+                if tab and first and first[0].startswith("--"):
                     found[name] = flags
         return found
 

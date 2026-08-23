@@ -23,6 +23,7 @@ from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.grades import Grades, OrdinalGrades
+from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
 from kneemri.training.objective import LabelStructure, Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
@@ -126,6 +127,9 @@ class RunSetup:
             severity_weight=options.severity_weight,
             grade_ladder=options.grade_ladder,
             side_weight=options.side_weight,
+            # The EMPTY STRING and not None, because that is what `LabelFocus.settings()` reports for
+            # the null policy, and this comparison is a strict equality against exactly that report.
+            focus_label=options.focus_label or "",
             unfreeze_last=options.unfreeze_last,
             layer_decay=options.layer_decay,
         )
@@ -150,6 +154,7 @@ class RunSetup:
         structure = LabelStructure(
             grades=OrdinalGrades() if options.grade_ladder else Grades(),
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
+            focus=LabelFocus(options.focus_label),
         )
         if options.pair_memory:
             return RememberedRanking(

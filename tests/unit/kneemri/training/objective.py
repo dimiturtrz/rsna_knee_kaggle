@@ -2,6 +2,7 @@ import torch
 
 from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
+from kneemri.training.label_focus import FOCUS, LabelFocus
 from kneemri.training.objective import (
     COUNT_NORMALISED,
     PAIR_POOL,
@@ -38,6 +39,7 @@ def test_objective_settings():
         COUNT_NORMALISED: False,
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
+        FOCUS: "",
     }
 
 
@@ -50,6 +52,7 @@ def test_ranked_objective_settings():
         COUNT_NORMALISED: True,
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
+        FOCUS: "",
     }
 
 
@@ -213,10 +216,25 @@ def _twelve() -> Predicted:
 
 
 def test_label_structure_settings():
-    """Both held policies are reported, so a run can check either one landed."""
-    assert LabelStructure().settings() == {GRADE_LADDER: False, SIDE_TERM: 0.0}
+    """All three held policies are reported, so a run can check any one of them landed."""
+    assert LabelStructure().settings() == {GRADE_LADDER: False, SIDE_TERM: 0.0, FOCUS: ""}
     assert LabelStructure(grades=OrdinalGrades()).settings()[GRADE_LADDER] is True
     assert LabelStructure(sides=PairedSides(0.5)).settings()[SIDE_TERM] == 0.5
+    assert LabelStructure(focus=LabelFocus(TARGETS[3])).settings()[FOCUS] == TARGETS[3]
+
+
+def test_focused():
+    """The structure delegates the mask, and the null policy hands the same object back.
+
+    Identity rather than equality on the null case: every member shipped to date was fitted through
+    this branch, and a mask of ones would multiply where the old runs did not.
+    """
+    batch = _twelve()
+
+    assert LabelStructure().focused(batch) is batch
+    assert float(LabelStructure(focus=LabelFocus(TARGETS[3])).focused(batch).weights.sum()) == float(
+        batch.weights[:, 3].sum()
+    )
 
 
 def test_label_structure_spread():

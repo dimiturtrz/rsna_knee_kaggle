@@ -20,6 +20,7 @@ from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
+from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
@@ -77,6 +78,7 @@ class TrainingOptions:
     grade_ladder: bool = False
     rank_weight: float = 0.0
     side_weight: float = 0.0
+    focus_label: str | None = None
     pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False
@@ -379,6 +381,17 @@ class TrainingOptions:
             "Cross-entropy scores the twelve columns independently, so a head can minimise it on a pair "
             "by emitting the pair's marginal twice; side_blindness measures the Lateral OA column doing "
             "exactly that, at chance on every member.",
+        )
+        parser.add_argument(
+            "--focus-label",
+            default=None,
+            choices=TARGETS,
+            help="fit ONE of the twelve findings: every other column's loss weight is zeroed, so the "
+            "whole encoder goes behind it. The published per-finding numbers this project is measured "
+            "against come from SPECIALIST models, while the one published twelve-finding panel averages "
+            "0.812 — below our own mean. This is the instrument that says whether our per-finding gaps "
+            "are the price of jointness. The head still emits twelve logits, so the checkpoint stays a "
+            "member; only the loss narrows.",
         )
         parser.add_argument(
             "--slot-pooling",

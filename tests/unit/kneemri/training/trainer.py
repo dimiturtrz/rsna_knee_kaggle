@@ -15,6 +15,7 @@ from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER, Predicted
+from kneemri.training.label_focus import FOCUS
 from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import SIDE_TERM
@@ -228,6 +229,7 @@ def test_policies():
         COUNT_NORMALISED: False,
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
+        FOCUS: "",
         INTENSITY_AUGMENT: False,
     }
 

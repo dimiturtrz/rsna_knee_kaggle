@@ -2264,6 +2264,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.label_focus",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.label_focus",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.landed",
       "target": "core.data.corpus.slot_reader",
       "weight": 1
@@ -2295,6 +2307,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.training.label_focus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.training.objective",
       "weight": 1
     },
@@ -2314,6 +2332,12 @@
       "kind": "import",
       "source": "kneemri.training.objective",
       "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.objective",
+      "target": "kneemri.training.label_focus",
       "weight": 1
     },
     {
@@ -2356,6 +2380,12 @@
       "kind": "import",
       "source": "kneemri.training.options",
       "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -2494,6 +2524,12 @@
       "kind": "import",
       "source": "kneemri.training.run_setup",
       "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.label_focus",
       "weight": 1
     },
     {
@@ -11551,6 +11587,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.label_focus.LabelFocus",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.label_focus.LabelFocus.focused",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.landed.Landed",
       "target": "core.data.labels.targets.Targets",
@@ -11625,13 +11673,31 @@
     {
       "kind": "holds",
       "source": "kneemri.training.objective.LabelStructure",
+      "target": "kneemri.training.label_focus.LabelFocus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.objective.LabelStructure",
       "target": "kneemri.training.side_ranking.SideRanking",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.LabelStructure.focused",
+      "target": "kneemri.training.label_focus.LabelFocus.focused",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.objective.LabelStructure.settings",
       "target": "kneemri.training.grades.Grades.settings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.LabelStructure.settings",
+      "target": "kneemri.training.label_focus.LabelFocus.settings",
       "weight": 1
     },
     {
@@ -12172,6 +12238,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.grades.OrdinalGrades",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.label_focus.LabelFocus",
       "weight": 1
     },
     {
@@ -13023,7 +13095,7 @@
       "role": null
     },
     {
-      "descendants": 113,
+      "descendants": 114,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13751,7 +13823,7 @@
       "role": null
     },
     {
-      "descendants": 22,
+      "descendants": 23,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -13818,6 +13890,14 @@
       "descendants": 0,
       "id": "kneemri.training.heartbeat",
       "label": "heartbeat",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.label_focus",
+      "label": "label_focus",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -15749,6 +15829,14 @@
       "level": "class",
       "parent": "kneemri.training.heartbeat",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.label_focus.LabelFocus",
+      "label": "LabelFocus",
+      "level": "class",
+      "parent": "kneemri.training.label_focus",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -23400,6 +23488,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.label_focus.LabelFocus.__post_init__",
+      "label": "__post_init__",
+      "level": "method",
+      "parent": "kneemri.training.label_focus.LabelFocus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.label_focus.LabelFocus.focused",
+      "label": "focused",
+      "level": "method",
+      "parent": "kneemri.training.label_focus.LabelFocus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.label_focus.LabelFocus.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.label_focus.LabelFocus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.landed.Landed.__init__",
       "label": "__init__",
       "level": "method",
@@ -23436,6 +23548,14 @@
       "label": "wanted",
       "level": "method",
       "parent": "kneemri.training.landed.Request",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.LabelStructure.focused",
+      "label": "focused",
+      "level": "method",
+      "parent": "kneemri.training.objective.LabelStructure",
       "role": null
     },
     {
