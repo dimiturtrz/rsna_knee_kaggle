@@ -2542,3 +2542,72 @@ recipe is genuinely DINOv3-shaped and every trunk swap needs its own tuning pass
 or the trunk is not where the remaining board budget lives. The greedy curve over the cleaned 68-member pool
 says the latter more cheaply: **the peak is 0.8717 at seats 8–10 and declines monotonically after**, so the
 ensemble does not want another member — it wants a member that can do something none of the existing ones can.
+
+### sided_pool — the head was given a medial/lateral axis, and did not use it
+
+`band_dense`'s recipe with `--pool sided`, one flag off the best single member on disk. 12 epochs,
+377 s/epoch, best at e6/e9.
+
+**Result: 0.8561 against `band_dense` 0.8578 on the 909-study fold-0 holdout — −0.0017, inside the
+0.0062 floor. The MIDDLE pre-registered band.**
+
+The band's own instruction was to read the per-label columns before writing a verdict, since the mean
+over twelve labels can absorb a real move on three. Read (paired, 95% intervals):
+
+| target | delta | interval |
+|---|---|---|
+| MCL | +0.0052 | [−0.0162, +0.0298] |
+| Lateral OA | +0.0000 | [−0.0148, +0.0142] |
+| Lateral Meniscus | −0.0064 | [−0.0215, +0.0085] |
+
+Mean of the three side-defined targets ≈ −0.0004; every interval spans zero. The labels the pooling
+was built for are the labels it did not move.
+
+**The mechanism FIRED — this is not a plumbing null.** The saved config carries `'pool': 'sided'` and
+`head.proj.1.weight` is (256, **1152**) = 384×3 parts, against `cls_mean`'s 768 = 384×2. The head was
+built three-part and did see the split. Verified before the verdict was written, because a silently
+two-part head would have produced exactly this flat reading.
+
+`ACL +0.0175 [+0.0009, +0.0333]` is the one interval clear of zero, and ACL is not side-defined. One
+significant hit in twelve tests at 95% is what chance produces. Not claimed.
+
+**Named suspect that is NOT cleared.** The config reads `'centre': 'image'`, `crop_mm 130`. The pooling
+splits the patch grid at its centre COLUMN, which is the anatomical midline only if the crop is
+anatomically centred. An image-centred crop leaves the true midline off-column by a study-varying
+offset, which smears the halves into each other. This is a live alternative to "the idea is wrong" and
+it is cheap to test — an anatomically registered crop, or a split at the measured midline rather than
+at column `side // 2`.
+
+**What this KILLS:** the halves-of-an-image-centred-crop split as a way to buy the side-defined labels.
+**What it does NOT rule out:** an anatomically registered split; a finer grid (quadrants, or the
+compartment columns rather than halves); and the small-weight side REGULARISER that `side_dense` left
+standing, which was explicitly deferred to "a head that sees position" — this arm built one, so that
+row is now testable and was not tested here.
+
+**Ensemble seat.** Greedy over the champion's six scoreable members plus this one picks it FOURTH,
+ahead of three incumbents — but seat 3 is 0.8690 and seat 4 is 0.8700, so it contributes **+0.0010**,
+under the floor, and seats 5–7 add nothing. It also ranks fourth by SOLO score inside that pack, so its
+greedy rank is its quality rank, not decorrelation. That greedy is in-sample selection over seven
+members and carries the measured +0.0033 selection overfit, so the honest figure is smaller still,
+possibly negative. No submission was spent on it.
+
+Denominator note: the champion could not be used directly. `seat_value` raises on `final_ws_e12`, a
+`--fold -1` member that is unscoreable forever, so the roster above is the SIX scoreable champion
+members, not the shipped seven. Filed as a P1.
+
+### focus_latmen — 0.4747, and why a DEAD member is the one a greedy selector reaches for
+
+Never finished. The checkpoint on disk is epoch 0 and scores **0.4747**, which is worse than chance on
+a twelve-label mean. It is recorded here not as a result but because of what it did to a reading.
+
+A near-random member is, by construction, DECORRELATED from every trained member. A greedy ensemble
+selector maximising a mix score will therefore pick it up as apparent diversity and keep paying for it.
+That is what produced the earlier peak of 0.8721 at seats 11–13: re-run on a pool with this member
+removed, the greedy peaks at **0.8717 at seats 8–10** and declines monotonically after. The extra seats
+were fitting noise, and the tool cannot warn about it because the failure LOOKS like the result you
+wanted.
+
+Operational consequence, and the part that generalises: `.partial` survives a SUCCESSFUL run, so it is
+not a liveness marker. The finished test is the existence of the `.pt`. Any pool built by globbing
+checkpoints must score every member alone before mixing — a member below the weakest trained member is
+a dead checkpoint, not a diverse one.
