@@ -1834,3 +1834,41 @@ for having no holdout record. `max()` on an empty sequence. **Plumbing, not trai
 reporting step is indistinguishable in the log from a training failure, and it cost this run its first
 reading. `swap` now returns `no candidate carries a holdout record, so no seat can be priced`, with a
 test, because every `_ff` member the gated refit produces would have hit the same line.
+
+### Result: `kneemri-greedy7` reads 0.933 — the fourth tie, and roster search is retired (2026-08-23)
+
+Ref `55713981`, **0.933**. That is the pre-registered `0.933` band verbatim: *"a third tie. The board is
+decisively flat to WHOLESALE exchange within this pool, not merely to one-for-one swaps. Roster search is
+retired entirely and the budget belongs to new axes only."* No re-argument is available — the band was
+written before the number and the number landed inside it.
+
+**What was exchanged.** Four of the champion's seven seats, not one. `band_dense`, `grade_ladder`,
+`base_dense` and `lr4e-5_ws` left; `band_dense_long`, `through_dense`, `depth_regions_narrow` and
+`calibrated_targets` took their places. Count (7), kit (`cf6a99f`), vote and serving config were held
+fixed. The roster was chosen by `record_mix --greedy` over the 28 packaged members: **0.8712 offline
+against the champion seven's 0.8694**, the first offline gap in the whole search above the seat ruler's
++0.0015 resolution.
+
+**+0.0018 offline bought +0.000 board.** At `knee-7d1`'s median 4.67 board points per holdout point that
+edge priced at about +0.008. It delivered nothing. This is now the fourth board reading of 0.933 across
+`gradeswap`, `accumseat` and `greedy7`, with `sevenplane` at 0.932 — a spread of 0.001 across every
+rearrangement of this pool anyone has shipped.
+
+**The mechanism, named.** Not the harness. The offline number is real and was computed correctly; what
+fails is its TRANSFER. The greedy roster maximises the very quantity it is then scored on, over 28
+candidates on 909 studies, so a +0.0018 edge selected that way is inside the selection noise of the
+search itself rather than a property of the members. `2026-08-23_the_ensemble_axis_is_exhausted.md`
+predicted this from the other direction: the marginal seventh member is worth +0.0004 and the best
+SUBSET peaks at four (0.8696 against seven's 0.8694). A pool with nothing left in it to select cannot be
+rearranged into a result by any rule, however good — and greedy is the best rule available.
+
+**What this does NOT rule out.** Nothing about member QUALITY or about axes absent from the pool. Every
+one of the 28 candidates was fitted from the same encoder family on the same pixels. `final_ws_e12`
+(data volume, ref `55715039`, pending) and `vjepa_member` (a tubelet 3D trunk, on the card) are both
+members that did not exist when this pool was searched, and neither is answered here.
+
+**What it forbids.** No further submission slot may be spent on a roster drawn from the currently
+packaged pool, by ANY selection rule — greedy included, and greedy was the strongest argument the
+project had. The `greedy4` precedent (pre-registered at or below 0.928, returned 0.930) is hereby scoped
+to the pool it ran on: greedy transferred when the pool still had slack, and does not now that it does
+not. An entry must change what is IN the pool.
