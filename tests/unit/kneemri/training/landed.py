@@ -7,7 +7,14 @@ import torch
 from torch import nn
 
 from core.data.corpus.slot_reader import GROUP
-from core.data.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, WEIGHT_FLOOR, Supervision, Targets
+from core.data.labels.targets import (
+    ANNOTATIONS,
+    CALIBRATED,
+    CONFIDENCE_FLOOR,
+    WEIGHT_FLOOR,
+    Supervision,
+    Targets,
+)
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
@@ -90,6 +97,7 @@ PLAIN = Request(
     weight_floor=False,
     calibrated_targets=False,
     severity_weight=False,
+    hold_annotations=False,
     grade_ladder=False,
     side_weight=0.0,
     focus_label="",
@@ -248,6 +256,24 @@ def test_missing_labels() -> None:
     supervised = Supervision(floor=CONFIDENCE_FLOOR, calibrated=True)
 
     assert Landed(model, trainer, _targets(supervised)).missing(asked) == []
+
+
+def test_missing_held_annotations() -> None:
+    """The withheld annotations, which is the switch whose silent no-op would cost the WHOLE instrument.
+
+    `annot_holdout` exists only to produce predictions that never saw the 58 image-read annotations. A
+    `--hold-annotations` that never reached `Supervision` trains the ordinary table, scores within the
+    floor of its control — exactly the pre-registered read — and hands `supervision_gap` a member as
+    tainted as every other. Nothing downstream would say a word, which is why it is compared here.
+    """
+    model = _model()
+    trainer = Trainer(model, torch.device("cpu"))
+    asked = replace(PLAIN, hold_annotations=True)
+
+    assert Landed(model, trainer, _targets()).missing(asked) == [f"{ANNOTATIONS}: asked False, the model shows True"], (
+        "a table built with the annotations under an arm that asked to withhold them"
+    )
+    assert Landed(model, trainer, _targets(Supervision(annotations=False))).missing(asked) == []
 
 
 def test_missing_depth() -> None:

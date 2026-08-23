@@ -6,6 +6,7 @@ import pytest
 
 from core.data.labels.targets import (
     ANNOTATED_WEIGHT,
+    ANNOTATIONS,
     CALIBRATED,
     CONFIDENCE_FLOOR,
     SEVERITY_WEIGHT,
@@ -85,11 +86,17 @@ def test_supervised(tmp_path: Path):
 
     loaded = Targets.load(derived_path, annotated_path, ["a", "b", "c"], supervision)
 
-    assert loaded.supervised() == {WEIGHT_FLOOR: CONFIDENCE_FLOOR, CALIBRATED: True, SEVERITY_WEIGHT: False}
+    assert loaded.supervised() == {
+        WEIGHT_FLOOR: CONFIDENCE_FLOOR,
+        CALIBRATED: True,
+        SEVERITY_WEIGHT: False,
+        ANNOTATIONS: True,
+    }
     assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {
         WEIGHT_FLOOR: 0.0,
         CALIBRATED: False,
         SEVERITY_WEIGHT: False,
+        ANNOTATIONS: True,
     }
 
 
@@ -174,6 +181,7 @@ def test_moves_the_ruler():
     assert not Supervision(floor=CONFIDENCE_FLOOR).moves_the_ruler(), "applied identically to arm and control"
     assert Supervision(calibrated=True).moves_the_ruler()
     assert Supervision(severity=True).moves_the_ruler()
+    assert Supervision(annotations=False).moves_the_ruler(), "696 cells move back to what the report said"
 
 
 def test_load_grades_the_weight_without_moving_the_target(tmp_path: Path):
@@ -212,6 +220,42 @@ def test_pair_leaves_the_ruler_uncalibrated(tmp_path: Path):
     assert training is not ruler, "one object for both would recalibrate the ruler with the targets"
     assert training.scores[0, 0] == pytest.approx(0.378), "the training table carries the measured rate"
     assert ruler.scores[0, 0] == pytest.approx(0.68), "the ruler keeps the value it always had"
+
+
+def test_load_can_withhold_the_annotations_so_a_member_never_trains_on_them(tmp_path: Path):
+    """The one input `supervision_gap` needs: a study whose radiologist labels the loss never read.
+
+    Study "a" is annotated 0.0 against a report score of 0.9, so the two are distinguishable by value
+    as well as by weight — a guard that dropped only the WEIGHT would leave the annotation's score in
+    the table and the member would still be fitted on it.
+    """
+    derived_path, annotated_path = _tables(tmp_path)
+    identifiers = ["a", "b", "c"]
+
+    held = Targets.load(derived_path, annotated_path, identifiers, Supervision(annotations=False))
+    control = Targets.load(derived_path, annotated_path, identifiers)
+
+    assert control.scores[0, 0] == 0.0, "the control trains on the annotation"
+    assert held.scores[0, 0] == pytest.approx(0.9), "the arm trains on what the REPORT said instead"
+    assert held.weights[0, 0] == pytest.approx(1.0), "and at the report's own confidence, not 3.0"
+    assert held.supervised()[ANNOTATIONS] is False, "recorded, so the pre-flight check proves it fired"
+    assert held.scores[1, 0] == control.scores[1, 0], "an unannotated study is untouched either way"
+
+
+def test_pair_keeps_the_annotations_in_the_ruler_when_the_arm_withholds_them(tmp_path: Path):
+    """What makes the instrument comparable to every ledger row: only the TRAINING table changes.
+
+    Withholding them from the ruler too would move this arm's holdout onto a different table from the
+    one every other member was scored on, which is the exact incomparability `pair` exists to prevent.
+    """
+    derived_path, annotated_path = _tables(tmp_path)
+
+    training, ruler = Targets.pair(derived_path, None, annotated_path, ["a", "b", "c"], Supervision(annotations=False))
+
+    assert training is not ruler, "one object for both would hide the annotations from the ruler too"
+    assert training.scores[0, 0] == pytest.approx(0.9), "the arm is fitted on the report score"
+    assert ruler.scores[0, 0] == 0.0, "the ruler keeps the annotation every other member was scored on"
+    assert ruler.weights[0, 0] == ANNOTATED_WEIGHT
 
 
 def test_pair_without_a_calibration_still_shares_one_table(tmp_path: Path):

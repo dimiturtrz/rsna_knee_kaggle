@@ -56,7 +56,8 @@ UNCERTAIN_LEVEL = 0.28
 WEIGHT_FLOOR = "weight_floor"
 CALIBRATED = "calibrated_targets"
 SEVERITY_WEIGHT = "severity_weight"
-"""The three label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+ANNOTATIONS = "annotations"
+"""The four label switches, named where the object that answers for them lives. See `Targets.supervised`."""
 
 
 @dataclass(frozen=True)
@@ -94,17 +95,28 @@ class Supervision:
     severity: bool = False
     """Whether a cell's WEIGHT comes from the grade the reader assigned rather than its `__conf`."""
 
+    annotations: bool = True
+    """Whether the 58 image-read annotations are read into the TRAINING table at all.
+
+    Off makes a member whose predictions on those studies never saw their radiologist labels, which is
+    the one input `kneemri.evaluation.supervision_gap` needs and cannot get from any member we fit: the
+    override weights them at `ANNOTATED_WEIGHT`, so every member is scored against a ruler it trained
+    on. 696 cells at weight 3.0 is ~0.66% of total training weight — the cheapest thing in the project
+    to give up, and it buys back the only radiologist-truth ruler there is.
+    """
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
 
     def moves_the_ruler(self) -> bool:
         """Whether this supervision would also change the table an arm is SCORED against.
 
-        Both switches do, by different routes — a calibration moves the VALUES a holdout AUC ranks
-        against, a severity weight moves which cells the holdout counts and how much. Either way the
+        All three switches do, by different routes — a calibration moves the VALUES a holdout AUC ranks
+        against, a severity weight moves which cells the holdout counts and how much, and withholding
+        the annotations moves 696 cells back to what the report said about them. Either way the
         ruler has to be re-read plain or the arm earns credit for the labels agreeing with themselves.
         The floor alone does not: it is applied identically to every arm and the control.
         """
-        return self.calibrated or self.severity
+        return self.calibrated or self.severity or not self.annotations
 
     def reliability(self) -> tuple[tuple[float, float], ...]:
         """Each asserting level beside how often that assertion held, which is not the same as its rate.
@@ -191,6 +203,7 @@ class Targets:
             WEIGHT_FLOOR: self.supervision.floor,
             CALIBRATED: self.supervision.calibrated,
             SEVERITY_WEIGHT: self.supervision.severity,
+            ANNOTATIONS: self.supervision.annotations,
         }
 
     @classmethod
@@ -236,7 +249,7 @@ class Targets:
                 said = ~np.isnan(value)
                 scores[said, column] = value[said]
                 weights[said, column] = floor + (1.0 - floor) * trust[said]
-            if target in annotated.columns:
+            if supervision.annotations and target in annotated.columns:
                 truth = annotated[target].to_numpy(dtype=np.float32)
                 read = ~np.isnan(truth)
                 scores[read, column] = truth[read]

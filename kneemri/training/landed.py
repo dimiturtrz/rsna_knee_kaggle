@@ -24,7 +24,14 @@ import numpy as np
 import torch
 
 from core.data.corpus.slot_reader import GROUP
-from core.data.labels.targets import CALIBRATED, CONFIDENCE_FLOOR, SEVERITY_WEIGHT, WEIGHT_FLOOR, Targets
+from core.data.labels.targets import (
+    ANNOTATIONS,
+    CALIBRATED,
+    CONFIDENCE_FLOOR,
+    SEVERITY_WEIGHT,
+    WEIGHT_FLOOR,
+    Targets,
+)
 from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
@@ -194,6 +201,7 @@ class Request:
     weight_floor: bool
     calibrated_targets: bool
     severity_weight: bool
+    hold_annotations: bool
     grade_ladder: bool
     side_weight: float
     focus_label: str
@@ -237,6 +245,10 @@ class Request:
             WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             CALIBRATED: self.calibrated_targets,
             SEVERITY_WEIGHT: self.severity_weight,
+            # Re-derived from the FLAG, and inverted here rather than in the options property, for the
+            # reason WEIGHT_FLOOR gives above: taking `supervision.annotations` would compare that
+            # property's output against itself and pass on whatever it produced.
+            ANNOTATIONS: not self.hold_annotations,
             GRADE_LADDER: self.grade_ladder,
             SIDE_TERM: self.side_weight,
             FOCUS: self.focus_label,

@@ -75,6 +75,7 @@ class TrainingOptions:
     per_label_loss: bool = False
     calibrated_targets: bool = False
     severity_weight: bool = False
+    hold_annotations: bool = False
     grade_ladder: bool = False
     rank_weight: float = 0.0
     side_weight: float = 0.0
@@ -172,6 +173,7 @@ class TrainingOptions:
             floor=CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             calibrated=self.calibrated_targets,
             severity=self.severity_weight,
+            annotations=not self.hold_annotations,
         )
 
     @classmethod
@@ -336,6 +338,15 @@ class TrainingOptions:
             help="a cell pulls at how often its GRADE was confirmed against the image annotations "
             "(0.378 mild / 0.688 moderate / 0.958 severe) rather than at the reader's __conf, which is "
             "0.95 on all three. Values are untouched — this is the weight, not the target.",
+        )
+        parser.add_argument(
+            "--hold-annotations",
+            action="store_true",
+            help="withhold the 58 image-read annotations from the TRAINING table, so this member's "
+            "predictions on those studies never saw their radiologist labels. That is the one input "
+            "`kneemri.evaluation.supervision_gap` needs and no member we fit can give it: the override "
+            "weights them at 3.0, so every other member is scored against a ruler it trained on. The "
+            "holdout ruler is re-read WITH them, so this arm stays comparable to every ledger row.",
         )
         parser.add_argument(
             "--grade-ladder",

@@ -54,6 +54,8 @@ NOT_IN_CONFIG = {
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
     "severity_weight": "supervision policy, same — it grades the loss weight and leaves the head alone",
+    "hold_annotations": "supervision policy, same — it decides which cells the loss READ and touches no "
+    "parameter, so the head a rebuild serves is byte-identical",
     "grade_ladder": "objective policy — the thresholds are subtracted INSIDE the loss, so the head still "
     "emits the one per-label logit a rebuild serves",
     "side_weight": "objective policy — the term compares two of the twelve logits against each "

@@ -125,6 +125,7 @@ class RunSetup:
             weight_floor=options.weight_floor,
             calibrated_targets=options.calibrated_targets,
             severity_weight=options.severity_weight,
+            hold_annotations=options.hold_annotations,
             grade_ladder=options.grade_ladder,
             side_weight=options.side_weight,
             # The EMPTY STRING and not None, because that is what `LabelFocus.settings()` reports for
