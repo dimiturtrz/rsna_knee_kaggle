@@ -30,6 +30,7 @@ from torch import Tensor
 from core.data.corpus.study import SlotPipeline, Study
 from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble, Read
+from kneemri.kaggle.slot_fill import SlotFill
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,22 @@ class Submission:
         self.working = working
         self.overlap = overlap
         self.split = split or Split()
+        self.fill: dict[tuple[str, ...], SlotFill] = {}
+
+    def witnessed(self, batch: dict[int, tuple[Tensor, Tensor]], read: Read) -> dict[int, tuple[Tensor, Tensor]]:
+        """Record a decoded chunk's slot coverage and hand the chunk straight back.
+
+        KEYED BY SCHEME because an entry may serve more than one. `Ensemble.reads` groups members by
+        their scheme, so a run with a canonical member and a multiscale one decodes twice under different
+        slot axes, and pooling those counts would average two different questions into one meaningless
+        share. Same reason the sizes are collapsed rather than kept: within one read every size is a
+        resize of ONE decode, so their masks are the same mask and counting each would multiply the
+        denominator by the number of resolutions.
+        """
+        names = tuple(slot.name for slot in read.scheme.slots)
+        witness = self.fill.setdefault(names, SlotFill(names))
+        witness.observed(next(iter(batch.values()))[1])
+        return batch
 
     def decode(
         self, identifiers: list[str], planes: dict[str, str], read: Read
@@ -228,7 +245,7 @@ class Submission:
                     submit(pool, groups[index + 1]) if index + 1 < len(groups) else []
                 )
                 decode_started = time.time()
-                sized = self.batched([future.result() for future in pending], read)
+                sized = self.witnessed(self.batched([future.result() for future in pending], read), read)
                 pending = following
                 begin = index * STUDY_CHUNK
                 # THE PROJECTION IS THE ENSEMBLE'S TO MAKE, not this loop's. It used to be computed here
@@ -332,6 +349,9 @@ class Submission:
         logger.info(f"{len(identifiers)} studies, {len(series)} series")
 
         combined = self.predict(identifiers, planes)
+        for witness in self.fill.values():
+            witness.report()
+            witness.refuse_if_collapsed()
         frame = pd.DataFrame(self.ensemble.submission(identifiers, combined))
         self.check(frame, identifiers)
         frame.to_csv(self.working / "submission.csv", index=False)

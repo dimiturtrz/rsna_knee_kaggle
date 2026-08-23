@@ -1982,6 +1982,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.submission",
+      "target": "kneemri.kaggle.slot_fill",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.depth_attention",
       "target": "kneemri.models.slice_attention",
       "weight": 1
@@ -10417,6 +10423,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_fill.SlotFill.report",
+      "target": "kneemri.kaggle.slot_fill.SlotFill.shares",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.submission.Submission",
       "target": "core.data.corpus.study.SlotPipeline",
@@ -10432,6 +10444,12 @@
       "kind": "references",
       "source": "kneemri.kaggle.submission.Submission",
       "target": "kneemri.inference.ensemble.Read",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.submission.Submission",
+      "target": "kneemri.kaggle.slot_fill.SlotFill",
       "weight": 1
     },
     {
@@ -10474,6 +10492,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submission.Submission.chunks",
       "target": "kneemri.kaggle.submission.Submission.pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submission.Submission.chunks",
+      "target": "kneemri.kaggle.submission.Submission.witnessed",
       "weight": 1
     },
     {
@@ -10540,6 +10564,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submission.Submission.run",
       "target": "kneemri.kaggle.submission.Submission.predict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submission.Submission.witnessed",
+      "target": "kneemri.kaggle.slot_fill.SlotFill",
       "weight": 1
     },
     {
@@ -13209,7 +13239,7 @@
       "role": null
     },
     {
-      "descendants": 115,
+      "descendants": 116,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13657,7 +13687,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 15,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -13764,6 +13794,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value",
       "label": "seat_value",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill",
+      "label": "slot_fill",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -15534,6 +15572,14 @@
       "label": "SeatValue",
       "level": "class",
       "parent": "kneemri.kaggle.seat_value",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill",
+      "label": "SlotFill",
+      "level": "class",
+      "parent": "kneemri.kaggle.slot_fill",
       "role": "primary"
     },
     {
@@ -22106,6 +22152,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill.observed",
+      "label": "observed",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill.refuse_if_collapsed",
+      "label": "refuse_if_collapsed",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_fill.SlotFill.shares",
+      "label": "shares",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.submission.Split.series",
       "label": "series",
       "level": "method",
@@ -22212,6 +22298,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.submission.Submission.run",
       "label": "run",
+      "level": "method",
+      "parent": "kneemri.kaggle.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submission.Submission.witnessed",
+      "label": "witnessed",
       "level": "method",
       "parent": "kneemri.kaggle.submission.Submission",
       "role": null

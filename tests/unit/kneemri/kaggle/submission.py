@@ -292,6 +292,41 @@ def test_decoded_at(tmp_path: Path):
     assert not empty.any(), "and an empty mask, so the head renormalises over what is really there"
 
 
+def _presence(rows: list[list[float]]) -> Tensor:
+    return torch.tensor(rows, dtype=torch.float32)
+
+
+def test_witnessed(tmp_path: Path):
+    """The chunk passes through unchanged, and its coverage is recorded under its own scheme."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    read = Read(3, scheme, (IMAGE,))
+    pipeline = SlotPipeline(scheme=scheme, reader=SlotReader(image_size=IMAGE))
+    root = submission.split.series(submission.competition)
+    bags = [Submission.decoded_at(root / name, {"sag": "Sagittal"}, pipeline, read) for name in ("study_a", "study_b")]
+    batch = submission.batched(bags, read)
+
+    returned = submission.witnessed(batch, read)
+
+    assert returned is batch, "the witness observes the chunk, it does not replace it"
+    names = tuple(slot.name for slot in scheme.slots)
+    assert submission.fill[names].studies == 2, "keyed by the scheme the chunk was decoded under"
+
+
+def test_witnessed_counts_one_decode_not_one_resolution(tmp_path: Path):
+    """Two sizes are a resize of ONE decode, so they must not double the denominator."""
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    read = Read(3, scheme, (IMAGE,))
+    presence = _presence([[1.0] + [0.0] * (len(scheme.slots) - 1)])
+    images = torch.zeros(1, len(scheme.slots), 3, IMAGE, IMAGE, dtype=torch.uint8)
+
+    submission.witnessed({IMAGE: (images, presence), IMAGE // 2: (images, presence)}, read)
+
+    names = tuple(slot.name for slot in scheme.slots)
+    assert submission.fill[names].studies == 1, "one study decoded once, whatever it was resized to"
+
+
 def test_batched(tmp_path: Path):
     """Per-study bags stacked into one batch per size, in the order given."""
     submission = _submission(tmp_path)
