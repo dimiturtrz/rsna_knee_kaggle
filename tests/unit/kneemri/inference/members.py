@@ -751,3 +751,44 @@ def test_at(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     assert MemberPackage.at(named.root, paths).root == named.root
     assert MemberPackage.at(None, paths).root == shipped
+
+
+def test_the_defaults_a_keyless_config_is_read_at_are_pinned_to_the_values_that_were_once_the_behaviour():
+    """Every default here IS the behaviour that existed before its key did — which is load-bearing.
+
+    Serving reads the whole geometry as `config.get(key, DEFAULT)`, so a checkpoint written before a key
+    existed is indistinguishable from one that agrees with the default. That is SAFE today only because
+    each default was chosen to reproduce the prior behaviour: `deep24_s2026` carries no `whole_stack`,
+    `centre` or `tie` and was in fact fitted windowed, image-centred and first-maximal at 12 slices over
+    0.20-0.80. Seven roster members are in that position.
+
+    So the hazard is not any checkpoint on disk — it is an EDIT to one of these constants. Move
+    `SLICE_BAND` and every keyless member is retro-served on a band it never saw; move `LEGACY_SLICES`
+    and their stacks change depth. Nothing raises, the fingerprint is taken over read size and group
+    alone and cannot see it, and the damage lands as a board number that is honestly wrong.
+
+    This was reached by porting a peer project's defect — their kernel pins the decode grid as a literal,
+    so a checkpoint trained at another grid mounts clean and decodes wrong. Ours holds no such literal:
+    a kernel passes member names and nothing else, and heterogeneity across the roster (20 slices beside
+    12) is correct by construction. The literal that CAN bite us is a default, and it bites on edit.
+    """
+    assert LEGACY_SLICES == 12
+    assert Band().recorded() == [0.20, 0.80]
+    assert CROP_MM == 130.0
+    assert DEFAULT_CENTRE == "image"
+    keyless = Member(
+        identifier="keyless",
+        file=Path("m_keyless.pt"),
+        fold=0,
+        config=cast(MemberConfig, {"img": 336, "group": 3, "slots": list(SLOTS)}),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    assert keyless.tie == "first"
+    assert keyless.variant == SMALL
+    assert keyless.whole_stack is False
+    assert keyless.slices == LEGACY_SLICES
+    assert keyless.band.recorded() == [0.20, 0.80]
+    assert keyless.crop.centre == DEFAULT_CENTRE
+    assert StudyDesign.from_config(dict(keyless.config)).slice_pooling == "channels"
