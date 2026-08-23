@@ -43,9 +43,35 @@ def test_report(tmp_path: Path):
 
     lines = SeatValue(_champion(), tmp_path).report([tmp_path / "candidate.pt"])
 
-    assert lines[0].startswith("roster of 2:"), "the base every delta is against is stated"
-    assert "+candidate.pt" in lines[1], "the candidate is named with its marginal contribution"
-    assert "shipped" not in lines[1], "a roster member is never also priced as a candidate"
+    assert lines[0] == "priced against all 2 champion members", "the denominator leads, even when it is whole"
+    assert lines[1].startswith("roster of 2:"), "the base every delta is against is stated"
+    assert "+candidate.pt" in lines[2], "the candidate is named with its marginal contribution"
+    assert "shipped" not in lines[2], "a roster member is never also priced as a candidate"
+
+
+def test_scoreable(tmp_path: Path):
+    """A member that held nothing out is separated from the ones that can be priced, not silently dropped."""
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    _member(tmp_path / "shipped.pt", truth, 2.0)
+    seats = SeatValue(_champion(), tmp_path)
+
+    priced, unscoreable = seats.scoreable(seats.roster())
+
+    assert [path.name for path in priced] == ["shipped.pt"]
+    assert [path.name for path in unscoreable] == ["other.pt"], "a fold -1 member is named, not discarded quietly"
+
+
+def test_report_states_the_subset_it_priced_against(tmp_path: Path):
+    """With an unscoreable member in the roster the report still prices, and says what it priced over."""
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    for name in ("shipped.pt", "other.pt", "candidate.pt"):
+        _member(tmp_path / name, truth, 2.0)
+    champion = Champion(entry="test", kernel="k", board=0.9, members=("shipped", "other", "held"), kit="abc123")
+
+    lines = SeatValue(champion, tmp_path).report([tmp_path / "candidate.pt"])
+
+    assert lines[0] == "priced against 2 of 3 champion members; held unscoreable (fold -1)"
+    assert lines[1].startswith("roster of 2:"), "the proxy roster is the scoreable subset, and it is labelled"
 
 
 def test_named(tmp_path: Path):

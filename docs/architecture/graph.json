@@ -1988,6 +1988,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.seat_value",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.submission",
       "target": "core.data.corpus.study",
       "weight": 1
@@ -10588,6 +10594,24 @@
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.kaggle.seat_value.SeatValue.roster",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.kaggle.seat_value.SeatValue.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_value.SeatValue.scoreable",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.scoreable",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -22504,6 +22528,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value.SeatValue.roster",
       "label": "roster",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_value.SeatValue",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_value.SeatValue.scoreable",
+      "label": "scoreable",
       "level": "method",
       "parent": "kneemri.kaggle.seat_value.SeatValue",
       "role": null

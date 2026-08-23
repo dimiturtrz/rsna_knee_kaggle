@@ -65,6 +65,7 @@ from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.champion_check import Champion
+from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,21 @@ class SeatValue:
         one downstream is the one that also catches a member present but recordless.
         """
         return [self.processed / f"{name}.pt" for name in self.champion.members]
+
+    def scoreable(self, roster: list[Path]) -> tuple[list[Path], list[Path]]:
+        """The roster split into the members that carry a holdout record and the ones that never can.
+
+        The shipped champion contains a member trained with `--fold -1`, which held nothing out and is
+        therefore unscoreable FOREVER rather than pending. `RecordMix.split` refuses such a roster, and
+        that refusal is right: a roster silently scored at 6 of 7 makes every delta below it read against
+        the wrong base. But the refusal leaves the entry that ACTUALLY SCORED unpriceable against any
+        candidate, which is the wrong end of the trade.
+
+        So the roster is priced against its scoreable subset and the denominator is stated in the output.
+        A labelled proxy is honest arithmetic; the failure this guards is the SILENT one.
+        """
+        priced = [member for member in roster if HoldoutRecord(member).exists()]
+        return priced, [member for member in roster if member not in priced]
 
     def named(self, candidate: Path) -> Path:
         """A candidate given by NAME becomes the checkpoint of that name; one given by path is left alone.
@@ -107,12 +123,19 @@ class SeatValue:
         Quoting a seat value without it is quoting the ruler that was wrong about the last decision it
         was asked to make.
         """
-        roster = self.roster()
+        roster, unscoreable = self.scoreable(self.roster())
         named = [self.named(candidate) for candidate in candidates]
         mixed = RecordMix(list(dict.fromkeys([*roster, *named]))).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
         held, rest = mixed.split(roster)
+        denominator = (
+            f"priced against {len(roster)} of {len(roster) + len(unscoreable)} champion members; "
+            f"{', '.join(sorted(member.stem for member in unscoreable))} unscoreable (fold -1)"
+            if unscoreable
+            else f"priced against all {len(roster)} champion members"
+        )
         return [
+            denominator,
             *MixReading(mixed, roster).lines(curve, greedy=False, paired=False, labels=False),
             *MemberDistance(held, rest).report(),
         ]
