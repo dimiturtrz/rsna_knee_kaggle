@@ -1759,3 +1759,42 @@ first full run over 80 records reproduced the roster's annotated numbers exactly
 validates the measure — the smokes rank last at 0.41–0.55 and the five collapsed `--encoder-weights`
 members sit at the floor (`mae_matched` 0.617, `encoder_adapt*` 0.63–0.67). **The ruler is still retired
 as a SELECTION rule** by the entry above; the tool is kept as a diagnostic, not a chooser.
+
+### Pre-registration: `kneemri-greedy7` — the greedy rule re-run on a pool that grew
+
+`small_batch6 + band_dense_long + calib_span + through_dense + aprior_dense + depth_regions_narrow +
+calibrated_targets`, offline **0.8712** over the 909-study fold-0 holdout against the champion seven's
+**0.8694**. Same count, same `overlap=false`, same `RankAverage`, every member already in
+`kneemri-members` — the entry costs a kernel push and no re-upload.
+
+**THIS IS THE STANDING RULE, NOT A NEW BET.** `greedy4` ran this exact search over the then-mounted
+sixteen, was pre-registered to land *at or below* 0.928, and came back **0.930 as a new champion** —
+refuting the one-swap rule outright. This ledger's own conclusion from that was to *"make every future
+entry greedy-optimal by rule."* Since then the mounted pool has grown by five members
+(`small_accum`, `severity_weight`, `small_batch6`, `aprior_dense`, `focal_dense`, pushed 2026-08-22),
+and the greedy re-run over 28 mounted records is what that rule now says to ship. It is also NOT the
+move the `accumseat` entry banned: that ban is on a one-for-one member swap justified by a ruler, and
+this moves four of seven seats on the joint metric itself.
+
+**WHOLESALE, NOT A SWAP.** `band_dense`, `grade_ladder`, `base_dense` and `lr4e-5_ws` all leave;
+`small_batch6`, `aprior_dense`, `depth_regions_narrow` and `calibrated_targets` all enter. Two entries
+have now tied at 0.933 on single swaps of this same seven, which the ledger read as *"the seven-member
+vote is flat to single-member exchange"*. Four seats at once is the test that reading cannot answer.
+
+**PREDICTION, written before the run.** +0.0018 offline at knee-7d1's median +4.67 board points per
+holdout point prices at about **+0.008**, i.e. 0.941 — which would clear the standing 0.940 target. I do
+not expect the median; the compression is a median over a spread and this edge is a quarter of the
+0.0062 noise floor.
+
+- **≥0.936** — the greedy rule transfers at full roster width on a grown pool; every future entry is
+  chosen this way and the remaining slots go to re-running it as members land.
+- **0.934–0.935** — directional, consistent with compression, champion moves.
+- **0.933** — a third tie, and now a decisive one: the seven-member vote is flat to WHOLESALE exchange,
+  not merely to single-member exchange. That retires roster search entirely and leaves only new axes.
+- **≤0.932** — greedy over the grown pool overfits the 909-study holdout. **Named mechanism: selection
+  bias.** The search chose these seven by maximising the very number it is scored on, over 28 candidates
+  and 909 studies; `greedy4` was chosen the same way over 16 and did transfer, so a loss here says the
+  bias grows with the pool, which is a fact worth the slot.
+
+**WHAT IT DOES NOT TEST.** It is silent about data volume: every member is fold-0-trained on 79% of the
+corpus. `final_fit` is on the card as this is written and answers that separately.
