@@ -25,11 +25,13 @@ V3_SMALL_PLUS = "v3splus"
 V3_BASE = "v3base"
 CONVNEXT_BASE = "cnxbase"
 VJEPA2_LARGE = "vjepa2l"
+RAD_DINO = "raddino"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
 CONVNEXT = "convnext"
 VJEPA2 = "vjepa2"
+RADDINO = "rad-dino"
 
 
 @dataclass(frozen=True)
@@ -444,5 +446,43 @@ ENCODERS: dict[str, Encoder] = {
         tubelet=2,
         # Counted off the loaded weights once, here, rather than guessed from "ViT-L": 325.97M.
         params_m=326.0,
+    ),
+    # THE FIRST TRUNK NOT PRETRAINED ON NATURAL IMAGES, added 2026-08-23. Every encoder above it —
+    # DINOv2, DINOv3, ConvNeXtV2, V-JEPA2 — was pretrained on photographs or on video of the world, and
+    # the failure mode they share is stated on the ledger: `base_dense` reaches 0.8371 holdout at train
+    # loss 0.8456 while `cnx_dense` reaches 0.7927 at a BETTER train loss of 0.8332. A trunk that fits
+    # our pixels harder generalises 0.044 worse on them. That gap is what a domain-matched
+    # initialisation is for, and it is the only mechanism left priced above the 1.5% bar (knee-ombx).
+    #
+    # AN EXACT CONTROL EXISTS, which is the whole reason this one is worth an arm. RAD-DINO is
+    # FINETUNED FROM `facebook/dinov2-base` — same ViT-B/14, same 768 width, same 12 blocks, no
+    # registers — so it is a drop-in for BASE through the identical `AutoModel` path, with no
+    # conversion, no wrapper and no new dependency. `base_dense_s2026` is that encoder at this exact
+    # recipe (0.8512). Swapping only the initialisation weights therefore reads the domain question
+    # with ONE variable, which no previous encoder arm here has managed: every other family change
+    # moved architecture and pretraining together.
+    #
+    # THE DOMAIN MATCH IS PARTIAL AND IS NOT OVERSOLD. 882,775 CHEST RADIOGRAPHS (MIMIC-CXR, CheXpert,
+    # NIH-CXR, PadChest, BRAX) — grayscale clinical anatomy with radiological tissue contrast, and
+    # neither the acquisition physics nor the body part of a knee MRI. So it prices below the class:
+    # +0.005-0.015 plausible against the mechanism's 1.5-3%.
+    #
+    # IT ALSO PRICES RadImageNet, which is the better-matched and far dearer version of the same
+    # question — 1.35M radiology images across 11 anatomies, its own published evaluation including ACL
+    # and meniscus tear detection on MR, and Keras `.h5` weights with no PyTorch port, so 2-4 h of
+    # conversion carrying a silent-mismatch failure mode that would read exactly like a null. If
+    # radiology initialisation moves nothing against an EXACT control here, that conversion is not
+    # worth buying; this is the cheap half of a cost-tiered pair.
+    #
+    # LICENCE MIT, checked before the arm rather than after, the same way V-JEPA2's was. No mount yet,
+    # so it trains here and cannot be submitted until the weights are mirrored — and MIT permits a
+    # PUBLIC mirror, unlike DINOv3's, so that is a plain dataset upload deferred until a seat is earned.
+    RAD_DINO: Encoder(
+        RAD_DINO,
+        "microsoft/rad-dino",
+        768,
+        family=RADDINO,
+        leaf="rad-dino",
+        params_m=86.6,
     ),
 }
