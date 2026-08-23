@@ -1872,3 +1872,44 @@ packaged pool, by ANY selection rule — greedy included, and greedy was the str
 project had. The `greedy4` precedent (pre-registered at or below 0.928, returned 0.930) is hereby scoped
 to the pool it ran on: greedy transferred when the pool still had slack, and does not now that it does
 not. An entry must change what is IN the pool.
+
+### Result: `kneemri-finalfit` reads 0.934 — the first board movement in five entries, and it came from DATA (2026-08-23)
+
+Ref `55715039`, **0.934**. That lands in the arm's `0.934-0.935` band, pre-registered verbatim as
+*"directional"* with the instruction *"keep the one member and stop"*. So `final_fit_six.sh` — the six
+remaining seats refitted at `--fold -1`, repriced at ~10 h — stays UNRUN. The band was written before
+the number and the number landed inside it; there is no re-argument available and none is attempted.
+
+**What changed.** One seat of seven. `gradeswap`'s roster with `band_dense` out and `final_ws_e12` in —
+the same recipe fitted on **4,406 studies instead of 3,497, +26%** — with count, kit (`cf6a99f`), vote
+and serving config held fixed. No offline number exists for it by construction: `--fold -1` holds out
+nothing, so the member has seen every holdout study and can never be seat-scored, curve-scored or
+distance-scored again.
+
+**WHY THIS ONE IS WORTH MORE THAN ITS +0.001.** Five entries in a row read 0.933, 0.933, 0.933, 0.932 —
+`gradeswap`, `accumseat`, `greedy7`, `sevenplane` — and every one of them was a REARRANGEMENT of the
+same packaged pool, including `greedy7`, which maximised the offline mean by the best selection rule
+available and still delivered +0.000. This entry is the first that changed what is IN the pool rather
+than which of it was seated, and it is the first to move. That is a statement about the AXIS, not about
+the size: roster search is flat, data is not.
+
+**The size, stated honestly and not inflated.** +0.001 is ONE unit of the board's resolution and sits far
+under the 1.5% bar. It is directional and nothing more. It is not a finding, nothing may be planned
+around it, and no confirmation slot is owed to it. What it buys is a DIRECTION, and the direction was
+already argued from the other side: `knee-krnd`'s data slope is concave — each doubling worth ~0.48 of
+the last — and this is +26% on ONE member of seven, which is a small fraction of one doubling applied to
+a seventh of the ensemble. A board reading of +0.001 is about what that predicts, which is the reason to
+believe the mechanism rather than the number.
+
+**What it does NOT license.** Not `final_fit_six`. Its own gate was 0.936 and the result missed it by two
+board points; at ~10 h for six more members whose individual contributions must then be divided the same
+way this one was, the ratio is poor and the band said so in advance. Not a data-QUANTITY programme
+either: `knee-krnd` prices the next full doubling from 3,526 studies at ~+0.009 offline, and we do not
+have another 3,526 studies to fetch.
+
+**What it does license.** The reading that the live axis is what the encoder and the corpus CONTAIN, not
+how the members are arranged — which is the same axis `raddino_dense` (knee-vp8q, queued behind vjepa)
+attacks from the initialisation side rather than the sample-count side.
+
+**Champion repinned.** `comp/champion.json` moves from `gradeswap` (0.933) to this entry; `champion_check`
+is what proves the new pin still rebuilds.
