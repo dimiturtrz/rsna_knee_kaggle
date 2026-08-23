@@ -590,6 +590,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.alignment_damage",
+      "target": "core.data.corpus.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.alignment_damage",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.alignment_damage",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "core.data.corpus.folds",
       "weight": 1
@@ -3147,13 +3165,31 @@
     {
       "kind": "references",
       "source": "core.data.corpus.crop_alignment.CropAlignment",
+      "target": "core.data.corpus.crop_alignment.StudyOffsets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.crop_alignment.CropAlignment",
       "target": "core.data.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.CropAlignment.dump",
+      "target": "core.data.corpus.crop_alignment.CropAlignment.spread",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
       "target": "core.data.corpus.crop_alignment.CropAlignment.offset",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "core.data.corpus.crop_alignment.StudyOffsets",
       "weight": 1
     },
     {
@@ -3241,6 +3277,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "core.data.corpus.crop_alignment.StudyOffsets",
+      "target": "core.data.corpus.crop_alignment.SlotOffset",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.corpus.crop_alignment.main",
       "target": "core.data.corpus.crop_alignment.CropAlignment",
@@ -3249,7 +3291,25 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
+      "target": "core.data.corpus.crop_alignment.CropAlignment.dump",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.main",
+      "target": "core.data.corpus.crop_alignment.CropAlignment.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.main",
       "target": "core.data.corpus.crop_alignment.CropAlignment.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.main",
+      "target": "core.data.corpus.crop_alignment.CropAlignment.sampled",
       "weight": 1
     },
     {
@@ -5056,6 +5116,120 @@
       "kind": "calls",
       "source": "kneemri.embeddings.report_embeddings.main",
       "target": "kneemri.embeddings.report_embeddings.ReportEmbeddings.reduce",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "target": "core.data.corpus.anatomy.Extent",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "target": "kneemri.evaluation.alignment_damage.SpreadSplit",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.by_extent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.differential",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.label_gaps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.label_gaps",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.by_extent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.differential",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.label_gaps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.split",
+      "target": "kneemri.evaluation.alignment_damage.SpreadSplit",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.alignment_damage.HoldoutJoin",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.alignment_damage.HoldoutJoin.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.alignment_damage.HoldoutJoin.combined",
       "weight": 1
     },
     {
@@ -13263,7 +13437,7 @@
       "role": null
     },
     {
-      "descendants": 116,
+      "descendants": 117,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13327,11 +13501,19 @@
       "role": null
     },
     {
-      "descendants": 25,
+      "descendants": 26,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage",
+      "label": "alignment_damage",
+      "level": "module",
+      "parent": "kneemri.evaluation",
       "role": null
     },
     {
@@ -14304,6 +14486,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.StudyOffsets",
+      "label": "StudyOffsets",
+      "level": "class",
+      "parent": "core.data.corpus.crop_alignment",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.crop_centre.Crop",
       "label": "Crop",
       "level": "class",
@@ -14781,6 +14971,30 @@
       "level": "class",
       "parent": "kneemri.embeddings.report_embeddings",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "label": "AlignmentDamage",
+      "level": "class",
+      "parent": "kneemri.evaluation.alignment_damage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.HoldoutJoin",
+      "label": "HoldoutJoin",
+      "level": "class",
+      "parent": "kneemri.evaluation.alignment_damage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.SpreadSplit",
+      "label": "SpreadSplit",
+      "level": "class",
+      "parent": "kneemri.evaluation.alignment_damage",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -16536,8 +16750,24 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.CropAlignment.dump",
+      "label": "dump",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
       "label": "measure_study",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.CropAlignment.named",
+      "label": "named",
       "level": "method",
       "parent": "core.data.corpus.crop_alignment.CropAlignment",
       "role": null
@@ -16562,6 +16792,14 @@
       "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment.report",
       "label": "report",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.CropAlignment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.CropAlignment.sampled",
+      "label": "sampled",
       "level": "method",
       "parent": "core.data.corpus.crop_alignment.CropAlignment",
       "role": null
@@ -18428,6 +18666,86 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.embeddings.report_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.by_extent",
+      "label": "by_extent",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.differential",
+      "label": "differential",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.label_gaps",
+      "label": "label_gaps",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.AlignmentDamage.split",
+      "label": "split",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.HoldoutJoin.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.HoldoutJoin",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.HoldoutJoin.combined",
+      "label": "combined",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.HoldoutJoin",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.SpreadSplit.sizes",
+      "label": "sizes",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage.SpreadSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.alignment_damage.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.alignment_damage",
       "role": null
     },
     {

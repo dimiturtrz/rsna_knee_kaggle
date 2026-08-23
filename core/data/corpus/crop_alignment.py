@@ -76,6 +76,19 @@ class SlotOffset:
 
 
 @dataclass(frozen=True)
+class StudyOffsets:
+    """One study's routed slots, still carrying the identifier that names it.
+
+    The identifier travels with the measurement because the aggregate report is not the only consumer:
+    a per-study spread can only be joined against a per-study holdout error if both are keyed, and an
+    aggregate that has already dropped the key cannot be re-keyed afterwards.
+    """
+
+    identifier: str
+    offsets: list[SlotOffset]
+
+
+@dataclass(frozen=True)
 class CropAlignment:
     """Whether the routed slots of one study place the knee at the same offset inside their own frames."""
 
@@ -138,8 +151,45 @@ class CropAlignment:
         across = np.median([offset.across_mm for offset in offsets])
         return f"{plane:14s} {median:13.1f} {tail:8.1f} {down:10.1f} {across:12.1f} {magnitudes.size:7d}"
 
+    def sampled(self, identifiers: list[str], size: int) -> list[str]:
+        """Every k-th identifier, so the sample is a property of the corpus order and not of a seed.
+
+        The same choice `crop_coverage` makes, which is what lets the two measurements be about the same
+        studies rather than about two draws that happen to be the same size.
+        """
+        return identifiers[:: max(1, len(identifiers) // size)][:size]
+
+    def named(self, listing: Path, identifiers: list[str]) -> list[str]:
+        """The identifiers written in a file, checked against the corpus rather than trusted.
+
+        A name that is not in the corpus is an error and not a skip: silently dropping it would shrink the
+        denominator of every statistic below without saying so, and a rate over the studies that happened
+        to match is not a rate over the ones that were asked for.
+        """
+        wanted = [line.strip() for line in listing.read_text().splitlines() if line.strip()]
+        missing = sorted(set(wanted) - set(identifiers))
+        if missing:
+            message = f"{len(missing)} of {len(wanted)} named studies are not in the corpus, first: {missing[0]}"
+            raise ValueError(message)
+        return wanted
+
+    def dump(self, destination: Path, decoded: list["StudyOffsets"]) -> None:
+        """Write each study's spread beside its identifier, abstentions included as nan rather than dropped.
+
+        A study with one routed slot has no spread, and writing it as nan keeps it visible to the consumer
+        as an abstention. Dropping it would let a join silently narrow to the multi-slot studies while
+        still reporting a count taken over all of them.
+        """
+        spreads = [self.spread(study.offsets) for study in decoded]
+        np.savez(
+            destination,
+            studies=np.array([study.identifier for study in decoded], dtype="<U64"),
+            spread=np.array([np.nan if found is None else found for found in spreads], dtype=np.float32),
+            slots=np.array([len(study.offsets) for study in decoded], dtype=np.int32),
+        )
+
     @staticmethod
-    def measure_study(request: CoverageRequest) -> list[SlotOffset]:
+    def measure_study(request: CoverageRequest) -> "StudyOffsets":
         """Every routed slot of one study, offset. A staticmethod so a process pool can pickle it.
 
         Read UNCROPPED, because the displacement being measured is the one the crop would apply — taking
@@ -157,9 +207,9 @@ class CropAlignment:
             ]
         except (OSError, ValueError, RuntimeError, IndexError) as failure:
             logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
-            return []
+            return StudyOffsets(request.identifier, [])
         found = [alignment.offset(stack, spacing, name) for name, stack, spacing in read if stack is not None]
-        return [offset for offset in found if offset is not None]
+        return StudyOffsets(request.identifier, [offset for offset in found if offset is not None])
 
 
 def main() -> None:
@@ -169,15 +219,32 @@ def main() -> None:
     parser.add_argument("--slices", type=int, default=SLICES)
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+    parser.add_argument(
+        "--studies",
+        type=Path,
+        default=None,
+        help="a file of identifiers, one per line, to measure INSTEAD of a spread sample of the corpus. "
+        "The spread sample answers what the corpus looks like; a named list is what lets the spread be "
+        "joined against a holdout record, which needs the same studies on both sides, not a sample of them",
+    )
+    parser.add_argument(
+        "--dump",
+        type=Path,
+        default=None,
+        help="write the per-study spread to this .npz, keyed by identifier, alongside the report",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
     identifiers = split.identifiers()
     planes = split.planes()
-    # Every k-th rather than a random draw, so the sample is a property of the corpus order and not of a
-    # seed — the same choice `crop_coverage` makes, so the two measurements are about the same studies.
-    chosen = identifiers[:: max(1, len(identifiers) // arguments.sample)][: arguments.sample]
+    alignment = CropAlignment()
+    chosen = (
+        alignment.named(arguments.studies, identifiers)
+        if arguments.studies
+        else alignment.sampled(identifiers, arguments.sample)
+    )
 
     requests = [
         CoverageRequest(identifier=name, source=str(split.source), planes=planes, slices=arguments.slices)
@@ -185,9 +252,12 @@ def main() -> None:
     ]
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         read = list(pool.map(CropAlignment.measure_study, requests, chunksize=4))
-    measured = [offsets for offsets in read if offsets]
-    for line in CropAlignment().report(measured, len(chosen), len(identifiers)):
+    decoded = [study for study in read if study.offsets]
+    for line in alignment.report([study.offsets for study in decoded], len(chosen), len(identifiers)):
         logger.info(line)
+    if arguments.dump:
+        alignment.dump(arguments.dump, decoded)
+        logger.info(f"per-study spread written to {arguments.dump}")
 
 
 if __name__ == "__main__":

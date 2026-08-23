@@ -2666,3 +2666,37 @@ not prove the aggregator was fine — it removes the assumption that it was the 
 LIMIT, from the module's own docstring: an Otsu mass centroid is not a joint centre; it is dragged by
 coil, fat and the far limb, and knee-yrf measured tissue-centring's worst series as worse than
 image-centring's at 80 mm. A small spread would have been conclusive; this middling one is suggestive.
+
+### alignment_damage — slot disagreement does NOT predict focal error; the registration fix is unlicensed
+
+`crop_alignment` measured the INPUT: a study's routed slots disagree about where the knee sits by 5.7 mm
+p50 / 10.7 mm p90, three to six times a meniscal tear. This is the OUTPUT read that was pre-registered
+against it, on the 909 fold-0 holdout studies, mixing the champion's six scoreable members. Zero GPU,
+~30 minutes of CPU, and it was built to decide a 99 GB cache rebuild plus hours of refit BEFORE either
+was started.
+
+```
+455 well-agreeing studies and 454 poorly-agreeing, split at 5.85 mm; 0 abstained with one slot
+focal mean gap -0.0068, regional mean gap -0.0171
+DIFFERENTIAL (focal minus regional) +0.0103, 95% [-0.0305, +0.0421]
+```
+
+THE VERDICT, AGAINST THE BANDS FILED BEFORE ANY NUMBER EXISTED. The sizing argument was that a perfect
+registration lifts the poorly-agreeing half toward the well-agreeing one on the seven focal findings
+only, so the mean-AUC gain is `differential x (7/12) x (1/2) = differential x 0.29`; the 1.5% bar
+therefore needed a differential near 0.051, and even a 0.01 move needed 0.034. The measured +0.0103 sits
+in the pre-registered `<= 0.020` band AND its interval spans zero. The registration fix is not licensed
+by this evidence. It is dropped as a candidate for the rebuild, not carried as a rider.
+
+THE SIGN NOBODY PREDICTED, AND WHAT IT RETIRES. Both raw gaps are NEGATIVE: the poorly-agreeing half
+scored BETTER, on focal and regional alike. That is the opposite direction from the difficulty confound
+the differential was built to subtract — a scattered tissue centroid is evidently not a proxy for a worse
+study. Whatever the Otsu spread is tracking, it is not acquisition quality, which is worth knowing
+because the same proxy underwrites the whole `crop_alignment` reading.
+
+WHAT THIS DOES NOT KILL. The COMMON-MODE offset, which this design cannot see at all: every study shares
+it, so it cannot separate studies and cannot appear as a spread effect. That fix — tissue-centred
+cropping — stays exactly where knee-yrf left it, priced on retention (+0.0294 at 130 mm, knob-sized).
+Nor does it clear the proxy: an Otsu mass centroid is not a joint centre, and a spread built on it
+attenuates any true gap toward zero. And it says nothing about a model TRAINED aligned from the start,
+which is a different experiment from scoring an image-centred model on studies that happen to align.

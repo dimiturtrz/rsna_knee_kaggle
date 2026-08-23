@@ -3,8 +3,9 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
-from core.data.corpus.crop_alignment import CropAlignment, SlotOffset
+from core.data.corpus.crop_alignment import CropAlignment, SlotOffset, StudyOffsets
 from core.data.corpus.crop_coverage import CoverageRequest
 
 SPACING = 2.0
@@ -79,4 +80,46 @@ def test_plane_line():
 
 def test_measure_study(tmp_path: Path):
     """A study that will not decode is silent about alignment rather than counted as aligned."""
-    assert CropAlignment.measure_study(CoverageRequest(identifier="absent", source=str(tmp_path), planes={})) == []
+    read = CropAlignment.measure_study(CoverageRequest(identifier="absent", source=str(tmp_path), planes={}))
+
+    assert read.offsets == []
+    assert read.identifier == "absent", "the failure still names itself, or the join cannot tell which study abstained"
+
+
+def test_sampled():
+    """Every k-th identifier, so the sample is a property of the corpus order and not of a seed."""
+    identifiers = [f"study{index:03d}" for index in range(100)]
+    chosen = CropAlignment().sampled(identifiers, 10)
+
+    assert chosen == identifiers[::10]
+    assert CropAlignment().sampled(identifiers, 10) == chosen, "no seed, so two calls must agree exactly"
+    assert CropAlignment().sampled(identifiers, 300) == identifiers, "asking for more than exist yields all of them"
+
+
+def test_named(tmp_path: Path):
+    """A named list is checked against the corpus, and an unknown name raises instead of shrinking it."""
+    listing = tmp_path / "studies.txt"
+    listing.write_text("b\n\na\n")
+
+    assert CropAlignment().named(listing, ["a", "b", "c"]) == ["b", "a"], "the file's own order is preserved"
+
+    with pytest.raises(ValueError, match="not in the corpus"):
+        CropAlignment().named(listing, ["a"])
+
+
+def test_dump(tmp_path: Path):
+    """Each study's spread is written beside its identifier, a one-slot study as nan rather than dropped."""
+    destination = tmp_path / "spread.npz"
+    CropAlignment().dump(
+        destination,
+        [
+            StudyOffsets("pair", [SlotOffset("sag", 3.0, 4.0), SlotOffset("cor", 0.0, 20.0)]),
+            StudyOffsets("lonely", [SlotOffset("sag", 3.0, 4.0)]),
+        ],
+    )
+    written = np.load(destination, allow_pickle=True)
+
+    assert written["studies"].tolist() == ["pair", "lonely"]
+    assert written["spread"][0] == pytest.approx(15.0)
+    assert np.isnan(written["spread"][1]), "a study with nothing to disagree with must abstain, not score zero"
+    assert written["slots"].tolist() == [2, 1]
