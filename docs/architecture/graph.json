@@ -1304,6 +1304,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.weights_gap",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.weights_gap",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.weights_gap",
+      "target": "kneemri.evaluation.published_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.weights_gap",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.weights_gap",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "core.data.corpus.study_cache",
       "weight": 1
@@ -7832,6 +7862,84 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "target": "kneemri.evaluation.published_ruler.PublishedFold",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "target": "kneemri.evaluation.weights_gap.WeightsGap",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.evaluation.weights_gap.MatchedRuler.theirs",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.evaluation.weights_gap.WeightsGap",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.folds",
+      "target": "kneemri.evaluation.published_ruler.PublishedFold.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.MatchedRuler.theirs",
+      "target": "kneemri.evaluation.weights_gap.MatchedRuler.folds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.weights_gap.main",
+      "target": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.weights_gap.main",
+      "target": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.experiments.arm_check.ArmCheck",
       "target": "kneemri.experiments.arm_check.ArmReading",
       "weight": 1
@@ -13101,7 +13209,7 @@
       "role": null
     },
     {
-      "descendants": 114,
+      "descendants": 115,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13165,7 +13273,7 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -13360,6 +13468,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.tie_divergence",
       "label": "tie_divergence",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap",
+      "label": "weights_gap",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -14994,6 +15110,22 @@
       "label": "TieDivergenceReport",
       "level": "class",
       "parent": "kneemri.evaluation.tie_divergence",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "label": "MatchedRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.weights_gap",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.WeightsGap",
+      "label": "WeightsGap",
+      "level": "class",
+      "parent": "kneemri.evaluation.weights_gap",
       "role": "satellite"
     },
     {
@@ -19930,6 +20062,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.tie_divergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.MatchedRuler.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
+      "label": "compared",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.MatchedRuler.folds",
+      "label": "folds",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.MatchedRuler.theirs",
+      "label": "theirs",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.MatchedRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.WeightsGap.against_member",
+      "label": "against_member",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.WeightsGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.WeightsGap.against_pool",
+      "label": "against_pool",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap.WeightsGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.weights_gap.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.weights_gap",
       "role": null
     },
     {

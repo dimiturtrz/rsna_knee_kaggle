@@ -869,6 +869,17 @@ mean:
   at 0.784, is our BEST finding at 0.8923 over the corpus. The weakest is Lateral Meniscus at 0.7981,
   never named. The `+0.0173 from MCL and Fracture` target above is dead, exactly as `label_power`
   predicted from the standard error of 62 positives.
+- **And that label profile was THEIR model's, not ours — the whole per-label axis is worth +0.0043.**
+  2026-08-23, `kneemri/evaluation/weights_gap.py`: the two bullets above compare OUR fold-0 columns
+  against a corpus ruler built from THEIR weights, which differs in studies AND weights at once. Put
+  both on the same 909 studies and our single member beats their average single member on **ten of
+  twelve labels** (mean 0.8483 vs 0.8285) and beats their four-seed pool (0.8369). Only MCL (−0.0346)
+  and Fracture (−0.0167) lose. Closing both completely, to weights that provably exist, is
+  `(0.0346+0.0167)/12 = +0.0043` — a quarter of the bar, and the CEILING of the whole weak-column
+  programme. Fracture's share is sampling (68 positives). So the line at 827 above — "MCL is hard to
+  see, which is what the resolution arm now targets" — is superseded on PRICE, not on mechanism, and
+  `focus_mcl` was cancelled before it ran. See
+  `interpretations/kneemri/2026-08-23_the_per_label_axis_is_worth_0.004.md`.
 - **A run kept eight of the 881 studies it predicted, and threw the rest away.** `Fitting.ranked`
   already scores the whole holdout to rank each epoch, and that array is what every per-label number in
   this ledger was read off; eight studies of it became the witness and 873 were dropped. They are now
