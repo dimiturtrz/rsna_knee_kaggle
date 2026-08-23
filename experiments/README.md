@@ -2611,3 +2611,58 @@ Operational consequence, and the part that generalises: `.partial` survives a SU
 not a liveness marker. The finished test is the existence of the `.pt`. Any pool built by globbing
 checkpoints must score every member alone before mixing — a member below the weakest trained member is
 a dead checkpoint, not a diverse one.
+
+### crop_alignment — the slots disagree by 3-6x a meniscal tear, and two thirds of the offset is harmless
+
+`python -m core.data.corpus.crop_alignment --workers 20`, 400 studies of 4407, 1848 routed slots,
+~20 min CPU, zero GPU. The module had been written and never run. An INSTRUMENT: it cannot raise a
+score, it decides what runs next.
+
+```
+plane           |offset| p50      p90   down p50   across p50   slots
+AX_FLUID_FS              9.9     18.3        8.2         -0.6     396
+COR_FLUID_FS            10.2     22.5       -8.1         -0.8     386
+COR_T1                   9.1     19.6       -6.0         -0.6     263
+SAG_FLUID_FS            13.9     26.1       -4.7         10.7     380
+SAG_FLUID_NOFS          11.1     22.3       -8.1          2.9     246
+SAG_T1                  12.9     23.4       -8.5          3.4     177
+within-study spread of |offset| across slots: p50 5.7 mm, p90 10.7 mm, max 18.8 mm
+```
+
+**Middle pre-registered band (4-10 mm), which required reading the per-plane SIGNED components rather
+than the mean.** The honest cross-slot comparison is within a plane, where the axes agree: the three
+SAGITTAL slots run +10.7 / +2.9 / +3.4 mm anterior-posterior, so `SAG_FLUID_FS` sits ~7.8 mm displaced
+from the other two sagittal slots, systematically. Axial `down` is anterior-posterior and coronal `down`
+is superior-inferior, so those two columns are NOT comparable and no verdict is drawn from them.
+
+**Most of the displacement is COMMON MODE, and that is the finding that resizes the lever.** Per-slot
+|offset| is 9-14 mm but the within-study spread across slots is only 5.7 mm. The study is shifted as a
+whole; the slots are shifted together. A common-mode shift does not break slot correspondence — it
+spends crop margin. This RECONCILES with knee-yrf rather than contradicting it: its 6.9 mm dy and
+6.4 mm dx combine to ~9.4 mm of magnitude on 60 studies, against 9-14 mm here on 400.
+
+**The residual, with its denominator.** At 130 mm over 336 px the scale is 0.387 mm/px, so the 5.7 mm
+p50 residual is ~15 px and the p90 ~28 px. `anatomy.py` records a meniscal tear at 1-2 mm. The
+cross-slot misregistration is therefore **3-6x the size of the finding** for millimetre-scale labels and
+irrelevant for centimetre-scale ones.
+
+That is a PREDICTION, and it matches the weakest columns on the 909-study holdout: MCL 0.7893, Lateral
+OA 0.8246, Lateral Meniscus 0.8504 — all fine structure — against Effusion 0.8655 and Baker's 0.9086.
+
+**What this does NOT license.** Not CoPAS's +0.056. That was bought against a full-FOV 576-matrix
+baseline with no crop and no alignment; we already crop, and two thirds of our offset is common-mode and
+already harmless. The available component is the 5.7 mm residual only, and its size is unmeasured in AUC.
+
+**What it DOES license.** Two separable fixes, and they are not the same work:
+1. the common-mode ~10 mm offset -> crop CENTRING, which knee-yrf declined on retention grounds
+   (+0.0294 tissue kept, not worth a 99 GB rebuild). It now has a second, independent reason.
+2. the residual 5.7 mm cross-slot spread -> slot-to-slot REGISTRATION, which is the CoPAS mechanism and
+   which centring alone does not fix.
+
+**What it retires.** The blanket reading that our six flat slot-aggregation arms failed because the
+aggregator was wrong. They were fusing views misregistered by 3-6x the fine findings' size. That does
+not prove the aggregator was fine — it removes the assumption that it was the only suspect.
+
+LIMIT, from the module's own docstring: an Otsu mass centroid is not a joint centre; it is dragged by
+coil, fat and the far limb, and knee-yrf measured tissue-centring's worst series as worse than
+image-centring's at 80 mm. A small spread would have been conclusive; this middling one is suggestive.
