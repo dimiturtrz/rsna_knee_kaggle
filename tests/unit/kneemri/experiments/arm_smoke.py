@@ -7,7 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.experiments.arm_smoke import SMOKE_TIMEOUT_SECONDS, ArmSmoke
+from kneemri.experiments.arm_smoke import (
+    CPU_SMOKE_TIMEOUT_SECONDS,
+    SMOKE_TIMEOUT_SECONDS,
+    ArmSmoke,
+)
 
 LAST_SWEEP = 1_700_000_000
 """A stamp from before this run, so "the smoke wrote it" is decided by the clock rather than by timing."""
@@ -149,3 +153,14 @@ def test_reported(tmp_path: Path):
     assert ran == ["fine"], "an arm the parser already refused is not worth the card"
     assert not broken, "nothing failed, so nothing is reported"
     assert out.is_dir(), "the smoke makes its own output directory"
+
+
+def test_timeout():
+    """A CPU smoke gets a bound that is not already inside its own expected runtime.
+
+    The card's ten minutes is 70% of the seven-minute CPU epoch this module documents, which is not a
+    bound on hanging: `focus_latmen` was reported BROKEN by a checker that had merely stopped watching.
+    """
+    assert ArmSmoke.timeout(on_card=True) == SMOKE_TIMEOUT_SECONDS
+    assert ArmSmoke.timeout(on_card=False) == CPU_SMOKE_TIMEOUT_SECONDS
+    assert ArmSmoke.timeout(on_card=False) > 2 * ArmSmoke.timeout(on_card=True), "a CPU epoch is minutes, not seconds"

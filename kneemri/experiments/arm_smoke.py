@@ -17,6 +17,8 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+import torch
+
 from kneemri.spawn import Spawn
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,20 @@ Generous on purpose: the encoder is fetched on a cold HuggingFace cache and ever
 once (compilation became the default on 2026-08-17), and a smoke that timed out on its own setup would
 report a healthy arm as broken. Measured across thirty-six arms: a compiled epoch on sixty studies takes
 21-49 s against 5-9 s eager, nearly all of it that one graph build."""
+
+CPU_SMOKE_TIMEOUT_SECONDS = 3600
+"""The same bound when there is no card, where the EXPECTED runtime is minutes rather than seconds.
+
+The ten-minute bound was measured on the card, and on CPU it is not a bound on hanging at all: this
+module's own `--smoke` help records a whole-stack CPU epoch at about seven minutes, which is 70% of it
+before decode or interpreter startup. `focus_latmen` — twenty slices, heavier than the twelve that
+measurement was taken on — was then reported BROKEN by a checker that had simply stopped watching, and
+a checker that calls a healthy arm broken is worse than no checker, because the fix it invites is to
+change the arm.
+
+Six times the card's bound rather than a tuned figure: on CPU the thing being bounded is a HANG, and
+anything under an hour is inside the honest spread of a device whose epoch time nobody has pinned per
+arm."""
 
 TIMED_OUT = 124
 """The exit code a timeout is reported under — `timeout(1)`'s, so the number in the log means the thing
@@ -53,6 +69,16 @@ class ArmSmoke:
         self.runner = runner or self._subprocess
 
     @staticmethod
+    def timeout(*, on_card: bool) -> int:
+        """How long one smoke may run before it is the problem, on the device it will actually run on.
+
+        Asked of the DEVICE rather than passed as a flag, because the smoke does not choose its device
+        either: `train.py` takes the card when there is one, so a bound given by hand is free to
+        describe a device the run never used.
+        """
+        return SMOKE_TIMEOUT_SECONDS if on_card else CPU_SMOKE_TIMEOUT_SECONDS
+
+    @staticmethod
     def _subprocess(argv: list[str]) -> tuple[int, str]:
         """Run one smoke to completion and return its exit code with whatever it last complained about.
 
@@ -62,11 +88,12 @@ class ArmSmoke:
         any of the remaining ones ran, leaving that arm's artifacts behind because the cleanup lives
         past the call. The arm that hung is the one thing such a sweep must be able to name.
         """
+        bound = ArmSmoke.timeout(on_card=torch.cuda.is_available())
         try:
             # fixed argv built from our own arm files, no shell
-            done = Spawn().ran(argv, capture_output=True, text=True, timeout=SMOKE_TIMEOUT_SECONDS, check=False)
+            done = Spawn().ran(argv, capture_output=True, text=True, timeout=bound, check=False)
         except subprocess.TimeoutExpired:
-            return TIMED_OUT, f"still running after {SMOKE_TIMEOUT_SECONDS}s on {SMOKE_STUDIES} studies"
+            return TIMED_OUT, f"still running after {bound}s on {SMOKE_STUDIES} studies"
         lines = done.stderr.strip().splitlines()
         return done.returncode, lines[-1] if lines else ""
 

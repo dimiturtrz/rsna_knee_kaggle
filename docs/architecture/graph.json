@@ -8125,6 +8125,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke.timeout",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
       "target": "kneemri.spawn.Spawn",
@@ -20154,6 +20160,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_smoke.ArmSmoke.reported",
       "label": "reported",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.timeout",
+      "label": "timeout",
       "level": "method",
       "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
       "role": null
