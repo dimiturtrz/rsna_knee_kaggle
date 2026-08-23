@@ -309,6 +309,21 @@ def test_swap_unresolvable():
     assert "not a free look" in lines[-1], "which is the reading knee-c0u9 refuted"
 
 
+def test_swap_prices_nothing_when_no_candidate_carries_a_record():
+    """An empty candidate pool is a STATE, not an error — `final_ws_e12` can never carry a record.
+
+    It used to raise `max() iterable argument is empty` AFTER a twelve-epoch fit had already written its
+    checkpoint, so a crash in a reporting step read in the log exactly like a training failure.
+    """
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    roster = Pool(["a.pt", "b.pt"], [_member(2.0, SEED), _member(2.0, SEED + 1)], truth)
+
+    lines = curve.swap(roster, Pool([], [], truth))
+
+    assert lines == ["no candidate carries a holdout record, so no seat can be priced"]
+
+
 def test_board_cost():
     """The three bands a best-seat delta can fall in, each said in the words that decide a slot.
 

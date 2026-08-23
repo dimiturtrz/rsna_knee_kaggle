@@ -204,3 +204,9 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # the board. The morning's interpretation called 63 such candidates "exhausted" by comparing +0.0005
 # straight against the +0.0015 BOARD threshold; gradeswap refutes that by instance (+0.0001 offline,
 # +0.001 board) and both that document and the README are corrected. The pool is FLAT, not empty.
+final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
+# Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
+# studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored
+# or distance-scored, and it must never enter a pool that reports an offline mean. knee-7d1's 4.67x
+# board-per-holdout compression does not apply to it either — that converts an HONEST offline delta, and
+# this member has none. It ships blind against the pinned 0.933 in `kneemri-finalfit` or not at all.

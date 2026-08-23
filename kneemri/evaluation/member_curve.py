@@ -245,6 +245,14 @@ class MemberCurve:
         """
         truth = candidates.truth
         base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
+        if not candidates.names:
+            # EVERY candidate was skipped for having no holdout record, which is a STATE and not an error:
+            # `final_ws_e12` is fitted at --fold -1 and can never carry one, so the arm that produces the
+            # deliverable ends by asking this question of an empty pool. It used to answer by raising
+            # `max() iterable argument is empty` from the line below, AFTER a twelve-epoch fit had
+            # written its checkpoint — a crash in a reporting step reads exactly like a training failure
+            # in the log, and this one cost a first reading of the run that produced it.
+            return ["no candidate carries a holdout record, so no seat can be priced"]
         priced = []
         for candidate, name in zip(candidates.predictions, candidates.names, strict=True):
             seats = [

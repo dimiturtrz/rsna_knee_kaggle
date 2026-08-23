@@ -1798,3 +1798,39 @@ not expect the median; the compression is a median over a spread and this edge i
 
 **WHAT IT DOES NOT TEST.** It is silent about data volume: every member is fold-0-trained on 79% of the
 corpus. `final_fit` is on the card as this is written and answers that separately.
+
+### Pre-registration: `kneemri-finalfit` — the data-volume step, and the crash that hid its success
+
+`gradeswap`'s exact seven with `band_dense_s2026` out and **`final_ws_e12`** in. Count, kit (`cf6a99f`),
+vote, serving config and the other six identical. `final_ws_e12` is `band_dense`'s flags copied verbatim
+plus `--fold -1` and `--ema`: 4,406 training studies rather than 3,497. **Training data volume, 79% ->
+100%, is the only design difference.**
+
+**WHY THIS AXIS.** Data volume is the only axis that has ever cleared the 1.5% house bar here —
+`half_data` 0.8344 against `band_dense` 0.8578, a -0.0234 gap at 3.8x the offline noise floor. The curve
+is CONCAVE, so the 80->100% step is 0.32 of a doubling and prices at about +0.0029 offline before the
+last-epoch penalty.
+
+**TWO VARIABLES, NOT ONE.** `--ema` is not removable: with `--fold -1` there is no best-epoch selection
+and the trainer keeps the LAST epoch, so ema is the deliverable's only variance control. The read is
+"data step + ema" and a null cannot separate them.
+
+**NO OFFLINE NUMBER EXISTS OR CAN EXIST FOR THIS MEMBER.** It has seen every holdout study. It cannot be
+seat-scored, curve-scored or distance-scored, and `knee-7d1`'s 4.67x compression does not apply — that
+converts an HONEST offline delta and this member has none. The pre-registration is written on the board.
+
+- **0.936+** — the free data step transfers. Licenses `experiments/arms/final_fit_six.sh` (~10 h of card,
+  written and arm_check-clean, deliberately unrun). The only path still priced above the 0.933 -> 0.940 gap.
+- **0.934-0.935** — directional, under the bar. Keep the member, do NOT license the refit.
+- **0.933** — a tie. The data step does not survive the swap; ~10 h retired before it is spent. That is
+  the cost-tiered shape working: 93 min of card decides ten hours of it.
+- **0.932 or below** — suspect the SWAP, not the data. `band_dense` is the strongest single member
+  (0.8578); the next test ADDS `final_ws_e12` as an eighth rather than displacing it.
+
+**A HARNESS BUG, NAMED BEFORE THE RESULT.** The twelve-epoch fit SUCCEEDED and wrote its checkpoint, and
+the run log ends in a traceback anyway: the arm's automatic `seat_value` step asked `member_curve.swap`
+to price a candidate pool that was empty — because the only candidate is this member, and it is skipped
+for having no holdout record. `max()` on an empty sequence. **Plumbing, not training.** A crash in a
+reporting step is indistinguishable in the log from a training failure, and it cost this run its first
+reading. `swap` now returns `no candidate carries a holdout record, so no seat can be priced`, with a
+test, because every `_ff` member the gated refit produces would have hit the same line.
