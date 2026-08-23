@@ -2486,3 +2486,32 @@ ruler transfers" from "grade_ladder is simply a good member". This re-rank is th
 it is a RE-TEST, not an application of a settled fact. If the `small_accum` swap ties or loses at a gap
 larger than the one that passed, the single pass was the coincidence and the ruler goes back in the
 box beside residual distance.
+
+---
+
+## `side_dense` — the loss cannot buy the side, and the contrast is not the metric (2026-08-22, `knee-6u12`)
+
+| arm | what moved | best | vs control | reading |
+| --- | --- | --- | --- | --- |
+| **`side_dense`** | `band_dense`'s recipe with `--side-weight 1.0` — a within-study term asking the worse side of a compartment pair to outrank the better one | **0.7937** | **−0.0641 vs `band_dense`** | **REGRESSION, with the mechanism CONFIRMED to fire.** Term verified landed three ways BEFORE the run: `side_weight: 1.0` stamped in the checkpoint recipe; smoke loss 1.9368 against the control's ~1.2, the extra ~0.69 being exactly `softplus(0)`, what a side-blind pair must pay; VRAM 26.92/24.93 GB and 361 s/epoch byte-identical to the control, as a term adding no parameter must be. **The contrast moved the way the arm predicted** — Lateral OA 0.5141 → **0.5759**, Medial OA 0.7416 → 0.7962 — and **every one of the twelve labels fell**, ten times the 0.0062 floor: Baker's −0.207, MCL −0.077, PF OA −0.076, Lateral Meniscus −0.069, Effusion −0.068, ACL −0.056, Medial Meniscus −0.056, Synovitis −0.050, **Lateral OA −0.034**, Medial OA −0.030, Fracture −0.025, Contusion −0.023. **The last of those is the finding: the column the term exists to fix became MORE side-dependent on the contrast and WORSE at the metric, in the same run.** The metric ranks study-against-study WITHIN a label; the term orders label-against-label WITHIN a study. Orthogonal orderings over the same logits — buying one costs the other rather than composing with it, which is why `Objective.pairs` was never missing the side comparison by oversight. **NOT the pre-registered mass-imbalance failure**: the meniscus pair was supposed to eat the gradient 2.6:1 and gain at the OA pair's expense; instead it lost too (Medial Meniscus −0.071), and damage is uniform across labels the term places NO gradient on, which is shared-encoder damage rather than pair-specific robbery. Per-pair normalisation therefore redistributes a cost instead of removing it and is declined with the weight sweep. **Which link broke: the IDEA, in this specific use** — plumbing verified, data and split identical by construction, training one flag off a control already on disk, test the same tool on the same 909 studies and the same n. Seat **−0.0019**, 0 of 1 clearing +0.0015, negative and charged ~3× by the board — no seat. **CAVEAT THE TOOL NOW CARRIES:** the neutral control column went dirty — `PF OA` reads 0.4274 / 0.3498 under the arm against 0.4770 / 0.4133 under the control, and `side_blindness` flags both pairs CONFOUNDED. The term puts literally zero gradient on `PF OA` (asserted in its unit test), so this is indirect coupling through the shared encoder. **`side_blindness` can audit a run trained WITHOUT a side term; it cannot cleanly audit one trained with it** — a second, independent reason a weight sweep could not be steered by the contrast, since the sweep would bend its own ruler. **FOLLOW-UP DECLINED, and that is the arm's return.** PRICE: 73 min of card for weight 0.3, P(clears 1.5% on the mean) ≈ 0.02 — the result says the SIGN of the trade is wrong, not merely its size, so a third of the weight buys a third of a bad trade. **What it does NOT rule out:** the side-blindness OBSERVATION is untouched (Lateral OA at chance on all eight members separately, four data-side explanations already refuted by `knee-yrg`); the side IS recoverable from this representation, since the contrast rose 0.062 on demand — what is refuted is getting it out of the loss for free; and the term survives as a small-weight regulariser on a head that SEES position (pooling or field of view for the OA compartments), where it would be read on per-label AUC rather than on the contrast. [interpretation](../interpretations/kneemri/2026-08-23_side_resolution_is_not_score.md) |
+
+## `accumseat` — the ordinal ruler's re-test at a LARGER gap, and it tied (2026-08-22)
+
+`accumseat` displaced `lr4e-5_ws` (the champion's ordinal floor, 0.770) for `small_accum` (0.784) — a
++0.014 separation against the +0.011 that bought `gradeswap` its tick. **It scored 0.933. A tie.**
+
+The consequence was pre-registered in this file before the entry fired, and it is owed:
+
+> If the `small_accum` swap ties or loses at a gap larger than the one that passed, the single pass was
+> the coincidence and the ruler goes back in the box beside residual distance.
+
+**So all three rulers are now dead as selection rules.** Residual distance is 0-for-2 in opposite
+directions. Binary seat value is blind at ±0.0015. Ordinal concordance passed once at +0.011 and tied at
++0.014 — a ruler that does not order its own two trials by their separation is not measuring what it
+claims. Nothing in this project may now spend a submission slot on a member swap justified by a ruler.
+
+The second thing it settles is about the roster rather than the rulers: **displacing the weakest seat of a
+seven-member vote is free in both directions.** `gradeswap` and `accumseat` are two different displacements
+of a seven and both read 0.933. That is a statement about the ensemble's flatness at seven, and it points
+the remaining board budget at the count (an eighth seat, never tested) or at a member from an axis the
+roster does not contain — not at further one-for-one swaps.

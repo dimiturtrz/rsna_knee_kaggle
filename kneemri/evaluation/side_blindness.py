@@ -44,6 +44,19 @@ WHAT IT CANNOT SAY. It reads the pooled ENSEMBLE the same way it reads a member,
 the family, not one architecture; the members share a pooling stage and would have to be read apart to
 blame it. And the discordant groups are small — the whole point is that they exclude the studies positive
 on both sides — so the interval matters more than the point estimate and is reported beside it.
+
+IT CANNOT AUDIT A RUN TRAINED WITH A SIDE TERM, measured rather than supposed. `side_dense` (knee-6u12)
+fitted `PairedSides` at weight 1.0, which places literally zero gradient on the CONTROL column, and the
+control still went dirty in both pairs: 0.4770 / 0.4133 under the matched control against 0.4274 / 0.3498
+under the arm. Pushing two columns of a shared trunk apart moves a third that reads the same features, so
+the confound detector stops being a detector exactly when a side term is on. Two consequences: a
+side-term weight sweep cannot be steered by this contrast, since the sweep bends its own ruler; and
+`side_dense` established separately that a column can gain here while LOSING per-label AUC, so this
+reading is a diagnostic about the representation and never a proxy for the score.
+
+AND IT IS NOT THE METRIC. The competition ranks study against study WITHIN a label; this contrast ranks
+one label against another WITHIN a study. They are orthogonal orderings over the same logits, and buying
+the second cost the first outright on the one arm that tried.
 """
 
 import argparse

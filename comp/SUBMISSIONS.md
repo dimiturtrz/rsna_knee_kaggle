@@ -1697,3 +1697,36 @@ concluded the pool was exhausted by comparing those offline numbers against the 
 seats must be multiplied by the measured compression (`knee-7d1`, median +4.67 board points per holdout
 point) before they meet a board threshold, which puts the best available eighth seat at ~+0.002 board.
 The pool is flat, not empty. Both that interpretation and the root README are corrected.
+
+---
+
+## `accumseat` — 0.933, a tie, and the ordinal ruler goes back in the box (2026-08-22 20:42Z, ref 55698943)
+
+`small_accum_s2026` displaces `lr4e-5_ws_s2026`, the champion's weakest ordinal seat at 0.770, for a
+member at 0.784. Pre-registered: **≥0.934** the ordinal ruler transfers · **0.933** a tie about the SEAT
+rather than the ruler · **≤0.932** it does not transfer.
+
+**RESULT: 0.933.** The tie branch, and the ledger's own caveat is what makes it decisive rather than
+merely uninformative. `gradeswap` passed on a +0.011 ordinal gap; this is +0.014, a LARGER separation,
+and it bought nothing. A ruler whose two trials do not order by their own separation is not measuring
+what it claims, so `experiments/README.md`'s written condition fires: the single pass was the
+coincidence.
+
+**All three rulers are now retired as selection rules.**
+
+| ruler | record | status |
+| --- | --- | --- |
+| residual distance | 0-for-2, in opposite directions | dead since `gradeswap` |
+| binary seat value | blind at its own ±0.0015 resolution | never usable at board resolution |
+| ordinal concordance | passed at +0.011, tied at +0.014 | **dead as of this entry** |
+
+No further submission slot may be spent on a one-for-one member swap justified by a ruler. What the two
+ties DO establish is about the roster: two different displacements of the same seven both read 0.933, so
+**the seven-member vote is flat to single-member exchange**. The remaining board budget belongs to the
+member COUNT — an eighth seat, which no entry has ever tested — or to a member from an axis the roster
+does not contain, and `knee-7d1`'s measured compression (+4.67 board points per holdout point) is the
+arithmetic that prices either.
+
+**Two 22.08 slots lapsed unused.** The machine slept from ~22:40Z to ~10:20Z and the UTC day closed with
+them unspent. Recorded rather than glossed: the eighth-seat scan that would have chosen an entry was
+launched at 22:36Z and died in its first member when the host went down.
