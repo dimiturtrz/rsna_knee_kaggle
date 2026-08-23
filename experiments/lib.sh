@@ -347,6 +347,16 @@ require() {
   done
 }
 
+_out_path() {
+  # The value the arm passed to --out, or nothing. Parsed here rather than assumed from the arm's name:
+  # several arms name a checkpoint that has no relation to their invocation name.
+  local previous=""
+  for flag in "$@"; do
+    [ "$previous" = "--out" ] && { echo "$flag"; return 0; }
+    previous="$flag"
+  done
+}
+
 run_train() {
   # $1 is the arm's name; the rest are kneemri.training.train flags.
   #
@@ -395,6 +405,23 @@ run_train() {
   fi
   # THE ARM'S OWN FLAGS, minus its name: the free-VRAM gate derives what THIS recipe reserves rather
   # than asking every arm for the same 18 GB. See `arm_needs_mib`.
+  # A FITTED CHECKPOINT IS AN ASSET AND NO ARM MAY DESTROY ONE IMPLICITLY. Checked BEFORE hold_card, so
+  # a refusal costs neither the card nor the queue slot behind it.
+  #
+  # `final_fit.sh` derives its output name from the epoch count alone — `final_ws_e${EPOCHS}.pt`, with
+  # nothing about geometry in it — so re-running it at a different recipe on 2026-08-23 overwrote
+  # knee-7tq's 392 px / 12-slice fit with a 336 px / 20-slice one under the same name. Nothing shipped
+  # had seated the old member, so no board result lost its rebuildable path; the asset itself is simply
+  # gone, and having been fitted at --fold -1 it had no offline number by which anyone would notice.
+  # A name collision is silent by nature — only the file system ever knew.
+  #
+  # ALLOW_OVERWRITE=1 is the deliberate act: re-running an arm that failed, or replacing a fit on
+  # purpose. Typing it is cheap. The point is that destruction is never what happens by default.
+  local out; out="$(_out_path "${@:2}")"
+  if [ -n "$out" ] && [ -e "$out" ] && [ -z "${ALLOW_OVERWRITE:-}" ]; then
+    echo "run_train: REFUSED $1 - '$out' already holds a checkpoint. Set ALLOW_OVERWRITE=1 to replace it, or give this arm a distinct --out."
+    return 1
+  fi
   hold_card "${@:2}"
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
