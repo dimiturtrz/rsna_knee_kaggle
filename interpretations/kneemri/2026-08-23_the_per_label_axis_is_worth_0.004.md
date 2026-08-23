@@ -92,6 +92,19 @@ strongest label at 0.8923. The honestly-purchasable number is **MCL alone, +0.00
 Three candidate locations for the gap have now each been priced and found too small: per-label deficits
 (+0.0043, here), the recipe axis around `band_dense` (knob-sized by construction, `experiments/README.md`),
 and subset selection over the existing member pool (selection overfit +0.0033, `2026-08-23_selection-overfit`).
-What is left unpriced is data volume and the input itself — 17.4% of series never routed, a tenth of the
-acquired slices used, 336 px for findings a few voxels wide — which is `knee-jk3`'s axis and the only one
-still capable of a 1.5% move.
+
+**And the obvious fourth is already spent — this section said otherwise in its first draft and the ledger
+corrected it within the hour.** Data volume and the input itself (17.4% of series never routed, a tenth of
+the acquired slices used, 336 px for few-voxel findings) is `knee-jk3`'s axis, and all four of its
+starvations were measured by 2026-08-21: whole-stack `+0.0147` SHIPPED, extended slots `+0.0002`, twenty
+cached slices `−0.0001`, 392 px `+0.0002`, against a `0.0062` floor. One paid, and it paid by changing
+WHICH data a step sees rather than by adding any. `depth_true` then closed the order axis that could have
+made those nulls unreadable (0.8461, seat `−0.0002`). Writing "the only unpriced axis" over a bead whose
+own notes say "PRESCRIPTION SPENT" is exactly the failure the read-the-ledger rule exists for.
+
+So this document prices an axis closed and names no replacement. What the ledger leaves genuinely open is
+narrower than any of the above: a 3D encoder that sees the volume BEFORE per-slice features exist (which
+`depth_true`'s close explicitly does not rule out), and the label/loss side, which is blocked behind a
+58-study vision ruler (`knee-7d1`) rather than measured. Both are stated as open by the beads that closed
+their neighbours, and neither has a priced mechanism yet. That is the honest state, and inventing a fourth
+priced axis to end the document on is how the first draft got it wrong.
