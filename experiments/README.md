@@ -321,7 +321,66 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `slot_mean` | uniform mean over present slots instead of learned slot attention | 0.8406 | −0.0051 vs `whole_stack` | attention is worth ONE floor-width — a knob, not a lever (knee-7gv) |
 | `per_label_loss` | loss normalised per column, so each of the twelve weighs one twelfth | 0.8414 | −0.0043 vs `wsfold0_e6` | **the arm's own null, and its falsifiable clause resolves with the WRONG SIGN** — see below |
 | `weight_average` | EMA of the weights, scored and saved in place of the live ones | 0.8460 | +0.0003 vs `wsfold0_e6` | flat where a holdout ranks epochs, exactly as written; the last-epoch case is +0.0013, directional — see below |
+| **`margin_seat`** | `band_dense`'s recipe with the ranking loss replaced by an **AUC-margin surrogate** (`--auc-margin 1.0 --rank-weight 0.0`) — the objective moved, nothing else | 0.8525 | **−0.0053 vs `band_dense`** | **THE SOLO IS A NON-RESULT AND THE SEAT IS THE FINDING — the first candidate this project has measured into the strong-and-distant cell.** See below |
 | `centre_tissue` | the control's 130 mm extent held, the crop CENTRED ON THE TISSUE instead of the image | 0.8409 | −0.0048 vs `wsfold0_e6` | **null, as pre-registered** — inside the 0.0062 floor, flag verified (`crop_mm=130.0, centre=tissue` against a control that predates both). Seat value **−0.0016**. Two labels clear their paired interval and both are NEGATIVE (Contusion −0.0128\*, Medial Meniscus −0.0096\*); nothing positive resolves. This is the arm that licenses reading `crop80_tissue` as a RESOLUTION result rather than a centring one. See below |
+
+### `margin_seat` — a losing solo that greedy picks SECOND of sixty-five, and the empty quadrant finally has an occupant — 2026-08-24
+
+**PLUMBING FIRST, because the whole row rests on one variable having moved.** The checkpoint's own config
+stamp carries `auc_margin: '1.0'` and `rank_weight: '0.0'` against `band_dense`'s inverse, and no other key
+differs. The objective is the single change.
+
+**THE MEAN SAYS NOTHING.** Solo 0.8525 against the control's 0.8578 is −0.0053, inside the 0.0062 floor, so
+by this project's own rule the arm neither wins nor loses on quality. It converged rather than truncated —
+peak 0.8525 at epoch 10, 0.8524 at 11, flat and never turning down — so the number is the method's, not a
+schedule artefact.
+
+**THE PER-LABEL PROFILE IS EMPHATICALLY NOT FLAT, which refutes this arm's own pre-registered
+"surrogate is simply worse" branch.** A uniformly weaker objective produces a uniformly depressed column;
+this produces a redistribution of about ±0.03 with a mean that barely moves (\* clears the paired interval):
+
+| up | | down | |
+|---|---|---|---|
+| MCL | **+0.0272\*** | Lateral Meniscus | **−0.0546\*** |
+| Fracture | +0.0250 | PF OA | **−0.0288\*** |
+| Baker's | **+0.0163\*** | Medial Meniscus | **−0.0277\*** |
+| Lateral OA | +0.0130 | Effusion | **−0.0145\*** |
+| Contusion | **+0.0126\*** | ACL | −0.0128 |
+
+That is a DIFFERENT ERROR STRUCTURE, not a worse one — which is exactly the property a seat is bought with,
+and exactly the property `dissent_seat.sh` was written to argue a different inductive bias does not
+automatically deliver.
+
+**THE SEAT READ, card-free over 65 fold-0 records sharing 909 studies** (`logs/greedy_margin.log`; in-flight
+arms and smokes excluded from the glob per knee-p94l, since a running arm writes a partial holdout npz).
+Greedy builds `small_batch6` 0.8598 → **`margin_seat` 0.8669** → `calib_span` 0.8706 → `through_dense` 0.8720
+→ `band_dense_long` 0.8726 → `sided_pool` 0.8729 → `aprior_dense` 0.8730 → `crop80_span` 0.8731 (peak, flat
+to seat 9). **It is taken SECOND of sixty-five, worth +0.0071 to the pair, by a ruler that has never seen its
+solo score favourably.** Priced against that greedy-7 roster: **add +0.0015**, best **swap +0.0013**
+(displacing `crop80_span`). The tool's own verdict line reads `0 of 3 clear +0.0015`, so this is at the very
+edge of `BOARD_RESOLVABLE` and not past it — but the comparison that matters is historical: the best seat
+move across 59 candidates was **+0.0004** (knee-dfl1), and the mounted pool was written up above as
+EXHAUSTED at +0.0002. This is an order up on both.
+
+**DISTANCE — the half that makes it the quadrant, and it reads NO labels.** The greedy roster's own
+nearest-neighbour agreements span 0.8717–0.8893. `margin_seat` sits at **nearest 0.8628, mean 0.8314** —
+below the roster's own tightest pair, i.e. further from every seated member than any two of them are from
+each other. For contrast `cnx_dense` reads nearest 0.7686 at solo 0.7927: distant, but weak, which is the
+cell this project keeps landing in.
+
+**CONSEQUENCE: the strong-and-distant cell (knee-053z), recorded empty since the project began, has an
+occupant — and it came from the OBJECTIVE, not from a trunk swap.** Every previous attempt at distance
+bought it with architecture and paid for it with quality (`cnx_dense`, `vjepa_warm`, the DINOv3 family, all
+distant-and-weak). An objective change bought distance at a solo cost inside the noise floor. That
+re-prices the loss axis above the trunk axis for seat-hunting specifically, and it is the argument
+`dissent_seat` is currently on the card to extend — a second, differently-motivated objective, testing
+whether this is a property of AUC-margin or a property of moving the objective at all.
+
+**HONEST LIMITS, stated because the number is small.** Greedy selection on the holdout is IN-SAMPLE: the
++0.0071 is the price of picking on the same 909 studies it is scored on, and the seat value +0.0015 is the
+out-of-that-loop figure. `seat_value`'s own instruction is READ THE SIGN, NOT THE SCORE. And the pinned
+champion roster cannot be priced against at all — six of its seven members are `--fold -1` and have seen
+every holdout study — so every seat number here is against the greedy fold-0 proxy, not against what ships.
 
 ### Moving the crop's CENTRE, at the control's extent, does nothing — which is the point (2026-08-19)
 
