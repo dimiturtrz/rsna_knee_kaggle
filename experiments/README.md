@@ -2807,17 +2807,35 @@ amount scales with how different the architecture is.
 across the whole axis. That is why each arm read as a refutation in isolation: every one bought its distance
 with quality and was then judged on quality alone.
 
-**The confound nobody eliminated.** Every trunk in that table was trained on the recipe tuned for DINOv2 —
-dense sampling, 336, the same schedule and learning rate. A CNN and a tubelet trunk have different optimal
-read sizes, different LR scales, and in the tubelet case a different token geometry (`prefix_tokens = 0`, no
-class token, no registers). The measured weakness is confounded with recipe transfer and cannot be charged
-to the architecture. **Faulty TRAINING is live on this axis and has never been ruled out.**
+**CORRECTION TO THIS ENTRY'S FIRST DRAFT, written the same hour.** It claimed the recipe confound was
+unnoticed and named read size and learning rate as the wrong knobs. Both are wrong, and the ledger says so
+three screens up — this is the failure CLAUDE.md warns about, filed against rows that already held better
+evidence. The confound was raised on 2026-08-23 in `raddino_dense` (line 2538: "a new trunk plugged into a
+recipe that was fitted around DINOv3 … every trunk swap needs its own tuning pass before it can be read at
+all"), and set aside on a cost argument rather than refuted. And for `cnx_dense` specifically, read size is
+dead on three independent readings and the schedule was refuted hard enough to retitle `knee-9otf`.
 
-So the honest statement is not "architecture diversity does not pay". It is **"architecture diversity has
-only ever been measured where the recipe was wrong for the trunk"** — every arm sampled a point on the curve
-and none tried to move it. `cnx_dense` sits 0.078 more distant than any seated member is from its own nearest
-neighbour, and being a CNN its wrong knobs are nameable in advance rather than searched. Bands are
-pre-registered in `knee-y59c`.
+**What the recipe confound actually still covers, on `cnx_dense`'s own numbers.** At MATCHED TRAIN LOSS it
+holds 0.7927 at loss 0.8332 where `base_dense` holds 0.8371 at loss 0.8456 — a 0.044 generalisation gap at
+equal fit. It fits BETTER and generalises WORSE. That is not an under-driven trunk, so LR and epochs are
+correctly dead; it is the signature of a REGULARISATION regime that does not transfer. DINOv2's recipe needs
+little augmentation because the pretrained representation carries the generalisation. A CNN fine-tuned
+end-to-end from ImageNet weights on ~1.5k studies is a different regime, and **augmentation strength is the
+one knob on this arm that nothing has tested.** That is the surviving live suspect, narrower than the first
+draft claimed and pointed at by the arm's own trajectory rather than assumed.
+
+**What today's measurement DOES refute, and it is a sentence, not a knob.** `cnx_dense`'s entry closes with
+"a different inductive bias is not a different error structure. The axis closes." The distance ruler
+measures the opposite: nearest **0.7941** against a roster whose most distant seated member reads 0.8724 —
+0.078 outside the spread, the largest of any member that did not collapse. A different inductive bias
+produced the most different error structure in this project. What the entry correctly showed is that it
+produced a WORSE one; what it did not show, and could not with the quality ruler alone, is that it produced
+a SIMILAR one.
+
+And that lands exactly on the question `raddino_dense`'s entry closes with — the greedy peak sits at seats
+8–10 and declines after, so "the ensemble does not want another member, it wants a member that can do
+something none of the existing ones can." Today's table names which candidates those are, by measurement.
+Bands are pre-registered in `knee-y59c`.
 
 The distance ruler still has ONE paired board observation behind it (2026-08-21). Quoted as a RANKING, never
 as a price.
