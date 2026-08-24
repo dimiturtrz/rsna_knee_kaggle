@@ -8348,6 +8348,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.beads",
+      "target": "kneemri.experiments.arm_check.ArmCheck._header",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.controls",
+      "target": "kneemri.experiments.arm_check.ArmCheck._header",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.decode_smoke_caches",
       "target": "kneemri.experiments.arm_check.ArmCheck.readings",
       "weight": 1
@@ -8356,6 +8368,30 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.invocations",
       "target": "kneemri.experiments.arm_check.ArmCheck._printed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "target": "kneemri.experiments.arm_check.ArmCheck._flag_values",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "target": "kneemri.experiments.arm_check.ArmCheck._header",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "target": "kneemri.experiments.arm_check.ArmCheck._same",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "target": "kneemri.experiments.arm_check.ArmCheck.controls",
       "weight": 1
     },
     {
@@ -8404,6 +8440,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.refused",
       "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.report_mismatch",
+      "target": "kneemri.experiments.arm_check.ArmCheck.mismatched",
       "weight": 1
     },
     {
@@ -8536,6 +8578,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_check.ArmCheck.refused",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_check.ArmCheck.report_mismatch",
       "weight": 1
     },
     {
@@ -12380,6 +12428,36 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.objective.DecorrelatedObjective",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.DecorrelatedObjective",
+      "target": "kneemri.training.objective.LabelStructure",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.objective.DecorrelatedObjective",
+      "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.DecorrelatedObjective.__call__",
+      "target": "kneemri.training.objective.DecorrelatedObjective.dissent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.DecorrelatedObjective.dissent",
+      "target": "kneemri.training.objective.RankedObjective.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.objective.DistilledObjective",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -12472,6 +12550,30 @@
       "kind": "calls",
       "source": "kneemri.training.objective.LabelStructure.spread",
       "target": "kneemri.training.grades.Grades.spread",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.MarginObjective",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.MarginObjective",
+      "target": "kneemri.training.objective.LabelStructure",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.objective.MarginObjective",
+      "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.MarginObjective.__call__",
+      "target": "kneemri.training.objective.MarginObjective.auc_margin",
       "weight": 1
     },
     {
@@ -13011,6 +13113,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective.DecorrelatedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.DistilledObjective",
       "weight": 1
     },
@@ -13018,6 +13126,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.LabelStructure",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective.MarginObjective",
       "weight": 1
     },
     {
@@ -13036,6 +13150,18 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.remembered_ranking.RememberedRanking",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.run_setup.RunSetup._check_margin_alone",
       "weight": 1
     },
     {
@@ -16836,6 +16962,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.DecorrelatedObjective",
+      "label": "DecorrelatedObjective",
+      "level": "class",
+      "parent": "kneemri.training.objective",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.DistilledObjective",
       "label": "DistilledObjective",
       "level": "class",
@@ -16846,6 +16980,14 @@
       "descendants": 0,
       "id": "kneemri.training.objective.LabelStructure",
       "label": "LabelStructure",
+      "level": "class",
+      "parent": "kneemri.training.objective",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.MarginObjective",
+      "label": "MarginObjective",
       "level": "class",
       "parent": "kneemri.training.objective",
       "role": "satellite"
@@ -21164,6 +21306,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck._flag_values",
+      "label": "_flag_values",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck._header",
+      "label": "_header",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck._parsed",
       "label": "_parsed",
       "level": "method",
@@ -21174,6 +21332,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck._printed",
       "label": "_printed",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck._same",
+      "label": "_same",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
@@ -21196,6 +21362,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.controls",
+      "label": "controls",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.decode_smoke_caches",
       "label": "decode_smoke_caches",
       "level": "method",
@@ -21206,6 +21380,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.invocations",
       "label": "invocations",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "label": "mismatched",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
@@ -21238,6 +21420,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.refused",
       "label": "refused",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.report_mismatch",
+      "label": "report_mismatch",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
@@ -24948,6 +25138,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.DecorrelatedObjective.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.objective.DecorrelatedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.DecorrelatedObjective.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.objective.DecorrelatedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.DecorrelatedObjective.dissent",
+      "label": "dissent",
+      "level": "method",
+      "parent": "kneemri.training.objective.DecorrelatedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.DecorrelatedObjective.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.objective.DecorrelatedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.DistilledObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -25008,6 +25230,38 @@
       "label": "spread",
       "level": "method",
       "parent": "kneemri.training.objective.LabelStructure",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.MarginObjective.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.objective.MarginObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.MarginObjective.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.objective.MarginObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.MarginObjective.auc_margin",
+      "label": "auc_margin",
+      "level": "method",
+      "parent": "kneemri.training.objective.MarginObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.MarginObjective.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.objective.MarginObjective",
       "role": null
     },
     {
@@ -25392,6 +25646,22 @@
       "label": "from_file",
       "level": "method",
       "parent": "kneemri.training.report_supervision.ReportSupervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
+      "label": "_check_dissent_alone",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._check_margin_alone",
+      "label": "_check_margin_alone",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
     },
     {
