@@ -1,9 +1,29 @@
 #!/usr/bin/env bash
 # v3base_own_recipe.sh — DINOv3-base at a rate chosen FOR DINOv3, which has never happened either.
 #
-# CONTINGENT ON `cnx_own_recipe` (knee-y59c). Do not launch this until that arm reads. It exists now
-# because its argument is that arm's argument, applied to the candidate that is already nearest to the
-# cell we are trying to fill, and writing it after the result would let the result choose the reasoning.
+# CONTINGENT ON `cnx_own_recipe` (knee-y59c). THAT ARM HAS NOW READ, AND THE CONTINGENCY IS RELEASED —
+# but not in the shape either branch of this file anticipated, so the reasoning is restated here before
+# the number, on 2026-08-24.
+#
+#   cnx_dense       ConvNeXt-base at the INHERITED 4e-5   0.7927
+#   cnx_own_recipe  ConvNeXt-base at 4e-4                 0.8186 peak (e6), 0.8136 at e10
+#
+# The rate correction bought **+0.0259** on a non-DINOv2 trunk — four times the 0.0062 holdout floor, and
+# the largest single-flag move any backbone-family arm in this ledger has produced. So the mechanism this
+# arm inherits is CONFIRMED, not refuted: the 4e-5 fitted across ~189 DINOv2-family runs really does cost
+# other families real points, and every previous outside-corpus candidate was measured at a rate chosen
+# for someone else's encoder. That re-reads all seven of the outside-corpus refutations below.
+#
+# THE HONEST CAVEAT, because it is a two-flag pair. `cnx_own_recipe` also moved `--train-size` 336 -> 448,
+# so +0.0259 is rate AND grid. Resolution at constant field is independently priced at +0.0002 (knee-a8x,
+# and per-label null across all twelve labels on a matched 336/392 pair), so nearly all of the +0.0259 is
+# attributable to the rate — but "nearly all" is an inference, not a measurement, and this arm holds the
+# grid at the control's value precisely so IT is the clean single-variable test of the rate.
+#
+# WHAT IT DOES NOT SAY: cnx does not seat. 0.8186 is 0.0280 below the weakest seated member. A confirmed
+# mechanism on a family that is weak in absolute terms buys a member for nobody; it buys the RIGHT TO
+# RE-TEST the families that were close. v3base_dense at 0.8455 is 0.0011 under the seated floor and is
+# the closest of them, which is why this arm and not another.
 #
 # THE CELL THIS AIMS AT. Nineteen displacement tests have passed zero candidates, and seven of those
 # candidates came from outside the DINOv2 pretrain corpus (video-JEPA, RadDINO, DINOv3). Every one of
