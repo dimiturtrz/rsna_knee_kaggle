@@ -3070,10 +3070,32 @@ gates no decision; a bar 33 candidates fail is measuring the bar. It is replaced
 way in. Solo AUC stops being a gate entirely — it enters the pool at any value. `knee-y59c` carries the
 replacement.
 
-HONEST LIMITS: one peak set, one split, one fold. The swap test is SINGLE-swap over twelve candidates, not
-exhaustive over 33, so a two-member exchange is untested. And every candidate here is from this project's own
-recipe space — the result bounds what re-rolling THIS pipeline can buy, and says nothing about a member from
-outside it (a different pretrain corpus, a different modality prior).
+**"The RECIPE SPACE is what saturated" was the obvious next claim, and it was tested the same hour rather
+than written down.** Seven members that never entered the 33 were run through the same displacement test —
+`vjepa_warm`, `vjepa_member` (video pretrain), `raddino_dense` (medical-imaging pretrain), `dinov3_base_lora`,
+`dinov3_v3small_224`, `lora_r8_v3small_224`, `grade_ladder`. **All seven return the original eight.** That is
+nineteen displacement tests and zero passes, three separate pretrain corpora among them, so "a member from
+outside the corpus gets in" is NOT supported and must not be asserted.
+
+But the confound is the same one that broke the five-point read, so it is checked here rather than skipped.
+Solo scores: `dinov3_v3small_224` 0.8057, `raddino_dense` 0.8137, `lora_r8_v3small_224` 0.8215,
+`dinov3_base_lora` 0.8268, `vjepa_warm` 0.8337, `vjepa_member` 0.8343 — every outside-corpus member is
+**0.013–0.054 BELOW the seated band (0.8466–0.8598)**. They are outside-corpus AND worse, and the test cannot
+separate the two. The one candidate at genuine parity is `grade_ladder` at **0.8565**, above six of the eight
+seated members — and it is an inside-space member (an ordinal-target trick, same trunk, same corpus). It fails
+too.
+
+So the honest state of the axis is: **no candidate has ever existed that is BOTH outside the pretrain corpus
+AND at seated quality.** Inside-space-at-parity fails (`grade_ladder`). Outside-corpus-below-parity fails
+(six members). The cell that would decide it is empty, and `cnx_own_recipe` — a different trunk on a recipe
+built for it rather than inherited — is the first candidate that could fill it. That is now the arm's whole
+value: not a ninth seat, but the one measurement that separates corpus from quality.
+
+HONEST LIMITS: one peak set, one split, one fold. The swap test is SINGLE-swap, not exhaustive, so a
+two-member exchange is untested. And `record_mix`'s own docstring records that this holdout prices diversity
+2.4× too cheaply against the board (0.0059 here read 0.014 there) — which does NOT rescue any of the 33,
+since a multiplier on a negative delta is still negative, but it does mean the 0.0011 ordering could be
+board-resolvable even though it is holdout-noise. Quoted as a ranking, never as a price.
 
 And that lands exactly on the question `raddino_dense`'s entry closes with — the greedy peak sits at seats
 8–10 and declines after, so "the ensemble does not want another member, it wants a member that can do
