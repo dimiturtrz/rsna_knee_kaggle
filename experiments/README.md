@@ -3407,3 +3407,24 @@ The greedy curve says another member near 0.84-0.85 lands in the flat zone and i
 produces one costs 3.3 h. What the curve does license is the inventory note's conclusion, sharpened: the
 lever is a member class substantially BETTER than 0.8512 solo, not another draw from the distribution we
 have. Eight members buy +0.0133 over the best solo and then the ensemble is done.
+
+**CORRECTED TWO MINUTES LATER, and the correction is the same mistake in miniature.** The paragraph above
+closes "the card has no run priced above the bar tonight". That was written from the greedy curve, and the
+greedy curve cannot see the axis that had a priced, pre-registered run waiting on it. **Greedy ranks
+members by a HOLDOUT record, and a dark member is fitted at `--fold -1` with no holdout**, so not one of
+the six dark members has ever appeared on that curve. Reading "member selection is not a lever" as "no
+member run is worth the card" applied a measurement outside the denominator it was made on — which is the
+error this ledger has now recorded three times in two days, most recently four paragraphs above.
+
+`small_batch6_ff` (knee-rndp) is armed at 22:15Z on the freed card: `arm_check` clean, 12 epochs, ~95 min,
+converting the best member this project owns (`small_batch6`, 0.8598 — and the exact member that held the
+fold-0 seat in `lastseat` at 0.937, so its behaviour in this ensemble is a measured control) into a
+SEVENTH dark member. Count-of-dark-members is the one variable every board entry since `finalfit` has held
+fixed, because exactly six exist and no entry has ever had a seventh to offer. Pre-registration stands as
+written in the arm: **≥0.939 the dose still pays · 0.936–0.938 flat, and the full-fit axis closes with a
+number instead of an extrapolation · ≤0.935 indicts `--ema`/all-data and the harness is first suspect.**
+
+The honest expectation is the middle branch at P≈0.3 for the top one, i.e. +0.002 to +0.003 — under the
+house bar and under the +0.0082 first place costs. It is armed anyway, and the justification is not that
+it might win: it is that the wall-clock is free, and that the FLAT branch is itself the deliverable,
+closing the only axis that has ever moved this board with a measurement rather than an extrapolation.
