@@ -208,11 +208,23 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # THE CONSTANT ABOVE IS STALE, CORRECTED 2026-08-24, AND THE LINE IS LEFT STANDING SO THE CORRECTION HAS
 # SOMETHING TO ATTACH TO. +4.67 was fitted over five or six pairs spanning 0.0043 offline — inside our own
 # 0.0062 noise floor, so a slope through noise. The `weakseven` instrument (0.8562 offline, 0.908 board)
-# placed a point outside that band and the refit reads +2.14. So `small_batch6`'s +0.0005 prices at about
+# placed a point outside that band and the refit read +2.14. So `small_batch6`'s +0.0005 prices at about
 # +0.001 board, not the +0.002 written above, and EVERY offline delta converted anywhere in this file is
 # worth 46% of what it was sold for. The RULE — never read an offline seat against a board threshold
 # without the compression — stands unchanged; only the constant halved. Read it from `board_transfer`,
 # never from prose, this comment included.
+#
+# AND THE CORRECTION ITSELF WAS WRONG, RE-CORRECTED HOURS LATER ON 2026-08-24, WHICH IS WHY THE LINE
+# ABOVE ALSO STAYS. +2.14 was computed BY HAND from the prose ledger, because `comp/board.jsonl` — the
+# file `board_transfer` actually reads — had gone unwritten since 2026-08-20 and was missing seven
+# entries. One of its three anchors paired `gradeswap`'s offline 0.8694 with `finalfit`'s board 0.934:
+# two different entries, and `finalfit` has no offline number at all, being six-sevenths `--fold -1`.
+# Backfilled, the tool reads +1.92 over 15 entries and 90 pairs, and the inversion clause strengthened
+# to 0 of 57 resolved pairs. The numeric move is small (2.14 → 1.92) and that is precisely why nothing
+# caught it. Note also that the four best entries are one-sided and enter no pair, so +1.92 is fitted
+# entirely at or below board 0.933 and is an EXTRAPOLATION where we now live at 0.937. The constant has
+# been wrong twice and both times it was quoted from prose — including from this comment. Run
+# `python -m kneemri.evaluation.board_transfer`; if it disagrees with any document, the document is stale.
 final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
 # Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
 # studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored

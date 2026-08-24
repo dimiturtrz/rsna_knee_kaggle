@@ -86,3 +86,53 @@ None of the four bands reopens an offline family. If the axis is spent, the cand
 member is zero and the gap to the leader (0.952 against a champion 0.934) has no named mechanism behind
 it. That is the honest position, and inventing an arm to avoid stating it would spend wall-clock on a
 family the ledger has already closed.
+
+---
+
+## THE READ: 0.937 (ref 55736360, scored 2026-08-24)
+
+The **0.936–0.939** band fired. Its consequence, written above before the number and unedited since:
+*"sub-linear, or a shared ceiling ... Converting a seventh seat buys a seventh of a diminishing quantity,
+so the 7.3 h train is NOT justified — the honest move is to stop here and record the axis as
+real-but-spent."*
+
+`band_dense_long_ff` is **not run**. The card stays with the other project and biohub has been told.
+
+**The dose, with the third point the file could not have when it was written.** The 0.933 chain is the
+zero-dose control: `gradeswap`, `accumseat` and `greedy7` all read 0.933 with no all-data seat at all.
+
+| all-data seats | board | Δ per seat over the previous row |
+|---|---|---|
+| 0 | 0.933 | — |
+| 1 (`finalfit`) | 0.934 | +0.0010 |
+| 6 (`allfit`) | **0.937** | +0.0006 |
+
+Sub-linear, and the shape is the one the band named: the first seat is worth more than each of the next
+five. That is what "the seats are not independent" predicts — six members trained on the same extra 909
+studies re-learn mostly the same thing, so the sixth adds less than the first. It does not distinguish
+"diminishing returns on this axis" from "a shared ceiling the ensemble is now near", and with three
+points it cannot; both readings give the same instruction, which is to stop.
+
+**What the read does NOT say.** +0.003 is directional against the owner's 0.02 bar and one board tick is
+this competition's reporting resolution. The axis is licensed as a DIRECTION — data volume moved this
+board where seven rearrangements of the same members did not — and nothing about the SIZE may be planned
+against. The gap to the leader is now 0.015, and this axis was the last one with a named mechanism.
+
+**The correction above was worth making even though its band did not fire.** The ≤0.932 branch never
+happened, so the fold-diversity error would have cost nothing this time. It was still the right fix: the
+value of a pre-registration is that every branch is honest before you know which one you land on, and a
+file that only has to be right on the branch that fires is not a pre-registration.
+
+**The price the entry paid, which the bands did not price.** Six of seven seats are `--fold -1`, so this
+champion has **no offline number of any kind**. Not a weak one — none. Every roster decision from here is
+made against the board alone at five reads a day, and the offline ruler survives only on pools that
+exclude these six members. That trade bought +0.003 and it cannot be made twice: there is no second
+ability-to-measure to spend.
+
+**A finding that arrived sideways, from writing the read down.** `comp/board.jsonl` had not been written
+since 2026-08-20 and was missing seven entries, so yesterday's slope refit was done by hand off prose and
+mis-paired `gradeswap`'s offline with `finalfit`'s board. Backfilled, `board_transfer` reads **+1.92**,
+not +2.14, with inversions improving to 0 of 57 resolved pairs — and with the four best entries
+one-sided, so the slope is an extrapolation at the board level we now occupy. Full account in
+`comp/SUBMISSIONS.md`. The general form is the one this file already argues: a number is a claim about a
+record at a moment, and prose does not know when the record moves.

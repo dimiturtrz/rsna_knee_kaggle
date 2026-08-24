@@ -1967,3 +1967,76 @@ cheap arms looking viable; every offline delta this file priced since 2026-08-16
 was sold for.
 
 No slot bought more than this one, and it bought it by scoring 0.026 below the champion on purpose.
+
+### Result: `kneemri-allfit` reads 0.937 — the all-data axis is real, sub-linear, and now spent (2026-08-24)
+
+Ref `55736360`, submitted 07:35 UTC, **0.937**. A new best by +0.003 over `finalfit`, and the largest
+single-entry movement since 2026-08-19. Kit `e7b65a0`, read from the kernel log's own `kit` line.
+
+**The dose, which is the whole point of the entry.** Count (7), vote (`RankAverage`) and serving were
+held fixed and the only thing that moved was how many seats trained on all 4,406 studies:
+
+| entry | all-data seats | fold-0 seats | board |
+|---|---|---|---|
+| the 0.933 chain (`gradeswap`/`accumseat`/`greedy7`) | 0 | 7 | 0.933 |
+| `finalfit` | 1 | 6 | 0.934 |
+| `allfit` | 6 | 1 | **0.937** |
+
+The first seat bought +0.001; the next five bought +0.003 between them, about +0.0006 each. That is the
+**0.936–0.939 band**, pre-registered in `interpretations/kneemri/2026-08-24_the_all_data_dose_response.md`
+before the number, whose consequence reads verbatim: *"Converting a seventh seat buys a seventh of a
+diminishing quantity, so the 7.3 h train is NOT justified — the honest move is to stop here and record the
+axis as real-but-spent."* So `band_dense_long_ff` is **UNRUN** and the card stays with the other project.
+The seats are not independent: six all-data members largely re-learn the same extra 909 studies.
+
+**This is +0.003, and the owner's bar is 0.02.** Directional, not a result. What it is allowed to license
+is a DIRECTION — data volume moves this board where seven rearrangements of the same members did not —
+and it is not allowed to license a plan built on the size.
+
+**What it cost: the offline ruler, on this pool, entirely.** Six of seven seats held out nothing, so this
+entry has no offline number of any kind. `board.jsonl` records it null, `board_transfer` names it in
+`unmeasured()` rather than dropping it, and it enters no pair. Roster decisions from here are made against
+the board alone at five reads a day.
+
+### The record went stale for four days, and the correction I pushed yesterday was computed on the gap
+
+`comp/board.jsonl` — the machine-readable half this file's header points at, and the file
+`board_transfer` prices **every** experiment from — was last written on 2026-08-20 at `greedy4_v1`. Seven
+entries existed in this prose and not in the record: `sevenplane`, `gradeswap`, `accumseat`, `greedy7`,
+`finalfit`, `weakseven`, `allfit`.
+
+**The consequence was not cosmetic.** Yesterday's refit was done BY HAND off this prose, and its first
+anchor — *"champion 0.8694 → 0.934"* — pairs `gradeswap`'s offline with `finalfit`'s board. Two different
+entries. `finalfit` has no offline number at all, by the same `--fold -1` construction recorded above, so
+there was no pair there to take. That anchor read 1.97; the honest pair (`weakseven` 0.8562/0.908 against
+`gradeswap` 0.8694/0.933) reads **1.89**. The `+2.14` that came out of it went into this file **and** into
+`comp/members.roster` as a correction of the older `+4.67`.
+
+**Backfilled, the tool reads +1.92** over 15 ensemble entries and 90 orderable pairs. The size of the
+error is small — 2.14 against 1.92 — and that is exactly why it survived: an entity error whose numeric
+consequence is inside the noise is invisible to every check except reading the two rows.
+
+| reading | slope | fitted on |
+|---|---|---|
+| `knee-7d1`, 2026-08-16 | +4.67 | 5–6 pairs spanning 0.0043 offline — **inside** our own 0.0062 floor |
+| by hand, 2026-08-24 | +2.14 | three anchors, one of them pairing two different entries |
+| `board_transfer`, backfilled | **+1.92** | 15 entries, 90 pairs, 57 of them resolved |
+
+**The inversion clause got STRONGER**: 4 of 90 pairs inverted, **0 of the 57 the holdout resolves at all**
+(was 0 of 33). Every disagreement still sits under 0.0053.
+
+**But note where the slope is NOT measured.** The four best entries — `allfit`, `finalfit`, `sevenplane`,
+`accumseat` — are all one-sided and enter no pair, three of them because `--fold -1` erased their offline
+number. So +1.92 is fitted entirely on entries at or below 0.933 and is an **extrapolation at the top of
+the board**, where every remaining decision now lives.
+
+**The rule that survives is unchanged and is the one that matters:** never read an offline seat against a
+board threshold without the compression. The CONSTANT has now been wrong twice, at +4.67 and at +2.14, and
+both times because it was quoted from prose rather than read from the tool. Read it from
+`python -m kneemri.evaluation.board_transfer`. If the tool and a document disagree, the document is stale.
+
+**Third stale-claim-in-a-live-document this week, and none of the three was caught by a gate.** The others
+were the roster's `+4.67` and the champion pin lagging the board by three hours. The shape is identical
+every time: a number is correct when written, the thing it describes moves, and nothing connects them. A
+gate is buildable here — assert every `## ` result heading in this file has a matching `id` in
+`board.jsonl` — and it is filed rather than written now, because the axis reading was the thing owed.
