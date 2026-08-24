@@ -3231,3 +3231,74 @@ with a WEAK non-DINOv2 member: if trunk distance pays there, a strong RadDINO is
 
 Filed as three beads — the two crash readings, and a convergence check for the arm harness. The repo has
 nine gates that gate a SHIPMENT and none that gate a NUMBER, which is how the same defect landed three times.
+
+### `convergence_check` — the tenth check, and the first that guards a NUMBER rather than a shipment — 2026-08-24
+
+Nine checks in `kneemri/experiments/` guard a SHIPMENT: that a kit builds, that a kernel's members mount,
+that a queue is armed exactly once, that a champion is still rebuildable. None guarded a RESULT. This is
+the tenth, and it exists because the same defect landed three times: a run bounded by the harness rather
+than by the recipe, whose partial peak was then written down as a fact about an architecture.
+
+`python -m kneemri.experiments.convergence_check` reads every metrics file under the processed root and
+compares three numbers the file already holds — the best epoch, the last epoch recorded, and the epoch
+budget the recipe ASKED for.
+
+**Reading of the corpus, 88 runs: 57 converged · 15 undertrained · 7 truncated · 3 stopped · 6 unscored.**
+
+**THE FIRST VERSION OF THIS CHECK WAS WRONG, AND THE WAY IT WAS WRONG IS THE ENTRY.** It reported TEN
+truncated runs. Three of those — `res392_lr8e-6_ws`, `focal_pool`, `calibrated_targets` — carry
+`patience=3` in their recipe and stopped at exactly epoch 10 of 12. That is the stopper working. One of
+them is `res392`, the resolution refutation, so a check written to stop us reasoning from killed runs
+would have re-opened a correctly-closed family on its first run. The fix is one recipe key: `patience=0`
+is the default and means no stopper was armed, so a run carrying it that ends short was ended by
+something outside the trainer. Verdicts `TRUNCATED` (died) and `STOPPED` (decided) look identical on
+disk and differ only there.
+
+**WHAT IT ACTUALLY FOUND, STATED SMALLER THAN IT FIRST LOOKED.** Of the seven truncations, the ledger had
+already labelled four in prose — `depth_regions_span` ("truncated at 9 of 12 epochs by its own wall-clock
+`timeout`, not by a fault", and its conclusion rests on run 1, which finished), `dissent_seat` ("killed at
+epoch 8 of 12"), `pair_memory` ("a first run whose checkpoint was overwritten"), and `focus_latmen`. One,
+`slices16_ws`, is a **known false positive**: `RunMetrics.rows()` returns the LAST run's group, and that
+file holds a finished twelve-epoch run plus a killed re-run whose checkpoint was never kept. The verdict
+is about the last thing that ran, which is not always the member on disk. That leaves `raddino_dense` and
+`vjepa_member` unmarked — the same two the hand audit found this afternoon.
+
+So the tool did not expand the hand audit; it CONFIRMED it, and that is the honest claim. Its value is
+that the label is now mechanical. Four of those seven were caught only because someone remembered to
+write "(killed at epoch 8 of 12)" into a prose cell, and the two that nobody wrote down are exactly the
+two that were reasoned from for weeks as properties of RadDINO and V-JEPA.
+
+**WHAT A TRUNCATION IS ACTUALLY WORTH, WHICH IS NOT ONE NUMBER — and this paragraph replaces a wrong one.**
+The first version of this entry, and knee-qk4a with it, said `dissent_seat`'s −0.0069 was "smaller than the
+anneal is worth on every finished curve here." That was asserted, not measured, and measuring it refutes it.
+For each of the 54 CONVERGED twelve-epoch runs, take the gain from best-through-epoch-N to best-overall —
+exactly what a run killed at N rows under-reports by:
+
+```
+killed at  7 rows   median +0.0011   mean +0.0035   90th +0.0113   max +0.0336   over the 0.0062 floor: 7/54
+killed at  9 rows   median +0.0000   mean +0.0006   90th +0.0023   max +0.0099   over the 0.0062 floor: 2/54
+killed at 10 rows   median +0.0000   mean +0.0001   90th +0.0004   max +0.0028   over the 0.0062 floor: 0/54
+```
+
+**Truncation depth decides whether truncation matters, and the three truncated runs therefore split three
+ways rather than sharing one verdict:**
+
+- `vjepa_member` died at **10**. Nothing is owed to it — 0.8343 is its number, and re-running it buys a
+  clean exit code rather than a score. Do not expect the V-JEPA reading to move.
+- `dissent_seat` died at **9**, where the median cost is zero and only 1 of 54 runs would lose more than
+  its own −0.0069. So the anneal does not explain that number and **knee-qk4a drops P1 → P3.** What survives
+  is thin and should be stated as thin: a killed run's score is a bound, and `margin_seat` read positive on
+  the same axis, so the objective family is not CLOSED on `dissent_seat` alone. That is a reason not to quote
+  the closure, not a lead to spend a card on.
+- `raddino_dense` died at **7**, mean +0.0035 with a 90th percentile of +0.0113. It is the one genuine floor
+  of the three, and the only one whose warm start is priced by evidence rather than by principle.
+
+The general claim — a truncated run's score is a floor — is still true and still worth the check. It is the
+SIZE that was invented: priced at one depth, then quoted at every depth. The check reports the depth on
+every line it prints; I did not read it.
+
+**WHY THE VERDICT IS NOT A BOOLEAN.** `TRUNCATED` and `UNDERTRAINED` have opposite fixes. A truncated run
+is re-run or warm-started; an undertrained one needs a longer budget or a fitted rate. Collapsing them
+would have hidden that `cnx_dense` wanted a rate (+0.0259 when it got one) while `raddino_dense` wanted
+only to be allowed to finish. Only `TRUNCATED` exits non-zero: an undertrained run is an honest
+measurement of a budget and its score is real.

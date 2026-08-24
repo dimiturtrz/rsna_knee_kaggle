@@ -44,7 +44,7 @@ either. Here is the inventory, with what each family actually returned:
 | pooling / aggregation | four operators span **0.0019** | saturated from three directions |
 | resolution at constant field | +0.0002 | refuted, and re-refuted per-label on 2026-08-24 |
 | SSL-as-init | −0.09 to −0.15 | five consecutive collapses, family closed |
-| loss / objective | seat-positive once, retracted by `dissent_seat` | closed |
+| loss / objective | seat-positive once (`margin_seat`), retracted by `dissent_seat` | **weakly re-opened** — retracted by a run killed at 9 of 12, `patience=0`; the kill is worth ~0 at that depth, so this stays a gap in the evidence and not a lead |
 | encoder family / trunk | ConvNeXt +0.0259 **from a rate fix**, still 0.8186 | mechanism confirmed, no member |
 | all-data dose | +0.003 over five extra seats | real, **sub-linear, and spent** |
 | member count / seat swaps | every entry inside 0.930–0.937 | one draw from one distribution |
@@ -52,6 +52,26 @@ either. Here is the inventory, with what each family actually returned:
 
 Summed generously and pretending they compose, which they demonstrably do not — span and depth-regions are
 substitutes, crop and band are antagonists — the whole remaining inventory is short of +0.0082 by about 3×.
+
+**One row of that table came back open two hours after it was written, and it is worth saying how.** The
+convergence check built the same evening reads `dissent_seat` — the run whose −0.0069 closed the objective
+family — as TRUNCATED: nine epochs of the twelve it asked for, `patience=0` so no stopper was armed, and
+`ARM FAILED dissent_seat (trainer exit 1)` in the logs. Under `one_cycle` the three missing epochs are the
+anneal, so −0.0069 is a bound rather than a measurement. `margin_seat` read POSITIVE on the same axis.
+
+**Then the bound was priced, and it is nearly empty at that depth.** Across the 54 finished twelve-epoch
+runs, a kill at nine rows costs a median of +0.0000 and exceeds −0.0069 in one run out of fifty-four. So
+the missing anneal does not account for `dissent_seat`'s number, and the row re-opens only in the weak
+sense that a killed run should not be the sole evidence closing a family. (The same measurement says a kill
+at SEVEN rows — `raddino_dense` — costs a mean of +0.0035 and a 90th percentile of +0.0113, which is why
+that one, and not this one, is the warm start worth buying.) The family therefore holds one
+positive finished reading and one negative killed one, and it was closed on the killed one (knee-qk4a).
+
+That does not add a number to the table — the objective axis may well be worth nothing. It changes the
+table's SHAPE: this note's central claim is that every family is closed and the goal needs something not
+on the list, and one of those closures turns out to rest on a harness defect rather than on evidence. The
+right correction is not optimism, it is narrower: **the inventory is closed on finished evidence in eight
+rows and on a floor in one.**
 
 **Nothing we currently know how to build is sized for the goal.** Every honest path to it starts with
 something not on this table.
