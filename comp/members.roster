@@ -225,7 +225,22 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # entirely at or below board 0.933 and is an EXTRAPOLATION where we now live at 0.937. The constant has
 # been wrong twice and both times it was quoted from prose — including from this comment. Run
 # `python -m kneemri.evaluation.board_transfer`; if it disagrees with any document, the document is stale.
-vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project has ever produced
+# UNMOUNTED 2026-08-24 — vjepa_warm_s2026.pt, 0.8337, the most DISTANT member this project has produced.
+# The line below stood since it was written, but the member was never actually in the live package, so
+# the mismatch cost nothing and hid its own price. Packaging it for real today revealed the price:
+# every kernel that loads the whole package then needs the VJEPA2 encoder mounted, and SIX do not
+# declare it (efficient, loadcheck, solo, trained, trio, views, vote all flip to REFUSED in
+# `mount_check`). Shipping this member was never a push, it was a push plus six kernel edits.
+#
+# Against that: it is 1.3 GB — fifteen ordinary members — and it does not seat. Today's displacement
+# sweep (knee-98y2) ran nineteen candidates against the 8-member peak under exhaustive best-8 and this
+# was one of them; the peak came back unchanged. It is also the FIRST of the three failures the roster
+# itself records under knee-053z's distance-to-seat inference, quoted twenty lines below as the
+# cautionary case `margin_seat` has to answer. Mounting the cautionary case was the inconsistency.
+#
+# Reversible, and the way back is written down: declare dimiturnt/vjepa2-hf/vjepa2-vitl on the six
+# kernels above, then restore this line. Not done today because nothing measured wants the member.
+# vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project has ever produced
 # Added 2026-08-24, and it is the first member here whose encoder is not a 2D image trunk at all:
 # V-JEPA2-large, a tubelet transformer that tokenises TWO slices per token, warm-started from our own
 # 2D weights. Every other line in this file reads the volume one slice at a time and reconstructs depth
@@ -295,6 +310,29 @@ margin_seat_s2026.pt        # 0.8525 — the first member measured into STRONG-A
 #
 # Ledger row and full write-up: experiments/README.md, `margin_seat` — a losing solo that greedy picks
 # SECOND of sixty-five. Mounting is reversible and a slot is not; naming it is a separate decision.
+sided_pool_s2026.pt         # 0.8561 — seated in the greedy PEAK and never shippable until now
+crop80_span_s2026.pt        # 0.8466 — the weakest member of that peak, seated on distance alone
+# Added 2026-08-24, and the reason they are added is a SHIPPING HOLE rather than a new measurement.
+# The 8-member greedy peak (0.8731, the best ensemble this project has measured) is
+# small_batch6 + margin_seat + calib_span + through_dense + band_dense_long + sided_pool +
+# aprior_dense + crop80_span. Five of those eight were in the live package; `margin_seat` was rostered
+# but not yet pushed (knee-g6md), and these two had never been in the roster at all — `sided_pool`
+# appears nowhere in this file before today and `crop80_span` only inside a comment on the line above,
+# as the member `margin_seat` displaces. So our best measured ensemble has NEVER been submittable, and
+# no board entry has ever contained it. That is the hole; the two lines close it.
+#
+# They are mounted on OPPOSITE rulers, which is what makes both worth the bytes. Measured over the peak
+# eight, nearest-neighbour agreement runs 0.8628–0.8893. `sided_pool` reads solo 0.8561 — third best of
+# the eight — at nearest 0.8879, which is the second CLOSEST seat in the set: it is there on quality,
+# not on distance. `crop80_span` is the mirror image, solo 0.8466 (the WEAKEST of the eight) at nearest
+# 0.8717, the second most distant seat after `margin_seat`'s 0.8628: it is there on distance alone, and
+# the greedy took it over members half a point better on quality.
+#
+# NOT claimed: that either improves a board entry. The peak is a holdout reading, `board_transfer`'s
+# +1.92 points-per-holdout-point is fitted at or below 0.933 while we sit at 0.937, and the whole
+# ninth-seat sweep (knee-98y2, 33 candidates) says this set resists addition and single-swap. What is
+# claimed is narrower and sufficient: an ensemble we can measure but cannot upload is an ensemble we
+# cannot test, and mounting is reversible where a slot is not.
 final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
 # Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
 # studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored
