@@ -72,6 +72,12 @@ class RecordMix:
         oldest member. What must never be silent is a record that exists and disagrees, and that is
         `shared`'s refusal.
 
+        A path where NEITHER the checkpoint nor its record is on disk is the other fault, and it is a
+        refusal. Both once printed "no holdout record, skipped", which meant a wrong root — or one
+        mistyped name in nine — scored an eight-member ensemble while the caller read the number as
+        nine members. The crash that exposed it only fired because EVERY path was wrong; one wrong path
+        is silent, and a wrong denominator wearing a result's clothes is what this project rules out.
+
         Read once and held: `shared` and `per_member` both want them, so an uncached read decodes every
         npz three times and prints each skipped member's line three times, which reads as three
         different missing records rather than one.
@@ -80,7 +86,11 @@ class RecordMix:
             return self._readings
         found = []
         for path in self.records:
-            reading = HoldoutRecord(path).read()
+            record = HoldoutRecord(path)
+            if not path.exists() and not record.exists():
+                message = f"{path} is not on disk, and neither is {record.path} — check the root"
+                raise FileNotFoundError(message)
+            reading = record.read()
             if reading is None:
                 logger.info("%s: no holdout record, skipped", path.name)
                 continue

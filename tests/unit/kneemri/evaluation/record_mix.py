@@ -30,6 +30,7 @@ def test_readings(tmp_path: Path):
     """
     studies = [f"s{index}" for index in range(8)]
     _record(tmp_path / "a.pt", studies)
+    (tmp_path / "never_trained.pt").write_bytes(b"")
     mix = RecordMix([tmp_path / "a.pt", tmp_path / "never_trained.pt"])
 
     found = mix.readings()
@@ -37,6 +38,18 @@ def test_readings(tmp_path: Path):
     assert [name for name, _ in found] == ["a.pt"], "the missing record is skipped, not fatal"
     assert found[0][1].studies == studies
     assert mix.readings() is found, "read once, not once per caller"
+
+
+def test_readings_refuses_a_path_that_is_not_there(tmp_path: Path):
+    """A checkpoint with no record is skipped; a path with no checkpoint EITHER is a wrong root.
+
+    Both once printed the same skip line, so one mistyped name in nine scored an eight-member ensemble
+    and reported it as nine.
+    """
+    _record(tmp_path / "a.pt", [f"s{index}" for index in range(8)])
+
+    with pytest.raises(FileNotFoundError, match="check the root"):
+        RecordMix([tmp_path / "a.pt", tmp_path / "elsewhere" / "b.pt"]).readings()
 
 
 def test_shared(tmp_path: Path):
@@ -53,8 +66,9 @@ def test_shared(tmp_path: Path):
     with pytest.raises(ValueError, match="different folds or splits"):
         RecordMix([tmp_path / "a.pt", tmp_path / "elsewhere.pt"]).shared()
 
+    (tmp_path / "untrained.pt").write_bytes(b"")
     with pytest.raises(ValueError, match="no member carries a holdout record"):
-        RecordMix([tmp_path / "absent.pt"]).shared()
+        RecordMix([tmp_path / "untrained.pt"]).shared()
 
 
 def test_shared_refuses_a_narrow_member(tmp_path: Path):
