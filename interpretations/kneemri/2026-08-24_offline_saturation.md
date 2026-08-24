@@ -243,3 +243,14 @@ weakseven reading says the slope really is ~4.67, member search is dead by arith
 is not one option among three — it is the only unspent mechanism left on the offline side. If the slope
 is ~1, the holdout stops being the instrument that decides anything above 0.868 and the budget moves to
 board-read levers. Either way the reading, not another arm, is what picks.
+
+## Addendum 2026-08-24 07:45Z — one more offline axis opened and closed on the same day
+
+`knee-i6ig` asked whether a study's slot-presence pattern injects SPURIOUS ordering into a
+population-wide AUC, which would have been free to remove at test time. It does not: removing it
+costs 0.0091-0.0209 mean AUC, and adding it back explicitly as a leave-one-out per-pattern prior buys
+0.0000. Signal, already used, closed from both sides —
+[2026-08-24_slot_availability_is_signal.md](2026-08-24_slot_availability_is_signal.md).
+
+That is the third offline family to close since this note was written, and it strengthens the
+sentence above rather than changing it: **the reading, not another arm, is what picks.**

@@ -1010,6 +1010,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.protocol_prior",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.record_mix",
       "target": "kneemri.evaluation.member_curve",
       "weight": 1
@@ -6850,6 +6856,66 @@
       "kind": "calls",
       "source": "kneemri.evaluation.prevalence_match.main",
       "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.protocol_prior.Holdout",
+      "target": "kneemri.evaluation.protocol_prior.Holdout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.load",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "target": "kneemri.evaluation.protocol_prior.Holdout.patterns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.auc",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "target": "kneemri.evaluation.protocol_prior.ProtocolPrior",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "target": "kneemri.evaluation.protocol_prior.ProtocolPrior.fit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.Ordering.auc",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.protocol_prior.main",
+      "target": "kneemri.evaluation.protocol_prior.Holdout.load",
       "weight": 1
     },
     {
@@ -13461,7 +13527,7 @@
       "role": null
     },
     {
-      "descendants": 117,
+      "descendants": 118,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -13525,7 +13591,7 @@
       "role": null
     },
     {
-      "descendants": 26,
+      "descendants": 27,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -13640,6 +13706,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.prevalence_match",
       "label": "prevalence_match",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior",
+      "label": "protocol_prior",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -15243,6 +15317,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.prevalence_match",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Holdout",
+      "label": "Holdout",
+      "level": "class",
+      "parent": "kneemri.evaluation.protocol_prior",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Ordering",
+      "label": "Ordering",
+      "level": "class",
+      "parent": "kneemri.evaluation.protocol_prior",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.ProtocolPrior",
+      "label": "ProtocolPrior",
+      "level": "class",
+      "parent": "kneemri.evaluation.protocol_prior",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19746,6 +19844,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.prevalence_match",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Holdout.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.Holdout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Holdout.patterns",
+      "label": "patterns",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.Holdout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Holdout.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.Holdout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Ordering.auc",
+      "label": "auc",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.Ordering",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.Ordering.ranks",
+      "label": "ranks",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.Ordering",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.ProtocolPrior.fit",
+      "label": "fit",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior.ProtocolPrior",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.protocol_prior.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.protocol_prior",
       "role": null
     },
     {
