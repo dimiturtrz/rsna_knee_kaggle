@@ -99,7 +99,21 @@ What that licenses, in order of plausible size against the +0.0082 bar:
    ~189 DINOv2-family runs and then handed to every other encoder unexamined, costing ConvNeXt +0.0259.
    The same defect was already sitting corrected-but-unnoticed on DINOv3 (LoRA-over-frozen 0.8268 vs full
    adaptation **0.8455**, +0.0187). Two families, two inherited hyperparameters, both written up as facts
-   about architectures. `v3base_own_recipe` is written, `arm_check`-clean and unqueued; it asks exactly this.
+   about architectures.
+
+   **Corrected an hour after this note was first written, by the audit in the ledger's 2026-08-24 entry.**
+   The obvious next step looked like `v3base_own_recipe` (written, `arm_check`-clean, 2h16m, a fitted
+   1.5e-4 on DINOv3-base). It is a ~0-expected run and should not be armed: `v3base_dense`'s curve peaks
+   at e6 and then runs its remaining five epochs without beating that peak, so DINOv3-base is already
+   converged at 4e-5 and does not carry the ConvNeXt defect. The real finding is elsewhere and larger —
+   `raddino_dense` (0.8137) and `vjepa_member` (0.8343) are **crash readings**, killed mid-epoch at
+   healthy throughput and entered in the ledger as facts about their architectures. RadDINO is the most
+   pixel-distant trunk in the pool, which is exactly the empty cell the ledger's previous entry names as
+   the last open one. A warm start from its e6 checkpoint costs ~1.65 h.
+
+   So the thread is not "fit a rate on the next trunk". It is: **this project has never once measured a
+   foreign trunk cleanly**, and three of the four numbers it reasoned from were bounded by the harness
+   rather than by the architecture.
 2. **Package `v3base_dense` (0.8455).** It is on disk and absent from `comp/members.roster`, so the package
    holds the WEAK end of the v3 family and not the strong end. Card-free; needs an upload window.
 3. **Supervision that says WHERE.** `aprior_dense` showed the head already recovers the plane-by-finding

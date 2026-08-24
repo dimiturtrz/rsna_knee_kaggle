@@ -3154,3 +3154,80 @@ support.
 table above orders solo score exactly opposite to distance with no exception. Nobody has held a member that is
 distant AND strong, so the greedy has never been offered the trade it would have to refuse for the axis to be
 closed. `v3lora_dense` (knee-u0my) exists to produce exactly that member and is on the card tonight.
+
+---
+
+### `cnx_own_recipe` — the inherited rate cost a whole trunk, and an audit says two more were never finished — 2026-08-24
+
+`cnx_own_recipe` finished at 21:00Z, 12 epochs, **peak 0.8186 at e6** against `cnx_dense`'s 0.7927.
+**+0.0259**, four times the 0.0062 floor.
+
+**THE CONFOUND, STATED FIRST.** Three flags moved, not one: `--backbone-lr` 4e-5 → **4e-4** (ten times),
+`--train-size` 352 → 448, and `--batch 2 --accumulate 3` → `--batch 1 --accumulate 6` (effective batch 6
+unchanged — that one is VRAM for the larger read, not a training change). Resolution at constant field was
+independently priced at **+0.0002** on `res392` and re-refuted per-label on 2026-08-24, so the read size is
+not a plausible carrier of +0.0259, but it is not a clean single-variable arm and is not written up as one.
+
+**WHAT SETTLES IT ANYWAY, AND IT NEEDS NO CONTROL ARM.** The two curves have different SHAPES.
+
+```
+cnx_dense       (4e-5)  auc  0.7050 .. 0.7909 0.7927 0.7927   PEAK AT e11 OF 11
+                        loss 1.261  .. 0.855  0.842  0.833    still falling at the end
+cnx_own_recipe  (4e-4)  auc  0.7314 .. 0.8186 0.8167 .. 0.8130  PEAK AT e6, then DECLINES
+```
+
+`cnx_dense` never converged. Its best epoch is its last, its loss is still dropping when the run ends, and
+its number is therefore a statement about the epoch budget rather than about ConvNeXt. `cnx_own_recipe`
+peaks and then overfits, which is what a fitted rate looks like. That diagnosis is read off `cnx_dense`'s
+OWN trajectory and does not depend on the second run at all.
+
+**THE DEFECT IN ONE SENTENCE.** 4e-5 was fitted over ~189 DINOv2-family runs and then handed to every other
+encoder unexamined, and the ledger wrote the resulting numbers up as facts about architectures.
+
+**WHAT IT DOES NOT BUY.** 0.8186 is still 0.033 below `base_dense` (0.8512). The trunk is far and, even
+fitted, weak. This corrects the ledger's account of WHY, not its ranking.
+
+Per-label, at each run's own peak: gains everywhere but Synovitis (−0.0066), led by Baker's **+0.1136**,
+ACL +0.0341, Contusion +0.0391. **MCL moves +0.0027** — it does not move for anything, in any arm, ever.
+
+#### The audit this triggered, which is larger than the result
+
+Every `metrics.jsonl` on disk was scanned for the same signature — best epoch at or next to the last epoch
+recorded. **Twenty-one runs match.** Two are not undertrained but outright broken:
+
+| run | asked | got | recorded | what the driver log says |
+|---|---|---|---|---|
+| `raddino_dense` | 12 | **7** | 0.8137 | `ARM FAILED raddino_dense (trainer exit 1)` |
+| `vjepa_member` | 12 | **10** | 0.8343 | `ARM FAILED vjepa_member (trainer exit 127)` |
+
+Both died **mid-epoch** at healthy throughput — raddino at step 248/583 running 448 img/s with loss still
+falling, no traceback, no OOM (27.14 GB peak on a 32 GB card), killed externally at 23:29 on 2026-08-23
+during the card-handoff window. Exit 127 is command-not-found, so vjepa's arm chain broke rather than its
+trainer — the third instance in this repo of a missing binary reading as a result. `vjepa_member`'s log
+additionally records a real stall (`173 img/s against this run's own peak of 589`, diagnosed in-log as
+another process paging over PCIe), so that number was measured under contention as well as truncated.
+
+**WHY TRUNCATED IS NOT THE SAME AS SHORT.** The recipes set `one_cycle=True` over 12 epochs. A run that
+stops at 7 stops in the high-LR portion, so the anneal — where one-cycle does its fine convergence — never
+runs at all. The control for this is on disk and it is decisive: `v3base_dense` ALSO peaks at e6, then runs
+its remaining five epochs and never beats that peak. That is a converged measurement. RadDINO has no such
+evidence, and its 0.8137 is a floor.
+
+**AND `v3base_dense` SETTLES A CARD DECISION IN THE OTHER DIRECTION.** Because it converges at 4e-5, DINOv3-base
+does NOT carry the ConvNeXt defect. `v3base_own_recipe` — written, `arm_check`-clean, 2h16m, asking for a
+fitted 1.5e-4 — is therefore a ~0-expected run and should NOT be armed. The rate-fix mechanism is real and
+it does not apply here. One free audit of a file already on disk retired a 2h16m arm.
+
+**WHAT THE AUDIT OPENS.** This ledger's previous entry ends: *"Nobody has held a member that is distant AND
+strong, so the greedy has never been offered the trade it would have to refuse for the axis to be closed."*
+The most pixel-distant trunk in the pool is RadDINO — pretrained on medical images — and it is one of the two
+that crashed. The empty cell was never measured; it was measured and thrown away by a killed process.
+
+Its own curve (`0.7247 0.7439 0.7852 0.7944 0.8000 0.8119 0.8137`) is DECELERATING, so the honest estimate
+of the remaining gain is modest and uncertain, not the naive slope. But `fitted_encoder.py` exists to start
+an arm from a member checkpoint, so the finish is a warm start (~1.65 h) rather than 12 epochs from scratch
+(~3.3 h). Gated on `kneemri-farswap`'s board number at the 00:00Z reset, which tests the same seat hypothesis
+with a WEAK non-DINOv2 member: if trunk distance pays there, a strong RadDINO is the member that cashes it.
+
+Filed as three beads — the two crash readings, and a convergence check for the arm harness. The repo has
+nine gates that gate a SHIPMENT and none that gate a NUMBER, which is how the same defect landed three times.
