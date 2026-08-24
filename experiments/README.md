@@ -322,6 +322,7 @@ and adding a pair there means running the pixel arm, not editing the file.
 | `per_label_loss` | loss normalised per column, so each of the twelve weighs one twelfth | 0.8414 | −0.0043 vs `wsfold0_e6` | **the arm's own null, and its falsifiable clause resolves with the WRONG SIGN** — see below |
 | `weight_average` | EMA of the weights, scored and saved in place of the live ones | 0.8460 | +0.0003 vs `wsfold0_e6` | flat where a holdout ranks epochs, exactly as written; the last-epoch case is +0.0013, directional — see below |
 | **`margin_seat`** | `band_dense`'s recipe with the ranking loss replaced by an **AUC-margin surrogate** (`--auc-margin 1.0 --rank-weight 0.0`) — the objective moved, nothing else | 0.8525 | **−0.0053 vs `band_dense`** | **THE SOLO IS A NON-RESULT AND THE SEAT IS THE FINDING — the first candidate this project has measured into the strong-and-distant cell.** See below |
+| **`dissent_seat`** | a SECOND objective on `band_dense`'s recipe, teacher gated to fold-0 twins — the test `margin_seat`'s row asked for | 0.8509 (killed at epoch 8 of 12) | **−0.0069 vs `band_dense`** | **NO SEAT — greedy picks it 38th of 66 and the ensemble peak is unchanged. Nine of twelve labels down, widest swing −0.0307: it reads the SAME as its control, slightly worse, where `margin_seat` read DIFFERENTLY. Retracts the "loss axis buys seats" rule this table stated one row up.** See below |
 | `centre_tissue` | the control's 130 mm extent held, the crop CENTRED ON THE TISSUE instead of the image | 0.8409 | −0.0048 vs `wsfold0_e6` | **null, as pre-registered** — inside the 0.0062 floor, flag verified (`crop_mm=130.0, centre=tissue` against a control that predates both). Seat value **−0.0016**. Two labels clear their paired interval and both are NEGATIVE (Contusion −0.0128\*, Medial Meniscus −0.0096\*); nothing positive resolves. This is the arm that licenses reading `crop80_tissue` as a RESOLUTION result rather than a centring one. See below |
 
 ### `margin_seat` — a losing solo that greedy picks SECOND of sixty-five, and the empty quadrant finally has an occupant — 2026-08-24
@@ -376,11 +377,70 @@ re-prices the loss axis above the trunk axis for seat-hunting specifically, and 
 `dissent_seat` is currently on the card to extend — a second, differently-motivated objective, testing
 whether this is a property of AUC-margin or a property of moving the objective at all.
 
+**THAT TEST RAN THE SAME DAY AND ANSWERED NO — see `dissent_seat` below.** A second objective-axis member
+lands 38th of 66 in the same greedy. The re-pricing in the paragraph above is therefore RETRACTED as a rule:
+what is measured is that `margin_seat` bought a seat, not that the loss axis buys seats. One member is not
+an axis, and this file nearly recorded it as one.
+
 **HONEST LIMITS, stated because the number is small.** Greedy selection on the holdout is IN-SAMPLE: the
 +0.0071 is the price of picking on the same 909 studies it is scored on, and the seat value +0.0015 is the
 out-of-that-loop figure. `seat_value`'s own instruction is READ THE SIGN, NOT THE SCORE. And the pinned
 champion roster cannot be priced against at all — six of its seven members are `--fold -1` and have seen
 every holdout study — so every seat number here is against the greedy fold-0 proxy, not against what ships.
+
+### `dissent_seat` — the objective axis is NOT a seat lever; 38th of 66, and the per-label table says why — 2026-08-24
+
+The arm `margin_seat`'s section (above) named as the test of whether its seat came from AUC-margin
+specifically or from moving the objective at all. `dissent_seat` is that second objective — a different
+motivation, same trunk, same data, same recipe, and a teacher signal gated to fold-0 twins by
+`teacher_targets.py` so the holdout stays honest. It answers **no**.
+
+| | `margin_seat` | `dissent_seat` |
+|---|---|---|
+| solo | 0.8525 (−0.0053 vs `band_dense`) | **0.8509 (−0.0069)** |
+| greedy pick, same pool | **2nd** of 65 | **38th** of 66 |
+| ensemble peak with it in the pool | 0.8731 | **0.8731, unchanged** |
+
+Killed at epoch 8 of 12 rather than run out. Epochs 6/7/8 read 0.8509 / 0.8501 / 0.8503 — a plateau, and
+the best epoch's weights were already on disk, so the tail was ~18 minutes of a SHARED card to maybe
+improve a member sitting thirty places from a seat. The card went back to the other project instead. The
+stop is recorded here because "killed early" and "converged" are different facts and the ledger should not
+have to guess which.
+
+**WHY IT IS 38TH, from the per-label table against its control — and this is the whole finding.**
+
+| label | `dissent_seat` | `band_dense` | Δ |
+|---|---|---|---|
+| ACL | 0.8872 | 0.8740 | +0.0132 |
+| Lateral Meniscus | 0.8602 | 0.8464 | +0.0138 |
+| Contusion | 0.8783 | 0.8705 | +0.0078 |
+| Effusion | 0.8580 | 0.8595 | −0.0015 |
+| Lateral OA | 0.8098 | 0.8156 | −0.0058 |
+| Medial Meniscus | 0.8949 | 0.9047 | −0.0099 |
+| Medial OA | 0.8688 | 0.8797 | −0.0109 |
+| PF OA | 0.8471 | 0.8583 | −0.0112 |
+| Baker's | 0.8937 | 0.9065 | −0.0128 |
+| Fracture | 0.7922 | 0.8088 | −0.0166 |
+| MCL | 0.7745 | 0.7931 | −0.0186 |
+| Synovitis | 0.8456 | 0.8764 | −0.0307 |
+
+Nine of twelve down, widest swing −0.0307. Set that beside `margin_seat`, whose swings ran +0.0272 MCL and
+−0.0546 Lateral Meniscus: that member READ DIFFERENTLY, and paid for it in the mean. This one reads the
+SAME WAY, slightly worse everywhere. A member that is uniformly a little worse is not distant — it is
+just worse, and a greedy that selects on complementarity has no reason to reach for it. The seat and the
+redistribution are the same fact seen twice.
+
+**CONSEQUENCE — the rule retracted above.** `margin_seat` bought a seat; the objective axis did not. Two
+members on that axis, 2nd and 38th. The re-pricing of "loss axis over trunk axis for seat-hunting" was
+written in this file on a sample of one and is now withdrawn: what transfers is the METHOD (price a
+candidate on both rulers before believing it) not the AXIS. Filed to biohub as a correction too, since
+yesterday's letter offered them the axis as the transferable bit.
+
+**HONEST LIMITS.** The greedy is in-sample on the same 909 studies, so 38th is a rank on a proxy, not a
+verdict on the board — but the gap is thirty places, not three, and no in-sample correction closes that.
+The member also stopped at epoch 8 under a OneCycle schedule built for 12, so its solo is a floor rather
+than its converged score; that raises the solo, not the complementarity, and complementarity is what the
+seat is made of.
 
 ### Moving the crop's CENTRE, at the control's extent, does nothing — which is the point (2026-08-19)
 
