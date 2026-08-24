@@ -105,7 +105,7 @@ def main() -> None:
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
     model = setup.model(encoder, len(SCHEMES[arguments.scheme]), design, device)
-    trainer = setup.trainer(model, device, identifiers, len(training))
+    trainer = setup.trainer(model, device, identifiers, training)
     # BEFORE THE CARD IS SPENT, and this is the last moment it can be asked: from here on the only
     # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once
     # matched an encoder's projections by name and wrapped nothing, so an arm trained a plain model

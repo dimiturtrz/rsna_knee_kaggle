@@ -78,6 +78,8 @@ class TrainingOptions:
     hold_annotations: bool = False
     grade_ladder: bool = False
     rank_weight: float = 0.0
+    distill_weight: float = 0.0
+    teacher_targets: Path | None = None
     side_weight: float = 0.0
     focus_label: str | None = None
     pair_memory: int = 0
@@ -374,6 +376,17 @@ class TrainingOptions:
             "for pairs of studies ordered the wrong way round.",
         )
         parser.add_argument(
+            "--distill-weight",
+            type=float,
+            default=0.0,
+            help="add a pairwise term at this strength asking the student to reproduce an ENSEMBLE's "
+            "ordering of these studies (0 = off). Not the usual KL on softened probabilities, which "
+            "targets calibration the metric discards. The reader emits five levels, so a pair of studies "
+            "on the SAME level teaches the label term nothing — and a finding present in 7%% of studies "
+            "strands roughly 87%% of its pairs that way. A continuous teacher orders all of them, so the "
+            "gain should concentrate on the rarest findings. Requires --teacher-targets.",
+        )
+        parser.add_argument(
             "--pair-memory",
             type=int,
             default=0,
@@ -461,6 +474,14 @@ class TrainingOptions:
             "this cuts one side only, so the score is comparable to every full-data row in the ledger.",
         )
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
+        parser.add_argument(
+            "--teacher-targets",
+            type=Path,
+            default=None,
+            help="npz of an ensemble's scores for the TRAINING studies, read by --distill-weight. "
+            "Its members must not have seen the holdout this arm is scored on: a --fold -1 member saw "
+            "every study, so teaching from one leaks the evaluation labels into the student.",
+        )
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser

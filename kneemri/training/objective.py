@@ -81,7 +81,17 @@ measuring a method that has not yet shown signal.
 PAIR_FLOOR = 1e-6
 """Guards a batch in which every study carries the same reading for a label, so no pair separates."""
 
+DISTILL_WEIGHT = 1.0
+"""How hard the teacher's ordering pulls relative to cross-entropy when distillation is enabled at all.
+
+Equal weighting for the reason `RANK_WEIGHT` gives: both terms are means over their own pair
+populations and both sit near `softplus(0)` at initialisation, so parity is the neutral start rather
+than a tuned one. Sweeping it before the term has shown any signal would be measuring a method that has
+not yet worked.
+"""
+
 RANK_TERM = "rank_weight"
+DISTILL_TERM = "distill_weight"
 PAIR_POOL = "pair_memory"
 PER_LABEL = "per_label_loss"
 COUNT_NORMALISED = "normalise_by_count"
@@ -148,12 +158,13 @@ class Objective:
     def settings(self) -> dict[str, object]:
         """This objective's own account of the loss switches it carries.
 
-        The plain one reports the ranking term and the pair pool as OFF rather than omitting them: the
-        question asked before a run starts is whether a ranking arm got a ranking objective at all, and
-        a key the plain answer leaves out cannot answer it.
+        The plain one reports the ranking term, the distillation term and the pair pool as OFF rather
+        than omitting them: the question asked before a run starts is whether a ranking arm got a
+        ranking objective at all, and a key the plain answer leaves out cannot answer it.
         """
         return {
             RANK_TERM: 0.0,
+            DISTILL_TERM: 0.0,
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
@@ -255,3 +266,91 @@ class RankedObjective(Objective):
         pair_weight = confidence * separation
         misordered = pair_weight * nn.functional.softplus(-gap)
         return misordered.sum(), pair_weight.sum()
+
+
+class DistilledObjective(RankedObjective):
+    """The ranking objective, plus the same pairwise term judged against an ENSEMBLE'S ordering.
+
+    WHY A RANKING TERM AND NOT THE KL THAT DISTILLATION USUALLY MEANS. Standard knowledge distillation
+    matches temperature-softened probabilities, which is a CALIBRATION target. This competition scores
+    twelve rank-based AUCs, and `inference/ensemble.py` states the consequence plainly: calibration is
+    worth nothing here. A KL would spend the student's capacity reproducing probability values the
+    metric discards, and temperature — being monotone — cannot change the target's order at all, so the
+    one knob the technique is usually tuned on is provably inert against this metric.
+
+    WHAT THE TEACHER ADDS THAT THE LABELS CANNOT. `pairs` weights a pair by `relu(s_i - s_j)`, so a pair
+    teaches nothing when the two studies carry the SAME reading. The reader emits five levels, so under
+    labels alone the pair mass collapses onto the level boundaries: a finding present in 7% of studies
+    leaves roughly 87% of its pairs unordered, because both studies sit at the bottom level. The teacher
+    is continuous and orders all of them, including the two-negatives and two-positives comparisons a
+    five-level target cannot express. That is more supervision over the SAME corpus — which is the point,
+    because the corpus is where this project is bound and no additional corpus has a usable licence.
+
+    So the gain is predicted to CONCENTRATE on the rarest findings, by roughly six-fold across the panel,
+    and a uniform lift across the twelve would refute the mechanism claimed here rather than confirm it.
+
+    THE TEACHER MUST NOT HAVE TRAINED ON THESE STUDIES. Six of the seven champion members were fitted
+    with `--fold -1`, so their readings of a training study are memorised rather than inferred, and
+    distilling on those would teach the student the teacher's memorisation and score it on a holdout
+    that flatters both. The fold-0 twins are the honest teachers; enforcing that is the caller's job,
+    and it is the single assumption this class cannot check for itself.
+    """
+
+    def __init__(
+        self,
+        weight: float = DISTILL_WEIGHT,
+        *,
+        rank_weight: float = 0.0,
+        normalise_by_count: bool = False,
+        per_label: bool = False,
+        structure: LabelStructure | None = None,
+    ) -> None:
+        super().__init__(rank_weight, normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        self.distill_weight = weight
+
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
+        """Everything the ranking objective descends, plus the teacher's ordering at its own strength.
+
+        The teacher is handed the FOCUSED batch, for the reason `RankedObjective.__call__` gives about
+        its own term: the focus mask is idempotent, so both layers may apply it without coordinating.
+        """
+        focused = self.structure.focused(batch)
+        return super().__call__(focused) + self.distill_weight * self.imitation(focused)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The ranking account plus the distillation term's real strength, not the flag that asked."""
+        return {**super().settings(), DISTILL_TERM: self.distill_weight}
+
+    def imitation(self, batch: Predicted) -> Float[Tensor, ""]:
+        """How much of the teacher's ordering this batch's logits get the wrong way round.
+
+        The whole term is the EXISTING `pairs` machinery pointed at a different target: the student's
+        own logits judged against the teacher's scores. Nothing about the pair algebra changes, which is
+        the reason to express it this way — the surrogate, the directionality and the self-pair
+        cancellation are already argued and already tested where they are written.
+
+        Pair mass is the FOCUS MASK rather than the label weights. Reusing the weights would import the
+        reports' confidence into a term that is not judging the reports, and would silence the teacher
+        exactly where the reports are least certain — which is where a teacher is worth the most. Taking
+        `weights > 0` keeps a focused arm narrow, since focus is what zeroes a column, while leaving
+        every surviving cell counted at full strength.
+
+        RAISES when the batch carries no teacher, rather than contributing zero. A distilling arm whose
+        targets never arrived would otherwise descend plain cross-entropy under this class's name and
+        report a number that reads as a refutation of the mechanism — the exact failure `RANK_TERM`'s
+        docstring was written about, and one this repo has already paid for in other flags.
+        """
+        if batch.teacher is None:
+            message = (
+                "a distilling objective was handed a batch with no teacher readings, so the term it "
+                "exists for would contribute nothing — this is a plumbing failure, not an empty batch"
+            )
+            raise ValueError(message)
+        taught = Predicted(
+            logits=batch.logits,
+            scores=batch.teacher,
+            weights=(batch.weights > 0).to(batch.weights.dtype),
+        )
+        misordered, pair_weight = self.pairs(taught, taught)
+        return misordered / pair_weight.clamp(min=PAIR_FLOOR)

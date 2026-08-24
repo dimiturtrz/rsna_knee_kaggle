@@ -34,6 +34,19 @@ class Predicted:
     logits: Float[Tensor, "b o"]
     scores: Float[Tensor, "b o"]
     weights: Float[Tensor, "b o"]
+    teacher: Float[Tensor, "b o"] | None = None
+    """What an ensemble said about these same studies, when a run is distilling — `None` otherwise.
+
+    A FIELD rather than a fourth argument through the chain, for the reason the class docstring gives
+    about the ordinal grade. It defaults to `None` so every arm in the ledger constructs the identical
+    three-field readout it always did, and so a distillation term that finds nothing here raises rather
+    than silently descending cross-entropy under a distilling arm's name.
+
+    It is the TEACHER'S SCORES, in the same [0, 1] space as `scores`, and it is judged against the same
+    `logits`: `Objective.pairs` reads separation from scores and the gap from logits, so pointing it at
+    this field asks the student to reproduce the teacher's ORDER rather than its probabilities — which
+    is the only part of a teacher an AUC can read.
+    """
 
 
 class Grades:

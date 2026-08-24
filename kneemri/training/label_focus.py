@@ -72,7 +72,7 @@ class LabelFocus:
             return batch
         mask = torch.zeros_like(batch.weights)
         mask[:, TARGETS.index(self.finding)] = 1.0
-        return Predicted(logits=batch.logits, scores=batch.scores, weights=batch.weights * mask)
+        return Predicted(logits=batch.logits, scores=batch.scores, weights=batch.weights * mask, teacher=batch.teacher)
 
     def settings(self) -> dict[str, object]:
         """This policy's account, so a checkpoint records WHICH finding was fitted rather than that one was."""

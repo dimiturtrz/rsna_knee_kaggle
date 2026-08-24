@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from core.findings import COMPARTMENT_PAIRS, TARGETS
@@ -5,9 +6,11 @@ from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
 from kneemri.training.label_focus import FOCUS, LabelFocus
 from kneemri.training.objective import (
     COUNT_NORMALISED,
+    DISTILL_TERM,
     PAIR_POOL,
     PER_LABEL,
     RANK_TERM,
+    DistilledObjective,
     LabelStructure,
     Objective,
     RankedObjective,
@@ -34,6 +37,7 @@ def test_objective_settings():
     """
     assert Objective(per_label=True).settings() == {
         RANK_TERM: 0.0,
+        DISTILL_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: True,
         COUNT_NORMALISED: False,
@@ -47,6 +51,7 @@ def test_ranked_objective_settings():
     """The ranked one reports the term's real strength, not the flag that asked for it."""
     assert RankedObjective(0.3, normalise_by_count=True).settings() == {
         RANK_TERM: 0.3,
+        DISTILL_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: True,
@@ -251,3 +256,100 @@ def test_label_structure_side_term():
 
     assert float(LabelStructure().side_term(batch)) == 0.0
     assert float(LabelStructure(sides=PairedSides(1.0)).side_term(batch)) > 0.0
+
+
+def _taught(order: list[float], teacher: list[float]) -> Predicted:
+    """One label's logits laid out in `order`, judged against a teacher that ranks them by `teacher`.
+
+    The label scores are held IDENTICAL across every study on purpose. That is the equivalence class the
+    whole mechanism rests on: a pair the reports do not separate contributes nothing to `ranking`, so any
+    signal these batches carry can only have come from the teacher.
+    """
+    logits = torch.tensor(order).reshape(-1, 1)
+    flat = torch.full((len(order), 1), 0.08)
+    return Predicted(logits, flat, torch.ones_like(flat), teacher=torch.tensor(teacher).reshape(-1, 1))
+
+
+def test_distilled_objective_settings():
+    """The distilling objective's account carries BOTH terms, because both are live in the same run.
+
+    The owner's design is one training with three exits, so a checkpoint has to record the distillation
+    strength beside the ranking strength — a run that reports only one of them cannot afterwards say
+    which term produced its number.
+    """
+    settings = DistilledObjective(0.5, rank_weight=0.25).settings()
+
+    assert settings[DISTILL_TERM] == 0.5
+    assert settings[RANK_TERM] == 0.25, "the ranking term is still reported, not shadowed by the new one"
+    assert settings[PAIR_POOL] == 0
+    assert settings[PER_LABEL] is False
+    assert settings[COUNT_NORMALISED] is False
+
+
+def test_imitation():
+    """Agreeing with the teacher's order costs less than contradicting it, which is the whole term."""
+    objective = DistilledObjective()
+    teacher = [0.9, 0.8, 0.7, 0.3, 0.2, 0.1]
+
+    agreeing = objective.imitation(_taught([3.0, 2.0, 1.0, -1.0, -2.0, -3.0], teacher))
+    contradicting = objective.imitation(_taught([-3.0, -2.0, -1.0, 1.0, 2.0, 3.0], teacher))
+
+    assert float(agreeing) < float(contradicting)
+    assert float(agreeing) < 0.1, "a student that already ranks the teacher's way owes almost nothing"
+
+
+def test_imitation_orders_pairs_the_labels_cannot():
+    """THE MECHANISM, and the reason this term is worth card time at all.
+
+    `pairs` weights a pair by the gap between the two readings, so two studies carrying the SAME level
+    form no pair and teach nothing. The reader emits five levels and the rarest findings put ~93% of
+    studies on the bottom one, which strands most of their pairs. A continuous teacher separates all of
+    them. Here every label score is identical, so `ranking` has nothing to say and `imitation` still does
+    — if that ever stopped holding, the claimed source of the extra supervision would be gone.
+    """
+    batch = _taught([3.0, 2.0, 1.0, -1.0, -2.0, -3.0], [0.1, 0.2, 0.3, 0.7, 0.8, 0.9])
+
+    assert float(RankedObjective().ranking(batch)) == 0.0, "the labels separate nothing in this batch"
+    assert float(DistilledObjective().imitation(batch)) > 0.0, "the teacher separates all of it"
+
+
+def test_imitation_ignores_pairs_the_teacher_does_not_separate():
+    """A teacher with no opinion is not evidence of misordering, however the student ranks them.
+
+    The boundary case of the class above: same algebra, teacher side flat instead of the label side.
+    """
+    order = [3.0, 2.0, 1.0, -1.0, -2.0, -3.0]
+
+    assert float(DistilledObjective().imitation(_taught(order, [0.5] * len(order)))) == 0.0
+
+
+def test_imitation_raises_when_no_teacher_arrived():
+    """A distilling run whose targets never landed must FAIL, not quietly descend cross-entropy.
+
+    The failure this repo keeps paying for is a flag recorded in a config and ignored by its consumer:
+    the arm runs, the term contributes nothing, and the flat number reads as a refutation of the
+    mechanism rather than as the plumbing bug it is.
+    """
+    with pytest.raises(ValueError, match="no teacher readings"):
+        DistilledObjective().imitation(_batch([3.0, 2.0, 1.0, -1.0, -2.0, -3.0]))
+
+
+def test_distilled_objective_adds_the_term_at_its_configured_strength():
+    """Zero strength descends exactly what the ranking objective alone would, and more strength costs more."""
+    batch = _taught([-3.0, -2.0, -1.0, 1.0, 2.0, 3.0], [0.9, 0.8, 0.7, 0.3, 0.2, 0.1])
+    plain = float(RankedObjective(0.0)(Predicted(batch.logits, batch.scores, batch.weights)))
+
+    assert float(DistilledObjective(0.0)(batch)) == pytest.approx(plain), "off is off, bit for bit"
+    assert float(DistilledObjective(1.0)(batch)) > float(DistilledObjective(0.5)(batch)) > plain
+
+
+def test_imitation_carries_a_gradient_to_every_study_it_misorders():
+    """Every study in a contradicted batch must receive gradient, or the term trains only its extremes."""
+    logits = torch.tensor([[-3.0], [-2.0], [-1.0], [1.0], [2.0], [3.0]], requires_grad=True)
+    flat = torch.full((6, 1), 0.08)
+    teacher = torch.tensor([0.9, 0.8, 0.7, 0.3, 0.2, 0.1]).reshape(-1, 1)
+
+    DistilledObjective().imitation(Predicted(logits, flat, torch.ones_like(flat), teacher=teacher)).backward()
+
+    assert logits.grad is not None
+    assert bool((logits.grad.abs() > 0).all()), "a study with no gradient is a study the term cannot fix"

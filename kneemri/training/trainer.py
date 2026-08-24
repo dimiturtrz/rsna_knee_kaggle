@@ -39,6 +39,7 @@ from kneemri.training.grades import Predicted
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
+from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +135,10 @@ class Trainer:
         self.accumulation = Accumulation()
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
+        # None rather than a no-op object, unlike every other policy here, because there is no
+        # harmless zero for a teacher: a distilling objective handed an absent teacher must raise
+        # rather than descend the label term alone under a distilling arm's name.
+        self.teacher: TeacherTargets | None = None
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
@@ -159,6 +164,7 @@ class Trainer:
             AVERAGING: isinstance(self.average, WeightAverage),
             SCHEDULED: self.schedule is not None,
             REPORTS: isinstance(self.reports, ReportSupervision),
+            TEACHER: self.teacher is not None,
             ACCUMULATION: self.accumulation.every,
             LAYER_DECAY: self.encoder_rate_decay(),
         }
@@ -183,6 +189,10 @@ class Trainer:
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
         self.reports = reports
+
+    def teach_from(self, teacher: TeacherTargets) -> None:
+        """Carry an ensemble's readings of these same studies into every batch, for a distilling term."""
+        self.teacher = teacher
 
     def bfloat16(self) -> None:
         """Autocast in bf16 and drop the loss scaler with it.
@@ -367,6 +377,12 @@ class Trainer:
                     logits.float(),
                     torch.from_numpy(score).to(self.device),
                     torch.from_numpy(weight).to(self.device),
+                    # INDEXED BY THE SAME `batch` the labels are, which is what makes the alignment a
+                    # fact rather than a hope: both tables were reordered into the corpus's study order
+                    # at load, so one index array addresses the same study in each.
+                    teacher=(
+                        None if self.teacher is None else torch.from_numpy(self.teacher.rows(batch)).to(self.device)
+                    ),
                 )
                 loss = self.objective(judged) + self.reports(report.float(), batch)
             self.scaler.scale(self.accumulation.share(loss)).backward()

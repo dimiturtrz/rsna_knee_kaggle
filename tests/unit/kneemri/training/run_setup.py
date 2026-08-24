@@ -1,6 +1,7 @@
 import dataclasses
 from pathlib import Path
 
+import numpy as np
 import pytest
 import torch
 
@@ -91,7 +92,7 @@ def test_trainer(tmp_path: Path):
     from ..models.model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
 
     device = torch.device("cpu")
-    plain = _setup().trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), device, [], 120)
+    plain = _setup().trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), device, [], np.arange(120))
     assert plain.window == GROUP, "a default run reads one group, not the stack"
     assert plain.read_size is None
     assert plain.schedule is None
@@ -101,7 +102,7 @@ def test_trainer(tmp_path: Path):
 
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
     asked = _setup(whole_stack=True, slices=16, train_size=392, one_cycle=True, epochs=2, ema=True, bf16=False)
-    trainer = asked.trainer(model, device, [], 120)
+    trainer = asked.trainer(model, device, [], np.arange(120))
     assert trainer.window == 16
     assert trainer.read_size == 392
     assert trainer.schedule is not None, "one-cycle must reach the trainer, or the rate never anneals"
@@ -109,12 +110,10 @@ def test_trainer(tmp_path: Path):
     assert trainer.autocast_dtype is torch.float16, "--fp16 is the only way back, so it must land"
     assert trainer.scaler is not None, "fp16 has a scale that can collapse, so the scaler comes with it"
 
-    import numpy as np  # noqa: PLC0415 - only this branch needs a vectors file on disk
-
     vectors = tmp_path / "reports.npz"
     np.savez(vectors, identifiers=np.array(["s0"]), vectors=np.zeros((1, 4), dtype=np.float32))
     supervised = _setup(report_weight=0.3, report_vectors=vectors).trainer(
-        StudyModel(_FakeBackbone(), DIM, SLOTS), device, ["s0"], 120
+        StudyModel(_FakeBackbone(), DIM, SLOTS), device, ["s0"], np.arange(120)
     )
     attached = supervised.reports
     assert isinstance(attached, ReportSupervision), "the term the loop ADDS, so an unattached one is a plain run"
@@ -127,8 +126,6 @@ def test_reports(tmp_path: Path):
     Skipping it trained the PLAIN recipe under the report arm's name, so the arm would have read as a
     refutation of the mechanism when it refuted only the invocation.
     """
-    import numpy as np  # noqa: PLC0415 - the rest of this module needs no numpy
-
     assert _setup().reports([]) is None, "no weight, no supervision, no file read"
 
     with pytest.raises(ValueError, match="--report-vectors"):
@@ -139,6 +136,29 @@ def test_reports(tmp_path: Path):
     supervision = _setup(report_weight=0.3, report_vectors=vectors).reports(["s0"])
     assert supervision is not None
     assert supervision.weight == 0.3
+
+
+def test_teacher(tmp_path: Path):
+    """The teacher is all-or-nothing for `test_reports`' reason, and it is refused BEFORE the card.
+
+    Half of this mechanism is worse than none of it: a `--distill-weight` with no readings would descend
+    the label term alone under a distilling arm's name, and a `--teacher-targets` with no weight would
+    load an array nothing reads. Either way the ledger gains a row that names a mechanism the run never
+    ran, which is the failure every check in this file exists against.
+    """
+    assert _setup().teacher([], np.array([], dtype=np.int64)) is None, "no weight, no file, no readings"
+
+    readings = tmp_path / "teacher.npz"
+    np.savez(readings, identifiers=np.array(["s0"]), scores=np.zeros((1, len(TARGETS)), dtype=np.float32))
+
+    with pytest.raises(ValueError, match="two halves of one mechanism"):
+        _setup(distill_weight=0.3).teacher(["s0"], np.array([0]))
+    with pytest.raises(ValueError, match="two halves of one mechanism"):
+        _setup(teacher_targets=readings).teacher(["s0"], np.array([0]))
+
+    teacher = _setup(distill_weight=0.3, teacher_targets=readings).teacher(["s0"], np.array([0]))
+    assert teacher is not None
+    assert teacher.rows(np.array([0])).shape == (1, len(TARGETS))
 
 
 def test_model(monkeypatch: pytest.MonkeyPatch):
@@ -214,7 +234,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 22, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 23, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

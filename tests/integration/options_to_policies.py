@@ -17,6 +17,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
+import numpy as np
 import pytest
 import torch
 
@@ -99,6 +100,8 @@ def _options() -> TrainingOptions:
         compile_encoder=True,
         report_weight=1.0,
         report_vectors=Path("reports.npz"),
+        distill_weight=0.3,
+        teacher_targets=Path("teacher.npz"),
     )
 
 
@@ -132,11 +135,12 @@ def _recorded(monkeypatch: pytest.MonkeyPatch, owner: type, names: list[str]) ->
 def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.MonkeyPatch):
     """A switch parsed and stamped but never attached is a run that trains the recipe before it."""
     monkeypatch.setattr(build_module.ReportSupervision, "from_file", lambda *arguments: object())
+    monkeypatch.setattr(build_module.TeacherTargets, "from_file", lambda *arguments: object())
     policies = _policies(Trainer, THE_LOOP | TRAINER_REPORTER)
     called = _recorded(monkeypatch, Trainer, policies)
 
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign())
-    RunSetup(_options()).trainer(model, DEVICE, ["study"], training_positions=16)
+    RunSetup(_options()).trainer(model, DEVICE, ["study"], np.arange(16))
 
     assert set(policies) == called, f"{sorted(set(policies) - called)} is a policy no run can turn on"
 

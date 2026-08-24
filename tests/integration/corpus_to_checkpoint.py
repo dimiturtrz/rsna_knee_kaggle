@@ -93,7 +93,7 @@ def _trained(destination: Path) -> _Checkpoint:
     # here shared no code with the run it claims to reproduce, so a policy that stopped being attached
     # in `main` would leave this chain green.
     options = TrainingOptions(image_size=SIZE, slices=SLICES, whole_stack=True, slice_pooling="max")
-    trainer = RunSetup(options).trainer(model, DEVICE, [], STUDIES)
+    trainer = RunSetup(options).trainer(model, DEVICE, [], np.arange(STUDIES))
     record = MemberRecord(
         options,
         Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM),

@@ -32,14 +32,25 @@ class PairMemory:
         """Everything remembered as one readout, or None when nothing is — the first step of a run."""
         if not self.remembered:
             return None
+        taught = [step.teacher for step in self.remembered if step.teacher is not None]
         return Predicted(
             logits=torch.cat([step.logits for step in self.remembered]),
             scores=torch.cat([step.scores for step in self.remembered]),
             weights=torch.cat([step.weights for step in self.remembered]),
+            # ALL OR NOTHING, because a partial pool is worse than no pool: concatenating only the steps
+            # that carried a teacher would silently align those rows against the wrong studies. The ring
+            # is homogeneous in practice — a run either distils or does not — so this is a guard rather
+            # than a case, and the `None` it falls back to is what a distilling objective raises on.
+            teacher=torch.cat(taught) if len(taught) == len(self.remembered) else None,
         )
 
     def remember(self, batch: Predicted) -> None:
         """Keep this step's readout for the next few, dropping the oldest once the ring is full."""
         self.remembered.append(
-            Predicted(logits=batch.logits.detach(), scores=batch.scores.detach(), weights=batch.weights.detach())
+            Predicted(
+                logits=batch.logits.detach(),
+                scores=batch.scores.detach(),
+                weights=batch.weights.detach(),
+                teacher=None if batch.teacher is None else batch.teacher.detach(),
+            )
         )

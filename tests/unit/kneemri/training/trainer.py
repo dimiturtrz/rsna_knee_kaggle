@@ -16,9 +16,18 @@ from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
-from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, Objective, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    DISTILL_TERM,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    Objective,
+    RankedObjective,
+)
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import SIDE_TERM
+from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
@@ -207,6 +216,28 @@ def test_fit_epoch_augments():
     assert seen[0].dtype == torch.uint8
 
 
+def test_teach_from():
+    """Attaching readings flips the LANDING WITNESS, which is a different fact from the term's weight.
+
+    A distilling run carries two numbers that can disagree: the objective's `--distill-weight`, which is
+    a float a run can hold while the array behind it never loaded, and this — whether an ensemble's
+    readings actually reached the trainer. The check before the card compares both, so the second one
+    has to be observable off the trainer rather than inferred from the first.
+    """
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+    )
+    assert trainer.policies()[TEACHER] is False
+
+    scores = np.zeros((2, len(TARGETS)), dtype=np.float32)
+    trainer.teach_from(TeacherTargets(scores))
+
+    assert trainer.policies()[TEACHER] is True
+    assert trainer.teacher is not None
+    assert trainer.teacher.rows(np.array([1])).shape == (1, len(TARGETS))
+
+
 def test_policies():
     """The trainer's own account of which optional policies are attached, before and after attaching.
 
@@ -224,6 +255,7 @@ def test_policies():
     )
     constructed = {
         RANK_TERM: 0.3,
+        DISTILL_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: False,
@@ -241,6 +273,7 @@ def test_policies():
         AVERAGING: False,
         SCHEDULED: False,
         REPORTS: False,
+        TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
     }
@@ -259,6 +292,7 @@ def test_policies():
         AVERAGING: True,
         SCHEDULED: True,
         REPORTS: False,
+        TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
     }

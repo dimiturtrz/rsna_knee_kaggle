@@ -16,7 +16,9 @@ WHAT DOES NOT MOVE: `supervision` reads two flags into a value the LABEL table t
 import logging
 from dataclasses import dataclass
 
+import numpy as np
 import torch
+from numpy.typing import NDArray
 
 from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
@@ -25,12 +27,18 @@ from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
-from kneemri.training.objective import LabelStructure, Objective, RankedObjective
+from kneemri.training.objective import (
+    DistilledObjective,
+    LabelStructure,
+    Objective,
+    RankedObjective,
+)
 from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import PairedSides, SideRanking
+from kneemri.training.teacher_targets import TeacherTargets
 from kneemri.training.trainer import Adaptation, Trainer
 
 logger = logging.getLogger(__name__)
@@ -118,6 +126,8 @@ class RunSetup:
             accumulate=options.accumulate,
             reports=options.report_vectors is not None,
             rank_weight=options.rank_weight,
+            distill_weight=options.distill_weight,
+            teaching=options.teacher_targets is not None,
             pair_memory=options.pair_memory,
             per_label_loss=options.per_label_loss,
             normalise_by_count=options.normalise_by_count,
@@ -152,11 +162,32 @@ class RunSetup:
                 "--rank-weight was given, so there is no ranking term for it to widen"
             )
             raise ValueError(message)
+        if options.distill_weight and options.pair_memory:
+            # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
+            # and knows nothing about a teacher, so the two together would train a distilling arm whose
+            # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
+            message = (
+                f"--distill-weight {options.distill_weight} and --pair-memory {options.pair_memory} are "
+                "not composed: the remembered pool widens the label term only, so the teacher would be "
+                "dropped for every remembered step"
+            )
+            raise ValueError(message)
         structure = LabelStructure(
             grades=OrdinalGrades() if options.grade_ladder else Grades(),
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
             focus=LabelFocus(options.focus_label),
         )
+        if options.distill_weight:
+            # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
+            # the owner's design is one training that runs both terms, so this is the composed objective
+            # rather than a third alternative to the other two.
+            return DistilledObjective(
+                options.distill_weight,
+                rank_weight=options.rank_weight,
+                normalise_by_count=options.normalise_by_count,
+                per_label=options.per_label_loss,
+                structure=structure,
+            )
         if options.pair_memory:
             return RememberedRanking(
                 options.rank_weight,
@@ -197,6 +228,25 @@ class RunSetup:
             raise ValueError(message)
         return ReportSupervision.from_file(options.report_vectors, identifiers, options.report_weight)
 
+    def teacher(self, identifiers: list[str], training: NDArray[np.int64]) -> TeacherTargets | None:
+        """The ensemble readings this run asked for, or None — and never half of it, for `reports`' reason.
+
+        Both halves raise, not just the missing file: a `--teacher-targets` with no `--distill-weight`
+        loads an array nothing reads, and the arm would report the plain recipe under a distilling name
+        just as surely as the other way round. `DistilledObjective` raises on an absent teacher too, but
+        it raises on the first BATCH — this raises before the card is touched.
+        """
+        options = self.options
+        if not options.distill_weight and options.teacher_targets is None:
+            return None
+        if options.teacher_targets is None or not options.distill_weight:
+            message = (
+                f"--distill-weight {options.distill_weight} and --teacher-targets "
+                f"{options.teacher_targets} are two halves of one mechanism, and only one was given"
+            )
+            raise ValueError(message)
+        return TeacherTargets.from_file(options.teacher_targets, identifiers, training)
+
     def model(self, encoder: Encoder, slots: int, design: StudyDesign, device: torch.device) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
 
@@ -236,7 +286,7 @@ class RunSetup:
         model: StudyModel,
         device: torch.device,
         identifiers: list[str],
-        training_positions: int,
+        training: NDArray[np.int64],
     ) -> Trainer:
         """A `Trainer` with every optional policy this run asked for already attached.
 
@@ -262,6 +312,9 @@ class RunSetup:
         reports = self.reports(identifiers)
         if reports is not None:
             trainer.report_supervision(reports)
+        teacher = self.teacher(identifiers, training)
+        if teacher is not None:
+            trainer.teach_from(teacher)
         if options.ema:
             trainer.exponential_average()
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
@@ -277,7 +330,7 @@ class RunSetup:
             # group, so counting micro-batches would size the cycle `accumulate` times too long and the
             # run would end mid-warmup-and-decay having never reached the low rate the schedule exists
             # to finish at. Same class of failure as the ceil above, opposite sign.
-            micro_batches = max(training_positions // options.batch, 1)
+            micro_batches = max(len(training) // options.batch, 1)
             steps_per_epoch = trainer.accumulation.groups(micro_batches)
             trainer.one_cycle(options.epochs * max(steps_per_epoch, 1))
         return trainer

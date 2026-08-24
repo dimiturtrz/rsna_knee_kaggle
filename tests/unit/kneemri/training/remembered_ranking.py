@@ -4,7 +4,14 @@ import torch
 
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
-from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM, RankedObjective
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    DISTILL_TERM,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+    RankedObjective,
+)
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.side_ranking import SIDE_TERM
 
@@ -20,6 +27,7 @@ def test_settings():
     """The pool is read off the memory, so a run's `--pair-memory` is checked against what would drop."""
     assert RememberedRanking(0.3, capacity=4).settings() == {
         RANK_TERM: 0.3,
+        DISTILL_TERM: 0.0,
         PAIR_POOL: 4,
         PER_LABEL: False,
         COUNT_NORMALISED: False,

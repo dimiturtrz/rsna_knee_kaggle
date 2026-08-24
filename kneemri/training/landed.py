@@ -36,8 +36,9 @@ from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECO
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS
-from kneemri.training.objective import COUNT_NORMALISED, PAIR_POOL, PER_LABEL, RANK_TERM
+from kneemri.training.objective import COUNT_NORMALISED, DISTILL_TERM, PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.side_ranking import SIDE_TERM
+from kneemri.training.teacher_targets import TEACHER
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
@@ -82,6 +83,8 @@ NOT_A_SWITCH = {
     "compile_encoder": "resolved into `Request.compiling`, which `main` decides on the device",
     "recompute_activations": "resolved into `Request.recompute`",
     "report_vectors": "resolved into `Request.reports`",
+    "teacher_targets": "resolved into `Request.teaching`: the check asks whether readings ARRIVED, and "
+    "WHICH file they came from is recorded by `member_record` rather than compared here",
     "report_weight": "resolved into `Request.reports` alongside it",
     "variant": "chosen by CONSTRUCTION: the registry raises on a name it cannot build",
     "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
@@ -194,6 +197,8 @@ class Request:
     one_cycle: bool
     reports: bool
     rank_weight: float
+    distill_weight: float
+    teaching: bool
     pair_memory: int
     per_label_loss: bool
     normalise_by_count: bool
@@ -238,6 +243,8 @@ class Request:
             SCHEDULED: self.one_cycle,
             REPORTS: self.reports,
             RANK_TERM: self.rank_weight,
+            DISTILL_TERM: self.distill_weight,
+            TEACHER: self.teaching,
             PAIR_POOL: self.pair_memory,
             PER_LABEL: self.per_label_loss,
             COUNT_NORMALISED: self.normalise_by_count,

@@ -71,6 +71,10 @@ NOT_IN_CONFIG = {
     "recompute_activations": "a memory-for-compute trade inside the backward pass",
     "compile_encoder": "a compilation of the same function — `load_trained` strips its prefix",
     "report_vectors": "the report head is ALWAYS built, so no rebuild can ask whether it was trained",
+    "distill_weight": "objective policy — the term pulls the SAME twelve logits toward a teacher's "
+    "ordering inside the loss and adds no parameter, so the head a rebuild serves is byte-identical",
+    "teacher_targets": "the ensemble that taught it, which is a fact about how these weights were "
+    "REACHED — a rebuild loads the student, and the teacher is not part of the function it is",
     "encoder_weights": "where the encoder STARTED, which the fitted weights have already absorbed — a "
     "rebuild loads this member, not the initialisation it grew out of",
     "encoder_adapt_depth": "how much of that starting point was taken — a fact about the run's history, "
