@@ -204,6 +204,15 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # the board. The morning's interpretation called 63 such candidates "exhausted" by comparing +0.0005
 # straight against the +0.0015 BOARD threshold; gradeswap refutes that by instance (+0.0001 offline,
 # +0.001 board) and both that document and the README are corrected. The pool is FLAT, not empty.
+#
+# THE CONSTANT ABOVE IS STALE, CORRECTED 2026-08-24, AND THE LINE IS LEFT STANDING SO THE CORRECTION HAS
+# SOMETHING TO ATTACH TO. +4.67 was fitted over five or six pairs spanning 0.0043 offline — inside our own
+# 0.0062 noise floor, so a slope through noise. The `weakseven` instrument (0.8562 offline, 0.908 board)
+# placed a point outside that band and the refit reads +2.14. So `small_batch6`'s +0.0005 prices at about
+# +0.001 board, not the +0.002 written above, and EVERY offline delta converted anywhere in this file is
+# worth 46% of what it was sold for. The RULE — never read an offline seat against a board threshold
+# without the compression — stands unchanged; only the constant halved. Read it from `board_transfer`,
+# never from prose, this comment included.
 final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
 # Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
 # studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored
