@@ -3437,3 +3437,29 @@ cannot read the prose inside it, and prose is what I put there.** The handoff be
 which already had it (`cee8c20`); the flag is now removed and the arm relaunched at 22:20Z. Cost: four
 minutes, and only because the ARM EXIT was read rather than assumed — the same failure the ledger records
 for `nox` and for `git commit | tail`, arriving through a third door.
+
+## The foreign trunk finished, and it is 53rd of 67 (2026-08-24 22:37Z)
+
+`cnx_own_recipe` — ConvNeXt at a rate fitted for ConvNeXt rather than the 4e-5 inherited from ~189
+DINOv2-family runs — is the arm the goal note ranks FIRST among everything still open, on the grounds that
+its +0.0259 rate fix is the only +0.02-class mechanism this project owns. It has finished, converged, and
+the reading is clean: peak **0.8186 at e6**, then five consecutive epochs of monotone decline to 0.8130.
+No truncation, no stopper, no harness suspect. The rate fix is real and the member it produces is 0.041
+below `small_batch6`.
+
+Greedy over the whole same-split pool places it at **seat 53 of 67**, and the peak is unchanged: 0.8731 at
+seat 8, the same eight members in the same order as the 22:12Z scan. So the fitted-rate foreign trunk is
+not additive either — not as a quality member, and not as a diversity member.
+
+**That is the goal note's item 1, measured.** The list of things "sized like the goal" had three entries;
+one is now a finished negative, one (`v3base_own_recipe`) was retired as ~0-expected because DINOv3-base
+does not carry the ConvNeXt defect, and one (RadDINO at a fitted rate) was refuted three ways earlier
+tonight by its own loss curve. **The trunk axis is closed on finished evidence, not on a floor.** What
+remains open is not a better encoder; the ledger has now said "the limit is upstream" from four
+directions and the fourth one cost 3.1 h of card to say it.
+
+**One process note, because it cost forty seconds and would have cost more later.** `displacement.sh
+cnx_own_recipe_s2026` re-ran greedy with the candidate passed explicitly ON TOP of a pool glob of
+`*_s2026.pt` that already contained it. The script tests nothing for any member matching that glob — its
+explicit argument only adds something for arms named outside it, which is precisely the new `_ff` full-fit
+members. Correct for what it was written for, a no-op for what I pointed it at.
