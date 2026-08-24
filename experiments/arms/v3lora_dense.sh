@@ -85,7 +85,16 @@ HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head 
 export HF_TOKEN
 [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
+# `v3lora_dense smoke` runs the SAME line at 60 studies for one epoch, to a checkpoint whose name can
+# never be mistaken for the arm's. It exists so the queue can chain the smoke and the arm together and
+# the card is never idle waiting for a human to run the two-minute check by hand — the gap the queue was
+# built to close (four hours on 2026-08-19). It is a NAMED MODE rather than a `"$@"` passthrough on
+# purpose: a queue entry that can override any flag is how `resolution` spent a slot re-fitting a member
+# we already had and overwrote its own checkpoint (knee-8hu7). Only these three flags can move.
+SMOKE=""
+[ "${1:-}" = "smoke" ] && SMOKE="--studies 60 --epochs 1 --out $PROCESSED/v3lora_smoke.pt"
+
 run_train v3lora_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant v3base --lora-rank 8 --backbone-lr 5e-4 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --labels "$LABELS" --out "$PROCESSED/v3lora_dense_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/v3lora_dense_s2026.pt" $SMOKE
