@@ -1604,7 +1604,31 @@ that an offline delta inside the floor is a real board cost of roughly 3x its si
 a licence to switch the default; it is a statement that batch 6 is *available* when a member needs the VRAM,
 which is exactly the case `base_dense` was in.
 
-### `cnx_dense` — the first non-transformer trunk, and it closes encoder diversity as an axis — 2026-08-21
+### `cnx_dense` — the first non-transformer trunk, at n=1 against DINOv2's n=189 — 2026-08-21
+
+> **RETITLED 2026-08-24, and the old title is quoted here because it was quoted forward.** This entry
+> read *"and it closes encoder diversity as an axis"* until today. It does not close anything, on two
+> counts measured after the fact (knee-zfgn).
+>
+> **The denominator.** Of the 202 trained checkpoints on disk, ~189 are DINOv2-family and **one** is this
+> ConvNeXt run. Every recipe knob this project owns — read size, backbone LR, schedule, band, sampling,
+> augmentation, batch, pooling — was tuned across those 189. The standing recipe is a 189-run local
+> optimum around DINOv2-small, and it was handed to a convolutional trunk unchanged, once. What the run
+> measures is our own tuning, charged to the architecture.
+>
+> **Its own pre-registration was overruled.** The arm named four outcomes before it ran. The one that
+> fired says: *solo below 0.80 … the reading is about RESOLUTION and the retry is 448 px (a 14×14 grid)
+> **before the trunk is judged***. It scored **0.7927**. The 448 retry was never run, and the entry was
+> written up as a verdict anyway. A pre-registration discarded when it fires is not a pre-registration.
+>
+> **And the LR is DINOv2's.** `--backbone-lr 4e-5` is an adapter rate for a ViT; convolutional trunks
+> fine-tune roughly an order of magnitude higher. One point, one rate, chosen for a different family.
+>
+> **What this run DOES establish, and it survives intact:** the trunk is genuinely FAR. `cnx_dense` reads
+> nearest **0.7941** against a seated roster whose own spread floors at 0.8724 — 0.078 more distant than
+> any seated member is from its nearest neighbour. The claim elsewhere that *"a different inductive bias
+> is not a different error structure"* is false; ConvNeXt produces a very different one. The distance half
+> of the thesis holds. The quality half has never been tested at a fair budget. See knee-y59c, knee-zfgn.
 
 **The flag landed.** `run_comparison` against `base_dense` names `variant base→cnxbase`, with
 `train_size 0→352` and `batch 6→2` — the two deviations the arm stated before it ran, both forced by a
