@@ -78,6 +78,15 @@ something not on this table.
 
 ## Where the deficit actually lives, and why the obvious fix is already dead
 
+> **THIS SECTION IS RETRACTED, same day — see `2026-08-24_no_denominator_resolves_a_per_label_deficit.md`.**
+> The table below is not ours. It is PUBLISHED members scored against radiologist annotations on the 58
+> studies `train.csv` annotates, where Lateral Meniscus has 23 positives and a 95% halfwidth of **±0.148** —
+> so "move it 0.65 → 0.80" moves it to the top of its own interval. On our own holdout, which scores every
+> study, Lateral Meniscus is **0.8453 and mid-pack**; the worst labels are MCL, Fracture and Lateral OA, and
+> lifting the worst to the median of the rest is worth **+0.0066**, at the noise floor. The per-label
+> targeting argument does not hold. **The rest of this note — the closed inventory and the +0.0082 pricing —
+> does not depend on it and stands.** Kept rather than deleted because the error is the instructive part.
+
 The metric is the unweighted mean of twelve per-label AUCs, and ours are very uneven:
 
 ```
@@ -106,8 +115,9 @@ here are already refuted, in opposite directions:**
 
 ## The consequence, which is a change of target and not a change of knob
 
-Three separate lines of evidence — the closed inventory, the per-label deficit, and the refuted resolution
-axis — converge on the same statement: **the bottleneck is what one slice's feature vector contains, and
+Two separate lines of evidence — the closed inventory and the refuted resolution axis — converge on the same
+statement (a third, the per-label deficit, was retracted the same day and is NOT counted here; the
+convergence is weaker for losing it, and it is the two that survive): **the bottleneck is what one slice's feature vector contains, and
 every lever we have left operates downstream of that.** The ledger reached this independently at
 `attend_true` ("the limit is upstream") and again at `focal_dense` ("the bottleneck moves to supervision or
 to the encoder"). This note is the third arrival, from the direction of the scoreboard.
@@ -150,6 +160,16 @@ they are measured at a tenth of what the goal costs.
 extrapolation at exactly the part of the board we now live on, and the one direct probe we have of the top
 of the range says the transfer **saturates** there (0.8712 → 0.933, then 0.8731 → **0.932**). If that
 saturation is real, +0.0082 offline is a floor on what first place costs, not an estimate of it.
+
+**That constant got its first independent cross-check the same night, and it points the same way.**
+`ruler_transfer` compares a delta measured on our LLM-read report labels against the same delta measured
+on radiologist annotations, over the 58 annotated studies. Wherever it resolves, the ratio is above 1 —
++1.70 [+1.07, +3.48] at a large perturbation, rising 0.97 → 1.15 across a share sweep. The report ruler
+UNDERSTATES deltas rather than overstating them, which is `board_transfer`'s +1.82 arrived at from a
+completely different construction. Two caveats keep it from being a second estimate of the constant: the
+resolving rows are permuted degradations rather than real improvements, and at the delta sizes this
+project actually produces (+0.002 to +0.005) the intervals span 1 so widely that 58 studies answer
+nothing. See `2026-08-24_no_denominator_resolves_a_per_label_deficit.md`.
 
 And by the house bar — no board difference under 0.02 is a result — this project's entire shipped history,
 0.930 through 0.937, is one draw from one distribution. That applies to the gap too: 0.015 is *under* the

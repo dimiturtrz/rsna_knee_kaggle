@@ -3302,3 +3302,30 @@ is re-run or warm-started; an undertrained one needs a longer budget or a fitted
 would have hidden that `cnx_dense` wanted a rate (+0.0259 when it got one) while `raddino_dense` wanted
 only to be allowed to finish. Only `TRUNCATED` exits non-zero: an undertrained run is an honest
 measurement of a budget and its score is real.
+
+**THE OTHER HALF OF THE OUTPUT, READ A DAY LATE — and it yields nothing, which is the point of writing it
+down.** The first corpus reading reported 15 UNDERTRAINED against 7 TRUNCATED, and only the truncations were
+chased. Reading the larger class:
+
+- **Six were `throughput_*` timing probes and one a smoke, all asking a single epoch.** A one-epoch run peaks
+  on its last epoch BY CONSTRUCTION, so the verdict was vacuous for nearly half the class. `benchmark()` now
+  drops `epochs<=1` and the corpus reads **81 runs: 56 converged, 7 truncated, 3 stopped, 9 undertrained,
+  6 unscored.**
+- **Three completed SHORT budgets** — `crop80_tissue` (8), `schedule_8` (8), `wholestack_fold2` (6). Their
+  anneal ran to its end, so "peaked last" is the schedule finishing, not a crash. And the axis is already
+  priced: the ledger's own `crop80_tissue` entry above says the control is 12 epochs to this arm's 8, and
+  `schedule_length` puts that difference at **−0.0028** — inside the 0.0062 floor. Extending a roster member
+  to 12 buys under half a noise floor for ~2 h of card. **Declined, on evidence that was already here.**
+- **Three peak on the last epoch of a FULL twelve** — `cnx_dense` and the two `encoder_adapt` runs. All three
+  already carry a confirmed recipe defect: `cnx_dense` returned +0.0259 when its rate was fitted, and
+  `encoder_adapt` (0.6902 / 0.7309) is the closed SSL-as-init family. **No unclaimed run is left in the class.**
+
+Worth stating precisely because the verdict is easy to over-read: **a late peak is ORDINARY under one-cycle.**
+32% of finished twelve-epoch runs peak at e9 or e10, deep in the anneal. Peaking on the very last epoch is
+what is rare — 3 of 53, against the ~14% a flat prior over the observed e5–e11 range would predict — and its
+3-for-3 association with a confirmed recipe defect is a direction at n=3, not a rule.
+
+So the check has now been read end to end, and **on this corpus it has produced no lead it did not confirm
+from prose already in this file.** That is the honest measure of it: it converts knowledge that lived in
+paragraphs into a command that cannot go stale, and on a corpus this well-audited that is all it can do. Its
+value is prospective — the next killed run gets caught the evening it dies, not three weeks later.

@@ -83,7 +83,16 @@ class Convergence(StrEnum):
     is the recipe's number — the same shape on disk as TRUNCATED, and the opposite meaning."""
 
     UNDERTRAINED = "UNDERTRAINED"
-    """Ran the whole budget and peaked on the last epoch of it. The budget bound the result, not the recipe."""
+    """Ran the whole budget and was still gaining as the anneal drove the rate to zero.
+
+    Read WITH its base rate, because the first reading of this verdict over the corpus was a
+    misinterpretation. Under `one_cycle` a late peak is ordinary — 32% of finished twelve-epoch runs peak at
+    e9 or e10, deep in the anneal — so "peaked late" says nothing. Peaking on the very LAST epoch is a
+    different matter: 3 of 53 finished twelve-epoch runs do it, against the ~14% a flat prior over the
+    observed e5-e11 range would give. It is rarer than chance, and all three carry a recipe defect confirmed
+    from somewhere else — `cnx_dense` (+0.0259 once its rate was fitted) and the two `encoder_adapt` runs.
+    n=3 makes that a direction, not a rule.
+    """
 
     UNSCORED = "UNSCORED"
     """Held nothing back, so it has no epoch to peak on. Every `--fold -1` member is here by construction."""
@@ -122,6 +131,17 @@ class ConvergenceCheck:
         """
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and recipe.get(STUDIES, "0") not in ("0", "")
+
+    def benchmark(self, run: RunMetrics) -> bool:
+        """Whether the run asked for one epoch, which makes every convergence verdict vacuous.
+
+        A one-epoch run peaks on its last epoch BY CONSTRUCTION — there is no earlier epoch to peak on —
+        so it reads UNDERTRAINED however healthy it was. Six of the fifteen the first corpus reading
+        reported were `throughput_*` timing probes that never produced a member, and they diluted the
+        three full-budget runs that are the actual finding.
+        """
+        asked = self.asked(run)
+        return asked is not None and asked <= 1
 
     def asked(self, run: RunMetrics) -> int | None:
         """The epoch budget the recipe requested, or None for a run that recorded no recipe."""
@@ -180,7 +200,7 @@ class ConvergenceCheck:
         found = [
             self.verdict(run)
             for metrics in sorted(processed.glob("*.metrics.jsonl"))
-            if (run := RunMetrics(metrics)).rows() and not self.smoke(run)
+            if (run := RunMetrics(metrics)).rows() and not self.smoke(run) and not self.benchmark(run)
         ]
         return sorted(found, key=lambda seen: (seen.settled(), seen.name))
 

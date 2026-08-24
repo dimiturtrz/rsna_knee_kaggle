@@ -92,6 +92,18 @@ def test_smoke(tmp_path: Path) -> None:
     assert check.smoke(RunMetrics(smoked))
 
 
+def test_benchmark(tmp_path: Path) -> None:
+    """A one-epoch timing probe cannot peak anywhere but its last epoch, so it earns no verdict."""
+    check = ConvergenceCheck()
+    probe = write_run(tmp_path, "throughput_bf16", peak=0, epochs=1, asked=1)
+    assert check.benchmark(probe)
+    assert not check.benchmark(write_run(tmp_path, "real_run", peak=6, epochs=12, asked=12))
+
+    audited = [run.name for run in check.audit(tmp_path)]
+    assert "throughput_bf16" not in audited
+    assert "real_run" in audited
+
+
 def test_audit(tmp_path: Path) -> None:
     """Every scored run under a root, smokes dropped, unsettled first."""
     write_run(tmp_path, "v3base_dense", peak=SETTLED_PEAK, epochs=12, asked=12)
