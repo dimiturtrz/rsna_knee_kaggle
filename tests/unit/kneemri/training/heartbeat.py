@@ -2,7 +2,17 @@ import logging
 
 import pytest
 
+from kneemri.training.card_memory import CardMemory
 from kneemri.training.heartbeat import Heartbeat
+
+
+def blind_card() -> CardMemory:
+    """A card that cannot be read — the only kind a unit test may hold.
+
+    Every test here injects one. A default `CardMemory` shells out to `nvidia-smi` the moment a stall
+    latches, which is a unit test reaching for a device it did not create.
+    """
+    return CardMemory(read=lambda: None)
 
 
 def test_tick(caplog: pytest.LogCaptureFixture):
@@ -12,7 +22,7 @@ def test_tick(caplog: pytest.LogCaptureFixture):
     testing the scheduler and would trip the no-sleep gate.
     """
     now = [100.0]
-    beat = Heartbeat(every_seconds=30.0, clock=lambda: now[0])
+    beat = Heartbeat(every_seconds=30.0, clock=lambda: now[0], card=blind_card())
     asked = []
 
     def loss(value: float):
@@ -45,7 +55,7 @@ def test_watch(caplog: pytest.LogCaptureFixture):
     for long enough, slow for long enough, and back. The 2026-08-19 failure is the third — it ran at a
     tenth of its peak for the rest of the arm and nothing said anything.
     """
-    beat = Heartbeat()
+    beat = Heartbeat(card=blind_card())
     with caplog.at_level(logging.INFO):
         beat.watch(1000.0)
         beat.watch(900.0)
@@ -61,7 +71,8 @@ def test_watch(caplog: pytest.LogCaptureFixture):
         assert "peak of 1000" in caplog.text, "the reference has to be in the line, or it cannot be judged"
 
         beat.watch(40.0)
-        assert sum(record.levelno == logging.WARNING for record in caplog.records) == 1, "said once, not per report"
+        said = sum(record.levelno == logging.WARNING for record in caplog.records)
+        assert said == 1, "said once, not per report"
 
         beat.watch(950.0)
         assert "recovered" in caplog.text

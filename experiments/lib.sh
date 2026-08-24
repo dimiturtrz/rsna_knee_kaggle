@@ -125,9 +125,11 @@ hold_card() {
   done
   [ "$blocked" -gt 0 ] && echo "took the card after ${blocked}m parked"
   echo $$ > "$LOCK_DIR/pid"
-  trap drop_own_card EXIT
+  trap 'drop_claim; drop_own_card' EXIT
   wait_out_legacy_lock
+  wait_out_peer_claim
   wait_for_free_card "$@"
+  claim_card "$@"
   # Explicit, because this function's status is whatever its last command left behind and an arm runs
   # under `set -e`. wait_for_free_card ends on a test in one of its branches.
   return 0
@@ -151,6 +153,78 @@ wait_out_legacy_lock() {
     sleep 60
   done
   return 0
+}
+
+CLAIM_FILE="$REPO/logs/CARD_CLAIM"
+PEER_CLAIMS="${PEER_CLAIMS:-$REPO/../*/logs/CARD_CLAIM}"
+# An INTENT file, which is the one thing neither the lock nor the free-VRAM gate can represent.
+#
+# Both of those read the card's CURRENT state, so both are blind in the same direction: on 2026-08-24 the
+# gate correctly saw ~30 GB free at 09:22Z and let a 72-minute arm through, and a sibling project's ~4.8 GB
+# job arrived ninety seconds later. Total hit 31.8 GB of 32.6 and the arm reported 94 img/s against its own
+# peak of 1221 — a 13x paging collapse that would have made 72 minutes into fifteen hours. Nothing was
+# broken. Both sides asked the right question and neither could see a job that had not started yet.
+#
+# NOT a second lock. The sibling took the protocol and implemented it as a claim FILE rather than the
+# `$HOME/.gpu.lock` mkdir we already had, so the machine now has two mechanisms that each cover one
+# direction. Rather than argue the sibling into ours, this reads theirs — a claim is advisory and a reader
+# costs nothing, where a lock nobody else takes is a lock that protects nobody. We write ours in the same
+# format for exactly that reason.
+
+claim_card() {
+  # State the intent this arm is about to act on, so a peer deciding at the same moment can see it.
+  local finish
+  finish="$(date -u -d "+${CLAIM_HOURS:-2} hours" +%Y-%m-%dT%H:%MZ 2>/dev/null)"
+  mkdir -p "$(dirname "$CLAIM_FILE")"
+  {
+    echo "CLAIM $(date -u +%Y-%m-%dT%H:%MZ)"
+    echo "holder: kneemri (pid $$)"
+    echo "job: ${1:-unnamed arm}"
+    echo "footprint_mib: $(arm_needs_mib "$@")"
+    echo "expected_finish: ${finish:-unknown}"
+  } > "$CLAIM_FILE"
+  return 0
+}
+
+drop_claim() {
+  # Only ours, and only if it is still ours — the same ownership test the lock trap learned on 2026-08-19.
+  [ "$(sed -n 's/^holder: kneemri (pid \(.*\))$/\1/p' "$CLAIM_FILE" 2>/dev/null)" = "$$" ] && rm -f "$CLAIM_FILE"
+  return 0
+}
+
+wait_out_peer_claim() {
+  # Park while a sibling project has said it is about to use the card, up to its own stated finish time.
+  #
+  # BOUNDED BY THE CLAIM'S OWN EXPIRY, not by a timeout of ours. A claim file is written by a process that
+  # can be killed, and a dead holder's file does not vanish — the lock has the same failure and clears it
+  # by asking whether the pid is alive, which does not work across projects. The stated finish is what the
+  # writer offered as the promise, so a claim past it is stale by its author's own account and is ignored
+  # LOUDLY rather than silently: a stale advisory file must not be able to idle our queue forever.
+  local claim now finish waited=0
+  while :; do
+    claim=""
+    for candidate in $PEER_CLAIMS; do
+      [ -f "$candidate" ] && [ "$candidate" != "$CLAIM_FILE" ] && claim="$candidate" && break
+    done
+    [ -z "$claim" ] && { [ "$waited" -gt 0 ] && echo "peer released the card after ${waited}m parked"; return 0; }
+    now="$(date -u +%Y-%m-%dT%H:%MZ)"
+    finish="$(sed -n 's/^expected_finish: *//p' "$claim" | head -1)"
+    # String comparison rather than epoch arithmetic: ISO-8601 UTC sorts lexicographically by construction,
+    # and `date -d` on an arbitrary field is a parse this loop should not be able to fail on.
+    case "$finish" in
+      20[0-9][0-9]-*Z) [ "$now" \> "$finish" ] && {
+        echo "IGNORING a peer claim at $claim: it promised $finish and it is now $now" >&2
+        return 0
+      } ;;
+      *) echo "IGNORING a peer claim at $claim: no readable expected_finish, so it cannot bound our wait" >&2
+         return 0 ;;
+    esac
+    [ "$waited" -eq 0 ] && { echo "parking behind a peer claim until $finish:"; sed 's/^/  /' "$claim"; }
+    [ $((waited % WAIT_HEARTBEAT_MINUTES)) -eq 0 ] && [ "$waited" -gt 0 ] &&
+      echo "parked ${waited}m behind the peer claim, which runs to $finish"
+    waited=$((waited + 1))
+    sleep 60
+  done
 }
 
 drop_own_card() {
@@ -256,6 +330,7 @@ release_card() {
   # An `if` rather than `[ ... ] && rm`, because that construct returns non-zero when the guard fails
   # and this file runs under `set -e` — releasing a lock we do not hold would then kill the chain.
   if [ -n "${LOCK_DIR:-}" ]; then
+    drop_claim
     drop_own_card
   fi
   LOCK_DIR=""

@@ -2336,6 +2336,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.heartbeat",
+      "target": "kneemri.training.card_memory",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.label_focus",
       "target": "core.findings",
       "weight": 1
@@ -12025,6 +12031,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.heartbeat.Heartbeat",
+      "target": "kneemri.training.card_memory.CardMemory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.heartbeat.Heartbeat.__init__",
+      "target": "kneemri.training.card_memory.CardMemory",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.heartbeat.Heartbeat.tick",
       "target": "kneemri.training.heartbeat.Heartbeat.watch",
@@ -13539,7 +13557,7 @@
       "role": null
     },
     {
-      "descendants": 118,
+      "descendants": 119,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -14299,7 +14317,7 @@
       "role": null
     },
     {
-      "descendants": 23,
+      "descendants": 24,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -14318,6 +14336,14 @@
       "descendants": 0,
       "id": "kneemri.training.augmentation",
       "label": "augmentation",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory",
+      "label": "card_memory",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -16272,6 +16298,14 @@
       "label": "Augmentation",
       "level": "class",
       "parent": "kneemri.training.augmentation",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory.CardMemory",
+      "label": "CardMemory",
+      "level": "class",
+      "parent": "kneemri.training.card_memory",
       "role": "primary"
     },
     {
@@ -24016,6 +24050,38 @@
       "label": "intensity",
       "level": "method",
       "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory.CardMemory.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.card_memory.CardMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory.CardMemory.free_mib",
+      "label": "free_mib",
+      "level": "method",
+      "parent": "kneemri.training.card_memory.CardMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory.CardMemory.remember",
+      "label": "remember",
+      "level": "method",
+      "parent": "kneemri.training.card_memory.CardMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.card_memory.CardMemory.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.training.card_memory.CardMemory",
       "role": null
     },
     {

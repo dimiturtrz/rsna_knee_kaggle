@@ -4,6 +4,8 @@ import logging
 import time
 from collections.abc import Callable
 
+from kneemri.training.card_memory import CardMemory
+
 logger = logging.getLogger(__name__)
 
 HEARTBEAT_SECONDS = 30.0
@@ -43,9 +45,15 @@ class Heartbeat:
     A log line is the right instrument when the reader is a file.
     """
 
-    def __init__(self, every_seconds: float = HEARTBEAT_SECONDS, clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(
+        self,
+        every_seconds: float = HEARTBEAT_SECONDS,
+        clock: Callable[[], float] = time.monotonic,
+        card: CardMemory | None = None,
+    ) -> None:
         self.every_seconds = every_seconds
         self.clock = clock
+        self.card = card if card is not None else CardMemory()
         self._since = 0.0
         self._images = 0
         self._peak = 0.0
@@ -69,6 +77,7 @@ class Heartbeat:
             return
         rate = self._images / elapsed
         logger.info("  step %d/%d  loss %.4f  %.0f img/s", step, steps, loss(), rate)
+        self.card.remember()
         self.watch(rate)
         self._since = now
         self._images = 0
@@ -97,11 +106,10 @@ class Heartbeat:
             if self._slow >= STALL_REPORTS and not self._stalled:
                 self._stalled = True
                 logger.warning(
-                    "  STALLED: %.0f img/s against this run's own peak of %.0f. Check whether another "
-                    "process holds the card (nvidia-smi: near-full VRAM at 99%% utilisation and a low "
-                    "power draw is memory paging over PCIe, not compute)",
+                    "  STALLED: %.0f img/s against this run's own peak of %.0f — %s",
                     rate,
                     self._peak,
+                    self.card.verdict(),
                 )
             return
         if self._stalled:
