@@ -49,11 +49,32 @@ helps nor hurts, and the extra 909 studies buy nothing the other six members wer
 Retires the axis. Nothing left open, which is a real and unwelcome finding rather than a null to work
 around.
 
-**≤0.932 — the informative loss, and the one band with a FREE move.** A real share of what the ensemble
-was getting from its members was FOLD diversity: seven members trained on seven different views of the
-data disagree in ways seven members trained on all of it cannot. This is the most interesting outcome and
-the cheapest to act on, because the reverse direction costs no card at all — the fold-0 members already
-exist and are already packaged. The move is to seat MORE of them, not fewer, and the next slot tests it.
+**≤0.932 — the informative loss, and the one band with a FREE move.** The reverse direction costs no card
+at all: the fold-0 members already exist and are already packaged, so the move is to seat MORE of them and
+the next slot tests it.
+
+**The mechanism I first wrote for this band was WRONG, and it is corrected here before the read rather
+than after.** I wrote that a low number would mean the ensemble had been living on FOLD diversity —
+"seven members trained on seven different views of the data". That is false about both entries. Every
+`_s2026` member in the roster is SAME-SPLIT: they share one fold-0 holdout of 909 studies, which is
+precisely why they can all be seat-scored against each other. `finalfit`'s six fold-0 seats are six
+members trained on the *same* 3,497 studies, differing in recipe, band, rate, resolution and encoder —
+never in which studies they saw. Neither entry has any fold diversity, so no reading of this pair can
+show fold diversity being lost.
+
+What a low read would actually mean is narrower and duller: training on the extra 909 studies makes a
+member WORSE as a seat. Candidate mechanisms, none of them tested — `--ema` rides along on every `_ff`
+recipe and is not held fixed; a 26% larger corpus at an unchanged epoch count and schedule is a different
+operating point on a lever this project has already seen invert (`calib_span` is negative at the recipe
+we ship and positive at the one we do not); or the all-data members are simply individually weaker and
+the pool is paying for it. Only the first is separable cheaply, and none is separable without the card.
+
+This matters beyond the wording, because the wrong mechanism named a move that cannot be built. Real
+fold diversity would need members trained on other folds, and folds are banned here by explicit standing
+instruction — seeds and folds being the same thing tried slightly differently. Had the number landed low
+and this text stood, the "free move" would have read as a licence for the one family that is closed by
+decree. Seating more fold-0 members is still the right response to a low read; it is just a response to
+"all-data seats are weak", not to "we lost our diversity".
 
 Note the asymmetry: the two middle bands both end the axis and cost nothing further, the top band costs
 7.3 h, and the bottom band hands back a shippable change for free. Only one of four outcomes wants the
