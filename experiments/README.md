@@ -3329,3 +3329,81 @@ So the check has now been read end to end, and **on this corpus it has produced 
 from prose already in this file.** That is the honest measure of it: it converts knowledge that lived in
 paragraphs into a command that cannot go stale, and on a corpus this well-audited that is all it can do. Its
 value is prospective — the next killed run gets caught the evening it dies, not three weeks later.
+
+## The card came free, and the measurement said not to spend it (2026-08-24 22:12Z)
+
+`celltrack` released the card at 22:08Z after a reconciliation worth recording on its own: their session
+announced "card-free" at 21:55Z, our `card_check` read a biohub python holding 1876 MiB at 22:05Z, and the
+explanation was a `pytest` collection that imports a CUDA-touching module — true when claimed, briefly
+false after, gone by 22:08Z. **A session's claim about what it is running is the weakest available
+evidence, including when the session is ours.** Both projects spent 65 minutes yielding an idle card to
+each other because each trusted the other's prose over the device.
+
+With the card free the queue held one run priced and ready: warm-start `raddino_dense` from its e6
+checkpoint, ~1.65 h, justified this morning as "the one truncation with a measured floor under it" (N=7,
+mean +0.0035, 90th +0.0113). **It was not armed, and the reason is that three separate checks refuted it
+in the twenty minutes before the card would have been taken.**
+
+**1. The truncation is a DECISION, not a crash.** `convergence_check` reads `raddino_dense` as TRUNCATED
+because `patience=0`, and `patience` can only see the automatic stopper. This ledger's own 2026-08-23
+entry says the run was killed deliberately against a pre-registered band: slope +0.0018/epoch at e6, five
+remaining epochs worth ~+0.009 at that slope, landing ~0.823 against a pool whose control is 0.8512. The
+check cannot distinguish a kill from a judgement, and the depth-pricing I published this morning inherited
+the misreading. **The check's TRUNCATED verdict needs the ledger read next to it; on this run the ledger
+is the better instrument and it was already right.**
+
+**2. "RAD-DINO is under-driven" is refuted by curves already on disk.** The rate-refit case rested on the
+shallow slope with the loss still falling — the `cnx_dense` signature, which returned +0.0259 when its rate
+was fitted. Against `band_dense_llrd`, the arm this repo already ran to characterise an underfit trunk:
+
+```
+at epoch 6     train loss     holdout AUC
+raddino_dense     0.7570         0.8137
+band_dense_llrd   0.8419         0.8435
+```
+
+RAD-DINO reaches a **lower** training loss and a **lower** holdout AUC than the known-underfit arm at the
+same epoch. That is fitting fast and transferring badly — a representation mismatch, where more rate makes
+it worse. The hypothesis predicted the opposite sign of exactly the number that was already recorded.
+
+**3. Layer decay would have been the wrong tool anyway**, for the reason `band_dense_llrd`'s entry gives at
+line 2025: `parameter_groups` anchors the ladder at the TOP opened block, so `--layer-decay` *divides* the
+rate of the blocks the control trains rather than letting the top rate rise. Reaching for it to drive a
+trunk harder does the opposite.
+
+**Then the asset was priced card-free, which is what should have happened in the first place.** Both
+candidates have holdout records on disk, so `record_mix --seats greedy` costs seconds:
+
+```
+greedy  1: 0.8598  +small_batch6      greedy  6: 0.8729  +sided_pool
+greedy  2: 0.8669  +margin_seat       greedy  7: 0.8730  +aprior_dense
+greedy  3: 0.8706  +calib_span        greedy  8: 0.8731  +crop80_span     <- peak
+greedy  4: 0.8720  +through_dense     greedy  9: 0.8731  +attend_dense
+greedy  5: 0.8726  +band_dense_long   ...
+                                      greedy 36: 0.8704  +v3base_dense
+                                      greedy 54: 0.8670  +raddino_dense
+```
+
+`raddino_dense` (0.8137 solo) enters at seat **54 of 68**; `cnx_own_recipe` (0.8186) at **53**. Neither
+weak-but-distant trunk displaces anything, so the diversity-over-quality case does not hold for these two
+on this holdout — worth stating plainly because it is the owner's stated thesis and it deserves a real
+test rather than an assumption in either direction. n=2 trunks: this is evidence about RAD-DINO and
+ConvNeXt, not a refutation of diversity.
+
+**`v3base_dense` enters at seat 36, which retires a P1.** It is 0.8455 solo — the strong end of the v3
+family, absent from `comp/members.roster`, and packaging it has been carried as P1 work needing an upload
+window. It is not in the eight-member peak, and neither is `dinov3_base_lora`. The package is not holding
+the weak end of a family whose strong end matters; the strong end does not seat either.
+
+**AND THE TAIL IS THE FINDING THE OTHER THREE ARE FOOTNOTES TO.** The greedy curve runs 0.8720 at seat 4,
+0.8731 at seat 8, 0.8704 at seat 36 — **a spread of 0.0016 across thirty-two seats, against a 0.0062 noise
+floor.** Everything from seat 4 to seat 36 is one flat line inside the noise. Member SELECTION is not a
+lever, and the reason a 33rd member cannot move the number is arithmetic rather than judgement. This is
+the same result the member-swap work reached from the other direction (only the sign transfers, the
+ordering broke on the third point), now with the curve printed next to it.
+
+**So the card has no run priced above the bar tonight, and that is a measurement rather than idleness.**
+The greedy curve says another member near 0.84-0.85 lands in the flat zone and is worth ~0.000; a run that
+produces one costs 3.3 h. What the curve does license is the inventory note's conclusion, sharpened: the
+lever is a member class substantially BETTER than 0.8512 solo, not another draw from the distribution we
+have. Eight members buy +0.0133 over the best solo and then the ensemble is done.
