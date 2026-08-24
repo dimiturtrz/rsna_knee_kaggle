@@ -2078,3 +2078,32 @@ the ceiling was declared.
 still says the cheap families are short, and that its confidence interval is wider than it reads. It does
 not license re-running an arm the offline ruler already called flat. It does mean that a family should not
 be described as *arithmetically* dead in future write-ups without the words "on an extrapolated slope".
+
+### Result: `kneemri-lastseat` reads 0.937 — the repeat holds, and the seat is not the variable (2026-08-24)
+
+Ref 55739968, submitted 10:25Z, scored inside the hour. **0.937 — identical to `allfit`**, landing in the
+pre-registered **0.936–0.939** band, the one the kernel called the expected outcome.
+
+The exchange was `band_dense_long_s2026` (0.8587 solo) out, `small_batch6_s2026` (0.8598 solo — the best
+single member this project has ever fitted) in, with count, vote, kit and the six-seat all-data dose all
+held. So this is the first REPEAT at the top of the board, and it buys three things:
+
+- **`allfit`'s +0.003 was the DOSE, not the seat.** Two entries differing in one seat read the same
+  number, so the dose table in `interpretations/kneemri/2026-08-24_the_all_data_dose_response.md` stands
+  without a caveat. That was the reading most at risk.
+- **Board scatter across a single-seat exchange at 0.937 is at most one tick.** Every board-only decision
+  from here inherits that error bar. The honest limit is the one the pre-registration already wrote down:
+  two entries reading the same band BOUND the scatter, they do not measure it.
+- **"The seven-member vote is flat to single-member exchange" now extends to the all-data pool**, where it
+  had never been checked. It has now held across five entries and both pools.
+
+Note what did NOT happen: the better member offline (+0.0011 solo) was neither the better seat nor the
+worse one. In the fold-0 pool solo score and seat value are ordered *oppositely*; here they are ordered
+not at all. Both readings say the same thing from different directions — **at seven members the seat
+identity is not the variable**, which is exactly the seat principle the member-count curve already
+carried, arriving now by a second route.
+
+**What it costs the plan.** The seventh seat is retired as a search axis, the same way roster search was
+retired at `greedy7`. Nothing left at the top of this board is bought by rearranging members that already
+exist — which is the fourth independent statement of the data-bound verdict, and it points the remaining
+card at the same place: a BETTER member, or a member of a kind this pool does not contain.
