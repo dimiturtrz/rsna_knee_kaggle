@@ -2040,3 +2040,41 @@ were the roster's `+4.67` and the champion pin lagging the board by three hours.
 every time: a number is correct when written, the thing it describes moves, and nothing connects them. A
 gate is buildable here — assert every `## ` result heading in this file has a matching `id` in
 `board.jsonl` — and it is filed rather than written now, because the axis reading was the thing owed.
+
+### The door-closing arithmetic is an extrapolation, and the backfill did not fix that (2026-08-24, knee-1p1i)
+
+Line ~1962 above closes the whole cheap-arm family: *"0.934 → 0.950 is +0.016 board = +0.0075 offline at
+2.14 ... Seat swaps, ensemble width, decode knobs and vote rules are not flat — they are arithmetically
+short by 3x."* Two things have moved under it since, and only one of them was recorded.
+
+**Restating it at the current numbers.** The champion is 0.937, not 0.934, and the constant is +1.92, not
++2.14. So the requirement is 0.013 board = **+0.0068 offline**, against a measured offline ceiling of
+~0.872 — about +0.0026 over the champion pool. That is ~2.6x the remaining audited headroom rather than
+3x. The verdict does not change; it is restated so that nothing downstream quotes 2.14 again.
+
+**The defect the backfill did NOT fix, which is the actual finding.** `board_transfer` names it in its own
+output: the four best entries — `allfit`, `finalfit`, `sevenplane`, `accumseat` — are ONE-SIDED and enter
+no pair, three of them because `--fold -1` erased their offline number. The slope is therefore fitted
+**entirely on entries at or below board 0.933**, and every use of it above 0.933 is an extrapolation —
+including the use that shuts the door.
+
+The risk is not symmetric. If the ratio STEEPENS near the top, the offline headroom needed for +0.013 is
+smaller than +0.0068 and the audited space is not arithmetically dead. If it FLATTENS, the door is shut
+harder than stated. There is a mechanism for either, so this is not wishful: the metric is a mean of
+twelve independent AUCs, and late offline gains may concentrate in the hard labels (steepening) or in the
+easy ones every member already gets right (flattening). We cannot tell, because the pairs that would tell
+us are exactly the ones `--fold -1` destroyed. That is a second, undiscounted instalment of the price
+`allfit` paid, on top of the one already recorded.
+
+**And the fix is blocked by the same damage.** Extending the fit needs a fold-0-only pool meaningfully
+above 0.933 — but 0.933 *is* the fold-0 ceiling as measured (`gradeswap`/`accumseat`/`greedy7` all read
+it, greedy accumulation saturated four steps running, the seven-member vote is flat to wholesale
+exchange). No rearrangement of existing fold-0 members clears it, so no slot can buy this. Only a BETTER
+FOLD-0 MEMBER moves it, which needs card — which is what `ema_dense` (knee-56w5) is, and it is on the card
+now. Its top band is simultaneously an EMA verdict and the first fold-0 member above the seated band since
+the ceiling was declared.
+
+**What to do with this in the meantime: nothing, loudly.** The honest position is that the arithmetic
+still says the cheap families are short, and that its confidence interval is wider than it reads. It does
+not license re-running an arm the offline ruler already called flat. It does mean that a family should not
+be described as *arithmetically* dead in future write-ups without the words "on an extrapolated slope".
