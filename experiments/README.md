@@ -2740,3 +2740,41 @@ The profile is neither flat nor rarity-ordered — the largest gain IS on the ra
 headline prediction, and the 2nd and 3rd rarest are the 1st and 3rd most negative. Writing a per-label
 clause against a per-label ruler that cannot resolve a per-label effect is the defect; the next arm on
 this axis states its rule on the axis its ruler can read. knee-1x4j stays gated.
+
+### CORRECTION — the v3 axis was closed on the wrong member, and the distance ruler says so (2026-08-24)
+
+The `v3base_dense` entry above closes DINOv3 "as a *source of new seats*" on a seat value of −0.0007. Three
+things are wrong with carrying that forward, and the entry itself warned about two of them.
+
+```
+against greedy7_v1 (0.933, the CURRENT seven) — roster's own nearest spread 0.8724 .. 0.8893
+
+  candidate            seat      nearest   solo
+  lora_r8_v3small_224  -0.0013   0.8455    0.8217
+  dinov3_base_lora     -0.0009   0.8467    0.8268
+  v3base_dense         -0.0006   0.8829    0.8512
+```
+
+**It was closed on the one v3 member that is not distant.** `v3base_dense` reads nearest 0.8829, inside the
+roster's own spread — an ordinary member. Both LoRA-v3 members sit at ~0.846, BELOW the most distant seated
+member by 0.027, which is `member_distance`'s own definition of genuinely new information. A claim about
+*redundancy* was decided on the sole family member that is not redundant.
+
+**It was priced against a roster that no longer exists** — five members, 0.8690, two of them since replaced —
+and **with the quality ruler alone**, on the same day `MemberDistance` was built to answer this exact
+question. The entry's own words: *"The −0.0007 is not evidence that a v3base seat would cost a tick; it is
+evidence that this ruler cannot tell."* The caveat was written and then the verdict was quoted without it.
+
+**The mechanism was inside the adaptation finding.** LoRA freezes the base, so the member keeps DINOv3's
+representation rather than being fine-tuned toward the solution every other member converges on. That
+predicts exactly the ordering measured: both LoRA members distant, the full fine-tune ordinary. The
+adaptation that scores WORSE is the one that is DISTANT, and nothing charged that to diversity.
+
+**And the variable that makes it runnable was never isolated.** `v3base_dense` and `dinov3_base_lora` differ
+on TWO things — LoRA vs full fine-tune, AND 224 → 336 plus the dense recipe — and the whole +0.0244 was
+charged to adaptation. Nobody has run **LoRA + the dense recipe + 336**. That is the distant-and-strong cell
+`knee-053z` asked for and never got, and it is filed as `knee-u0my` with its bands pre-registered.
+
+WHAT STANDS FROM THE ORIGINAL ENTRY: the adaptation re-attribution (DINOv3's weakness was a recipe finding,
+not an encoder one) is untouched and is in fact the load-bearing half of the argument above. What does not
+stand is "the axis is closed as a source of new seats".
