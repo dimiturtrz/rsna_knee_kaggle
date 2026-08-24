@@ -46,8 +46,8 @@ eight](interpretations/kneemri/2026-08-22_the_pool_is_exhausted.md), per-label s
 *oracle* sits below the plain average), and the vote itself is flat — rank, logit and quality-weighted
 averaging land within 0.0005 of each other, an order below the board's noise floor. Diversity is the
 lever left, and what is left of it is small rather than absent: priced card-free over **63 candidates**,
-the best available eighth seat is **+0.0005** offline — which at the measured **+4.67 board points per
-holdout point** is about +0.002 on the board, a tick rather than a step. The entry that took us to 0.933
+the best available eighth seat is **+0.0005** offline — which at the measured **+2.14 board points per
+holdout point** is about +0.001 on the board, a tick rather than a step. The entry that took us to 0.933
 priced **+0.0001** offline, so a seat number below the holdout's own resolution is not evidence of
 nothing; it is the seat ruler running out of range.
 

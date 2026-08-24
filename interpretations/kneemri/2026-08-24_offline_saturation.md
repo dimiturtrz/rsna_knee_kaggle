@@ -177,6 +177,25 @@ they must recover +0.024 offline to reach the seated band and then +0.0075 more 
 axis where resolution is separately measured flat (`res392` 0.8459–0.8523). That is not a 1.5% mechanism;
 it is a ~0-expected-gain arm and it must not be sold as the last hope.
 
+### And the per-label axis, re-priced, because the new slope makes it look tempting again
+
+The per-label table at the top of this document shows MCL, Fracture and Lateral OA holding +0.0197 of
+joint headroom against a 0.90 target — more than the whole deficit, and at 2.14 that is +0.042 board. It
+is the first thing the refit makes look like a lever, and it is not one. `weights_gap.py` already priced
+this axis on 2026-08-23 and the number is a CEILING, not a target: put our member and the published
+members on the same 909 studies and ours wins ten of twelve labels (0.8483 against 0.8285, and it beats
+their four-seed pool at 0.8369). Only MCL (−0.0346) and Fracture (−0.0167) lose. Closing BOTH gaps
+COMPLETELY, to weights that provably exist, is (0.0346 + 0.0167) / 12 = **+0.0043 offline** — which at
+2.14 is +0.0092 board, half the deficit, at the unreachable limit. `focus_mcl` was cancelled on exactly
+this arithmetic before it ran.
+
+The 0.90 target was mine and it is not evidence. A headroom measured against a number nobody has
+demonstrated on this corpus is a wish; the +0.0043 is measured against weights that exist. Note also
+that MCL's own mechanism is already named and is a squeeze rather than an opening: at 140 mm it loses
+0.016–0.021 to coarser mm/px (`band140`, the thinnest label spends sampling density first), and at an
+80 mm crop it loses 0.0265 to being cut off at the field margin (`crop80_span`). Wider costs it density,
+tighter costs it the structure. That is not an untried knob, it is a closed vice.
+
 **So the honest state is: there is no identified offline mechanism that reaches 0.950.** External data is
 blocked (`knee-ombx`, unanswered). The reader branch closed this morning. The 3D encoder closed weeks ago
 and I mis-read it as open. Saying "one candidate remains" was the comfortable version of an audit that

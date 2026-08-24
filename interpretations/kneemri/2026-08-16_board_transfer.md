@@ -2,6 +2,25 @@
 
 2026-08-16, from `python -m kneemri.evaluation.board_transfer` over `comp/board.jsonl`.
 
+> **CORRECTION 2026-08-24 — THE CONSTANT IN THIS DOCUMENT IS 2.2x TOO BIG. The title is not.**
+>
+> Everything below fits the compression over entries spanning **0.0043 offline**, which is inside this
+> project's own **0.0062** holdout noise floor. A slope fitted entirely inside the noise floor cannot be
+> falsified by the data that produced it, and this one was wrong: the `weakseven` instrument
+> (`knee-825t`) was built for no other purpose than to place a point outside that band, scored offline
+> 0.8562 against the champion's 0.8694, and read **0.908** against 0.934. That is 0.0132 offline buying
+> 0.026 board — a slope of **1.97**, or 2.21 against the chain floor. Re-running the tool over all twelve
+> entries now prints **+2.14**.
+>
+> **The headline claim of this document SURVIVES and is stronger than when it was written.** Inversions
+> are 4 of 55 orderable pairs and **0 of the 33 the holdout resolved at all** — every disagreement sits
+> under 0.0053. The holdout has still never mis-ordered a pair it could see, and it ordered the largest
+> gap ever put in front of it correctly and monotonically. It whispers; it does not lie.
+>
+> So: trust the SIGN above 0.0053 exactly as this document says. **Halve the MAGNITUDE.** Any figure
+> below, or in any document written between 2026-08-16 and 2026-08-24, that converts an offline delta
+> into board points at 4.67 is 2.2x too generous. Read the constant from the tool, never from prose.
+
 ## The question
 
 Every recipe decision in this project is made on a 58-study holdout scored against LLM-read report
