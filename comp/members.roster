@@ -225,6 +225,39 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # entirely at or below board 0.933 and is an EXTRAPOLATION where we now live at 0.937. The constant has
 # been wrong twice and both times it was quoted from prose — including from this comment. Run
 # `python -m kneemri.evaluation.board_transfer`; if it disagrees with any document, the document is stale.
+vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project has ever produced
+# Added 2026-08-24, and it is the first member here whose encoder is not a 2D image trunk at all:
+# V-JEPA2-large, a tubelet transformer that tokenises TWO slices per token, warm-started from our own
+# 2D weights. Every other line in this file reads the volume one slice at a time and reconstructs depth
+# afterwards; this one is handed the stack.
+#
+# Its solo number is the second-worst in the file and its seat value is +0.0002 — 0 of 1 clearing the
+# +0.0015 BOARD_RESOLVABLE threshold, which by this roster's own rule means the offline ruler cannot
+# tell it from the incumbent. That is the whole argument for mounting it, not against. Its
+# nearest-neighbour correlation is 0.8210 against a seated band of 0.8801 to 0.9143, so it sits
+# 0.06-0.09 further out than anything that has ever held a seat, and the quantity our holdout is known
+# to misprice is exactly that distance (0.0059 offline became 0.014 on the board, 2.4x; knee-nas5,
+# knee-avzz). `calib_span` at -0.0020 carried 0.929 and `through_dense` at -0.0020 is seated in the
+# champion; this is the same shape with a larger step and a worse solo score.
+#
+# What it is NOT mounted on is its own arm's verdict. `vjepa_member` — the same trunk cold from natural
+# video — read 0.8343 against a 0.845 bar and the mechanism is named: video pretraining teaches temporal
+# object permanence and camera motion, and an MRI stack's third axis is anatomical depth with no motion
+# at all. The warm start is the residue that null left standing, and its 0.8337 says the warm start did
+# not rescue the solo score either. Neither number is a reason to expect a good MEAN from it.
+#
+# Mounting it required publishing the weights: `vjepa2l` carried no Kaggle mount until today, which is
+# the half `knee-rpkw`'s recorded shippability clearance missed — it verified the kit carried the CODE
+# and concluded the member could fire, while a kernel has no internet and reaches an encoder only
+# through a mount, so `package_members.shippable` would have refused this line. Now
+# `dimiturnt/vjepa2-hf/vjepa2-vitl`, the same private per-variant pattern as `dimiturnt/dinov3-hf`.
+#
+# NAMING IT IS GATED, and the gate is already running. `kneemri-augseat` tests whether the board pays
+# for a member the offline ruler killed. At >= 0.940 that licenses mounting on distance against the
+# ruler's verdict, and this is the strongest such candidate on the board by a wide margin. At <= 0.935
+# the ruler was right and no kernel should name this. The line is added ahead of the answer only
+# because mounting is reversible and a slot is not — the same reason every negative-delta member above
+# was mounted before it was named.
 final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
 # Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
 # studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored

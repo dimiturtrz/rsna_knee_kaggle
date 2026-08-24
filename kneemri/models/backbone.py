@@ -439,6 +439,13 @@ ENCODERS: dict[str, Encoder] = {
         patch=16,
         family=VJEPA2,
         leaf="vjepa2-vitl",
+        # V-JEPA2 has no official Kaggle mirror, so the snapshot is published as a private dataset the
+        # same way DINOv3 is, one directory per variant named for the leaf `locates` matches on. Without
+        # this the variant trains locally and cannot ship: `package_members.shippable` refuses a member
+        # whose encoder no dataset mirrors, which is the half `knee-rpkw`'s recorded shippability
+        # clearance did not check — it verified the kit carried the CODE and concluded the member could
+        # fire, while a kernel has no internet and reaches weights only through a mount.
+        mount="dimiturnt/vjepa2-hf/vjepa2-vitl",
         depth=24,
         # The only tubelet trunk in the registry: `fpc64` tokenises TWO frames per token, so the same
         # window costs half the per-slice activations a 2D ViT-L would. Without this the cap OVERSTATES
