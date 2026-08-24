@@ -82,10 +82,11 @@ The two readings imply opposite plans:
 
 - **slope really ~4.67** — board 0.950 needs offline ~0.875. Nothing in this saturated space reaches
   it, and the entire member-search axis is dead by arithmetic. Budget must go to a mechanism that moves
-  offline by 0.003+, and only three candidates remain unspent: a 3D encoder that sees the volume before
-  any per-slice feature exists (named untouched by `depth_true`'s row), an ordinal grade/certainty
-  SPLIT in the reader (`knee-mxj`'s design, distinct from the regex weight that was refuted), and
-  external data (blocked, `knee-ombx`).
+  offline by 0.003+, and after the audit below **exactly one candidate remains unspent**: a 3D encoder
+  that sees the volume before any per-slice feature exists (named untouched by `depth_true`'s row).
+  External data is blocked (`knee-ombx`, MRNet RUA is non-commercial against a $77k purse). The reader
+  grade/certainty split, listed here as the second candidate when this was written, **is closed** — see
+  below.
 - **slope really ~1** — the holdout is simply a poor guide above 0.868, board gains live where it
   cannot see, and offline deltas we have been dismissing as noise are UNDER-priced rather than over.
 
@@ -113,3 +114,47 @@ Pre-registration, for the offline gap of −0.0086:
 There is no outcome on which this entry becomes a champion, and none on which it teaches nothing. That
 is what makes it worth a slot under `comp/champion.json`'s own rule — a submission is a verification
 of a path, not a measurement of a method, and a slot that expires is the reading we did not take.
+
+FIRED 05:55Z, submission 55734428, slot 1 of 5.
+
+## Addendum, same morning: the reader branch closes, which leaves one mechanism
+
+`knee-mxj` was the second of the three unspent candidates above, priced at one LLM pass over 4,407
+reports, on the argument that the reader emits ONE scalar carrying both severity and certainty and
+should be made to emit two. Read rather than grepped, `api_labeler.py` **already emits two**: its schema
+requires `{verdict, severity}`, severity is an integer 1–3 with its own vocabulary, `_verdicts()` zeroes
+it whenever the verdict is not YES, and `to_scores` maps the pair to the value. That is where the three
+YES levels come from, and `options.py:339` names them in the repo's own words — *"0.378 mild / 0.688
+moderate / 0.958 severe"*. The graded value IS the severity field; `__conf` IS the certainty field. The
+split the bead was written to buy is the split that already shipped.
+
+What is genuinely degenerate is `__conf`, constant per verdict — and that axis was closed on 2026-08-21
+when both cheap derivations of a better weight read BACKWARDS on real data (graded −0.146 over 266
+positive calls, hedged +0.052 over 34), with one mechanism explaining both: the reader has already read
+the hedge, so a regex over the same sentence re-derives its own output worse.
+
+The consumer side is spent three ways against a single control (`experiments/README.md:1315`): target
+VALUE `calib_span` −0.0020, loss WEIGHT `severity_weight` −0.0048, target SHAPE `grade_ladder` −0.0013.
+`severity_flat`, which deletes the gradation, reads −0.0044 — so the gradation is live signal AND every
+way of leaning harder on it is negative.
+
+A population check ran first and pointed the same way. Counting the three YES levels per label against
+`ordinal_signal` (baseline mean 0.741, `band_dense_long_s2026`) tested whether the three weakest-AUC
+labels rank weakest on severity because their grade axis is too thin to measure. It is not thinness:
+Effusion has the second-thinnest severe tail (5.9% of 2666 graded) and the BEST severity ranking
+(0.859), while PF OA has the fattest (39.7% of 1991) and the second-WORST (0.676). Lateral OA is
+likewise well-populated (23.6% of 1087) at 0.681. Fracture's 0.606 rests on 314 graded rows and must not
+be read at all. So for the OA pair the axis is present, well-populated, already the target value, and
+four arms deep — the model simply does not follow it. That is a statement about imaging capacity, not
+about supervision, which is the same place `attend_dense`/`focal_dense` left the decode family.
+
+One correction the close forced: the gate `knee-mxj` specified cannot be run as written. `ordinal_signal`
+excludes annotated rows BY DESIGN (`GRADED = (0.5, 1.0)`, exclusive, because `Targets.load` overwrites
+annotated studies with hard 0.0/1.0), so "re-run it against the 58 image-read annotations" asks the tool
+for exactly the rows it drops. Any future severity gate scores on the graded non-annotated band.
+
+**Consequence for the plan.** The two branches above are unchanged in kind but sharper in stakes. If the
+weakseven reading says the slope really is ~4.67, member search is dead by arithmetic and the 3D encoder
+is not one option among three — it is the only unspent mechanism left on the offline side. If the slope
+is ~1, the holdout stops being the instrument that decides anything above 0.868 and the budget moves to
+board-read levers. Either way the reading, not another arm, is what picks.
