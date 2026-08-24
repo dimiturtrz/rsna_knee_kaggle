@@ -2778,3 +2778,46 @@ charged to adaptation. Nobody has run **LoRA + the dense recipe + 336**. That is
 WHAT STANDS FROM THE ORIGINAL ENTRY: the adaptation re-attribution (DINOv3's weakness was a recipe finding,
 not an encoder one) is untouched and is in fact the load-bearing half of the argument above. What does not
 stand is "the axis is closed as a source of new seats".
+
+### THE ARCHITECTURE AXIS IS A TRADEOFF CURVE, AND EVERY POINT ON IT WAS TRAINED ON THE WRONG RECIPE (2026-08-24)
+
+`knee-y59c`. The v3 correction above was one member. This is the same audit run across **every trunk this
+project has ever fitted**, on both rulers, card-free, priced against `greedy7_v1`'s seven members.
+
+```
+  member                trunk                 nearest   solo
+  mae_matched           MAE pretraining       0.4333    0.6735
+  cnx_dense             ConvNeXt (CNN)        0.7941    0.7927
+  vjepa_warm            V-JEPA 3D tubelet     0.8212    0.8337
+  lora_r8_v3small       DINOv3 + LoRA         0.8455    0.8217
+  dinov3_base_lora      DINOv3 + LoRA         0.8467    0.8268
+  v3base_dense          DINOv3 full fine-tune 0.8829    0.8512
+  distill_pairs         DINOv2 self-distill   0.9159    0.8594
+
+  roster of 7, its own nearest-neighbour spread: 0.8724 .. 0.8893
+```
+
+**Distance orders exactly by architectural distance from DINOv2, seven points, no exception** — a different
+pretraining objective, then a different inductive bias, then a different input geometry, then a frozen base
+of the same family, then a fine-tuned base of the same family, then the same family distilled from itself.
+That is a curve, not scatter. Architecture diversity demonstrably produces different orderings here and the
+amount scales with how different the architecture is.
+
+**Solo score is monotone the other way on the same seven points.** Distance and strength are anti-correlated
+across the whole axis. That is why each arm read as a refutation in isolation: every one bought its distance
+with quality and was then judged on quality alone.
+
+**The confound nobody eliminated.** Every trunk in that table was trained on the recipe tuned for DINOv2 —
+dense sampling, 336, the same schedule and learning rate. A CNN and a tubelet trunk have different optimal
+read sizes, different LR scales, and in the tubelet case a different token geometry (`prefix_tokens = 0`, no
+class token, no registers). The measured weakness is confounded with recipe transfer and cannot be charged
+to the architecture. **Faulty TRAINING is live on this axis and has never been ruled out.**
+
+So the honest statement is not "architecture diversity does not pay". It is **"architecture diversity has
+only ever been measured where the recipe was wrong for the trunk"** — every arm sampled a point on the curve
+and none tried to move it. `cnx_dense` sits 0.078 more distant than any seated member is from its own nearest
+neighbour, and being a CNN its wrong knobs are nameable in advance rather than searched. Bands are
+pre-registered in `knee-y59c`.
+
+The distance ruler still has ONE paired board observation behind it (2026-08-21). Quoted as a RANKING, never
+as a price.
