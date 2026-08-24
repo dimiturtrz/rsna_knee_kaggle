@@ -60,6 +60,8 @@
 # the teacher path), so the mechanism fired into a crippled recipe. The bands below are unread.
 #
 # bead: knee-1xsu
+# deliberate: --distill-weight
+# deliberate: --teacher-targets
 # control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with no teacher.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

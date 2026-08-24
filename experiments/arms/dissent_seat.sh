@@ -62,6 +62,9 @@
 # read. `--backbone-lr 4e-5` below is that flag. See knee-f8j9.
 #
 # bead: knee-2f0q
+# deliberate: --dissent-weight
+# deliberate: --rank-weight
+# deliberate: --teacher-targets
 # control  band_dense = 0.8578 (best epoch 8), identical recipe with a flat pair mass.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

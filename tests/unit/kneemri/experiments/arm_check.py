@@ -361,3 +361,73 @@ def test_report_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
     assert check.report_prices(both, arming=True) is True, "a bead with neither mark refuses the arm naming it"
     assert check.report_prices(both, arming=False) is False, "the full sweep counts them and passes"
+
+
+def test_controls(tmp_path: Path):
+    """ONE REP PER CLASS of how a header can name a control: declared, prose, absent.
+
+    The `=` is what separates a declaration from a sentence — five headers in the tree open prose with
+    "# control is the same recipe...", and reading those as a control name would diff every arm against
+    a run called `is`.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "declared.sh").write_text("# control  band_dense = 0.8578 (best epoch 8)\n", encoding="utf-8")
+    (arms / "prose.sh").write_text("# control is the same recipe with one flag moved\n", encoding="utf-8")
+    (arms / "silent.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+
+    found = check.controls({"declared": "--epochs 8", "prose": "--epochs 8", "silent": "--epochs 8"})
+
+    assert found == {"declared": "band_dense"}, "a sentence beginning with the word is not a declaration"
+
+
+def test_mismatched(tmp_path: Path):
+    """The defect that cost 75 minutes of card, and the three ways an arm is allowed to differ anyway.
+
+    Partitioned on what a flag does relative to the control it names: OMITTED (the real defect —
+    `distill_pairs` dropped `--backbone-lr` and silently took the trainer's 8e-6 against a control at
+    4e-5), ADDED without a declaration, DECLARED with a `# deliberate:` line, INCIDENTAL (`--out`, which
+    differs between any two arms by construction), and EQUAL-BUT-SPELLED-DIFFERENTLY (`4e-5` against
+    `4e-05`, the same learning rate).
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "silent.sh").write_text("# control  base = 0.85\n", encoding="utf-8")
+    (arms / "declaring.sh").write_text("# deliberate: --distill-weight\n# control  base = 0.85\n", encoding="utf-8")
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+    against = {"base": "--epochs 8 --backbone-lr 4e-5 --out base.pt"}
+
+    found = check.mismatched(
+        {
+            "silent": "--epochs 8 --distill-weight 0.3 --out silent.pt",
+            "declaring": "--epochs 8 --backbone-lr 4e-05 --distill-weight 0.3 --out declaring.pt",
+        },
+        against,
+    )
+
+    assert found == {"silent": ["--backbone-lr: 4e-5 -> absent", "--distill-weight: absent -> 0.3"]}, (
+        "a declared flag, an incidental one and the same rate spelled twice are not differences"
+    )
+
+
+def test_report_mismatch(tmp_path: Path):
+    """The ASYMMETRY again: the same tree refuses while arming and only counts otherwise.
+
+    Thirty-two arms in the real tree differ from the control they name without declaring it, and nearly
+    all of them already ran — refusing the full sweep would fail every invocation of this tool until
+    they are back-filled, which is how a pre-flight check earns a `--no-verify`.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "silent.sh").write_text("# control  base = 0.85\n", encoding="utf-8")
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
+    invocations = {"silent": "--epochs 8 --distill-weight 0.3"}
+    against = {"base": "--epochs 8"}
+
+    assert check.report_mismatch(invocations, against, arming=True) is True, "an undeclared flag refuses the arming"
+    assert check.report_mismatch(invocations, against, arming=False) is False, "the full sweep counts it and passes"
+
+    (arms / "silent.sh").write_text("# deliberate: --distill-weight\n# control  base = 0.85\n", encoding="utf-8")
+
+    assert check.report_mismatch(invocations, against, arming=True) is False, "a declared flag is not a mismatch"

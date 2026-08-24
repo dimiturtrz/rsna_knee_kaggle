@@ -50,6 +50,23 @@ PRICE_MARKS = ("PRICE:", "P(clears")
 """What a priced bead says: a cost AND the odds it clears the bar. Both, because a cost alone is the
 argument that let the 140 mm build run unpriced. knee-yuqf carries the format."""
 
+CONTROL_LINE = re.compile(r"^#\s*control\s+([A-Za-z0-9_]+)\s*=", re.MULTILINE)
+"""How an arm names the run its number will be read against. `# control  band_dense = 0.8578`.
+
+The name must be followed by `=` because the word also opens prose in several headers ("# control is
+the same recipe..."), and a sentence is not a declaration.
+"""
+
+DELIBERATE_LINE = re.compile(r"^#\s*deliberate:\s*(--[a-z0-9-]+)", re.MULTILINE)
+"""How an arm says IN WRITING which flag it moves away from its control. One flag per line.
+
+An arm exists to move something, so a diff against the control is not by itself a defect — an
+UNDECLARED diff is. This is the declaration, and it costs the author one line per variable, which is
+also the moment they notice they are moving two."""
+
+INCIDENTAL_FLAGS = frozenset({"--out", "--labels", "--paths"})
+"""Flags that differ between any two arms by construction and say nothing about the experiment."""
+
 ARMS = Path("experiments/arms")
 STUB = Path("experiments/stub_lib.sh")
 SHELLS = Path("experiments")
@@ -302,9 +319,109 @@ class ArmCheck:
         None, because a recipe that exists to exercise one flag at sixty studies is not an experiment and
         has nothing to price.
         """
-        named = ((name, self.arms / f"{name}.sh") for name in invocations)
-        found = ((name, BEAD_LINE.search(path.read_text(encoding="utf-8"))) for name, path in named if path.exists())
+        headers = ((name, self._header(name)) for name in invocations)
+        found = ((name, BEAD_LINE.search(header)) for name, header in headers if header)
         return {name: match.group(1) if match else None for name, match in found}
+
+    def _header(self, name: str) -> str:
+        """The shell text of the arm printing this name, or empty where it has no shell of its own."""
+        path = self.arms / f"{name}.sh"
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    def controls(self, invocations: Mapping[str, str]) -> dict[str, str]:
+        """The control each arm declares in a `# control  <name> = <score>` line, by arm name.
+
+        Arms declaring none are absent rather than None: seventy arms predate the convention and most
+        of them name a CHECKPOINT (`wsfold0_e6`) rather than another arm, which is a control this tool
+        cannot re-derive flags for. Silence here is a missing comparison, not a wrong one.
+        """
+        found = ((name, CONTROL_LINE.search(self._header(name))) for name in invocations)
+        return {name: match.group(1) for name, match in found if match}
+
+    @staticmethod
+    def _flag_values(flags: str) -> dict[str, str]:
+        """One arm's flag line as flag -> value, with a bare switch mapping to the empty string.
+
+        Values are normalised through `float` where both sides are numbers, because `4e-5` and `4e-05`
+        are the same learning rate and a diff that reports them is a diff nobody reads twice.
+        """
+        tokens = shlex.split(flags)
+        values: dict[str, str] = {}
+        for index, token in enumerate(tokens):
+            if not token.startswith("--"):
+                continue
+            following = tokens[index + 1] if index + 1 < len(tokens) else ""
+            values[token] = "" if following.startswith("--") else following
+        return values
+
+    @staticmethod
+    def _same(one: str, other: str) -> bool:
+        """Whether two flag values mean the same thing — numerically where both are numbers."""
+        try:
+            return float(one) == float(other)
+        except ValueError:
+            return one == other
+
+    def mismatched(self, invocations: Mapping[str, str], against: Mapping[str, str]) -> dict[str, list[str]]:
+        """Each arm's UNDECLARED flag differences from the control it names, as `flag: control -> arm`.
+
+        THE HOLE THIS CLOSES, and it cost 75 minutes of card on 2026-08-24. `distill_pairs.sh` declared
+        "the control is band_dense byte-for-byte" and "ONE VARIABLE: --distill-weight", then omitted
+        `--backbone-lr` and trained at the trainer's 8e-6 default against a control at 4e-5. Every check
+        in this module passed it: they ask whether the flags PRESENT are real, and have no notion of the
+        flags that should have been. The number it produced could not be read against anything.
+
+        The diff itself already existed — `kneemri.evaluation.run_comparison` prints
+        `backbone_lr 4e-05->8e-06` — but AFTER the card is spent. This is that diff, before.
+
+        AN ARM IS SUPPOSED TO DIFFER, so a difference is reported only where the arm has not DECLARED it
+        with a `# deliberate: <flag>` line. The declaration is the check: an experiment moving one thing
+        writes one line, and an author writing three lines is being shown that their arm moves three.
+
+        `against` is the FULL printed set rather than the selection, because `--only margin_seat` is
+        exactly the invocation that must still resolve `band_dense`.
+        """
+        differences: dict[str, list[str]] = {}
+        for name, control in self.controls(invocations).items():
+            if control not in against or control == name:
+                continue
+            declared = set(DELIBERATE_LINE.findall(self._header(name)))
+            mine = self._flag_values(invocations[name])
+            theirs = self._flag_values(against[control])
+            found = [
+                f"{flag}: {theirs.get(flag, 'absent')} -> {mine.get(flag, 'absent')}"
+                for flag in sorted(set(mine) | set(theirs))
+                if flag not in INCIDENTAL_FLAGS
+                and flag not in declared
+                and not (flag in mine and flag in theirs and self._same(mine[flag], theirs[flag]))
+            ]
+            if found:
+                differences[name] = found
+        return differences
+
+    def report_mismatch(self, invocations: Mapping[str, str], against: Mapping[str, str], *, arming: bool) -> bool:
+        """Log every undeclared difference from a named control, and say whether it should REFUSE.
+
+        The same asymmetry `report_prices` draws, for the same reason: thirty-two of the tree's arms
+        differ from the control they name without a `# deliberate:` line, and nearly all of them have
+        already run — refusing the full sweep would fail every invocation of this tool until they are
+        back-filled, which is how a pre-flight check earns a `--no-verify`. The defect costs a card only
+        at the moment an arm is ARMED, and the run that arms one is the run that names it.
+        """
+        mismatched = self.mismatched(invocations, against)
+        if arming:
+            for name, found in sorted(mismatched.items()):
+                logger.info(
+                    "MISMATCHED %s: undeclared against its own control — %s (knee-f8j9)", name, "; ".join(found)
+                )
+        elif mismatched:
+            logger.info(
+                "MISMATCHED: %d of %d arms differ from the control they name without a `# deliberate:` "
+                "line saying so; --only <arm> names the flags (knee-f8j9)",
+                len(mismatched),
+                len(invocations),
+            )
+        return arming and bool(mismatched)
 
     @staticmethod
     def unpriced(descriptions: Mapping[str, str]) -> list[str]:
@@ -597,6 +714,7 @@ def main() -> None:
             len(invocations),
             ", ".join(OPERATING_POINT_FLAGS),
         )
+    undeclared = check.report_mismatch(invocations, {**printed, **switches}, arming=bool(arguments.only))
     # A REFUSAL, not an advisory: unlike an overstated cap this one silently destroys a completion
     # marker, and the arm it destroys it for has already spent the machine.
     carriage_returns = check.carriage_returns()
@@ -612,7 +730,7 @@ def main() -> None:
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
-    if refused or broken or carriage_returns or priceless or (uncached and arguments.require_caches):
+    if refused or broken or carriage_returns or priceless or undeclared or (uncached and arguments.require_caches):
         sys.exit(1)
 
 
