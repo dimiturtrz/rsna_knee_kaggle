@@ -3428,3 +3428,12 @@ The honest expectation is the middle branch at P≈0.3 for the top one, i.e. +0.
 house bar and under the +0.0082 first place costs. It is armed anyway, and the justification is not that
 it might win: it is that the wall-clock is free, and that the FLAT branch is itself the deliverable,
 closing the only axis that has ever moved this board with a measurement rather than an extrapolation.
+
+**And it did not start.** The first launch exited 0 in under a minute with `run_train: YIELDING before
+small_batch6_ff` — `lib.sh` gates on the EXISTENCE of `logs/YIELD_CARD`, not on its contents, and I had
+carefully rewritten the file to record the handoff instead of deleting it. Exit 0, ninety-five minutes of
+free card, and a log whose three lines say plainly what happened. **A gate that reads a file's presence
+cannot read the prose inside it, and prose is what I put there.** The handoff belongs in git history,
+which already had it (`cee8c20`); the flag is now removed and the arm relaunched at 22:20Z. Cost: four
+minutes, and only because the ARM EXIT was read rather than assumed — the same failure the ledger records
+for `nox` and for `git commit | tail`, arriving through a third door.
