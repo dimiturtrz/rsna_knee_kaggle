@@ -86,7 +86,9 @@ The two readings imply opposite plans:
   that sees the volume before any per-slice feature exists (named untouched by `depth_true`'s row).
   External data is blocked (`knee-ombx`, MRNet RUA is non-commercial against a $77k purse). The reader
   grade/certainty split, listed here as the second candidate when this was written, **is closed** — see
-  below.
+  below. *(Both halves of this bullet were superseded the same day: the slope refit to 2.14, not 4.67,
+  and the 3D encoder turned out already spent by three V-JEPA arms. See the two sections at the end —
+  the candidate count is ZERO, not one.)*
 - **slope really ~1** — the holdout is simply a poor guide above 0.868, board gains live where it
   cannot see, and offline deltas we have been dismissing as noise are UNDER-priced rather than over.
 
@@ -116,6 +118,70 @@ is what makes it worth a slot under `comp/champion.json`'s own rule — a submis
 of a path, not a measurement of a method, and a slot that expires is the reading we did not take.
 
 FIRED 05:55Z, submission 55734428, slot 1 of 5.
+
+## THE READING: 0.908, and the slope is 2.14, not 4.67
+
+Second band. `weakseven` landed **0.908** at 07:14Z, inside the pre-registered 0.905–0.920 window, which
+reads: *the slope in the large is ~1–2, not 4.67, and `board_transfer` must be refitted or retired.*
+Refitted. Three independent computations agree:
+
+| anchor pair | Δ offline | Δ board | slope |
+|---|---|---|---|
+| champion 0.8694 → 0.934 | 0.0132 | 0.026 | 1.97 |
+| chain floor 0.8648 → 0.927 | 0.0086 | 0.019 | 2.21 |
+| `board_transfer` over all 12 entries | — | — | **2.14** |
+
+The old 4.67 was fitted over six pairs spanning 0.0043 offline, inside the 0.0062 noise floor. This
+entry was built for no other purpose than to sit outside that band, and it cost no card at all.
+
+**The half that is easy to miss is the better news.** Inversions: 4 of 55 orderable pairs, and **0 of
+the 33 the holdout resolved at all** — every disagreement sits under 0.0053. The holdout did not get the
+ORDER wrong anywhere it could see. So this is not "the ruler is broken and board gains live where it
+cannot look", which was the other live hypothesis. It is a correct ruler with a shallower conversion:
+**trust the sign above 0.0053, halve the magnitude.**
+
+### What that does to the goal, stated plainly
+
+0.934 → 0.950 is +0.016 board. At 2.14 that is **+0.0075 offline**, not the +0.0034 the old constant
+implied. Measured offline ceiling across every direction this space has been pushed is ~0.872, which is
++0.0026 above the champion's 0.8694. The requirement is roughly three times the entire remaining
+headroom of the audited space. **Member search, seat swaps, width, decode knobs and vote rules are dead
+by arithmetic** — not flat, not noisy, arithmetically short by 3x. The refit did not loosen the problem;
+it tightened it, and it retires a whole family of cheap arms that the 4.67 figure kept looking viable.
+
+Leader 0.952 is +0.018 board on us, i.e. offline ~0.878. Nothing here reaches that either.
+
+## Correction: the 3D encoder is NOT unspent, and I filed that claim four hours ago
+
+The section above says *"exactly one candidate remains unspent: a 3D encoder that sees the volume before
+any per-slice feature exists"*, sourced to `depth_true`'s ledger row. That row is right about
+`depth_true` and **stale about the axis** — it predates the V-JEPA arms, and I quoted it without
+checking what came after it. The ledger holds three arms on exactly this mechanism:
+
+| arm | what | offline |
+|---|---|---|
+| `vjepa_probe` | V-JEPA 2 ViT-L, tubelet 2, whole 12-slice stack as frames, frozen features | 0.7620 |
+| `vjepa_member` | same trunk fitted cold as a member | 0.8313 |
+| `vjepa_warm` | warm-started from `vjepa_member_e5.encoder.pt`, 6 epochs, whole-stack 20 slices | 0.8337 |
+
+Seated band is 0.8525–0.8578. A true volume encoder, with genuine tubelet-level 3D attention, lands
+**0.024 below the weakest seated member**, and its own overfit signature argues against "it needed more
+epochs" (train loss fell monotonically across all six while holdout peaked at epoch 3 and drifted down).
+It bought +0.0002 in the ensemble despite being the most distant prediction family this project has
+produced. So the volume-encoder mechanism is armed, measured, and negative.
+
+What is genuinely open on that axis is narrower than a mechanism: line 2375 clause (d), *V-JEPA at a
+larger read — every number was taken at 256 px with 20 slices*, and clause (a), a matched 12-epoch
+schedule at ~3.2 h of card. Both are RE-TESTS of a spent axis. Price them under the new slope: to matter
+they must recover +0.024 offline to reach the seated band and then +0.0075 more to move the goal, on an
+axis where resolution is separately measured flat (`res392` 0.8459–0.8523). That is not a 1.5% mechanism;
+it is a ~0-expected-gain arm and it must not be sold as the last hope.
+
+**So the honest state is: there is no identified offline mechanism that reaches 0.950.** External data is
+blocked (`knee-ombx`, unanswered). The reader branch closed this morning. The 3D encoder closed weeks ago
+and I mis-read it as open. Saying "one candidate remains" was the comfortable version of an audit that
+actually returns zero, and the correct next move is to go find a mechanism outside this space rather than
+to re-run the least-dead thing in it.
 
 ## Addendum, same morning: the reader branch closes, which leaves one mechanism
 

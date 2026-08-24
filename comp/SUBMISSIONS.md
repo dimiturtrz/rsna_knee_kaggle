@@ -287,9 +287,24 @@ arriving as a better member rather than as an extra one. Pre-registered 0.929, l
 The `local` and `LB` columns of the all-ours rows also live in `comp/board.jsonl`, in the form something
 can read — with the one field this table never carried, the SCOPE each local number was measured on.
 `python -m kneemri.evaluation.board_transfer` reads it and answers what the prose cannot: the holdout
-has not mis-ordered a single pair it can resolve, and it converts at a median 4.7 board points per
-holdout point. See `interpretations/kneemri/2026-08-16_board_transfer.md`. **A new scored entry gets a
+has not mis-ordered a single pair it can resolve, and it converts at a median **2.14** board points per
+holdout point. See `interpretations/kneemri/2026-08-16_board_transfer.md`.  **A new scored entry gets a
 line there as well as a row here.**
+
+**THE COMPRESSION WAS 4.67 UNTIL 2026-08-24 AND EVERY NUMBER DERIVED FROM IT IS 2.2x TOO BIG.** The
+older figure was fitted over six pairs spanning 0.0043 offline — inside our own 0.0062 holdout noise
+floor — so it was a slope through noise and could not be falsified by the data that produced it. The
+`weakseven` instrument (`knee-825t`) was built to sit outside that band and did: offline 0.8562 against
+the champion's 0.8694, board 0.908 against 0.934, which is 0.0132 offline buying 0.026 board — a slope
+of 1.97, and 2.21 against the chain floor. The tool's own refit over all twelve entries agrees at 2.14.
+Prose written before that date quotes 4.67; the dated entries below are left as they were filed, because
+a ledger that edits its own past readings stops being evidence. **Multiply by 2.14, not 4.67.**
+
+The other half of that refit matters more than the constant. Inversions are 4 of 55 orderable pairs and
+**0 of the 33 the holdout resolved at all** — every disagreement is under the floor. The holdout is not
+a broken ruler that needs replacing; it is a directionally perfect ruler that was priced too steep. Its
+SIGN can be trusted wherever it clears 0.0053, and its MAGNITUDE buys less than half of what this file
+has been assuming since 2026-08-16.
 
 | date | kernel | v | method | local | LB | note |
 |---|---|---|---|---|---|---|
@@ -1913,3 +1928,42 @@ attacks from the initialisation side rather than the sample-count side.
 
 **Champion repinned.** `comp/champion.json` moves from `gradeswap` (0.933) to this entry; `champion_check`
 is what proves the new pin still rebuilds.
+
+### Result: `kneemri-weakseven` reads 0.908 — the slope was 2.2x too steep, and the holdout was never wrong (2026-08-24)
+
+Submission 55734428, fired 05:55Z, read 07:14Z. **0.908**, inside the pre-registered 0.905-0.920 band,
+which the kernel docstring wrote as *"the slope in the large is ~1-2, not 4.67 ... `board_transfer` must
+be refitted or retired."*
+
+This is the only entry in this file that was designed to lose, and it is the one that changed the plan.
+
+**Why it existed.** Every board reading we owned sat in a 0.0043 offline band, against a 0.0062 holdout
+noise floor. The recorded +4.67 board points per holdout point was therefore a slope fitted through
+noise, unfalsifiable from its own data, and no amount of training could fix that — the missing quantity
+was a point OUTSIDE the band. `record_mix` over the 28 packaged members picked the seven weakest solos
+(0.8215-0.8462) for a joint 0.8562, the furthest offline a point can sit while every member stays
+rebuildable from `comp/members.roster`. Count (7) and vote (`RankAverage`) held fixed so only member
+QUALITY moved.
+
+**The refit.**
+
+| anchor pair | Δ offline | Δ board | slope |
+|---|---|---|---|
+| champion 0.8694 → 0.934 | 0.0132 | 0.026 | 1.97 |
+| chain floor 0.8648 → 0.927 | 0.0086 | 0.019 | 2.21 |
+| `board_transfer` over all 12 entries | — | — | **2.14** |
+
+**The clause that survived, and it is the important one.** Inversions are 4 of 55 orderable pairs and
+**0 of the 33 the holdout resolved at all** — every disagreement is under 0.0053. The competing
+hypothesis was that the holdout is a poor guide above 0.868 and board gains live where it cannot see.
+That is refuted: the holdout ordered a 0.0132 offline gap into a 0.026 board gap, monotonically and in
+the right direction. Trust the SIGN above 0.0053; halve the MAGNITUDE.
+
+**What it costs the plan.** 0.934 → 0.950 is +0.016 board = **+0.0075 offline** at 2.14, against a
+measured offline ceiling of ~0.872 (+0.0026 over the champion). The requirement is ~3x the entire
+remaining headroom of the audited space. Seat swaps, ensemble width, decode knobs and vote rules are not
+flat — they are arithmetically short by 3x. The 4.67 constant had been keeping that whole family of
+cheap arms looking viable; every offline delta this file priced since 2026-08-16 is worth 46% of what it
+was sold for.
+
+No slot bought more than this one, and it bought it by scoring 0.026 below the champion on purpose.
