@@ -50,6 +50,15 @@
 #     --out "$PROCESSED/teacher_fold0.npz"
 # SMOKE IT before queueing: `python -m kneemri.experiments.arm_check --smoke`, then --studies 60 --epochs 1.
 #
+# THE FIRST RUN OF THIS ARM WAS VOID, AND ITS NUMBER MUST NOT BE READ. On 2026-08-24 it ran without
+# `--backbone-lr`, so it took the trainer's default 8e-6 (trainer.py) while the control holds 4e-5 — a
+# fifth of the control's backbone rate, against a docstring two lines up claiming byte-for-byte. It was
+# killed at epoch 8 (0.8423, mean -0.0138) once `run_comparison` printed the config diff. The per-label
+# profile was every label down and worst on the FOCAL structures (focal -0.0178, regional -0.0082): the
+# signature of a starved backbone, not of a distillation null, and not the rarity ordering the pair-mass
+# mechanism predicts either. The distill term itself DID land (the diff carried distill_weight=0.3 and
+# the teacher path), so the mechanism fired into a crippled recipe. The bands below are unread.
+#
 # bead: knee-1xsu
 # control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with no teacher.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
@@ -61,6 +70,6 @@ require "$LABELS"
 # swept before the mechanism is shown to fire spends the card on a curve through a null.
 run_train distill_pairs \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
-  --slices 20 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --distill-weight 0.3 --teacher-targets "$PROCESSED/teacher_fold0.npz" \
   --labels "$LABELS" --out "$PROCESSED/distill_pairs_s2026.pt"
