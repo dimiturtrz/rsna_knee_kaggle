@@ -2967,6 +2967,34 @@ end-to-end from ImageNet weights on ~1.5k studies is a different regime, and **a
 one knob on this arm that nothing has tested.** That is the surviving live suspect, narrower than the first
 draft claimed and pointed at by the arm's own trajectory rather than assumed.
 
+**RETRACTED 2026-08-24, by the trajectory this paragraph claimed to read.** The matched-loss argument above
+is real arithmetic and the wrong inference, and the giveaway is the clause "pointed at by the arm's own
+trajectory" — the trajectory was never opened. `logs/cnx_dense.log` holds it:
+
+| epoch | 0 | 3 | 6 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|
+| train loss | 1.2612 | 1.0696 | 0.9419 | 0.8833 | 0.8553 | 0.8416 | 0.8332 |
+| holdout AUC | 0.7050 | 0.7659 | 0.7858 | 0.7921 | 0.7909 | 0.7927 | 0.7927 |
+
+The holdout rises monotonically to the final epoch and never turns over, while train loss is still falling
+steeply. **That is an UNDER-TRAINED curve, and it is the one curve an over-regularisation story cannot
+produce** — a regime that fails to transfer peaks and then decays, and this one has not peaked in twelve
+epochs. What the matched-loss comparison actually shows is that ConvNeXt converts loss into AUC more slowly
+than DINOv2 does; it holds two different points on two different trajectories side by side, which reads as
+overfitting only if you assume both had converged. Neither had been checked.
+
+So the correction runs the other way, and it un-kills what this paragraph killed: **LR and epochs are NOT
+correctly dead on this arm — they are the live suspects, and augmentation is the one that is now
+contraindicated.** Adding augmentation strength to a model that never finished climbing would slow the
+climb. `cnx_own_recipe` is left exactly as written (`--backbone-lr 4e-4`, ten times `cnx_dense`'s), because
+raising the rate is the conventional fix for a monotone-rising fine-tune and the arm already carried it.
+Priced on `knee-y59c`; kill at epoch 4 against `cnx_dense`'s 0.7681 if the rate does not bite.
+
+This is the same failure as the two P0s three screens up, one layer in: not reciting a belief instead of
+reading the record, but reading HALF the record — two summary numbers pulled from the entry — and writing
+"the arm's own trajectory" over the half that was never opened. The twelve lines that refute it cost one
+`grep` of a log that had sat in `logs/` since the run.
+
 **What today's measurement DOES refute, and it is a sentence, not a knob.** `cnx_dense`'s entry closes with
 "a different inductive bias is not a different error structure. The axis closes." The distance ruler
 measures the opposite: nearest **0.7941** against a roster whose most distant seated member reads 0.8724 —
@@ -2974,6 +3002,48 @@ measures the opposite: nearest **0.7941** against a roster whose most distant se
 produced the most different error structure in this project. What the entry correctly showed is that it
 produced a WORSE one; what it did not show, and could not with the quality ruler alone, is that it produced
 a SIMILAR one.
+
+**And the distance does not cash, which is the same day's second measurement and the one that sets the bar.**
+Being the most distant member is not the same as being worth a seat, and the gap between those two was never
+measured — `cnx_dense`'s 63rd-of-65 came from a FORWARD greedy, which only ever asks "is this the best next
+add to a 62-member soup". It never asks what the member does to the PEAK set. That question needs no card;
+the holdout arrays have been on disk since the runs. Adding a ninth member to the 8-member greedy peak
+(0.8731), `record_mix`:
+
+| added 9th | solo | ensemble |
+|---|---|---|
+| `quarter_data` | 0.7907 | 0.8710 |
+| `cnx_dense` | 0.7927 | **0.8706** |
+| `side_dense` | 0.7937 | 0.8710 |
+| `conf24` | 0.8259 | 0.8716 |
+| `deep24` | 0.8352 | 0.8727 |
+| — none — | — | **0.8731** |
+
+Damage is monotone in SOLO QUALITY, and `cnx_dense` — 0.078 outside the roster spread, the most distant
+member this project has — lands 0.0004 BELOW `side_dense` and `quarter_data`, which sit at the same solo
+score and nowhere near the same distance. **Extreme distance bought no exemption whatsoever.**
+
+The confound that would rescue it was checked and did not. `RankAverage` is EQUAL-WEIGHT, so a weak member
+is forced to vote as loudly as a strong one, which penalises precisely the distant-but-weak case. Under the
+weighted rule the damage shrinks and does not reverse: `QualityWeightedRank` 0.8712, `LogitAverage` 0.8726,
+both still under the 0.8731 the peak holds without it. Down-weighting a distant weak member does not make it
+pay.
+
+**What this does NOT say** — and the distinction is the whole finding. It does not say diversity loses to
+averaging. `margin_seat` is solo 0.8525, worse than several seated members, and greedy takes it **2nd of 65**
+on distance alone. So the diversity payoff is real and it operates ABOVE A QUALITY FLOOR. This brackets the
+floor between `deep24` (0.8352, still costs 0.0004) and `margin_seat` (0.8525, pays). Below it distance is
+not a currency; above it distance outranks quality. Filed as `knee-98y2`.
+
+**CONSEQUENCE — this is why it was worth the ten minutes.** It converts `cnx_own_recipe` from a run judged
+on a hunch into one judged on a bar written down before it finished: the ConvNeXt member must clear **~0.85
+solo to be a seat candidate at all**, and the test that decides it is **`peak8 + it > 0.8731`**, never its
+solo number. From `cnx_dense`'s 0.7927 that is +0.057 — large, but one knob has moved this corpus that far
+before (`lr2e-4_ws` 0.7391 against `lr4e-5_ws` 0.8525 is 0.11 from the learning rate alone), and the LR is
+exactly what this arm changes.
+
+HONEST LIMITS: five members, one peak set, one split. The floor is BRACKETED to 0.8352–0.8525, not measured.
+Whether it moves with ensemble size, or with the peak set's own composition, is untested.
 
 And that lands exactly on the question `raddino_dense`'s entry closes with — the greedy peak sits at seats
 8–10 and declines after, so "the ensemble does not want another member, it wants a member that can do
