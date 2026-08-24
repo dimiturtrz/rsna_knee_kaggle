@@ -179,7 +179,7 @@ claim_card() {
   {
     echo "CLAIM $(date -u +%Y-%m-%dT%H:%MZ)"
     echo "holder: kneemri (pid $$)"
-    echo "job: ${1:-unnamed arm}"
+    echo "job: ${CLAIM_JOB:-unnamed arm}"
     echo "footprint_mib: $(arm_needs_mib "$@")"
     echo "expected_finish: ${finish:-unknown}"
   } > "$CLAIM_FILE"
@@ -204,7 +204,15 @@ wait_out_peer_claim() {
   while :; do
     claim=""
     for candidate in $PEER_CLAIMS; do
-      [ -f "$candidate" ] && [ "$candidate" != "$CLAIM_FILE" ] && claim="$candidate" && break
+      # WHOSE claim it is, read off the file, rather than which PATH it sits at. The glob expands to
+      # `$REPO/../*/logs/CARD_CLAIM`, which matches our own repo through `..` and spells it differently
+      # from `$CLAIM_FILE` — so the path test never fired, our own claim was picked as the peer, its
+      # kneemri-format `holder` line still parsed, and the loop then `break`s on the FIRST candidate.
+      # A leftover claim of ours therefore made this whole function return before it could see a real
+      # peer claim listed after it: the guard was disabled by the thing it was guarding. Measured
+      # 2026-08-24T12:10Z, where it announced "IGNORING a peer claim" about a file we had just written.
+      grep -q '^holder: kneemri' "$candidate" 2>/dev/null && continue
+      [ -f "$candidate" ] && claim="$candidate" && break
     done
     [ -z "$claim" ] && { [ "$waited" -gt 0 ] && echo "peer released the card after ${waited}m parked"; return 0; }
     now="$(date -u +%Y-%m-%dT%H:%MZ)"
@@ -519,6 +527,10 @@ run_train() {
     echo "run_train: REFUSED $1 - '$out' already holds a checkpoint. Set ALLOW_OVERWRITE=1 to replace it, or give this arm a distinct --out."
     return 1
   fi
+  # The arm's NAME, which `hold_card "${@:2}"` drops on purpose — everything downstream of it wants the
+  # trainer's flags, not the name. The claim file is the one exception: it is written for a PEER to read,
+  # and a claim reading `job: --fold` names nothing anyone could act on. Measured 2026-08-24T12:10Z.
+  CLAIM_JOB="$1"
   hold_card "${@:2}"
   local name="$1"; shift
   # FROM THE SNAPSHOT, never the repo: the package is copied per arm so an edit mid-run cannot reach a
