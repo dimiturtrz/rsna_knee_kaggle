@@ -50,6 +50,7 @@
 #     --out "$PROCESSED/teacher_fold0.npz"
 # SMOKE IT before queueing: `python -m kneemri.experiments.arm_check --smoke`, then --studies 60 --epochs 1.
 #
+# bead: knee-1xsu
 # control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with no teacher.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
