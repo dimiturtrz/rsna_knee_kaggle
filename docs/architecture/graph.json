@@ -10981,6 +10981,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.kaggle.seat_value.SeatValue.unpriceable",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.kaggle.seat_value.SeatValue.scoreable",
       "target": "kneemri.runs.holdout_record.HoldoutRecord",
@@ -10996,6 +11002,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.main",
       "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.main",
+      "target": "kneemri.kaggle.champion_check.Champion.from_board",
       "weight": 1
     },
     {
@@ -22842,6 +22854,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion.from_board",
+      "label": "from_board",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check.Champion",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.champion_check.Champion.named_by_kernel",
       "label": "named_by_kernel",
       "level": "method",
@@ -23372,6 +23392,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value.SeatValue.scoreable",
       "label": "scoreable",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_value.SeatValue",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_value.SeatValue.unpriceable",
+      "label": "unpriceable",
       "level": "method",
       "parent": "kneemri.kaggle.seat_value.SeatValue",
       "role": null

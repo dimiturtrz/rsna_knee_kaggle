@@ -42,6 +42,15 @@ KERNELS = Path("comp/kernels")
 CHOSEN = "chosen"
 """The name a kernel binds its member tuple to, which is the only line of it this check reads."""
 
+BOARD = Path("comp/board.jsonl")
+"""Every scored entry, one JSON object a line — the record `from_board` reads a NON-champion entry from.
+
+The pin above names one entry because a champion is one thing. Pricing a member needs a roster whose
+members can still be scored on the holdout, and the champion's need not be one: `allfit` scored highest
+with six of its seven members fitted at `--fold -1`. So the board is the wider record, and an entry
+chosen out of it carries its own id into the report's denominator.
+"""
+
 
 @dataclass(frozen=True)
 class Champion:
@@ -63,6 +72,29 @@ class Champion:
             board=float(str(held["board"])),
             members=tuple(str(name) for name in held["members"]),
             kit=str(held["kit"]),
+        )
+
+    @classmethod
+    def from_board(cls, entry: str, path: Path = BOARD) -> "Champion":
+        """Any scored entry, read from the board record by its id — not necessarily the best one.
+
+        `recorded` answers "what is the champion"; this answers "price against THIS entry", which is a
+        different question and became a necessary one when the champion stopped being scoreable. The
+        return type is the same because the roster arithmetic downstream does not care which entry it
+        was handed — only the denominator it prints does, and that is built from `entry`.
+        """
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        held = {str(row["id"]): row for row in rows if "id" in row}
+        if entry not in held:
+            message = f"no board entry named {entry}; the record holds {', '.join(sorted(held))}"
+            raise ValueError(message)
+        row = held[entry]
+        return cls(
+            entry=entry,
+            kernel=str(row["kernel"]),
+            board=float(str(row["board"])),
+            members=tuple(str(name) for name in row["members_named"]),
+            kit=str(row["kit"]),
         )
 
     def named_by_kernel(self, kernels: Path = KERNELS) -> tuple[str, ...]:

@@ -2700,3 +2700,43 @@ cropping — stays exactly where knee-yrf left it, priced on retention (+0.0294 
 Nor does it clear the proxy: an Otsu mass centroid is not a joint centre, and a spread built on it
 attenuates any true gap toward zero. And it says nothing about a model TRAINED aligned from the start,
 which is a different experiment from scoring an image-centred model on studies that happen to align.
+
+### distill_pairs — rank distillation is a TWIN of a seated member; the per-label rule was unreadable
+
+`--distill-weight` with `--teacher-targets`, 8 epochs on the shared recipe. The mechanism predicts lift
+ORDERED BY TEACHABLE PAIR MASS `2p(1-p)`: a teacher's ordering can only be copied where the student has
+ordered pairs to get wrong, so the rarest labels should gain most.
+
+```
+mean 0.8594 (e8) vs control 0.8578  = +0.0016, inside the 0.0062 holdout floor
+seat value against greedy7_v1 (7 scoreable members): -0.0003  (0 of 1 clear +0.0015)
+distance: nearest 0.9159 vs the roster's own worst nearest 0.8893
+```
+
+| label | positive rate | pair mass | delta vs control |
+|---|---|---|---|
+| Fracture | 0.071 | 0.132 | **+0.0133** |
+| Synovitis | 0.132 | 0.229 | -0.0071 |
+| MCL | 0.174 | 0.288 | -0.0049 |
+| Lateral OA | 0.247 | 0.372 | +0.0005 |
+| Baker's | 0.253 | 0.378 | +0.0104 |
+| Lateral Meniscus | 0.254 | 0.379 | +0.0075 |
+| ACL | 0.278 | 0.402 | +0.0054 |
+| Contusion | 0.294 | 0.415 | -0.0036 |
+| Medial OA | 0.367 | 0.465 | -0.0050 |
+| PF OA | 0.452 | 0.495 | -0.0045 |
+| Medial Meniscus | 0.533 | 0.498 | +0.0057 |
+| Effusion | 0.605 | 0.478 | +0.0013 |
+
+THE SHIPPING QUESTION IS ANSWERED AND THE MECHANISM QUESTION IS NOT. Both rulers decline the seat, and
+for once they agree: the seat value is negative, and the distance column says WHY — at 0.9159 nearest,
+this member sits closer to a seated member than any seated member sits to its own nearest neighbour. A
+rank average cannot pay for an ordering it already holds. `distill_pairs` does not go on a card.
+
+THE ARM'S OWN DECISION RULE COULD NOT BE EXECUTED, which is a harness finding, not a verdict on
+distillation. It pre-registered "lift ordered by pair mass" and the paired per-label floor half-widths
+run to +/-0.0284, so only Baker's is even marked; eleven of twelve deltas are unreadable individually.
+The profile is neither flat nor rarity-ordered — the largest gain IS on the rarest label, the mechanism's
+headline prediction, and the 2nd and 3rd rarest are the 1st and 3rd most negative. Writing a per-label
+clause against a per-label ruler that cannot resolve a per-label effect is the defect; the next arm on
+this axis states its rule on the axis its ruler can read. knee-1x4j stays gated.

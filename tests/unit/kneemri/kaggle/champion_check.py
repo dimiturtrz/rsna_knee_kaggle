@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from kneemri.kaggle.champion_check import Champion
 
 RECORD = {
@@ -78,6 +80,41 @@ def test_drift(tmp_path: Path):
     assert len(dropped) == 1
     assert "res392_ws_s2026" in dropped[0]
     assert "roster" in dropped[0]
+
+
+def _board(tmp_path: Path) -> Path:
+    """The board record as it is actually written: prose rows interleaved among the entries."""
+    path = tmp_path / "board.jsonl"
+    rows = [
+        {"note": "how to read this file"},
+        {
+            "id": "greedy7_v1",
+            "board": 0.933,
+            "kernel": "kneemri-greedy7",
+            "kit": "e7b65a0",
+            "members_named": ["small_batch6_s2026", "calib_span_s2026"],
+        },
+    ]
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    return path
+
+
+def test_from_board(tmp_path: Path):
+    """Any scored entry can be priced against, not only the best one — the champion may be unscoreable."""
+    entry = Champion.from_board("greedy7_v1", _board(tmp_path))
+
+    assert entry.entry == "greedy7_v1"
+    assert entry.board == 0.933
+    assert entry.members == ("small_batch6_s2026", "calib_span_s2026")
+    assert entry.kit == "e7b65a0"
+
+
+def test_from_board_skips_the_prose_rows(tmp_path: Path):
+    """A row carrying only a note is not an entry, and it is not an error either."""
+    with pytest.raises(ValueError, match="no board entry named nosuch") as raised:
+        Champion.from_board("nosuch", _board(tmp_path))
+
+    assert "the record holds greedy7_v1" in str(raised.value), "only real entries are offered as the way out"
 
 
 def test_drift_sees_a_kernel_that_stopped_naming_a_member(tmp_path: Path):

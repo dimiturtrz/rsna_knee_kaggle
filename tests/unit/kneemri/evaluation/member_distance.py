@@ -67,6 +67,15 @@ def test_spread():
     assert "m0.pt" in lines[0]
 
 
+def test_spread_of_a_roster_with_no_neighbour():
+    """A member alone is near nobody, and the scale says so rather than crashing or inventing one."""
+    lines = MemberDistance(_pool([_member(1)]), _pool([])).spread()
+
+    assert len(lines) == 1
+    assert "no spread" in lines[0], "the absence of the scale is what is reported"
+    assert "roster of 1" in lines[0], "with the denominator that makes it a fact"
+
+
 def test_report():
     """THE ORACLE: the board split that motivated this file, reproduced on constructed members.
 

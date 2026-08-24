@@ -48,6 +48,15 @@ from jaxtyping import Float
 from kneemri.evaluation.member_curve import Pool
 from kneemri.inference.vote import RankAverage
 
+NEIGHBOURED = 2
+"""The smallest roster in which a seated member has anyone to be near.
+
+A roster of one has no nearest neighbour, and `max()` over the empty list of its neighbours is where
+this module crashed on 2026-08-24 (knee-1gdf) once the pinned champion moved to the all-data pool and
+left exactly one scoreable member. The scale this report exists to print does not exist at that size,
+so it says so rather than inventing one.
+"""
+
 
 class MemberDistance:
     """Rank-space distance between members, computed without ever opening the label table."""
@@ -81,7 +90,14 @@ class MemberDistance:
         return [self.agreement(member, seated) for index, seated in enumerate(self.roster.predictions) if index != skip]
 
     def spread(self) -> list[str]:
-        """What each seated member's NEAREST neighbour reads — the scale a candidate is judged on."""
+        """What each seated member's NEAREST neighbour reads — the scale a candidate is judged on.
+
+        A roster too small to have neighbours reports the absence of the scale, because a candidate's
+        distance means nothing without something to be far from. Printing the candidate columns anyway
+        would let a number computed against ONE member read as a number computed against a roster.
+        """
+        if len(self.roster.predictions) < NEIGHBOURED:
+            return [f"  no spread: a roster of {len(self.roster.predictions)} has no neighbour to be near"]
         return [
             f"  seated {name}: nearest {max(self.against(seated, skip=index)):.4f}"
             for index, (name, seated) in enumerate(zip(self.roster.names, self.roster.predictions, strict=True))

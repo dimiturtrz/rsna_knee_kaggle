@@ -69,6 +69,19 @@ from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
+PRICEABLE = 2
+"""The smallest roster a seat value can be priced against, and it is a claim about meaning not a guard.
+
+A marginal contribution is what a candidate adds to a MIX. Against one member there is no mix — the
+number would be a pairwise comparison wearing a roster's name, and every arm's log would carry it as
+though it had been priced against the entry that scored.
+
+This is not hypothetical arithmetic. On 2026-08-24 the pinned champion became `allfit`, six of whose
+seven members were fitted at `--fold -1` and are unscoreable forever, leaving exactly one. Every arm
+that finished after that printed a traceback where its seat should be, and the ruler that decides
+whether a member ships went dark as a side effect of the board improving (knee-1gdf).
+"""
+
 
 class SeatValue:
     """The pinned champion's members, and what each candidate would add to them."""
@@ -114,6 +127,22 @@ class SeatValue:
         """
         return self.processed / candidate.name if candidate.parent == Path() else candidate
 
+    def unpriceable(self, roster: list[Path], unscoreable: list[Path]) -> list[str]:
+        """Why no seat value exists for this entry, with the denominator that makes it a fact.
+
+        A refusal is the deliverable here, not an error path: the alternative is a number priced against
+        fewer members than the entry has, printed under that entry's name. The way out is named in the
+        last line, because a refusal a reader cannot act on is only half of one.
+        """
+        return [
+            f"NO SEAT VALUE against {self.champion.entry}: {len(roster)} of "
+            f"{len(roster) + len(unscoreable)} members carry a holdout record, and pricing a marginal "
+            f"contribution needs at least {PRICEABLE}",
+            f"unscoreable (fold -1, they have seen every holdout study): "
+            f"{', '.join(sorted(member.stem for member in unscoreable))}",
+            "price against a scoreable entry instead: --against <board entry id>",
+        ]
+
     def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED) -> list[str]:
         """Each candidate's marginal contribution to the champion, best first — and its DISTANCE beside it.
 
@@ -124,6 +153,8 @@ class SeatValue:
         was asked to make.
         """
         roster, unscoreable = self.scoreable(self.roster())
+        if len(roster) < PRICEABLE:
+            return self.unpriceable(roster, unscoreable)
         named = [self.named(candidate) for candidate in candidates]
         mixed = RecordMix(list(dict.fromkeys([*roster, *named]))).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
@@ -147,10 +178,15 @@ def main() -> None:
     parser.add_argument("--candidates", type=Path, nargs="+", required=True, help="checkpoints to price")
     parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
+    parser.add_argument(
+        "--against",
+        default=None,
+        help="board entry id to price against instead of the pinned champion (see comp/board.jsonl)",
+    )
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    champion = Champion.recorded()
+    champion = Champion.from_board(arguments.against) if arguments.against else Champion.recorded()
     logger.info("%s scored %.3f on the board with %d members", champion.entry, champion.board, len(champion.members))
     seats = SeatValue(champion, DataRoot.from_config(arguments.paths).processed())
     for line in seats.report(arguments.candidates, arguments.combine_seed):

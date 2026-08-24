@@ -82,6 +82,35 @@ def test_named(tmp_path: Path):
     assert seats.named(tmp_path / "x.pt") == tmp_path / "x.pt", "a path given in full is left alone"
 
 
+def test_unpriceable(tmp_path: Path):
+    """A roster of one has no mix to be marginal to, so the refusal carries its own denominator."""
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    _member(tmp_path / "shipped.pt", truth, 2.0)
+    seats = SeatValue(_champion(), tmp_path)
+    roster, unscoreable = seats.scoreable(seats.roster())
+
+    lines = seats.unpriceable(roster, unscoreable)
+
+    assert lines[0] == (
+        "NO SEAT VALUE against test: 1 of 2 members carry a holdout record, and pricing a marginal "
+        "contribution needs at least 2"
+    )
+    assert "other" in lines[1], "the members that can never be scored are named, not counted"
+    assert "--against" in lines[2], "a refusal a reader cannot act on is half a refusal"
+
+
+def test_report_refuses_a_roster_too_small_to_price(tmp_path: Path):
+    """The refusal reaches the arm log in place of a number, rather than beside one."""
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    _member(tmp_path / "shipped.pt", truth, 2.0)
+    _member(tmp_path / "candidate.pt", truth, 2.0)
+
+    lines = SeatValue(_champion(), tmp_path).report([tmp_path / "candidate.pt"])
+
+    assert lines[0].startswith("NO SEAT VALUE against test:")
+    assert not any("candidate" in line for line in lines), "no candidate is priced against a roster of one"
+
+
 def test_report_prices_a_candidate_given_by_name(tmp_path: Path):
     """The equivalence class the existing test missed by always passing a full path.
 
