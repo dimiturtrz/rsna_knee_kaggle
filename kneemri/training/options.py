@@ -79,6 +79,7 @@ class TrainingOptions:
     grade_ladder: bool = False
     rank_weight: float = 0.0
     distill_weight: float = 0.0
+    dissent_weight: float = 0.0
     teacher_targets: Path | None = None
     side_weight: float = 0.0
     focus_label: str | None = None
@@ -387,6 +388,17 @@ class TrainingOptions:
             "gain should concentrate on the rarest findings. Requires --teacher-targets.",
         )
         parser.add_argument(
+            "--dissent-weight",
+            type=float,
+            default=0.0,
+            help="add a pairwise ranking term at this strength whose pairs are re-weighted toward the "
+            "ones an ENSEMBLE orders WRONG (0 = off). The same teacher file --distill-weight reads, for "
+            "the opposite purpose: not to reproduce the pool's ordering but to spend the member's "
+            "capacity where that ordering fails, which is the one way to raise ensemble ambiguity "
+            "without raising member error. Anchored to the labels throughout — a pair is only ever paid "
+            "for in the direction the reports order it. Requires --teacher-targets.",
+        )
+        parser.add_argument(
             "--pair-memory",
             type=int,
             default=0,
@@ -478,7 +490,8 @@ class TrainingOptions:
             "--teacher-targets",
             type=Path,
             default=None,
-            help="npz of an ensemble's scores for the TRAINING studies, read by --distill-weight. "
+            help="npz of an ensemble's scores for the TRAINING studies, read by --distill-weight and by "
+            "--dissent-weight. "
             "Its members must not have seen the holdout this arm is scored on: a --fold -1 member saw "
             "every study, so teaching from one leaks the evaluation labels into the student.",
         )

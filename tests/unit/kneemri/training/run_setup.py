@@ -9,7 +9,7 @@ from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.landed import Request
-from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.objective import DISSENT_TERM, Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
@@ -160,6 +160,28 @@ def test_teacher(tmp_path: Path):
     assert teacher is not None
     assert teacher.rows(np.array([0])).shape == (1, len(TARGETS))
 
+    # The OTHER consumer of the same file. The halves that must arrive together are "a term that reads a
+    # teacher" and "a teacher", so a dissenting arm has to trip both branches exactly as a distilling one
+    # does — the version of this gate that named only distillation let one through silently.
+    with pytest.raises(ValueError, match="two halves of one mechanism"):
+        _setup(dissent_weight=0.3).teacher(["s0"], np.array([0]))
+    assert _setup(dissent_weight=0.3, teacher_targets=readings).teacher(["s0"], np.array([0])) is not None
+
+
+def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
+    """A dissenting arm that also passes one of these would have that flag SILENTLY dropped.
+
+    `DecorrelatedObjective` holds the flat-mass ranking term at zero on purpose, and neither the teacher
+    pull nor the remembered pool is composed with it. Each of the three would otherwise be recorded in
+    the config and ignored by the consumer — the failure mode this whole file is written against, and one
+    this repo has now paid a full card slot for once.
+    """
+    for conflict in ({"distill_weight": 0.3}, {"rank_weight": 0.3}, {"pair_memory": 8}):
+        with pytest.raises(ValueError, match="not composed"):
+            _setup(dissent_weight=0.3, **conflict).objective()
+
+    assert _setup(dissent_weight=0.3).objective().settings()[DISSENT_TERM] == 0.3
+
 
 def test_model(monkeypatch: pytest.MonkeyPatch):
     """Adaptation happens BEFORE the wrappers, because both wrap whatever they are handed.
@@ -234,7 +256,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 23, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 24, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

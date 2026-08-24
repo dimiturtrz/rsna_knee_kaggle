@@ -6,10 +6,12 @@ from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
 from kneemri.training.label_focus import FOCUS, LabelFocus
 from kneemri.training.objective import (
     COUNT_NORMALISED,
+    DISSENT_TERM,
     DISTILL_TERM,
     PAIR_POOL,
     PER_LABEL,
     RANK_TERM,
+    DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
     Objective,
@@ -38,6 +40,7 @@ def test_objective_settings():
     assert Objective(per_label=True).settings() == {
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
+        DISSENT_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: True,
         COUNT_NORMALISED: False,
@@ -52,6 +55,7 @@ def test_ranked_objective_settings():
     assert RankedObjective(0.3, normalise_by_count=True).settings() == {
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
+        DISSENT_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: True,
@@ -353,3 +357,112 @@ def test_imitation_carries_a_gradient_to_every_study_it_misorders():
 
     assert logits.grad is not None
     assert bool((logits.grad.abs() > 0).all()), "a study with no gradient is a study the term cannot fix"
+
+
+def _contested(order: list[float], teacher: list[float]) -> Predicted:
+    """`_batch`'s labelled studies, plus what an ensemble said about the same six.
+
+    The labels stay binary and fully separated here, which is the opposite of `_taught`: the whole point
+    of this term is that it pays only for pairs the LABELS order, so a batch whose labels order nothing
+    would leave it with nothing to re-weight.
+    """
+    labelled = _batch(order)
+    return Predicted(labelled.logits, labelled.scores, labelled.weights, teacher=torch.tensor(teacher).reshape(-1, 1))
+
+
+def test_decorrelated_objective_settings():
+    """Its account reports its own strength AND the ranking term as OFF, because it holds that at zero.
+
+    The two keys together are the check that matters: this term IS the label ordering at a re-weighted
+    mass, so a config showing both live would mean the arm descended that ordering twice.
+    """
+    settings = DecorrelatedObjective(0.4).settings()
+
+    assert settings[DISSENT_TERM] == 0.4
+    assert settings[RANK_TERM] == 0.0, "the flat-mass ranking term is deliberately not composed with this"
+    assert settings[DISTILL_TERM] == 0.0
+    assert settings[PAIR_POOL] == 0
+
+
+def test_dissent():
+    """Ordering the labels' way costs less than contradicting them, whatever the teacher emphasises.
+
+    The base case, and the guard on the term's direction: the emphasis chooses WHICH pairs are charged,
+    never which order is correct. A student that ranks the reports right owes almost nothing here even
+    on the pairs the pool gets wrong — which is what makes the term safe to run unbounded.
+    """
+    objective = DecorrelatedObjective()
+    teacher = [0.9, 0.5, 0.1, 0.2, 0.2, 0.2]
+
+    agreeing = objective.dissent(_contested([3.0, 2.0, 1.0, -1.0, -2.0, -3.0], teacher))
+    contradicting = objective.dissent(_contested([-3.0, -2.0, -1.0, 1.0, 2.0, 3.0], teacher))
+
+    assert float(agreeing) < float(contradicting)
+    assert float(agreeing) < 0.1, "a student already ordering the reports' way owes almost nothing"
+
+
+def test_dissent_matches_plain_ranking_when_the_teacher_separates_nothing():
+    """A teacher with no opinion emphasises nothing, and the term collapses onto `ranking` exactly.
+
+    THE EQUALITY THAT SAYS THE EMPHASIS IS DOING THE WORK. Both sums carry the emphasis, so a uniform one
+    cancels whatever its size — if this ever drifted, the term would be `ranking` on a rescaled axis and
+    every number it produced would be a learning-rate change wearing a mechanism's name.
+    """
+    batch = _contested([3.0, 1.0, -1.0, 2.0, -2.0, -3.0], [0.5] * STUDIES)
+
+    assert float(DecorrelatedObjective().dissent(batch)) == pytest.approx(
+        float(RankedObjective().ranking(batch)), abs=1e-6
+    )
+
+
+def test_dissent_pays_more_for_the_pairs_the_teacher_gets_wrong():
+    """THE MECHANISM: two students that owe `ranking` the same amount do NOT owe this term the same.
+
+    Both batches misorder exactly one positive study by the same margin, so the flat-mass term cannot
+    tell them apart. The teacher ranks study 0 confidently above the negatives and study 2 below them,
+    so the student that fails where the POOL already fails is the one this term charges — and the one
+    that fixes it is a member the pool is missing.
+    """
+    teacher = [0.9, 0.5, 0.1, 0.2, 0.2, 0.2]
+    fails_where_the_pool_fails = _contested([5.0, 5.0, -5.0, 0.0, 0.0, 0.0], teacher)
+    fails_where_the_pool_is_right = _contested([-5.0, 5.0, 5.0, 0.0, 0.0, 0.0], teacher)
+
+    assert float(RankedObjective().ranking(fails_where_the_pool_fails)) == pytest.approx(
+        float(RankedObjective().ranking(fails_where_the_pool_is_right)), abs=1e-6
+    ), "the flat-mass term is blind to which study was misordered, which is why this term exists"
+    assert float(DecorrelatedObjective().dissent(fails_where_the_pool_fails)) > float(
+        DecorrelatedObjective().dissent(fails_where_the_pool_is_right)
+    )
+
+
+def test_dissent_raises_when_no_teacher_arrived():
+    """A decorrelating run whose readings never landed must FAIL rather than descend the plain term.
+
+    `test_imitation_raises_when_no_teacher_arrived`'s reason, and the same cost: the arm would run, the
+    emphasis would never exist, and its flat number would read as a refutation of the mechanism.
+    """
+    with pytest.raises(ValueError, match="no teacher readings"):
+        DecorrelatedObjective().dissent(_batch([3.0, 2.0, 1.0, -1.0, -2.0, -3.0]))
+
+
+def test_decorrelated_objective_adds_the_term_at_its_configured_strength():
+    """Zero strength descends exactly what plain cross-entropy would, and more strength costs more."""
+    batch = _contested([-3.0, -2.0, -1.0, 1.0, 2.0, 3.0], [0.9, 0.8, 0.7, 0.3, 0.2, 0.1])
+    plain = float(Objective()(Predicted(batch.logits, batch.scores, batch.weights)))
+
+    assert float(DecorrelatedObjective(0.0)(batch)) == pytest.approx(plain), "off is off, bit for bit"
+    assert float(DecorrelatedObjective(1.0)(batch)) > float(DecorrelatedObjective(0.5)(batch)) > plain
+
+
+def test_dissent_never_asks_the_student_to_contradict_the_labels():
+    """The anchor: a batch ranked exactly as the reports order it owes this term nothing, teacher or not.
+
+    This is what separates it from a correlation penalty, and it is the property that makes the term safe
+    to run unbounded — being different is only ever rewarded through being right, so a perfect student is
+    a fixed point however wrong the pool is about these studies.
+    """
+    contrary = [0.1, 0.1, 0.1, 0.9, 0.9, 0.9]
+
+    assert float(DecorrelatedObjective().dissent(_contested([9.0, 9.0, 9.0, -9.0, -9.0, -9.0], contrary))) == (
+        pytest.approx(0.0, abs=1e-3)
+    )

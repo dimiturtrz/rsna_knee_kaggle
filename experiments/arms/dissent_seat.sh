@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# dissent_seat.sh — one member trained where the ENSEMBLE is wrong, to fill the quadrant nothing has.
+#
+# WHY THIS AND NOT ANOTHER TRUNK. Six architecture families have been fitted here and the encoder axis
+# is closed three ways: `v3base_dense` (DINOv3) seats at -0.0007, `cnx_dense` (a CNN, outside the
+# transformer class entirely) at -0.0042, and `base_dense`'s one paying seat is better explained by its
+# 768 width than by its family. Every one of those arms holds the same slice sampling, the same
+# 2D-slice-then-pool architecture, the same five-level targets, the same BCE-plus-ranking objective and
+# the same head, and moves only the trunk's weights. The errors an ensemble needs decorrelated are made
+# downstream of all of that. A different inductive bias is not a different error structure.
+#
+# THE QUADRANT. Sorted by (solo strength, distance from the seated pool), everything this project has
+# fitted lands in three cells: strong-and-near (every DINOv2 member; seats saturate at seven),
+# distant-and-weak (`vjepa_warm`, 0.8337, nearest seated neighbour 0.8210 against a seated spread of
+# 0.8801-0.8911 — genuinely different, and worth +0.0002), and distant-and-broken (`mae_matched`,
+# nearest neighbour 0.4333, -0.0041). STRONG-AND-DISTANT is empty and always has been. Distance is
+# necessary and measured not sufficient.
+#
+# THE MECHANISM, STATED SO IT CAN FAIL. `ensemble error = mean member error - ambiguity`. Every arm
+# above moved exactly one of those terms and let the other go where it liked: a distant trunk raised
+# ambiguity and member error together, a swapped trunk left ambiguity flat. This term moves both, by
+# spending the member's capacity on the pairs the POOL orders wrong — pairs it still learns from the
+# LABELS, in the direction the reports order them, with the teacher only saying which of them matter
+# most. `DecorrelatedObjective.dissent` is `RankedObjective.ranking` with each pair's mass scaled by
+# `softplus(-(t_i - t_j))`, so a teacher with no opinion collapses it onto the control's own term bit
+# for bit (`test_dissent_matches_plain_ranking_when_the_teacher_separates_nothing`).
+#
+# WHY NOT A CORRELATION PENALTY. Negative correlation learning rewards departure from the ensemble
+# mean. It is defined on VALUES, and this metric is twelve rank statistics that read no value, so a
+# member can decorrelate its scores completely without moving one pair. And it is unbounded — nothing
+# in it says the departure should be CORRECT — which leaves the accuracy term to hold it back and makes
+# the balance the whole experiment. Anchoring the emphasis to label-ordered pairs removes both problems:
+# being different is only ever paid for through being right.
+#
+# ONE VARIABLE against the control. `band_dense` runs `--rank-weight 1.0` out of the shared recipe; this
+# arm holds the TOTAL ranking strength at 1.0 and moves it wholly onto the emphasised mass. So the
+# variable is the pair mass, not the amount of ranking — which is why `--rank-weight 0` is spelled here
+# rather than the two terms being run side by side. `run_setup` REFUSES to compose them for the same
+# reason: two copies of one ordering at two strengths, and no number afterwards saying which moved it.
+#
+# THE TEACHER MUST NOT HAVE SEEN THE HOLDOUT, exactly as for distillation: the fold-0 `_s2026` twins,
+# never a `--fold -1` member. `teacher_readings` refuses `--fold -1` outright, and `RunSetup.teacher`
+# refuses either half of the mechanism without the other before the card is touched.
+#
+# THE FALSIFIABLE PART, written before the run. This member is bought for its SEAT, not its solo score,
+# so the mean alone cannot read it:
+#   * solo within the 0.0062 floor of the control AND nearest seated neighbour DOWN — the construction
+#     works, and the seat measurement is what it was built for.
+#   * solo down by more than the floor with the neighbour also down — distant-and-weak, the vjepa
+#     quadrant again. That REFUTES this construction rather than its operating point, because the term
+#     never asks the member to be wrong; if it is weaker anyway, label-anchoring did not hold it.
+#   * neighbour UNCHANGED — the emphasis did not reach the error structure, and the operating point
+#     (weight, teacher strength) is what is open. File the neighbour, not a verdict.
+# Seat value over the standing roster decides shipping; solo alone decides nothing here.
+#
+# COST. The teacher cache already exists (`teacher_fold0.npz`, built for knee-1xsu). ~45 min for the
+# student, ZERO submission slots. SMOKE IT before queueing: `--studies 60 --epochs 1`.
+#
+# THE FLAG SET IS DIFFED AGAINST THE CONTROL BY HAND HERE, because on 2026-08-24 an arm one line from
+# this one declared `band_dense` byte-for-byte, omitted `--backbone-lr`, silently took the trainer's
+# 8e-6 default against a control at 4e-5, and burned 75 minutes of card on a number that could not be
+# read. `--backbone-lr 4e-5` below is that flag. See knee-f8j9.
+#
+# bead: knee-2f0q
+# control  band_dense = 0.8578 (best epoch 8), identical recipe with a flat pair mass.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+require "$PROCESSED/teacher_fold0.npz"
+
+run_train dissent_seat \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --rank-weight 0 --dissent-weight 1.0 --teacher-targets "$PROCESSED/teacher_fold0.npz" \
+  --labels "$LABELS" --out "$PROCESSED/dissent_seat_s2026.pt"

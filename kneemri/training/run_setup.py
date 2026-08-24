@@ -28,6 +28,7 @@ from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
 from kneemri.training.objective import (
+    DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
     Objective,
@@ -127,6 +128,7 @@ class RunSetup:
             reports=options.report_vectors is not None,
             rank_weight=options.rank_weight,
             distill_weight=options.distill_weight,
+            dissent_weight=options.dissent_weight,
             teaching=options.teacher_targets is not None,
             pair_memory=options.pair_memory,
             per_label_loss=options.per_label_loss,
@@ -153,6 +155,11 @@ class RunSetup:
         after it has already waited forty minutes for the card.
         """
         options = self.options
+        # FIRST of the three guards. A dissenting arm that also passed `--pair-memory` would otherwise be
+        # told about a missing `--rank-weight` it never intended to give, which sends the reader to the
+        # wrong flag entirely.
+        if options.dissent_weight:
+            self._check_dissent_alone()
         if options.pair_memory and not options.rank_weight:
             # LOUD, for the reason `reports` gives below: a memory with no ranking term to feed is a
             # silent no-op that trains the plain recipe under the arm's name, and would be read as a
@@ -177,6 +184,13 @@ class RunSetup:
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
             focus=LabelFocus(options.focus_label),
         )
+        if options.dissent_weight:
+            return DecorrelatedObjective(
+                options.dissent_weight,
+                normalise_by_count=options.normalise_by_count,
+                per_label=options.per_label_loss,
+                structure=structure,
+            )
         if options.distill_weight:
             # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
             # the owner's design is one training that runs both terms, so this is the composed objective
@@ -209,6 +223,32 @@ class RunSetup:
             structure=structure,
         )
 
+    def _check_dissent_alone(self) -> None:
+        """The three flags `--dissent-weight` cannot be composed with, each LOUD for `objective`'s reason.
+
+        `--distill-weight` reads the same teacher to pull the member TOWARD the pool's ordering, which is
+        the opposite of what this term spends the member on; running both descends a sum whose result
+        says nothing about either. `--rank-weight` is the same label ordering at a flat pair mass, and
+        `DecorrelatedObjective` deliberately holds it at zero — passing it would be silently ignored,
+        which is the exact failure the whole flag vocabulary here exists to prevent. `--pair-memory`
+        widens the label term's pool with remembered readouts that carry no teacher, so every remembered
+        pair would enter at an emphasis this term cannot compute.
+        """
+        options = self.options
+        conflicts = {
+            "--distill-weight": options.distill_weight,
+            "--rank-weight": options.rank_weight,
+            "--pair-memory": options.pair_memory,
+        }
+        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
+        if named:
+            message = (
+                f"--dissent-weight {options.dissent_weight} is not composed with {', '.join(named)}: it "
+                "IS the label ranking term at a re-weighted pair mass, and each of those either "
+                "descends that same ordering a second time or feeds it pairs with no teacher"
+            )
+            raise ValueError(message)
+
     def reports(self, identifiers: list[str]) -> ReportSupervision | None:
         """The report-embedding supervision this run asked for, or None — and never half of it.
 
@@ -237,12 +277,16 @@ class RunSetup:
         it raises on the first BATCH — this raises before the card is touched.
         """
         options = self.options
-        if not options.distill_weight and options.teacher_targets is None:
+        # EITHER consumer of the file, because the halves that must arrive together are "a term that
+        # reads a teacher" and "a teacher", not "distillation" specifically.
+        wants_teacher = options.distill_weight or options.dissent_weight
+        if not wants_teacher and options.teacher_targets is None:
             return None
-        if options.teacher_targets is None or not options.distill_weight:
+        if options.teacher_targets is None or not wants_teacher:
             message = (
-                f"--distill-weight {options.distill_weight} and --teacher-targets "
-                f"{options.teacher_targets} are two halves of one mechanism, and only one was given"
+                f"--distill-weight {options.distill_weight} / --dissent-weight {options.dissent_weight} "
+                f"and --teacher-targets {options.teacher_targets} are two halves of one mechanism, and "
+                "only one was given"
             )
             raise ValueError(message)
         return TeacherTargets.from_file(options.teacher_targets, identifiers, training)

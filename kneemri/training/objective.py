@@ -8,10 +8,13 @@ Cross-entropy does not optimise that. It optimises calibration — being right a
 ordering comes out as a by-product. A model can lose real cross-entropy while ranking every pair
 correctly, and it spends capacity on the part of the answer the metric throws away.
 
-So the two objectives here are a genuine pair rather than a knob:
+So the objectives here are a chain rather than a set of knobs, each one the last plus one term:
 
 - `Objective` — confidence-weighted cross-entropy, our measured default.
 - `RankedObjective` — the same, plus a term that pays only for pairs ordered the wrong way.
+- `DistilledObjective` — the same, plus that term judged against an ensemble's ordering.
+- `DecorrelatedObjective` — the same term, with its pairs re-weighted toward the ones an ensemble
+  orders WRONG. The teacher file of the one above, read for the opposite purpose.
 
 The ranking term is written for OUR supervision, not copied: our targets are weighted confidences in
 [0, 1] rather than binary labels, so a pair contributes in proportion to how much the reports actually
@@ -90,8 +93,17 @@ than a tuned one. Sweeping it before the term has shown any signal would be meas
 not yet worked.
 """
 
+DISSENT_WEIGHT = 1.0
+"""How hard the disagreement term pulls relative to cross-entropy when it is enabled at all.
+
+Parity with cross-entropy for `RANK_WEIGHT`'s reason, and with one more argument specific to this term:
+it is a RE-WEIGHTED `ranking`, mass-normalised by the same emphasis that scales it, so it sits on the
+same scale as the ranking term whose weight has already been measured neither inert nor dominant here.
+"""
+
 RANK_TERM = "rank_weight"
 DISTILL_TERM = "distill_weight"
+DISSENT_TERM = "dissent_weight"
 PAIR_POOL = "pair_memory"
 PER_LABEL = "per_label_loss"
 COUNT_NORMALISED = "normalise_by_count"
@@ -165,6 +177,7 @@ class Objective:
         return {
             RANK_TERM: 0.0,
             DISTILL_TERM: 0.0,
+            DISSENT_TERM: 0.0,
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
@@ -242,8 +255,20 @@ class RankedObjective(Objective):
         misordered, pair_weight = self.pairs(batch, batch)
         return misordered / pair_weight.clamp(min=PAIR_FLOOR)
 
-    def pairs(self, above: Predicted, below: Predicted) -> tuple[Float[Tensor, ""], Float[Tensor, ""]]:
+    def pairs(
+        self,
+        above: Predicted,
+        below: Predicted,
+        emphasis: Float[Tensor, "b b o"] | None = None,
+    ) -> tuple[Float[Tensor, ""], Float[Tensor, ""]]:
         """The misordering mass asking `above` to outrank `below`, and the pair mass it is out of.
+
+        `emphasis` scales the mass of each pair INDIVIDUALLY, which is the one thing a caller cannot
+        express by editing the two `Predicted`s it passes in: `weights` are per study, and "how much
+        does this COMPARISON matter" is per pair. It defaults to None, so every objective written before
+        it forms the identical mass it always did. It multiplies BOTH returned sums, so a caller
+        dividing one by the other gets a re-weighted average of the same surrogate rather than a term on
+        a new scale — a uniform emphasis, whatever its size, is exactly no emphasis.
 
         Returned unreduced as a (numerator, denominator) pair rather than as their ratio, because a
         caller pooling several populations of pairs must add the two sums BEFORE dividing. Averaging
@@ -264,6 +289,8 @@ class RankedObjective(Objective):
         separation = (above.scores.unsqueeze(1) - below.scores.unsqueeze(0)).clamp(min=0.0)
         confidence = above.weights.unsqueeze(1) * below.weights.unsqueeze(0)
         pair_weight = confidence * separation
+        if emphasis is not None:
+            pair_weight = pair_weight * emphasis
         misordered = pair_weight * nn.functional.softplus(-gap)
         return misordered.sum(), pair_weight.sum()
 
@@ -353,4 +380,89 @@ class DistilledObjective(RankedObjective):
             weights=(batch.weights > 0).to(batch.weights.dtype),
         )
         misordered, pair_weight = self.pairs(taught, taught)
+        return misordered / pair_weight.clamp(min=PAIR_FLOOR)
+
+
+class DecorrelatedObjective(RankedObjective):
+    """The ranking objective, with its pairs re-weighted toward the ones the ENSEMBLE gets wrong.
+
+    THE SAME LOADER AS DISTILLATION, AND THE OPPOSITE INTENT. `DistilledObjective` reads the pool's
+    readings and pulls the student TOWARD that ordering, which by construction makes a member that is
+    near the pool. This one reads the same array and spends the student's capacity where the pool's
+    ordering FAILS. Both are the teacher file, the same batch alignment, the same pair algebra; only
+    what the teacher is used for differs.
+
+    WHY THIS AND NOT A CORRELATION PENALTY. Negative correlation learning adds a term rewarding a member
+    for departing from the ensemble mean. Two things make that the wrong shape here. It is defined on
+    VALUES, and this metric is twelve rank statistics that read no value — a member can decorrelate its
+    scores completely without moving a single pair. And it is unbounded: nothing in a departure term
+    says the departure should be CORRECT, so its whole job is done by the accuracy term holding it back,
+    which is the tuning problem in the literature and a poor bet on a corpus this size.
+
+    So the departure is anchored to the LABELS instead. Every pair this term pays for is a pair the
+    reports order, judged in the direction the reports order it; the teacher only says which of those
+    pairs to care about most. A member trained this way cannot drift into being wrong-but-different,
+    because being different is only ever rewarded through being right.
+
+    WHAT IT IS FOR, STATED SO IT CAN FAIL. `ensemble error = mean member error - ambiguity`. Every seat
+    this project has bought or failed to buy moved exactly one of those terms: a distant trunk raised
+    ambiguity and member error together (+0.0002), a swapped trunk left ambiguity flat (-0.0007). This
+    term is the attempt to move both at once, so the prediction is specific — the member's SOLO score
+    should land within noise of its control (it is still descending the labels), while its nearest
+    seated neighbour drops. A member that comes back distant AND weak is the vjepa quadrant again and
+    refutes this construction rather than the operating point.
+    """
+
+    def __init__(
+        self,
+        weight: float = DISSENT_WEIGHT,
+        *,
+        normalise_by_count: bool = False,
+        per_label: bool = False,
+        structure: LabelStructure | None = None,
+    ) -> None:
+        # The base ranking term is left OFF and not threaded through. `dissent` is that same term with a
+        # re-weighted mass, so running both would descend the label ordering twice at two strengths and
+        # neither number afterwards would say which of them moved the member.
+        super().__init__(0.0, normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        self.dissent_weight = weight
+
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
+        """Cross-entropy and the side term, plus the emphasised ranking term at its own strength."""
+        focused = self.structure.focused(batch)
+        return super().__call__(focused) + self.dissent_weight * self.dissent(focused)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The ranking account plus this term's real strength, not the flag that asked for it."""
+        return {**super().settings(), DISSENT_TERM: self.dissent_weight}
+
+    def dissent(self, batch: Predicted) -> Float[Tensor, ""]:
+        """The label ranking term, with each pair's mass scaled by how badly the teacher orders it.
+
+        The emphasis is `softplus(-(t_i - t_j))` — the SAME surrogate `pairs` uses for the student, read
+        against the teacher's scores. It is near zero on a pair the pool orders confidently right, and
+        grows linearly in the gap on one it orders confidently wrong. Both sums carry it, so the term is
+        a re-weighted average and a teacher that separates nothing leaves `ranking` untouched, bit for
+        bit — which is the equality that says the emphasis and not some rescaling is doing the work.
+
+        The teacher is DETACHED. It is a fixed array read off disk, and letting the emphasis carry a
+        gradient would be asking the student to make the pool look wrong, which is the unanchored term
+        this class exists to avoid.
+
+        RAISES on a batch with no teacher, for the reason `DistilledObjective.imitation` gives: a member
+        whose readings never arrived would descend the plain ranking term under this class's name and
+        report a null that reads as a refutation of the mechanism.
+        """
+        if batch.teacher is None:
+            message = (
+                "a decorrelating objective was handed a batch with no teacher readings, so it would "
+                "descend the plain ranking term under its own name — a plumbing failure, not an "
+                "empty batch"
+            )
+            raise ValueError(message)
+        teacher = batch.teacher.detach()
+        teacher_gap = teacher.unsqueeze(1) - teacher.unsqueeze(0)
+        emphasis = nn.functional.softplus(-teacher_gap)
+        misordered, pair_weight = self.pairs(batch, batch, emphasis)
         return misordered / pair_weight.clamp(min=PAIR_FLOOR)

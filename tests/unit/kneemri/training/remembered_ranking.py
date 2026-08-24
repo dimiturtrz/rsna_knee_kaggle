@@ -6,6 +6,7 @@ from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.objective import (
     COUNT_NORMALISED,
+    DISSENT_TERM,
     DISTILL_TERM,
     PAIR_POOL,
     PER_LABEL,
@@ -28,6 +29,7 @@ def test_settings():
     assert RememberedRanking(0.3, capacity=4).settings() == {
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
+        DISSENT_TERM: 0.0,
         PAIR_POOL: 4,
         PER_LABEL: False,
         COUNT_NORMALISED: False,

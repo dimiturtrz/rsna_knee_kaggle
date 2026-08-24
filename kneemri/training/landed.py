@@ -36,7 +36,14 @@ from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECO
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS
-from kneemri.training.objective import COUNT_NORMALISED, DISTILL_TERM, PAIR_POOL, PER_LABEL, RANK_TERM
+from kneemri.training.objective import (
+    COUNT_NORMALISED,
+    DISSENT_TERM,
+    DISTILL_TERM,
+    PAIR_POOL,
+    PER_LABEL,
+    RANK_TERM,
+)
 from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.teacher_targets import TEACHER
 from kneemri.training.trainer import (
@@ -198,6 +205,7 @@ class Request:
     reports: bool
     rank_weight: float
     distill_weight: float
+    dissent_weight: float
     teaching: bool
     pair_memory: int
     per_label_loss: bool
@@ -244,6 +252,7 @@ class Request:
             REPORTS: self.reports,
             RANK_TERM: self.rank_weight,
             DISTILL_TERM: self.distill_weight,
+            DISSENT_TERM: self.dissent_weight,
             TEACHER: self.teaching,
             PAIR_POOL: self.pair_memory,
             PER_LABEL: self.per_label_loss,
