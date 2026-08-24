@@ -354,3 +354,11 @@ base_dense_ff.pt            # DARK. base_dense_s2026's flags plus --fold -1 --em
 # whole arm on kneemri-finalfit reading 0.936 and it read 0.934. Its seat is filled by the fold-0
 # band_dense_long_s2026, which is what makes `kneemri-allfit` a six-of-seven swap rather than a clean
 # sweep — stated here because an entry whose composition looks like an oversight will be read as one.
+#
+# Added 2026-08-24 23:06Z, ahead of the run finishing, so the reset window is fire-only.
+small_batch6_ff.pt          # DARK. small_batch6_s2026's flags plus --fold -1 --ema. The SEVENTH dark
+# member and the first one that has ever existed; count-of-dark-members was held at six by every board
+# entry since finalfit because six was all there were. Every caveat above applies without exception: it
+# has seen every holdout study, no offline score exists or can exist for it, and it must never enter a
+# pool that reports an offline mean. Its fold-0 twin small_batch6_s2026 is greedy seat 1 of 67 (0.8598)
+# and held the swapped seat in lastseat at 0.937, so this member's behaviour is a measured control.
