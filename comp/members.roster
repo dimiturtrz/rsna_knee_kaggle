@@ -210,3 +210,18 @@ final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can
 # or distance-scored, and it must never enter a pool that reports an offline mean. knee-7d1's 4.67x
 # board-per-holdout compression does not apply to it either — that converts an HONEST offline delta, and
 # this member has none. It ships blind against the pinned 0.933 in `kneemri-finalfit` or not at all.
+calib_span_ff.pt            # DARK. calib_span_s2026's flags plus --fold -1 --ema
+grade_ladder_ff.pt          # DARK. grade_ladder_s2026's flags plus --fold -1 --ema
+through_dense_ff.pt         # DARK. through_dense_s2026's flags plus --fold -1 --ema
+lr4e-5_ws_ff.pt             # DARK. lr4e-5_ws_s2026's flags plus --fold -1 --ema
+base_dense_ff.pt            # DARK. base_dense_s2026's flags plus --fold -1 --ema (variant base, batch 6)
+# Added 2026-08-24, from final_fit_six.sh members 1-5. Every caveat on final_ws_e12 above applies to all
+# five WITHOUT EXCEPTION: they have seen every holdout study, no offline score exists or can exist for
+# them, they must never enter a pool that reports an offline mean, and no board-per-holdout compression
+# converts anything about them because they have no honest offline delta to convert.
+#
+# The sixth member of that arm, band_dense_long_ff, DOES NOT EXIST and is not expected to. The chain was
+# stopped before it (logs/YIELD_CARD, 2026-08-24 06:19Z) because final_fit_six.sh's own header gates the
+# whole arm on kneemri-finalfit reading 0.936 and it read 0.934. Its seat is filled by the fold-0
+# band_dense_long_s2026, which is what makes `kneemri-allfit` a six-of-seven swap rather than a clean
+# sweep — stated here because an entry whose composition looks like an oversight will be read as one.
