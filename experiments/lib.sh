@@ -60,6 +60,11 @@ from core.paths import DataRoot
 print(DataRoot.from_config(Path("paths.yaml")).processed().as_posix())')"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$PROCESSED/experiments"
+
+# Touch this to stop a chain STARTING further arms; the running one finishes. See run_train.
+# In the repo's gitignored logs/ rather than under $PROCESSED, because the request comes from a person
+# or a peer session and it has to be findable without knowing where paths.yaml points.
+YIELD_FILE="$REPO/logs/YIELD_CARD"
 mkdir -p "$LOGS"
 
 # The GPU lock is MACHINE-scoped, not project-scoped, because the card is.
@@ -392,6 +397,23 @@ run_train() {
   # queue.sh needs none of this: it runs each arm as `bash experiments/arms/<arm>.sh`, a fresh shell
   # that sources this file fresh. The stale case is the hand-typed chain that sources once and then
   # calls run_train arm after arm, which is how two arms finished with no SEAT VALUE line on 2026-08-19.
+  # A CHAIN CAN BE ASKED TO STOP WITHOUT KILLING THE ARM THAT IS RUNNING.
+  #
+  # The card is shared with another project by arrangement, so "give it back" is a routine request and
+  # it arrives mid-chain. Before this existed the only ways to honour it were to kill the driver shell
+  # by pid — on a box where MSYS pids and Windows pids are different numbers for the same process, which
+  # is how a live shell has already been read as dead — or to let hours of unlicensed card run out. Both
+  # are worse than a file.
+  #
+  # Checked BEFORE the staleness re-source and before hold_card, so a yield costs neither the card nor a
+  # re-parse; and checked per CALL, which is what makes it land between arms rather than inside one. The
+  # arm on the card when the file appears finishes normally — that is the point, since abandoning a fit
+  # ten epochs in wastes the very card time the request is trying to reclaim.
+  if [ -e "$YIELD_FILE" ]; then
+    echo "run_train: YIELDING before $1 - '$YIELD_FILE' exists: $(cat "$YIELD_FILE" 2>/dev/null)"
+    echo "run_train: remove that file to let a chain start arms again."
+    return 1
+  fi
   if _lib_is_stale && [ -z "${_LIB_REFRESHING:-}" ]; then
     echo "run_train: this shell holds lib.sh $LIB_PARSED, the tree has $(_lib_blob) - re-sourcing before $1"
     _LIB_REFRESHING=1
