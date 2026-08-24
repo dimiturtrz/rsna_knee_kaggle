@@ -3019,9 +3019,35 @@ the holdout arrays have been on disk since the runs. Adding a ninth member to th
 | `deep24` | 0.8352 | 0.8727 |
 | — none — | — | **0.8731** |
 
-Damage is monotone in SOLO QUALITY, and `cnx_dense` — 0.078 outside the roster spread, the most distant
-member this project has — lands 0.0004 BELOW `side_dense` and `quarter_data`, which sit at the same solo
-score and nowhere near the same distance. **Extreme distance bought no exemption whatsoever.**
+That five-point read was written up as a QUALITY FLOOR, and the write-up carried two claims the sample could
+not support. **Both are retracted here, by the denser measurement below.** The first: `cnx_dense` was said to
+lose to "matched-quality but much NEARER peers `side_dense` and `quarter_data`". Their distances were never
+looked up. Measured, all three are far outside the roster spread — `cnx_dense` nearest 0.7686, `quarter_data`
+0.7932, `side_dense` 0.7961. The comparison held distance roughly FIXED and varied nothing; it is not evidence
+that distance bought no exemption, because no near member was in it. The second: "damage is monotone in solo
+quality" fails on the wider sample — `deep24` (solo 0.8352, nearest 0.8342) scores 0.8727, ABOVE `v3base_dense`
+(solo 0.8455, nearest 0.8829) at 0.8721. Higher solo, closer, worse.
+
+**The denser measurement, and it is a bigger result than the floor it replaces.** The sweep was extended to 28
+further members, spanning solo 0.8406–0.8534 and nearest-agreement 0.8342–0.8951 (`logs/floor_sweep.log`):
+
+```
+best   intensity392_ws 0.8729  attend_true 0.8729  calibrated_targets 0.8728  aug_long 0.8728  focal_dense 0.8728
+worst  slices16_ws 0.8718  per_label_loss 0.8718  slotmean 0.8719  schedule_8 0.8720  band_full 0.8720
+```
+
+With the five above that is **33 candidates, spanning solo 0.79–0.857 and nearest 0.769–0.951, and not one of
+them reaches 0.8731.** The whole spread of outcomes is 0.0011 — a sixth of the 0.0062 noise floor. Nor is it
+an append-only limit: for twelve of the strongest and most distant candidates, the EXHAUSTIVE best-8 over
+{peak8 + candidate} returns the original eight, unchanged, in all twelve cases (`logs/swap_sweep.log`,
+`swap_sweep2.log`). The peak set is a local optimum under append AND under single-swap.
+
+**The owner's principle shows up in the SIGN and dies on the SIZE.** Over the 28,
+`spearman(delta, NEAREST) = −0.203` — distant members do help more, which is the direction "it is about
+diversity, not averaging seven copies of the same number" predicts, and the two most distant of the 28
+(`intensity392_ws` 0.8551, `attend_true` 0.8607) are two of the best five. But `spearman(delta, SOLO) = +0.477`
+is the larger of the two, and both effects live inside a 0.0011 band. **Distance orders the candidates; it
+does not pay any of them.**
 
 The confound that would rescue it was checked and did not. `RankAverage` is EQUAL-WEIGHT, so a weak member
 is forced to vote as loudly as a strong one, which penalises precisely the distant-but-weak case. Under the
@@ -3031,19 +3057,23 @@ pay.
 
 **What this does NOT say** — and the distinction is the whole finding. It does not say diversity loses to
 averaging. `margin_seat` is solo 0.8525, worse than several seated members, and greedy takes it **2nd of 65**
-on distance alone. So the diversity payoff is real and it operates ABOVE A QUALITY FLOOR. This brackets the
-floor between `deep24` (0.8352, still costs 0.0004) and `margin_seat` (0.8525, pays). Below it distance is
-not a currency; above it distance outranks quality. Filed as `knee-98y2`.
+on distance alone; distance built this peak. What is exhausted is the POOL, not the principle. Every member
+that exists today was trained on one trunk family, one data pipeline, one split — the diversity already
+banked in the eight is all this recipe space has to give, and a 34th draw from it is a re-roll, not a new
+axis. Filed as `knee-98y2`.
 
-**CONSEQUENCE — this is why it was worth the ten minutes.** It converts `cnx_own_recipe` from a run judged
-on a hunch into one judged on a bar written down before it finished: the ConvNeXt member must clear **~0.85
-solo to be a seat candidate at all**, and the test that decides it is **`peak8 + it > 0.8731`**, never its
-solo number. From `cnx_dense`'s 0.7927 that is +0.057 — large, but one knob has moved this corpus that far
-before (`lr2e-4_ws` 0.7391 against `lr4e-5_ws` 0.8525 is 0.11 from the learning rate alone), and the LR is
-exactly what this arm changes.
+**CONSEQUENCE — and it changes the bar, not just the wording.** The pre-registered test written yesterday for
+`cnx_own_recipe` was `peak8 + it > 0.8731`. **That is a test nothing passes**, so it prices no member and
+gates no decision; a bar 33 candidates fail is measuring the bar. It is replaced by a DISPLACEMENT test: put
+`cnx_own_recipe` into the full pool, re-run the greedy from scratch, and ask whether the NEW peak exceeds
+0.8731. A member that cannot append can still rebuild the set around itself, and that is the only remaining
+way in. Solo AUC stops being a gate entirely — it enters the pool at any value. `knee-y59c` carries the
+replacement.
 
-HONEST LIMITS: five members, one peak set, one split. The floor is BRACKETED to 0.8352–0.8525, not measured.
-Whether it moves with ensemble size, or with the peak set's own composition, is untested.
+HONEST LIMITS: one peak set, one split, one fold. The swap test is SINGLE-swap over twelve candidates, not
+exhaustive over 33, so a two-member exchange is untested. And every candidate here is from this project's own
+recipe space — the result bounds what re-rolling THIS pipeline can buy, and says nothing about a member from
+outside it (a different pretrain corpus, a different modality prior).
 
 And that lands exactly on the question `raddino_dense`'s entry closes with — the greedy peak sits at seats
 8–10 and declines after, so "the ensemble does not want another member, it wants a member that can do
