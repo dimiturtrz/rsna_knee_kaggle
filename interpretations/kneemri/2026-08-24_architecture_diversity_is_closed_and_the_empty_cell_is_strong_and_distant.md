@@ -118,3 +118,66 @@ One live measurement bears on this and has not read yet: `kneemri-farseat` seats
 distant member we have — in the champion's seventh seat. If the board pays for distance that the offline
 ruler priced at +0.0002, the ruler is under-pricing ambiguity and the case above gets stronger. If it does
 not, the +0.0002 was right and distance is being correctly valued at nearly nothing.
+
+## Added the same day: the seat rule itself was measured, and it changes two sentences above
+
+Everything above prices architecture diversity with the QUALITY ruler — seat value, swap value, the greedy
+ordering. All three read the holdout mean. That is not a neutral instrument for this question: the thing
+architecture diversity is supposed to buy is disagreement, and a rank average of a disagreeing member moves
+the mean least when the member is most useful. So the verdict "the axis closes" might have been the
+verdict of the ruler. Nothing distinguished those two readings until `MemberCurve.diverse` was written.
+
+**The rule.** Forward selection by DISAGREEMENT: seed with the strongest member, then repeatedly take the
+member whose agreement with its nearest already-seated neighbour is lowest, never consulting the mean.
+Parameter-free, because a distance threshold or a quality-times-distance weighting are knobs, and a knob on
+a rule invented to settle an argument is how a favourable answer gets tuned out of a pool of seventy.
+
+**The result, 70 same-split members over 909 shared studies, no card.**
+
+| seats | greedy (by mean) | diverse (by distance) |
+|---|---|---|
+| 1 | 0.8598 | 0.8598 (same seed member) |
+| 9 | **0.8719** — peak | 0.8331 |
+| 20 | 0.8715 | 0.8455 |
+| 62 | 0.8717 | **0.8624** — peak |
+| 70 | 0.8616 | 0.8616 (everything seated) |
+
+Distance alone loses 0.0095 at its own best and 0.039 at matched seat count, against a 0.0062 floor.
+
+### What this corrects
+
+**The sentence "a different inductive bias is not a different error structure" is wrong as written, and the
+document above quotes it approvingly.** The distance ruler measures the opposite: `cnx_dense` reads nearest
+0.7941 against a roster whose most-agreeing seated pair reads 0.8724. ConvNeXt DOES produce a different
+error structure — it is one of the most distant members we own. What is true is the weaker claim: the
+different error structure it produces is not worth its quality cost.
+
+**And the greedy is not blind to distance, which the "closed axis" framing implies it is.** It seats
+`vjepa_warm` twelfth and `mae_matched` — the single most distant member in the pool, solo 0.6735 —
+EIGHTEENTH, on a plateau flat to four decimals. The quality ruler takes the distant members. It takes them
+late, after the strong core, and it declines to take them INSTEAD OF a strong member. That is a narrower
+claim than "diversity buys nothing" and it is the one the numbers support.
+
+### What this confirms
+
+The empty cell named in the title is the right target, and the diverse curve says why in one line. Its
+first five seats are `mae_matched`, `lr2e-4_ws`, `quarter_data`, `encoder_adapt_thawed`,
+`dinov3_v3small_224` — two of those are members deliberately trained on a FRACTION of the corpus, one is a
+refuted learning rate. **In this pool, distance and weakness are correlated**, so any rule reading distance
+alone buys that correlation at full price. That correlation is the finding, not the loss it produces: it
+says every distant member we own is distant partly by being bad, and therefore that the greedy has never
+once been offered the trade it would have to refuse for this axis to be honestly closed.
+
+`v3lora_dense` (`knee-u0my`, on the card 2026-08-24) is built to break the correlation rather than to work
+around it — the dense recipe carries the strength, the frozen LoRA base keeps the representation that
+carries the distance. The two constructions above (`knee-2f0q`, `knee-bdhb`) attack the same cell from the
+objective side. All three are bets that the correlation is a property of what we happen to have trained,
+not of the task.
+
+### The falsification, sharpened
+
+The section above says a decorrelation-trained member landing distant-and-weak retires the line. Today's
+curve makes that test cleaner: it need not be argued from a seat value. Re-run `--seats diverse` with the
+new member in the pool. If distance and weakness are still correlated across the pool once a member built
+to break that correlation is IN it, the correlation is a property of the task and this axis is closed on
+its own ruler rather than on the quality ruler's.
