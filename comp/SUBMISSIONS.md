@@ -2107,3 +2107,36 @@ carried, arriving now by a second route.
 retired at `greedy7`. Nothing left at the top of this board is bought by rearranging members that already
 exist — which is the fourth independent statement of the data-bound verdict, and it points the remaining
 card at the same place: a BETTER member, or a member of a kind this pool does not contain.
+
+### Result: `kneemri-augseat` reads 0.936 — type does not carry at seven either (2026-08-24)
+
+Ref 55743145, submitted 12:44Z. **0.936**, one tick under `lastseat`'s and `allfit`'s 0.937, landing in
+the pre-registered **0.936–0.939** band whose name was written before the run: *type does not carry at
+seven*.
+
+The exchange held count, vote, kit and the six-seat all-data dose, and moved the single fold-0 seat from
+`small_batch6_s2026` (0.8598 solo, the best member this project has fitted) to `aug_long_s2026` — a
+member the offline ruler scores **0.0076 worse** and which had never been mounted in any entry. So the
+variable was not seat identity this time but the *kind* of distance: a regularised member rather than a
+better-or-worse one of the same construction.
+
+It buys one reading and closes one door:
+
+- **A member the holdout ranks clearly worse is worth the same seat.** Three entries in a row now read
+  0.936–0.937 across a single-seat exchange, and the third moved an axis the first two did not touch.
+  The seat is not the variable on the identity axis *or* the regularisation axis. Offline solo score
+  keeps failing to predict seat value in every direction it has been asked.
+- **Neither branch of `knee-avzz` fired.** `≥0.940` would have said the ruler is blind to the
+  regularisation axis and would have licensed mounting on measured DISTANCE against the ruler's own
+  verdict; `≤0.935` would have said the offline number was right about a killed member. 0.936 says
+  neither. `farseat` is therefore **not submitted** — its whole case was the `≥0.940` branch — and the
+  `vjepa_warm` question stays **open** rather than retired. Writing 0.936 into either branch would be
+  reading the band the pre-registration explicitly reserved for "no".
+- **Board scatter stays bounded at one tick** across three single-seat exchanges, which is the error bar
+  every board-only decision from here inherits. It is still a bound, not a measurement.
+
+**What it costs the plan.** The seventh seat is now retired twice over — once on identity (`lastseat`),
+once on type (`augseat`). Nothing at the top of this board is bought by rearranging or re-regularising
+members that already exist. The remaining card goes to a member of a kind this pool does not contain,
+which is what `margin_seat` (a different objective) and `dissent_seat` (a different error structure)
+are for.
