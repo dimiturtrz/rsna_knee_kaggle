@@ -73,6 +73,9 @@ NOT_IN_CONFIG = {
     "report_vectors": "the report head is ALWAYS built, so no rebuild can ask whether it was trained",
     "distill_weight": "objective policy — the term pulls the SAME twelve logits toward a teacher's "
     "ordering inside the loss and adds no parameter, so the head a rebuild serves is byte-identical",
+    "auc_margin": "objective policy — it swaps WHICH scalar the same twelve logits descend, adds no "
+    "parameter (its per-label constants are solved in closed form inside the loss, never stored), and "
+    "leaves the head a rebuild serves byte-identical",
     "dissent_weight": "objective policy — it re-weights the mass of the SAME label-ordering term by how "
     "badly a teacher pool orders each pair, inside the loss, adding no parameter; the head a rebuild "
     "serves is byte-identical",

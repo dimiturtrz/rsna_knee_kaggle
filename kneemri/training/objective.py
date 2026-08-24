@@ -16,6 +16,10 @@ So the objectives here are a chain rather than a set of knobs, each one the last
 - `DecorrelatedObjective` — the same term, with its pairs re-weighted toward the ones an ensemble
   orders WRONG. The teacher file of the one above, read for the opposite purpose.
 
+And one that is not in the chain at all: `MarginObjective` REPLACES cross-entropy with the AUC-margin
+surrogate that won CheXpert, on the argument the paragraph above makes — that the calibration part of
+the answer is the part the scoreboard throws away.
+
 The ranking term is written for OUR supervision, not copied: our targets are weighted confidences in
 [0, 1] rather than binary labels, so a pair contributes in proportion to how much the reports actually
 separate the two studies and how confident both of those readings were. A pair the reports disagree
@@ -101,9 +105,27 @@ it is a RE-WEIGHTED `ranking`, mass-normalised by the same emphasis that scales 
 same scale as the ranking term whose weight has already been measured neither inert nor dominant here.
 """
 
+AUC_MARGIN = 1.0
+"""How far apart the two classes' mean scores must be pulled before the margin term stops paying.
+
+The scores it measures are sigmoid probabilities, so the whole available range is 1.0 and this default
+asks for complete separation — which is the value Yuan et al. use and the one LibAUC ships. It is a
+width, not a strength: `0.0` means the margin objective is OFF, and any positive value selects it.
+"""
+
+POSITIVE_AT = 0.5
+"""Where a graded reading becomes a positive, which MUST be where the scorer cuts.
+
+`LabelScores` binarises the holdout at its own `MIDPOINT` and the twelve AUCs are computed against
+that. A margin objective cut anywhere else optimises a different partition than the one being scored,
+silently and with no number afterwards that would say so — `test_the_margin_cuts_where_the_scorer_cuts`
+is what keeps the two equal.
+"""
+
 RANK_TERM = "rank_weight"
 DISTILL_TERM = "distill_weight"
 DISSENT_TERM = "dissent_weight"
+MARGIN_TERM = "auc_margin"
 PAIR_POOL = "pair_memory"
 PER_LABEL = "per_label_loss"
 COUNT_NORMALISED = "normalise_by_count"
@@ -178,6 +200,7 @@ class Objective:
             RANK_TERM: 0.0,
             DISTILL_TERM: 0.0,
             DISSENT_TERM: 0.0,
+            MARGIN_TERM: 0.0,
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
@@ -466,3 +489,90 @@ class DecorrelatedObjective(RankedObjective):
         emphasis = nn.functional.softplus(-teacher_gap)
         misordered, pair_weight = self.pairs(batch, batch, emphasis)
         return misordered / pair_weight.clamp(min=PAIR_FLOOR)
+
+
+class MarginObjective(Objective):
+    """The AUC-margin surrogate INSTEAD of cross-entropy — the one objective here that replaces a term.
+
+    THE MECHANISM. Every other objective in this file is cross-entropy plus something. Cross-entropy is
+    a calibration loss and the metric is twelve rank statistics, so a measurable share of every step
+    goes into a degree of freedom the scoreboard cannot read. This class removes that share rather than
+    adding a term to compete with it.
+
+    PRIOR ART, not an invention here. Deep AUC Maximization with the AUC-margin surrogate won the
+    Stanford CheXpert competition in 2020 — multi-label, class-imbalanced, medical imaging, scored on
+    mean AUROC, which is the published task closest in shape to this one. Yuan et al., *Large-scale
+    Robust Deep AUC Maximization* (arXiv 2012.03173, ICCV 2021); reference implementation LibAUC.
+
+    THE SURROGATE, AND WHY IT IS WRITTEN IN CLOSED FORM. The published loss is a min-max problem over
+    per-label scalars `(a, b)` minimised and a dual `alpha` maximised, which LibAUC descends with its own
+    optimiser. Both inner problems are quadratic and solved exactly: `a` and `b` at the two class means,
+    `alpha` at the margin shortfall. Substituting them (the envelope theorem says the outer gradient is
+    unchanged) collapses the whole thing to
+
+        var[p | positive] + var[p | negative] + relu(margin - (mean_pos - mean_neg))^2
+
+    which is also, exactly, the pairwise squared-hinge surrogate `E[(margin - (p+ - p-))^2]` decomposed.
+    So no extra parameters, no second optimiser, and the arm can run under the one-cycle AdamW every
+    other member here was fitted with — the alternative was a vendored dependency and an untested
+    interaction between PESG and this project's schedule.
+
+    THE READING BINARISES WHERE THE SCORER DOES. Our targets carry five levels and an AUC reads two, so
+    the loss cuts at `POSITIVE_AT` and keeps the graded confidence only as the per-study weight — the
+    part of the reading the metric can see, weighted by how sure the reader was, and nothing else.
+
+    THE KNOWN WEAKNESS, STATED BEFORE THE RUN. A label needs both a positive and a negative in the batch
+    to form this term at all, and a batch here holds twelve studies while Fracture is positive in ~7% of
+    them, so its term is skipped in roughly half of all steps. Cross-entropy is skipped in none. That
+    biases the panel AGAINST the rare labels, which is the opposite of the direction the mechanism
+    predicts, so a rare-label regression here is ambiguous by construction: it would be a batch-size
+    artefact before it was a refutation, and `RememberedRanking` already proves the fix in this repo.
+    """
+
+    def __init__(
+        self,
+        margin: float = AUC_MARGIN,
+        *,
+        normalise_by_count: bool = False,
+        per_label: bool = False,
+        structure: LabelStructure | None = None,
+    ) -> None:
+        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        self.margin = margin
+
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
+        """The margin surrogate and the side term — cross-entropy is REPLACED here, not added to."""
+        focused = self.structure.focused(batch)
+        return self.auc_margin(focused) + self.structure.side_term(focused)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The base account with the margin's real width, which is also what selects this objective."""
+        return {**super().settings(), MARGIN_TERM: self.margin}
+
+    def auc_margin(self, batch: Predicted) -> Float[Tensor, ""]:
+        """Within-class spread plus the shortfall between the two class means, averaged over live labels.
+
+        `normalise_by_count` and `per_label` do not reach this term and are reported unchanged. Both
+        describe how cross-entropy pools its elements, and this term has no elements to pool: it is
+        already one number per label, and it already gives each of the twelve an equal say — which is
+        what `per_label` exists to buy for cross-entropy.
+
+        A label with no positive or no negative in the batch forms no comparison and is DROPPED from the
+        mean rather than contributing a zero, which would read as a label already separated.
+        """
+        graded = self.structure.spread(batch)
+        probability = graded.logits.sigmoid()
+        positive = (graded.scores > POSITIVE_AT).to(probability.dtype) * graded.weights
+        negative = (graded.scores <= POSITIVE_AT).to(probability.dtype) * graded.weights
+        positive_mass, negative_mass = positive.sum(dim=0), negative.sum(dim=0)
+        live = (positive_mass > 0.0) & (negative_mass > 0.0)
+        if not bool(live.any()):
+            return probability.sum() * 0.0
+        positive_mean = (positive * probability).sum(dim=0) / positive_mass.clamp(min=PAIR_FLOOR)
+        negative_mean = (negative * probability).sum(dim=0) / negative_mass.clamp(min=PAIR_FLOOR)
+        spread = (positive * (probability - positive_mean) ** 2).sum(dim=0) / positive_mass.clamp(min=PAIR_FLOOR) + (
+            negative * (probability - negative_mean) ** 2
+        ).sum(dim=0) / negative_mass.clamp(min=PAIR_FLOOR)
+        shortfall = (self.margin - (positive_mean - negative_mean)).clamp(min=0.0)
+        return (spread + shortfall**2)[live].mean()

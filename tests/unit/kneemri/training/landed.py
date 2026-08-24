@@ -92,6 +92,7 @@ PLAIN = Request(
     rank_weight=0.0,
     distill_weight=0.0,
     dissent_weight=0.0,
+    auc_margin=0.0,
     teaching=False,
     pair_memory=0,
     per_label_loss=False,

@@ -9,7 +9,7 @@ from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.landed import Request
-from kneemri.training.objective import DISSENT_TERM, Objective, RankedObjective
+from kneemri.training.objective import DISSENT_TERM, MARGIN_TERM, MarginObjective, Objective, RankedObjective
 from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
@@ -183,6 +183,22 @@ def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
     assert _setup(dissent_weight=0.3).objective().settings()[DISSENT_TERM] == 0.3
 
 
+def test_objective_refuses_to_compose_the_margin_with_the_term_it_replaces():
+    """`--auc-margin` REMOVES cross-entropy, and all four of those flags add themselves to it.
+
+    Composed, the run would descend a sum that is neither objective, while its config reported both
+    switches landed — the shape that has cost this repo a card slot before. The refusal names the margin
+    flag rather than the stacked one, because that is the flag whose meaning the caller has misread.
+    """
+    for conflict in ({"rank_weight": 0.3}, {"distill_weight": 0.3}, {"dissent_weight": 0.3}, {"pair_memory": 8}):
+        with pytest.raises(ValueError, match="not composed"):
+            _setup(auc_margin=1.0, **conflict).objective()
+
+    chosen = _setup(auc_margin=0.8).objective()
+    assert isinstance(chosen, MarginObjective)
+    assert chosen.settings()[MARGIN_TERM] == 0.8
+
+
 def test_model(monkeypatch: pytest.MonkeyPatch):
     """Adaptation happens BEFORE the wrappers, because both wrap whatever they are handed.
 
@@ -256,7 +272,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 24, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 25, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

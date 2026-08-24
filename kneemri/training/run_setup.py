@@ -31,6 +31,7 @@ from kneemri.training.objective import (
     DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
+    MarginObjective,
     Objective,
     RankedObjective,
 )
@@ -129,6 +130,7 @@ class RunSetup:
             rank_weight=options.rank_weight,
             distill_weight=options.distill_weight,
             dissent_weight=options.dissent_weight,
+            auc_margin=options.auc_margin,
             teaching=options.teacher_targets is not None,
             pair_memory=options.pair_memory,
             per_label_loss=options.per_label_loss,
@@ -155,9 +157,13 @@ class RunSetup:
         after it has already waited forty minutes for the card.
         """
         options = self.options
-        # FIRST of the three guards. A dissenting arm that also passed `--pair-memory` would otherwise be
-        # told about a missing `--rank-weight` it never intended to give, which sends the reader to the
-        # wrong flag entirely.
+        # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
+        # every other objective here is built on, so a composition it cannot honour has to be named
+        # against THIS flag rather than against whichever term was stacked on top of it.
+        if options.auc_margin:
+            self._check_margin_alone()
+        # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
+        # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
         if options.dissent_weight:
             self._check_dissent_alone()
         if options.pair_memory and not options.rank_weight:
@@ -184,6 +190,13 @@ class RunSetup:
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
             focus=LabelFocus(options.focus_label),
         )
+        if options.auc_margin:
+            return MarginObjective(
+                options.auc_margin,
+                normalise_by_count=options.normalise_by_count,
+                per_label=options.per_label_loss,
+                structure=structure,
+            )
         if options.dissent_weight:
             return DecorrelatedObjective(
                 options.dissent_weight,
@@ -222,6 +235,30 @@ class RunSetup:
             per_label=options.per_label_loss,
             structure=structure,
         )
+
+    def _check_margin_alone(self) -> None:
+        """The four flags `--auc-margin` cannot be composed with, each LOUD for `objective`'s reason.
+
+        Every other objective in this file's chain is cross-entropy PLUS a term, and this one removes
+        cross-entropy. So each of those flags would ask for a term to be added to a loss that is no
+        longer there, and the sum would descend fine while meaning nothing: the run would report both
+        switches landed and no number afterwards would say which objective it actually was.
+        """
+        options = self.options
+        conflicts = {
+            "--rank-weight": options.rank_weight,
+            "--distill-weight": options.distill_weight,
+            "--dissent-weight": options.dissent_weight,
+            "--pair-memory": options.pair_memory,
+        }
+        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
+        if named:
+            message = (
+                f"--auc-margin {options.auc_margin} is not composed with {', '.join(named)}: it REPLACES "
+                "the cross-entropy term those all add themselves to, so what ran would be neither the "
+                "margin objective nor the ranking one"
+            )
+            raise ValueError(message)
 
     def _check_dissent_alone(self) -> None:
         """The three flags `--dissent-weight` cannot be composed with, each LOUD for `objective`'s reason.

@@ -80,6 +80,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     distill_weight: float = 0.0
     dissent_weight: float = 0.0
+    auc_margin: float = 0.0
     teacher_targets: Path | None = None
     side_weight: float = 0.0
     focus_label: str | None = None
@@ -397,6 +398,17 @@ class TrainingOptions:
             "capacity where that ordering fails, which is the one way to raise ensemble ambiguity "
             "without raising member error. Anchored to the labels throughout — a pair is only ever paid "
             "for in the direction the reports order it. Requires --teacher-targets.",
+        )
+        parser.add_argument(
+            "--auc-margin",
+            type=float,
+            default=0.0,
+            help="REPLACE cross-entropy with the AUC-margin surrogate at this margin width (0 = off, "
+            "1.0 = the published default and full separation on a sigmoid scale). Cross-entropy "
+            "optimises calibration and the metric is twelve rank statistics, so this drops the part of "
+            "the answer the scoreboard cannot read rather than adding a term to compete with it. Won "
+            "CheXpert 2020 (Yuan et al., arXiv 2012.03173). Composed with none of the terms above, "
+            "which all add themselves to the cross-entropy this removes.",
         )
         parser.add_argument(
             "--pair-memory",

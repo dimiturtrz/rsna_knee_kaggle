@@ -8,12 +8,15 @@ from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
+    MARGIN_TERM,
     PAIR_POOL,
     PER_LABEL,
+    POSITIVE_AT,
     RANK_TERM,
     DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
+    MarginObjective,
     Objective,
     RankedObjective,
 )
@@ -41,6 +44,7 @@ def test_objective_settings():
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
+        MARGIN_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: True,
         COUNT_NORMALISED: False,
@@ -56,6 +60,7 @@ def test_ranked_objective_settings():
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
+        MARGIN_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,
         COUNT_NORMALISED: True,
@@ -466,3 +471,114 @@ def test_dissent_never_asks_the_student_to_contradict_the_labels():
     assert float(DecorrelatedObjective().dissent(_contested([9.0, 9.0, 9.0, -9.0, -9.0, -9.0], contrary))) == (
         pytest.approx(0.0, abs=1e-3)
     )
+
+
+def _graded(levels: list[float], order: list[float]) -> Predicted:
+    """One label read at the reader's five levels rather than binarised, at full confidence."""
+    logits = torch.tensor(order).reshape(-1, 1)
+    scores = torch.tensor(levels).reshape(-1, 1)
+    return Predicted(logits, scores, torch.ones_like(scores))
+
+
+def test_margin_objective_settings():
+    """Its account reports the margin's WIDTH, which is also the flag that selects it, and every added
+    term as off — this objective composes with none of them because it removes what they add to.
+    """
+    settings = MarginObjective(0.8).settings()
+
+    assert settings[MARGIN_TERM] == 0.8
+    assert settings[RANK_TERM] == 0.0
+    assert settings[DISTILL_TERM] == 0.0
+    assert settings[DISSENT_TERM] == 0.0
+
+
+def test_auc_margin():
+    """Separating the two classes by the margin costs little; ordering them backwards costs a lot."""
+    objective = MarginObjective()
+
+    separated = objective.auc_margin(_batch([3.0, 2.0, 1.0, -1.0, -2.0, -3.0]))
+    reversed_order = objective.auc_margin(_batch([-3.0, -2.0, -1.0, 1.0, 2.0, 3.0]))
+
+    assert float(separated) < float(reversed_order)
+    assert float(reversed_order) > 1.0, "a fully reversed batch owes more than the whole margin squared"
+
+
+def test_the_margin_cuts_where_the_scorer_cuts():
+    """THE ONE WAY THIS OBJECTIVE CAN BE SILENTLY WRONG: optimising a different partition than the one
+    scored. The loss binarises at `POSITIVE_AT` and the twelve holdout AUCs binarise at `LabelScores`'
+    own midpoint, and nothing but this equality keeps the two the same number.
+    """
+    from kneemri.evaluation.scores import MIDPOINT  # noqa: PLC0415 - local to the one test that needs it
+
+    assert POSITIVE_AT == MIDPOINT
+
+
+def test_auc_margin_reads_the_cut_and_not_the_level():
+    """The metric sees a positive, never HOW positive, so two batches that binarise alike must cost alike.
+
+    Both carry the reader's real levels, and they differ on every one of them — the graded value is the
+    part of the reading this term is designed to throw away, and a loss that still moved with it would
+    be spending capacity on exactly the degree of freedom the objective exists to stop paying for.
+    """
+    objective = MarginObjective()
+    order = [3.0, 2.0, 1.0, -1.0, -2.0, -3.0]
+
+    top = objective.auc_margin(_graded([0.94, 0.82, 0.68, 0.08, 0.28, 0.08], order))
+    bottom = objective.auc_margin(_graded([0.68, 0.68, 0.94, 0.28, 0.08, 0.28], order))
+
+    assert float(top) == pytest.approx(float(bottom), abs=1e-7)
+
+
+def test_auc_margin_drops_a_label_no_pair_can_be_formed_for():
+    """A label all-positive in this batch forms no comparison, and must leave the mean rather than
+    enter it as a zero — a zero reads as a label already separated by the full margin.
+    """
+    order = [3.0, 2.0, 1.0, -1.0, -2.0, -3.0]
+    one = _batch(order)
+    both = Predicted(
+        torch.cat([one.logits, one.logits], dim=1),
+        torch.cat([torch.ones_like(one.scores), one.scores], dim=1),
+        torch.ones(len(order), 2),
+    )
+
+    assert float(MarginObjective().auc_margin(both)) == pytest.approx(float(MarginObjective().auc_margin(one)))
+
+
+def test_auc_margin_is_zero_when_nothing_can_be_compared():
+    """Every label all-positive: no term exists, and the step must be a hard zero that still carries a
+    graph — returning a bare constant would break the backward pass on a batch a sampler can produce.
+    """
+    logits = torch.tensor([[3.0], [2.0], [1.0], [-1.0], [-2.0], [-3.0]], requires_grad=True)
+    scores = torch.ones_like(logits)
+    term = MarginObjective().auc_margin(Predicted(logits, scores, torch.ones_like(scores)))
+
+    assert float(term) == 0.0
+    term.backward()
+    assert logits.grad is not None
+
+
+def test_margin_objective_replaces_cross_entropy_rather_than_adding_to_it():
+    """A batch ranked perfectly but scaled badly owes this objective almost nothing and BCE plenty.
+
+    THE WHOLE CLAIM, in one comparison: the logits below are miscalibrated by a wide margin and ordered
+    correctly with the classes fully apart. Cross-entropy charges for the calibration, this does not,
+    and the metric reads the ordering only.
+    """
+    batch = _batch([8.0, 8.0, 8.0, -8.0, -8.0, -8.0])
+
+    assert float(MarginObjective()(batch)) < 0.01
+    assert float(Objective()(batch)) < float(MarginObjective()(batch)) + 1.0, "sanity: both are small here"
+    assert float(MarginObjective()(_batch([0.2, 0.1, 0.05, -0.05, -0.1, -0.2]))) > float(MarginObjective()(batch)), (
+        "a correctly ordered but barely separated batch still owes the margin"
+    )
+
+
+def test_auc_margin_carries_a_gradient_to_every_study_it_has_not_separated():
+    """Every study must receive gradient, or the term trains only the studies at the class means."""
+    logits = torch.tensor([[-1.0], [0.0], [1.0], [-1.0], [0.0], [1.0]], requires_grad=True)
+    scores = torch.tensor([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]).reshape(-1, 1)
+
+    MarginObjective().auc_margin(Predicted(logits, scores, torch.ones_like(scores))).backward()
+
+    assert logits.grad is not None
+    assert bool((logits.grad.abs() > 0).all()), "a study with no gradient is a study the term cannot fix"
