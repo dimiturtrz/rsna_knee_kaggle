@@ -65,21 +65,6 @@ class MemberDistance:
         self.roster = roster
         self.candidates = candidates
 
-    @staticmethod
-    def agreement(left: Float[np.ndarray, "studies targets"], right: Float[np.ndarray, "studies targets"]) -> float:
-        """Two members' orderings correlated per label and averaged over labels.
-
-        Per label and not over the flattened array, for the reason `Vote.ranks` is per label: one
-        correlation across twelve unrelated findings is dominated by whichever label has the widest
-        prevalence spread, and the metric that decides the board scores each label alone.
-        """
-        left_ranks, right_ranks = RankAverage.ranks(left), RankAverage.ranks(right)
-        per_label = [
-            float(np.corrcoef(left_ranks[:, label], right_ranks[:, label])[0, 1])
-            for label in range(left_ranks.shape[1])
-        ]
-        return float(np.mean(per_label))
-
     def against(self, member: Float[np.ndarray, "studies targets"], skip: int | None = None) -> list[float]:
         """One member's agreement with each seated member, optionally skipping one seat.
 
@@ -87,7 +72,11 @@ class MemberDistance:
         correlates 1.0 with itself, and leaving that in would report every incumbent as its own twin and
         make the roster's spread — the only scale this report has — meaningless.
         """
-        return [self.agreement(member, seated) for index, seated in enumerate(self.roster.predictions) if index != skip]
+        return [
+            RankAverage.agreement(member, seated)
+            for index, seated in enumerate(self.roster.predictions)
+            if index != skip
+        ]
 
     def spread(self) -> list[str]:
         """What each seated member's NEAREST neighbour reads — the scale a candidate is judged on.

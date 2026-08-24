@@ -93,3 +93,20 @@ def test_logit_average_combine():
 
     assert np.isfinite(combined).all(), "a saturated member is clipped, not infinite"
     assert (combined > 0.5).all(), "and it still pulls the ensemble its way"
+
+
+def test_agreement():
+    """A member agrees perfectly with itself and near-zero with an independent draw."""
+    first, second = _members(2)
+    assert RankAverage.agreement(first, first) == 1.0
+    assert abs(RankAverage.agreement(first, second)) < 0.4
+
+
+def test_agreement_is_blind_to_a_monotone_rescale():
+    """Ranks, not logits — so a recalibrated member is the SAME member to this ruler.
+
+    The property that makes agreement a distance between ORDERINGS rather than between calibrations,
+    and the reason it lives beside `ranks` rather than beside the report that first printed it.
+    """
+    member = _members(1)[0]
+    assert RankAverage.agreement(member, member * 7.0 - 2.0) == 1.0

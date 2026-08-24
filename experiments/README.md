@@ -2839,3 +2839,53 @@ Bands are pre-registered in `knee-y59c`.
 
 The distance ruler still has ONE paired board observation behind it (2026-08-21). Quoted as a RANKING, never
 as a price.
+
+### DISTANCE AS A SEAT RULE, RUN RATHER THAN ARGUED — AND REFUTED (2026-08-24)
+
+The architecture-diversity question has been asked in this repository more times than it has been
+measured. Every reading that touched it — `seat_value`, `marginal`, `swap`, the greedy curve — prices a
+candidate by what it does to the HOLDOUT MEAN, which is the quality ruler choosing seats. `MemberDistance`
+was built on 2026-08-21 to read the other axis and has only ever been printed BESIDE the quality number,
+never used to decide anything. So the greedy's standing verdict against every distant member this project
+has trained might have been the verdict of the ruler rather than of the axis, and nothing distinguished
+those two cases.
+
+`MemberCurve.diverse` is the missing rule. Seed with the strongest member, then repeatedly take the member
+whose agreement with its nearest already-seated neighbour is LOWEST — the twin detector run backwards. The
+mean is printed at every seat and never consulted. Parameter-free on purpose: a distance threshold or a
+quality-times-distance weighting are both knobs, and a knob on a rule invented to settle an argument is how
+a favourable answer gets tuned out of a pool of seventy.
+
+    python -m kneemri.evaluation.record_mix --records <pool> --seats greedy
+    python -m kneemri.evaluation.record_mix --records <pool> --seats diverse
+
+**70 members over 909 shared studies, both curves off the same arrays, no card.**
+
+    seats     greedy (by mean)        diverse (by distance)
+      1       0.8598                  0.8598  (same seed member)
+      9       0.8719  <- peak         0.8331
+     20       0.8715                  0.8455
+     62       0.8717                  0.8624  <- peak
+     70       0.8616                  0.8616  (everything seated, same set)
+
+**Distance alone loses 0.0095 at its own peak and 0.039 at matched seat count.** The floor is 0.0062, so
+the first is past it by 1.5x and the second is not close to a judgement call. The rule is refuted.
+
+**WHY IT LOSES, WHICH IS NOT WHAT THE HEADLINE SAYS.** Read `diverse`'s first five seats: `mae_matched`,
+`lr2e-4_ws`, `quarter_data`, `encoder_adapt_thawed`, `dinov3_v3small_224`. Two of those are members
+deliberately trained on a FRACTION OF THE DATA and one is a refuted learning rate. In this pool distance
+and weakness are correlated — a member ends up far from the roster mostly by being bad at the task — so a
+rule that reads distance alone buys that correlation at full price. What is refuted is the sentence
+"distance is a seat rule", not the sentence "a distant member can be worth a seat".
+
+**AND THE GREEDY IS NOT BLIND TO DISTANCE, which is the reading that actually settles the argument.** It
+seats `vjepa_warm` twelfth and `mae_matched` — the most distant member in the pool, solo 0.6735 — EIGHTEENTH,
+on a plateau where the curve is flat to four decimals. So the quality ruler does take the distant members;
+it takes them late, once the strong core is assembled, and it declines to take them instead of a strong
+member. That is a different claim from "architecture diversity buys nothing" and it is the one the numbers
+support.
+
+**WHAT IS STILL OPEN, and it is one cell.** Every distant member this project owns is also weak: the seven-point
+table above orders solo score exactly opposite to distance with no exception. Nobody has held a member that is
+distant AND strong, so the greedy has never been offered the trade it would have to refuse for the axis to be
+closed. `v3lora_dense` (knee-u0my) exists to produce exactly that member and is on the card tonight.

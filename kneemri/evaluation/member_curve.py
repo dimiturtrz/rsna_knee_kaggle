@@ -207,6 +207,43 @@ class MemberCurve:
             lines.append(f"greedy {len(chosen)}: {score:.4f}  +{pool.names[index]}")
         return lines
 
+    def diverse(self, pool: Pool) -> list[str]:
+        """Forward selection by DISAGREEMENT rather than by mean — the seat rule nobody has run.
+
+        THE QUESTION IT EXISTS TO ANSWER, asked repeatedly and never tested. `greedy` picks the member
+        that lifts the holdout mean most, which is the QUALITY ruler choosing seats; every architecturally
+        distant member this project has trained was rejected by it, and on 2026-08-24 the distance ruler
+        priced seven trunks and ordered them EXACTLY opposite to their solo scores. So the greedy's
+        verdict on architecture diversity may be the verdict of the ruler rather than of the axis, and
+        the only way to tell is to build the ensemble the other way and compare the two PEAKS.
+
+        The rule: seed with the strongest member, then repeatedly take the member whose agreement with
+        its nearest already-seated neighbour is lowest — the twin detector run backwards. The mean is
+        computed and printed at every seat count but never consulted, so the two paths differ in the
+        selection rule alone and the curves are read against each other.
+
+        Parameter-free on purpose. A distance THRESHOLD or a quality-times-distance weighting would both
+        be knobs, and a knob on a rule invented to settle an argument is how a favourable answer gets
+        tuned out of a pool of 68 members. Where this loses to `greedy` is the finding, not a reason to
+        add a term.
+        """
+        chosen = [max(range(len(pool)), key=lambda index: self.scores.mean(pool.predictions[index], pool.truth))]
+        remaining = set(range(len(pool))) - set(chosen)
+        lines = [f"diverse 1: {self.scores.mean(pool.combined(chosen), pool.truth):.4f}  +{pool.names[chosen[0]]}"]
+        while remaining:
+            index = min(
+                remaining,
+                key=lambda candidate: max(
+                    RankAverage.agreement(pool.predictions[candidate], pool.predictions[seat]) for seat in chosen
+                ),
+            )
+            nearest = max(RankAverage.agreement(pool.predictions[index], pool.predictions[seat]) for seat in chosen)
+            chosen.append(index)
+            remaining.discard(index)
+            score = self.scores.mean(pool.combined(chosen), pool.truth)
+            lines.append(f"diverse {len(chosen)}: {score:.4f}  +{pool.names[index]}  (nearest {nearest:.4f})")
+        return lines
+
     def swap(self, roster: Pool, candidates: Pool) -> list[str]:
         """What each candidate is worth in the best SEAT it could take, holding the member count fixed.
 

@@ -5,6 +5,7 @@ import numpy as np
 from core.findings import TARGETS
 from kneemri.evaluation.member_curve import Pool
 from kneemri.evaluation.member_distance import MemberDistance
+from kneemri.inference.vote import RankAverage
 
 STUDIES = 60
 
@@ -32,19 +33,6 @@ def _pool(members: list[np.ndarray]) -> Pool:
     return Pool([f"m{index}.pt" for index in range(len(members))], members, _truth())
 
 
-def test_agreement():
-    """A member agrees perfectly with itself and near-zero with an independent draw."""
-    first, second = _member(1), _member(2)
-    assert MemberDistance.agreement(first, first) == 1.0
-    assert abs(MemberDistance.agreement(first, second)) < 0.4
-
-
-def test_agreement_is_blind_to_a_monotone_rescale():
-    """Ranks, not logits — so a recalibrated member is the SAME member to this ruler."""
-    member = _member(3)
-    assert MemberDistance.agreement(member, member * 7.0 - 2.0) == 1.0
-
-
 def test_against():
     """One member against each seat, in roster order."""
     roster = _pool([_member(1), _member(2)])
@@ -56,7 +44,7 @@ def test_against_skips_a_seat():
     """An incumbent measured against the roster must not count itself as its own twin."""
     members = [_member(1), _member(2)]
     distance = MemberDistance(_pool(members), _pool([]))
-    assert distance.against(members[0], skip=0) == [MemberDistance.agreement(members[0], members[1])]
+    assert distance.against(members[0], skip=0) == [RankAverage.agreement(members[0], members[1])]
 
 
 def test_spread():

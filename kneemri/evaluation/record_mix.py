@@ -166,7 +166,7 @@ class MixReading:
     pool: Pool
     roster: list[Path]
 
-    def lines(self, curve: MemberCurve, *, greedy: bool, paired: bool, labels: bool) -> list[str]:
+    def lines(self, curve: MemberCurve, seats: str | None, *, paired: bool, labels: bool) -> list[str]:
         """The reading this invocation asked for, as report lines."""
         if labels:
             # BEFORE the roster branch, because a label reading of the SHIPPED mix is the common case
@@ -181,8 +181,13 @@ class MixReading:
             # ship it and at whose expense. Printing only the add is what let every seat number quoted in
             # this repository be the price of a fifth member the pin forbids.
             return curve.marginal(held, candidates) + curve.swap(held, candidates)
-        if greedy:
-            return curve.greedy(self.pool)
+        # A NAMED SEAT RULE rather than a `greedy` flag, because there are now two forward selections and
+        # they are the same KIND of reading: build an ensemble from nothing, one member at a time,
+        # differing only in what decides the next seat. `greedy` asks the holdout mean, `diverse` asks the
+        # rank-space distance and never opens the labels. Two booleans would have made `greedy=True,
+        # diverse=True` expressible and meaningless.
+        if seats:
+            return {"greedy": curve.greedy, "diverse": curve.diverse}[seats](self.pool)
         return curve.logged(self.pool, paired=paired)
 
 
@@ -199,9 +204,12 @@ def main() -> None:
         help="hold these members fixed and report what each OTHER record would add — the seat number",
     )
     parser.add_argument(
-        "--greedy",
-        action="store_true",
-        help="forward selection instead of every subset — the only tractable reading past a dozen members",
+        "--seats",
+        choices=("greedy", "diverse"),
+        help="forward selection instead of every subset — the only tractable reading past a dozen members. "
+        "`greedy` takes the member that lifts the holdout mean most; `diverse` takes the member LEAST "
+        "correlated with anything already seated and never opens the labels. The comparison worth reading "
+        "is the two PEAKS: whether an ensemble built for spread beats the one the quality ruler builds.",
     )
     parser.add_argument(
         "--labels",
@@ -221,7 +229,7 @@ def main() -> None:
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
     reading = MixReading(mixed, roster)
-    for line in reading.lines(curve, greedy=arguments.greedy, paired=arguments.paired, labels=arguments.labels):
+    for line in reading.lines(curve, arguments.seats, paired=arguments.paired, labels=arguments.labels):
         logger.info(line)
 
 

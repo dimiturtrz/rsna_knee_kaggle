@@ -112,6 +112,30 @@ class RankAverage(Vote):
             return per_member[0]
         return np.stack([self.ranks(member) for member in per_member]).mean(0)
 
+    @staticmethod
+    def agreement(left: NDArray[np.float64], right: NDArray[np.float64]) -> float:
+        """Two members' orderings correlated per label and averaged over labels.
+
+        Per label and not over the flattened array, for the reason `ranks` is per label: one correlation
+        across twelve unrelated findings is dominated by whichever label has the widest prevalence
+        spread, and the metric that decides the board scores each label alone.
+
+        IT LIVES HERE, BESIDE THE RANKING IT IS COMPUTED IN, rather than on `MemberDistance` where it was
+        written. Two modules need it and only one of them may import the other: `member_distance` imports
+        `Pool` from `member_curve`, so a seat rule in `member_curve` that selects by disagreement could
+        not reach a function on `MemberDistance` without closing a cycle. Agreement is a property of the
+        rank space this rule defines, not of the report that first printed it.
+        """
+        left_ranks, right_ranks = RankAverage.ranks(left), RankAverage.ranks(right)
+        return float(
+            np.mean(
+                [
+                    float(np.corrcoef(left_ranks[:, label], right_ranks[:, label])[0, 1])
+                    for label in range(left_ranks.shape[1])
+                ]
+            )
+        )
+
 
 class QualityWeightedRank(Vote):
     """Rank-average weighted by how far each member beats chance on the holdout.

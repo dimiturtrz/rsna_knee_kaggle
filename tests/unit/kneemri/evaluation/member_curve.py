@@ -359,3 +359,25 @@ def test_marginal():
     assert lines[0].startswith("roster of 2:"), "the base the deltas are against is stated, not implied"
     assert "+good.pt" in lines[1], "the candidate that adds most is reported first"
     assert lines[2].split("(")[1].startswith("-"), "a member that only adds noise reads as a negative seat"
+
+
+def test_diverse():
+    """The second seat goes to the STRANGER, not to the twin the mean would rather have."""
+    rng = np.random.default_rng(SEED + 40)
+    curve = MemberCurve(LabelScores())
+    truth = _truth()
+    strong = _member(2.0, SEED)
+    twin = strong + rng.normal(0.0, 0.02, strong.shape)
+    stranger = _member(1.6, SEED + 7)
+
+    lines = curve.diverse(Pool(["strong.pt", "twin.pt", "stranger.pt"], [strong, twin, stranger], truth))
+
+    # The pair is asserted as a PAIR rather than by name: `twin` is `strong` under a 0.02 nudge, so which
+    # of the two rounds higher on the holdout is noise, and pinning it would make this test a statement
+    # about a seed. What the rule promises is that the OTHER one waits until last.
+    assert lines[0].startswith("diverse 1:"), "the seed is the strongest member, whichever of the pair that is"
+    assert "+stranger.pt" in lines[1], "the seat rule takes the least-correlated member, not the best one"
+    assert {"strong.pt", "twin.pt"} == {lines[0].split("+")[1].split()[0], lines[2].split("+")[1].split()[0]}, (
+        "the near-duplicate is taken last, which is the whole point of the rule"
+    )
+    assert "(nearest 0.9" in lines[2], "each step reports the agreement that decided it"
