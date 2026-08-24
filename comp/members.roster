@@ -258,6 +258,43 @@ vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project ha
 # the ruler was right and no kernel should name this. The line is added ahead of the answer only
 # because mounting is reversible and a slot is not — the same reason every negative-delta member above
 # was mounted before it was named.
+margin_seat_s2026.pt        # 0.8525 — the first member measured into STRONG-AND-DISTANT, and the loss bought it
+# Added 2026-08-24. `band_dense`'s recipe with the ranking loss replaced by an AUC-margin surrogate
+# (`--auc-margin 1.0 --rank-weight 0.0`, single variable verified in the checkpoint's own config stamp).
+# Solo 0.8525 against that control's 0.8578 is −0.0053, INSIDE the 0.0062 floor, so on quality this
+# member is not distinguishable from the recipe it varies.
+#
+# It is mounted on the OTHER ruler, and unlike every negative-delta line above it clears the threshold
+# rather than being excused from it. Greedy forward selection over 65 fold-0 records / 909 shared studies
+# takes it SECOND of sixty-five — `small_batch6` 0.8598 → 0.8669, +0.0071 to the pair, the largest single
+# addition in that curve. Priced against the resulting greedy-7 it is +0.0015 to add and +0.0013 to swap
+# (displacing `crop80_span`). +0.0015 is exactly BOARD_RESOLVABLE; the tool's own line reads `0 of 3
+# clear +0.0015`, so it sits ON the threshold, not past it. Against the historical distribution it is an
+# order up: the best move across 59 candidates was +0.0004, and the mounted pool was written up as
+# EXHAUSTED at +0.0002.
+#
+# WHY THIS LINE IS DIFFERENT FROM `vjepa_warm` ABOVE, which is the objection it has to answer. Both are
+# mounted on distance. knee-053z has failed the distance-to-seat inference three times — `vjepa_warm`
+# (most distant member we own, seat +0.0001), `gradeswap` (called most redundant, took a board tick), and
+# `MemberCurve.diverse` (whose first five seats include `quarter_data` and `half_data`). The recorded
+# reason is a confound, in the bead's own words: every distant member we own is distant partly by being
+# bad. This one breaks it. Same trunk, same data, same recipe, same read — distance bought by the
+# OBJECTIVE, at a solo cost inside the noise floor. Nearest-neighbour agreement 0.8628 against the greedy
+# roster's own internal spread of 0.8717–0.8893, i.e. further from every seated member than any two of
+# them are from each other, while `cnx_dense` (0.7686 nearest, 0.7927 solo) is what distant-and-weak looks
+# like.
+#
+# The per-label profile is a redistribution, not a depression — MCL +0.0272*, Fracture +0.0250, Baker's
+# +0.0163* against Lateral Meniscus −0.0546*, PF OA −0.0288*, Medial Meniscus −0.0277* — which is a
+# DIFFERENT error structure rather than a worse one, and is the property a seat is actually bought with.
+#
+# Read the seat number with the compression and read the compression from the tool: `board_transfer` on
+# 2026-08-24 says +1.92 board points per holdout point over 15 entries and 90 pairs, so +0.0013 prices at
+# about +0.0025 board — and the tool also prints that +1.92 is fitted entirely at or below board 0.933
+# while we now live at 0.937, so this is an extrapolation. Not claimed as an edge.
+#
+# Ledger row and full write-up: experiments/README.md, `margin_seat` — a losing solo that greedy picks
+# SECOND of sixty-five. Mounting is reversible and a slot is not; naming it is a separate decision.
 final_ws_e12.pt             # THE DARK MEMBER — no offline score exists or can exist
 # Added 2026-08-23. band_dense's flags copied verbatim plus --fold -1 and --ema, so it trains on 4,406
 # studies rather than 3,497. It has SEEN every holdout study: it can never be seat-scored, curve-scored
