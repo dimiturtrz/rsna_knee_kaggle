@@ -183,7 +183,6 @@ def test_an_unscored_run_reports_no_number_and_keeps_the_last_epoch(tmp_path: Pa
 
     assert np.isnan(kept.holdout), "a run with no holdout cannot report one by construction"
     assert kept.epoch == 2, "ranking by epoch number makes keep-the-best keep the LAST state"
-    assert kept.witness is None, "there is no held-out study to witness"
     # The LEDGER too, not only the checkpoint: the epoch index used to land in the `auc` column, where
     # `ledger_check.best` reads the maximum and would quote a twelve-epoch final fit as scoring 11.0.
     assert all(np.isnan(row["auc"]) for row in fitting.metrics.rows()), "three epochs, and not one score"
@@ -278,3 +277,31 @@ def test_an_unscored_run_records_no_predictions_because_it_made_none(tmp_path: P
     fitting.run(_fold(holdout=False))
 
     assert not fitting.predictions.exists()
+
+
+def test_witnessed(tmp_path: Path):
+    """A fingerprint comes back whether or not anything was held out, from training studies when not."""
+    fitting = _fitting(tmp_path / "member.pt", epochs=1)
+    scored = _fold()
+    predicted = np.zeros((STUDIES, len(TARGETS)), dtype=np.float64)
+
+    from_holdout = fitting.witnessed(scored, predicted)
+    from_training = fitting.witnessed(_fold(holdout=False), None)
+
+    assert from_holdout["studies"] == [f"s{index}" for index in range(STUDIES)]
+    assert from_training["studies"] == [f"s{index}" for index in range(STUDIES)], "the training positions"
+    replayed = from_training["predictions"]
+    assert isinstance(replayed, list), "a witness carries plain lists, because it is read weights_only"
+    assert len(replayed) == STUDIES, "one row per named study"
+    assert from_training["batch"] == BATCH, "the batch is part of the claim, so it travels either way"
+
+
+def test_an_unscored_run_still_witnesses_how_it_must_be_read(tmp_path: Path):
+    """The hole knee-52mu found: `--fold -1` wrote an EMPTY witness, so five all-data members shipped
+    inside a live board entry with nothing for the serving check to compare against. Holding nothing
+    back says nothing about whether inference reads the weights the way training did."""
+    kept = _fitting(tmp_path / "final.pt", epochs=1).run(_fold(holdout=False))
+
+    assert kept.witness, "an all-data member is unverifiable at serve time without this"
+    assert kept.witness["studies"], "named studies, re-derivable from a different process"
+    assert np.isnan(kept.holdout), "and it still reports no score, because it has none"

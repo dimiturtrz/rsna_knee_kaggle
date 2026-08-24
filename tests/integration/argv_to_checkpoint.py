@@ -406,10 +406,17 @@ def test_a_full_fit_holds_nothing_back(corpus: Path, monkeypatch: pytest.MonkeyP
     It cannot report a score by construction, which is the one path through `Fitting` where the kept
     epoch is the LAST rather than the best — and a run that raised here would be discovered after the
     card had already been held for an hour.
+
+    It DOES still witness how it must be read. This assertion used to demand the opposite — an empty
+    witness, "because a run with no holdout has nothing to witness" — and that sentence is knee-52mu:
+    five all-data members reached a live board entry unverifiable at serve time, because a replay
+    fingerprint was assumed to need unseen studies when it never did.
     """
     payload = _run(corpus, monkeypatch, "--fold", "-1")
 
-    assert _nested(payload, "config")["witness"] == {}, "a run with no holdout has nothing to witness"
+    witness = cast("dict[str, object]", _nested(payload, "config")["witness"])
+    assert witness["studies"], "named training studies, replayed through the training path"
+    assert np.isnan(cast("float", payload["holdout"])), "and still no score, because it held nothing back"
 
 
 class _WatchedOptions(TrainingOptions):

@@ -134,7 +134,12 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     """
     witness = member.witness
     if not witness:
-        return "UNVERIFIED - no witness (trained before the check existed, or a published member)"
+        # The third cause was missing here for as long as it mattered most. Five all-data members read
+        # as "trained before the check existed" while the real reason was that `--fold -1` took its
+        # witness from a holdout it did not have (knee-52mu) — a wrong cause that reads as a known one
+        # is worse than no message, because it retires the question. Fixed in `Fitting.witnessed`, so a
+        # member fitted after 2026-08-24 hitting this line is one of the first two cases.
+        return "UNVERIFIED - no witness (a published member, or fitted before 2026-08-24)"
 
     corpus, identifiers = member.cache(root).load()
     index = {name: position for position, name in enumerate(identifiers)}

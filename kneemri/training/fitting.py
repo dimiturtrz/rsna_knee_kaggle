@@ -33,7 +33,7 @@ from core.data.labels.targets import Targets
 from core.wakelock import Wakelock
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
-from kneemri.runs.member_record import MemberRecord
+from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 from kneemri.training.patience import Patience
 from kneemri.training.trainer import Trainer
@@ -134,11 +134,7 @@ class Fitting:
         state = {name: value.detach().cpu().clone() for name, value in model.state_dict().items()}
         # NaN, not `ranked`: with no holdout that value is the epoch index standing in for a score.
         holdout = ranked if fold.scored else NO_HOLDOUT
-        witness = (
-            None
-            if predicted is None
-            else self.record.witness(fold.targets.identifiers, fold.holdout, predicted, self.plan.batch)
-        )
+        witness = self.witnessed(fold, predicted)
         if predicted is not None:
             # The SAME array the ledger's per-label numbers were read off, kept whole. Eight studies of
             # it become the witness; the other 873 are what any paired interval over this arm needs, and
@@ -152,6 +148,32 @@ class Fitting:
         kept = Fitted(state=state, holdout=holdout, epoch=epoch, witness=witness)
         self.trainer.save_partial(self.plan.destination, self.record.payload(state, holdout, epoch, witness))
         return kept
+
+    def witnessed(self, fold: Fold, predicted: NDArray[np.float64] | None) -> dict[str, object]:
+        """A replay fingerprint for these weights, which a run with NO HOLDOUT must also carry.
+
+        A witness is an end-to-end claim — re-read these named studies through the inference path and
+        you must get these numbers back — and nothing in that claim needs the studies to have been held
+        out. But the holdout was the only place it was ever taken from, so `--fold -1` produced
+        `predicted is None` and silently wrote no witness at all. Five all-data members shipped inside a
+        live board entry that way (knee-52mu), and `witness_check` reported them as "trained before the
+        check existed", which is the wrong cause and hid the real one.
+
+        With no holdout the fingerprint is taken from the first training studies instead. They are
+        studies the weights have SEEN, so these numbers say nothing about generalisation — and they were
+        never asked to. What they pin is the reading: image size, slot list, decode resolution, window,
+        precision. Every defect this check has ever caught was a consumer-side default disagreeing with
+        a recorded value, and a memorised study exposes that exactly as well as an unseen one.
+
+        The extra forward is free of the run's randomness: `Trainer.batches` takes `shuffle=False` here
+        and never draws from the generator, so a member fitted through this path is bit-identical to one
+        fitted before it existed.
+        """
+        if predicted is not None:
+            return self.record.witness(fold.targets.identifiers, fold.holdout, predicted, self.plan.batch)
+        chosen = fold.training[:WITNESS_STUDIES]
+        replayed = self.trainer.predict(fold.corpus, chosen, self.plan.batch, self.generator)
+        return self.record.witness(fold.targets.identifiers, chosen, replayed, self.plan.batch)
 
     def run(self, fold: Fold) -> Fitted:
         """Fit every epoch, and return the one that is kept.
