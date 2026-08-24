@@ -2140,3 +2140,29 @@ once on type (`augseat`). Nothing at the top of this board is bought by rearrang
 members that already exist. The remaining card goes to a member of a kind this pool does not contain,
 which is what `margin_seat` (a different objective) and `dissent_seat` (a different error structure)
 are for.
+
+## `peak8` — the offline peak, shipped: **0.932** (submission 55751365, kit `2cc4fc8`)
+
+Eight members, the best-scoring subset the greedy holdout search has ever found (0.8731), and the first
+board entry to carry `margin_seat_s2026`, `sided_pool_s2026` and `crop80_span_s2026` at all. It landed
+in the **pre-registered kill band (≤0.934)**.
+
+It is **0.0019 above `allfit` offline and 0.005 below it on the board.** The two rulers now disagree in
+sign, and with the two earlier pairs the shape of the transfer is readable:
+
+| offline | board | slope |
+|---|---|---|
+| 0.8562 | 0.908 | — |
+| 0.8712 | 0.933 | ~1.67 |
+| 0.8731 | **0.932** | **negative** |
+
+**Offline greedy member selection is closed as a lever.** The transfer is real where members are weak
+and **saturated** at the top of the range, so the `board_transfer` +1.92 constant must not be
+extrapolated above ~0.933. A greedy peak is now evidence about the holdout, not about the board.
+
+**What this entry does NOT say.** It is not a reading on member **count**. All eight seats are fold-0 —
+an all-data dose of 0/8, against `allfit`'s 6/7 on the one axis ever measured worth +0.003. Count and
+dose are fully confounded here, and the −0.005 is the dose difference's own size with the sign it
+already had. Count-at-dark-dose has never been on this board and cannot be built until a **seventh dark
+member exists**, which is what `knee-rndp` (`small_batch6_ff`) is for: six dark checkpoints exist, so
+every entry to date has been six-dark-plus-one and the pool has never had a seventh to offer.
