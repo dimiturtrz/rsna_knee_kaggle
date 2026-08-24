@@ -6062,6 +6062,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.diverse",
+      "target": "kneemri.evaluation.member_curve.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.diverse",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.diverse",
+      "target": "kneemri.inference.vote.RankAverage.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.greedy",
       "target": "kneemri.evaluation.member_curve.Pool.combined",
       "weight": 1
@@ -6459,13 +6477,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.member_distance.MemberDistance.against",
-      "target": "kneemri.evaluation.member_distance.MemberDistance.agreement",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.member_distance.MemberDistance.agreement",
-      "target": "kneemri.inference.vote.Vote.ranks",
+      "target": "kneemri.inference.vote.RankAverage.agreement",
       "weight": 1
     },
     {
@@ -7036,12 +7048,6 @@
       "kind": "holds",
       "source": "kneemri.evaluation.record_mix.MixReading",
       "target": "kneemri.evaluation.member_curve.Pool",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.record_mix.MixReading.lines",
-      "target": "kneemri.evaluation.member_curve.MemberCurve.greedy",
       "weight": 1
     },
     {
@@ -10240,6 +10246,12 @@
       "kind": "inherits",
       "source": "kneemri.inference.vote.RankAverage",
       "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.RankAverage.agreement",
+      "target": "kneemri.inference.vote.Vote.ranks",
       "weight": 1
     },
     {
@@ -19998,6 +20010,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.diverse",
+      "label": "diverse",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.greedy",
       "label": "greedy",
       "level": "method",
@@ -20152,14 +20172,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_distance.MemberDistance.against",
       "label": "against",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_distance.MemberDistance",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.member_distance.MemberDistance.agreement",
-      "label": "agreement",
       "level": "method",
       "parent": "kneemri.evaluation.member_distance.MemberDistance",
       "role": null
@@ -22810,6 +22822,14 @@
       "label": "combine",
       "level": "method",
       "parent": "kneemri.inference.vote.QualityWeightedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.RankAverage.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.inference.vote.RankAverage",
       "role": null
     },
     {
