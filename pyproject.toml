@@ -230,6 +230,10 @@ source = ["core", "kneemri"]
 # Trainer, which are unit-tested. Covering them here would mean asserting on an argparse call.
 omit = [
     "core/data/corpus/build_cache.py",
+    # The same shape for the second corpus: build_rijeka reads a 3.3 GB archive and its logic is
+    # RijekaCorpus, which is unit-tested. What is left here is argparse plus the one guard that refuses
+    # a scheme which would write over our own arrays — and that guard is a parser.error, not a branch.
+    "core/data/corpus/build_rijeka.py",
     "kneemri/kaggle/package_members.py",
     "core/data/corpus/diagnose_laterality.py",
     # train.py is now NOTHING but that entrypoint: its flags live in options.py and what they build in

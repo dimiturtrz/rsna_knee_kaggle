@@ -76,3 +76,4 @@ node_modules/
 # the README are tracked; nothing that lands in the box ever is.
 /inbox/*.txt
 /inbox/read/
+experiments/logs/

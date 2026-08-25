@@ -142,10 +142,35 @@ ONE DECODE SERVES BOTH, because 80 mm is a subset of 130 mm: the tight crop is t
 wide one already produced, so scale costs encoder passes and not I/O.
 """
 
+RIJEKA_SCHEME = "rijeka"
+"""The slot axis of the kneeMRI (Rijeka) corpus — one sequence, and therefore one slot.
+
+WHY A FOREIGN CORPUS NEEDS A SCHEME NAME AT ALL, and it is a safety requirement rather than tidiness.
+`StudyCache.key` is the only thing separating one decoded corpus from another on disk, and
+`Routing.suffix()` is EMPTY for the canonical scheme — so a foreign corpus decoded at 336 px / 12 slices
+under the canonical name writes to `images_336px_12sl.npy`, the path every member on disk was fitted on,
+and destroys 71.6 GB with an array differing only in its FIRST axis. Naming the scheme makes that
+collision unrepresentable, which is the accident `StudyCache.key`'s own docstring records escaping three
+times on our own axes (slot count, physical crop, slice band). A second corpus is the fourth chance.
+"""
+
+RIJEKA_SLOTS: tuple[Slot, ...] = (SLOTS[0],)
+"""SAG_FLUID_FS alone — the canonical first slot standing by itself, not a lookalike beside it.
+
+Štajduhar et al. 2017 (Comput Methods Programs Biomed 140, 151-164) acquired that whole corpus on one
+Siemens Avanto 1.5T, sagittally, by a proton-density-weighted fat-suppression technique. That is
+`SLOTS[0]`'s predicate exactly, so an exam of theirs occupies the same position in the slot axis that it
+would occupy in ours, and a pretrained encoder meets the same sequence in the same channel afterwards.
+
+Nothing ROUTES into it: that corpus ships one volume per exam with no series to choose between, so
+`SlotScheme.assign` is never asked. The scheme is here to name the axis and the cache, not to select.
+"""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
     MULTISCALE_SCHEME: MULTISCALE_SLOTS,
+    RIJEKA_SCHEME: RIJEKA_SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""

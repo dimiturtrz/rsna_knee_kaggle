@@ -1,3 +1,4 @@
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,6 +44,26 @@ def test_index_path(tmp_path: Path):
 
 def test_progress_path(tmp_path: Path):
     assert StudyCache(tmp_path, slices=4, image_size=16).progress_path.name == "progress_16px_4sl.npz"
+
+
+def test_prepare(tmp_path: Path):
+    """The directory the three files land in is made, and making it twice is not an error."""
+    cache = StudyCache(tmp_path / "nested" / "cache", slices=4, image_size=16)
+
+    cache.prepare()
+    cache.prepare()
+
+    assert cache.directory.is_dir()
+
+
+def test_record(tmp_path: Path):
+    """The study order is written where `load` and the resume check both read it from."""
+    cache = StudyCache(tmp_path, slices=4, image_size=16)
+    cache.prepare()
+
+    cache.record(["a", "b"])
+
+    assert json.loads(cache.index_path.read_text(encoding="utf-8")) == ["a", "b"]
 
 
 def test_build_resumes(tmp_path: Path):
@@ -539,7 +560,7 @@ def test_key_separates_a_different_tie(tmp_path: Path):
     assert theirs.images_path != default.images_path
 
 
-def test_reader(tmp_path: Path):
+def test_cached_corpus_reader(tmp_path: Path):
     """A mapped corpus reads its file outright; one assembled in memory has no file, and indexes."""
     written = np.zeros((2, 2, 2, 2, 2), dtype=np.uint8)
     np.save(tmp_path / "images.npy", written)
@@ -547,6 +568,20 @@ def test_reader(tmp_path: Path):
 
     assert isinstance(CachedCorpus(np.load(tmp_path / "images.npy", mmap_mode="r"), mask).reader, FileReader)
     assert isinstance(CachedCorpus(written, mask).reader, MappedReader)
+
+
+def test_study_cache_reader(tmp_path: Path):
+    """The cache's decoder comes back at THIS cache's size and geometry, not at a reader's defaults.
+
+    Assembling one from `reading` and `image_size` separately is the mismatch `decode_one` records: a
+    reader built at its default size does not fit the map it is asked to fill.
+    """
+    reading = Reading(band=Band(0.1, 0.9))
+
+    decoder = StudyCache(tmp_path, slices=4, image_size=16, reading=reading).reader()
+
+    assert decoder.image_size == 16
+    assert decoder.band == reading.band
 
 
 def test_window(tmp_path: Path):

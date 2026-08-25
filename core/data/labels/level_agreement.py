@@ -22,12 +22,11 @@ import pandas as pd
 
 from core import cli
 from core.data.labels.targets import ASSERTS_PRESENCE, MEASURED_AGREEMENT
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
 LABELS = "report_labels_v2.csv"
-STUDY = "StudyInstanceUID"
 TOLERANCE = 1e-6
 """Levels are written as decimals by the reader and read back as floats; this compares them as levels."""
 

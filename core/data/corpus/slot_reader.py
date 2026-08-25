@@ -185,7 +185,7 @@ class SlotReader:
         ordered = acquisition.ordered_files()
         if not ordered:
             return None
-        planes = [self._decode(acquisition, ordered[index]) for index in self._sample_indices(len(ordered), slices)]
+        planes = [self._decode(acquisition, ordered[index]) for index in self.band_indices(len(ordered), slices)]
         stack = self._stacked(planes)
         return None if stack is None else self._crop(stack, acquisition.pixel_spacing)
 
@@ -225,8 +225,13 @@ class SlotReader:
             raise ValueError("decoded indices must point at decoded planes")
         return nearest
 
-    def _sample_indices(self, available: int, slices: int) -> list[int]:
+    def band_indices(self, available: int, slices: int) -> list[int]:
         """Indices spread over the central band, repeating the last when the band is thinner than asked.
+
+        PUBLIC because the band is a reading rule and not a DICOM one. A second corpus arrives as whole
+        pickled volumes rather than as files to decode lazily, so it cannot enter through `cropped` — but
+        it must be sampled through the depth by the SAME rule, or the two corpora differ on an axis that
+        is measured (0.20-0.80 = 0.8525, 0.10-0.90 = 0.8565, 0.00-1.00 = 0.8427) while claiming not to.
 
         THE DEDUPE IS WHAT CLUSTERS THE REPEATS, and it is left alone deliberately. Measured over a
         60-study sample (315 series): 8.3% of series hold fewer than twelve slices in the band, and for

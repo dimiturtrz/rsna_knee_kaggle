@@ -26,6 +26,14 @@ TARGETS: tuple[str, ...] = (
 )
 """The twelve findings, in the column order the submission and the trained members both use."""
 
+STUDY = "StudyInstanceUID"
+"""The column every labels table is keyed by, beside the findings those tables carry.
+
+Vocabulary, so it sits with TARGETS rather than in whichever module needed it first — which was a leaf
+analysis CLI, and a second labels PRODUCER would otherwise have had to import an agreement report to
+learn the name of its own index column.
+"""
+
 COMPARTMENT_PAIRS: tuple[tuple[str, str], ...] = (
     ("Medial Meniscus", "Lateral Meniscus"),
     ("Medial OA", "Lateral OA"),

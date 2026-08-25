@@ -27,7 +27,7 @@ import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
 
-from core.data.corpus.slot_reader import IMAGE_SIZE, Reading
+from core.data.corpus.slot_reader import IMAGE_SIZE, Reading, SlotReader
 from core.data.corpus.slots import SCHEMES, Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
@@ -262,6 +262,28 @@ class StudyCache:
         """The cache's dimensions for a given number of studies."""
         return (studies, self.slots, self.slices, self.image_size, self.image_size)
 
+    def reader(self) -> SlotReader:
+        """The reader that produces THIS cache's pixels — its geometry at its resolution.
+
+        The two are one fact and were being assembled by each caller from `reading` and `image_size`
+        separately, which is the mismatch `decode_one` was already bitten by: a reader built at its own
+        default rather than at the cache's simply does not fit the map.
+        """
+        return self.reading.reader(self.image_size)
+
+    def prepare(self) -> None:
+        """Make the directory the three files land in."""
+        self.directory.mkdir(parents=True, exist_ok=True)
+
+    def record(self, identifiers: list[str]) -> None:
+        """Write the study order the pixel and mask arrays are indexed by.
+
+        The cache owns it because the order is what makes a position mean a study: `_resumed` compares
+        this file study by study before believing a partial build, and a writer that spelled the JSON
+        itself would be free to write an order the resume check then rejects.
+        """
+        self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
+
     def build(self, source: Path, identifiers: list[str], planes: dict[str, str], workers: int = 16) -> None:
         """Decode every study into the cache, in parallel, writing straight into the memory map.
 
@@ -282,7 +304,7 @@ class StudyCache:
         decode — see `progress_path` for what that cost used to be.
         """
         identifiers = self.enrolled(identifiers)
-        self.directory.mkdir(parents=True, exist_ok=True)
+        self.prepare()
         mask, done = self._resumed(identifiers) or self._started(identifiers)
 
         arguments = [
@@ -319,7 +341,7 @@ class StudyCache:
             self.images_path, mode="w+", dtype=np.uint8, shape=self.shape(len(identifiers))
         )
         del images
-        self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
+        self.record(identifiers)
         return np.zeros((len(identifiers), self.slots), dtype=np.float32), np.zeros(len(identifiers), dtype=np.bool_)
 
     def _resumed(self, identifiers: list[str]) -> tuple[NDArray[np.float32], NDArray[np.bool_]] | None:

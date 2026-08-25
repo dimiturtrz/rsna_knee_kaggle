@@ -86,6 +86,36 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.data.corpus.rijeka_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.cache_flags",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
@@ -340,6 +370,18 @@
       "kind": "import",
       "source": "core.data.corpus.prefetch",
       "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.rijeka_corpus",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.rijeka_corpus",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -3601,6 +3643,48 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_rijeka.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.data.corpus.cache_flags.CacheFlags",
       "target": "core.data.corpus.study_cache.StudyCache",
@@ -4370,6 +4454,90 @@
     },
     {
       "kind": "references",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "target": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus._pixels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.labels",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
+      "target": "core.data.corpus.study_cache.StudyCache.reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus._metadata",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus._share",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "target": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.corpus.slot_geometry.SlotFrame",
       "target": "core.data.corpus.slot_geometry.SlotFrame",
       "weight": 1
@@ -4623,13 +4791,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "target": "core.data.corpus.slot_reader.SlotReader._sample_indices",
+      "target": "core.data.corpus.slot_reader.SlotReader._stacked",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "target": "core.data.corpus.slot_reader.SlotReader._stacked",
+      "target": "core.data.corpus.slot_reader.SlotReader.band_indices",
       "weight": 1
     },
     {
@@ -4963,6 +5131,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.study_cache.StudyCache",
+      "target": "core.data.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "core.data.corpus.study_cache.StudyCache",
       "target": "core.data.corpus.slots.Routing",
@@ -4996,6 +5170,12 @@
       "kind": "calls",
       "source": "core.data.corpus.study_cache.StudyCache._decode_all",
       "target": "core.data.corpus.study_cache.StudyCache.decode_one",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.StudyCache._started",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
       "weight": 1
     },
     {
@@ -5043,6 +5223,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.study_cache.StudyCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.StudyCache.build",
       "target": "core.data.corpus.study_cache.StudyCache.report",
       "weight": 1
     },
@@ -5074,6 +5260,12 @@
       "kind": "construct",
       "source": "core.data.corpus.study_cache.StudyCache.load",
       "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.StudyCache.reader",
+      "target": "core.data.corpus.slot_reader.Reading.reader",
       "weight": 1
     },
     {
@@ -14937,7 +15129,7 @@
   ],
   "nodes": [
     {
-      "descendants": 42,
+      "descendants": 44,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -14961,7 +15153,7 @@
       "role": null
     },
     {
-      "descendants": 32,
+      "descendants": 34,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -14969,7 +15161,7 @@
       "role": null
     },
     {
-      "descendants": 23,
+      "descendants": 25,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -15004,6 +15196,14 @@
       "descendants": 0,
       "id": "core.data.corpus.build_cache",
       "label": "build_cache",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.build_rijeka",
+      "label": "build_rijeka",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -15100,6 +15300,14 @@
       "descendants": 0,
       "id": "core.data.corpus.prefetch",
       "label": "prefetch",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus",
+      "label": "rijeka_corpus",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -16615,6 +16823,22 @@
       "level": "class",
       "parent": "core.data.corpus.prefetch",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "label": "RijekaCorpus",
+      "level": "class",
+      "parent": "core.data.corpus.rijeka_corpus",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "label": "RijekaVolume",
+      "level": "class",
+      "parent": "core.data.corpus.rijeka_corpus",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19042,6 +19266,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.build_rijeka.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.build_rijeka",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.cache_flags.CacheFlags.add_to",
       "label": "add_to",
       "level": "method",
@@ -19506,6 +19738,78 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus._metadata",
+      "label": "_metadata",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus._pixels",
+      "label": "_pixels",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus._share",
+      "label": "_share",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "label": "build",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.labels",
+      "label": "labels",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
+      "label": "stack",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaVolume.level",
+      "label": "level",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.slot_geometry.SlotFrame.angle_to",
       "label": "angle_to",
       "level": "method",
@@ -19682,16 +19986,16 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.slot_reader.SlotReader._sample_indices",
-      "label": "_sample_indices",
+      "id": "core.data.corpus.slot_reader.SlotReader._stacked",
+      "label": "_stacked",
       "level": "method",
       "parent": "core.data.corpus.slot_reader.SlotReader",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.slot_reader.SlotReader._stacked",
-      "label": "_stacked",
+      "id": "core.data.corpus.slot_reader.SlotReader.band_indices",
+      "label": "band_indices",
       "level": "method",
       "parent": "core.data.corpus.slot_reader.SlotReader",
       "role": null
@@ -20218,8 +20522,32 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.study_cache.StudyCache.prepare",
+      "label": "prepare",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.study_cache.StudyCache.progress_path",
       "label": "progress_path",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study_cache.StudyCache.reader",
+      "label": "reader",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study_cache.StudyCache.record",
+      "label": "record",
       "level": "method",
       "parent": "core.data.corpus.study_cache.StudyCache",
       "role": null

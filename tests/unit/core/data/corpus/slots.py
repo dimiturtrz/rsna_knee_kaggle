@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from core.data.corpus.acquisition import Acquisition
-from core.data.corpus.slots import LAST_MAXIMAL, SLOTS, Routing, Slot, SlotScheme
+from core.data.corpus.slots import LAST_MAXIMAL, RIJEKA_SCHEME, SLOTS, Routing, Slot, SlotScheme
 from tests.unit.conftest import write_series
 
 
@@ -104,6 +104,9 @@ def test_suffix():
     assert Routing(tie=LAST_MAXIMAL).suffix() == "_last"
     assert Routing(scheme="extended").suffix() == "_extended"
     assert Routing(scheme="extended", tie=LAST_MAXIMAL).suffix() == "_extended_last"
+    # The suffix is the ONLY thing keeping a foreign corpus off our own 71.6 GB of arrays: a kneeMRI
+    # build at 336px/12sl under the canonical name would write `images_336px_12sl.npy` over them.
+    assert Routing(scheme=RIJEKA_SCHEME).suffix() == f"_{RIJEKA_SCHEME}"
 
 
 def test_built():
@@ -113,3 +116,9 @@ def test_built():
     assert built.tie == LAST_MAXIMAL
     assert [slot.name for slot in built.slots] == [slot.name for slot in SLOTS]
     assert len(Routing(scheme="extended").built().slots) > len(SLOTS), "the named scheme, not a default"
+
+    rijeka = Routing(scheme=RIJEKA_SCHEME).built()
+    assert [slot.name for slot in rijeka.slots] == [SLOTS[0].name], (
+        "the kneeMRI corpus acquired ONE sequence, and it is our first slot's predicate exactly: "
+        "sagittal proton-density fat-suppressed on a 1.5T Avanto"
+    )

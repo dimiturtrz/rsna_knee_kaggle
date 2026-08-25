@@ -135,6 +135,23 @@ def test_sized(tmp_path: Path):
     assert small.dtype == torch.uint8
 
 
+def test_band_indices():
+    """Indices spread over the central band, repeating the last when the band is thinner than asked.
+
+    PUBLIC because the band is a reading rule and not a DICOM one — a second corpus arrives as whole
+    pickled volumes and cannot enter through `cropped`, but must be sampled by the SAME rule or the two
+    corpora differ on an axis that is measured while claiming not to.
+    """
+    reader = SlotReader(band=Band(0.0, 1.0))
+
+    assert reader.band_indices(10, 3) == [0, 4, 9], "the whole stack, ends included"
+    assert SlotReader().band_indices(11, 3) == [2, 5, 8], "the historic band keeps its own indices"
+    assert SlotReader(band=Band(0.1, 0.9)).band_indices(11, 3) == [1, 5, 9]
+    assert reader.band_indices(2, 5) == [0, 1, 1, 1, 1], "a thin band pads the deepest rather than failing"
+    assert SlotReader().band_indices(2, 3) == [1, 1, 1], "a band too thin to have two ends takes the middle"
+    assert len(reader.band_indices(37, 12)) == 12, "always exactly as many planes as the cache holds"
+
+
 def _offset_stack() -> np.ndarray:
     """A stack whose only signal is a block well away from the image centre."""
     stack = np.zeros((4, 200, 200), np.float32)
