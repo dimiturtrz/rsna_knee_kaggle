@@ -32,8 +32,24 @@ IMAGE_SIZE = 336
 """130 mm / 336 px = 0.387 mm per pixel, which clears the 0.5 mm a 1 mm tear needs."""
 
 SLICE_BAND = (0.20, 0.80)
-"""The central band the samples spread over: the outermost slices of a knee series are mostly soft
-tissue outside the joint."""
+"""The central band the samples spread over — the HISTORIC reading, and no longer the best one.
+
+It is kept as the default because every cache on disk and every member fitted before 2026-08-18 was
+built under it, and a default that moves rewrites what a caller who says nothing gets.
+
+THE AXIS IS CLOSED AND THIS IS NOT ITS PEAK. Three points on the span axis at 12 slices: 0.20-0.80 =
+0.8525, **0.10-0.90 = 0.8565**, 0.00-1.00 = 0.8427. An INTERIOR optimum — coverage does not keep
+paying, and the outer tenths are active distraction rather than weak signal (the 0.00-1.00 arm fired
+both halves of its pre-registered refutation, with Baker's, ACL and Contusion each losing more than
+their own paired interval). So the band is a FILTER, not a budget, and narrowing past 0.20-0.80 walks
+away from the peak rather than toward it.
+
+**0.10-0.90 is the operating point every arm should read from, and every shipped member already does**
+— it is passed explicitly (`--band-low 0.1 --band-high 0.9`), not inherited from here. Stated because
+this constant reads like an unexamined guess and its neighbour in `band_coverage` said outright that
+nothing had ever measured it; that sentence survived the measurement that refuted it and cost a later
+reader an audit to rediscover a closed axis. See `interpretations/kneemri/2026-08-17_slice_band_coverage.md`.
+"""
 
 GROUP = 3
 """How many slices one encoder feature covers — three, because a natural-image backbone takes three

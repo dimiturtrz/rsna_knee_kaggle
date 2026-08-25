@@ -1,10 +1,19 @@
 """What the central slice band actually discards: `python -m core.data.corpus.band_coverage`.
 
-THE CONSTANT THIS INTERROGATES. `slot_reader.SLICE_BAND = (0.20, 0.80)` carries one line of
-justification — "the outermost slices of a knee series are mostly soft tissue outside the joint" — and
-nothing has ever measured it. Every member on disk was fitted under it (knee-nas5: `band_low`/`band_high`
-appear in none of the six all-ours checkpoints' recorded options), so it is the one reading rule the pool
-has never varied, on the decode axis that transfers to the board at 2.4x the usual compression.
+THE CONSTANT THIS INTERROGATED, AND THE ANSWER IT NO LONGER NEEDS. This tool was written on 2026-08-17
+against a `slot_reader.SLICE_BAND = (0.20, 0.80)` that carried one line of justification and no
+measurement, on the decode axis that transfers to the board at 2.4x the usual compression.
+
+**THE AXIS IS NOW CLOSED, and every sentence below in the present tense is history.** Three trained
+points settled it: 0.20-0.80 = 0.8525, 0.10-0.90 = **0.8565**, 0.00-1.00 = 0.8427 — an interior
+optimum, so the band is a filter rather than a budget. Every shipped member passes `--band-low 0.1
+--band-high 0.9` explicitly. This module is kept because the coverage profile is the cheap instrument
+that decided where to spend the training slots, and it is the right first move on any future reading
+rule; it is no longer an open question about this one.
+
+Left in the present tense once too long, this docstring cost a 2026-08-25 audit that set out to build
+a cache for an operating point the pool had already adopted. A tool that says "nothing has ever
+measured it" after the measurement is worse than silent — it is a standing invitation to redo the work.
 
 WHY IT IS SUSPECTED NOW. On a SAGITTAL series the through-plane axis IS the medial-lateral axis, so this
 rule deletes the outer 20% of medial-lateral extent at each end before a model sees a pixel — and
