@@ -19,9 +19,23 @@ from pathlib import Path
 
 import torch
 
+from kneemri.experiments.vram_need import MIB_PER_GB
 from kneemri.spawn import Spawn
+from kneemri.training.options import TrainingOptions
+from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
+
+BYTES_PER_MIB = 1024 * 1024
+"""`torch.cuda.mem_get_info` answers in bytes and every other figure in this file is MiB."""
+
+NO_ROOM = "card had no room"
+"""The prefix that separates a card too full from an arm too broken.
+
+WHY THE WORDING IS THE FIX AND NOT AN ORNAMENT. On 2026-08-25 a smoke that could not allocate was
+reported as BROKEN, and the repair that reading invites is to change the arm — which would have been a
+change to a recipe that was correct, made on evidence about a neighbouring process. An outcome has to
+name the thing that has to change."""
 
 SMOKE_STUDIES = 60
 """Enough corpus for both halves of the loop, few enough that an epoch costs seconds rather than minutes."""
@@ -97,6 +111,45 @@ class ArmSmoke:
         lines = done.stderr.strip().splitlines()
         return done.returncode, lines[-1] if lines else ""
 
+    @staticmethod
+    def reserves(flags: str) -> int:
+        """MiB the arm's OWN flags will make the allocator reserve, by the trainer's own cost model.
+
+        Derived per arm rather than assumed once, for the reason `vram_need` records: a figure fitted
+        on one configuration and handed to every arm is wrong in both directions. Twelve slices at
+        224 px derive 8124 MiB and twenty at 336 px derive 28.26 GB — a factor of three and a half
+        between two arms in the same sweep.
+
+        A recipe whose slices are unknown derives 0, which `room` then reads as "cannot be gated" and
+        lets through: a check that refuses what it cannot price would stop the sweep on the arms it
+        knows least about. FLAGS THE PARSER REJECTS derive 0 for the same reason and not as a lapse —
+        `ArmCheck` has already refused those arms and `reported` never smokes a refused one, so the
+        only way to reach here unparseable is a caller this module does not own, and a memory gate is
+        the wrong place to re-raise somebody else's argument error.
+        """
+        try:
+            options = TrainingOptions.of(shlex.split(flags))
+        except SystemExit:
+            return 0
+        return math.ceil(RunSetup(options).budget().needed() * MIB_PER_GB)
+
+    @staticmethod
+    def room(need: int) -> str:
+        """Empty when this arm may start, and what the card is holding when it may not.
+
+        ASKS THE DEVICE, never the sweep's own bookkeeping. The memory that made the difference on
+        2026-08-25 belonged to a run this process did not start and could not enumerate — a live arm
+        of ours, and on other nights a sibling project's job — so the only honest source is what the
+        driver says is free right now. `card_check` reaches for the device for the same reason.
+
+        No card means no gate: on CPU there is nothing to run out of, and the smoke's whole point
+        there is to prove a recipe parses and steps.
+        """
+        if not torch.cuda.is_available() or need <= 0:
+            return ""
+        free = torch.cuda.mem_get_info()[0] // BYTES_PER_MIB
+        return "" if need <= free else f"{NO_ROOM}: needs {need} MiB, {free} MiB free"
+
     def command(self, flags: str, out: Path) -> list[str]:
         """The invocation that runs one arm's recipe as a smoke rather than as an arm.
 
@@ -165,10 +218,22 @@ class ArmSmoke:
         on 2026-08-17 — 3.5 GB of ninety-megabyte `.partial` files in a smoke directory the cleanup
         exists to leave empty. The modification time separates the two: an arm the smoke did not write
         keeps its stamp, and everything the trainer wrote this run does not.
+
+        AN ARM IS PRICED BEFORE IT IS STARTED. `lib.sh` will not launch a real arm until the card has
+        room for what `vram_need` derives from its flags; the smoke path reaches the trainer directly
+        and so had no such gate at all. On 2026-08-25 that let a 28.26 GB smoke onto a card already
+        holding a live 16.24 GB run: it could not allocate, sat the full ten-minute bound, and stretched
+        the epoch beside it from 248 s to 734 s. The gate costs one arithmetic comparison per arm and
+        the reading it protects is somebody else's.
         """
         broken: dict[str, str] = {}
         for name, flags in invocations.items():
             checkpoint = out / f"{name}.pt"
+            crowded = self.room(self.reserves(flags))
+            if crowded:
+                broken[name] = crowded
+                logger.info("NO ROOM %s: %s", name, crowded)
+                continue
             untouched = {path: path.stat().st_mtime_ns for path in out.glob(f"{name}.*")}
             code, complaint = self.runner(self.command(flags, checkpoint))
             trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)

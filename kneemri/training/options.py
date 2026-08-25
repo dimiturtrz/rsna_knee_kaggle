@@ -7,6 +7,7 @@ because the three are different jobs and only this one is imported by things tha
 and with it `transformers`, to read a dataclass.
 """
 
+import sys
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -255,6 +256,20 @@ class TrainingOptions:
         )
 
     @classmethod
+    def of(cls, argv: list[str]) -> "TrainingOptions":
+        """Read an arm's flags into an options object without going through the process's own argv.
+
+        THE COST MODEL HAS TO BE ASKABLE ABOUT A RECIPE THE ASKER IS NOT RUNNING. `vram_need` derives
+        an arm's reservation by parsing `sys.argv`, which is the only shape a `$(...)` caller in bash
+        needs — and it is exactly the shape `arm_smoke` could not use, because it holds thirty-four
+        arms' flag strings in one process and none of them is its own command line. So the smoke sweep
+        started arms without ever asking what they would reserve, and one 28.26 GB smoke went onto a
+        card already holding 16.24 GB of a live run: it could not allocate, sat the full ten-minute
+        bound, and cost the run beside it 734 s for an epoch that had taken 248 s and 255 s.
+        """
+        return cls(**vars(FlagVocabulary.parser().parse_args(argv)))
+
+    @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object.
 
@@ -262,7 +277,7 @@ class TrainingOptions:
         field here has a default in two homes, the dataclass and the flag, and every test that asserts
         they agree goes through the parser directly rather than through this.
         """
-        return cls(**vars(FlagVocabulary.parser().parse_args()))
+        return cls.of(sys.argv[1:])
 
     @property
     def positions(self) -> FitPositions:

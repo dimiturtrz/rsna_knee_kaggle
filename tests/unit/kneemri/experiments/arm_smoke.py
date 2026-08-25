@@ -6,9 +6,12 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import torch
 
 from kneemri.experiments.arm_smoke import (
+    BYTES_PER_MIB,
     CPU_SMOKE_TIMEOUT_SECONDS,
+    NO_ROOM,
     SMOKE_TIMEOUT_SECONDS,
     ArmSmoke,
 )
@@ -164,3 +167,32 @@ def test_timeout():
     assert ArmSmoke.timeout(on_card=True) == SMOKE_TIMEOUT_SECONDS
     assert ArmSmoke.timeout(on_card=False) == CPU_SMOKE_TIMEOUT_SECONDS
     assert ArmSmoke.timeout(on_card=False) > 2 * ArmSmoke.timeout(on_card=True), "a CPU epoch is minutes, not seconds"
+
+
+def test_reserves():
+    """An arm's reservation is derived from ITS OWN flags, so two arms in one sweep price apart."""
+    lean = ArmSmoke.reserves("--labels l.csv --slices 12 --image-size 224 --whole-stack")
+    heavy = ArmSmoke.reserves("--labels l.csv --slices 20 --image-size 336 --whole-stack")
+
+    assert lean > 0, "a priced recipe is priced, not waved through"
+    assert ArmSmoke.reserves("--not-a-flag") == 0, "an argument error is ArmCheck's to report, not the gate's"
+    assert heavy > lean, "twenty slices at 336 px cost more than twelve at 224 — the whole point of per-arm pricing"
+
+
+def test_room(monkeypatch: pytest.MonkeyPatch):
+    """A card with less free than the arm needs is the CARD's fault, and says so in those words."""
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.cuda, "mem_get_info", lambda: (10 * BYTES_PER_MIB, 32 * BYTES_PER_MIB))
+
+    assert ArmSmoke.room(9) == "", "an arm that fits starts"
+    assert ArmSmoke.room(0) == "", "a recipe the cost model cannot price is not refused on a guess"
+    crowded = ArmSmoke.room(11)
+    assert crowded.startswith(NO_ROOM), "the outcome names the card, never the recipe"
+    assert "11 MiB" in crowded and "10 MiB free" in crowded, "both sides of the arithmetic, or it cannot be checked"
+
+
+def test_room_without_a_card(monkeypatch: pytest.MonkeyPatch):
+    """No card means no gate — the smoke's job on CPU is to prove a recipe parses and steps."""
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+
+    assert ArmSmoke.room(1 << 30) == "", "there is nothing to run out of"

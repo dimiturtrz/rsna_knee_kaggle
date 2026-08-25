@@ -198,3 +198,12 @@ def test_positions():
     assert TrainingOptions(seed=7).positions == FitPositions(), (
         "the MODEL seed does not move which studies exist, as with the fold — only --split-seed does"
     )
+
+
+def test_of():
+    """Flags come from a LIST, so a caller can price a recipe it is not itself running."""
+    options = TrainingOptions.of(["--labels", "l.csv", "--slices", "12", "--image-size", "224"])
+
+    assert options.slices == 12, "the list is read, not the process's own argv"
+    assert options.image_size == 224
+    assert str(options.labels) == "l.csv"
