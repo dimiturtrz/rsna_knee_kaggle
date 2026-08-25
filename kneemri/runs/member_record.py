@@ -115,6 +115,11 @@ class RunOptions(Protocol):
     """
 
     @property
+    def recipe(self) -> dict[str, str]:
+        """Every flag the run was given, as strings — stamped whole, never re-derived here."""
+        ...
+
+    @property
     def image_size(self) -> int: ...
 
     @property
@@ -242,15 +247,16 @@ class MemberRecord:
 
     @property
     def recipe(self) -> dict[str, str]:
-        """Every option this run was given, as strings — the checkpoint's `options` block, reusable.
+        """The run's own account of its flags — the checkpoint's `options` block, and the metrics file's.
 
-        Strings because the checkpoint is loaded with `weights_only=True`, which refuses to unpickle a
-        `Path`, and because the second consumer is a JSONL line that must survive `json.dumps` for the
-        same reason. One home rather than two spellings: the metrics file records the recipe so a
-        per-label comparison can say which axes moved between two runs, and a recipe that disagreed
-        with the checkpoint's would be worse than none.
+        THE OPTIONS OBJECT OWNS IT, and this delegates rather than re-deriving, for the reason the
+        recipe is one home at all: the metrics file records it so a per-label comparison can say which
+        axes moved between two runs, `train` logs it before epoch 0 so a running arm is auditable
+        without waiting for its checkpoint, and a recipe that disagreed with the checkpoint's would be
+        worse than none. Reaching through `record.options` at each call site instead would be three
+        strangers deep and would say the same thing three times.
         """
-        return {name: str(value) for name, value in vars(self.options).items()}
+        return self.options.recipe
 
     def witness(
         self,

@@ -30,6 +30,13 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     arguments = TrainingOptions.parse()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    # THE FIRST LINE OF THE LOG, before the cache is mapped and long before the card is taken. The
+    # recipe was stamped only into the CHECKPOINT, which is written at run END — so for the whole 84
+    # minutes of a 12-epoch arm there was no way to assert that `--auc-margin`, or any other flag, had
+    # been parsed at all. The log opened with a memory-gate line and went straight to `epoch 0`. This is
+    # the SAME object `MemberRecord` stamps, so a queued arm is now auditable from second zero and the
+    # line cannot drift from the block it will be saved under.
+    logger.info("recipe: %s", json.dumps(arguments.recipe, sort_keys=True))
 
     # The MODEL's initialisation. The data order is seeded from the same value inside `Fitting`, which
     # is where the only consumer of it lives.

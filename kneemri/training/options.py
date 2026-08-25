@@ -120,6 +120,22 @@ class TrainingOptions:
     paths: Path = Path("paths.yaml")
 
     @property
+    def recipe(self) -> dict[str, str]:
+        """Every flag this run was given, as strings — the one account of what the process parsed.
+
+        HERE rather than on `MemberRecord`, which is where it lived, because the checkpoint is written
+        at RUN END and the question this answers is asked at run START. A 12-epoch arm spent 84 minutes
+        on the card with nothing in its log naming a single flag it had parsed: the stamp existed, and
+        the only way to read it was to wait for the run that was in doubt to finish. Now `train` logs
+        this before the corpus is mapped, and `MemberRecord.recipe` stamps the same object, so the log
+        line and the checkpoint block cannot disagree — a second spelling is exactly how they would.
+
+        Strings because the checkpoint is loaded with `weights_only=True`, which refuses to unpickle a
+        `Path`, and because the other consumer is a JSONL line that must survive `json.dumps`.
+        """
+        return {name: str(value) for name, value in vars(self).items()}
+
+    @property
     def routing(self) -> Routing:
         """How this run turns series into slots — the scheme it reads and the tie rule it reads under."""
         return Routing(scheme=self.scheme, tie=self.tie)

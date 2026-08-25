@@ -27,6 +27,21 @@ def test_parse(monkeypatch: pytest.MonkeyPatch):
     assert options.eval_labels is None, "no ruler given means score on what you trained on"
 
 
+def test_recipe():
+    """Every flag, as strings — the account `train` logs at second zero and the checkpoint stamps later.
+
+    Iterated from the dataclass rather than listed, which is the whole point: a flag added to a run
+    reaches both the log line and the stamp without anyone remembering to add it here.
+    """
+    options = TrainingOptions(auc_margin=0.5, whole_stack=True, labels=Path("a.csv"))
+    recipe = options.recipe
+
+    assert recipe.keys() == vars(options).keys(), "every flag, not a chosen few"
+    assert recipe["auc_margin"] == "0.5", "the value the process parsed, so a typo is visible in the log"
+    assert recipe["whole_stack"] == "True"
+    assert recipe["labels"] == "a.csv", "a Path as a string: a checkpoint read with weights_only cannot hold one"
+
+
 def test_parse_reads_a_separate_evaluation_ruler(monkeypatch: pytest.MonkeyPatch):
     """The ruler is separable, which is what makes two label arms comparable."""
     monkeypatch.setattr("sys.argv", ["train", "--labels", "a.csv", "--eval-labels", "b.csv"])
