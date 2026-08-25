@@ -125,10 +125,17 @@ def main() -> None:
     # `members=2`, so it is a two-member kernel from an era before the roster and was never shipped.
     # This is the first entry that asks the question on a roster anyone cares about.
     #
-    # THE SEATS ARE `allfit`'s, UNCHANGED AND IN THE SAME ORDER. Same seven names, same six-dark dose,
-    # same `overlap=False`. The ONLY thing that moves is how seven members' tables become one number.
-    # `allfit` measured 0.937 under `RankAverage`, so this arm has a matched control that is not an
-    # estimate — it is a board number from this exact roster.
+    # THE SEATS ARE `dark6`'s, UNCHANGED AND IN THE SAME ORDER. Same six all-data names, same
+    # `overlap=False`. The ONLY thing that moves is how six members' tables become one number. `dark6`
+    # measured 0.937 under `RankAverage`, so this arm has a matched control that is not an estimate —
+    # it is a board number from this exact roster.
+    #
+    # IT RIDES SIX, NOT `allfit`'s SEVEN, AND THAT IS A CORRECTION. This kernel was written against
+    # `allfit` before the count control existed. Four entries now read exactly 0.937 while the member
+    # COUNT (six vs seven), the seventh member's IDENTITY and its FOLD STATUS all vary — dark6, dark7,
+    # allfit, lastseat. The marginal seventh seat is inert, so carrying `band_dense_long_s2026` would
+    # have added a member measured to be worth zero board points to an arm about serving mechanics.
+    # Six is the smallest roster that reads 0.937, which makes it the cleanest thing to vary a rule on.
     #
     # WHY ASK A KNOB THE OFFLINE RULER CALLS DEAD. Because the offline ruler is what died. `member_curve`
     # reads RankAverage 0.8589 / LogitAverage 0.8588 / QualityWeightedRank 0.8589 — a 0.0001 spread that
@@ -143,7 +150,7 @@ def main() -> None:
     # distribution than ours, those two can come apart in either direction, and which one is right is a
     # property of the TEST distribution — which is precisely the thing our holdout cannot see.
     #
-    # PRE-REGISTRATION, written before the number, against `allfit`'s 0.937.
+    # PRE-REGISTRATION, written before the number, against `dark6`'s 0.937.
     #
     #   THE VOTE IS LIVE — >= 0.940. Magnitudes carry information ranks throw away, on the real test
     #     set, and a free retrain-nothing axis just moved the board. Sweep the third rule
@@ -158,13 +165,14 @@ def main() -> None:
     #     we have shipped. That would make `RankAverage` a real design decision rather than an
     #     inherited default, and it retires the other two rules for good.
     #
-    # COST: one slot, zero card time, nothing retrained. That ratio is why it runs tonight rather than
-    # any arm that needs the GPU — the card belongs to biohub until at least 00:00Z.
+    # COST: one slot, zero card time, nothing retrained. That ratio is why it holds the day's last slot
+    # rather than any arm that needs the GPU — every downstream axis the card could move (pooling, slice
+    # count, slot count and pooling, slice order, registration, resolution, overlap, encoder family,
+    # all-data dose, seat) is measured saturated, and the card is shared with biohub besides.
     chosen = (
         "final_ws_e12",
         "calib_span_ff",
         "grade_ladder_ff",
-        "band_dense_long_s2026",
         "base_dense_ff",
         "lr4e-5_ws_ff",
         "through_dense_ff",
