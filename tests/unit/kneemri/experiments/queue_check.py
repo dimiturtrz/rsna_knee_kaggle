@@ -111,6 +111,59 @@ def test_stranded_already_on_the_card(tmp_path: Path):
     assert QueuedArms(tmp_path, LIVE).stranded() == [], "an announced arm has already run, not gone missing"
 
 
+def _arm_log(directory: Path, stem: str, verdict: str) -> None:
+    """An arm's OWN log, which is `<stem>.log` beside the watcher's `after_<stem>.log`."""
+    (directory / f"{stem}.log").write_text(f"epoch 0: loss 0.62\n{verdict} {stem}\n", encoding="utf-8")
+
+
+def test_landed(tmp_path: Path):
+    """The arm's own log, and only on success — `ARM FAILED` still owes its work.
+
+    MEASURED 2026-08-24: `cnx_own_recipe` had finished (best 0.8186 at e6, in the ledger) and the check
+    still advised relaunching it, onto a card `small_batch6_ff` was 6/12 through.
+    """
+    queue = QueuedArms(tmp_path, "")
+    assert not queue.landed("experiments/arms/cnx_own_recipe.sh"), "no log at all is not a finished arm"
+    _arm_log(tmp_path, "cnx_own_recipe", "ARM FAILED")
+    assert not queue.landed("experiments/arms/cnx_own_recipe.sh"), "a died arm still owes its work"
+    _arm_log(tmp_path, "cnx_own_recipe", "ARM DONE")
+    assert queue.landed("experiments/arms/cnx_own_recipe.sh")
+
+
+def test_landed_is_not_vouched_for_by_the_watcher_waiting_on_it(tmp_path: Path):
+    """A watcher header QUOTES `ARM DONE <stem>` as the marker it waits on — that is a queue, not a result.
+
+    Read from `after_*.log` instead of the arm's own log, a queue that has never started anything would
+    read as one that had finished, which is the same misread with the sign flipped.
+    """
+    _log(tmp_path, "after_v3base_band.log", "ARM DONE v3base_band", "experiments/arms/aprior_dense.sh")
+    assert not QueuedArms(tmp_path, "").landed("experiments/arms/v3base_band.sh")
+
+
+def test_finished(tmp_path: Path):
+    """Arms a dead watcher owes whose work already landed — litter to clean up, and NOT a fault."""
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+    _arm_log(tmp_path, "v3base_band", "ARM DONE")
+    queue = QueuedArms(tmp_path, "")
+
+    assert queue.finished() == ["experiments/arms/v3base_band.sh"]
+    assert queue.stranded() == ["experiments/arms/aprior_dense.sh"], "only the arm that never ran is owed"
+    assert not any(fault.startswith("FINISHED") for fault in queue.faults()), "litter does not block a launch"
+    assert QueuedArms(tmp_path, LIVE).finished() == [], "a live watcher's arms are owed, not abandoned"
+
+
+def test_stranded_drops_an_arm_that_already_ran(tmp_path: Path):
+    """The 2026-08-24 incident whole: every arm of the dead chain landed, so nothing is stranded."""
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+    _arm_log(tmp_path, "v3base_band", "ARM DONE")
+    _arm_log(tmp_path, "aprior_dense", "ARM DONE")
+    queue = QueuedArms(tmp_path, "")
+
+    assert queue.stranded() == [], "a finished 3.1 h arm must never be advised back onto the card"
+    assert queue.faults() == [], "and with nothing owed the queue is not broken"
+    assert any("already ran" in line for line in queue.lines()), "the log is still named, as litter"
+
+
 def test_lines(tmp_path: Path):
     _log(tmp_path, "after_chain.log", MARKER, ARMS)
     assert QueuedArms(tmp_path, LIVE).lines()[-1].startswith("OK:")

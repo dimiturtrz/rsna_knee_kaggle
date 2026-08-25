@@ -40,6 +40,15 @@ ARM_SUFFIX = ".sh"
 HEADER = "before running: "
 STARTED = "=== "
 
+DONE = "ARM DONE "
+"""What `lib.sh` echoes on SUCCESS ONLY, once the trainer exited 0 and wrote a `best holdout` line.
+
+READ FROM THE ARM'S OWN LOG, `<stem>.log`, never from a watcher's — a watcher's header quotes this
+same string as the marker it waits on, so a queue that has not started anything would otherwise read
+as a queue that finished. `ARM FAILED` deliberately does NOT close a strand: an arm that died still
+owes its work, and relaunching it is the right advice.
+"""
+
 UNREADABLE = 1
 FOUND = 2
 """Distinct exit codes, because "the table could not be read" is not "the queue is broken"."""
@@ -138,6 +147,33 @@ class QueuedArms:
         owed = dict.fromkeys(arm for watch in self.watches() for arm in watch.waiting())
         return [arm for arm in owed if sum(1 for line in self.watchers() if arm in line) > 1]
 
+    def landed(self, arm: str) -> bool:
+        """Whether this arm's own log already carries its completion marker — the work is DONE.
+
+        THE CHECK REASONS ABOUT WATCHERS, AND AN ARM IS NOT A WATCHER. MEASURED 2026-08-24: it printed
+        STRANDED for `cnx_own_recipe.sh`, which had already finished — `ARM DONE` in its log, best
+        0.8186 at e6, checkpoint on disk, written up in the ledger. Obeying the advice would have put a
+        finished 3.1 h arm back on the card, on top of `small_batch6_ff` at 6/12. Its own hedge named the
+        wrong hazard too: it warns the MARKER may already be written, when what matters is that the ARM
+        already ran.
+
+        Two categories, two different actions, and only one of them touches the GPU.
+        """
+        stem = Path(arm).stem
+        log = self.directory / f"{stem}.log"
+        if not log.is_file():
+            return False
+        return f"{DONE}{stem}" in log.read_text(encoding="utf-8", errors="replace")
+
+    def finished(self) -> list[str]:
+        """Arms nobody owes any more because they already ran — a watcher log to clean up, not work.
+
+        NOT A FAULT, on purpose. Nothing here is wrong with the card or the queue; a dead watcher whose
+        arms all landed is litter. Reporting it as blocking would train the reader to ignore a check
+        whose other two verdicts cost a card.
+        """
+        return [arm for arm in self._owed_by_the_dead() if self.landed(arm)]
+
     def stranded(self) -> list[str]:
         """Arms owed by a dead watcher and owed by no live one — the queue's actual hole.
 
@@ -148,11 +184,19 @@ class QueuedArms:
         An arm ANYONE has announced is covered too, and that second rule earned itself on this check's
         first live run: `aprior_dense` was on the card, announced by the live chain, and a dead log
         still claiming it made the arm read as stranded while it was training.
+
+        AND AN ARM WHOSE WORK ALREADY LANDED IS NOT OWED AT ALL — see `landed`, which is the third rule
+        and the one that would have cost the card rather than a reading.
         """
         covered = {arm for watch in self.watches() if self.alive(watch) for arm in watch.waiting()}
         covered |= {arm for watch in self.watches() for arm in watch.arms[: watch.started]}
+        owed = self._owed_by_the_dead()
+        return [arm for arm in owed if arm not in covered and not self.landed(arm)]
+
+    def _owed_by_the_dead(self) -> list[str]:
+        """Every arm a watcher with no live process still names, in order and without repeats."""
         owed = [arm for watch in self.watches() if not self.alive(watch) for arm in watch.waiting()]
-        return [arm for arm in dict.fromkeys(owed) if arm not in covered]
+        return list(dict.fromkeys(owed))
 
     def faults(self) -> list[str]:
         """Every way this queue is wrong, or empty when it is right.
@@ -185,6 +229,10 @@ class QueuedArms:
             f"  {'live' if self.alive(watch) else 'no watcher'}"
             for watch in watches
         ]
+        if finished := self.finished():
+            rows.append(
+                f"  ({' '.join(finished)} already ran — a dead watcher log to clean up, not an arm to relaunch)"
+            )
         return [*rows, *(self.faults() or ["OK: every arm still owed is gated by exactly one live process"])]
 
     @staticmethod
