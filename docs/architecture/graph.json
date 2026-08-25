@@ -11121,7 +11121,49 @@
     {
       "kind": "references",
       "source": "kneemri.kaggle.board_read.LeaderboardRead",
+      "target": "kneemri.kaggle.board_read.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead",
       "target": "kneemri.kaggle.board_read.LeaderboardRead",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead",
+      "target": "kneemri.kaggle.board_read.Standing",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead._kaggle",
+      "target": "kneemri.kaggle.board_read.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead.recorded",
+      "target": "kneemri.kaggle.board_read.Standing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead.taken_live",
+      "target": "kneemri.kaggle.board_read.Standing.of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_read.Standing",
+      "target": "kneemri.kaggle.board_read.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_read.Standing",
+      "target": "kneemri.kaggle.board_read.Standing",
       "weight": 1
     },
     {
@@ -17762,8 +17804,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_read.BoardRow",
+      "label": "BoardRow",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_read",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_read.LeaderboardRead",
       "label": "LeaderboardRead",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_read",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.Standing",
+      "label": "Standing",
       "level": "class",
       "parent": "kneemri.kaggle.board_read",
       "role": "satellite"
@@ -24906,6 +24964,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_read.BoardRow.ours",
+      "label": "ours",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_read.LeaderboardRead._kaggle",
       "label": "_kaggle",
       "level": "method",
@@ -24924,6 +24990,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_read.LeaderboardRead.now",
       "label": "now",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.ours",
+      "label": "ours",
       "level": "method",
       "parent": "kneemri.kaggle.board_read.LeaderboardRead",
       "role": null
@@ -24958,6 +25032,14 @@
       "label": "written",
       "level": "method",
       "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.Standing.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.Standing",
       "role": null
     },
     {

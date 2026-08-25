@@ -15,6 +15,20 @@ So: the live read is one injected round trip, the result is written to `comp/lea
 UTC instant it was taken, and `champion_check` refuses a read too old to plan against. The staleness
 bound is not a taste: five submissions a day reset at 00:00 UTC, so a read from before yesterday is a
 number taken ahead of ten slots that have since been spent, ours and theirs alike.
+
+THE GAP WAS ITSELF THE WRONG NUMBER, and this module printed it for a day before anything noticed. The
+first version asked the API for the board's first page — twenty rows, best-first — and reported
+`leader − ours`. On 2026-08-25 that read `leader 0.952, ours 0.938, gap 0.014`, which every note since
+has quoted as though one team stood between us and the top. The full board, downloaded the same minute,
+puts us **48th of 2,373**: forty-seven teams ahead, and forty-two of them inside 0.936–0.940. A gap of
+0.014 across a plateau that thick is not one step, it is the whole field, and a plan made against
+`gap` cannot see that because a page of twenty structurally cannot contain us.
+
+So the read is now the WHOLE board (`competition_leaderboard_download`, still no slot), and what it
+reports is our RANK and the size of the band we are tied inside. The gap survives as a property because
+it is still the right number for "how much score is left", but it is no longer the headline, and
+`ours` is now read off the board itself rather than trusted from `champion.json` — two sources that
+should agree, and a disagreement worth hearing about.
 """
 
 import json
@@ -34,6 +48,13 @@ COMPETITION = "rsna-knee-abnormality-detection"
 RECORD = Path("comp/leaderboard.json")
 """Where a read is kept, so the next reader gets a number and a date rather than a number."""
 
+USERNAME = "dimiturnt"
+"""Our account as the BOARD names it — an identity, not a credential, and nothing here reads a key.
+
+Matched against `TeamMemberUserNames` rather than `TeamName`, because a team name is display text the
+owner may change at any time while the username is the join key Kaggle itself uses.
+"""
+
 STALE_DAYS = 2
 """How old a read may be and still be worth planning against.
 
@@ -44,23 +65,60 @@ is the point past which the recorded gap describes a board that no longer exists
 
 
 @dataclass(frozen=True)
+class BoardRow:
+    """One team's line on the public board, as the downloaded leaderboard states it."""
+
+    rank: int
+    score: float
+    members: str
+    """The comma-joined Kaggle usernames of that team, which is how we find OUR row without
+    depending on a team NAME the owner is free to change between reads."""
+
+    def ours(self, username: str) -> bool:
+        """Whether this row is the one we are standing on."""
+        return username in self.members.split(",")
+
+
+@dataclass(frozen=True)
+class Standing:
+    """Where we sit on the board — the number a plan is actually made against, and it is not the gap."""
+
+    rank: int
+    score: float
+    field: int
+    tied: int
+    """How many teams share our score to the board's own precision, us included.
+
+    This is the number that makes a gap readable. Being 0.014 behind means one thing when the board
+    thins out above us and quite another when forty-two teams sit inside five thousandths — the first
+    is a rival to pass and the second is a plateau where a board increment buys twenty places.
+    """
+
+    @classmethod
+    def of(cls, username: str, rows: list[BoardRow]) -> "Standing":
+        """Our line, found by USERNAME. Raises where we are not on the board — absent is not last."""
+        mine = [row for row in rows if row.ours(username)]
+        if not mine:
+            message = f"no row on the public board lists {username}, so no standing can be read"
+            raise ValueError(message)
+        row = mine[0]
+        return cls(
+            rank=row.rank,
+            score=row.score,
+            field=len(rows),
+            tied=sum(1 for other in rows if other.score == row.score),
+        )
+
+
+@dataclass(frozen=True)
 class LeaderboardRead:
-    """One look at the public board: what the leader holds, what we hold, and when it was taken."""
+    """One look at the public board: what the leader holds, where we stand, and when it was taken."""
 
     leader: float
-    ours: float
+    standing: Standing
     taken: str
     """The UTC instant of the round trip, ISO-8601. Passed in rather than clocked inside, so the record
     a test writes is the record it asserts on."""
-
-    rows: int
-    """How many leaderboard rows the read actually covered — ONE PAGE, not the size of the field.
-
-    The API paginates at twenty and hands back a next-page token. Page one is enough for the question
-    this module asks, because Kaggle returns the board best-first so the leader is on it; it is NOT
-    enough to say how many teams are competing, and the field is named for what was read rather than
-    for what a reader might wish it meant.
-    """
 
     @staticmethod
     def now() -> str:
@@ -68,48 +126,82 @@ class LeaderboardRead:
         return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     @property
+    def ours(self) -> float:
+        """Our score as the BOARD states it, not as our own record claims it."""
+        return self.standing.score
+
+    @property
     def gap(self) -> float:
-        """How far the leader is above us — the number the plan is actually made against."""
+        """How much score is left between us and the top — real, and no longer the headline."""
         return self.leader - self.ours
 
     @classmethod
     def taken_live(
         cls,
-        ours: float,
         now: str,
-        viewer: Callable[[], list[float]] | None = None,
+        username: str = USERNAME,
+        viewer: Callable[[], list[BoardRow]] | None = None,
     ) -> "LeaderboardRead":
-        """Ask Kaggle for the public board, or ask whatever was injected in its place.
+        """Ask Kaggle for the whole public board, or ask whatever was injected in its place.
 
         Injected for the reason `board_check.LiveBoard` and `mount_check.LiveReading` give: a path
         reachable only through real credentials is a path with no test.
         """
-        scores = viewer() if viewer is not None else cls._kaggle()
-        if not scores:
-            message = f"the leaderboard for {COMPETITION} came back empty, so no gap can be read from it"
+        rows = viewer() if viewer is not None else cls._kaggle()
+        if not rows:
+            message = f"the leaderboard for {COMPETITION} came back empty, so no standing can be read"
             raise ValueError(message)
-        return cls(leader=max(scores), ours=ours, taken=now, rows=len(scores))
+        return cls(leader=max(row.score for row in rows), standing=Standing.of(username, rows), taken=now)
 
     @staticmethod
-    def _kaggle() -> list[float]:
-        """The real round trip, kept in one place so every other path is credential-free."""
+    def _kaggle() -> list[BoardRow]:
+        """The real round trip, kept in one place so every other path is credential-free.
+
+        The DOWNLOAD, not the view: `competition_leaderboard_view` returns the board's first page and a
+        team outside the top twenty is structurally absent from it, which is exactly the blindness this
+        module was built with. Neither call spends a submission slot.
+
+        Decoded `utf-8-sig`: the CSV Kaggle ships carries a BOM, so under plain `utf-8` the first column
+        is named `﻿Rank` and every row raises `KeyError: 'Rank'` — a header that LOOKS right in a log.
+        """
+        import csv  # noqa: PLC0415
+        import io  # noqa: PLC0415
+        import zipfile  # noqa: PLC0415
+
         from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
 
         api = KaggleApi()
         api.authenticate()
-        viewed = api.competition_leaderboard_view(COMPETITION) or []
-        return [float(entry.score) for entry in viewed if entry is not None and entry.score is not None]
+        into = RECORD.parent
+        api.competition_leaderboard_download(COMPETITION, str(into))
+        archive = max(into.glob(f"{COMPETITION}*.zip"), key=lambda path: path.stat().st_mtime)
+        try:
+            with zipfile.ZipFile(archive) as held:
+                text = held.read(held.namelist()[0]).decode("utf-8-sig")
+        finally:
+            archive.unlink()
+        return [
+            BoardRow(
+                rank=int(line["Rank"]),
+                score=float(line["Score"]),
+                members=str(line["TeamMemberUserNames"]),
+            )
+            for line in csv.DictReader(io.StringIO(text))
+        ]
 
     def written(self, path: Path = RECORD) -> Path:
         """Put the read where the next reader will find it without credentials."""
         held = {
             "why": "The public board as of `taken`, written by kneemri.kaggle.board_read. Never edit by "
-            "hand and never quote from prose — re-read it, the gap decays every day slots are spent.",
+            "hand and never quote from prose — re-read it, the standing decays every day slots are "
+            "spent. RANK is the headline, not gap: a gap across a crowded plateau is not one step.",
             "leader": self.leader,
             "ours": self.ours,
             "gap": round(self.gap, 4),
+            "rank": self.standing.rank,
+            "field": self.standing.field,
+            "tied": self.standing.tied,
             "taken": self.taken,
-            "rows": self.rows,
         }
         path.write_text(json.dumps(held, indent=2) + "\n", encoding="utf-8")
         return path
@@ -123,9 +215,13 @@ class LeaderboardRead:
         held = json.loads(path.read_text(encoding="utf-8"))
         return cls(
             leader=float(held["leader"]),
-            ours=float(held["ours"]),
+            standing=Standing(
+                rank=int(held["rank"]),
+                score=float(held["ours"]),
+                field=int(held["field"]),
+                tied=int(held["tied"]),
+            ),
             taken=str(held["taken"]),
-            rows=int(held["rows"]),
         )
 
     def stale(self, now: str, days: int = STALE_DAYS) -> list[str]:
@@ -134,8 +230,9 @@ class LeaderboardRead:
         if age <= timedelta(days=days):
             return []
         return [
-            f"the leaderboard read is {age.days} days old (taken {self.taken}), so its {self.gap:.3f} gap "
-            f"is a fact about a board that has since seen {5 * age.days} slots a competitor could spend"
+            f"the leaderboard read is {age.days} days old (taken {self.taken}), so its rank "
+            f"{self.standing.rank} of {self.standing.field} is a fact about a board that has since seen "
+            f"{5 * age.days} slots a competitor could spend"
         ]
 
 
@@ -143,28 +240,29 @@ def main() -> None:
     """Read the public board and record the gap: `python -m kneemri.kaggle.board_read --live`."""
     command = cli.Command(LeaderboardRead.__doc__, logger)
     command.parser.add_argument("--record", type=Path, default=RECORD, help="where the read is kept")
-    command.parser.add_argument("--champion", type=Path, default=Path("comp/champion.json"), help="our score")
+    command.parser.add_argument("--user", default=USERNAME, help="the Kaggle username to find us by")
     command.parser.add_argument(
         "--live",
         action="store_true",
-        help="ask Kaggle for the public board (needs credentials, spends NO slot); without it the "
+        help="ask Kaggle for the whole public board (needs credentials, spends NO slot); without it the "
         "recorded read is printed and checked for age instead",
     )
     arguments = command.parsed()
     now = LeaderboardRead.now()
 
     if arguments.live:
-        ours = float(json.loads(arguments.champion.read_text(encoding="utf-8"))["board"])
-        read = LeaderboardRead.taken_live(ours, now).written(arguments.record)
+        read = LeaderboardRead.taken_live(now, arguments.user).written(arguments.record)
         logger.info("recorded a fresh read into %s", read)
 
     held = LeaderboardRead.recorded(arguments.record)
     logger.info(
-        "leader %.3f, ours %.3f, gap %.3f against %d rows read, taken %s",
-        held.leader,
+        "rank %d of %d, tied with %d at %.3f; leader %.3f, gap %.3f, taken %s",
+        held.standing.rank,
+        held.standing.field,
+        held.standing.tied - 1,
         held.ours,
+        held.leader,
         held.gap,
-        held.rows,
         held.taken,
     )
     for complaint in held.stale(now):

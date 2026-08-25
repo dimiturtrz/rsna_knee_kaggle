@@ -1,8 +1,10 @@
 {
-  "why": "The public board as of `taken`, written by kneemri.kaggle.board_read. Never edit by hand and never quote from prose \u2014 re-read it, the gap decays every day slots are spent.",
+  "why": "The public board as of `taken`, written by kneemri.kaggle.board_read. Never edit by hand and never quote from prose \u2014 re-read it, the standing decays every day slots are spent. RANK is the headline, not gap: a gap across a crowded plateau is not one step.",
   "leader": 0.952,
   "ours": 0.938,
   "gap": 0.014,
-  "taken": "2026-08-25T13:18:15+00:00",
-  "rows": 20
+  "rank": 48,
+  "field": 2373,
+  "tied": 8,
+  "taken": "2026-08-25T13:39:48+00:00"
 }
