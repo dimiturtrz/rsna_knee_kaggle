@@ -332,35 +332,84 @@ def test_unpriced():
     assert ArmCheck.unpriced({"knee-both": priced}) == []
 
 
-def test_report_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """The ASYMMETRY, which is the whole design: the same tree refuses while arming and only counts otherwise.
+def test_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The JOIN of the two detectors either side of the tracker read: who named no bead, whose is unpriced.
 
-    Seventy arms predate the rule and nearly all of them already ran, so refusing the full sweep would
-    fail every invocation of this tool until they are back-filled — which is how a pre-flight check earns
-    a `--no-verify`. The rule exists to stop momentum at the moment of arming, so `arming` is the only
-    thing that turns a report into a refusal.
-
-    The tracker read is stubbed rather than run: a unit test may not shell out, and what is under test is
-    the JOIN of the two detectors, not `bd`.
+    The tracker read is stubbed rather than run — a unit test may not shell out, and what is under test is
+    the join, not `bd`. It returns verdicts rather than a refusal because whether this run is ARMING is not
+    something this method can see; `main` composes that in one place.
     """
     arms = tmp_path / "arms"
     arms.mkdir()
     (arms / "priced.sh").write_text("# bead: knee-yuqf\nrun_train priced\n", encoding="utf-8")
     (arms / "cheap.sh").write_text("# bead: knee-cost\nrun_train cheap\n", encoding="utf-8")
+    (arms / "bare.sh").write_text("run_train bare\n", encoding="utf-8")
     monkeypatch.setattr(
         ArmCheck,
         "_descriptions",
         staticmethod(lambda beads: dict.fromkeys(beads, "PRICE: 40 min. P(clears 1.5%) ~ 0.2")),
     )
     check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
-    both = {"priced": "--epochs 8", "cheap": "--epochs 8"}
+    all_three = {"priced": "--epochs 8", "cheap": "--epochs 8", "bare": "--epochs 8"}
 
-    assert check.report_prices(both, arming=True) is False, "every arm named a bead and every bead is priced"
+    unbeaded, unpriced = check.prices(all_three)
+
+    assert (unbeaded.label, unpriced.label) == ("UNBEADED", "UNPRICED")
+    assert set(unbeaded.found) == {"bare"}, "an arm whose header names no bead"
+    assert unpriced.found == {}, "every bead that IS named states both marks"
 
     monkeypatch.setattr(ArmCheck, "_descriptions", staticmethod(lambda beads: dict.fromkeys(beads, "just run it")))
 
-    assert check.report_prices(both, arming=True) is True, "a bead with neither mark refuses the arm naming it"
-    assert check.report_prices(both, arming=False) is False, "the full sweep counts them and passes"
+    assert set(check.prices(all_three)[1].found) == {"priced", "cheap"}, "a bead with neither mark is unpriced"
+
+
+def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Every check this tool runs, with the POLICY each one carries — the composition, not the detectors.
+
+    Each detector is partitioned by its own test; what is under test here is that the eight are all
+    present and that each is handed the refusal policy the tool's rules give it. That mapping is the part
+    a refactor can silently invert — a REFUSED that stops refusing, or an OVERSTATED that starts, would
+    leave every detector test green.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "silent.sh").write_text("run_train silent\n", encoding="utf-8")
+    monkeypatch.setattr(ArmCheck, "_descriptions", staticmethod(lambda beads: dict.fromkeys(beads, "")))
+    # An empty shell root, because `Path.write_text` translates newlines on Windows: the arm above lands
+    # on disk as CRLF and CRLF is exactly what one of these eight checks is looking for.
+    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path / "shells")
+
+    verdicts = check.verdicts({"silent": "--epochs 8"}, {}, {}, {}, require_caches=False)
+    policy = {verdict.label: (verdict.refuses, verdict.arming_refuses) for verdict in verdicts}
+
+    assert list(policy) == [
+        "REFUSED",
+        "UNCACHED",
+        "CRLF",
+        "OVERSTATED",
+        "UNSTATED",
+        "MISMATCHED",
+        "UNBEADED",
+        "UNPRICED",
+    ]
+    assert policy["REFUSED"] == (True, False) and policy["CRLF"] == (True, False), (
+        "a flag typo and a destroyed completion marker each cost a slot on any run"
+    )
+    assert policy["OVERSTATED"] == (False, False) and policy["UNSTATED"] == (False, False), (
+        "wall-clock only: neither mismatches an arm to its control nor invalidates a past number"
+    )
+    assert policy["MISMATCHED"] == policy["UNBEADED"] == policy["UNPRICED"] == (False, True), (
+        "the advisory rules stop MOMENTUM, so they refuse the run that arms an arm and no other"
+    )
+
+    cached = check.verdicts({"silent": "--epochs 8"}, {}, {}, {}, require_caches=True)
+
+    assert [verdict.refuses for verdict in cached if verdict.label == "UNCACHED"] == [True], (
+        "--require-caches is the one policy a run's own flags decide: a queue that builds no cache"
+    )
+    assert {verdict.label for verdict in verdicts if verdict.found} == {"UNSTATED", "UNBEADED"}, (
+        "the arm states no operating point and names no bead; nothing else has a finding to make"
+    )
 
 
 def test_controls(tmp_path: Path):
@@ -409,25 +458,3 @@ def test_mismatched(tmp_path: Path):
     assert found == {"silent": ["--backbone-lr: 4e-5 -> absent", "--distill-weight: absent -> 0.3"]}, (
         "a declared flag, an incidental one and the same rate spelled twice are not differences"
     )
-
-
-def test_report_mismatch(tmp_path: Path):
-    """The ASYMMETRY again: the same tree refuses while arming and only counts otherwise.
-
-    Thirty-two arms in the real tree differ from the control they name without declaring it, and nearly
-    all of them already ran — refusing the full sweep would fail every invocation of this tool until
-    they are back-filled, which is how a pre-flight check earns a `--no-verify`.
-    """
-    arms = tmp_path / "arms"
-    arms.mkdir()
-    (arms / "silent.sh").write_text("# control  base = 0.85\n", encoding="utf-8")
-    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
-    invocations = {"silent": "--epochs 8 --distill-weight 0.3"}
-    against = {"base": "--epochs 8"}
-
-    assert check.report_mismatch(invocations, against, arming=True) is True, "an undeclared flag refuses the arming"
-    assert check.report_mismatch(invocations, against, arming=False) is False, "the full sweep counts it and passes"
-
-    (arms / "silent.sh").write_text("# deliberate: --distill-weight\n# control  base = 0.85\n", encoding="utf-8")
-
-    assert check.report_mismatch(invocations, against, arming=True) is False, "a declared flag is not a mismatch"

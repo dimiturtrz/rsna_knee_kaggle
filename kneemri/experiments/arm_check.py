@@ -35,6 +35,7 @@ from core.data.corpus.study_cache import CorpusSplit, StudyCache
 from core.denominator import Denominator
 from core.paths import DataRoot
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
+from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.models.backbone import ENCODERS
 from kneemri.spawn import Spawn
@@ -399,30 +400,6 @@ class ArmCheck:
                 differences[name] = found
         return differences
 
-    def report_mismatch(self, invocations: Mapping[str, str], against: Mapping[str, str], *, arming: bool) -> bool:
-        """Log every undeclared difference from a named control, and say whether it should REFUSE.
-
-        The same asymmetry `report_prices` draws, for the same reason: thirty-two of the tree's arms
-        differ from the control they name without a `# deliberate:` line, and nearly all of them have
-        already run — refusing the full sweep would fail every invocation of this tool until they are
-        back-filled, which is how a pre-flight check earns a `--no-verify`. The defect costs a card only
-        at the moment an arm is ARMED, and the run that arms one is the run that names it.
-        """
-        mismatched = self.mismatched(invocations, against)
-        if arming:
-            for name, found in sorted(mismatched.items()):
-                logger.info(
-                    "MISMATCHED %s: undeclared against its own control — %s (knee-f8j9)", name, "; ".join(found)
-                )
-        elif mismatched:
-            logger.info(
-                "MISMATCHED: %d of %d arms differ from the control they name without a `# deliberate:` "
-                "line saying so; --only <arm> names the flags (knee-f8j9)",
-                len(mismatched),
-                len(invocations),
-            )
-        return arming and bool(mismatched)
-
     @staticmethod
     def unpriced(descriptions: Mapping[str, str]) -> list[str]:
         """The beads whose text carries no wall-clock/gain price, given each bead's own description.
@@ -459,33 +436,109 @@ class ArmCheck:
 
         return {bead: shown(bead) for bead in beads}
 
-    def report_prices(self, invocations: Mapping[str, str], *, arming: bool) -> bool:
-        """Log which arms name no bead or an unpriced one, and say whether that should REFUSE this run.
+    def prices(self, invocations: Mapping[str, str]) -> list[ArmVerdict]:
+        """The arms naming no bead, and those naming an unpriced one — the two halves of one rule.
 
-        A refusal only when an arm is being ARMED (`--only`), and the asymmetry is the same one `unstated`
-        draws. Seventy arms predate the rule and nearly all of them already ran; refusing the full sweep
-        would fail every invocation of this tool from now until they are all back-filled, which is how a
-        pre-flight check earns a `--no-verify`. The rule exists to stop MOMENTUM at the moment of arming,
-        and the run that arms an arm is the run that names it (knee-qxse).
+        The ONE place this tool talks to the tracker, joined to the pure detectors either side of it:
+        `beads` reads the headers, `unpriced` judges the text `bd` returns, and this is the read between
+        them. Both halves come back as verdicts rather than as a refusal, because the rule exists to stop
+        MOMENTUM at the moment of arming and nothing here knows whether this run is arming (knee-qxse).
         """
         beads = self.beads(invocations)
         named = {name: bead for name, bead in beads.items() if bead}
         unpriced = set(self.unpriced(self._descriptions(set(named.values()))))
-        underpriced = {name: bead for name, bead in named.items() if bead in unpriced}
-        unbeaded = sorted(name for name, bead in beads.items() if bead is None)
-        if arming:
-            for name in unbeaded:
-                logger.info("UNBEADED %s: names no `# bead: knee-xxxx`, so nothing records what it expects", name)
-            for name, bead in sorted(underpriced.items()):
-                logger.info("UNPRICED %s: %s states no PRICE / P(clears ...) — a cost, no gain", name, bead)
-        elif unbeaded or underpriced:
-            logger.info(
-                "UNPRICED: of %d arms, %d name no bead and %d name an unpriced one; --only <arm> refuses them",
-                len(beads),
-                len(unbeaded),
-                len(underpriced),
-            )
-        return arming and bool(unbeaded or underpriced)
+        return [
+            ArmVerdict(
+                "UNBEADED",
+                {
+                    name: "names no `# bead: knee-xxxx`, so nothing records what it expects"
+                    for name, bead in beads.items()
+                    if bead is None
+                },
+                clause="name no bead at all",
+                arming_refuses=True,
+            ),
+            ArmVerdict(
+                "UNPRICED",
+                {
+                    name: f"{bead} states no PRICE / P(clears ...) — a cost, no gain"
+                    for name, bead in named.items()
+                    if bead in unpriced
+                },
+                clause="name a bead stating a cost with no expected gain",
+                bead="knee-qxse",
+                arming_refuses=True,
+            ),
+        ]
+
+    def verdicts(
+        self,
+        invocations: dict[str, str],
+        against: Mapping[str, str],
+        refused: Mapping[str, str],
+        uncached: Mapping[str, str],
+        *,
+        require_caches: bool,
+    ) -> list[ArmVerdict]:
+        """Every check this tool runs, phrased — the sentences an author reads, beside the rules.
+
+        Apart from `main` because that entrypoint's job is argv and an exit code, and it had grown to
+        hold the phrasing of seven checks as well: at cyclomatic 21 it was the most tangled function in
+        the tree, and its complexity was the interleaving rather than any one rule. `refused` and
+        `uncached` are handed in rather than recomputed here, because the smoke and the closing tally
+        both want the raw dicts and parsing a hundred arms twice to re-derive them is a hundred parses.
+        """
+        overstated = self.overstated(invocations)
+        worst = max(overstated, key=lambda name: overstated[name], default="")
+        return [
+            ArmVerdict("REFUSED", refused, always=True, refuses=True),
+            ArmVerdict(
+                "UNCACHED",
+                {name: f"nothing decoded at {key}" for name, key in uncached.items()},
+                always=True,
+                refuses=require_caches,
+            ),
+            ArmVerdict(
+                "CRLF",
+                {
+                    path: f"{count} carriage returns on disk — bash reads the file as it is"
+                    for path, count in self.carriage_returns().items()
+                },
+                bead="knee-rlg5",
+                always=True,
+                refuses=True,
+            ),
+            ArmVerdict(
+                "OVERSTATED",
+                {name: f"asks {over:.2f} GB above what its own --slices reserve" for name, over in overstated.items()},
+                clause=f"name a --vram-gb above what their own --slices reserve, worst {worst} by "
+                f"{overstated.get(worst, 0.0):.2f} GB — the flag predates DeviceBudget.needed() and no "
+                f"arm needs it, so drop it",
+                bead="knee-ylp0",
+            ),
+            ArmVerdict(
+                "UNSTATED",
+                {
+                    name: f"says nothing about {', '.join(missing)}, so it inherits the pre-settlement "
+                    f"12 slices / 0.20-0.80 in silence"
+                    for name, missing in self.unstated(invocations).items()
+                },
+                clause=f"name none of {', '.join(OPERATING_POINT_FLAGS)}, so they inherit the "
+                f"pre-settlement 12 slices / 0.20-0.80 in silence",
+                bead="knee-aixw",
+            ),
+            ArmVerdict(
+                "MISMATCHED",
+                {
+                    name: f"undeclared against its own control — {'; '.join(found)}"
+                    for name, found in self.mismatched(invocations, against).items()
+                },
+                clause="differ from the control they name without a `# deliberate:` line saying so",
+                bead="knee-f8j9",
+                arming_refuses=True,
+            ),
+            *self.prices(invocations),
+        ]
 
     def readings(self, invocations: dict[str, str]) -> dict[str, ArmReading]:
         """Where each arm's pixels would come from, by arm name — its data root and the cache it names.
@@ -664,63 +717,18 @@ def main() -> None:
     switches = SwitchCoverage().invocations(printed) if arguments.switches else {}
     invocations = check.selected({**printed, **switches}, arguments.only)
     refused = check.refused(invocations)
-    for name, complaint in refused.items():
-        logger.info("REFUSED %s: %s", name, complaint)
     # A SMOKE-ONLY RECIPE IS NOT UNCACHED. A switch recipe exists to be RUN at sixty studies, and
     # `decode_smoke_caches` builds exactly that truncation for it; no queue will ever ask for its full
     # corpus, so `--tie last` reported "nothing decoded at 336px_12sl_last" on every sweep and always
     # would have — and a check that cries about a recipe working as specified is one nobody reads by
     # the third sweep. It also left --require-caches unable to pass alongside --switches at all.
     uncached = check.uncached({name: flags for name, flags in invocations.items() if name not in switches})
-    for name, key in uncached.items():
-        logger.info("UNCACHED %s: nothing decoded at %s", name, key)
-    # ADVISORY, not a refusal: an overstated cap costs wall-clock and risks the crawl, but it mismatches
-    # no arm to its control and invalidates no past number. Refusing on it would block a queue over a
-    # throughput fix, which is how a pre-flight check earns a --no-verify.
-    overstated = check.overstated(invocations)
-    if overstated:
-        worst = max(overstated, key=lambda name: overstated[name])
-        logger.info(
-            "OVERSTATED: %d of %d arms name a --vram-gb above what their own --slices reserve, worst %s "
-            "by %.2f GB. The flag predates DeviceBudget.needed() and no arm needs it; drop it (knee-ylp0)",
-            len(overstated),
-            len(invocations),
-            worst,
-            overstated[worst],
-        )
-    # ADVISORY for the same reason: silence about the operating point invalidates no flag and mismatches
-    # no cache, so it must not block a queue.
-    #
-    # PER ARM ONLY UNDER `--only`, and the asymmetry is the point rather than a volume control. Forty-one
-    # of the seventy arms are silent and nearly all of them ALREADY RAN — their numbers are in the ledger
-    # with whatever point they took, and forty-one unchanging lines would bury the REFUSED and OVERSTATED
-    # lines that cost a queue slot. The defect is only actionable on an arm about to be ARMED, which is
-    # exactly the run that names `--only`. The full sweep still says the count, because a number that
-    # never falls is the erosion record.
-    unstated = check.unstated(invocations)
-    if unstated and arguments.only:
-        for name, missing in sorted(unstated.items()):
-            logger.info(
-                "UNSTATED %s: says nothing about %s, so it inherits the pre-settlement 12 slices / "
-                "0.20-0.80 in silence (knee-aixw)",
-                name,
-                ", ".join(missing),
-            )
-    elif unstated:
-        logger.info(
-            "UNSTATED: %d of %d arms name none of %s, so they inherit the pre-settlement 12 slices / "
-            "0.20-0.80 in silence; --only <arm> names them (knee-aixw)",
-            len(unstated),
-            len(invocations),
-            ", ".join(OPERATING_POINT_FLAGS),
-        )
-    undeclared = check.report_mismatch(invocations, {**printed, **switches}, arming=bool(arguments.only))
-    # A REFUSAL, not an advisory: unlike an overstated cap this one silently destroys a completion
-    # marker, and the arm it destroys it for has already spent the machine.
-    carriage_returns = check.carriage_returns()
-    for path, count in sorted(carriage_returns.items()):
-        logger.info("CRLF %s: %d carriage returns on disk — bash reads the file as it is (knee-rlg5)", path, count)
-    priceless = check.report_prices(invocations, arming=bool(arguments.only))
+    verdicts = check.verdicts(
+        invocations, {**printed, **switches}, refused, uncached, require_caches=arguments.require_caches
+    )
+    # A LIST rather than a generator fed to `any`: that would stop reporting at the first refusal, and
+    # every check here exists to be READ. What it returns is the refusal; what it is for is the log.
+    refusing = [verdict.report(len(invocations), arming=bool(arguments.only)) for verdict in verdicts]
     broken: dict[str, str] = {}
     if arguments.smoke:
         # BEFORE the smoke, not as part of it: a smoke reads the truncated cache, and an arm on a
@@ -730,7 +738,7 @@ def main() -> None:
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
-    if refused or broken or carriage_returns or priceless or undeclared or (uncached and arguments.require_caches):
+    if any(refusing) or broken:
         sys.exit(1)
 
 
