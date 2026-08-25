@@ -8781,6 +8781,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.card_check.Holder.line",
+      "target": "kneemri.experiments.card_check.Holder.elided",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.card_check.Holder.line",
       "target": "kneemri.experiments.card_check.Holder.ours",
       "weight": 1
     },
@@ -21968,6 +21974,14 @@
       "label": "compute_pids",
       "level": "method",
       "parent": "kneemri.experiments.card_check.DeviceReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.card_check.Holder.elided",
+      "label": "elided",
+      "level": "method",
+      "parent": "kneemri.experiments.card_check.Holder",
       "role": null
     },
     {
