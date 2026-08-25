@@ -84,9 +84,31 @@ ways. That retires *"parse the reports better for Effusion"*: a better extractor
 the wording is what disagrees with the truth. The label lane is the map from adjective to annotation,
 which is an image question wearing a text question's clothes.
 
-On B we have done nothing. Crop geometry, physical slice ordering from DICOM orientation, stack-end
-removal — the one competitor who named a mechanism says a crop-geometry fix paid them +0.0059 across
-**10 of 12 labels**, and offers that shape as the tell: *"that's what a real effect looks like."*
+On B — **corrected within the hour, after auditing instead of assuming.** This section first read "we
+have done nothing", which was wrong, and the mistake is instructive enough to leave visible: I ranked a
+lane as open because a forum post made it sound open, without opening our own tree first. Every one of
+the four steps that competitor lists as their *next* experiment is already in `core/data/corpus/`:
+
+| their planned step | ours | since |
+|---|---|---|
+| fixed-mm physical cropping before resize | `slot.crop_mm`, 130 mm (`study.py:58`) | 2026-08-11 |
+| physical slice ordering from orientation/position | `slot_geometry.py`, `k = p·n̂` | 2026-08-11 |
+| removal of stack-end regions | `Band`, 0.1–0.9 — it is in the cache filename | 2026-08-11 |
+| anatomically better slice grouping | `crop_coverage` / `crop_alignment` / `crop_laterality` | 2026-08-11 |
+
+And the crop constant survived our own corpus measurement rather than being borrowed on faith: FOV
+(`Rows × PixelSpacing`) has a median of 160 mm and a 1st percentile of 130 mm, so only **0.43%** of
+series are narrower than the crop — it crops, it does not pad.
+
+So their +0.0059 across 10 of 12 labels is a gain *toward where we already stand*, not a lever above us.
+That is worth more than it looks: it prices the distance between a public-notebook pipeline and ours,
+and it says the 0.942 single model is beating us **from a geometry floor we already share**. Which puts
+the remaining weight back on A, and on whatever "some tweaks" means in a recipe we cannot see.
+
+One live thread does run out of this audit. Laterality is absent on 50.7% of series and **not at
+random** — Siemens tags 84.3%, Philips 38.3%, GE / Toshiba / Canon **0.0%**. That is the detection half
+of `knee-bduq` ("how do you detect which is which"), it is already half-built in `crop_laterality.py`,
+and a mirror-to-canonical augmentation would be free of both card and corpus.
 
 Beads: `knee-uj15` (the arithmetic), `knee-2dk1` (the bottleneck reading), `knee-bduq` (the bilateral
 knees from 735639), `knee-6477` (raddino, arming still owner-banned).
