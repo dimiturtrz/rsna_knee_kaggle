@@ -30,6 +30,20 @@ def test_every_kernel_carries_the_canonical_bootstrap():
     assert not drifted, f"{drifted} drifted from comp/kernel_bootstrap.py — run python -m comp.build_kernels"
 
 
+def test_a_stray_import_in_the_region_refuses_the_splice():
+    """Code that a tool moved into the region must stop the build, not be overwritten by it.
+
+    The region is regenerated, so anything sitting in it that the canonical text lacks is deleted on
+    the next run. `ruff check --select I --fix` puts code there without anyone asking: the OPEN marker
+    reads as a comment on the imports below it, so a kernel's own imports can be sorted down across it.
+    Written with the canonical text itself so it keeps testing the real region rather than a fixture.
+    """
+    bootstrap = Bootstrap()
+    moved = f"{OPEN}\nimport pandas as pd\n{bootstrap.text}{CLOSE}\n"
+    assert bootstrap.strays(moved) == ["import pandas as pd"]
+    assert bootstrap.strays(f"{OPEN}{bootstrap.text}{CLOSE}\n") == []
+
+
 def test_every_kernel_that_finds_the_kit_takes_it_from_the_region():
     """A kernel spelling its own `find_kit` is the duplication coming back, so it must sit in the region.
 

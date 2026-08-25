@@ -39,6 +39,7 @@ No leakage concern for the submission: the board's test set is disjoint from the
 training on 100% of train is exactly what a final fit is for.
 """
 
+# >>> KERNEL-BOOTSTRAP
 import logging
 import os
 import subprocess
@@ -46,7 +47,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -103,16 +103,30 @@ def install_wheels(kit: Path) -> None:
     )
 
 
-# <<< KERNEL-BOOTSTRAP
+def boot() -> Path:
+    """Everything a kernel does before its first line of ours can run, as one call.
 
+    Fifty-three kernels opened `main` with these same four statements in this same order, because the
+    order is forced: nothing may import `kneemri` until the wheels are installed, and nothing may find
+    the wheels until the kit is found. Four lines that MUST NOT be reordered are a step, not a preamble,
+    and a step copied fifty-three times is fifty-three places for the order to be got wrong once.
 
-def main() -> None:
+    Returns the kit so a kernel that needs a path into it has one; most only needed it for `sys.path`.
+    """
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
+    return kit
 
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+
+# <<< KERNEL-BOOTSTRAP
+
+
+def main() -> None:
+    boot()
+
+    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     chosen = (
         "final_ws_e12",

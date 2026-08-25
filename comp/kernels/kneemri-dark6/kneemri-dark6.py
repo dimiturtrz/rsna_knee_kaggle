@@ -42,6 +42,7 @@ PRE-REGISTRATION, written before the number, against finalfit's 0.934. Its one s
 There is no outcome on which this teaches nothing, and unlike `weakseven` there is one on which it wins.
 """
 
+# >>> KERNEL-BOOTSTRAP
 import logging
 import os
 import subprocess
@@ -49,7 +50,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -106,16 +106,30 @@ def install_wheels(kit: Path) -> None:
     )
 
 
-# <<< KERNEL-BOOTSTRAP
+def boot() -> Path:
+    """Everything a kernel does before its first line of ours can run, as one call.
 
+    Fifty-three kernels opened `main` with these same four statements in this same order, because the
+    order is forced: nothing may import `kneemri` until the wheels are installed, and nothing may find
+    the wheels until the kit is found. Four lines that MUST NOT be reordered are a step, not a preamble,
+    and a step copied fifty-three times is fifty-three places for the order to be got wrong once.
 
-def main() -> None:
+    Returns the kit so a kernel that needs a path into it has one; most only needed it for `sys.path`.
+    """
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
+    return kit
 
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+
+# <<< KERNEL-BOOTSTRAP
+
+
+def main() -> None:
+    boot()
+
+    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     # THE BOTTOM RUNG OF A STRICTLY NESTED COUNT CURVE. These are the SIX dark members and nothing
     # else. `allfit` is these six plus `band_dense_long_s2026`; `count8` is those seven plus

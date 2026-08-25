@@ -46,9 +46,33 @@ class Bootstrap:
         text = kernel.read_text(encoding="utf-8")
         return OPEN in text and CLOSE in text
 
+    def strays(self, text: str) -> list[str]:
+        """Imports sitting in that kernel's region that the canonical text does not have.
+
+        The region is a build product, so anything in it that this file did not put there is about to
+        be deleted by the next splice — and one thing PUTS code there without anyone deciding to.
+        `ruff check --select I --fix` treats the OPEN marker as a comment attached to the imports that
+        follow it, so a kernel whose own imports sit just above the marker can have them sorted DOWN
+        across it. That happened on 2026-08-25: `import pandas as pd` and `import torch` moved into
+        `kneemri-graft-verify`'s region, the next splice overwrote them, and the loss surfaced as
+        `Could not find name torch` from pyrefly rather than as anything about the region.
+
+        Imports only, and that is the whole point of the narrowness: the region's OTHER lines
+        legitimately differ from canonical whenever `kernel_bootstrap.py` itself has changed, which is
+        the ordinary reason to run this. A stray import is the one drift that is never an edit anyone
+        made on purpose.
+        """
+        current = {line.strip() for line in self.region(text, Path("<kernel>")).splitlines()}
+        canonical = {line.strip() for line in self.text.splitlines()}
+        return sorted(line for line in current - canonical if line.startswith(("import ", "from ")))
+
     def apply(self, kernel: Path, *, write: bool) -> bool:
         """Whether the kernel's copy already matched — writing it when it did not and may be written."""
         text = kernel.read_text(encoding="utf-8")
+        strays = self.strays(text)
+        if strays:
+            message = f"{kernel.parent.name} has imports inside the bootstrap region: {strays}"
+            raise ValueError(message)
         wanted = self.spliced(text)
         if wanted == text:
             return True

@@ -18,31 +18,14 @@ notice: every member still loads, every fingerprint still passes (each is checke
 reading), and the submission would just be quietly wrong.
 """
 
+# >>> KERNEL-BOOTSTRAP
 import logging
 import os
 import subprocess
 import sys
 import zipfile
 from pathlib import Path
-from typing import override
 
-WORKING = Path("/kaggle/working")
-
-GRAFT_TIE = "last"
-"""The router the published members were fitted under, measured against their own predictions."""
-
-
-def _published(root: Path) -> bool:
-    """Whether a mounted package is the published CC0 one rather than ours.
-
-    By the dataset directory name, which is what distinguishes them on Kaggle. Explicit rather than
-    inferred from the config, because the whole point is that their manifest does NOT record the
-    field we are supplying.
-    """
-    return "rsna-knee-weights" in str(root)
-
-
-# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -99,17 +82,50 @@ def install_wheels(kit: Path) -> None:
     )
 
 
-# <<< KERNEL-BOOTSTRAP
+def boot() -> Path:
+    """Everything a kernel does before its first line of ours can run, as one call.
 
+    Fifty-three kernels opened `main` with these same four statements in this same order, because the
+    order is forced: nothing may import `kneemri` until the wheels are installed, and nothing may find
+    the wheels until the kit is found. Four lines that MUST NOT be reordered are a step, not a preamble,
+    and a step copied fifty-three times is fifty-three places for the order to be got wrong once.
 
-def main() -> None:
+    Returns the kit so a kernel that needs a path into it has one; most only needed it for `sys.path`.
+    """
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     kit = find_kit()
     install_wheels(kit)
     sys.path.insert(0, str(kit))
+    return kit
 
-    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+
+# <<< KERNEL-BOOTSTRAP
+
+from typing import (  # noqa: E402 - a bootstrap: nothing may import before the region installs the kit
+    override,
+)
+
+WORKING = Path("/kaggle/working")
+
+GRAFT_TIE = "last"
+"""The router the published members were fitted under, measured against their own predictions."""
+
+
+def _published(root: Path) -> bool:
+    """Whether a mounted package is the published CC0 one rather than ours.
+
+    By the dataset directory name, which is what distinguishes them on Kaggle. Explicit rather than
+    inferred from the config, because the whole point is that their manifest does NOT record the
+    field we are supplying.
+    """
+    return "rsna-knee-weights" in str(root)
+
+
+def main() -> None:
+    boot()
+
+    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     logger = logging.getLogger("fusion")
 

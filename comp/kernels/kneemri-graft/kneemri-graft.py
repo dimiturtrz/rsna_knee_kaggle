@@ -12,26 +12,14 @@ bootstrap — finding the mounted kit and installing its wheels — has to be he
 the package it is finding can be imported.
 """
 
+# >>> KERNEL-BOOTSTRAP
 import logging
 import os
 import subprocess
 import sys
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    # The kit is not on sys.path when this module is imported, so the finder is a name to the
-    # type checker and an argument at runtime.
-    from core.mounts import Mounts
-
-import torch
-
-WORKING = Path("/kaggle/working")
-DINOV2_DIM = 384
-
-
-# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -88,7 +76,38 @@ def install_wheels(kit: Path) -> None:
     )
 
 
+def boot() -> Path:
+    """Everything a kernel does before its first line of ours can run, as one call.
+
+    Fifty-three kernels opened `main` with these same four statements in this same order, because the
+    order is forced: nothing may import `kneemri` until the wheels are installed, and nothing may find
+    the wheels until the kit is found. Four lines that MUST NOT be reordered are a step, not a preamble,
+    and a step copied fifty-three times is fifty-three places for the order to be got wrong once.
+
+    Returns the kit so a kernel that needs a path into it has one; most only needed it for `sys.path`.
+    """
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    kit = find_kit()
+    install_wheels(kit)
+    sys.path.insert(0, str(kit))
+    return kit
+
+
 # <<< KERNEL-BOOTSTRAP
+
+from typing import (  # noqa: E402 - a bootstrap: nothing may import before the region installs the kit
+    TYPE_CHECKING,
+)
+
+if TYPE_CHECKING:
+    # The kit is not on sys.path when this module is imported, so the finder is a name to the
+    # type checker and an argument at runtime.
+    from core.mounts import Mounts
+
+import torch  # noqa: E402 - a bootstrap: nothing may import before the region installs the kit
+
+WORKING = Path("/kaggle/working")
+DINOV2_DIM = 384
 
 
 def find_dinov2(mounts: "Mounts") -> Path:
@@ -104,17 +123,14 @@ def find_dinov2(mounts: "Mounts") -> Path:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    kit = find_kit()
-    install_wheels(kit)
-    sys.path.insert(0, str(kit))
+    boot()
 
-    from transformers import AutoModel  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from transformers import AutoModel  # noqa: PLC0415 - the kit is on sys.path only after boot
 
-    from core.mounts import Mounts  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-    from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - kit is on sys.path only after install_wheels
-    from kneemri.kaggle.submission import Submission  # noqa: PLC0415 - kit is on sys.path only after install_wheels
+    from core.mounts import Mounts  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.kaggle.submission import Submission  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     # ONE finder for the whole run: it caches, and each of these lookups used to walk the whole
     # competition mount on its own.

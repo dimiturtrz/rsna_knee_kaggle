@@ -12,8 +12,17 @@ fix is a slot spent on code we had already corrected — which has happened.
 The region between the markers below is the canonical text. `python -m comp.build_kernels` writes it
 into the matching region of every kernel that carries the markers, and `--check` fails when a kernel's
 copy has drifted, so the copy is a build product rather than a thing anyone maintains.
+
+THE IMPORTS ARE INSIDE THE REGION, and were once deliberately outside it. Outside, they were six lines
+that every kernel spelled for itself — 318 lines whose only job was to make the region's own code run.
+Inside, they are spliced with it and the kernels that need nothing else open with their docstring and
+the marker. The four kernels that DO import more of their own keep those above the marker, where
+`ruff check --select I --fix` can sort them down across it into the region and the next splice will
+eat them; `build_kernels.strays` refuses to write when it finds an import in there, because that loss
+is silent otherwise.
 """
 
+# >>> KERNEL-BOOTSTRAP
 import logging
 import os
 import subprocess
@@ -21,12 +30,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-# The imports sit ABOVE the region on purpose: every kernel already opens with these five, and a
-# region that carried its own imports would splice a second copy into each of them. Here they are what
-# makes this file a real module — checked by ruff and pyrefly like everything else, which the pasted
-# copies never were.
-
-# >>> KERNEL-BOOTSTRAP
 SERIES = {"train_series", "test_series", "train_images", "test_images"}
 """Competition mounts holding one directory per study. `rglob` walks every one of them."""
 
@@ -81,6 +84,23 @@ def install_wheels(kit: Path) -> None:
         [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q", *[str(w) for w in wheels]],
         check=True,
     )
+
+
+def boot() -> Path:
+    """Everything a kernel does before its first line of ours can run, as one call.
+
+    Fifty-three kernels opened `main` with these same four statements in this same order, because the
+    order is forced: nothing may import `kneemri` until the wheels are installed, and nothing may find
+    the wheels until the kit is found. Four lines that MUST NOT be reordered are a step, not a preamble,
+    and a step copied fifty-three times is fifty-three places for the order to be got wrong once.
+
+    Returns the kit so a kernel that needs a path into it has one; most only needed it for `sys.path`.
+    """
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    kit = find_kit()
+    install_wheels(kit)
+    sys.path.insert(0, str(kit))
+    return kit
 
 
 # <<< KERNEL-BOOTSTRAP
