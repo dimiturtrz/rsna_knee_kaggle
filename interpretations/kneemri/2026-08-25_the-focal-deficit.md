@@ -174,6 +174,34 @@ licenses is diagnostic rather than corrective: find out **whether our own member
 members' deficit shape**, since every number here rests on assuming they do, and that costs no card —
 only a set of predictions from a member fitted without annotation upweighting.
 
+## The split turned out to be PREDICTIVE, which is the strongest thing on this page
+
+Everything above is elimination. This is not, and it was earned after the page was written: `blendlabels`
+— a training table blended from three independent readers of the same reports — ran the same evening
+against `native224`, and the six findings it moved are the six this page had already named.
+
+```
+by structure scale:        focal +0.0000   regional +0.0083
+its 6 label-bottlenecked:  mean  +0.0070   (Baker's, Contusion, Effusion, Fracture, Medial OA, Synovitis)
+twelve-label MEAN:         +0.0034
+```
+
+`run_comparison --split` derives that six-finding set from the supervision gap itself, so it is not a
+set this page handed it. The claim group moves at **twice** the twelve-label mean while the focal group
+moves +0.0000 to four decimal places. A partition that was fitted to explain a past measurement and then
+correctly says where an unrelated future change will land is doing more than describing — it is the one
+result here that would survive someone disputing the -0.049.
+
+The exception is recorded rather than smoothed: MCL +0.0239\* is the largest single delta and MCL is a
+deficit-side structure a better reader should not reach. One marked crossing in twelve on the
+third-poorest label (153 positives) is about what chance gives, and the other three deficit structures
+behave — but it is not explained.
+
+And it sizes the label lane honestly, which the elimination sections cannot: better readers buy about
++0.007 on the six findings they reach and about +0.003 on the metric. Both sit at or under the 0.0062
+floor. **The lane is live and it is small** — an order of magnitude short of the 1.5% bar, so it is a
+thing to keep, not a thing to plan around.
+
 ## What it does NOT say
 
 It does not say ensembling is worthless or that the roster should change; those axes closed separately
