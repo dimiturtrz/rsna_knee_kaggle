@@ -63,6 +63,20 @@ class MountCheck:
             return f"REFUSED - names {', '.join(unpushed)}, which the LIVE members dataset does not hold"
         return f"ok - declares all of {', '.join(mounts)}"
 
+    def absent(self) -> list[str]:
+        """Every member the manifest names that the LIVE dataset does not hold — the package question.
+
+        PACKAGE-LEVEL, and that is the whole point. `MemberPackage.__init__` refuses a manifest whose
+        files it cannot all find, so ONE dropped file takes down every kernel that mounts the dataset,
+        including kernels whose own tuple never names it. `unpushed` asks the per-kernel question and
+        cannot see that: on 2026-08-25 it answered `kneemri-farseat: ok`, and the run then died with
+        "manifest listing 40 members but 1 of their files are absent (first 'small_accum_s2026.pt')" —
+        a member farseat does not name. A kernel slot bought that distinction.
+        """
+        if self.live is None:
+            return []
+        return [member.identifier for member in self.package.members if member.identifier not in self.live]
+
     def unpushed(self, names: list[str] | None) -> list[str]:
         """The members a kernel needs that the live dataset does not hold — empty when nothing was asked.
 
@@ -107,6 +121,17 @@ def main() -> None:
         logger.info("live %s holds %d members", identifier, len(live))
 
     check = MountCheck(package, live)
+    # BEFORE the per-kernel loop, because it invalidates every verdict that loop is about to print: a
+    # manifest the live dataset cannot satisfy refuses the package for ALL of them.
+    absent = check.absent()
+    if absent:
+        logger.error(
+            "live dataset does not hold %d of the %d members the manifest names (%s) — this refuses the "
+            "package for EVERY kernel, not only the ones naming them. Re-push the members dataset.",
+            len(absent),
+            len(package.members),
+            ", ".join(absent),
+        )
     verdicts = {kernel.name: check.verdict(kernel) for kernel in check.entries(arguments.kernels)}
     for name, verdict in verdicts.items():
         logger.info("  %s: %s", name, verdict)
@@ -119,7 +144,7 @@ def main() -> None:
     # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
     Denominator(passed, empty).refuse_empty()
-    if refused:
+    if refused or absent:
         sys.exit(1)
 
 

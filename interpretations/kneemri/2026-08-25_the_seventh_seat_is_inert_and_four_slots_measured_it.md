@@ -12,6 +12,7 @@ That was the project's main search axis for two days. It was searching a coordin
 | entry | seat four | board |
 |---|---|---|
 | dark6 | *(no seventh member)* | 0.937 |
+| dark7 | `small_batch6_ff` (all-data) | 0.937 |
 | allfit | `band_dense_long_s2026` (fold-0) | 0.937 |
 | lastseat | `small_batch6_s2026` (same family) | 0.937 |
 | augseat | `aug_long_s2026` (regularised) | 0.936 |
@@ -41,13 +42,34 @@ uncorrelated are made downstream of all of it. `dark6` is that note's board conf
 much stronger instrument than any seat swap: an entire extra member of the saturated family buys
 nothing at all.
 
+## dark7 landed FLAT, and it closes the dose axis too
+
+`dark7` (55756369) reads **0.937** — dark6's six plus `small_batch6_ff`, the seventh all-data member,
+and the highest-scoring member this project has ever trained. Its own pre-registration named that band:
+*"within 0.002 = the dose is spent and the full-fit axis closes on a measurement rather than an
+extrapolation."* So the all-data dose is **saturated at six**, and the seventh seat is inert whether it
+is filled by a fold-0 member or by a full-fit one.
+
+**Four board entries now read exactly 0.937**, and between them the member COUNT (six vs seven), the
+member IDENTITY, and the seventh member's FOLD STATUS all vary:
+
+    dark6      6 dark                          0.937
+    dark7      6 dark + 1 dark                 0.937
+    allfit     6 dark + band_dense_long (f0)   0.937
+    lastseat   6 dark + small_batch6 (f0)      0.937
+
+That is a plateau, not scatter, and it is the strongest statement this board has made. It also decides
+a card question for free: `small_batch6_ff.sh` pre-registered *"queue the second conversion
+immediately"* only on `>= 0.939`, so **`band_dense_long_ff` is not converted** and the ~3 h that would
+have cost is not spent.
+
 ## What is still live
 
 Three strictly nested entries, one variable each, and the third has never been run:
 
     dark6    six all-data members                    0.937
-    dark7    + a seventh of the SAME family          pending  (55756369)
-    farseat  + a seventh of the ONE OTHER family     unsubmitted
+    dark7    + a seventh of the SAME family          0.937
+    farseat  + a seventh of the ONE OTHER family     running
 
 `farseat`'s tuple is exactly `dark6`'s six with `vjepa_warm_s2026` appended (verified member-for-member).
 `vjepa_warm_s2026` is the only line in the roster that breaks the slice-then-pool term of the closure
@@ -59,8 +81,9 @@ It had been unmounted since 2026-08-24 and was remounted 2026-08-25 01:14Z by wa
 written way back. Its kernel had been gated on `augseat >= 0.940`; that gate is void by the argument
 above, and has been rewritten against `dark6`.
 
-If `dark7` and `farseat` land together, the reading is COUNT. If they separate, the reading is FAMILY —
-and that is the first live lever past the 0.937 plateau in four entries.
+With `dark7` now flat, `farseat` is the whole remaining question, and its attribution is clean by
+construction: the same-family control has been run and returned nothing, so a move at `farseat` can only
+be FAMILY. It is the last variable at seat seven that has not been measured.
 
 Beyond that triple, the axes never varied on any board entry are the **vote** (`RankAverage` on every
 single submission this project has made; measured flat offline at +0.0002, but the offline ruler is

@@ -87,6 +87,21 @@ def test_unpushed(tmp_path: Path):
     assert check.unpushed(None) == ["v3member"], unnamed
 
 
+def test_absent(tmp_path: Path):
+    """The failure of 2026-08-25: a member the manifest names, live nowhere, and named by NO kernel.
+
+    `unpushed` is per-kernel and cannot see it — the one it misses is exactly the one that matters,
+    because `MemberPackage` refuses a manifest whose files it cannot all find and takes every kernel
+    down with it.
+    """
+    package = _package(tmp_path)
+    assert MountCheck(package).absent() == [], "without --live there is nothing to compare against"
+
+    check = MountCheck(package, live={"v2member"})
+    assert check.absent() == ["v3member"], "a manifest row with no live file, regardless of who names it"
+    assert MountCheck(package, live={"v2member", "v3member"}).absent() == []
+
+
 def test_verdict_refuses_an_unpushed_member(tmp_path: Path):
     """And it reads as a REFUSAL on the kernel, not as a mount problem — the mounts are fine."""
     check = MountCheck(_package(tmp_path), live={"v2member"})

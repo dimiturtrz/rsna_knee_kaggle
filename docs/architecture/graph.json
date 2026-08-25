@@ -11025,6 +11025,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.kaggle.mount_check.MountCheck.absent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.main",
       "target": "kneemri.kaggle.mount_check.MountCheck.entries",
       "weight": 1
     },
@@ -23556,6 +23562,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.mount_check.MountCheck.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check.MountCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck.absent",
+      "label": "absent",
       "level": "method",
       "parent": "kneemri.kaggle.mount_check.MountCheck",
       "role": null
