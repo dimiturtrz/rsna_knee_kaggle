@@ -45,8 +45,29 @@
 #   * <= -0.015. The public readers are injecting noise our own reader does not have, which argues for
 #     the TIEBREAK mode (base ordering dominant) over MEAN, and that is the follow-up arm.
 #
+# AND A PER-LABEL PREDICTION, added 2026-08-25 18:58Z from the supervision_gap split, before the run.
+# The diagnostic divides the twelve findings in two: six where the model already BEATS the report labels
+# (Effusion +0.1304, Contusion +0.0891, Synovitis +0.0508, Medial OA +0.0419, Baker's +0.0226, Fracture
+# +0.0160) and six where it trails, among them all four internal-derangement structures. A finer label
+# table is a supervision improvement, so its gain can only land on the first group — where the reader is
+# the weak part. On ACL, MCL and the two menisci the reader already reads 0.84-0.99 and the model is what
+# trails, so a better table has nothing to give there.
+#
+# So `run_comparison --control native224_s2026.pt --arms blendlabels_s2026.pt` is the reading, not the
+# mean alone. A mean that moves with the gain spread evenly, or concentrated on the four the mechanism
+# says it CANNOT touch, is a mean that moved for some other reason and the arm is unread. A mean that
+# moves with the gain on the six reader-bottlenecked findings is the mechanism firing.
+#
+# AND THE HARNESS CHECK CAUGHT ITS THIRD FLAG, 2026-08-25 18:59Z, on this arm's first launch. The header
+# above said `deliberate: --image-size 224` and the run_train line passed no --image-size at all, so the
+# recipe inherited $RECIPE's 336 and the log printed "image_size": "336". Every band below was written
+# against native224's 0.8502; at 336 the arm is an hour instead of twenty minutes and its matched control
+# is a different row. Nothing about the arm was wrong except that its own command did not say what its
+# own comment said — which is why the check reads the RECIPE LINE and not the header. Killed at 60s and
+# relaunched with the flag. `base224` and `native224` both pass it explicitly; this arm alone did not.
+#
 # HARNESS CHECK BEFORE READING ANY OF THAT. The printed recipe must name blend_three_v1.csv on "labels"
-# AND report_labels_v2.csv on "eval_labels" — a null here is the failure mode that makes the whole run
+# AND report_labels_v2.csv on "eval_labels" AND 224 on "image_size" — a null here is the failure mode that makes the whole run
 # unreadable, and it is the flag most likely to be silently dropped. The log must load 4,406 studies and
 # hold out 909, the same holdout every fold-0 row was scored on.
 #
@@ -64,5 +85,5 @@ require "$LABELS"
 
 run_train blendlabels \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 --image-size 224 \
   --labels "$BLEND" --eval-labels "$LABELS" --out "$PROCESSED/blendlabels_s2026.pt"
