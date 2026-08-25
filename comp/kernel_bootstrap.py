@@ -16,10 +16,13 @@ copy has drifted, so the copy is a build product rather than a thing anyone main
 THE IMPORTS ARE INSIDE THE REGION, and were once deliberately outside it. Outside, they were six lines
 that every kernel spelled for itself — 318 lines whose only job was to make the region's own code run.
 Inside, they are spliced with it and the kernels that need nothing else open with their docstring and
-the marker. The four kernels that DO import more of their own keep those above the marker, where
-`ruff check --select I --fix` can sort them down across it into the region and the next splice will
-eat them; `build_kernels.strays` refuses to write when it finds an import in there, because that loss
-is silent otherwise.
+the marker. The four kernels that DO import more of their own keep those BELOW the region — which is
+where they belong anyway, since an import may come from a wheel the region installs. Above it they were
+reachable: `ruff check --select I --fix` reads the OPEN marker as a comment attached to the imports
+under it and sorts them DOWN across it into the region, and the next splice eats them. Below it, no sort
+can reach in. `build_kernels.strays` refuses to write over a region holding an import, because that loss
+is silent otherwise — it surfaced as `Could not find name torch`, which names neither the region nor the
+sort.
 """
 
 # >>> KERNEL-BOOTSTRAP
