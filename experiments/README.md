@@ -3809,3 +3809,14 @@ negative proxy number would be evidence FOR the change.
 `annotated_readings` REFUSES any checkpoint that trained on those cells rather than scoring it.
 **Non-license:** n = 58, the annotated set is not a random sample (ACL 41% there against ~20% in the
 corpus, topic 734106). The claim is about WHICH RULER, and it is documentary, not statistical.
+
+**It also re-reads `merged_corpus`, for free.** That arm's headline — *"the six DEFICIT findings mean
++0.0061, the six SURPLUS findings mean −0.0022"* — used the PUBLISHED model's partition, which `holdannot`
+has now shown is not ours. Re-split on our measured three-against-nine, the same recorded deltas give
+**+0.0071 (ours to fix) against +0.0002 (the reader's)**: the separation SURVIVES and widens. Two cuts:
+n = 3, with Lateral Meniscus +0.0196\* carrying nearly all of it, so it is one starred row wearing a
+partition; and **ACL +0.0161 sits on the LABEL side for us**, where Rijeka supervises it directly — that is
+supervision arriving, not encoder transfer, and it must not be counted toward the transfer claim. Rijeka's
+ACL column is expert double-blind IMAGE reads, so of every supervision source here exactly two are
+image-read rather than text-mined (the 58, and Rijeka), and the axis that has ever moved our deficit
+findings is the one whose labels are the board's KIND. Convergent with `knee-ombx`, not new evidence for it.

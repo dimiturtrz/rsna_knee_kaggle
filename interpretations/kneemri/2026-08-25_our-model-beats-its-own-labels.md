@@ -197,6 +197,41 @@ was looked up. Cost: one 20–40 minute card slot, no submission slot. Pre-regis
 `holdannot_s2026` as the control rather than `native224` — both arms have to hold the annotations for the
 comparison to be single-variable. The standing rule is **knee-9198**.
 
+## Re-reading `merged_corpus` on OUR partition — the split gets SHARPER, and it costs no card
+
+`merged_corpus` is the other arm this touches, and it touches it twice.
+
+Its headline reading is *"the six DEFICIT findings mean +0.0061, the six SURPLUS findings mean −0.0022 …
+the first mechanism on the board to move the deficit set AS A SET."* That partition came from
+`2026-08-25_the-focal-deficit.md` — **the published model's deficit shape, which the table above shows is
+not ours.** So the arm's strongest claim was read on the wrong six, and re-reading it is arithmetic on
+numbers already in the ledger.
+
+Our partition is three model-side (PF OA, Lateral Meniscus, MCL) against nine label-side. Re-splitting
+`merged_corpus`'s recorded per-label deltas on it:
+
+| partition | findings | deltas | mean |
+|---|---|---|---|
+| **ours to fix** (model-side, 3) | Lateral Meniscus, MCL, PF OA | +0.0196\*, +0.0062, −0.0044 | **+0.0071** |
+| **the reader's** (label-side, 9) | ACL, Lateral OA, Medial Meniscus, Synovitis, Contusion, Medial OA, Effusion, Baker's, Fracture | +0.0161, +0.0016, −0.0024, −0.0206\*, +0.0035, +0.0023, +0.0017, +0.0004, −0.0005 | **+0.0002** |
+
+**The separation survives the change of partition and widens** — +0.0071 against +0.0002, where the old
+split read +0.0061 against −0.0022. The arm's claim was right for a reason it had not established.
+
+Two honest cuts on that. It is **three findings**, and Lateral Meniscus +0.0196\* carries almost all of it,
+so this is one starred row wearing a partition; n = 3 is not a set. And **ACL +0.0161 sits on the LABEL
+side for us**, where Rijeka supervises it directly — that delta is supervision arriving, not the encoder
+transferring, and it should not be counted toward the transfer claim.
+
+The second thing it touches is the ruler. **Rijeka's ACL column is expert double-blind IMAGE reads.** Of
+every supervision source in this project, exactly two are image-read rather than text-mined: the 58
+annotations and Rijeka. The 58 were priced at nothing — but they are 696 cells at ~0.66% of training
+weight, which is a fact about their SIZE, not about their kind. Rijeka is 736 studies, +21% of corpus, and
+it moved the number. **The one axis that has ever moved this project's deficit findings is also the one
+axis whose labels are the same KIND as the board's ruler.** That is convergent with `knee-ombx`'s MRNet
+argument rather than new evidence for it — and it sharpens the argument's shape: MRNet is to be argued on
+KIND, and the ruler finding says what "kind" is worth, which is the difference between the two rulers.
+
 ## Consequence for how arms are read
 
 Any label-side arm from here should report BOTH numbers: its holdout AUC on the proxy, and its
