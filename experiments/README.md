@@ -3855,3 +3855,20 @@ hides.
 **Stated limit:** `hold_annotations: False`, so this member cannot be read on the objective ruler. Every
 number above is the PROXY, and by knee-9198's own argument the proxy under-pays a corpus arm that moves
 the model toward annotation truth. The split is the reading; the mean is the floor.
+
+**Its seat, priced the same evening.** `member_curve` over the champion roster's five fold-0 counterparts
+(`calib_span`, `grade_ladder`, `base_dense`, `lr4e-5_ws`, `through_dense`), with and without it. The sixth
+roster member `final_ws_e12` is EXCLUDED: it is full-fit and reads **0.9541** on the fold-0 holdout it
+trained on, which would have carried the whole greedy path.
+
+| pool | best subset | all-member RankAverage | LogitAverage | best single |
+| --- | --- | --- | --- | --- |
+| five, without | 0.8680 | 0.8683 | 0.8686 | 0.8565 |
+| six, with | **0.8700** | **0.8697** | **0.8702** | **0.8587** |
+| seat value | +0.0020 | +0.0014 | +0.0016 | +0.0022 |
+
+**It is in every best subset from one to six, and it is the best single member in the pool** — ahead of
+`band_span` (0.8545) and `res392` (0.8523), the two that have held that place all week. Seat value
++0.0014 to +0.0020 offline, against the ~+0.001 a seat swap has historically been worth; roughly a double
+seat, and still an order of magnitude under the house bar. `LogitAverage` stays ahead of `RankAverage` by
++0.0005, as the champion's own vote already assumes.
