@@ -362,3 +362,14 @@ small_batch6_ff.pt          # DARK. small_batch6_s2026's flags plus --fold -1 --
 # has seen every holdout study, no offline score exists or can exist for it, and it must never enter a
 # pool that reports an offline mean. Its fold-0 twin small_batch6_s2026 is greedy seat 1 of 67 (0.8598)
 # and held the swapped seat in lastseat at 0.937, so this member's behaviour is a measured control.
+#
+# Added 2026-08-25 00:47Z, card-free, on the second item of the goal-pricing note.
+v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE family, which the package has
+# never held. Until now the only DINOv3-base member shipped was dinov3_base_lora_s2026 at 0.8268, and
+# that gap is not an architecture fact: it is LoRA-over-frozen against full adaptation on the same trunk,
+# +0.0187 for the adaptation, one of the two inherited-hyperparameter defects the 2026-08-24 audit found
+# written up as facts about encoders. So every entry that has ever varied the encoder FAMILY on the board
+# varied it with the weak reading of it.
+#
+# It costs no slot and no card — the trunk's weights are already mounted at dimiturnt/dinov3-hf/vitb16,
+# and it is converged rather than truncated (12 epochs asked, 12 run, peak before the last).
