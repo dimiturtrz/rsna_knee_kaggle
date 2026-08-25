@@ -77,6 +77,52 @@
 # deliberate: --lora-rank
 # deliberate: --backbone-lr
 #
+# THE VRAM PARAGRAPH ABOVE WAS WRONG, MEASURED 2026-08-25, and the arm OOMed on its first launch:
+#
+#   torch.OutOfMemoryError: Tried to allocate 1.84 GiB ... 28.54 GiB allowed; 25.75 GiB allocated by
+#   PyTorch, 2.56 GiB reserved but unallocated.   buf74 = empty_strided_cuda((720, 446, 3072), bf16)
+#
+# LoRA does not cut activation memory, and activations are what this recipe is made of. It removes the
+# trunk's optimiser state and weight gradients — real, roughly a gigabyte — but the backward still
+# traverses all 72 layers to reach the early adapters, so every trunk activation is still held, and the
+# adapters ADD their own at each of those layers. Net it rose. The prediction was made from the
+# parameter count and the memory is bought by the token count.
+#
+# WHY --eager-encoder AND NOT A SMALLER BATCH. The named allocation is an inductor buffer, so the
+# fused-kernel intermediates torch.compile materialises are the part that does not fit. Compilation is
+# an execution backend and not arithmetic: `--eager-encoder`'s own help records the throughput pair at
+# 0.7604 eager against 0.7606 compiled, a fifth of the noise floor. It costs 21% per step (~2.7-3.1 h
+# instead of 2.2-2.6 h) and leaves the recipe's mathematics untouched, which is the whole point of the
+# arm.
+#
+# `--batch 3 --accumulate 2` is the obvious reach and is WRONG HERE, for a reason `Accumulation`'s own
+# docstring states: anything pooling WITHIN a step still sees `batch` studies, and this recipe carries
+# `--rank-weight 1.0`, so halving the micro-batch halves the ranking term's pair population. That is a
+# second variable in an arm whose entire argument is that adaptation is the only one. Accumulation is
+# free for a pointwise loss and is not free for this one.
+#
+# `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` would reclaim the 2.56 GiB of fragmentation and is
+# dead on this machine — see experiments/lib.sh, which records three arms carrying it unhelped.
+# AND THE GATE'S ESTIMATE IS ITSELF WRONG FOR LoRA, which is why --vram-gb appears on a line that
+# otherwise names only recipe flags. `DeviceBudget.needed()` derives the non-activation term from the
+# TRAINABLE trunk — "weights, gradients and Adam's two moments, held once per step" — so rank-8
+# adapters make that term nearly vanish and the gate reserves 29230 MiB. The activations it derives
+# from slices are unchanged, and the adapters' own activations are not in the model at all, so the
+# estimate falls exactly where the true cost does not. Eager measured 22.53 GiB allocated + 4.39 GiB
+# reserved-unallocated = 26.9, and the failing request wants 1.84 more: ~28.8 against a 28.54 cap.
+#
+# 29.5 GB is 30208 MiB against 31045 free on an idle card, so it leaves ~800 MiB of DEVICE slack. That
+# is the number that matters and not the cap: lib.sh's warning is about a cap set above what the card
+# can SPARE, because Windows pages GPU memory over PCIe instead of failing, and a run that does not fit
+# then crawls at a fraction of its power budget while reporting 100% utilisation. Here the device keeps
+# room, so the cap converts the shortfall into a clean OOM rather than into paging, and
+# `kneemri.training.heartbeat` covers the residual risk by reporting a collapse against the run's own peak.
+#
+# --vram-gb is NOT a second design variable: switch_coverage records it as "a memory cap, set by the
+# queue against the card it runs on". It changes what the allocator may hold, never what is computed.
+# deliberate: --eager-encoder
+# deliberate: --vram-gb
+#
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
@@ -97,4 +143,5 @@ SMOKE=""
 run_train v3lora_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant v3base --lora-rank 8 --backbone-lr 5e-4 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --eager-encoder --vram-gb 29.5 \
   --labels "$LABELS" --out "$PROCESSED/v3lora_dense_s2026.pt" $SMOKE
