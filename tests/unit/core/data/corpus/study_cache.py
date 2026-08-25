@@ -559,5 +559,5 @@ def test_window(tmp_path: Path):
     mapped = CachedCorpus(np.load(path, mmap_mode="r"), mask)
     resident = CachedCorpus(written, mask)
     batch = np.array([3, 0, 2])
-    assert np.array_equal(mapped.window(batch, 1, 2), written[batch, :, 1:3])
-    assert np.array_equal(resident.window(batch, 1, 2), written[batch, :, 1:3])
+    assert np.array_equal(mapped.window(batch, start=1, width=2), written[batch, :, 1:3])
+    assert np.array_equal(resident.window(batch, start=1, width=2), written[batch, :, 1:3])

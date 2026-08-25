@@ -43,9 +43,9 @@ def test_seconds():
     images = _images()
 
     class Counts(MappedReader):
-        def read(self, batch, start, width):  # type: ignore[no-untyped-def]
+        def read(self, batch, *, start, width):  # type: ignore[no-untyped-def]
             reads.append(len(batch))
-            return super().read(batch, start, width)
+            return super().read(batch, start=start, width=width)
 
     assert FetchBench().seconds(Counts(images), sweep) >= 0.0
     assert reads == [BATCH] * BATCHES

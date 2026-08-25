@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from core.data.corpus.window_reader import FileReader, MappedReader
 
@@ -26,9 +27,9 @@ def test_file_reader_read(tmp_path: Path):
         (np.array([8]), 5, 1),
         (np.array([3, 3]), 1, 4),
     ]:
-        window = explicit.read(batch, start, width)
+        window = explicit.read(batch, start=start, width=width)
         assert window.shape == (len(batch), 3, width, 5, 5)
-        assert np.array_equal(window, indexed.read(batch, start, width))
+        assert np.array_equal(window, indexed.read(batch, start=start, width=width))
         assert np.array_equal(window, written[batch, :, start : start + width])
 
 
@@ -38,9 +39,13 @@ def test_mapped_reader_read(tmp_path: Path):
     np.save(tmp_path / "images.npy", written)
     batch = np.array([4, 1])
 
-    window = MappedReader(np.load(tmp_path / "images.npy", mmap_mode="r")).read(batch, 2, 3)
+    reader = MappedReader(np.load(tmp_path / "images.npy", mmap_mode="r"))
+    window = reader.read(batch, start=2, width=3)
     assert window.shape == (2, 2, 3, 4, 4)
     assert np.array_equal(window, written[batch, :, 2:5])
+
+    with pytest.raises(TypeError):
+        reader.read(batch, 2, 3)  # type: ignore[unexpected-positional-argument] - which is the point
 
 
 def test_per_slot(tmp_path: Path):

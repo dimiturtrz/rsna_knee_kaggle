@@ -52,7 +52,7 @@ class HoldoutSlab:
         A whole-stack read is also the file reader's fastest shape: one seek per study.
         """
         positions = self.holdout[begin : begin + size]
-        return self.corpus.window(positions, 0, self.corpus.slices), self.corpus.mask[positions]
+        return self.corpus.window(positions, start=0, width=self.corpus.slices), self.corpus.mask[positions]
 
     def batches(self, size: int) -> Iterator[tuple[NDArray[np.uint8], NDArray[np.float32]]]:
         """Every batch in holdout order, so a consumer's rows come back in the order it asked for."""

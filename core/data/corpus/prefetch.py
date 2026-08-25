@@ -45,7 +45,7 @@ class Prefetch:
         is hiding — to buy a `non_blocking` transfer on the main one.
         """
         batch, start = self.plan[step]
-        pixels = torch.from_numpy(self.corpus.window(batch, start, self.width))
+        pixels = torch.from_numpy(self.corpus.window(batch, start=start, width=self.width))
         return pixels.pin_memory() if self.pin else pixels
 
     def __iter__(self) -> Iterator[tuple[NDArray[np.int64], UInt8[Tensor, "b n g h w"]]]:

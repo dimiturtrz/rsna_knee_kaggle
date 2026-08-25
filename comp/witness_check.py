@@ -164,7 +164,7 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     # pass in both cases, so the comparison is about the READING and not about window averaging.
     width = member.slices if member.whole_stack else member.group
     start = (corpus.slices - width) // 2
-    images = torch.from_numpy(corpus.window(positions, start, width)).to(device)
+    images = torch.from_numpy(corpus.window(positions, start=start, width=width)).to(device)
     mask = torch.from_numpy(corpus.mask[positions]).to(device)
 
     encoder = ENCODERS[member.variant]

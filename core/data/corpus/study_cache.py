@@ -66,9 +66,9 @@ class CachedCorpus:
             return FileReader(images, Path(images.filename))
         return MappedReader(images)
 
-    def window(self, batch: NDArray[np.int64], start: int, width: int) -> NDArray[np.uint8]:
+    def window(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]:
         """`width` slices of every slot, from `start`, for each position in `batch`."""
-        return self.reader.read(batch, start, width)
+        return self.reader.read(batch, start=start, width=width)
 
     @property
     def image_size(self) -> int:

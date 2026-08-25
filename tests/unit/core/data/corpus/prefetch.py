@@ -20,7 +20,7 @@ def test_fetch(tmp_path: Path):
     plan = [(np.array([1, 4]), 2), (np.array([0, 8]), 0)]
 
     reader = Prefetch(corpus, plan, 3, pin=False)
-    assert torch.equal(reader.fetch(1), torch.from_numpy(corpus.window(np.array([0, 8]), 0, 3)))
+    assert torch.equal(reader.fetch(1), torch.from_numpy(corpus.window(np.array([0, 8]), start=0, width=3)))
     assert reader.fetch(0).shape == (2, 2, 3, 4, 4)
 
 
@@ -38,7 +38,7 @@ def test_iter(tmp_path: Path):
     assert len(served) == len(plan)
     for (batch, pixels), (expected, start) in zip(served, plan, strict=True):
         assert np.array_equal(batch, expected)
-        assert torch.equal(pixels, torch.from_numpy(corpus.window(expected, start, 3)))
+        assert torch.equal(pixels, torch.from_numpy(corpus.window(expected, start=start, width=3)))
 
 
 def test_iter_serves_an_empty_plan(tmp_path: Path):

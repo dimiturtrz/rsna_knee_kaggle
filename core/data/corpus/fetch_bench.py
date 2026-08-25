@@ -85,7 +85,7 @@ class FetchBench:
         """Wall-clock for the whole sweep, which is what a step pays — not a per-call best case."""
         started = time.time()
         for batch in sweep.rows:
-            reader.read(batch, sweep.start, sweep.width)
+            reader.read(batch, start=sweep.start, width=sweep.width)
         return time.time() - started
 
     def rate(self, reader: WindowReader, sweep: Sweep, images: NDArray[np.uint8]) -> float:
