@@ -108,29 +108,102 @@ teacher was better than the report.
 
 So the correct reading is not "go distil". It is a redirection, and an uncomfortable one.
 
-## The consequence is that BOTH supervision levers are priced, and neither is 1.5%-sized
+## THE RULER: the board scores against ANNOTATIONS, not against reports
 
-This measurement completes the pair. The label half is measured: `blendlabels`, +0.0034 on the metric and
-+0.0070 on the findings it can reach. The model half is now measured too, and it is **three findings** —
-MCL −0.0465, Lateral Meniscus −0.0149, PF OA −0.0071 — where the earlier page had it at six summing
-−0.049. Neither half is an order of magnitude from where it needs to be, and they cannot be added into
-one either, since they are opposite sides of the same partition.
+Written thirty minutes after the section above, which had concluded from the same table that both
+supervision levers were priced and small. **That conclusion was wrong, and it was wrong because it
+assumed a fact instead of looking it up.** The fact took one forum read and no card.
 
-**That is the actionable content.** Supervision was the last lane that still had an untested "maybe it's
-big" attached to it, and the answer is no. What is left with plausible 1.5% mass is what it always was —
-more and different DATA (`merged_corpus`, MRNet, fastMRI+) and ensemble seats built on genuinely different
-mechanisms. Slot planning should not move toward the label lane on the strength of this page; it should
-stop treating the supervision question as open.
+The competition's own overview (topic 733343, *Courtesy of Dr. Jacob Kazam*) states it outright:
 
-## The one thing that could reverse it, and is not known
+> *"Models are evaluated on twelve binary labels, each indicating the presence or absence of a specific
+> finding in the imaged knee. The labels, and the criteria used by the **annotating radiologists**, are
+> summarized below. In each case, ambiguous or borderline findings ("on the fence") were graded as
+> **negative to favor specificity**."*
+>
+> *"**Each study in the annotated reference set was independently labeled by two subspecialty-trained MSK
+> radiologists, with disagreements adjudicated by a third radiologist to produce a single consensus
+> ground truth.**"*
 
-Everything above measures our model against the RADIOLOGIST. Whether that is the ruler the board uses is
-not established here. If the hidden test labels are report-derived, then matching the report reader is
-exactly the right target and a model that beats it is spending capacity on the wrong truth. If they are
-image-read annotations — which is what the hosts' *"those folks did not use the reports as a starting
-point"* implies — then our training targets ARE the binding ceiling and target correction is worth more
-than this page prices it at. **That single fact decides whether the label lane is small or large, and it
-is cheaper to find out than to run anything.** Filed as a question, not an assumption.
+So the board's ruler is image-read radiologist consensus — **the same KIND of label as our 58, and not
+the report-derived table every number in this project is optimised against.** The reports are an input
+the competition generously supplies, never the target.
+
+That rearranges everything above:
+
+- **`supervision_gap` is not a side instrument. It is the only direct measurement of the actual
+  competition objective this project owns.** Every other number we have — every ledger row, every
+  `run_comparison`, the 0.8502 control — is measured against a PROXY.
+- **The proxy and the objective disagree by a lot, and we have measured it on identical predictions.**
+  The same holdannot weights score **0.8487 against report labels and 0.8932 against annotation truth**.
+  That is +0.045 from the ruler alone — same model, same studies, no ensembling, no TTA. It is also a
+  documented mechanism for a chunk of the standing board-versus-holdout gap (0.938 against ~0.85), which
+  had been carried as unexplained.
+- **The label lane is NOT measured small. It is UNMEASURED.** `blendlabels`' +0.0034 is its value on the
+  proxy ruler. Its value on the objective was never computed, and the two rulers are +0.045 apart. The
+  earlier section's "both levers are priced" claim has to be withdrawn: only one of them was, and on the
+  wrong ruler.
+- **The nine/three partition gains teeth.** A finding where our model already beats the report reader is
+  a finding where our TRAINING TARGET is the thing holding us back on the objective the board actually
+  scores. That is nine of twelve.
+- **"On the fence → negative, to favor specificity" is a calibration fact with a matching measurement.**
+  Our threshold table reads 44.7% of cells positive at cut 0.50 where the adjudicated radiologist calls
+  34.5%. Our targets are systematically more generous than the ground truth is defined to be. `Supervision`
+  already carries the machinery that addresses exactly this — `calibrated_targets` replaces each reader
+  level with the rate the radiologist actually agreed at, fitted on these 58 — and it was built before
+  there was a reason to believe the annotation ruler was the one that counts.
+
+**What this does not license is a victory lap.** Nothing here has moved the board. It says where to
+measure, not that a measurement will land: n = 58, the annotated set is not a random sample of the corpus
+(ACL runs 41% there against ~20% overall, per topic 734106), and an arm scored on 58 studies has a
+standard error that swallows most single-finding effects. The claim is about WHICH RULER, and that claim
+is documentary rather than statistical.
+
+## The proxy ruler is not NEUTRAL toward label-side arms — it is biased against them
+
+This is the part that costs something, because a lever was already killed on it.
+
+The metric is per-label rank AUC. Report labels and annotation labels *rank the same studies differently* —
+that is precisely what `labels 0.8658` measures. So a change that moves a model's ranking toward
+annotation truth **mechanically loses AUC against report labels.** The bias is not a suspicion; its size is
+bounded by the same +0.045 the two rulers already showed on identical weights. A label-side arm scored on
+the proxy is scored on a ruler that pays it for agreeing with the reader it was built to correct.
+
+`calib_span` is the arm this lands on. It measured `--calibrated-targets` on the recipe we ship, scored
+**−0.0020 vs `band_span`**, and the ledger's verdict — *"THE CLAUSE DID NOT MISS, IT INVERTED"* — closed the
+lever and killed `calib_dense` unlaunched by pre-registration. The calibration replaces each reader level
+with the rate the radiologist actually agreed at. **Its entire purpose is to move the target away from the
+report and toward the annotation.** Scoring it against report-derived holdout labels is scoring it on the
+thing it deliberately walked away from. A small negative is what a correct move in that direction is
+*supposed* to look like on that ruler.
+
+**This does not revive the lever.** It says the arm never measured what it claimed to. Two things stand
+against a simple "it was right all along":
+
+- `knee-p9oc` found the remap's constants are POOLED across findings that do not agree (the 0.68 level is
+  assigned 0.378 while the twelve findings run 0.000 to 0.778). That is a defect in the estimate, not in
+  the ruler, and the ruler change does not repair it.
+- The per-label pattern is too structured for ruler bias alone. Ruler bias should spread roughly across
+  labels; `calib_span` posted Effusion −0.0212\* against PF OA +0.0170\*. Something label-specific is in
+  there. Ruler bias is a *partial* alternative account of the mean, not a replacement for the mechanism.
+
+**The decisive test is one arm and no ambiguity**: refit `calib_span` with `--hold-annotations` added and
+nothing else, then read it on BOTH rulers — proxy holdout AUC and `supervision_gap` over the 58. The
+pre-registration writes itself, because the two rulers now make opposite predictions for the same arm:
+if the calibration is real, the proxy number stays negative or flat *and the annotation number rises*. If
+both fall, the lever is dead on the objective too and stays dead. It is the first arm this project can run
+where a NEGATIVE proxy result would be evidence FOR the change, and that is only sayable because the ruler
+was looked up. Cost: one 20–40 minute card slot, no submission slot. Pre-registered as **knee-bs4l**, with
+`holdannot_s2026` as the control rather than `native224` — both arms have to hold the annotations for the
+comparison to be single-variable. The standing rule is **knee-9198**.
+
+## Consequence for how arms are read
+
+Any label-side arm from here should report BOTH numbers: its holdout AUC on the proxy, and its
+`supervision_gap` aggregate against the 58 annotation cells. They are +0.045 apart and they are not
+interchangeable. Running the second one requires the arm to be fitted with `--hold-annotations`, which
+`holdannot` has now shown costs −0.0015 — nothing. **The honest ruler is available for the price of a
+flag, and it has not been used.**
 
 ## What this does NOT say
 

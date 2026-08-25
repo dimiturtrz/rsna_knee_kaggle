@@ -3773,3 +3773,39 @@ The bias runs toward the null the finding cleared.
 lever bigger than measured (+0.0034 on the metric, +0.0070 on the six) — it makes it OURS.
 
 See `interpretations/kneemri/2026-08-25_our-model-beats-its-own-labels.md`, `knee-487l`, `knee-w7xa`.
+
+### THE RULER: the board scores against ANNOTATIONS, and every number above is a PROXY (2026-08-25, knee-ivuq)
+
+Read twenty minutes after the section above, from the competition's own overview (topic 733343, *Courtesy
+of Dr. Jacob Kazam*), through `kneemri.kaggle.discussion_read` — one forum read, no card:
+
+> *"Models are evaluated on twelve binary labels… the criteria used by the **annotating radiologists** are
+> summarized below. In each case, ambiguous or borderline findings ("on the fence") were graded as
+> **negative to favor specificity**."* · *"**Each study in the annotated reference set was independently
+> labeled by two subspecialty-trained MSK radiologists, with disagreements adjudicated by a third
+> radiologist to produce a single consensus ground truth.**"*
+
+The board's ruler is image-read radiologist consensus — the same KIND of label as our 58, and **not** the
+report-derived table every row in this ledger is measured against. The reports are an input the
+competition supplies; they were never the target. `holdannot_s2026` scores **0.8487 against report labels
+and 0.8932 against the 58 annotation cells** — same weights, same studies, no ensembling, no TTA. **+0.045
+from the ruler alone**, and a documented mechanism for part of the standing 0.938-vs-~0.85 board gap that
+had been carried as unexplained.
+
+**The proxy is not NEUTRAL toward label-side arms; it is biased against them.** The metric is per-label
+rank AUC and the two label sets rank studies differently — that is what `labels 0.8658` measures — so a
+change that moves a model toward annotation truth mechanically LOSES AUC against report labels, by up to
+that same +0.045. This lands on `calib_span`, killed at **−0.0020** and taking `calib_dense` with it:
+`--calibrated-targets` exists to move the target away from the report and toward the annotation, so it was
+scored on the ruler it was built to walk away from, and a small negative is what a correct move in that
+direction *should* look like there. It does not revive the lever — `knee-p9oc`'s pooled-constants defect is
+untouched by the ruler, and Effusion −0.0212\* against PF OA +0.0170\* is too structured for ruler bias
+alone. It says the arm never measured what it claimed to. **knee-bs4l** pre-registers the decisive refit
+(`calib_span` + `--hold-annotations`, control `holdannot_s2026`, read on both), the first arm here where a
+negative proxy number would be evidence FOR the change.
+
+**RULE from here (knee-9198):** a label-side arm reports BOTH numbers — proxy holdout AUC and the
+`supervision_gap` aggregate over the 58. It costs one flag: `--hold-annotations`, priced at −0.0015.
+`annotated_readings` REFUSES any checkpoint that trained on those cells rather than scoring it.
+**Non-license:** n = 58, the annotated set is not a random sample (ACL 41% there against ~20% in the
+corpus, topic 734106). The claim is about WHICH RULER, and it is documentary, not statistical.
