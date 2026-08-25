@@ -71,16 +71,28 @@ it. What was missing is the second half: the blindness is not merely an absence 
 ## What the board says directly, which is the evidence that should have led
 
 `lastseat_v1` is the mixed candidate at n=7 — the all-data six plus one fold-0 member
-(`small_batch6_s2026`) — and it read **0.937** against `votefit`'s 0.938. One fold-0 seat cost a
-tick. The dilution mechanism is plain: members that held out 909 studies, averaged against members
-that saw everything, drag the strong half toward the weak. Six such seats is that experiment six
-times over.
+(`small_batch6_s2026`) — and it read **0.937**.
+
+**CORRECTED within the hour, against knee-97ib.** I first wrote that against `votefit`'s 0.938 and
+called it a one-tick dilution cost. That compares across a changed VOTE: `votefit` is `dark6` with
+LogitAverage, and the matched control is `dark6` itself at RankAverage, **0.937**. So the fold-0
+seat is **flat, not costly**, and there is no dilution mechanism to name. The same bead settles the
+twin question directly: `lastseat_v1` (fold-0 `small_batch6_s2026`) and `dark7_v1` (`small_batch6_ff`,
+the same member refit at `--fold -1`) both read 0.937 — one flag moved, board identical.
+
+What that leaves is weaker than dilution and enough on its own: **the seventh seat is inert**. Six
+rosters, five different seventh members spanning the best member this project owns to the most
+distant one available, one tick of total spread. The mixed candidate's realistic outcome is flat,
+not a loss.
 
 Together with the five seventh-seat trials (`dark7` 0.937, `lastseat` 0.937, `augseat` 0.936,
-`v3seat` 0.936, `farseat` 0.937, `allfit` 0.937, against `dark6` 0.937 and `votefit` 0.938), the
-count axis is **closed in the all-data pool**: seven has been tried five ways and every one is flat
-or down, `_ff` refits are closed (knee-97ib) so no eighth all-data member can be built, and the
-fold-0 members that would fill the seats cost a tick each.
+`v3seat` 0.936, `farseat` 0.937, `allfit` 0.937, against `dark6` 0.937), the count axis is **closed
+in the all-data pool at seven**: it has been tried five ways and every one is flat, and `_ff` refits
+are closed (knee-97ib) because the marginal member's conversion measured flat too.
+
+The honest residue is that **nobody has tested seats eight through twelve in the all-data pool.**
+Six inert-seventh-seat trials are a strong prior that they are inert as well, and that prior is what
+withdraws the candidate — not a measured loss.
 
 ## The second finding, which is smaller and useful
 
