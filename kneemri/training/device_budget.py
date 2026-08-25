@@ -57,16 +57,18 @@ reserve 16.24 GB, 20 reserve 26.92. Those two give 1.335 a slice plus `RESIDENT_
 arm — held out of the fit — measured 21.57 against the line's 21.58. A slice is a whole forward and
 backward through the encoder, so linearity in slice count is what the architecture predicts.
 
-IT IS A 336 px CONSTANT, and `FITTED_SIZE` is now where that says so in code rather than only in
-prose. No arm at 224, 392 or 448 recorded a peak (the log line postdates them), so the resolution axis
-is DERIVATION: activations scale with the patch grid, so the slice cost goes as `size ** 2`.
+IT IS A 336 px CONSTANT, and `FITTED_SIZE` is where that says so in code rather than only in prose.
+Activations scale with the patch grid, so the slice cost goes as the TOKEN count.
 
-The derivation is CONSUMED now, which it was not, and the reason is that leaving it in prose made the
-cap silently wrong off 336 px rather than merely unproven. `needed()` took slices alone while
-`--vram-gb` was being stripped from the arms, so `resolution.sh 420` would have asked for 16.28 GB
-against a rung MEASURED at 23.42 — a cap under a demand, which this class's own docstring calls the
-one thing that prevents nothing and guarantees the failure. The 420 arm could not have logged the peak
-that was supposed to license the form, because it would have OOM'd before writing one."""
+THE RESOLUTION AXIS IS NOW MEASURED, NOT DERIVED, AND IT HOLDS TO 2%. It was derivation when this form
+landed, and `budget_residuals` grades it against every recorded peak — at fixed slices, batch, width
+and trainable depth, the three points on the `train_size` axis are 336 px / 576 tokens (the fit),
+392 px / 784 tokens (measured 22.43, derived 22.02, +1.8%) and 420 px / 900 tokens (measured 24.75,
+derived 25.25, -2.0%). Two held-out points BRACKETING ZERO WITH OPPOSITE SIGNS over a 1.56x span in
+tokens is what rules out the quadratic attention term this was once suspected of missing (knee-bj90):
+SDPA never materialises the attention matrix, so memory is linear in tokens, and there is no t**2 term
+to fit. Read residuals with `python -m kneemri.experiments.budget_residuals` before touching any
+constant here — the ledger grades this file, and it does not agree with prose."""
 
 FITTED_SIZE = 336
 """The pixel size `GB_PER_SLICE` was fitted at, so the scaling is exact there and only moves off it."""
@@ -142,7 +144,15 @@ the count of blocks in the graph. So six blocks open and twelve open differ by a
 term the slice loop multiplies, and `depth` cannot say it — `cnx_dense` runs 36 blocks with 6 open.
 
 Like the size, width and batch terms it is a DERIVATION rather than a fit, and it reproduces the fitted
-point exactly: a run that names nothing gets `unfreeze_last` 6 and a ratio of 1."""
+point exactly: a run that names nothing gets `unfreeze_last` 6 and a ratio of 1.
+
+AND THE DERIVATION IS WRONG, MEASURABLY (knee-pf8b). A PURE ratio prices a frozen block at ZERO, but a
+frozen block still runs its forward and still holds what the blocks above it read; only its gradients
+and Adam state go away. `budget_residuals` reads three points off the ledger — 1.2142 a unit at four
+blocks open, 1.3350 at six, 1.7730 at twelve — which a line `a + b*u` fits with a=0.9726, b=0.0604 and
+which predicts the held-out twelve within 4.5%, where this ratio predicts it 51% over. In the other
+direction it CAPPED `unfreeze4_s2026` at 11.79 GB against its own measured 14.79. Do not read the
+`unfreeze_last` axis of the ledger as if this term were right."""
 
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
