@@ -65,7 +65,15 @@ class Champion:
     kernel: str
     board: float
     members: tuple[str, ...]
-    kit: str
+    kit: str | None
+    """The commit the shipped kit was built at, and None where it did not survive.
+
+    OPTIONAL because the record is honestly incomplete and pretending otherwise costs more than the
+    gap: fourteen board entries predate per-entry kernel directories, so no log holds their sha. A
+    required field forces such a row to carry the string "None", which reads exactly like a commit to
+    every check downstream. Nothing that PRICES an entry reads this — `seat_value` wants the members
+    and the score — so demanding it would only refuse those rows the one use they are still good for.
+    """
 
     @classmethod
     def recorded(cls, path: Path = RECORD) -> "Champion":
@@ -98,7 +106,13 @@ class Champion:
         # make an entry rebuildable, and reading them straight raised a bare KeyError naming neither the
         # entry nor the field. Say which, because the repair is to go and read the kernel's `chosen`
         # tuple and its log's `kit` line for that entry.
-        absent = [field for field in ("kernel", "board", "members_named", "kit") if field not in row]
+        #
+        # A NULL counts as absent, not just a missing key: a row saying `"kit": null` is DECLINING to
+        # invent a sha, and a presence-only test would pass it and hand the caller `str(None)`.
+        #
+        # `kit` is not in this list — see the field's own note. What is required is what makes the entry
+        # a comparison target at all: which kernel, what it scored, and which members it loaded.
+        absent = [field for field in ("kernel", "board", "members_named") if row.get(field) is None]
         if absent:
             message = f"board entry {entry} records no {', '.join(absent)}, so nothing can be rebuilt from it"
             raise ValueError(message)
@@ -107,7 +121,7 @@ class Champion:
             kernel=str(row["kernel"]),
             board=float(str(row["board"])),
             members=tuple(str(name) for name in row["members_named"]),
-            kit=str(row["kit"]),
+            kit=str(row["kit"]) if row.get("kit") is not None else None,
         )
 
     def named_by_kernel(self, kernels: Path = KERNELS) -> tuple[str, ...]:

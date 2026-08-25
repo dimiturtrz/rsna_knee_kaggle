@@ -118,10 +118,27 @@ def test_from_board_names_the_field_a_half_written_row_is_missing(tmp_path: Path
     path = tmp_path / "half.jsonl"
     path.write_text(json.dumps({"id": "thin_v1", "board": 0.9, "kernel": "k"}) + "\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match="records no members_named, kit") as raised:
+    with pytest.raises(ValueError, match="records no members_named") as raised:
         Champion.from_board("thin_v1", path)
 
     assert "thin_v1" in str(raised.value), "the entry, so the reader knows which kernel log to open"
+
+
+def test_from_board_carries_an_unknown_kit_as_none_and_still_prices(tmp_path: Path):
+    """`"kit": null` is a row DECLINING to invent a sha, and it must neither refuse nor become "None".
+
+    Fourteen entries predate per-entry kernel directories, so no log holds their kit. Refusing them
+    would cost the one use they are still good for — nothing that prices an entry reads the kit — and
+    requiring the field would make `str(None)` read like a commit to every check downstream.
+    """
+    path = tmp_path / "nulled.jsonl"
+    row = {"id": "nulled_v1", "board": 0.9, "kernel": "k", "members_named": ["a", "b"], "kit": None}
+    path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    entry = Champion.from_board("nulled_v1", path)
+
+    assert entry.kit is None, "the unknown stays an unknown rather than becoming the string 'None'"
+    assert entry.members == ("a", "b"), "and the entry is still a usable pricing target"
 
 
 def test_from_board_skips_the_prose_rows(tmp_path: Path):
