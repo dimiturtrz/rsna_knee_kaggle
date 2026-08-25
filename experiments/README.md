@@ -2738,6 +2738,26 @@ Denominator note: the champion could not be used directly. `seat_value` raises o
 `--fold -1` member that is unscoreable forever, so the roster above is the SIX scoreable champion
 members, not the shipped seven. Filed as a P1.
 
+**2026-08-25 — the crop suspect above is EXCLUDED, by arithmetic, and this row hardens into a
+refutation.** The `'centre': 'image'` alternative was going to be tested by `sided_tissue` at a real
+price: the arm lands on an undecoded reading axis, and a full cache build is recorded here at about two
+hours, so ~3.25 h of card. Pricing it forced the question of whether the suspect is even large enough
+to be the explanation, and it is not. At 336 px with ViT patch 14 the grid is 24 columns, 12 per half,
+across a 130 mm crop — **5.4 mm per column**. `core/data/corpus/crop_centre.py` measured the tissue
+centroid against the image centre over 60 studies at median 7 mm, p90 18 mm: **1.3 columns at the
+median, 3.3 at p90**. Contamination of each half is 1.3/12 ≈ 11%, and a difference-of-means contrast
+attenuates by (1−2c), so **~78% of the true contrast survives for the median study and ~56% at p90**.
+A confound that preserves three quarters of the signal cannot flatten a real effect to −0.0004 with all
+three side-defined intervals spanning zero.
+
+So the flat reading above stands on its own terms, and it is stronger than it claimed: the halves
+partition the grid, the head was built three-part and verified so, the crop offset is too small to hide
+the split, and the head still did not use it. **Head-sees-position is refuted AT HALVES on this data.**
+The finer grid (quadrants, compartment columns) rests on the same premise that just failed and needs a
+new argument rather than a rerun. The arm and its cache smoke are kept — the smoke read `ok
+sided_tissue`, 0 refused, so the axis is proven decodable if one arrives. Bead `knee-86vi`, closed
+without running.
+
 ### focus_latmen — 0.4747, and why a DEAD member is the one a greedy selector reaches for
 
 Never finished. The checkpoint on disk is epoch 0 and scores **0.4747**, which is worse than chance on
