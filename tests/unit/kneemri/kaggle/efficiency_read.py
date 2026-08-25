@@ -125,14 +125,13 @@ def test_taken(tmp_path: Path):
     """The download is injected, so the whole read is exercised without credentials."""
     built = _boards([(OURS, 0.938, 0.933, 95)])
 
-    def _written(into: Path) -> tuple[Path, Path]:
+    def _written(into: Path) -> tuple[str, Path]:
         into.mkdir(parents=True, exist_ok=True)
-        public, efficiency = into / "public.csv", into / "efficiency.csv"
-        built.public.to_csv(public, index=False)
+        efficiency = into / "efficiency.csv"
         built.efficiency.to_csv(efficiency, index=False)
-        return public, efficiency
+        return built.public.to_csv(index=False), efficiency
 
     board = EfficiencyBoard.taken(tmp_path / "boards", download=_written)
 
-    assert list(board.public[TEAM]) == [OURS], "a plain csv is read as itself, not unzipped"
+    assert list(board.public[TEAM]) == [OURS], "the accuracy board arrives as text, from board_read"
     assert int(board.efficiency[EFFICIENCY_RANK].iloc[0]) == 95

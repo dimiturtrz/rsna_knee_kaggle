@@ -64,6 +64,42 @@ is the point past which the recorded gap describes a board that no longer exists
 """
 
 
+class PublicBoard:
+    """The competition's accuracy leaderboard as Kaggle ships it, and the ONE place this repo fetches it.
+
+    `efficiency_read` reads the same board to join it against the efficiency track, and for a day the
+    two modules each had their own download-and-unzip — two places to fix the next time the archive
+    changes shape, and the BOM below is exactly that kind of surprise. `efficiency_read` now calls this
+    and keeps only the efficiency-kernel pull, which is genuinely its own.
+    """
+
+    @staticmethod
+    def text(into: Path) -> str:  # devtools-ignore: test-mirror
+        """The whole board as CSV text. Credentials-only, so injected everywhere it is consumed.
+
+        The DOWNLOAD, not the view: `competition_leaderboard_view` returns the board's first page and a
+        team outside the top twenty is structurally absent from it. Neither call spends a slot.
+
+        Decoded `utf-8-sig`: the CSV Kaggle ships carries a BOM, so under plain `utf-8` the first column
+        is named `﻿Rank` and every reader raises `KeyError: 'Rank'` against a header that LOOKS right
+        in a log.
+        """
+        import zipfile  # noqa: PLC0415
+
+        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
+
+        into.mkdir(parents=True, exist_ok=True)
+        api = KaggleApi()
+        api.authenticate()
+        api.competition_leaderboard_download(COMPETITION, str(into))
+        archive = max(into.glob(f"{COMPETITION}*.zip"), key=lambda path: path.stat().st_mtime)
+        try:
+            with zipfile.ZipFile(archive) as held:
+                return held.read(held.namelist()[0]).decode("utf-8-sig")
+        finally:
+            archive.unlink()
+
+
 @dataclass(frozen=True)
 class BoardRow:
     """One team's line on the public board, as the downloaded leaderboard states it."""
@@ -155,31 +191,11 @@ class LeaderboardRead:
 
     @staticmethod
     def _kaggle() -> list[BoardRow]:
-        """The real round trip, kept in one place so every other path is credential-free.
-
-        The DOWNLOAD, not the view: `competition_leaderboard_view` returns the board's first page and a
-        team outside the top twenty is structurally absent from it, which is exactly the blindness this
-        module was built with. Neither call spends a submission slot.
-
-        Decoded `utf-8-sig`: the CSV Kaggle ships carries a BOM, so under plain `utf-8` the first column
-        is named `﻿Rank` and every row raises `KeyError: 'Rank'` — a header that LOOKS right in a log.
-        """
+        """The real round trip, kept in one place so every other path is credential-free."""
         import csv  # noqa: PLC0415
         import io  # noqa: PLC0415
-        import zipfile  # noqa: PLC0415
 
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
-        api = KaggleApi()
-        api.authenticate()
-        into = RECORD.parent
-        api.competition_leaderboard_download(COMPETITION, str(into))
-        archive = max(into.glob(f"{COMPETITION}*.zip"), key=lambda path: path.stat().st_mtime)
-        try:
-            with zipfile.ZipFile(archive) as held:
-                text = held.read(held.namelist()[0]).decode("utf-8-sig")
-        finally:
-            archive.unlink()
+        text = PublicBoard.text(RECORD.parent)
         return [
             BoardRow(
                 rank=int(line["Rank"]),

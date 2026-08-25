@@ -27,8 +27,8 @@ had actually seen was **20.5% (median 0.006)** — the track is additive, by hal
 said. `settled` is the filter; `additive` reports through it and says how many rows it dropped.
 """
 
+import io
 import logging
-import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -36,10 +36,10 @@ from pathlib import Path
 import pandas as pd
 
 from core import cli
+from kneemri.kaggle import board_read
 
 logger = logging.getLogger(__name__)
 
-COMPETITION = "rsna-knee-abnormality-detection"
 EFFICIENCY_KERNEL = "ryanholbrook/rsna-knee-abnormalities-efficiency-lb"
 EFFICIENCY_FILE = "full_leaderboard.csv"
 
@@ -179,34 +179,29 @@ class EfficiencyBoard:
     @staticmethod
     def taken(
         into: Path,
-        download: Callable[[Path], tuple[Path, Path]] | None = None,
+        download: Callable[[Path], tuple[str, Path]] | None = None,
     ) -> "EfficiencyBoard":
         """Both boards, downloaded into `into`. Injected for the reason `board_read` gives — a path that
         needs real credentials is a path with no test."""
         fetch = download if download is not None else EfficiencyBoard._kaggle
         public, efficiency = fetch(into)
-        return EfficiencyBoard(EfficiencyBoard._unzipped(public), pd.read_csv(efficiency))
+        return EfficiencyBoard(pd.read_csv(io.StringIO(public)), pd.read_csv(efficiency))
 
     @staticmethod
-    def _unzipped(path: Path) -> pd.DataFrame:
-        """The accuracy board arrives as a one-entry zip whose member name carries the download stamp."""
-        if path.suffix != ".zip":
-            return pd.read_csv(path)
-        with zipfile.ZipFile(path) as archive, archive.open(archive.namelist()[0]) as member:
-            return pd.read_csv(member)
+    def _kaggle(into: Path) -> tuple[str, Path]:
+        """The real round trips, kept in one place so every other path is credential-free.
 
-    @staticmethod
-    def _kaggle(into: Path) -> tuple[Path, Path]:
-        """The real round trips, kept in one place so every other path is credential-free."""
+        The accuracy board is fetched through `board_read.downloaded` rather than here: it is the same
+        archive that module reads, and one home means the next surprise in its shape (a BOM, last time)
+        is fixed once. What stays here is the efficiency kernel's output, which nothing else wants.
+        """
         from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
 
         into.mkdir(parents=True, exist_ok=True)
         api = KaggleApi()
         api.authenticate()
-        api.competition_leaderboard_download(COMPETITION, str(into))
         api.kernels_output(EFFICIENCY_KERNEL, str(into))
-        zipped = sorted(into.glob("*.zip"))
-        return zipped[0], into / EFFICIENCY_FILE
+        return board_read.PublicBoard.text(into), into / EFFICIENCY_FILE
 
 
 def main() -> None:
