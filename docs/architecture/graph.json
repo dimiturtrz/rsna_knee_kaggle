@@ -24780,6 +24780,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.recipe",
+      "label": "recipe",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.report_weight",
       "label": "report_weight",
       "level": "method",
@@ -25854,6 +25862,14 @@
       "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.reading",
       "label": "reading",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.recipe",
+      "label": "recipe",
       "level": "method",
       "parent": "kneemri.training.options.TrainingOptions",
       "role": null
