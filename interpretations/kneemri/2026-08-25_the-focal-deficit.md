@@ -202,6 +202,49 @@ And it sizes the label lane honestly, which the elimination sections cannot: bet
 floor. **The lane is live and it is small** — an order of magnitude short of the 1.5% bar, so it is a
 thing to keep, not a thing to plan around.
 
+## And then something moved the deficit set — a corpus that differs in KIND
+
+Every closure above is a DECODE closure: how the pixels are read, pooled, sized, ordered, covered. The
+one axis that has ever cleared the bar is data VOLUME (`half_data`, −0.0234 on half the corpus), and the
+prevalence check further up refuted volume as the *ordering* of the deficit while leaving exactly one
+door open — a corpus differing in KIND rather than in count, one carrying explicit internal-derangement
+reads. `merged_corpus` walks through it.
+
+736 kneeMRI (Rijeka) studies, concatenated into our corpus as one cache and trained jointly. They are
+sagittal PD fat-suppressed on one Siemens Avanto — `SLOTS[0]`'s predicate exactly — and their ACL labels
+are expert double-blind reads OF THE IMAGES, not text mined from a report. They carry one label column.
+
+    deficit six                       surplus six
+    Lateral Meniscus  +0.0196*        Synovitis   -0.0206*
+    ACL               +0.0161         Contusion   +0.0035
+    MCL               +0.0062         Medial OA   +0.0023
+    Lateral OA        +0.0016         Effusion    +0.0017
+    Medial Meniscus   -0.0024         Baker's     +0.0004
+    PF OA             -0.0044         Fracture    -0.0005
+    mean              +0.0061         mean        -0.0022
+
+    twelve-label mean +0.0020    focal +0.0056    regional -0.0031
+
+**The twelve-label mean is a third of the floor and says nothing.** The split is the result: the two
+halves separate by 0.0083 in the pre-registered direction, and three of the four internal-derangement
+structures move up.
+
+**The line that carries the page is Lateral Meniscus.** Rijeka supervises the ACL and nothing else —
+`Targets.pair` weights an absent column at 0.0, so there is no meniscus gradient anywhere in those 736
+studies. Yet Lateral Meniscus is the largest mover and one of only two deltas clearing its own interval.
+That gain cannot be supervision. It has to be the encoder: expert focal reads taught it to encode focal
+structure, and the benefit landed on a structure the new labels never named. Which is precisely the
+hypothesis every decode closure above leaves standing — the limit is *what one slice's feature vector
+contains*, and this is the first thing to change it.
+
+Held honestly: one arm, one seed, a wide paired floor (±0.0400; the control predates per-study
+predictions), and **Synovitis −0.0206\* is a starred cost on a surplus finding that is not explained.**
+Nothing here clears 1.5%. What it does is re-point the schedule: 21% more studies with ONE label column
+moved the set that six decode axes could not touch, so the next lever is MORE OF THIS KIND, not another
+knob. MRNet (`knee-ombx`, owner-blocked on the RUA) is 1,370 studies with image-read ACL **and meniscus**
+labels — 1.9× this arm on the axis that just moved, supervising the structure that moved most. That case
+is now made on KIND. It was never available on volume, and the prevalence refutation above says so.
+
 ## What it does NOT say
 
 It does not say ensembling is worthless or that the roster should change; those axes closed separately
