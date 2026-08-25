@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# holdannot.sh — the control's recipe with the 58 image-read annotations withheld from the loss.
+#
+# bead: knee-487l
+#
+# THIS ARM IS AN INSTRUMENT, NOT AN IMPROVEMENT, and it is priced as one. It is expected to score at or
+# slightly below its control, because it trains on strictly less supervision: the 58 annotated studies
+# lose their 3.0 override weight and their radiologist cells. Nothing here is trying to raise a number.
+# What it buys is the one input `kneemri.evaluation.supervision_gap` needs and cannot get from any of the
+# 111 members on disk — a prediction on the gold studies that never read their gold labels.
+#
+# WHY IT IS WORTH TWENTY MINUTES. On 2026-08-25 the supervision gap read our aggregate model at 0.8392
+# against its teacher's 0.8658, and split the twelve findings in two: six where the model beats its own
+# labels (Effusion by +0.1304) and six where it trails, with all four internal-derangement structures —
+# ACL, MCL, both menisci — on the deficit side and summing to -0.049 macro. That reading is currently
+# steering which lever the remaining slots go to. But it was computed on the PUBLISHED members'
+# out-of-fold predictions, because every member we fit weights the annotations at 3.0 and would be
+# scoring its own training data. So the whole page rests on the assumption that our members share the
+# public baseline's deficit SHAPE, and that assumption has never been tested. This arm tests it for the
+# price of one 224px run and no submission slot.
+#
+# WHAT MOVES. One flag: `--hold-annotations`. `Supervision` drops the annotation rows from the TRAINING
+# table only; the holdout ruler is re-read WITH them, so this member's holdout score stays comparable to
+# every other fold-0 row and the arm doubles as an ordinary ledger entry.
+#
+# control  native224 = 0.8502 — same twelve slices, same 0.20-0.80 band, same whole-stack, same 4e-5,
+#          same twelve epochs, same 224px read. The ONLY difference is whether the loss read 58 studies'
+#          radiologist cells.
+# cost     ~20 min at 224px/12sl, the control's own cost. No cache is built.
+#
+# THE FALSIFIABLE PART, and note it has TWO readings because the arm answers two questions.
+#
+# As an INSTRUMENT — run `python -m kneemri.evaluation.supervision_gap --labels report_labels_v2.csv`
+# against this member and compare the per-finding split to the published one:
+#   * the four internal-derangement structures come back on the DEFICIT side. The shape transfers, the
+#     interpretation stands as written, and the remaining hours go to what one slice's feature vector
+#     contains rather than to labels.
+#   * they come back MIXED or positive. The deficit is a property of the public baseline and not of our
+#     members, `2026-08-25_the-focal-deficit.md` is about someone else's model, and the label lane
+#     reopens for us. This is the outcome that would cost the most to learn late.
+#   * the aggregate flips above the teacher (model > 0.8658). Our supervision, not our modelling, is the
+#     binding constraint after all, and the field's consensus in 735826 is right for us too.
+# n = 58 and the per-label standard error is 0.04-0.09 (`label_power`), so NO SINGLE FINDING decides
+# this. The claim under test is the 4-of-4 sign structure, which is what a per-row reading would miss.
+#
+# As a MEMBER — read the holdout score against native224's 0.8502 like any other row:
+#   * >= -0.006. Withholding 1.3% of studies and a 3.0 override costs nothing measurable, which is worth
+#     knowing on its own: it prices what the annotation upweight is actually buying.
+#   * <= -0.015. The 58 annotated studies are carrying real weight for a corpus of 4,406, which argues
+#     the annotation budget is the lever and points at getting more of them rather than better readers.
+#
+# HARNESS CHECK BEFORE READING ANY OF THAT. The printed recipe must say "hold_annotations": "True" AND
+# "image_size": "224" AND name report_labels_v2.csv on "labels". A --hold-annotations that never reaches
+# `Supervision` trains the ordinary table and scores within noise of its control, which is indistinguishable
+# from the honest null and would be read as one — `tests/unit/kneemri/training/landed.py:269` exists for
+# exactly this flag. And the flag was checked here for a reason: this arm's sibling `blendlabels` printed
+# "image_size": "336" on its first launch today because its header claimed a flag its command never passed.
+#
+# deliberate: --image-size 224 (matched to native224, which is the only control this arm can be read
+# deliberate: against; the pixel axis measured flat at -0.0023 so the cheap read costs no signal)
+# deliberate: --hold-annotations (the arm's whole point)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train holdannot \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --image-size 224 --hold-annotations \
+  --labels "$LABELS" --out "$PROCESSED/holdannot_s2026.pt"
