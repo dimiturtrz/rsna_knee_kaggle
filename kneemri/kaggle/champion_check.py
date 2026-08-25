@@ -29,6 +29,8 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
+from kneemri.kaggle.board_read import RECORD as LEADERBOARD
+from kneemri.kaggle.board_read import LeaderboardRead
 from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
@@ -189,6 +191,9 @@ def main() -> None:
     command.parser.add_argument("--roster", type=Path, default=Path("comp/members.roster"), help="what ships")
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where kernel scripts live")
     command.parser.add_argument("--board", type=Path, default=BOARD, help="every scored entry")
+    command.parser.add_argument(
+        "--leaderboard", type=Path, default=LEADERBOARD, help="the last read of the public board"
+    )
     arguments = command.parsed()
     champion = Champion.recorded(arguments.record)
     # A champion whose member tuple could not be parsed out of its kernel has no member to find missing,
@@ -211,6 +216,15 @@ def main() -> None:
     if outranked:
         message = f"the pin lags the board: {champion.entry} ({champion.board}) is no longer the best entry"
         raise SystemExit(message)
+    # The third staleness, and the one nothing could see: the pin can be rebuildable AND current and
+    # still be planned against a competition position read days ago. The gap sat in this record's prose
+    # at 0.008 while the board said 0.015. The live read needs credentials, so it is a separate command
+    # and this only refuses its AGE — the same split board_check draws with `--live`.
+    aged = LeaderboardRead.recorded(arguments.leaderboard).stale(LeaderboardRead.now())
+    for complaint in aged:
+        logger.error("%s", complaint)
+    if aged:
+        raise SystemExit("re-read the board: `python -m kneemri.kaggle.board_read --live`")
     logger.info(
         "%s (%s, kit %s) is still buildable: %d members named and packaged",
         champion.entry,

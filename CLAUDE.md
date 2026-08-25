@@ -150,7 +150,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Eleven checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Twelve checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -174,7 +174,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   still be rebuilt (its members still named by its kernel's `chosen` tuple, still packaged by the roster),
   because losing that path would leave every other gate green — and that the pin is still the board's best
   `ensemble` row, because it has now lagged twice with every other gate green. Read the entry and its score
-  from that file, never from here: this line quoted 0.925 through two later champions. And
+  from that file, never from here: this line quoted 0.925 through two later champions.
+  `python -m kneemri.kaggle.board_read --live` before planning against the GAP — the only one that looks
+  at the competition rather than at us. It costs no slot, writes `comp/leaderboard.json` with the UTC
+  instant of the read, and `champion_check` refuses one over two days old (five slots a day reset at
+  00:00 UTC, so an older read describes a board that has since been spent). The pinned gap read 0.008
+  while the API said 0.015 and nothing noticed, which is the same way `board_transfer`'s slope was quoted
+  wrong from prose twice. And
   `python -m kneemri.experiments.convergence_check` before quoting ANY run's score — the only one that guards a
   NUMBER rather than a shipment. It compares a run's best epoch, its last recorded epoch and the epochs its recipe
   ASKED for, and separates TRUNCATED (died early; under `one_cycle` the anneal never ran, so the score is a FLOOR)

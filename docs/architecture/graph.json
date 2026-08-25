@@ -2018,6 +2018,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.board_read",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.champion_check",
       "target": "core.cli",
       "weight": 1
@@ -2027,6 +2033,12 @@
       "source": "kneemri.kaggle.champion_check",
       "target": "core.denominator",
       "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_check",
+      "target": "kneemri.kaggle.board_read",
+      "weight": 2
     },
     {
       "kind": "import",
@@ -10922,6 +10934,30 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.kaggle.board_read.LeaderboardRead",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_read.main",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead.now",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_read.main",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_read.main",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead.taken_live",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.kaggle.champion_check.Champion",
       "target": "kneemri.kaggle.champion_check.Champion",
       "weight": 1
@@ -10948,6 +10984,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.champion_check.main",
       "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead.now",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.kaggle.board_read.LeaderboardRead.recorded",
       "weight": 1
     },
     {
@@ -14833,7 +14881,7 @@
       "role": null
     },
     {
-      "descendants": 129,
+      "descendants": 130,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -15337,7 +15385,7 @@
       "role": null
     },
     {
-      "descendants": 16,
+      "descendants": 17,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -15348,6 +15396,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_check",
       "label": "board_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read",
+      "label": "board_read",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -17318,6 +17374,14 @@
       "label": "LiveBoard",
       "level": "class",
       "parent": "kneemri.kaggle.board_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead",
+      "label": "LeaderboardRead",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_read",
       "role": "satellite"
     },
     {
@@ -24294,6 +24358,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.board_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead._kaggle",
+      "label": "_kaggle",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.gap",
+      "label": "gap",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.now",
+      "label": "now",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.stale",
+      "label": "stale",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.taken_live",
+      "label": "taken_live",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.LeaderboardRead.written",
+      "label": "written",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read.LeaderboardRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_read.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_read",
       "role": null
     },
     {
