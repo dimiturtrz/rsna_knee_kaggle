@@ -142,6 +142,22 @@ config, `devtools/`, and the nox/CI/pre-commit runners are **template-owned**: d
 a gate — fix upstream in the scaffold and `uvx copier update`, or edit only within `# >>> LOCAL-SLOT`
 regions. `copier update` pulls scaffold improvements as reviewable steps.
 
+**Sync once with the git-shim in log-only mode after a `devtools_ref` bump.** A bump makes `uv` REBUILD
+the `sdlc-devtools` git dep, and uv builds a git dependency by checking it out into its own cache and
+running `git reset --hard <sha>`. The global shim blocks reset-hard, so the sync dies with `BLOCKED by
+git-shim [reset-hard] in global scope` — mid-gate-run, after ruff/vulture/import-linter have already
+printed clean, which reads as a gate regression. It is not one: the target is uv's cache, never this
+tree. Build it once, then run gates normally (the build is cached, no further git op):
+
+```bash
+GIT_SHIM_LOG_ONLY=1 uv sync --extra dev --extra devtools   # log-only, not GIT_SHIM=off — still recorded
+uvx nox -s gates
+```
+
+A path-scoped allowance in the shim would be the permanent fix and lose no protection (uv only ever
+resets its own cache), but the shim is machine-global and outside this repo, so it is the owner's call
+(knee-fo45).
+
 **Don't test template-owned code, either.** The `devtools/` detectors are unit-tested in the scaffold
 itself; a `tests/unit/devtools/` here would re-litigate every template change locally (it duplicates
 upstream coverage of byte-identical code, and breaks on the next `copier update`). Trust the upstream
