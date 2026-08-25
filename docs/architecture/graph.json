@@ -1473,12 +1473,6 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.models.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.spawn",
       "weight": 1
     },
@@ -1492,6 +1486,12 @@
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "kneemri.training.options",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.training.run_setup",
       "weight": 1
     },
     {
@@ -8565,13 +8565,13 @@
     {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.device_budget.DeviceBudget",
+      "target": "kneemri.training.run_setup.RunSetup",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "target": "kneemri.training.run_setup.RunSetup.budget",
       "weight": 1
     },
     {
@@ -11708,7 +11708,7 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.models.backbone.Encoder.activation_units",
+      "source": "kneemri.models.backbone.Encoder.blocks",
       "target": "kneemri.models.backbone.Stage",
       "weight": 1
     },
@@ -11740,6 +11740,12 @@
       "kind": "construct",
       "source": "kneemri.models.backbone.MapAsTokens.forward",
       "target": "kneemri.models.backbone.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.backbone.Stage.units",
+      "target": "kneemri.models.backbone.Stage.per_block",
       "weight": 1
     },
     {
@@ -24724,6 +24730,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.backbone.Encoder.blocks",
+      "label": "blocks",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.backbone.Encoder.load",
       "label": "load",
       "level": "method",
@@ -24756,6 +24770,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.backbone.Encoder.retained_units",
+      "label": "retained_units",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.backbone.MapAsTokens.__init__",
       "label": "__init__",
       "level": "method",
@@ -24768,6 +24790,14 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.backbone.MapAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Stage.per_block",
+      "label": "per_block",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Stage",
       "role": null
     },
     {
