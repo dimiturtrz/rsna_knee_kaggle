@@ -5,6 +5,10 @@
 # cheap half is `final_fit.sh` (knee-g8nb): 93 min of card decides these ~7 h. Run this ONLY if
 # `kneemri-finalfit` reads **0.936 or above** on the board. At 0.934-0.935 keep the one member and stop;
 # at 0.933 or below the data step did not survive the swap and this arm is retired unrun.
+# gate: kneemri-finalfit >= 0.936
+#
+# The line above is the half `arm_check` evaluates; the paragraph is the half it cannot. On 2026-08-23
+# the board read 0.934 and this arm ran anyway for five hours, because prose has no consumer (knee-1e3m).
 #
 # WHAT IT IS. `gradeswap`'s six non-`band_dense` seats, each copied VERBATIM from the arm that settled
 # it, plus exactly two flags: `--fold -1` (4,406 studies rather than 3,497, +26%) and `--ema`. Copying

@@ -116,6 +116,26 @@ invocation of this tool until they are back-filled — which is how a pre-flight
 `--no-verify`. The rule exists to stop momentum at the moment of arming, and the run that arms an arm is
 the run that names it. The full sweep prints one summary count instead.
 
+**`# gate: <entry> >= <score>` — an arm may not RUN past its own written stop condition.** `final_fit_six.sh`
+opened with one: "Run this ONLY if `kneemri-finalfit` reads 0.936 or above on the board." The board read
+0.934. The arm ran anyway — four members to completion plus a fifth to epoch 10 of 12, roughly five hours of
+card — and was stopped only because a peer project asked for the machine. The arm was not wrong: the gate
+was written *before* the reading and priced the decision honestly. Its verdict simply had no consumer,
+because it lived in a bash comment, which is the one place in this tree where nothing executes. So the gate
+becomes data: one line naming a board entry and a floor, evaluated against `comp/board.jsonl`. The prose
+stays — it says what to do in each band, which no threshold can — but the line is what refuses.
+
+An **unread** gate refuses too, and so does a missing board file: an arm gated on a submission nobody has
+pushed yet is exactly the arm most likely to be launched on a hunch, and a check that passes because its
+evidence is absent is the failure mode this repository keeps paying for. Like the bead rule it names the
+finding on every sweep and **refuses only under `--only`** — the run that arms an arm.
+
+The same fix closed a larger hole underneath it. Every header rule resolved an arm's header as
+`arms/<name>.sh`, but an arm is keyed by the name it **prints**: `final_fit_six.sh` prints six member names
+and none of them is its filename, so the gate, the `# bead:` line and the `# control` line were all unread
+on precisely the arms that spend the most card. `ArmHeader` now records which shell printed each name as the
+shells are sourced, and falls back to it.
+
 **`--studies N` — the one check that DOES want the card, and wants it for two minutes.** `arm_check`
 proves an arm's flags parse; it cannot prove the recipe they select survives contact with the corpus,
 the encoder and the loss. `--studies 60` caps the corpus positions a run touches, keeping the fold's

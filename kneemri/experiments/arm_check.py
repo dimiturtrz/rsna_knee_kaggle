@@ -23,7 +23,6 @@ import contextlib
 import io
 import logging
 import os
-import re
 import shlex
 import subprocess
 import sys
@@ -34,6 +33,7 @@ from pathlib import Path
 from core.data.corpus.study_cache import CorpusSplit, StudyCache
 from core.denominator import Denominator
 from core.paths import DataRoot
+from kneemri.experiments.arm_header import ARMS, ArmHeader
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
@@ -44,31 +44,13 @@ from kneemri.training.options import TrainingOptions
 
 logger = logging.getLogger(__name__)
 
-BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+)\s*$", re.MULTILINE)
-"""How an arm names the issue that priced it. One line, anywhere in the shell's header."""
-
 PRICE_MARKS = ("PRICE:", "P(clears")
 """What a priced bead says: a cost AND the odds it clears the bar. Both, because a cost alone is the
 argument that let the 140 mm build run unpriced. knee-yuqf carries the format."""
 
-CONTROL_LINE = re.compile(r"^#\s*control\s+([A-Za-z0-9_]+)\s*=", re.MULTILINE)
-"""How an arm names the run its number will be read against. `# control  band_dense = 0.8578`.
-
-The name must be followed by `=` because the word also opens prose in several headers ("# control is
-the same recipe..."), and a sentence is not a declaration.
-"""
-
-DELIBERATE_LINE = re.compile(r"^#\s*deliberate:\s*(--[a-z0-9-]+)", re.MULTILINE)
-"""How an arm says IN WRITING which flag it moves away from its control. One flag per line.
-
-An arm exists to move something, so a diff against the control is not by itself a defect — an
-UNDECLARED diff is. This is the declaration, and it costs the author one line per variable, which is
-also the moment they notice they are moving two."""
-
 INCIDENTAL_FLAGS = frozenset({"--out", "--labels", "--paths"})
 """Flags that differ between any two arms by construction and say nothing about the experiment."""
 
-ARMS = Path("experiments/arms")
 STUB = Path("experiments/stub_lib.sh")
 SHELLS = Path("experiments")
 """Every shell file an arm's run touches, arms and the libs they source alike — the CR check's subject.
@@ -155,6 +137,7 @@ class ArmCheck:
         self.arms = arms
         self.stub = stub
         self.shells = shells
+        self.headers = ArmHeader(arms)
 
     def _environment(self) -> dict[str, str]:
         """The inherited environment, plus ARM_LIB, the resolved data root, and coreutils on PATH.
@@ -237,6 +220,7 @@ class ArmCheck:
                 first = shlex.split(flags)[:1]
                 if tab and first and first[0].startswith("--"):
                     found[name] = flags
+                    self.headers.record(name, Path(command[0]))
         return found
 
     @staticmethod
@@ -309,36 +293,6 @@ class ArmCheck:
         counted = ((path, path.read_bytes().count(b"\r")) for path in sorted(self.shells.glob("**/*.sh")))
         return {str(path.as_posix()): count for path, count in counted if count}
 
-    def beads(self, invocations: Mapping[str, str]) -> dict[str, str | None]:
-        """The bead each arm names in a `# bead:` line, or None where its shell names none.
-
-        The cheapest binding from an arm to the issue that PRICED it. There is no other link: an arm is a
-        shell, a bead is a row in a database, and nothing in the tree connects them, which is how a run
-        gets launched against a bead whose price was never computed.
-
-        Arms with no shell — the switch recipes `SwitchCoverage` synthesises — are absent rather than
-        None, because a recipe that exists to exercise one flag at sixty studies is not an experiment and
-        has nothing to price.
-        """
-        headers = ((name, self._header(name)) for name in invocations)
-        found = ((name, BEAD_LINE.search(header)) for name, header in headers if header)
-        return {name: match.group(1) if match else None for name, match in found}
-
-    def _header(self, name: str) -> str:
-        """The shell text of the arm printing this name, or empty where it has no shell of its own."""
-        path = self.arms / f"{name}.sh"
-        return path.read_text(encoding="utf-8") if path.exists() else ""
-
-    def controls(self, invocations: Mapping[str, str]) -> dict[str, str]:
-        """The control each arm declares in a `# control  <name> = <score>` line, by arm name.
-
-        Arms declaring none are absent rather than None: seventy arms predate the convention and most
-        of them name a CHECKPOINT (`wsfold0_e6`) rather than another arm, which is a control this tool
-        cannot re-derive flags for. Silence here is a missing comparison, not a wrong one.
-        """
-        found = ((name, CONTROL_LINE.search(self._header(name))) for name in invocations)
-        return {name: match.group(1) for name, match in found if match}
-
     @staticmethod
     def _flag_values(flags: str) -> dict[str, str]:
         """One arm's flag line as flag -> value, with a bare switch mapping to the empty string.
@@ -383,10 +337,10 @@ class ArmCheck:
         exactly the invocation that must still resolve `band_dense`.
         """
         differences: dict[str, list[str]] = {}
-        for name, control in self.controls(invocations).items():
+        for name, control in self.headers.controls(invocations).items():
             if control not in against or control == name:
                 continue
-            declared = set(DELIBERATE_LINE.findall(self._header(name)))
+            declared = self.headers.deliberate(name)
             mine = self._flag_values(invocations[name])
             theirs = self._flag_values(against[control])
             found = [
@@ -425,7 +379,7 @@ class ArmCheck:
         """
 
         def shown(bead: str) -> str:
-            # fixed argv, a bead id matched by BEAD_LINE, no shell
+            # fixed argv, a bead id matched by ArmHeader's BEAD_LINE, no shell
             done = Spawn().ran(
                 ["bd", "show", bead],
                 capture_output=True,
@@ -444,7 +398,7 @@ class ArmCheck:
         them. Both halves come back as verdicts rather than as a refusal, because the rule exists to stop
         MOMENTUM at the moment of arming and nothing here knows whether this run is arming (knee-qxse).
         """
-        beads = self.beads(invocations)
+        beads = self.headers.beads(invocations)
         named = {name: bead for name, bead in beads.items() if bead}
         unpriced = set(self.unpriced(self._descriptions(set(named.values()))))
         return [
@@ -526,6 +480,14 @@ class ArmCheck:
                 clause=f"name none of {', '.join(OPERATING_POINT_FLAGS)}, so they inherit the "
                 f"pre-settlement 12 slices / 0.20-0.80 in silence",
                 bead="knee-aixw",
+            ),
+            ArmVerdict(
+                "UNMET-GATE",
+                self.headers.gated(invocations),
+                clause="declare a `# gate:` the board does not meet",
+                bead="knee-1e3m",
+                always=True,
+                arming_refuses=True,
             ),
             ArmVerdict(
                 "MISMATCHED",

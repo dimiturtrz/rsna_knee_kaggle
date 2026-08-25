@@ -291,26 +291,6 @@ def test_queued(tmp_path: Path):
         check.queued(["rung"])
 
 
-def test_beads(tmp_path: Path):
-    """ONE REP PER CLASS of how an arm can name the issue that priced it: named, unnamed, or absent.
-
-    The header line is the whole record — nothing else on disk ties an arm to the argument that bought
-    its card, and the 140 mm build ran forty minutes on a cost with no expected gain beside it. An arm
-    whose file does not exist is dropped rather than reported None, because `invocations` can carry a
-    queued rung (`rung_12`) whose SCRIPT is named `rung.sh`; reporting that as unbeaded would refuse
-    every parameterised arm for a file it was never going to have.
-    """
-    arms = tmp_path / "arms"
-    arms.mkdir()
-    (arms / "priced.sh").write_text("#!/bin/bash\n# bead: knee-yuqf\nrun_train priced\n", encoding="utf-8")
-    (arms / "bare.sh").write_text("#!/bin/bash\nrun_train bare\n", encoding="utf-8")
-    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
-
-    found = check.beads({"priced": "--epochs 8", "bare": "--epochs 8", "rung_12": "--epochs 12"})
-
-    assert found == {"priced": "knee-yuqf", "bare": None}, "a rung with no file of its own is not an unbeaded arm"
-
-
 def test_unpriced():
     """The BOTH-MARKS boundary: a cost alone is exactly the argument that let an unpriced arm run.
 
@@ -366,7 +346,7 @@ def test_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every check this tool runs, with the POLICY each one carries — the composition, not the detectors.
 
-    Each detector is partitioned by its own test; what is under test here is that the eight are all
+    Each detector is partitioned by its own test; what is under test here is that the nine are all
     present and that each is handed the refusal policy the tool's rules give it. That mapping is the part
     a refactor can silently invert — a REFUSED that stops refusing, or an OVERSTATED that starts, would
     leave every detector test green.
@@ -388,6 +368,7 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "CRLF",
         "OVERSTATED",
         "UNSTATED",
+        "UNMET-GATE",
         "MISMATCHED",
         "UNBEADED",
         "UNPRICED",
@@ -401,6 +382,9 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert policy["MISMATCHED"] == policy["UNBEADED"] == policy["UNPRICED"] == (False, True), (
         "the advisory rules stop MOMENTUM, so they refuse the run that arms an arm and no other"
     )
+    assert policy["UNMET-GATE"] == (False, True), (
+        "an unmet gate is a fact about ONE arm: it must not fail a sweep, and must stop that arm arming"
+    )
 
     cached = check.verdicts({"silent": "--epochs 8"}, {}, {}, {}, require_caches=True)
 
@@ -410,25 +394,6 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert {verdict.label for verdict in verdicts if verdict.found} == {"UNSTATED", "UNBEADED"}, (
         "the arm states no operating point and names no bead; nothing else has a finding to make"
     )
-
-
-def test_controls(tmp_path: Path):
-    """ONE REP PER CLASS of how a header can name a control: declared, prose, absent.
-
-    The `=` is what separates a declaration from a sentence — five headers in the tree open prose with
-    "# control is the same recipe...", and reading those as a control name would diff every arm against
-    a run called `is`.
-    """
-    arms = tmp_path / "arms"
-    arms.mkdir()
-    (arms / "declared.sh").write_text("# control  band_dense = 0.8578 (best epoch 8)\n", encoding="utf-8")
-    (arms / "prose.sh").write_text("# control is the same recipe with one flag moved\n", encoding="utf-8")
-    (arms / "silent.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
-    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
-
-    found = check.controls({"declared": "--epochs 8", "prose": "--epochs 8", "silent": "--epochs 8"})
-
-    assert found == {"declared": "band_dense"}, "a sentence beginning with the word is not a declaration"
 
 
 def test_mismatched(tmp_path: Path):
