@@ -1,14 +1,34 @@
 """The seventh seat filled by the FURTHEST member this project has ever produced, on a 3D encoder.
 
-GATED — DO NOT SUBMIT until `kneemri-augseat` has read. This entry and that one ask the same question
-with different members, and augseat's band decides whether this one is worth a slot at all:
+**THE augseat GATE ABOVE THIS LINE IS VOID, and `dark6` is what voided it.** The original gate said: if
+augseat reads 0.936-0.939, "type of distance does not carry at seven seats," so do not spend a slot here.
+augseat read 0.936 and this kernel was correctly left unsubmitted on 2026-08-25 01:14Z. Then `dark6`
+(55756018) read **0.937** — six `--fold -1` members and NOTHING ELSE, tying `allfit` and `lastseat`, which
+are those same six plus a seventh. The seventh seat is worth ZERO. So augseat's 0.936 was never a
+measurement of "type of distance at seven seats"; it was a measurement of an INERT COORDINATE, and the
+premise the gate reasoned from does not exist. A gate whose input turned out to be noise around a null
+cannot refuse anything.
 
-- augseat **>= 0.940** — the board pays for a member the offline ruler killed, on distance the ruler
-  cannot see. `vjepa_warm_s2026` is then the strongest such candidate that exists here by a wide margin,
-  and this entry is the next slot.
-- augseat **0.936-0.939** or **below** — type of distance does not carry at seven seats. This entry is
-  then a second measurement of a null on a WEAKER member, and the pricing rule refuses it. Do not submit;
-  leave this kernel unsubmitted as a written-down plan and spend the slot elsewhere.
+**AND dark6 IS ALSO WHAT MAKES THIS ENTRY WORTH A SLOT.** It gives this kernel the control it never had.
+The tuple below is EXACTLY dark6's six with `vjepa_warm_s2026` appended — verified member-for-member, not
+inferred. `dark7` (55756369) is EXACTLY dark6's six with `small_batch6_ff` appended. Three strictly nested
+entries, one variable each:
+
+    dark6    six all-data members                      0.937
+    dark7    + a seventh of the SAME family            PENDING
+    farseat  + a seventh of the ONE OTHER family       this entry
+
+`2026-08-24_architecture_diversity_is_closed...` closes the encoder axis on the mechanism that slice
+sampling, the 2D-slice-then-pool architecture, the targets, the objective and the head are held fixed
+across every arm, so a trunk swap changes how features are SPELLED and not what is optimised. dark6 is
+that closure's board confirmation, and it is far stronger than any seat swap: a whole extra member of the
+saturated family buys nothing. `vjepa_warm_s2026` is the only line in the roster that breaks the second
+term — it tokenises two slices per token and is handed the stack. Whether the seat is inert for a member
+OUTSIDE that family is the one thing none of these entries has measured.
+
+Read against dark7, not against augseat. If dark7 and farseat land together, the reading is COUNT. If they
+separate, the reading is FAMILY, and that is the first live lever past the 0.937 plateau this board has
+shown in four entries.
 
 **WHY THIS MEMBER, IF THE GATE OPENS.** `vjepa_warm_s2026` is a V-JEPA2-large tubelet transformer — two
 slices per token, an encoder family with no other representative in the roster, warm-started from our own
@@ -42,22 +62,28 @@ clears the owner's 1.5% bar) is about 0.00; nothing on this board has ever moved
 
 **NO OFFLINE NUMBER IS REPORTED AND NONE CAN BE.** Six members have seen the entire 909-study holdout.
 
-PRE-REGISTRATION, written before the number, against `allfit` 0.937, `lastseat` 0.937, and whatever
-`augseat` reads — which must be filled in here before this is submitted, because the two entries differ
-only in the KIND of the seventh member and reading one without the other wastes both.
+PRE-REGISTRATION, written before the number, against **dark6 0.937** — the matched control, six of these
+exact seven members — and read alongside dark7, the same-family arm.
 
-- **0.940 or above** — distance of a kind the pool has never held buys a board tick where quality does not.
-  Combined with augseat this makes the seventh seat a DISTANCE slot rather than a member slot, and the next
-  entries build members chosen for remoteness, not for holdout score.
-- **0.936-0.939** — neutral. The 2.4x under-pricing survives (a member 0.026 below the seat it replaces
-  holding the board flat is itself the blindness argument), but the seat argument does not, and the
-  distance axis stops being worth slots.
-- **0.933-0.935** — the far member costs about what the all-data dose bought. Distance at this magnitude
-  is not free, and the ensemble wants members that AGREE more than it wants members that differ.
-- **0.932 or below** — a 3D member actively breaks the vote. That is the reading that would retire the
-  whole distance argument, including `knee-avzz`'s, and send the next slot back to member quality.
-
-Four bands, each changing something written down.
+- **0.940 or above** — the seventh seat is inert for the saturated family and LIVE for a member outside
+  it. That is the first thing to move this board since finalfit, and it says the ensemble is capped by
+  architectural redundancy rather than by data or by member quality. If dark7 is flat at the same time,
+  the attribution is FAMILY and it is clean. The next entries then buy members for what they are, not for
+  what they score: RadDINO and the volumetric arms come back off the shelf, and the last slot goes to a
+  second out-of-family seat rather than to the vote.
+- **0.936-0.939** — flat, and with dark6 in hand this is now a strong closure rather than a shrug. The
+  seventh seat is inert for EVERY member in the inventory including the furthest one that exists, so
+  member-level diversity is spent as a lever on this board. That retires the 2.4x under-pricing argument,
+  `knee-avzz`, and the whole distance program, and it points the remaining slot at the vote and the
+  serving path — the only two axes never varied on a board entry.
+- **0.933-0.935** — the far member COSTS, on a seat where a same-family member costs nothing. The vote
+  wants agreement, not distance, and that is a reading about `RankAverage` rather than about V-JEPA2:
+  a rank average over near-identical rankers is robust, and one genuine dissenter in seven is diluted at
+  best and disruptive at worst. Argues LogitAverage / a weighted vote for the last slot.
+- **0.932 or below** — a 3D member actively breaks the vote, OR the mount is wrong. The mount is the
+  first suspect and not the second: this member was remounted 2026-08-25 01:14Z after months unmounted,
+  and its trunk `dimiturnt/vjepa2-hf` was declared on seven kernels in one mechanical edit. Re-run
+  `witness_check` and `mount_check --live` before any of this is believed.
 """
 
 import logging
