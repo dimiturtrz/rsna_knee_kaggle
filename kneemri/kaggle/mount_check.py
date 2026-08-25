@@ -16,6 +16,7 @@ import logging
 import sys
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
@@ -151,6 +152,103 @@ class MountCheck:
         return [name for name in needed if name not in self.live]
 
 
+@dataclass(frozen=True)
+class LiveReading:
+    """What asking Kaggle what the members dataset holds ANSWERED — a state, not an exit.
+
+    The acquisition used to sit inline in `main`, where the truncated case called `sys.exit(2)` from the
+    middle of the function. That made the whole live path unreachable from a unit test: the only way to
+    exercise it was to run the CLI against real credentials, which is why the half of this tool that
+    cost a kernel slot on 2026-08-25 had no test at all. As a state, UNKNOWN is a value the caller reads
+    and turns into an exit code at the one place exit codes are decided.
+    """
+
+    live: set[str] | None
+    unsettled: list[str]
+    unknown: str = ""
+    """Why the live listing could not be believed, empty when it could. A partial listing answers the
+    question wrongly in BOTH directions, so it is neither a refusal nor a pass."""
+
+    @classmethod
+    def taken(
+        cls,
+        package: MemberPackage,
+        *,
+        live: bool,
+        settle: bool,
+        listing: Callable[[str], str] | None = None,
+        pause: Callable[[], None] = SETTLE_PAUSE,
+    ) -> "LiveReading":
+        """Read the live dataset when either flag asked for it; otherwise the not-asked reading.
+
+        `--settle` implies `--live`, and the poll runs INSIDE the same try: a listing can truncate on
+        any read, not only the first, and a truncation part-way through a poll is the same UNKNOWN.
+
+        `listing` and `pause` are injected for the same reason `settled` takes them: without them the
+        only way to reach this code is a real Kaggle round trip, and this is the half of the tool that
+        cost a kernel slot untested.
+        """
+        if not (live or settle):
+            return cls(None, [])
+        identifier = LiveDataset.identified(package.root)
+        dataset = LiveDataset(identifier, listing)
+        try:
+            held = dataset.members()
+            unsettled = MountCheck(package, held).settled(dataset.members, pause=pause) if settle else []
+        except TruncatedListingError as truncated:
+            return cls(None, [], str(truncated))
+        logger.info("live %s holds %d members", identifier, len(held))
+        return cls(held, unsettled)
+
+
+@dataclass(frozen=True)
+class MountSweep:
+    """Every kernel's verdict, bucketed, carrying the count of directories the sweep WALKED.
+
+    The walked count is a field rather than a derivation because it is the only number that can disagree
+    with the others: the buckets are computed from the verdicts, so they always sum to the verdicts and
+    can never show a directory that never became one. The number that CAN is the one the sweep walked
+    past — which is the whole of what `kneemri-dark7`'s silence looked like.
+    """
+
+    verdicts: dict[str, str]
+    walked: int
+    checked: int
+    """Directories that became entries. `walked - checked` is what the sweep declined to look at."""
+
+    @classmethod
+    def over(cls, check: MountCheck, kernels: Path) -> "MountSweep":
+        """Every entry under a root, judged, with the directory count read from the same directory."""
+        entries = check.entries(kernels)
+        walked = len([entry for entry in kernels.iterdir() if entry.is_dir()])
+        return cls({kernel.name: check.verdict(kernel) for kernel in entries}, walked, len(entries))
+
+    @property
+    def refused(self) -> list[str]:
+        """The kernels that could not run what they name — the reason this tool exits non-zero."""
+        return [name for name, verdict in self.verdicts.items() if verdict.startswith("REFUSED")]
+
+    @property
+    def skipped(self) -> list[str]:
+        """The kernels this tool cannot answer about, which is not the same as answering ok."""
+        return [name for name, verdict in self.verdicts.items() if verdict.startswith("skipped")]
+
+    @property
+    def passed(self) -> int:
+        """Kernels actually checked and cleared — the denominator a pre-flight is honest about."""
+        return len(self.verdicts) - len(self.skipped) - len(self.refused)
+
+    def lines(self, kernels: Path) -> list[str]:
+        """The per-kernel rows and the tally, in the order they are read."""
+        rows = [f"  {name}: {verdict}" for name, verdict in self.verdicts.items()]
+        rows.append(
+            f"{self.passed} ok, {len(self.skipped)} skipped, {len(self.refused)} refused of "
+            f"{self.checked} kernel directories ({self.walked - self.checked} others under {kernels} "
+            f"are not kernels)"
+        )
+        return rows
+
+
 def main() -> None:
     """Report every kernel's mount coverage and refuse if any entry could not run what it names."""
     command = cli.Command(__doc__, logger)
@@ -175,32 +273,23 @@ def main() -> None:
     # local answer cannot see a package that leads the pushed one, which is exactly the failure that
     # killed a kernel run on 2026-08-19. A pre-flight without --live checks the kernels; --live checks
     # the SHIPMENT.
-    live = None
-    unsettled: list[str] = []
-    if arguments.live or arguments.settle:
-        identifier = LiveDataset.identified(package.root)
-        dataset = LiveDataset(identifier)
-        try:
-            live = dataset.members()
-            if arguments.settle:
-                unsettled = MountCheck(package, live).settled(dataset.members)
-        except TruncatedListingError as truncated:
-            # UNKNOWN, not REFUSED and not a clean pass: a partial listing answers the question wrongly
-            # in BOTH directions, so the only honest report is that the live check did not run.
-            logger.error("live check UNKNOWN - %s", truncated)
-            sys.exit(2)
-        logger.info("live %s holds %d members", identifier, len(live))
-    if unsettled:
+    reading = LiveReading.taken(package, live=arguments.live, settle=arguments.settle)
+    if reading.unknown:
+        # UNKNOWN, not REFUSED and not a clean pass: a partial listing answers the question wrongly
+        # in BOTH directions, so the only honest report is that the live check did not run.
+        logger.error("live check UNKNOWN - %s", reading.unknown)
+        sys.exit(2)
+    if reading.unsettled:
         logger.error(
             "the live dataset never read complete: %d of %d members were absent at some point in the "
             "poll (%s). A version that is still materialising answers differently read to read, so this "
             "refuses the package until a re-push settles.",
-            len(unsettled),
+            len(reading.unsettled),
             len(package.members),
-            ", ".join(unsettled),
+            ", ".join(reading.unsettled),
         )
 
-    check = MountCheck(package, live)
+    check = MountCheck(package, reading.live)
     # BEFORE the per-kernel loop, because it invalidates every verdict that loop is about to print: a
     # manifest the live dataset cannot satisfy refuses the package for ALL of them.
     absent = check.absent()
@@ -212,32 +301,14 @@ def main() -> None:
             len(package.members),
             ", ".join(absent),
         )
-    entries = check.entries(arguments.kernels)
-    verdicts = {kernel.name: check.verdict(kernel) for kernel in entries}
-    for name, verdict in verdicts.items():
-        logger.info("  %s: %s", name, verdict)
-
-    refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
-    skipped = [name for name, verdict in verdicts.items() if verdict.startswith("skipped")]
-    passed = len(verdicts) - len(skipped) - len(refused)
-    # AGAINST THE DIRECTORY COUNT, not against len(verdicts): the buckets are computed from the verdicts,
-    # so they always sum to the verdicts and can never show a directory that never became one. The number
-    # that CAN is the one the sweep walked past — which is the whole of what dark7's silence looked like.
-    walked = len([entry for entry in arguments.kernels.iterdir() if entry.is_dir()])
-    logger.info(
-        "%d ok, %d skipped, %d refused of %d kernel directories (%d others under %s are not kernels)",
-        passed,
-        len(skipped),
-        len(refused),
-        len(entries),
-        walked - len(entries),
-        arguments.kernels,
-    )
+    sweep = MountSweep.over(check, arguments.kernels)
+    for line in sweep.lines(arguments.kernels):
+        logger.info(line)
     # PASSED, not len(verdicts): a --kernels path that names nothing, and a root where every kernel
     # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
-    Denominator(passed, empty).refuse_empty()
-    if refused or absent or unsettled:
+    Denominator(sweep.passed, empty).refuse_empty()
+    if sweep.refused or absent or reading.unsettled:
         sys.exit(1)
 
 

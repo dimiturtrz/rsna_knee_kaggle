@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from kneemri.inference.members import MemberPackage
-from kneemri.kaggle.mount_check import MountCheck
+from kneemri.kaggle.mount_check import LiveReading, MountCheck, MountSweep
 
 DINOV2 = "metaresearch/dinov2/PyTorch/small/1"
 DINOV3 = "dimiturnt/dinov3-hf"
@@ -155,3 +155,96 @@ def test_verdict_refuses_an_unpushed_member(tmp_path: Path):
     verdict = check.verdict(kernel)
     assert verdict.startswith("REFUSED")
     assert "LIVE members dataset" in verdict
+
+
+def _listable(tmp_path: Path, *pages: str) -> tuple[MemberPackage, list[str]]:
+    """A package that can be asked about live, and the CSV pages the fake CLI will answer with."""
+    package = _package(tmp_path)
+    (package.root / "dataset-metadata.json").write_text(json.dumps({"id": "dimiturnt/members"}), encoding="utf-8")
+    return package, list(pages)
+
+
+def test_taken(tmp_path: Path):
+    """ONE REP PER CLASS of what asking the live dataset can ANSWER: not asked, read, and UNKNOWN.
+
+    The third class is the one that had no test: the truncated listing used to call `sys.exit(2)` from
+    the middle of `main`, so the only way to reach it was a real Kaggle round trip. As a state it is a
+    value, and a partial listing stays neither a refusal nor a pass — `live` is None, not a short set
+    that would read as members the dataset lacks.
+    """
+    package, pages = _listable(tmp_path)
+    complete = "name,size\nv2member.pt,1\nv3member.pt,1\n"
+
+    unasked = LiveReading.taken(package, live=False, settle=False)
+    assert (unasked.live, unasked.unknown) == (None, ""), "no flag means no round trip and no verdict"
+
+    pages[:] = [complete]
+    read = LiveReading.taken(package, live=True, settle=False, listing=lambda _: pages.pop(0))
+    assert (read.live, read.unsettled, read.unknown) == ({"v2member", "v3member"}, [], "")
+
+    pages[:] = ["Next Page Token = abc\nname,size\nv2member.pt,1\n"]
+    truncated = LiveReading.taken(package, live=True, settle=False, listing=lambda _: pages.pop(0))
+    assert truncated.live is None, "a partial listing must not be read as a dataset missing members"
+    assert "listed more than" in truncated.unknown
+
+
+def test_taken_polls_until_settled(tmp_path: Path):
+    """`--settle` implies `--live`, and a truncation part-way THROUGH the poll is the same UNKNOWN."""
+    package, pages = _listable(tmp_path)
+    complete = "name,size\nv2member.pt,1\nv3member.pt,1\n"
+    pages[:] = ["name,size\nv2member.pt,1\n", complete, complete]
+    settled = LiveReading.taken(package, live=False, settle=True, listing=lambda _: pages.pop(0), pause=lambda: None)
+    assert (settled.unsettled, settled.unknown) == ([], ""), "settle alone asks, and two clear reads settle it"
+
+    pages[:] = [complete, "Next Page Token = abc\nname,size\n", complete]
+    mid = LiveReading.taken(package, live=False, settle=True, listing=lambda _: pages.pop(0), pause=lambda: None)
+    assert mid.live is None and "listed more than" in mid.unknown, "the poll's reads are inside the same try"
+
+
+def _swept(tmp_path: Path) -> MountSweep:
+    """One kernel of each bucket, plus a directory the sweep must walk past rather than judge."""
+    _kernel(tmp_path, "kneemri-ok", "KernelRun(names=('v2member',)).run()\n", [DINOV3])
+    _kernel(tmp_path, "kneemri-refused", "KernelRun(names=('v3member',)).run()\n", [])
+    skipped = tmp_path / "kneemri-skipped"
+    skipped.mkdir()
+    (skipped / "kneemri-skipped.py").write_text("print('no KernelRun here')\n", encoding="utf-8")
+    (skipped / "kernel-metadata.json").write_text(json.dumps({"id": "dimiturnt/s"}), encoding="utf-8")
+    (tmp_path / "notakernel").mkdir()
+    return MountSweep.over(MountCheck(_package(tmp_path)), tmp_path)
+
+
+def test_over(tmp_path: Path):
+    """Every entry judged, and the WALKED count read from the directory rather than from the verdicts.
+
+    Those two numbers are the point of the class: the buckets are computed from the verdicts and so can
+    never disagree with them, while `walked` can — it is the only number that could have shown dark7's
+    silence, a directory the sweep passed over without ever becoming an entry.
+    """
+    sweep = _swept(tmp_path)
+
+    assert set(sweep.verdicts) == {"kneemri-ok", "kneemri-refused", "kneemri-skipped"}
+    assert (sweep.checked, sweep.walked) == (3, 5), "the members dir and notakernel are walked, not checked"
+
+
+def test_refused(tmp_path: Path):
+    """The bucket that decides the exit code, keyed on the word the verdict starts with."""
+    assert _swept(tmp_path).refused == ["kneemri-refused"]
+
+
+def test_skipped(tmp_path: Path):
+    """Unanswerable is not ok — a kernel building no KernelRun picks its members some other way."""
+    assert _swept(tmp_path).skipped == ["kneemri-skipped"]
+
+
+def test_passed(tmp_path: Path):
+    """The honest denominator: checked and cleared, never the count of verdicts printed."""
+    assert _swept(tmp_path).passed == 1, "one ok of three verdicts - the skip is not a pass"
+
+
+def test_lines(tmp_path: Path):
+    """Each verdict on its own row, then a tally that names what was walked past."""
+    lines = _swept(tmp_path).lines(tmp_path)
+
+    assert len(lines) == 4, "three verdicts and one tally"
+    assert lines[-1].startswith("1 ok, 1 skipped, 1 refused of 3 kernel directories")
+    assert "(2 others" in lines[-1], "the directories the sweep declined to judge are counted out loud"
