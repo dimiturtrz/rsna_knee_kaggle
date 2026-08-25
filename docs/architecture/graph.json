@@ -7088,13 +7088,49 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.member_curve.MemberCurve.greedy",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.forward",
       "target": "kneemri.evaluation.member_curve.Pool.combined",
       "weight": 1
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.forward",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.greedy",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.forward",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.honest",
+      "target": "kneemri.evaluation.label_combine.LabelCombine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.honest",
+      "target": "kneemri.evaluation.label_combine.LabelCombine.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.honest",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.forward",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.honest",
+      "target": "kneemri.evaluation.member_curve.Pool.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.honest",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
@@ -22858,8 +22894,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.greedy",
       "label": "greedy",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.honest",
+      "label": "honest",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve.MemberCurve",
       "role": null
@@ -22980,6 +23032,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve.Pool.named",
       "label": "named",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.Pool",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.Pool.rows",
+      "label": "rows",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve.Pool",
       "role": null
