@@ -245,6 +245,41 @@ knob. MRNet (`knee-ombx`, owner-blocked on the RUA) is 1,370 studies with image-
 labels — 1.9× this arm on the axis that just moved, supervising the structure that moved most. That case
 is now made on KIND. It was never available on volume, and the prevalence refutation above says so.
 
+## WHOSE MODEL IS THIS A PAGE ABOUT? Not ours, on the part that matters most
+
+Every ACHIEVED number above comes from the published members, because they are the only predictions in
+this project that never saw the annotations. The page therefore measures THEIR model against the labels,
+and the whole time it has been read as a statement about ours. It is not one, and the difference is
+largest exactly where the page's argument is loudest.
+
+Our best single member (`lr4e-5_ws`) against the published ensemble, per label, on the 909 studies both
+hold out, scored against `report_labels_v2`:
+
+    Lateral Meniscus  +0.0661        Contusion    +0.0165        MCL         +0.0020
+    Medial Meniscus   +0.0451        ACL          +0.0128        Fracture    -0.0017
+    Baker's           +0.0220        PF OA        +0.0130        Synovitis   -0.0125
+    Lateral OA        +0.0102        Medial OA    +0.0085        Effusion    +0.0091
+    mean ours 0.8525   published 0.8366   ours-published +0.0159, ahead on ten of twelve
+
+The two largest gaps in the whole table are the two MENISCI — the deficit six's biggest members, where the
+published model reads −0.1925 and −0.0938. Our own weakest findings are MCL (0.7908), Fracture (0.8066),
+Lateral OA (0.8178) and PF OA (0.8392); our menisci and ACL are among our STRONGEST. The 4-of-4
+internal-derangement shape, which is the page's headline, does not hold for our model: two of those four
+are in our top three.
+
+WHAT THIS DOES AND DOES NOT LICENSE. It is a different RULER — report labels over 909 studies, not
+radiologist truth over 58 — so it cannot say the deficit is closed, only that the model the deficit was
+measured on is not the model we ship. The right instrument cannot be run: `supervision_gap` needs
+predictions that never trained on the annotations AND that cover them out of fold, and of our 58
+annotated studies only 13 fall in fold 0 while `member_fold1..4` left no prediction file at all — union
+coverage 2 of 58. Producing it means training four folds, which are banned. So the honest position is:
+the −0.049 macro and the 4-of-4 shape are facts about the published members, must not be quoted as
+facts about ours, and there is no cheap experiment that converts one into the other.
+
+The MRNet case does NOT rest on this. `merged_corpus`'s deficit/surplus split above was measured on OUR
+members under OUR ruler and stands on its own evidence; it is the KIND argument, and it survives this
+section untouched.
+
 ## What it does NOT say
 
 It does not say ensembling is worthless or that the roster should change; those axes closed separately
