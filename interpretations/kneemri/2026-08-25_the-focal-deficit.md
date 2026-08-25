@@ -85,10 +85,70 @@ by structure scale: focal -0.0029  regional +0.0045
 The menisci move the **wrong way**. The predicted signature is absent, not averaged away. The row was
 right and the re-read confirms it rather than reopening it.
 
-**3. Aggregation.** Already closed from both ends by the ledger, before today: 20 cached slices against
-12 reads −0.0001 (`knee-ezz`), and three pooling operators — elementwise max, unweighted mean, a trained
-64-wide gate — span 0.0019 across `attend_true` / `attend_dense`. Neither more inputs to the slice
-aggregator nor a better rule for combining them moves the number.
+**3. Aggregation.** Already closed from both ends by the ledger, before today, and closed harder than
+this section first stated: 20 cached slices against 12 reads −0.0001 (`knee-ezz`), and **four** pooling
+operators span 0.0019 on one recipe — elementwise max 0.8457, an order-aware gate 0.8461, unweighted
+mean 0.8473, a trained permutation-blind gate 0.8476 (`attend_true`, `depth_true`). The order-aware one
+matters to this page's argument and was missing from it: all three of the others are permutation-blind,
+so slice ORDER was the clause `attend_true` left open, and `depth_true` closed it by landing
+second-worst. Neither more inputs to the slice aggregator, nor a better rule for combining them, nor
+telling it which slice came before which, moves the number.
+
+Read the plumbing note with these: `attend_dense`'s gate sat in no optimiser group (knee-7gyw), so it
+ran as a fixed mean. That is not a hole in the triple — it is why the MEAN point exists. `parameter_groups`
+now selects the readout by EXCLUSION from the backbone (`model.py:489`), which is the form of the fix
+that cannot lose the next sibling module the same way, and both trained-gate arms above are post-fix
+re-runs with the gate's weights verified non-zero before their verdicts were written.
+
+**4. The pooled vector's WIDTH — the hypothesis this page originally closed on, answered by two arms
+already on disk.** `--pool cls_mean_focal` concatenates the mean of each channel's top eighth over the
+patch grid, and its own flag help names this page's four structures as the reason it exists: a finding
+occupying 1–2 of 256 patches is diluted by a plain mean, and that dilution ratio is invariant to
+resolution and to slot coverage, which is exactly why (1) and (2) could come back flat while the
+mechanism stayed alive. It is the best-argued remaining explanation, and it has been run twice:
+
+```
+focal_dense (20sl, vs band_dense)   focal +0.0001   regional -0.0114
+focal_pool  (12sl, vs whole_stack)  focal -0.0004   diffuse  -0.0065
+```
+
+Both flat on the focal group, both paying on the diffuse one. And read against THIS page's six deficit
+findings rather than against the tool's focal/regional split — which is a different partition, so the
+structure-scale lines above do not answer it — `focal_dense` moves ACL +0.006, Lateral Meniscus +0.010,
+Lateral OA +0.005 against MCL −0.008, Medial Meniscus −0.006, PF OA −0.003: **net ≈ +0.004 over the six,
+and LATERAL-up / MEDIAL-down rather than deficit-up.** The tail does reach the finest structure in the
+corpus, which is a real observation about where it spends attention; it does not reach the deficit SET.
+No new run was needed to learn this and none should be queued — the axis was read per-label, and it is
+the third mean-refutation this page has re-read at per-label resolution without reopening one.
+
+**5. Supervision VOLUME — the first thing anyone reading the table above would propose, and it is
+refuted by inversion at both ends.** If the deficit set were simply the findings the corpus has fewest
+positive examples of, the whole page would be a data problem with a known lever. `core.data.labels.label_power`
+on `report_labels_v2` gives each finding's positives in an 881-study fold, and set against the split:
+
+```
+DEFICIT side (model trails)              SURPLUS side (model beats its labels)
+  Lateral Meniscus  -0.1925   224          Effusion         +0.1304   533   <- RICHEST
+  ACL               -0.1225   245          Contusion        +0.0891   259
+  MCL               -0.0964   153          Synovitis        +0.0508   116   <- 2nd poorest
+  Medial Meniscus   -0.0938   469  <- 2nd richest
+  PF OA             -0.0856   398  <- 3rd richest
+  Lateral OA        -0.0793   217          Baker's          +0.0226   222
+                                           Fracture         +0.0160    62   <- POOREST
+  mean 284 positives                       mean 252 positives
+```
+
+The two POOREST labels in the corpus are both on the surplus side; the second- and third-richest are
+both on the deficit side; and the deficit side carries MORE positives on average, not fewer. Prevalence
+does not order this split — it very nearly anti-orders it.
+
+Two things follow, and the second is a caution against over-reading the first. Positive COUNT is not
+what distinguishes a finding the model beats its teacher on from one it trails on, so "get more studies"
+is not licensed by this page, and MRNet (`knee-ombx`) should not be argued for on the strength of it.
+But this does NOT say more data cannot help: it says volume is not the AXIS the deficit lies along, and
+a corpus that differs in KIND rather than in count — one carrying explicit internal-derangement reads —
+is untouched by the argument. It also does not disturb `knee-yrg`'s separate medial-over-lateral
+prevalence question, which is about a gap WITHIN the deficit side, not about the split itself.
 
 ## Where that leaves the mechanism
 
@@ -100,10 +160,15 @@ competitor in topic 735154), and the surviving statement is narrow and uncomfort
 - it is not the trunk's **capacity** (small ≈ base, twice measured),
 - it is not the **image's** resolution (336 ≈ 224 on the focal four),
 - it is not the **input's** coverage (nine slots ≈ six, and worse on menisci),
-- it is not the **aggregator** (slice count and pooling rule both flat),
-- it is not the **labels**, for these four findings — the reports describe them at 0.84–0.99.
+- it is not the **aggregator** (slice count, pooling rule and slice order all flat),
+- it is not the pooled vector's **width** (the focal tail, read per-label, ≈+0.004 over the six),
+- it is not the **labels**, for these four findings — the reports describe them at 0.84–0.99,
+- it is not supervision **volume** (the split anti-orders with positive count).
 
-Everything cheap has been eliminated and the deficit is still −0.049. That is not a lever yet; it is a
+Everything cheap has been eliminated and the deficit is still −0.049. The list is now closed on every
+DECODE-side axis this project can name: what is read (resolution, coverage), how much of it is read
+(slice count), and how it is combined (operator, order, width). Two of those five were closed today by
+new arms; the other three were already on disk and needed reading, not running. That is not a lever yet; it is a
 well-localised open question, and stating it as one is the honest end of the page. The next thing it
 licenses is diagnostic rather than corrective: find out **whether our own members share the published
 members' deficit shape**, since every number here rests on assuming they do, and that costs no card —
