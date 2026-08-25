@@ -166,11 +166,26 @@ Nothing ROUTES into it: that corpus ships one volume per exam with no series to 
 `SlotScheme.assign` is never asked. The scheme is here to name the axis and the cache, not to select.
 """
 
+MERGED_SCHEME = "merged"
+"""Our corpus and a foreign one in ONE array — the canonical slot axis under a name of its own.
+
+THE SLOTS ARE THE CANONICAL SIX, unchanged, so a run over a merged cache has the same head width, the
+same slot attention and the same members as a run over ours: the arm is a normal supervised run, and its
+control is that same recipe on our corpus alone. Only the study axis grows.
+
+THE NAME EXISTS FOR THE COLLISION, exactly as `RIJEKA_SCHEME` does. A merged cache is canonical in every
+respect the shape can express — same slots, same slices, same size — so under the canonical scheme it
+would write `images_336px_12sl.npy`, the path every member on disk was fitted on, and differ from it only
+in the length of axis 0. That is the one failure `StudyCache.key` records escaping three times. The
+scheme name is what makes it unrepresentable here.
+"""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
     MULTISCALE_SCHEME: MULTISCALE_SLOTS,
     RIJEKA_SCHEME: RIJEKA_SLOTS,
+    MERGED_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""

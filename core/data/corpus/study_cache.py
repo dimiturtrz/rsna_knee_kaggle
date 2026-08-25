@@ -17,7 +17,7 @@ import json
 import logging
 from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cached_property
 from pathlib import Path
 from typing import Protocol
@@ -220,6 +220,15 @@ class StudyCache:
     def scheme_slots(self) -> list[str]:
         """The slot names this cache is built over, in order — the width of its second axis."""
         return [slot.name for slot in SCHEMES[self.routing.scheme]]
+
+    def under(self, scheme: str) -> "StudyCache":
+        """This same cache read under another slot scheme, which names a DIFFERENT set of files.
+
+        The one axis a merge's two sources and its destination differ on. Everything else that names a
+        cache — size, slices, band, crop, truncation — is carried rather than respelled, which is what
+        keeps a derived cache at the geometry the corpus was actually decoded at.
+        """
+        return replace(self, routing=replace(self.routing, scheme=scheme))
 
     @property
     def images_path(self) -> Path:

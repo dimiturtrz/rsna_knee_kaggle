@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from core.data.corpus.folds import FitPositions, ReportFolds
+from core.data.corpus.folds import TRAIN_ONLY, FitPositions, ReportFolds
 
 
 def _table(tmp_path: Path) -> Path:
@@ -31,6 +31,21 @@ def test_assign_is_stable_across_runs(tmp_path: Path):
     identifiers = ["a", "b", "c", "d", "e", "f"]
     table = str(_table(tmp_path))
     assert ReportFolds().assign(table, identifiers).tolist() == ReportFolds().assign(table, identifiers).tolist()
+
+
+def test_assign_keeps_a_foreign_corpus_out_of_every_holdout(tmp_path: Path):
+    """A study this table never heard of trains and is never scored on — under a fold, and under -1.
+
+    Otherwise a fifth of a merged cache's foreign studies land in the holdout, and the number the arm
+    reports is over a different mix of corpora than the control it exists to be compared against.
+    """
+    folds = ReportFolds(folds=5)
+
+    assignments = folds.assign(str(_table(tmp_path)), ["a", "b", "rijeka-vol01"])
+
+    assert assignments[2] == TRAIN_ONLY
+    for fold in (-1, 0, 1, 2, 3, 4):
+        assert 2 not in folds.holdout(assignments, fold=fold)[1].tolist()
 
 
 def test_holdout(tmp_path: Path):

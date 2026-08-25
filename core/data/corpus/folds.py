@@ -16,6 +16,22 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
+TRAIN_ONLY = -2
+"""The fold of a study that may never be scored on — a corpus that is not the one we are measured on.
+
+A merged cache holds our studies followed by a foreign corpus's, and hashing a foreign identifier the
+ordinary way puts a fifth of them in the holdout. That silently changes what a holdout number MEANS: the
+denominator becomes a different mix of corpora, and those rows carry labels for one finding out of
+twelve, so the arm could not be read against the control it exists to be compared with.
+
+NOT `-1`, which is already the sentinel for a run that reports no holdout at all: at `--fold -1` a
+`-1` here would make the foreign corpus the ENTIRE holdout. `-2` is training under every fold, including
+that one.
+
+IT CHANGES NOTHING THAT EXISTS. Measured: 0 of our 4,407 studies are absent from `train.csv`, so before
+a foreign corpus was on disk no study could reach this value.
+"""
+
 
 class ReportFolds:
     """Study-to-fold assignment by report-text hash, so duplicate reports never straddle the divide."""
@@ -29,12 +45,18 @@ class ReportFolds:
 
         The hash is of the report text, not of the study id: two studies sharing a report must land in
         the same fold, which is the whole point.
+
+        A study this table has never heard of is a study from another corpus, and it goes to `TRAIN_ONLY`
+        rather than into the rotation — see that constant for why a holdout it appeared in would report a
+        number nothing could be compared against.
         """
         reports = pd.read_csv(train_table).set_index("StudyInstanceUID")["Report"].fillna("").to_dict()
         assignments = np.empty(len(identifiers), dtype=np.int64)
         for index, identifier in enumerate(identifiers):
-            text = str(reports.get(identifier, identifier))
-            digest = hashlib.sha1(f"{self.seed}:{text}".encode("utf-8")).hexdigest()
+            if identifier not in reports:
+                assignments[index] = TRAIN_ONLY
+                continue
+            digest = hashlib.sha1(f"{self.seed}:{reports[identifier]!s}".encode("utf-8")).hexdigest()
             assignments[index] = int(digest[:8], 16) % self.folds
         return assignments
 

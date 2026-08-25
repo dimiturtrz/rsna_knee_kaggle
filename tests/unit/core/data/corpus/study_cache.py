@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 
 from core.data.corpus.crop_centre import Crop
 from core.data.corpus.slot_reader import Band, Reading
-from core.data.corpus.slots import EXTENDED_SLOTS, SLOTS, Routing
+from core.data.corpus.slots import EXTENDED_SLOTS, MERGED_SCHEME, SLOTS, Routing
 from core.data.corpus.study_cache import (
     NAMED_BY,
     CachedCorpus,
@@ -439,6 +439,16 @@ def test_scheme_slots():
     cache = StudyCache(Path("nowhere"))
     assert cache.scheme_slots == [slot.name for slot in SLOTS]
     assert len(StudyCache(Path("nowhere"), routing=Routing(scheme="extended")).scheme_slots) == len(EXTENDED_SLOTS)
+
+
+def test_under():
+    """Another scheme carries every other naming axis, and names DIFFERENT files than the cache it came from."""
+    cache = StudyCache(Path("nowhere"), slices=8, image_size=64)
+
+    merged = cache.under(MERGED_SCHEME)
+
+    assert (merged.slices, merged.image_size) == (8, 64)
+    assert merged.images_path != cache.images_path
 
 
 def test_report(caplog: pytest.LogCaptureFixture):
