@@ -523,6 +523,14 @@ run_train() {
   # ALLOW_OVERWRITE=1 is the deliberate act: re-running an arm that failed, or replacing a fit on
   # purpose. Typing it is cheap. The point is that destruction is never what happens by default.
   local out; out="$(_out_path "${@:2}")"
+  # THE LOG IS NAMED FOR THE CHECKPOINT, NOT FOR THE ARM (knee-tkyy). A smoke is the arm's own name
+  # with `--studies 60 --epochs 1` added, so both wrote `<arm>.full.log` and `tee` without -a truncates:
+  # the arm's first line destroyed the traceback of the smoke that was supposed to gate it. The one
+  # file saying why the smoke failed was deleted by the run the smoke existed to prevent.
+  #
+  # `--out` is the axis that was already unambiguous — run_train REFUSES an arm whose checkpoint exists,
+  # so two runs sharing a name must differ here or one of them cannot start at all.
+  ARM_LOG_NAME="$(basename "${out:-$1}" .pt)"
   if [ -n "$out" ] && [ -e "$out" ] && [ -z "${ALLOW_OVERWRITE:-}" ]; then
     echo "run_train: REFUSED $1 - '$out' already holds a checkpoint. Set ALLOW_OVERWRITE=1 to replace it, or give this arm a distinct --out."
     return 1
@@ -546,7 +554,7 @@ run_train() {
   # epoch 4 with exit 127 and no traceback. run_snapshot protects the SOURCE from edits mid-run; this
   # protects the ENVIRONMENT, which is the other half and was missing.
   (cd "${ARM_SRC:-$REPO}" && uv run --no-sync --project "$REPO" python -u -m kneemri.training.train "$@") 2>&1 \
-    | tee "$LOGS/$name.full.log" \
+    | tee "$(_arm_log "$name")" \
     | grep --line-buffered -E "epoch |best |rror|emory"
   local status="${PIPESTATUS[0]}"
   # Released on EVERY path out, including the failures. A crashed trainer that kept the lock would idle
@@ -563,7 +571,7 @@ run_train() {
   fi
   # A trainer can also exit 0 having produced nothing useful. The best-score line is the artefact the
   # ledger quotes, so its absence is a failure whatever the exit code says.
-  if ! grep -q "best holdout" "$LOGS/$name.full.log"; then
+  if ! grep -q "best holdout" "$(_arm_log "$name")"; then
     _mark "$name" "ARM FAILED $name (exit 0 but no 'best holdout' line) - see $LOGS/$name.full.log"
     return 1
   fi
@@ -594,7 +602,7 @@ _seat_value() {
   # But the arm TRAINED, and marking a finished arm failed because an after-the-fact reading could not
   # join would throw away forty minutes of GPU over arithmetic that costs none.
   local name="$1" best checkpoint
-  best="$(grep -m1 'best holdout' "$LOGS/$name.full.log")"
+  best="$(grep -m1 'best holdout' "$(_arm_log "$name")")"
   checkpoint="${best##*-> }"
   checkpoint="${checkpoint%% |*}"
   if [ ! -f "$checkpoint" ]; then
@@ -612,6 +620,13 @@ _seat_value() {
   _mark "$name" "$report"
 }
 
+_arm_log() {
+  # The file a run writes, named for the CHECKPOINT it produced rather than for the arm that produced
+  # it (knee-tkyy). Falls back to the arm name for a run with no `--out`, which is the only case where
+  # the two were never distinguishable anyway.
+  echo "$LOGS/${ARM_LOG_NAME:-$1}.full.log"
+}
+
 _mark() {
   # Write an arm's verdict to BOTH the terminal and the arm's own log.
   #
@@ -620,7 +635,7 @@ _mark() {
   # was never going to arrive there. Found while queueing the resolution arm: the GPU would simply
   # have gone idle with nothing reporting an error.
   local name="$1" message="$2"
-  echo "$message" | tee -a "$LOGS/$name.full.log"
+  echo "$message" | tee -a "$(_arm_log "$name")"
 }
 
 wait_for() {
