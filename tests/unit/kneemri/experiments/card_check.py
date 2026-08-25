@@ -61,6 +61,22 @@ def test_holder_ours_accepts_a_repo_spelled_the_other_way():
     assert Holder("55356", OURS.replace("\\", "/").upper()).ours()
 
 
+def test_holder_elided():
+    """The TAIL survives, because that is where an arm's own overrides are.
+
+    `$RECIPE $FIT` puts the shared defaults first, so a head truncation shows the flags being
+    overridden and hides the ones that moved — which is how `--fold -1` was read as `--fold 0`.
+    """
+    command = "python -m kneemri.training.train " + "--epochs 12 " * 30 + "--fold -1 --ema"
+    shown = Holder("55356", command).elided()
+
+    assert len(shown) == 110
+    assert shown.endswith("--fold -1 --ema"), "the override is the whole reason to print the row"
+    assert shown.startswith("python -m kneemri.training.train"), "and the head still says whose job it is"
+    assert "..." in shown, "a row that dropped a screen of flags must say so"
+    assert Holder("55356", "python -m kneemri.training.train").elided() == "python -m kneemri.training.train"
+
+
 def test_holder_line():
     assert Holder("55356", OURS).line().startswith("  OURS  pid   55356")
     assert "(not in the process table)" in Holder("999", "").line()

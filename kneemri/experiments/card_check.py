@@ -106,6 +106,13 @@ class DeviceReport:
         return found
 
 
+PREVIEW_WIDTH = 110
+"""How much of one holder's argv a row shows. A terminal row, not a policy — what it is SPENT on is."""
+
+ELISION = " ... "
+"""What stands where the shared defaults were, so a reader can see the row is not the whole command."""
+
+
 @dataclass(frozen=True)
 class Holder:
     """One process computing on the device, named by the process table rather than by the driver."""
@@ -124,10 +131,29 @@ class Holder:
         return self.normalised(str(repo)) in self.normalised(self.command)
 
     def line(self) -> str:
-        """This holder as one row, truncated because a full argv here is a screen of flags."""
+        """This holder as one row, elided because a full argv here is a screen of flags."""
         who = "OURS " if self.ours() else "other"
-        shown = self.command[:110] if self.command else "(not in the process table)"
-        return f"  {who} pid {self.pid:>7}  {shown}"
+        return f"  {who} pid {self.pid:>7}  {self.elided()}"
+
+    def elided(self, width: int = PREVIEW_WIDTH) -> str:
+        """The command at preview width with the MIDDLE dropped — never the tail.
+
+        BOTH ENDS ARE LOAD-BEARING AND THE MIDDLE IS NOT. Every arm here runs `$RECIPE $FIT`: the
+        shared defaults first, the arm's own overrides last. A head-truncated preview therefore shows
+        precisely the flags that are being overridden and never the ones that were moved —
+        `small_batch6_ff` ran `--fold -1 --ema` and the preview displayed `--fold 0`. Read at face
+        value that says the one deliberate flag of the arm did not land, which indicts a correct
+        95-minute run mid-flight; it resolved the other way only by going around this tool entirely.
+        The head still names the entrypoint, which is what says whose job this is, so the part that can
+        be spent is the defaults nobody reads.
+        """
+        if not self.command:
+            return "(not in the process table)"
+        if len(self.command) <= width:
+            return self.command
+        kept = width - len(ELISION)
+        head = kept // 2
+        return self.command[:head] + ELISION + self.command[head - kept :]
 
     @staticmethod
     def normalised(text: str) -> str:
