@@ -28,7 +28,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)

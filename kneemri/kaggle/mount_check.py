@@ -17,7 +17,7 @@ import logging
 import sys
 from pathlib import Path
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources

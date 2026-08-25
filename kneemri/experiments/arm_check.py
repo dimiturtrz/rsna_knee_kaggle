@@ -32,8 +32,8 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from core.data.corpus.study_cache import CorpusSplit, StudyCache
+from core.denominator import Denominator
 from core.paths import DataRoot
-from kneemri.denominator import Denominator
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.models.backbone import ENCODERS

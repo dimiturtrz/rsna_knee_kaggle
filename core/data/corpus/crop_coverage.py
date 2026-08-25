@@ -23,7 +23,6 @@ tissue while losing the knee. This bounds the failure from one side only — a c
 tissue at 80 mm cannot be the one keeping more joint, and that is the direction the decision needs.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
@@ -32,13 +31,13 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.data.corpus.crop_centre import CENTRES, CROP_MM, TissueCentre
 from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import Routing
 from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
+from core.data.corpus.study_cache import CorpusSample, CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +134,7 @@ class CropCoverage:
             )
         return lines
 
-    def report(self, measured: list[dict[str, float]], sampled: int, corpus: int) -> list[str]:
+    def report(self, measured: list[dict[str, float]], sample: CorpusSample) -> list[str]:
         """The retained-tissue distribution per crop, the paired deltas, and WHAT WAS MEASURED ON.
 
         The denominators are the first line rather than a footnote: a share computed over the series
@@ -143,7 +142,7 @@ class CropCoverage:
         other three times in a single session.
         """
         lines = [
-            f"{len(measured)} series measured, from {sampled} studies sampled of {corpus} in the corpus",
+            sample.line(len(measured), "series"),
             f"{'crop':16s} {'median':>8s} {'p10':>8s} {'worst':>8s}  {'series':>7s}",
         ]
         for key in sorted({name for kept in measured for name in kept}):
@@ -178,35 +177,30 @@ class CropCoverage:
 
 def main() -> None:
     """Decode a spread sample of studies uncropped and score both centres at both extents."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
-    parser.add_argument("--slices", type=int, default=SLICES)
-    parser.add_argument("--tight-mm", type=float, default=TIGHT_MM, help="the extent with no margin")
-    parser.add_argument("--workers", type=int, default=20, help="decode processes")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    command.parser.add_argument("--slices", type=int, default=SLICES)
+    command.parser.add_argument("--tight-mm", type=float, default=TIGHT_MM, help="the extent with no margin")
+    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
-    identifiers = split.identifiers()
+    split = CorpusSplit(command.rooted(arguments).raw())
     planes = split.planes()
-    # Every k-th rather than a random draw: the sample is then a property of the corpus order rather
-    # than of a seed, and repeating the measurement cannot quietly answer with different studies.
-    chosen = identifiers[:: max(1, len(identifiers) // arguments.sample)][: arguments.sample]
+    sample = split.sample(arguments.sample)
 
     extents = (CROP_MM, arguments.tight_mm)
     requests = [
         CoverageRequest(
             identifier=name, source=str(split.source), planes=planes, slices=arguments.slices, extents=extents
         )
-        for name in chosen
+        for name in sample.chosen
     ]
     measured: list[dict[str, float]] = []
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         for kept in pool.map(CropCoverage.measure_study, requests, chunksize=4):
             measured.extend(kept)
-    for line in CropCoverage(extents).report(measured, len(chosen), len(identifiers)):
-        logger.info(line)
+    command.report(CropCoverage(extents).report(measured, sample))
+    sample.denominator(len(measured), "series").refuse_empty()
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 
 
 def test_refuse_empty(caplog: pytest.LogCaptureFixture):

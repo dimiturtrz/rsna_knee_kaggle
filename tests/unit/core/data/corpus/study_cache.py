@@ -10,7 +10,14 @@ from numpy.typing import NDArray
 from core.data.corpus.crop_centre import Crop
 from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import EXTENDED_SLOTS, SLOTS, Routing
-from core.data.corpus.study_cache import NAMED_BY, CachedCorpus, CorpusSplit, DecodeRequest, StudyCache
+from core.data.corpus.study_cache import (
+    NAMED_BY,
+    CachedCorpus,
+    CorpusSample,
+    CorpusSplit,
+    DecodeRequest,
+    StudyCache,
+)
 from core.data.corpus.window_reader import FileReader, MappedReader
 from tests.unit.conftest import write_series
 
@@ -223,6 +230,46 @@ def test_planes(tmp_path: Path):
     )
 
     assert CorpusSplit(tmp_path).planes() == {"e0": "SAG"}
+
+
+def test_sample(tmp_path: Path):
+    """Every k-th study, so the draw is a property of the corpus order and not of a seed."""
+    identifiers = [f"study{index:03d}" for index in range(100)]
+    pd.DataFrame({"StudyInstanceUID": identifiers}).to_csv(tmp_path / "train.csv", index=False)
+    split = CorpusSplit(tmp_path)
+
+    drawn = split.sample(10)
+    assert drawn.chosen == identifiers[::10]
+    assert drawn.corpus == 100, "the corpus denominator travels with the draw"
+    assert split.sample(10).chosen == drawn.chosen, "no seed, so two calls must agree exactly"
+    assert split.sample(300).chosen == identifiers, "asking for more than exist yields all of them"
+
+
+def test_named(tmp_path: Path):
+    """A named list is checked against the corpus, and an unknown name raises instead of shrinking it."""
+    pd.DataFrame({"StudyInstanceUID": ["a", "b", "c"]}).to_csv(tmp_path / "train.csv", index=False)
+    listing = tmp_path / "studies.txt"
+    listing.write_text("b\n\na\n")
+
+    assert CorpusSplit(tmp_path).named(listing).chosen == ["b", "a"], "the file's own order is preserved"
+
+    pd.DataFrame({"StudyInstanceUID": ["a"]}).to_csv(tmp_path / "train.csv", index=False)
+    with pytest.raises(ValueError, match="not in the corpus"):
+        CorpusSplit(tmp_path).named(listing)
+
+
+def test_line():
+    """One wording for the denominator pair, so three audits cannot each word it differently."""
+    line = CorpusSample(["a", "b"], 4407).line(5, "series")
+
+    assert line == "5 series measured, from 2 studies sampled of 4407 in the corpus"
+
+
+def test_denominator():
+    """A wholesale decode failure is a refusal, not a header with no rows and exit 0."""
+    assert CorpusSample(["a", "b"], 4407).denominator(5, "series").measured == 5
+    with pytest.raises(SystemExit):
+        CorpusSample(["a", "b"], 4407).denominator(0, "series").refuse_empty()
 
 
 def test_load(tmp_path: Path):

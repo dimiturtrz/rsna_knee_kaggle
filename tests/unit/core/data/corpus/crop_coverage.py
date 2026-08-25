@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 
 from core.data.corpus.crop_coverage import CoverageRequest, CropCoverage
+from core.data.corpus.study_cache import CorpusSample
 
 EXTENTS = (130.0, 80.0)
 SPACING = 1.0
@@ -58,7 +59,7 @@ def test_paired():
 
 def test_report():
     """The denominators lead, because a share over what decoded is not a share over the corpus."""
-    lines = CropCoverage((80.0,)).report([{"tissue@80": 0.9, "image@80": 0.6}], sampled=2, corpus=4407)
+    lines = CropCoverage((80.0,)).report([{"tissue@80": 0.9, "image@80": 0.6}], CorpusSample(["a", "b"], 4407))
 
     assert lines[0] == "1 series measured, from 2 studies sampled of 4407 in the corpus"
     assert any(line.startswith("tissue@80") for line in lines)

@@ -49,7 +49,7 @@ from core.data.corpus.crop_centre import TissueCentre
 from core.data.corpus.slot_reader import SLICE_BAND, Band, SlotReader
 from core.data.corpus.slots import Routing
 from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSplit
+from core.data.corpus.study_cache import CorpusSample, CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -162,15 +162,14 @@ class BandCoverage:
         """A bootstrap interval on the mean, so a share is never reported as a bare point estimate."""
         return Bootstrap.seeded(seed).mean_interval(values)
 
-    def report(self, measured: list[tuple[str, dict[str, float]]], sampled: int, corpus: int) -> list[str]:
+    def report(self, measured: list[tuple[str, dict[str, float]]], sample: CorpusSample) -> list[str]:
         """Discarded tissue per slot, with the DENOMINATORS on the first line rather than in a footnote.
 
         A share computed over the series that happened to decode is not a share over the corpus, and this
         project has read one as the other three times in a single session.
         """
         header = [
-            f"band {self.band.low:g}-{self.band.high:g} over {len(measured)} series "
-            f"from {sampled} studies sampled of {corpus} in the corpus",
+            f"band {self.band.low:g}-{self.band.high:g}: {sample.line(len(measured), 'series')}",
             f"uniform tissue along the axis would discard {1.0 - (self.band.high - self.band.low):.4f} — "
             f"a share BELOW that is the constant's claim, at or above it is knee",
             f"{'slot':16s} {'discarded':>10s} {'95% CI':>18s} {'p90':>7s} {'low end':>8s} {'high end':>9s} "
@@ -219,21 +218,20 @@ def main() -> None:
     arguments = command.parsed()
 
     split = CorpusSplit(command.rooted(arguments).raw())
-    identifiers = split.identifiers()
     planes = split.planes()
-    # Every k-th rather than a random draw, as `crop_coverage` does: the sample is a property of the
-    # corpus order rather than of a seed, so repeating this cannot quietly answer with other studies.
-    chosen = identifiers[:: max(1, len(identifiers) // arguments.sample)][: arguments.sample]
+    sample = split.sample(arguments.sample)
 
     requests = [
-        BandRequest(identifier=name, source=str(split.source), planes=planes, depth=arguments.depth) for name in chosen
+        BandRequest(identifier=name, source=str(split.source), planes=planes, depth=arguments.depth)
+        for name in sample.chosen
     ]
     measured: list[tuple[str, dict[str, float]]] = []
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         for scored in pool.map(BandCoverage.measure_study, requests, chunksize=4):
             measured.extend(scored)
     band = Band(low=arguments.band_low, high=arguments.band_high)
-    command.report(BandCoverage(band).report(measured, len(chosen), len(identifiers)))
+    command.report(BandCoverage(band).report(measured, sample))
+    sample.denominator(len(measured), "series").refuse_empty()
 
 
 if __name__ == "__main__":

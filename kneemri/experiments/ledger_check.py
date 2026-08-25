@@ -31,7 +31,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
 

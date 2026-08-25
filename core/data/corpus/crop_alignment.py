@@ -30,7 +30,6 @@ bounds the question from one side: if the spread is small, the slots already agr
 mechanism is not available here at any price.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -40,13 +39,13 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.crop_centre import ImageCentre, TissueCentre
 from core.data.corpus.crop_coverage import SAMPLE, SLICES, UNCROPPED, CoverageRequest
 from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import Routing
 from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
+from core.data.corpus.study_cache import CorpusSample, CorpusSplit
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +117,7 @@ class CropAlignment:
         gaps = [abs(first - second) for first, second in combinations(magnitudes, 2)]
         return float(np.mean(gaps))
 
-    def report(self, measured: list[list[SlotOffset]], sampled: int, corpus: int) -> list[str]:
+    def report(self, measured: list[list[SlotOffset]], sample: CorpusSample) -> list[str]:
         """The per-plane offset distribution, then the within-study spread, then the denominators.
 
         The denominators are stated because a share computed over the studies that happened to decode is
@@ -127,7 +126,7 @@ class CropAlignment:
         slots = [offset for study in measured for offset in study]
         spreads = [found for found in (self.spread(study) for study in measured) if found is not None]
         lines = [
-            f"{len(measured)} studies measured of {sampled} sampled, from {corpus} in the corpus; "
+            f"{sample.line(len(measured), 'studies')}; "
             f"{len(slots)} routed slots, {len(spreads)} studies with at least {MIN_SLOTS_FOR_SPREAD} slots",
             f"{'plane':14s} {'|offset| p50':>13s} {'p90':>8s} {'down p50':>10s} {'across p50':>12s} {'slots':>7s}",
         ]
@@ -150,28 +149,6 @@ class CropAlignment:
         down = np.median([offset.down_mm for offset in offsets])
         across = np.median([offset.across_mm for offset in offsets])
         return f"{plane:14s} {median:13.1f} {tail:8.1f} {down:10.1f} {across:12.1f} {magnitudes.size:7d}"
-
-    def sampled(self, identifiers: list[str], size: int) -> list[str]:
-        """Every k-th identifier, so the sample is a property of the corpus order and not of a seed.
-
-        The same choice `crop_coverage` makes, which is what lets the two measurements be about the same
-        studies rather than about two draws that happen to be the same size.
-        """
-        return identifiers[:: max(1, len(identifiers) // size)][:size]
-
-    def named(self, listing: Path, identifiers: list[str]) -> list[str]:
-        """The identifiers written in a file, checked against the corpus rather than trusted.
-
-        A name that is not in the corpus is an error and not a skip: silently dropping it would shrink the
-        denominator of every statistic below without saying so, and a rate over the studies that happened
-        to match is not a rate over the ones that were asked for.
-        """
-        wanted = [line.strip() for line in listing.read_text().splitlines() if line.strip()]
-        missing = sorted(set(wanted) - set(identifiers))
-        if missing:
-            message = f"{len(missing)} of {len(wanted)} named studies are not in the corpus, first: {missing[0]}"
-            raise ValueError(message)
-        return wanted
 
     def dump(self, destination: Path, decoded: list["StudyOffsets"]) -> None:
         """Write each study's spread beside its identifier, abstentions included as nan rather than dropped.
@@ -214,11 +191,11 @@ class CropAlignment:
 
 def main() -> None:
     """Decode a spread sample of studies uncropped and report how far each slot's knee sits off centre."""
-    parser = argparse.ArgumentParser(description=__doc__)
+    command = cli.Command(__doc__, logger)
+    parser = command.parser
     parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
     parser.add_argument("--slices", type=int, default=SLICES)
     parser.add_argument("--workers", type=int, default=20, help="decode processes")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
     parser.add_argument(
         "--studies",
         type=Path,
@@ -233,28 +210,22 @@ def main() -> None:
         default=None,
         help="write the per-study spread to this .npz, keyed by identifier, alongside the report",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
-    identifiers = split.identifiers()
+    split = CorpusSplit(command.rooted(arguments).raw())
     planes = split.planes()
     alignment = CropAlignment()
-    chosen = (
-        alignment.named(arguments.studies, identifiers)
-        if arguments.studies
-        else alignment.sampled(identifiers, arguments.sample)
-    )
+    sample = split.named(arguments.studies) if arguments.studies else split.sample(arguments.sample)
 
     requests = [
         CoverageRequest(identifier=name, source=str(split.source), planes=planes, slices=arguments.slices)
-        for name in chosen
+        for name in sample.chosen
     ]
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         read = list(pool.map(CropAlignment.measure_study, requests, chunksize=4))
     decoded = [study for study in read if study.offsets]
-    for line in alignment.report([study.offsets for study in decoded], len(chosen), len(identifiers)):
-        logger.info(line)
+    command.report(alignment.report([study.offsets for study in decoded], sample))
+    sample.denominator(len(decoded), "studies").refuse_empty()
     if arguments.dump:
         alignment.dump(arguments.dump, decoded)
         logger.info(f"per-study spread written to {arguments.dump}")

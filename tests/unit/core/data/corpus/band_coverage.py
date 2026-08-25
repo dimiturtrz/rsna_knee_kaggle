@@ -6,6 +6,7 @@ import numpy as np
 
 from core.data.corpus.band_coverage import BandCoverage, BandRequest, SlotShares
 from core.data.corpus.slot_reader import Band
+from core.data.corpus.study_cache import CorpusSample
 
 
 def _ended_stack() -> np.ndarray:
@@ -91,9 +92,9 @@ def test_row():
 def test_report():
     """The denominators lead, and each slot is one row — a share over what decoded is not a corpus share."""
     measured = [("SAG_FLUID_FS", {"discarded": 0.3, "low_end": 0.1, "high_end": 0.2, "span_mm": 100.0})] * 8
-    lines = BandCoverage().report(measured, sampled=5, corpus=4407)
+    lines = BandCoverage().report(measured, CorpusSample(["a", "b", "c", "d", "e"], 4407))
 
-    assert lines[0] == "band 0.2-0.8 over 8 series from 5 studies sampled of 4407 in the corpus"
+    assert lines[0] == "band 0.2-0.8: 8 series measured, from 5 studies sampled of 4407 in the corpus"
     assert sum(line.startswith("SAG_FLUID_FS") for line in lines) == 1
     row = next(line for line in lines if line.startswith("SAG_FLUID_FS"))
     assert "0.3000" in row

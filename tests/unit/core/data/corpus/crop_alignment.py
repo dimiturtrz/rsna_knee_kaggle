@@ -7,6 +7,7 @@ import pytest
 
 from core.data.corpus.crop_alignment import CropAlignment, SlotOffset, StudyOffsets
 from core.data.corpus.crop_coverage import CoverageRequest
+from core.data.corpus.study_cache import CorpusSample
 
 SPACING = 2.0
 BLOCK = 60
@@ -57,15 +58,16 @@ def test_spread():
 def test_report():
     """The denominators lead, because a spread over what decoded is not a spread over the corpus."""
     study = [SlotOffset("sag", 3.0, 4.0), SlotOffset("cor", 0.0, 20.0)]
-    lines = CropAlignment().report([study], sampled=2, corpus=4407)
+    lines = CropAlignment().report([study], CorpusSample(["a", "b"], 4407))
 
-    assert lines[0].startswith("1 studies measured of 2 sampled, from 4407 in the corpus")
+    assert lines[0].startswith("1 studies measured, from 2 studies sampled of 4407 in the corpus")
     assert "2 routed slots, 1 studies" in lines[0]
     assert any(line.startswith("sag") for line in lines)
     assert any(line.startswith("cor") for line in lines)
     assert any("within-study spread" in line and "p50 15.0 mm" in line for line in lines)
 
-    assert not any("within-study spread" in line for line in CropAlignment().report([], sampled=1, corpus=2))
+    empty = CropAlignment().report([], CorpusSample(["a"], 2))
+    assert not any("within-study spread" in line for line in empty)
 
 
 def test_plane_line():
@@ -84,27 +86,6 @@ def test_measure_study(tmp_path: Path):
 
     assert read.offsets == []
     assert read.identifier == "absent", "the failure still names itself, or the join cannot tell which study abstained"
-
-
-def test_sampled():
-    """Every k-th identifier, so the sample is a property of the corpus order and not of a seed."""
-    identifiers = [f"study{index:03d}" for index in range(100)]
-    chosen = CropAlignment().sampled(identifiers, 10)
-
-    assert chosen == identifiers[::10]
-    assert CropAlignment().sampled(identifiers, 10) == chosen, "no seed, so two calls must agree exactly"
-    assert CropAlignment().sampled(identifiers, 300) == identifiers, "asking for more than exist yields all of them"
-
-
-def test_named(tmp_path: Path):
-    """A named list is checked against the corpus, and an unknown name raises instead of shrinking it."""
-    listing = tmp_path / "studies.txt"
-    listing.write_text("b\n\na\n")
-
-    assert CropAlignment().named(listing, ["a", "b", "c"]) == ["b", "a"], "the file's own order is preserved"
-
-    with pytest.raises(ValueError, match="not in the corpus"):
-        CropAlignment().named(listing, ["a"])
 
 
 def test_dump(tmp_path: Path):

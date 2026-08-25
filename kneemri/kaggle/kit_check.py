@@ -26,7 +26,7 @@ import os
 import shutil
 from pathlib import Path
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 from kneemri.kaggle.kernel_closure import KernelClosure
 from kneemri.kaggle.mounted_kit import DATASET, MountedKit
 from kneemri.spawn import Spawn

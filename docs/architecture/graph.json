@@ -111,6 +111,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.crop_alignment",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.crop_alignment",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
     },
@@ -146,14 +152,14 @@
     },
     {
       "kind": "import",
-      "source": "core.data.corpus.crop_alignment",
-      "target": "core.paths",
+      "source": "core.data.corpus.crop_coverage",
+      "target": "core.bootstrap",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "core.data.corpus.crop_coverage",
-      "target": "core.bootstrap",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -184,12 +190,6 @@
       "kind": "import",
       "source": "core.data.corpus.crop_coverage",
       "target": "core.data.corpus.study_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_coverage",
-      "target": "core.paths",
       "weight": 1
     },
     {
@@ -466,6 +466,12 @@
       "kind": "import",
       "source": "core.data.corpus.study_cache",
       "target": "core.data.corpus.window_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.study_cache",
+      "target": "core.denominator",
       "weight": 1
     },
     {
@@ -1371,13 +1377,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "core.paths",
+      "target": "core.denominator",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.denominator",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -1431,13 +1437,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.convergence_check",
-      "target": "core.paths",
+      "target": "core.denominator",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.convergence_check",
-      "target": "kneemri.denominator",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -1455,13 +1461,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.ledger_check",
-      "target": "core.paths",
+      "target": "core.denominator",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.ledger_check",
-      "target": "kneemri.denominator",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -1857,7 +1863,7 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.champion_check",
-      "target": "kneemri.denominator",
+      "target": "core.denominator",
       "weight": 1
     },
     {
@@ -1959,13 +1965,13 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.kit_check",
-      "target": "core.paths",
+      "target": "core.denominator",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.kaggle.kit_check",
-      "target": "kneemri.denominator",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -1995,7 +2001,7 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.mount_check",
-      "target": "kneemri.denominator",
+      "target": "core.denominator",
       "weight": 1
     },
     {
@@ -3067,6 +3073,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.band_coverage.BandCoverage",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.band_coverage.BandCoverage.discarded",
       "target": "core.data.corpus.band_coverage.BandCoverage.profile",
@@ -3145,6 +3157,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.band_coverage.BandCoverage.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.data.corpus.band_coverage.SlotShares",
       "target": "core.data.corpus.band_coverage.BandCoverage",
@@ -3195,13 +3213,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
       "weight": 1
     },
     {
@@ -3319,6 +3337,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.crop_alignment.CropAlignment",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.CropAlignment.dump",
       "target": "core.data.corpus.crop_alignment.CropAlignment.spread",
@@ -3421,6 +3445,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.CropAlignment.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "core.data.corpus.crop_alignment.StudyOffsets",
       "target": "core.data.corpus.crop_alignment.SlotOffset",
@@ -3441,19 +3471,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.named",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.main",
       "target": "core.data.corpus.crop_alignment.CropAlignment.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.sampled",
       "weight": 1
     },
     {
@@ -3471,7 +3489,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
+      "target": "core.data.corpus.study_cache.CorpusSplit.named",
       "weight": 1
     },
     {
@@ -3483,7 +3501,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.paths.DataRoot.from_config",
+      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
       "weight": 1
     },
     {
@@ -3520,6 +3538,12 @@
       "kind": "references",
       "source": "core.data.corpus.crop_coverage.CropCoverage",
       "target": "core.data.corpus.crop_coverage.CoverageRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.crop_coverage.CropCoverage",
+      "target": "core.data.corpus.study_cache.CorpusSample",
       "weight": 1
     },
     {
@@ -3584,6 +3608,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.crop_coverage.CropCoverage.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.crop_coverage.CropCoverage.series",
       "target": "core.data.corpus.crop_coverage.CropCoverage.tissue",
       "weight": 1
@@ -3639,19 +3669,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.main",
       "target": "core.data.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.paths.DataRoot.from_config",
+      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
       "weight": 1
     },
     {
@@ -4597,9 +4621,51 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.study_cache.CorpusSample",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.study_cache.CorpusSample.denominator",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.study_cache.CorpusSplit",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.study_cache.CorpusSplit.named",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.CorpusSplit.named",
+      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.study_cache.CorpusSplit.planes",
       "target": "core.data.corpus.study_cache.StudyCache.planes_of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.study_cache.CorpusSplit.sample",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.CorpusSplit.sample",
+      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
       "weight": 1
     },
     {
@@ -8565,13 +8631,13 @@
     {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.main",
-      "target": "kneemri.denominator.Denominator",
+      "target": "core.denominator.Denominator",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "target": "core.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -8935,21 +9001,21 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.convergence_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.convergence_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.convergence_check.main",
       "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.experiments.convergence_check.main",
-      "target": "kneemri.denominator.Denominator",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.convergence_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -9019,21 +9085,21 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.ledger_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.ledger_check.main",
       "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.experiments.ledger_check.main",
-      "target": "kneemri.denominator.Denominator",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.ledger_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -10467,13 +10533,13 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.champion_check.main",
-      "target": "kneemri.denominator.Denominator",
+      "target": "core.denominator.Denominator",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.champion_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "target": "core.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -10849,21 +10915,21 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.kit_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kit_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.kit_check.main",
       "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.kit_check.main",
-      "target": "kneemri.denominator.Denominator",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.kit_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -10983,13 +11049,13 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.mount_check.main",
-      "target": "kneemri.denominator.Denominator",
+      "target": "core.denominator.Denominator",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.main",
-      "target": "kneemri.denominator.Denominator.refuse_empty",
+      "target": "core.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -12655,15 +12721,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.DecorrelatedObjective",
-      "target": "kneemri.training.objective.LabelStructure",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.training.objective.DecorrelatedObjective",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.DecorrelatedObjective",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12685,15 +12751,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.DistilledObjective",
-      "target": "kneemri.training.objective.LabelStructure",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.training.objective.DistilledObjective",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.DistilledObjective",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12781,15 +12847,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.MarginObjective",
-      "target": "kneemri.training.objective.LabelStructure",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.training.objective.MarginObjective",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.MarginObjective",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12807,7 +12873,7 @@
     {
       "kind": "references",
       "source": "kneemri.training.objective.Objective",
-      "target": "kneemri.training.objective.LabelStructure",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12819,7 +12885,7 @@
     {
       "kind": "construct",
       "source": "kneemri.training.objective.Objective.__init__",
-      "target": "kneemri.training.objective.LabelStructure",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12829,15 +12895,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.objective.LabelStructure",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.training.objective.RankedObjective",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.RankedObjective",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -12850,6 +12916,12 @@
       "kind": "calls",
       "source": "kneemri.training.objective.RankedObjective.ranking",
       "target": "kneemri.training.objective.RankedObjective.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.objective.Shaping",
+      "target": "kneemri.training.objective.LabelStructure",
       "weight": 1
     },
     {
@@ -13135,15 +13207,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.objective.LabelStructure",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.training.remembered_ranking.RememberedRanking",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.remembered_ranking.RememberedRanking",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -13366,6 +13438,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -13935,7 +14013,7 @@
   ],
   "nodes": [
     {
-      "descendants": 39,
+      "descendants": 40,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -14208,6 +14286,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.denominator",
+      "label": "denominator",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.findings",
       "label": "findings",
       "level": "module",
@@ -14255,7 +14341,7 @@
       "role": null
     },
     {
-      "descendants": 123,
+      "descendants": 122,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -14266,14 +14352,6 @@
       "descendants": 0,
       "id": "kneemri.commands",
       "label": "commands",
-      "level": "module",
-      "parent": "kneemri",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.denominator",
-      "label": "denominator",
       "level": "module",
       "parent": "kneemri",
       "role": null
@@ -15632,6 +15710,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.study_cache.CorpusSample",
+      "label": "CorpusSample",
+      "level": "class",
+      "parent": "core.data.corpus.study_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.study_cache.CorpusSplit",
       "label": "CorpusSplit",
       "level": "class",
@@ -15728,6 +15814,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.denominator.Denominator",
+      "label": "Denominator",
+      "level": "class",
+      "parent": "core.denominator",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.mounts.Mounts",
       "label": "Mounts",
       "level": "class",
@@ -15797,14 +15891,6 @@
       "level": "class",
       "parent": "kneemri.commands",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.denominator.Denominator",
-      "label": "Denominator",
-      "level": "class",
-      "parent": "kneemri.denominator",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -17288,6 +17374,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.Shaping",
+      "label": "Shaping",
+      "level": "class",
+      "parent": "kneemri.training.objective",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions",
       "label": "TrainingOptions",
       "level": "class",
@@ -17784,14 +17878,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.named",
-      "label": "named",
-      "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment.offset",
       "label": "offset",
       "level": "method",
@@ -17810,14 +17896,6 @@
       "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment.report",
       "label": "report",
-      "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.sampled",
-      "label": "sampled",
       "level": "method",
       "parent": "core.data.corpus.crop_alignment.CropAlignment",
       "role": null
@@ -18728,6 +18806,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.study_cache.CorpusSample.denominator",
+      "label": "denominator",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.CorpusSample",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study_cache.CorpusSample.line",
+      "label": "line",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.CorpusSample",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.study_cache.CorpusSplit.identifiers",
       "label": "identifiers",
       "level": "method",
@@ -18736,8 +18830,24 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.study_cache.CorpusSplit.named",
+      "label": "named",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.CorpusSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.study_cache.CorpusSplit.planes",
       "label": "planes",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.CorpusSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study_cache.CorpusSplit.sample",
+      "label": "sample",
       "level": "method",
       "parent": "core.data.corpus.study_cache.CorpusSplit",
       "role": null
@@ -19288,6 +19398,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.denominator.Denominator.refuse_empty",
+      "label": "refuse_empty",
+      "level": "method",
+      "parent": "core.denominator.Denominator",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.mounts.Mounts.__init__",
       "label": "__init__",
       "level": "method",
@@ -19540,14 +19658,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.commands",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.denominator.Denominator.refuse_empty",
-      "label": "refuse_empty",
-      "level": "method",
-      "parent": "kneemri.denominator.Denominator",
       "role": null
     },
     {

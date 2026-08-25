@@ -42,7 +42,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-from kneemri.denominator import Denominator
+from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 

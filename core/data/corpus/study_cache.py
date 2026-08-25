@@ -31,6 +31,7 @@ from core.data.corpus.slot_reader import IMAGE_SIZE, Reading
 from core.data.corpus.slots import SCHEMES, Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
+from core.denominator import Denominator
 
 logger = logging.getLogger(__name__)
 
@@ -495,3 +496,61 @@ class CorpusSplit:
     def planes(self) -> dict[str, str]:
         """Series UID to anatomical plane, which is what the slot predicate routes on."""
         return StudyCache.planes_of(self.series_table)
+
+    def sample(self, size: int) -> "CorpusSample":
+        """Every k-th study, so the draw is a property of the corpus ORDER rather than of a seed.
+
+        Repeating a measurement then cannot quietly answer with different studies, and two tools asking
+        for the same size are asking about the same studies rather than about two draws that match in
+        count alone.
+        """
+        identifiers = self.identifiers()
+        return CorpusSample(identifiers[:: max(1, len(identifiers) // size)][:size], len(identifiers))
+
+    def named(self, listing: Path) -> "CorpusSample":
+        """The studies written in a file, checked against the corpus rather than trusted.
+
+        A name that is not in the corpus is an error and not a skip: silently dropping it would shrink the
+        denominator of every statistic downstream without saying so, and a rate over the studies that
+        happened to match is not a rate over the ones that were asked for.
+        """
+        identifiers = self.identifiers()
+        wanted = [line.strip() for line in listing.read_text().splitlines() if line.strip()]
+        missing = sorted(set(wanted) - set(identifiers))
+        if missing:
+            message = f"{len(missing)} of {len(wanted)} named studies are not in the corpus, first: {missing[0]}"
+            raise ValueError(message)
+        return CorpusSample(wanted, len(identifiers))
+
+
+@dataclass(frozen=True)
+class CorpusSample:
+    """The studies a corpus tool drew, and the two denominators any share of them must be read against.
+
+    It owns the DRAW as well as the sentence that states it, because they are one fact. Three audits
+    (`band_coverage`, `crop_coverage`, `crop_alignment`) each sliced their own every-k-th sample and then
+    wrote their own wording of "from N sampled of M in the corpus" — and a share over the series that
+    happened to decode is not a share over the corpus, which this project has printed as the other three
+    times in a single session. Owning only the sentence would leave the numbers inside it free to come
+    from somewhere the sentence never saw.
+    """
+
+    chosen: list[str]
+    corpus: int
+
+    def line(self, measured: int, unit: str) -> str:
+        """The denominator sentence a coverage report opens with, in ONE wording.
+
+        `unit` because the three tools measure different things — series, studies, routed slots — and the
+        count is the only part of the sentence that is theirs.
+        """
+        return f"{measured} {unit} measured, from {len(self.chosen)} studies sampled of {self.corpus} in the corpus"
+
+    def denominator(self, measured: int, unit: str) -> Denominator:
+        """The refusal owed when a tool decoded NOTHING.
+
+        Every one of these audits drops a study that will not decode, which is right — an unreadable
+        series is silent rather than evidence. But a wholesale decode failure then prints a header, no
+        rows, and exits 0, which is the exact shape `Denominator` was written for.
+        """
+        return Denominator(measured, f"{unit} decoded from {len(self.chosen)} sampled studies")
