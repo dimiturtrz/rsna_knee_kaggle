@@ -11,7 +11,7 @@
   "dataset_sources": [
     "dimiturnt/kneemri-kit",
     "dimiturnt/kneemri-members",
-    "dimiturnt/dinov3-hf"
+    "dimiturnt/dinov3-hf", "dimiturnt/vjepa2-hf"
   ],
   "competition_sources": [
     "rsna-knee-abnormality-detection"

@@ -240,7 +240,27 @@ focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 #
 # Reversible, and the way back is written down: declare dimiturnt/vjepa2-hf/vjepa2-vitl on the six
 # kernels above, then restore this line. Not done today because nothing measured wants the member.
-# vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project has ever produced
+#
+# REMOUNTED 2026-08-25 01:14Z, by walking exactly that written way back. The seven kernels
+# (efficient, loadcheck, solo, trained, trio, views, vote — seven, not the six the note counted) now
+# declare `dimiturnt/vjepa2-hf`, so the price the unmount was paid to avoid has been paid once, in a
+# mechanical edit, and does not recur. What changed is not the member's number, which is unchanged at
+# 0.8337 and +0.0002 at seat, but WHAT THE OFFLINE RULER IS WORTH at the board level we now occupy.
+# The unmount's gate was `augseat >= 0.940 licenses mounting on distance`; augseat read 0.936, so
+# neither branch fired and the question was left OPEN rather than closed. Since then the board has
+# said something the offline ruler cannot: `peak8`, the best offline number this project owns (0.8731),
+# read 0.932 — BELOW `allfit`/`lastseat` 0.937 at lower offline — so at the top of our range the greedy
+# ruler that priced this member's seat at +0.0002 is measured ANTI-CORRELATED with the board. A seat
+# value of +0.0002 from a saturated ruler is not evidence of a tie; it is an absence of evidence.
+#
+# And this member is the only line in this file that varies the one thing every closure note holds
+# fixed. `2026-08-24_architecture_diversity_is_closed...` closes the encoder axis on the mechanism that
+# slice sampling, the 2D-SLICE-THEN-POOL ARCHITECTURE, the targets, the objective and the head are all
+# held constant, so a trunk swap changes how features are spelled and not what is optimised. V-JEPA2 is
+# the one trunk in the inventory that breaks the second of those: it tokenises two slices per token and
+# is handed the stack, where every other member reads slices and reconstructs depth afterwards. Its
+# nearest-neighbour agreement is 0.8210 against a seated band of 0.8801-0.9143.
+vjepa_warm_s2026.pt         # 0.8337 — the most DISTANT member this project has ever produced
 # Added 2026-08-24, and it is the first member here whose encoder is not a 2D image trunk at all:
 # V-JEPA2-large, a tubelet transformer that tokenises TWO slices per token, warm-started from our own
 # 2D weights. Every other line in this file reads the volume one slice at a time and reconstructs depth
