@@ -240,6 +240,16 @@ interchangeable. Running the second one requires the arm to be fitted with `--ho
 `holdannot` has now shown costs −0.0015 — nothing. **The honest ruler is available for the price of a
 flag, and it has not been used.**
 
+**The retro-fit route was considered and is not worth building.** Every existing member holds out fold 0
+entirely, so the ~12 annotated studies that land in fold 0 were never trained on — cells included — and
+reading any member over just those is legal without a refit. It would give every arm already in the ledger
+a reading on the objective ruler, retroactively, for no card. It is still the wrong instrument: 12 studies
+against twelve labels puts the macro standard error an order of magnitude above the 0.0062 floor, so it
+cannot resolve any delta this project argues about. `annotated_readings` refuses non-`--hold-annotations`
+checkpoints outright and should keep refusing them; the blunt refusal is right because the subset it would
+have to carve out is too small to mean anything. **Recorded here so it is not built later** — the reason it
+fails is arithmetic, not effort, and the arithmetic will not change.
+
 ## What this does NOT say
 
 It does not say our model is good. 0.8932 against a radiologist on 58 studies is not the board and not the
