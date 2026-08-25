@@ -3820,3 +3820,38 @@ supervision arriving, not encoder transfer, and it must not be counted toward th
 ACL column is expert double-blind IMAGE reads, so of every supervision source here exactly two are
 image-read rather than text-mined (the 58, and Rijeka), and the axis that has ever moved our deficit
 findings is the one whose labels are the board's KIND. Convergent with `knee-ombx`, not new evidence for it.
+
+### `merged_blend` — the two corpus mechanisms composed, and the SPLIT is the reading (2026-08-25, knee-twtr)
+
+Three flags: `--scheme merged`, `--labels merged_blend_v1.csv`, `--eval-labels report_labels_v2.csv`. The
+third is not optional — scored unpinned it would measure disagreement with v2 and report it as quality.
+Control is `lr4e-5_ws_s2026` (0.8525), NOT `native224`. `convergence_check` EXIT 0; peak at epoch 7 (0.8589)
+with e8–e10 flat at 0.8584, so the budget bound nothing.
+
+```
+MCL +0.0345*  Baker's +0.0139*  Lateral Meniscus +0.0134  Fracture +0.0128  Medial Meniscus -0.0095
+ACL +0.0088  MEAN +0.0063  Contusion +0.0056  Synovitis -0.0052  Lateral OA +0.0051  Medial OA -0.0033
+Effusion -0.0003  PF OA +0.0001        paired half-widths up to +/-0.0348
+```
+
+**The mean is the weak reading and the arm said so in advance.** +0.0063 clears its own pre-registered
+0.0062 gate by 0.0001, which is not clearance in any meaningful sense, and it is an order of magnitude
+under the house bar. **Directional.** Only MCL and Baker's are starred.
+
+**Both splits, because they answer different questions.** The PUBLISHED partition is what the arm
+pre-registered against and is reported so the pre-registration is honoured; OURS is what the split MEANS
+(`holdannot` measured it on cells no member trained on).
+
+| partition | deficit / ours-to-fix | surplus / the reader's |
+| --- | --- | --- |
+| published six-and-six | **+0.0087** | **+0.0039** |
+| ours, three against nine | **+0.0160** | **+0.0031** |
+
+Both halves rose on the published cut, which is the additive-composition outcome the arm named. On our
+own cut the separation is **5x**, and the largest mover — **MCL +0.0345\*** — is our single weakest finding
+(−0.0465 model−labels). That is the mechanism landing where it was predicted to land, at a size the mean
+hides.
+
+**Stated limit:** `hold_annotations: False`, so this member cannot be read on the objective ruler. Every
+number above is the PROXY, and by knee-9198's own argument the proxy under-pays a corpus arm that moves
+the model toward annotation truth. The split is the reading; the mean is the floor.
