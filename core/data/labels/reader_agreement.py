@@ -96,7 +96,9 @@ class ReaderAgreement:
         Sorted by how LOPSIDED a finding is rather than by its error count, because a finding that only
         over-calls and one that only under-calls need different work, and a ranking by volume hides
         exactly that. Synovitis is the reason: it is the sole inversion, missing 14 and over-calling 3,
-        and it is also the finding whose labels predict the radiologist worst (0.6953, `supervision_gap`).
+        and it is also the finding whose labels predict the radiologist worst
+        (`kneemri.evaluation.supervision_gap`, which read it at 0.6870 against report_labels_v2 on
+        2026-08-25; quote that tool rather than this line, which has no table beside its number).
         """
         wrong = self.errors(cells)
         lines = [f"{len(wrong)} wrong of {len(cells)} cells over {cells['study'].nunique()} studies"]

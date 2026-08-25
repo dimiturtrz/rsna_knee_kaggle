@@ -1,9 +1,9 @@
 """Combine several report readers into one label table: `python -m core.data.labels.table_blend`.
 
 WHY THIS EXISTS, AND IT IS NOT THE REASON IT LOOKS LIKE. Scored against the 58 radiologist-annotated
-studies by `supervision_gap`, our table reads 0.8658 and the best public LLM table reads 0.8927, which
-invites the conclusion that we read reports worse than the forum does. We do not. Quantise that table
-onto our own five levels and it falls to 0.8445 — BELOW ours. At equal resolution our reader wins by
+studies by `kneemri.evaluation.supervision_gap`, our table reads 0.8658 and the best public LLM table
+reads 0.8927, which invites the conclusion that we read reports worse than the forum does. We do not.
+Quantise that table onto our own five levels and it falls to 0.8445 — BELOW ours. At equal resolution our reader wins by
 +0.021.
 
 THE GAP IS TIE MASS, NOT READER QUALITY. `Supervision.MEASURED_AGREEMENT` emits five levels, so 38.5%

@@ -1,8 +1,8 @@
 """Does the 58-study ruler obey its own severity rule? `python -m core.data.labels.severity_boundary`.
 
 EVERY LABEL-COLUMN NUMBER THIS PROJECT HOLDS IS SCORED AGAINST THOSE 58 ANNOTATIONS.
-`supervision_gap` prices each finding twice against them — labels 0.8639 against model 0.8391 in
-aggregate, Effusion 0.8137 against 0.9453 — and `reader_agreement` accepts or rejects a replacement
+`kneemri.evaluation.supervision_gap` prices each finding twice against them — labels 0.8658 against
+model 0.8392 in aggregate, Effusion 0.8149 against 0.9453 — and `reader_agreement` accepts or rejects a replacement
 reader by them. If the annotation itself does not follow the rule the competition states, then part of
 the reader's measured error is not error, and no better reader recovers it.
 
