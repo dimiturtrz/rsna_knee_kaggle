@@ -3613,3 +3613,32 @@ five-level BCE target carries less ordering information into the gradient than a
 that settles it trains the canonical recipe on the blend and **pins `--eval-labels` to
 `report_labels_v2`**, because our fold-0 holdout is scored against v2 itself and an unpinned ruler
 measures disagreement with v2, not supervision quality.
+
+## 2026-08-25 — native224: the resolution axis is flat, and that is a THROUGHPUT result
+
+`native224` = the control's recipe with one flag moved, `--image-size 224`.
+
+| arm | best holdout | s/epoch | reserved |
+|---|---|---|---|
+| `lr4e-5_ws` (control, 336 px) | 0.8525 | ~290 | 17997 MiB |
+| `native224` | **0.8502** | **94** | **8124 MiB** |
+
+−0.0023 against a 0.0062 floor. Flat, and `convergence_check` does not flag it — best epoch 7,
+epochs 8–11 declining, so this is the arm's real number and not a floor.
+
+**Read it as a price, not as a score.** DINOv2-small was pretrained at 224 and we have been paying
+2.25× the patches to interpolate its position embeddings to 336 for no measurable accuracy. What the
+flat result buys is card-time: a twelve-epoch arm costs 19 minutes at 224 instead of 60. Every matched
+comparison from here can run at 224 against `native224` = 0.8502 as its control, and three arms fit in
+the wall-clock one used to take.
+
+**What it does NOT say.** It does not say resolution never matters — `band_dense` (0.8578) reads 20
+slices at a wider band and was deliberately excluded as the control precisely because it would confound
+geometry with resolution. It says that at THIS geometry (12 slices, 0.20–0.80 band, whole-stack, max
+pooling) the extra pixels are not carrying anything. A finding that needs fine texture — cartilage
+thinning, a small meniscal tear — could still want them, and no arm here has isolated one.
+
+**As a member**: 0.8502 is a mid-pool solo score, and the input tensor differs from every seated member
+(different pixel grid, not merely a different band), which is the PIXEL-distance axis `through_dense`
+was bought on. Unpriced — 0 of votefit's 6 members carry a holdout record, so seat value is not
+computable against the champion.
