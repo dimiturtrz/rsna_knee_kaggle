@@ -193,6 +193,50 @@ def test_activation_units():
     )
 
 
+def test_per_block():
+    """One block's share of a stage — the currency a SUFFIX can be counted in, which a total cannot."""
+    assert Stage(3, 4, 128).per_block(352) == 88 * 88 * 128, "the block count is the only thing divided out"
+    assert Stage(3, 4, 128).units(352) == 3 * Stage(3, 4, 128).per_block(352), "the total is still the sum of them"
+
+
+def test_blocks():
+    """The trunk as a run-ordered block list, which is the only place its REAL depth is stated.
+
+    `cnxbase` declares `depth` 12 — the field's default, meaningless once `stages` is given — and runs
+    36. A caller clamping `unfreeze_last` against `depth` therefore opened a third of the trunk and
+    priced it as all of it (knee-rwjs).
+    """
+    convnext = ENCODERS[CONVNEXT_BASE]
+    assert len(convnext.blocks) == 36, "three, three, twenty-seven, three"
+    assert len(convnext.blocks) != convnext.depth, "and `depth` is not that number, which is the trap"
+    assert convnext.blocks[-1].width == 1024, "run order, so the last block is the narrowest grid and widest channel"
+    assert convnext.blocks[0].width == 128
+
+    small = ENCODERS[SMALL]
+    assert len(small.blocks) == small.depth, "a trunk that states no stages is one uniform stage deep"
+
+
+def test_retained_units():
+    """What the OPEN blocks hold — a suffix of the block list, not a fraction of the trunk's total.
+
+    The cost model multiplied the whole-trunk sum by a scalar in the block COUNT until 2026-08-25,
+    which prices the open suffix at the trunk's AVERAGE block. On a 12-deep ViT that is exact; on
+    `cnxbase` the last six blocks are 9.7% of the bill where six of twelve uniform would be 50%.
+    """
+    small = ENCODERS[SMALL]
+    assert small.retained_units(336, 12) == small.activation_units(336), "all twelve open is the whole trunk"
+    assert small.retained_units(336, 6) == small.activation_units(336) / 2, "and a ViT's blocks are equal"
+    assert small.retained_units(336, 0) == 0.0, "nothing open retains nothing"
+
+    convnext = ENCODERS[CONVNEXT_BASE]
+    assert convnext.retained_units(352, 6) < 0.1 * convnext.activation_units(352), (
+        "the last six blocks of a downsampling trunk are a tenth of its bill, not half"
+    )
+    assert convnext.retained_units(352, 1000) == convnext.activation_units(352), (
+        "the clamp is HERE, against 36 real blocks — a caller clamping against `depth` would open 12"
+    )
+
+
 def test_require_tiling():
     """A read size the patch grid cannot tile is refused, with the sizes that would work.
 

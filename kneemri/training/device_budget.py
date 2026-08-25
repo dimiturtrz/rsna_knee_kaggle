@@ -172,6 +172,17 @@ a pure ratio scales four-open down to two thirds where the measurement says nine
 on the `unfreeze_last` axis BEFORE 2026-08-25 were priced by the broken term; the ledger's numbers are
 what the runs measured, but any cap quoted against them is not."""
 
+RETAINED_WEIGHT = TRAINABLE_PER_BLOCK * FITTED_DEPTH
+"""What ONE unit of RETAINED activation costs, in the same units as `TRAINABLE_FLOOR`.
+
+The slope above was fitted in blocks, on a trunk where opening `u` of 12 uniform blocks retains exactly
+`u / 12` of the trunk's activation units. So `TRAINABLE_PER_BLOCK` per block IS `TRAINABLE_PER_BLOCK *
+FITTED_DEPTH` per unit — the same measurement, said in the currency a non-uniform trunk can also speak.
+No new fit and no new number: on any 12-deep ViT the two forms are algebraically identical."""
+
+FITTED_RETAINED = FITTED_UNITS * FITTED_TRAINABLE / FITTED_DEPTH
+"""The retained units of the fitted point — six of twelve uniform blocks, so half the trunk's bill."""
+
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
 and the allocator's own blocks, none of which the slice loop multiplies.
@@ -249,12 +260,19 @@ class DeviceBudget:
     because batch was invisible here — so the only lever a caller has against an overstated ask moved
     nothing, and the larger-encoder axis was unreachable rather than expensive."""
 
-    trainable_blocks: int = FITTED_TRAINABLE
-    """How many encoder blocks carry a gradient — `unfreeze_last`, clamped to the trunk's own depth.
+    retained: float = FITTED_RETAINED
+    """The activation units of the blocks supervision OPENED — `Encoder.retained_units`.
 
     It is the axis `units` cannot express. `units` is a property of the TRUNK at a size; this is a
     property of what the RECIPE opened, and the two move independently — a 36-block ConvNeXt with six
-    blocks open holds less than a 12-block ViT with all twelve open. See `FITTED_TRAINABLE`."""
+    blocks open holds less than a 12-block ViT with all twelve open.
+
+    IT IS UNITS RATHER THAN A BLOCK COUNT, and it was a block count until 2026-08-25 (knee-rwjs). A
+    count only prices the open suffix correctly when every block costs the same, which is true of a ViT
+    and of nothing else here: `cnxbase`'s last six blocks are 9.7% of its bill where six uniform blocks
+    of thirty-six would be 17% and six of twelve would be 50%. Asking the encoder for the suffix's own
+    units also moves the CLAMP to the only place that knows the real block count — `depth` is 12 on a
+    trunk that runs 36."""
 
     params_m: float = FITTED_PARAMS_M
     """The trunk's parameter count in millions — what the OPTIMISER's share of the bill is a function of.
@@ -286,9 +304,9 @@ class DeviceBudget:
         """
         if not self.slices:
             return 0.0
-        opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * self.trainable_blocks
-        fitted_opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * FITTED_TRAINABLE
-        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH) * (opened / fitted_opened)
+        activation = TRAINABLE_FLOOR * self.units + RETAINED_WEIGHT * self.retained
+        fitted = TRAINABLE_FLOOR * FITTED_UNITS + RETAINED_WEIGHT * FITTED_RETAINED
+        step = (activation / fitted) * (self.batch / FITTED_BATCH)
         optimiser = RESIDENT_GB + OPTIMISER_GB_PER_MPARAM * max(0.0, self.params_m - FITTED_PARAMS_M)
         return GB_PER_SLICE * (self.slices + 1) * step + optimiser
 

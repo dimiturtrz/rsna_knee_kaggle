@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from kneemri.device import VisibleCards
-from kneemri.models.backbone import CONVNEXT_BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
+from kneemri.models.backbone import CONVNEXT_BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL, Encoder
 from kneemri.training.device_budget import (
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
@@ -18,16 +18,32 @@ from kneemri.training.device_budget import (
     FITTED_BATCH,
     FITTED_DEPTH,
     FITTED_PARAMS_M,
+    FITTED_RETAINED,
     FITTED_TRAINABLE,
     FITTED_UNITS,
     GB_PER_SLICE,
     OPTIMISER_GB_PER_MPARAM,
     RESIDENT_GB,
+    RETAINED_WEIGHT,
     SMALLEST_RUN_GB,
     TRAINABLE_FLOOR,
-    TRAINABLE_PER_BLOCK,
     DeviceBudget,
 )
+
+
+def _priced(encoder: Encoder, size: int, *, slices: int = 12, batch: int = FITTED_BATCH) -> DeviceBudget:
+    """A budget for a trunk at a size with the FITTED number of blocks open.
+
+    Both activation terms come from the same encoder, because that is what `RunSetup.budget` does — a
+    caller that scales the trunk and leaves `retained` at the fitted point is describing a recipe
+    nobody runs.
+    """
+    return DeviceBudget(
+        slices=slices,
+        units=encoder.activation_units(size),
+        batch=batch,
+        retained=encoder.retained_units(size, FITTED_TRAINABLE),
+    )
 
 
 def test_select():
@@ -184,10 +200,8 @@ def test_needed():
 
     fitted = ENCODERS[SMALL]
     at_336 = DeviceBudget(slices=12).needed()
-    assert DeviceBudget(slices=12, units=fitted.activation_units(336)).needed() == at_336, (
-        "the fit's own encoder at the fit's own size is the default"
-    )
-    at_420 = DeviceBudget(slices=12, units=fitted.activation_units(420)).needed()
+    assert _priced(fitted, 336).needed() == at_336, "the fit's own encoder at the fit's own size is the default"
+    at_420 = _priced(fitted, 420).needed()
     assert at_420 == pytest.approx(at_336 * (420 / 336) ** 2, abs=0.3), (
         "a slice is a patch grid, so it costs the square of the side"
     )
@@ -204,20 +218,22 @@ def test_needed_reads_the_encoder():
     """
     v2 = ENCODERS[SMALL]
     for size in (224, 336, 392, 420):
-        derived = DeviceBudget(slices=12, units=v2.activation_units(size)).needed()
-        assert derived == pytest.approx(DeviceBudget(slices=12, units=FITTED_UNITS * (size / 336) ** 2).needed()), (
+        scale = (size / 336) ** 2
+        legacy = DeviceBudget(slices=12, units=FITTED_UNITS * scale, retained=FITTED_RETAINED * scale).needed()
+        assert _priced(v2, size).needed() == pytest.approx(legacy), (
             "naming small's own structure cannot move a number the arms were fitted with"
         )
 
     small, base = ENCODERS[V3_SMALL], ENCODERS[V3_BASE]
-    narrow = DeviceBudget(slices=20, units=small.activation_units(224)).needed()
-    wide = DeviceBudget(slices=20, units=base.activation_units(224)).needed()
+    narrow = _priced(small, 224, slices=20).needed()
+    wide = _priced(base, 224, slices=20).needed()
     assert wide == pytest.approx(2 * (narrow - RESIDENT_GB) + RESIDENT_GB, abs=0.02), (
         "activation bytes go linearly with width, so 768 costs twice 384 above the resident intercept"
     )
     assert wide > 12.68, "the derivation must clear the cap that OOM'd, or the fix forbids the same recipe"
 
-    patch14 = DeviceBudget(slices=20, units=FITTED_DEPTH * (224 / 14) ** 2 * base.dim).needed()
+    pixel_only = FITTED_DEPTH * (224 / 14) ** 2 * base.dim
+    patch14 = DeviceBudget(slices=20, units=pixel_only, retained=pixel_only / 2).needed()
     assert patch14 > wide, "224 px is 256 tokens at patch 14 and 196 at 16, so a pixel-only cap overstates v3"
 
 
@@ -236,7 +252,7 @@ def test_needed_reads_a_trunk_that_is_not_a_transformer():
     )
 
     measured_peak_gb = 10.49
-    derived = DeviceBudget(slices=20, units=convnext.activation_units(352), batch=2).needed()
+    derived = _priced(convnext, 352, slices=20, batch=2).needed()
     assert derived > measured_peak_gb, "a cap under the measured demand is the one failure this class exists to stop"
     assert DeviceBudget(slices=20, units=output_grid_only, batch=2).needed() < measured_peak_gb, (
         "and the old form is BELOW it, which is why the smoke OOM'd — the test would pass on the bug otherwise"
@@ -305,26 +321,40 @@ def test_needed_reads_how_many_blocks_supervision_opened():
 
     The term is AFFINE, not a ratio (knee-pf8b). A pure ratio priced a frozen block at zero, doubled the
     ask at twelve open where the measurement doubles it by 1.27, and refused `unfreeze4_s2026` at 11.79
-    GB against its own measured 14.79.
+    GB against its own measured 14.79. It is carried in UNITS rather than in blocks (knee-rwjs), which
+    on this uniform-block trunk is the same arithmetic said differently.
     """
     fitted = DeviceBudget(slices=20).needed()
-    assert DeviceBudget(slices=20, trainable_blocks=FITTED_TRAINABLE).needed() == fitted, (
+    assert DeviceBudget(slices=20, retained=FITTED_RETAINED).needed() == fitted, (
         "the default `unfreeze_last` is the fitted point, so every arm in the ledger is untouched"
     )
 
-    opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * 2 * FITTED_TRAINABLE
-    ratio = opened / (TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * FITTED_TRAINABLE)
-    thawed = DeviceBudget(slices=20, trainable_blocks=2 * FITTED_TRAINABLE).needed()
+    opened = TRAINABLE_FLOOR * FITTED_UNITS + RETAINED_WEIGHT * FITTED_UNITS
+    ratio = opened / (TRAINABLE_FLOOR * FITTED_UNITS + RETAINED_WEIGHT * FITTED_RETAINED)
+    thawed = DeviceBudget(slices=20, retained=FITTED_UNITS).needed()
     assert thawed == pytest.approx(ratio * (fitted - RESIDENT_GB) + RESIDENT_GB, abs=1e-6), (
         "twelve open costs 1.27x six open, not 2x — `encoder_adapt_thawed` measured 6.13 GB against 9.12 derived"
     )
 
-    frozen = DeviceBudget(slices=20, trainable_blocks=0).needed()
+    frozen = DeviceBudget(slices=20, retained=0.0).needed()
     assert frozen > 0.7 * fitted, (
         "a trunk with NOTHING open still runs every forward and still holds what the blocks above it "
         "read — only gradients and Adam state go away, so the cost of opening blocks has a floor"
     )
 
-    assert DeviceBudget(slices=20, batch=FITTED_BATCH // 3, trainable_blocks=2 * FITTED_TRAINABLE).needed() < fitted, (
+    assert DeviceBudget(slices=20, batch=FITTED_BATCH // 3, retained=FITTED_UNITS).needed() < fitted, (
         "and the batch stays the lever against it — thirding the studies must outweigh doubling the depth"
     )
+
+
+def test_needed_prices_the_open_suffix_at_its_own_width_not_the_trunk_average():
+    """A block count cannot price a trunk whose blocks differ, and two of ours do (knee-rwjs).
+
+    Two trunks with the SAME total activation bill and the same number of blocks open, differing only
+    in whether the open ones are the trunk's cheap end or its average, must not derive the same cap.
+    Under the block-count form they did — the scalar multiplied a whole-trunk sum, so where the open
+    blocks sat in the trunk was invisible. `cnxbase` opens its last six into 9.7% of its bill.
+    """
+    average = DeviceBudget(slices=20, units=4 * FITTED_UNITS, retained=4 * FITTED_RETAINED).needed()
+    cheap_end = DeviceBudget(slices=20, units=4 * FITTED_UNITS, retained=0.1 * FITTED_RETAINED).needed()
+    assert cheap_end < average, "opening the narrow end of a hierarchical trunk retains less, and must cost less"

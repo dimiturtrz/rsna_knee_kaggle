@@ -37,10 +37,10 @@ from kneemri.experiments.arm_header import ARMS, ArmHeader
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
-from kneemri.models.backbone import ENCODERS
 from kneemri.spawn import Spawn
-from kneemri.training.device_budget import GB_PER_SLICE, DeviceBudget
+from kneemri.training.device_budget import GB_PER_SLICE
 from kneemri.training.options import TrainingOptions
+from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
 
@@ -563,13 +563,7 @@ class ArmCheck:
             options = self._parsed(flags)[0]
             if options is None or not options.vram_gb:
                 continue
-            encoder = ENCODERS[options.variant]
-            needed = DeviceBudget(
-                slices=options.slices,
-                units=encoder.activation_units(options.train_size or options.image_size),
-                batch=options.batch,
-                params_m=encoder.params_m,
-            ).needed()
+            needed = RunSetup(options).budget().needed()
             if options.vram_gb > needed + GB_PER_SLICE:
                 asked[name] = round(options.vram_gb - needed, 2)
         return asked

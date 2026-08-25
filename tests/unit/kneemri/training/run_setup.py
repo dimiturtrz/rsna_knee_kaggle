@@ -312,7 +312,7 @@ def test_budget():
     budget = _setup(slices=20, batch=2, unfreeze_last=12).budget()
     assert budget.slices == 20
     assert budget.batch == 2
-    assert budget.trainable_blocks == min(12, encoder.depth), "clamped to the trunk the run actually names"
+    assert budget.retained == encoder.retained_units(336, 12), "the units of the blocks the run opened"
     assert budget.params_m == encoder.params_m
 
     assert _setup(slices=20, train_size=448).budget().units == encoder.activation_units(448), (
@@ -321,6 +321,7 @@ def test_budget():
     assert _setup(slices=20, unfreeze_last=12).budget().needed() > _setup(slices=20).budget().needed(), (
         "opening twice the blocks retains twice the stack, which is the term that refused the arm"
     )
-    assert _setup(slices=20, unfreeze_last=0, lora_rank=8).budget().trainable_blocks == encoder.depth, (
-        "under LoRA the base weights are frozen and every block still carries a retaining adapter"
+    assert _setup(slices=20, unfreeze_last=0, lora_rank=8).budget().retained == encoder.activation_units(336), (
+        "under LoRA the base weights are frozen and every block still carries a retaining adapter, and "
+        "the clamp is the ENCODER's — a caller clamping against `depth` opens 12 of a 36-block trunk"
     )

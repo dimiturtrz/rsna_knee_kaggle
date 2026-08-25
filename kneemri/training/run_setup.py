@@ -83,11 +83,12 @@ class RunSetup:
         every arm, which is the same fitted-on-one-configuration failure `DeviceBudget` itself has now
         recorded five times. A batch-2 arm that reserves 9.6 GB waited for 18.
 
-        `Encoder` answers the two questions the cap cannot ask a flag: how many activation units the
-        trunk holds at this run's size, and how many parameters the optimiser has to carry. And
-        `trainable_blocks` is what supervision OPENED, which is `unfreeze_last` clamped to the trunk's
-        depth — except under LoRA, where every block carries an adapter and retains, so the base-weight
-        count would understate it by the full depth.
+        `Encoder` answers the three questions the cap cannot ask a flag: how many activation units the
+        trunk holds at this run's size, how many of them the OPEN blocks hold, and how many parameters
+        the optimiser has to carry. `opened` is what supervision opened — `unfreeze_last`, except under
+        LoRA, where every block carries an adapter and retains, so the base-weight count would
+        understate it by the full depth. The CLAMP against the trunk's real block count is the
+        encoder's, not this method's: `depth` is 12 on a trunk that runs 36.
         """
         encoder = ENCODERS[self.options.variant]
         size = self.options.train_size or self.options.image_size
@@ -97,7 +98,7 @@ class RunSetup:
             self.options.slices,
             encoder.activation_units(size),
             self.options.batch,
-            trainable_blocks=min(opened, encoder.depth),
+            retained=encoder.retained_units(size, opened),
             params_m=encoder.params_m,
         )
 

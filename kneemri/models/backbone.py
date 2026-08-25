@@ -119,9 +119,18 @@ class Stage:
     `await_headroom` waiting on memory it would never have allocated, and never starts.
     """
 
+    def per_block(self, size: int) -> float:
+        """ONE block's tokens times width, PER SLICE — activation bytes up to one constant.
+
+        Split out from `units` because the cost model asks two different questions of a trunk: what
+        EVERY block costs to run forward, and what the OPEN ones cost to retain until their backward.
+        The second is a suffix of the block list, and a suffix cannot be taken from a per-stage total.
+        """
+        return (size / self.stride) ** 2 * self.width / self.tubelet
+
     def units(self, size: int) -> float:
         """Tokens times width times blocks, PER SLICE — activation bytes up to one constant."""
-        return self.blocks * (size / self.stride) ** 2 * self.width / self.tubelet
+        return self.blocks * self.per_block(size)
 
 
 @dataclass(frozen=True)
@@ -173,6 +182,22 @@ class Encoder:
     cap has to be derived BEFORE anything is fetched, since refusing a run that will not fit is what it
     is for."""
 
+    @property
+    def blocks(self) -> tuple[Stage, ...]:
+        """One entry per block of the trunk, in run order — the stage each block belongs to.
+
+        Held as blocks rather than as stages because the two things a cost model asks are a SUM over
+        all of them and a SUM OVER A SUFFIX, and the suffix — what `unfreeze_last` opened — crosses
+        stage boundaries. A ConvNeXt's last six blocks are three of stage four and three of stage
+        three, at two different widths on two different grids.
+
+        THIS IS ALSO THE TRUNK'S REAL DEPTH, which `depth` is not for a hierarchical trunk: `cnxbase`
+        states `depth` 12 (the field's default, meaningless once `stages` is given) and runs 36. Every
+        clamp of `unfreeze_last` therefore belongs here rather than at a caller reading `depth`.
+        """
+        stages = self.stages or (Stage(self.depth, self.patch, self.dim, tubelet=self.tubelet),)
+        return tuple(stage for stage in stages for _ in range(stage.blocks))
+
     def activation_units(self, size: int) -> float:
         """Summed tokens-times-width over every block, which is activation bytes up to one constant.
 
@@ -186,10 +211,27 @@ class Encoder:
         are all 12 deep — so no DINOv2 or DINOv3 arm derives a different cap than it did before. Only a
         trunk with `stages` moves, which is the entire repair.
         """
-        return sum(
-            stage.units(size)
-            for stage in self.stages or (Stage(self.depth, self.patch, self.dim, tubelet=self.tubelet),)
-        )
+        return sum(block.per_block(size) for block in self.blocks)
+
+    def retained_units(self, size: int, opened: int) -> float:
+        """The same quantity over the OPEN blocks only — what must survive to a backward.
+
+        `activation_units` is what the trunk costs to run; this is what it costs to remember, and the
+        two scale differently because a frozen block's activations are freed the moment the next block
+        consumes them. The cost model weighs them separately (`DeviceBudget.needed`), and until
+        2026-08-25 it did not: it multiplied the whole-trunk sum by a scalar in the block COUNT, which
+        is only right when every block costs the same. On a ViT it is. On the two trunks that are not
+        ViTs it prices the open suffix at the trunk's AVERAGE block, and their suffixes are nowhere
+        near average — `cnxbase`'s last six blocks are 9.7% of its bill, where six of twelve uniform
+        blocks would be 50%.
+
+        `opened` is clamped HERE, against the real block count, because that is the only place that
+        knows it — a caller clamping against `depth` gives a fully-open ConvNeXt twelve blocks of
+        retention out of the thirty-six it actually opens.
+        """
+        blocks = self.blocks
+        held = blocks[len(blocks) - min(max(opened, 0), len(blocks)) :] if opened > 0 else ()
+        return sum(block.per_block(size) for block in held)
 
     leaf: str = ""
     """The directory named for THIS encoder, matched as a whole path segment and never as a substring.
