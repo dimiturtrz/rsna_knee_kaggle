@@ -410,6 +410,32 @@ out-of-that-loop figure. `seat_value`'s own instruction is READ THE SIGN, NOT TH
 champion roster cannot be priced against at all — six of its seven members are `--fold -1` and have seen
 every holdout study — so every seat number here is against the greedy fold-0 proxy, not against what ships.
 
+**AND THE IN-SAMPLE PRICE IS NOW MEASURED, not estimated — 2026-08-25.** `record_mix --seats honest`
+refits the greedy on half the studies, scores each prefix on the other half and averages both directions.
+Over 77 same-split members:
+
+| seats | held-out | in-sample | bias |
+|---|---|---|---|
+| 5 | 0.8697 | 0.8728 | +0.0031 |
+| 6 | 0.8697 | 0.8732 | +0.0035 |
+| 8 | 0.8715 | 0.8735 | +0.0020 |
+| **12** | **0.8720** | 0.8734 | +0.0014 |
+| 16 | 0.8718 | 0.8728 | +0.0011 |
+| 24 | 0.8712 | 0.8724 | +0.0012 |
+
+**Best honest count is TWELVE at 0.8720, against an in-sample peak of 0.8736 at ten.** Two readings, and
+the second matters more than the first. (1) The bias is real but small — +0.0035 at six seats, decaying to
++0.0014 by twelve, so roughly a fifth of the plateau was the selection and four fifths is a real ensemble.
+(2) The honest curve peaks LATER and FLATTER than the in-sample one: selection overfitting is what made a
+narrow roster look optimal. Six honest seats read 0.8697 and twelve read 0.8720, so widening to twelve buys
+**+0.0023** — directional, under the 0.0062 floor, not a submission on its own.
+
+The greedy's first twelve on the full pool: `small_batch6`, `margin_seat`, `calib_span`, **`blendlabels`**
+(fourth, its first seat), `band_dense_long`, `through_dense`, `base224`, `attend_dense`, `aprior_dense`,
+`crop80_span`, `sided_pool`, `calibrated_targets`. Nine are already in `comp/members.roster`; `blendlabels`,
+`base224` and `attend_dense` are not, and adding them is the packaging cost of shipping this count.
+Split-half chooses the COUNT, the full pool chooses the MEMBERS — the count is the thing that overfits.
+
 ### `dissent_seat` — the objective axis is NOT a seat lever; 38th of 66, and the per-label table says why — 2026-08-24
 
 The arm `margin_seat`'s section (above) named as the test of whether its seat came from AUC-margin
