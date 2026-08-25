@@ -160,3 +160,56 @@ independent case.
 `farseat` is now the only open question on this board. It is the one member that breaks the
 slice-then-pool term rather than the trunk term — and if it lands flat too, the ensemble axis is not
 narrowed, it is finished.
+
+## farseat reads 0.937 — the ensemble axis is finished, not narrowed
+
+`farseat` (55758082) landed **0.937**, dead inside its pre-registered FLAT band of 0.935–0.939 and
+identical to `dark6`, the six-member control it was built against.
+
+This is the reading the arm was constructed to make un-dodgeable. Every prior seventh-seat entry could
+be answered with "the dissenter was still a slice-then-pool model, so of course it agreed" — `dark7`
+filled the seat from the same family, `lastseat`/`allfit` filled it with a fold-0 member of the same
+family, `augseat` filled it with a regularised one, `v3seat` moved the ENCODER inside the family.
+`vjepa_warm_s2026` is the only roster line that breaks the **slice-then-pool term itself**: a tubelet
+transformer handed the stack, two slices per token, nearest-neighbour agreement 0.8210 against a seated
+band of 0.8801–0.9143 — the most distant member the package has ever held.
+
+It moved nothing.
+
+Six variables have now been moved across seven entries and the board has answered 0.936 or 0.937 to all
+of them:
+
+| entry | the one variable | board |
+|---|---|---|
+| `dark6` | six all-data members | 0.937 |
+| `dark7` | count → seven | 0.937 |
+| `allfit` / `lastseat` | seat 7 = fold-0 member | 0.937 |
+| `augseat` | seat 7 = regularised | 0.936 |
+| `v3seat` | seat 4 = DINOv3-base (encoder family) | 0.936 |
+| `farseat` | seat 7 = V-JEPA2 (architecture family) | 0.937 |
+
+**MECHANISM, and it is now the strong form.** The plateau was already known not to be a plumbing bug —
+the kernel logs read `loaded and fingerprint-checked 6 of 6` and `7 of 7`, and the CSVs differ on every
+cell at the rank lattice of their own count. What `farseat` adds is that it is not a DIVERSITY deficit
+either. Adding the most distant available member to the roster is worth the same as adding the nearest
+one, which means the marginal seat is not competing for a share of the answer — the answer is already
+determined by the six, and a seventh vote of any provenance is being averaged into a decision that does
+not depend on it.
+
+**CONSEQUENCE.** Of the axes a submission slot can vary, exactly one has never been moved: the **vote**.
+`kneemri-votefit` (built, clean, armed for slot 5) swaps `RankAverage` for `LogitAverage` on `dark6`'s
+identical six, holding every other variable the seven entries above have held. `overlap` is not a second
+option — it logs `overlap=False requested, INERT — all members are whole-stack`, so it is structurally
+unavailable to any all-data roster, not merely measured flat.
+
+If the vote is flat too, no remaining variable on this board is a member-shaped one, and the ledger's
+own 2026-08-22 conclusion stands unamended: **no lever measured on this board is priced above 1.5%**,
+and the only route the evidence supports is a chain of directional gains that sums past the bar. Note
+that the data axis is NOT the exception it was treated as earlier in this session — the concave fit
+reprices MRNet at **~+0.004**, knob-sized, below the 0.0062 floor.
+
+**WHAT `farseat` DOES NOT KILL.** It refutes the marginal seventh SEAT across families. It says nothing
+about a roster rebuilt AROUND a different family — six V-JEPA members voting against each other is a
+different object from one V-JEPA member voting against six DINOv2 ones, and no entry has tested it. That
+is a ~7 card-hour build, and at the observed 0.001 spread it is not licensed by anything measured here;
+it is recorded so a later session re-tests rather than assumes.
