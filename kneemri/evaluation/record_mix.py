@@ -34,7 +34,6 @@ project has three label tables and has already re-run its ablations after one of
 across that boundary is refused rather than averaged over.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,6 +42,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve, Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, HoldoutRecord
@@ -230,17 +230,17 @@ class MixReading:
 
 def main() -> None:
     """Score every subset of the given runs from their recorded holdout predictions, with no card."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--records", type=Path, nargs="+", required=True, help="runs sharing ONE split")
-    parser.add_argument("--paired", action="store_true", help="per-label deltas against the FIRST run")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--records", type=Path, nargs="+", required=True, help="runs sharing ONE split")
+    command.parser.add_argument("--paired", action="store_true", help="per-label deltas against the FIRST run")
+    command.parser.add_argument(
         "--roster",
         type=Path,
         nargs="+",
         default=(),
         help="hold these members fixed and report what each OTHER record would add — the seat number",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--seats",
         choices=("greedy", "diverse"),
         help="forward selection instead of every subset — the only tractable reading past a dozen members. "
@@ -248,15 +248,13 @@ def main() -> None:
         "correlated with anything already seated and never opens the labels. The comparison worth reading "
         "is the two PEAKS: whether an ensemble built for spread beats the one the quality ruler builds.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--labels",
         action="store_true",
         help="the mix's own per-label AUCs, worst first, each priced in units of the final score",
     )
-    parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
+    arguments = command.parsed()
     scores = LabelScores()
     roster = list(arguments.roster)
     everything = list(dict.fromkeys([*arguments.records, *roster]))

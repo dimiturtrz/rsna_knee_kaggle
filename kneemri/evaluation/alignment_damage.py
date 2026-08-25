@@ -31,7 +31,6 @@ retention instead. Nor would it clear the proxy: an Otsu mass centroid is not a 
 spread statistic built on it is noisy in a way that shrinks any true gap toward zero.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -39,6 +38,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
 from kneemri.evaluation.scores import BOOTSTRAP_SEED, LabelScores
@@ -224,13 +224,11 @@ class HoldoutJoin:
 
 def main() -> None:
     """Join a spread dump against a member mix and print whether disagreement costs the focal findings."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--spread", type=Path, required=True, help="the .npz written by crop_alignment --dump")
-    parser.add_argument("--members", type=Path, nargs="+", required=True, help="holdout .npz records to mix")
-    parser.add_argument("--resamples", type=int, default=RESAMPLES)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--spread", type=Path, required=True, help="the .npz written by crop_alignment --dump")
+    command.parser.add_argument("--members", type=Path, nargs="+", required=True, help="holdout .npz records to mix")
+    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    arguments = command.parsed()
     join = HoldoutJoin()
     predictions, truth, studies = join.combined(arguments.members)
     spread = join.aligned(arguments.spread, studies)

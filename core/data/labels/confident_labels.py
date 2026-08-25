@@ -19,12 +19,12 @@ value and gives it weight 0, which is what "we do not know" should mean. Zeroing
 instead leave the floor pulling toward a value the reader never asserted.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import pandas as pd
 
+from core import cli
 from core.findings import TARGETS
 
 UNSURE = "UNK"
@@ -58,12 +58,10 @@ class ConfidentLabels:
 
 def main() -> None:
     """Write the struck-out table beside the original."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--out", type=Path, required=True)
+    arguments = command.parsed()
     labels = ConfidentLabels(pd.read_csv(arguments.labels))
     shares = labels.struck_share()
     logger.info("struck per target: %s", {name: round(value, 3) for name, value in shares.items()})

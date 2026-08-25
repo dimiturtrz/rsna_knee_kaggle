@@ -18,7 +18,6 @@ radiologist saying "present", not a reader saying "severe" — pooling it with t
 measure the binary signal this test exists to hold out.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,6 +26,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
@@ -218,18 +218,19 @@ class OrdinalSignal:
 
 def main() -> None:
     """Report ordinal concordance: per label for one member, or ranked across many."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, nargs="+", help="a member, its metrics file or its record")
-    parser.add_argument("--directory", type=Path, help="scan every holdout record under it")
-    parser.add_argument("--seated", nargs="*", default=(), help="member names to mark, so a displacement is read")
-    arguments = parser.parse_args()
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoint", type=Path, nargs="+", help="a member, its metrics file or its record")
+    command.parser.add_argument("--directory", type=Path, help="scan every holdout record under it")
+    command.parser.add_argument(
+        "--seated", nargs="*", default=(), help="member names to mark, so a displacement is read"
+    )
+    arguments = command.parsed()
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     checkpoints = list(arguments.checkpoint or ())
     if arguments.directory is not None:
         checkpoints += sorted(arguments.directory.glob("*.holdout.npz"))
     if not checkpoints:
-        parser.error("pass --checkpoint, --directory, or both")
+        command.parser.error("pass --checkpoint, --directory, or both")
     logger.info("chance is %.2f; above it means the graded levels carry severity, not only certainty", CHANCE)
     if len(checkpoints) == 1:
         for line in OrdinalSignal.detail(checkpoints[0]):

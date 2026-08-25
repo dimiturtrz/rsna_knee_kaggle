@@ -45,11 +45,11 @@ driver's name, this check would have called our own job the other project's — 
 exists to prevent. The pid is the only field taken from the driver; every name comes from the crossing.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from core import cli
 from kneemri.process_table import PROBES, Probe, ProcessTable
 
 logger = logging.getLogger(__name__)
@@ -249,9 +249,7 @@ def main() -> None:
     `queue_check` states at the same place: a warning that leaves the status at 0 reads, in a log tail,
     exactly like a pass.
     """
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    cli.Command(__doc__, logger).parsed()
     report = DEVICE.read()
     if not report.strip():
         logger.warning("nvidia-smi could not be read, so the card's holders cannot be crossed")

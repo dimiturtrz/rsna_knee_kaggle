@@ -18,7 +18,6 @@ The accepted flags are then asked a second question: is the cache that reading n
 a typo does — and it is a `FileNotFoundError` on a memory map rather than anything an arm anticipates.
 """
 
-import argparse
 import contextlib
 import io
 import logging
@@ -30,6 +29,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from core import cli
 from core.data.corpus.study_cache import CorpusSplit, StudyCache
 from core.denominator import Denominator
 from core.paths import DataRoot
@@ -622,16 +622,16 @@ class ArmCheck:
 
 def main() -> None:
     """Check every committed arm, and exit non-zero if any would be refused."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arms", type=Path, default=ARMS)
-    parser.add_argument("--stub", type=Path, default=STUB)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--arms", type=Path, default=ARMS)
+    command.parser.add_argument("--stub", type=Path, default=STUB)
+    command.parser.add_argument(
         "--require-caches",
         action="store_true",
         help="also refuse an arm whose cache is not decoded yet. Off by default because a queue may "
         "legitimately build one in an earlier slot; on when arming a queue that builds nothing.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--smoke",
         type=Path,
         default=None,
@@ -642,8 +642,8 @@ def main() -> None:
         "in about seven minutes, so a single arm can be smoked while the card belongs elsewhere. The "
         "full sweep cannot: that is over the per-arm timeout times thirty-five.",
     )
-    parser.add_argument("--smoke-studies", type=int, default=SMOKE_STUDIES)
-    parser.add_argument(
+    command.parser.add_argument("--smoke-studies", type=int, default=SMOKE_STUDIES)
+    command.parser.add_argument(
         "--only",
         nargs="+",
         default=None,
@@ -652,7 +652,7 @@ def main() -> None:
         "on the card; a single arm about to be queued is two minutes. Names are the ones the arms "
         "print, and a name that matches no arm is refused rather than quietly selecting nothing.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--as-queued",
         nargs="+",
         default=None,
@@ -663,15 +663,14 @@ def main() -> None:
         "cache-checked or smoked — the flag-typo-costs-a-slot failure, at the one invocation that is "
         "not the shipping one. Composes with --smoke.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--switches",
         action="store_true",
         help="also check the switches NO arm passes — one default recipe per uncovered option, from "
         "`switch_coverage`. Composes with --smoke, which is where it earns itself: five switches were "
         "landed-checked, stamped and never run, so a break in one surfaced at a queue slot.",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
     check = ArmCheck(arguments.arms, arguments.stub)
     printed = check.queued(arguments.as_queued) if arguments.as_queued else check.invocations()

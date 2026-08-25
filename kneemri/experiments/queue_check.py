@@ -25,11 +25,11 @@ The process listing is passed in rather than read inside, so the crossing itself
 two strings and the unit test needs no process to kill.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from core import cli
 from kneemri.process_table import PROBES, ProcessTable
 
 logger = logging.getLogger(__name__)
@@ -259,10 +259,9 @@ def main() -> None:
     and on 2026-08-20 a process table that could not be spawned at all). "The check could not run" and
     "the check ran and found nothing" must not share an exit code.
     """
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--directory", type=Path, default=Path("logs"), help="where the watcher logs live")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--directory", type=Path, default=Path("logs"), help="where the watcher logs live")
+    arguments = command.parsed()
     running = ProcessTable.read().text
     if not running:
         logger.warning(

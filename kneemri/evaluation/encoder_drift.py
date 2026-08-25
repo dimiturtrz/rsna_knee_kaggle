@@ -13,7 +13,6 @@ The stock weights are passed IN rather than fetched here, for the reason `Holdou
 records: a method that downloads 90 MB is a method that cannot be tested.
 """
 
-import argparse
 import logging
 import re
 from pathlib import Path
@@ -21,6 +20,7 @@ from pathlib import Path
 import torch
 from torch import Tensor
 
+from core import cli
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import COMPILED_PREFIX
 
@@ -170,11 +170,9 @@ class EncoderDrift:
 
 def main() -> None:
     """Profile one or more member checkpoints against their own stock backbones."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("checkpoints", type=Path, nargs="+")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("checkpoints", type=Path, nargs="+")
+    arguments = command.parsed()
     from transformers import AutoModel  # noqa: PLC0415 - a 90 MB import the unit gate must not pay for
 
     for path in arguments.checkpoints:

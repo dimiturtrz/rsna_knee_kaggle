@@ -23,11 +23,12 @@ moves the peak late — is measuring the shape of the tail, and a stopper delete
 Patience pays on arms that ask what a knob scores at a fixed schedule; on shape arms it is a blindfold.
 """
 
-import argparse
 import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -140,10 +141,9 @@ class StaleGaps:
 
 def main() -> None:
     """Derive a patience value from the curves already on disk."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--directory", type=Path, required=True, help="a processed directory of runs")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--directory", type=Path, required=True, help="a processed directory of runs")
+    arguments = command.parsed()
     for line in StaleGaps(arguments.directory).lines():
         logger.info(line)
 

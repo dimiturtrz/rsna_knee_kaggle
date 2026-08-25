@@ -59,7 +59,6 @@ one label against another WITHIN a study. They are orthogonal orderings over the
 the second cost the first outright on the one arm that tried.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -68,6 +67,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.bootstrap import RESAMPLE_SEED, RESAMPLES
 from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.evaluation.record_mix import RecordMix
@@ -219,11 +219,9 @@ class SideBlindness:
 
 def main() -> None:
     """Read the compartment contrast off holdout records, with no card and no inference pass."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--records", type=Path, nargs="+", required=True, help="runs sharing ONE split")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--records", type=Path, nargs="+", required=True, help="runs sharing ONE split")
+    arguments = command.parsed()
     pool = RecordMix(arguments.records).per_member()
     columns = {target: index for index, target in enumerate(TARGETS)}
     combined = pool.combined(list(range(len(pool))))

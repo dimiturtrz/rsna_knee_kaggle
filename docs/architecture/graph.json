@@ -483,7 +483,19 @@
     {
       "kind": "import",
       "source": "core.data.labels.confident_labels",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.confident_labels",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.label_power",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -609,6 +621,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.alignment_damage",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.alignment_damage",
       "target": "core.data.corpus.anatomy",
       "weight": 1
     },
@@ -694,6 +712,18 @@
       "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_transfer",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.encoder_drift",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -939,6 +969,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ordinal_signal",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ordinal_signal",
       "target": "core.findings",
       "weight": 1
     },
@@ -1029,6 +1065,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.protocol_prior",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.record_mix",
       "target": "core.cli",
       "weight": 1
     },
@@ -1215,6 +1257,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.side_blindness",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.side_blindness",
       "target": "core.findings",
       "weight": 1
     },
@@ -1377,6 +1425,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
@@ -1455,6 +1509,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.card_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.card_check",
       "target": "kneemri.process_table",
       "weight": 1
     },
@@ -1521,7 +1581,19 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.queue_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.queue_check",
       "target": "kneemri.process_table",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.stale_gap",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -1900,6 +1972,12 @@
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "kneemri.teacher_file",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_check",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -2344,6 +2422,12 @@
       "kind": "import",
       "source": "kneemri.training.device_budget",
       "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitted_encoder",
+      "target": "core.cli",
       "weight": 1
     },
     {

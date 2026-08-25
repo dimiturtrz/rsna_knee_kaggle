@@ -21,13 +21,13 @@ that is how the axes get priced — so a differing kernel is not a finding. Only
 reproduction path is asserted.
 """
 
-import argparse
 import ast
 import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from core import cli
 from core.denominator import Denominator
 from kneemri.kaggle.package_members import MemberRoster
 
@@ -136,13 +136,11 @@ class Champion:
 
 def main() -> None:
     """Assert the champion is still buildable: `python -m kneemri.kaggle.champion_check`."""
-    parser = argparse.ArgumentParser(description=Champion.__doc__)
-    parser.add_argument("--record", type=Path, default=RECORD, help="the pinned champion")
-    parser.add_argument("--roster", type=Path, default=Path("comp/members.roster"), help="what ships")
-    parser.add_argument("--kernels", type=Path, default=KERNELS, help="where kernel scripts live")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
+    command = cli.Command(Champion.__doc__, logger)
+    command.parser.add_argument("--record", type=Path, default=RECORD, help="the pinned champion")
+    command.parser.add_argument("--roster", type=Path, default=Path("comp/members.roster"), help="what ships")
+    command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where kernel scripts live")
+    arguments = command.parsed()
     champion = Champion.recorded(arguments.record)
     # A champion whose member tuple could not be parsed out of its kernel has no member to find missing,
     # so `drift` comes back empty and this check reports the entry as rebuildable over an empty roster —

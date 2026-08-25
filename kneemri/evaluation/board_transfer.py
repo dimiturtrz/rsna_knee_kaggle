@@ -20,12 +20,13 @@ pairwise ratio is a confounded read and only the DISTRIBUTION is worth quoting; 
 the ruler and the board disagreed, not that the ruler is wrong about the axis its entry was built on.
 """
 
-import argparse
 import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 from statistics import median
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -220,16 +221,15 @@ class BoardTransfer:
 
 def main() -> None:
     """Read the board against the holdout: `python -m kneemri.evaluation.board_transfer`."""
-    parser = argparse.ArgumentParser(description=BoardTransfer.__doc__)
-    parser.add_argument("--record", type=Path, default=RECORD, help="the scored-submission record")
-    parser.add_argument(
+    command = cli.Command(BoardTransfer.__doc__, logger)
+    command.parser.add_argument("--record", type=Path, default=RECORD, help="the scored-submission record")
+    command.parser.add_argument(
         "--scope",
         default=ENSEMBLE,
         help="which denominator to read within. Entries on different scopes are not subtractable, so "
         "each scope is its own reading rather than one mixed ranking.",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
     logger.info("%s", BoardTransfer(arguments.record, arguments.scope).report())
 
 

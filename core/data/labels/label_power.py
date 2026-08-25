@@ -16,13 +16,13 @@ shrinks by about the square root of twelve, which lands close to the 0.0062 spre
 seeds. The mean is readable BECAUSE its parts are noisy and many.
 """
 
-import argparse
 import logging
 import math
 from pathlib import Path
 
 import pandas as pd
 
+from core import cli
 from core.findings import TARGETS
 
 logger = logging.getLogger(__name__)
@@ -93,11 +93,10 @@ class LabelPower:
 
 def main() -> None:
     """Report per-label measurement precision for the corpus."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--folds", type=int, default=FOLDS)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--folds", type=int, default=FOLDS)
+    arguments = command.parsed()
     logger.info("%s", LabelPower(arguments.labels, arguments.folds).report())
 
 

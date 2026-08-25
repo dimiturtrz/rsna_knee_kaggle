@@ -19,13 +19,14 @@ same arithmetic over the state dict, because rebuilding the model to merge it wo
 path (design, pooling, slots) to answer a question about weights alone.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import torch
 from jaxtyping import Float
 from torch import Tensor
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -133,11 +134,10 @@ class FittedEncoder:
 
 def main() -> None:
     """Convert one fitted member into an encoder file, so `--encoder-weights` can start from it."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("member", type=Path, help="a fitted member .pt")
-    parser.add_argument("destination", type=Path, help="where to write the encoder file")
-    parsed = parser.parse_args()
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("member", type=Path, help="a fitted member .pt")
+    command.parser.add_argument("destination", type=Path, help="where to write the encoder file")
+    parsed = command.parsed()
     FittedEncoder(parsed.member).write(parsed.destination)
 
 
