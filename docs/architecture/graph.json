@@ -24188,6 +24188,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow.disagrees",
+      "label": "disagrees",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardRow.parsed",
       "label": "parsed",
       "level": "method",
