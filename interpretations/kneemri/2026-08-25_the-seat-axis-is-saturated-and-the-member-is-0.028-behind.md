@@ -41,6 +41,24 @@ ensembles, look at the efficiency lb". Set beside our table:
 - their best reported SINGLE model, 0.942, beats our best SIX-MEMBER ensemble, 0.938;
 - it beats our best single member, 0.914, by **0.028**.
 
+### The thread does not use "single model" the way I read it
+
+Read verbatim at 23:35Z, the thread's own wording splits: two of the strong entries say
+**"single(5-fold) model"** (0.929 @ 224 px, 0.926 @ 336 px), and a 5-fold submission is five
+checkpoints averaged — an ensemble of five by our own table's definition, where our own best five reads
+0.931. Those two are not evidence about a single checkpoint at all, and against our 5-member row they
+are FLAT. The 0.942 entry ("Single model 0.934 @ 224px Update: 0.942 with some tweaks") does not say
+which it is.
+
+What survives unambiguously is **"I'm at 0.938 with a single model, single fold"** and "single model
+0.915, DinoV2 based". The first still beats our best single, 0.914, by **0.024**, and still matches our
+best six. So the ordering — their member beats our ensemble — holds on the one post that states its
+own terms. The deficit is real; the specific 0.028 was read off a post that may be describing a five.
+
+**"with some tweaks" names nothing.** No augmentation, schedule, backbone, or pooling detail appears
+anywhere in the thread. There is no method to replicate here, only a target — which is why tonight's
+card goes to a mechanism we can price ourselves rather than to a reconstruction of somebody's hint.
+
 Divided by the transfer constant, 0.028 board is **0.0154 holdout** — which is, to two decimals, the
 1.5% significance bar this project set for itself before any of this was measured. The field's member
 is exactly one real result ahead of ours, and our +0.024 of ensembling is what has been hiding it.
