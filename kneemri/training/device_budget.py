@@ -143,16 +143,34 @@ survives is the checkpoint boundary rather than the whole block, but the count o
 the count of blocks in the graph. So six blocks open and twelve open differ by a factor of two in the
 term the slice loop multiplies, and `depth` cannot say it — `cnx_dense` runs 36 blocks with 6 open.
 
-Like the size, width and batch terms it is a DERIVATION rather than a fit, and it reproduces the fitted
-point exactly: a run that names nothing gets `unfreeze_last` 6 and a ratio of 1.
+The term built on it is an AFFINE ratio rather than a pure one, and it reproduces the fitted point
+exactly: a run that names nothing gets `unfreeze_last` 6 and a ratio of 1. See `TRAINABLE_FLOOR`."""
 
-AND THE DERIVATION IS WRONG, MEASURABLY (knee-pf8b). A PURE ratio prices a frozen block at ZERO, but a
-frozen block still runs its forward and still holds what the blocks above it read; only its gradients
-and Adam state go away. `budget_residuals` reads three points off the ledger — 1.2142 a unit at four
-blocks open, 1.3350 at six, 1.7730 at twelve — which a line `a + b*u` fits with a=0.9726, b=0.0604 and
-which predicts the held-out twelve within 4.5%, where this ratio predicts it 51% over. In the other
-direction it CAPPED `unfreeze4_s2026` at 11.79 GB against its own measured 14.79. Do not read the
-`unfreeze_last` axis of the ledger as if this term were right."""
+TRAINABLE_FLOOR = 0.9726
+"""What a slice-unit costs with NO block open, in the units `GB_PER_SLICE` is measured in.
+
+THE TERM WAS A PURE RATIO UNTIL 2026-08-25, and a pure ratio prices a frozen block at ZERO (knee-pf8b).
+A frozen block still runs its forward and still holds what the blocks above it read; only its gradients
+and Adam state go away. So the cost of opening blocks has a floor, and the floor is most of it: this
+value says a fully frozen trunk still costs 73% of what the six-open fitted point does.
+
+Read off the ledger by `budget_residuals`: 1.2142 GB a unit at four blocks open and 1.3350 at six fit
+the line `TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * u`, which predicts the HELD-OUT twelve-open point
+(measured 1.7730) at 1.6974 — 4.3% under, where the pure ratio predicted it 51% over. Two points fitted
+and the third kept back on purpose; refitting on all three would spend the only validation the axis has.
+
+The line's value at `FITTED_TRAINABLE` is 1.3350, which IS `GB_PER_SLICE` — not a coincidence and not a
+second fit, since the six-open point is the fitted point. That is why dividing by it leaves every
+DINOv2 and DINOv3 arm at the default deriving exactly what it derived before."""
+
+TRAINABLE_PER_BLOCK = 0.0604
+"""What each block OPENED adds to a slice-unit — the slope of that line: gradients and Adam state for
+one block's worth of the graph, which is the part a freeze actually removes.
+
+It CAPPED `unfreeze4_s2026` at 11.79 GB against its own measured 14.79 while the term was pure, because
+a pure ratio scales four-open down to two thirds where the measurement says nine tenths. Runs recorded
+on the `unfreeze_last` axis BEFORE 2026-08-25 were priced by the broken term; the ledger's numbers are
+what the runs measured, but any cap quoted against them is not."""
 
 RESIDENT_GB = 0.22
 """The intercept of that line: what a step holds regardless of slice count — weights, optimiser state
@@ -268,7 +286,9 @@ class DeviceBudget:
         """
         if not self.slices:
             return 0.0
-        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH) * (self.trainable_blocks / FITTED_TRAINABLE)
+        opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * self.trainable_blocks
+        fitted_opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * FITTED_TRAINABLE
+        step = (self.units / FITTED_UNITS) * (self.batch / FITTED_BATCH) * (opened / fitted_opened)
         optimiser = RESIDENT_GB + OPTIMISER_GB_PER_MPARAM * max(0.0, self.params_m - FITTED_PARAMS_M)
         return GB_PER_SLICE * (self.slices + 1) * step + optimiser
 

@@ -24,6 +24,8 @@ from kneemri.training.device_budget import (
     OPTIMISER_GB_PER_MPARAM,
     RESIDENT_GB,
     SMALLEST_RUN_GB,
+    TRAINABLE_FLOOR,
+    TRAINABLE_PER_BLOCK,
     DeviceBudget,
 )
 
@@ -300,15 +302,27 @@ def test_needed_reads_how_many_blocks_supervision_opened():
     had already scaled itself down correctly for the batch and then refused the run anyway is the
     signature of a MISSING term rather than a mis-fitted one: a frozen block's activations are freed as
     soon as the next block consumes them, a trainable block's must survive to its backward.
+
+    The term is AFFINE, not a ratio (knee-pf8b). A pure ratio priced a frozen block at zero, doubled the
+    ask at twelve open where the measurement doubles it by 1.27, and refused `unfreeze4_s2026` at 11.79
+    GB against its own measured 14.79.
     """
     fitted = DeviceBudget(slices=20).needed()
     assert DeviceBudget(slices=20, trainable_blocks=FITTED_TRAINABLE).needed() == fitted, (
         "the default `unfreeze_last` is the fitted point, so every arm in the ledger is untouched"
     )
 
+    opened = TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * 2 * FITTED_TRAINABLE
+    ratio = opened / (TRAINABLE_FLOOR + TRAINABLE_PER_BLOCK * FITTED_TRAINABLE)
     thawed = DeviceBudget(slices=20, trainable_blocks=2 * FITTED_TRAINABLE).needed()
-    assert thawed == pytest.approx(2 * (fitted - RESIDENT_GB) + RESIDENT_GB, abs=1e-6), (
-        "twice the blocks in the graph is twice the retained stack, above an intercept held once"
+    assert thawed == pytest.approx(ratio * (fitted - RESIDENT_GB) + RESIDENT_GB, abs=1e-6), (
+        "twelve open costs 1.27x six open, not 2x — `encoder_adapt_thawed` measured 6.13 GB against 9.12 derived"
+    )
+
+    frozen = DeviceBudget(slices=20, trainable_blocks=0).needed()
+    assert frozen > 0.7 * fitted, (
+        "a trunk with NOTHING open still runs every forward and still holds what the blocks above it "
+        "read — only gradients and Adam state go away, so the cost of opening blocks has a floor"
     )
 
     assert DeviceBudget(slices=20, batch=FITTED_BATCH // 3, trainable_blocks=2 * FITTED_TRAINABLE).needed() < fitted, (
