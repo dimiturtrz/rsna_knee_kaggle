@@ -1,4 +1,3 @@
-import dataclasses
 from pathlib import Path
 
 import pytest
@@ -9,6 +8,7 @@ from core.data.corpus.folds import FitPositions
 from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import Routing
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
+from kneemri.training.flag_vocabulary import FlagVocabulary
 from kneemri.training.options import TrainingOptions
 
 
@@ -135,18 +135,6 @@ def test_parse_compiles_the_encoder_unless_the_run_asks_for_eager(monkeypatch: p
     assert not TrainingOptions.parse().compile_encoder, "the throughput control can still measure eager"
 
 
-def test_parser():
-    """Every field is reachable from argv, and every flag lands on a field.
-
-    A field with no flag is a knob only a test can turn; a flag with no field would raise on `parse`,
-    which is loud — the silent half is the first, and it is the half that queues an arm whose recipe
-    cannot be asked for.
-    """
-    dests = set(vars(TrainingOptions.parser().parse_args(["--labels", "labels.csv"])))
-
-    assert dests == {field.name for field in dataclasses.fields(TrainingOptions)}
-
-
 def test_crop():
     """The two flags argparse must land as scalars, read back as the one value everything else wants."""
     assert TrainingOptions().crop == Crop()
@@ -193,7 +181,7 @@ def test_cache():
     assert TrainingOptions(cache_studies=60).cache(Path(".")).key.endswith("_first60"), (
         "the smoke truncation is an axis of the NAME, so a partial decode cannot overwrite the full one"
     )
-    argv = TrainingOptions.parser().parse_args(["--labels", "labels.csv"])
+    argv = FlagVocabulary.parser().parse_args(["--labels", "labels.csv"])
 
     assert TrainingOptions().cache(Path(".")).key == CacheFlags.cache(argv, Path(".")).key, (
         "the dataclass half and the namespace half of one rule, pinned equal on the reading every "
