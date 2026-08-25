@@ -11,8 +11,8 @@ from kneemri.training.objective import (
     PAIR_MEMORY,
     PAIR_POOL,
     RANK_WEIGHT,
-    LabelStructure,
     RankedObjective,
+    Shaping,
 )
 from kneemri.training.pair_memory import PairMemory
 
@@ -37,15 +37,9 @@ class RememberedRanking(RankedObjective):
     """
 
     def __init__(
-        self,
-        weight: float = RANK_WEIGHT,
-        *,
-        capacity: int = PAIR_MEMORY,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
+        self, weight: float = RANK_WEIGHT, shaping: Shaping | None = None, *, capacity: int = PAIR_MEMORY
     ) -> None:
-        super().__init__(weight, normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        super().__init__(weight, shaping)
         self.memory = PairMemory(capacity)
 
     @override

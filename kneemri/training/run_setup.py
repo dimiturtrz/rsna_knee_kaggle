@@ -34,6 +34,7 @@ from kneemri.training.objective import (
     MarginObjective,
     Objective,
     RankedObjective,
+    Shaping,
 )
 from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
@@ -190,51 +191,25 @@ class RunSetup:
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
             focus=LabelFocus(options.focus_label),
         )
-        if options.auc_margin:
-            return MarginObjective(
-                options.auc_margin,
-                normalise_by_count=options.normalise_by_count,
-                per_label=options.per_label_loss,
-                structure=structure,
-            )
-        if options.dissent_weight:
-            return DecorrelatedObjective(
-                options.dissent_weight,
-                normalise_by_count=options.normalise_by_count,
-                per_label=options.per_label_loss,
-                structure=structure,
-            )
-        if options.distill_weight:
-            # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
-            # the owner's design is one training that runs both terms, so this is the composed objective
-            # rather than a third alternative to the other two.
-            return DistilledObjective(
-                options.distill_weight,
-                rank_weight=options.rank_weight,
-                normalise_by_count=options.normalise_by_count,
-                per_label=options.per_label_loss,
-                structure=structure,
-            )
-        if options.pair_memory:
-            return RememberedRanking(
-                options.rank_weight,
-                capacity=options.pair_memory,
-                normalise_by_count=options.normalise_by_count,
-                per_label=options.per_label_loss,
-                structure=structure,
-            )
-        if options.rank_weight:
-            return RankedObjective(
-                options.rank_weight,
-                normalise_by_count=options.normalise_by_count,
-                per_label=options.per_label_loss,
-                structure=structure,
-            )
-        return Objective(
+        shaping = Shaping(
             normalise_by_count=options.normalise_by_count,
             per_label=options.per_label_loss,
             structure=structure,
         )
+        if options.auc_margin:
+            return MarginObjective(options.auc_margin, shaping)
+        if options.dissent_weight:
+            return DecorrelatedObjective(options.dissent_weight, shaping)
+        if options.distill_weight:
+            # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
+            # the owner's design is one training that runs both terms, so this is the composed objective
+            # rather than a third alternative to the other two.
+            return DistilledObjective(options.distill_weight, shaping, rank_weight=options.rank_weight)
+        if options.pair_memory:
+            return RememberedRanking(options.rank_weight, shaping, capacity=options.pair_memory)
+        if options.rank_weight:
+            return RankedObjective(options.rank_weight, shaping)
+        return Objective(shaping)
 
     def _check_margin_alone(self) -> None:
         """The four flags `--auc-margin` cannot be composed with, each LOUD for `objective`'s reason.

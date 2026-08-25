@@ -14,7 +14,6 @@ per-label profiles agree almost by construction — a high within-fold correlati
 ACROSS-fold correlation is evidence about the model, and it is the smaller of the two.
 """
 
-import argparse
 import itertools
 import logging
 from pathlib import Path
@@ -22,6 +21,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -85,16 +85,12 @@ class LabelStability:
 
 def main() -> None:
     """Compare per-label profiles across every run that scored, split by which fold it held out."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--other-folds", nargs="+", default=["wholestack_fold1", "wholestack_fold2"])
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--other-folds", nargs="+", default=["wholestack_fold1", "wholestack_fold2"])
+    arguments = command.parsed()
 
     stability = LabelStability()
-    processed = DataRoot.from_config(arguments.paths).processed()
+    processed = command.rooted(arguments).processed()
     runs: dict[str, dict[str, float]] = {}
     for metrics in sorted(processed.glob("*.metrics.jsonl")):
         name = metrics.name.removesuffix(".metrics.jsonl")
@@ -104,8 +100,7 @@ def main() -> None:
 
     others = {name: scores for name, scores in runs.items() if name in set(arguments.other_folds)}
     shared = {name: scores for name, scores in runs.items() if name not in others}
-    for line in stability.report(shared, others):
-        logger.info(line)
+    command.report(stability.report(shared, others))
 
 
 if __name__ == "__main__":

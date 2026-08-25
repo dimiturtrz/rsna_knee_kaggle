@@ -17,17 +17,16 @@ instrument's own width — which is exactly what a floor is. This is a measureme
 seed twins as a null, not a seed experiment: nothing here trains anything or proposes to.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.labels.label_power import LabelPower
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
-from core.paths import DataRoot
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import MIDPOINT, RESAMPLES, LabelScores
 
@@ -120,14 +119,12 @@ class PairedFloor:
 
 def main() -> None:
     """Measure the paired floor on the published out-of-fold predictions, at two holdout sizes."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--resamples", type=int, default=RESAMPLES)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     identifiers, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores
     floor = PairedFloor(LabelPower(arguments.labels))

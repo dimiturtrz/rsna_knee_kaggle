@@ -151,6 +151,25 @@ It is a flag with an explicit default, not a swept hyper-parameter, for the reas
 """
 
 
+@dataclass(frozen=True)
+class Shaping:
+    """How the loss is normalised, whether it is read per-label, and the label policies it composes.
+
+    The three travelled TOGETHER through all five constructors in this chain and both of its callers:
+    every subclass re-declared the same three keyword arguments and forwarded them to `super()`
+    unexamined, and `run_setup.objective` spelled them out again at each of its six return statements.
+    Named once, a subclass declares only the term it adds, and a caller that builds this correctly builds
+    it correctly for every branch rather than for each branch.
+
+    The objective UNPACKS it into flat fields rather than holding it, so nothing reads a policy through
+    two dots — `self.structure` is used on almost every line of every `__call__` here.
+    """
+
+    normalise_by_count: bool = False
+    per_label: bool = False
+    structure: LabelStructure = field(default_factory=LabelStructure)
+
+
 class Objective:
     """Confidence-weighted cross-entropy, normalised either by total weight or by element count.
 
@@ -163,16 +182,11 @@ class Objective:
     schedule, so the pair has to be measured together rather than one at a time.
     """
 
-    def __init__(
-        self,
-        *,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
-    ) -> None:
-        self.normalise_by_count = normalise_by_count
-        self.per_label = per_label
-        self.structure = structure or LabelStructure()
+    def __init__(self, shaping: Shaping | None = None) -> None:
+        settled = shaping or Shaping()
+        self.normalise_by_count = settled.normalise_by_count
+        self.per_label = settled.per_label
+        self.structure = settled.structure
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
         """The scalar this step descends.
@@ -242,15 +256,8 @@ class RankedObjective(Objective):
     finding with few separating pairs in a batch would contribute almost nothing to any step.
     """
 
-    def __init__(
-        self,
-        weight: float = RANK_WEIGHT,
-        *,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
-    ) -> None:
-        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+    def __init__(self, weight: float = RANK_WEIGHT, shaping: Shaping | None = None) -> None:
+        super().__init__(shaping)
         self.weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
@@ -349,13 +356,11 @@ class DistilledObjective(RankedObjective):
     def __init__(
         self,
         weight: float = DISTILL_WEIGHT,
+        shaping: Shaping | None = None,
         *,
         rank_weight: float = 0.0,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
     ) -> None:
-        super().__init__(rank_weight, normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        super().__init__(rank_weight, shaping)
         self.distill_weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
@@ -436,18 +441,11 @@ class DecorrelatedObjective(RankedObjective):
     refutes this construction rather than the operating point.
     """
 
-    def __init__(
-        self,
-        weight: float = DISSENT_WEIGHT,
-        *,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
-    ) -> None:
+    def __init__(self, weight: float = DISSENT_WEIGHT, shaping: Shaping | None = None) -> None:
         # The base ranking term is left OFF and not threaded through. `dissent` is that same term with a
         # re-weighted mass, so running both would descend the label ordering twice at two strengths and
         # neither number afterwards would say which of them moved the member.
-        super().__init__(0.0, normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+        super().__init__(0.0, shaping)
         self.dissent_weight = weight
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
@@ -529,15 +527,8 @@ class MarginObjective(Objective):
     artefact before it was a refutation, and `RememberedRanking` already proves the fix in this repo.
     """
 
-    def __init__(
-        self,
-        margin: float = AUC_MARGIN,
-        *,
-        normalise_by_count: bool = False,
-        per_label: bool = False,
-        structure: LabelStructure | None = None,
-    ) -> None:
-        super().__init__(normalise_by_count=normalise_by_count, per_label=per_label, structure=structure)
+    def __init__(self, margin: float = AUC_MARGIN, shaping: Shaping | None = None) -> None:
+        super().__init__(shaping)
         self.margin = margin
 
     def __call__(self, batch: Predicted) -> Float[Tensor, ""]:

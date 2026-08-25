@@ -6,7 +6,7 @@ import torch
 from core.findings import TARGETS
 from kneemri.training.grades import Predicted
 from kneemri.training.label_focus import FOCUS, LabelFocus
-from kneemri.training.objective import LabelStructure, Objective, RankedObjective
+from kneemri.training.objective import LabelStructure, Objective, RankedObjective, Shaping
 
 LATERAL_MENISCUS = "Lateral Meniscus"
 BATCH = 4
@@ -67,7 +67,7 @@ def test_ranking_term_is_narrowed_by_the_same_mask() -> None:
     what the same objective descends on a batch where the other eleven were never weighted at all.
     """
     structure = LabelStructure(focus=LabelFocus(LATERAL_MENISCUS))
-    focused = RankedObjective(1.0, structure=structure)(batch())
+    focused = RankedObjective(1.0, Shaping(structure=structure))(batch())
     hand_masked = RankedObjective(1.0)(LabelFocus(LATERAL_MENISCUS).focused(batch()))
 
     assert focused.item() == pytest.approx(hand_masked.item())
@@ -76,6 +76,6 @@ def test_ranking_term_is_narrowed_by_the_same_mask() -> None:
 def test_focus_changes_the_scalar_it_descends() -> None:
     """Focusing is not a no-op on this data — a guard against a mask that silently never lands."""
     plain = Objective()(batch())
-    focused = Objective(structure=LabelStructure(focus=LabelFocus(LATERAL_MENISCUS)))(batch())
+    focused = Objective(Shaping(structure=LabelStructure(focus=LabelFocus(LATERAL_MENISCUS))))(batch())
 
     assert focused.item() != pytest.approx(plain.item())

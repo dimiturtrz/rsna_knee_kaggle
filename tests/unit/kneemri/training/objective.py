@@ -19,6 +19,7 @@ from kneemri.training.objective import (
     MarginObjective,
     Objective,
     RankedObjective,
+    Shaping,
 )
 from kneemri.training.side_ranking import SIDE_TERM, PairedSides
 
@@ -40,7 +41,7 @@ def test_objective_settings():
     It reports the ranking term OFF rather than omitting the key: the question is whether a ranking arm
     got a ranking objective at all, and a missing key cannot answer it.
     """
-    assert Objective(per_label=True).settings() == {
+    assert Objective(Shaping(per_label=True)).settings() == {
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
@@ -56,7 +57,7 @@ def test_objective_settings():
 
 def test_ranked_objective_settings():
     """The ranked one reports the term's real strength, not the flag that asked for it."""
-    assert RankedObjective(0.3, normalise_by_count=True).settings() == {
+    assert RankedObjective(0.3, Shaping(normalise_by_count=True)).settings() == {
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
@@ -93,7 +94,7 @@ def test_cross_entropy_normalisation_modes_differ():
     weights = torch.full((4, 2), 0.25)
 
     by_weight = Objective().cross_entropy(Predicted(logits, scores, weights))
-    by_count = Objective(normalise_by_count=True).cross_entropy(Predicted(logits, scores, weights))
+    by_count = Objective(Shaping(normalise_by_count=True)).cross_entropy(Predicted(logits, scores, weights))
     assert not torch.isclose(by_weight, by_count)
     assert by_weight > by_count
 
@@ -187,13 +188,13 @@ def test_cross_entropy_per_label_gives_every_label_the_same_say():
     weights[0, rare] = 1.0
 
     pooled = float(Objective()(Predicted(logits, scores, weights)))
-    balanced = float(Objective(per_label=True)(Predicted(logits, scores, weights)))
+    balanced = float(Objective(Shaping(per_label=True))(Predicted(logits, scores, weights)))
     assert balanced > pooled * 4, "the rare label must dominate once every column counts the same"
 
     # And with the columns equally represented the two agree, so this is a REWEIGHTING and not a rescale.
     even = torch.ones(20, 2)
     pooled_even = float(Objective()(Predicted(logits, scores, even)))
-    balanced_even = float(Objective(per_label=True)(Predicted(logits, scores, even)))
+    balanced_even = float(Objective(Shaping(per_label=True))(Predicted(logits, scores, even)))
     assert abs(pooled_even - balanced_even) < 1e-6, "equal representation, equal answer — a reweighting, not a rescale"
 
 
@@ -214,7 +215,8 @@ def test_ordinal_grades_leave_the_ranking_term_alone():
     wearing this one's name.
     """
     batch = _batch([1.0, 0.5, 0.0, -0.5, -1.0, -1.5])
-    plain, laddered = RankedObjective(), RankedObjective(structure=LabelStructure(grades=OrdinalGrades()))
+    laddered = RankedObjective(shaping=Shaping(structure=LabelStructure(grades=OrdinalGrades())))
+    plain = RankedObjective()
     assert torch.isclose(plain.ranking(batch), laddered.ranking(batch))
     assert not torch.isclose(plain.cross_entropy(batch), laddered.cross_entropy(batch))
 

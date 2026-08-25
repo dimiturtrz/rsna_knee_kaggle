@@ -35,7 +35,6 @@ meniscus, and that is the direction that kills the hypothesis cheaply. A band wh
 reason to build the cache, not a result.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -44,13 +43,13 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.data.corpus.crop_centre import TissueCentre
 from core.data.corpus.slot_reader import SLICE_BAND, Band, SlotReader
 from core.data.corpus.slots import Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -211,17 +210,15 @@ class BandCoverage:
 
 def main() -> None:
     """Decode a spread sample of studies over the whole series and price what the band removes."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
-    parser.add_argument("--depth", type=int, default=DEPTH, help="slices read along the through-plane axis")
-    parser.add_argument("--band-low", type=float, default=SLICE_BAND[0])
-    parser.add_argument("--band-high", type=float, default=SLICE_BAND[1])
-    parser.add_argument("--workers", type=int, default=20, help="decode processes")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    command.parser.add_argument("--depth", type=int, default=DEPTH, help="slices read along the through-plane axis")
+    command.parser.add_argument("--band-low", type=float, default=SLICE_BAND[0])
+    command.parser.add_argument("--band-high", type=float, default=SLICE_BAND[1])
+    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    split = CorpusSplit(command.rooted(arguments).raw())
     identifiers = split.identifiers()
     planes = split.planes()
     # Every k-th rather than a random draw, as `crop_coverage` does: the sample is a property of the
@@ -236,8 +233,7 @@ def main() -> None:
         for scored in pool.map(BandCoverage.measure_study, requests, chunksize=4):
             measured.extend(scored)
     band = Band(low=arguments.band_low, high=arguments.band_high)
-    for line in BandCoverage(band).report(measured, len(chosen), len(identifiers)):
-        logger.info(line)
+    command.report(BandCoverage(band).report(measured, len(chosen), len(identifiers)))
 
 
 if __name__ == "__main__":
