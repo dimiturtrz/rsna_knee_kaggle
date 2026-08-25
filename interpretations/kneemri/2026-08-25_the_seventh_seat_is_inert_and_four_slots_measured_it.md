@@ -94,3 +94,37 @@ separately measured anti-correlated at the top of this range — `peak8` 0.8731 
 
 `board_transfer` reads **+1.82** board points per holdout point, fitted entirely on entries <= 0.933,
 so it is a floor and not an estimate. Any prose in this tree quoting 4.67, 2.14 or 1.92 is stale.
+
+## The plateau is not a plumbing bug, and two candidate artifacts are dead
+
+Four rosters reading *exactly* 0.937 is the shape of a saturated ensemble and equally the shape of a
+kernel that quietly serves the same members every time. The project's own rule — assert the flag
+LANDED, do not assume it — says that has to be checked rather than assumed, and it was checkable for
+the cost of two `kaggle kernels output` calls.
+
+It is clean. `dark6`'s log reads `loaded and fingerprint-checked 6 of 6 members`, `dark7`'s reads
+`7 of 7`, and their submissions carry different numbers on every study and every label (`dark6` on
+twelfths, `dark7` on fourteenths — the rank lattice of six and seven members respectively). **The
+plateau is real.** Whatever 0.937 is, it is not the same file scored four times.
+
+Two artifacts that would have explained a plateau were then chased and both are dead:
+
+**fp16 serving is not the cause.** Every board entry this project has shipped prints, once per member,
+`asked for bf16 and this device cannot run it — serving fp16`. A T4 has no bf16 tensor cores, so
+members fitted with 8 exponent bits are served with 5, and an overflow past 65504 would cost every
+roster the same amount — exactly a plateau's shape. But `Ensemble.arithmetic` already carries the
+measurement: on real studies these members peak at **127.6**, a factor of 500 below fp16's ceiling,
+and a non-finite fallback sits below it besides. Closed before it was raised.
+
+**Rank-average ties are not the cause either.** `RankAverage` emits a discrete lattice and genuine
+ties (`Baker's` reads exactly 1.0 in both entries, `Synovitis` exactly 0.5), and a tied pair scores
+0.5 on a rank metric where an ordered one scores 0 or 1. That is a real mechanism, and it is far too
+small: six members at the seated band's 0.88 agreement over 909 studies leave **78 tied pairs of
+412,686**, so even if every one were discordant the cost is **0.000095**. A hundredth of the noise
+floor. `kneemri-votefit`'s pre-registration is deliberately left unchanged — its case rests on the
+magnitude information ranks discard, not on ties, and grafting a 1e-4 mechanism onto it would have
+dressed a null up as a prediction.
+
+Also confirmed from those logs: `overlap=False requested, INERT — all members are whole-stack`. The
+serving/overlap path is not merely measured flat, it is structurally unavailable to every all-data
+roster. Of the two axes never varied on a board entry, that leaves exactly one — the **vote**.
