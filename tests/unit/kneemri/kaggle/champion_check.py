@@ -109,12 +109,57 @@ def test_from_board(tmp_path: Path):
     assert entry.kit == "e7b65a0"
 
 
+def test_from_board_names_the_field_a_half_written_row_is_missing(tmp_path: Path):
+    """A row can be present and unusable, and the complaint must say which field sent the reader back.
+
+    31 of 48 rows were written without `members_named`, so this path raised a bare KeyError naming
+    neither the entry nor the field — on exactly the entries at the top of the board.
+    """
+    path = tmp_path / "half.jsonl"
+    path.write_text(json.dumps({"id": "thin_v1", "board": 0.9, "kernel": "k"}) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="records no members_named, kit") as raised:
+        Champion.from_board("thin_v1", path)
+
+    assert "thin_v1" in str(raised.value), "the entry, so the reader knows which kernel log to open"
+
+
 def test_from_board_skips_the_prose_rows(tmp_path: Path):
     """A row carrying only a note is not an entry, and it is not an error either."""
     with pytest.raises(ValueError, match="no board entry named nosuch") as raised:
         Champion.from_board("nosuch", _board(tmp_path))
 
     assert "the record holds greedy7_v1" in str(raised.value), "only real entries are offered as the way out"
+
+
+def test_outranked(tmp_path: Path):
+    """A pin the board has moved past is a defect, and a disqualified row scoring higher is not.
+
+    THE HOLE THIS CLOSES: `drift` asks whether the pin can be rebuilt and passes on a pin naming
+    yesterday's entry, which is how the pin came to lag twice — once by three hours, once through five
+    submissions — while every gate stayed green. The scope filter is the other half: an `excluded` row is
+    on the board with a stated reason it may never be a champion (a grafted fusion, a kit failure), so it
+    must not raise this complaint however it scored.
+    """
+    path = tmp_path / "board.jsonl"
+    rows = [
+        {"note": "how to read this file"},
+        {"id": "tied_v1", "board": 0.938, "scope": "ensemble"},
+        {"id": "grafted_v1", "board": 0.944, "scope": "excluded"},
+        {"id": "better_v1", "board": 0.941, "scope": "ensemble"},
+    ]
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    champion = Champion(entry="votefit", kernel="kneemri-votefit", board=0.938, members=("a",), kit="aa79cd3")
+
+    found = champion.outranked(path)
+
+    assert len(found) == 1, "a tie is not outranked, and the grafted 0.944 is disqualified by scope"
+    assert "better_v1" in found[0]
+    assert "0.941" in found[0]
+
+    ahead = Champion(entry="better", kernel="k", board=0.941, members=("a",), kit="aa79cd3")
+
+    assert ahead.outranked(path) == [], "a pin holding the maximum is current"
 
 
 def test_drift_sees_a_kernel_that_stopped_naming_a_member(tmp_path: Path):

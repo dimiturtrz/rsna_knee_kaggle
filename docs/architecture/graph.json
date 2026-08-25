@@ -24322,6 +24322,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.champion_check.Champion.outranked",
+      "label": "outranked",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_check.Champion",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.champion_check.Champion.recorded",
       "label": "recorded",
       "level": "method",

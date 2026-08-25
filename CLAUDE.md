@@ -128,9 +128,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   submission (it caught `kneemri-solo` ranking over a package that had gained a DINOv3 member while its
   metadata still declared DINOv2 only — a kernel that loads every member and then cannot build one), and
   `python -m kneemri.kaggle.champion_check` whenever the roster or a champion kernel is edited — the only
-  one that guards a RESULT rather than a shipment: it asserts the 0.925 entry pinned in `comp/champion.json`
-  can still be rebuilt (its members still named by its kernel's `chosen` tuple, still packaged by the
-  roster), because losing that path would leave every other gate green, and
+  one that guards a RESULT rather than a shipment: it asserts the entry pinned in `comp/champion.json` can
+  still be rebuilt (its members still named by its kernel's `chosen` tuple, still packaged by the roster),
+  because losing that path would leave every other gate green — and that the pin is still the board's best
+  `ensemble` row, because it has now lagged twice with every other gate green. Read the entry and its score
+  from that file, never from here: this line quoted 0.925 through two later champions. And
   `python -m kneemri.experiments.convergence_check` before quoting ANY run's score — the only one that guards a
   NUMBER rather than a shipment. It compares a run's best epoch, its last recorded epoch and the epochs its recipe
   ASKED for, and separates TRUNCATED (died early; under `one_cycle` the anneal never ran, so the score is a FLOOR)
@@ -140,8 +142,8 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   crashes — including `res392`, which would have re-opened a correctly-closed family.
   `python -m kneemri.kaggle.board_check --live` after any submission scores, and before quoting a board number
   or a transfer constant — the check that guards the RECORD. `comp/board.jsonl` held 34 of the competition's 58
-  submissions until 2026-08-25: fifteen scored all-ours entries were absent, `basedense_v1` (the entry
-  `comp/champion.json` pins) and `votefit_v1` (the best score this project owns) among them, and the compression
+  submissions until 2026-08-25: fifteen scored all-ours entries were absent, `basedense_v1` and `votefit_v1`
+  (the entry `comp/champion.json` now pins) among them, and the compression
   constant `board_transfer` fits from that file read +1.82 against a complete set's +1.72. It joins on the Kaggle
   submission REF, never a name — asking Kaggle for the list spends no slot — so every submission carries a row,
   the ones this file will not price included (`scope: excluded` plus the reason). A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes.

@@ -42,6 +42,11 @@ KERNELS = Path("comp/kernels")
 CHOSEN = "chosen"
 """The name a kernel binds its member tuple to, which is the only line of it this check reads."""
 
+PINNABLE = "ensemble"
+"""The one scope a pin may hold. An `excluded` row is on the board and disqualified for a stated reason
+(a grafted fusion, a kit failure), and a `member_mean` row is not an entry at all — neither can be a
+champion however it scored, so neither may raise the staleness complaint below."""
+
 BOARD = Path("comp/board.jsonl")
 """Every scored entry, one JSON object a line — the record `from_board` reads a NON-champion entry from.
 
@@ -89,6 +94,14 @@ class Champion:
             message = f"no board entry named {entry}; the record holds {', '.join(sorted(held))}"
             raise ValueError(message)
         row = held[entry]
+        # A row can be present and still be unusable: 31 of 48 were written without the two fields that
+        # make an entry rebuildable, and reading them straight raised a bare KeyError naming neither the
+        # entry nor the field. Say which, because the repair is to go and read the kernel's `chosen`
+        # tuple and its log's `kit` line for that entry.
+        absent = [field for field in ("kernel", "board", "members_named", "kit") if field not in row]
+        if absent:
+            message = f"board entry {entry} records no {', '.join(absent)}, so nothing can be rebuilt from it"
+            raise ValueError(message)
         return cls(
             entry=entry,
             kernel=str(row["kernel"]),
@@ -116,6 +129,27 @@ class Champion:
                 )
         return ()
 
+    def outranked(self, path: Path = BOARD) -> list[str]:
+        """Scored entries the board holds ABOVE this one — the staleness `drift` is structurally blind to.
+
+        `drift` asks whether the pin can still be rebuilt, which is a question about the past. This asks
+        whether it is still the entry worth pinning, which the record itself said no check was asking:
+        `comp/champion.json` carries a principle instructing a reader to update the pin in the same
+        motion as reading the board, written after the pin lagged by three hours — and the pin then
+        lagged again, through five submissions, with every gate green. A rule that fails twice the same
+        way belongs in a check, and this one is a comparison against a file this module already reads.
+
+        The cost of the lag is not cosmetic: `seat_value` reads its roster from the pin precisely so no
+        arm header can hold a hand-typed copy, so a pin naming yesterday's entry prices every candidate
+        against a champion that no longer holds the board.
+        """
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        return [
+            f"{row['id']} scored {row['board']} against this pin's {self.board}"
+            for row in rows
+            if row.get("scope") == PINNABLE and row.get("board") is not None and float(row["board"]) > self.board
+        ]
+
     def drift(self, roster: Path, kernels: Path = KERNELS) -> list[str]:
         """Every way the champion can no longer be rebuilt, named. Empty means it still can."""
         named = self.named_by_kernel(kernels)
@@ -140,6 +174,7 @@ def main() -> None:
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the pinned champion")
     command.parser.add_argument("--roster", type=Path, default=Path("comp/members.roster"), help="what ships")
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where kernel scripts live")
+    command.parser.add_argument("--board", type=Path, default=BOARD, help="every scored entry")
     arguments = command.parsed()
     champion = Champion.recorded(arguments.record)
     # A champion whose member tuple could not be parsed out of its kernel has no member to find missing,
@@ -152,6 +187,15 @@ def main() -> None:
         logger.error("%s", complaint)
     if drift:
         message = f"{champion.entry} ({champion.board}) can no longer be rebuilt"
+        raise SystemExit(message)
+    # A stale pin is a different defect from an unbuildable one and is reported as one: the entry is
+    # intact, it is simply no longer the entry worth pinning. It still exits non-zero, because the only
+    # reason this needs a check at all is that the same rule written as prose was skipped twice.
+    outranked = champion.outranked(arguments.board)
+    for complaint in outranked:
+        logger.error("%s", complaint)
+    if outranked:
+        message = f"the pin lags the board: {champion.entry} ({champion.board}) is no longer the best entry"
         raise SystemExit(message)
     logger.info(
         "%s (%s, kit %s) is still buildable: %d members named and packaged",

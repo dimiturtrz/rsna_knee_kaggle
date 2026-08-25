@@ -1,23 +1,22 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "allfit",
-  "kernel": "kneemri-allfit",
-  "submission": 55736360,
-  "date": "2026-08-24",
-  "board": 0.937,
-  "kit": "e7b65a0",
+  "entry": "votefit",
+  "kernel": "kneemri-votefit",
+  "submission": 55759764,
+  "date": "2026-08-25",
+  "board": 0.938,
+  "kit": "aa79cd3 DIRTY",
   "members": [
     "final_ws_e12",
     "calib_span_ff",
     "grade_ladder_ff",
-    "band_dense_long_s2026",
     "base_dense_ff",
     "lr4e-5_ws_ff",
     "through_dense_ff"
   ],
   "serving": {
     "overlap": false,
-    "vote": "RankAverage",
+    "vote": "LogitAverage",
     "views": null,
     "precision": "each member's own"
   },
@@ -45,6 +44,9 @@
     "THE ALL-DATA AXIS IS REAL AND SUB-LINEAR, read as a DOSE and not as a one-off. Two entries hold count (7), vote (RankAverage) and serving fixed and move only how many seats trained on all 4,406 studies instead of 3,497: finalfit one seat 0.934, this entry six seats 0.937. The first seat bought about +0.001 over the 0.933 chain, the next five bought +0.003 together - roughly +0.0006 a seat against the first seat's +0.001. So the seats are NOT independent: six all-data members largely re-learn the same extra 909 studies. The consequence was pre-registered before the number in interpretations/kneemri/2026-08-24_the_all_data_dose_response.md, whose 0.936-0.939 band reads verbatim 'the 7.3 h train is NOT justified - the honest move is to stop here and record the axis as real-but-spent'. band_dense_long_ff is therefore UNRUN and the card stays with the other project. A band written before the read is the only thing that makes a +0.003 stopping point a decision rather than a story.",
     "THIS PIN IS NEARLY BLIND, which is worse than the previous one and is the price of the axis that produced it. Six of its seven seats are --fold -1, so the entry has no offline number of any kind by construction - not a weak one, none. board.jsonl records its offline as null and board_transfer's own `unmeasured()` names it rather than dropping it silently. Every roster decision from here is made against the board alone at five reads a day, and the offline ruler can only be used on pools that exclude these six. Buying board points by spending the ability to measure offline is a trade that cannot be made twice.",
     "A LEDGER THAT NOTHING READS GOES STALE SILENTLY, and it took four days and a pushed correction to notice. comp/board.jsonl - the machine-readable half that board_transfer prices EVERY experiment from - stopped being written on 2026-08-20 while comp/SUBMISSIONS.md kept its prose current, so seven entries (sevenplane, gradeswap, accumseat, greedy7, finalfit, weakseven, allfit) existed in the prose and not in the record. The 2026-08-24 refit was then computed by HAND from that prose and mis-paired gradeswap's offline 0.8694 with finalfit's board 0.934 - two different entries, because finalfit has no offline number at all - and the resulting +2.14 was written into this file AND into comp/members.roster as a correction. Backfilled, the tool itself reads +1.92 over 15 entries and 90 pairs. The rule that survives unchanged is the one that matters (never read an offline seat against a board threshold without the compression); the constant has now been wrong twice, first at +4.67 and then at +2.14, and both times because it was quoted from prose. Read it from `python -m kneemri.evaluation.board_transfer`, and if the two disagree the record is stale, not the tool.",
-    "THE INVERSION CLAUSE GOT STRONGER ON MORE DATA, which is the one place this project's ruler has held up. With the backfill the holdout inverts on 4 of 90 orderable pairs and 0 of the 57 it resolves at all - every disagreement still sits under the 0.0053 floor, now over 57 resolved pairs instead of 33. But note what the slope is fitted ON: the four best entries here (allfit, finalfit, sevenplane, accumseat) are ONE-SIDED and enter no pair, so +1.92 is measured entirely on entries at or below 0.933 and is an extrapolation at the top of the board. Trust the SIGN above 0.0053, halve the MAGNITUDE, and do not quote the slope as though it had been tested where we now live."
+    "THE INVERSION CLAUSE GOT STRONGER ON MORE DATA, which is the one place this project's ruler has held up. With the backfill the holdout inverts on 4 of 90 orderable pairs and 0 of the 57 it resolves at all - every disagreement still sits under the 0.0053 floor, now over 57 resolved pairs instead of 33. But note what the slope is fitted ON: the four best entries here (allfit, finalfit, sevenplane, accumseat) are ONE-SIDED and enter no pair, so +1.92 is measured entirely on entries at or below 0.933 and is an extrapolation at the top of the board. Trust the SIGN above 0.0053, halve the MAGNITUDE, and do not quote the slope as though it had been tested where we now live.",
+    "THE KIT SHA ON THIS PIN IS DIRTY, and it is the first one that is. Every pin before this read a bare seven-character sha off its kernel log; this entry's log says 'kit aa79cd3 DIRTY', so the sha names a commit the shipped bytes were not equal to. The DIRTY is recorded here rather than trimmed off, because a pin whose whole purpose is that the entry can be rebuilt must not claim a reproducibility it does not have: aa79cd3 plus unknown working-tree edits is what scored 0.938. farseat, shipped from the same dirty tree, carries the same marker in board.jsonl. This does not make the entry unbuildable - its members are named by its kernel and packaged by the roster, which is what champion_check asserts - it makes the SERVING CODE approximate. Ship the next entry from a clean tree, and if a dirty ship is unavoidable, the marker travels with it.",
+    "THIS PIN IS FULLY BLIND, where the previous one was nearly. allfit held one fold-0 seat (band_dense_long_s2026) among seven; this entry is those seven minus exactly that seat, so all six of its members were fitted at --fold -1 and every one of them has seen every holdout study. There is no pool here that can be seat-scored, curve-scored or distance-scored at all - not a weak offline number, none, and board.jsonl records offline null by construction. seat_value reads its roster from this pin, so the consequence is direct: priced against the champion it can report no offline mean whatsoever. The door that remains is seat_value --against <board entry>, which exists precisely because the champion stopped being scoreable, and it must now be pointed at an entry whose members are not all-data. Two pins in a row have bought board position by spending the ability to measure, and the second one spent the last of it.",
+    "THE PIN LAGGED A SECOND TIME, so the rule stopped being prose and became a check. The principle above states in this file that a lagging pin misprices every candidate under it and that the pin must be updated in the same motion as reading the board. It was written after basedense_v1 held the pin three hours past allfit's score - and then allfit held the pin while votefit_v1 sat on the board at 0.938, through five further submissions. A rule that has now failed twice in the same way is not a rule anyone is going to remember on the third occasion; knee-cun6 moves it into champion_check, which already reads board.jsonl and can simply compare. Note what the move does NOT rest on: 0.938 over 0.937 is one board tick, under the noise floor, and the record says plainly it is not a result. The pin is a reproducibility record of the best-scoring path, not a claim that the path is better - which is exactly why it can be kept current mechanically."
   ]
 }
