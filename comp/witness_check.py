@@ -236,10 +236,23 @@ def main() -> None:
     # dictionary comprehension that used to wrap it meant a run killed by a timeout printed NOTHING —
     # every verdict it had already computed died with it, so fifteen minutes of work read as no output
     # at all rather than as most of an answer.
+    # COUNTED AGAINST A TOTAL, because a killed run and a finished one printed the SAME SHAPE of log.
+    # On 2026-08-25 a 900 s cap cut this at member 22 of 40 and the eighteen it never reached left no
+    # trace: no line, no count, no summary. Eighteen absent verdicts read as eighteen members that do
+    # not exist, and the seven that actually ship were among them. The index is what makes a truncated
+    # log say so on its own — "22/40" ends a run that stopped, "40/40" ends one that finished.
     verdicts: dict[str, str] = {}
-    for member in members:
+    logger.info("checking %d members on %s", len(members), device.type)
+    for position, member in enumerate(members, start=1):
         verdicts[member.identifier] = check(package, member, root, device, arguments.batch)
-        logger.info("  %s: %s", member.identifier, verdicts[member.identifier])
+        logger.info("  [%d/%d] %s: %s", position, len(members), member.identifier, verdicts[member.identifier])
+
+    unreached = [member.identifier for member in members if member.identifier not in verdicts]
+    if unreached:
+        # Unreachable while the loop is exhaustive, and kept anyway: the claim "checked" must be the
+        # loop's own arithmetic rather than a property a future edit is trusted to preserve.
+        message = f"{len(unreached)} members produced no verdict: {', '.join(unreached)}"
+        raise SystemExit(message)
 
     refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
     unverified = [name for name, verdict in verdicts.items() if verdict.startswith("UNVERIFIED")]
