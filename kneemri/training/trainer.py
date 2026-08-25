@@ -37,6 +37,7 @@ from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
 from kneemri.training.grades import Predicted
 from kneemri.training.heartbeat import Heartbeat
+from kneemri.training.mixup import Mixup
 from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
@@ -88,6 +89,7 @@ SCHEDULED = "one_cycle"
 REPORTS = "report_supervision"
 ACCUMULATION = "micro_batches_per_step"
 LAYER_DECAY = "encoder_rate_decay"
+MIXUP = "mixup_alpha"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 NEEDED_FOR_A_RATIO = 2
@@ -133,6 +135,9 @@ class Trainer:
         # Attached for the same reason, and a no-op by default: `every=1` steps on every micro-batch,
         # which is the loop every number in the ledger was measured under.
         self.accumulation = Accumulation()
+        # Attached and null by default for the same reason: alpha zero draws no blend at all, so the
+        # loop is byte-for-byte the one every number in the ledger was measured under.
+        self.mixup = Mixup()
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
         # None rather than a no-op object, unlike every other policy here, because there is no
@@ -167,6 +172,7 @@ class Trainer:
             TEACHER: self.teacher is not None,
             ACCUMULATION: self.accumulation.every,
             LAYER_DECAY: self.encoder_rate_decay(),
+            MIXUP: self.mixup.alpha,
         }
 
     def encoder_rate_decay(self) -> float:
@@ -261,6 +267,10 @@ class Trainer:
     def accumulate(self, every: int) -> None:
         """Update on `every` micro-batches at once — see `Accumulation` for what that does and does not buy."""
         self.accumulation = Accumulation(every)
+
+    def blend(self, alpha: float) -> None:
+        """Mix each batch with a permutation of itself — see `Mixup` for why this axis and not another epoch."""
+        self.mixup = Mixup(alpha)
 
     def one_cycle(self, total_steps: int) -> None:
         """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
@@ -369,6 +379,13 @@ class Trainer:
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
+            # AFTER the augmenter and over all four tensors at once. Blending the raw read instead would
+            # hand two studies the same warp and the same gain, which is a cheaper draw than it looks:
+            # the pair would differ only in anatomy, not in appearance. Under the null policy every one
+            # of these four calls is the identity — see `Blend`.
+            blend = self.mixup.draw(len(batch), generator)
+            pixels, flags = blend.images(pixels), blend.mask(flags)
+            score, weight = blend.rows(score), blend.rows(weight)
             with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.
@@ -380,8 +397,13 @@ class Trainer:
                     # INDEXED BY THE SAME `batch` the labels are, which is what makes the alignment a
                     # fact rather than a hope: both tables were reordered into the corpus's study order
                     # at load, so one index array addresses the same study in each.
+                    # BLENDED TOO, by the same draw. A teacher table left un-mixed would score the
+                    # blended pixels against the first study's soft labels alone, which is the distilling
+                    # arm silently training on a different target than the label term does.
                     teacher=(
-                        None if self.teacher is None else torch.from_numpy(self.teacher.rows(batch)).to(self.device)
+                        None
+                        if self.teacher is None
+                        else torch.from_numpy(blend.rows(self.teacher.rows(batch))).to(self.device)
                     ),
                 )
                 loss = self.objective(judged) + self.reports(report.float(), batch)

@@ -16,6 +16,7 @@ from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
+from kneemri.training.mixup import OFF
 from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
@@ -35,6 +36,7 @@ from kneemri.training.trainer import (
     AUTOCAST,
     AVERAGING,
     LAYER_DECAY,
+    MIXUP,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
@@ -143,6 +145,20 @@ def test_accumulate():
     assert trainer.policies()[ACCUMULATION] == 1, "the default loop steps on every micro-batch"
     trainer.accumulate(4)
     assert trainer.policies()[ACCUMULATION] == 4
+
+
+def test_blend():
+    """Attaching the blend is visible in the trainer's own account of itself.
+
+    This is the POSITIVE WITNESS for `--mixup`. Everything else about the flag is silent: a value that
+    never reached the trainer leaves the loop drawing an identity blend, trains perfectly well, and
+    reports the un-mixed recipe's number under the mixed arm's name — the failure shape `landed` exists
+    for, and one this project has already paid for three times.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[MIXUP] == OFF, "the default must be the loop every ledger number was measured under"
+    trainer.blend(0.2)
+    assert trainer.policies()[MIXUP] == pytest.approx(0.2)
 
 
 def test_fit_epoch_accumulation_matches_the_larger_batch():
@@ -280,6 +296,7 @@ def test_policies():
         TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
+        MIXUP: OFF,
     }
 
     trainer.bfloat16()
@@ -299,6 +316,7 @@ def test_policies():
         TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
+        MIXUP: OFF,
     }
 
 

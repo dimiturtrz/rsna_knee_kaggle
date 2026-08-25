@@ -52,6 +52,7 @@ from kneemri.training.trainer import (
     AUTOCAST,
     AVERAGING,
     LAYER_DECAY,
+    MIXUP,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
@@ -223,6 +224,7 @@ class Request:
     unfreeze_last: int
     accumulate: int
     layer_decay: float
+    mixup: float
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -274,4 +276,5 @@ class Request:
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
+            MIXUP: self.mixup,
         }

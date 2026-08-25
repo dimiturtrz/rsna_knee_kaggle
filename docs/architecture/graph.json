@@ -2901,6 +2901,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.flag_vocabulary",
+      "target": "kneemri.training.mixup",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.flag_vocabulary",
       "target": "kneemri.training.pretrained_encoder",
       "weight": 1
     },
@@ -3160,6 +3166,12 @@
       "kind": "import",
       "source": "kneemri.training.options",
       "target": "kneemri.training.flag_vocabulary",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
+      "target": "kneemri.training.mixup",
       "weight": 1
     },
     {
@@ -3484,6 +3496,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.heartbeat",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.mixup",
       "weight": 1
     },
     {
@@ -14617,6 +14635,42 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.mixup.Blend.images",
+      "target": "kneemri.training.mixup.Blend.identity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.mixup.Blend.mask",
+      "target": "kneemri.training.mixup.Blend.identity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.mixup.Blend.rows",
+      "target": "kneemri.training.mixup.Blend.identity",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.mixup.Mixup",
+      "target": "kneemri.training.mixup.Blend",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.mixup.Mixup.draw",
+      "target": "kneemri.training.mixup.Blend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.mixup.Mixup.draw",
+      "target": "kneemri.training.mixup.Mixup.enabled",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.objective.DecorrelatedObjective",
       "target": "kneemri.training.grades.Predicted",
@@ -15447,6 +15501,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.blend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.exponential_average",
       "weight": 1
     },
@@ -15721,6 +15781,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.mixup.Mixup",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.objective.Objective",
@@ -15777,6 +15843,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.mixup.Mixup",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.objective.Objective",
       "weight": 1
     },
@@ -15802,6 +15874,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.augment_bag",
       "target": "kneemri.training.augmentation.Augmentation.bagged",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.blend",
+      "target": "kneemri.training.mixup.Mixup",
       "weight": 1
     },
     {
@@ -15862,6 +15940,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.heartbeat.Heartbeat.tick",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.mixup.Mixup.draw",
       "weight": 1
     },
     {
@@ -16315,7 +16399,7 @@
       "role": null
     },
     {
-      "descendants": 134,
+      "descendants": 135,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -17179,7 +17263,7 @@
       "role": null
     },
     {
-      "descendants": 26,
+      "descendants": 27,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -17278,6 +17362,14 @@
       "descendants": 0,
       "id": "kneemri.training.landed",
       "label": "landed",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup",
+      "label": "mixup",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -19640,6 +19732,22 @@
       "label": "Request",
       "level": "class",
       "parent": "kneemri.training.landed",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Blend",
+      "label": "Blend",
+      "level": "class",
+      "parent": "kneemri.training.mixup",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Mixup",
+      "label": "Mixup",
+      "level": "class",
+      "parent": "kneemri.training.mixup",
       "role": "satellite"
     },
     {
@@ -29348,6 +29456,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.mixup.Blend.identity",
+      "label": "identity",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Blend.images",
+      "label": "images",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Blend.mask",
+      "label": "mask",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Blend.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Mixup.draw",
+      "label": "draw",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Mixup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.mixup.Mixup.enabled",
+      "label": "enabled",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Mixup",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.DecorrelatedObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -30126,6 +30282,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.bfloat16",
       "label": "bfloat16",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.blend",
+      "label": "blend",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

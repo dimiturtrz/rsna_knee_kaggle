@@ -26,6 +26,7 @@ from kneemri.models.model import (
 )
 from kneemri.models.slice_pooling import MAXIMUM
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
+from kneemri.training.mixup import OFF
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
 from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
@@ -110,6 +111,7 @@ PLAIN = Request(
     # what is there. The mismatch a real encoder would show is the point of the strict comparison.
     unfreeze_last=4,
     layer_decay=NO_LAYER_DECAY,
+    mixup=OFF,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 

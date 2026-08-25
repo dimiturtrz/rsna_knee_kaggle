@@ -149,6 +149,7 @@ class RunSetup:
             focus_label=options.focus_label or "",
             unfreeze_last=options.unfreeze_last,
             layer_decay=options.layer_decay,
+            mixup=options.mixup,
         )
 
     def objective(self) -> Objective:
@@ -377,6 +378,7 @@ class RunSetup:
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
         # and the trainer's own accumulation is what converts micro-batches into them.
         trainer.accumulate(options.accumulate)
+        trainer.blend(options.mixup)
         if options.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR

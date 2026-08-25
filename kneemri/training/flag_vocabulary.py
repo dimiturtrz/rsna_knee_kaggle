@@ -19,6 +19,7 @@ from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
+from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import Adaptation
 
@@ -56,6 +57,17 @@ class FlagVocabulary:
             "the settled recipe's batch: dinov2-base at 336 px and 20 slices asks 56.3 GB at batch 12 "
             "and 28.3 at 6. Costs one forward/backward per micro-batch, and restores the GRADIENT only "
             "- anything pooled within a step still sees --batch studies.",
+        )
+        parser.add_argument(
+            "--mixup",
+            type=float,
+            default=OFF,
+            help="blend each batch with a permutation of itself, pixels and TARGETS together, at a "
+            "weight drawn from Beta(a, a). 0.1-0.4 is the usual range; 0, the default, is off and is "
+            "what every ledger number was measured under. This is the first label-space regulariser "
+            "here: --intensity-aug changes how a study looks and leaves its label alone, which is why "
+            "it fired and the overfitting did not care - band_dense_long peaked at epoch 6 and lost "
+            "0.0182 over eighteen more while its train loss halved.",
         )
         # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
         # blocks here and eight more in `build_cache`, and the two had already diverged on the band.

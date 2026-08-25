@@ -85,6 +85,10 @@ NOT_IN_CONFIG = {
     "rebuild loads this member, not the initialisation it grew out of",
     "encoder_adapt_depth": "how much of that starting point was taken — a fact about the run's history, "
     "not about the function these weights are, and a rebuild loads the fitted encoder whole",
+    "mixup": "an input-AND-target policy applied while fitting, never while serving — it blends the "
+    "batch with a permutation of itself and adds no parameter, so the head a rebuild serves is "
+    "byte-identical. It is `intensity_aug`'s write-off with the target moved too; the recipe block "
+    "carries the alpha, which is where the landed-check reads it",
 }
 """Every run setting the config does NOT carry, each with WHY — a decision record.
 

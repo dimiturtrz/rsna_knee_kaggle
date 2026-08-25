@@ -24,6 +24,7 @@ from kneemri.models.slice_pooling import CHANNELS
 from kneemri.models.slot_head import ATTENDED
 from kneemri.models.token_pooling import CLS_MEAN
 from kneemri.training.flag_vocabulary import FlagVocabulary
+from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import Adaptation
 
@@ -68,6 +69,10 @@ class TrainingOptions:
     accumulate: int = 1
     """Micro-batches per optimiser step: the EFFECTIVE batch is `batch * accumulate`, at the activation
     memory of `batch` alone. 1 is the loop every arm in the ledger ran."""
+    mixup: float = OFF
+    """Beta concentration for blending each batch with a permutation of itself; 0 is off. The first
+    LABEL-SPACE regulariser this project has — see `kneemri.training.mixup` for why the appearance-only
+    one it already had left the overfitting untouched."""
     slices: int = 12
     image_size: int = IMAGE_SIZE
     train_size: int = 0
