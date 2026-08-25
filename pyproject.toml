@@ -234,6 +234,8 @@ omit = [
     # RijekaCorpus, which is unit-tested. What is left here is argparse plus the one guard that refuses
     # a scheme which would write over our own arrays — and that guard is a parser.error, not a branch.
     "core/data/corpus/build_rijeka.py",
+    # And the same again for MRNet: build_mrnet reads a 5.7 GB archive and its logic is MRNetCorpus.
+    "core/data/corpus/build_mrnet.py",
     # And the third: build_merged is argparse plus the guard that refuses the destination as a source.
     # Its logic is MergedCache and StudyCache.under, both unit-tested.
     "core/data/corpus/build_merged.py",

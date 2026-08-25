@@ -166,6 +166,34 @@ Nothing ROUTES into it: that corpus ships one volume per exam with no series to 
 `SlotScheme.assign` is never asked. The scheme is here to name the axis and the cache, not to select.
 """
 
+MRNET_SCHEME = "mrnet"
+"""The slot axis of the MRNet (Stanford) corpus — three planes, and therefore three slots.
+
+Same safety argument as `RIJEKA_SCHEME`: a foreign corpus decoded under the canonical name writes onto
+the arrays every member on disk was fitted on. The scheme makes the collision unrepresentable.
+"""
+
+MRNET_SLOTS: tuple[Slot, ...] = (SLOTS[0], SLOTS[2], SLOTS[4])
+"""SAG_FLUID_FS, AX_FLUID_FS and COR_T1 — three of the canonical six, in canonical order.
+
+Bien et al. 2018 (PLOS Medicine 15(11)) state the corpus's most common sequences: sagittal T2 with fat
+saturation, coronal T1, axial PD with fat saturation. Those are exactly `SLOTS[0]`, `SLOTS[4]` and
+`SLOTS[2]`'s predicates, so an MRNet exam occupies three of the positions it would occupy in our own
+corpus and a trunk meets each sequence in the channel it already knows.
+
+WHY THIS CORPUS IS WORTH MORE THAN RIJEKA'S ONE SLOT. A Rijeka exam fills one of six and leaves five
+zero, so "a foreign corpus reads flat" and "a degenerate input reads flat" are the same measurement.
+Three filled slots separates them.
+
+THE SEQUENCES ARE MODAL, NOT GUARANTEED. The published description says most common, and the corpus
+ships no per-exam sequence metadata to check it against — so a minority of exams sit in a slot whose
+weighting predicate they do not satisfy. That is a known, stated impurity of this axis, not an
+assumption being passed off as a fact.
+
+Canonical ORDER is load-bearing: `MergedCache.positions` matches by slot NAME, and `_copy` assigns a
+source block into `[0, 2, 4]` in this tuple's order.
+"""
+
 MERGED_SCHEME = "merged"
 """Our corpus and a foreign one in ONE array — the canonical slot axis under a name of its own.
 
@@ -185,6 +213,7 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     "extended": EXTENDED_SLOTS,
     MULTISCALE_SCHEME: MULTISCALE_SLOTS,
     RIJEKA_SCHEME: RIJEKA_SLOTS,
+    MRNET_SCHEME: MRNET_SLOTS,
     MERGED_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
