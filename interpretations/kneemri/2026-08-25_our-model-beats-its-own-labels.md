@@ -94,6 +94,44 @@ n = 58 and the per-label standard error is 0.04–0.09 (`label_power`), so **no 
 finding.** The claim is the aggregate sign and the nine/three partition, both of which are far outside
 what one row's error moves.
 
+## It does not open distillation, and it is worth saying why
+
+"Our model beats its labels on nine of twelve" is, on its face, the textbook precondition for training the
+student toward the teacher's own outputs, and the machinery is already here (`--distill-weight` +
+`--teacher-targets`, gated so neither half can arrive alone). **That arm has already run and is closed by
+a structural argument this measurement does not touch.** `distill_pairs` scored +0.0016 on the mean — well
+inside the 0.0062 floor — and, more decisively, landed at **nearest-neighbour distance 0.9159, closer to a
+seated member than any seated member sits to its own nearest.** A student fitted toward our own ensemble
+converges toward our own ensemble; a rank average cannot pay for an ordering it already holds. Nothing
+above changes that, because the twin problem is about where the student ENDS UP, not about whether the
+teacher was better than the report.
+
+So the correct reading is not "go distil". It is a redirection, and an uncomfortable one.
+
+## The consequence is that BOTH supervision levers are priced, and neither is 1.5%-sized
+
+This measurement completes the pair. The label half is measured: `blendlabels`, +0.0034 on the metric and
++0.0070 on the findings it can reach. The model half is now measured too, and it is **three findings** —
+MCL −0.0465, Lateral Meniscus −0.0149, PF OA −0.0071 — where the earlier page had it at six summing
+−0.049. Neither half is an order of magnitude from where it needs to be, and they cannot be added into
+one either, since they are opposite sides of the same partition.
+
+**That is the actionable content.** Supervision was the last lane that still had an untested "maybe it's
+big" attached to it, and the answer is no. What is left with plausible 1.5% mass is what it always was —
+more and different DATA (`merged_corpus`, MRNet, fastMRI+) and ensemble seats built on genuinely different
+mechanisms. Slot planning should not move toward the label lane on the strength of this page; it should
+stop treating the supervision question as open.
+
+## The one thing that could reverse it, and is not known
+
+Everything above measures our model against the RADIOLOGIST. Whether that is the ruler the board uses is
+not established here. If the hidden test labels are report-derived, then matching the report reader is
+exactly the right target and a model that beats it is spending capacity on the wrong truth. If they are
+image-read annotations — which is what the hosts' *"those folks did not use the reports as a starting
+point"* implies — then our training targets ARE the binding ceiling and target correction is worth more
+than this page prices it at. **That single fact decides whether the label lane is small or large, and it
+is cheaper to find out than to run anything.** Filed as a question, not an assumption.
+
 ## What this does NOT say
 
 It does not say our model is good. 0.8932 against a radiologist on 58 studies is not the board and not the

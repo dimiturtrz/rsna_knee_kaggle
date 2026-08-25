@@ -3726,8 +3726,11 @@ claim, and +0.0008 is under the +0.0015 this ruler has ever been shown to resolv
 
 ## 2026-08-25 — holdannot: the annotation upweight costs nothing, and OUR model beats OUR labels
 
-`holdannot` = the control's recipe with `--hold-annotations`, which drops the 58 radiologist-read studies
-from the training table and with them their 3.0 loss override. Twelve epochs, `ARM DONE`, converged
+`holdannot` = the control's recipe with `--hold-annotations`, which stops the 58 radiologist-read studies
+from OVERWRITING their report-derived rows — the 696 annotation cells and their 3.0 weight go away and
+those studies train on what the report said instead. The studies themselves stay in the corpus; it is the
+cells that are withheld, which is the whole point (`Supervision.annotations`). Twelve epochs, `ARM DONE`,
+converged
 (`convergence_check`: peak at 10 of 12, then two lower epochs — STOPPED, not truncated).
 
 | run | holdout mean AUC | vs control |
@@ -3736,9 +3739,10 @@ from the training table and with them their 3.0 loss override. Twelve epochs, `A
 | `holdannot` (e9 / **e10** / e11) | 0.8482 / **0.8487** / 0.8481 | **−0.0015** |
 
 **The member reading is a null, and the null is the point.** −0.0015 sits inside the arm's own
-pre-registered `>= -0.006` band, so withholding 1.3% of the corpus AND a 3.0 upweight costs nothing
-measurable. That prices the annotation upweight: it is not what carries the corpus, and no future arm
-needs to protect it.
+pre-registered `>= -0.006` band, so the only labels in this project read from PIXELS rather than from
+text — 696 cells at 3.0, ~0.66% of total training weight — are worth nothing measurable on the metric.
+That prices the annotation upweight: it is not what carries the corpus, and no future arm needs to
+protect it.
 
 **The instrument reading is the result.** The member exists so `supervision_gap` can be computed on a
 model of OURS whose loss never touched a radiologist cell. Reading it over all **58 of 58** annotated
