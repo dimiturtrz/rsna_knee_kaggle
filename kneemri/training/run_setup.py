@@ -327,7 +327,7 @@ class RunSetup:
             backbone = PretrainedEncoder(options.encoder_weights).into(
                 backbone, options.variant, options.encoder_adapt_depth
             )
-        model = StudyModel(backbone, encoder.dim, slots, design)
+        model = StudyModel(backbone, encoder.dim, slots, design, encoder.normalization)
         if options.lora_rank:
             logger.info(
                 "low-rank adaptation: %d layers at rank %d", model.low_rank(options.lora_rank), options.lora_rank

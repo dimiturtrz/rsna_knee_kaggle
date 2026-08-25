@@ -10,6 +10,7 @@ from kneemri.models.backbone import (
     BASE,
     CONVNEXT_BASE,
     ENCODERS,
+    IMAGENET,
     LARGE,
     RAD_DINO,
     SMALL,
@@ -19,6 +20,7 @@ from kneemri.models.backbone import (
     VJEPA2_LARGE,
     Encoder,
     MapAsTokens,
+    Normalization,
     Stage,
     TokenOutput,
 )
@@ -36,6 +38,55 @@ class _FeatureMap(nn.Module):
         rows = torch.arange(self.side * self.side, dtype=torch.float32)
         emitted = rows.view(1, 1, self.side, self.side).expand(len(pixel_values), self.dim, self.side, self.side)
         return TokenOutput(emitted)
+
+
+RAD_DINO_PREPROCESSOR = {
+    "image_mean": [0.5307, 0.5307, 0.5307],
+    "image_std": [0.2583, 0.2583, 0.2583],
+    "crop_size": {"height": 518, "width": 518},
+}
+"""microsoft/rad-dino's own `preprocessor_config.json`, copied from the checkpoint rather than from the
+forum post that pointed at it — the numbers are the whole finding, so they come from the primary source."""
+
+
+def test_declared():
+    """A checkpoint's own constants, read off the file the checkpoint ships them in."""
+    assert Normalization.declared(RAD_DINO_PREPROCESSOR) == ENCODERS[RAD_DINO].normalization
+
+    with pytest.raises(ValueError, match="no image_mean"):
+        Normalization.declared({"crop_size": {"height": 518, "width": 518}})
+
+
+def test_triple():
+    """One constant per channel, or one constant for all three — configs are written both ways."""
+    assert Normalization.triple([0.5307]) == (0.5307, 0.5307, 0.5307)
+    assert Normalization.triple([0.485, 0.456, 0.406]) == IMAGENET.mean
+
+
+def test_assert_declared():
+    """The registry held to the checkpoint, wherever the checkpoint ships the file to hold it to."""
+    ENCODERS[RAD_DINO].normalization.assert_declared(RAD_DINO_PREPROCESSOR, RAD_DINO)
+
+    with pytest.raises(ValueError, match=r"0\.5307.*0\.485"):
+        ENCODERS[RAD_DINO].normalization.assert_declared(
+            {"image_mean": [0.485, 0.456, 0.406], "image_std": [0.229, 0.224, 0.225]}, RAD_DINO
+        )
+
+
+def test_every_encoder_declares_the_constants_it_was_pretrained_under():
+    """Six of seven are ImageNet and one is not, which is exactly why a shared constant survived so long.
+
+    Each of these was checked against that encoder's own `preprocessor_config.json` — DINOv2 and
+    ConvNeXtV2 from HuggingFace, DINOv3 from the local snapshot, RAD-DINO from both. V-JEPA2 is the one
+    the registry states without having read: no snapshot on disk and no readable file on the hub, so its
+    ImageNet default is an ASSUMPTION and is marked as one here rather than passing quietly.
+    """
+    natural = [SMALL, BASE, LARGE, V3_SMALL, V3_SMALL_PLUS, V3_BASE, CONVNEXT_BASE]
+
+    assert all(ENCODERS[variant].normalization == IMAGENET for variant in natural), "all verified ImageNet"
+    assert ENCODERS[RAD_DINO].normalization.mean == (0.5307, 0.5307, 0.5307), "greyscale radiographs"
+    assert ENCODERS[RAD_DINO].normalization.std == (0.2583, 0.2583, 0.2583)
+    assert ENCODERS[VJEPA2_LARGE].normalization == IMAGENET, "UNVERIFIED — check before arming a vjepa arm"
 
 
 def test_mounted_source():

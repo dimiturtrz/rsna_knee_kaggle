@@ -33,7 +33,7 @@ import torch
 from jaxtyping import Bool, Float
 from torch import Tensor, nn
 
-from kneemri.models.model import IMAGENET_MEAN, IMAGENET_STD
+from kneemri.models.backbone import IMAGENET, Normalization
 
 BYTE_RANGE = 255.0
 CHANNELS = 3
@@ -98,13 +98,22 @@ class SpectralMae(nn.Module):
     mean: Tensor
     std: Tensor
 
-    def __init__(self, backbone: nn.Module, dim: int, config: SpectralMaskConfig) -> None:
+    def __init__(
+        self,
+        backbone: nn.Module,
+        dim: int,
+        config: SpectralMaskConfig,
+        normalization: Normalization = IMAGENET,
+    ) -> None:
         super().__init__()
         self.backbone = backbone
         self.config = config
         self.decoder = nn.Linear(dim, config.patch * config.patch)
-        self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, CHANNELS, 1, 1))
-        self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, CHANNELS, 1, 1))
+        # The trunk's OWN pretraining constants, for the reason `StudyModel` states: pretraining a
+        # checkpoint through somebody else's normalisation is a silent handicap, and this path is the
+        # one where the trunk is the entire subject of the run.
+        self.register_buffer("mean", torch.tensor(normalization.mean).view(1, CHANNELS, 1, 1))
+        self.register_buffer("std", torch.tensor(normalization.std).view(1, CHANNELS, 1, 1))
 
     def patchify(self, images: Float[Tensor, "b 1 h w"]) -> Float[Tensor, "b n q"]:
         """One row per patch, in the raster order the backbone emits its patch tokens in.

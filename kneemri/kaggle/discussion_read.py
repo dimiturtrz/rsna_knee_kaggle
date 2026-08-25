@@ -111,11 +111,23 @@ class Discussion:
     def since(self, stamp: str) -> list[DiscussionTopic]:
         """The threads that took a post after `stamp` — the delta, which is all a second reading wants.
 
-        Compared as text, which is what an ISO stamp is FOR. Sorted most-recent first rather than by
-        votes: a thread that has been argued in today outranks a settled announcement with more of them.
+        Compared as text, which is what an ISO stamp is FOR — but ONLY after both sides are put in the
+        same shape. The API writes `2026-08-25 11:00:00` with a space and a caller types the ISO `T`,
+        and a space sorts BELOW `T`, so `--since 2026-08-25T00:00:00` silently excluded every thread
+        that had been posted in that day and reported no movement. A filter whose failure mode is an
+        empty result is a filter that reports an all-clear when it breaks.
+
+        Sorted most-recent first rather than by votes: a thread argued in today outranks a settled
+        announcement with more of them.
         """
-        moved = [topic for topic in self.topics if topic.active > stamp]
+        wanted = self.stamped(stamp)
+        moved = [topic for topic in self.topics if self.stamped(topic.active) > wanted]
         return sorted(moved, key=lambda topic: topic.active, reverse=True)
+
+    @staticmethod
+    def stamped(value: str) -> str:
+        """One stamp in the one shape both sides are compared in: space-separated, no timezone suffix."""
+        return value.replace("T", " ").split("+")[0].strip()
 
     @staticmethod
     def _kaggle_topics(page: int) -> Sequence[object]:

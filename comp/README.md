@@ -180,7 +180,13 @@ dataset push, which is how it escaped the first time. It fired on its first real
     hand the solution to the field. **If we place, `kneemri-members` and `kneemri-kit` must be flipped to
     public before the winner deadline.**
 
-## The Efficiency Prize, measured rather than assumed (2026-08-11)
+## The Efficiency Prize, measured rather than assumed (2026-08-11, re-measured 2026-08-25)
+
+**Read it with `python -m kneemri.kaggle.efficiency_read --live` rather than from this section.** Every
+number below the 2026-08-25 heading is a live read; every number above it is the 2026-08-11 snapshot,
+kept because the reasoning is still the reasoning. The section exists in two dated halves because the
+first half went two weeks stale without anybody noticing — the field had more than doubled and the
+efficiency leader had moved 0.013 — which is the whole argument for the tool.
 
 Its evaluation page is JS-only like the rules, but `ryanholbrook/rsna-knee-abnormalities-efficiency-lb`
 publishes the leaderboard as a notebook output, and `kaggle kernels output` pulls it. From the snapshot:
@@ -227,6 +233,49 @@ demonstrably hold both, including the efficiency leader (public 0.939, efficienc
 So a cheap submission **adds** an efficiency candidate rather than displacing the accurate one, and the
 track costs us nothing but a submission slot. Get both leaderboards with
 `kaggle competitions leaderboard <slug> -d` and `kaggle kernels output ryanholbrook/rsna-knee-abnormalities-efficiency-lb`.
+
+### Re-measured 2026-08-25 — the conclusion holds, two of the numbers do not
+
+**The additivity argument above is measured through a confound, and correcting it halves the effect.**
+The efficiency board is a SNAPSHOT (its newest submission is 2026-08-23 22:30) while the accuracy board
+is live. A team that improved *after* the snapshot therefore reads as one deliberately holding a cheaper
+efficiency entry. The tell is one-sided, which is why it went unnoticed: **lag can only push an
+efficiency score DOWN**, so "never higher" — the observation the argument leans on — is exactly what pure
+staleness looks like and proves nothing on its own. Splitting on whether the snapshot had actually seen
+each team's last submission:
+
+| rows | below their public best | median gap |
+|---|---:|---:|
+| all 2,230 joined | 34.8% | 0.011 |
+| **1,694 the snapshot had seen** | **20.5%** | **0.006** |
+| 536 that submitted afterwards | 79.9% | — |
+
+The track **is** additive — 348 settled teams demonstrably hold a cheaper efficiency entry — but by half
+as much as recorded, and the median settled team's efficiency entry is 0.006 below its best, *under our
+own 0.0062 noise floor*. `efficiency_read.additive` reports through the `settled` filter and prints how
+many rows it dropped.
+
+**What moved on the board itself:** 905 ranked teams → **2,238**. Efficiency rank 1 was 0.934; it is now
+**0.947**. The top 20 efficiency ranks score **0.918 to 0.947, median 0.932**. That 0.918 floor is what a
+cheap build must clear, and the whole-stack pair prescribed above scored 0.919 — still inside the band,
+by one thousandth. The prescription survives; its margin does not.
+
+**Our own standing, and the reason the track is still worth a slot:** accuracy rank **48 of 2,371 at
+0.938**, efficiency rank **95 of 2,238 at 0.933** — and that efficiency row is itself stale, since we
+submitted after the snapshot. **29 teams score within 0.002 of our 0.933 and they hold efficiency ranks
+6 through 1,667.** At a fixed accuracy the whole rank span is runtime. **68 teams rank above us on
+efficiency while scoring below us.** Accuracy is not what holds us at 95.
+
+What is still not measured: the metric's actual formula. The evaluation page is JS-only and the API does
+not carry it, so nothing here predicts a rank — only that runtime, not accuracy, is our binding
+constraint on that board.
+
+**A note on where these numbers came from, because it is the same trap twice.** The efficiency board is
+not published by Kaggle as a board; it is the OUTPUT OF A NOTEBOOK, and it was read here as if it were
+live. It is not — hence the whole correction above. A number lifted from somebody's notebook is a claim
+until our own leaderboard row agrees with it, and that applies to a published score as much as to a
+published table: a replication that has not landed on the board has not landed. The competitor
+single-model scores in `knee-3d8q` are in exactly that category and are labelled as such.
 
 ## Measured on 2026-08-10 by `kernels/kneemri-probe`
 

@@ -9,9 +9,10 @@ a load, or not at all if the head happens to accept it.
 The variant is the only free choice; the repository and the feature width follow from it.
 """
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 import torch
 from jaxtyping import Float
@@ -32,6 +33,71 @@ DINOV3 = "dinov3"
 CONVNEXT = "convnext"
 VJEPA2 = "vjepa2"
 RADDINO = "rad-dino"
+
+
+@dataclass(frozen=True)
+class Normalization:
+    """The mean and standard deviation a checkpoint was pretrained under — ITS contract, not ours.
+
+    A PRETRAINED TRUNK CARRIES ITS OWN PREPROCESSING CONTRACT, and feeding it somebody else's is a
+    handicap that raises no error. The model registered the ImageNet constants as buffers for every
+    encoder, which was right six times out of seven by coincidence: DINOv2 (all three), DINOv3 (all
+    three) and ConvNeXtV2-base all declare exactly those numbers in their own `preprocessor_config.json`.
+    RAD-DINO does not — it was pretrained on greyscale radiographs at 0.5307 / 0.2583 — so it was
+    receiving inputs offset 0.20 std from its pretraining distribution with a 12.8% scale error on top.
+
+    That is the shape of the failure worth naming: the arm still trains, still logs a plausible curve,
+    and still produces a real number supporting a false conclusion about the exact hypothesis it was
+    built to test. Six encoders agreeing is what kept it invisible.
+
+    DECLARED HERE rather than read from the checkpoint, for the reason `params_m` is: a Kaggle mount is
+    not a HuggingFace snapshot. Ours holds `config.json` and the weights and no `preprocessor_config.json`
+    at all, so a kernel reading the constants off the checkpoint would find nothing and fall back to the
+    assumption this exists to remove. `assert_declared` is how the declaration is held to the checkpoint
+    wherever that file IS present.
+    """
+
+    mean: tuple[float, float, float]
+    std: tuple[float, float, float]
+
+    @classmethod
+    def declared(cls, preprocessor: Mapping[str, object]) -> "Normalization":
+        """The constants a `preprocessor_config.json` states, for checking a declaration against it.
+
+        The parameter is NOT called `config`, deliberately: `tests/integration/checkpoint_config_to_readers`
+        scrapes every `config.get("key")` in the package and demands a fresh checkpoint stamp that key.
+        A HuggingFace preprocessor file is a different document with a different vocabulary, and reading
+        it through a receiver named `config` would tell that guard to look for `image_mean` in OUR stamp.
+        """
+        mean, std = preprocessor.get("image_mean"), preprocessor.get("image_std")
+        if not isinstance(mean, Sequence) or not isinstance(std, Sequence):
+            message = "preprocessor config carries no image_mean/image_std to read"
+            raise ValueError(message)
+        return cls(cls.triple(mean), cls.triple(std))
+
+    @staticmethod
+    def triple(values: Sequence[object]) -> tuple[float, float, float]:
+        """The three channel constants, from a config that may state one per channel or one for all."""
+        read = [float(value) for value in cast(Sequence[float], values)]
+        stated = read * 3 if len(read) == 1 else read
+        return (stated[0], stated[1], stated[2])
+
+    def assert_declared(self, preprocessor: Mapping[str, object], variant: str) -> None:
+        """Refuse a registry entry the checkpoint's own config contradicts, naming both sides.
+
+        Only callable where the snapshot ships that file — which is every HuggingFace repository and
+        none of our Kaggle mounts, so this guards the declaration at its source rather than at its use.
+        """
+        stated = Normalization.declared(preprocessor)
+        if stated == self:
+            return
+        message = f"{variant} is declared {self.mean}/{self.std} and its checkpoint says {stated.mean}/{stated.std}"
+        raise ValueError(message)
+
+
+IMAGENET = Normalization((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+"""What every natural-image trunk in this registry was pretrained under, and the reason a per-encoder
+field looked unnecessary for as long as the registry held only natural-image trunks."""
 
 
 @dataclass(frozen=True)
@@ -149,6 +215,13 @@ class Encoder:
 
     family: str = ""
     """The encoder line, as it appears somewhere in the mounted path: `dinov2` or `dinov3`."""
+
+    normalization: Normalization = IMAGENET
+    """The constants THIS checkpoint was pretrained under — see `Normalization` for what a wrong one costs.
+
+    Defaulting to ImageNet is honest rather than lazy: it is what every natural-image trunk here really
+    declares, verified against each one's own config. A trunk pretrained on something else states its
+    own, and the only one so far is RAD-DINO."""
 
     depth: int = 12
     """How many blocks the trunk runs, which is the factor a per-block activation bill is missing.
@@ -534,6 +607,15 @@ ENCODERS: dict[str, Encoder] = {
     # the `rad-dino/` segment `locates` matches on does not exist. That was caught by listing `dinov3-hf`
     # — which DOES report `vits16/...` prefixes — rather than by a kernel, which is where it was heading.
     # Naming the dataset for the encoder makes the mount path its own leaf and needs no directory at all.
+    #
+    # THE ONE ENCODER HERE THAT IS NOT NORMALISED LIKE THE OTHERS, and until 2026-08-25 it was fed the
+    # ImageNet constants anyway, because the model registered them as buffers for every trunk alike. Its
+    # own `preprocessor_config.json` says 0.5307 / 0.2583 — greyscale, one number repeated across the
+    # three channels — so the trunk was seeing a 0.20-std offset with a 12.8% scale error. That makes
+    # `raddino_dense`'s 0.8137 against `base_dense_s2026`'s 0.8512 a reading of the mismatch as much as
+    # of the domain, on top of the run being TRUNCATED at epoch 6 of 12 (knee-8wm6). The exact-control
+    # argument above is undamaged and unmeasured: swapping only the initialisation is still the clean
+    # single-variable read, and it has not actually been taken yet.
     RAD_DINO: Encoder(
         RAD_DINO,
         "microsoft/rad-dino",
@@ -542,5 +624,6 @@ ENCODERS: dict[str, Encoder] = {
         family=RADDINO,
         leaf="rad-dino",
         params_m=86.6,
+        normalization=Normalization((0.5307, 0.5307, 0.5307), (0.2583, 0.2583, 0.2583)),
     ),
 }

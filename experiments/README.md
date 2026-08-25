@@ -2698,6 +2698,20 @@ roster does not contain — not at further one-for-one swaps.
 | --- | --- | --- | --- | --- |
 | **`raddino_dense`** | `band_dense`'s recipe with the trunk swapped to Microsoft **RAD-DINO** (a DINOv2-family ViT-B pretrained on chest radiographs with report supervision) instead of DINOv3 — everything else identical | **0.8137 at epoch 6 of 12** (killed) | **−0.0375 vs `base_dense_s2026` 0.8512 at e8** | **KILLED ON ITS OWN SLOPE, not on a landing number.** Epochs 0–6 read 0.7247 / 0.7439 / 0.7852 / 0.7944 / 0.8000 / 0.8119 / 0.8137 at ~990 s each. Per-epoch gains: +0.019, +0.041, +0.009, +0.006, +0.012, **+0.0018**. The pre-registered top band was ≥0.866, which needed +0.052 in the five remaining epochs while the arm was delivering two thousandths. The bottom band (≤0.845) was already unreachable-from-below in the other direction: it would have landed there or under. **PRICE that killed it:** 83 min of card to convert a near-certain bottom-band landing into a certain one, against 72 min for `sided_pool` on an axis no arm in this repo has ever touched. **Which link is suspect, before any verdict:** the trunk DID fire — loss falls monotonically 1.11 → 0.757 and VRAM/step-time are backbone-appropriate, so this is not a plumbing failure and not a frozen-encoder failure. **The confound this arm cannot separate is the RECIPE:** `--backbone-lr 4e-5` and the twelve-epoch schedule were tuned on DINOv3, and RAD-DINO is a different pretraining objective at a different scale. A slope this shallow is as consistent with an under-driven backbone as with a backbone that does not transfer. **What this kills: the DROP-IN swap** — RAD-DINO at DINOv3's recipe does not reach DINOv3's number and is not worth a seat. **What it does NOT rule out:** RAD-DINO at its own learning rate, RAD-DINO as a frozen feature extractor, or the wider premise that medical-domain pretraining transfers to knee MRI. Those are re-testable; this run says nothing about them. The asset stays on disk. |
 
+**A SECOND confound, found on 2026-08-25 (`knee-8wm6`) and now fixed in the tree.** The arm was fed the
+ImageNet constants. `StudyModel` hardcoded `mean 0.485/0.456/0.406`, `std 0.229/0.224/0.225` for every
+trunk, and `microsoft/rad-dino`'s own `preprocessor_config.json` declares `image_mean 0.5307`,
+`image_std 0.2583` — greyscale, fitted on chest radiographs. That is an input **offset by 0.20 std**
+((0.5307 − 0.485)/0.229) at a **12.8% scale error** (0.2583/0.229). Six of the other seven registry
+encoders declare the ImageNet pair themselves, so the shared constant was right by coincidence
+everywhere it had ever been looked at, and RAD-DINO is the one encoder it was wrong for — the one
+encoder whose arm was read as evidence about domain pretraining. So 0.8137 is a floor under a floor:
+truncated at e6 AND fed the wrong contract. It does not price RAD-DINO, at this recipe or any other.
+The constants now live on `Encoder.normalization` (`kneemri/models/backbone.py`) and ride the state
+dict as persistent buffers, so every member already packaged keeps what it was fitted under and only a
+new fit moves. V-JEPA2's constants are **UNVERIFIED** (gated repo, no local snapshot) and must be
+checked before any vjepa arm is armed.
+
 The wider reading is about the roster rather than the backbone. This is the **third** arm to fail the same way —
 a new trunk (`cnx_dense` 0.7927, `vjepa_member` 0.8343, `raddino_dense` ~0.82 extrapolated) plugged into a recipe
 that was fitted around DINOv3, and each landed below the DINOv3 control it was measured against. Either the

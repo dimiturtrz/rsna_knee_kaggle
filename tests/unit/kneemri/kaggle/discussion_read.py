@@ -25,11 +25,14 @@ class _Post:
 
 PAGES: dict[int, Sequence[object]] = {
     1: [
-        _Topic(1, "OOF vs LB", votes=9, comment_count=3, last_comment_post_date="2026-08-25T11:00:00"),
-        _Topic(2, "single model 0.942", votes=12, last_comment_post_date="2026-08-20T09:00:00"),
+        _Topic(1, "OOF vs LB", votes=9, comment_count=3, last_comment_post_date="2026-08-25 11:00:00"),
+        _Topic(2, "single model 0.942", votes=12, last_comment_post_date="2026-08-20 09:00:00"),
     ],
-    2: [_Topic(3, "site split?", votes=12, comment_count=1, last_comment_post_date="2026-08-24T08:00:00")],
+    2: [_Topic(3, "site split?", votes=12, comment_count=1, last_comment_post_date="2026-08-24 08:00:00")],
 }
+"""Stamps SPACE-separated, which is the shape the API really returns. They were written here with an ISO
+`T` instead, and that one character was the whole reason `since` shipped broken: the fixture agreed with
+the filter's assumption rather than with the server's output, so both were wrong together and green."""
 
 
 def _lister(page: int) -> Sequence[object]:
@@ -79,12 +82,24 @@ def test_matching():
     assert Discussion.taken(lister=_lister).matching("efficiency") == []
 
 
+def test_stamped():
+    """Both sides of the comparison in one shape, because the two sides are written by different hands."""
+    assert Discussion.stamped("2026-08-25T00:00:00") == "2026-08-25 00:00:00", "the ISO T a caller types"
+    assert Discussion.stamped("2026-08-25 11:00:00") == "2026-08-25 11:00:00", "the space the API writes"
+    assert Discussion.stamped("2026-08-25T11:00:00+00:00") == "2026-08-25 11:00:00", "a zone sorts above no zone"
+    assert Discussion.stamped("") == ""
+
+
 def test_since():
     """The delta a second reading wants, ordered by when it moved rather than by how it was voted."""
     moved = Discussion.taken(lister=_lister).since("2026-08-23T00:00:00")
 
     assert [topic.identifier for topic in moved] == [1, 3], "the 08-20 thread is settled, whatever its votes"
     assert Discussion.taken(lister=_lister).since("2026-08-26T00:00:00") == [], "nothing new is an empty list"
+    assert Discussion.taken(lister=_lister).since("2026-08-25T00:00:00") == moved[:1], (
+        "an ISO T against the API's space is the case that shipped broken: ' ' sorts BELOW 'T', so every "
+        "thread posted in that same day was dropped and the filter reported an all-clear"
+    )
 
 
 def test_posts():

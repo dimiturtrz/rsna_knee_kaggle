@@ -7,6 +7,7 @@ import pytest
 import torch
 from torch import Tensor, nn
 
+from kneemri.models.backbone import IMAGENET, RAD_DINO
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
     ADAPTERS,
@@ -396,6 +397,23 @@ def test_study_model_from_config():
     assert not any(
         isinstance(m, LoRALinear) for m in StudyModel.from_config({}, _BlockedBackbone(), DIM, SLOTS).backbone.modules()
     )
+
+
+def test_study_model_from_config_resolves_the_variants_normalization():
+    """THE REBUILD READS THE REGISTRY, not one shared constant.
+
+    Six of seven encoders were pretrained under the ImageNet constants and the seventh was not, so a
+    hardcoded pair was right by coincidence everywhere it was ever checked. RAD-DINO's greyscale
+    constants sit 0.20 std off in offset and 12.8% off in scale — no error, a plausible curve, a real
+    number supporting a false conclusion.
+    """
+    torch.manual_seed(SEED)
+    rad = StudyModel.from_config({"variant": RAD_DINO}, _BlockedBackbone(), DIM, SLOTS)
+    assert rad.mean.flatten().tolist() == pytest.approx([0.5307] * 3), "the mount's own constants, not ImageNet's"
+    assert rad.std.flatten().tolist() == pytest.approx([0.2583] * 3)
+    plain = StudyModel.from_config({}, _BlockedBackbone(), DIM, SLOTS)
+    assert plain.mean.flatten().tolist() == pytest.approx(list(IMAGENET.mean)), "an unnamed variant stays ImageNet"
+    assert plain.std.flatten().tolist() == pytest.approx(list(IMAGENET.std))
 
 
 def test_low_rank_refuses_a_backbone_with_no_linears():

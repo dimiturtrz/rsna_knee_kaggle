@@ -2156,6 +2156,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.efficiency_read",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
       "target": "core.mounts",
       "weight": 1
@@ -2380,6 +2386,12 @@
       "kind": "import",
       "source": "kneemri.models.model",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
+      "target": "kneemri.models.backbone",
       "weight": 1
     },
     {
@@ -3087,7 +3099,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.spectral_mae",
-      "target": "kneemri.models.model",
+      "target": "kneemri.models.backbone",
       "weight": 1
     },
     {
@@ -11216,6 +11228,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.discussion_read.Discussion.since",
+      "target": "kneemri.kaggle.discussion_read.Discussion.stamped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.discussion_read.Discussion.taken",
       "target": "kneemri.kaggle.discussion_read.DiscussionTopic.seen",
       "weight": 1
@@ -11356,6 +11374,60 @@
       "kind": "calls",
       "source": "kneemri.kaggle.dry_run.main",
       "target": "kneemri.kaggle.dry_run.DryRun.scored",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.additive",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.additive",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.settled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.settled",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.settled",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.snapshot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.standing",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.standing",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.snapshot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard.taken",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard._unzipped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.main",
+      "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard.taken",
       "weight": 1
     },
     {
@@ -12171,6 +12243,12 @@
     {
       "kind": "holds",
       "source": "kneemri.models.backbone.Encoder",
+      "target": "kneemri.models.backbone.Normalization",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.backbone.Encoder",
       "target": "kneemri.models.backbone.Stage",
       "weight": 1
     },
@@ -12208,6 +12286,18 @@
       "kind": "construct",
       "source": "kneemri.models.backbone.MapAsTokens.forward",
       "target": "kneemri.models.backbone.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.backbone.Normalization",
+      "target": "kneemri.models.backbone.Normalization",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.backbone.Normalization.assert_declared",
+      "target": "kneemri.models.backbone.Normalization.declared",
       "weight": 1
     },
     {
@@ -12316,6 +12406,12 @@
       "kind": "references",
       "source": "kneemri.models.model.StudyDesign",
       "target": "kneemri.models.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.model.StudyModel",
+      "target": "kneemri.models.backbone.Normalization",
       "weight": 1
     },
     {
@@ -14377,6 +14473,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.spectral_mae.SpectralMae",
+      "target": "kneemri.models.backbone.Normalization",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.training.spectral_mae.SpectralMae",
       "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
@@ -15131,7 +15233,7 @@
       "role": null
     },
     {
-      "descendants": 131,
+      "descendants": 132,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -15635,7 +15737,7 @@
       "role": null
     },
     {
-      "descendants": 18,
+      "descendants": 19,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -15678,6 +15780,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.dry_run",
       "label": "dry_run",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read",
+      "label": "efficiency_read",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -17692,6 +17802,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "label": "EfficiencyBoard",
+      "level": "class",
+      "parent": "kneemri.kaggle.efficiency_read",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_closure.KernelClosure",
       "label": "KernelClosure",
       "level": "class",
@@ -17857,6 +17975,14 @@
       "level": "class",
       "parent": "kneemri.models.backbone",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Normalization",
+      "label": "Normalization",
+      "level": "class",
+      "parent": "kneemri.models.backbone",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -24948,6 +25074,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.discussion_read.Discussion.stamped",
+      "label": "stamped",
+      "level": "method",
+      "parent": "kneemri.kaggle.discussion_read.Discussion",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.discussion_read.Discussion.taken",
       "label": "taken",
       "level": "method",
@@ -25016,6 +25150,94 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.dry_run",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard._kaggle",
+      "label": "_kaggle",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard._unzipped",
+      "label": "_unzipped",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.additive",
+      "label": "additive",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.frontier",
+      "label": "frontier",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.joined",
+      "label": "joined",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.settled",
+      "label": "settled",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.snapshot",
+      "label": "snapshot",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.standing",
+      "label": "standing",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.EfficiencyBoard.taken",
+      "label": "taken",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.efficiency_read.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.efficiency_read",
       "role": null
     },
     {
@@ -25800,6 +26022,30 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.backbone.MapAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Normalization.assert_declared",
+      "label": "assert_declared",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Normalization",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Normalization.declared",
+      "label": "declared",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Normalization",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Normalization.triple",
+      "label": "triple",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Normalization",
       "role": null
     },
     {

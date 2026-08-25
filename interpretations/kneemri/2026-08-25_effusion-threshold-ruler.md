@@ -112,3 +112,20 @@ forum reported — they claimed at least one moderate annotated 0; this finds th
 threshold is a coin flip.
 
 Bead: `knee-6qfb`.
+
+## One secondhand claim in the same thread that would change what this measures
+
+A competitor writes: *"According to comments from the hosts those folks did not use the reports as a
+starting point."* If true, the 58 annotations are **image-derived** and the reports are a parallel
+description of the same knee rather than the annotation's source — which reframes every number here.
+The small/moderate coin flip would then not be an annotator failing to apply a stated rule; it would be
+two independent readings of one knee disagreeing at the boundary, one written into a report and one
+into a label. Same consequence for us (a ceiling on the ruler, not a labelling recipe) and a different
+mechanism, and the difference matters for the LLM-confidence argument above: against an image-derived
+label, report-derived supervision is not noisy-but-unbiased, it is a different measurement.
+
+**UNVERIFIED, and deliberately recorded as such.** It is one participant's memory of a host comment,
+not a host post read here — the same shape of claim the RAD-DINO scaling post made, which turned out to
+be true and still had to be re-derived from the primary source before it could be used. The check is
+cheap and costs no slot: find the host's own message with `discussion_read` and quote it, or find that
+no such message exists. Do that before any work is planned on top of it.

@@ -18,6 +18,7 @@ from torch import Tensor, nn
 
 from core.data.corpus.anatomy import ANATOMY, SlotAffinity
 from core.findings import TARGETS
+from kneemri.models.backbone import ENCODERS, IMAGENET, SMALL, Normalization
 from kneemri.models.depth_window import DepthWindow
 from kneemri.models.encoder_surgery import NO_LAYER_DECAY, EncoderSurgery
 from kneemri.models.fingerprint import FINGERPRINT
@@ -42,8 +43,9 @@ COMPILED_ENCODER = "compile_encoder"
 OPENED_BLOCKS = "opened_blocks"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
 
-IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
-IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
+DEFAULT_VARIANT = SMALL
+"""What a config that names no encoder was fitted on — every member published before `variant` was
+recorded. Spelled here because this is where a config is turned back into a model."""
 
 
 @dataclass(frozen=True)
@@ -169,7 +171,14 @@ class StudyModel(nn.Module):
     mean: Tensor
     std: Tensor
 
-    def __init__(self, backbone: nn.Module, dim: int, n_slot: int, design: StudyDesign | None = None) -> None:
+    def __init__(
+        self,
+        backbone: nn.Module,
+        dim: int,
+        n_slot: int,
+        design: StudyDesign | None = None,
+        normalization: Normalization = IMAGENET,
+    ) -> None:
         # `backbone` is any module callable as `backbone(pixel_values=x)` returning an object with
         # `last_hidden_state` of shape (n, 1 + patches, dim) — a DINOv2 from transformers in
         # production, a deterministic stand-in under test, and a medical-pretrained encoder when that
@@ -212,8 +221,11 @@ class StudyModel(nn.Module):
         self._encodes_each_slice = pooling.per_slice
         self.slices = pooling.aggregator(head_width) if pooling.aggregator is not None else None
         self.head = SLOT_POOLINGS[self.design.slot_pooling](head_width, n_slot, len(TARGETS), prior)
-        self.register_buffer("mean", torch.tensor(IMAGENET_MEAN).view(1, 3, 1, 1))
-        self.register_buffer("std", torch.tensor(IMAGENET_STD).view(1, 3, 1, 1))
+        # PERSISTENT, so they ride in the state dict — which is what makes fixing the default safe:
+        # every member already on disk keeps the constants it was actually fitted under, whatever the
+        # registry now says, and only a fresh fit moves.
+        self.register_buffer("mean", torch.tensor(normalization.mean).view(1, 3, 1, 1))
+        self.register_buffer("std", torch.tensor(normalization.std).view(1, 3, 1, 1))
 
     @classmethod
     def from_config(cls, config: Mapping[str, object], backbone: nn.Module, dim: int, n_slot: int) -> "StudyModel":
@@ -225,8 +237,17 @@ class StudyModel(nn.Module):
 
         The adapters are applied BEFORE the caller loads anything, because a LoRA member's state dict
         carries adapter keys that only exist once `low_rank` has wrapped the encoder's linears.
+
+        The normalisation is resolved from the config's `variant` for the same reason everything else
+        here is: both rebuild paths go through this one method, so an encoder whose constants are not
+        ImageNet is right in the trainer and in the kernel at once rather than in whichever was edited.
+        A member's own buffers overwrite these the moment its weights load — this decides what an
+        UNLOADED model normalises with, which is what a fresh fit starts from.
         """
-        model = cls(backbone, dim, n_slot, StudyDesign.from_config(config))
+        variant = str(config.get("variant", DEFAULT_VARIANT))
+        encoder = ENCODERS.get(variant)
+        normalization = encoder.normalization if encoder is not None else IMAGENET
+        model = cls(backbone, dim, n_slot, StudyDesign.from_config(config), normalization)
         rank = StudyDesign.lora_rank_of(config)
         if rank:
             model.low_rank(rank)

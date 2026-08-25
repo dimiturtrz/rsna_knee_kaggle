@@ -256,7 +256,9 @@ def main() -> None:
         highpass=arguments.highpass,
         patch=encoder.patch,
     )
-    objective = SpectralMae(AutoModel.from_pretrained(encoder.repository), encoder.dim, config).to(device)
+    objective = SpectralMae(
+        AutoModel.from_pretrained(encoder.repository), encoder.dim, config, encoder.normalization
+    ).to(device)
     if device.type == "cuda":
         objective.backbone.compile()
 
