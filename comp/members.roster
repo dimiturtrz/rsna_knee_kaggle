@@ -393,3 +393,4 @@ v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE famil
 #
 # It costs no slot and no card — the trunk's weights are already mounted at dimiturnt/dinov3-hf/vitb16,
 # and it is converged rather than truncated (12 epochs asked, 12 run, peak before the last).
+merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0.0017, in every best subset

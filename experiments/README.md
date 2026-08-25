@@ -3872,3 +3872,20 @@ trained on, which would have carried the whole greedy path.
 +0.0014 to +0.0020 offline, against the ~+0.001 a seat swap has historically been worth; roughly a double
 seat, and still an order of magnitude under the house bar. `LogitAverage` stays ahead of `RankAverage` by
 +0.0005, as the champion's own vote already assumes.
+
+**CORRECTION, same evening, before the number was acted on.** "The best single member we own" was scoped
+to the six-member roster pool and is wrong as written. Re-priced over the ten strongest members whose
+holdout predictions are already cached (no card, the pair was training): `merged_blend` **ties**
+`band_dense_long` at 0.8587, and `small_batch6_s2026` at **0.8598** — uncached, so not in the pool — is
+still the best solo member this project has. What survives is the seat, and it survives against real
+competition rather than five roster twins:
+
+| pool of ten | best 1 | best 4 | best 5 | flat RankAverage |
+| --- | --- | --- | --- | --- |
+| without `merged_blend` (nine) | 0.8587 | 0.8696 | 0.8696 | 0.8692 |
+| with it (ten) | 0.8587 | 0.8712 | **0.8713** | 0.8698 |
+
+Seat value **+0.0017** on the best subset, +0.0006 flat — the same size the roster-twin pool reported, so
+the price is not an artefact of a weak pool. It sits in **every** best subset from two members to nine.
+The offline peak is five: `merged_blend + band_dense_long + band_dense + through_dense + calib_span` =
+**0.8713**.
