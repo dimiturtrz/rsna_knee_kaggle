@@ -2012,6 +2012,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.board_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.champion_check",
       "target": "core.cli",
       "weight": 1
@@ -10736,6 +10742,138 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.kaggle.board_check.BoardCensus",
+      "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.duplicated",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.mismatched",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.phantom",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refless",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.duplicated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.mismatched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.phantom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.refless",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unnamed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unpriceable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unrecorded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "target": "kneemri.kaggle.board_check.BoardRow.parsed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.unnamed",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.unpriceable",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.unrecorded",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_check.BoardRow",
+      "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_check.LiveBoard",
+      "target": "kneemri.kaggle.board_check.LiveBoard",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.board_check.main",
+      "target": "kneemri.kaggle.board_check.BoardCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.main",
+      "target": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.main",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.main",
+      "target": "kneemri.kaggle.board_check.LiveBoard.taken",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.kaggle.champion_check.Champion",
       "target": "kneemri.kaggle.champion_check.Champion",
       "weight": 1
@@ -14641,7 +14779,7 @@
       "role": null
     },
     {
-      "descendants": 127,
+      "descendants": 128,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -15145,11 +15283,19 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check",
+      "label": "board_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
       "role": null
     },
     {
@@ -17087,6 +17233,30 @@
       "level": "class",
       "parent": "kneemri.inference.vote",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus",
+      "label": "BoardCensus",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow",
+      "label": "BoardRow",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.LiveBoard",
+      "label": "LiveBoard",
+      "level": "class",
+      "parent": "kneemri.kaggle.board_check",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -23926,6 +24096,126 @@
       "label": "ranks",
       "level": "method",
       "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.duplicated",
+      "label": "duplicated",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.mismatched",
+      "label": "mismatched",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.phantom",
+      "label": "phantom",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.refless",
+      "label": "refless",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "label": "refusals",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.unnamed",
+      "label": "unnamed",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.unpriceable",
+      "label": "unpriceable",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.unrecorded",
+      "label": "unrecorded",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow.all_data",
+      "label": "all_data",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow.parsed",
+      "label": "parsed",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.LiveBoard._kaggle",
+      "label": "_kaggle",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.LiveBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.LiveBoard.taken",
+      "label": "taken",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.LiveBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check",
       "role": null
     },
     {

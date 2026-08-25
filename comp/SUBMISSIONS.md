@@ -73,7 +73,7 @@ never spent on a cell that already has a number.
 | `ours×2×whole×2/study` (res392 + calibrated) | **null** — stale kit, no `Member.precision` | 0.500 |
 | `ours×5×whole×5/study` | submitted 2026-08-13, result not recorded here | — |
 | `ours×2×whole×2/study` re-run on kit `5ba86ee` | submitted 2026-08-13, result not recorded here | — |
-| `fusion×25×windowed×overlap` (our 5 + their 20) | 2026-08-17 | **0.894** |
+| `fusion×25×windowed×overlap` (our 5 + their 20), `fusion25` in `board.jsonl` | 2026-08-17 | **0.894** |
 | `ours×5×whole×5/study`, five DIFFERENT recipes | **untried** | — |
 | `ours×1×whole` (post-LoRA pool) — `kneemri-solo` | 2026-08-17 | **0.914** |
 | `ours×3×whole` (post-LoRA pool) — `kneemri-trio` | 2026-08-17 | **0.913** |
@@ -2166,3 +2166,40 @@ dose are fully confounded here, and the −0.005 is the dose difference's own si
 already had. Count-at-dark-dose has never been on this board and cannot be built until a **seventh dark
 member exists**, which is what `knee-rndp` (`small_batch6_ff`) is for: six dark checkpoints exist, so
 every entry to date has been six-dark-plus-one and the pool has never had a seventh to offer.
+
+## 2026-08-25 — five entries, one tick of movement, and the record that did not hold them
+
+Written on 2026-08-25 during the `knee-624j` record repair, from the submissions' own descriptions and
+their scores read back off Kaggle. **These five had scored and appeared in NO record** — not this file,
+not `board.jsonl` — which is the defect that bead exists for. `board_check --live` is now the gate.
+
+| entry | ref | members | board | the one variable |
+|---|---|---|---|---|
+| `dark6` | 55756018 | 6 | 0.937 | all-data dose at six, no fold-0 seat at all |
+| `dark7` | 55756369 | 7 | 0.937 | count of dark members, six → seven |
+| `v3seat` | 55757184 | 7 | 0.936 | seventh seat's encoder FAMILY (DINOv3-base, strong reading) |
+| `farseat` | 55758082 | 7 | **0.937** | seventh seat's ARCHITECTURE family (V-JEPA2, breaks slice-then-pool) |
+| `votefit` | 55759764 | 6 | **0.938** | the vote: `LogitAverage` for `RankAverage` |
+
+**`dark6` = `dark7` = `farseat` = `allfit` = `lastseat` = 0.937.** Five entries, one number. The seventh
+seat has now been filled with a fold-0 member, a converted all-data member, a different encoder family
+and a different architecture family, and it moved nothing in any of them. `v3seat`'s 0.936 is one tick
+down and inside its own pre-registered FLAT band. **The marginal seat is inert regardless of provenance**,
+which says the six already determine the answer.
+
+**The all-data dose is spent at six, measured rather than extrapolated.** `dark6` against
+`allfit`/`lastseat` says the fold-0 seat those two carried bought nothing; `dark7` against `dark6` says
+the seventh dark member bought nothing either. `knee-rndp`'s seventh dark checkpoint was built and it
+answered the question it was built for with a null.
+
+**`votefit` 0.938 is the best score this project owns and it is not a result.** One tick over `dark6` on
+an identical roster, inside the pre-registered 0.935–0.939 FLAT band, an order of magnitude under the
+1.5% bar. The `≥0.940` branch did NOT fire, so the licensed `QualityWeightedRank` sweep stays unbuilt.
+The vote was the last unvaried board axis; **no member-shaped or serving-shaped variable remains.**
+
+**What the backfill did to the transfer constant.** `board.jsonl` held 34 of 58 submissions until this
+repair. Fifteen scored all-ours entries were absent — `basedense_v1`, the entry `comp/champion.json`
+pins, among them — and five of those carry an offline number. With them entered, `board_transfer` reads
+**+1.72** where kernels shipped this week quote +1.82, +1.92 and +2.14. Every one of those was fitted on
+an incomplete set. It also now reads **0 inversions in 108 resolved pairs**: where the holdout separates
+two entries by more than its own noise floor, the board has never once ordered them the other way.

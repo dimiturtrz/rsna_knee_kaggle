@@ -108,7 +108,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Ten checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Eleven checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -137,7 +137,14 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   from STOPPED (`patience` fired, a decision) from UNDERTRAINED (peaked on its last epoch; the budget bound it).
   Only TRUNCATED exits non-zero. It exists because three runs entered the ledger as facts about architectures when
   they were facts about a killed process, and because its own FIRST run over-reported three patience stops as
-  crashes — including `res392`, which would have re-opened a correctly-closed family. A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes.
+  crashes — including `res392`, which would have re-opened a correctly-closed family.
+  `python -m kneemri.kaggle.board_check --live` after any submission scores, and before quoting a board number
+  or a transfer constant — the check that guards the RECORD. `comp/board.jsonl` held 34 of the competition's 58
+  submissions until 2026-08-25: fifteen scored all-ours entries were absent, `basedense_v1` (the entry
+  `comp/champion.json` pins) and `votefit_v1` (the best score this project owns) among them, and the compression
+  constant `board_transfer` fits from that file read +1.82 against a complete set's +1.72. It joins on the Kaggle
+  submission REF, never a name — asking Kaggle for the list spends no slot — so every submission carries a row,
+  the ones this file will not price included (`scope: excluded` plus the reason). A recipe is smoked with `--studies 60 --epochs 1` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes.
   A recipe on a reading axis NOBODY HAS DECODED cannot be smoked until something writes the truncated cache, and
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct
   filename (`_first60`) so it can never overwrite a full array. Reach for that before hand-building one: on 2026-08-19
