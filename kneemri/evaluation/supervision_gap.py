@@ -171,9 +171,20 @@ class SupervisionGap:
         annotations produces a number rather than an error. It lives here, once, because both readers of
         this measurement — the report and `run_comparison`'s split — would otherwise each write it.
         """
-        identifiers, truth = self.annotated(train_table)
         names, per_seed = PublishedRuler(published).per_seed()
-        combined = RankAverage().combine(per_seed)
+        return self.matched(labels, train_table, names, RankAverage().combine(per_seed))
+
+    def matched(
+        self, labels: Path, train_table: Path, names: list[str], combined: Float[np.ndarray, "read targets"]
+    ) -> tuple[Float[np.ndarray, "kept targets"], Float[np.ndarray, "kept targets"], Float[np.ndarray, "kept targets"]]:
+        """The same three arrays, from predictions a caller already holds rather than the published pool.
+
+        Split out because the published members are no longer the only readings that never saw the
+        annotations: `annotated_readings` produces them for a run fitted with `--hold-annotations`, which
+        is the only way this split can be measured on a model WE fitted. The alignment is the part that
+        can silently be wrong, so it stays here, once, whoever the predictions came from.
+        """
+        identifiers, truth = self.annotated(train_table)
         position = {name: index for index, name in enumerate(names)}
         keep = [index for index, name in enumerate(identifiers) if name in position]
         rows = np.array([position[identifiers[index]] for index in keep], dtype=np.int64)
@@ -240,13 +251,35 @@ def main() -> None:
     """Split the findings by whether their labels or their model is the weaker half."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to price")
+    command.parser.add_argument(
+        "--records",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="OUR members, each fitted with --hold-annotations, read over every annotated study instead "
+        "of the published pool's out-of-fold arrays. This is the only way the split can be measured on a "
+        "model we fitted; without it the page describes a stranger's model and says so.",
+    )
+    command.parser.add_argument("--device", default=None, help="where to read prediction-cache misses")
     arguments = command.parsed()
 
     root = command.rooted(arguments)
     gap = SupervisionGap()
-    values, predictions, annotations = gap.aligned(
-        arguments.labels, root.raw() / "train.csv", root.processed() / "published"
-    )
+    train_table = root.raw() / "train.csv"
+    if arguments.records:
+        import torch  # noqa: PLC0415 - CLI-only, and the published path must not pay for a GPU import
+
+        from kneemri.device import VisibleCards  # noqa: PLC0415 - CLI-only
+        from kneemri.evaluation.annotated_readings import AnnotatedReadings  # noqa: PLC0415 - CLI-only
+
+        device = torch.device(arguments.device or VisibleCards().device().type)
+        identifiers, _ = gap.annotated(train_table)
+        names, per_member = AnnotatedReadings(root, device).readings(arguments.records, identifiers)
+        values, predictions, annotations = gap.matched(
+            arguments.labels, train_table, names, RankAverage().combine(per_member)
+        )
+    else:
+        values, predictions, annotations = gap.aligned(arguments.labels, train_table, root.processed() / "published")
     logger.info("%d annotated studies with a held-out prediction", len(values))
 
     command.report(gap.report(gap.against(values, annotations), gap.against(predictions, annotations)))

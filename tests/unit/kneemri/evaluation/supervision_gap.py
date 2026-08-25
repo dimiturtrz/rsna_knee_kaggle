@@ -59,6 +59,20 @@ def test_aligned(tmp_path: Path):
     assert values[:, 1].tolist() != predictions[:, 1].tolist(), "and the odd finding is the inverted one"
 
 
+def test_matched(tmp_path: Path):
+    """Predictions handed in directly align the same way, and by NAME rather than by row order."""
+    train = _train_table(tmp_path / "train.csv", annotate=STUDIES - 2)
+    labels, _ = _corpus(tmp_path, ["s2", "s0", "s1"])
+    names = ["s1", "s0"]
+    combined = np.array([[float(column % 2) for column in range(len(TARGETS))] for _ in names], dtype=np.float32)
+
+    values, predictions, annotations = SupervisionGap().matched(labels, train, names, combined)
+
+    assert values.shape == predictions.shape == annotations.shape == (2, len(TARGETS))
+    assert values.tolist() == annotations.tolist(), "the report table follows the annotation order"
+    assert predictions[:, 1].tolist() == [1.0, 1.0], "and the handed-in rows were re-ordered by name, not copied"
+
+
 def test_measured(tmp_path: Path):
     """The split, end to end from the three files: the findings the model inverts are the model's half."""
     train = _train_table(tmp_path / "train.csv", annotate=STUDIES)

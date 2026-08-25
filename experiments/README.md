@@ -3723,3 +3723,49 @@ only member of this family inside it (knee-bxp2).
 `base224` as a *distance* bet, on its 0.8679 being below every seated member's nearest. That premise is
 void. The move survives on the repaired argument — best on both columns at once — but it is a weaker
 claim, and +0.0008 is under the +0.0015 this ruler has ever been shown to resolve.
+
+## 2026-08-25 — holdannot: the annotation upweight costs nothing, and OUR model beats OUR labels
+
+`holdannot` = the control's recipe with `--hold-annotations`, which drops the 58 radiologist-read studies
+from the training table and with them their 3.0 loss override. Twelve epochs, `ARM DONE`, converged
+(`convergence_check`: peak at 10 of 12, then two lower epochs — STOPPED, not truncated).
+
+| run | holdout mean AUC | vs control |
+|---|---|---|
+| `native224` (control) | 0.8502 | — |
+| `holdannot` (e9 / **e10** / e11) | 0.8482 / **0.8487** / 0.8481 | **−0.0015** |
+
+**The member reading is a null, and the null is the point.** −0.0015 sits inside the arm's own
+pre-registered `>= -0.006` band, so withholding 1.3% of the corpus AND a 3.0 upweight costs nothing
+measurable. That prices the annotation upweight: it is not what carries the corpus, and no future arm
+needs to protect it.
+
+**The instrument reading is the result.** The member exists so `supervision_gap` can be computed on a
+model of OURS whose loss never touched a radiologist cell. Reading it over all **58 of 58** annotated
+studies (`python -m kneemri.evaluation.supervision_gap --records holdannot_s2026.pt --device cpu`, which
+needed a new entrypoint — `kneemri.evaluation.annotated_readings` — because nothing here could predict a
+member over a study list that is not a fold holdout):
+
+```
+aggregate: labels 0.8658   model 0.8932
+Contusion +0.1430 · Synovitis +0.0812 · Effusion +0.0658 · Baker's +0.0353 · Medial OA +0.0295
+Fracture +0.0215 · Medial Meniscus +0.0144 · Lateral OA +0.0039 · ACL +0.0025
+  --- above: the model beats its own labels, so the READER is the weak part ---
+PF OA -0.0071 · Lateral Meniscus -0.0149 · MCL -0.0465
+```
+
+The PUBLISHED members read **0.8392 against the same 0.8658** — 0.027 BELOW their teacher, four of four
+internal derangements on the deficit side. **Ours is +0.0274 the other way, with nine of twelve on the
+label side, and the 4-of-4 shape gone** (ACL and Medial Meniscus are both surplus). So the −0.049 macro
+deficit that `2026-08-25_the-focal-deficit.md` and `knee-487l` are built on is a property of a model we
+did not fit, and the field's *"the entire competition is the label making"* consensus checks out for us.
+
+Memorisation is not the explanation: the member saw the IMAGES of ~46 of the 58 with their REPORT labels,
+and perfect memorisation of a report label scores the model AT the reference (0.8658), never above it.
+The bias runs toward the null the finding cleared.
+
+`blendlabels`' six pre-registered label-bottlenecked findings all sit inside our nine; our own split adds
+**Medial Meniscus, Lateral OA and ACL** to the surface a better reader can reach. It does not make the
+lever bigger than measured (+0.0034 on the metric, +0.0070 on the six) — it makes it OURS.
+
+See `interpretations/kneemri/2026-08-25_our-model-beats-its-own-labels.md`, `knee-487l`, `knee-w7xa`.
