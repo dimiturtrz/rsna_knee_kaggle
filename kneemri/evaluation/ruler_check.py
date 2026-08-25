@@ -19,16 +19,15 @@ that is more biased than the one it replaces, not less.
 `python -m kneemri.evaluation.ruler_check --checkpoints a.pt b.pt --labels full.csv --confident confident.csv`
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import numpy as np
 from jaxtyping import Bool, Float
 
+from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.data.labels.targets import Targets
-from core.paths import DataRoot
 from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
@@ -82,20 +81,20 @@ class RulerCheck:
 
 def main() -> None:
     """Score every checkpoint on its shared holdout under both rulers."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoints", type=Path, nargs="+", required=True, help="members sharing ONE split")
-    parser.add_argument("--labels", type=Path, required=True, help="the full report-derived table")
-    parser.add_argument("--confident", type=Path, required=True, help="the same table with UNKNOWN calls struck")
-    parser.add_argument("--fold", type=int, default=0)
-    parser.add_argument("--folds", type=int, default=5)
-    parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
-    parser.add_argument("--refresh", action="store_true", help="recompute rather than reuse stored predictions")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoints", type=Path, nargs="+", required=True, help="members sharing ONE split")
+    command.parser.add_argument("--labels", type=Path, required=True, help="the full report-derived table")
+    command.parser.add_argument(
+        "--confident", type=Path, required=True, help="the same table with UNKNOWN calls struck"
+    )
+    command.parser.add_argument("--fold", type=int, default=0)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    command.parser.add_argument("--refresh", action="store_true", help="recompute rather than reuse stored predictions")
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     # EACH MEMBER'S OWN READING, never one cache and one size for all of them. This CLI loaded whatever
     # cache its flags named, rebuilt every checkpoint at the canonical six slots, passed IMAGE_SIZE as
     # the read size, windowed by GROUP and predicted in the fp16 default — so a whole-stack member was

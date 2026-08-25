@@ -36,12 +36,12 @@ both twelve-epoch runs; only one of them converged, and this check is what separ
 a run that converges early at a badly-chosen rate reads CONVERGED here and is still worth refitting.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
@@ -207,19 +207,15 @@ class ConvergenceCheck:
 
 def main() -> None:
     """Report every run whose number is not finished, and exit non-zero if any is truncated."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--run", type=Path, help="one metrics file or checkpoint, instead of the whole root")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--run", type=Path, help="one metrics file or checkpoint, instead of the whole root")
+    arguments = command.parsed()
 
     check = ConvergenceCheck()
     if arguments.run is not None:
         seen = [check.verdict(RunMetrics(arguments.run))]
     else:
-        processed = DataRoot.from_config(arguments.paths).processed()
+        processed = command.rooted(arguments).processed()
         seen = check.audit(processed)
         # The data root is gitignored and machine-local, so an unmounted drive reports "0 runs, all
         # settled" — the sentence a clean tree produces, from a check that read nothing at all.

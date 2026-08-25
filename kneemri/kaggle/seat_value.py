@@ -55,11 +55,10 @@ pair, deliberately visibly — quoting this one without the other is quoting the
 the last decision it was asked to make.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
-from core.paths import DataRoot
+from core import cli
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.record_mix import MixReading, RecordMix
@@ -174,21 +173,19 @@ class SeatValue:
 
 def main() -> None:
     """Price candidate members against the entry that actually scored."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--candidates", type=Path, nargs="+", required=True, help="checkpoints to price")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--candidates", type=Path, nargs="+", required=True, help="checkpoints to price")
+    command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
+    command.parser.add_argument(
         "--against",
         default=None,
         help="board entry id to price against instead of the pinned champion (see comp/board.jsonl)",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
     champion = Champion.from_board(arguments.against) if arguments.against else Champion.recorded()
     logger.info("%s scored %.3f on the board with %d members", champion.entry, champion.board, len(champion.members))
-    seats = SeatValue(champion, DataRoot.from_config(arguments.paths).processed())
+    seats = SeatValue(champion, command.rooted(arguments).processed())
     for line in seats.report(arguments.candidates, arguments.combine_seed):
         logger.info(line)
 

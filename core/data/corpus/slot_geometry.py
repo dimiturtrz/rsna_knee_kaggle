@@ -28,7 +28,6 @@ moving the knee. It bounds the question rather than answering it — a small spr
 a large one localises it but still needs the anatomy checked before a shift is built.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -39,13 +38,13 @@ import numpy as np
 import pydicom
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_coverage import SAMPLE, UNCROPPED, CoverageRequest
 from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -246,14 +245,12 @@ class SlotGeometry:
 
 def main() -> None:
     """Place every routed slot of a sample of studies in patient space and report the pairwise geometry."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to place")
-    parser.add_argument("--workers", type=int, default=8, help="header-reading processes")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to place")
+    command.parser.add_argument("--workers", type=int, default=8, help="header-reading processes")
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    split = CorpusSplit(command.rooted(arguments).raw())
     identifiers = split.identifiers()
     planes = split.planes()
     # Every k-th rather than a random draw, so this sample is the same studies `crop_coverage` and

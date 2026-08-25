@@ -9,14 +9,12 @@ a fitted member's: the harness exists to rank head designs cheaply BEFORE a memb
 features from a member already fitted on this fold would be reporting its training data back to it.
 """
 
-import argparse
 import logging
-from pathlib import Path
 
 import torch
 
+from core import cli
 from core.data.corpus.cache_flags import CacheFlags
-from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
@@ -30,18 +28,18 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     """Build one embedding cache from one pixel cache."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--variant", default=SMALL, choices=tuple(ENCODERS))
-    CacheFlags.add_to(parser)
-    parser.add_argument("--train-size", type=int, default=None, help="resample to this before encoding")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--variant", default=SMALL, choices=tuple(ENCODERS))
+    CacheFlags.add_to(command.parser)
+    command.parser.add_argument("--train-size", type=int, default=None, help="resample to this before encoding")
+    command.parser.add_argument(
         "--pool",
         default=CLS_MEAN,
         choices=tuple(POOL_PARTS),
         help="how patch tokens become one vector per slice. The name reaches the embedding cache KEY, "
         "so a pooling the model cannot build must fail here rather than after the backbone is fetched.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--slice-read",
         default=MAXIMUM,
         choices=tuple(SLICE_POOLINGS),
@@ -50,10 +48,8 @@ def main() -> None:
         "inside the encoder and stores one vector per slot. It reaches the cache KEY, because the two "
         "produce arrays of different rank from the same pixels.",
     )
-    parser.add_argument("--batch", type=int, default=8, help="studies per forward")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--batch", type=int, default=8, help="studies per forward")
+    arguments = command.parsed()
 
     encoder = ENCODERS[arguments.variant]
     read_size = arguments.train_size or arguments.image_size
@@ -62,7 +58,7 @@ def main() -> None:
     # grid the weights never saw.
     encoder.require_tiling(read_size)
 
-    root = DataRoot.from_config(arguments.paths).processed()
+    root = command.rooted(arguments).processed()
     # THE WHOLE READING, not the three axes this CLI happened to take flags for. It could not be pointed
     # at the 80 mm arrays at all, so it encoded the default ones whatever was asked of it.
     pixels = CacheFlags.cache(arguments, root)

@@ -19,13 +19,13 @@ the entrypoint's import closure (`kernel_closure`), which is a fraction of the p
 log names the mounted commit, but only after the slot is spent — the same too-late that cost the first two.
 """
 
-import argparse
 import json
 import logging
 import os
 import shutil
 from pathlib import Path
 
+from core import cli
 from core.denominator import Denominator
 from kneemri.kaggle.kernel_closure import KernelClosure
 from kneemri.kaggle.mounted_kit import DATASET, MountedKit
@@ -129,15 +129,13 @@ class KitCheck:
 
 def main() -> None:
     """Refuse a kit that is behind the working tree in the packages a kernel runs."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--kit", type=Path, help="the built kit; defaults beside the other build artefacts")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--mounted", action="store_true", help="ask Kaggle what it will mount, not the local build")
-    parser.add_argument("--dataset", default=DATASET)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--kit", type=Path, help="the built kit; defaults beside the other build artefacts")
+    command.parser.add_argument(
+        "--mounted", action="store_true", help="ask Kaggle what it will mount, not the local build"
+    )
+    command.parser.add_argument("--dataset", default=DATASET)
+    arguments = command.parsed()
 
     repo = Path(__file__).resolve().parent
     check = KitCheck(repo)
@@ -148,7 +146,7 @@ def main() -> None:
     if arguments.mounted:
         where, recorded = arguments.dataset, MountedKit(arguments.dataset).recorded()
     else:
-        kit = arguments.kit or DataRoot.from_config(arguments.paths).processed() / "kit"
+        kit = arguments.kit or command.rooted(arguments).processed() / "kit"
         where, recorded = str(kit), check.recorded(kit)
     behind = check.behind(recorded)
     for line in behind:

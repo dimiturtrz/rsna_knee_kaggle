@@ -23,7 +23,6 @@ THE DENOMINATOR IS PRINTED WITH EVERY ROW, because that is the mistake this proj
 for twice: a rate computed inside the subset that happened to parse is not a rate over the corpus.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +30,7 @@ from pathlib import Path
 import numpy as np
 from jaxtyping import Float
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import BOOTSTRAP_SEED, MIDPOINT, RESAMPLES, LabelScores
@@ -171,16 +171,12 @@ class PrevalenceMatch:
 
 def main() -> None:
     """Re-price the medial-over-lateral gap with the two findings' sample sizes made equal."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to score against")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--resamples", type=int, default=RESAMPLES)
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to score against")
+    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    arguments = command.parsed()
 
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
-
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     names, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     predictions = np.asarray(RankAverage().combine(per_seed), dtype=np.float32)
     truth = SupervisionGap().reported(arguments.labels, names)

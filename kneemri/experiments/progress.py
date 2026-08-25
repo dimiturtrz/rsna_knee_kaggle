@@ -20,12 +20,10 @@ the next epoch is overdue — and it says so about a run this shell never launch
 cannot do here at all (see `lib.sh:wait_for_pid`).
 """
 
-import argparse
 import logging
 from datetime import UTC, datetime
-from pathlib import Path
 
-from core.paths import DataRoot
+from core import cli
 from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -85,12 +83,10 @@ class ArmProgress:
 
 def main() -> None:
     """Print every recorded run, the producing ones first."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    arguments = command.parsed()
 
-    processed = DataRoot.from_config(arguments.paths).processed()
+    processed = command.rooted(arguments).processed()
     now = datetime.now(UTC).timestamp()
     arms = [ArmProgress(RunMetrics(found)) for found in sorted(processed.glob(f"*{METRICS_RECORD}"))]
     producing = [arm for arm in arms if arm.producing(now)]

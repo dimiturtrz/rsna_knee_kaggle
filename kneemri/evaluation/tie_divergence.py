@@ -26,6 +26,7 @@ import torch
 from jaxtyping import UInt8
 from torch import Tensor
 
+from core import cli
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import SLOTS, SlotScheme
@@ -170,23 +171,19 @@ class TieDivergenceReport:
 
 def main() -> None:
     """Measure how much the tied candidates actually differ, across the training corpus."""
-    import argparse  # noqa: PLC0415 - CLI-only, and this module is imported as a library by analyses
     import logging  # noqa: PLC0415 - as above
     from concurrent.futures import ProcessPoolExecutor  # noqa: PLC0415 - as above
 
     from core.data.corpus.study_cache import StudyCache  # noqa: PLC0415 - as above
-    from core.paths import DataRoot  # noqa: PLC0415 - as above
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--split", type=str, default="train_series")
-    parser.add_argument("--workers", type=int, default=12)
-    parser.add_argument("--studies", type=int, default=0, help="0 reads the whole corpus")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger(__name__)
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--split", type=str, default="train_series")
+    command.parser.add_argument("--workers", type=int, default=12)
+    command.parser.add_argument("--studies", type=int, default=0, help="0 reads the whole corpus")
+    arguments = command.parsed()
 
-    raw = DataRoot.from_config(arguments.paths).raw()
+    raw = command.rooted(arguments).raw()
     planes = StudyCache.planes_of(raw / arguments.split.replace("_series", "_series.csv"))
     directories = sorted(path for path in (raw / arguments.split).iterdir() if path.is_dir())
     if arguments.studies:

@@ -15,7 +15,6 @@ supervised recipe consumes it through `--encoder-weights` with nothing else chan
 `kneemri.evaluation.encoder_drift` can measure it against the same stock reference.
 """
 
-import argparse
 import logging
 import time
 from collections.abc import Iterable
@@ -28,9 +27,9 @@ from jaxtyping import Float
 from torch import Tensor
 from torch.amp.autocast_mode import autocast
 
+from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.study_cache import CachedCorpus
-from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.training.spectral_mae import BYTE_RANGE, SpectralMae, SpectralMaskConfig
@@ -208,11 +207,11 @@ class Pretrainer:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    CacheFlags.add_to(parser)
-    parser.add_argument("--variant", default=SMALL, help="which encoder to adapt")
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    CacheFlags.add_to(command.parser)
+    command.parser.add_argument("--variant", default=SMALL, help="which encoder to adapt")
+    command.parser.add_argument("--epochs", type=int, default=10)
+    command.parser.add_argument(
         "--slices-per-step",
         type=int,
         default=96,
@@ -220,7 +219,7 @@ def main() -> None:
         "encoder AND a slot head at 26.9 GB; this carries no head, so the ceiling is higher and the "
         "reason to stay under it is that a masked-reconstruction gradient wants many steps, not few.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--lr",
         type=float,
         default=1.0e-4,
@@ -228,26 +227,24 @@ def main() -> None:
         "chosen to keep a 12-epoch fine-tune from destroying a representation it cannot rebuild — the "
         "opposite of what this run is for.",
     )
-    parser.add_argument("--mask-ratio", type=float, default=SpectralMaskConfig.mask_ratio)
-    parser.add_argument("--spectral-weight", type=float, default=SpectralMaskConfig.spectral_weight)
-    parser.add_argument("--highpass", type=float, default=SpectralMaskConfig.highpass)
-    parser.add_argument(
+    command.parser.add_argument("--mask-ratio", type=float, default=SpectralMaskConfig.mask_ratio)
+    command.parser.add_argument("--spectral-weight", type=float, default=SpectralMaskConfig.spectral_weight)
+    command.parser.add_argument("--highpass", type=float, default=SpectralMaskConfig.highpass)
+    command.parser.add_argument(
         "--max-steps",
         type=int,
         default=None,
         help="SMOKE ONLY: truncate each epoch to this many steps, to prove the wiring without spending "
         "the card. A checkpoint written under this flag has not seen the corpus once.",
     )
-    parser.add_argument("--seed", type=int, default=2026)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--seed", type=int, default=2026)
+    command.parser.add_argument("--out", type=Path, required=True)
+    arguments = command.parsed()
 
     from transformers import AutoModel  # noqa: PLC0415 - a 90 MB import the unit gate must not pay for
 
     encoder = ENCODERS[arguments.variant]
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, root.processed())
     corpus, identifiers = cache.load()
     encoder.require_tiling(corpus.image_size)

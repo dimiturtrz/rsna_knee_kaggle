@@ -9,7 +9,6 @@ Splitting the holdout by HOW each study's side was decided separates them. This 
 read per series — so it costs seconds and no cache rebuild.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import replace
@@ -17,10 +16,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from core import cli
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.laterality import Laterality
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +69,12 @@ class LateralityAudit:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--workers", type=int, default=20)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--out", type=Path, required=True)
+    command.parser.add_argument("--workers", type=int, default=20)
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    split = CorpusSplit(command.rooted(arguments).raw())
     table = LateralityAudit().run(split.source, split.identifiers(), arguments.workers)
     table.to_csv(arguments.out, index=False)
 

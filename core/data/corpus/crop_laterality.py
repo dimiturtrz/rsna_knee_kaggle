@@ -24,7 +24,6 @@ asymmetric deficit, and that is the direction that kills the hypothesis cheaply;
 harder is a reason to rebuild a cache, not a result.
 """
 
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -33,6 +32,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_centre import CROP_MM
@@ -41,7 +41,6 @@ from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import Plane, Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -214,16 +213,14 @@ class CropLateralityReport:
 
 def main() -> None:
     """Decode a spread sample uncropped and price the crop's two edges against the knee's two sides."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
-    parser.add_argument("--slices", type=int, default=SLICES)
-    parser.add_argument("--crop-mm", type=float, default=CROP_MM, help="the extent every member reads at")
-    parser.add_argument("--workers", type=int, default=20, help="decode processes")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    command.parser.add_argument("--slices", type=int, default=SLICES)
+    command.parser.add_argument("--crop-mm", type=float, default=CROP_MM, help="the extent every member reads at")
+    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
+    arguments = command.parsed()
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    split = CorpusSplit(command.rooted(arguments).raw())
     identifiers = split.identifiers()
     planes = split.planes()
     # Every k-th rather than a random draw, matching `crop_coverage`: the sample is then a property of

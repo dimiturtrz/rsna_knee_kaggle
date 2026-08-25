@@ -19,7 +19,6 @@ that difference is a choice rather than a defect. So the check feeds exactly the
 makes both paths read the same pixels and leaves any remaining difference attributable to the reading.
 """
 
-import argparse
 import logging
 import sys
 from pathlib import Path
@@ -28,11 +27,11 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from core import cli
 from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from core.paths import DataRoot
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.members import Member, MemberPackage
 from kneemri.models.backbone import ENCODERS
@@ -188,36 +187,36 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
 
 def main() -> None:
     """Check every member's witness in a packaged directory."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=None, help="a package to check; default is the one that ships")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument(
+        "--root", type=Path, default=None, help="a package to check; default is the one that ships"
+    )
     # A GATE THAT NEEDS THE GPU IS A GATE THAT GETS SKIPPED. This reads eight studies through one
     # small encoder — seconds of work — and defaulting to cuda meant it could not run at all while a
     # training arm owned the card, which is exactly when a member is most likely to be packaged. The
     # verdict is device-independent: TOLERANCE is set above GPU noise precisely so a reading change is
     # what moves it, and cpu-vs-cuda is not a reading change.
-    parser.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda"))
+    command.parser.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda"))
     # A CHECK THAT CAN ONLY REFUSE CANNOT REQUIRE. Every member of the mounted kit predates the witness,
     # so the summary read "0 ok, 3 unverified, 0 refused" and exited 0 — success-shaped output over a
     # package nothing had been proven about. Re-fitting those members is the real fix (knee-stp) and it
     # needs the card, so failing by default would leave the gate permanently red for a reason it cannot
     # fix; an automated caller asks for the strong claim instead.
-    parser.add_argument("--require-witness", action="store_true", help="a member with no witness fails")
+    command.parser.add_argument("--require-witness", action="store_true", help="a member with no witness fails")
     # THE SHAPE THE WITNESS WAS PRODUCED UNDER, for members recorded before the witness carried it.
     # Every member on disk was scored at --batch 12, which is readable from its metrics.jsonl and not
     # from the packaged member, so the geometry leg is runnable on them only by being told. New runs
     # record it and need no flag.
-    parser.add_argument("--batch", type=int, default=None, help="feed this batch shape (default: as recorded)")
+    command.parser.add_argument("--batch", type=int, default=None, help="feed this batch shape (default: as recorded)")
     # THE MEMBERS ONE ENTRY ACTUALLY MOUNTS, because the package holds every member ever fitted and an
     # entry seats a handful. On CPU the whole package takes longer than the timeout it is run under, so
     # the gate that the conventions require before every submission could not finish while the card was
     # busy — which is exactly when it is needed. Naming the entry's members turns it back into a check.
-    parser.add_argument("--members", nargs="+", default=None, help="check only these identifiers")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--members", nargs="+", default=None, help="check only these identifiers")
+    arguments = command.parsed()
 
     package = MemberPackage.at(arguments.root, arguments.paths)
-    root = DataRoot.from_config(arguments.paths).processed()
+    root = command.rooted(arguments).processed()
     selected = arguments.device
     if selected == "auto":
         selected = VisibleCards().device().type

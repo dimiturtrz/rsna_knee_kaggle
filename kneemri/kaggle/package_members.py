@@ -12,7 +12,6 @@ one could be pushed over the live package, and nothing on disk said which set th
 had actually run. The roster is the fix: one file, in git, that a `git log` can date.
 """
 
-import argparse
 import json
 import logging
 import shutil
@@ -23,7 +22,7 @@ from typing import cast
 
 import torch
 
-from core.paths import DataRoot
+from core import cli
 from kneemri.inference.members import MemberPackage
 from kneemri.models.backbone import ENCODERS, SMALL
 
@@ -160,9 +159,11 @@ class MemberManifest:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=None, help="where to write; default is the package that ships")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument(
+        "--out", type=Path, default=None, help="where to write; default is the package that ships"
+    )
+    command.parser.add_argument(
         "--roster",
         type=Path,
         default=Path("comp/members.roster"),
@@ -171,13 +172,11 @@ def main() -> None:
         "the package it produced did not: two local directories both stamped the live dataset id, "
         "holding three members and four, while the live package held six.",
     )
-    parser.add_argument("--title", default="kneemri-members")
-    parser.add_argument("--owner", default="dimiturnt")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--title", default="kneemri-members")
+    command.parser.add_argument("--owner", default="dimiturnt")
+    arguments = command.parsed()
 
-    source = DataRoot.from_config(arguments.paths).processed()
+    source = command.rooted(arguments).processed()
     checkpoints = MemberRoster.read(arguments.roster).checkpoints(source)
     # Named, not counted: a roster line that matched more than intended is invisible as a number and
     # obvious as a list, and this copies ~89 MB per member.

@@ -5,38 +5,35 @@ spawns fresh interpreters that re-import the parent module, and a `__main__` rea
 to import, so every child dies with BrokenProcessPool.
 """
 
-import argparse
 import logging
 import sys
 from pathlib import Path
 
+from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.folds import ReportFolds
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    CacheFlags.add_to(parser)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    CacheFlags.add_to(command.parser)
+    command.parser.add_argument(
         "--print-key",
         action="store_true",
         help="print the cache key this configuration resolves to and exit. The arm script used to "
         "rebuild the key in bash, so every new reading axis silently broke its own completion check.",
     )
-    parser.add_argument("--workers", type=int, default=20, help="decode processes")
-    parser.add_argument("--split", default="train_series", help="which split to decode")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--holdout-fold", type=int, default=None, help="cache only this fold's holdout studies")
-    parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
+    command.parser.add_argument("--split", default="train_series", help="which split to decode")
+    command.parser.add_argument("--holdout-fold", type=int, default=None, help="cache only this fold's holdout studies")
+    command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     raw = root.raw()
     split = CorpusSplit(raw, arguments.split)
     identifiers = split.identifiers()
@@ -47,7 +44,7 @@ def main() -> None:
         # cost two hours, differing only in one axis length. It cannot be named for itself either:
         # `train.py` has no fold-restriction flag, so a suffix here would make the arrays it already
         # reads unaddressable. So the directory is what separates them, and it is now required.
-        parser.error("--holdout-fold writes a partial corpus under the FULL cache's name: pass --out")
+        command.parser.error("--holdout-fold writes a partial corpus under the FULL cache's name: pass --out")
 
     if arguments.holdout_fold is not None:
         # A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's

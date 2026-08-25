@@ -33,6 +33,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from core import cli
 from core.data.corpus.slots import SLOTS, SlotScheme
 from core.data.corpus.study import Study
 
@@ -158,24 +159,20 @@ class SlotTiesReport:
 
 def main() -> None:
     """Count contested slots across the training corpus."""
-    import argparse  # noqa: PLC0415 - CLI-only, and this module is imported as a library by analyses
     import logging  # noqa: PLC0415 - as above
     from concurrent.futures import ProcessPoolExecutor  # noqa: PLC0415 - as above
 
     from core.data.corpus.study_cache import StudyCache  # noqa: PLC0415 - as above
-    from core.paths import DataRoot  # noqa: PLC0415 - as above
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--split", type=str, default="train_series")
-    parser.add_argument("--workers", type=int, default=12)
-    parser.add_argument("--studies", type=int, default=0, help="0 reads the whole corpus")
-    parser.add_argument("--lost", action="store_true", help="census the series no slot accepts")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger(__name__)
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--split", type=str, default="train_series")
+    command.parser.add_argument("--workers", type=int, default=12)
+    command.parser.add_argument("--studies", type=int, default=0, help="0 reads the whole corpus")
+    command.parser.add_argument("--lost", action="store_true", help="census the series no slot accepts")
+    arguments = command.parsed()
 
-    raw = DataRoot.from_config(arguments.paths).raw()
+    raw = command.rooted(arguments).raw()
     table = raw / arguments.split.replace("_series", "_series.csv")
 
     # FIRST, because it can make everything below moot in one CSV read: if the two pipelines see the

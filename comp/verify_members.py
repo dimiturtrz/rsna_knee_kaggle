@@ -11,11 +11,11 @@ differed by **2.25** against a 2e-3 tolerance. The gate refused it, correctly; t
 makes that refusal happen BEFORE a submission slot is spent rather than inside a Kaggle kernel.
 """
 
-import argparse
 import logging
 import sys
 from pathlib import Path
 
+from core import cli
 from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -29,13 +29,17 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     """Load every member in a packaged directory and verify it against its stored fingerprint."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=None, help="a package to verify; default is the one that ships")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--kernel", type=Path, help="a kernel-metadata.json whose mounts must cover this package")
-    parser.add_argument("--members", nargs="*", help="the members that kernel runs; default is the whole package")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument(
+        "--root", type=Path, default=None, help="a package to verify; default is the one that ships"
+    )
+    command.parser.add_argument(
+        "--kernel", type=Path, help="a kernel-metadata.json whose mounts must cover this package"
+    )
+    command.parser.add_argument(
+        "--members", nargs="*", help="the members that kernel runs; default is the whole package"
+    )
+    arguments = command.parsed()
 
     package = MemberPackage.at(arguments.root, arguments.paths)
     try:

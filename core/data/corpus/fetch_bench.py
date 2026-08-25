@@ -17,7 +17,6 @@ second. Disjoint row ranges are what make the arms comparable, so the sweep refu
 the same rows.
 """
 
-import argparse
 import logging
 import time
 from dataclasses import dataclass
@@ -26,6 +25,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
 
 logger = logging.getLogger(__name__)
@@ -102,12 +102,11 @@ class FetchBench:
 def main() -> None:
     """Time the real cache under each reader and handle count, on rows no other arm reads."""
     from core.data.corpus.cache_flags import CacheFlags  # noqa: PLC0415 - CLI-only
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    CacheFlags.add_to(parser)
-    parser.add_argument("--width", type=int, default=None, help="slices per read (default: the whole stack)")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    CacheFlags.add_to(command.parser)
+    command.parser.add_argument("--width", type=int, default=None, help="slices per read (default: the whole stack)")
+    command.parser.add_argument(
         "--offset",
         type=int,
         default=0,
@@ -115,14 +114,12 @@ def main() -> None:
         "the first run warmed, which measures RAM; a rerun at a new one also hands each reader a "
         "different region, which is what separates a reader's rate from where in the file it landed.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--reverse", action="store_true", help="time the readers in the opposite order, against arm-order effects"
     )
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
-    cache = CacheFlags.cache(arguments, DataRoot.from_config(arguments.paths).processed())
+    cache = CacheFlags.cache(arguments, command.rooted(arguments).processed())
     corpus, identifiers = cache.load()
     images = corpus.images
     if not isinstance(images, np.memmap) or not images.filename:

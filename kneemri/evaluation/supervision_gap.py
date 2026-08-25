@@ -28,7 +28,6 @@ upweighted, so scoring them here would be scoring training data. The published m
 so the radiologist labels are genuinely unseen by them. See `kneemri.evaluation.oof_oracle`.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,6 +36,7 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import LabelScores
@@ -238,15 +238,11 @@ class SupervisionGap:
 
 def main() -> None:
     """Split the findings by whether their labels or their model is the weaker half."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to price")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to price")
+    arguments = command.parsed()
 
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
-
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     gap = SupervisionGap()
     values, predictions, annotations = gap.aligned(
         arguments.labels, root.raw() / "train.csv", root.processed() / "published"

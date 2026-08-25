@@ -29,7 +29,6 @@ because a faster card has less kernel-launch overhead for compilation to remove.
 question for the kernel, a loss here settles it.
 """
 
-import argparse
 import logging
 import time
 from collections.abc import Callable
@@ -38,6 +37,7 @@ from pathlib import Path
 
 import torch
 
+from core import cli
 from kneemri.inference.members import Member, MemberPackage
 
 logger = logging.getLogger(__name__)
@@ -151,13 +151,14 @@ class ServeBenchReport:
 
 def main() -> None:
     """Time one member's serving forward eager against compiled, on synthetic pixels of its own shape."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=None, help="a package to time; default is the one that ships")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--member", default="", help="which member to time (default: the strongest)")
-    parser.add_argument("--studies", type=int, default=STUDIES)
-    parser.add_argument("--repeats", type=int, default=REPEATS)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument(
+        "--root", type=Path, default=None, help="a package to time; default is the one that ships"
+    )
+    command.parser.add_argument("--member", default="", help="which member to time (default: the strongest)")
+    command.parser.add_argument("--studies", type=int, default=STUDIES)
+    command.parser.add_argument("--repeats", type=int, default=REPEATS)
+    command.parser.add_argument(
         "--read-size",
         type=int,
         default=0,
@@ -165,8 +166,7 @@ def main() -> None:
         "predictions are then meaningless and the cost is not: it is what a member fitted at that "
         "size would spend, which is how a resolution arm is priced before it is trained.",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
     from kneemri.device import VisibleCards  # noqa: PLC0415 - CLI-only
     from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - CLI-only

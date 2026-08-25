@@ -26,12 +26,12 @@ Nor does a marker being present mean it attaches to a particular finding — mea
 per-finding regex extraction adds nothing a level does not already carry.
 """
 
-import argparse
 import logging
 import re
-from pathlib import Path
 
 import pandas as pd
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -160,14 +160,10 @@ class ReportLanguages:
 
 def main() -> None:
     """Report the corpus's language mix and how much of it grades its findings."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    arguments = command.parsed()
 
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
-
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     reports = pd.read_csv(root.raw() / "train.csv")["Report"].fillna("").astype(str).tolist()
     for line in ReportLanguages().census(reports):
         logger.info(line)

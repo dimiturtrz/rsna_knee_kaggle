@@ -9,11 +9,10 @@ moves it to where the comparison reads it, for the runs that predate `RunMetrics
 nothing and reports.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
-from core.paths import DataRoot
+from core import cli
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
 
@@ -54,13 +53,11 @@ class MetricsRecipe:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--check", action="store_true", help="write nothing; report what is missing")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--check", action="store_true", help="write nothing; report what is missing")
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths).processed()
+    root = command.rooted(arguments).processed()
     filled, orphaned = MetricsRecipe(root).backfill(write=not arguments.check)
     logger.info("%d recipe(s) %s: %s", len(filled), "recoverable" if arguments.check else "recovered", filled)
     if orphaned:

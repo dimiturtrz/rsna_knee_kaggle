@@ -30,7 +30,6 @@ data and would beat us everywhere for a reason that is not weight quality. Any f
 `HELD_OUT_SHARE` of the corpus is refused, loudly.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -38,8 +37,8 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
-from core.paths import DataRoot
 from kneemri.evaluation.published_ruler import PublishedFold
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -159,13 +158,11 @@ class MatchedRuler:
 
 def main() -> None:
     """Print the per-label gap between our weights and the published ones, worst deficit first."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--run", required=True, help="a run name or any of its own file names")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--run", required=True, help="a run name or any of its own file names")
+    arguments = command.parsed()
 
-    processed = DataRoot.from_config(arguments.paths).processed()
+    processed = command.rooted(arguments).processed()
     record = Path(arguments.run) if Path(arguments.run).exists() else processed / f"{arguments.run}.pt"
     rows = MatchedRuler(processed / "published").compared(record)
 

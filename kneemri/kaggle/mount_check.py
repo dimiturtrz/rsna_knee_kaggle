@@ -12,11 +12,11 @@ is data the parse does not have. The first is skipped; the second reads as the w
 over-declaring costs mount seconds and under-declaring costs the slot.
 """
 
-import argparse
 import logging
 import sys
 from pathlib import Path
 
+from core import cli
 from core.denominator import Denominator
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
@@ -91,17 +91,17 @@ class MountCheck:
 
 def main() -> None:
     """Report every kernel's mount coverage and refuse if any entry could not run what it names."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=None, help="a package to check; default is the one that ships")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--kernels", type=Path, default=Path("comp/kernels"))
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument(
+        "--root", type=Path, default=None, help="a package to check; default is the one that ships"
+    )
+    command.parser.add_argument("--kernels", type=Path, default=Path("comp/kernels"))
+    command.parser.add_argument(
         "--live",
         action="store_true",
         help="also ask Kaggle what the members dataset actually holds (needs credentials)",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
     package = MemberPackage.at(arguments.root, arguments.paths)
     # OPT-IN, because it needs credentials and a round trip, and REQUIRED before a submission: the

@@ -17,7 +17,6 @@ are NOT independent draws: the interval here is bootstrapped over STUDIES, not c
 twice the width a cell-wise interval would report.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
@@ -25,6 +24,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.labels.report_language import ReportLanguages
 from core.findings import TARGETS
 
@@ -231,15 +231,11 @@ class ReaderAgreement:
 
 def main() -> None:
     """Report reader-radiologist agreement per language on the annotated studies."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, help="the reader's table; defaults to report_labels_v2.csv")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, help="the reader's table; defaults to report_labels_v2.csv")
+    arguments = command.parsed()
 
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
-
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     truth = pd.read_csv(root.raw() / "train.csv")
     read = pd.read_csv(arguments.labels or root.processed() / "labels" / "report_labels_v2.csv")
     annotated = truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]

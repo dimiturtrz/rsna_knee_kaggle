@@ -28,7 +28,6 @@ plumbing failure in its purest form: a knob that lands in the record and never r
 the variant that runs.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -40,6 +39,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 from torch import Tensor, nn
 
+from core import cli
 from core.data.corpus.anatomy import ANATOMY, SlotAffinity
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.labels.targets import Targets
@@ -323,40 +323,39 @@ class AxisConcordance:
 
 def main() -> None:
     """Fit one head on a cached corpus, or sweep the rank weight."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--variant", default="small")
-    CacheFlags.add_to(parser)
-    parser.add_argument("--read-size", type=int, default=336)
-    parser.add_argument("--pool", default=CLS_MEAN, choices=tuple(POOL_PARTS))
-    parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--variant", default="small")
+    CacheFlags.add_to(command.parser)
+    command.parser.add_argument("--read-size", type=int, default=336)
+    command.parser.add_argument("--pool", default=CLS_MEAN, choices=tuple(POOL_PARTS))
+    command.parser.add_argument("--epochs", type=int, default=30)
+    command.parser.add_argument(
+        "--rank-weight", type=float, nargs="+", default=[1.0], help="one value, or several to sweep"
+    )
+    command.parser.add_argument(
         "--slice-read",
         default=MAXIMUM,
         choices=tuple(SLICE_POOLINGS),
         help="which cache to read: how the slices reached the ENCODER when it was built. "
         "Distinct from --slice-pooling, which reduces the slice axis this trial then finds.",
     )
-    parser.add_argument("--slice-pooling", default=MAXIMUM, choices=TRIAL_SLICE_POOLINGS)
-    parser.add_argument("--slot-pooling", default=ATTENDED, choices=tuple(SLOT_POOLINGS))
-    parser.add_argument("--anatomical-prior", action="store_true")
-    parser.add_argument(
+    command.parser.add_argument("--slice-pooling", default=MAXIMUM, choices=TRIAL_SLICE_POOLINGS)
+    command.parser.add_argument("--slot-pooling", default=ATTENDED, choices=tuple(SLOT_POOLINGS))
+    command.parser.add_argument("--anatomical-prior", action="store_true")
+    command.parser.add_argument(
         "--correlate",
         action="store_true",
         help=f"rerun the pairs in {HEAD_AXES} and report whether the ordering survives freezing",
     )
-    parser.add_argument("--fold", type=int, default=0)
-    parser.add_argument("--folds", type=int, default=5)
-    parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command.parser.add_argument("--fold", type=int, default=0)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    arguments = command.parsed()
 
     from core.data.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     # The features are named after the PIXELS they were encoded from, so this asks the same question
     # `build_embeddings` answered rather than restating three of that cache's six axes.
     source = CacheFlags.cache(arguments, root.processed()).key

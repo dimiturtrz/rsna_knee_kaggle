@@ -20,7 +20,6 @@ This runs OFFLINE and its output is a file. The text encoder never enters the Ka
 `python -m kneemri.embeddings.report_embeddings --out <processed>/labels/report_embeddings.npz`
 """
 
-import argparse
 import logging
 from pathlib import Path
 
@@ -29,7 +28,7 @@ import pandas as pd
 import torch
 from jaxtyping import Float
 
-from core.paths import DataRoot
+from core import cli
 from kneemri.device import VisibleCards
 
 ENCODER = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -95,17 +94,15 @@ class ReportEmbeddings:
 
 def main() -> None:
     """Embed every training report and write the vectors beside their study identifiers."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dims", type=int, default=64, help="principal components kept as the target")
-    parser.add_argument("--encoder", type=str, default=ENCODER)
-    parser.add_argument("--out", type=Path, default=None)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--dims", type=int, default=64, help="principal components kept as the target")
+    command.parser.add_argument("--encoder", type=str, default=ENCODER)
+    command.parser.add_argument("--out", type=Path, default=None)
+    arguments = command.parsed()
 
     from transformers import AutoModel, AutoTokenizer  # noqa: PLC0415 - a 90 MB import only this CLI needs
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     table = pd.read_csv(root.raw() / "train.csv")
     identifiers = table["StudyInstanceUID"].astype(str).tolist()
     reports = table["Report"].astype(str).tolist()

@@ -21,7 +21,6 @@ habitus all travel with slice count, and a deeper scan may simply be a better sc
 ASSOCIATION and says so; it cannot separate "we threw away more" from "these studies differ".
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +29,7 @@ import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.bootstrap import INTERVAL, RESAMPLE_SEED, RESAMPLES
 from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
@@ -182,20 +182,17 @@ class StackCoverageReport:
 
 def main() -> None:
     """Score the published members' held-out predictions inside bands of acquired stack depth."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--groups", type=int, default=GROUPS)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--groups", type=int, default=GROUPS)
+    arguments = command.parsed()
 
     from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
     from core.data.labels.targets import Targets  # noqa: PLC0415 - CLI-only
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.published_ruler import PublishedRuler  # noqa: PLC0415 - CLI-only
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     split = CorpusSplit(root.raw())
     names, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     combined = RankAverage().combine(per_seed)

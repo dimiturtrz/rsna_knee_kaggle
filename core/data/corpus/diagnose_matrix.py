@@ -15,7 +15,6 @@ size. The defect was real and the fix stands as insurance for the hidden test, b
 corpus it never fired — no member on disk was ever served a blackened slot for this reason.
 """
 
-import argparse
 import logging
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
@@ -23,6 +22,8 @@ from pathlib import Path
 
 import pandas as pd
 import pydicom
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -76,18 +77,15 @@ class MatrixAudit:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path)
-    parser.add_argument("--studies", type=int, default=SAMPLED_STUDIES)
-    parser.add_argument("--workers", type=int, default=20)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--out", type=Path)
+    command.parser.add_argument("--studies", type=int, default=SAMPLED_STUDIES)
+    command.parser.add_argument("--workers", type=int, default=20)
+    arguments = command.parsed()
 
     from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only, as above
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
 
-    split = CorpusSplit(DataRoot.from_config(arguments.paths).raw())
+    split = CorpusSplit(command.rooted(arguments).raw())
     identifiers = split.identifiers()[: arguments.studies]
     table = MatrixAudit().run(split.source, identifiers, arguments.workers)
     if arguments.out:

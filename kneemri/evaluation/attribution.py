@@ -32,6 +32,7 @@ import torch
 from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
@@ -412,31 +413,27 @@ class AttributionReport:
 
 def main() -> None:
     """Run the occlusion diagnostics for one member on its fold's holdout."""
-    import argparse  # noqa: PLC0415 - CLI-only, and this module is imported as a library by analyses
     import logging  # noqa: PLC0415 - as above
     from pathlib import Path  # noqa: PLC0415 - as above
 
     from core.data.corpus.folds import ReportFolds  # noqa: PLC0415 - as above
     from core.data.labels.targets import Targets  # noqa: PLC0415 - as above
-    from core.paths import DataRoot  # noqa: PLC0415 - as above
     from core.wakelock import Wakelock  # noqa: PLC0415 - as above
     from kneemri.inference.members import Member  # noqa: PLC0415 - as above
     from kneemri.models.backbone import ENCODERS, SMALL  # noqa: PLC0415 - as above
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, required=True)
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--fold", type=int, default=0)
-    parser.add_argument("--folds", type=int, default=5)
-    parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--studies", type=int, default=400, help="holdout studies sampled, for wall-clock")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger = logging.getLogger(__name__)
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoint", type=Path, required=True)
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--fold", type=int, default=0)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--slices", type=int, default=12)
+    command.parser.add_argument("--studies", type=int, default=400, help="holdout studies sampled, for wall-clock")
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     # THE MEMBER'S OWN READING, never a constant. This CLI loaded the default 336 px cache, windowed by
     # GROUP whatever the member was, passed IMAGE_SIZE as the read size and assumed the canonical six
     # slots — so a whole-stack member was occluded three slices at a time, a 448-cache member could not

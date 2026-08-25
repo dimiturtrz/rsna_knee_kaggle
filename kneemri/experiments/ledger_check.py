@@ -25,12 +25,12 @@ its name, because the smoke this project documents takes no `--out` and lands on
 fails on correct behaviour is one the reader learns to skip.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import torch
 
+from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
@@ -145,17 +145,13 @@ class LedgerCheck:
 
 def main() -> None:
     """Report finished runs the written record does not mention, and exit non-zero if any."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--ledger", type=Path, default=LEDGER)
-    parser.add_argument("--interpretations", type=Path, default=INTERPRETATIONS)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only, and this module is imported as a library
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--ledger", type=Path, default=LEDGER)
+    command.parser.add_argument("--interpretations", type=Path, default=INTERPRETATIONS)
+    arguments = command.parsed()
 
     check = LedgerCheck(arguments.ledger, *sorted(arguments.interpretations.rglob("*.md")))
-    processed = DataRoot.from_config(arguments.paths).processed()
+    processed = command.rooted(arguments).processed()
     runs = check.finished(processed)
     # The data root is machine-local and gitignored, so an unmounted drive or a paths.yaml pointing at
     # the wrong dataset produces "0 finished runs, 0 unrecorded" — the sentence a fully recorded ledger

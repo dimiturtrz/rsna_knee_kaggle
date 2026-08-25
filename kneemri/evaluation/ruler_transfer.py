@@ -30,7 +30,6 @@ candidate mechanism `supervision_gap.thresholds` names from the other side: our 
 cells positive where the radiologist calls 34.4%.
 """
 
-import argparse
 import itertools
 import logging
 from dataclasses import dataclass
@@ -39,6 +38,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from core import cli
 from kneemri.evaluation.scores import BOOTSTRAP_SEED, RESAMPLES, LabelScores
 
 logger = logging.getLogger(__name__)
@@ -221,21 +221,18 @@ class RulerTransfer:
 
 def main() -> None:
     """Score a ladder of published-member arms against both label sources."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", type=Path, required=True, help="the report-derived table, read raw")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--resamples", type=int, default=RESAMPLES)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table, read raw")
+    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    command.parser.add_argument(
         "--shares", type=float, nargs="*", default=list(SHARES), help="permutation blends, for deltas worth reading"
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.published_ruler import PublishedRuler  # noqa: PLC0415 - CLI-only
     from kneemri.evaluation.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     gap = SupervisionGap()
     identifiers, truth = gap.annotated(root.raw() / "train.csv")
     names, per_member = PublishedRuler(root.processed() / "published").per_seed()

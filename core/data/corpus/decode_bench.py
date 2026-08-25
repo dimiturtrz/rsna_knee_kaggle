@@ -24,12 +24,13 @@ slower mount, so the RATIO will differ. What transfers is the GIL-boundedness, w
 the code rather than the disk.
 """
 
-import argparse
 import logging
 import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
+
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -100,16 +101,13 @@ class DecodeBench:
 
 def main() -> None:
     """Time the real decode under each strategy and print what each buys over running serially."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--studies", type=int, default=STUDIES)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--studies", type=int, default=STUDIES)
+    arguments = command.parsed()
 
     from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
 
-    source = CorpusSplit(DataRoot.from_config(arguments.paths).raw()).source
+    source = CorpusSplit(command.rooted(arguments).raw()).source
     studies = [str(path) for path in sorted(source.iterdir()) if path.is_dir()]
     chosen = studies[: arguments.studies]
 

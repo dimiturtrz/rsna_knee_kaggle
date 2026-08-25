@@ -35,7 +35,6 @@ FETCHING THE INPUTS (out of the repo, as all data is):
     kaggle datasets download pilkwang/rsna-knee-weights --unzip
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -47,11 +46,11 @@ import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.slot_reader import Band
 from core.data.corpus.slot_ties import SlotTies
 from core.data.corpus.slots import SCHEMES
 from core.data.corpus.study_cache import CorpusSplit
-from core.paths import DataRoot
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.members import Member, MemberConfig
 
@@ -243,15 +242,13 @@ class OutOfFoldOracleReport:
 
 def main() -> None:
     """Score one published member through our pipeline and compare against its own recorded output."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, required=True, help="a published member carrying `oof`")
-    parser.add_argument("--studies", type=int, default=0, help="0 uses every study the checkpoint recorded")
-    parser.add_argument("--device", default="cuda", choices=("cuda", "cpu"))
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoint", type=Path, required=True, help="a published member carrying `oof`")
+    command.parser.add_argument("--studies", type=int, default=0, help="0 uses every study the checkpoint recorded")
+    command.parser.add_argument("--device", default="cuda", choices=("cuda", "cpu"))
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     oracle = OutOfFoldOracle()
     published = PublishedCheckpoint.read(arguments.checkpoint)
     identifiers, theirs = published.recorded()

@@ -20,13 +20,13 @@ WHAT IT DOES NOT TEST: the T4's memory, the mounted kit, and the hidden test's o
 the failures `kit_check` and the image budget address; this one is about the ANSWER, not the run.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
 import pandas as pd
 import torch
 
+from core import cli
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from core.paths import DataRoot
@@ -101,16 +101,14 @@ class DryRun:
 
 def main() -> None:
     """Score the submission path on labelled studies, and refuse a table that ranks like a coin."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--studies", type=int, default=STUDIES)
-    parser.add_argument("--members", type=Path, required=True, help="a weights package to run")
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--device", default="cpu", choices=("cpu", "cuda"))
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--studies", type=int, default=STUDIES)
+    command.parser.add_argument("--members", type=Path, required=True, help="a weights package to run")
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--device", default="cpu", choices=("cpu", "cuda"))
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     package = MemberPackage(arguments.members)
     identifiers = pd.read_csv(root.raw() / "train.csv")["StudyInstanceUID"].tolist()[: arguments.studies]
 

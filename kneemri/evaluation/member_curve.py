@@ -17,7 +17,6 @@ Every subset of each size is scored, not one arbitrary subset, because with thre
 spread between the best and worst subset of a given size is the honest error bar on the mean.
 """
 
-import argparse
 import itertools
 import logging
 from dataclasses import dataclass
@@ -28,9 +27,9 @@ import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.data.labels.targets import Targets
-from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
@@ -558,15 +557,15 @@ class MemberCurve:
 
 def main() -> None:
     """Score every subset of the given checkpoints on their shared holdout."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoints", type=Path, nargs="+", required=True, help="members sharing ONE split")
-    parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--fold", type=int, default=0)
-    parser.add_argument("--folds", type=int, default=5)
-    parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--slices", type=int, default=12)
-    parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoints", type=Path, nargs="+", required=True, help="members sharing ONE split")
+    command.parser.add_argument("--labels", type=Path, required=True)
+    command.parser.add_argument("--fold", type=int, default=0)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--slices", type=int, default=12)
+    command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    command.parser.add_argument(
         "--paired",
         action="store_true",
         help="per-label 95%% interval of each member's delta against the FIRST, by bootstrap over "
@@ -574,7 +573,7 @@ def main() -> None:
         "arms are scored on the same studies - wide enough that a whole arm's per-label claim came "
         "back unread. Costs a thousand rescorings of arrays already in memory, and no GPU.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--tta",
         action="store_true",
         help="average over SpatialViews (rotations 0/-6/+6) as well as windows. A whole-stack member "
@@ -582,22 +581,21 @@ def main() -> None:
         "structurally unavailable to it and rotation is the only test-time average it can have. Costs "
         "three forward passes per member.",
     )
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument(
+    command.parser.add_argument(
         "--combine-seed",
         type=int,
         default=COMBINE_SEED,
         help="which half of the holdout fits the per-label member choice and which reports it. Fixed by "
         "default so the curve is reproducible; vary it to see how much of a gain is the split.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--refresh",
         action="store_true",
         help="re-read every member through its encoder instead of using cached probabilities. The cache "
         "keys on the checkpoint's size and mtime, the scored studies and the whole reading policy, so a "
         "stale hit should not be possible - this is the escape hatch for when it is.",
     )
-    parser.add_argument(
+    command.parser.add_argument(
         "--device",
         default=VisibleCards().device().type,
         choices=("cuda", "cpu"),
@@ -605,10 +603,9 @@ def main() -> None:
         "cpu explicitly stays available — but the default now answers it too, since `VisibleCards` "
         "counts visible cards rather than asking whether CUDA is installed.",
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     device = torch.device(arguments.device)
     views = SpatialViews() if arguments.tta else None
     predictions = HoldoutPredictions(device, views)
