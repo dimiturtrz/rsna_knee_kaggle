@@ -36,6 +36,13 @@ not — the one Failed line is hundreds of lines above. It cost three silent no-
 (a `ruff format` disagreement, a pyrefly `NDArray` type argument, an E501). Write the commit's output to
 a log, then `git log --oneline -1`; on a failure grep that log for `Failed`.
 
+**Finish every `bd` WRITE before `git add`, and run none while a commit is in flight.** A bd write ends
+by exporting the working set to `.beads/issues.jsonl` *and* git-adding it — measured, and reads
+(`bd show`/`list`/`ready`) do not. So a `bd close` fired next to a commit changes a STAGED file
+underneath pre-commit, which reports `files were modified by this hook` and blames whichever hook was
+running — always one of the three slowest, always with clean output, always green on the retry
+(knee-hahw).
+
 ## Package structure
 
 Your code lives in your declared packages: `core/`, `kneemri/` — organise modules however the project needs.
