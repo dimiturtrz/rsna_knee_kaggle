@@ -62,8 +62,20 @@ map from adjective to annotation, not in the parse. That kills a lane cheaply, w
 near 0.5 by construction and a confident 0/1 away from it, which is a change to gradient emphasis rather
 than to label ordering: all smalls move together, so no ordering inside the table changes and
 `supervision_gap`'s AUC cannot move. The claim would have to be tested on a board or a holdout, not on
-the gold 58, and it is Effusion-shaped — one of twelve findings — so nothing here is priced near the
-1.5% bar. It is a free rider on a label arm, never an arm of its own.
+the gold 58.
+
+**The corpus denominator is what settles its size, and it settles it downward.** The bucket is not 12
+studies; over the whole corpus the same rule reads 4407 studies, 1769 of them English (40.1%), and the
+small bucket holds **509 — 11.5% of the corpus**. So the edit would touch 509 training rows, on ONE of
+twelve findings, with a target moving by at most 0.18. Even a perfect repair of Effusion's boundary
+supervision reaches the macro through a twelfth of it. Nothing here is priced near the 1.5% bar: it is a
+free rider on a label arm, never an arm of its own.
+
+**And the axis cannot be widened to the other findings on our evidence.** Grade words exist for OA
+(mild / moderate / severe), for meniscal tears (partial / complete) and elsewhere, so the same question
+is askable there — but it is answerable only against image-derived truth, and that truth is 58 studies
+of which 28 parse. Per-finding those counts are single digits. The honest position is that this is
+measured for Effusion and unmeasurable for the rest, not that it generalises.
 
 **It does not touch the modelling-headroom reading.** Our model is 0.027 below its own teacher
 (`2026-08-25_forum-bottleneck-vs-our-own-diagnostic.md`); this says the teacher itself is noisy at one
