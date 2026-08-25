@@ -124,8 +124,33 @@ into a label. Same consequence for us (a ceiling on the ruler, not a labelling r
 mechanism, and the difference matters for the LLM-confidence argument above: against an image-derived
 label, report-derived supervision is not noisy-but-unbiased, it is a different measurement.
 
-**UNVERIFIED, and deliberately recorded as such.** It is one participant's memory of a host comment,
-not a host post read here — the same shape of claim the RAD-DINO scaling post made, which turned out to
-be true and still had to be re-derived from the primary source before it could be used. The check is
-cheap and costs no slot: find the host's own message with `discussion_read` and quote it, or find that
-no such message exists. Do that before any work is planned on top of it.
+**The check was run on 2026-08-25** (`discussion_read --live`, every thread, no slot). No host message
+saying that sentence exists on the forum. What does exist is the host's own competition overview
+(topic 733343, "Courtesy of Dr. Jacob Kazam"), which is the primary source for how the 58 were made and
+settles the substance without settling the wording.
+
+Three things it states, quoted:
+
+- *"Each study in the annotated reference set was independently labeled by two subspecialty-trained MSK
+  radiologists, with disagreements adjudicated by a third radiologist to produce a single consensus
+  ground truth."*
+- *"In each case, ambiguous or borderline findings ('on the fence') were graded as negative to favor
+  specificity."*
+- *"Joint effusion: A moderate or large amount of fluid distending the joint."*
+
+Every one of the twelve criteria is written in IMAGE terms — signal that "definitely contacts the
+meniscal surface on at least two images", "greater than 50 percent of cartilage thickness", "bone marrow
+edema-like signal" — and the worked examples are "drawn from the challenge's **image** annotation
+guidelines", figures with arrows on pixels. The reports are never named as an input to the annotation.
+So the competitor's claim is **supported in substance and unverified as a quotation**: the annotation
+protocol as the host describes it is image-derived and three-radiologist adjudicated, and the reports
+are a parallel description rather than the label's source. Treat the mechanism paragraph above as
+holding, and do not quote the sentence itself as a host statement.
+
+**And the middle bullet makes this page's finding harder, not softer.** The stated rule is not merely a
+threshold, it is a threshold with a declared bias: on the fence goes to zero. That predicts errors in
+ONE direction — small effusions annotated negative. We measure both directions at once: 6 of 12 small
+annotated **positive** (against the bias) and 1 of 3 moderate annotated **negative** (with it, but past
+the stated threshold). A rule that is applied noisily against its own declared tie-break is not being
+applied to the report's word at all, which is exactly what an image-derived annotation looks like when
+you cross-tab it against report vocabulary.
