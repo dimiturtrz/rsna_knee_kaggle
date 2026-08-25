@@ -22,7 +22,6 @@ from one as INDICATIVE. The record says what it is; nothing downstream has to re
 back-filled.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +30,7 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
@@ -161,21 +161,17 @@ class HoldoutBackfill:
 
 def main() -> None:
     """Back-fill the arms already run: `python -m kneemri.inference.holdout_backfill --checkpoints *.pt`."""
-    parser = argparse.ArgumentParser(description=HoldoutBackfill.__doc__)
-    parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--device", default=VisibleCards().device().type)
-    parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
-    parser.add_argument("--refresh", action="store_true", help="re-derive runs that already kept a record")
-    parser.add_argument(
+    command = cli.Command(HoldoutBackfill.__doc__, logger)
+    command.parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
+    command.parser.add_argument("--device", default=VisibleCards().device().type)
+    command.parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
+    command.parser.add_argument("--refresh", action="store_true", help="re-derive runs that already kept a record")
+    command.parser.add_argument(
         "--restamp", action="store_true", help="correct an existing record's epoch only, with no inference"
     )
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
 
-    backfill = HoldoutBackfill(
-        DataRoot.from_config(arguments.paths), torch.device(arguments.device), overlap=arguments.overlap
-    )
+    backfill = HoldoutBackfill(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     # The walk, not each member: a suspend between two members costs the same wall-clock as one inside
     # a member, and the walk over 55 of them is what runs for hours unattended (knee-wyzj).
     with Wakelock():

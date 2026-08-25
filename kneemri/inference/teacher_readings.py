@@ -21,7 +21,6 @@ saw every study, the holdout included, so distilling from it leaks the evaluatio
 student through this file and the arm reads as a win with nothing behind it. Pass the fold-aware twins.
 """
 
-import argparse
 import logging
 from pathlib import Path
 
@@ -30,6 +29,7 @@ import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.paths import DataRoot
 from core.wakelock import Wakelock
@@ -109,17 +109,15 @@ class TeacherReadings:
 
 def main() -> None:
     """Write the teacher file: `--checkpoints <fold-0 twins> --out teacher.npz`."""
-    parser = argparse.ArgumentParser(description=TeacherReadings.__doc__)
-    parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument("--device", default=VisibleCards().device().type)
-    parser.add_argument("--folds", type=int, default=5)
-    parser.add_argument("--split-seed", type=int, default=2026)
-    parser.add_argument("--fold", type=int, default=0, help="the fold these members held out, never -1")
-    parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    command = cli.Command(TeacherReadings.__doc__, logger)
+    command.parser.add_argument("--checkpoints", type=Path, nargs="+", required=True)
+    command.parser.add_argument("--out", type=Path, required=True)
+    command.parser.add_argument("--device", default=VisibleCards().device().type)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--fold", type=int, default=0, help="the fold these members held out, never -1")
+    command.parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
+    arguments = command.parsed()
 
     if arguments.fold < 0:
         message = (
@@ -128,7 +126,7 @@ def main() -> None:
         )
         raise ValueError(message)
 
-    readings = TeacherReadings(DataRoot.from_config(arguments.paths), torch.device(arguments.device))
+    readings = TeacherReadings(command.rooted(arguments), torch.device(arguments.device))
     members = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
     _, identifiers = members[0].cache(readings.root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)

@@ -10,7 +10,6 @@ it is the honest floor: if the linear form cannot beat the raw logit out of samp
 asked to find structure this measurement says is not there.
 """
 
-import argparse
 import json
 import logging
 from pathlib import Path
@@ -19,8 +18,8 @@ import numpy as np
 from jaxtyping import Bool, Float
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
-from core.paths import DataRoot
 from kneemri.evaluation.residual_coupling import LabelCoupling
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -153,21 +152,19 @@ class HeldOutProbe:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("record", type=Path, help="a run's .holdout.npz, or any of its own names")
-    parser.add_argument("--labels", type=Path, default=None, help="the label table carrying the verdicts")
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    parser.add_argument(
+    command = cli.Command(__doc__, LOGGER)
+    command.parser.add_argument("record", type=Path, help="a run's .holdout.npz, or any of its own names")
+    command.parser.add_argument("--labels", type=Path, default=None, help="the label table carrying the verdicts")
+    command.parser.add_argument(
         "--ridge",
         type=float,
         nargs="+",
         default=[RIDGE],
         help="probe penalties to report. Several exist so a null can be shown not to be the penalty's",
     )
-    arguments = parser.parse_args()
-    processed = DataRoot.from_config(arguments.paths).processed()
+    arguments = command.parsed()
+    processed = command.rooted(arguments).processed()
     table = arguments.labels or processed / "labels" / "report_labels_v2.csv"
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     for ridge in arguments.ridge:
         LOGGER.info(json.dumps(HeldOutProbe.report(arguments.record, table, ridge), indent=2))
 

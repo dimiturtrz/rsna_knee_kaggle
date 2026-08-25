@@ -23,7 +23,6 @@ training studies and applied by reading the mask the pipeline already computes. 
 encoder, no second pass over pixels.
 """
 
-import argparse
 import json
 import logging
 from dataclasses import dataclass
@@ -32,7 +31,7 @@ from pathlib import Path
 import numpy as np
 from jaxtyping import Float, Integer
 
-from core.paths import DataRoot
+from core import cli
 
 logger = logging.getLogger(__name__)
 
@@ -172,13 +171,11 @@ class ProtocolPrior:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--members", nargs="*", default=list(CHAMPION))
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--members", nargs="*", default=list(CHAMPION))
+    arguments = command.parsed()
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    holdout = Holdout.load(DataRoot.from_config(arguments.paths).processed(), tuple(arguments.members))
+    holdout = Holdout.load(command.rooted(arguments).processed(), tuple(arguments.members))
     table = holdout.report()
 
     header = "  ".join(f"w={weight:<5}" for weight in BLENDS)

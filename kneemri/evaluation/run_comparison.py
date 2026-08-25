@@ -1,11 +1,11 @@
 """Read several runs' metrics files side by side: `python -m kneemri.evaluation.run_comparison`."""
 
-import argparse
 import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from core import cli
 from core.data.corpus.anatomy import ScaleProfile
 from core.data.labels.label_power import FOLDS, LabelPower
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
@@ -500,25 +500,24 @@ class RunComparison:
 
 def main() -> None:
     """Compare arms per label: `python -m kneemri.evaluation.run_comparison --control a --arms b c`."""
-    parser = argparse.ArgumentParser(description=RunComparison.__doc__)
-    parser.add_argument("--control", type=Path, required=True, help="the checkpoint the arms are measured against")
-    parser.add_argument("--arms", type=Path, nargs="+", required=True)
-    parser.add_argument("--labels", type=Path, help="the label table, to print each delta's own error bar")
-    parser.add_argument(
+    command = cli.Command(RunComparison.__doc__, logger)
+    command.parser.add_argument(
+        "--control", type=Path, required=True, help="the checkpoint the arms are measured against"
+    )
+    command.parser.add_argument("--arms", type=Path, nargs="+", required=True)
+    command.parser.add_argument("--labels", type=Path, help="the label table, to print each delta's own error bar")
+    command.parser.add_argument(
         "--split",
         action="store_true",
         help="also print each arm's deltas over the half of the findings its kind of change can move",
     )
-    parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-    arguments = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    arguments = command.parsed()
     # OPT-IN, because the split costs the twenty published checkpoints and their alignment to the
     # annotations — seconds, and a `--labels` table this comparison does not otherwise need. Asking for
     # it without the table is REFUSED rather than silently skipped: a restriction that quietly did not
     # happen reads as an arm whose claim was not worth printing.
-    from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
 
-    root = DataRoot.from_config(arguments.paths)
+    root = command.rooted(arguments)
     control = RunComparison.resolved(arguments.control, root.processed())
     arms = [RunComparison.resolved(arm, root.processed()) for arm in arguments.arms]
     split = None

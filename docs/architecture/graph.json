@@ -747,13 +747,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.label_probe",
-      "target": "core.findings",
+      "target": "core.cli",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.label_probe",
-      "target": "core.paths",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -1029,7 +1029,7 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.protocol_prior",
-      "target": "core.paths",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -1149,6 +1149,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.run_comparison",
       "target": "core.data.corpus.anatomy",
       "weight": 1
     },
@@ -1156,12 +1162,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
       "target": "core.data.labels.label_power",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.run_comparison",
-      "target": "core.paths",
       "weight": 1
     },
     {
@@ -1581,6 +1581,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
       "target": "core.data.corpus.folds",
       "weight": 1
     },
@@ -1810,6 +1816,12 @@
       "kind": "import",
       "source": "kneemri.inference.serve_bench",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.teacher_readings",
+      "target": "core.cli",
       "weight": 1
     },
     {
@@ -6021,12 +6033,6 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.label_probe.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.label_probe.main",
       "target": "kneemri.evaluation.label_probe.HeldOutProbe.report",
       "weight": 1
     },
@@ -7035,12 +7041,6 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.protocol_prior.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.protocol_prior.main",
       "target": "kneemri.evaluation.protocol_prior.Holdout.load",
       "weight": 1
     },
@@ -7762,12 +7762,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.view",
       "target": "kneemri.runs.recorded_run.RecordedRun.of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.main",
-      "target": "core.paths.DataRoot.from_config",
       "weight": 1
     },
     {
@@ -9643,12 +9637,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.inference.holdout_backfill.main",
-      "target": "core.paths.DataRoot.from_config",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "core.wakelock.Wakelock",
@@ -10300,12 +10288,6 @@
       "kind": "construct",
       "source": "kneemri.inference.teacher_readings.main",
       "target": "core.data.corpus.folds.ReportFolds",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.teacher_readings.main",
-      "target": "core.paths.DataRoot.from_config",
       "weight": 1
     },
     {
