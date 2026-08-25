@@ -63,7 +63,8 @@ from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
-from kneemri.kaggle.champion_check import Champion
+from kneemri.kaggle.champion_check import BOARD, Champion
+from kneemri.kaggle.priceable_entries import PriceableEntries
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -85,9 +86,10 @@ whether a member ships went dark as a side effect of the board improving (knee-1
 class SeatValue:
     """The pinned champion's members, and what each candidate would add to them."""
 
-    def __init__(self, champion: Champion, processed: Path) -> None:
+    def __init__(self, champion: Champion, processed: Path, board: Path = BOARD) -> None:
         self.champion = champion
         self.processed = processed
+        self.board = board
 
     def roster(self) -> list[Path]:
         """The champion's members as checkpoints on disk.
@@ -139,7 +141,7 @@ class SeatValue:
             f"contribution needs at least {PRICEABLE}",
             f"unscoreable (fold -1, they have seen every holdout study): "
             f"{', '.join(sorted(member.stem for member in unscoreable))}",
-            "price against a scoreable entry instead: --against <board entry id>",
+            PriceableEntries(self.processed, self.board).suggestion(PRICEABLE),
         ]
 
     def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED) -> list[str]:

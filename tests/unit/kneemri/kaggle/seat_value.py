@@ -1,5 +1,6 @@
 """A candidate is priced against the champion the pin names, not against a roster typed by hand."""
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -24,6 +25,23 @@ def _member(path: Path, truth: np.ndarray, shift: float) -> None:
     predictions = truth * shift + RNG.random((STUDIES, LABELS))
     HoldoutRecord(path).write(studies, predictions.astype(np.float64), truth.astype(np.float32), epoch=6)
     path.write_bytes(b"")
+
+
+def _board(tmp_path: Path) -> Path:
+    """A board holding one fully scoreable entry, one that is not, and two rows that are not entries.
+
+    The last two are the reason `entries` cannot simply map `from_board` over the file: the real record
+    opens with prose notes carrying no `id`, and 31 of its rows record no members at all.
+    """
+    rows = [
+        {"note": "the record's own preamble, which is not an entry"},
+        {"id": "whole", "kernel": "k", "board": 0.933, "members_named": ["shipped", "spare"], "scope": "ensemble"},
+        {"id": "dark", "kernel": "k", "board": 0.938, "members_named": ["shipped", "ghost"], "scope": "ensemble"},
+        {"id": "ruined", "kernel": "k", "board": 0.94, "scope": "ensemble"},
+    ]
+    path = tmp_path / "board.jsonl"
+    path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+    return path
 
 
 def test_roster(tmp_path: Path):
@@ -87,7 +105,8 @@ def test_unpriceable(tmp_path: Path):
     """A roster of one has no mix to be marginal to, so the refusal carries its own denominator."""
     truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
     _member(tmp_path / "shipped.pt", truth, 2.0)
-    seats = SeatValue(_champion(), tmp_path)
+    _member(tmp_path / "spare.pt", truth, 2.0)
+    seats = SeatValue(_champion(), tmp_path, _board(tmp_path))
     roster, unscoreable = seats.scoreable(seats.roster())
 
     lines = seats.unpriceable(roster, unscoreable)
@@ -106,7 +125,7 @@ def test_report_refuses_a_roster_too_small_to_price(tmp_path: Path):
     _member(tmp_path / "shipped.pt", truth, 2.0)
     _member(tmp_path / "candidate.pt", truth, 2.0)
 
-    lines = SeatValue(_champion(), tmp_path).report([tmp_path / "candidate.pt"])
+    lines = SeatValue(_champion(), tmp_path, _board(tmp_path)).report([tmp_path / "candidate.pt"])
 
     assert lines[0].startswith("NO SEAT VALUE against test:")
     assert not any("candidate" in line for line in lines), "no candidate is priced against a roster of one"

@@ -2444,6 +2444,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.priceable_entries",
+      "target": "kneemri.kaggle.champion_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.priceable_entries",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
       "weight": 1
@@ -2476,6 +2488,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "kneemri.kaggle.champion_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_value",
+      "target": "kneemri.kaggle.priceable_entries",
       "weight": 1
     },
     {
@@ -12607,6 +12625,42 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "target": "kneemri.kaggle.champion_check.Champion",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries.entries",
+      "target": "kneemri.kaggle.champion_check.Champion.from_board",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries.fully",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries.entries",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries.fully",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries.fully",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_entries.PriceableEntries.suggestion",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries.fully",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -12694,6 +12748,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.scoreable",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_value.SeatValue.unpriceable",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.unpriceable",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries.suggestion",
       "weight": 1
     },
     {
@@ -15919,7 +15985,7 @@
       "role": null
     },
     {
-      "descendants": 132,
+      "descendants": 133,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -16423,7 +16489,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -16554,6 +16620,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries",
+      "label": "priceable_entries",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -18685,6 +18759,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.package_members",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "label": "PriceableEntries",
+      "level": "class",
+      "parent": "kneemri.kaggle.priceable_entries",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -26876,6 +26958,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries.PriceableEntries.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries.PriceableEntries.entries",
+      "label": "entries",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries.PriceableEntries.fully",
+      "label": "fully",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_entries.PriceableEntries.suggestion",
+      "label": "suggestion",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_entries.PriceableEntries",
       "role": null
     },
     {
