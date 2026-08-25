@@ -180,8 +180,7 @@ def main() -> None:
     names, per_seed = PublishedRuler(root.processed() / "published").per_seed()
     predictions = np.asarray(RankAverage().combine(per_seed), dtype=np.float32)
     truth = SupervisionGap().reported(arguments.labels, names)
-    for line in PrevalenceMatch(resamples=arguments.resamples).report(predictions, truth):
-        logger.info(line)
+    command.report(PrevalenceMatch(resamples=arguments.resamples).report(predictions, truth))
 
 
 if __name__ == "__main__":

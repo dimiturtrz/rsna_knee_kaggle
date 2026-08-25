@@ -249,11 +249,9 @@ def main() -> None:
     )
     logger.info("%d annotated studies with a held-out prediction", len(values))
 
-    for line in gap.report(gap.against(values, annotations), gap.against(predictions, annotations)):
-        logger.info(line)
+    command.report(gap.report(gap.against(values, annotations), gap.against(predictions, annotations)))
     # WHERE the graded label becomes a positive, which decides the base rate our ruler scores against.
-    for line in gap.thresholds(values, annotations):
-        logger.info(line)
+    command.report(gap.thresholds(values, annotations))
 
 
 if __name__ == "__main__":

@@ -209,8 +209,7 @@ def main() -> None:
         CACHED_SLICES,
     )
     bands = coverage.bands(depths, names, arguments.groups)
-    for line in StackCoverageReport(coverage.trend(combined, truth, bands), bands).lines():
-        logger.info(line)
+    command.report(StackCoverageReport(coverage.trend(combined, truth, bands), bands).lines())
 
 
 if __name__ == "__main__":

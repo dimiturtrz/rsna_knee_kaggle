@@ -283,8 +283,7 @@ def main() -> None:
     split = CorpusSplit(root.raw())
     covariates = oracle.covariates(chosen, pd.read_csv(split.series_table))
     covariates.update(oracle.routing(chosen, split.source, split.planes()))
-    for line in OutOfFoldOracleReport(chosen, ours, theirs[keep], covariates).lines():
-        logger.info(line)
+    command.report(OutOfFoldOracleReport(chosen, ours, theirs[keep], covariates).lines())
     logger.info("(contested-slot rate for context: %s)", SlotTies().disagreeing_order(split.series_table))
 
 

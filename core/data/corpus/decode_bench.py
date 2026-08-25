@@ -113,8 +113,7 @@ def main() -> None:
 
     bench = DecodeBench()
     measured = bench.timings(DecodeBench._decode_one, chosen)  # noqa: SLF001 - its own CLI
-    for line in bench.report(measured, len(chosen)):
-        logger.info(line)
+    command.report(bench.report(measured, len(chosen)))
 
 
 if __name__ == "__main__":

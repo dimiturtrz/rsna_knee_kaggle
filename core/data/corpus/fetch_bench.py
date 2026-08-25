@@ -136,8 +136,7 @@ def main() -> None:
         rows = Sweep.over(arm + arguments.offset, len(identifiers), start=0, width=width)
         measured[label] = bench.rate(reader, rows, images)
 
-    for line in bench.report(measured, width, corpus.slices):
-        logger.info(line)
+    command.report(bench.report(measured, width, corpus.slices))
 
 
 if __name__ == "__main__":

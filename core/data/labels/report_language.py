@@ -165,8 +165,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     reports = pd.read_csv(root.raw() / "train.csv")["Report"].fillna("").astype(str).tolist()
-    for line in ReportLanguages().census(reports):
-        logger.info(line)
+    command.report(ReportLanguages().census(reports))
 
 
 if __name__ == "__main__":

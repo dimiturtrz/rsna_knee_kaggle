@@ -260,8 +260,7 @@ def main() -> None:
     requests = [CoverageRequest(identifier=name, source=str(split.source), planes=planes) for name in chosen]
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         read = list(pool.map(SlotGeometry.measure_study, requests, chunksize=4))
-    for line in SlotGeometry().report([frames for frames in read if frames], len(chosen), len(identifiers)):
-        logger.info(line)
+    command.report(SlotGeometry().report([frames for frames in read if frames], len(chosen), len(identifiers)))
 
 
 if __name__ == "__main__":

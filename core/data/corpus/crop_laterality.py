@@ -233,8 +233,7 @@ def main() -> None:
     ]
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         measured = [clip for study in pool.map(CropLaterality.measure_study, requests) for clip in study]
-    for line in CropLateralityReport(measured, len(sampled), len(identifiers)).lines():
-        logger.info(line)
+    command.report(CropLateralityReport(measured, len(sampled), len(identifiers)).lines())
 
 
 if __name__ == "__main__":

@@ -209,8 +209,7 @@ def main() -> None:
     warmup = time.perf_counter() - started
     compiled = bench.timed(forward, arguments.repeats)
 
-    for line in ServeBenchReport(eager, compiled, warmup, bench.graphs()).lines():
-        logger.info(line)
+    command.report(ServeBenchReport(eager, compiled, warmup, bench.graphs()).lines())
 
 
 if __name__ == "__main__":

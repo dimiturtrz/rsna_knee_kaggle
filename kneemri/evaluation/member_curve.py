@@ -651,8 +651,7 @@ def main() -> None:
             logger.info("%s alone: %.4f", member.file.name, scores.mean(scored, truth))
 
     pool = Pool(names, per_member, truth)
-    for line in MemberCurve(scores, arguments.combine_seed).logged(pool, paired=arguments.paired):
-        logger.info(line)
+    command.report(MemberCurve(scores, arguments.combine_seed).logged(pool, paired=arguments.paired))
 
 
 if __name__ == "__main__":

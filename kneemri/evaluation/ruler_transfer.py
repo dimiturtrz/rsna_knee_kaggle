@@ -255,10 +255,8 @@ def main() -> None:
     pairs[f"perm {arguments.shares[-1]:.2f}"] = transfer.transfer(
         transfer.weakened(best, arguments.shares[-1]), best, reported, annotated
     )
-    for line in transfer.lines(pairs, len(keep)):
-        logger.info(line)
-    for line in transfer.spread(best, reported, annotated, tuple(arguments.shares)):
-        logger.info(line)
+    command.report(transfer.lines(pairs, len(keep)))
+    command.report(transfer.spread(best, reported, annotated, tuple(arguments.shares)))
 
 
 if __name__ == "__main__":

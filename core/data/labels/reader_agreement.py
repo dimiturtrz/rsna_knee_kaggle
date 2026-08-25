@@ -242,16 +242,13 @@ def main() -> None:
 
     agreement = ReaderAgreement()
     cells = agreement.cells(annotated, read)
-    for line in agreement.report(cells):
-        logger.info(line)
+    command.report(agreement.report(cells))
     # WHAT a replacement reader must do differently, beside how well this one agrees. The two are
     # separate questions and the second is the actionable one.
-    for line in agreement.error_report(cells):
-        logger.info(line)
+    command.report(agreement.error_report(cells))
     # And whether the report text holds a signal the reader's own verdict does not already carry, which
     # is the only thing that could fill the empty weight column (knee-mxj).
-    for line in agreement.signal_report(cells):
-        logger.info(line)
+    command.report(agreement.signal_report(cells))
 
 
 if __name__ == "__main__":
