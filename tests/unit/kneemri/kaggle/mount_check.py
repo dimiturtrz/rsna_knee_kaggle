@@ -102,6 +102,34 @@ def test_absent(tmp_path: Path):
     assert MountCheck(package, live={"v2member", "v3member"}).absent() == []
 
 
+def test_settled(tmp_path: Path):
+    """A flip-flopping listing is a REFUSAL: one green read of a materialising version is not proof."""
+    package = _package(tmp_path)
+    check = MountCheck(package)
+    reads: list[set[str]] = []
+    waits: list[str] = []
+
+    def listing() -> set[str]:
+        return reads.pop(0)
+
+    def pause() -> None:
+        waits.append("slept")
+
+    both = {"v2member", "v3member"}
+    reads[:] = [{"v2member"}, both, both]
+    assert check.settled(listing, pause=pause) == [], "two consecutive complete reads settle it"
+    assert (len(waits), reads) == (2, []), "and it stops reading, and sleeping, the moment they do"
+
+    reads[:] = [both, {"v2member"}, both, both]
+    flip = "one green read then an absence is not settled - it takes two consecutive ones after it"
+    assert check.settled(listing, pause=pause) == [], flip
+    assert reads == [], flip
+
+    reads[:] = [{"v2member"}, both, {"v3member"}]
+    union = "a listing that never settles reports every member seen absent, not the last read alone"
+    assert check.settled(listing, attempts=3, pause=pause) == ["v2member", "v3member"], union
+
+
 def test_verdict_refuses_an_unpushed_member(tmp_path: Path):
     """And it reads as a REFUSAL on the kernel, not as a mount problem — the mounts are fine."""
     check = MountCheck(_package(tmp_path), live={"v2member"})

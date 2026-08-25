@@ -10977,6 +10977,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.main",
+      "target": "kneemri.kaggle.mount_check.MountCheck.settled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.main",
       "target": "kneemri.kaggle.mount_check.MountCheck.verdict",
       "weight": 1
     },
@@ -23648,6 +23654,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.mount_check.MountCheck.entries",
       "label": "entries",
+      "level": "method",
+      "parent": "kneemri.kaggle.mount_check.MountCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.mount_check.MountCheck.settled",
+      "label": "settled",
       "level": "method",
       "parent": "kneemri.kaggle.mount_check.MountCheck",
       "role": null

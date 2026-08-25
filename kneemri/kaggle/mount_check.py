@@ -14,6 +14,9 @@ over-declaring costs mount seconds and under-declaring costs the slot.
 
 import logging
 import sys
+import time
+from collections.abc import Callable
+from functools import partial
 from pathlib import Path
 
 from core import cli
@@ -26,6 +29,11 @@ from kneemri.kaggle.live_dataset import LiveDataset, TruncatedListingError
 logger = logging.getLogger(__name__)
 
 METADATA = "kernel-metadata.json"
+SETTLED_READS = 2
+SETTLE_ATTEMPTS = 8
+SETTLE_SECONDS = 20.0
+SETTLE_PAUSE = partial(time.sleep, SETTLE_SECONDS)
+"""What `settled` waits between two reads — a partial rather than a def, which is a top-level function."""
 
 
 class MountCheck:
@@ -77,6 +85,43 @@ class MountCheck:
             return []
         return [member.identifier for member in self.package.members if member.identifier not in self.live]
 
+    def settled(
+        self,
+        listing: Callable[[], set[str]],
+        *,
+        reads: int = SETTLED_READS,
+        attempts: int = SETTLE_ATTEMPTS,
+        pause: Callable[[], None] = SETTLE_PAUSE,
+    ) -> list[str]:
+        """Poll the live listing until the whole manifest reads present twice running; name what is not.
+
+        THE UPLOAD HALF of the 2026-08-25 failure, and the half `absent` cannot close. A Kaggle dataset
+        version can land INCOMPLETE while the CLI reports the push a success — the marker line "Dataset
+        version is being created" is printed before the files are all there — and one dropped `.pt` then
+        refuses `MemberPackage` for every kernel that mounts the dataset, including the ones whose tuple
+        never names it. That cost a kernel run and twenty minutes of a critical path with two slots left.
+
+        TWICE RUNNING, because a single green read is not proof: a version that is still materialising
+        answers differently read to read, so a package that is complete once is not therefore complete.
+        An incomplete read on the way there is EXPECTED — that is what polling is for — and settling
+        returns nothing at all. What is reported when it never settles is the UNION of every member seen
+        absent at any point, not the last read: on a listing that flip-flops, the last read is the one
+        answer known to be unreliable, and the union is the only honest account of what to re-push.
+        """
+        seen: set[str] = set()
+        clear = 0
+        for attempt in range(max(attempts, reads)):
+            live = listing()
+            missing = [member.identifier for member in self.package.members if member.identifier not in live]
+            seen.update(missing)
+            clear = 0 if missing else clear + 1
+            if clear >= reads:
+                return []
+            logger.info("live listing holds %d, %d of the manifest absent - re-reading", len(live), len(missing))
+            if attempt < attempts - 1:
+                pause()
+        return sorted(seen)
+
     def unpushed(self, names: list[str] | None) -> list[str]:
         """The members a kernel needs that the live dataset does not hold — empty when nothing was asked.
 
@@ -101,6 +146,11 @@ def main() -> None:
         action="store_true",
         help="also ask Kaggle what the members dataset actually holds (needs credentials)",
     )
+    command.parser.add_argument(
+        "--settle",
+        action="store_true",
+        help="implies --live, and POLLS it until the whole manifest reads present twice running",
+    )
     arguments = command.parsed()
 
     package = MemberPackage.at(arguments.root, arguments.paths)
@@ -109,16 +159,29 @@ def main() -> None:
     # killed a kernel run on 2026-08-19. A pre-flight without --live checks the kernels; --live checks
     # the SHIPMENT.
     live = None
-    if arguments.live:
+    unsettled: list[str] = []
+    if arguments.live or arguments.settle:
         identifier = LiveDataset.identified(package.root)
+        dataset = LiveDataset(identifier)
         try:
-            live = LiveDataset(identifier).members()
+            live = dataset.members()
+            if arguments.settle:
+                unsettled = MountCheck(package, live).settled(dataset.members)
         except TruncatedListingError as truncated:
             # UNKNOWN, not REFUSED and not a clean pass: a partial listing answers the question wrongly
             # in BOTH directions, so the only honest report is that the live check did not run.
             logger.error("live check UNKNOWN - %s", truncated)
             sys.exit(2)
         logger.info("live %s holds %d members", identifier, len(live))
+    if unsettled:
+        logger.error(
+            "the live dataset never read complete: %d of %d members were absent at some point in the "
+            "poll (%s). A version that is still materialising answers differently read to read, so this "
+            "refuses the package until a re-push settles.",
+            len(unsettled),
+            len(package.members),
+            ", ".join(unsettled),
+        )
 
     check = MountCheck(package, live)
     # BEFORE the per-kernel loop, because it invalidates every verdict that loop is about to print: a
@@ -144,7 +207,7 @@ def main() -> None:
     # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
     Denominator(passed, empty).refuse_empty()
-    if refused or absent:
+    if refused or absent or unsettled:
         sys.exit(1)
 
 

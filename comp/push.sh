@@ -104,6 +104,22 @@ case "$WHAT" in
     # parent — out of the repo, where there is no pyproject.toml to resolve.
     REPO="$(cd .. && pwd)"
     (cd "$PARENT" && confirmed "is being created" "$UV" run --project "$REPO" --with kaggle kaggle datasets version -p "$(basename "$TARGET")" -m "${MESSAGE:?a dataset version needs a message}" --dir-mode zip)
+    # THE READBACK, and the reason `confirmed` above is not enough: "Dataset version is being created" is
+    # printed BEFORE the files are all there, so the CLI reports a success that can land INCOMPLETE. One
+    # dropped `.pt` then refuses `MemberPackage` for every kernel that mounts the dataset — including the
+    # kernels whose own tuple never names it — and on 2026-08-25 that was discovered by a spent kernel
+    # slot rather than by the pusher. Only a members package is polled: `manifest.json` is what makes one.
+    if [ -f "$TARGET/manifest.json" ]; then
+      # `pwd -W` because the check is a WINDOWS python and TARGET is the POSIX absolute Git Bash's `pwd`
+      # prints; this is the same drive-letter disagreement the kernel branch below documents.
+      WINDOWS_TARGET="$(cd "$TARGET" && pwd -W)"
+      # Explicitly, because this script runs under `set -u` and NOT `set -e`: a silent non-zero here
+      # would leave the push reading as a success, which is the exact defect being closed.
+      if ! (cd "$REPO" && "$UV" run python -m kneemri.kaggle.mount_check --root "$WINDOWS_TARGET" --settle); then
+        echo "REFUSING to report success: the pushed version never read complete. Re-push before submitting."
+        exit 4
+      fi
+    fi
     ;;
   kernel)
     # THE SAME PARENT-AND-BASENAME SHAPE AS THE DATASET BRANCH, for a different reason. The resolution
