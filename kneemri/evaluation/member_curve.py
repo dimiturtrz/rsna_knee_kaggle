@@ -48,6 +48,12 @@ COMBINE_SEED = 2026
 arbitrary-but-fixed partitions of the same corpus and a second free number would only be a second thing
 to accidentally vary."""
 
+HONEST_SEATS_REPORTED = 24
+"""How many seats of the honest curve are printed. The greedy orders every member in the pool — 77 of
+them on the current disk — and the decision this reading serves is where the count SATURATES, which the
+ledger puts inside the first ten. The tail is the same members in a fixed order scoring monotonically
+worse and reading it has never changed a roster."""
+
 BOARD_RESOLVABLE = 0.0015
 """The offline seat delta below which this ruler has never been shown to pick a board tick.
 
@@ -148,6 +154,16 @@ class Pool:
             Pool([name for name, _ in rest], [member for _, member in rest], self.truth),
         )
 
+    def rows(self, studies: NDArray[np.int64]) -> "Pool":
+        """This same pool over a SUBSET of the studies, members and truth restricted together.
+
+        Restricting members and truth in one place is the point: a seat chosen on one half of the
+        holdout and scored on the other is only honest if both halves index the same rows, and the two
+        arrays live in different attributes here. Every caller that sliced one of them separately is a
+        caller that could have scored a member against another member's truth.
+        """
+        return Pool(self.names, [member[studies] for member in self.predictions], self.truth[studies])
+
 
 class MemberCurve:
     """Mean score against ensemble size, over every subset of that size."""
@@ -190,8 +206,22 @@ class MemberCurve:
         inside the offline-to-board transfer error that already governs the decision. What it must not
         be read as is a score — see this module's caller for the two reasons.
         """
+        return [
+            f"greedy {seat + 1}: {score:.4f}  +{pool.names[index]}"
+            for seat, (score, index) in enumerate(self.forward(pool))
+        ]
+
+    def forward(self, pool: Pool) -> list[tuple[float, int]]:
+        """The greedy's path itself — each seat's score and the member that took it, in order.
+
+        Separated from `greedy` because the ORDER is now asked for twice and the score-on-this-pool is
+        only wanted once. `honest` fits this path on half the studies and scores the resulting prefixes
+        on the other half, which needs the indices and must throw the fitted scores away; formatting
+        them into a line first and parsing them back would be the same computation done twice, differing
+        in whichever of the two copies was edited last.
+        """
         chosen: list[int] = []
-        lines = []
+        path: list[tuple[float, int]] = []
         remaining = set(range(len(pool)))
         while remaining:
             score, index = max(
@@ -203,7 +233,52 @@ class MemberCurve:
             )
             chosen.append(index)
             remaining.discard(index)
-            lines.append(f"greedy {len(chosen)}: {score:.4f}  +{pool.names[index]}")
+            path.append((score, index))
+        return path
+
+    def honest(self, pool: Pool) -> list[str]:
+        """The greedy's count, chosen on studies it is NOT scored on. The only seat number worth quoting.
+
+        WHY THIS EXISTS. `greedy` searches 77 members for the prefix that maximises the holdout mean and
+        then REPORTS that maximum — selection and scoring on the same 909 studies. Its own docstring
+        already says the path must not be read as a score, and the caller repeats it, and the number was
+        quoted as one anyway (0.8717 at eight to ten members, 2026-08-22). It is the identical mistake
+        that voided this module's first answer, where members were scored on holdouts that were training
+        data for the others, and the identical one that killed per-label selection — which is why the
+        fitted label rule next door is reported SPLIT-HALF and is the only column its own docstring
+        says is worth reading. Forward selection over a large pool is a fitting procedure; a fitting
+        procedure scored in-sample reports its own overfitting as a result.
+
+        Both directions of the split, averaged, because one half throws away half the evidence about a
+        choice whose whole question is whether it survives being made elsewhere — the same argument
+        `LabelCombine.halves` is built on, and it is reused here rather than re-derived.
+
+        The gap between this and `greedy` at the same count is the SELECTION BIAS, stated rather than
+        subtracted. A count whose honest score peaks well below its in-sample one is a count that was
+        fitted; a plateau that survives is a plateau.
+        """
+        splits = LabelCombine(self.scores).halves(len(pool.truth), self.combine_seed)
+        out_of_sample: dict[int, list[float]] = {}
+        for fit, report in splits:
+            order = [index for _, index in self.forward(pool.rows(fit))]
+            scored = pool.rows(report)
+            for seats in range(1, len(order) + 1):
+                prefix = order[:seats]
+                out_of_sample.setdefault(seats, []).append(self.scores.mean(scored.combined(prefix), scored.truth))
+        held = {seats: float(np.mean(scores)) for seats, scores in out_of_sample.items()}
+        best = max(held, key=lambda seats: held[seats])
+        in_sample = [score for score, _ in self.forward(pool)]
+        lines = [
+            "honest seats: greedy refitted on half the studies, scored on the other half, both directions",
+            *(
+                f"  {seats:2d} members: held-out {held[seats]:.4f}   in-sample {in_sample[seats - 1]:.4f}"
+                f"   bias {in_sample[seats - 1] - held[seats]:+.4f}"
+                for seats in sorted(held)
+                if seats <= HONEST_SEATS_REPORTED
+            ),
+            f"best honest count {best} at {held[best]:.4f}, against the in-sample peak "
+            f"{max(in_sample):.4f} at {in_sample.index(max(in_sample)) + 1}",
+        ]
         return lines
 
     def diverse(self, pool: Pool) -> list[str]:

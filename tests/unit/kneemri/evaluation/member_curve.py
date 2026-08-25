@@ -381,3 +381,42 @@ def test_diverse():
         "the near-duplicate is taken last, which is the whole point of the rule"
     )
     assert "(nearest 0.9" in lines[2], "each step reports the agreement that decided it"
+
+
+def test_rows():
+    """A subset of the studies restricts members and truth TOGETHER, which is what keeps a split honest."""
+    members = [_member(1.0, seed) for seed in (1, 2)]
+    pool = Pool(_names(members), members, _truth())
+    studies = np.array([0, 1, 2, STUDIES - 1], dtype=np.int64)
+
+    restricted = pool.rows(studies)
+
+    assert len(restricted) == len(pool), "restricting studies drops no member"
+    assert restricted.truth.shape[0] == len(studies)
+    assert np.array_equal(restricted.predictions[1], members[1][studies]), "each member is cut on the same rows"
+    assert np.array_equal(restricted.truth, pool.truth[studies])
+
+
+def test_forward():
+    """The greedy's path is the data behind the printed lines — each seat's score and who took it."""
+    curve = MemberCurve(LabelScores())
+    members = [_member(0.2, SEED), _member(2.0, SEED + 1), _member(0.3, SEED + 2)]
+
+    path = curve.forward(Pool(["weak.pt", "strong.pt", "middling.pt"], members, _truth()))
+
+    assert len(path) == 3, "every member is eventually seated"
+    assert path[0][1] == 1, "the best single member takes the first seat"
+    assert sorted(index for _, index in path) == [0, 1, 2], "no member is seated twice"
+
+
+def test_honest():
+    """The seat count is chosen on studies it is NOT scored on, and the in-sample bias is stated."""
+    curve = MemberCurve(LabelScores())
+    members = [_member(strength, SEED + step) for step, strength in enumerate((2.0, 1.5, 0.05))]
+
+    lines = curve.honest(Pool(["strong.pt", "good.pt", "noise.pt"], members, _truth()))
+
+    assert lines[0].startswith("honest seats:"), "the reading says how it was split before it says a number"
+    assert len(lines) == 1 + len(members) + 1, "one line per seat, plus the header and the verdict"
+    assert all("bias" in line for line in lines[1 : 1 + len(members)])
+    assert lines[-1].startswith("best honest count "), "the count is the answer, and it is named as held-out"

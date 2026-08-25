@@ -224,7 +224,7 @@ class MixReading:
         # rank-space distance and never opens the labels. Two booleans would have made `greedy=True,
         # diverse=True` expressible and meaningless.
         if seats:
-            return {"greedy": curve.greedy, "diverse": curve.diverse}[seats](self.pool)
+            return {"greedy": curve.greedy, "diverse": curve.diverse, "honest": curve.honest}[seats](self.pool)
         return curve.logged(self.pool, paired=paired)
 
 
@@ -242,11 +242,14 @@ def main() -> None:
     )
     command.parser.add_argument(
         "--seats",
-        choices=("greedy", "diverse"),
+        choices=("greedy", "diverse", "honest"),
         help="forward selection instead of every subset — the only tractable reading past a dozen members. "
         "`greedy` takes the member that lifts the holdout mean most; `diverse` takes the member LEAST "
         "correlated with anything already seated and never opens the labels. The comparison worth reading "
-        "is the two PEAKS: whether an ensemble built for spread beats the one the quality ruler builds.",
+        "is the two PEAKS: whether an ensemble built for spread beats the one the quality ruler builds. "
+        "`honest` is `greedy` refitted on half the studies and scored on the other half, both directions: "
+        "the ONLY one of the three whose number may be quoted, because the other two choose and score on "
+        "the same studies and report their own overfitting as a result.",
     )
     command.parser.add_argument(
         "--labels",
