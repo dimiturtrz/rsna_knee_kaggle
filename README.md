@@ -91,7 +91,7 @@ uvx nox -s lint test cov
 
 `uvx nox -s lint test cov` (or `uvx nox -s gates`) runs exactly what CI runs:
 
-- **lint** — ruff check (pinned) + ruff format --check (advisory) + vulture + arch-fitness (`graph.py --assert`) + ast-grep + jscpd.
+- **lint** — ruff check (pinned) + ruff format --check (enforced) + vulture + arch-fitness (`graph.py --assert`) + ast-grep + jscpd.
 - **test** — pytest.
 - **cov** — pytest --cov with a `--fail-under=90` floor.
 
@@ -115,7 +115,7 @@ Publishing to GitHub Pages — one repo = one Pages site, so pick ONE of:
   - uses: astral-sh/setup-uv@v5
   - name: Architecture view (/architecture/)
     run: |
-      uv run --no-project --with "sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.27.1#subdirectory=sdlc-devtools" \
+      uv run --no-project --with "sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools" \
         python -c "from devtools.graph.archmap import Archmap; Archmap(['core', 'kneemri']).write_viewer(project='kneemri')"
       mkdir -p _site/architecture
       cp docs/architecture/graph.json docs/architecture/index.html _site/architecture/

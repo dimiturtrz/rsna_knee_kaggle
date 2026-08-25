@@ -46,7 +46,7 @@ submit = ["kaggle"]
 # update is a one-line `devtools_ref` bump on `copier update`, no source diff in your PRs. Imports as
 # `devtools` (`python -m devtools.graph.fitness …`); grimp/networkx arrive transitively. ast-grep/jscpd configs are
 # located from the install via `python -m devtools.tools.config`. Pin lives in .copier-answers.yml (devtools_ref).
-devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.27.1#subdirectory=sdlc-devtools"]
+devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools"]
 
 [[tool.uv.index]]
 url = "https://download.pytorch.org/whl/cu128"

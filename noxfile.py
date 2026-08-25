@@ -11,7 +11,20 @@ nox.options.sessions = ["lint", "test", "cov"]
 
 RUFF = "ruff@0.15.13"
 VULTURE = "vulture@2.16"
-SELECT = "F,B,I,T201,FBT,BLE001,S101,S110,C901,PLR0912,PLR0913,PLR0915,PLR2004,PLC0415,RUF100,N,E741,E742,E743,PLR0124,PLR1714,PLW3301,RUF012,RUF005,RUF007,RUF010,RUF022,RUF046,C408,C420,SIM,PERF401,PLW0108,E731,E402,ICN001,S603,S607,PTH123,E501,SLF001,PGH003,PGH004,TID251"
+# The enforced ruff select, chunked purely so no line runs past the 120 limit — the value is the flat
+# comma list ruff's `--select` takes, and `,`.join restores it exactly. Written wrapped because the flat
+# literal is a single 274-char string that `ruff format` cannot split, so it would ship an E501 to every
+# consumer forever (bd 98d); the chunking also makes a rule arriving or leaving a one-line diff.
+SELECT = ",".join(
+    (
+        "F,B,I,T201,FBT,BLE001,S101,S110",
+        "C901,PLR0912,PLR0913,PLR0915,PLR2004,PLC0415,RUF100,N",
+        "E741,E742,E743,PLR0124,PLR1714,PLW3301,RUF012,RUF005",
+        "RUF007,RUF010,RUF022,RUF046,C408,C420,SIM,PERF401",
+        "PLW0108,E731,E402,ICN001,S603,S607,PTH123,E501",
+        "SLF001,PGH003,PGH004,TID251",
+    )
+)
 LAYERS = ["core", "kneemri"]
 # ruff + jscpd are R1 HYGIENE gates — they may scan WIDER than the R2/R3 arch set LAYERS (a viewer / tests
 # tree worth linting). Default = LAYERS; widen via lint_paths/jscpd_paths in .copier-answers.yml (bd 9mu).
@@ -26,7 +39,7 @@ def lint(session: nox.Session) -> None:
     # here — matching CI (bd skr GAP1/kqk). F722 = multi-token dim strings ("b c h w"); F821 = single-axis
     # ("n") which parses as an undefined forward-ref. Off domain=ml both are absent (no jaxtyping dep).
     session.run("uvx", RUFF, "check", *LINT_LAYERS, "--select", SELECT, "--ignore", "F722,F821", external=True)
-    # Advisory (mirrors CI, never blocks): the full enforced select over the whole tree, plus format drift.
+    # Advisory (mirrors CI, never blocks): the full enforced select over the whole tree.
     # ruff_advisory_select is empty by default (E501/SLF001 graduated into the enforced union, bd 4c2/8ex),
     # so --extend-select is appended only when it carries a code.
     session.run(
@@ -38,7 +51,11 @@ def lint(session: nox.Session) -> None:
         external=True,
         success_codes=[0, 1],
     )
-    session.run("uvx", RUFF, "format", "--check", ".", external=True, success_codes=[0, 1])
+    # ENFORCED, and it has to be: pre-commit has always run this hook for real, so a tree that passed
+    # `nox -s gates` could still be refused at commit time — the documented merge gate said green on a
+    # tree that could not be committed. A generated repo is formatted by construction, so the graduation
+    # bar is met on arrival; the only way to fail this is drift introduced after generation.
+    session.run("uvx", RUFF, "format", "--check", ".", external=True)
     # vulture takes NO package args — scope is config-driven via [tool.vulture] paths (the vulture-scan
     # LOCAL-SLOT), same as CI + pre-commit. A repo widens the dead-code scan there, not on the CLI.
     session.run("uvx", VULTURE, "--min-confidence", "80", external=True)

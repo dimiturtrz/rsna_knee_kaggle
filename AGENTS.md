@@ -56,29 +56,68 @@ fails. Fix the finding, don't suppress it; suppressions stay minimal and meaning
 no prose, never a blanket ignore). Thresholds are legislated values (file_max, CC 10), never seeded from
 the repo's current state. The linter is a bug-finder, not cosmetics.
 
-- **ruff** (pinned `0.15.13`) — `check` on the full house select, enforced; `format --check` advisory.
+### Enforced — these BLOCK, in nox, CI and pre-commit alike
+
+Every one of them is a rule you can write TO. Discovering a gate by failing it means the doc failed first.
+
+- **ruff** (pinned `0.15.13`) — `check` on the full house select, enforced; `format --check` enforced too — pre-commit always ran it for real, so an advisory nox/CI meant the merge gate passed a tree that could not be committed.
   Encodes: logging not prints (T20), named constants not magic numbers (PLR2004), keyword-only bools
   (FBT), specific-exception-or-crash (BLE001/S), low complexity (C90/PLR), imports-at-top (PLC0415).
-- **vulture** (pinned `2.16`) — dead-code at `min_confidence = 60`.
+- **vulture** (pinned `2.16`) — dead-code at `min_confidence = 80`; scope is `[tool.vulture]`, not the CLI.
 - **coverage** — pytest-cov with a `--fail-under=90` floor.
+- **deptry** (pinned `0.25.1`) — undeclared (DEP001) / unused (DEP002) / transitive (DEP003) imports; config in `[tool.deptry]`.
+- **pyrefly** (pinned `1.1.1`) — strict static types: every `def` annotated, plus the annotations check.
+- **jscpd** — copy-paste over the threshold in the packaged `jscpd.json`.
 - **import-linter** — directional forbidden-import contracts (`[tool.importlinter]`); the layer axis graph.py can't express.
-- **arch-fitness** — `python -m devtools.graph.fitness kneemri core --assert`: god-module (fan-in/out),
-  god-file, import-cycle, and test-mirror (a logic module needs its `tests/unit/<pkg>/…/test_<name>.py`);
-  thresholds in `[tool.structure]`. Advisory: line-floor (off) + chokepoint. NOT `devtools.graph`, which is
-  a package and answers `No module named devtools.graph.__main__`.
-- **the batch runner** — every AST gate in ONE interpreter, which is how `nox -s lint` actually invokes them:
-  `python -m devtools.run kneemri core --gate graph.fitness,coupling.demeter,coupling.purity,
-  coupling.composition,coupling.envy,coupling.contracts,astgrep,hygiene.mirror,hygiene.small,shape_contracts`.
-  ALL ENFORCED. Beyond the four above: **demeter** (a call chained through a field into a stranger),
-  **purity** (a `@property` that assigns to `self`), **composition** (a `holds` cycle — the intra-file case
-  an import cycle cannot represent), **envy** (a method more interested in another class than its own),
-  **astgrep** (the packaged module-shape rules), **hygiene.mirror** (the METHOD-level mirror: each public
-  `A.a` needs a `test_a` that CALLS and ASSERTS — stricter than graph's file-level one), **hygiene.small**
-  (a UNIT test touches nothing it did not create: no data root, no network, no sleep, no unseeded RNG).
-  Swap `--gate` for `--report` to run an advisory engine (`cohesion.complexity`, `cohesion.lcom`,
-  `cohesion.data_clumps`).
-- **deptry** (pinned `0.25.1`) — undeclared (DEP001) / unused (DEP002) / transitive (DEP003) imports.
-- **archmap** (advisory / doc-gen) — `python -m devtools.graph.archmap <packages>` emits
+
+The rest run in ONE process — `python -m devtools.run <packages> --gate <list>` — because each would
+otherwise pay interpreter startup separately. All of them still answer `python -m devtools.<module>
+<packages> --assert` individually, which is how you check ONE while fixing it:
+
+- **arch-fitness** — `python -m devtools.graph.fitness`: god-module (fan-in/out), god-file, import-cycle,
+  and the FILE-level test mirror (a logic module needs its `tests/unit/<pkg>/…/test_<name>.py`); thresholds
+  in `[tool.structure]`. Advisory sub-checks: line-floor (off) + chokepoint. It is `devtools.graph.fitness`,
+  NOT `devtools.graph` — that is a package and answers `No module named devtools.graph.__main__`.
+- **demeter** — `python -m devtools.coupling.demeter`: CALLING a method through a field into a stranger.
+  Ceiling `[tool.structure] demeter_max_depth` (default 2). Only chains ending in a CALL count — reading a
+  deep config tree is data navigation, not coupling.
+- **purity** — `python -m devtools.coupling.purity`: a `@property` that assigns to `self`. A read dressed as
+  attribute access has to BE a read.
+- **composition** — `python -m devtools.coupling.composition`: a `holds` cycle (A owns a B that owns an A),
+  the intra-file case an import cycle cannot represent.
+- **envy** — `python -m devtools.coupling.envy`: a METHOD more interested in another class than its own.
+  Floor `[tool.structure] feature_envy_min` (default 4); value objects are never the target.
+- **contracts** — `python -m devtools.coupling.contracts`: directional forbidden-USE rules over the resolved
+  arrows (not imports). Empty by default — you add them.
+- **ast-grep** — `python -m devtools.astgrep`: the packaged module-shape rule set, the syntactic axis ruff
+  has no plugin API for.
+- **method mirror** — `python -m devtools.hygiene.mirror`: for each public method `A.a`, the module's mirror
+  test file holds a `test_a` that CALLS it and ASSERTS. STRICTER than graph's file-level mirror, which one
+  smoke test satisfies for a module of twenty methods. Resolved through `[tool.structure] test_layout`
+  (`off` disables both mirrors); per-method escape `# devtools-ignore: test-mirror`. See `docs/UNIT_TESTS.md`,
+  which also states the case AGAINST the convention.
+- **small** — `python -m devtools.hygiene.small`: a unit test touches nothing it did not create — no external
+  data root, no network, no sleep, no unseeded RNG. UNIT ONLY; an integration test SHOULD read a real fixture.
+- **shape-contracts** — `python -m devtools.shape_contracts`: a public array/tensor boundary must carry a
+  **jaxtyping** shape (`Float[Tensor, "b c h w"]`), not a bare `np.ndarray`/`Tensor`. Aliases in
+  `[tool.shape_contracts]`; make shapes live at runtime with a `@shapecheck` decorator (jaxtyping+beartype,
+  see `devtools/README.md`). A fresh generation has 0 boundaries and passes — a bare boundary then fails.
+  Here it has GRADUATED: nox, CI and pre-commit all pass `--assert`, and the tree measures 0 bare
+  boundaries, so a new one BLOCKS.
+
+### Advisory — these REPORT and never block
+
+Reviewer signal. Reading them is how you find the next thing to fix, not a thing you must fix now.
+
+- **class-shape smells** — `devtools.cohesion.state_candidates` (namespace-state), `devtools.cohesion.lcom`
+  (LCOM4 cohesion), `devtools.cohesion.data_clumps` (Fowler clumps).
+- **complexity ranking** — `devtools.cohesion.complexity` (radon; ruff C901 is the FIXED gate, this ranks).
+- **magic literals** — `devtools.hygiene.magic_literals`: recurring literals that want a StrEnum/dataclass.
+- **behavioural arrows** — `devtools.graph.arrows` and `devtools.graph.calls`: the resolved call/construct
+  graph the architecture viewer draws.
+- **ruff whole-tree** — the enforced select over `.` with `--statistics`, wider than the blocking `lint_paths`.
+- **vulture at 60** and **coverage at 95%** — the same engines one notch stricter than their blocking bar.
+- **archmap** (doc-gen) — `python -m devtools.graph.archmap <packages>` emits
   `docs/architecture/graph.json` (the committed, diffable architecture — nodes + weighted import edges) plus
   a self-contained interactive **cytoscape viewer** (`index.html`, regenerated + gitignored) that folds/expands
   packages to any depth and focuses a module's neighbourhood. Regenerate with `uvx nox -s archmap` and **commit the
@@ -88,11 +127,7 @@ the repo's current state. The linter is a bug-finder, not cosmetics.
   `/architecture/preview/` = dev, `/` redirects). If the repo ALREADY deploys Pages, do NOT enable it; fold
   archmap into the existing workflow as an `/architecture/` subpath instead (see README: "Compose archmap into
   an existing Pages site"). Doc-gen, not enforcement — import-linter is the directional gate.
-- **shape-contracts** (ENFORCED) — `python -m devtools.shape_contracts core kneemri --assert`: a public
-  array/tensor boundary must carry a **jaxtyping** shape (`Float[Tensor, "b c h w"]`), not a bare
-  `np.ndarray`/`Tensor`. Aliases in `[tool.shape_contracts]`; make shapes live at runtime with a
-  `@shapecheck` decorator (jaxtyping+beartype, see `devtools/README.md`). It graduated: nox, CI and
-  pre-commit all pass `--assert`, and the tree measures 0 bare boundaries, so a new one BLOCKS.
+
 ## Scaffolding
 
 Guardrails provisioned by **sdlc-scaffold** via copier — `.copier-answers.yml` pins the version. The gate
