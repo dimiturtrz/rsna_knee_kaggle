@@ -11,7 +11,7 @@ from pathlib import Path
 
 from core.data.corpus.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
 from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
-from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, LAST_MAXIMAL, SCHEMES, Routing
+from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, TIES, Routing
 from core.data.corpus.study_cache import StudyCache
 
 
@@ -80,7 +80,7 @@ class CacheFlags:
         parser.add_argument(
             "--tie",
             default=FIRST_MAXIMAL,
-            choices=(FIRST_MAXIMAL, LAST_MAXIMAL),
+            choices=TIES,
             help="which of several equally dense candidates fills a slot. 'first' is ours and keeps the "
             "historic cache name; the published members reproduce their own predictions better under "
             "'last' (knee-evn), so a graft-matching cache is built with it.",

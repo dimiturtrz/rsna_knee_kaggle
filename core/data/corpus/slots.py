@@ -95,6 +95,14 @@ also a FIRST-maximal rule, so if the two pipelines diverge on contested slots it
 is not the one we assumed. For TESTING against the published members' recorded predictions, not for
 switching on."""
 
+TIES: tuple[str, ...] = (FIRST_MAXIMAL, LAST_MAXIMAL)
+"""Selectable tie rules, by the name a cache and a manifest record.
+
+A registry for the same reason `SCHEMES` and `CENTRES` are ones: it is the vocabulary a CLI offers, so
+it is also the vocabulary a test can WALK. Spelled as a literal tuple at the argparse call site, the
+tie was the one reading axis no test could enumerate, and a name accepted there but dropped from the
+cache key is a decode that lands on the arrays every member on disk was fitted on."""
+
 CANONICAL_SCHEME = "canonical"
 """The scheme whose caches keep their historic names, and the one the published members use.
 

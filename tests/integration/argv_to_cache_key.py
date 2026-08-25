@@ -16,9 +16,9 @@ import pandas as pd
 import pytest
 
 from core.data.corpus import build_cache
-from core.data.corpus.crop_centre import Crop
+from core.data.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
 from core.data.corpus.slot_reader import Band, Reading
-from core.data.corpus.slots import Routing
+from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, TIES, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.paths import COMPETITION
 
@@ -86,6 +86,43 @@ def test_the_scheme_reaches_the_key(root: Path, monkeypatch: pytest.MonkeyPatch,
 
     assert printed == StudyCache(root, slices=SLICES, routing=Routing(scheme="extended")).key
     assert "extended" in printed
+
+
+READING_VOCABULARIES = {
+    "--scheme": (tuple(SCHEMES), CANONICAL_SCHEME),
+    "--centre": (tuple(CENTRES), DEFAULT_CENTRE),
+    "--tie": (TIES, FIRST_MAXIMAL),
+}
+"""The reading axes a CLI offers a CLOSED SET of names for, each with the name that keeps the historic
+cache.
+
+The tests above spell ONE name of each — `extended`, `tissue` — and that is the hole this closes
+(knee-29s5): a name added to a registry and offered by `CacheFlags` but not carried into the key is a
+decode that lands on the arrays every member on disk was fitted on, and it fails at the commit that
+adds the name rather than the run that first asks for it. Walking the vocabulary is what makes that
+true; naming today's alternatives is what left `multiscale` and both tie rules unexercised."""
+
+
+@pytest.mark.parametrize(("flag", "vocabulary_and_historic"), READING_VOCABULARIES.items())
+def test_every_reading_a_run_can_name_reaches_the_key(
+    flag: str,
+    vocabulary_and_historic: tuple[tuple[str, ...], str],
+    root: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    """Every name argv accepts either IS the historic reading or is named for itself — no third case."""
+    vocabulary, historic = vocabulary_and_historic
+    assert historic in vocabulary, f"{flag} defaults to a name it does not offer"
+    default = _key(root, monkeypatch, capsys)
+
+    for name in vocabulary:
+        printed = _key(root, monkeypatch, capsys, flag, name)
+        if name == historic:
+            assert printed == default, f"{flag} {name} is the historic reading and must keep its name"
+            continue
+        assert printed != default, f"{flag} {name} decodes different pixels under the historic name"
+        assert name in printed, f"{flag} {name} is not readable back off the name it decoded under"
 
 
 def test_a_truncated_decode_reaches_the_key(
