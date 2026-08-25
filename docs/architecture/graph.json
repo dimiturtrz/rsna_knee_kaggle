@@ -5882,6 +5882,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.table_blend.main",
+      "target": "core.data.labels.table_blend.LabelBlend.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.targets.Supervision.trusted",
       "target": "core.data.labels.targets.Supervision.reliability",
       "weight": 1
@@ -21610,6 +21616,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend._mean",
+      "label": "_mean",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend._tiebreak",
+      "label": "_tiebreak",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.table_blend.LabelBlend.blended",
       "label": "blended",
       "level": "method",
@@ -21634,34 +21656,18 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.table_blend.LabelBlend.readings",
-      "label": "readings",
+      "id": "core.data.labels.table_blend.LabelBlend.read",
+      "label": "read",
       "level": "method",
       "parent": "core.data.labels.table_blend.LabelBlend",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.table_blend._mean",
-      "label": "_mean",
+      "id": "core.data.labels.table_blend.LabelBlend.readings",
+      "label": "readings",
       "level": "method",
-      "parent": "core.data.labels.table_blend",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.table_blend._read",
-      "label": "_read",
-      "level": "method",
-      "parent": "core.data.labels.table_blend",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.table_blend._tiebreak",
-      "label": "_tiebreak",
-      "level": "method",
-      "parent": "core.data.labels.table_blend",
+      "parent": "core.data.labels.table_blend.LabelBlend",
       "role": null
     },
     {
