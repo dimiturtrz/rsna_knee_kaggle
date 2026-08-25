@@ -3483,3 +3483,50 @@ cnx_own_recipe_s2026` re-ran greedy with the candidate passed explicitly ON TOP 
 `*_s2026.pt` that already contained it. The script tests nothing for any member matching that glob — its
 explicit argument only adds something for arms named outside it, which is precisely the new `_ff` full-fit
 members. Correct for what it was written for, a no-op for what I pointed it at.
+
+### Per-label reader agreement — ρ=+0.53 against per-label AUC, and recalibration is worth 0.000 (2026-08-25)
+
+**COST: no GPU.** `reader_agreement.by_label` has been in the tool since it was written and its numbers
+have never been in this ledger. Run card-free while a submission was pending
+(`logs/reader_agreement_20260825.log`).
+
+Agreement on the reader's POSITIVE calls, per finding — **denominator 311 positive calls over 57
+annotated studies (684 cells)**, so each rate carries roughly ±20pp and no pair of labels is separated:
+
+| label | AUC (`band_dense`) | reader agrees | n calls |
+|---|---|---|---|
+| Baker's | 0.9065 | 68.8% | 16 |
+| Medial Meniscus | 0.9047 | 78.1% | 32 |
+| Medial OA | 0.8797 | 63.6% | 22 |
+| Synovitis | 0.8764 | 81.2% | 16 |
+| ACL | 0.8740 | 71.9% | 32 |
+| **Contusion** | 0.8705 | **44.4%** | 36 |
+| Effusion | 0.8595 | 68.0% | 50 |
+| PF OA | 0.8583 | 66.7% | 24 |
+| Lateral Meniscus | 0.8464 | 66.7% | 30 |
+| Lateral OA | 0.8156 | 56.2% | 16 |
+| **Fracture** | 0.8088 | **68.4%** | 19 |
+| MCL | 0.7931 | 50.0% | 18 |
+
+**Spearman ρ = +0.53** (Σd² = 134.5, n = 12, p ≈ 0.08) — moderate, NOT established. The residual is
+carried almost entirely by two trauma findings pulling opposite ways: Contusion is 6th by AUC and LAST
+by agreement, Fracture is 11th by AUC and 5th by agreement.
+
+**FREE KILL, and it needs no resolution at all.** The error census is lopsided 3.4:1 — 108 false
+positives against 32 misses, Synovitis the only inversion at −11 — which reads as a calibration lever.
+It is not one. The metric is a per-label RANK AUC, so a monotone per-label recalibration cannot change
+it by construction. **Any arm that corrects the reader's over-call rate is worth exactly 0.000 on this
+board**, retired before it was proposed. Consistent with `calibrated_targets` at +0.0038, inside the floor.
+
+**THE TWELVE-LABEL DEFICIT TARGET IS OVER-PRICED.** `farseat`'s FLAT branch hands off to "lifting
+Lateral Meniscus 0.7981, PF OA 0.8165, MCL 0.8166, Lateral OA 0.8215 to 0.87 is +0.0189". MCL at 50.0%
+and Lateral OA at 56.2% are the worst reader precision after Contusion, so that arithmetic prices
+headroom the label table may not contain — it asks the model to out-rank its own training signal. NOT
+refuted: Contusion scores 0.8705 on 44.4% precision, which proves a label can. But not licensed as a
+target either. Anything built against the label deficit must name the labels it targets and state their
+agreement.
+
+**WHAT THIS DOES NOT SAY.** Agreement here is precision on the reader's positives only; recall is the
+separate 32-miss column. And the board scores radiologist annotations while we train on report-read
+labels — the line above (2026-08-22) and `interpretations/kneemri/2026-08-11` do not agree on how far
+those two diverge, and this measurement does not settle it.
