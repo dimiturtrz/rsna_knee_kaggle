@@ -16,7 +16,7 @@ That was the project's main search axis for two days. It was searching a coordin
 | allfit | `band_dense_long_s2026` (fold-0) | 0.937 |
 | lastseat | `small_batch6_s2026` (same family) | 0.937 |
 | augseat | `aug_long_s2026` (regularised) | 0.936 |
-| v3seat | `v3base_dense_s2026` (DINOv3-base) | pending |
+| v3seat | `v3base_dense_s2026` (DINOv3-base) | 0.936 |
 
 Three slots spent, a fourth in flight. The pre-registrations were all written against 0.937 as *"the
 champion"*, when 0.937 is really *"what six members already read"*. So `augseat`'s 0.936 is not a
@@ -128,3 +128,35 @@ dressed a null up as a prediction.
 Also confirmed from those logs: `overlap=False requested, INERT — all members are whole-stack`. The
 serving/overlap path is not merely measured flat, it is structurally unavailable to every all-data
 roster. Of the two axes never varied on a board entry, that leaves exactly one — the **vote**.
+
+## v3seat reads 0.936, and the encoder-family axis closes on the board rather than offline
+
+`v3seat` (55757184) put a **DINOv3-base** trunk in seat seven — the strong reading of a family this
+package had only ever shipped weak — against two matched DINOv2-small controls at 0.937. Its own
+pre-registration named 0.936-0.939 as *"FLAT, three rulers agree, seat search closes for good
+(expected)"*. It read **0.936**.
+
+That is the fifth entry inside one board point, and the seat has now been varied along every axis
+anyone proposed for it:
+
+    dark6      no seventh member                       0.937
+    dark7      a seventh of the SAME family            0.937
+    allfit     a fold-0 member                         0.937
+    lastseat   a different fold-0 member               0.937
+    augseat    a REGULARISED member                    0.936
+    v3seat     a different ENCODER FAMILY              0.936
+
+Count, identity, fold status, regularisation and encoder family: six entries, six variables, one
+number. The architecture-diversity closure written on 2026-08-24 predicted exactly this and has now
+been confirmed on the board rather than on the holdout it was argued from — the trunk decides how
+features are *spelled*, and the errors an ensemble needs uncorrelated are made downstream of it, in
+the slice sampling, the five-level targets, the BCE objective and the head that every member shares.
+
+`v3seat`'s lower bands are voided rather than read. It reserved 0.933-0.935 for *"the vote wants
+agreement not distance, argues LogitAverage next"* and <=0.932 for *"indicts the vitb16 serving path"*.
+Neither fired, so this entry says nothing for or against `kneemri-votefit`, which keeps its own
+independent case.
+
+`farseat` is now the only open question on this board. It is the one member that breaks the
+slice-then-pool term rather than the trunk term — and if it lands flat too, the ensemble axis is not
+narrowed, it is finished.
