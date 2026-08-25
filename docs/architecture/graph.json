@@ -10921,6 +10921,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.live_dataset.LiveDataset.members",
+      "target": "kneemri.kaggle.live_dataset.TruncatedListingError",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.mount_check.MountCheck",
       "target": "kneemri.inference.members.MemberPackage",
@@ -16665,6 +16671,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.live_dataset",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.live_dataset.TruncatedListingError",
+      "label": "TruncatedListingError",
+      "level": "class",
+      "parent": "kneemri.kaggle.live_dataset",
+      "role": "satellite"
     },
     {
       "descendants": 0,
