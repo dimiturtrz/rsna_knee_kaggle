@@ -29,6 +29,25 @@ def main() -> None:
     command.parser.add_argument("--labels", type=Path, default=None, help=f"our labels table (default: {LABELS})")
     command.parser.add_argument("--extra-labels", type=Path, default=None, help=f"theirs (default: {EXTRA_LABELS})")
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
+    command.parser.add_argument(
+        "--labels-out",
+        type=Path,
+        default=None,
+        help=(
+            f"where the union table is written (default: {MERGED_LABELS}). A run that changes --labels MUST "
+            "change this too: the default name is what every merged member on disk was fitted against, and "
+            "overwriting it would leave those runs unreproducible with every gate still green."
+        ),
+    )
+    command.parser.add_argument(
+        "--labels-only",
+        action="store_true",
+        help=(
+            "write the union table and stop. The images are a 41.8 GB sequential copy and the table is a "
+            "concat of two CSVs, and a run that changes only which labels our rows carry needs the second "
+            "without paying for the first — the arrays a label table indexes are the same arrays."
+        ),
+    )
     arguments = command.parsed()
 
     if MERGED_SCHEME in (arguments.scheme, arguments.extra_scheme):
@@ -44,8 +63,11 @@ def main() -> None:
     merger.labels(
         arguments.labels or root.processed() / "labels" / LABELS,
         arguments.extra_labels or root.processed() / "labels" / EXTRA_LABELS,
-        root.processed() / "labels" / MERGED_LABELS,
+        arguments.labels_out or root.processed() / "labels" / MERGED_LABELS,
     )
+    if arguments.labels_only:
+        logger.info("LABELS ONLY — the images were left alone")
+        return
     # An hour of sequential copy with no keyboard input, and the idle timer counts INPUT rather than load.
     with Wakelock():
         merger.build()
