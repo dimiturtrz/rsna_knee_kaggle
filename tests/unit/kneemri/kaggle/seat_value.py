@@ -19,10 +19,11 @@ def _champion() -> Champion:
 
 
 def _member(path: Path, truth: np.ndarray, shift: float) -> None:
-    """One member's record: predictions that follow the truth by `shift`."""
+    """One member's record, and the checkpoint it was read from — a record alone is a dead run."""
     studies = [f"s{index}" for index in range(STUDIES)]
     predictions = truth * shift + RNG.random((STUDIES, LABELS))
     HoldoutRecord(path).write(studies, predictions.astype(np.float64), truth.astype(np.float32), epoch=6)
+    path.write_bytes(b"")
 
 
 def test_roster(tmp_path: Path):

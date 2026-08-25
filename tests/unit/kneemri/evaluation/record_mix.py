@@ -15,10 +15,15 @@ RNG = np.random.default_rng(2026)
 
 
 def _record(path: Path, studies: list[str], *, shift: float = 0.0, truth: np.ndarray | None = None) -> Path:
-    """One run's record: predictions that follow the truth by `shift`, so a mix has something to gain."""
+    """One run's record: predictions that follow the truth by `shift`, so a mix has something to gain.
+
+    The CHECKPOINT is written too, empty but present, because a member is weights plus a reading of them
+    — a record whose `.pt` never landed is a dead run, and the pool now drops it.
+    """
     answers = truth if truth is not None else (RNG.random((len(studies), LABELS)) > 0.5).astype(np.float32)
     predictions = answers * shift + RNG.random((len(studies), LABELS))
     HoldoutRecord(path).write(studies, predictions.astype(np.float64), answers.astype(np.float32), epoch=6)
+    path.write_bytes(b"")
     return path
 
 
@@ -50,6 +55,32 @@ def test_readings_refuses_a_path_that_is_not_there(tmp_path: Path):
 
     with pytest.raises(FileNotFoundError, match="check the root"):
         RecordMix([tmp_path / "a.pt", tmp_path / "elsewhere" / "b.pt"]).readings()
+
+
+def test_readings_drops_a_record_whose_run_never_finished(tmp_path: Path):
+    """A record with no checkpoint is a DEAD run — the array is real, the weights are gone.
+
+    `Fitting` writes the record on every improving epoch and the checkpoint only after it returns, so
+    this is the shape a crash leaves behind. Nine of ninety-one records under the processed root are in
+    it, and a glob of that directory would seat a tenth of its pool on members nothing can package.
+    """
+    studies = [f"s{index}" for index in range(8)]
+    _record(tmp_path / "alive.pt", studies)
+    _record(tmp_path / "died.pt", studies).unlink()
+    mix = RecordMix([tmp_path / "alive.pt", tmp_path / "died.pt"])
+
+    assert [name for name, _ in mix.readings()] == ["alive.pt"], "a run that never ended is not a member"
+    assert mix.dropped() == ["died.pt"], "and it is NAMED, so the pool size the caller asked for is checkable"
+
+
+def test_dropped(tmp_path: Path):
+    """A healthy pool drops nothing, so the warning means what it says on the day it fires."""
+    studies = [f"s{index}" for index in range(8)]
+    _record(tmp_path / "a.pt", studies)
+    assert RecordMix([tmp_path / "a.pt"]).dropped() == []
+
+    _record(tmp_path / "died.pt", studies).unlink()
+    assert RecordMix([tmp_path / "a.pt", tmp_path / "died.pt"]).dropped() == ["died.pt"]
 
 
 def test_shared(tmp_path: Path):

@@ -7123,6 +7123,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix.dropped",
+      "target": "kneemri.evaluation.record_mix.RecordMix.readings",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.record_mix.RecordMix.per_member",
       "target": "kneemri.evaluation.member_curve.Pool",
@@ -7192,6 +7198,12 @@
       "kind": "construct",
       "source": "kneemri.evaluation.record_mix.main",
       "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.dropped",
       "weight": 1
     },
     {
@@ -20918,6 +20930,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.record_mix.RecordMix._rows",
       "label": "_rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix.dropped",
+      "label": "dropped",
       "level": "method",
       "parent": "kneemri.evaluation.record_mix.RecordMix",
       "role": null

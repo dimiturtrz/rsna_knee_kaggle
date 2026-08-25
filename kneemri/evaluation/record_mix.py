@@ -63,6 +63,7 @@ class RecordMix:
     def __init__(self, records: list[Path]) -> None:
         self.records = records
         self._readings: list[tuple[str, HoldoutReading]] | None = None
+        self._dead: list[str] = []
 
     def readings(self) -> list[tuple[str, HoldoutReading]]:
         """Each record that exists, as (member name, its reading).
@@ -77,6 +78,16 @@ class RecordMix:
         mistyped name in nine — scored an eight-member ensemble while the caller read the number as
         nine members. The crash that exposed it only fired because EVERY path was wrong; one wrong path
         is silent, and a wrong denominator wearing a result's clothes is what this project rules out.
+
+        A record with NO CHECKPOINT beside it is dropped and named, because it is not a member. The
+        trainer writes `.holdout.npz` on every improving epoch and the `.pt` only after fitting returns,
+        so a record without its checkpoint is a run that DIED — the array is real, the weights it was
+        read from are gone, and nothing that wins a seat here can ever be packaged. Nine of the ninety-one
+        records under the processed root are in that state (crashes, and rotated `_run1`/`_run2` runs whose
+        checkpoint was overwritten), so a glob of the directory seats a tenth of its pool on runs that
+        cannot ship. Dropped, not raised on, for the same reason a missing record is: a sweep must not be
+        decided by its worst member. Named through `dropped`, because a pool silently one member shorter
+        than the caller asked for is the wrong-denominator failure again.
 
         Read once and held: `shared` and `per_member` both want them, so an uncached read decodes every
         npz three times and prints each skipped member's line three times, which reads as three
@@ -94,9 +105,25 @@ class RecordMix:
             if reading is None:
                 logger.info("%s: no holdout record, skipped", path.name)
                 continue
+            if not path.exists():
+                self._dead.append(path.name)
+                logger.warning(
+                    "%s: a holdout record with no checkpoint — the run never reached its end, dropped",
+                    path.name,
+                )
+                continue
             found.append((path.name, reading))
         self._readings = found
         return found
+
+    def dropped(self) -> list[str]:
+        """The records that had no checkpoint, in the order they were given — what left the pool, and why.
+
+        A caller that globbed a directory asked for a pool size; this is the difference between that
+        number and the one the search actually ran over.
+        """
+        self.readings()
+        return self._dead
 
     def shared(self) -> list[str]:
         """The studies every member held out, in the first member's order.
@@ -233,8 +260,16 @@ def main() -> None:
     scores = LabelScores()
     roster = list(arguments.roster)
     everything = list(dict.fromkeys([*arguments.records, *roster]))
-    mixed = RecordMix(everything).per_member()
-    logger.info("%d members over %d shared studies", len(mixed.names), len(mixed.truth))
+    mix = RecordMix(everything)
+    mixed = mix.per_member()
+    logger.info(
+        "%d of %d records became members, over %d shared studies",
+        len(mixed.names),
+        len(everything),
+        len(mixed.truth),
+    )
+    if dead := mix.dropped():
+        logger.warning("dropped, no checkpoint to package: %s", " ".join(dead))
     for line in mixed.alone(scores):
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
