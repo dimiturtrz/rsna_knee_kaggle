@@ -28,12 +28,19 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.kaggle.kernel_script import KernelScript
 
 logger = logging.getLogger(__name__)
 
 RECORD = Path("comp/board.jsonl")
 LEDGER = Path("comp/SUBMISSIONS.md")
+KERNELS = Path("comp/kernels")
 COMPETITION = "rsna-knee-abnormality-detection"
+KERNEL_PREFIX = "kneemri-"
+VERSION_MARK = "_v"
+"""How an entry id carries its revision (`chosen_v2`), and the prefix every kernel directory takes. An
+entry that records no `kernel` still names its own script through these two: that join is what found a
+surviving script for thirteen of the fourteen rows this file once called unrecoverable."""
 EXCLUDED = "excluded"
 """The scope of a submission this record deliberately does not price. `board_transfer` already reports
 per-scope drops, so an excluded row is counted out loud rather than missing."""
@@ -60,6 +67,17 @@ class BoardRow:
     board: float | None
     offline: float | None
     members_named: tuple[str, ...]
+    names_key: bool
+    """Whether the line carried `members_named` AT ALL, which an empty tuple cannot say on its own.
+
+    ABSENT AND EMPTY ARE DIFFERENT CLAIMS. Absent says this entry's seats are unknown; empty says they
+    were looked up and there are none, which is false of every ensemble ever submitted. `weakseven_v1`
+    carried `[]` through two recovery passes with a kernel and a literal tuple sitting in the tree,
+    because a consumer testing membership read it as recovered and one testing truthiness read it as
+    missing, and neither was wrong about the JSON.
+    """
+    kernel: str | None
+    members: int | None
 
     @classmethod
     def parsed(cls, row: Mapping[str, object]) -> "BoardRow":
@@ -74,7 +92,21 @@ class BoardRow:
             board=None if row.get("board") is None else float(str(row["board"])),
             offline=None if row.get("offline") is None else float(str(row["offline"])),
             members_named=tuple(str(name) for name in seats),
+            names_key=named is not None,
+            kernel=None if row.get("kernel") is None else str(row["kernel"]),
+            members=None if row.get("members") is None else int(str(row["members"])),
         )
+
+    def script(self, kernels: Path) -> Path:
+        """The kernel script this entry shipped from, its own field first and its id stem as fallback.
+
+        The fallback is the whole point: the earlier recovery offered a row a script ONLY through
+        `kernel`, so every row carrying a null there was never handed one and was written off as having
+        no surviving source. `chosen_v2` -> `kneemri-chosen` is a two-line join, and it reaches thirteen
+        of the fourteen.
+        """
+        name = self.kernel or KERNEL_PREFIX + self.identifier.rsplit(VERSION_MARK, 1)[0]
+        return kernels / name / f"{name}.py"
 
     def disagrees(self, scored: float | None) -> bool:
         """Whether this row's board number says something other than what the board holds.
@@ -100,9 +132,10 @@ class BoardRow:
 class BoardCensus:
     """The recorded submissions, asked whether they are all of them and whether each says a true thing."""
 
-    def __init__(self, record: Path = RECORD, ledger: Path = LEDGER) -> None:
+    def __init__(self, record: Path = RECORD, ledger: Path = LEDGER, kernels: Path = KERNELS) -> None:
         self.record = record
         self.ledger = ledger
+        self.kernels = kernels
 
     def rows(self) -> list[BoardRow]:
         """Every recorded entry, the notes skipped — they carry commentary and no submission."""
@@ -139,6 +172,50 @@ class BoardCensus:
             if row.scope != EXCLUDED and row.identifier.rsplit("_v", 1)[0] not in prose
         ]
 
+    def hollow(self) -> list[str]:
+        """Rows carrying an empty `members_named` — the claim no entry can truthfully make."""
+        return [
+            f"{row.identifier} carries an EMPTY members_named; omit the key when the seats are unknown, "
+            f"because empty reads as 'this entry had none' and no ensemble ever had none"
+            for row in self.rows()
+            if row.names_key and not row.members_named
+        ]
+
+    def miscounted(self) -> list[str]:
+        """Rows naming a different number of seats than they record — the rule the hand recovery used.
+
+        `members` is written from the submission log and `members_named` from the script, so the two are
+        independently sourced and their disagreement is exactly the signal: a partial recovery that
+        stopped at four of six looks complete until these are compared.
+        """
+        return [
+            f"{row.identifier} names {len(row.members_named)} members and records members={row.members}"
+            for row in self.rows()
+            if row.members_named and row.members is not None and len(row.members_named) != row.members
+        ]
+
+    def recoverable(self) -> list[str]:
+        """Unnamed rows whose surviving script DOES name its members literally — recovery left on the table.
+
+        Silence about a row's seats is only honest when nothing can break it. A row selecting by rank
+        (`KernelRun(members=N)` is `strongest(N)` over recorded holdouts) cannot be replayed against a
+        package that has since changed, and `member_names` returns None for it, so those stay silent and
+        this stays quiet about them. A row whose script holds a literal tuple has no such excuse.
+
+        Read the tuple from the commit that SHIPPED the entry, not from HEAD: `kneemri-chosen` was edited
+        after `chosen_v2` submitted. The tuple was unchanged, which is a thing you check and not a thing
+        you assume.
+        """
+        found = []
+        for row in self.rows():
+            if row.members_named or row.scope == EXCLUDED:
+                continue
+            script = row.script(self.kernels)
+            names = KernelScript(script).member_names() if script.is_file() else None
+            if names:
+                found.append(f"{row.identifier} names no members and {script} names {len(names)} of them")
+        return found
+
     def unrecorded(self, live: Mapping[str, float | None]) -> list[str]:
         """Submissions Kaggle reports that this file has never heard of — the failure that was live."""
         recorded = {row.ref for row in self.rows()}
@@ -160,6 +237,9 @@ class BoardCensus:
         """Every defect found, in the order a reader should act on them; empty when the record is whole."""
         found = [f"{name} carries no ref, so no live listing can reach it" for name in self.refless()]
         found += [f"ref {ref} is recorded twice" for ref in self.duplicated()]
+        found += self.hollow()
+        found += self.miscounted()
+        found += self.recoverable()
         found += self.unpriceable()
         found += [f"{name} is priced here and named nowhere in {self.ledger}" for name in self.unnamed()]
         if live is None:
@@ -201,6 +281,7 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--record", type=Path, default=RECORD)
     command.parser.add_argument("--ledger", type=Path, default=LEDGER)
+    command.parser.add_argument("--kernels", type=Path, default=KERNELS)
     command.parser.add_argument(
         "--live",
         action="store_true",
@@ -209,7 +290,7 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    census = BoardCensus(arguments.record, arguments.ledger)
+    census = BoardCensus(arguments.record, arguments.ledger, arguments.kernels)
     live = LiveBoard.taken().scores if arguments.live else None
     refusals = census.refusals(live)
     logger.info(

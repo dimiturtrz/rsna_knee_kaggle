@@ -27,13 +27,19 @@ def _census(
     tmp_path: Path,
     rows: Sequence[Mapping[str, object]] | None = None,
     prose: str = "alpha beta",
+    scripts: Mapping[str, str] | None = None,
 ) -> BoardCensus:
     """A record and a ledger written into the test's own directory — it touches nothing it did not make."""
     record = tmp_path / "board.jsonl"
     record.write_text("".join(json.dumps(row) + "\n" for row in (rows if rows is not None else CLEAN)))
     ledger = tmp_path / "SUBMISSIONS.md"
     ledger.write_text(prose)
-    return BoardCensus(record, ledger)
+    kernels = tmp_path / "kernels"
+    for name, body in (scripts or {}).items():
+        directory = kernels / name
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / f"{name}.py").write_text(body)
+    return BoardCensus(record, ledger, kernels)
 
 
 def test_parsed():
@@ -42,9 +48,26 @@ def test_parsed():
     assert (row.identifier, row.ref, row.board, row.offline) == ("beta_v1", "2", 0.937, None)
     assert row.members_named == ("calib_span_ff", "band_dense_s2026")
 
+    assert row.names_key, "the key was there"
+
     excluded = BoardRow.parsed(CLEAN[3])
     assert excluded.identifier == "3", "a row with no id is identified by its ref, never by an empty string"
     assert excluded.members_named == (), "no members named is an empty tuple, not a crash"
+    assert not excluded.names_key, "and an absent key is distinguishable from an empty one"
+    assert (excluded.kernel, excluded.members) == (None, None)
+
+
+def test_script(tmp_path: Path):
+    """The kernel script an entry shipped from, by its own field and by the id-stem fallback."""
+    declared = BoardRow.parsed({"id": "chosen_v2", "ref": "1", "kernel": "kneemri-chosen"})
+    assert declared.script(tmp_path) == tmp_path / "kneemri-chosen" / "kneemri-chosen.py"
+
+    silent = BoardRow.parsed({"id": "chosen_v2", "ref": "1"})
+    assert silent.script(tmp_path) == declared.script(tmp_path), "a null kernel is not an unreachable row"
+
+    assert BoardRow.parsed({"id": "solo", "ref": "1"}).script(tmp_path).name == "kneemri-solo.py", (
+        "an id carrying no version mark is its own stem"
+    )
 
 
 def test_disagrees():
@@ -99,6 +122,43 @@ def test_unnamed(tmp_path: Path):
     assert _census(tmp_path).unnamed() == []
     assert _census(tmp_path, prose="alpha only").unnamed() == ["beta_v1"]
     assert "3" not in _census(tmp_path, prose="").unnamed(), "an excluded row earns no write-up"
+
+
+def test_hollow(tmp_path: Path):
+    """An empty members_named, which reads as recovered to one consumer and missing to another."""
+    assert _census(tmp_path).hollow() == [], "absent is silence and silence is allowed"
+    no_seats: list[str] = []
+    empty = [{"id": "weak_v1", "ref": "1", "board": 0.9, "scope": "ensemble", "members_named": no_seats}]
+    found = _census(tmp_path, empty).hollow()
+    assert len(found) == 1 and "weak_v1" in found[0]
+
+
+def test_miscounted(tmp_path: Path):
+    """Seats named against seats recorded — two independently sourced numbers, so disagreement is signal."""
+    assert _census(tmp_path).miscounted() == [], "beta names two and records no count to contradict"
+    short = [{"id": "part_v1", "ref": "1", "members": 6, "members_named": ["a", "b"], "scope": "ensemble"}]
+    found = _census(tmp_path, short).miscounted()
+    assert len(found) == 1 and "names 2" in found[0] and "members=6" in found[0]
+
+    whole = [{"id": "part_v1", "ref": "1", "members": 2, "members_named": ["a", "b"], "scope": "ensemble"}]
+    assert _census(tmp_path, whole).miscounted() == []
+
+
+def test_recoverable(tmp_path: Path):
+    """An unnamed row whose surviving script names its members anyway — and the ones that honestly cannot."""
+    literal = 'chosen = ("a", "b", "c")\nKernelRun(names=chosen)\n'
+    unnamed: list[Mapping[str, object]] = [{"id": "gamma_v1", "ref": "1", "board": 0.9, "scope": "ensemble"}]
+
+    assert _census(tmp_path, unnamed).recoverable() == [], "no script is no claim"
+
+    found = _census(tmp_path, unnamed, scripts={"kneemri-gamma": literal}).recoverable()
+    assert len(found) == 1 and "3 of them" in found[0], "the id stem alone reaches the script"
+
+    ranked = _census(tmp_path, unnamed, scripts={"kneemri-gamma": "KernelRun(members=3)\n"}).recoverable()
+    assert ranked == [], "strongest(N) is a ranking a parse cannot replay, so silence is honest there"
+
+    dropped: list[Mapping[str, object]] = [{"ref": "1", "board": 0.5, "scope": "excluded", "why": "kit"}]
+    assert _census(tmp_path, dropped, scripts={"kneemri-1": literal}).recoverable() == []
 
 
 def test_unrecorded(tmp_path: Path):

@@ -35,6 +35,48 @@ vendor flags alone would put fluid-weighted series in the T1 slots for a fifth o
 Three planes fused, versus six plane-and-contrast slots attended over. **The headline mechanism is not a
 lever here because it is already spent.**
 
+## The ablation table, read 2026-08-25 — the components do not add, and CPA has no isolated number
+
+The ablation is NOT in the article; it is Table 10 of the supplementary PDF
+(`static-content.springer.com/esm/art%3A10.1038%2Fs41467-024-51888-4/MediaObjects/41467_2024_51888_MOESM1_ESM.pdf`,
+page 10). Centre A, mean AUC-ROC over the twelve labels:
+
+| row | configuration | mean AUC |
+|-----|---------------|---------:|
+| (i) | MRNet baseline, **ROI-cropped** | 0.781 |
+| (ii) | baseline **w/o ROI** | 0.725 |
+| (iii) | baseline, multitask 12-class | 0.744 |
+| (iv) | + CPA (cross-**plane** attention) | 0.774 |
+| (v) | + CSA (cross-**sequence** attention) | 0.799 |
+| (vi) | + CRM (correlation mining) = **CoPAS** | 0.812 |
+| (vii) | CoPAS, single-task ×12 | 0.808 |
+
+**There is no clean CPA-only step anywhere in this ladder.** The text builds (iv) "on the basis of model
+(ii)", i.e. WITHOUT the ROI crop, while (iii) is compared in the prose against (i), i.e. WITH it. So every
+subtraction that reaches CPA also crosses the crop or the single-to-multitask change. Any quoted
+"cross-plane attention is worth +0.0xx" is a mis-subtraction, including one this project made: +0.049 is
+(iv) − (ii), which silently skips (iii).
+
+(Their prose and their own table disagree, which is why only the table is quoted here: the text says the
+multitask adaptation drops "0.781 to 0.705" and row (iii) reads 0.744.)
+
+**The clean steps are the two we have least use for.** CSA is (iv)→(v) = **+0.025** and it buys T1W and T2W
+as separate branches — a multi-contrast axis, not a plane one. CRM is (v)→(vi) = **+0.013**, under our own
+1.5% bar on its own ruler before any corpus transfer.
+
+**The arithmetic that settles it.** Those two clean steps sum to +0.038 on the no-crop ladder, while the
+whole stack over the ROI-cropped baseline (i)→(vi) is **+0.031**. Different ladders, so this is not a strict
+subtraction — but the stack cannot be worth less than its own two later components unless the crop and the
+attention modules overlap heavily. Their own sentence says exactly that: *"cropping along ROI can align the
+spatial position across sequences."* **Alignment is what the crop buys, and it is most of what CPA was
+buying on top of an unaligned baseline.** We already crop to 130mm and our slots are orthogonal within
+87.3°, so we sit at (i) and the residual for cross-plane feature attention is somewhere near zero by their
+numbers — not by an argument about our geometry.
+
+That correction runs the other way too: "our slots are already orthogonal, so cross-plane attention cannot
+help" is not a valid argument on its own. Orthogonality is the PRECONDITION their module operates on, not a
+substitute for it. What kills the lever is the table, not the geometry.
+
 ## What is genuinely left of their delta
 
 A **3D encoder with depth-preserving features and geometric cross-plane resampling**, against our 2D slice

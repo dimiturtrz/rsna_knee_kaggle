@@ -2018,6 +2018,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.board_check",
+      "target": "kneemri.kaggle.kernel_script",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.board_read",
       "target": "core.cli",
       "weight": 1
@@ -10814,6 +10820,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.hollow",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.miscounted",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.mismatched",
       "target": "kneemri.kaggle.board_check.BoardCensus.rows",
       "weight": 1
@@ -10822,6 +10840,24 @@
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.phantom",
       "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.recoverable",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.board_check.BoardCensus.recoverable",
+      "target": "kneemri.kaggle.kernel_script.KernelScript",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.recoverable",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
       "weight": 1
     },
     {
@@ -10839,6 +10875,18 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.hollow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.miscounted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
       "target": "kneemri.kaggle.board_check.BoardCensus.mismatched",
       "weight": 1
     },
@@ -10846,6 +10894,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
       "target": "kneemri.kaggle.board_check.BoardCensus.phantom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.recoverable",
       "weight": 1
     },
     {
@@ -24250,6 +24304,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.hollow",
+      "label": "hollow",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.miscounted",
+      "label": "miscounted",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardCensus.mismatched",
       "label": "mismatched",
       "level": "method",
@@ -24260,6 +24330,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardCensus.phantom",
       "label": "phantom",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.recoverable",
+      "label": "recoverable",
       "level": "method",
       "parent": "kneemri.kaggle.board_check.BoardCensus",
       "role": null
@@ -24332,6 +24410,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardRow.parsed",
       "label": "parsed",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow.script",
+      "label": "script",
       "level": "method",
       "parent": "kneemri.kaggle.board_check.BoardRow",
       "role": null
