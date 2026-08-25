@@ -188,7 +188,33 @@ ignore_decorators = ["@model_validator", "@field_validator", "@field_serializer"
 # "don't care" list — a FACT VOCAB, per-repo, parallel to the pep8-naming slot (bd fy5). `model_config`
 # is the universal pydantic base (metaclass-read); add this repo's documented FPs below.
 # >>> LOCAL-SLOT: vulture-ignore-names — this repo's documented dead-code false positives
-ignore_names = ["model_config"]
+ignore_names = [
+  "model_config",
+  # TypedDict / dataclass FIELDS, read by subscript or by `json.dumps` of the whole row — vulture sees a
+  # declared key it never watches indexed. Deleting one deletes the only written record of a published
+  # artefact's layout: `ids`/`pred` are OutOfFoldBlock, `oof` is PublishedPayload, `img` is MemberConfig,
+  # `annot` is a Member field, and the two `vram_*` are written by RunMetrics and read back off the row.
+  "ids",
+  "pred",
+  "oof",
+  "img",
+  "annot",
+  "vram_peak_gb",
+  "vram_alloc_gb",
+  # Read from OUTSIDE the scanned packages (`paths` above is core + kneemri only): `comp/verify_members.py`
+  # groups a package by `member.pixel_group`, and the Kaggle kernels under `comp/kernels/` are what
+  # instantiate `KernelRun` and `KitWheels` — the whole reason those two classes exist.
+  "pixel_group",
+  "KernelRun",
+  "KitWheels",
+  # Read only by the unit gate that exists to keep a wire total. Each is a written-off or renamed set that
+  # a test differences against `TrainingOptions`' fields, so a flag added without a decision fails there;
+  # `unaccounted` is the same shape for the switch table. Their being unused in the package IS the design.
+  "RECORDED_AS",
+  "NOT_IN_CONFIG",
+  "NOT_A_SWITCH",
+  "unaccounted",
+]
 # <<< LOCAL-SLOT: vulture-ignore-names
 # >>> LOCAL-SLOT: vulture-scan — edit freely, the template will not overwrite intent here
 paths = ["core", "kneemri"]

@@ -282,7 +282,7 @@ class Encoder:
 
 ENCODERS: dict[str, Encoder] = {
     SMALL: Encoder(
-        SMALL, "facebook/dinov2-small", 384, mount="metaresearch/dinov2/PyTorch/small/1", family="dinov2", leaf="small"
+        SMALL, "facebook/dinov2-small", 384, mount="metaresearch/dinov2/PyTorch/small/1", family=DINOV2, leaf="small"
     ),
     # 86M parameters against 22M, and 768-wide features. The strongest public notebooks here run base.
     #
@@ -299,7 +299,7 @@ ENCODERS: dict[str, Encoder] = {
         "facebook/dinov2-base",
         768,
         mount="metaresearch/dinov2/PyTorch/base/1",
-        family="dinov2",
+        family=DINOV2,
         leaf="base",
         params_m=86.6,
     ),
@@ -318,7 +318,7 @@ ENCODERS: dict[str, Encoder] = {
         "facebook/dinov2-large",
         1024,
         mount="metaresearch/dinov2/PyTorch/large/1",
-        family="dinov2",
+        family=DINOV2,
         leaf="large",
         params_m=304.0,
     ),
@@ -347,7 +347,7 @@ ENCODERS: dict[str, Encoder] = {
         384,
         mount="dimiturnt/dinov3-hf/vits16",
         patch=16,
-        family="dinov3",
+        family=DINOV3,
         leaf="vits16",
         params_m=21.6,
     ),
@@ -360,7 +360,7 @@ ENCODERS: dict[str, Encoder] = {
         384,
         mount="dimiturnt/dinov3-hf/vits16plus",
         patch=16,
-        family="dinov3",
+        family=DINOV3,
         leaf="vits16plus",
         params_m=29.0,
     ),
@@ -370,7 +370,7 @@ ENCODERS: dict[str, Encoder] = {
         768,
         mount="dimiturnt/dinov3-hf/vitb16",
         patch=16,
-        family="dinov3",
+        family=DINOV3,
         leaf="vitb16",
         params_m=86.6,
     ),
