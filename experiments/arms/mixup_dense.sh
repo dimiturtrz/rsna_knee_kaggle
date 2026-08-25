@@ -51,6 +51,24 @@
 #   peak-to-finish decline is UNCHANGED. That would say the memorisation is not in the study-to-label
 #   pair at all, and would move the remaining suspects to supervision volume — i.e. to knee-ombx, which
 #   is owner-blocked, and would be worth knowing for exactly that reason.
+# WHY PIXEL SPACE AND NOT THE EMBEDDING, decided before the run rather than after it fails. A convex
+# combination of two knees is not a knee: this arm blends anatomy that no scanner could produce, and the
+# findings this task turns on are focal and few-voxel. Manifold mixup — the same convex combination taken
+# at a hidden representation instead — is the standard answer to exactly that objection, is a
+# generalisation of this arm rather than a rival to it, and is reported effective on prostate MR (+2-4
+# Dice) and on whole-brain segmentation under ROAM's random-layer variant. It is ALSO a one-line change at
+# a seam this commit already opened.
+#
+# It is not what runs first, because input mixup is the CHEAPER INFORMATION and both of its failure modes
+# name manifold mixup as the successor for a DIFFERENT reason, which is what makes running it first
+# decisive rather than merely traditional:
+#   peak FALLS  -> blending anatomy destroyed the focal findings. Manifold mixup is the fix, because it
+#                  never shows the encoder an impossible knee.
+#   peak FLAT, train loss ROSE -> the blend fired and the memorisation did not care (aug_long's outcome).
+#                  Manifold mixup is the fix for the OPPOSITE reason: the perturbation never reached the
+#                  representation where the memorising happens.
+# So this arm separates two mechanisms that a manifold-first run would confound, and it does it on code
+# that is already written, gated and committed.
 # deliberate: --mixup 0.2 (the arm's thesis)
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
