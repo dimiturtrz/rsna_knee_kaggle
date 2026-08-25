@@ -3642,3 +3642,56 @@ thinning, a small meniscal tear — could still want them, and no arm here has i
 (different pixel grid, not merely a different band), which is the PIXEL-distance axis `through_dense`
 was bought on. Unpriced — 0 of votefit's 6 members carry a holdout record, so seat value is not
 computable against the champion.
+
+## 2026-08-25 — base224: encoder scale is flat, and distance turns out to be a twin detector
+
+`base224` = `native224`'s recipe with one flag moved, `--variant base`. Twelve epochs, `ARM DONE`, best
+at epoch 9, `convergence_check` does not flag it.
+
+| arm | best holdout | s/epoch | reserved |
+|---|---|---|---|
+| `native224` (control, small trunk) | 0.8502 | 94 | 8124 MiB |
+| `base224` | **0.8509** | **240** | **15943 MiB** |
+
++0.0007 — an order of magnitude under the floor. The arm existed to re-ask encoder scale with the batch
+handicap removed: earlier `dinov2-base` runs at higher resolution were starved on batch size, so their
+flat readings were confounded. Handicap removed (batch 12, 14.0 GB allocated against a 17 GB gate), the
+axis still reads flat. **Encoder SCALE is not the binding constraint** at this geometry.
+
+The flag landed — the config records `variant: base`, and the 240 s/epoch against small's 94 is the
+bigger trunk actually running, not a base label over a small model. This is a reading about the axis.
+
+**And it cost 2.6× the card for nothing**, which is the throughput half of the result: `native224`'s 94
+s/epoch is the cheapest useful arm in the ledger, and the base trunk buys none of what it charges.
+
+### The pricing, which says something the arm did not
+
+The whole 224 family, priced in one call against `gradeswap_v1` (0.933, the highest board entry whose
+every member still carries a holdout record — the champion's own six are all `_ff` and price nothing):
+
+| candidate | seat value | best swap | nearest |
+|---|---|---|---|
+| `dinov3_v3small_224` | −0.0017 | −0.0020 | **0.7936** |
+| `lora_r8_v3small_224` | −0.0010 | −0.0010 | 0.8159 |
+| `base224` | **+0.0007** | **+0.0008** | 0.8679 |
+| `native224` | +0.0002 | +0.0004 | 0.8946 |
+
+**Distance is monotone ANTICORRELATED with seat value here**, and that is the entry's real finding. The
+most distant member we have ever measured against this roster is also the worst seat in the family.
+
+The mechanism is not subtle: distance is confounded with quality. A weak member is distant *because* its
+predictions are noisy, and noise is maximally uncorrelated with everything. A rank-distance column cannot
+separate orthogonal SIGNAL from orthogonal NOISE, and those two have opposite value. The seated members
+say the same thing from the other side — every one of the seven sits at 0.88–0.92 to its nearest, so the
+best roster this board has produced is built from members that are neither twins nor strangers.
+
+So distance keeps exactly the job `seat_value`'s own docstring gives it and no more: a **twin detector**
+that VETOES a candidate too close to a seated member, which is how the 2026-08-22 split was called
+(`band_span` priced +0.0002 and cost a tick as a near-twin). It never endorses one for being far. The
+usable rule is a band — positive seat value AND nearest inside roughly 0.86–0.92 — and `base224` is the
+only member of this family inside it (knee-bxp2).
+
+**Correcting myself in the open**: forty minutes earlier I had written the 00:00 slot plan around
+`base224` as a *distance* bet, on its 0.8679 being below every seated member's nearest. That premise is
+void. The move survives on the repaired argument — best on both columns at once — but it is a weaker
+claim, and +0.0008 is under the +0.0015 this ruler has ever been shown to resolve.
