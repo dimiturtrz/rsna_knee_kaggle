@@ -3564,3 +3564,52 @@ agreement.
 separate 32-miss column. And the board scores radiologist annotations while we train on report-read
 labels — the line above (2026-08-22) and `interpretations/kneemri/2026-08-11` do not agree on how far
 those two diverge, and this measurement does not settle it.
+
+## 2026-08-25 — `merged_corpus`, and the label table that is not worse but coarser
+
+**`merged_corpus` is FLAT, exactly as it pre-registered.** Peak holdout 0.8545 at epoch 8 of twelve
+(`convergence_check` calls it converged, so this is the recipe's number and not a floor), against the
+`lr4e-5_ws = 0.8525` control that shares its every flag. **+0.0020, inside the 0.0062 floor.** The arm
+file named this as its DEFAULT outcome before the run and says what it is not: neither a refutation nor
+a confirmation of the hidden-test distribution-shift argument. What it buys is a member reading a
+different corpus, which is a diversity axis no seated member has — priced as a seat, not as a score.
+Fold-0 harness verified live: 5,143 studies, 4,234 train, 909 holdout, byte-identical to every prior
+fold-0 row.
+
+**OUR LABEL TABLE IS NOT THE WORST MAINSTREAM TABLE. IT IS THE COARSEST ONE.** Scored by
+`kneemri.evaluation.supervision_gap` against the 58 radiologist-annotated studies:
+
+| table | gold macro AUC | distinct levels | tie-pair mass |
+|---|---|---|---|
+| `flight0234/report_labels_v4hybrid` | 0.8991 | 85 | — |
+| `stevenleehans/llm_labels_v4_blend` | 0.8927 | 85 | 0.173 |
+| **ours, `report_labels_v2`** | **0.8658** | **5** | **0.385** |
+| `lixin73/report_labels_gpt56sol` | 0.8352 | — | — |
+| **`stevenleehans` QUANTISED onto our 5 levels** | **0.8445** | 5 | 0.409 |
+
+That last row is the control that reframes the whole comparison. **At equal resolution our reader beats
+theirs by +0.021.** The 0.027 that first read as supervision quality is a scale artifact: AUC breaks no
+ties, and `Supervision.MEASURED_AGREEMENT`'s five levels tie 38.5% of cell pairs against their 17.3%.
+`v4hybrid` and `v4_blend` share a distinct-count, a min, a max and a mean — they are one reader with a
+`__conf` column added, not two.
+
+Breaking the ties recovers most of it, and **the weight does not matter** — `ours + w*(foreign − 0.5)`
+reads 0.8874 at w = 0.02, 0.05 and 0.10, and 0.8872 at 0.25. That invariance IS the mechanism proof:
+AUC is rank-based, so every small w yields the same ordering and the entire +0.0216 is tie-breaking
+rather than reweighting. Averaging goes slightly further — two readers 0.8885, three 0.8912 — through
+`python -m core.data.labels.table_blend`.
+
+**THREE PUBLIC TABLES SCORE 1.0000 AND THAT IS LEAKAGE.** `yunusgmsoy/report_labels_v5`,
+`gxpixel/train_labels_final` (which ships `gold_58.csv` and an `is_gold` column) and
+`rayanbabur/train_targets_soft` (which ships `gold_benchmark_58.csv`) contain the ruler they are scored
+against. Anyone ranking public tables this way is fooled by them; `table_blend.LEAKED` refuses all three
+by name.
+
+**WHAT THIS DOES NOT SAY.** The three-reader blend at 0.8912 does NOT beat its best single input at
+0.8927, which is what averaging independent readers is supposed to do. 58 studies and ~696 cells, no
+interval computed, so none of these numbers are separated — **do not quote any pair of them as a
+delta**. The claim that survives is narrow and is a TRAINING claim the gold ruler cannot settle: a
+five-level BCE target carries less ordering information into the gradient than an 85-level one. The arm
+that settles it trains the canonical recipe on the blend and **pins `--eval-labels` to
+`report_labels_v2`**, because our fold-0 holdout is scored against v2 itself and an unpinned ruler
+measures disagreement with v2, not supervision quality.

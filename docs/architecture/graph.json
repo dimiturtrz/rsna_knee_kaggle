@@ -692,6 +692,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.table_blend",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.table_blend",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.table_blend",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.targets",
       "target": "core.findings",
       "weight": 1
@@ -5818,6 +5836,48 @@
       "kind": "calls",
       "source": "core.data.labels.severity_boundary.main",
       "target": "core.data.labels.severity_boundary.SeverityBoundary.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.LabelBlend.blended",
+      "target": "core.data.labels.table_blend.LabelBlend.findings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.LabelBlend.blended",
+      "target": "core.data.labels.table_blend.LabelBlend.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.LabelBlend.coverage",
+      "target": "core.data.labels.table_blend.LabelBlend.findings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.table_blend.main",
+      "target": "core.data.labels.table_blend.LabelBlend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.main",
+      "target": "core.data.labels.table_blend.LabelBlend.blended",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.main",
+      "target": "core.data.labels.table_blend.LabelBlend.coverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.main",
+      "target": "core.data.labels.table_blend.LabelBlend.findings",
       "weight": 1
     },
     {
@@ -15453,7 +15513,7 @@
   ],
   "nodes": [
     {
-      "descendants": 48,
+      "descendants": 49,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -15477,7 +15537,7 @@
       "role": null
     },
     {
-      "descendants": 38,
+      "descendants": 39,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -15725,7 +15785,7 @@
       "role": null
     },
     {
-      "descendants": 7,
+      "descendants": 8,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -15776,6 +15836,14 @@
       "descendants": 0,
       "id": "core.data.labels.severity_boundary",
       "label": "severity_boundary",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend",
+      "label": "table_blend",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -17442,6 +17510,14 @@
       "label": "SeverityBoundary",
       "level": "class",
       "parent": "core.data.labels.severity_boundary",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend",
+      "label": "LabelBlend",
+      "level": "class",
+      "parent": "core.data.labels.table_blend",
       "role": "primary"
     },
     {
@@ -21522,6 +21598,78 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.severity_boundary",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend.blended",
+      "label": "blended",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend.findings",
+      "label": "findings",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend._mean",
+      "label": "_mean",
+      "level": "method",
+      "parent": "core.data.labels.table_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend._read",
+      "label": "_read",
+      "level": "method",
+      "parent": "core.data.labels.table_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend._tiebreak",
+      "label": "_tiebreak",
+      "level": "method",
+      "parent": "core.data.labels.table_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.table_blend",
       "role": null
     },
     {
