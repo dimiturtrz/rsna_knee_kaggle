@@ -44,10 +44,28 @@ def _kernel(tmp_path: Path, name: str, body: str, sources: list[str]) -> Path:
 
 
 def test_entries(tmp_path: Path):
-    """Kernel directories are found by their metadata, so a stray directory is not one."""
+    """A directory qualifies on metadata OR on code — the second half is what dark7's silence needed.
+
+    Keying only on the metadata dropped a written-but-unpushed kernel out of the sweep entirely, which
+    reads exactly like a kernel with nothing to say. An empty directory is still not a kernel.
+    """
     _kernel(tmp_path, "kneemri-a", "KernelRun().run()\n", [DINOV3])
     (tmp_path / "notakernel").mkdir()
-    assert [kernel.name for kernel in MountCheck(_package(tmp_path)).entries(tmp_path)] == ["kneemri-a"]
+    (tmp_path / "kneemri-unpushed").mkdir()
+    (tmp_path / "kneemri-unpushed" / "kneemri-unpushed.py").write_text("KernelRun().run()\n", encoding="utf-8")
+    names = [kernel.name for kernel in MountCheck(_package(tmp_path)).entries(tmp_path)]
+    assert names == ["kneemri-a", "kneemri-unpushed"], (
+        "code with no metadata is a kernel the sweep must SAY something about"
+    )
+
+
+def test_verdict_refuses_a_kernel_with_no_metadata(tmp_path: Path):
+    """And what it says is a REFUSAL: `push.sh kernel` cannot push it, and the slot clock is running."""
+    (tmp_path / "kneemri-unpushed").mkdir()
+    (tmp_path / "kneemri-unpushed" / "kneemri-unpushed.py").write_text("KernelRun().run()\n", encoding="utf-8")
+    verdict = MountCheck(_package(tmp_path)).verdict(tmp_path / "kneemri-unpushed")
+    assert verdict.startswith("REFUSED"), "not a skip - a skip is what silence already sounded like"
+    assert "kernel-metadata.json" in verdict
 
 
 def test_verdict(tmp_path: Path):

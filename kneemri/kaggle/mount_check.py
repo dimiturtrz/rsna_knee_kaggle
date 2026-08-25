@@ -44,14 +44,31 @@ class MountCheck:
         self.live = live
 
     def entries(self, kernels: Path) -> list[Path]:
-        """The kernel directories under a root, in a stable order."""
-        return sorted(kernel for kernel in kernels.iterdir() if (kernel / METADATA).is_file())
+        """Every directory under a root that is TRYING to be a kernel, in a stable order.
+
+        A directory qualifies on its metadata OR on holding code, and the second half is the fix for a
+        silence. Keying only on `kernel-metadata.json` made a metadata-less directory vanish from the
+        sweep entirely — `kneemri-dark7` was in none of the ok / skipped / refused buckets and drew no
+        line at all, so a check that had NOT looked at it read exactly like a check that had. That is
+        also not an exotic state: it is what a kernel looks like between being written and being pushed,
+        which is precisely when this check runs. A directory with neither metadata nor code is still not
+        a kernel and is still not this tool's business.
+        """
+        return sorted(
+            kernel
+            for kernel in kernels.iterdir()
+            if kernel.is_dir() and ((kernel / METADATA).is_file() or any(kernel.glob("*.py")))
+        )
 
     def verdict(self, kernel: Path) -> str:
         """One kernel's answer: ok, skipped with the reason, or a refusal naming what is missing."""
         scripts = sorted(kernel.glob("*.py"))
         if not scripts:
             return "skipped - no script to read a member selection from"
+        if not (kernel / METADATA).is_file():
+            # A REFUSAL rather than a skip: `push.sh kernel` cannot push this at all, and the slot clock
+            # is running by the time the CLI says so.
+            return f"REFUSED - has a script and no {METADATA}, so it cannot be pushed"
         script = KernelScript(scripts[0])
         if script.call() is None:
             return "skipped - builds no KernelRun, so its package is not ours to check"
@@ -195,14 +212,27 @@ def main() -> None:
             len(package.members),
             ", ".join(absent),
         )
-    verdicts = {kernel.name: check.verdict(kernel) for kernel in check.entries(arguments.kernels)}
+    entries = check.entries(arguments.kernels)
+    verdicts = {kernel.name: check.verdict(kernel) for kernel in entries}
     for name, verdict in verdicts.items():
         logger.info("  %s: %s", name, verdict)
 
     refused = [name for name, verdict in verdicts.items() if verdict.startswith("REFUSED")]
     skipped = [name for name, verdict in verdicts.items() if verdict.startswith("skipped")]
     passed = len(verdicts) - len(skipped) - len(refused)
-    logger.info("%d ok, %d skipped, %d refused", passed, len(skipped), len(refused))
+    # AGAINST THE DIRECTORY COUNT, not against len(verdicts): the buckets are computed from the verdicts,
+    # so they always sum to the verdicts and can never show a directory that never became one. The number
+    # that CAN is the one the sweep walked past — which is the whole of what dark7's silence looked like.
+    walked = len([entry for entry in arguments.kernels.iterdir() if entry.is_dir()])
+    logger.info(
+        "%d ok, %d skipped, %d refused of %d kernel directories (%d others under %s are not kernels)",
+        passed,
+        len(skipped),
+        len(refused),
+        len(entries),
+        walked - len(entries),
+        arguments.kernels,
+    )
     # PASSED, not len(verdicts): a --kernels path that names nothing, and a root where every kernel
     # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
