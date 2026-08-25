@@ -2577,6 +2577,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.options",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
       "target": "core.data.corpus.slot_reader",
       "weight": 1
     },
@@ -12753,6 +12759,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.options.TrainingOptions",
+      "target": "core.data.corpus.folds.FitPositions",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.options.TrainingOptions",
       "target": "core.data.corpus.slot_reader.Band",
       "weight": 1
     },
@@ -12820,6 +12832,12 @@
       "kind": "construct",
       "source": "kneemri.training.options.TrainingOptions.parser",
       "target": "kneemri.models.model.StudyDesign",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.options.TrainingOptions.positions",
+      "target": "core.data.corpus.folds.FitPositions",
       "weight": 1
     },
     {
@@ -15376,6 +15394,14 @@
       "label": "Sweep",
       "level": "class",
       "parent": "core.data.corpus.fetch_bench",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.folds.FitPositions",
+      "label": "FitPositions",
+      "level": "class",
+      "parent": "core.data.corpus.folds",
       "role": "satellite"
     },
     {
@@ -18024,6 +18050,30 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.corpus.fetch_bench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.folds.FitPositions.caveats",
+      "label": "caveats",
+      "level": "method",
+      "parent": "core.data.corpus.folds.FitPositions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.folds.FitPositions.sampled",
+      "label": "sampled",
+      "level": "method",
+      "parent": "core.data.corpus.folds.FitPositions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.folds.FitPositions.thinned",
+      "label": "thinned",
+      "level": "method",
+      "parent": "core.data.corpus.folds.FitPositions",
       "role": null
     },
     {
@@ -25732,6 +25782,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.positions",
+      "label": "positions",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.reading",
       "label": "reading",
       "level": "method",
@@ -25748,24 +25806,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.options.TrainingOptions.sampled",
-      "label": "sampled",
-      "level": "method",
-      "parent": "kneemri.training.options.TrainingOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.supervision",
       "label": "supervision",
-      "level": "method",
-      "parent": "kneemri.training.options.TrainingOptions",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.options.TrainingOptions.thinned",
-      "label": "thinned",
       "level": "method",
       "parent": "kneemri.training.options.TrainingOptions",
       "role": null

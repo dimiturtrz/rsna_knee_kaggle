@@ -68,16 +68,11 @@ def main() -> None:
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-    training, holdout = arguments.sampled(training, holdout)
-    training = arguments.thinned(training)
-    if arguments.train_fraction < 1.0:
-        logger.warning(
-            "DATA-SCALING RUN: %.2f of the training studies (%d), holdout untouched",
-            arguments.train_fraction,
-            len(training),
-        )
-    if arguments.studies:
-        logger.warning("SMOKE RUN: %d studies — the holdout it reports is not a result", arguments.studies)
+    positions = arguments.positions
+    training, holdout = positions.sampled(training, holdout)
+    training = positions.thinned(training)
+    for caveat in positions.caveats(training):
+        logger.warning(caveat)
     # ONE call, and %s rather than a second positional: logging treats extra positionals as %-format
     # arguments, so `logger.info("target coverage:", {...})` printed the label and silently dropped the
     # dict. Every run so far has logged the words "target coverage:" and none of the coverage.

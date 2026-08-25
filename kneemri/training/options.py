@@ -11,11 +11,9 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
-from numpy.typing import NDArray
-
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
+from core.data.corpus.folds import FitPositions
 from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from core.data.corpus.study_cache import StudyCache
@@ -619,48 +617,12 @@ class TrainingOptions:
             "55% and 21% of its own norm.",
         )
 
-    def sampled(
-        self, training: NDArray[np.int64], holdout: NDArray[np.int64]
-    ) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
-        """The first `--studies` corpus positions, split in the ratio the fold already has.
+    @property
+    def positions(self) -> FitPositions:
+        """How much of the fold's split this run fits on — the smoke cap and the scaling fraction.
 
-        A SMOKE, not an arm: it proves the recipe WIRES — cache mapped, encoder fetched, model built,
-        loss stepped, checkpoint written and reloaded — in a couple of minutes on the card rather than
-        the forty a real fit costs. Every flag combination this repository ships has at some point been
-        discovered miswired only after the GPU had already been held, which is the most expensive place
-        to find out.
-
-        The ratio is kept rather than a second flag added, so a smoke exercises BOTH halves of the loop:
-        a run with a holdout of zero never scores, never selects a best epoch and so never proves the
-        half of `Fitting` that writes the checkpoint. The score it produces is meaningless by
-        construction — a few dozen studies — and `main` says so in the log for the same reason
-        `--fold -1` says it cannot report one.
+        A property for the reason `crop` and `band` give: the two flags have to land as scalars because
+        `parse` builds this dataclass straight from argparse's dest names, and everything downstream
+        wants them as one value. The RULES live beside `ReportFolds`, whose split they cut.
         """
-        if not self.studies:
-            return training, holdout
-        share = len(training) / max(len(training) + len(holdout), 1)
-        kept = min(max(round(self.studies * share), 1), len(training))
-        return training[:kept], holdout[: max(self.studies - kept, 1)]
-
-    def thinned(self, training: NDArray[np.int64]) -> NDArray[np.int64]:
-        """A random `--train-fraction` share of the training studies, holdout untouched.
-
-        DRAWN AT RANDOM AND NOT SLICED OFF THE FRONT, which `sampled` above is free to do because a
-        smoke's score is meaningless anyway. Here it is the whole point: the corpus positions carry the
-        order `ReportFolds` assigned them, so a prefix is a systematically chosen half and any
-        difference it produces could be a property of that half rather than of its size.
-
-        SEEDED BY `--split-seed`, not `--seed`, for the same reason the fold is: which studies exist is
-        a property of the CORPUS and must not move when the model seed does. Two arms at the same
-        fraction therefore fit the same studies, so a scaling curve and a recipe comparison can be run
-        against each other without a second confound.
-
-        The kept positions are re-sorted so that a thinned run reads the cache in the same ascending
-        order a full one does — the loader's access pattern stays sequential rather than becoming a
-        random gather over a 99 GB memory-map.
-        """
-        if self.train_fraction >= 1.0:
-            return training
-        kept = max(round(len(training) * self.train_fraction), 1)
-        drawn = np.random.default_rng(self.split_seed).choice(len(training), size=kept, replace=False)
-        return training[np.sort(drawn)]
+        return FitPositions(studies=self.studies, train_fraction=self.train_fraction, split_seed=self.split_seed)
