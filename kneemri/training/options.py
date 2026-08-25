@@ -8,8 +8,10 @@ and with it `transformers`, to read a dataclass.
 """
 
 import argparse
-from dataclasses import dataclass
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, replace
 from pathlib import Path
+from typing import cast, get_args, get_type_hints
 
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
@@ -26,6 +28,22 @@ from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import Adaptation
+
+NOT_STATED = "None"
+"""How `recipe` spells a field that was never given — `str(None)`, since it stringifies every value.
+
+It is ambiguous for the two `str | None` fields, where the literal text and the absent value have the
+same spelling, and unambiguous for every other field: no int, float, Path or bool stringifies to this."""
+
+_READERS: dict[type, Callable[[str], object]] = {
+    int: int,
+    float: float,
+    str: str,
+    Path: Path,
+    bool: lambda text: text == str(True),
+}
+"""How each field type reads back off the string `recipe` wrote — `bool` being the one that cannot use
+its own constructor, since `bool("False")` is True and would silently arm every switch a run left off."""
 
 
 @dataclass(frozen=True)
@@ -134,6 +152,37 @@ class TrainingOptions:
         `Path`, and because the other consumer is a JSONL line that must survive `json.dumps`.
         """
         return {name: str(value) for name, value in vars(self).items()}
+
+    @classmethod
+    def of_recipe(cls, recipe: Mapping[str, str]) -> "TrainingOptions":
+        """The run those strings describe — the INVERSE of `recipe`, and beside it for that reason.
+
+        A finished run's account of itself is a dict of strings, and every reader that wanted a VALUE
+        out of one has had to re-derive the type: `budget_residuals` needs the slices, batch, encoder
+        and trainable depth of 74 recorded runs to price them against what they measured, and hand-
+        mapping four of ninety fields is how a reader comes to disagree with the trainer about what a
+        recipe said. Going through the dataclass means the two spellings cannot drift — a field added
+        to a run's flags is a field this reads, with no second list to remember.
+
+        A key the dataclass does not have is DROPPED rather than raising: the ledger spans renamed
+        flags (`band` became `band_low`/`band_high`), and a reader that refuses an old recipe outright
+        can price none of the runs that predate the rename. A field the recipe does not mention keeps
+        its default, which is what the run that wrote it got. That last rule is why the defaults are
+        built first and CHANGED, rather than passed as a constructor's keywords: a field whose value is
+        only known at runtime cannot be typed at a call site, and `replace` is the one door the dataclass
+        offers for exactly that.
+        """
+        hints = get_type_hints(cls)
+        stated = {name: cls._value(hints[name], text) for name, text in recipe.items() if name in hints}
+        return replace(cls(), **stated)
+
+    @staticmethod
+    def _value(hint: object, text: str) -> object:
+        """One recipe field as the type its dataclass declares, with `X | None` read as its stated half."""
+        if text == NOT_STATED:
+            return None
+        stated = next((argument for argument in get_args(hint) if argument is not type(None)), hint)
+        return _READERS[cast("type", stated)](text)
 
     @property
     def routing(self) -> Routing:

@@ -1508,6 +1508,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "kneemri.training.device_budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "kneemri.training.options",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.budget_residuals",
+      "target": "kneemri.training.run_setup",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.card_check",
       "target": "core.cli",
       "weight": 1
@@ -8858,6 +8894,90 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.experiments.budget_residuals.PricedRun",
+      "target": "kneemri.experiments.budget_residuals.PricedRun",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.budget_residuals.PricedRun",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.budget_residuals.PricedRun",
+      "target": "kneemri.training.device_budget.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.derived",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.training.options.TrainingOptions.of_recipe",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.training.run_setup.RunSetup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "target": "kneemri.training.run_setup.RunSetup.budget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.refused",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.PricedRun.slack",
+      "target": "kneemri.training.device_budget.DeviceBudget.needed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.budget_residuals.main",
+      "target": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.budget_residuals.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.experiments.card_check.CardHolders",
       "target": "kneemri.experiments.card_check.CardHolders",
       "weight": 1
@@ -14515,7 +14635,7 @@
       "role": null
     },
     {
-      "descendants": 126,
+      "descendants": 127,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -14795,7 +14915,7 @@
       "role": null
     },
     {
-      "descendants": 13,
+      "descendants": 14,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -14838,6 +14958,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_verdict",
       "label": "arm_verdict",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals",
+      "label": "budget_residuals",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -16648,6 +16776,14 @@
       "label": "ArmVerdict",
       "level": "class",
       "parent": "kneemri.experiments.arm_verdict",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun",
+      "label": "PricedRun",
+      "level": "class",
+      "parent": "kneemri.experiments.budget_residuals",
       "role": "satellite"
     },
     {
@@ -22348,6 +22484,62 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.derived",
+      "label": "derived",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.refused",
+      "label": "refused",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.residual",
+      "label": "residual",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.PricedRun.slack",
+      "label": "slack",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals.PricedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.budget_residuals.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.budget_residuals",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.card_check.CardHolders.__init__",
       "label": "__init__",
       "level": "method",
@@ -26380,6 +26572,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions._value",
+      "label": "_value",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.band",
       "label": "band",
       "level": "method",
@@ -26398,6 +26598,14 @@
       "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.crop",
       "label": "crop",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.of_recipe",
+      "label": "of_recipe",
       "level": "method",
       "parent": "kneemri.training.options.TrainingOptions",
       "role": null

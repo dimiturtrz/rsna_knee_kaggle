@@ -42,6 +42,35 @@ def test_recipe():
     assert recipe["labels"] == "a.csv", "a Path as a string: a checkpoint read with weights_only cannot hold one"
 
 
+def test_of_recipe():
+    """A recorded recipe reads back as the run that wrote it — every field, at its declared type.
+
+    Round-tripped against `recipe` rather than checked field by field, for the reason `test_recipe`
+    iterates the dataclass: a flag added to a run must survive both directions without anyone
+    remembering this test. The switches are what make it a real inverse — `bool("False")` is True, so a
+    reader using the type's own constructor would arm every option a run deliberately left off.
+    """
+    options = TrainingOptions(
+        slices=20,
+        batch=6,
+        variant="v3base",
+        one_cycle=True,
+        ema=False,
+        rank_weight=0.5,
+        labels=Path("a.csv"),
+        teacher_targets=None,
+        out=Path("member.pt"),
+    )
+
+    assert TrainingOptions.of_recipe(options.recipe) == options, "every field, both ways"
+    assert TrainingOptions.of_recipe({"band": "0.1 0.9"}) == TrainingOptions(), (
+        "a flag this tree renamed is dropped, not raised on: the ledger spans the rename"
+    )
+    assert TrainingOptions.of_recipe({"slices": "20"}).batch == TrainingOptions().batch, (
+        "and a field the recipe never mentions keeps the default the run that wrote it got"
+    )
+
+
 def test_parse_reads_a_separate_evaluation_ruler(monkeypatch: pytest.MonkeyPatch):
     """The ruler is separable, which is what makes two label arms comparable."""
     monkeypatch.setattr("sys.argv", ["train", "--labels", "a.csv", "--eval-labels", "b.csv"])
