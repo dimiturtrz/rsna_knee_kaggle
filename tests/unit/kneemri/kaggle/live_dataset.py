@@ -3,15 +3,29 @@
 import json
 from pathlib import Path
 
-from kneemri.kaggle.live_dataset import LiveDataset
+import pytest
+
+from kneemri.kaggle.live_dataset import LiveDataset, TruncatedListingError
 
 LISTING = "name,size,creationDate\nv2member.pt,89,2026-08-19 05:30:55\nmanifest.json,12,2026-08-19 05:30:55\n"
+PAGED = LISTING + "Next Page Token: eyJvZmZzZXQiOjIwfQ==\n"
 
 
 def test_members():
     """The listing is CSV with a header, and only the `.pt` rows name members."""
     live = LiveDataset("dimiturnt/kneemri-members", lambda _: LISTING)
     assert live.members() == {"v2member"}, "manifest.json is not a member and the header is not a row"
+
+
+def test_members_refuses_a_paged_listing():
+    """A page-one answer is REFUSED, because a name missing from page one is not a name Kaggle lacks.
+
+    This is the 2026-08-25 failure verbatim: the CLI pages at 20, the members package held 38, and the
+    live check refused nearly every kernel in the tree including one whose members had scored 0.937.
+    """
+    live = LiveDataset("dimiturnt/kneemri-members", lambda _: PAGED)
+    with pytest.raises(TruncatedListingError, match="not a name the dataset lacks"):
+        live.members()
 
 
 def test_identified(tmp_path: Path):

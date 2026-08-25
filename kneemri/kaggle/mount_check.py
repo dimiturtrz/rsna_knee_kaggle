@@ -21,7 +21,7 @@ from kneemri.denominator import Denominator
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
-from kneemri.kaggle.live_dataset import LiveDataset
+from kneemri.kaggle.live_dataset import LiveDataset, TruncatedListingError
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,13 @@ def main() -> None:
     live = None
     if arguments.live:
         identifier = LiveDataset.identified(package.root)
-        live = LiveDataset(identifier).members()
+        try:
+            live = LiveDataset(identifier).members()
+        except TruncatedListingError as truncated:
+            # UNKNOWN, not REFUSED and not a clean pass: a partial listing answers the question wrongly
+            # in BOTH directions, so the only honest report is that the live check did not run.
+            logger.error("live check UNKNOWN - %s", truncated)
+            sys.exit(2)
         logger.info("live %s holds %d members", identifier, len(live))
 
     check = MountCheck(package, live)

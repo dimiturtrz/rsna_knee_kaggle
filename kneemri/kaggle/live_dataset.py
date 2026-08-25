@@ -9,6 +9,16 @@ from kneemri.spawn import Spawn
 
 DATASET_METADATA = "dataset-metadata.json"
 LIVE_TIMEOUT_SECONDS = 120
+LIVE_PAGE_SIZE = 1000
+NEXT_PAGE_MARKER = "Next Page Token"
+
+
+class TruncatedListingError(RuntimeError):
+    """The live listing did not fit in one page, so a missing name proves nothing.
+
+    Raised rather than returned because the failure is indistinguishable from a real absence at the
+    call site, and the whole value of this class is that a missing name means something.
+    """
 
 
 class LiveDataset:
@@ -50,7 +60,15 @@ class LiveDataset:
         """The CLI's own CSV listing, which is the read path that works without a bearer token."""
         # fixed argv, a dataset id from our own metadata, no shell
         done = Spawn().ran(
-            [self.entrypoint(), "datasets", "files", identifier, "--csv"],
+            [
+                self.entrypoint(),
+                "datasets",
+                "files",
+                identifier,
+                "--csv",
+                "--page-size",
+                str(LIVE_PAGE_SIZE),
+            ],
             capture_output=True,
             text=True,
             timeout=LIVE_TIMEOUT_SECONDS,
@@ -59,8 +77,23 @@ class LiveDataset:
         return done.stdout
 
     def members(self) -> set[str]:
-        """Every member identifier the live dataset holds, from the `.pt` filenames it lists."""
+        """Every member identifier the live dataset holds, from the `.pt` filenames it lists.
+
+        REFUSES A PARTIAL ANSWER, which is the failure this method shipped with. The CLI pages at 20
+        files by default; the members package held 38. So on 2026-08-25 the live check compared kernel
+        tuples against page one and refused nearly every kernel in the tree, `allfit` among them, whose
+        members had produced a COMPLETE 0.937 board entry that same day.
+
+        Both directions of that are wrong and the quiet one is worse: a valid kernel refused costs a
+        submission window to diagnose, but a listing that happens to page in the members a bad kernel
+        names passes it silently. A gate trusted in both directions is worse than no gate.
+        """
         rows = self.listing(self.identifier).splitlines()
+        if any(row.startswith(NEXT_PAGE_MARKER) for row in rows):
+            raise TruncatedListingError(
+                f"{self.identifier} listed more than {LIVE_PAGE_SIZE} files, so a name missing from "
+                f"this page is not a name the dataset lacks - raise LIVE_PAGE_SIZE or page the listing"
+            )
         names = (row.split(",", 1)[0].strip() for row in rows[1:] if row.strip())
         return {name.removesuffix(".pt") for name in names if name.endswith(".pt")}
 
