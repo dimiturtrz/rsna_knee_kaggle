@@ -165,6 +165,14 @@ def test_unrecorded(tmp_path: Path):
     """A submission that scored and reached no record — the failure this tool was written for."""
     assert _census(tmp_path).unrecorded(LIVE) == []
     assert _census(tmp_path).unrecorded({**LIVE, "99": 0.938}) == ["99"]
+    assert _census(tmp_path).unrecorded({**LIVE, "99": None}) == [], "still scoring cannot yet be recorded"
+
+
+def test_pending(tmp_path: Path):
+    """The submission in flight: reported so it is not forgotten, and never counted as a defect."""
+    assert _census(tmp_path).pending(LIVE) == []
+    assert _census(tmp_path).pending({**LIVE, "99": None}) == ["99"]
+    assert _census(tmp_path).pending({**LIVE, "99": 0.938}) == [], "a scored orphan is a refusal, not a wait"
 
 
 def test_phantom(tmp_path: Path):
@@ -185,6 +193,7 @@ def test_refusals(tmp_path: Path):
     assert _census(tmp_path).refusals(LIVE) == []
     assert _census(tmp_path).refusals(None) == []
     assert len(_census(tmp_path).refusals({**LIVE, "99": 0.938})) == 1
+    assert _census(tmp_path).refusals({**LIVE, "99": None}) == [], "an entry in flight blocks nothing"
     assert _census(tmp_path).refusals(None) == [], "without a listing the offline rules still pass"
 
 

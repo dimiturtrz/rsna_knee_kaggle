@@ -217,9 +217,19 @@ class BoardCensus:
         return found
 
     def unrecorded(self, live: Mapping[str, float | None]) -> list[str]:
-        """Submissions Kaggle reports that this file has never heard of — the failure that was live."""
+        """Scored submissions this file has never heard of — the failure that was live.
+
+        A submission Kaggle is still scoring carries no board number, so it CANNOT be recorded yet and is
+        not a defect: it belongs to `pending`. Refusing on it would leave this gate red for the forty
+        minutes after every submission, which is how a gate teaches its reader to ignore it.
+        """
         recorded = {row.ref for row in self.rows()}
-        return sorted(ref for ref in live if ref not in recorded)
+        return sorted(ref for ref, score in live.items() if ref not in recorded and score is not None)
+
+    def pending(self, live: Mapping[str, float | None]) -> list[str]:
+        """Submissions still scoring and not yet written down — a reminder to come back, never a refusal."""
+        recorded = {row.ref for row in self.rows()}
+        return sorted(ref for ref, score in live.items() if ref not in recorded and score is None)
 
     def phantom(self, live: Mapping[str, float | None]) -> list[str]:
         """Recorded refs Kaggle does not report — a typo in a ref, or a row for a submission never made."""
@@ -298,6 +308,8 @@ def main() -> None:
         len(census.rows()),
         f"{len(live)} live" if live is not None else "live listing not asked for (--live)",
     )
+    for ref in census.pending(live) if live is not None else []:
+        logger.warning("submission %s is still scoring - record it when it lands", ref)
     for refusal in refusals:
         logger.error("%s", refusal)
     if refusals:
