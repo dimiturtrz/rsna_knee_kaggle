@@ -18,6 +18,18 @@ days, and the kit changed underneath them - fp16 serving, the image budget, over
 that doubled. Only the two 17:45 entries on 2026-08-16 are a same-day matched pair. So a single
 pairwise ratio is a confounded read and only the DISTRIBUTION is worth quoting; and an inversion says
 the ruler and the board disagreed, not that the ruler is wrong about the axis its entry was built on.
+
+ONE MEDIAN IS THE WRONG SHAPE FOR THIS, and the report says so in its own output. The ratio is not
+constant across the record: re-read over only the strongest entries it FALLS, from +1.72 over
+everything to under +1.00 among the entries at the top. Whatever that is - a real saturation, or the
+attenuation you get from dividing a board gap by an offline gap barely wider than the offline noise -
+it decides how far a target is. Pricing an arm against today's champion at the whole-record median
+reports what a holdout point USED to be worth, and the two differ by about a factor of two, which is
+the difference between a goal one arm away and a goal nothing on the queue can reach. So `regimes`
+re-reads the same estimator at floors the record itself supplies, and `report` prints the fall rather
+than a number a reader could quote alone. For PRICING, the local cell is the right one even if the
+saturation is only attenuation: an arm is priced from an OBSERVED offline reading, which carries
+exactly the noise that attenuates the estimate.
 """
 
 import json
@@ -47,6 +59,15 @@ This is the line that decides what an inversion MEANS, so it is not a display de
 separates by less than its own floor is two entries it called equal; the board ordering them either way
 refutes nothing. A pair it separates by more is a claim, and the board reversing THAT is the failure
 that costs a slot.
+"""
+
+
+REGIME_QUANTILES = (0.5, 0.75)
+"""Where to re-read the compression, as fractions through the entries' OWN offline scores.
+
+Not invented levels. The whole point of re-reading is that the ratio moves with the score being priced,
+so the only cut points that are not a thumb on the scale are the ones the record supplies. Two are
+enough to show the direction; more would only invite a reader to quote the smallest cell as a number.
 """
 
 
@@ -193,8 +214,40 @@ class BoardTransfer:
         ratios = [pair.ratio() for pair in self.pairs() if pair.resolved]
         return median(ratios) if ratios else 0.0
 
-    def report(self) -> str:
-        """What the holdout is worth as a selector, in the two numbers that decide a submission."""
+    def floor_at(self, fraction: float) -> float:
+        """The offline score `fraction` of the way up the entries, 0.0 when there are none."""
+        found = self.entries()
+        if not found:
+            return 0.0
+        return found[min(int(fraction * len(found)), len(found) - 1)].offline
+
+    def compression_above(self, floor: float) -> tuple[int, float]:
+        """Resolved pairs sitting ENTIRELY at or above `floor`, counted, and their median ratio.
+
+        `compression` answers what a holdout point has been worth across the whole record. Pricing an
+        arm asks the narrower question - what is it worth HERE, against the entry we would be beating -
+        and those are different numbers as soon as the ratio stops being flat. The count is returned
+        beside the median because the top cell is always the thinnest, and a median of a handful of
+        pairs is a direction rather than a constant.
+        """
+        ratios = [pair.ratio() for pair in self.pairs() if pair.resolved and pair.worse.offline >= floor]
+        return len(ratios), median(ratios) if ratios else 0.0
+
+    def regimes(self) -> list[tuple[float, int, float]]:
+        """The compression re-read at each quantile floor: (floor, resolved pairs, median ratio)."""
+        found = []
+        for fraction in REGIME_QUANTILES:
+            floor = self.floor_at(fraction)
+            count, value = self.compression_above(floor)
+            found.append((floor, count, value))
+        return found
+
+    def report(self, near: float | None = None) -> str:
+        """What the holdout is worth as a selector, in the two numbers that decide a submission.
+
+        `near` is the offline score an arm would be priced AGAINST, and asking for it reads the ratio
+        among the entries that are already there rather than across the whole record.
+        """
         pairs = self.pairs()
         if not pairs:
             return f"{self.record} records no entry carrying both numbers"
@@ -204,7 +257,17 @@ class BoardTransfer:
             f"{len(self.entries())} entries on the {self.scope} scope, {len(pairs)} orderable pairs "
             f"(excluded: {excluded or 'none'}; "
             f"one-sided: {', '.join(self.unmeasured()) or 'none'})",
-            f"compression: median {self.compression():+.2f} board points per holdout point",
+            f"compression: median {self.compression():+.2f} board points per holdout point "
+            f"over the WHOLE record — the wrong number to price an arm with, see below",
+        ]
+        lines += [
+            f"  among entries at or above {floor:.4f}: {count} resolved pairs, median {value:+.2f}"
+            for floor, count, value in self.regimes()
+        ]
+        if near is not None:
+            count, value = self.compression_above(near)
+            lines.append(f"  among entries at or above {near:.4f} (asked for): {count} pairs, median {value:+.2f}")
+        lines += [
             f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
             f"{sum(pair.inverted for pair in pairs if pair.resolved)}/"
             f"{sum(pair.resolved for pair in pairs)} of the pairs the holdout resolved at all "
@@ -229,8 +292,15 @@ def main() -> None:
         help="which denominator to read within. Entries on different scopes are not subtractable, so "
         "each scope is its own reading rather than one mixed ranking.",
     )
+    command.parser.add_argument(
+        "--near",
+        type=float,
+        default=None,
+        help="the offline score an arm would be priced against. The compression is re-read among the "
+        "entries at or above it, because the whole-record median describes a regime we have left.",
+    )
     arguments = command.parsed()
-    logger.info("%s", BoardTransfer(arguments.record, arguments.scope).report())
+    logger.info("%s", BoardTransfer(arguments.record, arguments.scope).report(arguments.near))
 
 
 if __name__ == "__main__":

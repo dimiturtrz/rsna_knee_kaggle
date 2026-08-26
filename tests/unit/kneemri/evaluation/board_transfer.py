@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.evaluation.board_transfer import BoardEntry, BoardPair, BoardTransfer
+from kneemri.evaluation.board_transfer import REGIME_QUANTILES, BoardEntry, BoardPair, BoardTransfer
 
 RECORD = [
     {"note": "a comment line carries no entry and must not be read as one"},
@@ -84,6 +84,32 @@ def test_compression(tmp_path: Path):
     # strong over weak: 0.040 board on 0.0100 holdout = 4.0. close over weak: 0.030 on 0.0130 = 2.31.
     # close over strong is UNRESOLVED at 0.0030 and contributes nothing, though it would read -3.3.
     assert BoardTransfer(_record(tmp_path)).compression() == pytest.approx(3.1538, abs=1e-4)
+
+
+def test_floor_at(tmp_path: Path):
+    """The cut points are the entries' own scores, so no level is invented to make a point."""
+    transfer = BoardTransfer(_record(tmp_path))
+
+    assert transfer.floor_at(0.0) == pytest.approx(0.8500), "lowest entry"
+    assert transfer.floor_at(0.75) == pytest.approx(0.8630), "the strongest of three"
+
+
+def test_compression_above(tmp_path: Path):
+    """Restricting to the top entries drops the pair that spans the whole record."""
+    transfer = BoardTransfer(_record(tmp_path))
+
+    assert transfer.compression_above(0.0) == (2, pytest.approx(3.1538, abs=1e-4)), "both pairs"
+    # Only `close` over `strong` starts at or above 0.8600, and it is UNRESOLVED at 0.0030.
+    assert transfer.compression_above(0.8600) == (0, 0.0), "no resolved pair survives the floor"
+
+
+def test_regimes(tmp_path: Path):
+    """Every floor is reported with its own pair count, because the top cell is always the thinnest."""
+    regimes = BoardTransfer(_record(tmp_path)).regimes()
+
+    assert len(regimes) == len(REGIME_QUANTILES)
+    assert [count for _, count, _ in regimes] == [0, 0], "nothing above the median is resolved here"
+    assert all(floor >= 0.8500 for floor, _, _ in regimes), "floors come from the entries themselves"
 
 
 def test_report(tmp_path: Path):
