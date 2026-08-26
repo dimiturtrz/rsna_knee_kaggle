@@ -2263,3 +2263,31 @@ Rigid views are retired: not "untried", not "inconclusive", measured and inert. 
 levers are member quality and supervision, which is where `blendsix` is pointed.
 
 Offline null by construction — all six seats are `--fold -1`.
+
+**`blendthree_v1` 0.939 — the floor-raise mechanism gets its first direct board test, at half dose, and
+buys nothing.** The champion's six seating with three non-blend seats replaced by their own
+blend-supervised twins (`blend_calib`, `blend_ladder`, `blend_ws`), each refitted on harmonised labels
+and 12 / 0.2–0.8 geometry. Vote (`LogitAverage`), count (6), kit (`8243a95`), serving views and member
+order are `blendseat`'s, untouched — the kernel diff is three lines and each is the same swap. This is
+DOSE 3 of `knee-5z9r`'s dose curve, whose dose 1 is `blendseat_v1` 0.939.
+
+It read **0.939** — not near the champion, *exactly* the champion — landing in the pre-registered
+**0.936–0.939 FLAT** band.
+
+Why that is worth writing down rather than filing as another flat entry: `knee-urvf`'s standing
+prescription is that *"what raises the ensemble is raising the FLOOR of every member, or adding one that
+is strong AND unlike."* Ten entries have now moved count, member identity, fold status, regularisation,
+encoder family, architecture family, the vote rule, serving views and corpus, all inside 0.936–0.939 —
+and this is the first entry to move the **supervision the members were fitted under**, which is the
+first half of that prescription tested directly. At three seats of six it moved the board by 0.000.
+
+That is a lowered prior on dose 6, not a refutation of it, and the band said so before the number: a
+LINEAR dose effect reads flat at the midpoint, and only the endpoint separates "blend supervision does
+nothing" from "three seats is not enough of it".
+
+**The bead's own rule is not fired.** `knee-5z9r` sends this band to dose 6 at slot 5. Slot 5 is held by
+owner directive (`knee-pubw`), and the owner beats the bead: dose 6 waits for a slot on 2026-08-27, and
+is asked for before it is spent. The champion pin is unchanged — a tie does not displace a pin, and does
+not need a slot to defend it.
+
+Offline null by construction — every seat is `--fold -1`.
