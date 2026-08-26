@@ -1,5 +1,5 @@
-{"id": "dimiturnt/kneemri-v3six", "title": "kneemri-v3six",
- "code_file": "kneemri-v3six.py", "language": "python", "kernel_type": "script",
+{"id": "dimiturnt/kneemri-soloseat", "title": "kneemri-soloseat",
+ "code_file": "kneemri-soloseat.py", "language": "python", "kernel_type": "script",
  "is_private": true, "enable_gpu": true, "enable_internet": false,
  "machine_shape": "NvidiaTeslaT4",
  "dataset_sources": ["dimiturnt/kneemri-kit", "dimiturnt/kneemri-members", "dimiturnt/dinov3-hf"],

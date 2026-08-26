@@ -1,42 +1,42 @@
-"""SIX DINOv3-BASE ALL-DATA MEMBERS — the roster rebuilt in another family, not a seat swapped into it.
+"""The champion's anchor member, served ALONE — the only question left that a slot can answer cheaply.
 
-**THE OBJECT SEVEN FLAT ENTRIES LEFT UNTESTED.** dark6, dark7, allfit, lastseat, augseat, v3seat and
-farseat read 0.936-0.937 while member COUNT, member IDENTITY, FOLD STATUS, REGULARISATION, ENCODER
-FAMILY AT ONE SEAT (v3seat, DINOv3-base) and ARCHITECTURE FAMILY OUTSIDE the slice-then-pool trunk
-(farseat, a V-JEPA2 tubelet transformer whose nearest-neighbour agreement is 0.8210 against a seated
-band of 0.8801-0.9143) each moved alone. Adding the most distant available member buys what adding the
-nearest one buys: nothing. That is not a diversity deficit — it says the SIX already determine the
-answer and a seventh vote of any provenance is averaged into a decision that does not depend on it.
+**WHAT THIS IS FOR, AND IT IS NOT A SCORE.** `comp/board.jsonl` holds the count curve as board numbers:
+one member 0.914 (`solo_v4`, 2026-08-17), four 0.924-0.928, five 0.931, six-to-seven 0.936-0.939. So
+ensembling buys this project **+0.025** over its own best single. The competition forum (topic 735304)
+holds five self-reported SINGLE-model scores between 0.915 and 0.942 — rivals' best single model is our
+best six-member ensemble. That one comparison says the gap is MEMBER QUALITY, and every remaining hour
+of card should follow it. Before spending those hours it is worth one slot to ask whether nine days of
+member work moved the single-member number at all, because no offline ruler can answer it: every member
+built since has been `--fold -1`, and an all-data member has no holdout left to score on.
 
-So the untested object is the six themselves. This is `final_fit_six.sh`'s six recipes, verbatim, with
-`--variant v3base` on every one of them.
+**THE MEMBER.** `final_ws_e12` — all 5,143 studies (`--fold -1`), the dense geometry (20 slices,
+0.1-0.9), EMA, twelve epochs, whole-stack with max slice pooling. It is the champion's first-listed
+seat and the most-trained member this package holds. It is NOT chosen for an offline score, because it
+has none; it is chosen because it strictly dominates `solo_v4`'s conditions on data and epochs.
 
-**WHAT ELSE MOVED, NAMED RATHER THAN BURIED.** The slice count: 12, not 20. `v3base_dense` peaks at
-25.38 GB allocated at 20 slices and biohub holds 10.2 GB of this 32.6 GB card by arrangement, so 20 was
-denied while it ran. `band_span` measured the density main effect at BOTH spans (+0.0014 at 0.1-0.9,
-+0.0013 at 0.2-0.8), so what 12 slices forfeits is bounded at +0.0013 — a fifth of the 0.0062 holdout
-noise floor, against a family term this roster exists to measure. Attribution is family + density, and
-density is the small, measured half.
+**WHAT THIS ENTRY CANNOT DO.** `solo_v4` was served by `members=1`, which ranks inside the package
+rather than naming a member, so the 2026-08-17 identity is not recoverable. The comparison is therefore
+"our best single THEN" against "our best single NOW", not a matched member swap. Stated here rather
+than discovered when the number arrives.
 
-One recipe is not a copy. `base_dense_ff` was distinguished by `--variant base` (DINOv2-base); under a
-family swap that axis collapses into the swap and would duplicate `v3_ws_ff`. It is replaced by
-`--slice-pooling attend`, the slice combiner every other member holds at `max`.
+**SERVING IS THE CHAMPION'S, MINUS THE VOTE.** `overlap=False` and the same kit; `LogitAverage` over one
+member is the identity, so no vote rule is passed and none is implied. The only variable against
+`kneemri-blendseat` is COUNT, from six to one.
 
-**NO OFFLINE NUMBER IS REPORTED AND NONE CAN BE.** All six carry `--fold -1` and have seen every one of
-the 909 holdout studies. Any joint score would be a memorisation reading. The board is the only ruler.
+PRE-REGISTRATION, written before the number, against `solo_v4`'s 0.914.
 
-PRE-REGISTRATION, written before the number, against `dark6`'s 0.937.
-
-  * **>= 0.945** — the family of the SIX is the plateau, and the next roster is built in whichever
-    family wins rather than by seating dissenters into this one.
-  * **0.940-0.944** — the family carries but does not close the gap to 0.950. A MIXED six, three of
-    each, is then the arm that prices whether the gain is FAMILY or simply CHANGE.
-  * **0.933-0.939 FLAT** — the expected reading. The plateau does not live in the encoder family at
-    all. The ensemble axis closes in its strong form: neither the marginal seat NOR the whole roster's
-    family moves this board, and every remaining path runs through data or labels.
-  * **<= 0.932** — DINOv3-base does not survive all-data fitting at this depth. The harness is the
-    first suspect, not the family: confirm `--variant v3base` reached the checkpoint config on all six
-    before concluding anything.
+- **0.929 or above** — member quality climbed a full house bar in nine days. The member axis is live,
+  ensembling is the smaller half of our 0.939, and every hour of card goes to better members —
+  `blendsix` (six blend-supervised seats) first, then better label TABLES.
+- **0.920-0.928** — directional. Members improved, and ensembling still carries +0.011 to +0.019 on top.
+  Both axes pay; the card keeps going to members because that is the one with room.
+- **0.915-0.919** — FLAT. Nine days of member work bought nothing the board can see, and our 0.939 is
+  ensembling stacked on a stalled member. The next slot does not go to another member of ours: it goes
+  to reproducing the RECIPE behind a rival 0.94 single (topic 735304), because ours has stopped moving.
+- **0.913 or below** — indicts `--fold -1` itself at serving. An all-data member has no holdout to
+  select on, so nothing stops it drifting past its best epoch, and EMA is the only thing standing in
+  for early stopping. That would implicate FIVE of the champion's six seats, and the first test is
+  `convergence_check` over the all-data arms rather than another submission.
 """
 
 # >>> KERNEL-BOOTSTRAP
@@ -128,14 +128,8 @@ def main() -> None:
 
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
-    chosen = (
-        "v3_calib_ff",
-        "v3_grade_ff",
-        "v3_through_ff",
-        "v3_ws_ff",
-        "v3_attend_ff",
-        "v3_focal_ff",
-    )
+    # Named, not ranked. `solo_v4` used `members=1` and its identity is gone; this one is quotable.
+    chosen = ("final_ws_e12",)
     KernelRun(names=chosen, overlap=False).run()
 
 
