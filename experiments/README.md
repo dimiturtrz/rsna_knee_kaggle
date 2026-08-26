@@ -4047,3 +4047,55 @@ regularisation or data, and `mixup224_long` already tested the first of those.
 **WHAT IT DOES NOT SAY.** Nothing about 336. Both arms live in the 224 cell, which the resolution rows
 above price at ~0.005 below 336 offline and, through `board_transfer`'s +1.82, ~0.009 below on the board.
 224 remains a throughput lever and neither of these numbers is a member.
+
+### Per-label member selection, finally READ — the flat rank-average is the optimum of its own family (2026-08-26)
+
+The metric is the unweighted mean of twelve **independent** per-label AUCs, so the combine that matches
+it is per-label: let each finding choose its own subset of members rather than every label sharing one
+flat rank-average. That is the most metric-aligned ensemble idea available, and until today it had never
+produced a number here — `kneemri/evaluation/label_combine.py` implemented it on 2026-08-20, was cited
+twice as prior art (line 539 above, and the 2026-08-20 interpretation), and **had no `main`**. A library
+with no entrypoint is a claim, not a measurement. It has one now.
+
+Seven fold-0 members (`gradeswap_v1`'s roster), read back from `member_curve`'s prediction store, so the
+encoder never ran — the whole reading cost about a minute of arithmetic and no card:
+
+```
+top- 1 per label:  in-sample 0.8643   split-half 0.8538
+top- 2 per label:  in-sample 0.8708   split-half 0.8637
+top- 3 per label:  in-sample 0.8714   split-half 0.8663
+top- 4 per label:  in-sample 0.8714   split-half 0.8674
+top- 5 per label:  in-sample 0.8710   split-half 0.8686
+top- 6 per label:  in-sample 0.8705   split-half 0.8688
+top- 7 per label:  in-sample 0.8694   split-half 0.8696   (= the flat rank-average)
+```
+
+**Read the split-half column only.** It is monotone increasing in `k` and its maximum is at `k = 7`,
+which *is* the flat rank-average already shipped. Every per-label subset is worse out of sample; the best
+candidate (`k = 3`) is **−0.0033**.
+
+**The control is inside the curve**, which is why this is a verdict rather than a shrug: selecting the
+top `k` per label at `k =` every member *is* the flat average, so candidate and matched baseline are
+estimated by the same estimator on the same studies. Nothing here compares two rulers.
+
+**And the optimism is visible rather than assumed.** In-sample peaks at `k = 3–4` (0.8714), a +0.0020
+"gain" that is entirely the selection choosing its own noise. The columns diverge by **0.0051** at
+`k = 3` — larger than any candidate gain in the table, which is exactly what the module's docstring
+pre-registered: *if the two columns diverge by more than the gain, the gain is the divergence*. Anyone
+running this without the split-half estimator ships a per-label roster and reports +0.002.
+
+The mechanism says why, so this is not merely a null. Twelve choices are fitted on 881 studies with as
+few as 62 Fracture positives; a per-label AUC on 62 positives carries a standard error near 0.04, so the
+ranking it induces is mostly noise, and selecting on it discards real members to chase it. Averaging
+more members *is* the variance reduction — selecting fewer is the opposite of what the small-positive
+labels need.
+
+**What it does not close:** one roster, one fold; and hard SELECTION is not per-label *weighting* that
+shrinks toward the flat average. That variant is untested — though its prior drops here, since the hard
+version's optimum sits exactly at "do not select at all". It also says nothing about per-label
+supervision, refuted separately from the training side (`per_label_loss`, 2026-08-19, above).
+
+This is the eleventh flat-or-negative reading on ensemble construction and the first that is
+metric-aligned by construction, so it strengthens `knee-uj15`'s arithmetic rather than merely agreeing
+with it: the remaining distance is inside one member, and now the most favourable combine rule anyone
+could propose has been measured at the place the ledger already stood.

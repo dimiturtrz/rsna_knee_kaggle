@@ -19,13 +19,26 @@ estimator. Comparing a split-half number against a whole-holdout one would compa
 No GPU: arithmetic over the arrays `HoldoutPredictions.cached` returns.
 """
 
+import logging
+from pathlib import Path
+
 import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
+from core import cli
+from core.data.corpus.folds import ReportFolds
+from core.data.labels.targets import Targets
 from core.findings import TARGETS
+from kneemri.device import VisibleCards
 from kneemri.evaluation.scores import LabelScores
+from kneemri.inference.holdout_predictions import HoldoutPredictions
+from kneemri.inference.member_readings import MemberReadings
+from kneemri.inference.members import Member
+from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.vote import RankAverage
+
+logger = logging.getLogger(__name__)
 
 UNDEFINED = -np.inf
 """Where a label has one class present its AUC is nan, and a nan must sort LAST rather than compare
@@ -128,3 +141,61 @@ class LabelCombine:
     def _finite(value: float) -> float:
         """An undefined AUC, ordered rather than left to the sort's mercy."""
         return UNDEFINED if np.isnan(value) else value
+
+
+def main() -> None:
+    """Read the k curve over members that already have holdout predictions.
+
+    THIS MODULE HAD NO ENTRYPOINT FOR SIX DAYS. It was written on 2026-08-20, cited twice as prior art —
+    once in the ledger and once in an interpretation — and never once produced a number, because a
+    library with no `main` is a claim rather than a measurement. The ledger's own sentence, "a per-label
+    roster is prior art in this repo", was true about the CODE and false about the KNOWLEDGE.
+
+    IT COSTS NO CARD when the members are already on `member_curve`'s prediction store: the arrays are
+    read back by hash, and the encoder runs only for a member the store has never seen. Pass `--refresh`
+    and it will run them, which on a shared card is the expensive mistake this docstring exists to warn
+    about.
+    """
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--checkpoints", type=Path, nargs="+", required=True, help="members sharing ONE split")
+    command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to score on")
+    command.parser.add_argument("--fold", type=int, default=0)
+    command.parser.add_argument("--folds", type=int, default=5)
+    command.parser.add_argument("--split-seed", type=int, default=2026)
+    command.parser.add_argument("--seed", type=int, default=2026, help="the half-split, NOT the fold split")
+    command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
+    command.parser.add_argument("--refresh", action="store_true", help="recompute rather than reuse stored predictions")
+    arguments = command.parsed()
+
+    root = command.rooted(arguments)
+    readings = MemberReadings([Member.from_checkpoint(path) for path in arguments.checkpoints], root.processed())
+
+    # The split comes from the FIRST cache and is reused, so every member is scored on the same studies
+    # in the same order — the same discipline `ruler_check` follows, and for the same reason: a member
+    # read over a differently-ordered study list is compared against the wrong truth rows and returns a
+    # number rather than an error.
+    corpus, identifiers = readings.reference()
+    folds = ReportFolds(arguments.folds, arguments.split_seed)
+    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
+
+    predictions = HoldoutPredictions(VisibleCards().device())
+    store = PredictionCache(
+        root.processed() / "holdout_predictions",
+        [identifiers[position] for position in holdout],
+        predictions.views,
+        refresh=arguments.refresh,
+    )
+
+    per_member = []
+    for member, slab, held in readings.slabs(holdout, identifiers, corpus):
+        window = member.window(held.slices, overlap=arguments.overlap)
+        per_member.append(predictions.cached(member, slab, store, window))
+        logger.info("read %s", member.file.stem)
+
+    for line in LabelCombine(LabelScores()).curve(per_member, truth, arguments.seed):
+        logger.info("%s", line)
+
+
+if __name__ == "__main__":
+    main()
