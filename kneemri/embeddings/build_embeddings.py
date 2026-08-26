@@ -74,6 +74,10 @@ def main() -> None:
         encoder.dim,
         len(corpus.mask[0]),
         StudyDesign(pool=arguments.pool, slice_pooling=arguments.slice_read),
+        # The ENCODER's constants, not ImageNet's. This is a fresh construction with no state dict to
+        # ride in on, so the default was the value — and a trunk pretrained on greyscale radiographs
+        # (RAD-DINO declares 0.5307/0.2583) was being embedded 0.20 std off its own distribution.
+        encoder.normalization,
     )
     model.eval().to(device)
 

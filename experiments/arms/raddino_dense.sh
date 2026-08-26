@@ -45,11 +45,22 @@
 # (1 + 24x24), the correct grid. Against `facebook/dinov2-base`: ZERO of 223 tensors are identical, so
 # every weight moved during radiology pretraining and this is genuinely a different initialisation.
 #
-# NORMALISATION IS SHARED, NOT MATCHED, and that is stated because it is the one preprocessing
-# difference worth naming. This repository applies no ImageNet mean/std anywhere; slices are scaled
-# per study. So RAD-DINO does not see the intensity statistics it was pretrained under — and NEITHER
-# DOES THE CONTROL, which is DINOv2-base under the same pipeline. The mismatch is common to both arms
-# rather than differential, so it cannot explain a gap in either direction.
+# NORMALISATION WAS THE ONE THING THIS FILE GOT WRONG, and the 2026-08-23 run is void because of it.
+# The block here used to read "this repository applies no ImageNet mean/std anywhere; slices are scaled
+# per study", and concluded the mismatch was common to both arms and therefore cancelled. It is not:
+# `StudyModel.forward` HAS always normalised, against buffers that defaulted to the ImageNet constants
+# for every trunk alike. DINOv2-base declares exactly those, so the CONTROL was correct — and RAD-DINO
+# declares 0.5307/0.2583 (greyscale, repeated over three channels), so the treatment was fed inputs
+# 0.20 std off its pretraining distribution with a 12.8% scale error. The one preprocessing difference
+# this file named as shared was in fact DIFFERENTIAL, and pointed against the arm being tested.
+#
+# So this is a COLD RE-RUN, not a retry. `Normalization` is now a per-encoder frozen dataclass and both
+# construction sites read it (`run_setup.model`, `build_embeddings`); the buffers are persistent, so
+# members already on disk keep the constants they were fitted under and only a fresh fit moves. The
+# 0.8137 on the ledger is a reading of the mismatch AND of a process killed at epoch 7 of 12 under
+# `one_cycle` (knee-6477) — two defects, one number, and no claim about radiology pretraining survives
+# either. There is no warm start from that checkpoint: it carries the wrong constants in its own state
+# dict, which is what makes the owner's ban on warm-starting it correct twice over.
 #
 # SUBMITTABLE, as of 2026-08-23 and mid-run. This said "not submittable yet, deferred until this arm
 # says a seat is worth one" and that deferral was the mistake: an unmirrored encoder makes a WINNING
