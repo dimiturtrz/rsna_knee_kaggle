@@ -1,0 +1,70 @@
+# Rival single models, and what the field says the bottleneck is
+
+**Read 2026-08-26 22:11Z** via `python -m kneemri.kaggle.discussion_read --live`, topics 735304 and 735826.
+Costs no submission slot. Theirs, not ours — every number below is self-reported by a competitor and
+unverifiable; treat them as claims with a plausible-lie floor, not as measurements.
+
+## The number that matters
+
+Self-reported SINGLE-model public-board scores, topic 735304:
+
+| claim | resolution | note |
+|---|---|---|
+| 0.942 | 224 px | "0.934 @ 224px. Update: 0.942 with some tweaks, still @ 224px" |
+| 0.938 | — | "single model, single fold" |
+| 0.934 | 224 px | same poster as the 0.942, before tweaks |
+| 0.929 | 224 px | 5-fold, "LLM output labels only" |
+| 0.926 | 336 px | 5-fold, "LLM output labels only" |
+| 0.92  | — | "OOF AUC = LB AUC within noise" |
+| 0.915 | — | DINOv2-based |
+
+**Our best six-member ensemble scores 0.939.** A rival's single model is claimed at 0.942, and two more
+sit at or within noise of our ensemble. Our best single-model board entry (`soloseat`) reads 0.925.
+
+**This localises our gap in MEMBER QUALITY and not in ensembling, for the second time.** Every ensemble
+number we own is measured inside our own pool, so it cannot see this; only the forum can. It is also the
+second independent statement of it — topic 735304 said the same on 2026-08-25 with a 0.915-0.942 spread
+against our then-best single of 0.914.
+
+Two of them volunteer the corollary directly: *"9 days into a competition is a very silly time to be
+wasting efforts refining ensemble models"* and *"Highly doubt the top results are ensembles — look at the
+efficiency LB, many high-scoring submissions have decent run times."* The efficiency board is checkable
+evidence for that claim rather than an assertion, and we have not looked at it.
+
+## What the field says the bottleneck is (topic 735826)
+
+The question was posed as A labels / B preprocessing geometry / C backbone capacity / D validation /
+E other. Nobody argued C. Two independent claims worth keeping:
+
+- **Larger encoder buys nothing.** One competitor froze a `(4407, 6, 9, 224, 224)` uint8 cache and swapped
+  ResNet34 → DINOv2-small with slot attention, holding data and labels fixed: OOF BCE went 0.664 → 0.674,
+  i.e. WORSE. Matches our own `knee-` scaling result (+0.0011) and our v3base/large arms. Backbone size is
+  a closed axis, theirs and ours.
+- **Report labels contradict image labels near the severity boundary.** Filter reports whose effusion
+  sentence carries a small-size qualifier ("small", "minimal", "trace") and the group holds both
+  `Effusion = 0` and `Effusion = 1`; one poster found **two reports with the same English template and the
+  same sentence carrying opposite labels**, and at least one "moderate effusion" report labelled 0. So it
+  is not a threshold at all — it is reader disagreement written into the gold set.
+
+The sharpest consequence stated, and it is one we can act on: **asking an LLM for its confidence is
+measuring its confidence in APPLYING A HEURISTIC TO TEXT, not the uncertainty in the diagnosis.** It will
+be very sure "small effusion" means 0, while the process that chose the word "small" over "moderate" was
+itself noisy. Our calibrated-target arms inherit exactly this defect.
+
+And the diagnostic worth running: **score your label extractor against the 58 gold studies, then score
+your image model against the same 58.** If the image model does not beat its own teacher there is
+modelling headroom; if it beats it by a lot, the labels are the ceiling. We have
+`kneemri/evaluation/annotated_readings.py` and have never run this comparison in that direction.
+
+## What this changes here
+
+Nothing about tonight's authorised slot — `kneemri-resseat` is already argued and already an explicit bet.
+It changes what the next block of card time is worth spending on:
+
+1. The label lane (`knee-pju4`, P0) is not one lever among several. It is the lever the field agrees on,
+   and 27.3% of our supervision cells (14,445 of 52,872) are a constant rather than a read.
+2. The severity boundary is a real, named, reproducible defect with a filter that finds it — see
+   `interpretations/kneemri/2026-08-25_effusion-threshold-ruler.md` and `core/data/labels/severity_boundary.py`.
+3. The efficiency leaderboard is unexamined evidence about whether the leaders ensemble at all.
+
+Not acted on here, and none of it is verified against a primary source we own.

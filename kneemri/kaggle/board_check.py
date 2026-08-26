@@ -6,7 +6,15 @@ every number derived from it: a missing row is not a gap in a document, it is a 
 from a fit that decides which entry gets a slot. On 2026-08-25 the file held 34 of the competition's 58
 submissions. Fifteen scored all-ours entries were absent, including `basedense_v1` — the entry pinned in
 `comp/champion.json` — and `votefit_v1`, the best score this project owns. The compression constant read
-+1.82 against +1.72 once they were entered, and that constant is quoted inside shipped kernels.
++1.82 against +1.72 once they were entered, and that number is quoted inside shipped kernels.
+
+IT IS NOT A CONSTANT, AND THE WHOLE-RECORD MEDIAN IS THE WRONG NUMBER TO PRICE AN ARM WITH.
+`board_transfer` reports the compression as a CURVE that saturates: over the whole record the median is
++1.72 board points per holdout point, but restricted to the regime we now ship in (offline at or above
+0.8661) it is +0.74, and above 0.8679 no pair resolves at all. Every kernel docstring quoting a single
+figure as "the transfer" is quoting the slope of a region it has already left. Read the in-regime line
+of `board_transfer`'s own output, not a number copied out of prose — a stale slope has now been quoted
+wrong three times, which is the same failure this check was written to stop one level down.
 
 THE JOIN IS THE SUBMISSION REF, not a name. Kernel names repeat across entries (`sixfresh` shipped
 twice), prose spells them freely ("sixfresh v2", "rate member displaces sliceattn"), and a heading score

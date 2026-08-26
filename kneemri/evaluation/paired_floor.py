@@ -90,7 +90,7 @@ class PairedFloor:
 
         The two widths this class already prints are both about a DIFFERENCE between arms scored on the
         same studies. A large share of this project's claims are not differences at all: a member's mean
-        set beside a forum post's number, a holdout mean pushed through the +1.82 board transfer, an
+        set beside a forum post's number, a holdout mean pushed through the board transfer, an
         offline mean read against the board score it produced. Those compare an absolute number to
         something measured elsewhere, and the paired floor - the narrowest of the three - is the wrong
         ruler for every one of them.
