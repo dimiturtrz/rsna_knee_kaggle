@@ -2240,3 +2240,26 @@ rather than inferred from a nine-day-old row.
 Caveat kept from the kernel docstring: `solo_v4` was served by `members=1`, which RANKS inside the
 package rather than naming a member, so its identity is unrecoverable. This is "our best single THEN vs
 NOW", not a matched swap.
+
+**`jitterfit_v1` 0.937 — rigid test-time views are neither a lever nor a hazard, and the last serving
+axis closes.** `votefit`'s identical six, served through `SpatialViews(0, -6)`: a rigid view jitter
+applied at inference, with count, roster, vote rule (`LogitAverage`), kit, fold status and per-member
+precision all held. `knee-wnam` called this the last unmeasured serving axis, and it was — every other
+serving variable this board carries has had its own entry.
+
+It read **0.937**, the same digit as `dark6` 0.937 and one tick under `votefit` 0.938 — squarely in its
+own pre-registered **0.935–0.939 FLAT** band. What makes this worth a slot rather than a shrug is that
+the pre-registration was TWO-SIDED and both sides are now refuted by the same number:
+
+- **≥0.940 would have said the members are pose-brittle** — that a small rigid perturbation reveals
+  variance the ensemble could average away. It did not happen. The seats are not pose-sensitive at this
+  amplitude, so nothing is to be gained by averaging over views.
+- **≤0.934 would have said the warp destroys slice-edge information** — that resampling the volume
+  costs signal at the boundaries where a focal finding lives. It did not happen either. The warp is
+  harmless.
+
+A flat reading that kills a hoped-for gain AND clears a suspected hazard is a closed axis, not a null.
+Rigid views are retired: not "untried", not "inconclusive", measured and inert. The remaining board
+levers are member quality and supervision, which is where `blendsix` is pointed.
+
+Offline null by construction — all six seats are `--fold -1`.

@@ -77,6 +77,15 @@ own five arms on that plateau say otherwise: `native224_long` 0.8490 and `mixup2
 336 members at 0.8525 – 0.8598. On our ruler 224 is about 0.005 *worse*, inside the 0.0062 paired floor.
 Flat, not better.
 
+**Corrected 02:28Z.** Twice this sitting I turned that 0.005 into "~0.009 on the board" by multiplying it
+through `board_transfer`. Two things are wrong with that. The constant I used was **+1.82**, read from
+prose; the tool now fits **+1.72** over the complete entry set `board_check` recovered. And the fit is
+built on entries at or below 0.933 — `comp/champion.json` calls it an extrapolation at the top of the
+board, which is where a 0.939 champion lives. The defensible statement is the offline one: 224 is 0.005
+worse on our ruler, inside the floor, and **untested at serving**. It is not shown to be safe there, and
+it is not shown to cost 0.009 either. Three of the four strongest singles on topic 735304 are at 224,
+which is a reason not to close the question, not a reason to reopen it with a card.
+
 What 224 *is* is a **throughput** lever, and a large one: ~91 s an epoch against ~297 – 361 s for a 336
 merged epoch, on an axis where four arms have now read flat against each other. Roughly three times the
 experiments per card-hour on a recipe the resolution is insensitive to. Filed as `knee-1xib`, with its

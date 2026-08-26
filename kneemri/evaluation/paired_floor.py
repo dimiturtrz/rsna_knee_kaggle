@@ -24,11 +24,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import STUDY_RESAMPLES
 from core.data.labels.label_power import LabelPower
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
-from kneemri.evaluation.scores import MIDPOINT, RESAMPLES, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class PairedFloor:
         first: NDArray[np.float64],
         second: NDArray[np.float64],
         targets: NDArray[np.float32],
-        resamples: int = RESAMPLES,
+        resamples: int = STUDY_RESAMPLES,
     ) -> dict[str, float]:
         """Each label's paired 95% interval WIDTH, by bootstrap over the studies both arms scored."""
         interval = self.scores.paired_interval(first, second, targets, resamples)
@@ -83,7 +84,7 @@ class PairedFloor:
         self,
         predictions: NDArray[np.float64],
         targets: NDArray[np.float32],
-        resamples: int = RESAMPLES,
+        resamples: int = STUDY_RESAMPLES,
     ) -> float:
         """The 95% width of ONE arm's absolute mean — the ruler for a claim that has no pair.
 
@@ -115,7 +116,7 @@ class PairedFloor:
         first: NDArray[np.float64],
         second: NDArray[np.float64],
         targets: NDArray[np.float32],
-        resamples: int = RESAMPLES,
+        resamples: int = STUDY_RESAMPLES,
     ) -> dict[str, float]:
         """Log both widths and their ratio per label, and hand back the paired widths."""
         paired = self.paired(first, second, targets, resamples)
@@ -146,7 +147,7 @@ def main() -> None:
     """Measure the paired floor on the published out-of-fold predictions, at two holdout sizes."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, required=True)
-    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    command.parser.add_argument("--resamples", type=int, default=STUDY_RESAMPLES)
     arguments = command.parsed()
 
     root = command.rooted(arguments)

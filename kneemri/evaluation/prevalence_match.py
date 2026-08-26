@@ -31,9 +31,10 @@ import numpy as np
 from jaxtyping import Float
 
 from core import cli
+from core.bootstrap import STUDY_RESAMPLES, STUDY_SEED
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
-from kneemri.evaluation.scores import BOOTSTRAP_SEED, MIDPOINT, RESAMPLES, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.supervision_gap import SupervisionGap
 from kneemri.inference.vote import RankAverage
 
@@ -85,7 +86,7 @@ class MatchedGap:
 class PrevalenceMatch:
     """Each compartment pair's gap, re-measured with the two findings' sample sizes made equal."""
 
-    def __init__(self, scores: LabelScores | None = None, resamples: int = RESAMPLES) -> None:
+    def __init__(self, scores: LabelScores | None = None, resamples: int = STUDY_RESAMPLES) -> None:
         self.scores = scores or LabelScores()
         self.resamples = resamples
 
@@ -121,7 +122,7 @@ class PrevalenceMatch:
         Seeded from the project's one bootstrap seed, so an interval quoted in a bead is the interval
         anyone else recomputes, and so the unit gate's ban on unseeded randomness is honoured.
         """
-        generator = np.random.default_rng(BOOTSTRAP_SEED)
+        generator = np.random.default_rng(STUDY_SEED)
         columns = {name: TARGETS.index(name) for name in (rich, poor)}
         values = {name: predictions[:, column].astype(np.float64) for name, column in columns.items()}
         labels = {name: (truth[:, column] > MIDPOINT).astype(np.int64) for name, column in columns.items()}
@@ -173,7 +174,7 @@ def main() -> None:
     """Re-price the medial-over-lateral gap with the two findings' sample sizes made equal."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table to score against")
-    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    command.parser.add_argument("--resamples", type=int, default=STUDY_RESAMPLES)
     arguments = command.parsed()
 
     root = command.rooted(arguments)

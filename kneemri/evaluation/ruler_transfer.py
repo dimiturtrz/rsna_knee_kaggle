@@ -39,7 +39,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
-from kneemri.evaluation.scores import BOOTSTRAP_SEED, RESAMPLES, LabelScores
+from core.bootstrap import STUDY_RESAMPLES, STUDY_SEED
+from kneemri.evaluation.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ class Transfer:
 class RulerTransfer:
     """Two arms, two rulers, one bootstrap draw shared between them."""
 
-    def __init__(self, scores: LabelScores | None = None, resamples: int = RESAMPLES) -> None:
+    def __init__(self, scores: LabelScores | None = None, resamples: int = STUDY_RESAMPLES) -> None:
         self.scores = scores or LabelScores()
         self.resamples = resamples
 
@@ -97,7 +98,7 @@ class RulerTransfer:
 
         return {size: RankAverage().combine(per_member[:size]) for size in sizes if size <= len(per_member)}
 
-    def weakened(self, arm: NDArray[np.float64], share: float, seed: int = BOOTSTRAP_SEED) -> NDArray[np.float64]:
+    def weakened(self, arm: NDArray[np.float64], share: float, seed: int = STUDY_SEED) -> NDArray[np.float64]:
         """The arm blended toward a permutation of itself — a quality drop of a size we choose.
 
         THE MEMBER LADDER IS TOO SHORT TO READ, which is what the first run of this module measured:
@@ -124,7 +125,7 @@ class RulerTransfer:
         annotated: NDArray[np.float32],
     ) -> Transfer:
         """The gap between two arms, measured against both label sources on the same studies."""
-        generator = np.random.default_rng(BOOTSTRAP_SEED)
+        generator = np.random.default_rng(STUDY_SEED)
         studies = annotated.shape[0]
         drawn_reported: list[float] = []
         drawn_annotated: list[float] = []
@@ -223,7 +224,7 @@ def main() -> None:
     """Score a ladder of published-member arms against both label sources."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, required=True, help="the report-derived table, read raw")
-    command.parser.add_argument("--resamples", type=int, default=RESAMPLES)
+    command.parser.add_argument("--resamples", type=int, default=STUDY_RESAMPLES)
     command.parser.add_argument(
         "--shares", type=float, nargs="*", default=list(SHARES), help="permutation blends, for deltas worth reading"
     )

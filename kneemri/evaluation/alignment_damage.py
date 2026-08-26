@@ -39,18 +39,16 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import StudyBootstrap
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
-from kneemri.evaluation.scores import BOOTSTRAP_SEED, LabelScores
+from kneemri.evaluation.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
 RESAMPLES = 2000
 """Bootstrap draws for the differential's interval. The differential is a difference of four AUCs, so
 it carries more sampling error than any of them and is the one number here that must not be read bare."""
-
-INTERVAL = (2.5, 97.5)
-"""A 95% interval, two-sided, because the prediction is signed but the null is not."""
 
 MIDPOINT = 0.5
 """Graded targets binarise here, matching `LabelScores.per_label` — an AUC needs two classes, and this
@@ -137,19 +135,13 @@ class AlignmentDamage:
         conditional on a boundary that the data chose — narrower than the truth, by exactly the amount
         the boundary's own error contributes.
         """
-        generator = np.random.default_rng(BOOTSTRAP_SEED)
-        studies = targets.shape[0]
-        drawn: list[float] = []
-        for _ in range(resamples):
-            index = generator.integers(0, studies, size=studies)
-            value = self.differential(
+
+        def differential(index: NDArray[np.int64]) -> float:
+            return self.differential(
                 self.by_extent(self.label_gaps(predictions[index], targets[index], self.split(spread[index])))
             )
-            if not np.isnan(value):
-                drawn.append(value)
-        if not drawn:
-            return (float("nan"), float("nan"))
-        return (float(np.percentile(drawn, INTERVAL[0])), float(np.percentile(drawn, INTERVAL[1])))
+
+        return StudyBootstrap(resamples).interval(targets.shape[0], differential)
 
     def report(
         self,

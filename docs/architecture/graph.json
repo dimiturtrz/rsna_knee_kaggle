@@ -801,6 +801,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.alignment_damage",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.alignment_damage",
       "target": "core.cli",
       "weight": 1
     },
@@ -1245,6 +1251,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.paired_floor",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.paired_floor",
       "target": "core.cli",
       "weight": 1
     },
@@ -1276,6 +1288,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.paired_floor",
       "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.prevalence_match",
+      "target": "core.bootstrap",
       "weight": 1
     },
     {
@@ -1413,6 +1431,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ruler_transfer",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ruler_transfer",
       "target": "core.cli",
       "weight": 1
     },
@@ -1492,6 +1516,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.run_comparison",
       "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.scores",
+      "target": "core.bootstrap",
       "weight": 1
     },
     {
@@ -3544,6 +3574,30 @@
       "kind": "references",
       "source": "core.bootstrap.Bootstrap",
       "target": "core.bootstrap.Bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.bootstrap.StudyBootstrap.interval",
+      "target": "core.bootstrap.StudyBootstrap.draws",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.bootstrap.StudyBootstrap.interval",
+      "target": "core.bootstrap.StudyBootstrap.percentiles",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.bootstrap.StudyBootstrap.per_label",
+      "target": "core.bootstrap.StudyBootstrap.draws",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.bootstrap.StudyBootstrap.per_label",
+      "target": "core.bootstrap.StudyBootstrap.percentiles",
       "weight": 1
     },
     {
@@ -6391,6 +6445,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "core.bootstrap.StudyBootstrap.interval",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
       "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.by_extent",
@@ -9097,9 +9163,33 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.scores.LabelScores.mean_interval",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.scores.LabelScores.mean_interval",
+      "target": "core.bootstrap.StudyBootstrap.interval",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.scores.LabelScores.mean_interval",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.scores.LabelScores.paired_interval",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.scores.LabelScores.paired_interval",
+      "target": "core.bootstrap.StudyBootstrap.per_label",
       "weight": 1
     },
     {
@@ -17592,6 +17682,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap",
+      "label": "StudyBootstrap",
+      "level": "class",
+      "parent": "core.bootstrap",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.cli.Command",
       "label": "Command",
       "level": "class",
@@ -20060,6 +20158,46 @@
       "label": "seeded",
       "level": "method",
       "parent": "core.bootstrap.Bootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.bootstrap.StudyBootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap.draws",
+      "label": "draws",
+      "level": "method",
+      "parent": "core.bootstrap.StudyBootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "core.bootstrap.StudyBootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap.per_label",
+      "label": "per_label",
+      "level": "method",
+      "parent": "core.bootstrap.StudyBootstrap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.bootstrap.StudyBootstrap.percentiles",
+      "label": "percentiles",
+      "level": "method",
+      "parent": "core.bootstrap.StudyBootstrap",
       "role": null
     },
     {

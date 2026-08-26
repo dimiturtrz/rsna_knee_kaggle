@@ -13,17 +13,11 @@ is invariant under any strictly increasing map, so such a step could only add a 
 import numpy as np
 from numpy.typing import NDArray
 
+from core.bootstrap import STUDY_RESAMPLES, StudyBootstrap
 from core.findings import TARGETS
 
 MIDPOINT = 0.5
 """Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""
-
-
-RESAMPLES = 1000
-"""Bootstrap draws. Enough that the 2.5th percentile is stable to about a thousandth."""
-
-BOOTSTRAP_SEED = 2026
-"""Fixed, so an interval quoted in a bead is the interval anyone else recomputes."""
 
 
 class LabelScores:
@@ -88,7 +82,7 @@ class LabelScores:
         first: NDArray[np.float64],
         second: NDArray[np.float64],
         targets: NDArray[np.float32],
-        resamples: int = RESAMPLES,
+        resamples: int = STUDY_RESAMPLES,
     ) -> dict[str, tuple[float, float]]:
         """The 95% interval of the per-label DIFFERENCE between two arms, by bootstrap over studies.
 
@@ -106,29 +100,19 @@ class LabelScores:
         Seeded, because an interval that moves between runs cannot settle an argument - and because the
         unit-test gate refuses unseeded randomness, for the same reason.
         """
-        generator = np.random.default_rng(BOOTSTRAP_SEED)
-        studies = targets.shape[0]
-        deltas: dict[str, list[float]] = {target: [] for target in TARGETS}
-        for _ in range(resamples):
-            drawn = generator.integers(0, studies, size=studies)
+
+        def delta(drawn: NDArray[np.int64]) -> dict[str, float]:
             left = self.per_label(first[drawn], targets[drawn])
             right = self.per_label(second[drawn], targets[drawn])
-            for target in TARGETS:
-                difference = right[target] - left[target]
-                if not np.isnan(difference):
-                    deltas[target].append(difference)
-        return {
-            target: (float(np.percentile(values, 2.5)), float(np.percentile(values, 97.5)))
-            if values
-            else (float("nan"), float("nan"))
-            for target, values in deltas.items()
-        }
+            return {target: right[target] - left[target] for target in TARGETS}
+
+        return StudyBootstrap(resamples).per_label(targets.shape[0], delta)
 
     def mean_interval(
         self,
         predictions: NDArray[np.float64],
         targets: NDArray[np.float32],
-        resamples: int = RESAMPLES,
+        resamples: int = STUDY_RESAMPLES,
     ) -> tuple[float, float]:
         """The 95% interval of ONE arm's own mean, by bootstrap over studies.
 
@@ -140,7 +124,7 @@ class LabelScores:
         an absolute number.
 
         WHY THAT MATTERS HERE. Every cross-corpus comparison this project has made reads an absolute
-        mean: a member's 0.8502 against a forum post's 0.942, a holdout number pushed through the +1.82
+        mean: a member's 0.8502 against a forum post's 0.942, a holdout number pushed through the
         board transfer, an ensemble's offline mean set beside its board score. None of those is a paired
         comparison and none of them may use the paired floor - the floor is the wrong ruler for them, and
         it is the narrower one, so using it overstates every such claim. This measures the right one.
@@ -149,17 +133,9 @@ class LabelScores:
         same 909 studies, so resampling labels would treat one sample as twelve. Seeded for the same
         reason `paired_interval` is seeded.
         """
-        generator = np.random.default_rng(BOOTSTRAP_SEED)
-        studies = targets.shape[0]
-        means: list[float] = []
-        for _ in range(resamples):
-            drawn = generator.integers(0, studies, size=studies)
-            drawn_mean = self.mean(predictions[drawn], targets[drawn])
-            if not np.isnan(drawn_mean):
-                means.append(drawn_mean)
-        if not means:
-            return (float("nan"), float("nan"))
-        return (float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5)))
+        return StudyBootstrap(resamples).interval(
+            targets.shape[0], lambda drawn: self.mean(predictions[drawn], targets[drawn])
+        )
 
     def mean(self, predictions: NDArray[np.float64], targets: NDArray[np.float32]) -> float:
         """The competition's score: the unweighted mean over the twelve findings.
