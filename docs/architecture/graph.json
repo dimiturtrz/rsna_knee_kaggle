@@ -6080,6 +6080,18 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.reader_agreement.ReaderAgreement.silence_report",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.errors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_agreement.ReaderAgreement.silence_report",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.silence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.reader_agreement.ReaderAgreement.split",
       "target": "core.data.labels.reader_agreement.ReaderAgreement._resample",
       "weight": 1
@@ -6118,6 +6130,12 @@
       "kind": "calls",
       "source": "core.data.labels.reader_agreement.main",
       "target": "core.data.labels.reader_agreement.ReaderAgreement.signal_report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_agreement.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.silence_report",
       "weight": 1
     },
     {
@@ -22942,6 +22960,22 @@
       "descendants": 0,
       "id": "core.data.labels.reader_agreement.ReaderAgreement.signal_report",
       "label": "signal_report",
+      "level": "method",
+      "parent": "core.data.labels.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_agreement.ReaderAgreement.silence",
+      "label": "silence",
+      "level": "method",
+      "parent": "core.data.labels.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_agreement.ReaderAgreement.silence_report",
+      "label": "silence_report",
       "level": "method",
       "parent": "core.data.labels.reader_agreement.ReaderAgreement",
       "role": null
