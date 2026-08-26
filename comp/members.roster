@@ -394,3 +394,23 @@ v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE famil
 # It costs no slot and no card — the trunk's weights are already mounted at dimiturnt/dinov3-hf/vitb16,
 # and it is converged rather than truncated (12 epochs asked, 12 run, peak before the last).
 merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0.0017, in every best subset
+
+# Added 2026-08-26 05:24Z, the blendsix harvest (knee-4i3m, knee-5z9r). Five all-data twins of five
+# champion seats, identical in every respect EXCEPT the label table they are supervised by:
+# merged_blend_v1.csv instead of report_labels_v2. The supervision change is the only variable, which
+# is why the geometry was harmonised to 12 slices / 0.2-0.8 span across all five rather than each twin
+# keeping its parent's.
+#
+# NONE OF THEM CAN EVER BE SCORED OFFLINE. They are --fold -1, so they have seen every holdout study;
+# the ledger will carry no mean for them and the board is their only ruler. That is deliberate — a
+# fold-0 twin would have measured the supervision on a ruler (report_labels_v2) that is one of the two
+# tables under test, which is the defect `table_blend` documents under "TRAINING ON THE RESULT NEEDS
+# --eval-labels".
+#
+# `table_separation` (2026-08-26) settled the premise with no card: merged_blend reads 0.8912 against
+# the 58 radiologist annotations and report_labels_v2 reads 0.8658, separated at +0.0254
+# [+0.0098, +0.0428]. So these five are supervised by a resolvably better reader. What that is worth as
+# SUPERVISION is exactly what dose 3 and dose 6 are being spent to find out.
+blend_ws.pt                 # twin of lr4e-5_ws_ff — dose-3 seat
+blend_calib.pt              # twin of calib_span_ff — dose-3 seat
+blend_ladder.pt             # twin of grade_ladder_ff — dose-3 seat
