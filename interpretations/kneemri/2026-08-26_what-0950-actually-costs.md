@@ -275,3 +275,47 @@ read 0.939 dead flat. That is the nearest precedent to `calibsix` and it returne
 size and not kind — blend supervision measured +0.0034 at three seats, against +0.0061 at five here — and
 if `calibsix` also reads flat, the uniform-lift route is refuted at the operating point and the ensemble
 axis is closed for good rather than only for marginal members.
+
+### Correction to the correction, 2026-08-26 16:0xZ — 92% was my own denominator error, and the truth is above 100%
+
+The table above quotes "mean solo delta of the same flag at the same corners +0.0061". That is not a
+mean. It is the **dense pair alone**, generalised to three pairs by nobody but me, and it is the
+`CLAUDE.md` denominator failure in its purest form: I averaged over the corners that agreed with the
+story. The ledger caught it — `experiments/README.md:318` records `calib_span` at **−0.0020 against
+`band_span`**, a negative the "+0.0061" silently absorbed.
+
+All six members re-scored one at a time over the same 909 shared studies:
+
+| corner | calibrated | uncalibrated | Δ |
+|---|---|---|---|
+| dense, hold | 0.8634 | 0.8573 | +0.0061 |
+| span, hold | 0.8565 | 0.8493 | +0.0072 |
+| span, no hold | 0.8545 | 0.8565 | **−0.0020** |
+| | | **mean** | **+0.0038** |
+
+And the ensembles, on two nested pools:
+
+| pool | calibrated | uncalibrated | Δ ensemble | Δ mean solo | pass-through |
+|---|---|---|---|---|---|
+| trio | 0.8685 | 0.8629 | +0.0056 | +0.0038 | **147%** |
+| hold-only pair | 0.8679 | 0.8595 | **+0.0084** | +0.00665 | **126%** |
+
+**The pass-through is above one, on both pools.** That changes the mechanism claim rather than just the
+digit. A pure error-term lift predicts ~100% and I predicted 92%; measuring 126–147% means the
+calibrated members also disagree with each other *more* than their uncalibrated twins do, so
+`ambiguity` moved the helpful way instead of standing still. Calibration buys diversity as a side
+effect. That is a better result than the one I claimed, arrived at by being wrong about the arithmetic.
+
+**What it does not buy is confidence.** Every solo delta above is inside the 0.0062 three-seed floor,
+the negative one included; only the +0.0084 pair clears it. And the confound is unflattering: both
+positive pairs carry `--hold-annotations`, the negative one does not, and **`calibsix`'s five seats
+carry none**. `calib_span` and `calib_span_hold` sit on the identical corner and differ in nothing but
+that flag, yet their calibration deltas are −0.0020 and +0.0072. At n=1 per cell a 0.0092 spread
+between two single-run differences is what scatter produces, and the ledger's own `calibrated_targets`
+row is +0.0038 with no hold at the 0.2–0.8 corner — so no-hold is not uniformly negative. But it is
+named as risk 4 in the arm, and if `calibsix` reads flat it is the first suspect, ahead of the
+mechanism.
+
+**Repriced, deliberately at the low end** (pass-through 1.0, not 1.3): 5 × 0.0038 = +0.0038 offline,
+×1.72 = +0.0065 board, **0.939 → 0.946**, with 0.949 the optimistic end. The earlier +0.0047/0.947 was
+right by coincidence — the mean solo fell and the pass-through rose by almost the same factor.

@@ -10,23 +10,38 @@
 #
 #     ensemble error  =  mean member error  −  ambiguity
 #
-# A new member moves BOTH terms and they cancel. Lifting EVERY seat with the same flag moves only the
-# first. That second quantity has now been measured too, on three matched pairs, at zero card cost:
+# A new member moves BOTH terms and they cancel. Lifting EVERY seat with the same flag moves the first
+# term for certain, and may or may not touch the second. That is measurable from records already on
+# disk, at zero card cost, and it was measured — twice, on two nested pools, all six members joined over
+# the same 909 shared studies:
 #
-#     calibrated trio  (calib_dense_hold + calib_span_hold + calib_span)   0.8685
-#     uncalibrated twins(band_dense_hold + band_span_hold  + band_span )   0.8629
-#                                                               delta     +0.0056
-#     mean solo delta of the same flag at the same corners                +0.0061
+#     SOLO, the six members one at a time
+#       calib_dense_hold 0.8634   band_dense_hold 0.8573     +0.0061
+#       calib_span_hold  0.8565   band_span_hold  0.8493     +0.0072
+#       calib_span       0.8545   band_span       0.8565     -0.0020
+#                                            MEAN OF THREE   +0.0038
 #
-# **A uniform lift passes through at 92%, against 23% for a marginal member.** Both numbers are true and
-# they do not contradict: the trio and its twins share the same ambiguity, so only the error term moved.
+#     ENSEMBLED, the same members pooled by the shipped rank-average rule
+#       calibrated trio 0.8685   uncalibrated twins 0.8629   +0.0056   against mean solo +0.0038
+#       calibrated pair 0.8679   uncalibrated pair  0.8595   +0.0084   against mean solo +0.00665
 #
-# THE PREDICTION, stated as arithmetic before the run:
-#     five of six seats × 0.92 pass-through × +0.0061 per seat = +0.0047 offline
-#     × board_transfer +1.72 (read live 2026-08-26 15:24Z, 21 entries / 171 pairs) = +0.0081 board
-#     champion `blendseat` 0.939 → **0.947**
-# Not 0.950 on its own. `margin_calib`'s seat (`knee-myl0`, +0.0018 offline ≈ +0.003 board if it lands)
-# is the arm that would carry the rest, and it runs first for that reason.
+# **The pass-through is ABOVE one — 147% on the trio and 126% on the pair.** That is not the 92% a pure
+# error-term lift predicts, and the excess is the finding: calibration is buying AMBIGUITY as well as
+# quality. The calibrated members disagree with each other more than their uncalibrated twins do, so the
+# decomposition's second term moves the helpful way instead of not moving at all.
+#
+# THE PREDICTION, stated as arithmetic before the run, and deliberately taken at the LOW end:
+#     five of six seats × 1.0 pass-through (not 1.3) × +0.0038 per seat = +0.0038 offline
+#     × board_transfer +1.72 (read live 2026-08-26 15:24Z, 21 entries / 171 pairs) = +0.0065 board
+#     champion `blendseat` 0.939 → **0.946**, with 0.949 the optimistic end if 1.3 holds at five seats
+# Not 0.950 on its own under either. `margin_calib`'s seat (`knee-myl0`, +0.0018 offline ≈ +0.003 board
+# if it lands) is the arm that would carry the rest, and it runs first for that reason.
+#
+# THE HONEST SIZE OF ALL OF THIS. Every SOLO delta above is inside the 0.0062 three-seed floor, the
+# negative one included, so no single corner's sign is resolved and the per-corner spread is scatter
+# rather than structure. Only the +0.0084 pair clears the floor. What licenses the arm is not any one
+# pair but that the pooled solo estimate and both ensemble readings agree in sign across two nested
+# pools — and it is licensed as a DIRECTIONAL bet on idle card, never as a result.
 #
 # WHY FIVE AND NOT SIX. `calib_span_ff` already carries the flag; it is the sixth seat and is reused
 # unchanged. Every other seat below is its settled arm copied VERBATIM plus exactly one flag, which is
@@ -56,13 +71,25 @@
 #      and the ensemble axis closes for good rather than just for marginal members.
 #   3. It costs a submission slot to read at all, and slot 5 of 2026-08-26 is HELD by owner directive
 #      (`knee-pubw`). This ships no earlier than 2026-08-27, and it is ASKED FOR before it is spent.
+#   4. **THE CONFOUND, AND IT POINTS AT THIS ARM.** Of the three matched pairs, the two that read
+#      POSITIVE both carry `--hold-annotations` and the one that reads NEGATIVE does not. The five seats
+#      below carry none. `calib_span` and `calib_span_hold` sit on the IDENTICAL corner — 12 slices,
+#      0.1-0.9 — and differ in nothing else, yet their calibration deltas are -0.0020 and +0.0072, a
+#      0.0092 spread on one flag. Two readings against it: the ledger's own `calibrated_targets` row is
+#      +0.0038 against `wsfold0_e6` with no hold at the 0.2-0.8 corner, so no-hold is not uniformly
+#      negative; and at n=1 per cell, with each delta a difference of single runs, a 0.0092 spread
+#      between two deltas is comfortably inside what scatter produces. The arm stays single-flag rather
+#      than acquiring `--hold-annotations` too, because that would be the reassembly this file's own
+#      rule forbids. But if `calibsix` reads FLAT, this confound is the first suspect and the mechanism
+#      is the second — the honest follow-up is one matched no-hold pair, not a verdict.
 #
 # COST: five twelve-epoch fits at 336 px. At `final_fit`'s measured ~425 s/epoch over 4,406 studies that
 # is 60 epochs, about **7.1 h of card**, and ZERO submission slots to produce. Overnight card that would
 # otherwise idle. The 0.2-0.8 seats are the two to drop first if the card becomes contended — they are
 # the ones whose transfer is least evidenced (risk 1).
 #
-# deliberate: --calibrated-targets (the single flag, added to five seats; measured +0.0061 at this corner)
+# deliberate: --calibrated-targets (the single flag, added to five seats; pooled solo +0.0038 over three
+# deliberate: matched pairs, ensembled +0.0056 / +0.0084 on two nested pools)
 # deliberate: --fold -1 --ema (inherited verbatim from final_fit_six.sh, not chosen here — with no
 # deliberate: best-epoch selection left, ema is the deliverable's only variance control)
 # deliberate: --scheme merged (seat five's own corpus, copied from merged_blend.sh)
