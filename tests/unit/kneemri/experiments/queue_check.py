@@ -24,6 +24,7 @@ def test_of(tmp_path: Path):
     assert watch.marker == MARKER, "the marker is quoted in the header and is what liveness is crossed on"
     assert watch.arms == ("experiments/arms/v3base_band.sh", "experiments/arms/aprior_dense.sh")
     assert watch.started == 1
+    assert watch.watched == "/d/watch.log", "the polled path, which nothing read until it was wrong once"
 
 
 def test_of_not_a_watcher(tmp_path: Path):
@@ -82,6 +83,35 @@ def test_doubled(tmp_path: Path):
     _log(tmp_path, "after_chain.log", MARKER, ARMS)
     assert QueuedArms(tmp_path, LIVE).doubled() == [], "one watcher per arm is the healthy queue"
     assert QueuedArms(tmp_path, LIVE + LIVE).doubled() == ARMS.split(), "both arms would start twice"
+
+
+def _armed_on(directory: Path, watched: Path | str) -> None:
+    header = f"waiting for '{MARKER}' in {watched} before running: {ARMS}"
+    (directory / "after_chain.log").write_text(header, encoding="utf-8")
+
+
+def test_misarmed(tmp_path: Path):
+    """A live, singular watcher polling a path that will never appear — the 2026-08-26 hole.
+
+    The marker was right and only the path was wrong (arm full logs carry the seed), so `alive` said one
+    live process carried it and nothing was doubled or stranded. Every verdict was green while the queue
+    was dead, and the cost would have been the seven hours it gated.
+    """
+    producing = LIVE + "User 1 1 ? bash experiments/arms/aug_long.sh\n"
+    _armed_on(tmp_path, "/d/aug_long.full.log")
+    assert QueuedArms(tmp_path, producing).misarmed() == ["after_chain.log -> /d/aug_long.full.log"]
+    assert QueuedArms(tmp_path, producing).faults()[0].startswith("MISARMED:")
+
+    real = tmp_path / "aug_long_s2026.full.log"
+    real.write_text("epoch 1", encoding="utf-8")
+    _armed_on(tmp_path, real)
+    assert QueuedArms(tmp_path, producing).misarmed() == [], "the path the producer actually writes is fine"
+
+
+def test_misarmed_stays_silent_before_the_producer_starts(tmp_path: Path):
+    """An absent file is the NORMAL case for a watcher armed ahead of its arm — blocking there is noise."""
+    _armed_on(tmp_path, "/d/aug_long.full.log")
+    assert QueuedArms(tmp_path, LIVE).misarmed() == [], "nothing is writing that path yet, so nothing is wrong"
 
 
 def test_faults(tmp_path: Path):

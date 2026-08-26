@@ -21,6 +21,16 @@ marker, both owing `band_dense_llrd.sh`, and this check called the queue healthy
 by the marker alone, so a chain and the watcher it had superseded vouched for each other. Both failures
 are silent in the same way, and both are read off the same crossing, so both live here.
 
+MEASURED 2026-08-26, a third hole that both of the above read as healthy: a watcher armed on a log path
+that will never exist. `blendsix_smoke.sh` was gated on `ARM DONE nocycle224_long` in
+`…/nocycle224_long.full.log`, but an arm's full log carries the SEED — the real file is
+`nocycle224_long_s2026.full.log`. The marker was right and only the path was wrong, and `after.sh` polls
+a file, so a path that never appears is indistinguishable from a producer still working: the watcher
+printed its usual `waiting for` line, one live process carried it, and this check reported OK. It would
+have cost `blendsix`'s seven hours. The crossing that catches it is the same one: the watched file is
+MISSING while the arm named in the marker is ON THE CARD. A producer that has not started yet is the
+legitimate case and stays silent, which is exactly what separates the two.
+
 The process listing is passed in rather than read inside, so the crossing itself is a pure function of
 two strings and the unit test needs no process to kill.
 """
@@ -38,6 +48,7 @@ WATCHER_GLOB = "after_*.log"
 WATCHER = "after.sh"
 ARM_SUFFIX = ".sh"
 HEADER = "before running: "
+WATCHED = "' in "
 STARTED = "=== "
 
 DONE = "ARM DONE "
@@ -60,6 +71,12 @@ class Watch:
 
     log: str
     marker: str
+    watched: str
+    """The file `after.sh` polls for the marker — the one thing nothing used to read.
+
+    Split off the header's LAST `' in `, not its first: the marker is quoted and a marker containing
+    that string would otherwise take the path with it.
+    """
     arms: tuple[str, ...]
     started: int
     """How many arms this watcher has announced — a chain runs them in order, so this is a position."""
@@ -75,11 +92,12 @@ class Watch:
         if not lines or HEADER not in lines[0]:
             return None
         marker = lines[0].split("'")[1] if "'" in lines[0] else ""
-        entries = lines[0].split(HEADER, 1)[1].split()
+        head, _, tail = lines[0].partition(HEADER)
         return cls(
             log=path.name,
             marker=marker,
-            arms=tuple(entry for entry in entries if entry.endswith(ARM_SUFFIX)),
+            watched=head.rsplit(WATCHED, 1)[1].strip() if WATCHED in head else "",
+            arms=tuple(entry for entry in tail.split() if entry.endswith(ARM_SUFFIX)),
             started=sum(1 for line in lines if line.startswith(STARTED)),
         )
 
@@ -147,6 +165,33 @@ class QueuedArms:
         owed = dict.fromkeys(arm for watch in self.watches() for arm in watch.waiting())
         return [arm for arm in owed if sum(1 for line in self.watchers() if arm in line) > 1]
 
+    def misarmed(self) -> list[str]:
+        """Live watchers polling a file that does not exist while their producer is already running.
+
+        MEASURED 2026-08-26. `after.sh` waits by GREPPING A FILE, so a path that will never appear and a
+        path whose writer has not reached it are the same observation — the watcher prints its usual
+        `waiting for` line either way, `alive` says one live process carries it, and nothing is doubled
+        or stranded. Every verdict this check had was green while the queue was dead.
+
+        THE CROSSING IS WITH THE PRODUCER, and that is what makes it safe to BLOCK on. A watcher armed
+        before its producer starts is the normal case and its file is legitimately absent, so silence is
+        correct there. But if the arm named in the marker is ON THE CARD and has still written nothing at
+        that path, the path is wrong — a running arm writes its full log from its first line.
+
+        The producer is looked for OUTSIDE the watcher lines, because every watcher carries its own
+        marker in argv and would otherwise vouch for itself.
+        """
+        return [
+            f"{watch.log} -> {watch.watched}"
+            for watch in self.watches()
+            if watch.watched and self.alive(watch) and not Path(watch.watched).is_file() and self._producing(watch)
+        ]
+
+    def _producing(self, watch: Watch) -> bool:
+        """Whether the arm this watch waits on is itself live, read off any line that is not a watcher."""
+        producer = watch.marker.removeprefix(DONE)
+        return any(producer in line for line in self.running.splitlines() if WATCHER not in line)
+
     def landed(self, arm: str) -> bool:
         """Whether this arm's own log already carries its completion marker — the work is DONE.
 
@@ -201,11 +246,17 @@ class QueuedArms:
     def faults(self) -> list[str]:
         """Every way this queue is wrong, or empty when it is right.
 
-        The two failures are opposite and both are silent: an arm NO live watcher will start, and an arm
-        SEVERAL of them will. One wastes a card that is idle, the other oversubscribes a card that is
-        not.
+        The first two failures are opposite and both are silent: an arm NO live watcher will start, and
+        an arm SEVERAL of them will. One wastes a card that is idle, the other oversubscribes a card that
+        is not. The third is a watcher that is live, singular and pointed at nothing.
         """
         found = []
+        if misarmed := self.misarmed():
+            found.append(
+                f"MISARMED: {' '.join(misarmed)} — the watched file does not exist while the arm named in "
+                "the marker is running, so this watcher will wait forever; re-arm it on the real full log "
+                "(arm full logs carry the SEED, `<arm>_s<seed>.full.log`)"
+            )
         if doubled := self.doubled():
             found.append(
                 f"DOUBLE-QUEUED: {' '.join(doubled)} — more than one live after.sh will start each of "
