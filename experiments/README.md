@@ -4438,3 +4438,55 @@ entry would be all-calibrated — the matched case these pools measured. Priced 
 `board_transfer` +1.72 = +0.0065 board, **0.939 → 0.946**, with 0.949 the optimistic end if the
 ambiguity term scales to six seats. Seven hours of otherwise-idle overnight card, ZERO submission slots
 to produce, one to read. Chained behind `margin_calib`.
+
+## 2026-08-26 — ambiguity is mostly member WEAKNESS, and that closes the "pick a distant member" lane
+
+`knee-qij2`, pre-registered before the numbers, zero card, zero slots. Twenty members paired against
+anchor `band_dense` (solo 0.8578) over 909 shared studies, `ambiguity = pair − mean(solo_anchor, solo_member)`.
+Five carry no holdout record and are unusable here — `report03`, `report10`, `max12`, `max20`,
+`dinov3_v3small`; their pair line reads 0.8578, the anchor alone.
+
+RAW, by axis of difference:
+
+| axis | n | mean ambiguity |
+|---|---|---|
+| ARCHITECTURE | 5 | **+0.0121** |
+| LABEL | 4 | +0.0079 |
+| GEOMETRY | 6 | +0.0071 |
+
+Read raw that fires the pre-registered branch "architecture is the largest group -> the architecture axis
+was closed on the wrong ruler". **It is a confound, not an axis, and the scatter says so out loud.**
+Regressing ambiguity on the member's own solo across all fifteen: slope **-0.179**, **r-squared 0.875**.
+Seven eighths of the variance in this ruler is HOW WEAK THE SECOND MEMBER IS. The architecture group *is*
+the weak group — `cnx_dense` 0.7927, `raddino_dense` 0.8141, `vjepa_warm` 0.8337 are the three worst
+members in the set and they hold the three largest ambiguities, in that order.
+
+Residuals once the quality trend is removed:
+
+| axis | residual ambiguity |
+|---|---|
+| LABEL | +0.00049 |
+| ARCHITECTURE | -0.00004 |
+| GEOMETRY | -0.00030 |
+
+LABEL over GEOMETRY is **+0.00079**, half the pre-registered 0.0015 bar, and one of the four label members
+(`severity_weight`, -0.0025) runs hard the other way. Pre-registration says DIRECTIONAL ONLY. The axis is
+not real at this resolution and nothing is planned around it.
+
+**THE GENERAL RESULT, and it is a negative worth keeping.** Ambiguity is not a currency that can be shopped
+for. `ensemble error = mean member error − ambiguity` is an identity, and the second term is mostly a
+restatement of the first — a worse member disagrees more because it is wrong more. That is why every
+buy-the-distant-member rule this project has tried has failed on the board: `knee-bxp2`'s distance column
+(anticorrelated with seat value inside a family), `dissent_seat`'s negative-correlation loss (-0.0008, the
+most redundant candidate we hold). All of them were buying error and reading it as diversity. It also
+explains the +0.0018 seat that `margin_seat` took at 0.0109 WORSE solo without that being good news.
+
+**IT STRENGTHENS `calibsix` RATHER THAN WEAKENING IT.** Calibrated members are BETTER solo (+0.0038), so
+this fit predicts their ambiguity should FALL by 0.179 x 0.0038 = **-0.00067**. It ROSE **+0.00184**.
+`--calibrated-targets` is the one lever measured here that buys disagreement while moving quality the same
+way — quality-adjusted its ambiguity gain is **+0.0025**, not +0.0018. Caveat: the slope is fitted on
+`band_dense` pairs and the calibrated trio is a different pool, so cross-applying it is approximate.
+
+LIMIT, as pre-registered: all fifteen pairs share one anchor. These are fifteen readings of `band_dense`'s
+neighbourhood, not of the corpus. A second anchor costs nothing and is the honest follow-up if this is
+ever leaned on harder than it is here.
