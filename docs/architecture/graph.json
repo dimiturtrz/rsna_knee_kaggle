@@ -7208,6 +7208,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.compression_above",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.dropped",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer._rows",
       "weight": 1
@@ -7232,6 +7238,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.floor_at",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.inversions",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
       "weight": 1
@@ -7250,8 +7262,26 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.regimes",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.compression_above",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.regimes",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.floor_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.compression",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.compression_above",
       "weight": 1
     },
     {
@@ -7276,6 +7306,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.regimes",
       "weight": 1
     },
     {
@@ -23944,6 +23980,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.compression_above",
+      "label": "compression_above",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.dropped",
       "label": "dropped",
       "level": "method",
@@ -23960,6 +24004,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.floor_at",
+      "label": "floor_at",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.inversions",
       "label": "inversions",
       "level": "method",
@@ -23970,6 +24022,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
       "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.regimes",
+      "label": "regimes",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
       "role": null
