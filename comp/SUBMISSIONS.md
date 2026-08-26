@@ -2291,3 +2291,38 @@ is asked for before it is spent. The champion pin is unchanged — a tie does no
 not need a slot to defend it.
 
 Offline null by construction — every seat is `--fold -1`.
+
+## `resseat` — the decode-path bet, slot 5 of 2026-08-26 (22:21Z, ref 55803955)
+
+The champion's six with **one seat moved**: `lr4e-5_ws_ff` → `res392_ws_s2026`. Nothing else. Every
+champion seat decodes at **336 px**, and 392 px is the only resolution the champion does not contain,
+so the axis being moved is the **decode path** — the one diversity axis with a *measured* board
+transfer. `knee-nas5` collapsed three members onto a single pixel group and paid 0.0059 offline for
+0.014 on the board: a 2.4× compression, against the whole-record `board_transfer` median of +1.72.
+
+Quality-neutral by construction: the outgoing twin reads 0.8525 solo, the entering one 0.8523. Count
+held at six on board evidence — every 7-member entry we own caps at 0.937 (five of them), and both
+0.939 entries are 6-member. The single fold-0 seat is `merged_blend_s2026`, which was already fold-0 in
+both 0.939 entries, so no new fold-0 penalty is introduced.
+
+**The offline ruler is blind here, and this entry says so first.** Eleven seating variations spanned
+0.8687–0.8705 against a 0.0062 three-seed noise floor — the ruler cannot separate the field. This swap
+read the joint-best 0.8705 at **+0.0001** over the champion's base, and it is a *proxy* number besides:
+four of the six seats are `--fold -1` and were stood in for by their fold-0 twins to compute it at all.
+That is not evidence, is not quoted as any, and `board.jsonl` records this entry's `offline` as **null**
+— which is what `board_check` refused it for on the first try, correctly.
+
+Pre-registered against the 0.939 champion, before the score:
+
+| branch | reading |
+|---|---|
+| **≥ 0.941** | decode-path diversity is a live lever above the plateau; next slots sweep resolutions |
+| **0.940** | directional only, under the bar; keep and re-test |
+| **0.937–0.939** | **the most likely branch** — eleven entries on one plateau; the seating axis closes alongside vote, views, corpus and supervision |
+| **≤ 0.936** | 392 px is actively worse *in company*; resolution mixing is a hazard, not a diversity source |
+
+Fired on explicit owner authorisation for the last slot of the day, with ~1h40m left before the 00:00Z
+reset. The kernel push was refused once with `Maximum batch GPU session count of 2 reached` — the cap is
+per **account**, shared with the biohub/celltrack project, and no gate of ours asks before pushing
+(`knee-mjqk`). Nothing of theirs was cancelled; a letter went to their inbox and a waiter took the first
+slot that freed.
