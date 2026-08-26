@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.kaggle.board_read import BoardRow, LeaderboardRead, Standing
+from kneemri.kaggle.board_read import BoardRow, BoardTrend, LeaderboardRead, Standing
 
 TAKEN = "2026-08-25T11:00:00+00:00"
 
@@ -39,7 +39,7 @@ def test_board_row_ours():
     assert not _rows()[0].ours(US)
 
 
-def test_of():
+def test_standing_of():
     """The standing, which is rank and the width of the band we are tied inside — not the gap."""
     standing = Standing.of(US, _rows())
 
@@ -131,3 +131,101 @@ def test_now():
 
     assert stamped.tzinfo is not None, "a naive stamp cannot be differenced against another machine's"
     assert stamped.tzinfo.utcoffset(stamped) == timezone.utc.utcoffset(stamped)
+
+
+def _trend(oursides: list[float], frontiers: list[float]) -> BoardTrend:
+    return BoardTrend(
+        [
+            LeaderboardRead(
+                leader=front,
+                standing=Standing(rank=3, score=ours, field=4, tied=2),
+                taken=f"2026-08-2{day}T11:00:00+00:00",
+                frontier=front,
+            )
+            for day, (ours, front) in enumerate(zip(oursides, frontiers, strict=True), start=1)
+        ]
+    )
+
+
+def test_row():
+    """The flat record the snapshot and the history SHARE, so the two files cannot drift apart."""
+    row = _read().row()
+
+    assert row["rank"] == 3
+    assert row["taken"] == TAKEN
+    assert row["frontier"] == 0.0, "an unrecorded frontier is zero, never silently the leader"
+
+
+def test_leaderboard_read_of():
+    """A read rebuilt from a flat record, tolerating the `frontier` older rows do not carry."""
+    rebuilt = LeaderboardRead.of(_read().row())
+
+    assert rebuilt.ours == 0.938
+    assert rebuilt.taken == TAKEN
+
+    older = _read().row()
+    del older["frontier"]
+
+    assert LeaderboardRead.of(older).frontier == 0.0, "a history must load rows written before the column"
+
+
+def test_appended(tmp_path: Path):
+    """The history GROWS where the snapshot is overwritten — and one instant lands at most once."""
+    path = tmp_path / "leaderboard.jsonl"
+    _read().appended(path)
+    _read().appended(path)
+
+    assert len(LeaderboardRead.series(path)) == 1, "one instant re-read must not double-weight it in a slope"
+
+    _read(taken="2026-08-26T11:00:00+00:00").appended(path)
+
+    assert len(LeaderboardRead.series(path)) == 2, "a genuinely later read is a second point"
+
+
+def test_series(tmp_path: Path):
+    """An absent history is an EMPTY one — the first read must not have to create it by hand."""
+    assert LeaderboardRead.series(tmp_path / "absent.jsonl") == []
+
+
+def test_days():
+    """The x-axis both slopes are fitted on, in days since the first read rather than in row numbers."""
+    assert _trend([0.93, 0.94, 0.95], [0.95, 0.95, 0.95]).days() == [0.0, 1.0, 2.0]
+
+
+def test_slope():
+    """A fitted change per day — and NaN, never zero, where the history cannot support one.
+
+    Zero is a CLAIM, and it is exactly the claim ("the leader is flat") this history exists to stop being
+    assumed off two identical numbers.
+    """
+    trend = _trend([0.930, 0.932, 0.934], [0.950, 0.950, 0.950])
+
+    assert trend.slope([read.ours for read in trend.reads]) == pytest.approx(0.002)
+    assert trend.slope([read.frontier for read in trend.reads]) == pytest.approx(0.0, abs=1e-12)
+
+    short = _trend([0.93, 0.94], [0.95, 0.95])
+
+    assert short.slope([read.ours for read in short.reads]) != short.slope([read.ours for read in short.reads]), (
+        "two points fit a line exactly and must report NaN rather than a slope"
+    )
+
+
+def test_closing():
+    """The only number that decides anything: our climb MINUS the frontier's."""
+    assert _trend([0.930, 0.932, 0.934], [0.950, 0.950, 0.950]).closing() == pytest.approx(0.002)
+    assert _trend([0.930, 0.932, 0.934], [0.950, 0.953, 0.956]).closing() == pytest.approx(-0.001)
+
+
+def test_report():
+    """The count comes FIRST, and a history too short to fit says so instead of printing a flat slope."""
+    lines = _trend([0.930, 0.932, 0.934], [0.950, 0.950, 0.950]).report()
+
+    assert "3 recorded reads" in lines[0]
+    assert "closing +0.00200/day" in lines[1]
+    assert "closes in" in lines[2]
+
+    losing = _trend([0.930, 0.932, 0.934], [0.950, 0.953, 0.956]).report()
+
+    assert "not being caught" in losing[2], "a frontier pulling away must never read as a countdown"
+
+    assert "no slope is fitted" in _trend([0.93, 0.94], [0.95, 0.95]).report()[1]

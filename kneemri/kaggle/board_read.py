@@ -48,6 +48,25 @@ COMPETITION = "rsna-knee-abnormality-detection"
 RECORD = Path("comp/leaderboard.json")
 """Where a read is kept, so the next reader gets a number and a date rather than a number."""
 
+SERIES = Path("comp/leaderboard.jsonl")
+"""Every read ever taken, appended — where `RECORD` holds only the latest and is OVERWRITTEN by it.
+
+WHY A HISTORY AND NOT A SNAPSHOT. The plan that reaches 0.950 rests on two slopes: ours, fitted at
++0.0016/day over nine days of `comp/board.jsonl`, and the frontier's, for which this project held exactly
+two points — 0.952 on 2026-08-25 and 0.952 on 2026-08-26 — because each read overwrote the last. Two
+points is not a slope, and "the leader is flat" was the single unevidenced assumption underneath every
+plan made on 2026-08-26. A read costs no submission slot, so the history is free and the assumption need
+not stay one.
+"""
+
+TOP = 5
+"""How many rows make the FRONTIER, as against the leader alone.
+
+One team's best score moves in steps and sits still between them, so a leader series reads as flat for
+days and then jumps — which is a fact about one team's submission schedule, not about the field. The mean
+of the top five is the same measurement with four more draws, and it is the thing we are actually racing.
+"""
+
 USERNAME = "dimiturnt"
 """Our account as the BOARD names it — an identity, not a credential, and nothing here reads a key.
 
@@ -156,6 +175,13 @@ class LeaderboardRead:
     """The UTC instant of the round trip, ISO-8601. Passed in rather than clocked inside, so the record
     a test writes is the record it asserts on."""
 
+    frontier: float = 0.0
+    """The mean of the board's top `TOP` scores — the field's leading edge, not one team's best day.
+
+    Defaulted rather than required because reads taken before 2026-08-26 have no frontier recorded, and a
+    history that refuses to load its own older rows is a history that starts today.
+    """
+
     @staticmethod
     def now() -> str:
         """The clock, in one place, so every caller stamps the same shape and no test reaches for its own."""
@@ -187,7 +213,13 @@ class LeaderboardRead:
         if not rows:
             message = f"the leaderboard for {COMPETITION} came back empty, so no standing can be read"
             raise ValueError(message)
-        return cls(leader=max(row.score for row in rows), standing=Standing.of(username, rows), taken=now)
+        best = sorted((row.score for row in rows), reverse=True)[:TOP]
+        return cls(
+            leader=max(row.score for row in rows),
+            standing=Standing.of(username, rows),
+            taken=now,
+            frontier=sum(best) / len(best),
+        )
 
     @staticmethod
     def _kaggle() -> list[BoardRow]:
@@ -211,7 +243,16 @@ class LeaderboardRead:
             "why": "The public board as of `taken`, written by kneemri.kaggle.board_read. Never edit by "
             "hand and never quote from prose — re-read it, the standing decays every day slots are "
             "spent. RANK is the headline, not gap: a gap across a crowded plateau is not one step.",
+            **self.row(),
+        }
+        path.write_text(json.dumps(held, indent=2) + "\n", encoding="utf-8")
+        return path
+
+    def row(self) -> dict[str, float | int | str]:
+        """This read as a flat record, shared by the snapshot and the history so they cannot drift apart."""
+        return {
             "leader": self.leader,
+            "frontier": round(self.frontier, 4),
             "ours": self.ours,
             "gap": round(self.gap, 4),
             "rank": self.standing.rank,
@@ -219,16 +260,31 @@ class LeaderboardRead:
             "tied": self.standing.tied,
             "taken": self.taken,
         }
-        path.write_text(json.dumps(held, indent=2) + "\n", encoding="utf-8")
+
+    def appended(self, path: Path = SERIES) -> Path:
+        """Add this read to the history, unless a read with the same `taken` is already its last line.
+
+        Idempotent on the instant rather than on the content, so re-running the command inside one second
+        does not double-weight that second in a slope, while two genuinely different reads on the same day
+        both survive — the fit is over instants and can carry as many as there are.
+        """
+        existing = self.series(path)
+        if existing and existing[-1].taken == self.taken:
+            return path
+        with path.open("a", encoding="utf-8") as history:
+            history.write(json.dumps(self.row()) + "\n")
         return path
 
-    @classmethod
-    def recorded(cls, path: Path = RECORD) -> "LeaderboardRead":
-        """The last read, from the record. Raises where there is none — an absent read is not a gap of 0."""
+    @staticmethod
+    def series(path: Path = SERIES) -> list["LeaderboardRead"]:
+        """Every recorded read, oldest first. An absent history is an empty one, not an error."""
         if not path.exists():
-            message = f"{path} holds no leaderboard read; run `python -m kneemri.kaggle.board_read --live`"
-            raise ValueError(message)
-        held = json.loads(path.read_text(encoding="utf-8"))
+            return []
+        return [LeaderboardRead.of(json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+    @classmethod
+    def of(cls, held: dict[str, float | int | str]) -> "LeaderboardRead":
+        """One read from its flat record, tolerating the keys older rows do not carry."""
         return cls(
             leader=float(held["leader"]),
             standing=Standing(
@@ -238,7 +294,16 @@ class LeaderboardRead:
                 tied=int(held["tied"]),
             ),
             taken=str(held["taken"]),
+            frontier=float(held.get("frontier", 0.0)),
         )
+
+    @classmethod
+    def recorded(cls, path: Path = RECORD) -> "LeaderboardRead":
+        """The last read, from the record. Raises where there is none — an absent read is not a gap of 0."""
+        if not path.exists():
+            message = f"{path} holds no leaderboard read; run `python -m kneemri.kaggle.board_read --live`"
+            raise ValueError(message)
+        return cls.of(json.loads(path.read_text(encoding="utf-8")))
 
     def stale(self, now: str, days: int = STALE_DAYS) -> list[str]:
         """Complaints about the AGE of this read, empty where it is fresh enough to plan against."""
@@ -252,11 +317,91 @@ class LeaderboardRead:
         ]
 
 
+MIN_READS = 3
+"""Fewest reads this will fit a slope through.
+
+Two points always fit a line exactly and report a slope with no residual, which is how "the leader is
+flat" became a planning assumption off two identical numbers. Three is not enough either — it is the point
+at which the fit can DISAGREE with its own points, and the report says how many it rests on so the reader
+discounts it themselves.
+"""
+
+DAY = 86400.0
+
+
+@dataclass(frozen=True)
+class BoardTrend:
+    """Two slopes fitted over the recorded history: ours, and the frontier's — and which is faster.
+
+    THE CLOSING RATE IS THE ONLY NUMBER HERE THAT DECIDES ANYTHING. Our own climb is already measured off
+    `comp/board.jsonl` and needs no board read; what a board read adds is whether the field above us is
+    climbing at the same rate. A gap of 0.013 closes in eight days at +0.0016/day against a still frontier
+    and never closes at all against one moving as fast as we are, and the difference between those two
+    futures is not visible in any number this project held before the history existed.
+    """
+
+    reads: list[LeaderboardRead]
+
+    def days(self) -> list[float]:
+        """Days elapsed since the first read, one per read — the x-axis both slopes are fitted on."""
+        if not self.reads:
+            return []
+        first = datetime.fromisoformat(self.reads[0].taken)
+        return [(datetime.fromisoformat(read.taken) - first).total_seconds() / DAY for read in self.reads]
+
+    def slope(self, values: list[float]) -> float:
+        """Least-squares change per day, or NaN where the reads cannot support one.
+
+        NaN rather than 0.0 for a short or degenerate history, because a slope of zero is a CLAIM — it is
+        exactly the claim this whole module exists to stop being assumed — and an absent measurement must
+        not be readable as a flat one.
+        """
+        spans = self.days()
+        if len(spans) < MIN_READS or len(values) != len(spans):
+            return float("nan")
+        mean_day = sum(spans) / len(spans)
+        spread = sum((day - mean_day) ** 2 for day in spans)
+        if spread == 0.0:
+            return float("nan")
+        mean_value = sum(values) / len(values)
+        return sum((day - mean_day) * (value - mean_value) for day, value in zip(spans, values, strict=True)) / spread
+
+    def closing(self) -> float:
+        """How fast the gap to the frontier shrinks per day: our slope minus the frontier's.
+
+        Negative means the field above us is pulling away, and no amount of our own progress is closing
+        anything. That is the reading a plan needs and the one a snapshot cannot give.
+        """
+        return self.slope([read.ours for read in self.reads]) - self.slope([read.frontier for read in self.reads])
+
+    def report(self) -> list[str]:
+        """The two slopes and the closing rate, with the count they rest on stated first."""
+        spans = self.days()
+        lines = [f"{len(self.reads)} recorded reads over {(spans[-1] if spans else 0.0):.1f} days"]
+        if len(self.reads) < MIN_READS:
+            lines.append(f"  fewer than {MIN_READS} reads — no slope is fitted, and none should be assumed")
+            return lines
+        ours, frontier = (
+            self.slope([read.ours for read in self.reads]),
+            self.slope([read.frontier for read in self.reads]),
+        )
+        closing = self.closing()
+        lines.append(f"  ours {ours:+.5f}/day   frontier (top {TOP}) {frontier:+.5f}/day   closing {closing:+.5f}/day")
+        latest = self.reads[-1]
+        behind = latest.frontier - latest.ours
+        if closing > 0:
+            lines.append(f"  at that rate the {behind:+.4f} to the frontier closes in {behind / closing:.1f} days")
+        else:
+            lines.append(f"  the frontier is not being caught at this rate; {behind:+.4f} behind it and not closing")
+        return lines
+
+
 def main() -> None:
     """Read the public board and record the gap: `python -m kneemri.kaggle.board_read --live`."""
     command = cli.Command(LeaderboardRead.__doc__, logger)
     command.parser.add_argument("--record", type=Path, default=RECORD, help="where the read is kept")
     command.parser.add_argument("--user", default=USERNAME, help="the Kaggle username to find us by")
+    command.parser.add_argument("--series", type=Path, default=SERIES, help="the appended read history")
     command.parser.add_argument(
         "--live",
         action="store_true",
@@ -267,8 +412,10 @@ def main() -> None:
     now = LeaderboardRead.now()
 
     if arguments.live:
-        read = LeaderboardRead.taken_live(now, arguments.user).written(arguments.record)
-        logger.info("recorded a fresh read into %s", read)
+        taken = LeaderboardRead.taken_live(now, arguments.user)
+        logger.info("recorded a fresh read into %s", taken.written(arguments.record))
+        # And into the HISTORY, which is what turns "the leader is flat" from an assumption into a fit.
+        taken.appended(arguments.series)
 
     held = LeaderboardRead.recorded(arguments.record)
     logger.info(
@@ -281,6 +428,8 @@ def main() -> None:
         held.gap,
         held.taken,
     )
+    # The history, which answers the one question a snapshot structurally cannot: who is moving faster.
+    command.report(BoardTrend(LeaderboardRead.series(arguments.series)).report())
     for complaint in held.stale(now):
         logger.error("%s", complaint)
     if held.stale(now):
