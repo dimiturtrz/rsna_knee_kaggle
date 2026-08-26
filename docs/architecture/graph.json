@@ -6093,6 +6093,12 @@
     {
       "kind": "calls",
       "source": "core.data.labels.reader_agreement.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.blind",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_agreement.main",
       "target": "core.data.labels.reader_agreement.ReaderAgreement.cells",
       "weight": 1
     },
@@ -22836,6 +22842,14 @@
       "descendants": 0,
       "id": "core.data.labels.reader_agreement.ReaderAgreement._resample",
       "label": "_resample",
+      "level": "method",
+      "parent": "core.data.labels.reader_agreement.ReaderAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_agreement.ReaderAgreement.blind",
+      "label": "blind",
       "level": "method",
       "parent": "core.data.labels.reader_agreement.ReaderAgreement",
       "role": null

@@ -166,3 +166,27 @@ def test_error_report():
     assert "false positive: 1" in text
     # MCL only over-calls (+1) and Synovitis only under-calls (-1), so they sit at opposite ends.
     assert text.index("MCL") < text.index("Synovitis"), "ranked by net over-calling, not by volume"
+
+
+def _table(values: list[float], verdicts: list[str]) -> pd.DataFrame:
+    """A label table: one row per study, every finding carrying the same value and verdict."""
+    identifiers = [f"s{index}" for index in range(len(values))]
+    columns: dict[str, object] = {"StudyInstanceUID": identifiers}
+    for target in TARGETS:
+        columns[target] = list(values)
+        columns[f"{target}__verdict"] = list(verdicts)
+    return pd.DataFrame(columns)
+
+
+def test_blind():
+    """A table whose verdicts are the default's while its numbers moved is refused, and says why."""
+    default = _table([0.9, 0.2], ["YES", "NO"])
+    blended = _table([0.7, 0.4], ["YES", "NO"])
+
+    refusal = ReaderAgreement().blind(blended, default)
+
+    assert "verdicts are" in refusal and "table_separation" in refusal, refusal
+    assert f"{len(TARGETS)} findings" in refusal, "the refusal prices how much of the table moved"
+    assert ReaderAgreement().blind(default, default) == "", "the default read against itself is readable"
+    reread = _table([0.7, 0.4], ["NO", "NO"])
+    assert ReaderAgreement().blind(reread, default) == "", "a table with its OWN verdicts is what this tool reads"

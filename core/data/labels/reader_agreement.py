@@ -26,7 +26,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.report_language import ReportLanguages
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,13 @@ SEED = 2026
 INTERVAL = (2.5, 97.5)
 ENGLISH = "en"
 POSITIVE = "YES"
+
+VERDICT_SUFFIX = "__verdict"
+DEFAULT_TABLE = "report_labels_v2.csv"
+BASE = "__base"
+OTHER = "__other"
+BLIND = 3
+"""Exit code for a table this tool cannot distinguish from the default — see `blind`."""
 
 MIDPOINT = 0.5
 """Where a graded annotation becomes a positive, matching `LabelScores`."""
@@ -49,6 +56,43 @@ class ReaderAgreement:
 
     def __init__(self, languages: ReportLanguages | None = None) -> None:
         self.languages = languages or ReportLanguages()
+
+    def blind(self, read: pd.DataFrame, default: pd.DataFrame) -> str:
+        """Why this table cannot be READ here, or an empty string when it can.
+
+        MEASURED 2026-08-26. Every one of the nine tables in `processed/labels/` printed byte-identical
+        output through `--labels` — the same 311 positive calls, the same 140 wrong of 684, the same
+        per-language rates. The flag lands; the tool is blind. `cells` merges the `__verdict` columns,
+        and `table_blend` blends the NUMERIC column while carrying verdicts and `__conf` over from the
+        base untouched, so every blend IS its base to everything downstream of that merge.
+
+        THE TABLES ARE NOT THE SAME, which is what makes the silence a defect rather than a fact. Over
+        the same 57 annotated studies the blends flip 7 to 33 of 684 cells across the midpoint, and macro
+        AUC against the radiologist moves 0.8700 to 0.8978. The printed number was never wrong — it is a
+        true statement about verdicts — but the flag invites a question this tool cannot answer, and the
+        answer it prints instead reads as "every blend agrees exactly as well as v2 does".
+
+        So a table whose verdicts are the default's while its numbers are not is REFUSED by name, and the
+        refusal names the tool that scores the numeric column instead.
+        """
+        merged = default.merge(read, on=STUDY, suffixes=(BASE, OTHER))
+        verdicts = [f"{target}{VERDICT_SUFFIX}" for target in TARGETS if f"{target}{VERDICT_SUFFIX}" in read.columns]
+        spoken = all(merged[f"{name}{BASE}"].equals(merged[f"{name}{OTHER}"]) for name in verdicts)
+        moved = [
+            target
+            for target in TARGETS
+            if not np.allclose(
+                merged[f"{target}{BASE}"].to_numpy(float), merged[f"{target}{OTHER}"].to_numpy(float), equal_nan=True
+            )
+        ]
+        if not (spoken and moved):
+            return ""
+        return (
+            f"this table's verdicts are {DEFAULT_TABLE}'s while its numbers differ on {len(moved)} of "
+            f"{len(TARGETS)} findings ({', '.join(moved[:3])}...), so every line below would be about the "
+            "DEFAULT table and say so in the language of a reading — score the numeric column with "
+            "`kneemri.evaluation.table_separation` or `supervision_gap` instead"
+        )
 
     def cells(self, annotated: pd.DataFrame, read: pd.DataFrame) -> pd.DataFrame:
         """One row per (study, finding) the radiologist annotated AND the reader gave a verdict on.
@@ -239,10 +283,14 @@ def main() -> None:
 
     root = command.rooted(arguments)
     truth = pd.read_csv(root.raw() / "train.csv")
-    read = pd.read_csv(arguments.labels or root.processed() / "labels" / "report_labels_v2.csv")
+    fallback = root.processed() / "labels" / DEFAULT_TABLE
+    read = pd.read_csv(arguments.labels or fallback)
     annotated = truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     agreement = ReaderAgreement()
+    if arguments.labels and (refusal := agreement.blind(read, pd.read_csv(fallback))):
+        logger.error(refusal)
+        raise SystemExit(BLIND)
     cells = agreement.cells(annotated, read)
     command.report(agreement.report(cells))
     # WHAT a replacement reader must do differently, beside how well this one agrees. The two are
