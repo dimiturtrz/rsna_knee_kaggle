@@ -68,3 +68,49 @@ It changes what the next block of card time is worth spending on:
 3. The efficiency leaderboard is unexamined evidence about whether the leaders ensemble at all.
 
 Not acted on here, and none of it is verified against a primary source we own.
+
+## The efficiency leaderboard, read (topic 736678, 22:20Z)
+
+The unexamined evidence from the section above, now looked at. Four competitor statements, all
+self-reported, all unverifiable — but they are *statements about a public board* rather than about
+private results, so they are cheaper to lie about and easier to check later.
+
+1. **"As of Aug 22, not many of the public LB top 50 also appear in the Efficiency LB top 50 — about
+   32%."** Read alone this argues FOR ensembling: two thirds of the high scorers are slow.
+2. **"The top two Public LB submissions seem to be used for the Efficiency LB as well, so we should be
+   careful not to accidentally get a high score through ensembling."**
+3. **"I'm surprisingly #1 on the efficiency LB right now. No ensemble."**
+4. A poster at **Efficiency 22nd / Public 78th with 0.926** on a ~20-minute pipeline: preprocessing plus
+   a single model trained 5-fold.
+
+**(1) and (2) are not in conflict, and the shape they make together is the reading.** The broad top-50
+is slow, and the very top is fast. Ensembling is what the *plateau* is made of; the leaders are not
+there because of it.
+
+That is the third independent statement in two days that our gap is **member quality**, and this one is
+the strongest of the three because it is about the board rather than about a self-reported number: we
+arrived at 0.939 through six members, and the entries above us appear to be single models.
+
+It does not license abandoning the ensemble — a six-member 0.939 is still our best result and diversity
+is the only axis with a *measured* board transfer here (`knee-nas5`, 2.4×). It prices the two lanes
+against each other: **another seating variation is a knob on a plateau the field says tops out near
+0.94, and a better member is the axis the leaders are on.** That agrees, from the outside, with what
+`interpretations/kneemri/2026-08-26_our-model-is-past-its-teacher.md` concluded from the inside — and
+the two disagree about the mechanism, which is worth stating plainly rather than merging: the forum says
+*better model*, our own gold-label reading says *better labels*. Both point away from seating.
+
+### One technical asset, free
+
+A competitor profiled inference for ~1300 studies and published the breakdown: header pass 0.5 min ·
+**slice ordering 12.0 min** · decode + resize 4.1 min · container + import 5.0 min · GPU 5-fold 10.0 min.
+The ordering pass opens the geometry tags of every slice in every selected series (~186 files a study)
+to sort by projection onto the slice normal, then keeps 9. What they tried and what it bought:
+
+- threads saturate at **64** — 128/256/512 change nothing, so it is not latency-bound;
+- reading every Nth slice and interpolating drops ordering agreement to **~39%**, no better than chance;
+- **`InstanceNumber` instead of the projection: 94.5% agreement, and ZERO speedup** — the cost is opening
+  the file, not parsing the tag.
+
+We have no runtime constraint and no efficiency-board entry, so none of this is actionable today. It is
+worth keeping for the one case where it becomes load-bearing: if we ever ship a wide ensemble under the
+9-hour limit, the ordering pass — not the GPU — is what will bind.
