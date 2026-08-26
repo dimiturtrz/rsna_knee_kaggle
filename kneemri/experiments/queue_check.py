@@ -31,6 +31,17 @@ have cost `blendsix`'s seven hours. The crossing that catches it is the same one
 MISSING while the arm named in the marker is ON THE CARD. A producer that has not started yet is the
 legitimate case and stays silent, which is exactly what separates the two.
 
+MEASURED 2026-08-26, a fourth hole, and this one broke the GREEN verdict rather than a red one. The live
+chain owing `calib_dense_hold` and `ema_dense` had written its watcher log to `experiments/logs/` while
+this check globs `logs/`, so it read eleven dead logs from a finished morning, found every arm in them
+already landed, and printed `OK: every arm still owed is gated by exactly one live process`. It was
+looking in the wrong place and said so in the language of a pass. The crossing that catches it is the
+mirror of `stranded`: a live `after.sh` in the table whose arms match no log here.
+
+MEASURED 2026-08-26 as well: `misarmed` fired on a HEALTHY queue, because `after.sh` runs under git-bash
+and records `/d/…` while Windows Python resolves that to a nonexistent `\\d\\…`. A blocking verdict whose
+advice was to re-arm — that is, to tear down a live chain — over a file plainly on disk. See `_local`.
+
 The process listing is passed in rather than read inside, so the crossing itself is a pure function of
 two strings and the unit test needs no process to kill.
 """
@@ -184,8 +195,31 @@ class QueuedArms:
         return [
             f"{watch.log} -> {watch.watched}"
             for watch in self.watches()
-            if watch.watched and self.alive(watch) and not Path(watch.watched).is_file() and self._producing(watch)
+            if watch.watched
+            and self.alive(watch)
+            and not self.local(watch.watched).is_file()
+            and self._producing(watch)
         ]
+
+    def unlogged(self) -> list[str]:
+        """Live watchers this check cannot see, because their log is not in the directory it reads.
+
+        MEASURED 2026-08-26. The live chain owing `calib_dense_hold` and `ema_dense` wrote its watcher
+        log to `experiments/logs/` while this check globs `logs/`, so it read eleven dead logs from a
+        finished morning and reported `OK: every arm still owed is gated by exactly one live process`.
+        Every arm it vouched for had already run, and the only queue in the tree was invisible to it.
+
+        THIS IS THE MODULE'S OWN THESIS TURNED ON ITSELF. The whole point here is that a log and a
+        process say different things and only the crossing is true — and until now a MISSING log was the
+        one case that produced no crossing at all, so the check fell back to the logs and called them
+        the queue. `stranded` reads a log with no process; this reads a process with no log.
+
+        BLOCKING, because the verdict it corrupts is the green one. A stranded arm is announced loudly;
+        a check that is merely looking in the wrong place says OK, which is the shape this repo has now
+        paid for three times.
+        """
+        seen = {watch.arms for watch in self.watches()}
+        return [" ".join(armed) for line in self.watchers() if (armed := self._armed(line)) not in seen]
 
     def _producing(self, watch: Watch) -> bool:
         """Whether the arm this watch waits on is itself live, read off any line that is not a watcher."""
@@ -246,11 +280,21 @@ class QueuedArms:
     def faults(self) -> list[str]:
         """Every way this queue is wrong, or empty when it is right.
 
-        The first two failures are opposite and both are silent: an arm NO live watcher will start, and
-        an arm SEVERAL of them will. One wastes a card that is idle, the other oversubscribes a card that
-        is not. The third is a watcher that is live, singular and pointed at nothing.
+        Two of these failures are opposite and both are silent: an arm NO live watcher will start, and an
+        arm SEVERAL of them will. One wastes a card that is idle, the other oversubscribes a card that is
+        not. The third is a watcher that is live, singular and pointed at nothing.
+
+        UNLOGGED is reported FIRST because it is the only one that invalidates the others. The rest say
+        this queue is wrong; that one says the queue being read is not the queue that is running, and a
+        MISARMED or STRANDED verdict computed over the wrong directory is noise either way.
         """
         found = []
+        if unlogged := self.unlogged():
+            found.append(
+                f"UNLOGGED: {' '.join(unlogged)} — a live after.sh owes these and has no watcher log under "
+                f"{self.directory}, so every other verdict here was reached without seeing it; re-run with "
+                "--directory pointed at the log that chain actually writes"
+            )
         if misarmed := self.misarmed():
             found.append(
                 f"MISARMED: {' '.join(misarmed)} — the watched file does not exist while the arm named in "
@@ -295,6 +339,24 @@ class QueuedArms:
         """
         tail = line.split(WATCHER, 1)[1]
         return tuple(token.strip("\"'") for token in tail.split() if token.endswith(ARM_SUFFIX))
+
+    @staticmethod
+    def local(watched: str) -> Path:
+        """A path as `after.sh` recorded it, rewritten so THIS interpreter can open the same file.
+
+        MEASURED 2026-08-26, and it made `misarmed` fire on a HEALTHY queue. Watchers are launched from
+        git-bash, which writes an absolute path as `/d/personal_projects/…`; Windows Python resolves that to
+        a `\\d\\personal_projects\\…` on the CURRENT drive, which does not exist — so `is_file()` is False for
+        a file plainly sitting on disk. Every git-bash-launched watcher read as pointed at nothing, and
+        `misarmed` BLOCKS and advises re-arming, which means the advice was to tear down a live chain. That
+        is the shape `landed` was written for: a verdict whose action costs the card, about work that is fine.
+
+        Only the `/<letter>/` prefix is rewritten, and a genuine POSIX path is left alone, so the rule adds
+        no new way to be wrong on a machine where the recorded path was already openable.
+        """
+        head, _, tail = watched.lstrip("/").partition("/")
+        drive = watched.startswith("/") and len(head) == 1 and head.isalpha()
+        return Path(f"{head}:/{tail}") if drive else Path(watched)
 
     @staticmethod
     def _age(path: Path) -> float:

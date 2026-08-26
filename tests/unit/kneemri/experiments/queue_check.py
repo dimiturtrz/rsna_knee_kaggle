@@ -108,6 +108,48 @@ def test_misarmed(tmp_path: Path):
     assert QueuedArms(tmp_path, producing).misarmed() == [], "the path the producer actually writes is fine"
 
 
+def test_misarmed_reads_the_path_git_bash_recorded(tmp_path: Path):
+    """A `/d/…` path is a real Windows file — reading it literally called a healthy queue broken.
+
+    `after.sh` runs under git-bash and records the POSIX form; Windows Python resolves `/d/x` to `\\d\\x`,
+    which never exists. So MISARMED fired on every git-bash-launched watcher, and its advice is to re-arm,
+    which means tearing down a live chain.
+    """
+    producing = LIVE + "User 1 1 ? bash experiments/arms/aug_long.sh\n"
+    real = tmp_path / "aug_long_s2026.full.log"
+    real.write_text("epoch 1", encoding="utf-8")
+    posix = f"/{real.drive[0].lower()}{real.as_posix()[2:]}"
+
+    _armed_on(tmp_path, posix)
+
+    assert QueuedArms.local(posix).is_file(), "the file is on disk; only the spelling was foreign"
+    assert QueuedArms(tmp_path, producing).misarmed() == [], "a path git-bash can open is not misarmed"
+
+
+def test_local(tmp_path: Path):
+    """The `/<letter>/` prefix is a drive; anything else is left exactly as `after.sh` recorded it."""
+    created = tmp_path / "arm.log"
+    created.write_text("epoch 1", encoding="utf-8")
+    posix = f"/{created.drive[0].lower()}{created.as_posix()[2:]}"
+
+    assert QueuedArms.local(posix) == created, "git-bash's `/d/…` names the file Windows calls `D:/…`"
+    assert QueuedArms.local("logs/arm.log") == Path("logs/arm.log"), "a relative path has no drive to rewrite"
+
+
+def test_unlogged(tmp_path: Path):
+    """A live watcher whose log is in another directory — the hole that corrupted the GREEN verdict.
+
+    The chain owing two arms wrote its log to `experiments/logs/` while the check globbed `logs/`, so it
+    vouched for a finished morning and reported OK while the only live queue was invisible.
+    """
+    assert QueuedArms(tmp_path, LIVE).unlogged() == [ARMS], "a live chain with no log here is unseen"
+    assert QueuedArms(tmp_path, LIVE).faults()[0].startswith("UNLOGGED:")
+
+    _log(tmp_path, "after_chain.log", MARKER, ARMS)
+
+    assert QueuedArms(tmp_path, LIVE).unlogged() == [], "the same chain, now with its log in the directory"
+
+
 def test_misarmed_stays_silent_before_the_producer_starts(tmp_path: Path):
     """An absent file is the NORMAL case for a watcher armed ahead of its arm — blocking there is noise."""
     _armed_on(tmp_path, "/d/aug_long.full.log")

@@ -11258,6 +11258,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "target": "kneemri.experiments.queue_check.QueuedArms.unlogged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.finished",
       "target": "kneemri.experiments.queue_check.QueuedArms._owed_by_the_dead",
       "weight": 1
@@ -11307,6 +11313,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.misarmed",
+      "target": "kneemri.experiments.queue_check.QueuedArms.local",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.misarmed",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
       "weight": 1
     },
@@ -11331,6 +11343,24 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.stranded",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.unlogged",
+      "target": "kneemri.experiments.queue_check.QueuedArms._armed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.unlogged",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.unlogged",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
       "weight": 1
     },
@@ -26500,6 +26530,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.local",
+      "label": "local",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.misarmed",
       "label": "misarmed",
       "level": "method",
@@ -26510,6 +26548,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "label": "stranded",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.unlogged",
+      "label": "unlogged",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
