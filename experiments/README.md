@@ -4261,3 +4261,35 @@ chest-radiograph initialisation does not close it.
 
 **Not RAD-DINO at another rate**, per the surviving suspect above — but note this is a use-refutation, not
 an asset-kill: the encoder stays mounted (`dimiturnt/rad-dino`) and re-testable.
+
+## 2026-08-26 — the dense hold pair: the hold is free, and `--calibrated-targets` gives this project its best member
+
+Two arms of one chain, run back to back on the same corner so the second is a single-variable pair
+against the first. Both converged 12 of 12 under `convergence_check` — neither number is a truncation floor.
+
+| arm | recipe | peak | vs its control | reading |
+|---|---|---|---|---|
+| **`band_dense_hold`** | `band_dense` plus `--hold-annotations` — the 58 radiologist-read studies withheld from training so the annotation ruler can score them | **0.8573** @ e7 | **−0.0005 vs `band_dense`** 0.8578 | **the pre-registration fires.** The flag was priced at −0.0015 from `holdannot` at native224 (0.8502 → 0.8487); at the dense corner it costs −0.0005. Both are a fraction of the 0.0062 floor and they agree in sign and order of magnitude, so **the hold cost is recipe-independent** and this control is now reusable and free for every dense label-side arm. Curve 0.7452 / 0.7779 / 0.8315 / 0.8403 / 0.8482 / 0.8546 / 0.8541 / **0.8573** / 0.8546 / 0.8543 / 0.8536 / 0.8535 — a clean five-epoch decline after the peak |
+| **`band_dense_hold` + `--calibrated-targets`** = **`calib_dense_hold`** | one flag moved against the row above | **0.8634** @ e6 | **+0.0061 vs `band_dense_hold`** | **the best offline single member this project has produced**, past `band_dense`'s 0.8578, and the arm's own header predicted "the first member above 0.860" before it ran. Curve 0.7515 / 0.8007 / 0.8280 / 0.8438 / 0.8544 / 0.8554 / **0.8634** / 0.8620 / 0.8607 / 0.8596 / 0.8603 / 0.8598 |
+
+**Why this is not one-seed scatter, stated as evidence rather than as confidence.** +0.0061 sits *on*
+the 0.0062 paired floor, which alone would make it directional and nothing more. Two things lift it:
+
+1. **It replicates on a second corner.** `knee-bs4l` measured the same flag as a matched pair at
+   `calib_span` and read **+0.0072 proxy / +0.0129 annotated**. Two corners, same flag, same sign,
+   same size — the only directional gain this project holds twice.
+2. **The board ruler has never inverted a gap this size.** `board_transfer` read live 2026-08-26 15:24Z
+   over 21 ensemble entries and 171 orderable pairs: compression **+1.72** board points per holdout
+   point, and **0 of the 108 pairs the holdout resolved at all** (gap ≥ 0.0053) were ordered the other
+   way by the board. All eight inversions are pairs the holdout left UNRESOLVED. +0.0061 is above that
+   resolution line.
+
+**What it does not license.** This is a MEMBER reading, and the champion is a six-seat ensemble at 0.939
+whose axis has now read 0.936–0.939 flat across ten entries. Member quality and seat value are different
+quantities — `comp/champion.json` holds two principles saying so in both directions. The +0.010 board this
+converts to is a conversion, not a measurement, and it is a claim about a single member, not about a
+submission. `seat_value` is the tool that answers the other half.
+
+**Consequence.** `--calibrated-targets` is the only measured-positive term this project currently holds,
+which is what makes `stackfit` (`knee-orjq`) an additivity test worth the card rather than an academic
+one, and `stack3` (`knee-nu1m`) the arithmetic that follows it.
