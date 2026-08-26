@@ -5972,6 +5972,18 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.level_agreement.LevelAgreement.heterogeneity",
+      "target": "core.data.labels.level_agreement.LevelAgreement._dispersion",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.LevelAgreement.heterogeneity",
+      "target": "core.data.labels.level_agreement.LevelAgreement._width",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.level_agreement.LevelAgreement.stability",
       "target": "core.data.labels.level_agreement.LevelAgreement.gap_sigma",
       "weight": 1
@@ -5992,6 +6004,12 @@
       "kind": "construct",
       "source": "core.data.labels.level_agreement.main",
       "target": "core.data.labels.level_agreement.LevelAgreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.main",
+      "target": "core.data.labels.level_agreement.LevelAgreement.heterogeneity",
       "weight": 1
     },
     {
@@ -22690,6 +22708,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement._dispersion",
+      "label": "_dispersion",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement._width",
+      "label": "_width",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.level_agreement.LevelAgreement.gap_sigma",
       "label": "gap_sigma",
       "level": "method",
@@ -22700,6 +22734,14 @@
       "descendants": 0,
       "id": "core.data.labels.level_agreement.LevelAgreement.halves",
       "label": "halves",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement.heterogeneity",
+      "label": "heterogeneity",
       "level": "method",
       "parent": "core.data.labels.level_agreement.LevelAgreement",
       "role": null
