@@ -3975,3 +3975,40 @@ and 0.0062 is still their floor. This changes how a number may be compared ACROS
 of our own arms are compared to each other.
 
 Beads `knee-md39`. Code: `LabelScores.mean_interval`, `PairedFloor.absolute`.
+
+## 2026-08-26 — native224_long reads DEFECT REAL: the 224 cell overfits, and its anneal does not rescue it
+
+`native224_long`, 24 epochs, `one_cycle`, no regulariser — the control half of the 224 pair, armed to
+decide whether the 224 cell has the overfit the dense cell showed (-0.0182 peak-to-finish) or whether the
+mixup pair was a cure looking for a disease.
+
+| epoch | 0 | 3 | 6 | **9** | 12 | 15 | 18 | 21 | 23 |
+|---|---|---|---|---|---|---|---|---|---|
+| holdout mean AUC | 0.7337 | 0.8208 | 0.8445 | **0.8490** | 0.8410 | 0.8389 | 0.8334 | 0.8329 | 0.8325 |
+| train loss | 1.2241 | 0.9632 | 0.8173 | 0.7127 | 0.6048 | 0.5246 | 0.4869 | 0.4707 | 0.4670 |
+
+**Peak 0.8490 at epoch 9, finish 0.8325, decline 0.0165.** The arm's own pre-registration set DEFECT REAL
+at a decline of 0.0124 (2x the 0.0062 paired floor) and NO DEFECT at 0.0062; this clears the upper
+threshold with room, and it matches the dense cell's -0.0182 in kind and nearly in size.
+
+TWO THINGS THE SERIES SAYS THAT THE THRESHOLD DOES NOT. First, the train loss falls monotonically for all
+24 epochs, 1.2241 to 0.4670, while the holdout slides for fourteen consecutive epochs after e9 — the
+classic separation, not a noisy tail. Second, and this is what the pre-registration flagged as the reason
+to wait for 24 rather than read at 19: **the `one_cycle` anneal did not lift the finish.** The last four
+epochs, deep in the low-LR tail where the schedule is supposed to consolidate, read 0.8335, 0.8329,
+0.8327, 0.8325 — still descending. The budget is not merely unhelpful past e9; the schedule's own
+recovery mechanism fires and buys nothing.
+
+The run is not truncated. It ran the 24 epochs it asked for and its loss was still falling at the end, so
+the 0.8325 is a real finish and not a floor left by a killed process.
+
+WHAT THIS LICENSES, exactly as pre-registered: `mixup224_long`, the matched cure, which was parked behind
+this control on the card lock and is now released. It asks whether a regulariser lets the 224 cell USE the
+longer budget — i.e. finish above 0.8490 — rather than whether it merely slows the slide. Note the
+schedule suspect (`nocycle224_long`, knee-fkw5) is now MORE interesting than it was, not less: the anneal
+was the mechanism that was supposed to rescue the tail and it did not.
+
+WHAT IT DOES NOT LICENSE. It does not say a 224 member should train 12 epochs instead of 24. Under
+`one_cycle` a 12-epoch run is not the first 12 epochs of a 24-epoch run — the LR schedule differs
+throughout — so 0.8490 at e9 is not a prediction of what a 12-epoch arm would score, and reading it as
+one would be the same units error the board_transfer constant was quoted wrong by twice.
