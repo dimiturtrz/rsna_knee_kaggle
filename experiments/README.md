@@ -4461,6 +4461,14 @@ Seven eighths of the variance in this ruler is HOW WEAK THE SECOND MEMBER IS. Th
 the weak group — `cnx_dense` 0.7927, `raddino_dense` 0.8141, `vjepa_warm` 0.8337 are the three worst
 members in the set and they hold the three largest ambiguities, in that order.
 
+**CAVEAT, measured on a second anchor 2026-08-26T16:36Z and it cuts at this paragraph.** Refitting the
+same regression against `band_span` over only the members that WORK (solo >= 0.84, so the three named
+above leave) gives slope **-0.091**, half of -0.179. The steep slope and the r-squared 0.875 are both
+carried by the weak members: among usable members, solo quality explains much less of ambiguity than
+this section reads. The conclusion above survives -- no axis group separates on either fit, and it was
+drawn over the full set -- but "seven eighths of the variance" is a statement about a set containing
+three wrecks, not about the members a roster would actually choose between.
+
 Residuals once the quality trend is removed:
 
 | axis | residual ambiguity |
