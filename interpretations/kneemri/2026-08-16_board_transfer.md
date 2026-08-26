@@ -84,3 +84,49 @@ cannot resolve should be argued about from offline numbers.
 entry adds a line. Two of the existing rows say `"scope": "unknown"` — the ledger recorded a number
 without recording what it was a number OF, which is the same failure this project keeps paying for.
 Recovering them is worth a bead, not a guess.
+
+## Update 2026-08-26 09:54Z — the n=5 caveat is retired, and the ruler still never mis-orders
+
+Re-run on the complete record (`board_check` now reconciles 62 of 62 live submissions, against the 34
+this file was written from):
+
+```
+21 entries on the ensemble scope, 171 orderable pairs
+compression: median +1.72 board points per holdout point
+inversions: 8/171 pairs the board ordered the other way,
+            0/108 of the pairs the holdout resolved at all (a gap >= 0.0053)
+```
+
+**The property survived a 12x growth in the sample.** It was 0 of 5 resolved pairs when this page was
+written and 0 of 33 by the end of it; it is now **0 of 108**. Every one of the 8 inversions still sits
+under the floor — the largest is `peak8_v1` over `gradeswap_v1` at +0.0037 holdout — which is the
+signature of a ruler that is quiet where it should be quiet rather than one that is wrong.
+
+**The compression settled at 1.72, down from the 4.67 this page measured.** That figure came from five
+entries spanning 0.0043 offline, four of whose resolved pairs shared `solo_v1` as an endpoint; the
+warning written here at the time — *"n=5 … it is not five independent reads"* — was correct, and the
+ratio fell by two-thirds once the sample stopped being one anchor. 1.72 is the number to convert with.
+Quoting 4.67, or the +1.82 that an incomplete `board.jsonl` fitted before 2026-08-25, is quoting a
+superseded denominator.
+
+### Why this was worth re-running rather than assumed
+
+The suspicion it was checked against: our offline reads sit ~0.07 below our board scores
+(`soloseat_v1`, offline-era member at 0.8512, boards at 0.925), while a competitor reports *"OOF AUC =
+LB AUC within noise"*. A ruler that disagrees with the board by 0.07 is a **faulty-TEST** suspect, and
+every flat band this project has declared was read on it.
+
+It is not one. The ruler compresses and **does not invert**: a difference it can resolve is a difference
+the board agrees with, 108 times out of 108. So the offline holdout is sound for the one job the plan
+needs it for — deciding whether an arm moved — and `raddino_dense`'s incoming number can be read against
+its pre-registered bands without a board confirmation.
+
+### The one real gap that remains
+
+**27 of the 48 scored entries are one-sided** — `soloseat_v1`, `votefit_v1`, `blendseat_v1`,
+`jitterfit_v1`, `blendthree_v1` and every other recent one. They carry a board score and no offline
+number *by construction*, because their members are `--fold -1` full-fit and have no uncontaminated
+holdout. So 1.72 is fitted entirely on the **older** half of the board, before full-fit members existed.
+Nothing indicates the constant has drifted, and nothing could: the regime that would reveal a drift is
+exactly the regime that produces no offline number. Convert with 1.72, and treat a conversion involving
+a full-fit member as an estimate carrying an unmeasurable term.
