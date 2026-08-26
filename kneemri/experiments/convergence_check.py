@@ -12,7 +12,9 @@ facts about model architectures were bounded by the harness rather than by the a
   than its trainer. That is the third time in this repo a missing binary has read as a result.
 - `cnx_dense` ran its full 12 and peaked on the LAST one with its loss still dropping. It was written up
   as "the first non-transformer trunk, weak". Refitting its learning rate returned **+0.0259** and a curve
-  that peaks at e6 and then declines — which is what convergence looks like.
+  that peaks at e6 and then declines — which is what convergence looks like. The delta is the point here,
+  not the destination: `cnx_own_recipe` landed at 0.8186, seat 53 of 67, and did not move the ensemble
+  peak. A rate refit is the largest single delta this repo owns and it did not produce a usable member.
 
 WHY TRUNCATED IS NOT MERELY SHORT, and why this needs several verdicts rather than a pass/fail. The recipes
 set `one_cycle=True` over the full epoch count. A run that stops early stops in the HIGH-LR portion, so

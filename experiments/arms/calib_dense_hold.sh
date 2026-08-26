@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# calib_dense_hold.sh — the calibration on the best member's recipe, read on the ruler that decides.
+#
+# WHY THIS REPLACES THE UNHELD calib_dense. The corner is unchanged and so is the thesis: span (+0.0039)
+# and density (+0.0014) are additive on the same control with interaction ~0.0001, `band_dense` (0.8578)
+# carries both, and calibration is the third lever. What changed on 2026-08-26 is the reading, not the
+# arm. Three facts force the flag:
+#
+#   1. knee-9198 (open P0) requires a label-side arm to report BOTH rulers, and `--calibrated-targets` is
+#      a load-time remap of the training table — a label-side arm by definition.
+#   2. `annotated_readings` REFUSES an unheld checkpoint. Unheld, this arm cannot produce the second
+#      number at all.
+#   3. The proxy ruler is measurably BIASED AGAINST this exact change. knee-bs4l ran the same single
+#      variable at the span corner as a matched held pair and read +0.0072 proxy / +0.0129 annotated,
+#      against the unheld predecessor's -0.0020 — a sign flip of 0.0092, 1.5x the 0.0062 paired floor.
+#      An unheld null here is what knee-bs4l PREDICTS and would say nothing about the mechanism.
+#
+# The old header argued the other way: a member we would actually seat trains on all 4407, so read it
+# unheld. That argument is retired, not forgotten. The hold costs -0.0015 on the proxy, a quarter of the
+# noise floor, and it is paid on a MEASUREMENT, not on a member. If the mechanism wins here, the seatable
+# member is a later unheld refit of a corner we then know is real — two stages, and stage one has to be
+# readable or stage two is a guess.
+#
+# control  band_dense_hold (this pair's other half — run it FIRST). SINGLE VARIABLE against it:
+#          --calibrated-targets and nothing else. Second reading: `annotated_readings` over the 696
+#          annotation cells, against band_dense_hold and against calib_span_hold's +0.0129.
+# cost     one 12-epoch fit, ~40 min. With its control the pair is ~80-90 min. Zero submission slots.
+#
+# PREDICTION, written before the run. If calibration is a third independent lever and knee-bs4l's held
+# delta composes with density, the annotated read lands near calib_span_hold's +0.0129 over its own
+# control, and the proxy near +0.0072 over band_dense_hold. That would put the dense corner at the first
+# member this project has produced above 0.860 on the proxy and well past it on the ruler the board uses.
+# Per-label clause inherited unchanged from calib_span so it is not refitted: the gain concentrates on
+# MCL and Effusion, the two labels most skewed toward the 0.68 level, and PF OA barely moves.
+#
+# THE REFUTATION CONDITION. A mean at or below band_dense_hold on BOTH rulers, with MCL and Effusion
+# flat, says calibration and density are substitutes — the depth_regions_span shape a third time — and
+# retires stacking the label axis on the decode axis outright. A gain appearing uniformly across all
+# twelve labels refutes the MECHANISM while the mean still reads as a win, which is what the per-label
+# read exists to catch. A proxy null WITH a positive annotated read is not a refutation: it is knee-bs4l
+# reproduced, and it is the outcome the pair was built to be able to see.
+#
+# THE HARNESS SUSPECT, NAMED IN ADVANCE. knee-p9oc: the remap's constants are POOLED across findings that
+# do not agree — the 0.68 level is assigned 0.378 while the twelve findings run 0.000 to 0.778. A null on
+# both rulers is evidence about that pooled estimate as much as about calibration.
+#
+# bead: knee-ep74
+#
+# NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train calib_dense_hold \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --labels "$LABELS" --out "$PROCESSED/calib_dense_hold_s2026.pt"

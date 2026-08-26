@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # calib_dense.sh — the label calibration on the best single member we own, not on the thinner one.
 #
+# THIS IS STAGE TWO, AND IT IS NOT THE ARM TO LAUNCH FIRST — 2026-08-26. `calib_dense_hold.sh` supersedes
+# it as the MEASUREMENT: unheld, `annotated_readings` REFUSES this checkpoint, so this arm cannot report
+# the second ruler that knee-9198 requires of a label-side arm, and the one ruler it can report is the one
+# knee-bs4l measured as biased against this exact change by 1.5x the noise floor. Run the held pair first
+# (`band_dense_hold` then `calib_dense_hold`). This arm becomes the SEATING refit — unheld, on all 4407 —
+# and only if the held pair says the corner is real. Launching it first buys a number nobody can read.
+#
 # WHY THIS ARM EXISTS. Three levers are now measured separately on the same control (lr4e-5_ws,
 # 0.8525): span 0.10-0.90 is +0.0039, density 20-over-the-span is +0.0014, and the two are ADDITIVE on
 # the mean with an interaction of ~0.0001 (band_dense, 0.8578, is the corner that carries both). The
