@@ -4196,3 +4196,67 @@ result is why it is the right thing to have on the card rather than another regu
 **Limits.** 224 only; nothing here is a statement about the 336/dense cell where −0.0182 was measured, and
 the α = 0.4 dose was chosen because its curve had not flattened at 12 epochs, not because it was swept at
 24. A dose sweep is not priced — it would be sweeping a knob that already returned its answer.
+
+### raddino_dense (cold, fixed) — radiology initialisation LOSES 0.037 against its own exact control
+
+`experiments/arms/raddino_dense.sh`, 12 epochs of 12, 2026-08-26, ~3h20m on one card. Zero submission
+slots. The arm `knee-jk3`/`knee-ombx` priced as the last mechanism above the 1.5% bar, and the cheap half
+of a cost-tiered pair whose expensive half is RadImageNet.
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|-------|---|---|---|---|---|---|---|---|---|---|----|----|
+| holdout | .7237 | .7416 | .7824 | .7953 | .7951 | .8088 | .8111 | **.8141** | .8106 | .8103 | .8101 | .8102 |
+| train loss | 1.224 | 1.112 | 1.036 | .967 | .893 | .823 | .758 | .706 | .667 | .638 | .625 | .617 |
+
+**Peak 0.8141 at e7 against `base_dense_s2026`'s 0.8512 — −0.0371, six times the 0.0062 paired floor.**
+
+**THIS IS THE CLEANEST SINGLE-VARIABLE ENCODER READ THIS PROJECT HAS TAKEN, and that is why the number is
+allowed to mean something.** RAD-DINO is finetuned FROM `facebook/dinov2-base`: same ViT-B/14, same 768
+width, same 12 blocks, no registers. So `base_dense_s2026` is this encoder at this exact recipe, and the
+arms differ in the INITIALISATION WEIGHTS and nothing else — same 336px/20-slice/0.1-0.9 cache, same
+`--backbone-lr 4e-5`, same head rate, same 12 epochs, same one-cycle, same fold-0 holdout. Every previous
+family change in this ledger moved architecture and pretraining together.
+
+#### Both named harness suspects were cleared BEFORE the verdict was written
+
+The predecessor's 0.8137 was unreadable for two independent reasons, and a re-run that merely reproduced
+the number would have been the same broken arm twice. The peak moved +0.0004 (0.8137 → 0.8141), which is
+exactly the coincidence that has to be checked rather than explained.
+
+- **NORMALISATION — cleared by measurement, not by argument.** Until 2026-08-25 every trunk was fed the
+  ImageNet constants, so RAD-DINO — pretrained on greyscale radiographs at 0.5307/0.2583 — saw a 0.20-std
+  offset with a 12.8% scale error. The run's own `recipe:` line carries forty-odd flags and **does not
+  carry the normalisation**, so the log cannot answer this (filed P1). The checkpoint can: its registered
+  buffers read `mean [0.5307, 0.5307, 0.5307]`, `std [0.2583, 0.2583, 0.2583]`. **The fix fired.**
+- **TRUNCATION — cleared.** The predecessor died at e6 of 12 (`knee-8wm6`). This run recorded e11. Under
+  `one_cycle` a truncated run's score is a floor; this one's is not.
+- **RATE — the weakest surviving suspect, and weaker than it looks.** `4e-5` was not tuned for RAD-DINO.
+  But the exact control shares the architecture AND the rate and reaches 0.8512 on it, so the rate is not
+  mismatched to the *model*, only possibly to the *initialisation*. A rate refit is owner-blocked.
+
+#### What it refutes, stated at the size it earned
+
+**The domain-match mechanism, as priced, is refuted at this corner.** `knee-ombx` priced chest-radiograph
+initialisation at +0.005–0.015 plausible against the mechanism's 1.5–3%. It delivered **−0.037**. This is
+not a flat null to be explained away as dilution: it is a large, converged, single-variable loss.
+
+**It also prices RadImageNet, which is what the cost-tiering was for.** `backbone.py` pre-registered the
+consequence: *"If radiology initialisation moves nothing against an EXACT control here, that conversion is
+not worth buying."* It moved strongly negative, so the 2–4 hours of Keras→PyTorch conversion — carrying a
+silent-mismatch failure mode that would read exactly like a null — is now **unlicensed**. That saving is
+the arm's main return, and it is why the cheap half was run first.
+
+#### What it does NOT kill
+
+**Not MRNet (`knee-ombx`).** RAD-DINO is cross-MODALITY and cross-BODY-PART: chest radiographs against
+knee MRI. MRNet is knee MRI — the same modality, the same joint, the same slice geometry. This result
+lowers the prior on "domain-matched initialisation pays" but it does not test the matched case, and
+conflating the two would be reading a radiograph result as an MRI one.
+
+**Not the generalisation gap that motivated the whole axis.** `base_dense` reaches 0.8371 at train loss
+0.8456 while `cnx_dense` reaches 0.7927 at a *better* 0.8332 — a trunk that fits our pixels harder
+generalises 0.044 worse. That gap is still there and still unexplained; what is now known is that a
+chest-radiograph initialisation does not close it.
+
+**Not RAD-DINO at another rate**, per the surviving suspect above — but note this is a use-refutation, not
+an asset-kill: the encoder stays mounted (`dimiturnt/rad-dino`) and re-testable.
