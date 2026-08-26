@@ -99,10 +99,14 @@ class SupervisionGap:
 
         A study the table does not carry, or a finding the reader could not read, lands at PRESENT: the
         same 0.5 default the rest of the project uses, which binarises to absent.
+
+        ALL TWELVE COLUMNS, ALWAYS, even ones the table does not carry. `against` names its columns by
+        position — `TARGETS[column]` — so a table missing one finding would return eleven columns and
+        every finding after the gap would be scored under its neighbour's name. Ours carries all twelve
+        and the bug never fired; a foreign reader is not owed that assumption.
         """
         table = pd.read_csv(labels).set_index("StudyInstanceUID").reindex(identifiers)
-        columns = [target for target in TARGETS if target in table.columns]
-        values = table[columns].to_numpy(dtype=np.float32)
+        values = table.reindex(columns=list(TARGETS)).to_numpy(dtype=np.float32)
         return np.asarray(np.nan_to_num(values, nan=PRESENT), dtype=np.float32)
 
     def against(

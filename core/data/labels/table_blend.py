@@ -22,11 +22,24 @@ The w-invariance IS the mechanism proof. AUC is rank-based, so any weight small 
 ordering dominant yields the SAME ordering, and the whole +0.0216 is tie-breaking. A tie-break that
 paid for itself by reweighting would move when the weight moved.
 
-WHAT THE NUMBERS DO NOT SAY. `MEAN` over three readers reaches 0.8912 and the best single foreign table
-reads 0.8927, so the blend does not beat its best input — which is what averaging independent readers
-is supposed to do. On 58 studies and ~696 cells that difference has no computed interval and none of
-these should be quoted as separated. The honest claim is narrow: blending recovers most of what our
-scale's coarseness costs, and it does so without adopting a reader we cannot audit.
+WHAT THE NUMBERS DO NOT SAY — NOW MEASURED. `MEAN` over three readers reaches 0.8912 and the best single
+foreign table reads 0.8927, so the blend does not beat its best input, which is what averaging
+independent readers is supposed to do. That difference was quoted bare here for a week;
+`kneemri.evaluation.table_separation` has since bracketed it at +0.0015 [-0.0069, +0.0121] — UNRESOLVED,
+so the blend is neither shown to gain nor shown to lose against its best input. The honest claim is
+narrow: blending recovers most of what our scale's coarseness costs, and it does so without adopting a
+reader we cannot audit.
+
+WHAT THE SAME TOOL SETTLES ABOUT RECOMPOSING THE BLEND: nothing is available there. Four blends —
+this one, one with the weakest reader dropped, one with a fourth reader added, and ours plus the single
+strongest reader — span 0.8894 to 0.8931, and EVERY pairwise interval among them covers zero. The
+readers themselves separate (ours 0.8658, the best foreign 0.8991, the weakest 0.8352, all resolvably
+apart); their blends do not. The one thing that does read is that the strongest single reader is
+separated ABOVE two of the blends containing it, so averaging our coarser table in DILUTES it.
+
+The consequence is a lane, not a knob: on 58 studies this ruler resolves about +/-0.008, and every
+blend recipe lives inside that. A better label table has to come from a better READER, not from a new
+weighting of the readers already here.
 
 LEAKED TABLES ARE REFUSED BY NAME. Three public tables score exactly 1.0000 against the gold set
 because they BAKE IT IN — `yunusgmsoy/report_labels_v5`, `gxpixel/train_labels_final` (which ships

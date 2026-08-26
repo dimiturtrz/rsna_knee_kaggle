@@ -1652,6 +1652,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.table_separation",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.table_separation",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.table_separation",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.table_separation",
+      "target": "kneemri.evaluation.supervision_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.tie_divergence",
       "target": "core.cli",
       "weight": 1
@@ -9547,6 +9571,90 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.table_separation.TableSeparation",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.table_separation.TableSeparation",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.mean",
+      "target": "kneemri.evaluation.scores.LabelScores.mean_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.mean",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.against",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.readings",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.readings",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.reported",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.report",
+      "target": "kneemri.evaluation.table_separation.TableSeparation.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.report",
+      "target": "kneemri.evaluation.table_separation.TableSeparation.separation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.separation",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.separation",
+      "target": "core.bootstrap.StudyBootstrap.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.TableSeparation.separation",
+      "target": "kneemri.evaluation.table_separation.TableSeparation.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.table_separation.main",
+      "target": "kneemri.evaluation.table_separation.TableSeparation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.main",
+      "target": "kneemri.evaluation.table_separation.TableSeparation.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.table_separation.main",
+      "target": "kneemri.evaluation.table_separation.TableSeparation.report",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.tie_divergence.TieDivergence",
       "target": "core.data.corpus.acquisition.Acquisition",
@@ -16585,7 +16693,7 @@
       "role": null
     },
     {
-      "descendants": 135,
+      "descendants": 136,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -16641,7 +16749,7 @@
       "role": null
     },
     {
-      "descendants": 28,
+      "descendants": 29,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -16852,6 +16960,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap",
       "label": "supervision_gap",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation",
+      "label": "table_separation",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -18791,6 +18907,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.supervision_gap",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.TableSeparation",
+      "label": "TableSeparation",
+      "level": "class",
+      "parent": "kneemri.evaluation.table_separation",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -24806,6 +24930,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.TableSeparation.mean",
+      "label": "mean",
+      "level": "method",
+      "parent": "kneemri.evaluation.table_separation.TableSeparation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.TableSeparation.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.evaluation.table_separation.TableSeparation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.TableSeparation.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.table_separation.TableSeparation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.TableSeparation.separation",
+      "label": "separation",
+      "level": "method",
+      "parent": "kneemri.evaluation.table_separation.TableSeparation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.table_separation.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.table_separation",
       "role": null
     },
     {
