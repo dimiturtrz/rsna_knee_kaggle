@@ -10659,6 +10659,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "target": "kneemri.experiments.queue_check.QueuedArms.misarmed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
       "target": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "weight": 1
     },
@@ -10695,6 +10701,24 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.lines",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.misarmed",
+      "target": "kneemri.experiments.queue_check.QueuedArms._producing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.misarmed",
+      "target": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.misarmed",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
       "weight": 1
     },
@@ -25512,6 +25536,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._producing",
+      "label": "_producing",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.alive",
       "label": "alive",
       "level": "method",
@@ -25554,6 +25586,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.lines",
       "label": "lines",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.misarmed",
+      "label": "misarmed",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
