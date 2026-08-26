@@ -4012,3 +4012,38 @@ WHAT IT DOES NOT LICENSE. It does not say a 224 member should train 12 epochs in
 `one_cycle` a 12-epoch run is not the first 12 epochs of a 24-epoch run — the LR schedule differs
 throughout — so 0.8490 at e9 is not a prediction of what a 12-epoch arm would score, and reading it as
 one would be the same units error the board_transfer constant was quoted wrong by twice.
+
+## 2026-08-26 — nocycle224_long: the anneal is EXONERATED, and the slide is the data
+
+`nocycle224_long` = `native224_long` with one flag moved, `--one-cycle` off. Same cell, same 24 epochs,
+same 224 corpus, same seed.
+
+| arm | `one_cycle` | best holdout | at epoch | finish | s/epoch |
+|---|---|---|---|---|---|
+| `native224_long` | True | **0.8490** | e9 | 0.8325 | ~95 |
+| `nocycle224_long` | **False** | **0.8429** | **e17** | **0.8326** | ~95 |
+
+`native224_long` closed with the schedule named as the live suspect: the holdout slid for fourteen
+consecutive epochs after e9, and the `one_cycle` anneal — the mechanism that is supposed to consolidate
+in the low-LR tail — fired and bought nothing. That made the schedule MORE interesting, not less. This
+arm removes it.
+
+**The suspect is cleared, and the way it is cleared is the finding.** Without the anneal the run still
+peaks and still slides, and it lands on the SAME finish: 0.8326 against 0.8325, a gap of one ten-thousandth
+against a 0.0062 paired floor. A schedule that was causing the decline could not be deleted and leave the
+decline byte-for-byte where it was. What moves instead is WHEN the peak arrives — e17 rather than e9 — which
+is what a flat LR is supposed to do, so the flag demonstrably took effect and the null is a null about the
+mechanism rather than about the plumbing. The slide is overfitting on this corpus at this capacity; the LR
+schedule is not carrying it.
+
+Peak-to-peak the constant LR is 0.0061 WORSE, which sits exactly on the floor and is not a separation. Read
+it as "no better", not as "worse".
+
+**WHAT THIS CLOSES.** The schedule axis, `knee-fkw5`. Both endpoints of the one flag that governs the LR
+tail now read the same finish, so no further schedule variant is priced: a third setting would have to beat
+a mechanism that has twice failed to move the number it was named for. The cure for the slide is
+regularisation or data, and `mixup224_long` already tested the first of those.
+
+**WHAT IT DOES NOT SAY.** Nothing about 336. Both arms live in the 224 cell, which the resolution rows
+above price at ~0.005 below 336 offline and, through `board_transfer`'s +1.82, ~0.009 below on the board.
+224 remains a throughput lever and neither of these numbers is a member.
