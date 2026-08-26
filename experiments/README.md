@@ -3889,3 +3889,52 @@ Seat value **+0.0017** on the best subset, +0.0006 flat — the same size the ro
 the price is not an artefact of a weak pool. It sits in **every** best subset from two members to nine.
 The offline peak is five: `merged_blend + band_dense_long + band_dense + through_dense + calib_span` =
 **0.8713**.
+
+## 2026-08-26 — the mixup dose pair: the blend fired, the holdout did not move, and the data account is now outvoted 3-0
+
+`mixup224` (α = 0.2) and `mixup224_strong` (α = 0.4) against `native224` = 0.8502. One flag apart from the
+control and from each other, 224 px, twelve epochs, same 909-study holdout, same labels.
+
+| run | best | peak epoch | final train loss | vs control |
+| --- | --- | --- | --- | --- |
+| `native224` (control) | **0.8502** | 9 | 0.6066 | — |
+| `mixup224` α=0.2 | 0.8496 | 10 | 0.7369 | **−0.0006** |
+| `mixup224_strong` α=0.4 | **0.8516** | 11 (last) | 0.7908 | **+0.0014** |
+
+**Three numbers inside 0.002 — a third of the 0.0062 floor — and no ordering, since the control sits
+between the two doses.** The arm pre-registered that a dose pair would be worth more than a single point
+because "noise has no reason to respect the knob"; the knob was respected by the TRAIN loss (0.6066 →
+0.7369 → 0.7908, monotone) and ignored by the holdout. So the blend demonstrably fired and did real work
+to the fit, and the generalisation number did not care. That is `aug_long`'s signature repeated with a
+mechanism specifically chosen to be different from `aug_long`'s.
+
+**THE READING THAT MATTERS IS NOT THIS ARM'S, IT IS THE TALLY.** Three independent perturbations aimed at
+memorisation of the (study, label) pair have now left the quantity invariant:
+
+| perturbation | what it attacks | peak-to-finish decline |
+| --- | --- | --- |
+| `half_data` | example COUNT — half the studies | −0.0169 vs control −0.0182 |
+| `aug_long` | example APPEARANCE — the intensity block | −0.0169 vs control −0.0182 |
+| `mixup224` ×2 | the (study, label) PAIR itself — convex blending | holdout flat inside a third of the floor |
+
+A quantity that survives halving the dataset, changing the appearance, and convexly mixing the pair is
+not plausibly memorisation of that pair. **The overfitting diagnosis this project has carried for a week
+is outvoted by its own three tests**, and the suspect it has never varied is the SCHEDULE — `one_cycle`'s
+anneal over the 24-epoch budget where the peak-at-6 and the −0.0182 slide were both measured.
+
+**THE CONFOUND IN ALL THREE, NAMED HERE BECAUSE IT UNDERCUTS TONIGHT'S PAIR SPECIFICALLY.** The decline
+was measured on the 336/dense cell. This pair ran at 224, where `native224` over twelve epochs peaks at 9
+and slides **−0.0016** to epoch 11 — a quarter of the floor. **So mixup was tested against a control that
+had not been shown to have the defect mixup is supposed to cure**, on a budget half the length of the one
+the defect was measured over. That is a faulty-TEST reading in the CLAUDE.md sense, not a refutation of
+mixup, and it was visible in the arm header before either run: "the −0.0182 was measured over 24 epochs".
+`native224_long` (24 epochs, no mixup) is armed to settle whether the defect exists at 224 at all, with
+`mixup224_long` (α = 0.4, the dose whose curve had not finished) parked behind it on the card lock so it
+can be killed unrun if the control reads NO DEFECT.
+
+**What is NOT claimed:** that mixup does not work. It was tested at one resolution, on one budget, against
+a control with no demonstrated decline, and the honest verdict is that this SETUP could not separate it.
+What is claimed is that the three-way invariance is real and that spending a fourth arm on the data axis
+before the schedule axis has been touched once would be spending on the least likely suspect.
+
+Beads `knee-x580`. Interpretation: `interpretations/kneemri/2026-08-25_the-seat-axis-is-saturated-and-the-member-is-0.028-behind.md`.
