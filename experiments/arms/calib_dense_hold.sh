@@ -40,6 +40,22 @@
 # read exists to catch. A proxy null WITH a positive annotated read is not a refutation: it is knee-bs4l
 # reproduced, and it is the outcome the pair was built to be able to see.
 #
+# AND THAT LAST CLAUSE NEEDED A CHECK BEFORE IT COULD BE TRUSTED — 2026-08-26. A proxy null with a positive
+# annotated read is ALSO what a contaminated annotated ruler produces, and this arm cannot tell the two
+# apart from its own output. `MEASURED_AGREEMENT` is fitted on the 696 annotation cells and is a hardcoded
+# constant, so --hold-annotations drops those cells from the training TABLE and leaves the CONSTANTS
+# carrying them; `annotated_readings.withheld` reads only hold_annotations, so this exact flag pair walks
+# through the guard. The route was bounded on CPU rather than argued: level_agreement.stability refits the
+# constants on disjoint halves and prices the gap in its own binomial sigma — 1.1 / 1.5 / 0.9 / 2.0 / 0.7
+# across the five levels, four settled and only 0.82 at the line. Five scalars over 72-196 cells each are a
+# population estimate and cannot encode which study has an effusion, so the clause SURVIVES: the larger
+# annotated gain is calibration moving targets toward annotation-space, which is what it is for.
+#
+# WHAT STILL DOES NOT FOLLOW. The annotated number remains a consistency check between two rulers sharing
+# an origin, never an independent confirmation, because the constants are fitted on the ruler they are
+# scored against and no stability result changes that. Do not write this arm's annotated delta into the
+# ledger as a second, independent reading of the mechanism.
+#
 # THE HARNESS SUSPECT, NAMED IN ADVANCE. knee-p9oc: the remap's constants are POOLED across findings that
 # do not agree — the 0.68 level is assigned 0.378 while the twelve findings run 0.000 to 0.778. A null on
 # both rulers is evidence about that pooled estimate as much as about calibration.

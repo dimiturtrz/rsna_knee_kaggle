@@ -18,6 +18,26 @@ the draw. This reads the member over every annotated study it has, which is lega
 with `--hold-annotations`. Any other checkpoint is REFUSED rather than scored: a member that trained on
 those cells returns a number here, not an error, and the number would be its own supervision reflected
 back.
+
+THE REFUSAL GUARDS THE TABLE ROUTE ONLY, AND THERE IS A SECOND ONE — 2026-08-26. `withheld` reads
+`hold_annotations` and nothing else, so a `--calibrated-targets --hold-annotations` run passes it while
+its targets still carry annotation-derived values: `Supervision.MEASURED_AGREEMENT` is a hardcoded
+constant FITTED on these same 696 cells, and the hold drops the cells from the training table without
+refitting it. That is not an oversight to close by refusing more checkpoints — it is a limit on how the
+resulting number may be READ, and the flag is not the thing that decides it.
+
+WHY IT IS NOT CLOSED BY A REFUSAL. `core.data.labels.level_agreement.stability` refits the constants on
+disjoint halves of the annotated studies and prices the gap in its own binomial standard errors. Four of
+the five levels land under 2 sigma (0.7 to 1.5) and only 0.82 reaches 2.0 — so five scalars estimated from
+72-196 cells each are a population quantity, not a fit to these 58, and they cannot carry which study has
+an effusion. What calibration DOES do is move targets out of report-space toward annotation-space, so a
+larger gain here than on the report-label proxy is the mechanism working, not the score leaking.
+
+SO THE NUMBER IS A CONSISTENCY CHECK AND NEVER A CONFIRMATION. `knee-bs4l`'s +0.0129 annotated against
++0.0072 proxy survives this, but a calibrated arm's annotated read is scored on the ruler its constants
+were fitted against, and no stability result changes that. Quote it as agreement between two rulers that
+share an origin; an INDEPENDENT annotated number needs constants refitted on a held half, which needs a
+retrain, and no arm has spent one.
 """
 
 import logging

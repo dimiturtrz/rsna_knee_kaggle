@@ -5971,6 +5971,24 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.LevelAgreement.stability",
+      "target": "core.data.labels.level_agreement.LevelAgreement.gap_sigma",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.LevelAgreement.stability",
+      "target": "core.data.labels.level_agreement.LevelAgreement.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.LevelAgreement.stability",
+      "target": "core.data.labels.level_agreement.LevelAgreement.refit",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.labels.level_agreement.main",
       "target": "core.data.labels.level_agreement.LevelAgreement",
@@ -5992,6 +6010,12 @@
       "kind": "calls",
       "source": "core.data.labels.level_agreement.main",
       "target": "core.data.labels.level_agreement.LevelAgreement.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.level_agreement.main",
+      "target": "core.data.labels.level_agreement.LevelAgreement.stability",
       "weight": 1
     },
     {
@@ -22666,6 +22690,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement.gap_sigma",
+      "label": "gap_sigma",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement.halves",
+      "label": "halves",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.level_agreement.LevelAgreement.inverted",
       "label": "inverted",
       "level": "method",
@@ -22682,8 +22722,24 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement.refit",
+      "label": "refit",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.level_agreement.LevelAgreement.spread",
       "label": "spread",
+      "level": "method",
+      "parent": "core.data.labels.level_agreement.LevelAgreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.level_agreement.LevelAgreement.stability",
+      "label": "stability",
       "level": "method",
       "parent": "core.data.labels.level_agreement.LevelAgreement",
       "role": null

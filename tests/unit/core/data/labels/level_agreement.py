@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from core.data.labels.level_agreement import STUDY, THIN, LevelAgreement
+from core.data.labels.level_agreement import HALVES, STUDY, THIN, LevelAgreement
 from core.findings import TARGETS
 
 MILD = 0.68
@@ -64,3 +64,55 @@ def test_inverted():
     softened, gold = _tables([(MILD, 1.0), (MILD, 0.0), (MILD, 0.0), (MILD, 0.0), (MILD, 0.0)])
 
     assert agreement.inverted(agreement.rates(softened, gold)) == [], "0.200 and 0.378 share a side of 0.5"
+
+
+def test_halves():
+    """The annotated studies land in disjoint interleaved groups, covering all of them exactly once."""
+    agreement = LevelAgreement(MEASURED)
+    reader, annotated = _tables([(MILD, 1.0)] * (THIN * 2))
+
+    groups = agreement.halves(reader, annotated)
+
+    assert len(groups) == HALVES, "one group per half"
+    assert set(groups[0]).isdisjoint(set(groups[1])), "a study cannot fit its own held-out constant"
+    assert sorted(list(groups[0]) + list(groups[1])) == sorted(reader.index), "every study is placed once"
+
+
+def test_refit():
+    """The constant a subset alone would produce, beside the cells it rests on."""
+    agreement = LevelAgreement(MEASURED)
+    reader, annotated = _tables([(MILD, 1.0), (MILD, 1.0), (MILD, 0.0), (MILD, 0.0)])
+
+    whole = agreement.refit(reader, annotated, reader.index)
+    part = agreement.refit(reader, annotated, reader.index[:2])
+
+    assert whole[MILD] == (0.5, 4), "two of four annotated positive at the mild level"
+    assert part[MILD] == (1.0, 2), "the subset holds only the positive pair, and says so with its n"
+    assert whole[CONFIDENT][1] == 0, "a level nobody was assigned rests on no cells"
+
+
+def test_gap_sigma():
+    """How far two independent estimates drift by chance — smaller as the cells behind them grow."""
+    tight = LevelAgreement.gap_sigma(0.5, [100, 100])
+    loose = LevelAgreement.gap_sigma(0.5, [10, 10])
+
+    assert tight < loose, "more cells, less room for the halves to disagree by chance"
+    assert LevelAgreement.gap_sigma(0.5, [0, 0]) == 0.0, "no cells contribute no variance rather than dividing"
+
+
+def test_stability():
+    """A level whose halves sit apart by less than their own noise reads as settled, not as moving."""
+    agreement = LevelAgreement(MEASURED)
+    balanced = [(MILD, 1.0), (MILD, 1.0), (MILD, 0.0), (MILD, 0.0)] * THIN
+    reader, annotated = _tables(balanced)
+
+    mild = next(line for line in agreement.stability(reader, annotated) if "level 0.68" in line)
+
+    assert "sigma" in mild, "the gap is priced in its own standard errors, never in a flat distance"
+    assert "settled" in mild, "a period-four fixture puts both annotations in both halves, so neither drifts"
+
+    split, gold = _tables([(MILD, 1.0), (MILD, 0.0)] * THIN)
+
+    moved = next(line for line in agreement.stability(split, gold) if "level 0.68" in line)
+
+    assert "MOVES" in moved, "alternating rows interleave into an all-positive half and an all-negative one"
