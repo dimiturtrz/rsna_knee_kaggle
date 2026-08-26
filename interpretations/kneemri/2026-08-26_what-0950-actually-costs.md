@@ -74,10 +74,12 @@ consequences, and they pull against each other:
 
 ## What is in the stack, and what it is blocked on
 
-- **RAD-DINO** (`knee-fh31`) — pre-registered directional band 0.856–0.865 = **+0.005 to +0.014
-  offline**. Alone sufficient at its upper half. The 2026-08-23 reading is void twice over (mis-fed
-  normalization + killed at epoch 7 of 12, `knee-6477`), so this is a cold re-run, ~3.3 h, reads on a
-  fold-0 holdout, **costs no slot**. Card-blocked: celltrack holds it 5–7 h from ~09:20Z.
+- ~~**RAD-DINO** (`knee-fh31`) — pre-registered directional band 0.856–0.865 = **+0.005 to +0.014
+  offline**. Alone sufficient at its upper half.~~ **RAN AND REFUTED, 2026-08-26.** The cold re-run
+  converged (12 of 12, peak 0.8141 at e7, then a clean four-epoch decline — not a truncation floor) and
+  read **−0.0371 against `base_dense_s2026`'s 0.8512**, six times the paired floor, with the
+  initialisation weights as the only variable. It was the biggest single entry in this stack and it is
+  gone; nothing else here has a pre-registered band reaching +0.010 alone. **Do not re-queue it.**
 - **blendsix** — five members refitted on harmonised labels and geometry. This is the *other* route:
   it raises the FLOOR of every seat, which is `knee-urvf`'s own prescription for moving an ensemble.
   All five are `--fold -1`, so it reads **only on the board**, i.e. not before the 00:00Z reset.
@@ -119,3 +121,27 @@ on one member**, and the ensemble is not going to be talked into supplying it.
 The dose-6 endpoint is still the clean separator and is still worth a slot — but slot 5 is held by owner
 directive (`knee-pubw`), which beats the bead's own firing rule. It waits for 2026-08-27, and it is asked
 for before it is spent.
+
+## Update 2026-08-26 13:2xZ — the stack has no named member left, and that is the finding
+
+Two hours after this page was written its own inventory has emptied from the top. RAD-DINO — the only
+bullet whose pre-registered band reached the required **+0.010 offline on its own** — ran to convergence
+and read **−0.0371**. `blendthree` tested the other route on the board and read **0.939 flat**. So both
+of the two things this page named as capable of closing the distance have now been measured, and both
+returned nothing.
+
+**What survives is not a lever but a search.** `knee-s9cr` (P0) is the honest form of the remaining plan:
+the two best self-reported singles on the board (0.942 and 0.938) are both at **224 px**, and the 0.942
+was reached from 0.934 by unnamed *"tweaks"*. Our own `native224` prices 224 px at **−0.0023 against a
+0.0062 floor** — flat — while costing **94 s/epoch instead of 290**. An unnamed tweak is found by trying
+many, and 224 px is what buys many: **~19 min an arm instead of ~40**, roughly **2.3× the attempts per
+free card hour**, at a resolution cost our own ledger measures as zero.
+
+That reframes the arithmetic on this page one last time. The distance is still **+0.010 offline on one
+member**, and it is now to be *searched for* rather than spent on a named bet — which means the scarce
+resource stopped being submission slots (four spent, one held, none available until 00:00Z) and became
+**card hours and attempt count**. Every exploratory arm from here runs at 224 px unless it is a
+single-variable measurement against a 336 px control that already exists.
+
+The four queued dense-corner arms stay at 336 as written: each carries a pre-registration against
+`band_dense_hold`, and moving them would throw the control away to save twenty minutes.
