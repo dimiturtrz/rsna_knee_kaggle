@@ -33,8 +33,22 @@
 # uniformly across all twelve labels refutes the MECHANISM while the mean still reads as a win, which
 # is what the per-label read exists to catch.
 #
-# DO NOT LAUNCH THIS BEFORE calib_span LANDS. If the calibration is flat or negative on the span
-# corner, this corner is dead by the same measurement and the slot belongs elsewhere.
+# bead: knee-ep74
+#
+# THE BLOCKING CONDITION HAS BEEN DISCHARGED — 2026-08-26. This header used to read "DO NOT LAUNCH THIS
+# BEFORE calib_span LANDS", and calib_span landed at -0.0020, which fired the condition and closed the
+# arm unlaunched on 2026-08-19. That number no longer stands. knee-bs4l re-measured the same single
+# variable on 2026-08-25 as a matched pair with --hold-annotations on BOTH halves (calib_span_hold vs
+# band_span_hold) and read MEAN +0.0072 on the proxy and +0.0129 over the 58 annotation cells. The sign
+# flipped by 0.0092, which is 1.5x the 0.0062 paired floor. The premise the block rested on is gone.
+#
+# WHAT THAT DOES NOT LICENCE. The +0.0072 was measured in the HELD regime. This arm and its control
+# hold nothing, which is the UNHELD regime — the one that read -0.0020. So this arm does not inherit
+# the +0.0072 prior, and a null here is not a contradiction of knee-bs4l. It is run unheld on purpose:
+# a member we would actually seat trains on all 4407, so the unheld number is the one that decides
+# whether this becomes a member. knee-p9oc is the named harness suspect — the remap's constants are
+# POOLED across findings that do not agree (the 0.68 level is assigned 0.378 while the twelve findings
+# run 0.000 to 0.778), so a null is evidence about the pooled estimate as much as about calibration.
 #
 # NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB, which is what
 # band_dense's own run reproduced after its hand-typed 26 OOMed.
