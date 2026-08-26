@@ -145,3 +145,81 @@ single-variable measurement against a 336 px control that already exists.
 
 The four queued dense-corner arms stay at 336 as written: each carries a pre-registration against
 `band_dense_hold`, and moving them would throw the control away to save twenty minutes.
+
+## Update 2026-08-26 15:3xZ — the page's central arithmetic is wrong, and a seat measurement says so
+
+Every number above rests on one equation, stated on line 34 and never tested:
+
+```
+ensemble  =  best single  +  bonus (+0.0125)
+```
+
+It says a member gain passes through to the ensemble **at 1.0**, so +0.010 offline on one member buys
++0.010 offline on the ensemble and, at `board_transfer` +1.72, first place. That is the assumption the
+whole page is built on, and this project has now measured it.
+
+`calib_dense_hold` is the best offline single member this repo has ever produced — 0.8634, **+0.0056**
+over `band_dense`'s 0.8578 at the same corner, replicated in sign at `calib_span`. Priced into a seat by
+`kneemri.kaggle.seat_value --against gradeswap_v1` (0.933 board, 7 members, every one of them scoreable —
+the pinned champion cannot be priced at all because five of its six members are `_ff` full-fit):
+
+```
+roster of 7:                              0.8694
+  + calib_dense_hold                      0.8704   (+0.0010)
+  + band_dense_hold                       0.8695   (+0.0001)
+best seat each could take:
+  calib_dense_hold for grade_ladder:      0.8707   (+0.0013)
+  band_dense_hold  for grade_ladder:      0.8696   (+0.0002)
+0 of 2 clear +0.0015, under which this ruler has never been shown to pick a board tick
+nearest neighbour: calib_dense_hold 0.9273 (mean 0.8925) · band_dense_hold 0.9119 (mean 0.8885)
+seated spread: 0.8801 – 0.9248
+```
+
+**+0.0056 solo became +0.0013 in a seat. Pass-through is 23%, not 100%.**
+
+And the mechanism is legible in the same block: `calib_dense_hold`'s nearest seated neighbour is **0.9273**,
+higher than the entire seated spread's top (0.9248). Our best member is also our **most redundant**
+candidate. That is not a coincidence — it is what "better model, same question, same supervision, same
+pixels, same pooling" produces, which is
+`2026-08-24_architecture_diversity_is_closed_and_the_empty_cell_is_strong_and_distant.md`'s mechanism
+arriving from the other direction. Raising a member's quality moves `mean member error` down and takes
+`ambiguity` down with it.
+
+**What this reprices.**
+
+| claim on this page | at 1.0 pass-through | at 0.23 |
+|---|---|---|
+| +0.010 offline single ⇒ first place | 0.950+ | ≈ +0.0023 ensemble ⇒ **0.943** |
+| `stack3` (`knee-nu1m`), +0.0106 if every term is real and additive | 0.951 | ≈ +0.004 board ⇒ **0.943** |
+
+So the ceiling of the entire queued member-quality lane is **0.943, not 0.950** — which is, exactly, the
+number the owner named as enough for today, and is not first place. This does not kill the lane; it
+prices it honestly for the first time.
+
+**And it explains the flat band.** Ten board entries at 0.936–0.939 spanning count, member identity, fold
+status, encoder family, vote rule, serving views, corpus and supervision are what a 23% pass-through looks
+like from the outside. Nothing was wrong with those entries. The seats were being filled with better
+answers to the same question.
+
+**What survives, and it is one thing.** The board sequence 0.925 → 0.928 → 0.929 → 0.930 → 0.931 → 0.932 →
+0.933 → **0.939** has exactly one jump larger than a tick, and it is `blendseat` at **+0.006**. Five of its
+six members are `_ff` — full-fit, trained on fold 0 as well, +20% data. In the same window `blendthree`
+swapped three seats for better-*supervised* twins and read **0.939 flat**. Same board, same six seats:
+supervision bought zero, data bought +0.006. Data is also the only axis in this ledger that has ever
+cleared the significance bar in either direction (`half_data` −0.0234, `quarter_data` −0.0671, a concave
+curve whose next doubling extrapolates to ≈ +0.009).
+
+**The three caveats, stated before the consequence.** (1) `n = 1` seat measurement of the pass-through, on
+one pool, against one board entry. (2) `gradeswap_v1` is 0.933, not the 0.939 champion, so the pool priced
+against is one board tick weaker and possibly less saturated, which if anything makes 23% an
+**over**-estimate. (3) The `_ff` route reads on the board only — a full-fit member has seen the holdout, so
+it cannot be scored offline at all, which is why the +0.006 was never explained until now.
+
+**The consequence for the queue.** `stackfit` (`knee-orjq`) is still worth its card: it tests additivity,
+which is a fact about the method and is what licenses or kills the whole stack idea. But `stack3` is no
+longer a route to 0.950 and must not be sold as one — and it is the *wrong* lever for the ensemble even if
+every term in it is real, because it is `calib_dense_hold` plus more flags on the same model, so its
+nearest neighbour will be ≥ 0.927. More redundant, not less.
+
+The route to 0.950 is not on this page any more. It is either data (`_ff` refits, the blocked external
+corpora) or the empty cell — a member whose own loss is asked to produce ambiguity rather than hoped to.
