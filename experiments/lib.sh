@@ -293,6 +293,23 @@ FOREIGN_WAITS=60
 # process that parks 20 GB and never exits idle our whole queue in silence; an hour is longer than any
 # arm we run, so a real trainer on the other side clears well within it.
 
+compute_tenants() {
+  # The pids COMPUTING on this card, read off the driver's plain report — one line per holder, empty
+  # when the card is idle.
+  #
+  # NOT `--query-compute-apps`, which on this display driver enumerates every client of the device
+  # (thirty-one of them, Explorer and two Firefoxes included) and answers `[N/A]` for every one of their
+  # memory figures. The `Type` column that separates `C` from `C+G` exists in no CSV query, so this
+  # parses the human table for it, exactly as `kneemri.experiments.card_check` does and for the reason
+  # recorded there.
+  #
+  # The pid is matched as the last numeric field BEFORE the type rather than by column index, because a
+  # card without MIG prints `N/A` for `GI`/`CI` and one with it prints numbers, which moves every index.
+  nvidia-smi 2>/dev/null | awk '
+    { gsub(/\|/, " ") }
+    { for (i = 1; i < NF; i++) if ($i ~ /^[0-9]+$/ && $(i + 1) == "C") { print $i; break } }'
+}
+
 wait_for_free_card() {
   # Wait out a CUDA process this lock cannot see — one belonging to ANOTHER REPOSITORY.
   #
@@ -323,6 +340,25 @@ wait_for_free_card() {
     # Refusing to run because we could not measure would turn a missing tool into a stalled queue.
     case "$free" in ''|*[!0-9]*) return 0 ;; esac
     [ "$free" -ge "$needs" ] && return 0
+    # NOBODY IS COMPUTING, so there is nothing to wait for and the shortfall is the display driver.
+    #
+    # MEASURED 2026-08-26, on a card granted to us for the whole day: `free` read 29981 MiB against a
+    # 20-slice recipe's derived 29992 — ELEVEN MiB short — with no compute process on the device at all.
+    # This card keeps ~2.6 GB in window-manager and browser clients that appear in `memory.free` and
+    # never release it, so for the shipped recipe the free-VRAM test cannot pass on an idle card. The
+    # arm would have parked the full FOREIGN_WAITS hour and then started anyway, into a card that was
+    # free the whole time: an hour of the grant spent, and no paging prevented, because the thing this
+    # gate exists to wait out was not there.
+    #
+    # THE TENANT TEST IS THE ONE THAT MATCHES THE MECHANISM. PCIe paging comes from another TRAINER
+    # holding gigabytes it will not give back, not from a compositor's framebuffer — a co-tenant is a
+    # process, and the driver names them. Same `Type` column, matched `C` exactly and never as a prefix,
+    # that `kneemri.experiments.card_check` documents at length: `C+G` is Explorer and Firefox, and
+    # reading it loosely reports twenty-four holders of an empty card.
+    if [ -z "$(compute_tenants)" ]; then
+      [ "$waited" -gt 0 ] && echo "card is free after ${waited}m: no process computes on it (${free} MiB free)"
+      return 0
+    fi
     if [ "$waited" -ge "$FOREIGN_WAITS" ]; then
       echo "STARTING ANYWAY after ${waited}m: only ${free} MiB free, want ${needs}. Expect PCIe paging" >&2
       return 0
