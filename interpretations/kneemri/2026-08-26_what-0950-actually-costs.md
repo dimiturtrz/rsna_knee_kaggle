@@ -81,7 +81,12 @@ consequences, and they pull against each other:
 - **blendsix** — five members refitted on harmonised labels and geometry. This is the *other* route:
   it raises the FLOOR of every seat, which is `knee-urvf`'s own prescription for moving an ensemble.
   All five are `--fold -1`, so it reads **only on the board**, i.e. not before the 00:00Z reset.
-- **Untried recipe axes** — mixup (`knee-x580`) is the one never attempted.
+- **Untried recipe axes** — mixup (`knee-x580`) was the one never attempted. It has since been run and
+  **closed in its own band 2**: peak 0.8505 vs the matched control's 0.8490 (**+0.0015, a quarter of the
+  noise floor**), while the peak→finish slide halved, 0.0088 against 0.0165. The regulariser fires — final
+  train loss 0.2 higher, peak three epochs later — and the ceiling does not move. It contributes **nothing**
+  to the stack; it is a free rider for long-budget arms. Its real yield is a separation: the slide is
+  memorisation and is curable, and curing it returns +0.0015, so **the slide is not the bound**.
 - **Owner-blocked** — MRNet (`knee-ombx`), fastMRI+ (`knee-3oy8`). Both attack the representation gap
   (`knee-jk3`, 0.044 at matched train loss) that four closed lanes — resolution, crop geometry, the
   label axis, laterality — have now left as the only live suspect.
@@ -93,3 +98,24 @@ inside a better-diversified ensemble reaches 0.950 with **no member improvement 
 is the right bet rather than a floor-raiser. If it is +0.011, the ensemble axis is spent and only the
 member matters. **blendsix's board reading is the experiment that separates those two worlds**, and it
 is worth a slot for that reason and not for its score.
+
+## Update 2026-08-26 06:24Z — the floor-raise was tested at half strength and bought nothing
+
+`blendthree_v1` (ref 55787345) is that experiment at **dose 3 of 6**: the champion's exact six seats,
+vote rule, count, kit and serving config, with three seats swapped for their own blend-supervised twins
+on harmonised labels and 12/0.2-0.8 geometry. It read **0.939 — the champion's own number, to the tick.**
+
+That is the first DIRECT board test of `knee-urvf`'s floor-raise prescription, and raising the floor of
+**three of six** members moved the ensemble by zero. It does not refute dose 6 — a linear dose effect
+reads flat at the midpoint, which the pre-registration said before the number — but it lowers its prior,
+and it is the tenth entry in the 0.936–0.939 band, now spanning count, member identity, fold status,
+regularisation, encoder family, architecture family, vote rule, serving views, corpus and supervision.
+
+**The page's own falsifier now points one way.** Ten flat readings are not what a +0.026 bonus looks
+like; they are what a spent axis looks like. Planning weight moves further onto the **tight** bonus
+(+0.0125) and therefore onto the member: the remaining distance to first place stays **+0.010 offline
+on one member**, and the ensemble is not going to be talked into supplying it.
+
+The dose-6 endpoint is still the clean separator and is still worth a slot — but slot 5 is held by owner
+directive (`knee-pubw`), which beats the bead's own firing rule. It waits for 2026-08-27, and it is asked
+for before it is spent.
