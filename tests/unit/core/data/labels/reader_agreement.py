@@ -190,3 +190,43 @@ def test_blind():
     assert ReaderAgreement().blind(default, default) == "", "the default read against itself is readable"
     reread = _table([0.7, 0.4], ["NO", "NO"])
     assert ReaderAgreement().blind(reread, default) == "", "a table with its OWN verdicts is what this tool reads"
+
+
+def _silent_cells() -> pd.DataFrame:
+    """Six cells: three the reader spoke on, three it abstained on, only one of which hides a positive."""
+    return pd.DataFrame(
+        [
+            ("s1", "en", "ACL", "YES", 1.0),
+            ("s1", "en", "MCL", "YES", 0.0),
+            ("s1", "en", "Effusion", "NO", 0.0),
+            ("s2", "en", "Synovitis", "UNK", 1.0),
+            ("s2", "en", "Fracture", "UNK", 0.0),
+            ("s2", "en", "Baker's", "UNK", 0.0),
+        ],
+        columns=["study", "language", "target", "verdict", "truth"],
+    )
+
+
+def test_silence():
+    """How many cells the reader abstained on, and how many of them the radiologist calls positive.
+
+    The second number is the point: an UNK cell the radiologist also calls negative is already right at
+    the prior, so `hidden` — not the abstention count — bounds what filling the silence can buy.
+    """
+    census = ReaderAgreement().silence(_silent_cells())
+
+    assert census["cells"] == 3.0
+    assert census["share"] == pytest.approx(0.5)
+    assert census["hidden"] == 1.0, "only Synovitis hides a positive; two abstentions are already right"
+    assert census["positive_silent"] == pytest.approx(1 / 3)
+    assert census["positive_spoken"] == pytest.approx(1 / 3)
+
+
+def test_silence_report():
+    """The silence bound printed BESIDE the over-calling it competes with, and a per-finding split."""
+    lines = ReaderAgreement().silence_report(_silent_cells())
+    text = "\n".join(lines)
+
+    assert "3 silent cells of 6 (50.0%)" in text
+    assert "fixes at most 1 cells; over-calling costs 1" in text, "both failure modes on one line"
+    assert text.index("Synovitis") < text.index("Fracture"), "ranked by hidden positives, not by silence"

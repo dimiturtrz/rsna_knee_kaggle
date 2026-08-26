@@ -35,6 +35,8 @@ SEED = 2026
 INTERVAL = (2.5, 97.5)
 ENGLISH = "en"
 POSITIVE = "YES"
+SILENT = "UNK"
+"""The verdict that is an abstention rather than a read — the whole subject of `silence`."""
 
 VERDICT_SUFFIX = "__verdict"
 DEFAULT_TABLE = "report_labels_v2.csv"
@@ -259,6 +261,60 @@ class ReaderAgreement:
         positives = cells[cells["verdict"] == POSITIVE]
         return {str(label): (len(group), float(group["truth"].mean())) for label, group in positives.groupby("target")}
 
+    def silence(self, cells: pd.DataFrame) -> dict[str, float]:
+        """What the reader's SILENCE actually costs, measured against the radiologist rather than assumed.
+
+        `knee-pju4` rests on one number: 27.3% of all 52,872 (study, finding) pairs carry an UNK verdict
+        and are filled with a base-rate prior instead of a read, and filling them with a local reader is
+        proposed as the largest remaining lever. That is a coverage statistic. It says how much the reader
+        did not say; it does not say how much of what it did not say was POSITIVE, and only the second
+        number bounds what filling the silence can buy.
+
+        This is that bound. An UNK cell the radiologist also calls negative is already right at the prior
+        (0.28 sits below the midpoint), so a perfect silence-filler changes nothing there. The cells a
+        perfect filler could fix are exactly the UNK cells the radiologist calls POSITIVE, and `hidden`
+        counts them.
+
+        STATE THE DENOMINATOR: 684 cells over 57 annotated studies, 1.3% of the corpus, and the only
+        ground truth here that is not the reader's own output. `hidden` is a small integer and carries no
+        interval — read it as a ratio against the reader's other error mode, never as a rate to project
+        onto 14,445 cells.
+        """
+        spoken = cells[cells["verdict"] != SILENT]
+        silent = cells[cells["verdict"] == SILENT]
+        positive = silent["truth"] > MIDPOINT
+        return {
+            "cells": float(len(silent)),
+            "share": float(len(silent) / len(cells)) if len(cells) else float("nan"),
+            "hidden": float(positive.sum()),
+            "positive_silent": float(positive.mean()) if len(silent) else float("nan"),
+            "positive_spoken": float((spoken["truth"] > MIDPOINT).mean()) if len(spoken) else float("nan"),
+        }
+
+    def silence_report(self, cells: pd.DataFrame) -> list[str]:
+        """The silence bound beside the over-calling it competes with, so the two are priced together.
+
+        Printed as a comparison rather than alone because that is the decision it informs: a reader built
+        to fill silence and a reader built to stop over-calling are different readers, and the annotated
+        studies say which failure is larger before either is built.
+        """
+        census = self.silence(cells)
+        wrong = self.errors(cells)
+        over = int((wrong["kind"] == "false positive").sum())
+        lines = [
+            f"{census['cells']:.0f} silent cells of {len(cells)} ({census['share']:.1%}), the radiologist "
+            f"calls {census['positive_silent']:.1%} of them positive against {census['positive_spoken']:.1%} "
+            "where the reader spoke",
+            f"  a perfect silence-filler fixes at most {census['hidden']:.0f} cells; over-calling costs {over}",
+        ]
+        silent = cells[cells["verdict"] == SILENT]
+        counts = silent.groupby("target")["truth"].agg(["size", lambda column: int((column > MIDPOINT).sum())])
+        counts.columns = ["silent", "hidden"]
+        lines.append(f"  {'finding':18s} {'silent':>6s} {'hidden':>7s}")
+        for target, row in counts.sort_values("hidden", ascending=False).iterrows():
+            lines.append(f"  {target:18s} {row['silent']:6d} {row['hidden']:7d}")
+        return lines
+
     def report(self, cells: pd.DataFrame) -> list[str]:
         """Per-language agreement on the reader's positive calls, then the English/non-English gap."""
         positives = cells[cells["verdict"] == POSITIVE]
@@ -296,6 +352,8 @@ def main() -> None:
     # WHAT a replacement reader must do differently, beside how well this one agrees. The two are
     # separate questions and the second is the actionable one.
     command.report(agreement.error_report(cells))
+    # And what the reader's SILENCE is worth, which is the premise of every proposal to replace it.
+    command.report(agreement.silence_report(cells))
     # And whether the report text holds a signal the reader's own verdict does not already carry, which
     # is the only thing that could fill the empty weight column (knee-mxj).
     command.report(agreement.signal_report(cells))
