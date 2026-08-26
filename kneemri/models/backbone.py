@@ -99,6 +99,15 @@ IMAGENET = Normalization((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 """What every natural-image trunk in this registry was pretrained under, and the reason a per-encoder
 field looked unnecessary for as long as the registry held only natural-image trunks."""
 
+PREPROCESSOR_FILES = ("preprocessor_config.json", "video_preprocessor_config.json")
+"""The documents a HuggingFace snapshot may state `image_mean`/`image_std` in, in the order to try.
+
+A VIDEO trunk states the same two constants under a different filename: V-JEPA2 ships only
+`video_preprocessor_config.json` and 404s on the other. A checker that knows one name therefore reads
+the one encoder here whose pretraining corpus is not images as having no declaration AT ALL — which is
+the quiet half of the failure `Normalization` exists to make loud, since an unread declaration and an
+agreeing one are indistinguishable from the outside."""
+
 
 @dataclass(frozen=True)
 class TokenConfig:
@@ -220,8 +229,10 @@ class Encoder:
     """The constants THIS checkpoint was pretrained under — see `Normalization` for what a wrong one costs.
 
     Defaulting to ImageNet is honest rather than lazy: it is what every natural-image trunk here really
-    declares, verified against each one's own config. A trunk pretrained on something else states its
-    own, and the only one so far is RAD-DINO."""
+    declares, and `tests/integration/registry_to_checkpoints` holds all nine entries to their own
+    snapshots rather than to this sentence. A trunk pretrained on something else states its own, and the
+    only one so far is RAD-DINO — so the fix that introduced this field invalidates exactly ONE arm and
+    nothing already on disk."""
 
     depth: int = 12
     """How many blocks the trunk runs, which is the factor a per-block activation bill is missing.
