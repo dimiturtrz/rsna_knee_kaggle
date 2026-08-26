@@ -2203,3 +2203,14 @@ pins, among them — and five of those carry an offline number. With them entere
 **+1.72** where kernels shipped this week quote +1.82, +1.92 and +2.14. Every one of those was fitted on
 an incomplete set. It also now reads **0 inversions in 108 resolved pairs**: where the holdout separates
 two entries by more than its own noise floor, the board has never once ordered them the other way.
+
+**`blendseat_v1` 0.939 — the corpus axis finally has a board number, and it is one tick.** `votefit`'s
+identical six with `base_dense_ff` replaced by `merged_blend_s2026`, the only member trained on external
+expert image reads (Rijeka). Vote rule, count, kit and serving config all held, so the single moving
+variable is the CORPUS one seat was fitted on. It read **0.939** against `votefit`'s 0.938, inside its
+own pre-registered 0.939–0.941 band. One tick is under the 0.0062 paired floor: this is DIRECTIONAL, not
+a result. What it does say is narrow and worth keeping — an externally-fitted member is not harmful at
+serving, which is the first evidence of that kind this project owns, every earlier merged-corpus number
+having been offline. It does **not** license the 7 h `merged_blend_ff` refit on its own.
+
+It is also the best board row this project owns, and `comp/champion.json` is pinned to it.
