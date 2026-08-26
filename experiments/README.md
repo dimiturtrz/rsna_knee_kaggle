@@ -4149,3 +4149,50 @@ number on this page is the shipped entry's value. What transfers is the SHAPE of
 — not the level. And a member from an axis this pool does not vary at all (a genuinely different encoder,
 image-derived supervision) is not tested by any of it: saturation of a pool is a statement about that
 pool.
+
+## 2026-08-26 — mixup224_long: the regulariser WORKS and the ceiling does not move (band 2, exactly as written)
+
+It finished at **04:36Z and sat unread for four hours.** `mixup224_long_s2026.full.log` held a complete
+24-epoch run with `ARM DONE` on its last line while the ledger's next two sections were written around it —
+the same asymmetry `convergence_check` exists for, one layer out: that check guards a number that HAS been
+quoted, and nothing guards a number nobody looked at. Found by grepping the arm directory for logs newer
+than the sections above it, which is now the thing to do before opening a card.
+
+Matched against the control directly above it — same 224 cell, same 24 epochs, same seed, one flag moved
+(`--mixup 0.4`).
+
+| arm | best holdout | at epoch | finish | peak→finish | final train loss |
+|---|---|---|---|---|---|
+| `native224_long` (control) | 0.8490 | e9 | 0.8325 | **−0.0165** | 0.4670 |
+| `mixup224_long` (α = 0.4) | **0.8505** | **e12** | **0.8417** | **−0.0088** | 0.6646 |
+
+**The peak is flat: +0.0015, a quarter of the 0.0062 floor.** Not a gain, and it is not read as one.
+
+**The decline is halved: 0.0165 → 0.0088.** Below the 0.0124 threshold the control's own pre-registration
+set for DEFECT REAL, so on the axis this arm was armed to move, it moved it across the line. The peak also
+arrives three epochs later (e12 vs e9), and the final train loss is 0.20 HIGHER at the same budget —
+the blend demonstrably fired and the model demonstrably memorised less. Plumbing is not a suspect here.
+
+**This is pre-registered band 2, verbatim:** *"the peak is flat but the DECLINE shrinks (peak-to-finish
+well under 0.0182) → mixup regularises as intended and the bound is elsewhere; keep it as a free rider, do
+not spend a slot."* No slot is spent. Mixup at α = 0.4 is a free rider for any long-budget arm — it costs
+nothing, it converts a 24-epoch budget from actively harmful into merely flat, and it buys no height.
+
+### What it closes, and what it hands to the next arm
+
+The **label-space regularisation account of the ceiling is now closed**, and closed with a mechanism
+rather than a shrug. The tally is no longer three perturbations that failed to move the decline; it is one
+that moved the decline cleanly and still left the peak where it was. That separates two things this repo
+had bundled: the SLIDE is memorisation and is curable, and the CEILING is not the slide. Curing the
+overfit returns +0.0015.
+
+So the bound is not the schedule (`nocycle224_long`, exonerated above), not the example count (`half_data`),
+not appearance augmentation (`aug_long`), and not label-space mixing (here). Every axis that perturbs how
+the SAME supervision is presented to the SAME encoder now reads flat. What is left is the pair this
+repo has said for two weeks it is left with: **a different representation, or different supervision** —
+`knee-jk3` and `knee-rh4t`. `raddino_dense` (cold, running since 08:43Z) is the first of those, and this
+result is why it is the right thing to have on the card rather than another regulariser dose.
+
+**Limits.** 224 only; nothing here is a statement about the 336/dense cell where −0.0182 was measured, and
+the α = 0.4 dose was chosen because its curve had not flattened at 12 epochs, not because it was swept at
+24. A dose sweep is not priced — it would be sweeping a knob that already returned its answer.
