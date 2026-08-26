@@ -51,6 +51,23 @@ def test_unpaired(tmp_path: Path) -> None:
     assert widths["MCL"] > 0.0
 
 
+def test_absolute(tmp_path: Path) -> None:
+    """One arm's absolute mean carries a NON-zero width even against itself — nothing pairs it away.
+
+    Scored on an IMPERFECT predictor, deliberately: `_signal` separates the classes exactly, so every
+    resample of it scores 1.0 and the width would be zero for want of an error to measure rather than
+    because the construction cancels one.
+    """
+    floor = PairedFloor(_power(tmp_path))
+    signal = _signal()
+    signal[:40] = 0.5
+
+    width = floor.absolute(signal, _truth(), RESAMPLES)
+
+    assert width > 0.0, "an absolute mean has sampling error the paired construction cannot cancel"
+    assert width > floor.paired(signal, signal, _truth(), RESAMPLES)["MCL"]
+
+
 def test_tightening(tmp_path: Path) -> None:
     floor = PairedFloor(_power(tmp_path))
 

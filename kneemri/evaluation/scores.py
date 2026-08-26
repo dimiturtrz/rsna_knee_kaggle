@@ -124,6 +124,43 @@ class LabelScores:
             for target, values in deltas.items()
         }
 
+    def mean_interval(
+        self,
+        predictions: NDArray[np.float64],
+        targets: NDArray[np.float32],
+        resamples: int = RESAMPLES,
+    ) -> tuple[float, float]:
+        """The 95% interval of ONE arm's own mean, by bootstrap over studies.
+
+        This is the UNPAIRED companion to `paired_interval`, and it answers a different question. The
+        paired interval - and the 0.0062 floor this project quotes everywhere - measures how far two
+        arms scored on the SAME holdout can differ by chance. It says nothing about how far a single
+        arm's ABSOLUTE mean sits from the mean it would score on another 909 studies drawn the same
+        way, because the shared per-study difficulty that the pairing cancels is exactly what dominates
+        an absolute number.
+
+        WHY THAT MATTERS HERE. Every cross-corpus comparison this project has made reads an absolute
+        mean: a member's 0.8502 against a forum post's 0.942, a holdout number pushed through the +1.82
+        board transfer, an ensemble's offline mean set beside its board score. None of those is a paired
+        comparison and none of them may use the paired floor - the floor is the wrong ruler for them, and
+        it is the narrower one, so using it overstates every such claim. This measures the right one.
+
+        Bootstrap over STUDIES, not over labels: the twelve per-label AUCs are twelve readings of the
+        same 909 studies, so resampling labels would treat one sample as twelve. Seeded for the same
+        reason `paired_interval` is seeded.
+        """
+        generator = np.random.default_rng(BOOTSTRAP_SEED)
+        studies = targets.shape[0]
+        means: list[float] = []
+        for _ in range(resamples):
+            drawn = generator.integers(0, studies, size=studies)
+            drawn_mean = self.mean(predictions[drawn], targets[drawn])
+            if not np.isnan(drawn_mean):
+                means.append(drawn_mean)
+        if not means:
+            return (float("nan"), float("nan"))
+        return (float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5)))
+
     def mean(self, predictions: NDArray[np.float64], targets: NDArray[np.float32]) -> float:
         """The competition's score: the unweighted mean over the twelve findings.
 

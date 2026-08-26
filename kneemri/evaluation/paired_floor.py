@@ -79,6 +79,24 @@ class PairedFloor:
         """How many times tighter the paired interval is, per label. The bead's claim is about eleven."""
         return {target: unpaired[target] / paired[target] if paired.get(target) else float("nan") for target in TARGETS}
 
+    def absolute(
+        self,
+        predictions: NDArray[np.float64],
+        targets: NDArray[np.float32],
+        resamples: int = RESAMPLES,
+    ) -> float:
+        """The 95% width of ONE arm's absolute mean — the ruler for a claim that has no pair.
+
+        The two widths this class already prints are both about a DIFFERENCE between arms scored on the
+        same studies. A large share of this project's claims are not differences at all: a member's mean
+        set beside a forum post's number, a holdout mean pushed through the +1.82 board transfer, an
+        offline mean read against the board score it produced. Those compare an absolute number to
+        something measured elsewhere, and the paired floor - the narrowest of the three - is the wrong
+        ruler for every one of them.
+        """
+        low, high = self.scores.mean_interval(predictions, targets, resamples)
+        return high - low
+
     def mean_width(self, widths: dict[str, float]) -> float:
         """The mean width over labels that are defined at all."""
         return float(np.nanmean(list(widths.values())))
@@ -113,6 +131,13 @@ class PairedFloor:
             self.mean_width(paired),
             self.mean_width(unpaired),
             float(np.mean(finite)),
+        )
+        logger.info(
+            "%-18s %9.4f %9s %8s",
+            "ABSOLUTE MEAN",
+            self.absolute(first, targets, resamples),
+            "-",
+            "-",
         )
         return paired
 

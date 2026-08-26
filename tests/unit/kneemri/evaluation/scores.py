@@ -121,3 +121,29 @@ def test_paired_interval():
     assert low <= observed <= high, "the band must bracket the delta it bounds"
     assert (high - low) < 0.067, "a paired band must beat the unpaired bound it replaces"
     assert scores.paired_interval(first, second, truth, resamples=120) == interval, "seeded, so it is quotable"
+
+
+def test_mean_interval():
+    """One arm's absolute mean carries a band, and it is WIDER than the paired band on the same data.
+
+    That ordering is the whole point of the method: the paired interval cancels the per-study difficulty
+    two arms share, and an absolute mean cannot. Quoting the paired floor against an absolute number -
+    a member's mean against a forum post, a holdout pushed through the board transfer - therefore uses
+    the narrower ruler and overstates the claim.
+    """
+    generator = np.random.default_rng(7)
+    studies = 400
+    truth = np.zeros((studies, len(TARGETS)), dtype=np.float32)
+    for column in range(len(TARGETS)):
+        truth[generator.choice(studies, 120, replace=False), column] = 1.0
+    signal = truth + generator.normal(0, 1.0, truth.shape)
+    first = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
+    second = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
+
+    scores = LabelScores()
+    low, high = scores.mean_interval(first, truth, resamples=120)
+    paired = scores.paired_interval(first, second, truth, resamples=120)["ACL"]
+
+    assert low <= scores.mean(first, truth) <= high, "the band must bracket the mean it bounds"
+    assert (high - low) > (paired[1] - paired[0]), "an unpaired band cannot be tighter than a paired one"
+    assert scores.mean_interval(first, truth, resamples=120) == (low, high), "seeded, so it is quotable"

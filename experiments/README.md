@@ -3938,3 +3938,40 @@ What is claimed is that the three-way invariance is real and that spending a fou
 before the schedule axis has been touched once would be spending on the least likely suspect.
 
 Beads `knee-x580`. Interpretation: `interpretations/kneemri/2026-08-25_the-seat-axis-is-saturated-and-the-member-is-0.028-behind.md`.
+
+## 2026-08-26 — the absolute mean carries a band 3.4x the paired floor, and we have been quoting the wrong one
+
+`python -m kneemri.evaluation.paired_floor --labels .../report_labels_v2.csv --resamples 400`, on the
+published out-of-fold predictions. The row is new: `PairedFloor.absolute`, the 95% bootstrap width of ONE
+arm's own mean over studies, beside the two difference-widths that class already printed.
+
+| scale | paired MEAN | unpaired MEAN | **absolute mean** |
+|---|---|---|---|
+| corpus, 4,407 studies | 0.0141 | 0.0308 | **0.0093** |
+| our ruler's size, 881 studies | 0.0323 | 0.0683 | **0.0212** |
+
+At the size our holdout actually is, a single arm's absolute mean sits inside **+/-0.0106**. The floor this
+project quotes everywhere is **0.0062**, and that number is a *paired* floor — the width of a DIFFERENCE
+between two arms scored on the same studies, where the per-study difficulty both arms face cancels. It is
+the right ruler for `native224` against `native224_long`, and the WRONG ruler — by a factor of 3.4 — for
+every claim that compares an absolute number to something measured somewhere else.
+
+**Three standing claims are affected, and one of them dissolves.**
+
+- `knee-md39` cites a SIGN INVERSION as evidence the ruler is broken: offline 0.8731 scored board 0.932
+  while offline 0.8712 scored 0.937. Those two arms differ offline by **0.0019** — under a third of the
+  0.0062 paired floor, before the absolute band is even reached. That inversion is not evidence of
+  anything; it is two readings of one number. What survives in that bead is the OFFSET (+0.016 to +0.066),
+  which is far outside any of these bands and remains real.
+- The +1.82 transfer carries our own noise through it: +/-0.0106 offline is **+/-0.019 board points**, which
+  is most of the spread the constant was fitted through.
+- The 0.028 board deficit to the field's best reported single reads as 0.0154 holdout. Our side of that
+  comparison alone carries +/-0.0106, and the forum's number carries an error of its own that we cannot see.
+  So it is about 1.45 half-widths of our own instrument — a real ordering, quoted far too firmly at
+  "exactly one significance bar".
+
+**What it does NOT say.** Arm-to-arm readings on our fold are unaffected: those are paired by construction
+and 0.0062 is still their floor. This changes how a number may be compared ACROSS instruments, not how two
+of our own arms are compared to each other.
+
+Beads `knee-md39`. Code: `LabelScores.mean_interval`, `PairedFloor.absolute`.
