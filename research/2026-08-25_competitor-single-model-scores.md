@@ -105,10 +105,28 @@ That is worth more than it looks: it prices the distance between a public-notebo
 and it says the 0.942 single model is beating us **from a geometry floor we already share**. Which puts
 the remaining weight back on A, and on whatever "some tweaks" means in a recipe we cannot see.
 
-One live thread does run out of this audit. Laterality is absent on 50.7% of series and **not at
+~~One live thread does run out of this audit. Laterality is absent on 50.7% of series and **not at
 random** — Siemens tags 84.3%, Philips 38.3%, GE / Toshiba / Canon **0.0%**. That is the detection half
 of `knee-bduq` ("how do you detect which is which"), it is already half-built in `crop_laterality.py`,
-and a mirror-to-canonical augmentation would be free of both card and corpus.
+and a mirror-to-canonical augmentation would be free of both card and corpus.~~
+
+**CLOSED 2026-08-26 06:45Z, and struck rather than deleted because the error is the instructive part.**
+The 50.7% figure is a *series*-level tag rate, and I read it as a *study*-level one — the mistake this
+repo has now made four times, and the fix is the same single line of arithmetic. `diagnose_laterality`
+over all 4407 base studies (headers only, 25 s, no card, no slot) resolves **98.4%**: tag 2203, geometric
+fallback 2132, unresolved 72. The two agree on **0.986** where both exist, which is the cross-check
+`laterality.py` never had a number for — so the fallback is validated, not hopeful.
+
+Mirror-to-canonical is therefore not an unbuilt augmentation. It has been running on 98.4% of studies
+since 2026-08-11 (`study.py:59`). The residual wrong-handed minority is ~67 studies, ~1.5% of the corpus,
+which cannot produce a −0.19 Lateral Meniscus deficit. Full reasoning and the underpowered test I
+declined to run are in `knee-bduq`'s notes.
+
+What that leaves is worth more than the lane it closed: with resolution, crop geometry, the label axis
+and laterality all closed on instruments sharing no denominator, the focal deficit has **no remaining
+geometric or label-side explanation**. Three independent lanes now point at the same pair —
+REPRESENTATION (`knee-jk3`, 0.044 at matched train loss) and image-derived supervision (`knee-ombx`,
+owner-blocked). Both are what `knee-fh31`'s cold RAD-DINO arm aims at.
 
 Beads: `knee-uj15` (the arithmetic), `knee-2dk1` (the bottleneck reading), `knee-bduq` (the bilateral
 knees from 735639), `knee-6477` (raddino, arming still owner-banned).
