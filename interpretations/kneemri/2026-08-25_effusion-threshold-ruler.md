@@ -80,3 +80,44 @@ measured for Effusion and unmeasurable for the rest, not that it generalises.
 **It does not touch the modelling-headroom reading.** Our model is 0.027 below its own teacher
 (`2026-08-25_forum-bottleneck-vs-our-own-diagnostic.md`); this says the teacher itself is noisy at one
 finding's boundary. Both can be true, and the first still dominates the queue.
+
+---
+
+## Postscript 2026-08-26 — the per-finding spread this leaned on is chance at the level it leaned on
+
+This document reads Effusion's own boundary rate against the pooled constant, and the `calib_span` ledger
+row was extended with the same argument at corpus scale: at the 0.68 level the constant is 0.378 while the
+twelve findings' own rates run 0.000 to 0.778. Both readings share one unexamined step — **a wide range
+across findings was taken as evidence that the findings differ.**
+
+They hold 5–27 annotated cells each. Ten such findings, every one of them genuinely drawn from the SAME
+pooled constant, produce a wide range and cross 0.5 by sampling alone. `LevelAgreement.heterogeneity`
+draws that null: 2,000 corpora at each finding's own cell count, scoring the chi-square dispersion about
+the pooled rate and the observed range against the range chance produces.
+
+| level | findings | chi2 / df | p | range vs chance | |
+|---|---|---|---|---|---|
+| 0.08 | 11 | 8.1 / 10 | 0.615 | 0.105 vs 0.211 | consistent with pooling |
+| 0.28 | 12 | 26.1 / 11 | **0.021** | 0.341 vs 0.429 | beyond pooling |
+| 0.68 | 12 | 18.0 / 11 | 0.100 | 0.778 vs 0.833 | consistent with pooling |
+| 0.82 | 12 | 22.9 / 11 | **0.024** | 0.800 vs 0.750 | beyond pooling |
+| 0.94 | 11 | 20.3 / 10 | 0.135 | 0.400 vs 0.286 | consistent with pooling |
+
+**0.68 is the level this document is about, and it does not survive.** It carries the 6,461 mild cells, it
+holds Effusion's 0.481 against 0.378, and its headline range is *smaller* than what one constant produces.
+Heterogeneity survives at 0.28 and at 0.82 — and 0.82 is separately the one level whose pooled constant
+fails split-half at 2.0σ, and where four of the five sign inversions sit.
+
+**What still stands.** Everything measured here about the READER is untouched: a small-qualifier effusion
+is annotated positive 6 of 12, an unqualified mention 6 of 7, denials 0 of 5, moderate-or-larger 2 of 3.
+That is a statement about the map from adjective to annotation and it needed no pooling comparison. The
+document's own honest-size paragraph — 509 rows, one of twelve findings, a target moving by at most 0.18,
+nothing near the 1.5% bar — was right, and this postscript only removes the corpus-scale corroboration it
+was later given.
+
+**What does not.** Do not quote the per-finding spread at 0.68 as evidence that pooling is wrong. The
+narrow claim that survives is one level, 0.82, with Contusion (24 cells, 0.458 against 0.688) as the only
+thick row — and two of five levels at p ≈ 0.02 fail Bonferroni at α 0.01 individually, so even that rests
+on one uncorrected test. The joint count does survive (expected 0.25 tests below 0.05, observed 2,
+p ≈ 0.023), which is why the statement is "structure exists somewhere" rather than "the constants are
+fine".

@@ -1,8 +1,9 @@
 """One calibration constant per level, checked against per-finding rates built here."""
 
+import numpy as np
 import pandas as pd
 
-from core.data.labels.level_agreement import HALVES, STUDY, THIN, LevelAgreement
+from core.data.labels.level_agreement import HALVES, SEED, STUDY, THIN, LevelAgreement
 from core.findings import TARGETS
 
 MILD = 0.68
@@ -64,6 +65,34 @@ def test_inverted():
     softened, gold = _tables([(MILD, 1.0), (MILD, 0.0), (MILD, 0.0), (MILD, 0.0), (MILD, 0.0)])
 
     assert agreement.inverted(agreement.rates(softened, gold)) == [], "0.200 and 0.378 share a side of 0.5"
+
+
+def _two_findings(first: list[tuple[float, float]], second: list[tuple[float, float]]):
+    """Two findings populated over disjoint studies, so each carries its own cells at the mild level."""
+    reader, annotated = _tables(first)
+    other, gold = _tables(second, finding=OTHER)
+    other.index = pd.Index([f"other-{name}" for name in other.index], name=STUDY)
+    gold.index = other.index
+    return pd.concat([reader, other]), pd.concat([annotated, gold])
+
+
+def test_heterogeneity():
+    """A spread only thin cells explain reads as pooling; one they cannot explain reads as beyond it."""
+    agreement = LevelAgreement(MEASURED)
+    generator = np.random.default_rng(SEED)
+    apart = _two_findings([(MILD, 1.0)] * (THIN * 4), [(MILD, 0.0)] * (THIN * 4))
+
+    split = next(line for line in agreement.heterogeneity(agreement.rates(*apart), generator) if "0.68" in line)
+
+    assert "BEYOND POOLING" in split, "twenty all-positive cells beside twenty all-negative is not sampling"
+    assert "range 1.000" in split, "the range is reported beside the range chance produces, never alone"
+
+    thin = _two_findings([(MILD, 1.0)] * HALVES, [(MILD, 0.0)] * HALVES)
+
+    quiet = next(line for line in agreement.heterogeneity(agreement.rates(*thin), generator) if "0.68" in line)
+
+    assert "consistent with pooling" in quiet, "two cells each cannot distinguish a finding from the constant"
+    assert "range" not in quiet, "no finding reaches THIN cells, so no range is quoted"
 
 
 def test_halves():

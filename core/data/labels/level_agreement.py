@@ -9,6 +9,31 @@ This module measures the same object the constants estimate, WITHOUT pooling: fo
 level, how often the radiologist agreed. It needs no report text, so unlike `severity_boundary` it reads
 the non-English 59.9% too, and its Effusion row rests on 27 cells rather than that module's 12.
 
+AND THE SPREAD ITSELF NEEDED A NULL BEFORE IT COULD BE READ — 2026-08-26. `spread` prints a range and
+`inverted` names the rows crossing 0.5, and the ledger spent both as the mechanism behind `calib_span`'s
+inversion. Neither is evidence on its own: ten findings holding 5-27 annotated cells each, every one of
+them genuinely drawn from the pooled constant, produce a wide range and cross 0.5 by sampling alone.
+`heterogeneity` draws that null. Measured:
+
+    level   findings   chi2 / df    p       range vs chance
+    0.08       11      8.1 / 10    0.615    0.105 vs 0.211   consistent with pooling
+    0.28       12     26.1 / 11    0.021    0.341 vs 0.429   beyond pooling
+    0.68       12     18.0 / 11    0.100    0.778 vs 0.833   consistent with pooling
+    0.82       12     22.9 / 11    0.024    0.800 vs 0.750   beyond pooling
+    0.94       11     20.3 / 10    0.135    0.400 vs 0.286   consistent with pooling
+
+THE LEVEL THE LEDGER LEANED ON IS THE ONE THAT DOES NOT SURVIVE. 0.68 carries 6,461 mild cells, holds
+Effusion's 0.481 against 0.378 and Synovitis's 0.778, and its "0.000 to 0.778" range is the sentence the
+calib_span row quotes — and that range is SMALLER than the 0.833 those same cells produce under one
+constant. Heterogeneity survives at 0.28 and at 0.82, and 0.82 is exactly where four of the five
+inversions sit and where `stability` reads 2.0 sigma, so the pooled constant there is unstable in both
+directions at once.
+
+HOW FAR THAT MAY BE PUSHED: five levels were tested, so two at p ~ 0.02 do not survive a Bonferroni
+alpha of 0.01 individually. What does survive is the joint statement — under the null the expected count
+of p < 0.05 across five tests is 0.25 and seeing two has probability ~0.023 — so per-finding structure
+exists somewhere, while WHICH level carries it rests on a single uncorrected test each.
+
 A LEVEL THAT CROSSES 0.5 IS NOT THE SAME MISTAKE AS ONE THAT DOES NOT. The remap writes a target VALUE,
 and the metric ranks, so a constant that lands on the wrong SIDE of the finding's own rate inverts that
 finding's low-grade positives, while one that merely overshoots on the correct side only softens them.
@@ -47,6 +72,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.targets import ASSERTS_PRESENCE, MEASURED_AGREEMENT
@@ -65,6 +91,18 @@ pooled constant is not refuted by a number whose own interval spans it."""
 HALVES = 2
 """How many disjoint refits `stability` compares. Two, because the question is whether the constants are a
 population estimate, and a population estimate is one that survives being computed on someone else."""
+
+RESAMPLES = 2000
+"""How many corpora are drawn under the pooled constant to price the observed per-finding spread."""
+
+SEED = 2026
+"""The draw is seeded so two readings of the same tables cannot disagree about whether pooling holds."""
+
+DISPERSED = 0.05
+"""Below this tail fraction the per-finding spread is more than thin cells alone would produce."""
+
+SPREAD_QUANTILE = 0.95
+"""Where the simulated range is quoted, so the printed spread is read against a like-for-like number."""
 
 SETTLED = 2.0
 """How many of its OWN standard errors two half-refits may sit apart before the constant reads as a fit.
@@ -172,6 +210,57 @@ class LevelAgreement:
         variance = sum(rate * (1.0 - rate) / count for count in counts if count)
         return float(np.sqrt(variance))
 
+    def heterogeneity(self, rates: pd.DataFrame, generator: np.random.Generator) -> list[str]:
+        """Whether a level's per-finding spread is MORE than thin cells drawn from one constant produce.
+
+        `spread` and `inverted` print a range and name the rows that cross 0.5, and both were read as
+        evidence that the findings disagree. Neither is: ten findings holding 5-27 annotated cells each,
+        every one of them actually drawn from the pooled rate, produce a wide range and cross 0.5 by
+        sampling alone. Without this comparison the per-finding claim is unfalsifiable, and the ledger
+        already spends it as the mechanism behind `calib_span`'s inversion.
+
+        The statistic is the chi-square dispersion of the per-finding positive counts about the pooled
+        constant, and the null is drawn rather than tabulated — the cells are far too thin for the
+        asymptotic distribution, which is exactly the regime the whole question lives in. The observed
+        RANGE is reported beside the range those same draws produce, because the range is the number the
+        ledger quoted and it deserves its own null rather than a p-value standing in for it.
+        """
+        lines = []
+        for level in self.levels:
+            rows = rates[(rates["level"] == level) & (rates["studies"] > 0)]
+            counts = rows["studies"].to_numpy(dtype=np.int64)
+            pooled = self.pooled[level]
+            if counts.size < HALVES or pooled <= 0.0 or pooled >= 1.0:
+                continue
+            positives = np.rint(rows["rate"].to_numpy(dtype=np.float64) * counts)
+            drawn = generator.binomial(counts, pooled, size=(RESAMPLES, counts.size)).astype(np.float64)
+            observed = float(self._dispersion(positives[None, :], counts, pooled)[0])
+            tail = float((self._dispersion(drawn, counts, pooled) >= observed).mean())
+            thick = counts >= THIN
+            reported = ""
+            if int(thick.sum()) >= HALVES:
+                widths = self._width(drawn[:, thick], counts[thick])
+                span = float(self._width(positives[None, thick], counts[thick])[0])
+                reported = f"range {span:.3f} vs {float(np.quantile(widths, SPREAD_QUANTILE)):.3f} by chance   "
+            verdict = "BEYOND POOLING" if tail < DISPERSED else "consistent with pooling"
+            lines.append(
+                f"  level {level:.2f}  {counts.size} findings  chi2 {observed:.1f} on {counts.size - 1} df  "
+                f"p {tail:.3f}   {reported}{verdict}"
+            )
+        return lines
+
+    @staticmethod
+    def _dispersion(positives: NDArray[np.float64], counts: NDArray[np.int64], rate: float) -> NDArray[np.float64]:
+        """Chi-square dispersion of each row of per-finding positive counts about one shared rate."""
+        residual = positives - counts * rate
+        return np.asarray((residual**2 / (counts * rate * (1.0 - rate))).sum(axis=-1), dtype=np.float64)
+
+    @staticmethod
+    def _width(positives: NDArray[np.float64], counts: NDArray[np.int64]) -> NDArray[np.float64]:
+        """The range the per-finding rates span in each row, which is the number `spread` prints."""
+        observed = positives / counts
+        return np.asarray(observed.max(axis=-1) - observed.min(axis=-1), dtype=np.float64)
+
     def spread(self, rates: pd.DataFrame) -> list[str]:
         """Each level's per-finding rates beside the one constant standing in for all of them."""
         lines = []
@@ -220,6 +309,12 @@ def main() -> None:
     command.report(["per-finding spread against the pooled constant:", *agreement.spread(rates)])
     # The rows that invert rather than soften — a ranking metric feels these and not the others.
     command.report(["findings the pooled constant puts on the WRONG SIDE of 0.5:", *agreement.inverted(rates)])
+    command.report(
+        [
+            "is that spread more than thin cells drawn from ONE constant would produce:",
+            *agreement.heterogeneity(rates, np.random.default_rng(SEED)),
+        ]
+    )
     command.report(
         [
             "constants refitted on disjoint halves — do they estimate a population or these studies:",
