@@ -2214,3 +2214,29 @@ serving, which is the first evidence of that kind this project owns, every earli
 having been offline. It does **not** license the 7 h `merged_blend_ff` refit on its own.
 
 It is also the best board row this project owns, and `comp/champion.json` is pinned to it.
+
+**`soloseat_v1` 0.925 — the count curve's anchor, re-dated, and the ensemble premium is half what a
+stale anchor said.** `final_ws_e12` served alone: one member, `overlap=False`, the champion's kit, no
+vote rule. It exists because the only single-member board number this project owned was `solo_v4` 0.914
+from 2026-08-17, and every member built since is `--fold -1` with no holdout left to score on — so the
+question "did member quality move in nine days?" had no offline answer and only a slot could settle it.
+
+It read **0.925**, landing in its own pre-registered **0.920–0.928 DIRECTIONAL** band: +0.011 over
+`solo_v4`, real in direction, under the 1.5% house bar as a single step. Two consequences, and the
+second is worth more than the number.
+
+**The `--fold -1` suspicion is cleared.** The lowest pre-registered band (≤0.913) would have indicted
+all-data fitting at serving — no holdout to select on, EMA standing in for early stopping — and that
+implicates FIVE of the champion's six seats. It did not happen. All-data members are sound at serving,
+and the roster does not need auditing.
+
+**The ensemble premium is +0.014, not +0.025.** `interpretations/kneemri/2026-08-26_the-deficit-is-the-member.md`
+priced it off the 2026-08-17 anchor and read our six-member 0.939 as buying +0.025 over our own best
+single. Against a current single it buys **+0.014**. The member deficit against the forum's self-reported
+singles (0.938–0.942, topic 735304) narrows from 0.015–0.028 to **0.013–0.017** — still the largest
+single gap on this board, still the axis every remaining card hour belongs to, but smaller and measured
+rather than inferred from a nine-day-old row.
+
+Caveat kept from the kernel docstring: `solo_v4` was served by `members=1`, which RANKS inside the
+package rather than naming a member, so its identity is unrecoverable. This is "our best single THEN vs
+NOW", not a matched swap.

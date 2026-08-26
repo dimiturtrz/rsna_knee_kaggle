@@ -28,14 +28,21 @@ get a high leaderboard score and exposure. Waste of time IMO."*
 
 | members | board |
 | --- | --- |
-| 1 | 0.914 (`solo_v4`, 2026-08-17) |
+| 1 | 0.914 (`solo_v4`, 2026-08-17) → **0.925** (`soloseat_v1`, 2026-08-26) |
 | 4 | 0.924 – 0.928 |
 | 5 | 0.931 |
 | 6 – 7 | 0.936 – 0.939 |
 
-Ensembling buys this project **+0.025** over its own best single. A rival's *one* model reads 0.938 –
-0.942, which is our entire six-member champion. Board to board, our member deficit is **0.015 – 0.028**
-— at or above the 1.5% house bar, which nothing on the ensemble axis has been for nine days.
+**Corrected 02:06Z, after `soloseat` scored.** This section first read the 1-member point off `solo_v4`
+0.914 and concluded ensembling buys **+0.025** over our best single, with a member deficit of
+0.015 – 0.028. That anchor was nine days old, and re-dating it was the whole point of the submission
+this document argued for. A current single reads **0.925**, so ensembling buys **+0.014** and the deficit
+against the forum's singles is **0.013 – 0.017**.
+
+The reading survives the correction and is smaller: a rival's *one* model still reads 0.938 – 0.942,
+still equals our entire six-member champion, and the gap is still at the 1.5% house bar — which nothing
+on the ensemble axis has been for nine days. Two numbers in this document have now had to be halved
+after being quoted off something stale, which is the same failure twice in one sitting.
 
 That is the whole reading, and it is consistent with three things this repo already measured
 independently:
