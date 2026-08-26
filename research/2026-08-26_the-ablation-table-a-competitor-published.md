@@ -127,3 +127,52 @@ saved a card rather than spending one**, and `ema_dense`'s prior is lower than i
 
 Beads: `knee-56w5` (EMA, re-priced here), `knee-x580` (mixup, externally confirmed), `knee-q1pf` (the
 per-label ceiling).
+
+---
+
+# A second post the same day: they benchmarked the label tables against the 58, and we ran the control they did not
+
+Read live 2026-08-26 10:15Z, `--topic 737454`, posted 2026-08-25 15:52Z. No submission slot spent.
+
+Their measurement, in their words: *"Since only 58/4,407 studies carry radiologist labels, everyone is
+training on report-derived tables — but I couldn't find a comparison of them, so I measured each against
+those 58 studies."*
+
+| table | theirs | **ours** (`kneemri.evaluation.supervision_gap`) |
+|---|---|---|
+| `stevenleehans` v4 blend | 0.893 | **0.8927** |
+| `stevenleehans` v2 | 0.887 | — |
+| `pilkwang/report_labels_v2` — **ours** | 0.870 | **0.8658** |
+
+Two independent implementations of the same measurement agreeing to the third decimal. That is worth
+recording on its own: our `supervision_gap` is corroborated from outside.
+
+**The conclusion is still wrong, and the control is why.** Quantise `stevenleehans` onto our five levels
+and it reads **0.8445** — *at equal resolution our reader beats theirs by +0.021*. AUC breaks no ties, and
+`Supervision.MEASURED_AGREEMENT` ties **38.5%** of cell pairs against their 17.3%. Our table is not the
+worse table; it is the **coarser** one, and the whole 0.027 is a scale artifact (`knee-w7xa`).
+
+Their second claim fails here too. *"Averaging two independent tables beats either alone on several
+labels"* — our three-reader blend reads **0.8912** and does **not** beat its best single input at 0.8927.
+And the two tables they average are not independent: `v4hybrid` and `v4_blend` share a distinct-count, a
+min, a max and a mean. They are one reader with a `__conf` column, not two.
+
+**The hazard they do not flag.** Three public tables score **1.0000** against this ruler because they
+*contain* it — `yunusgmsoy/report_labels_v5`, `gxpixel/train_labels_final` (ships `gold_58.csv` and an
+`is_gold` column) and `rayanbabur/train_targets_soft` (ships `gold_benchmark_58.csv`). `table_blend.LEAKED`
+refuses all three by name. Anyone ranking public tables this way without that refusal is ranking leakage.
+
+Their Synovitis aside — *"only ~16% of reports mention synovitis in any of the nine languages, so it's
+largely inferred"* — is a real corpus fact and matches ours, but it prescribes nothing here:
+`research/2026-08-26_synovitis-is-not-our-weak-label.md` already records Synovitis at 0.8568, above our
+mean. Our weak labels are Fracture and MCL.
+
+**What the tick actually bought.** Not the table comparison, which was closed. Following it into the
+ledger surfaced a **stale kill**: `knee-ep74` (`calib_dense`) was closed 2026-08-19 on a blocking
+condition keyed to `calib_span`'s −0.0020, and `knee-bs4l` superseded that number on 2026-08-25 with a
+matched pair reading **+0.0072 proxy / +0.0129 annotated**. The arm is written, `arm_check`-clean, has a
+free control, costs no slot, and its own header predicts the first member this project has produced above
+0.860. Reopened at P1 and now ahead of `ema_dense` in the queue.
+
+Beads: `knee-w7xa` (coarse-not-worse), `knee-vwzj` (image-derived vs report-derived), `knee-9198` (both
+rulers), `knee-ep74` (reopened), `knee-56w5` (reordered behind it).
