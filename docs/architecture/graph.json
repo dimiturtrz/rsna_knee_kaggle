@@ -5341,6 +5341,12 @@
       "weight": 1
     },
     {
+      "kind": "inherits",
+      "source": "core.data.corpus.slot_reader.Adjacent",
+      "target": "core.data.corpus.slot_reader.Spacing",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.data.corpus.slot_reader.Band",
       "target": "core.data.corpus.slot_reader.Band",
@@ -5386,6 +5392,12 @@
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.Reading.suffix",
       "target": "core.data.corpus.slot_reader.Band.suffix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.slot_reader.Reading.suffix",
+      "target": "core.data.corpus.slot_reader.Reading.spacing_suffix",
       "weight": 1
     },
     {
@@ -5470,6 +5482,12 @@
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.SlotReader.read",
       "target": "core.data.corpus.slot_reader.SlotReader.sized",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "core.data.corpus.slot_reader.Spread",
+      "target": "core.data.corpus.slot_reader.Spacing",
       "weight": 1
     },
     {
@@ -18700,6 +18718,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Adjacent",
+      "label": "Adjacent",
+      "level": "class",
+      "parent": "core.data.corpus.slot_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.slot_reader.Band",
       "label": "Band",
       "level": "class",
@@ -18721,6 +18747,22 @@
       "level": "class",
       "parent": "core.data.corpus.slot_reader",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Spacing",
+      "label": "Spacing",
+      "level": "class",
+      "parent": "core.data.corpus.slot_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Spread",
+      "label": "Spread",
+      "level": "class",
+      "parent": "core.data.corpus.slot_reader",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -22060,6 +22102,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Adjacent.indices",
+      "label": "indices",
+      "level": "method",
+      "parent": "core.data.corpus.slot_reader.Adjacent",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.slot_reader.Band.of",
       "label": "of",
       "level": "method",
@@ -22086,6 +22136,14 @@
       "descendants": 0,
       "id": "core.data.corpus.slot_reader.Reading.reader",
       "label": "reader",
+      "level": "method",
+      "parent": "core.data.corpus.slot_reader.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Reading.spacing_suffix",
+      "label": "spacing_suffix",
       "level": "method",
       "parent": "core.data.corpus.slot_reader.Reading",
       "role": null
@@ -22184,6 +22242,22 @@
       "label": "window",
       "level": "method",
       "parent": "core.data.corpus.slot_reader.SlotReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Spacing.indices",
+      "label": "indices",
+      "level": "method",
+      "parent": "core.data.corpus.slot_reader.Spacing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_reader.Spread.indices",
+      "label": "indices",
+      "level": "method",
+      "parent": "core.data.corpus.slot_reader.Spread",
       "role": null
     },
     {
@@ -27420,6 +27494,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.members.Member.spacing",
+      "label": "spacing",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.members.Member.tie",
       "label": "tie",
       "level": "method",
@@ -30030,6 +30112,14 @@
       "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.slot_pooling",
       "label": "slot_pooling",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.spacing",
+      "label": "spacing",
       "level": "method",
       "parent": "kneemri.runs.member_record.RunOptions",
       "role": null

@@ -86,6 +86,7 @@ NOT_A_SWITCH = {
     "centre": "a cache axis",
     "band_low": "a cache axis",
     "band_high": "a cache axis",
+    "spacing": "a cache axis",
     "scheme": "a cache axis",
     "tie": "a cache axis",
     "cache_studies": "a cache axis — it is in the name as `_first{N}`",

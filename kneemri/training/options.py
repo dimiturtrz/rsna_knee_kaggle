@@ -15,7 +15,7 @@ from typing import cast, get_args, get_type_hints
 
 from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from core.data.corpus.folds import FitPositions
-from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
+from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
@@ -83,6 +83,10 @@ class TrainingOptions:
     centre: str = DEFAULT_CENTRE
     band_low: float = SLICE_BAND[0]
     band_high: float = SLICE_BAND[1]
+    spacing: str = SPREAD
+    """How the slices sit inside the band. A scalar field rather than part of `band` because
+    `Band.recorded` is a pair of floats every manifest on disk holds, and argparse's dest names land
+    as fields here."""
     tie: str = FIRST_MAXIMAL
     seed: int = 2026
     split_seed: int = 2026
@@ -224,7 +228,7 @@ class TrainingOptions:
     @property
     def reading(self) -> Reading:
         """The geometry this run decodes under — its crop and its band, which together name its cache."""
-        return Reading(crop=self.crop, band=self.band)
+        return Reading(crop=self.crop, band=self.band, spacing=self.spacing)
 
     def cache(self, directory: Path) -> StudyCache:
         """The arrays this run reads — six axes, resolved in ONE place instead of at every entrypoint.

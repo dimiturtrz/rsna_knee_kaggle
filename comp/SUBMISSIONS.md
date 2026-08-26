@@ -2321,6 +2321,23 @@ Pre-registered against the 0.939 champion, before the score:
 | **0.937–0.939** | **the most likely branch** — eleven entries on one plateau; the seating axis closes alongside vote, views, corpus and supervision |
 | **≤ 0.936** | 392 px is actively worse *in company*; resolution mixing is a hazard, not a diversity source |
 
+**SCORED 0.938** (2026-08-26 ~23:15Z). The **0.937-0.939 branch**, which is the one the entry named as
+most likely. One point below the 0.939 champion, which is a sixth of the noise floor and reads as flat,
+not as a regression: the swap neither cost nor bought anything the board can see.
+
+That is the **twelfth** consecutive entry on the 0.936-0.939 plateau, and the reading the branch
+pre-committed to now applies. **The seating axis is closed.** Eleven seating variations could not be
+separated by the offline ruler (0.8687-0.8705 against a 0.0062 floor), and the board has now failed to
+separate them either. Decode-path diversity is real where it was measured -- `knee-nas5` paid 0.014 on
+the board for collapsing three pixel groups -- but ADDING one 392 px seat to five 336 px seats does not
+buy it back, so the compression finding does not invert into a construction rule. Both 0.939 entries
+remain 6-member and `comp/champion.json` stays pinned to `blendseat_v1`.
+
+What this leaves: the last two gains came from a **vote rule** (`votefit`) and **better supervision**
+(`blendseat`), not from a seat swap, and both non-seating mechanisms outperformed every seating one.
+The next slots belong to mechanisms that change the PIXELS or the LABELS, not the roster -- which is
+exactly what `knee-e6sj` (slice contiguity) is.
+
 Fired on explicit owner authorisation for the last slot of the day, with ~1h40m left before the 00:00Z
 reset. The kernel push was refused once with `Maximum batch GPU session count of 2 reached` — the cap is
 per **account**, shared with the biohub/celltrack project, and no gate of ours asks before pushing

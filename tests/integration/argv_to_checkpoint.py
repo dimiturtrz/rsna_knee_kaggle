@@ -25,7 +25,7 @@ import torch
 
 from core.data.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
 from core.data.corpus.folds import ReportFolds
-from core.data.corpus.slot_reader import IMAGE_SIZE, Band, Reading
+from core.data.corpus.slot_reader import ADJACENT, IMAGE_SIZE, SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, DETAIL_MM, LAST_MAXIMAL, MULTISCALE_SCHEME, SCHEMES, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.findings import TARGETS
@@ -64,11 +64,12 @@ def _corpus(
     routing: Routing | None = None,
     crop: Crop | None = None,
     band: Band | None = None,
+    spacing: str = SPREAD,
     first: int = 0,
 ) -> list[str]:
     """Write the three files `StudyCache.load` reads, under the key the argv below selects.
 
-    The routing, the crop and the band are parameters because they are part of that key: an arm asking
+    The routing, the crop, the band and the spacing are parameters because they are part of that key: an arm asking
     for the other tie rule, another physical extent or another slice band reads a DIFFERENT cache, which
     is the property that keeps two readings from overwriting each other.
     """
@@ -78,7 +79,7 @@ def _corpus(
         slices=SLICES,
         image_size=SIZE,
         routing=routing or Routing(),
-        reading=Reading(crop=crop or Crop(), band=band or Band()),
+        reading=Reading(crop=crop or Crop(), band=band or Band(), spacing=spacing),
         first=first,
     )
     cache.directory.mkdir(parents=True, exist_ok=True)
@@ -295,6 +296,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
         Routing(scheme=MULTISCALE_SCHEME, tie=LAST_MAXIMAL),
         Crop(mm=TIGHT_MM, centre=TISSUE),
         WIDE_BAND,
+        ADJACENT,
         first=STUDIES,
     )
     payload = _run(
@@ -306,6 +308,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
         *("--centre", TISSUE),
         *("--band-low", str(WIDE_BAND.low)),
         *("--band-high", str(WIDE_BAND.high)),
+        *("--spacing", ADJACENT),
         *("--train-size", str(READ_SIZE)),
         # A TRUNCATED cache, which is a different file and a different index — the axis a smoke run
         # turns, and one a member re-read by a local tool has to answer for or it reads other pixels.

@@ -17,6 +17,7 @@ rather than extremes so one bright vessel does not compress everything else.
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import override
 
 import numpy as np
 import pydicom
@@ -50,6 +51,83 @@ this constant reads like an unexamined guess and its neighbour in `band_coverage
 nothing had ever measured it; that sentence survived the measurement that refuted it and cost a later
 reader an audit to rediscover a closed axis. See `interpretations/kneemri/2026-08-17_slice_band_coverage.md`.
 """
+
+SPREAD = "spread"
+"""Slices drawn evenly across the whole band — the historic rule, and what every cache on disk holds."""
+
+ADJACENT = "adjacent"
+"""A CONTIGUOUS run of slices centred in the band, so consecutive samples are consecutive in millimetres.
+
+WHY THE AXIS EXISTS AT ALL, AND WHY THE BAND WORK DID NOT ALREADY DECIDE IT. Eleven arms have varied the
+band's WIDTH and none has varied its SPACING; under `SPREAD` no two of the sampled slices are ever
+adjacent in the volume, at any width. Width is EXTENT — how much of the depth can be seen — and spacing
+is CONTIGUITY, which is a different mechanism and the one the deficit findings are defined by: a
+meniscal tear is 1-3 mm of signal that has to touch an articular surface on two CONSECUTIVE slices, and
+a spread sample cannot show that continuity however wide or narrow the band is. So the interior optimum
+`SLICE_BAND` records (0.10-0.90 beats both 0.20-0.80 and 0.00-1.00) is not evidence against this, and a
+competitor's +0.018 for a centre-adjacent nine over nine spread across twenty-four is not evidence
+against the band result. See `knee-e6sj`.
+"""
+
+
+@dataclass(frozen=True)
+class Spacing:
+    """How the `slices` samples are laid out INSIDE the band — the rule, held in a table not a branch.
+
+    A strategy for the reason `SlicePooling` and `TokenPooling` are: the vocabulary and the reduction
+    live in one place, so a name that reaches a recorded config cannot fail to reach the consumer. That
+    is this project's recurring plumbing defect, and it is worse here than anywhere else — a spacing
+    that lands in a manifest but not in the decode would fit a member on one set of pixels and stamp
+    another, with every fingerprint passing against its own reading.
+    """
+
+    def indices(self, low: int, high: int, slices: int) -> list[int]:
+        """`(low, high, slices) -> indices`, both bounds inclusive and already clipped to the series."""
+        raise NotImplementedError
+
+
+class Spread(Spacing):
+    """`linspace` across the band, de-duplicated then padded — what every member on disk was fitted on.
+
+    THE DEDUPE IS WHAT CLUSTERS THE REPEATS, and it is left alone deliberately. Measured over a 60-study
+    sample (315 series): 8.3% of series hold fewer than twelve slices in the band, and for those
+    `linspace` alone would give evenly spread duplicates — [1,1,2,3,3,4,4,5,6,6,7,7] — while
+    de-duplicating and then padding gives six copies of the deepest slice — [1,2,3,4,5,6,7,7,7,7,7,7].
+
+    It is not fixed because the cost is wrong, not because it is right. Changing this changes the CACHE,
+    so it invalidates 99 GB of decoded arrays and every member fitted on them, and no fingerprint would
+    catch the difference. Against that: the result is identical under `max` pooling, which is
+    duplicate-invariant, and the compute is identical either way. It skews only attention pooling, where
+    six copies of one slice take six shares of the softmax.
+
+    Fix it when a cache is next rebuilt for another reason, not on its own account.
+    """
+
+    @override
+    def indices(self, low: int, high: int, slices: int) -> list[int]:
+        """Evenly spread over the band, repeating the last when the band is thinner than asked."""
+        return list(dict.fromkeys(np.linspace(low, high, slices).astype(int).tolist()))
+
+
+class Adjacent(Spacing):
+    """A contiguous run centred in the band, shifted rather than truncated when it will not fit.
+
+    SHIFTED, NOT CLIPPED, because a run that hangs off one end and is cut there is neither contiguous nor
+    centred — it is a shorter spread sample wearing this name, and it would fail silently on exactly the
+    thin series `Spread`'s dedupe note measures at 8.3%. Sliding the window back inside the series keeps
+    the one property the rule exists for; only a series holding fewer slices than asked can lose it, and
+    that case pads like every other.
+    """
+
+    @override
+    def indices(self, low: int, high: int, slices: int) -> list[int]:
+        """`slices` consecutive indices about the band's midpoint, slid to stay inside `[low, high]`."""
+        start = (low + high + 1 - slices) // 2
+        return [index for index in range(max(low, min(start, high + 1 - slices)), high + 1)][:slices]
+
+
+SPACINGS: dict[str, Spacing] = {SPREAD: Spread(), ADJACENT: Adjacent()}
+"""The vocabulary, so a name is checkable at the flag and resolvable at the decode from one table."""
 
 GROUP = 3
 """How many slices one encoder feature covers — three, because a natural-image backbone takes three
@@ -129,10 +207,24 @@ class Reading:
 
     crop: Crop = Crop()
     band: Band = Band()
+    spacing: str = SPREAD
+    """How the samples sit inside the band. Here rather than on `Band` because `Band.recorded` is a pair
+    of floats every manifest on disk already holds, and a third element of another type would change
+    what a recorded band MEANS — this is a separate field with its own default, so every existing
+    manifest keeps reading back as the reading it was written under."""
 
     def suffix(self) -> str:
-        """What this reading adds to a cache's name — empty for the historic one, on both axes."""
-        return f"{self.crop.suffix()}{self.band.suffix()}"
+        """What this reading adds to a cache's name — empty for the historic one, on all three axes."""
+        return f"{self.crop.suffix()}{self.band.suffix()}{self.spacing_suffix()}"
+
+    def spacing_suffix(self) -> str:
+        """What the spacing adds to a cache's name — empty for `SPREAD`, for `Crop.suffix`'s reason.
+
+        Those arrays are memory-mapped by running trainers and every member on disk was fitted on them,
+        so the default must keep resolving to the file it always did. Any other spacing is a different
+        set of pixels under the same shape, which is exactly the silent clobber the cache key prevents.
+        """
+        return "" if self.spacing == SPREAD else f"_{self.spacing}"
 
     def reader(self, image_size: int) -> "SlotReader":
         """The reader that decodes under this geometry, at the size asked for.
@@ -141,7 +233,13 @@ class Reading:
         to the crop and then to the centre STRATEGY inside it — three deep, which is the coupling gate's
         complaint and a real one: every such site is a place a new axis has to be remembered.
         """
-        return SlotReader(crop_mm=self.crop.mm, image_size=image_size, band=self.band, centre=self.crop.located())
+        return SlotReader(
+            crop_mm=self.crop.mm,
+            image_size=image_size,
+            band=self.band,
+            centre=self.crop.located(),
+            spacing=self.spacing,
+        )
 
 
 class SlotReader:
@@ -153,8 +251,10 @@ class SlotReader:
         image_size: int = IMAGE_SIZE,
         band: Band | None = None,
         centre: CropCentre | None = None,
+        spacing: str = SPREAD,
     ) -> None:
         self.crop_mm = crop_mm
+        self.spacing = SPACINGS[spacing]
         # Defaulting to the image centre keeps every cache on disk and every member fitted on one
         # byte-identical; a different centre is a different reading and is keyed as such.
         self.centre = centre or ImageCentre()
@@ -226,30 +326,20 @@ class SlotReader:
         return nearest
 
     def band_indices(self, available: int, slices: int) -> list[int]:
-        """Indices spread over the central band, repeating the last when the band is thinner than asked.
+        """Indices inside the central band under this reader's spacing, padded when the band is thin.
 
         PUBLIC because the band is a reading rule and not a DICOM one. A second corpus arrives as whole
         pickled volumes rather than as files to decode lazily, so it cannot enter through `cropped` — but
         it must be sampled through the depth by the SAME rule, or the two corpora differ on an axis that
         is measured (0.20-0.80 = 0.8525, 0.10-0.90 = 0.8565, 0.00-1.00 = 0.8427) while claiming not to.
 
-        THE DEDUPE IS WHAT CLUSTERS THE REPEATS, and it is left alone deliberately. Measured over a
-        60-study sample (315 series): 8.3% of series hold fewer than twelve slices in the band, and for
-        those `linspace` alone would give evenly spread duplicates — [1,1,2,3,3,4,4,5,6,6,7,7] — while
-        de-duplicating and then padding gives six copies of the deepest slice — [1,2,3,4,5,6,7,7,7,7,7,7].
-
-        It is not fixed because the cost is wrong, not because it is right. Changing this changes the
-        CACHE, so it invalidates 99 GB of decoded arrays and every member fitted on them, and no
-        fingerprint would catch the difference. Against that: the result is identical under `max`
-        pooling, which is duplicate-invariant, and the compute is identical either way. It skews only
-        attention pooling, where six copies of one slice take six shares of the softmax.
-
-        Fix it when a cache is next rebuilt for another reason, not on its own account.
+        The bounds and the padding are shared by every spacing; only the layout between them is the
+        strategy's, which is why the `Spacing` table returns indices and this method finishes them.
         """
         low, high = int(self.band.low * (available - 1)), int(self.band.high * (available - 1))
         if high <= low:
             return [available // 2] * slices
-        indices = list(dict.fromkeys(np.linspace(low, high, slices).astype(int).tolist()))
+        indices = self.spacing.indices(low, high, slices)
         while len(indices) < slices:
             indices.append(indices[-1])
         return indices[:slices]

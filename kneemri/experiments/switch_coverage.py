@@ -37,6 +37,7 @@ NOT_A_RECIPE = {
     "fold": "which split half a run holds out, chosen per invocation",
     "band_low": "a cache axis the builder sets, read back by the run",
     "band_high": "the other end of that same axis",
+    "spacing": "a cache axis: how the slices sit inside that band",
     "bf16": "the default precision every current arm trains under",
     "vram_gb": "a memory cap, set by the queue against the card it runs on",
 }

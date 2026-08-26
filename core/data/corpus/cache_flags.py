@@ -10,7 +10,7 @@ import argparse
 from pathlib import Path
 
 from core.data.corpus.crop_centre import CENTRES, CROP_MM, DEFAULT_CENTRE, Crop
-from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, Band, Reading
+from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, SPACINGS, SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, TIES, Routing
 from core.data.corpus.study_cache import StudyCache
 
@@ -70,6 +70,15 @@ class CacheFlags:
             "under; a wider band is a different array under the same shape, so it is named for itself.",
         )
         parser.add_argument(
+            "--spacing",
+            choices=tuple(SPACINGS),
+            default=SPREAD,
+            help="how the slices sit INSIDE the band. 'spread' is the historic rule and keeps the "
+            "historic cache name; 'adjacent' takes a contiguous run centred in the band, so consecutive "
+            "samples are consecutive in millimetres - the continuity a 1-3 mm tear is defined by and "
+            "which no band width can supply (knee-e6sj). It reads a SEPARATE cache.",
+        )
+        parser.add_argument(
             "--scheme",
             choices=tuple(SCHEMES),
             default=CANONICAL_SCHEME,
@@ -113,6 +122,7 @@ class CacheFlags:
             reading=Reading(
                 crop=Crop(mm=arguments.crop_mm, centre=arguments.centre),
                 band=Band(low=arguments.band_low, high=arguments.band_high),
+                spacing=arguments.spacing,
             ),
             first=arguments.cache_studies,
         )

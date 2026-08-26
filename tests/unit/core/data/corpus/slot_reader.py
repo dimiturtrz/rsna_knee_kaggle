@@ -6,7 +6,7 @@ import torch
 
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_centre import Crop, ImageCentre, TissueCentre
-from core.data.corpus.slot_reader import Band, Reading, SlotReader
+from core.data.corpus.slot_reader import ADJACENT, SPREAD, Adjacent, Band, Reading, SlotReader, Spacing, Spread
 from tests.unit.conftest import write_series
 
 
@@ -150,6 +150,46 @@ def test_band_indices():
     assert reader.band_indices(2, 5) == [0, 1, 1, 1, 1], "a thin band pads the deepest rather than failing"
     assert SlotReader().band_indices(2, 3) == [1, 1, 1], "a band too thin to have two ends takes the middle"
     assert len(reader.band_indices(37, 12)) == 12, "always exactly as many planes as the cache holds"
+
+
+def test_indices():
+    """The base rule is a strategy and not a default — a spacing that forgot to answer must not read."""
+    try:
+        Spacing().indices(0, 9, 3)
+    except NotImplementedError:
+        return
+    raise AssertionError("the base spacing must not silently answer for a rule that was never written")
+
+
+def test_spread_indices():
+    """Evenly across the band, de-duplicated — the historic rule every member on disk was fitted on."""
+    assert Spread().indices(0, 9, 3) == [0, 4, 9]
+    assert Spread().indices(4, 6, 5) == [4, 5, 6], "a band thinner than asked de-duplicates rather than repeating"
+
+
+def test_adjacent_indices():
+    """A contiguous run centred in the band, slid inside rather than clipped when it will not fit."""
+    assert Adjacent().indices(0, 29, 9) == list(range(10, 19)), "consecutive, and centred on the band"
+    assert Adjacent().indices(20, 29, 9) == list(range(20, 29)), "a run that would hang off the end slides back"
+    assert Adjacent().indices(4, 6, 9) == [4, 5, 6], "a band shorter than the run gives what it has, to pad"
+
+
+def test_spacing_suffix():
+    """The historic spacing adds nothing to a cache name; any other one names its own file."""
+    assert Reading().spacing_suffix() == "", "the default must keep resolving to the arrays already on disk"
+    assert Reading(spacing=ADJACENT).spacing_suffix() == "_adjacent"
+    assert Reading(spacing=ADJACENT).suffix().endswith("_adjacent"), "and it must reach the cache key"
+
+
+def test_band_indices_spacing():
+    """The same band under the two rules: spread samples are never adjacent, adjacent ones always are."""
+    spread = SlotReader(band=Band(0.1, 0.9), spacing=SPREAD).band_indices(30, 9)
+    adjacent = SlotReader(band=Band(0.1, 0.9), spacing=ADJACENT).band_indices(30, 9)
+
+    assert min(np.diff(spread)) > 1, "the historic rule cannot show two consecutive millimetres, at any width"
+    assert list(np.diff(adjacent)) == [1] * 8, "which is the whole mechanism the adjacent rule exists for"
+    assert len(adjacent) == 9
+    assert SlotReader(spacing=ADJACENT).band_indices(2, 3) == [1, 1, 1], "a band too thin still takes the middle"
 
 
 def _offset_stack() -> np.ndarray:

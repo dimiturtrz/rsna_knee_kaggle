@@ -137,6 +137,15 @@ class RunOptions(Protocol):
         ...
 
     @property
+    def spacing(self) -> str:
+        """How the RUN laid its slices inside that band — the axis the band's own pair cannot express.
+
+        A read-only property and not a bare field, like every neighbour here: `TrainingOptions` is frozen,
+        so a read-write member of this protocol is not satisfiable by the one class that implements it.
+        """
+        ...
+
+    @property
     def routing(self) -> Routing:
         """The router the RUN used, for the same reason: a member served under another sees other series."""
         ...
@@ -353,6 +362,10 @@ class MemberRecord:
                 # path reads it to build the reader. A member fitted on a wide band and served on a
                 # narrow one sees a stack it was never fitted on, with every fingerprint still passing.
                 "band": options.band.recorded(),
+                # THE RUN'S OWN SPACING, on the axis the band does not cover: the band says how much
+                # depth is visible, this says whether consecutive samples are consecutive in
+                # millimetres. The serve path reads it to build the reader.
+                "spacing": options.spacing,
                 "slots": list(self.slot_names),
                 "variant": self.encoder.variant,
                 # THE RUN'S OWN POOLING, for the reason `crop_mm` gives above: `Member.pool` reads this

@@ -547,6 +547,17 @@ def test_band():
     assert legacy.band == Band(), "a manifest without the field is the historic reading, not a crash"
 
 
+def test_spacing():
+    """How the slices sat inside the band — defaulted, because no manifest before this axis holds it."""
+    adjacent = replace(_member(), config={**_config(), "spacing": "adjacent"})
+    legacy = replace(_member(), config={key: value for key, value in _config().items() if key != "spacing"})
+
+    assert adjacent.spacing == "adjacent"
+    assert adjacent.reading.spacing == "adjacent", "the reading names the cache, so it must carry it"
+    assert legacy.spacing == "spread", "an older manifest means the historic rule, which is what it was fitted on"
+    assert adjacent.pixel_group != legacy.pixel_group, "different millimetres cannot share one decode"
+
+
 def test_crop():
     """The physical extent a member was fitted on, defaulting to the constant for older manifests.
 
@@ -678,6 +689,7 @@ CONSUMED: dict[str, tuple[object, Callable[[Member], object], object]] = {
     "bf16": (True, lambda member: member.precision, torch.bfloat16),
     "witness": ({"studies": ["A"]}, lambda member: member.witness, {"studies": ["A"]}),
     "slots": (["SAG_T1", "COR_T1"], lambda member: member.slot_count, 2),
+    "spacing": ("adjacent", lambda member: member.reading.spacing, "adjacent"),
 }
 """Every recorded field a SERVE-side reader must take from the member, as (probe, reader, expected).
 

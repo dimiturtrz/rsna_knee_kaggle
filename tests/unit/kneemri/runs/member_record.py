@@ -4,6 +4,7 @@ from pathlib import Path
 import torch
 
 from core.data.corpus.crop_centre import CROP_MM
+from core.data.corpus.slot_reader import ADJACENT
 from core.data.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
@@ -81,6 +82,7 @@ ALTERNATES = {
     "pool": "cls_mean_focal",
     "slice_pooling": "attend",
     "slot_pooling": "mean",
+    "spacing": ADJACENT,
 }
 """A second legal value for each categorical option, taken from its own table rather than invented.
 
@@ -119,7 +121,7 @@ def test_payload_takes_each_config_field_from_the_option_of_its_own_name():
     """
     shared = {name for name in _config(OPTIONS) if name in vars(OPTIONS)} - DERIVED_ELSEWHERE
 
-    assert len(shared) == 24, "pinned, so a renamed option cannot drop silently out of the walk"
+    assert len(shared) == 25, "pinned, so a renamed option cannot drop silently out of the walk"
 
     plain = _config(OPTIONS)
     for name in sorted(shared):

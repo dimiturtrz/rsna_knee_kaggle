@@ -24,7 +24,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
-from core.data.corpus.slot_reader import Band, Reading
+from core.data.corpus.slot_reader import SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.mounts import Mounts
@@ -180,7 +180,16 @@ class Member:
         One property rather than two arguments at four call sites, because the pair is what names a
         cache and a caller that remembers one and forgets the other is the defect itself.
         """
-        return Reading(crop=self.crop, band=self.band)
+        return Reading(crop=self.crop, band=self.band, spacing=self.spacing)
+
+    @property
+    def spacing(self) -> str:
+        """How this member's slices sat INSIDE its band — the historic spread unless it says otherwise.
+
+        Defaulted for the reason `crop` gives: every manifest written before this axis existed means
+        `SPREAD` without saying so, and it is the only value those members were ever fitted under.
+        """
+        return str(self.config.get("spacing", SPREAD))
 
     def cache(self, directory: Path) -> StudyCache:
         """The cache holding the pixels this member was fitted on, in a given data directory.
@@ -433,6 +442,9 @@ class Member:
         """Members sharing this key need identical pixels, so one decode serves all of them."""
         pixels = {
             "band": self.band.recorded(),
+            # Adjacent and spread sample the SAME band at the same depth and return different
+            # millimetres, so two members that differ here cannot share one decode.
+            "spacing": self.spacing,
             # Extent AND centre: two members cropped differently are looking at different pixels, so one
             # decode cannot serve both.
             "crop": [self.crop.mm, self.crop.centre],
