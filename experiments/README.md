@@ -4371,3 +4371,70 @@ Greedy's own first five over the 84 (diagnostic, not quotable): `calib_dense_hol
 `merged_blend` 0.8688 → `through_dense` 0.8712 → **`margin_seat` 0.8724** → `calib_span_hold` 0.8736. The
 strongest solo and the strongest seat are the first and fourth picks, and they are the two ends of the
 table above.
+
+## 2026-08-26 — the ambiguity decomposition closes to the digit, and calibration is a DIVERSITY lever
+
+The seat measurement earlier today priced a marginal member's quality into an ensemble seat at 23% and
+was written up as if that priced member quality in general. It does not. A second reading, taken on
+records already on disk with no card, prices the OTHER case — lifting every seated member with the same
+flag — and the answer is not the ~100% a pure quality lift predicts.
+
+Six members, `--calibrated-targets` on and off at three matched corners, all joined over the same 909
+shared studies:
+
+| corner | calibrated | uncalibrated | Δ |
+|---|---|---|---|
+| dense, `--hold-annotations` | 0.8634 | 0.8573 | +0.0061 |
+| span, `--hold-annotations` | 0.8565 | 0.8493 | +0.0072 |
+| span, no hold | 0.8545 | 0.8565 | **−0.0020** |
+| | | **mean** | **+0.0038** |
+
+Pooled by the shipped rank-average rule, on two nested pools:
+
+| pool | mean solo | ensemble | **ambiguity** = ensemble − mean solo |
+|---|---|---|---|
+| calibrated trio | 0.85813 | 0.8685 | **+0.01037** |
+| uncalibrated twins | 0.85437 | 0.8629 | +0.00853 |
+| | | **Δ ambiguity** | **+0.00184** |
+| calibrated pair (hold only) | 0.85995 | 0.8679 | **+0.00795** |
+| uncalibrated pair (hold only) | 0.85330 | 0.8595 | +0.00620 |
+| | | **Δ ambiguity** | **+0.00175** |
+
+**`ensemble error = mean member error − ambiguity` closes to the digit on both pools**, which is the
+part worth keeping:
+
+    trio   +0.0038 (quality) + 0.00184 (ambiguity) = +0.00564   measured +0.0056
+    pair   +0.00665          + 0.00175             = +0.00840   measured +0.0084
+
+So the pass-through is **147% on the trio and 126% on the pair**, above one on both, and every point of
+the excess is the ambiguity term. **Calibrated members disagree with each other MORE than their
+uncalibrated twins do.** Two independent pools agree on the size to within 0.0001. Calibration is not
+only a quality lever — it is the first diversity lever this ledger has that was not asked to be one, and
+it arrives from the label table rather than from an architecture or a loss.
+
+**That is a correction of my own arithmetic, and it should be recorded as one.** The first write-up of
+this quoted "mean solo delta +0.0061" and derived a 92% pass-through. +0.0061 is the DENSE PAIR ALONE,
+generalised to three pairs by nobody but me; `calib_span` at −0.0020 against `band_span` is already three
+hundred lines above in this same file and the mean silently absorbed it. The denominator was the corner
+that agreed with the story.
+
+**Honest size, and it is small.** Every SOLO delta above is inside the 0.0062 three-seed floor, the
+negative one included, so no single corner's sign is resolved. Only the +0.0084 pair ensemble clears the
+floor. The ambiguity deltas are +0.0018, a third of the floor, and their agreement across two pools is
+not independent — the pair is a subset of the trio. What licenses acting on this is the sign agreeing
+across two pools and the decomposition closing exactly, not any one number clearing a bar.
+
+**The confound, stated because it points at the arm this licenses.** Both positive pairs carry
+`--hold-annotations` and the negative one does not. `calib_span` and `calib_span_hold` sit on the
+IDENTICAL corner — 12 slices, 0.1–0.9 — and differ in nothing else, yet read −0.0020 and +0.0072, a
+0.0092 spread on one flag. At n=1 per cell that is inside what scatter produces, and `calibrated_targets`
+reads +0.0038 against `wsfold0_e6` with no hold at the 0.2–0.8 corner, so no-hold is not uniformly
+negative. But `calibsix`'s five seats carry no hold, and if it reads flat this is the first suspect.
+
+**CONSEQUENCE: `calibsix` (`knee-1c00`).** The champion's five uncalibrated seats refitted with
+`--calibrated-targets` and nothing else; `calib_span_ff` is the sixth and already carries it, so the
+entry would be all-calibrated — the matched case these pools measured. Priced at the LOW end
+(pass-through 1.0, discarding the ambiguity term entirely): 5 × 0.0038 = +0.0038 offline, × the live
+`board_transfer` +1.72 = +0.0065 board, **0.939 → 0.946**, with 0.949 the optimistic end if the
+ambiguity term scales to six seats. Seven hours of otherwise-idle overnight card, ZERO submission slots
+to produce, one to read. Chained behind `margin_calib`.
