@@ -223,3 +223,55 @@ nearest neighbour will be ≥ 0.927. More redundant, not less.
 
 The route to 0.950 is not on this page any more. It is either data (`_ff` refits, the blocked external
 corpora) or the empty cell — a member whose own loss is asked to produce ambiguity rather than hoped to.
+
+---
+
+## Correction 2026-08-26 16:0xZ — 23% is the MARGINAL pass-through. The uniform one is 92%, and it is a route
+
+The section above is right about what it measured and wrong about what it concluded. It measured the
+seat value of adding **one** better member to an already-saturated pool of seven, found +0.0056 solo
+became +0.0013 in a seat, and wrote the ratio as if it priced member quality in general. It does not. It
+prices exactly one case, and the decomposition the same section quotes says which:
+
+    ensemble error  =  mean member error  −  ambiguity
+
+Adding a member moves **both** terms. A better member lowers mean member error; a better member that is
+also more redundant — and `calib_dense_hold`'s nearest neighbour is 0.9273, above the top of the entire
+seated spread — lowers ambiguity by about as much. They cancel, and 23% is what survives.
+
+Lifting **every** member with the same flag moves only the first term. The pool's mutual distances are
+unchanged, so ambiguity is untouched and there is nothing to cancel against. That predicts a
+pass-through near 1.0, and unlike the argument, this is now measured — three matched pairs, offline,
+zero card:
+
+| pool | members | holdout macro AUC |
+|---|---|---|
+| calibrated trio | `calib_dense_hold` + `calib_span_hold` + `calib_span` | **0.8685** |
+| uncalibrated twins | `band_dense_hold` + `band_span_hold` + `band_span` | 0.8629 |
+| | delta | **+0.0056** |
+| | mean solo delta of the same flag at the same corners | +0.0061 |
+
+**92%.** Both numbers are true and they answer different questions. 23% is what one more member is worth.
+92% is what lifting the ones already seated is worth.
+
+**What that repairs.** The page's closing line — "the route to 0.950 is not on this page any more" — was
+written from the 23% number alone and is too strong. The member-*quality* lane is dead as a route only in
+its **marginal** form: one more candidate, however good, into a saturated six. Its **uniform** form is
+alive and is arithmetic rather than hope. Five of the champion's six seats are uncalibrated
+(`calib_span_ff` is the sixth and already carries the flag):
+
+    5 seats × 0.92 × +0.0061  =  +0.0047 offline
+    × board_transfer +1.72     =  +0.0081 board
+    blendseat 0.939            →  0.947
+
+That is the `calibsix` arm (`knee-1c00`, `experiments/arms/calibsix.sh`), chained behind `margin_calib`:
+seven hours of otherwise-idle overnight card, zero submission slots to produce, one to read.
+
+**What it does not repair.** 0.947 is not 0.950, and no single queued arm closes the last three points —
+`margin_calib`'s empty-cell seat (`knee-myl0`, +0.0018 offline ≈ +0.003 board if it lands) is the only
+candidate, and its own pre-registration gives it 0.45. The three caveats above still stand unchanged, and
+a fourth belongs with them: `blendthree` swapped three of six seats for better-**supervised** twins and
+read 0.939 dead flat. That is the nearest precedent to `calibsix` and it returned nothing. The defence is
+size and not kind — blend supervision measured +0.0034 at three seats, against +0.0061 at five here — and
+if `calibsix` also reads flat, the uniform-lift route is refuted at the operating point and the ensemble
+axis is closed for good rather than only for marginal members.
