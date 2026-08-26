@@ -4099,3 +4099,53 @@ This is the eleventh flat-or-negative reading on ensemble construction and the f
 metric-aligned by construction, so it strengthens `knee-uj15`'s arithmetic rather than merely agreeing
 with it: the remaining distance is inside one member, and now the most favourable combine rule anyone
 could propose has been measured at the place the ledger already stood.
+
+### The ensemble is SATURATED — 37 members, and the honest peak is 0.872 from six seats onward (2026-08-26)
+
+Card-free, slot-free, ~40 s of arithmetic over `.holdout.npz` arrays that were already on disk.
+
+The lead this started from was the strongest unshipped one in the ledger: `record_mix --seats honest` on
+2026-08-25 read the best honest seat COUNT as **twelve at 0.8720** against a shipped roster of six or
+seven, and priced widening at **+0.0023**. The three members that reading wanted and the package does not
+hold — `blendlabels`, `base224`, `attend_dense` — are all on disk, and mounting costs a dataset push, not
+a slot and not a card. So it looked like a real gain sitting behind a free action.
+
+It is not. Two readings, both `--seats honest` (greedy refitted on half the studies, scored on the other
+half, both directions — the only one of the three modes whose number may be quoted):
+
+| pool | best honest count | peak | 6 seats | 7 seats |
+|---|---|---|---|---|
+| 34 members, MOUNTED ONLY | 9 | 0.8720 | 0.8711 | 0.8710 |
+| 37 members, + the three unmounted | 15 | **0.8721** | 0.8707 | 0.8713 |
+
+**Widening from seven seats to the honest peak buys +0.0010 on the mounted pool.** A sixth of the 0.0062
+floor. And **adding three genuinely new members to a 34-member pool moves the peak by +0.0001** — one
+ten-thousandth, on an axis where the three were specifically the ones an earlier greedy had reached for.
+
+So the 2026-08-25 +0.0023 was **not a count effect and not a member effect**. It was the difference
+between two pools, read across two different member sets as though the count were the variable. The
+correction is the same denominator discipline this file keeps relearning: compare curves only over the
+same pool.
+
+**What the shape actually says.** Both curves are flat from six seats to twenty within 0.0015 — smaller
+than the bias term the estimator itself reports. There is no peak to find; there is a plateau, and we have
+been standing on it since the fourth seat.
+
+**This is the twelfth flat-or-negative reading on ensemble construction**, and it now covers every axis
+the pool admits: seat count (here), membership (here, and six board entries with five different sevenths
+at 0.936–0.937), per-label selection (`label_combine`, 2026-08-26 — the flat rank-average is the optimum
+of its own family), the vote (`votefit_v1`, inside its pre-registered flat band), overlap TTA (five
+members, measured), and external corpus (`merged_corpus`, +17% studies, flat on score AND ordering).
+
+**THE CONSEQUENCE FOR SLOTS, WHICH IS THE POINT.** 0.8720 is the ceiling of *arithmetic over the members
+we already have*. No entry built from this pool — any count, any subset, any per-label roster, any vote —
+can beat the pinned 0.939 by more than noise. Holding slot 5 tonight is therefore not only the owner's
+directive; it is what the measurement independently recommends, because there is nothing left to put in
+it. The next real number costs a card, not a slot.
+
+**HONEST LIMITS.** This is the fold-0 proxy pool: `_s2026` members with holdout records. Six of the
+champion's members are `--fold -1` and have seen every holdout study, so they cannot appear here and no
+number on this page is the shipped entry's value. What transfers is the SHAPE of the axis — flat past six
+— not the level. And a member from an axis this pool does not vary at all (a genuinely different encoder,
+image-derived supervision) is not tested by any of it: saturation of a pool is a statement about that
+pool.
