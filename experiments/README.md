@@ -4293,3 +4293,81 @@ submission. `seat_value` is the tool that answers the other half.
 **Consequence.** `--calibrated-targets` is the only measured-positive term this project currently holds,
 which is what makes `stackfit` (`knee-orjq`) an additivity test worth the card rather than an academic
 one, and `stack3` (`knee-nu1m`) the arithmetic that follows it.
+
+## 2026-08-26 — a worse member takes a bigger seat: quality passes through at 23%, and the empty cell has the only occupant that pays
+
+Two free measurements, no card, both against `gradeswap_v1` (board 0.933, 7 members, every one scoreable —
+the pinned champion `blendseat` cannot be priced at all, because five of its six members are `_ff` full-fit
+and have seen every holdout study).
+
+### The seat table
+
+```
+roster of 7: 0.8694
+  +margin_seat        0.8709  (+0.0015)   best seat +0.0018   solo 0.8525   nearest 0.8628
+  +calib_dense_hold   0.8704  (+0.0010)   best seat +0.0013   solo 0.8634   nearest 0.9273
+  +small_batch6       0.8698  (+0.0004)                       solo 0.8598   nearest 0.9068
+  +sided_pool         0.8698  (+0.0004)                       solo 0.8561   nearest 0.9006
+  +vjepa_warm         0.8695  (+0.0001)                       solo 0.8337   nearest 0.8210
+  +dissent_seat       0.8686  (-0.0008)                       solo 0.8509   nearest 0.9292
+1 of 6 clears +0.0015, under which this ruler has never been shown to pick a board tick
+seated spread: 0.8801 – 0.9248
+```
+
+**`calib_dense_hold` is +0.0056 solo over `band_dense` and +0.0013 in a seat. That is a 23% pass-through**,
+and it is the first time this project has measured the quantity that
+`interpretations/kneemri/2026-08-26_what-0950-actually-costs.md` assumed was 1.0. At 23%, the entire queued
+member-quality lane ceilings at **0.943 board, not 0.950** — and ten board entries reading 0.936–0.939 flat
+across count, member identity, fold status, encoder family, vote rule, serving views, corpus and
+supervision stop being a puzzle.
+
+The mechanism is in the same table's last column. `calib_dense_hold`'s nearest seated neighbour is
+**0.9273 — above the top of the entire seated spread (0.9248)**. Our best member is our most redundant
+candidate. Better answers to the same question, asked of the same pixels with the same supervision and the
+same pooling, agree more, not less.
+
+**And `margin_seat` inverts the lane.** Solo 0.8525 — **0.0109 WORSE** than `calib_dense_hold` — and it is
+the only candidate of six that clears the bar, at **+0.0018**. A worse member bought a bigger seat, and
+the distance column says why: nearest 0.8628, the most distant candidate that is not simply broken
+(`vjepa_warm` at 0.8210 is distant-and-weak, the other failure mode, worth +0.0001).
+
+This does NOT restate the retracted "the loss axis buys seats" rule — `dissent_seat`, the other objective
+arm, is the MOST redundant candidate we hold (nearest 0.9292) and reads **−0.0008**. Decorrelation asked
+for explicitly in the loss produced a twin; an AUC margin that never asked for diversity produced the
+distance. One construction of the two named in
+`2026-08-24_architecture_diversity_is_closed_and_the_empty_cell_is_strong_and_distant.md` measured, the
+other refuted.
+
+**CONSEQUENCE — `margin_calib` (`knee-myl0`), queued behind `blendhold`.** `margin_seat` and
+`calib_dense_hold` sit on the IDENTICAL corner and have never been run together. The arm is that corner
+with both flags: `--auc-margin 1.0 --rank-weight 0` for the distance, `--calibrated-targets` for the
+quality. ~85 min, zero slots, read as SEAT first and SOLO second. Its informative failure is
+`nearest >= 0.92` with no seat, which would say calibration and an AUC margin are one lever wearing two
+names and close the objective route for good.
+
+### The honest member curve, over a pool that has doubled
+
+`record_mix --seats honest` over **84 of 102 fold-0 records, 909 shared studies** (the previous scan read
+70 records and peaked at 0.8717):
+
+```
+best honest count 19 at 0.8728, against the in-sample peak 0.8745 at 10
+  1 member   held-out 0.8634   bias -0.0000      (calib_dense_hold, the pool's strongest solo)
+  4 members  held-out 0.8709   bias +0.0015
+  7 members  held-out 0.8721   bias +0.0022
+ 10 members  held-out 0.8726   bias +0.0019
+ 19 members  held-out 0.8728   bias +0.0009
+ 24 members  held-out 0.8726   bias +0.0008
+```
+
+Selection bias is **+0.0019 mean**, in family with the +0.0033 priced in
+`2026-08-23_selection-overfit-explains-greedy7.md` and smaller because the pool is bigger. The honest curve
+is **flat from 8 to 24 members — span 0.0008, an eighth of the paired noise floor.** Our champion carries
+six. Going to nineteen buys, honestly, about **+0.002 offline ≈ +0.003 board**: real, free of card, under
+the bar, and directional only. It does not buy a submission slot, and choosing 19 *because* the curve peaks
+there is the exact move that document forbids.
+
+Greedy's own first five over the 84 (diagnostic, not quotable): `calib_dense_hold` 0.8634 →
+`merged_blend` 0.8688 → `through_dense` 0.8712 → **`margin_seat` 0.8724** → `calib_span_hold` 0.8736. The
+strongest solo and the strongest seat are the first and fourth picks, and they are the two ends of the
+table above.
