@@ -12277,6 +12277,24 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.__init__",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.plain",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.plain",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.stem",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.ledger_check.LedgerCheck.best",
       "target": "kneemri.runs.run_metrics.RunMetrics",
@@ -12308,8 +12326,44 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.owns",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.owns",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.trimmed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.stem",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.plain",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.stem",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.trimmed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.ledger_check.LedgerCheck.truncated",
       "target": "kneemri.runs.recorded_run.RecordedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.unattributed",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.unattributed",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.owns",
       "weight": 1
     },
     {
@@ -12340,6 +12394,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.ledger_check.main",
       "target": "kneemri.experiments.ledger_check.LedgerCheck.reran",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.main",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.unattributed",
       "weight": 1
     },
     {
@@ -29042,6 +29102,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
+      "label": "attributed",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.best",
       "label": "best",
       "level": "method",
@@ -29058,6 +29126,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.owns",
+      "label": "owns",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.plain",
+      "label": "plain",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.reran",
       "label": "reran",
       "level": "method",
@@ -29066,8 +29150,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.stem",
+      "label": "stem",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.trimmed",
+      "label": "trimmed",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.truncated",
       "label": "truncated",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.unattributed",
+      "label": "unattributed",
       "level": "method",
       "parent": "kneemri.experiments.ledger_check.LedgerCheck",
       "role": null

@@ -100,6 +100,103 @@ def test_reran(tmp_path: Path):
     assert check.reran(tmp_path, "absent") == 0, "a run that never wrote a metrics file never re-ran"
 
 
+def test_plain(tmp_path: Path):
+    """The one normalisation that makes the ledger's prose name and the file's output name equal."""
+    check = LedgerCheck(tmp_path / "absent.md")
+
+    assert check.plain("`whole_stack`") == check.plain("WholeStack"), "punctuation and case carry no meaning"
+    assert check.plain("0.8473") == "08473", "a score is compared as digits, so its dot must go too"
+
+
+def test_stem(tmp_path: Path):
+    """The seed and fit-regime tail is dropped, and only a tail — a name that merely contains one is not."""
+    check = LedgerCheck(tmp_path / "absent.md")
+
+    assert check.stem("warm_calib_dense_s2026") == "warmcalibdense"
+    assert check.stem("final_ws_cf") == "finalws"
+    assert check.stem("band_dense") == "banddense", "a name with no suffix is only normalised"
+    assert check.stem("s2026_probe") == "s2026probe", "the suffix is a tail, never a substring anywhere"
+
+
+def test_trimmed(tmp_path: Path):
+    """The suffix drop before normalisation, so the separators are still there to be counted."""
+    check = LedgerCheck(tmp_path / "absent.md")
+
+    assert check.trimmed("warm_calib_dense_s2026") == "warm_calib_dense"
+    assert check.trimmed("floor_fold0") == "floor", "what is left is one segment, and that is the point"
+    assert check.trimmed("band_dense") == "band_dense", "a name with no suffix is returned whole"
+
+
+def test_attributed(tmp_path: Path):
+    """Name and score on ONE line is attribution; the same two facts on two lines is not.
+
+    This is the case the number-only match cannot see, and it is not hypothetical: six lines quote
+    0.8562 and none of them is about `warm_calib_dense`, whose own mention carries no number.
+    """
+    ledger = tmp_path / "README.md"
+    ledger.write_text(
+        "\n".join(
+            [
+                "| `slice_attention` | attention over slices | 0.8473 | kept |",
+                "the `warm_calib_dense` arm ran overnight and is discussed below",
+                "3 members  0.8562  +0.0034",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    check = LedgerCheck(ledger)
+
+    assert check.attributed("sliceattn_s2026", 0.8473) is False, "a file name the ledger never spells is not tied"
+    assert check.attributed("slice_attention_s2026", 0.8473), "prose name plus its own score on one line"
+    assert check.attributed("warm_calib_dense_s2026", 0.8562) is False, (
+        "the name and the number are both in the record, and that is exactly what is not enough"
+    )
+
+
+def test_owns(tmp_path: Path):
+    """Attribution plus the one extra condition: a one-word stem may not be accused of owning a score."""
+    ledger = tmp_path / "README.md"
+    ledger.write_text(
+        "\n".join(
+            [
+                "| `band_dense` | twenty slices | 0.8556 | kept |",
+                "| + weight floor at 0.25 | 0.8221 | +0.0019 | kept |",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    check = LedgerCheck(ledger)
+
+    assert check.owns("band_dense_s2026", 0.8556), "two segments and its own number on its own row"
+    assert check.attributed("floor_fold0", 0.8221), "the lenient test is satisfied, and wrongly"
+    assert check.owns("floor_fold0", 0.8221) is False, (
+        "`floor` is prose here, and a one-word stem cannot be told apart from it"
+    )
+
+
+def test_unattributed(tmp_path: Path):
+    """Reports the loosely-recorded runs, and names the run that provably owns the number instead."""
+    ledger = tmp_path / "README.md"
+    ledger.write_text(
+        "\n".join(
+            [
+                "| `band_dense` | twenty slices | 0.8556 | kept |",
+                "| `slice_attention` | attention over slices | 0.8473 | kept |",
+                "an ensemble of three read 0.8562 on the same studies",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    loose = LedgerCheck(ledger).unattributed(
+        {"band_dense_s2026": 0.8556, "band140_s2026": 0.8556, "warm_calib_dense_s2026": 0.8562}
+    )
+
+    assert "band_dense_s2026" not in loose, "its own row states its own number"
+    assert loose["band140_s2026"] == ["band_dense_s2026"], "the number vouching for it is provably another run's"
+    assert loose["warm_calib_dense_s2026"] == [], "quoted by no run at all — loose, but nobody else's number"
+
+
 def test_unrecorded(tmp_path: Path):
     """A score the ledger quotes is recorded; one it does not is reported.
 

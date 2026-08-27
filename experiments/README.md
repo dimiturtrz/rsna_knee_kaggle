@@ -5215,3 +5215,36 @@ that earned `labelwise224` its keep. It writes a holdout record, so it can be pr
 
 **Card handed to celltrack at 18:35Z as promised**; `card_check` reads the device free with no `kneemri`
 process on it.
+
+### `warm_calib_dense` — the warm-start's FIRST arm priced init TIME, not capacity, and came in −0.0072 — 2026-08-27
+
+`warm_calib_dense_s2026` best holdout **0.8562** against its control `calib_dense_hold_s2026` **0.8634** —
+**−0.0072**, just past the 0.0062 arm-vs-arm floor. Written here with its own name beside its own number,
+which is the whole reason it took a day to surface: `0.8562` is quoted on six lines of this record and none
+of them is about this arm, so `ledger_check` read it as recorded while its verdict sat unwritten in
+`experiments/logs/warm_waiter.log:32`. That hole is now the `unattributed` advisory in the same check.
+
+**The harness is clean and the pair is genuinely single-variable.** The flag LANDED — the run logs
+`encoder initialised from calib_dense_hold.enc.pt, adapted on cache 0 (223 tensors, 0 left stock)` — and
+`calib_dense_hold.sh:69` against `warm_calib_dense.sh:56` is the same `run_train` line but for
+`--encoder-weights`. So the number is about the treatment.
+
+**But the treatment is not the one `knee-wbwq` argues for.** The bead's claim is CAPACITY: a warm encoder
+frees the adapter to learn something new. This arm passes no `--lora-rank` (recipe `"lora_rank": "0"`), and
+neither does its parent. `fitted_encoder.py:88-97` skips only keys ending `DOWN`/`UP` and rewrites only
+`BASE_WEIGHT`/`BASE_BIAS`; a rank-0 state has none of them, so every tensor falls through to
+`merged[name] = value`. **Nothing was merged and no fresh capacity was built.** The arm priced init TIME —
+does a converged trunk start better — and the answer is no. It says nothing about capacity.
+
+**The schedule suspect it named in advance is still live and is now correctly sized.** The arm predicted
+that below 0.85 would indict `one_cycle` ramping an already-converged trunk off its optimum. 0.8562 is a
+SMALL negative, equally consistent with "no capacity to gain, plus a little ramp damage". The two are not
+separated by this number. `nocycle224_long_s2026` (0.8442) is the nearest evidence on that axis and is
+itself unrecorded here.
+
+**Do not read this as the bead refuted.** What is refuted is one cell of a three-way grid (rank 0 × warm ×
+one_cycle), and it is not the cell the mechanism argument lives in. The rewritten chain is on `knee-wbwq`:
+**A** schedule — the same pair at `--backbone-lr 1e-5` or with no one_cycle ramp, ~40 min; **B** the actual
+capacity arm, which needs a LoRA parent (`dinov3_base_lora_s2026` or `lora_r8_v3small_224_s2026`)
+warm-started WITH a fresh `--lora-rank`; **C** `warm_calib_dense_short.sh` stays gated on A or B clearing.
+Both are blocked on the card, which is with celltrack.

@@ -12,6 +12,20 @@ somewhere in the ledger. It matches on the NUMBER rather than the arm name, beca
 are prose (`whole_stack`, `resolution`) while the files are outputs (`wholestack_s2026`,
 `res392_ws_s2026`) and a mapping between them is one more thing to get wrong.
 
+WHAT MATCHING ON THE NUMBER ALONE CANNOT SEE, and it cost a P1 bead's verdict. A run passes as recorded
+the moment its four-decimal score appears ANYWHERE in the corpus — including as some other run's score,
+or as an ensemble mean in an interpretation. `warm_calib_dense_s2026` (0.8562, `knee-wbwq`'s first arm)
+read as recorded on 2026-08-27 because six unrelated lines quote 0.8562, while the only mention of the
+arm itself is a passing prose reference with no number beside it. Its verdict — the arm came in 0.0072
+BELOW its own control — sat unwritten for a day and had to be re-derived from a run log.
+
+So `unattributed` reports the runs whose number never shares a LINE with their own name: the number is in
+the record, but not as this run's number. It is ADVISORY and never blocks, because 46 of 156 runs are in
+that state today and a gate that fails on a third of a correct-enough ledger is a gate the reader learns
+to skip — the exact failure the smoke exemption above was written to prevent. 13 of the 46 are worse than
+a formatting complaint and are named first: their score demonstrably sits on a line belonging to a
+DIFFERENT finished run, so the number vouching for them is provably not theirs.
+
 WHAT IT CANNOT CHECK: whether the surrounding sentence is true. A number can be present and its
 interpretation stale — which is the other half of what went wrong that day, and needs a reader.
 
@@ -39,6 +53,13 @@ logger = logging.getLogger(__name__)
 
 LEDGER = Path("experiments/README.md")
 INTERPRETATIONS = Path("interpretations")
+SUFFIXES = ("_s2026", "_s7", "_cf", "_ff", "_e12", "_hold", "_fold0", "_fold1", "_fold2")
+"""Seed and fit-regime tails a file name carries and the ledger's prose never does.
+
+Dropped before an attribution match, and ONLY there: `unrecorded` compares numbers, where a name plays
+no part at all.
+"""
+
 UNQUOTABLE = ("throughput", "smoke")
 """Name fragments of runs whose scores no ledger should quote.
 
@@ -59,6 +80,17 @@ class LedgerCheck:
 
     def __init__(self, *documents: Path) -> None:
         self.text = "\n".join(d.read_text(encoding="utf-8") for d in documents if d.exists())
+        self.lines = [self.plain(line) for line in self.text.splitlines()]
+
+    @staticmethod
+    def plain(text: str) -> str:
+        """Lowercase alphanumerics only, so `whole_stack` and `wholestack_s2026` compare equal.
+
+        The ledger writes arm names as prose and the files write them as outputs, which is the reason
+        `unrecorded` matches on the number and not the name at all. Attribution needs both on one line,
+        so it needs the one normalisation that makes the two spellings the same string.
+        """
+        return "".join(character for character in text.lower() if character.isalnum())
 
     def best(self, metrics: Path) -> float | None:
         """The best holdout mean AUC a run recorded, or None if it never scored an epoch.
@@ -134,6 +166,60 @@ class LedgerCheck:
         """
         return len(list(processed.glob(f"{name}{METRICS_SUFFIX}.*.jsonl")))
 
+    def stem(self, name: str) -> str:
+        """A run name with its seed or fit-regime suffix dropped, normalised for comparison.
+
+        The ledger calls the arm `warm_calib_dense`; the file is `warm_calib_dense_s2026`. Only the
+        suffix separates them, and it carries no information the ledger's prose ever repeats.
+        """
+        return self.plain(self.trimmed(name))
+
+    @staticmethod
+    def trimmed(name: str) -> str:
+        """The same drop, before normalisation — so the separators survive to be counted."""
+        for suffix in SUFFIXES:
+            if name.endswith(suffix):
+                return name[: -len(suffix)]
+        return name
+
+    def attributed(self, name: str, score: float) -> bool:
+        """Whether any ONE line carries both this run's name and this run's score.
+
+        Both on one line is the weakest condition under which the record can be said to state whose
+        number this is. Anything looser is satisfied by a collision, which is how a negative verdict
+        stayed unwritten for a day while the check that exists to catch it reported the ledger clean.
+        """
+        wanted, digits = self.stem(name), self.plain(f"{score:.4f}")
+        return any(wanted in line and digits in line for line in self.lines)
+
+    def owns(self, name: str, score: float) -> bool:
+        """Whether a line names this run beside this score, strictly enough to accuse it of owning one.
+
+        Stricter than `attributed` on purpose, and the asymmetry is the point: be generous about what
+        counts as written down, exacting about naming a culprit. What it adds is that a stem left with a
+        SINGLE segment cannot own anything. `floor_fold0` reduces to `floor`, which any line reading
+        "weight floor at 0.25" contains, and the first run of this reported six such arms as owners of
+        numbers they never quote — a one-word stem is not distinguishable from the ledger's prose.
+
+        The cost is real and worth stating: a genuinely one-word run name (`wholestack_s2026`) is never
+        named as an owner either. Missing an owner leaves an advisory line reading "quoted by no run at
+        all", which is the harmless direction; naming the wrong one sends a reader to the wrong row.
+        """
+        return "_" in self.trimmed(name) and self.attributed(name, score)
+
+    def unattributed(self, runs: dict[str, float]) -> dict[str, list[str]]:
+        """Runs whose score never shares a line with their own name, against the runs that own it.
+
+        The value is the OTHER finished runs whose name sits on a line quoting this score. An empty
+        list means only that nothing ties the number to this run; a non-empty one is proof that the
+        number vouching for it belongs to somebody else, and is the half worth reading first.
+        """
+        loose = {name: score for name, score in runs.items() if not self.attributed(name, score)}
+        return {
+            name: [other for other in runs if other != name and self.owns(other, score)]
+            for name, score in loose.items()
+        }
+
     def unrecorded(self, runs: dict[str, float]) -> dict[str, float]:
         """The runs whose best score appears nowhere in the written record.
 
@@ -179,7 +265,23 @@ def main() -> None:
                 earlier,
                 name,
             )
-    logger.info("%d finished runs, %d unrecorded", len(runs), len(missing))
+    loose = check.unattributed(runs)
+    collided = {name: owners for name, owners in loose.items() if owners}
+    for name, owners in sorted(collided.items()):
+        logger.info("UNATTRIBUTED %s: %.4f is quoted, but on a line naming %s", name, runs[name], ", ".join(owners[:3]))
+    # The rest are named too, as one line rather than forty: `warm_calib_dense_s2026` — the run this
+    # whole check was written for — sits here and not above, because the three runs that appeared to
+    # own its 0.8562 were one-word stems matching prose, and `owns` now declines to accuse them.
+    quiet = sorted(name for name, owners in loose.items() if not owners)
+    if quiet:
+        logger.info("UNATTRIBUTED, quoted by no other run either: %s", ", ".join(quiet))
+    logger.info(
+        "%d finished runs, %d unrecorded, %d unattributed (advisory; %d of those quote a number another run owns)",
+        len(runs),
+        len(missing),
+        len(loose),
+        len(collided),
+    )
     if missing:
         raise SystemExit(1)
 
