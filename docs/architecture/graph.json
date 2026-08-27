@@ -75,6 +75,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_cache",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_cache",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
