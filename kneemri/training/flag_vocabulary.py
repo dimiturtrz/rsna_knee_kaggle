@@ -106,6 +106,15 @@ class FlagVocabulary:
             "the five assigned values sit outside their own 95%% interval, all too high. Applies to the "
             "TRAINING table only - recalibrating the ruler would raise the AUC by construction.",
         )
+        parser.add_argument(
+            "--finding-calibration",
+            action="store_true",
+            help="on top of --calibrated-targets, shift each finding's level by its own measured "
+            "offset. The pooled map assumes a 0.68 is worth 0.378 on every finding; over the reader's "
+            "positive calls the radiologist agrees 44.4%% of the time on Contusion and 81.2%% on "
+            "Synovitis, and the two fail in OPPOSITE directions. Offsets are empirical-Bayes shrunk "
+            "(tau=0.294), so a thin finding keeps the pooled value. REQUIRES --calibrated-targets.",
+        )
         parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
         parser.add_argument(
             "--patience",

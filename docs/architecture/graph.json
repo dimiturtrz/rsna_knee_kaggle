@@ -620,6 +620,30 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.finding_calibration",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.finding_calibration",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.finding_calibration",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.finding_calibration",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.label_power",
       "target": "core.cli",
       "weight": 1
@@ -1234,6 +1258,36 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_distance",
       "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.noise_binding",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.noise_binding",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.noise_binding",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.noise_binding",
+      "target": "kneemri.evaluation.annotated_readings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.noise_binding",
+      "target": "kneemri.evaluation.supervision_gap",
       "weight": 1
     },
     {
@@ -5989,6 +6043,114 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.labels.finding_calibration.FindingCalibration",
+      "target": "core.data.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.__init__",
+      "target": "core.data.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.expected",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.information",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.offset",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.offsets",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.offsets",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.expected",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.offsets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.shifted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.FindingCalibration.shifted",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.expected",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.finding_calibration.main",
+      "target": "core.data.labels.finding_calibration.FindingCalibration",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.main",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.main",
+      "target": "core.data.labels.finding_calibration.FindingCalibration.valued",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.finding_calibration.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_calibration.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.cells",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.labels.label_power.LabelPower.report",
       "target": "core.data.labels.label_power.LabelPower.positives",
@@ -6385,6 +6547,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.labels.targets.Supervision.__post_init__",
+      "target": "core.data.labels.targets.UncalibratedFindingShiftError",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.labels.targets.Supervision.trusted",
       "target": "core.data.labels.targets.Supervision.reliability",
@@ -6418,6 +6586,12 @@
       "kind": "calls",
       "source": "core.data.labels.targets.Targets.load",
       "target": "core.data.labels.targets.Supervision.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.targets.Targets.load",
+      "target": "core.data.labels.targets.Supervision.per_finding",
       "weight": 1
     },
     {
@@ -8314,6 +8488,102 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_distance.MemberDistance.spread",
       "target": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "target": "kneemri.evaluation.noise_binding.Binding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding.report",
+      "target": "kneemri.evaluation.noise_binding.Binding.verdict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding.tracking",
+      "target": "kneemri.evaluation.noise_binding.Binding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding.tracking",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding._resample",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding.tracking",
+      "target": "kneemri.evaluation.noise_binding.UndiscriminatingMemberError",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.cells",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.readings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding.groups",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding.probabilities",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.noise_binding.NoiseBinding.tracking",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
       "weight": 1
     },
     {
@@ -16905,7 +17175,7 @@
   ],
   "nodes": [
     {
-      "descendants": 50,
+      "descendants": 51,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -16929,7 +17199,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 41,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -17177,7 +17447,7 @@
       "role": null
     },
     {
-      "descendants": 9,
+      "descendants": 10,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -17188,6 +17458,14 @@
       "descendants": 0,
       "id": "core.data.labels.confident_labels",
       "label": "confident_labels",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration",
+      "label": "finding_calibration",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -17313,7 +17591,7 @@
       "role": null
     },
     {
-      "descendants": 138,
+      "descendants": 139,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -17369,7 +17647,7 @@
       "role": null
     },
     {
-      "descendants": 30,
+      "descendants": 31,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -17460,6 +17738,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_distance",
       "label": "member_distance",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding",
+      "label": "noise_binding",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -18954,6 +19240,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration",
+      "label": "FindingCalibration",
+      "level": "class",
+      "parent": "core.data.labels.finding_calibration",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower",
       "label": "LabelPower",
       "level": "class",
@@ -19023,6 +19317,14 @@
       "level": "class",
       "parent": "core.data.labels.targets",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.targets.UncalibratedFindingShiftError",
+      "label": "UncalibratedFindingShiftError",
+      "level": "class",
+      "parent": "core.data.labels.targets",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -19311,6 +19613,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.member_distance",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.Binding",
+      "label": "Binding",
+      "level": "class",
+      "parent": "kneemri.evaluation.noise_binding",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "label": "NoiseBinding",
+      "level": "class",
+      "parent": "kneemri.evaluation.noise_binding",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.UndiscriminatingMemberError",
+      "label": "UndiscriminatingMemberError",
+      "level": "class",
+      "parent": "kneemri.evaluation.noise_binding",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -22962,6 +23288,94 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.expected",
+      "label": "expected",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.fitted",
+      "label": "fitted",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.information",
+      "label": "information",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.offset",
+      "label": "offset",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.offsets",
+      "label": "offsets",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.shifted",
+      "label": "shifted",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.FindingCalibration.valued",
+      "label": "valued",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration.FindingCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_calibration.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.finding_calibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower.__init__",
       "label": "__init__",
       "level": "method",
@@ -23442,6 +23856,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.targets.Supervision.__post_init__",
+      "label": "__post_init__",
+      "level": "method",
+      "parent": "core.data.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.targets.Supervision.applied",
       "label": "applied",
       "level": "method",
@@ -23452,6 +23874,14 @@
       "descendants": 0,
       "id": "core.data.labels.targets.Supervision.moves_the_ruler",
       "label": "moves_the_ruler",
+      "level": "method",
+      "parent": "core.data.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.targets.Supervision.per_finding",
+      "label": "per_finding",
       "level": "method",
       "parent": "core.data.labels.targets.Supervision",
       "role": null
@@ -24806,6 +25236,70 @@
       "label": "spread",
       "level": "method",
       "parent": "kneemri.evaluation.member_distance.MemberDistance",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.Binding.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.Binding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding._resample",
+      "label": "_resample",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding.groups",
+      "label": "groups",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding.probabilities",
+      "label": "probabilities",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.NoiseBinding.tracking",
+      "label": "tracking",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding",
       "role": null
     },
     {

@@ -53,6 +53,9 @@ NOT_IN_CONFIG = {
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
+    "finding_calibration": "supervision policy, same — it shifts each finding's level in the training "
+    "TABLE before the loss ever sees it, exactly as `calibrated_targets` (which it requires) does, and "
+    "adds no parameter, so the head a rebuild serves is byte-identical",
     "severity_weight": "supervision policy, same — it grades the loss weight and leaves the head alone",
     "hold_annotations": "supervision policy, same — it decides which cells the loss READ and touches no "
     "parameter, so the head a rebuild serves is byte-identical",

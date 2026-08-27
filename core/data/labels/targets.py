@@ -42,6 +42,40 @@ MEASURED_AGREEMENT: tuple[tuple[float, float], ...] = (
 )
 """Each level the reader emits, beside the rate the radiologist agreed at. See `Calibration`."""
 
+FINDING_OFFSETS: tuple[tuple[str, float], ...] = (
+    ("ACL", -0.622),
+    ("MCL", -0.474),
+    ("Medial Meniscus", 0.166),
+    ("Lateral Meniscus", 0.054),
+    ("Medial OA", -0.279),
+    ("Lateral OA", -0.460),
+    ("PF OA", 0.207),
+    ("Effusion", 0.432),
+    ("Synovitis", 0.985),
+    ("Baker's", -0.177),
+    ("Contusion", -0.531),
+    ("Fracture", 0.056),
+)
+"""A logit shift per finding ON TOP of `MEASURED_AGREEMENT`, because that table is pooled over all twelve.
+
+Fitted by `core.data.labels.finding_calibration` over the same 684 annotated cells the pooled table was
+fitted on — one maximum-likelihood shift per finding, drawn toward zero by an empirical-Bayes weight so
+a rate on 57 cells cannot manufacture a spread out of sampling noise. The between-finding variance
+survived that subtraction at 0.294 (sd 0.543 in logits), so the findings do NOT share one scale: a 0.68
+cell trains at 0.246 on ACL and 0.619 on Synovitis against the pooled 0.378.
+
+Read the two failure directions in the signs. Negative is a finding the reader OVER-calls — Contusion,
+where the radiologist agrees with only 44.4% of positive calls. Positive is one the reader MISSES —
+Synovitis, silent on 41 cells of which 14 are truly positive, and the only finding whose net error runs
+under rather than over. One parameter carries both because it is fitted on every cell, not on the
+positive calls alone.
+
+WHAT THIS CANNOT DO, stated where the constants live. A monotone map of one head's targets leaves that
+head's ranking unchanged, so in the well-specified limit per-head AUC does not move. Whatever this buys
+comes through the SHARED TRUNK — twelve heads competing for one representation, with the mis-scaled
+ones pulling too hard — which is the same indirect route the pooled calibration must already work
+through. Price it as second-order to a correction that was itself worth +0.0061."""
+
 ANNOTATED_WEIGHT = 3.0
 """Image-read annotations outweigh any derived row: they are the only labels read from the pixels rather
 than from text, and there are 58 of them."""
@@ -53,11 +87,20 @@ radiologist finds the thing; a 0.08 cell is right when they do not."""
 UNCERTAIN_LEVEL = 0.28
 """The one level that asserts nothing, so it has no reliability to compute — see `Supervision.trusted`."""
 
+NO_SHIFT = 0.0
+LOGIT_FLOOR = 1e-6
+"""Keeps the logit finite on a table that may hold an exact 0 or 1. See `Supervision.per_finding`."""
+
 WEIGHT_FLOOR = "weight_floor"
 CALIBRATED = "calibrated_targets"
+FINDING = "finding_calibration"
 SEVERITY_WEIGHT = "severity_weight"
 ANNOTATIONS = "annotations"
-"""The four label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+"""The five label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+
+
+class UncalibratedFindingShiftError(Exception):
+    """A per-finding offset asked for without the pooled calibration it was fitted as a correction to."""
 
 
 @dataclass(frozen=True)
@@ -105,7 +148,12 @@ class Supervision:
     to give up, and it buys back the only radiologist-truth ruler there is.
     """
 
+    finding: bool = False
+    """Whether each finding also carries its own shift on top of the pooled level map. Requires `calibrated`."""
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
+
+    offsets: tuple[tuple[str, float], ...] = FINDING_OFFSETS
 
     def moves_the_ruler(self) -> bool:
         """Whether this supervision would also change the table an arm is SCORED against.
@@ -116,7 +164,13 @@ class Supervision:
         ruler has to be re-read plain or the arm earns credit for the labels agreeing with themselves.
         The floor alone does not: it is applied identically to every arm and the control.
         """
-        return self.calibrated or self.severity or not self.annotations
+        return self.calibrated or self.finding or self.severity or not self.annotations
+
+    def __post_init__(self) -> None:
+        """A per-finding shift without the pooled map under it is a correction applied to the wrong table."""
+        if self.finding and not self.calibrated:
+            message = "finding calibration corrects the POOLED rates, so it requires calibrated targets"
+            raise UncalibratedFindingShiftError(message)
 
     def reliability(self) -> tuple[tuple[float, float], ...]:
         """Each asserting level beside how often that assertion held, which is not the same as its rate.
@@ -167,6 +221,26 @@ class Supervision:
             applied[np.isclose(value, level)] = rate
         return applied
 
+    def per_finding(self, value: NDArray[np.float32], target: str) -> NDArray[np.float32]:
+        """This finding's own shift applied in logit space, after the pooled level map and never instead.
+
+        Composes ONLY after `applied`, and the flag that turns it on requires the one that turns that
+        on: the offsets were fitted as corrections TO the pooled rates, so shifting the reader's raw
+        levels by them would be applying a correction to a table it was not measured against.
+
+        A finding absent from the table shifts by nothing rather than raising, which is what keeps a
+        twelve-name contract from becoming a thirteenth place to break when a finding is renamed —
+        `FINDING_OFFSETS` is checked against `TARGETS` in its own unit test instead.
+        """
+        if not self.finding:
+            return value
+        shift = dict(self.offsets).get(target, NO_SHIFT)
+        if shift == NO_SHIFT:
+            return value
+        bounded = np.clip(value.astype(np.float64), LOGIT_FLOOR, 1.0 - LOGIT_FLOOR)
+        moved = 1.0 / (1.0 + np.exp(-(np.log(bounded / (1.0 - bounded)) + shift)))
+        return np.where(np.isnan(value), value, moved.astype(np.float32))
+
 
 class Targets:
     """Per-study scores and weights, from the report-derived table and the few image annotations."""
@@ -202,6 +276,7 @@ class Targets:
         return {
             WEIGHT_FLOOR: self.supervision.floor,
             CALIBRATED: self.supervision.calibrated,
+            FINDING: self.supervision.finding,
             SEVERITY_WEIGHT: self.supervision.severity,
             ANNOTATIONS: self.supervision.annotations,
         }
@@ -245,7 +320,7 @@ class Targets:
                 # match nothing and silently fall back to `__conf`. The two switches compose only in
                 # this order.
                 trust = supervision.trusted(value, np.nan_to_num(raw, nan=1.0))
-                value = supervision.applied(value)
+                value = supervision.per_finding(supervision.applied(value), target)
                 said = ~np.isnan(value)
                 scores[said, column] = value[said]
                 weights[said, column] = floor + (1.0 - floor) * trust[said]

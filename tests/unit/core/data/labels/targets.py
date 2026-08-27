@@ -9,10 +9,13 @@ from core.data.labels.targets import (
     ANNOTATIONS,
     CALIBRATED,
     CONFIDENCE_FLOOR,
+    FINDING,
+    FINDING_OFFSETS,
     SEVERITY_WEIGHT,
     WEIGHT_FLOOR,
     Supervision,
     Targets,
+    UncalibratedFindingShiftError,
 )
 from core.findings import TARGETS
 
@@ -89,12 +92,14 @@ def test_supervised(tmp_path: Path):
     assert loaded.supervised() == {
         WEIGHT_FLOOR: CONFIDENCE_FLOOR,
         CALIBRATED: True,
+        FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
     }
     assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {
         WEIGHT_FLOOR: 0.0,
         CALIBRATED: False,
+        FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
     }
@@ -181,7 +186,36 @@ def test_moves_the_ruler():
     assert not Supervision(floor=CONFIDENCE_FLOOR).moves_the_ruler(), "applied identically to arm and control"
     assert Supervision(calibrated=True).moves_the_ruler()
     assert Supervision(severity=True).moves_the_ruler()
+    assert Supervision(calibrated=True, finding=True).moves_the_ruler()
     assert Supervision(annotations=False).moves_the_ruler(), "696 cells move back to what the report said"
+
+
+def test_per_finding():
+    """A finding's cells move by its own offset, in logit space, and only when the switch is on."""
+    supervision = Supervision(calibrated=True, finding=True)
+    value = np.array([0.378, np.nan], dtype=np.float32)
+
+    over_called = supervision.per_finding(value, "Contusion")
+    under_called = supervision.per_finding(value, "Synovitis")
+
+    assert over_called[0] < 0.378, "a finding the reader over-calls trains at less than the pooled rate"
+    assert under_called[0] > 0.378, "one it misses in silence trains at more"
+    assert np.isnan(over_called[1]), "a missing cell stays missing rather than becoming a rate"
+    assert Supervision(calibrated=True).per_finding(value, "Contusion")[0] == pytest.approx(0.378), (
+        "without the switch the pooled table is reproduced exactly"
+    )
+    assert value[0] == pytest.approx(0.378), "the input must not be mutated"
+
+
+def test_per_finding_names_exactly_the_findings_it_shifts():
+    """An offset for a finding that does not exist would be silently ignored, which is how a typo hides."""
+    assert tuple(name for name, _ in FINDING_OFFSETS) == tuple(TARGETS)
+
+
+def test_finding_calibration_refuses_to_shift_an_uncalibrated_table():
+    """The offsets are fitted ON TOP of the pooled level map — applied to raw levels they are nonsense."""
+    with pytest.raises(UncalibratedFindingShiftError):
+        Supervision(finding=True)
 
 
 def test_load_grades_the_weight_without_moving_the_target(tmp_path: Path):

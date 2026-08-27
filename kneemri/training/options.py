@@ -106,6 +106,7 @@ class TrainingOptions:
     normalise_by_count: bool = False
     per_label_loss: bool = False
     calibrated_targets: bool = False
+    finding_calibration: bool = False
     severity_weight: bool = False
     hold_annotations: bool = False
     grade_ladder: bool = False
@@ -255,6 +256,7 @@ class TrainingOptions:
         return Supervision(
             floor=CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             calibrated=self.calibrated_targets,
+            finding=self.finding_calibration,
             severity=self.severity_weight,
             annotations=not self.hold_annotations,
         )

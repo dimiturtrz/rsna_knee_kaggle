@@ -28,6 +28,7 @@ from core.data.labels.targets import (
     ANNOTATIONS,
     CALIBRATED,
     CONFIDENCE_FLOOR,
+    FINDING,
     SEVERITY_WEIGHT,
     WEIGHT_FLOOR,
     Targets,
@@ -217,6 +218,7 @@ class Request:
     intensity_aug: bool
     weight_floor: bool
     calibrated_targets: bool
+    finding_calibration: bool
     severity_weight: bool
     hold_annotations: bool
     grade_ladder: bool
@@ -266,6 +268,7 @@ class Request:
             INTENSITY_AUGMENT: self.intensity_aug,
             WEIGHT_FLOOR: CONFIDENCE_FLOOR if self.weight_floor else 0.0,
             CALIBRATED: self.calibrated_targets,
+            FINDING: self.finding_calibration,
             SEVERITY_WEIGHT: self.severity_weight,
             # Re-derived from the FLAG, and inverted here rather than in the options property, for the
             # reason WEIGHT_FLOOR gives above: taking `supervision.annotations` would compare that

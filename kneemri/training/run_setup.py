@@ -140,6 +140,7 @@ class RunSetup:
             intensity_aug=options.intensity_aug,
             weight_floor=options.weight_floor,
             calibrated_targets=options.calibrated_targets,
+            finding_calibration=options.finding_calibration,
             severity_weight=options.severity_weight,
             hold_annotations=options.hold_annotations,
             grade_ladder=options.grade_ladder,

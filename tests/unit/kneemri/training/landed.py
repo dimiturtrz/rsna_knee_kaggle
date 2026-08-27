@@ -101,6 +101,7 @@ PLAIN = Request(
     intensity_aug=False,
     weight_floor=False,
     calibrated_targets=False,
+    finding_calibration=False,
     severity_weight=False,
     hold_annotations=False,
     grade_ladder=False,
