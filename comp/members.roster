@@ -435,3 +435,26 @@ merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0
 blend_ws.pt                 # twin of lr4e-5_ws_ff — dose-3 seat
 blend_calib.pt              # twin of calib_span_ff — dose-3 seat
 blend_ladder.pt             # twin of grade_ladder_ff — dose-3 seat
+
+# Added 2026-08-27 11:32Z, the honest-12 seating (knee-7d53's sibling lane). These seven are the seats
+# the greedy picked that this package did not already hold. The other five of the twelve
+# (merged_blend_cf, margin_seat_s2026, calib_span_s2026, through_dense_s2026, small_batch6_s2026) are
+# already above.
+#
+# WHY TWELVE AND NOT SIX. `record_mix --seats honest --vote logit` over the 89 same-ruler records
+# (greedy refitted on half the 909 shared studies, scored on the other half, both directions) peaks at
+# TWELVE seats / 0.8751 held-out, against the shipped champion's five-twin shadow at 0.8701. +0.0050
+# offline, which at the measured +0.74 board points per holdout point is +0.0037 board.
+#
+# WHY `calibmix` IS NOT EVIDENCE AGAINST IT. That entry seated ELEVEN and scored 0.941, exactly what
+# six seats scored, which reads as a refutation of count until its names are resolved: its eleven are
+# five recipes with four of them entered TWICE under a different fit. Offline it collapses onto the same
+# five twins the champion has. It measured fit-duplication, not count, and fit-duplication is flat.
+# These twelve are twelve DISTINCT recipes.
+calib_dense_hold_s2026.pt   # 0.8634 — the best solo member this project owns, and the greedy's FIRST seat
+finding_calib_dense_s2026.pt # 0.8600 — third seat; +0.0017 as a swap for lr4e-5_ws on the champion shadow
+blendhold_s2026.pt          # 0.8575 — fourth seat; the 224 px / 12 slice geometry, a different decode path
+mae_matched_s2026.pt        # ninth seat
+base224_s2026.pt            # tenth seat — the only 224 px base-trunk member in the twelve
+calib_span_hold_s2026.pt    # 0.8565 — eleventh seat, and the champion's own calib_span_ff twin
+merged_dense_cf.pt          # twelfth seat
