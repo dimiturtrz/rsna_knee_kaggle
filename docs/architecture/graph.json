@@ -716,6 +716,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.report_reader",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.report_reader",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.report_reader",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.severity_boundary",
       "target": "core.cli",
       "weight": 1
@@ -6454,6 +6472,90 @@
       "kind": "calls",
       "source": "core.data.labels.report_language.main",
       "target": "core.data.labels.report_language.ReportLanguages.census",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.report_reader.LocalReader",
+      "target": "core.data.labels.report_reader.ReadingPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.report_reader.LocalReader",
+      "target": "core.data.labels.report_reader.ReportReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.report_reader.LocalReader.__init__",
+      "target": "core.data.labels.report_reader.ReadingPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.LocalReader.answer",
+      "target": "core.data.labels.report_reader.LocalReader.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.LocalReader.read",
+      "target": "core.data.labels.report_reader.LocalReader.answer",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.LocalReader.read",
+      "target": "core.data.labels.report_reader.ReportReading.parse",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.LocalReader.table",
+      "target": "core.data.labels.report_reader.LocalReader.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.ReadingPrompt.messages",
+      "target": "core.data.labels.report_reader.ReadingPrompt.system",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.ReadingPrompt.messages",
+      "target": "core.data.labels.report_reader.ReadingPrompt.user",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.labels.report_reader.ReportReading",
+      "target": "core.data.labels.report_reader.ReportGrade",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.report_reader.ReportReading",
+      "target": "core.data.labels.report_reader.ReportReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.report_reader.ReportReading.grade_of",
+      "target": "core.data.labels.report_reader.ReportGrade",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.report_reader.main",
+      "target": "core.data.labels.report_reader.LocalReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.main",
+      "target": "core.data.labels.report_reader.LocalReader.table",
       "weight": 1
     },
     {
@@ -17229,7 +17331,7 @@
   ],
   "nodes": [
     {
-      "descendants": 51,
+      "descendants": 52,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -17253,7 +17355,7 @@
       "role": null
     },
     {
-      "descendants": 41,
+      "descendants": 42,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -17501,7 +17603,7 @@
       "role": null
     },
     {
-      "descendants": 10,
+      "descendants": 11,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -17560,6 +17662,14 @@
       "descendants": 0,
       "id": "core.data.labels.report_language",
       "label": "report_language",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader",
+      "label": "report_reader",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -19339,6 +19449,38 @@
       "level": "class",
       "parent": "core.data.labels.report_language",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader",
+      "label": "LocalReader",
+      "level": "class",
+      "parent": "core.data.labels.report_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReadingPrompt",
+      "label": "ReadingPrompt",
+      "level": "class",
+      "parent": "core.data.labels.report_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportGrade",
+      "label": "ReportGrade",
+      "level": "class",
+      "parent": "core.data.labels.report_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportReading",
+      "label": "ReportReading",
+      "level": "class",
+      "parent": "core.data.labels.report_reader",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -23786,6 +23928,126 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.report_language",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.answer",
+      "label": "answer",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.load",
+      "label": "load",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.table",
+      "label": "table",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReadingPrompt.messages",
+      "label": "messages",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReadingPrompt",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReadingPrompt.system",
+      "label": "system",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReadingPrompt",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReadingPrompt.user",
+      "label": "user",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReadingPrompt",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportReading.grade_of",
+      "label": "grade_of",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReportReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportReading.parse",
+      "label": "parse",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReportReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportReading.row",
+      "label": "row",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReportReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.ReportReading.unread",
+      "label": "unread",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.ReportReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.annotated_reports",
+      "label": "annotated_reports",
+      "level": "method",
+      "parent": "core.data.labels.report_reader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.report_reader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.report_reader.verdict_of",
+      "label": "verdict_of",
+      "level": "method",
+      "parent": "core.data.labels.report_reader",
       "role": null
     },
     {
