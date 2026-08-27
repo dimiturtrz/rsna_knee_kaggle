@@ -60,7 +60,7 @@ import pandas as pd
 
 from core import cli
 from core.data.labels.targets import ASSERTS_PRESENCE, UNCERTAIN_LEVEL
-from core.findings import STUDY, TARGETS
+from core.findings import CRITERIA, SPECIFICITY, STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -147,8 +147,28 @@ class ReadingPrompt:
 
     findings: tuple[str, ...] = TARGETS
 
+    def criteria(self) -> str:
+        """The host's published criterion for each finding, in the contract order, one per line.
+
+        Rendered from `core.findings.CRITERIA` rather than restated here so the reader is told the same
+        words `data.labels.rubric_gap` measures it against. A prompt that paraphrased them would be
+        scored by a ruler reading the originals.
+        """
+        return "\n".join(f"- {finding}: {CRITERIA[finding]}" for finding in self.findings)
+
     def system(self) -> str:
-        """What the reader is, what it may claim, and the vocabulary it must answer in."""
+        """What the reader is, what it may claim, and the vocabulary it must answer in.
+
+        THE RUBRIC IS IN HERE BECAUSE THE TARGET IS NOT THE REPORT. The labels are an IMAGE review by two
+        MSK radiologists under stated criteria, with a third adjudicating; the report is a separate
+        document written for a different purpose. A reader told only to transcribe therefore grades
+        "intrasubstance degeneration without a definite tear" above absent, and the competition's label
+        for it is 0 — 448 such cells are measured in `rubric_gap`, across four of the twelve columns.
+
+        What does NOT change is that the reader may only use the REPORT: it still may not diagnose,
+        infer across findings, or imagine an image. The criteria are a THRESHOLD applied to what the
+        report said, not a licence to decide what the images would have shown.
+        """
         grades = ", ".join(f"{grade.value} ({grade.__doc__})" for grade in ReportGrade)
         return (
             "You read knee MRI radiology reports. Reports come in English, Spanish, Turkish, Croatian, "
@@ -157,6 +177,10 @@ class ReadingPrompt:
             "For each of the twelve findings, say what THE REPORT SAID about it. Do not diagnose, do not "
             "infer from other findings, and do not guess what an image would show. If the report is "
             "silent about a finding, that is 'unclear' — silence is not a normal result.\n\n"
+            "The findings are scored against an image review by radiologists working to the criteria "
+            "below. Apply these criteria to what the report says. A finding the report describes but "
+            f"that falls UNDER its criterion is 'absent', not 'possible'. {SPECIFICITY}\n\n"
+            f"{self.criteria()}\n\n"
             f"Grades: {grades}\n\n"
             "Answer with a single JSON object mapping each finding name to one grade word. No prose."
         )

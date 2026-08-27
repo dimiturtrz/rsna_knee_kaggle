@@ -14,7 +14,7 @@ from core.data.labels.rubric_gap import (
     UNQUALIFIED,
     RubricGap,
 )
-from core.findings import STUDY, TARGETS
+from core.findings import CRITERIA, STUDY, TARGETS
 
 DEGENERATE = (
     "There is intrasubstance degeneration of the medial meniscus without a definite tear. "
@@ -51,6 +51,18 @@ def test_sided():
     assert MENISCUS_RULE.sided()
     assert not ACL_RULE.sided()
     assert not MCL_RULE.sided()
+
+
+def test_criterion():
+    """A rule quotes the host's published criterion rather than restating it.
+
+    Reading topic 733343 verbatim is what caught `oedema` sitting in MCL's SUBTHRESHOLD vocabulary when
+    the published criterion names edema as part of the POSITIVE one. Sourcing the text from one place
+    keeps a rule and the reader's prompt from drifting apart.
+    """
+    assert MCL_RULE.criterion() == CRITERIA[MCL]
+    assert MENISCUS_RULE.criterion() == CRITERIA[MEDIAL]
+    assert "edema within and adjacent to the ligament" in MCL_RULE.criterion()
 
 
 def test_sentences():
@@ -105,7 +117,7 @@ def test_report():
     table = gap.table(MENISCUS_RULE, _reports(DEGENERATE), _labels(MEDIAL, POSITIVE))
     lines = gap.report(MENISCUS_RULE, table, corpus)
 
-    assert MENISCUS_RULE.criterion in lines[0]
+    assert MENISCUS_RULE.criterion() in lines[0]
     assert f"of {corpus} in the corpus" in lines[1]
     assert any(SUBTHRESHOLD in line for line in lines)
     assert lines[-1].startswith("  contradicted: 1 cells")

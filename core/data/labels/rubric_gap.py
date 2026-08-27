@@ -43,7 +43,7 @@ import pandas as pd
 from core import cli
 from core.data.labels.reader_agreement import ENGLISH, MIDPOINT
 from core.data.labels.report_language import ReportLanguages
-from core.findings import COMPARTMENT_PAIRS, STUDY, TARGETS
+from core.findings import COMPARTMENT_PAIRS, CRITERIA, STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,6 @@ class RubricRule:
     mention: str
     accepted: str
     subthreshold: str
-    criterion: str
     mentions: re.Pattern[str] = field(init=False)
     positive: re.Pattern[str] = field(init=False)
     under: re.Pattern[str] = field(init=False)
@@ -105,31 +104,37 @@ class RubricRule:
         """
         return len(self.columns) > 1
 
+    def criterion(self) -> str:
+        """The host's own words for this rule, from the vocabulary both this and the reader read."""
+        return CRITERIA[self.columns[0]]
+
 
 MENISCUS_RULE = RubricRule(
     columns=COMPARTMENT_PAIRS[0],
     mention=r"menisc",
-    accepted=r"\btear|\btorn|rupture|macerat|bucket.?handle|(?:reach|extend|contact)\w*\s+(?:to\s+|the\s+)*"
-    r"(?:articular\s+)?surface",
+    accepted=r"\btear|\btorn|rupture|macerat|bucket.?handle|truncat|diminutive|displaced|"
+    r"(?:reach|extend|contact)\w*\s+(?:to\s+|the\s+)*(?:articular\s+)?surface",
     subthreshold=r"degenerat|intrasubstance|intra-substance|mucoid|myxoid",
-    criterion="signal definitely contacting the articular surface on two or more images, or a morphologic "
-    "abnormality; intrasubstance degeneration is negative",
 )
 ACL_RULE = RubricRule(
     columns=("ACL",),
     mention=r"\bACL\b|anterior\s+cruciate",
     accepted=r"\btear|\btorn|rupture|discontinu|disrupt|full.thickness|complete",
     subthreshold=r"sprain|thicken|signal\s+change|increased\s+signal|mild|partial|degenerat|attenuat",
-    criterion="more than half the fibres, or discontinuity; mild signal change, degeneration or thickening "
-    "without discontinuity is negative",
 )
 MCL_RULE = RubricRule(
     columns=("MCL",),
     mention=r"\bMCL\b|medial\s+collateral",
-    accepted=r"high.?grade|grade\s*(?:3|III)\b|complete|\brupture|full.thickness|\btorn",
-    subthreshold=r"low.?grade|grade\s*(?:1|2|I{1,2})\b|sprain|strain|chronic|remote|thicken|oedema|edema",
-    criterion="high-grade ACUTE injury only; low-grade sprains and chronic or remote stress change are negative",
+    accepted=r"high.?grade|grade\s*(?:3|III)\b|complete|\brupture|full.thickness|\btorn|disrupt",
+    subthreshold=r"low.?grade|grade\s*(?:1|2|I{1,2})\b|sprain|strain|chronic|remote",
 )
+"""EDEMA IS NOT IN THE MCL SUBTHRESHOLD VOCABULARY, and the first version of this rule had it there.
+
+The published criterion reads "a high-grade partial or complete acute tear ... WITH DISRUPTED FIBERS AND
+EDEMA WITHIN AND ADJACENT TO THE LIGAMENT" — so oedema is part of what makes an MCL injury POSITIVE, and
+listing it as subthreshold read the positive class as the negative one. It cost 3 of 7 annotated cells
+disagreeing with the ruler before the thread was read verbatim rather than from a summary of it.
+"""
 RUBRIC: tuple[RubricRule, ...] = (MENISCUS_RULE, ACL_RULE, MCL_RULE)
 """The three published criteria whose negative class the report's own words name. The other nine findings
 turn on a size or an image feature ("moderate or large", "one centimetre of >50%-thickness loss") that a
@@ -199,7 +204,7 @@ class RubricGap:
         studies = table["study"].nunique()
         cells = corpus * len(rule.columns)
         lines = [
-            f"{'/'.join(rule.columns)} — {rule.criterion}",
+            f"{'/'.join(rule.columns)} — {rule.criterion()}",
             f"  {studies} English studies of {corpus} in the corpus ({studies / corpus:.1%})",
         ]
         for bucket in BUCKETS:

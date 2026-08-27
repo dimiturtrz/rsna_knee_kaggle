@@ -18,7 +18,7 @@ from core.data.labels.report_reader import (
     ReportGrade,
     ReportReading,
 )
-from core.findings import TARGETS
+from core.findings import CRITERIA, SPECIFICITY, TARGETS
 
 
 def _answer(word: str) -> str:
@@ -34,11 +34,25 @@ def test_verdict_of():
     assert ReportReading.verdict_of(LEVEL[ReportGrade.UNCLEAR]) == UNSURE
 
 
+def test_criteria():
+    """Every finding carries the host's own criterion, quoted rather than paraphrased."""
+    criteria = ReadingPrompt().criteria()
+    assert all(f"- {target}: " in criteria for target in TARGETS)
+    assert CRITERIA["Medial Meniscus"] in criteria
+    assert len(criteria.splitlines()) == len(TARGETS)
+
+
 def test_system():
-    """The instruction names the grades and forbids treating silence as a normal result."""
+    """The instruction names the grades, forbids silence-as-normal, and states the host's threshold.
+
+    The last two assertions are the point of the rubric-bearing prompt: without them the reader grades
+    "intrasubstance degeneration without a definite tear" above absent, which is 448 measured cells.
+    """
     system = ReadingPrompt().system()
     assert all(grade.value in system for grade in ReportGrade)
     assert "silence is not a normal result" in system
+    assert SPECIFICITY in system
+    assert CRITERIA["ACL"] in system
 
 
 def test_user():

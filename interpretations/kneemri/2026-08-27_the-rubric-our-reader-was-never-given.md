@@ -39,18 +39,18 @@ of >50%-thickness loss"). That is `severity_boundary`'s shape, and it needs the 
                                  subthreshold cells   ours positive   contradicted   of that finding's cells
 Medial/Lateral Meniscus                        196             165            165                     1.87%
 ACL                                            102              98             98                     2.22%
-MCL                                            213             207            207                     4.70%
+MCL                                            213             185            185                     4.20%
                                                                               ---
-                                                                              470
+                                                                              448
 ```
 
-**470 cells, and every one of them a FLOOR.** The tool reads 40.1% of the corpus; the other 59.9% is
+**448 cells, and every one of them a FLOOR.** The tool reads 40.1% of the corpus; the other 59.9% is
 Spanish, Turkish, Croatian, Greek, German, Bulgarian, Dutch or French and carries the same wording in its
-own language. If the class rate is language-flat the corpus figures are nearer 4.7% / 5.5% / 11.7%. The
+own language. If the class rate is language-flat the corpus figures are nearer 4.7% / 5.5% / 10.5%. The
 rates are stated over the corpus, not over the subset that parsed, because a rate computed inside the
 subset that happened to parse is not a rate over the corpus.
 
-Concentration matters more than the raw share. **165 of 196, 98 of 102 and 207 of 213 — 84%, 96% and 97%
+Concentration matters more than the raw share. **165 of 196, 98 of 102 and 185 of 213 — 84%, 96% and 87%
 — are flipped**, and all in one direction, onto the positive class. That is not symmetric noise a bigger
 model averages out; it is a bias that moves the decision boundary. Four of the twelve columns carry it.
 
@@ -73,10 +73,25 @@ READER error; it was a RUBRIC error all along, and studies 059, 062, 088 and 090
 
 **MCL is the largest arm and the least trustworthy one, and the annotation says so.** 3 of its 7
 subthreshold cells are annotated POSITIVE — the ruler and the radiologist disagree 43% of the time on
-exactly the class the count rests on. The likely cause is in the ruler, not the rule: `oedema|edema`,
-`thicken` and `strain` sit in the MCL subthreshold vocabulary, and a high-grade acute injury is
-described with all three. So treat 207 as an upper bound whose true share is unmeasured, and do not
-quote the 470 total without this line attached. ACL's 1 annotated cell settles nothing either way.
+exactly the class the count rests on.
+
+The flag paid immediately, and it paid in the ruler rather than in the rule. Reading topic 733343
+verbatim rather than from a summary of it gives the MCL criterion as *"a high-grade partial or complete
+acute tear … **with disrupted fibers and edema within and adjacent to the ligament**"* — so edema belongs
+to the POSITIVE class, and the first version of this ruler had `oedema|edema|thicken` in MCL's
+SUBTHRESHOLD vocabulary. It was reading the accepted class as the negative one. Corrected (edema and
+thickening dropped from subthreshold, `disrupt` added to accepted), MCL falls **207 → 185** and the total
+**470 → 448**.
+
+The 3-of-7 annotation disagreement is UNCHANGED by that fix — those seven cells are named-but-under-
+threshold on other words. So MCL stays flagged: treat 185 as an upper bound whose true share is
+unmeasured, and do not quote the 448 total without this line attached. ACL's 1 annotated cell settles
+nothing either way.
+
+The general lesson is the one the house rule already states and I broke anyway: I wrote a vocabulary for
+a published rule from my own knowledge of MCL injury instead of from the published rule. The criteria now
+live once, quoted, in `core.findings.CRITERIA`, and both the ruler and the reader's prompt render from
+there — so a paraphrase cannot drift from the thing it is scored against.
 
 The honest summary: **meniscus is measured, ACL is plausible and thin, MCL is flagged.**
 
