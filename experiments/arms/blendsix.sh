@@ -3,6 +3,18 @@
 #
 # bead: knee-4i3m
 #
+# THIS ARM HAS RUN, AND ITS QUESTION IS ANSWERED. DO NOT RE-QUEUE IT. Four of its five members exist
+# under the processed root — blend_ws.pt, blend_calib.pt, blend_ladder.pt, blend_through.pt, all written
+# 2026-08-26 and declared in `comp/members.roster` — so re-running it would OVERWRITE members that a
+# scored board row depends on being reproducible. The paragraph below says "this arm builds five more of
+# them" because it was written before they were built: it is a plan, not a state.
+#
+# AND THE DOSE IS FLAT. `kneemri-blendthree` served FOUR blend seats out of six and scored 0.939, against
+# blendseat_v1's ONE blend seat at the same 0.939. Dose one to dose four is +0.000, which is this arm's
+# own pre-registered FLAT band, already read. The label axis closes at the DOSE term. What it leaves open
+# is the TABLE term, and — untried, unpriced — blend and calibration composed on the SAME seat, which only
+# `blend_calib` and `merged_blend_cf` carry today.
+#
 # WHAT MOVES, AND IT IS ONE THING. `comp/champion.json` pins blendseat_v1 at 0.939: six members, of
 # which exactly ONE (`merged_blend_s2026`) was fitted on the merged corpus and the three-reader blend
 # label table. This arm builds five more of them, so the roster goes from a DOSE of one blend seat in
