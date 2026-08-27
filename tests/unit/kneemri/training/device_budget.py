@@ -12,6 +12,7 @@ import torch
 from kneemri.device import VisibleCards
 from kneemri.models.backbone import CONVNEXT_BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL, Encoder
 from kneemri.training.device_budget import (
+    CAP_HEADROOM,
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
@@ -175,15 +176,27 @@ def test_capped():
     assert DeviceBudget(vram_gb=26.0).capped(31.8) == 26.0, "an explicit budget is used as asked"
     assert DeviceBudget().capped(31.8) == pytest.approx(DEFAULT_SHARE * 31.8), "and silence still caps"
     assert DeviceBudget().capped(31.8) < 31.8, "the driver context and the desktop live outside the allocator"
-    twelve = DeviceBudget(slices=12).capped(31.8)
-    assert 16.24 < twelve < DEFAULT_SHARE * 31.8, "a stated recipe caps at its own need, under the share"
     assert DeviceBudget(vram_gb=28.0, slices=12).capped(31.8) == 28.0, "a named number still overrides it"
     # THE SHARE MUST NOT CLAMP A DERIVED NEED. 20 slices reserve 26.92 GB measured and the share is
     # 25.44, so the first version of `capped` — a `min` against the share — would have capped every
     # 20-slice arm below its own measured demand. Those arms RAN, at a hand-typed 28. A cap under a
     # measured need does not prevent the over-commit, it schedules it.
     assert DeviceBudget(slices=20).capped(31.8) > DEFAULT_SHARE * 31.8, "a measured need outranks the blind default"
-    assert DeviceBudget(slices=20).capped(31.8) == pytest.approx(26.92 + 1.335, abs=0.02)
+    assert DeviceBudget(slices=20).capped(31.8) == pytest.approx(CAP_HEADROOM * (26.92 + 1.335), abs=0.02)
+    # AND IT MUST ONLY EVER RAISE THE CEILING (knee-l93q). Handing `needed()` to the allocator as a
+    # ceiling made a recipe that matched its own prediction OOM: `dinov3_base_lora`, which this repo ran
+    # to 0.8268, died at "15.14 GiB is allocated by PyTorch ... 16.27 GiB allowed", and so did the arm
+    # under test beside it. Re-smoked at a 1.10 margin it read "17.90 GiB allowed ... 1.93 GiB is
+    # reserved by PyTorch but unallocated" — peak ALLOCATION 16.15, under the 16.27 derived. The fit is
+    # right and the cap governs a different quantity, so a 12-slice recipe must get the co-tenant share
+    # rather than a ceiling fitted to itself.
+    assert DeviceBudget(slices=12).capped(31.8) == pytest.approx(DEFAULT_SHARE * 31.8), (
+        "a derivation below the share must not tighten the ceiling under it"
+    )
+    assert DeviceBudget(slices=12).capped(31.8) > DeviceBudget(slices=12).needed() * 1.127, (
+        "and it must clear the measured reserved-to-allocated ratio, not sit on the prediction"
+    )
+    assert DeviceBudget(vram_gb=26.0, slices=12).capped(31.8) == 26.0, "a MEASURED number gets no margin"
 
 
 def test_needed():

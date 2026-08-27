@@ -1154,6 +1154,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_member",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_member",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_member",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_ruler",
       "target": "core.cli",
       "weight": 1
@@ -8296,6 +8314,72 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_gate.main",
       "target": "kneemri.inference.foreign_member.WindowFeed.order",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
+      "target": "kneemri.evaluation.foreign_member.Decode.checked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
+      "target": "kneemri.evaluation.foreign_member.ForeignMember.series",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.ForeignMember.record",
+      "target": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_member.ForeignMember.record",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.ForeignMember.record",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.evaluation.foreign_member.Decode",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.evaluation.foreign_member.Decode.loaded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.evaluation.foreign_member.ForeignMember",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.evaluation.foreign_member.ForeignMember.record",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_member.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -18765,7 +18849,7 @@
       "role": null
     },
     {
-      "descendants": 146,
+      "descendants": 147,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -18821,7 +18905,7 @@
       "role": null
     },
     {
-      "descendants": 35,
+      "descendants": 36,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -18880,6 +18964,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate",
       "label": "foreign_gate",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member",
+      "label": "foreign_member",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -20858,6 +20950,22 @@
       "label": "GateReading",
       "level": "class",
       "parent": "kneemri.evaluation.foreign_gate",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.Decode",
+      "label": "Decode",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.ForeignMember",
+      "label": "ForeignMember",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_member",
       "role": "satellite"
     },
     {
@@ -26618,6 +26726,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_gate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.Decode.checked",
+      "label": "checked",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member.Decode",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.Decode.loaded",
+      "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member.Decode",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
+      "label": "predicted",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member.ForeignMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.ForeignMember.record",
+      "label": "record",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member.ForeignMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.ForeignMember.series",
+      "label": "series",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member.ForeignMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_member.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_member",
       "role": null
     },
     {

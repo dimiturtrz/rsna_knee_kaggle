@@ -35,6 +35,32 @@ DEFAULT_SHARE = 0.8
 """Fraction of the card a run holds when it names no budget — read off the arms, not chosen: the
 accepted ones cap at 20, 26 and 28 GB of 31.8, and 26 is 0.82."""
 
+CAP_HEADROOM = 1.15
+"""What a DERIVED need is multiplied by before it may act as a ceiling — the gap between the quantity
+`needed()` predicts and the quantity `set_per_process_memory_fraction` governs.
+
+THEY ARE NOT THE SAME QUANTITY, and that is what this covers. The fit predicts ALLOCATION; the cap
+bounds RESERVATION, and PyTorch's caching allocator holds fragmentation slack inside its reservation
+that no cost model over layer shapes can see.
+
+MEASURED, NOT CHOSEN, and re-derived once after the first value proved too small (knee-l93q). The
+12-slice v3base smoke, run at a 1.10 ceiling, logged `17.90 GiB allowed`, `15.15 GiB is allocated by
+PyTorch, and 1.93 GiB is reserved by PyTorch but unallocated` — a reserved-to-allocated ratio of
+1.127 at peak, against the 1.108 that `experiments/lib.sh` gates the SAME cost model at
+(`ARM_NEEDS_MIB = 18432` over a measured *"peak memory 16.24 GB reserved"*, for the same stated
+reason: driver context and cuDNN workspaces sit on top of the allocator's reservation). 1.15 is the
+smaller step that clears the larger of the two measurements.
+
+IT CAN ONLY RAISE A CEILING, NEVER LOWER ONE — see `capped`, which takes the max against
+`DEFAULT_SHARE`. A margin on a self-imposed tight ceiling would still be a self-imposed tight ceiling,
+and the first version of this fix was exactly that: both sides of a controlled pair, `warm_v3base_lora`
+and the `dinov3_base_lora` control this repo has run to 0.8268, died at `15.14 GiB is allocated by
+PyTorch ... 16.27 GiB allowed` with the derivation acting as its own ceiling.
+
+IT APPLIES TO THE DERIVATION ONLY. A hand-named `--vram-gb` is a measured number rather than a
+prediction and is left exactly as typed, and `DEFAULT_SHARE` is a fraction of a real card and needs no
+margin over itself."""
+
 SMALLEST_RUN_GB = 5.5
 """Free VRAM below which no run this repo has ever recorded could have fitted, so starting is futile.
 
@@ -341,8 +367,29 @@ class DeviceBudget:
 
         A need above the card is left to raise. That is the documented preference of this whole class:
         an immediate OutOfMemoryError over a silent PCIe crawl.
+
+        THE DERIVATION MAY ONLY RAISE THE CEILING, NEVER LOWER IT, and that is the whole of knee-l93q.
+        `needed()` used to be handed straight to `set_per_process_memory_fraction`, which made the cost
+        model its own ceiling. A recipe that MATCHED its prediction then OOM'd on the spot, measured on
+        both sides of a controlled pair — `dinov3_base_lora`, a recipe this repo ran to 0.8268, failed
+        identically to its arm at `15.14 GiB is allocated by PyTorch ... 16.27 GiB allowed`.
+
+        The re-smoke at `CAP_HEADROOM` is what named the real quantity. It read `17.90 GiB allowed`,
+        `15.15 GiB is allocated by PyTorch`, `1.93 GiB is reserved by PyTorch but unallocated` — so peak
+        ALLOCATION was 16.15 GB, UNDER the 16.27 the fit derived. The fit is not wrong. It predicts
+        allocation while the cap governs RESERVATION, and the caching allocator's fragmentation slack —
+        12.7% of its own reservation at that peak — sits in between.
+
+        Which is why a tight self-ceiling was never buying anything. The run cannot allocate more than
+        it needs; that is the claim `needed()` makes. The cap exists to keep a CO-TENANT alive, and
+        `DEFAULT_SHARE` is what does that job. Taking `max` keeps the paragraph above true — a 20-slice
+        recipe reserving 26.92 is never capped under its own measured demand — while a 12-slice smoke
+        gets the co-tenant share rather than a ceiling fitted to itself, with `CAP_HEADROOM` covering
+        the fragmentation the derivation does not model.
+
+        A hand-named `--vram-gb` is measured rather than derived, so it is left exactly as typed.
         """
-        return self.vram_gb or self.needed() or DEFAULT_SHARE * whole
+        return self.vram_gb or max(self.needed() * CAP_HEADROOM, DEFAULT_SHARE * whole)
 
     def floor(self) -> float:
         """Free VRAM below which this run refuses to start at all — not the same number as its CAP.

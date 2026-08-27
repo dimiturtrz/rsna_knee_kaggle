@@ -46,6 +46,12 @@ dev = ["pytest", "pytest-cov"]
 # reads ~/.kaggle/kaggle.json and is the working path for competition/kernel READS. Declared so a bare
 # `uv sync` stops silently uninstalling it. Invoke the venv entrypoint (.venv/Scripts/kaggle.exe) by path.
 submit = ["kaggle"]
+# Serving a FOREIGN checkpoint through its own decode (`kneemri.evaluation.foreign_member`). Their
+# published reader opens with `import pydicom, cv2` — pydicom we already have, cv2 we did not, and the
+# absence is invisible until `_make_reader()` is called, i.e. after the model and the DICOM tree are
+# already loaded. An EXTRA rather than a runtime dep because nothing of OURS imports cv2 and nothing
+# should: it belongs to their decode, and a foreign member is opt-in.
+foreign = ["opencv-python-headless"]
 # The guardrail ANALYZERS are an installed package pinned by scaffold tag (not vendored source) — an engine
 # update is a one-line `devtools_ref` bump on `copier update`, no source diff in your PRs. Imports as
 # `devtools` (`python -m devtools.graph.fitness …`); grimp/networkx arrive transitively. ast-grep/jscpd configs are
@@ -102,6 +108,8 @@ DEP002 = [
     "pydantic",
     "kaggle",
     "triton-windows",
+    # cv2 is imported by THEIR reader, never by ours — see the `foreign` extra.
+    "opencv-python-headless",
 ]
 # <<< LOCAL-SLOT: deptry-unused
 

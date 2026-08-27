@@ -51,6 +51,15 @@ It lands within the cross-precision tolerance (4x eps), which is WIDER than a pa
 +/-0.016 — so an interval computed from one is indicative, and the file has to say so itself rather
 than leave the caller to remember which runs were back-filled."""
 
+FOREIGN = "foreign"
+"""Someone else's weights, served through someone else's decode — `kneemri.evaluation.foreign_member`.
+
+A third value rather than `DERIVED`, because the two differ in what a disagreement would MEAN. A
+re-derived array is our weights read twice and differs from `TRAINED` only by precision. A foreign one
+shares neither the trunk nor the feed, and the feed alone is worth -0.0348 on a byte-identical
+checkpoint (0.9167 through their reader against 0.8819 through our best cache). A comparison that
+cannot see which of the three it is holding will attribute that to weight quality."""
+
 
 @dataclass(frozen=True)
 class HoldoutReading:
