@@ -2306,6 +2306,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.inference.foreign_holdout",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_holdout",
+      "target": "kneemri.inference.foreign_member",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_holdout",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.inference.foreign_member",
       "target": "core.findings",
       "weight": 1
@@ -12662,6 +12680,102 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "target": "kneemri.inference.foreign_member.ForeignMember",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "target": "kneemri.inference.foreign_member.WindowFeed",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "target": "kneemri.inference.foreign_holdout.ForeignHoldout.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "target": "kneemri.inference.foreign_member.ForeignReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "target": "kneemri.inference.foreign_member.ForeignReadings.predict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_holdout.borrowed",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.borrowed",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.inference.foreign_member.ForeignMember.rebuild",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.inference.foreign_member.WindowFeed.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.inference.foreign_member.WindowFeed.order",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_holdout.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.inference.foreign_member.ForeignMember",
       "target": "kneemri.inference.foreign_head.ForeignHead",
       "weight": 1
@@ -18339,7 +18453,7 @@
       "role": null
     },
     {
-      "descendants": 143,
+      "descendants": 144,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -18787,7 +18901,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 15,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -18814,6 +18928,14 @@
       "descendants": 0,
       "id": "kneemri.inference.foreign_head",
       "label": "foreign_head",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout",
+      "label": "foreign_holdout",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -21040,6 +21162,14 @@
       "label": "ForeignHead",
       "level": "class",
       "parent": "kneemri.inference.foreign_head",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "label": "ForeignHoldout",
+      "level": "class",
+      "parent": "kneemri.inference.foreign_holdout",
       "role": "primary"
     },
     {
@@ -29064,6 +29194,46 @@
       "label": "weights",
       "level": "method",
       "parent": "kneemri.inference.foreign_head.ForeignHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.ForeignHoldout.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.ForeignHoldout.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_holdout.ForeignHoldout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.borrowed",
+      "label": "borrowed",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_holdout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_holdout.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_holdout",
       "role": null
     },
     {
