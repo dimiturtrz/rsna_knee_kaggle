@@ -121,3 +121,43 @@ thick row — and two of five levels at p ≈ 0.02 fail Bonferroni at α 0.01 in
 on one uncorrected test. The joint count does survive (expected 0.25 tests below 0.05, observed 2,
 p ≈ 0.023), which is why the statement is "structure exists somewhere" rather than "the constants are
 fine".
+
+---
+
+## Postscript 2026-08-27 — this explains `reader_agreement`'s largest single signal, and thereby spends it
+
+`core.data.labels.reader_agreement` run 2026-08-27 06:42Z reports, over the same 684 cells:
+
+```
+ graded   266 positive calls   agrees 63.2% against 77.8% plain: -0.146 [-0.277, +0.005]
+ hedged    34 positive calls   agrees 70.6% against 65.3% plain: +0.052 [-0.163, +0.202]
+```
+
+**−0.146 is the largest effect anywhere in that census** — larger than the English/non-English gap
+(+0.025), larger than any per-finding deviation — and its interval only just touches zero. Read alone it
+reads as a lever with a name attached: the reader over-calls on graded reports, so teach it that a grade
+word is not a full YES. That reading is wrong, and this document is why.
+
+**The graded penalty is not the reader being wrong; it is the RULER disagreeing with itself on exactly
+those cells.** A graded report is, by construction, one carrying a size or severity word — which is the
+same population this document buckets. Six of twelve small-qualifier effusions are annotated POSITIVE and
+one of three moderate-or-larger is annotated NEGATIVE, because the gold was made from the IMAGES and not
+from the reports (hosts, topic 735826). So on graded cells the annotation is near a coin flip, and any
+reader — ours, a Qwen-class replacement, a radiologist reading only the text — scores ~50% there no
+matter how well it parses. The 14.6-point penalty is the price of being measured against a ruler that
+splits, not the price of a parse.
+
+**The consequence is a subtraction from `knee-pju4`'s remaining case.** That bead's sizing argument was
+already killed by the silence census (a perfect silence-filler fixes at most 24 cells while over-calling
+costs 108), and what survived was "a local multilingual reader is still the instrument that could fix
+over-calling". This says a meaningful share of that 108 is not fixable by any reader, because the target
+on those cells is genuinely ~0.5. **The two directions the census names are therefore not symmetric in
+what they license**: the misses are a coverage problem a better reader could address, while the
+over-calls are part reader error and part irreducible boundary ambiguity, in an unmeasured proportion.
+Neither this document nor the census separates them, and 684 cells over 57 studies cannot.
+
+**What is NOT retracted.** The graded flag remains the right thing to record — knowing which cells sit on
+an ambiguous boundary is exactly what a soft target would need. This document's own honest-size paragraph
+still binds: 509 rows, one of twelve findings, a target moving by at most 0.18, nothing near the 1.5%
+bar. It stays a free rider on a label arm, never an arm of its own. The addition here is only that its
+strongest-looking corroboration from the reader side is the same fact seen twice, not a second one.
