@@ -4566,3 +4566,75 @@ measured, both on the same control, and neither pays. Written next to the rest o
 architecture axis this project owns is now closed on its own measurement**, and the only two numbers
 still moving — `merged_blend_cf` 0.8597 and `merged_blend_s2026` 0.8589 — are both the CORPUS axis.
 `merged_dense_cf` (knee-4hxv) is the arm that follows from that, and it is the only one queued.
+
+## 2026-08-27 — the corpus arm lands flat, and EMA is measured where its confound does not exist
+
+Two runs finished on the same card and neither clears anything. Both are recorded here because both
+were queued as decisions and a decision that reads flat is still spent.
+
+| arm | recipe | peak | vs its control | reading |
+|---|---|---|---|---|
+| **`merged_dense_cf`** | the merged corpus at the DENSE corner — `band_dense`'s 20 slices / 0.10–0.90 band over the combined study list, the arm the line above this section named as the only one queued | **0.8569** @ e8 | **−0.0009 vs `band_dense`** 0.8578, **−0.0028 vs `merged_blend_cf`** 0.8597 | **the corpus axis does not carry to the dense corner.** The section above closed every decode and architecture axis and left the corpus as the only lane still moving; this arm asked whether that motion survives at the recipe we actually ship, and it does not. Both deltas are a fraction of the 0.0062 floor, so nothing is refuted and nothing is bought — what is spent is the assumption that a corpus gain measured at the blend corner is portable. It is not measured to be. `merged_blend_cf` remains the corpus lane's best number and it was never beaten by adding slices to it. Survived a relaunch after the first attempt died at 05:01:58Z to an `nvlddmkm` Event ID 153 driver fault at 26.92 GB reserved — a fact about the shared machine, not about the recipe (the relaunch was byte-identical and completed twelve epochs) |
+| **`ema_dense`** | `band_dense`'s invocation with `--ema` appended and nothing else touched (`knee-56w5`) | **0.8588** @ e7 | **+0.0010 vs `band_dense`** 0.8578 | **FLAT, which is the band the bead pre-registered as `allfit`'s data reading being CLEAN.** The arm existed because every `_ff` member is its `_s2026` twin plus `--fold -1` AND `--ema`, so the one entry that ever moved the board (`kneemri-allfit`, 0.937) moved two variables at once. The confounded pair cannot be separated where it occurred; the confounding VARIABLE can be measured at fold 0, where the 909-study holdout still works and the control was already on disk. It reads a sixth of the floor. **The harness suspect the arm named in advance is cleared, not assumed:** `--ema` defaults False, so a flag that never reached the trainer would produce a run byte-identical to the control — the checkpoint config stamps `'ema': True` and the score is not the control's, so the flag landed and the null is about EMA rather than about plumbing. An outside single-variable ablation of the same flag read **+0.003** (`research/2026-08-26_the-ablation-table-a-competitor-published.md`); we read +0.0010. Two independent measurements, same sign, both under their own floors — the honest joint reading is a real but sub-floor lever, not a null. **Consequence: `allfit`'s +0.004 is a DATA result**, its co-variable is priced and small, and `knee-tfj3`'s closure stands |
+
+**The seat ruler, run card-free against `gradeswap_v1` (0.933, seven members), says neither is a member.**
+
+```
+roster of 7: 0.8694
+  +merged_dense_cf     0.8701  (+0.0007)   best seat +0.0008 (for lr4e-5_ws)   nearest 0.8902
+  +ema_dense           0.8690  (-0.0004)   best seat -0.0002 (for base_dense)  nearest 0.9306
+0 of 2 clear +0.0015
+```
+
+**And the distance column carries the one mechanism worth keeping out of this pair: EMA CANNOT BUY
+DIVERSITY, BY CONSTRUCTION.** `ema_dense`'s nearest seated neighbour is **0.9306** — the tightest twin
+reading any candidate has posted against this roster, tighter than `calib_dense_hold`'s 0.9273 and far
+tighter than `merged_dense_cf`'s 0.8902. That is not a surprise once stated: an EMA member is a running
+average of the *same optimisation trajectory* as its non-EMA twin, so it can only ever be a smoothed
+version of an ordering the roster already contains. `lr4e-5_ws` priced −0.0003 on the quality ruler and
+took 0.931 while `band_span` priced +0.0002 and cost a tick, because a rank average cannot charge for
+contributing one ordering twice — EMA is the purest form of that failure available. **So `--ema` is a
+solo-quality lever (sub-floor, directional) and is disqualified as a diversity lever regardless of what
+its solo number does.** The `_ff` members already carry it; nothing is owed there.
+
+**What this leaves.** The corpus lane's portability is unproven and the EMA confound is priced out. The
+only arm on the card is `stackfit`, which asks the question neither of these can: whether two directional
+gains measured separately ADD. Its arithmetic is stated in its own header and reproduced here so the
+number is read against a prediction rather than the other way round — `calib_dense_hold` 0.8634 plus
+(`ema_dense` 0.8588 − `band_dense` 0.8578) = **0.8644 predicted under additivity**, band ±0.0062.
+
+### The composition read `merged_dense_cf` was actually bought — and it is the first floor-clearing evidence AGAINST additivity
+
+`knee-4hxv` did not queue this arm for its solo number. Its claim under test was that **the corpus lever
+and the geometry lever COMPOSE**, "because they act on different parts of the chain (what the network
+sees vs what it is told)", and it pre-registered +0.004 — `band_span`'s span-alone measurement. Read as
+a composition question rather than as a member, the arm is not flat at all:
+
+| corpus | 12 slices, 0.2–0.8 | 20 slices, 0.1–0.9 | what the geometry buys |
+|---|---|---|---|
+| ours (report labels) | `rate_wholestack` 0.8525 | `band_dense` **0.8578** | **+0.0053** |
+| merged (Rijeka three-reader blend) | `merged_blend_cf` 0.8597 | `merged_dense_cf` **0.8569** | **−0.0028** |
+
+**The same geometry move, measured on two corpora, lands 0.0081 apart — 1.3× the 0.0062 paired floor,
+and the sign inverts.** So this is not "the corpus arm was flat"; it is "the geometry gain is a fact
+about the corpus it was measured on, and it does not survive being moved to a better-labelled one".
+
+**Suspect the harness before the mechanism, since a sign flip is the shape a plumbing fault makes.**
+Both merged runs read the merged study list (the builder refuses a foreign corpus name outright since
+`knee-48br`, so a merged run cannot silently decode ours); the dense merged cache is its own key
+(`336px_20sl_0.1-0.9band_merged`, distinct from the 12-slice merged build, per the reading-axis test in
+`tests/integration/argv_to_cache_key.py`); and `merged_dense_cf` converged at epoch 8 of 12 with the
+recipe stamp carrying `slices: 20`, `band [0.1, 0.9]`. The driver fault that killed the first attempt is
+excluded by construction — this number is the relaunch, which completed. What is NOT excluded is that
+each cell is one seed, and 0.0081 is 1.3 floors, not 3.
+
+**Why this matters more than either row above: it is the ONLY composition measurement this project
+holds, and `stackfit` is on the card right now betting the opposite.** `knee-orjq`'s whole remaining
+route to 0.950 is a STACK of directional gains, and nothing had ever tested whether gains add. This did,
+by accident, on a different pair of levers — and it read SUBSTITUTION with the sign flipped, the
+`depth_regions_span` shape. That does not settle `stackfit`: these two levers plausibly interact through
+the same channel (a better-labelled corpus and a denser read are both ways of resolving the same fine
+structure), where `--calibrated-targets` and `--ema` are mechanically independent — one changes what the
+targets say, the other changes which weights are kept. But it moves the honest prior on `stackfit` off
+"additive unless shown otherwise", and it means an additive read there should be believed *less*, not
+more. Stated before that number lands, so it cannot be fitted to it afterwards.
