@@ -2343,3 +2343,33 @@ reset. The kernel push was refused once with `Maximum batch GPU session count of
 per **account**, shared with the biohub/celltrack project, and no gate of ours asks before pushing
 (`knee-mjqk`). Nothing of theirs was cancelled; a letter went to their inbox and a waiter took the first
 slot that freed.
+
+## 2026-08-27 · `kneemri-calibsix` — 0.941, the plateau breaks
+
+**0.941.** A new best, +0.002 over `blendseat_v1` and `blendthree_v1`, and the first of twelve entries
+to leave the 0.936–0.939 band.
+
+The entry is the champion's six seating with `--calibrated-targets` on **every** seat. Nothing about the
+roster moves: same six seats, same `LogitAverage`, same count, same serving views, same member order.
+Five members are their champion twin's flags plus the one flag; `calib_span_ff` already carried it. So
+this is not a seating variation — it is the **member-quality lane** tested at roster scale for the first
+time, on the only term this project has measured positive twice (`knee-bs4l`: +0.0072 proxy / +0.0129
+annotated at the span corner; +0.0061 at the dense-hold corner).
+
+**Read it as directional, not as a finding.** +0.002 is under the 0.0053 Hanley–McNeil floor and well
+under the 0.0062 three-seed floor. One board read cannot separate it from the plateau it topped.
+
+**It came in BELOW its own pre-registration** (`knee-wrl6`, ~0.944 with `knee-ps8o`'s halved local slope
+already applied), and that miss is the useful part. The 23% seat pass-through was measured for ADDING
+one member to a roster; nothing had measured what happens when all six improve on the same axis at once.
+Now something has, and the answer is that it does not compound: the pass-through does not improve when
+the whole roster moves together.
+
+**The arithmetic that follows.** At this pass-through the member-quality lane ceilings near 0.943. The
+gap to first place is 0.013 (leader 0.952, board read 2026-08-27T05:57Z, rank 49 of 2486). So 0.950 is
+not reachable by improving members, and the remaining routes are **external data** (`merged_dense_cf`,
+on the card as this scored) and **stacking** (`knee-orjq` — whether directional gains ADD, which nothing
+has ever tested and which the whole 0.950 plan assumes).
+
+Witness-checked before the push: five seats ok, one UNVERIFIED (`calib_span_ff`, published before
+2026-08-24), no defects. Kit `fec94e7`, kernel version 1. Slot 1 of 5 on 2026-08-27.
