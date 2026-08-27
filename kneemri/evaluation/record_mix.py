@@ -45,6 +45,7 @@ from numpy.typing import NDArray
 from core import cli
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve, Pool
 from kneemri.evaluation.scores import LabelScores
+from kneemri.inference.vote import LogitAverage, MedianLogit, RankAverage, Vote
 from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,18 @@ SHARED_FLOOR = 0.9
 
 Not a tolerance for disagreement — members on one split agree exactly, so the real values are 1.0 or a
 fraction near zero. It is a floor with room for a member whose record predates a handful of studies.
+"""
+
+VOTE_RULES: dict[str, type[Vote]] = {
+    "rank": RankAverage,
+    "logit": LogitAverage,
+    "median": MedianLogit,
+}
+"""The vote rules this tool can be asked about, by their CLI name.
+
+`QualityWeightedRank` is absent because it fits its weights on the same holdout it would be scored on
+here — the defect that killed per-label selection, and the reason it has never shipped. The three that
+remain need nothing but the members' arrays, which is what makes them askable offline AND servable.
 """
 
 
@@ -159,12 +172,18 @@ class RecordMix:
             raise ValueError(message)
         return studies
 
-    def per_member(self) -> Pool:
+    def per_member(self, vote: Vote | None = None) -> Pool:
         """The members' names, their aligned predictions, and the one truth they are all scored against.
 
         Truth is checked against the first member's for every other member, which is the same refusal
         `HoldoutReading.aligned` makes pairwise: the arithmetic of a mix succeeds across two label
         tables and answers a question nobody asked.
+
+        `vote` defaults to the rank-average every number in this project's ledger was taken under, so an
+        old reading stays comparable. Pass another rule to ask the offline ruler about the VOTE axis —
+        which it could not be asked at all until 2026-08-27, while the shipped champion has served
+        `LogitAverage` since `kneemri-vote`. The ruler and the entry disagreeing on the rule is a harness
+        gap, not a finding.
         """
         studies = self.shared()
         readings = self.readings()
@@ -178,7 +197,7 @@ class RecordMix:
                 raise ValueError(message)
             names.append(name)
             predictions.append(mine)
-        return Pool(names, predictions, truth)
+        return Pool(names, predictions, truth, vote or RankAverage())
 
     @staticmethod
     def _rows(
@@ -256,18 +275,27 @@ def main() -> None:
         action="store_true",
         help="the mix's own per-label AUCs, worst first, each priced in units of the final score",
     )
+    command.parser.add_argument(
+        "--vote",
+        choices=tuple(VOTE_RULES),
+        default="rank",
+        help="the rule the mix votes under. `rank` is what every ledger number was taken under; `logit` "
+        "is what the shipped champion actually serves; `median` is the robust centre of the same space. "
+        "Reading the same roster under two of them is the only way to price the vote axis without a slot.",
+    )
     command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
     arguments = command.parsed()
     scores = LabelScores()
     roster = list(arguments.roster)
     everything = list(dict.fromkeys([*arguments.records, *roster]))
     mix = RecordMix(everything)
-    mixed = mix.per_member()
+    mixed = mix.per_member(VOTE_RULES[arguments.vote]())
     logger.info(
-        "%d of %d records became members, over %d shared studies",
+        "%d of %d records became members, over %d shared studies, voting %s",
         len(mixed.names),
         len(everything),
         len(mixed.truth),
+        mixed.vote.named(),
     )
     if dead := mix.dropped():
         logger.warning("dropped, no checkpoint to package: %s", " ".join(dead))

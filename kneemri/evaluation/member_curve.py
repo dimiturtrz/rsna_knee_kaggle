@@ -19,7 +19,7 @@ spread between the best and worst subset of a given size is the honest error bar
 
 import itertools
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -39,7 +39,7 @@ from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage
+from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage, Vote
 
 logger = logging.getLogger(__name__)
 
@@ -106,14 +106,21 @@ class Pool:
     names: list[str]
     predictions: list[Float[np.ndarray, "studies targets"]]
     truth: Float[np.ndarray, "studies targets"]
+    vote: Vote = field(default_factory=RankAverage)
+    """HOW these members combine. Defaults to the flat rank-average because that is the rule every
+    reading in `experiments/README.md` was taken under, and a default that silently changed it would
+    reprice the whole ledger. Pass another rule to ask what the offline ruler says about the VOTE axis
+    — which it could not be asked at all until 2026-08-27, while the champion has shipped
+    `LogitAverage` since `kneemri-vote`. The ruler and the entry disagreeing on the rule is a harness
+    gap, not a finding, and this field is what closes it."""
 
     def __len__(self) -> int:
         """How many members — the range every subset enumeration runs over."""
         return len(self.predictions)
 
     def combined(self, subset: tuple[int, ...] | list[int]) -> Float[np.ndarray, "studies targets"]:
-        """These members under the shipped rule, which is the flat per-label rank-average."""
-        return RankAverage().combine([self.predictions[index] for index in subset])
+        """These members under this pool's vote rule — the flat per-label rank-average unless told otherwise."""
+        return self.vote.combine([self.predictions[index] for index in subset])
 
     def named(self, subset: tuple[int, ...] | list[int]) -> str:
         """The subset as the names a submission would package."""
@@ -150,8 +157,8 @@ class Pool:
         held = [(name, member) for name, member in paired if name in wanted]
         rest = [(name, member) for name, member in paired if name not in wanted]
         return (
-            Pool([name for name, _ in held], [member for _, member in held], self.truth),
-            Pool([name for name, _ in rest], [member for _, member in rest], self.truth),
+            Pool([name for name, _ in held], [member for _, member in held], self.truth, self.vote),
+            Pool([name for name, _ in rest], [member for _, member in rest], self.truth, self.vote),
         )
 
     def rows(self, studies: NDArray[np.int64]) -> "Pool":
@@ -162,7 +169,7 @@ class Pool:
         arrays live in different attributes here. Every caller that sliced one of them separately is a
         caller that could have scored a member against another member's truth.
         """
-        return Pool(self.names, [member[studies] for member in self.predictions], self.truth[studies])
+        return Pool(self.names, [member[studies] for member in self.predictions], self.truth[studies], self.vote)
 
 
 class MemberCurve:

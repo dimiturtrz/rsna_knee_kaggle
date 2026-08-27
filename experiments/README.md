@@ -4899,3 +4899,42 @@ tracks marginally less; the two effects nearly cancel. A member with cleaner pol
 tracking ratio is not obviously worse than the control, and the holdout's −0.0039 is inside the floor.
 Not a finding — a reason not to write `finding_calib_dense` off as a strictly worse member if a seat
 ever wants a differently-calibrated one.
+
+### MedianLogit — a robust vote LOSES here, and the shape of the loss is why — 2026-08-27
+
+`record_mix` gained a `--vote {rank,logit,median}` flag, and `Pool` gained the vote rule as a field.
+The gap that closed: the whole-pool vote comparison at the foot of this tool's report has existed since
+2026-08-17, but the SUBSET SEARCH and the seat curve above it were hardcoded to `RankAverage` — so every
+"best k" and every seat number in this ledger was chosen under a rule the board entries do not serve.
+The champion has served `LogitAverage` since `kneemri-vote`.
+
+Pool: the offline shadow of the shipped roster — the five holdout twins of the champion six
+(`final_ws` is dark and has no twin) plus the two `pixgroup` adds. 909 shared studies.
+
+| seats | RankAverage | MedianLogit |
+|-------|-------------|-------------|
+| 2     | 0.8627      | 0.8632      |
+| 3     | 0.8659      | 0.8616      |
+| 4     | 0.8676      | 0.8660      |
+| 5     | 0.8685      | 0.8646      |
+| 6     | 0.8692      | 0.8671      |
+| 7     | 0.8697      | 0.8664      |
+
+Whole pool: RankAverage 0.8697 · LogitAverage 0.8702 · MedianLogit 0.8664. The median is −0.0033 under
+the ledger's rule and −0.0038 under the shipped one.
+
+**Read the SHAPE, not the size.** −0.0038 is inside the 0.0062 paired noise floor and would be noise if
+it were one number. It is not one number: the median's curve OSCILLATES on the parity of the seat count
+(2 up, 3 down, 4 up, 5 down, 6 up, 7 down) while every mean rule's rises monotonically. An even median
+averages the middle two members and keeps some of the mean's information; an odd one elects a single
+member and discards the pool. So a median vote makes the score depend on whether the roster happens to
+be even — a dependence no seating argument can control for. The rule is refuted at this corner for a
+named mechanism, not for a delta.
+
+The rule stays in `kneemri.inference.vote`, with the parity artefact named in its docstring, because a
+roster that IS outlier-shaped can re-ask this in one CLI flag and will not have to rediscover why the
+curve zig-zags.
+
+Incidental and useful: `LogitAverage` beats `RankAverage` by +0.0005 on this shadow, the same sign and
+size as the 2026-08-23 re-pricing on the champion seven (+0.0002). The shipped choice is confirmed by
+the ruler that had never been asked about it.

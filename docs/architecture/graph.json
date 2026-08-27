@@ -1485,6 +1485,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.record_mix",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.record_mix",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -8353,21 +8359,21 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_curve.Pool",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.Pool.alone",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.evaluation.member_curve.Pool.combined",
-      "target": "kneemri.inference.vote.RankAverage",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.Pool.combined",
-      "target": "kneemri.inference.vote.RankAverage.combine",
+      "target": "kneemri.inference.vote.Vote.combine",
       "weight": 1
     },
     {
@@ -9187,6 +9193,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.record_mix.RecordMix",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.record_mix.RecordMix",
       "target": "kneemri.runs.holdout_record.HoldoutReading",
@@ -9220,6 +9232,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.record_mix.RecordMix.per_member",
       "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "target": "kneemri.inference.vote.RankAverage",
       "weight": 1
     },
     {
@@ -12963,6 +12981,12 @@
     {
       "kind": "inherits",
       "source": "kneemri.inference.vote.LogitAverage",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.inference.vote.MedianLogit",
       "target": "kneemri.inference.vote.Vote",
       "weight": 1
     },
@@ -20320,6 +20344,14 @@
       "descendants": 0,
       "id": "kneemri.inference.vote.LogitAverage",
       "label": "LogitAverage",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.MedianLogit",
+      "label": "MedianLogit",
       "level": "class",
       "parent": "kneemri.inference.vote",
       "role": "satellite"
@@ -28386,6 +28418,14 @@
       "label": "combine",
       "level": "method",
       "parent": "kneemri.inference.vote.LogitAverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.MedianLogit.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.MedianLogit",
       "role": null
     },
     {

@@ -180,3 +180,50 @@ class LogitAverage(Vote):
         clipped = np.clip(np.stack(per_member), PROBABILITY_FLOOR, 1 - PROBABILITY_FLOOR)
         logits = np.log(clipped / (1 - clipped))
         return 1 / (1 + np.exp(-logits.mean(0)))
+
+
+class MedianLogit(Vote):
+    """The MEDIAN of the members' logits rather than the mean — the same space, a robust centre.
+
+    Every rule above averages, and an average is the estimator that is optimal when the members' errors
+    are symmetric and none of them is an outlier. Neither assumption is free here. A roster that mixes
+    decode paths, pixel sizes and fits contains members that are confidently wrong on DIFFERENT cells,
+    and one such member moves a six-member mean by a sixth of its own error. The median moves by nothing
+    until it flips the ordering of the middle two.
+
+    WHY IT IS WORTH MEASURING RATHER THAN ASSUMING. The gain is exactly the size of the outlier problem
+    and no larger: on a roster whose members agree, median and mean are the same number, and the rule
+    costs a small loss of information (it discards the extremes even when they are right). So this is a
+    rule to reach for when seats become HETEROGENEOUS — which is the direction the roster has been moving
+    since decode-path diversity became the only axis with super-linear board transfer — and one to leave
+    alone while seats are twins.
+
+    It also breaks a symmetry the other rules share: median in logit space and median in probability
+    space pick the SAME member, because the logit is monotone. So unlike the mean, this rule is
+    invariant to the space it is computed in, and a miscalibrated member cannot drag it by inflating a
+    margin. That is the property `LogitAverage`'s own docstring names as its exposure.
+
+    MEASURED, 2026-08-27, and it LOSES — not by noise, by structure. On the offline shadow of the
+    shipped roster (the five holdout twins of the champion six plus the two `pixgroup` adds, 909 shared
+    studies): RankAverage 0.8697, LogitAverage 0.8702, MedianLogit 0.8664. −0.0033 against the rule the
+    ledger uses and −0.0038 against the rule the board entry serves.
+
+    THE SHAPE OF THE LOSS IS THE FINDING, not the size. Every mean rule's seat curve rises monotonically
+    with count; this one OSCILLATES on the parity of the seat count — 2 up, 3 down, 4 up, 5 down, 6 up,
+    7 down. An even median averages the middle two members and so keeps some of the mean's information;
+    an odd one elects a single member and discards the rest of the pool. So a median vote makes the
+    ensemble's score depend on whether the roster happens to be even, which is a property no seating
+    argument can control for. The robustness this rule was reached for is real and the pool it was
+    reached for is not outlier-shaped enough to pay for it.
+
+    It stays in the family because a measured refutation is worth more standing than deleted — the next
+    roster that IS outlier-shaped can re-ask this in one flag, and will have the parity artefact named
+    for it in advance.
+    """
+
+    @override
+    def combine(self, per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
+        """Median of the members' logits, returned as a probability so every rule has one output space."""
+        clipped = np.clip(np.stack(per_member), PROBABILITY_FLOOR, 1 - PROBABILITY_FLOOR)
+        logits = np.log(clipped / (1 - clipped))
+        return 1 / (1 + np.exp(-np.median(logits, axis=0)))

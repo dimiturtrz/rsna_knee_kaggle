@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from kneemri.inference.vote import CHANCE, LogitAverage, QualityWeightedRank, RankAverage, Vote
+from kneemri.inference.vote import CHANCE, LogitAverage, MedianLogit, QualityWeightedRank, RankAverage, Vote
 
 STUDIES = 40
 LABELS = 3
@@ -93,6 +93,25 @@ def test_logit_average_combine():
 
     assert np.isfinite(combined).all(), "a saturated member is clipped, not infinite"
     assert (combined > 0.5).all(), "and it still pulls the ensemble its way"
+
+
+def test_median_logit_combine():
+    """The median ignores an outlier the mean cannot, and agrees with the mean when nothing is one.
+
+    Two members near 0.5 and one saturated at 1.0: the mean is dragged above 0.5 by the outlier, the
+    median is not, because it moves only when the ordering of the middle changes.
+    """
+    outlier = np.full((STUDIES, LABELS), 1.0)
+    near = [np.full((STUDIES, LABELS), 0.5), np.full((STUDIES, LABELS), 0.51)]
+    dragged = LogitAverage().combine([*near, outlier])
+    resisted = MedianLogit().combine([*near, outlier])
+
+    assert np.isfinite(resisted).all(), "the saturated member is clipped here too"
+    assert (resisted < dragged).all(), "the median resists the outlier the mean is dragged by"
+    assert np.allclose(resisted, 0.51), "and it sits on the middle member rather than between the three"
+    assert np.allclose(MedianLogit().combine(near * 2), LogitAverage().combine(near * 2), atol=0.01), (
+        "with no outlier the two rules answer nearly the same number"
+    )
 
 
 def test_agreement():
