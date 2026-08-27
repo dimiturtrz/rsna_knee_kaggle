@@ -13,6 +13,7 @@ from core.data.labels.report_reader import (
     LEVEL,
     PRESENT,
     UNSURE,
+    WORDING,
     LocalReader,
     ReadingPrompt,
     ReportGrade,
@@ -53,6 +54,8 @@ def test_system():
     assert "silence is not a normal result" in system
     assert SPECIFICITY in system
     assert CRITERIA["ACL"] in system
+    assert all(WORDING[grade] in system for grade in ReportGrade)
+    assert ReportGrade.__doc__ not in system
 
 
 def test_user():

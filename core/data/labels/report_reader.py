@@ -81,16 +81,29 @@ class ReportGrade(StrEnum):
     """
 
     ABSENT = "absent"
-    """The report states the structure is intact, normal, or unremarkable."""
     UNCLEAR = "unclear"
-    """The report does not mention it, or mentions it without asserting either side."""
     POSSIBLE = "possible"
-    """Hedged: suspicious for, cannot exclude, possible, question of."""
     PRESENT = "present"
-    """Stated plainly as a finding."""
     SEVERE = "severe"
-    """Stated with emphasis a reader could not disagree with: complete tear, large effusion, displaced."""
 
+
+WORDING: dict[ReportGrade, str] = {
+    ReportGrade.ABSENT: "the report states the structure is intact, normal, or unremarkable",
+    ReportGrade.UNCLEAR: "the report does not mention it, or mentions it without asserting either side",
+    ReportGrade.POSSIBLE: "hedged: suspicious for, cannot exclude, possible, question of",
+    ReportGrade.PRESENT: "stated plainly as a finding",
+    ReportGrade.SEVERE: "stated with emphasis a reader could not disagree with: complete tear, "
+    "large effusion, displaced",
+}
+"""What each grade MEANS, in the words the reader is given — a dict beside the enum, not member docstrings.
+
+A bare string under an enum member does NOT become that member's `__doc__`; `ReportGrade.ABSENT.__doc__`
+returns the CLASS docstring. `system()` rendered `grade.__doc__` for all five, so every reader run this
+project has made was handed the class docstring five times over instead of the five definitions — a
+thousand tokens of repeated prose where the grade vocabulary was supposed to be. It is silent because the
+prompt still names the five WORDS, so the model answers in the right vocabulary while being told nothing
+about what the words mean. Read the prompt, don't assume it.
+"""
 
 LEVEL: dict[ReportGrade, float] = {
     ReportGrade.ABSENT: 0.08,
@@ -169,7 +182,7 @@ class ReadingPrompt:
         infer across findings, or imagine an image. The criteria are a THRESHOLD applied to what the
         report said, not a licence to decide what the images would have shown.
         """
-        grades = ", ".join(f"{grade.value} ({grade.__doc__})" for grade in ReportGrade)
+        grades = "\n".join(f"- {grade.value}: {WORDING[grade]}" for grade in ReportGrade)
         return (
             "You read knee MRI radiology reports. Reports come in English, Spanish, Turkish, Croatian, "
             "Greek, German, Bulgarian, Dutch and French. Read the report in the language it is written "
@@ -181,7 +194,7 @@ class ReadingPrompt:
             "below. Apply these criteria to what the report says. A finding the report describes but "
             f"that falls UNDER its criterion is 'absent', not 'possible'. {SPECIFICITY}\n\n"
             f"{self.criteria()}\n\n"
-            f"Grades: {grades}\n\n"
+            f"Grades:\n{grades}\n\n"
             "Answer with a single JSON object mapping each finding name to one grade word. No prose."
         )
 

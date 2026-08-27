@@ -95,6 +95,43 @@ there — so a paraphrase cannot drift from the thing it is scored against.
 
 The honest summary: **meniscus is measured, ACL is plausible and thin, MCL is flagged.**
 
+## And the prompt was broken in a second way nobody had read
+
+Writing the rubric into `ReadingPrompt.system()` meant printing the rendered prompt for the first time in
+this project's life. It rendered the grade vocabulary like this:
+
+```
+Grades: absent (WHAT THE REPORT SAID about one finding — never how sure the model feels about it. …),
+unclear (WHAT THE REPORT SAID about one finding — …), possible (WHAT THE REPORT SAID …), …
+```
+
+`system()` read `grade.__doc__` for each member of `ReportGrade`, and **a bare string under an enum
+member does not become that member's `__doc__`** — it falls back to the CLASS docstring. So every reader
+run this project has ever made was handed the class docstring five times over, about a thousand tokens of
+repeated prose, exactly where the definitions of `absent` / `unclear` / `possible` / `present` / `severe`
+were supposed to be. The model was told the five WORDS (they are in the JSON instruction) and nothing at
+all about what they mean.
+
+It is silent by construction: the reader answers in the right vocabulary either way, so no parse fails,
+no schema breaks, and no metric names it. It surfaced only because someone read the prompt.
+
+The definitions now live in a `WORDING` dict beside the enum, the same shape as `LEVEL` two lines below
+it, and `test_system` asserts both that each definition appears and that the class docstring does not.
+The corrected prompt is **775 tokens against the broken one's 1037** — twelve published criteria added,
+and it still came out a quarter shorter.
+
+**This re-prices `knee-ufz5` upward, and it is a genuine unknown.** The re-read fixes two defects at
+once: the reader gains the host's thresholds AND, for the first time, a definition of its own grades. The
+`possible` rung in particular — the one carrying 6461 cells at 0.68 — was being assigned by a model that
+had never been told what `possible` means. How much of the ladder's measured behaviour is a fact about
+hedged reports and how much is a fact about an undefined word is not something this project can currently
+answer.
+
+That does not reopen the ladder's CALIBRATION (see the last section — 0.68's worth is measured against
+image annotations and is independent of how a cell earns the rung). It does mean the reader's measured
+ceiling — `blendlabels`' +0.0034, and every per-label supervision gap read off it — was measured with an
+instrument that was never given its own units.
+
 ## Why the blendlabels precedent does not price this down
 
 `blendlabels` measured that a better reader buys **+0.0034** on the mean and **+0.0070** on the six
