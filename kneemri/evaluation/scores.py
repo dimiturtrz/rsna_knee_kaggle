@@ -108,6 +108,43 @@ class LabelScores:
 
         return StudyBootstrap(resamples).per_label(targets.shape[0], delta)
 
+    def paired_mean_interval(
+        self,
+        first: NDArray[np.float64],
+        second: NDArray[np.float64],
+        targets: NDArray[np.float32],
+        resamples: int = STUDY_RESAMPLES,
+    ) -> tuple[float, float]:
+        """The 95% interval of the difference in the COMPETITION SCORE between two arms, paired.
+
+        The metric every decision here turns on is the mean of twelve AUCs, and until now nothing
+        measured its uncertainty for a COMPARISON. `paired_interval` pairs but reports twelve separate
+        labels; `mean_interval` reports the mean but is unpaired and answers a different question. So
+        every roster and ensemble judgement in this project has been read against a floor borrowed from
+        elsewhere.
+
+        WHY THE BORROWED FLOOR IS THE WRONG RULER HERE. The 0.0062 this repo quotes bounds an ARM
+        against an ARM - two separately trained models, so it carries training variance. Two ROSTERS
+        built from the same frozen member predictions carry none: the arrays are already written, and
+        the only uncertainty left is which studies were scored. Rosters sharing most of their members
+        agree per study almost exactly, and the paired difference does not care about the difficulty
+        they share. Using the arm-to-arm floor on a roster delta is conservative in the direction that
+        makes a real difference unreadable, which is how the seat-count curve came to be called flat
+        from its own numbers rather than from the board's.
+
+        WHAT IT DOES NOT LICENSE. A tight interval is honest for ONE PAIR NAMED IN ADVANCE. Read on the
+        winner of a search over rosters it is selection-optimistic - the same trap `LabelCombine` names,
+        where twelve choices made on 909 studies look like twelve findings. A searched roster still owes
+        the split-half treatment in `MemberCurve.honest`; this bounds the comparison, not the search.
+
+        Seeded, and over STUDIES rather than labels, for the reasons `paired_interval` gives.
+        """
+
+        def delta(drawn: NDArray[np.int64]) -> float:
+            return self.mean(second[drawn], targets[drawn]) - self.mean(first[drawn], targets[drawn])
+
+        return StudyBootstrap(resamples).interval(targets.shape[0], delta)
+
     def mean_interval(
         self,
         predictions: NDArray[np.float64],

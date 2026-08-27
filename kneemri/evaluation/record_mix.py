@@ -29,6 +29,17 @@ under logit, and logit's decay past its peak is gentler (0.8736 still at twenty-
 0.8727). So "count plateaus at eight to ten" is a fact about the RANK ruler, not about ensembling —
 name the rule beside the pool size, or the constant is stale in a second way.
 
+AND THE PEAK IS NOT A PEAK. 2026-08-27, with `--largest-pool` making the whole processed root reachable:
+104 records / 909 studies puts the honest peak at THIRTEEN / 0.8754 under logit, and the 42 packaged
+records put it at TWELVE / 0.8755. The count moved again, exactly as the paragraph above warns — but the
+useful reading is that it moved because it is NOISE. The honest curve spans 0.0030 from six seats to
+twenty-four, against a paired holdout floor of 0.0062, so no count in that range is distinguishable from
+any other. The board says the same from its side: six seats and eleven both score 0.941, seven and twelve
+both 0.937. What actually moves across the table is the greedy BIAS (+0.0031 at six seats, +0.0010 at
+twelve) — more seats buys a steadier estimate, not a better one. Do not spend a submission on this axis,
+and do NOT apply the `board_transfer` slope to a count delta: that slope was fitted on member QUALITY and
+does not carry across axes. See `interpretations/kneemri/2026-08-27_seat-count-is-flat-both-rulers.md`.
+
 READ THE NUMBER AS A SIGN, NOT AS A SCORE. Two reasons, both recorded. A training-time record was
 produced by the TRAINER's reading of the holdout, so a member fitted under a different window is
 scored here as it scored itself and not as the submission path would read it — comparable across
@@ -84,6 +95,7 @@ class RecordMix:
         self.records = records
         self._readings: list[tuple[str, HoldoutReading]] | None = None
         self._dead: list[str] = []
+        self._narrowed: list[str] = []
 
     def readings(self) -> list[tuple[str, HoldoutReading]]:
         """Each record that exists, as (member name, its reading).
@@ -144,6 +156,71 @@ class RecordMix:
         """
         self.readings()
         return self._dead
+
+    def narrow(self) -> list[str]:
+        """Drop what cannot be mixed and keep the LARGEST agreeing pool — the bisect, done by the tool.
+
+        WHY THIS EXISTS. `shared` and `per_member` both refuse rather than narrow, which is right when a
+        caller named its members and wrong when it globbed a directory. The processed root holds smoke
+        runs on eleven studies and members scored under an older label table beside ninety real records,
+        so the glob this tool was written for cannot run: it raises on one offender, and the offender is
+        named one at a time. Doing that by hand on 2026-08-27 dropped forty members without converging,
+        because `per_member` compares every table against the FIRST record's — so a bisect that removes
+        whatever it names walks toward whichever ruler happens to sort first, not toward the majority.
+
+        Both refusals stay exactly as they are. This is opt-in, and it reports every drop: the pool that
+        remains IS the denominator, and a search silently run over a third of the members it was handed
+        is the wrong-denominator failure this file already refuses twice.
+        """
+        readings = self.readings()
+        kept, off_split = self._on_widest_split(readings)
+        self._readings = kept
+        kept, off_ruler = self._largest_ruler_group(kept)
+        self._readings = kept
+        self._narrowed = [*off_split, *off_ruler]
+        return self._narrowed
+
+    @staticmethod
+    def _on_widest_split(
+        readings: list[tuple[str, HoldoutReading]],
+    ) -> tuple[list[tuple[str, HoldoutReading]], list[str]]:
+        """The members holding out a full split, and the names of those that hold out a stub of one.
+
+        Filtered on the member's OWN width rather than on the intersection it causes, because that is
+        the quantity `shared` refuses on, and a smoke run is short in exactly that way: eleven studies
+        against 909.
+        """
+        widest = max(len(reading.studies) for _, reading in readings)
+        kept = [(name, reading) for name, reading in readings if len(reading.studies) >= SHARED_FLOOR * widest]
+        narrow = [name for name, reading in readings if len(reading.studies) < SHARED_FLOOR * widest]
+        return kept, narrow
+
+    def _largest_ruler_group(
+        self, readings: list[tuple[str, HoldoutReading]]
+    ) -> tuple[list[tuple[str, HoldoutReading]], list[str]]:
+        """The biggest set of members whose truth agrees, and the names of everyone outside it.
+
+        Grouped under the same `allclose` that `per_member` refuses on, so a pool this returns is one
+        that `per_member` accepts — a stricter test here (exact bytes) would split a group the mix would
+        have taken, and a looser one would hand it a pool it then rejects.
+        """
+        studies = self.shared()
+        groups: list[tuple[Float[NDArray[np.float32], "shared labels"], list[tuple[str, HoldoutReading]]]] = []
+        for name, reading in readings:
+            _, theirs = self._rows(reading, studies)
+            for truth, members in groups:
+                if np.allclose(truth, theirs, atol=RULER_TOLERANCE, equal_nan=True):
+                    members.append((name, reading))
+                    break
+            else:
+                groups.append((theirs, [(name, reading)]))
+        largest = max(groups, key=lambda group: len(group[1]))[1]
+        seated = {name for name, _ in largest}
+        return largest, [name for name, _ in readings if name not in seated]
+
+    def narrowed(self) -> list[str]:
+        """What `narrow` dropped, or nothing when it was never called — the pool's missing denominator."""
+        return self._narrowed
 
     def shared(self) -> list[str]:
         """The studies every member held out, in the first member's order.
@@ -290,12 +367,23 @@ def main() -> None:
         "is what the shipped champion actually serves; `median` is the robust centre of the same space. "
         "Reading the same roster under two of them is the only way to price the vote axis without a slot.",
     )
+    command.parser.add_argument(
+        "--largest-pool",
+        action="store_true",
+        help="instead of refusing on the first member that cannot be mixed, keep the largest pool that "
+        "shares a split AND a label table, and name everything dropped. This is what makes a glob of the "
+        "processed root runnable: smoke runs and members scored under an older table are removed as a "
+        "group rather than one refusal at a time. The pool that survives is the denominator — read it "
+        "off the log line, not off the number of paths passed in.",
+    )
     command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
     arguments = command.parsed()
     scores = LabelScores()
     roster = list(arguments.roster)
     everything = list(dict.fromkeys([*arguments.records, *roster]))
     mix = RecordMix(everything)
+    if arguments.largest_pool and (narrowed := mix.narrow()):
+        logger.warning("not mixable with the majority, dropped: %s", " ".join(narrowed))
     mixed = mix.per_member(VOTE_RULES[arguments.vote]())
     logger.info(
         "%d of %d records became members, over %d shared studies, voting %s",

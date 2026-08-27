@@ -147,3 +147,30 @@ def test_mean_interval():
     assert low <= scores.mean(first, truth) <= high, "the band must bracket the mean it bounds"
     assert (high - low) > (paired[1] - paired[0]), "an unpaired band cannot be tighter than a paired one"
     assert scores.mean_interval(first, truth, resamples=120) == (low, high), "seeded, so it is quotable"
+
+
+def test_paired_mean_interval():
+    """The competition metric's own comparison band — and it must be TIGHTER the more the arms share.
+
+    Two assertions, because the method's whole claim is the second one. That a band brackets its delta
+    is table stakes; that pairing collapses as the two arms converge is the reason the borrowed
+    arm-to-arm floor is the wrong ruler for two rosters built from mostly the same members.
+    """
+    generator = np.random.default_rng(19)
+    studies = 400
+    truth = np.zeros((studies, len(TARGETS)), dtype=np.float32)
+    for column in range(len(TARGETS)):
+        truth[generator.choice(studies, 120, replace=False), column] = 1.0
+    signal = truth + generator.normal(0, 1.0, truth.shape)
+    first = (signal + generator.normal(0, 0.5, truth.shape)).astype(np.float64)
+    distant = (signal + generator.normal(0, 0.5, truth.shape)).astype(np.float64)
+    near = (first + generator.normal(0, 0.02, truth.shape)).astype(np.float64)
+
+    scores = LabelScores()
+    low, high = scores.paired_mean_interval(first, distant, truth, resamples=120)
+    observed = scores.mean(distant, truth) - scores.mean(first, truth)
+    tight = scores.paired_mean_interval(first, near, truth, resamples=120)
+
+    assert low <= observed <= high, "the band must bracket the delta it bounds"
+    assert (tight[1] - tight[0]) < (high - low), "a near-identical arm must read a narrower band"
+    assert scores.paired_mean_interval(first, distant, truth, resamples=120) == (low, high), "seeded"

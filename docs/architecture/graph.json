@@ -9758,7 +9758,37 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
+      "target": "kneemri.evaluation.record_mix.RecordMix._rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.record_mix.RecordMix.dropped",
+      "target": "kneemri.evaluation.record_mix.RecordMix.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "target": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "target": "kneemri.evaluation.record_mix.RecordMix._on_widest_split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "target": "kneemri.evaluation.record_mix.RecordMix.readings",
       "weight": 1
     },
@@ -9844,6 +9874,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.record_mix.main",
       "target": "kneemri.evaluation.record_mix.RecordMix.dropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "weight": 1
     },
     {
@@ -10504,6 +10540,24 @@
       "kind": "calls",
       "source": "kneemri.evaluation.scores.LabelScores.paired_interval",
       "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.scores.LabelScores.paired_mean_interval",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.scores.LabelScores.paired_mean_interval",
+      "target": "core.bootstrap.StudyBootstrap.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.scores.LabelScores.paired_mean_interval",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
     {
@@ -27140,6 +27194,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
+      "label": "_largest_ruler_group",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix._on_widest_split",
+      "label": "_on_widest_split",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.record_mix.RecordMix._rows",
       "label": "_rows",
       "level": "method",
@@ -27150,6 +27220,22 @@
       "descendants": 0,
       "id": "kneemri.evaluation.record_mix.RecordMix.dropped",
       "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "label": "narrow",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix.narrowed",
+      "label": "narrowed",
       "level": "method",
       "parent": "kneemri.evaluation.record_mix.RecordMix",
       "role": null
@@ -27558,6 +27644,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.scores.LabelScores.paired_interval",
       "label": "paired_interval",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.scores.LabelScores.paired_mean_interval",
+      "label": "paired_mean_interval",
       "level": "method",
       "parent": "kneemri.evaluation.scores.LabelScores",
       "role": null

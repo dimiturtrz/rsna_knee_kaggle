@@ -77,3 +77,4 @@ node_modules/
 /inbox/*.txt
 /inbox/read/
 experiments/logs/
+gates.log

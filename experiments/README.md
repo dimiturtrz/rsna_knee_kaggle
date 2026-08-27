@@ -5152,6 +5152,66 @@ the named precondition and remains untried.
 ~40 min; it ran 420 s and 84 min. The estimate was 2× optimistic against a control already on disk at
 413 s — an arm's cost should be read off its control's measured epoch time, not re-derived.
 
-**No seat, and no weight sweep.** A negative is charged roughly 3× on the board, and a dose sweep on a term
-whose supervision is degenerate at this batch size would sweep the wrong variable. The topology question
-goes to its strong form (masks, `knee-2sbk`) or to the remembered pool, not to `--contrast-weight 0.3`.
+**No weight sweep** — a dose sweep on a term whose supervision is degenerate at this batch size would sweep
+the wrong variable. The topology question goes to its strong form (masks, `knee-2sbk`) or to the remembered
+pool, not to `--contrast-weight 0.3`.
+
+**But it DOES earn a seat, and that correction is this entry's own.** The first version of this line read
+"No seat, and no weight sweep", written before the member was ever priced as one. Greedy forward selection
+under `record_mix --largest-pool --vote logit` over 104 records / 909 shared studies seats
+`contrast_dense_s2026.pt` **fifth**, at 0.8749 — after `calib_dense_hold` (0.8634), `merged_blend_cf`,
+`finding_calib_dense` and `blendhold`, and ahead of `margin_seat`, `warm_calib_dense` and `calib_span`. A
+recipe that loses 0.0087 solo is the owner's standing point about diversity over solo quality, measured on
+our own pool for the first time rather than asserted: the seat is bought by what the member disagrees about,
+and the contrastive term changed what it disagrees about even while it cost eleven of twelve labels. The
+disposition is **seat candidate**, not dead arm. What is still unpriced is whether that seat SURVIVES on the
+board — the greedy order is an in-sample ranking and the packaged-roster question is separate (the member is
+not in `all_ours`, so seating it costs a 7 GB push, `knee-unmb`).
+
+### labelwise_dense — per-diagnosis pooling fires, and buys nothing at the depth built for it — 2026-08-27
+
+bead: knee-377t. One variable against `calib_dense_hold` **0.8634**: `--slice-pooling max` → `labelwise`,
+same 20 slices, same 0.1-0.9 band, same calibrated targets, same held annotations, same rate, same seed.
+12 epochs, ~410 s each. Best **0.8613 @ e7**, then 0.8607 / 0.8611 / 0.8606 — a plateau, not a climb cut off.
+
+**−0.0021, inside the 0.0062 paired floor: FLAT**, the third of the four pre-registered bands.
+
+**The mechanism fired, and the check that proves it nearly failed for the wrong reason.** The header
+pre-registered `slices.pool.gate.3.weight` as the key to assert non-zero. That key does not exist — the
+dump came back with an EMPTY list, which is indistinguishable at a glance from the dead gate the check was
+written to catch. The real key is `slices.gate.3.weight`, shape **(12, 64)**, absmax 0.171, std 0.059,
+with the whole stack (`gate.0` 768→768, `gate.1` 64×768, `gate.3` 12×64) trained away from its
+zero init. Twelve output channels is the per-diagnosis axis, so the arm really did send different findings
+to different depths. The control's state dict carries NO gate keys at all, which is the single-variable
+claim proved from the other side.
+
+So this is NOT a repeat of `attend_dense`, where the aggregator sat in no parameter group and the arm
+compared the arithmetic mean against the max. Working per-diagnosis attention has now been read at
+336 px × 20 slices, which is the cell the ledger recorded as empty. **A pre-registered harness check with
+the wrong key name is worse than none** — it returns the failure signature on a healthy run, and the
+temptation is to read the empty list as the answer the header predicted.
+
+**What this does to the interaction hypothesis.** The arm existed because two axes had each been closed in
+the other's absence: slice count under MAX pooling read −0.0001 (`knee-ezz`, the head cannot spend the
+slices), and per-diagnosis pooling at 12 slices read +0.0015 (`labelwise224`, the pooling has no slices to
+spend). Raptor's `coatnet_v4_full` scored through our caches gains more from 16→20 slices (+0.0046) than
+from 12→16 (+0.0027), so their per-finding head was still steepening where we stopped. Run WITH the depth,
+ours does not steepen — it reads flat. The foreign curve is therefore about THEIR head or THEIR training,
+not about per-finding pooling as such; the two are no longer interchangeable evidence and `foreign_gate`
+numbers should not be used to price our own head again without saying which part is being borrowed.
+
+**What is NOT refuted.** That per-diagnosis pooling is worthless — flat at the 0.0062 floor is not zero, and
+`labelwise224`'s +0.0015 sits in the same band from the other side, so two arms now agree the effect is
+small-and-positive-or-nothing rather than absent. And it is not refuted that the head is the wrong place:
+what was tested is one aggregator over the slice axis, downstream of a `SlotHead` that already carries its
+own per-diagnosis query (`slot_head.py:120`). Two per-diagnosis mechanisms stacked may simply be one too
+many — the untested cell is labelwise pooling with the slot query REMOVED, not more depth.
+
+**Disposition: a diversity seat, not an upgrade.** Same quality, different internal structure — the profile
+that earned `labelwise224` its keep. It writes a holdout record, so it can be priced as a seat by
+`seat_value` without a refit. It is NOT in the shipped package, so seating it costs a 7 GB push
+(`knee-unmb`), and the seat-count reading of 2026-08-27 says a seventh seat is flat on both rulers anyway
+(`interpretations/kneemri/2026-08-27_seat-count-is-flat-both-rulers.md`). It goes in the pool, not on a slot.
+
+**Card handed to celltrack at 18:35Z as promised**; `card_check` reads the device free with no `kneemri`
+process on it.

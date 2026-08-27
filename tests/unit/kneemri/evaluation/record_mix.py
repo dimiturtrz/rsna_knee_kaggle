@@ -171,3 +171,52 @@ def test_lines(tmp_path: Path):
     assert priced[0].startswith("roster of 1:"), "the roster is honoured even with --seats greedy also passed"
     assert built[0].startswith("greedy 1:"), "with no roster the same call builds an ensemble instead"
     assert opened[0].startswith("mix of 1:"), "--labels opens the roster up rather than pricing against it"
+
+
+def test_narrow(tmp_path: Path):
+    """The largest agreeing pool survives; a stub split and a foreign ruler are dropped and NAMED.
+
+    Both offenders at once, because the bisect this replaces converged on neither: `per_member` compares
+    every truth against the FIRST record's, so dropping whatever gets named walks toward whichever ruler
+    sorts first rather than toward the majority.
+    """
+    studies = [f"s{index}" for index in range(20)]
+    truth = (RNG.random((len(studies), LABELS)) > 0.5).astype(np.float32)
+    for name in ("a.pt", "b.pt", "c.pt"):
+        _record(tmp_path / name, studies, truth=truth)
+    _record(tmp_path / "smoke.pt", studies[:2], truth=truth[:2])
+    _record(tmp_path / "other_ruler.pt", studies, truth=1.0 - truth)
+    mix = RecordMix(sorted(tmp_path.glob("*.pt")))
+
+    dropped = mix.narrow()
+
+    assert sorted(dropped) == ["other_ruler.pt", "smoke.pt"], "both offenders named, neither silently kept"
+    assert [name for name, _ in mix.readings()] == ["a.pt", "b.pt", "c.pt"], "the majority ruler is the pool"
+
+
+def test_narrow_keeps_the_majority_even_when_the_foreign_ruler_sorts_first(tmp_path: Path):
+    """Two agreeing members beat one that sorts ahead of them — the failure the hand bisect walked into."""
+    studies = [f"s{index}" for index in range(20)]
+    truth = (RNG.random((len(studies), LABELS)) > 0.5).astype(np.float32)
+    _record(tmp_path / "aaa_alone.pt", studies, truth=1.0 - truth)
+    _record(tmp_path / "zzz_one.pt", studies, truth=truth)
+    _record(tmp_path / "zzz_two.pt", studies, truth=truth)
+    mix = RecordMix(sorted(tmp_path.glob("*.pt")))
+
+    assert mix.narrow() == ["aaa_alone.pt"], "the first-sorting ruler loses to the bigger group"
+    assert [name for name, _ in mix.readings()] == ["zzz_one.pt", "zzz_two.pt"]
+
+
+def test_narrowed(tmp_path: Path):
+    """What was dropped stays askable after the fact — the pool that remains IS the denominator."""
+    studies = [f"s{index}" for index in range(20)]
+    truth = (RNG.random((len(studies), LABELS)) > 0.5).astype(np.float32)
+    _record(tmp_path / "a.pt", studies, truth=truth)
+    _record(tmp_path / "b.pt", studies, truth=truth)
+    _record(tmp_path / "smoke.pt", studies[:2], truth=truth[:2])
+    mix = RecordMix(sorted(tmp_path.glob("*.pt")))
+
+    assert mix.narrowed() == [], "nothing is dropped until narrowing is asked for"
+    dropped = mix.narrow()
+
+    assert mix.narrowed() == dropped == ["smoke.pt"]
