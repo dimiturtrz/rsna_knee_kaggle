@@ -4678,18 +4678,38 @@ and they do not agree:
 | calibration at the span corner | `band_span_hold` 0.8493 -> `calib_span_hold` 0.8565 = **+0.0072** | `band_span` 0.8565 -> `calib_span` 0.8545 = **-0.0020** | **0.0092, SIGN INVERTED** |
 | slice count without calibration | `band_span_hold` -> `band_dense_hold` = **+0.0080** | `band_span` -> `band_dense` = **+0.0013** | 0.0067 |
 
-`--hold-annotations` removes the 58 annotated studies from TRAINING and changes what is evaluated, so
-the two families are different denominators and neither is wrong. What it means is that **both main
-effects of this 2x2 are properties of the holdout definition as much as of the levers**, at 1.1-1.5
-floors. The INTERACTION is computed entirely within the matched hold family and stays valid there; its
-generality is untested, and the non-hold interaction CANNOT be computed because `calib_dense` was never
-launched. So: additivity is established for this holdout, not globally, and the honest claim is that the
-two terms do not substitute HERE.
+**CORRECTED 2026-08-27, SAME DAY, AND THE CORRECTION IS ARITHMETIC I HAD ALREADY WRITTEN ONE PARAGRAPH
+DOWN.** The first version of this section read that table as "both main effects of this 2x2 are
+properties of the holdout definition as much as of the levers, at 1.1-1.5 floors". Two things are wrong
+with it.
 
-One seed per cell besides, so the difference of differences carries roughly 1.4x a single comparison's
-noise, about 0.0088, and -0.0011 sits well inside it. Best-epoch selection on a noisy curve lifts every
-cell by roughly its local jitter, which largely cancels in a difference of differences but does not
-vanish.
+FIRST, THE PREMISE. `--hold-annotations` does NOT change what is evaluated. It drops the 58 annotated
+studies from the training TABLE; the holdout stays fold 0 of 5, about 880 studies, in both families
+(`fold: 0`, `folds: 5` in every recipe stamp here, and `kneemri/evaluation/annotated_readings.py:16`
+records that the fold-0 holdout naturally contains about a TWELFTH of the annotated studies, which is why
+scoring the annotation ruler needs its own all-58 route). The flag's own direct cost is measured twice and
+small — `band_dense_hold` -0.0005 against `band_dense`, `holdannot` -0.0015 at native224 — so the two
+families share a denominator and differ by roughly 1.2% of the training set.
+
+SECOND, THE RULER. A difference of differences carries about 1.4x a single paired comparison's noise,
+0.0062 x sqrt(2) = **0.0088** — the number the next paragraph uses to clear the interaction, and which the
+family table was never held to. Against it the calibration gap is 0.0092 (**1.05 floors**) and the
+slice-count gap 0.0067 (**0.76 floors**). NEITHER FAMILY DISAGREEMENT IS RESOLVABLE. A sign inversion is
+what a small positive effect measured twice with one seed each looks like when the effect is near the
+floor; it is not evidence that the holdout definition owns the lever, and reading it as such was reading
+scatter as a finding on exactly the axis this file spends most of its length warning about.
+
+**What survives, stated at the strength the data support.** The two families do not demonstrably disagree
+and do not demonstrably agree — the comparison is underpowered either way, and no arm should be spent
+resolving it, because both candidate answers price the levers under the 1.5% bar. The INTERACTION is
+computed entirely within the internally matched hold family and stays valid there at -0.0011, an eighth of
+its own 0.0088 ruler. The non-hold interaction CANNOT be computed at all because `calib_dense` was never
+launched. So: **additivity is established on this holdout, its generality is untested rather than
+refuted**, and the honest claim is that the two terms do not SUBSTITUTE here. That is weaker than "gains
+add globally" and stronger than the scoping paragraph it replaces.
+
+One seed per cell besides. Best-epoch selection on a noisy curve lifts every cell by roughly its local
+jitter, which largely cancels in a difference of differences but does not vanish.
 
 **AND IT CONTRADICTS THE REASONING THAT KILLED AN ARM.** The `calib_span` row above concluded "a
 calibration that is negative on the span corner cannot be positive on the denser one for any reason this
