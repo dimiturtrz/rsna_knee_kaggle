@@ -3,8 +3,8 @@
 import numpy as np
 
 from core.findings import TARGETS
-from kneemri.evaluation.member_curve import Pool
 from kneemri.evaluation.member_distance import MemberDistance
+from kneemri.evaluation.pool import Pool
 from kneemri.inference.vote import RankAverage
 
 STUDIES = 60

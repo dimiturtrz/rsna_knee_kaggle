@@ -5,7 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.evaluation.member_curve import MemberCurve, Pool
+from kneemri.evaluation.member_curve import MemberCurve
+from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord

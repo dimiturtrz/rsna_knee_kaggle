@@ -19,12 +19,10 @@ spread between the best and worst subset of a given size is the honest error bar
 
 import itertools
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
 import torch
-from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
@@ -33,13 +31,14 @@ from core.data.labels.targets import Targets
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
+from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage, Vote
+from kneemri.inference.vote import LogitAverage, QualityWeightedRank, RankAverage
 
 logger = logging.getLogger(__name__)
 
@@ -87,89 +86,6 @@ holdout, which makes it the one level a reader cannot dismiss as unreachable in 
 demonstrably attains it somewhere, so a label sitting far below it is a gap in this design rather than a
 statement about how hard that finding is. A common level is what makes the twelve numbers comparable —
 lifting each label to its own plausible ceiling would price them against twelve different rulers."""
-
-
-@dataclass(frozen=True)
-class Pool:
-    """What several members predicted for the same studies, in one order — every reading's input.
-
-    A type rather than three parameters threaded through nine signatures. The arrays are only meaningful
-    TOGETHER: a name list reordered against a prediction list mislabels every row of every report and
-    nothing fails, and a truth vector from a different fold scores the wrong studies just as quietly.
-    Passed as one value, the three cannot come apart at a call site.
-
-    It carries the operations every reading repeated by hand — combine a subset, name a subset, score a
-    member alone — because `RankAverage().combine([predictions[i] for i in subset])` appeared in four
-    methods and each copy was a chance to combine one list while naming another.
-    """
-
-    names: list[str]
-    predictions: list[Float[np.ndarray, "studies targets"]]
-    truth: Float[np.ndarray, "studies targets"]
-    vote: Vote = field(default_factory=RankAverage)
-    """HOW these members combine. Defaults to the flat rank-average because that is the rule every
-    reading in `experiments/README.md` was taken under, and a default that silently changed it would
-    reprice the whole ledger. Pass another rule to ask what the offline ruler says about the VOTE axis
-    — which it could not be asked at all until 2026-08-27, while the champion has shipped
-    `LogitAverage` since `kneemri-vote`. The ruler and the entry disagreeing on the rule is a harness
-    gap, not a finding, and this field is what closes it."""
-
-    def __len__(self) -> int:
-        """How many members — the range every subset enumeration runs over."""
-        return len(self.predictions)
-
-    def combined(self, subset: tuple[int, ...] | list[int]) -> Float[np.ndarray, "studies targets"]:
-        """These members under this pool's vote rule — the flat per-label rank-average unless told otherwise."""
-        return self.vote.combine([self.predictions[index] for index in subset])
-
-    def named(self, subset: tuple[int, ...] | list[int]) -> str:
-        """The subset as the names a submission would package."""
-        return " + ".join(self.names[index] for index in subset)
-
-    def alone(self, scores: LabelScores) -> list[str]:
-        """Each member's own mean score on the shared studies — the column every mix is read against."""
-        return [
-            f"{name} alone: {scores.mean(member, self.truth):.4f}"
-            for name, member in zip(self.names, self.predictions, strict=True)
-        ]
-
-    def split(self, roster: list[Path]) -> tuple["Pool", "Pool"]:
-        """The roster as a pool, and the rest as candidates against it.
-
-        The roster comes back NAMED rather than as bare arrays. A swap has to say which incumbent it
-        displaces — `calib_span for calibrated_targets` is the whole content of the line — and a list of
-        arrays cannot say it. An add did not need the names, which is why they were dropped here.
-
-        The roster is read through the SAME join as the candidates rather than scored on its own: the
-        shared-study intersection and the label-table refusal are the reason this type exists, and a
-        roster loaded separately would be compared to candidates over a different denominator.
-
-        A named roster member that carries no record is an error, not a skip. Elsewhere a missing
-        record means an old checkpoint and skipping it costs one row; here it silently scores a
-        four-member roster as three and every delta below it is against the wrong base.
-        """
-        wanted = {path.name for path in roster}
-        found = {name for name in self.names if name in wanted}
-        if found != wanted:
-            message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
-            raise ValueError(message)
-        paired = list(zip(self.names, self.predictions, strict=True))
-        held = [(name, member) for name, member in paired if name in wanted]
-        rest = [(name, member) for name, member in paired if name not in wanted]
-        return (
-            Pool([name for name, _ in held], [member for _, member in held], self.truth, self.vote),
-            Pool([name for name, _ in rest], [member for _, member in rest], self.truth, self.vote),
-        )
-
-    def rows(self, studies: NDArray[np.int64]) -> "Pool":
-        """This same pool over a SUBSET of the studies, members and truth restricted together.
-
-        Restricting members and truth in one place is the point: a seat chosen on one half of the
-        holdout and scored on the other is only honest if both halves index the same rows, and the two
-        arrays live in different attributes here. Every caller that sliced one of them separately is a
-        caller that could have scored a member against another member's truth.
-        """
-        return Pool(self.names, [member[studies] for member in self.predictions], self.truth[studies], self.vote)
 
 
 class MemberCurve:
@@ -441,16 +357,38 @@ class MemberCurve:
         the decision.
         """
         truth = candidates.truth
-        base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
-        added = [
-            (self.scores.mean(RankAverage().combine([*roster.predictions, candidate]), truth), name)
-            for candidate, name in zip(candidates.predictions, candidates.names, strict=True)
-        ]
+        combined = RankAverage().combine(roster.predictions)
+        base = self.scores.mean(combined, truth)
+        added = []
+        for candidate, name in zip(candidates.predictions, candidates.names, strict=True):
+            widened = RankAverage().combine([*roster.predictions, candidate])
+            band = self.scores.paired_mean_interval(combined, widened, truth)
+            added.append((self.scores.mean(widened, truth), name, band))
         lines = [f"roster of {len(roster)}: {base:.4f}"]
         lines += [
-            f"  +{name}: {score:.4f}  ({score - base:+.4f})" for score, name in sorted(added, key=lambda pair: -pair[0])
+            f"  +{name}: {score:.4f}  ({score - base:+.4f})  [{low:+.4f}, {high:+.4f}]{'*' if low > 0.0 else ''}"
+            for score, name, (low, high) in sorted(added, key=lambda priced: -priced[0])
         ]
-        return lines
+        return [*lines, *self.selection_caveat(sum(1 for _, _, (low, _) in added if low > 0.0), len(added))]
+
+    @staticmethod
+    def selection_caveat(clearing: int, priced: int) -> list[str]:
+        """Said on the report, because the band is exactly the number a reader will over-trust.
+
+        A paired band is honest for ONE PAIR NAMED IN ADVANCE. The top row of this table is not that —
+        it is the argmax of however many candidates were priced, and the largest of many draws clears
+        zero far more often than any single one of them would. That is `LabelCombine`'s trap in a new
+        place, and the whole reason `MemberCurve.honest` reports SPLIT-HALF.
+
+        A star is therefore evidence about the pair and not a licence to ship it. When nothing clears at
+        all the table is unambiguous and says so, which is the common case and the useful one.
+        """
+        if not clearing:
+            return [f"no candidate's band excludes zero over {priced} priced — this pool adds nothing readable"]
+        return [
+            f"{clearing} of {priced} bands exclude zero; the starred TOP row is an argmax over {priced} "
+            f"draws, so read it as a candidate for the split-half check, never as a decision"
+        ]
 
     def best(self, pool: Pool) -> list[str]:
         """The winning subset at each size, named — the line a submission is built from."""

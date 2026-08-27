@@ -45,7 +45,7 @@ unit of distance buys, and no slot should be spent on the strength of this numbe
 import numpy as np
 from jaxtyping import Float
 
-from kneemri.evaluation.member_curve import Pool
+from kneemri.evaluation.pool import Pool
 from kneemri.inference.vote import RankAverage
 
 NEIGHBOURED = 2

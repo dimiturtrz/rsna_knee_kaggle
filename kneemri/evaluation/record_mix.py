@@ -61,7 +61,8 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
-from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve, Pool
+from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
+from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import LogitAverage, MedianLogit, RankAverage, Vote
 from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, HoldoutRecord
