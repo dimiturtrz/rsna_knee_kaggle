@@ -5104,3 +5104,54 @@ concentrates past the point where the evidence is.
 seconds in on a torn source snapshot (an uncommitted mid-edit tree, `knee-2dcp`) and has been
 requeued. `stackfit.sh` (`knee-orjq`) stays gated on both singles landing non-negative, and this one did
 not: on this reading the gate is closed by half already.
+
+### `contrast_dense` — the representation lane's first probe costs 11 of 12 labels, and the batch is the named suspect — 2026-08-27
+
+`contrast_dense` (`knee-ek5s`), the owner's "torn meniscus is physically separated as a link" idea in its
+cheapest form: a supervised-contrastive term per finding over the vector each diagnosis reads before the
+readout collapses it. Single variable — `--contrast-weight 1.0` — against `calib_dense_hold` **0.8634**,
+verified by diffing the two stored recipes (the only other keys that differ are absent-in-the-older-run
+artefacts: `finding_calibration`, `spacing`, `out`).
+
+Twelve epochs at 420 s, control 413 s. Best **0.8547 at epoch 5**, then monotone decline to 0.8487 at
+e11. `convergence_check` reports it unscored rather than truncated, so this is the recipe's number.
+
+**−0.0087 against the control, outside the 0.0062 paired floor, the wrong way.** Per-label at each side's
+own best epoch:
+
+| label | control | arm | delta | | label | control | arm | delta |
+|---|---|---|---|---|---|---|---|---|
+| Effusion | 0.8559 | 0.8352 | **−0.0208** | | ACL | 0.8943 | 0.8894 | −0.0049 |
+| Synovitis | 0.8589 | 0.8424 | −0.0165 | | Contusion | 0.8814 | 0.8770 | −0.0043 |
+| Lateral OA | 0.8330 | 0.8169 | −0.0161 | | Fracture | 0.8214 | 0.8180 | −0.0034 |
+| MCL | 0.7923 | 0.7766 | −0.0158 | | Baker's | 0.9135 | 0.9124 | −0.0011 |
+| Medial OA | 0.8828 | 0.8691 | −0.0137 | | **PF OA** | 0.8584 | 0.8688 | **+0.0104** |
+| Lateral Meniscus | 0.8700 | 0.8573 | −0.0127 | | | | | |
+| Medial Meniscus | 0.8987 | 0.8931 | −0.0057 | | | | | |
+
+**Eleven of twelve down, one up, no label moving more than ~0.02.** That is uniform mild damage across
+labels the term places no per-label emphasis on — the shape of an auxiliary objective taxing a shared
+trunk, and the same shape `side_dense` showed at ten times the size (all twelve down, −0.0641). It is not
+the shape of a mechanism that helped some findings and hurt others.
+
+**And the two labels the idea was FOR did not move the right way.** Continuity is a meniscus story; Lateral
+Meniscus reads −0.0127 and Medial Meniscus −0.0057. Whatever the term did to the representation, it was
+not putting torn beside torn.
+
+**WHAT THIS DOES NOT REFUTE, and the arm named the suspect before it ran.** The docstring's stated weakness
+is that contrastive learning conventionally uses batches two orders of magnitude larger than our twelve
+studies, so a batch of twelve sees a 7%-prevalence finding about once — the positives a supervised
+contrastive term needs are mostly absent from the batch it is computed on. That is a HARNESS suspect
+(faulty TRAINING), not the idea, and it fired exactly where predicted: the term is loudest (~3× the
+cross-entropy at init, chosen deliberately so a null would be readable) while its supervision is
+degenerate. So the reading is **"supervised contrastive at batch 12 costs 0.009 and buys nothing"**, not
+"shaping the representation does not work". `RememberedRanking` — a remembered pool of past readouts — is
+the named precondition and remains untried.
+
+**Cost note, because this project prices arms in wall-clock.** The header predicted ~200 s an epoch and
+~40 min; it ran 420 s and 84 min. The estimate was 2× optimistic against a control already on disk at
+413 s — an arm's cost should be read off its control's measured epoch time, not re-derived.
+
+**No seat, and no weight sweep.** A negative is charged roughly 3× on the board, and a dose sweep on a term
+whose supervision is degenerate at this batch size would sweep the wrong variable. The topology question
+goes to its strong form (masks, `knee-2sbk`) or to the remembered pool, not to `--contrast-weight 0.3`.
