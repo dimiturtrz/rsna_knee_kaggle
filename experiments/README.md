@@ -4938,3 +4938,62 @@ curve zig-zags.
 Incidental and useful: `LogitAverage` beats `RankAverage` by +0.0005 on this shadow, the same sign and
 size as the 2026-08-23 re-pricing on the champion seven (+0.0002). The shipped choice is confirmed by
 the ruler that had never been asked about it.
+
+### The count plateau is a property of the VOTE RULE, not of ensembling — 2026-08-27
+
+The first thing `--vote` was pointed at, and it moved a constant this project has been planning against.
+`--seats honest` over the 91 same-ruler `_s2026` records (one, `confident224_s2026`, was scored by a
+different label table and is excluded; 909 shared studies), run twice:
+
+| seats | honest, RankAverage | honest, LogitAverage |
+|-------|---------------------|----------------------|
+| 5     | 0.8717              | 0.8708               |
+| 8     | 0.8723              | 0.8729               |
+| 10    | **0.8735**          | 0.8735               |
+| 12    | 0.8733              | 0.8746               |
+| 15    | 0.8733              | **0.8747**           |
+| 20    | 0.8727              | 0.8735               |
+| 24    | 0.8727              | 0.8736               |
+
+Rank peaks at TEN and decays. Logit peaks at FIFTEEN, and its decay past the peak is gentler — still
+0.8736 at twenty-four, where rank has fallen to 0.8727. The in-sample bias runs the same way in both
+(+0.002 to +0.004), so this is not a selection artefact of one arm.
+
+**What this corrects.** `record_mix`'s own docstring has said "count plateaus at eight to ten" since
+2026-08-22, and that sentence is the reason the seat lane was treated as closed above ~10. It was
+measured under `RankAverage` while every board entry since `kneemri-vote` has served `LogitAverage` —
+the ruler and the entry disagreeing on the rule, which is exactly the harness fault class this project
+keeps paying for. Under the rule we actually ship, the plateau sits five seats further out.
+
+**What it does NOT license.** 11 → 15 seats is +0.0013 offline, which is at the ruler's 0.0015
+resolution and prices at about +0.001 board — one tick, inside the noise. And the board has its own
+evidence on the same axis: `calibsix` (6 seats) and `calibmix` (11 seats) both scored 0.941 under
+LogitAverage, so the flat stretch this ruler now shows from 10 to 24 is what the board already
+measured. Count is still not a lever. What changed is the REASON: it is flat because it is flat out
+to twenty-four seats, not because it turns down after ten.
+
+The greedy ordering under logit is also worth reading against what we serve — its first eight are
+`calib_dense_hold`, `blendhold`, `finding_calib_dense`, `small_batch6`, `margin_seat`,
+`calib_span_hold`, `through_dense`, `merged_blend`. Three `_hold` members and two calibration members
+in the top six, and `finding_calib_dense` — retired this morning as a FLAT member on its own ruler —
+seated third. A member that is unremarkable alone can still be the best third seat, which is the
+diversity argument stated in the only place it can be checked.
+
+### normcount224 — the last unmeasured recipe key is FLAT, and the knob space is now enumerated by MEASUREMENT — 2026-08-27
+
+`--normalise-by-count` was the sixty-first and last recipe key this project had never varied. Its arm
+pre-registered a ~0.10 chance of clearing the noise floor and expected score movement of about zero,
+and it was armed as an INSTRUMENT: the claim "the knob space is enumerated" is what points our schedule
+at members and ensembles instead of at another sweep, and that claim was a survey, not a measurement.
+
+Twelve epochs at 224 px, ~115 s/epoch, 7.42 GB reserved (built small deliberately, to run beside a
+co-tenant). Curve: 0.7472 / 0.7658 / 0.8147 / 0.8270 / 0.8369 / 0.8417 / **0.8498** / 0.8429 / 0.8453 /
+0.8464 / 0.8454 / 0.8454. Peak 0.8498 at epoch 6; converged, not truncated.
+
+Control `native224` reads 0.8502 at epoch 7. **−0.0004.** The pre-registered ladder put 0.8440–0.8564
+in the FLAT band, so this lands mid-band and the knob is retired.
+
+The instrument paid for itself as an instrument. The knob space is now CLOSED BY MEASUREMENT rather
+than by survey: sixty-one keys, every one varied at least once, none of the remaining ones moving the
+number. Nothing in the schedule changes — which is the point of running it. A null that licenses the
+plan is worth its twenty minutes; it would not have been worth an hour.

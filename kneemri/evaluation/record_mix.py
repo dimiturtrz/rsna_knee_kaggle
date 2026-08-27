@@ -22,6 +22,13 @@ was finally run over all 70 same-split records rather than 22. Four reads 0.8703
 were taken on, which is the failure mode to watch for here: this tool's answer moves as the pool grows,
 so quote the pool size with the number or the next reader inherits a stale constant.
 
+AND THE PLATEAU MOVES WITH THE VOTE RULE, which nobody could see until `--vote` existed. Every count
+number above was taken under `RankAverage` while the board entries serve `LogitAverage`. On the 91
+same-ruler records, the honest curve peaks at TEN seats / 0.8735 under rank and at FIFTEEN / 0.8747
+under logit, and logit's decay past its peak is gentler (0.8736 still at twenty-four, against rank's
+0.8727). So "count plateaus at eight to ten" is a fact about the RANK ruler, not about ensembling —
+name the rule beside the pool size, or the constant is stale in a second way.
+
 READ THE NUMBER AS A SIGN, NOT AS A SCORE. Two reasons, both recorded. A training-time record was
 produced by the TRAINER's reading of the holdout, so a member fitted under a different window is
 scored here as it scored itself and not as the submission path would read it — comparable across
