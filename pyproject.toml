@@ -34,6 +34,10 @@ dependencies = [
     # members were built — same class, same weights, so a state dict transfers. Present in Kaggle's
     # image at 5.0.0, so it needs no wheel in the kit.
     "transformers",
+    # The foreign members (`kneemri/inference/foreign_member.py`) are timm architectures — their own
+    # checkpoints name the arch in a `arch` field and nothing else can rebuild it. Present in Kaggle's
+    # image, so it needs no wheel in the kit; declared here because the local inference layer imports it.
+    "timm",
 ]
 
 [project.optional-dependencies]
