@@ -4822,3 +4822,36 @@ pool, behind its own control at 0.8634 and ahead of `band_dense`'s 0.8578 by +0.
 NEITHER of the two is mounted or named by any kernel. That is a roster fact, not a result, and it is
 priced by the seat ruler before it is priced by enthusiasm — the 23% pass-through measured on `calibsix`
 says six simultaneous member gains buy about one member's worth of board.
+
+### The seat lane is closed on its own ruler: count plateaus, and spread LOSES to quality — 2026-08-27
+
+`record_mix --seats honest` and `--seats diverse` over the same 103-record pool (909 shared studies;
+smoke runs, other folds and `confident224`'s different label table excluded — all three raise their own
+error, which is how the pool was found).
+
+**HONEST (held-out selection, the only quotable selector).** Six members read 0.8720, nine 0.8729,
+seventeen 0.8736, and the peak is **0.8738 at twenty-four**. Six → twenty-four buys **+0.0018**, under a
+third of the 0.0062 three-seed paired floor, with the in-sample peak (0.8755 at seventeen) sitting
++0.0017 above the held-out one — i.e. the selection bias is the same size as the entire gain from
+quadrupling the roster. **Count is exhausted from about nine members.**
+
+**DIVERSE (spread-built).** Peak **0.8650 at ninety-nine**, against honest's 0.8738. **−0.0088**, past the
+floor by 1.4x. The curve says why plainly: maximising distance elects the pool's worst members first
+(`focus_latmen` at seat 2 drops the ensemble from 0.8634 to 0.7501), and it never recovers — it needs
+twenty-five seats to get back to 0.8451, which one member does alone.
+
+**This answers the question `record_mix`'s own docstring asks and has never had an answer to: an ensemble
+built for spread does NOT beat one built for quality.** Not narrowly — by 1.4 floors. Diversity is worth
+buying only among members that are already good, which is what "the seat number" has always priced and
+what the flat-distance selector throws away.
+
+**The one thing this does NOT close, stated because it is the whole reason a slot might still go here.**
+Both selectors are OFFLINE rulers, and the offline ruler is the instrument `knee-nas5` measured as
+UNDER-pricing decode-path diversity by **2.4x** (0.0059 offline, 0.014 on the board). So "count is flat"
+and "spread loses" are established in exactly the space where the diversity axis is known to be
+compressed. They close count and they close blind-distance selection; they do not close a targeted
+pixel-group add, which is the only diversity move with a measured super-linear board transfer.
+
+**What it costs to have learned this: zero slots and eleven minutes of CPU.** Both runs are on the ledger
+rather than on the board, which is the point — the seat lane now has a NUMBER saying stop, instead of
+`knee-xuj5`'s policy saying stop.
