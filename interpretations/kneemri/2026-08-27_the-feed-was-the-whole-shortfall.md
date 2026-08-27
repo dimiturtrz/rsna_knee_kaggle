@@ -95,12 +95,54 @@ Seating `raptor_v4` is the next slot. It was not spent tonight on purpose: the l
 mounting and witnessing it could not have finished before the 00:00Z reset. A rushed seat would have spent
 the slot on the packaging rather than on the member.
 
-Seating is `knee-p0gk`, and the member is `raptor_v4_swa`. `calibsolo` scored 0.923 the same evening, which
-puts the six-seat ensemble bonus at +0.018 over its own first seat — the +0.030 measured here is what a
-better seat 1 gets **added to**, not what it competes with.
+Seating is `knee-p0gk`, and the member is `raptor_v4_swa`.
 
 The remaining question is not the member. It is whether their **decode** can be served inside a Kaggle
 kernel without vendoring third-party code, which `knee-p0gk` states as the thing to decide before building.
+
+## Every seating of it is worse than serving it alone
+
+Priced offline with `record_mix` over the same 909 studies, no slot and no card:
+
+| seating | RankAverage |
+|---|---|
+| `raptor_v4_swa` alone | **0.8928** |
+| champion six + `raptor_v4_swa` | 0.8910 |
+| `raptor_v4_swa` + `raptor_v4` + `raptor_v9` | 0.8908 |
+| `raptor_v4_swa` + our best two calib members | 0.8876 |
+| champion six | 0.8597 |
+
+Nothing we own improves it. The whole champion six costs 0.0018, its own siblings 0.0020, our two best
+calib members 0.0052. `QualityWeightedRank` on the seven reaches 0.8918 and still does not recover the solo.
+
+This is not a puzzle. The member is 0.030 clear of the pool, a flat vote pays that gap in full, and the
+Synovitis/Effusion complementarity above — real, and the reason a seat looked worth buying — is worth about
+0.003 against it. A weighted vote is the only shape that could hold both, and the one weighting we have,
+fitted split-half, does not.
+
+**So the earlier claim in this file is wrong and is retracted here**: the +0.030 is not what a better seat 1
+gets *added to*. On this ruler it is what ensembling *spends*.
+
+## …and the board says the opposite, which is the finding
+
+`calibsolo` scored **0.923** the same evening — the champion's own first seat, alone, on the board. The
+six-seat roster scores **0.941**. Ensembling is worth **+0.018 there** while costing 0.002–0.005 here.
+
+The same six that the board pays +0.018 for read 0.8597 offline, *below four of the six foreign checkpoints
+individually*. Our holdout cannot see whatever the board is rewarding about a mixture. That inversion was
+already visible as the seating axis running opposite to offline gain across seven entries; this is its
+sharpest form, and it means the table above must **not** be read as "do not ensemble on the board".
+
+Two slots, and they bracket it rather than one guessing:
+
+- **solo `raptor_v4_swa`** — what the holdout says, and the clean read of a foreign member. Matched against
+  `calibsolo` 0.923, taken the same night on the same board.
+- **champion six + `raptor_v4_swa`** — what the board's own +0.018 says, on the roster whose board number
+  we know exactly.
+
+If solo wins, the board's ensemble bonus is a property of weak members and the offline ruler was right. If
+the seven win, the bonus survives a strong seat and the offline ruler is blind to it. Neither number can be
+inferred from the other, which is the whole reason to spend both.
 
 ## A ruler that disagrees with itself
 
