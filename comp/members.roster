@@ -364,6 +364,18 @@ grade_ladder_ff.pt          # DARK. grade_ladder_s2026's flags plus --fold -1 --
 through_dense_ff.pt         # DARK. through_dense_s2026's flags plus --fold -1 --ema
 lr4e-5_ws_ff.pt             # DARK. lr4e-5_ws_s2026's flags plus --fold -1 --ema
 base_dense_ff.pt            # DARK. base_dense_s2026's flags plus --fold -1 --ema (variant base, batch 6)
+# Added 2026-08-27 by experiments/arms/calibsix.sh (knee-1c00). The five seats above, each refitted
+# with exactly one extra flag: --calibrated-targets. The mechanism is a UNIFORM LIFT of every seat
+# rather than a better member in one seat, because seat pricing measured a new member's solo quality
+# passing through into a seat at only 23%, while calibration measured a pass-through ABOVE one (147%
+# on a trio, 126% on a pair) -- it buys ensemble AMBIGUITY as well as member quality.
+# Four of the five are DARK for the same reason their originals are (--fold -1). merged_blend_cf is
+# fold-0 like its own original and is the arm's ONLY offline read: against merged_blend_s2026 0.8587.
+final_ws_cf.pt              # DARK. final_ws_e12's flags plus --calibrated-targets
+grade_ladder_cf.pt          # DARK. grade_ladder_ff's flags plus --calibrated-targets
+through_dense_cf.pt         # DARK. through_dense_ff's flags plus --calibrated-targets
+lr4e-5_ws_cf.pt             # DARK. lr4e-5_ws_ff's flags plus --calibrated-targets
+merged_blend_cf.pt          # merged_blend_s2026's flags plus --calibrated-targets; fold 0, the arm's only offline read
 # Added 2026-08-24, from final_fit_six.sh members 1-5. Every caveat on final_ws_e12 above applies to all
 # five WITHOUT EXCEPTION: they have seen every holdout study, no offline score exists or can exist for
 # them, they must never enter a pool that reports an offline mean, and no board-per-holdout compression
