@@ -4739,3 +4739,32 @@ The member-quality lane ceilings near 0.943 not because the terms fail to stack 
 cannot hold more of them without giving up what it already holds. Reaching 0.950 therefore needs a seat
 that is BOTH high-quality and in a pixel group nothing else occupies - which is external data and a
 different decode path in the same member, not another term on an existing seat.
+
+### How `stackfit` must actually be read, written at 07:02Z with the arm at epoch 3 of 12
+
+Its pre-registration is broken, and the fix makes it a better arm than it was designed to be.
+
+`stackfit` carries `--hold-annotations`. Its named control `calib_dense_hold` does too. But its second
+term comes from `ema_dense`, which is `hold_annotations: False` - so the prediction
+`calib_dense_hold + (ema_dense - band_dense)` adds a NON-HOLD delta to a HOLD baseline. That transport
+assumes EMA's effect is the same in both families, and the 2x2 above just measured that calibration's is
+not (sign inverted, 0.0092) and slice count's is not (0.0067). The one assumption the prediction rests on
+is the one this session refuted.
+
+**What is still clean is a matched single-variable pair, and it is the whole arm.** `stackfit` against
+`calib_dense_hold`: same hold family, same 20 slices, same 0.1-0.9 band, same 336 px, same labels, same
+`--calibrated-targets`, same 12 epochs, same seed. ONE flag differs, `--ema`. So read the arm as what
+EMA buys ON TOP OF calibration at the dense corner, and read it against 0.8634, not against 0.8644.
+
+PRE-REGISTERED, before the number:
+
+| landing | reading |
+|---|---|
+| **>= 0.8696** | EMA is a real lever at this corner, LARGER than its +0.0010 non-hold estimate. The first thing this session would have found that clears the floor on a matched pair, and it would license EMA at roster scale the way calibration was. |
+| **0.8572 - 0.8696** | **FLAT** - the most likely branch. EMA adds nothing detectable on top of calibration, consistent with its own +0.0010 single. Closes EMA as a lever rather than leaving it untried, and the gross-substitution rung below is what the 85 minutes actually bought. |
+| **<= 0.8572** | EMA SUBSTITUTES for calibration - adding a term worth +0.0010 ate more than a floor of a term worth +0.0061. That is the `depth_regions_span` shape a fifth time, and it would be the strongest evidence this project holds against stacking. |
+
+Note what CANNOT be recovered: EMA alone in the hold family was never run, so the calibration x EMA
+INTERACTION is not computable from this arm at any landing. It measures a conditional effect, not a
+composition. The composition question is answered by the 2x2 above, on different levers, for that
+holdout only.
