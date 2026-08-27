@@ -2373,3 +2373,34 @@ has ever tested and which the whole 0.950 plan assumes).
 
 Witness-checked before the push: five seats ok, one UNVERIFIED (`calib_span_ff`, published before
 2026-08-24), no defects. Kit `fec94e7`, kernel version 1. Slot 1 of 5 on 2026-08-27.
+
+## 2026-08-27 · `kneemri-calibmix` — 0.941, count is not a lever
+
+**0.941 — identical to `calibsix` at six seats.** Eleven seats, five more than the champion, same
+score to the board's resolution.
+
+The entry is `calibsix`'s six **unchanged**, plus the second fit of five of those six members
+(`final_ws_e12`, `grade_ladder_ff`, `merged_blend_s2026`, `lr4e-5_ws_ff`, `through_dense_ff`). Same
+`LogitAverage`, same `overlap: false`, same kit `fec94e7`. The single variable is COUNT, and the seats
+added are deliberately the low-diversity kind — same recipe family, same decode path, differing only in
+fit. It asks the one question `calibsix`'s read could not separate from its own member-quality gain:
+does error-structure diversity from more seats buy anything once every seat is already calibrated?
+
+**The pre-registered FLAT branch fired** (0.939–0.941). No.
+
+**Two independent rulers now say the same thing.** Offline, the same window ran the seat-count curves on
+the 103-member pool: the *honest* (quality-ordered) curve goes six 0.8720 → nine 0.8729 → seventeen
+0.8736 → peak **0.8738 at twenty-four** — +0.0018 for four times the seats, under a third of the 0.0062
+floor and inside the +0.0017 in-sample/held-out selection bias. The *diverse* (flat-distance) curve peaks
+at 0.8650 across ninety-nine seats, **−0.0088 behind honest**, because flat-distance selection elects the
+pool's worst members first (`focus_latmen` at seat 2 drops 0.8634 → 0.7501) and needs twenty-five seats
+to match what one member does alone. Count plateaus; blind spread loses.
+
+**What this does NOT close.** Both rulers are offline, and `knee-nas5` measured the decode-path /
+pixel-group axis at 0.0059 offline against **0.014 on the board** — a 2.4× compression, the only
+super-linear board transfer this project has measured, and the one axis neither selector can see. A
+**targeted** pixel-group add (`res392_ws_s2026` at 392 px, `crop80_span_s2026` at crop 80, both already
+in the mounted package, taking pixel groups 1 → 3) is untouched by either result. Note `resseat` tested
+`res392` only as a SWAP, dropping a full-fit member for it, and read 0.938 — the pure ADD has never run.
+
+Kit `fec94e7`, submission `55813714`. Slot 2 of 5 on 2026-08-27.
