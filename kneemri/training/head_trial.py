@@ -181,7 +181,10 @@ class TrialHead(nn.Module):
         """
         slices = self.slices
         pooled = slices(features) if slices is not None else features.amax(dim=2)
-        return self.head(pooled * mask.unsqueeze(-1), mask)
+        # Broadcast to whatever rank the pooling produced: `labelwise` leaves a diagnosis axis where the
+        # others leave nothing, and a mask shaped for one silently multiplies the wrong axis of the other.
+        zeroing = mask.view(mask.shape + (1,) * (pooled.dim() - mask.dim()))
+        return self.head(pooled * zeroing, mask)
 
 
 @dataclass(frozen=True)

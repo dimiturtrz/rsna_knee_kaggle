@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# labelwise224.sh — one set of slice-pooling weights PER FINDING instead of one shared by all twelve.
+#
+# bead: knee-xuu5
+#
+# WHY THIS ARM. Our slice pooling scores each slice with a single shared query and softmaxes over depth.
+# Twelve findings then read the same pooled vector. A cruciate tear is two or three slices of signal; an
+# osteoarthritic change spreads across most of the stack. One weight has to serve both, so it settles on
+# the compromise — and the compromise is approximately the mean, which is approximately the maximum.
+#
+# THE NULL IS THE ARGUMENT FOR THE ARM, NOT AGAINST IT. `attend` beat `max` by +0.0002 in this ledger,
+# and that has stood for a week as "attention over slices buys nothing". It is exactly what a query
+# pulled twelve ways predicts about itself. The mechanism was never tested; one weight was.
+#
+# EXTERNAL EVIDENCE. Kaggle user dreaddevelopment published both halves of the model behind a 0.924
+# public inference notebook (pulled to external/raptor/). Their head is this operator with twelve
+# attention channels, and their own text ranks it above every other choice they made: "one shared
+# pooling weight forces those to compete; giving each finding its own attention lets each draw on the
+# slices that actually show it". They claim 0.936-0.938 unblended. That is THEIR number and is not
+# replicated here — it is a reason to spend twenty minutes, not a number to quote.
+#
+# CONVERGENCE. `SliceAttention`'s own docstring already named this successor and deferred it: "A
+# per-diagnosis query over slices is the obvious next step and is deliberately not taken until a shared
+# one earns it." Two independent routes to the same mechanism.
+#
+# ONE VARIABLE against the control: `--slice-pooling labelwise`. Byte-identical to `native224`
+# otherwise. The control pools with `max` rather than `attend`, which is deliberate and not a
+# convenience: `attend` and `max` are separated by +0.0002 in this ledger, so `native224` is the same
+# denominator to within a twentieth of the noise floor, and it is the control every other 224 arm reads
+# against — including `adjacent224`, which makes the two comparable to each other.
+#
+# THE MECHANISM'S OWN RULER, pre-registered because the mean is a weak one for this claim. The three
+# findings where our model still trails its own teacher are MCL (-0.0465), Lateral Meniscus (-0.0149)
+# and PF OA (-0.0071), and the first two are precisely the focal, few-slice findings a shared pooling
+# weight makes compete with the diffuse ones. If the mechanism is real those three move MORE than the
+# mean does. If the mean moves and they do not, the delta is not this mechanism and the arm is a lucky
+# reroll of a head — read it that way and say so.
+#
+# THE FALSIFIABLE PART, written before the run.
+#   * >= +0.010 on the mean, MCL and Lateral Meniscus among the movers. The mechanism is real. Rebuild
+#     at 336, refit the seated recipes under it, and re-price the whole `attend` family — its null was
+#     an artefact of the shared query.
+#   * >= +0.010 on the mean, the focal findings FLAT. Keep the member for the ensemble, and do not tell
+#     the per-finding story: something else in a twelve-channel head bought it.
+#   * +0.006 to +0.010. Directional, under the bar. Keep for pixel-distance diversity and re-test at 336
+#     where the slices are thinner and the focal findings have more to attend over.
+#   * within +/- 0.006. Per-diagnosis pooling is not the lever at 12 slices, and the honest reading is
+#     that 58 image-read labels cannot supervise twelve separate attention channels. Then the follow-up
+#     is their WINDOW GEOMETRY (three consecutive slices as RGB, centres spread by linspace), not more
+#     head capacity.
+#   * <= -0.006. Twelve channels over 4,407 studies is capacity we cannot afford. Report it as such and
+#     close the axis.
+#
+# HARNESS CHECK. The printed recipe must name "slice_pooling": "labelwise". At step zero the pooling IS
+# the mean for every finding (the score layer is zeroed, pinned by a unit test), so a first-epoch loss
+# far from `native224`'s means the flag did not land the way this arm thinks it did.
+#
+# control  native224 = 0.8502 (best epoch 7), byte-identical recipe under the shared-query pooling.
+#
+# deliberate: --slice-pooling labelwise (the arm's thesis)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train labelwise224 \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --image-size 224 \
+  --labels "$LABELS" --out "$PROCESSED/labelwise224_s2026.pt"

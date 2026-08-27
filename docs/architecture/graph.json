@@ -2792,6 +2792,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.labelwise_attention",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.labelwise_attention",
+      "target": "kneemri.models.slice_attention",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.model",
       "target": "core.data.corpus.anatomy",
       "weight": 1
@@ -2854,6 +2866,12 @@
       "kind": "import",
       "source": "kneemri.models.slice_pooling",
       "target": "kneemri.models.depth_attention",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_pooling",
+      "target": "kneemri.models.labelwise_attention",
       "weight": 1
     },
     {
@@ -14485,6 +14503,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.forward",
+      "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.report_vector",
+      "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.models.token_pooling.ClassAndPatchMean",
       "target": "kneemri.models.token_pooling.TokenPooling",
@@ -17277,7 +17307,7 @@
       "role": null
     },
     {
-      "descendants": 137,
+      "descendants": 138,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -17973,7 +18003,7 @@
       "role": null
     },
     {
-      "descendants": 13,
+      "descendants": 14,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -18024,6 +18054,14 @@
       "descendants": 0,
       "id": "kneemri.models.fingerprint",
       "label": "fingerprint",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.labelwise_attention",
+      "label": "labelwise_attention",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -20307,6 +20345,14 @@
       "level": "class",
       "parent": "kneemri.models.fingerprint",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.labelwise_attention.LabelwiseAttention",
+      "label": "LabelwiseAttention",
+      "level": "class",
+      "parent": "kneemri.models.labelwise_attention",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -29486,6 +29532,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.labelwise_attention.LabelwiseAttention.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.labelwise_attention.LabelwiseAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.labelwise_attention.LabelwiseAttention.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.labelwise_attention.LabelwiseAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.lora.LoRALinear.__init__",
       "label": "__init__",
       "level": "method",
@@ -29728,6 +29790,14 @@
       "descendants": 0,
       "id": "kneemri.models.slot_head.SlotHead.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "label": "per_diagnosis",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
       "role": null

@@ -3,7 +3,8 @@ from typing import cast
 import pytest
 import torch
 
-from kneemri.models.slice_pooling import ATTEND, CHANNELS, DEPTH, MAXIMUM, SLICE_POOLINGS
+from core.findings import TARGETS
+from kneemri.models.slice_pooling import ATTEND, CHANNELS, DEPTH, LABELWISE, MAXIMUM, SLICE_POOLINGS
 
 DIM = 8
 BATCH, SLOTS, GROUP = 2, 3, 4
@@ -11,7 +12,7 @@ BATCH, SLOTS, GROUP = 2, 3, 4
 
 @pytest.mark.parametrize(
     ("name", "per_slice"),
-    [(CHANNELS, False), (MAXIMUM, True), (ATTEND, True), (DEPTH, True)],
+    [(CHANNELS, False), (MAXIMUM, True), (ATTEND, True), (DEPTH, True), (LABELWISE, True)],
 )
 def test_slice_poolings_partition_the_vocabulary_by_what_the_encoder_sees(*, name: str, per_slice: bool):
     """ONE REP PER CLASS of the first decision a name makes: is a slice encoded alone, or stacked?
@@ -76,3 +77,20 @@ def test_slice_poolings_build_an_aggregator_that_pools_the_slice_axis_away(*, na
     assert out.shape == (BATCH, SLOTS, DIM), "an aggregator's job is to remove the slice axis"
     order_blind = bool(torch.allclose(out, reversed_out, atol=1e-4))
     assert order_blind == (not sees_order), f"{name} reads slice order as {not order_blind}, expected {sees_order}"
+
+
+def test_slice_poolings_may_replace_the_slice_axis_with_a_diagnosis_axis():
+    """The third class of aggregator, and the one whose OUTPUT SHAPE differs from the other two.
+
+    `attend` and `depth` remove the slice axis; `labelwise` replaces it with a per-finding axis, so the
+    head receives twelve readings of a slot instead of one. Asserted here because this table is what
+    tells `StudyModel` and `TrialHead` what to expect, and a pooling whose rank surprises them is the
+    plumbing failure this module exists to prevent — one that a shape error would only surface deep
+    inside a head, or not at all.
+    """
+    aggregator = SLICE_POOLINGS[LABELWISE].aggregator
+    assert aggregator is not None
+    torch.manual_seed(2026)
+    with torch.no_grad():
+        out = aggregator(DIM).eval()(torch.randn(BATCH, SLOTS, GROUP, DIM))
+    assert out.shape == (BATCH, SLOTS, len(TARGETS), DIM)

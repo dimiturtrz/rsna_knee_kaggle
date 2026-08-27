@@ -64,7 +64,7 @@ def test_slot_head_attention():
     mask = torch.ones(2, SLOTS)
     mask[0, -1] = 0.0
 
-    weights = head.attention(head.proj(features) + head.slot_emb, mask)
+    weights = head.attention(head.proj(head.per_diagnosis(features)) + head.slot_emb.unsqueeze(1), mask)
 
     assert weights.shape == (2, OUT, SLOTS)
     assert torch.allclose(weights.sum(-1), torch.ones(2, OUT), atol=1e-5)
@@ -130,3 +130,46 @@ def test_mean_slot_head_ignores_the_query_that_attention_uses():
         after = head.forward(features, mask)
 
     assert torch.allclose(before, after, atol=1e-6), "uniform pooling must not read the query or prior"
+
+
+def test_per_diagnosis():
+    """A shared reading expands to twelve identical ones, and twelve are passed through untouched.
+
+    THE PROOF THAT THE DIAGNOSIS AXIS COSTS NOTHING. Every member on disk was fitted under a pooling
+    that hands up one vector per slot, so the head must compute for them exactly what it computed
+    before this axis existed — the expansion is a view and the einsums contract the same numbers in the
+    same order. Asserted on `forward` rather than on the shapes alone, because the shapes were never
+    the risk: silently attending over the wrong axis is.
+    """
+    torch.manual_seed(SEED)
+    head = SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT).eval()
+    x = torch.randn(2, SLOTS, DIM)
+    mask = torch.ones(2, SLOTS)
+    with torch.no_grad():
+        expanded = head.per_diagnosis(x)
+        assert expanded.shape == (2, SLOTS, OUT, DIM)
+        assert head.per_diagnosis(expanded) is expanded, "an axis already present is not expanded again"
+        assert torch.allclose(head.forward(x, mask), head.forward(expanded, mask), atol=1e-6)
+
+
+def test_forward_reads_each_diagnosis_from_its_own_slot_features():
+    """Under `labelwise` pooling the twelve readings differ, and each logit reads only its own.
+
+    The axis is not decorative: corrupting the slot features of ONE diagnosis must move that diagnosis's
+    logit and leave the other eleven where they were. This is the property the whole mechanism buys, and
+    the one an accidental mean over the axis would silently destroy.
+    """
+    torch.manual_seed(SEED)
+    head = SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT).eval()
+    x = torch.randn(1, SLOTS, OUT, DIM)
+    mask = torch.ones(1, SLOTS)
+    corrupted = x.clone()
+    # Resampled rather than shifted: the projection LayerNorms first, so adding a constant to every
+    # feature of a diagnosis is invisible to it — a corruption that proves nothing about the axis.
+    corrupted[:, :, 3] = torch.randn_like(corrupted[:, :, 3]) * 3.0
+    with torch.no_grad():
+        before, after = head.forward(x, mask), head.forward(corrupted, mask)
+
+    assert not torch.allclose(before[:, 3], after[:, 3], atol=1e-4), "the corrupted diagnosis must move"
+    untouched = [index for index in range(OUT) if index != 3]
+    assert torch.allclose(before[:, untouched], after[:, untouched], atol=1e-6), "the others must not"

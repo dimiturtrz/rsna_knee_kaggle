@@ -305,8 +305,12 @@ class StudyModel(nn.Module):
         self,
         imgs: UInt8[Tensor, "b s g p q"],
         img_size: int | None = None,
-    ) -> Float[Tensor, "b s d"]:
+    ) -> Float[Tensor, "b s *o d"]:
         """One embedding per acquisition slot — everything before the head reads them.
+
+        Or TWELVE per slot, one per diagnosis, under `labelwise` pooling: that aggregator replaces the
+        slice axis with a diagnosis axis instead of removing it. `SlotHead.per_diagnosis` is where the
+        two shapes meet, so no caller here branches on which pooling ran.
 
         Split out of `forward` so a training step can take BOTH readouts from one encoder pass. The
         encoder is essentially the whole cost of a step, so computing it twice to also predict a report

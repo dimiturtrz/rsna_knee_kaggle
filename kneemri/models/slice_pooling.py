@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from torch import nn
 
 from kneemri.models.depth_attention import DepthAttention
+from kneemri.models.labelwise_attention import LabelwiseAttention
 from kneemri.models.slice_attention import SliceAttention
 
 ATTEND = "attend"
@@ -29,6 +30,12 @@ DEPTH = "depth"
 Named beside the two order-blind ones because that is the comparison it exists to make. See
 `DepthAttention` for why the axis went untested for this long."""
 
+LABELWISE = "labelwise"
+"""`attend` with one set of pooling weights PER FINDING instead of one shared by all twelve.
+
+The only pooling that hands the head a diagnosis axis rather than a single vector per slot. See
+`LabelwiseAttention` for why a shared query's +0.0002 is the null this predicts."""
+
 
 @dataclass(frozen=True)
 class SlicePooling:
@@ -42,7 +49,10 @@ class SlicePooling:
 
     per_slice: bool
     aggregator: Callable[[int], nn.Module] | None = None
-    """The module that pools the slice axis, or None when a bare `amax` does it."""
+    """The module that pools the slice axis away, or None when a bare `amax` does it.
+
+    It may replace that axis with a DIAGNOSIS axis rather than remove it outright — `labelwise` does —
+    and `SlotHead.per_diagnosis` is the one place that reconciles the two shapes."""
 
 
 SLICE_POOLINGS: dict[str, SlicePooling] = {
@@ -50,6 +60,7 @@ SLICE_POOLINGS: dict[str, SlicePooling] = {
     MAXIMUM: SlicePooling(per_slice=True),
     ATTEND: SlicePooling(per_slice=True, aggregator=SliceAttention),
     DEPTH: SlicePooling(per_slice=True, aggregator=DepthAttention),
+    LABELWISE: SlicePooling(per_slice=True, aggregator=LabelwiseAttention),
 }
 """The vocabulary, mapped to how the slice axis is read — the fact three call sites each decided.
 

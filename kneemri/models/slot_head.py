@@ -18,6 +18,9 @@ REPORT_DIMS = 64
 _HIDDEN = 256
 """Width the slot embeddings are projected to before the per-diagnosis attention."""
 
+_SHARED_READING = 3
+"""Rank of slot features that every diagnosis reads identically — "b s d", with no diagnosis axis."""
+
 _DROPOUT = 0.2
 """Applied to the attended context, where 4,407 studies meet a twelve-way readout."""
 
@@ -65,29 +68,47 @@ class SlotHead(nn.Module):
         # supervision is switched on; an unused head simply receives no gradient.
         self.report = nn.Linear(hidden, report_dims)
 
-    def attention(self, h: Float[Tensor, "b s h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
+    def per_diagnosis(self, x: Float[Tensor, "b s *o d"]) -> Float[Tensor, "b s o d"]:
+        """The slot features AS EACH DIAGNOSIS SEES THEM — one reading shared by all twelve, or twelve.
+
+        The head reads a diagnosis axis whether or not the slice pooling produced one. `channels`,
+        `max`, `attend` and `depth` all hand up a single vector per slot, which every finding then reads
+        identically; `labelwise` pools the slices once per finding and hands up twelve. Expanding the
+        first case is a VIEW and changes no arithmetic — the einsums below contract the same numbers in
+        the same order — so every member on disk computes exactly what it computed before.
+
+        The one place that knows the two shapes, so nothing downstream has to ask which pooling ran.
+        """
+        return x.unsqueeze(2).expand(-1, -1, self.query.shape[0], -1) if x.dim() == _SHARED_READING else x
+
+    def attention(self, h: Float[Tensor, "b s o h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
         """How much each diagnosis reads from each slot: a per-diagnosis softmax over the present ones."""
-        att = torch.einsum("bsh,oh->bos", h, self.query) / self.hidden**0.5
+        att = torch.einsum("bsoh,oh->bos", h, self.query) / self.hidden**0.5
         att = att + self.prior.unsqueeze(0)
         return att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
 
     @override
-    def forward(self, x: Float[Tensor, "b s d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o"]:
+    def forward(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o"]:
         """Attend each diagnosis's query over the present slots and read out one logit per diagnosis."""
-        h = self.proj(x) + self.slot_emb
-        ctx = self.drop(torch.einsum("bos,bsh->boh", self.attention(h, mask), h))
+        h = self.proj(self.per_diagnosis(x)) + self.slot_emb.unsqueeze(1)
+        ctx = self.drop(torch.einsum("bos,bsoh->boh", self.attention(h, mask), h))
         readout = self.out
         return (ctx * readout.weight.unsqueeze(0)).sum(-1) + readout.bias
 
-    def report_vector(self, x: Float[Tensor, "b s d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b r"]:
+    def report_vector(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b r"]:
         """Predict the study's report embedding from the mean of its PRESENT slots.
 
         Averaged over the present slots rather than over the per-diagnosis contexts: a report describes
         the whole study, so its target is a property of the study and not of any one finding's
         attention. Masked, for the reason the attention is masked — an absent acquisition must not pull
         the average toward whatever an unfilled slot happens to hold.
+
+        Averaged over the DIAGNOSIS axis too, and for the same reason: under `labelwise` pooling a slot
+        holds twelve readings, and a report describes the study rather than any one finding's view of
+        it. Under every other pooling the twelve are one vector expanded, so the mean is that vector and
+        this line changes nothing for any member on disk.
         """
-        h = self.proj(x) + self.slot_emb
+        h = self.proj(self.per_diagnosis(x)).mean(dim=2) + self.slot_emb
         present = (mask >= _PRESENT).float().unsqueeze(-1)
         pooled = (h * present).sum(dim=1) / present.sum(dim=1).clamp(min=1.0)
         return self.report(pooled)
@@ -110,7 +131,7 @@ class MeanSlotHead(SlotHead):
     """
 
     @override
-    def attention(self, h: Float[Tensor, "b s h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
+    def attention(self, h: Float[Tensor, "b s o h"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
         """Uniform over the slots the study actually has, and zero on the ones it does not.
 
         Masked for the same reason the softmax is masked: an absent acquisition must not pull the
