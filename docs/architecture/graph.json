@@ -753,6 +753,12 @@
     {
       "kind": "import",
       "source": "core.data.labels.rubric_gap",
+      "target": "core.data.labels.severity_boundary",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.rubric_gap",
       "target": "core.findings",
       "weight": 1
     },
@@ -6620,8 +6626,32 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "source": "core.data.labels.rubric_gap.RubricGap._annotated_rows",
       "target": "core.data.labels.rubric_gap.RubricGap._cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "target": "core.data.labels.rubric_gap.RubricGap._annotated_rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "target": "core.data.labels.rubric_gap.RubricGap.backed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "target": "core.data.labels.rubric_gap.RubricGap.subthreshold",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.backed",
+      "target": "core.data.labels.rubric_gap.RubricGap.subthreshold",
       "weight": 1
     },
     {
@@ -6650,6 +6680,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.subthreshold",
+      "target": "core.data.labels.rubric_gap.RubricGap._annotated_rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.rubric_gap.RubricGap.table",
       "target": "core.data.labels.rubric_gap.RubricGap._cells",
       "weight": 1
@@ -6670,6 +6706,12 @@
       "kind": "calls",
       "source": "core.data.labels.rubric_gap.main",
       "target": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap.backed",
       "weight": 1
     },
     {
@@ -24306,6 +24348,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap._annotated_rows",
+      "label": "_annotated_rows",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.rubric_gap.RubricGap._cells",
       "label": "_cells",
       "level": "method",
@@ -24316,6 +24366,14 @@
       "descendants": 0,
       "id": "core.data.labels.rubric_gap.RubricGap.annotated",
       "label": "annotated",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.backed",
+      "label": "backed",
       "level": "method",
       "parent": "core.data.labels.rubric_gap.RubricGap",
       "role": null
@@ -24348,6 +24406,14 @@
       "descendants": 0,
       "id": "core.data.labels.rubric_gap.RubricGap.sentences",
       "label": "sentences",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.subthreshold",
+      "label": "subthreshold",
       "level": "method",
       "parent": "core.data.labels.rubric_gap.RubricGap",
       "role": null

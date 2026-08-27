@@ -166,6 +166,49 @@ def test_denial_is_not_a_finding():
 
 
 def test_rubric_covers_only_rules_the_report_names():
-    """Nine of the twelve turn on a size the report states in its own units — those are severity_boundary."""
+    """Nine of the twelve columns; the other three name an image feature with no threshold to read."""
     assert len(RUBRIC) == len({rule.columns for rule in RUBRIC})
-    assert sum(len(rule.columns) for rule in RUBRIC) == len(MENISCUS_RULE.columns) + 2
+    covered = [column for rule in RUBRIC for column in rule.columns]
+    assert len(covered) == len(set(covered)) == len(TARGETS) - 3
+    assert set(covered) <= set(TARGETS)
+
+
+def test_backed():
+    """A rule earns its count only where the radiologist agrees its subthreshold class is negative.
+
+    The gate on every number this module prints. Without it Effusion's 524 cells — 6 of its 12 annotated
+    subthreshold cells annotated POSITIVE — would sum into the headline beside meniscus's measured 165 as
+    if they were the same kind of fact. The bar is zero counterexamples, because the rule's claim is a
+    rate of 0 rather than a rate under a half.
+    """
+    gap = RubricGap()
+    table = gap.table(MENISCUS_RULE, _reports(DEGENERATE), _labels(MEDIAL, POSITIVE))
+
+    agrees = _labels(MEDIAL, ABSENT)
+    agrees["Report"] = [DEGENERATE]
+    assert gap.backed(MENISCUS_RULE, table, agrees)
+
+    disagrees = _labels(MEDIAL, POSITIVE)
+    disagrees["Report"] = [DEGENERATE]
+    assert not gap.backed(MENISCUS_RULE, table, disagrees)
+
+
+def test_subthreshold():
+    """The only class the rule's claim is falsifiable on, carrying the radiologist's verdict beside ours."""
+    gap = RubricGap()
+    table = gap.table(MENISCUS_RULE, _reports(DEGENERATE, TEAR_REPORT), _labels(MEDIAL, POSITIVE, POSITIVE))
+    truth = _labels(MEDIAL, ABSENT, ABSENT)
+    truth["Report"] = [DEGENERATE, TEAR_REPORT]
+    sub = gap.subthreshold(MENISCUS_RULE, table, truth)
+
+    assert list(sub["study"]) == ["study-0"]
+    assert not bool(sub["truth"].iloc[0])
+
+
+def test_backed_is_false_when_nothing_is_annotated():
+    """An unmeasured rule has not earned a count either — silence is not agreement."""
+    gap = RubricGap()
+    table = gap.table(ACL_RULE, _reports(SILENT_REPORT), _labels("ACL", POSITIVE))
+    truth = _labels("ACL", ABSENT)
+    truth["Report"] = [SILENT_REPORT]
+    assert not gap.backed(ACL_RULE, table, truth)

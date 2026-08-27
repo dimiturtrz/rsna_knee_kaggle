@@ -26,74 +26,101 @@ and not a faulty test or a faulty idea.
 
 ## How big
 
-Three of the twelve published rules have the same shape — a MENTION of the structure, a vocabulary the
+Nine of the twelve published rules have the same shape — a MENTION of the structure, a vocabulary the
 rubric ACCEPTS, a vocabulary it names and calls NEGATIVE anyway, and a denial that must be subtracted
 before either is searched for. `core.data.labels.rubric_gap` holds one `RubricRule` per finding and reads
 our derived target beside the bucket. The stated rules supply the correct answer for the subthreshold
 class without needing any annotation, so the denominator is the corpus rather than the 58.
 
-The other nine turn on a size the report states in its own units ("moderate or large", "one centimetre
-of >50%-thickness loss"). That is `severity_boundary`'s shape, and it needs the annotations.
+They come in two shapes. Three state a TEAR word (meniscus, ACL, MCL); five state a SIZE — "a moderate or
+large amount of fluid", "a moderate or large area of high-grade cartilage loss" — which is
+`severity_boundary`'s shape, so the size vocabulary is imported from there rather than restated. The
+remaining three (Synovitis, Contusion, Fracture) name an image feature with no threshold vocabulary at
+all, and this ruler is blind to them.
 
 ```
-                                 subthreshold cells   ours positive   contradicted   of that finding's cells
-Medial/Lateral Meniscus                        196             165            165                     1.87%
-ACL                                            102              98             98                     2.22%
-MCL                                            213             185            185                     4.20%
-                                                                              ---
-                                                                              448
+                          subthreshold   ours positive   contradicted   of that finding's cells   annotations
+Medial/Lateral Meniscus            196             165            165                     1.87%   0 of  3  ✓
+ACL                                102              98             98                     2.22%   0 of  1  ✓
+Baker's                            244             239            239                     5.42%   0 of  1  ✓
+                                                                  ---
+                                                                  502
+MCL                                187             185            185                     4.20%   3 of  7  ✗
+Effusion                           526             524            524                    11.89%   6 of 12  ✗
+Medial OA                          132             123            123                     2.79%   1 of  2  ✗
+Lateral OA                         124             112            112                     2.54%   2 of  5  ✗
+PF OA                              183             154            154                     3.49%   1 of  4  ✗
+                                                                 ----
+                                                                 1098
 ```
 
-**448 cells, and every one of them a FLOOR.** The tool reads 40.1% of the corpus; the other 59.9% is
+**The last column is the whole table.** A rule's claim is that its subthreshold class is annotated
+NEGATIVE — a rate of zero, not a rate under a half — so one radiologist annotation on the other side
+refutes it, and the cells under it are measuring the ruler's disagreement with the radiologist rather
+than a mislabelled corpus. No re-read recovers those, because there is nothing wrong with them.
+`RubricGap.backed` enforces exactly that, and `main` prints the two totals apart so they can never be
+summed by accident. The first version of `backed` used a majority instead and called MCL backed at 3 of
+7 — the arm this document had already flagged by hand. That disagreement is what showed the TEST was
+wrong, not the arm.
+
+**502 cells, and every one of them a FLOOR.** The tool reads 40.1% of the corpus; the other 59.9% is
 Spanish, Turkish, Croatian, Greek, German, Bulgarian, Dutch or French and carries the same wording in its
-own language. If the class rate is language-flat the corpus figures are nearer 4.7% / 5.5% / 10.5%. The
+own language. If the class rate is language-flat the corpus figures are nearer 4.7% / 5.5% / 13.5%. The
 rates are stated over the corpus, not over the subset that parsed, because a rate computed inside the
 subset that happened to parse is not a rate over the corpus.
 
-Concentration matters more than the raw share. **165 of 196, 98 of 102 and 185 of 213 — 84%, 96% and 87%
+Concentration matters more than the raw share. **165 of 196, 98 of 102 and 239 of 244 — 84%, 96% and 98%
 — are flipped**, and all in one direction, onto the positive class. That is not symmetric noise a bigger
-model averages out; it is a bias that moves the decision boundary. Four of the twelve columns carry it.
+model averages out; it is a bias that moves the decision boundary.
 
-## The annotations agree with the host on two arms and hedge on the third
+Three cautions on the 502, in the order they bite. Baker's is 239 of it and rests on ONE annotated cell:
+a pass at n=1 is barely evidence, where a fail at n=12 is strong evidence, and the gate is deliberately
+asymmetric that way. Meniscus's 165 is the only arm with more than one cell behind its pass. And the
+1098 is not a claim that those columns are clean — it is a claim that this ruler cannot tell.
 
-Of the 58 annotated studies, 27 are English. Bucketed the same way:
+**The SIZE family fails as a family, and that is the finding, not an accident.** Effusion is the largest
+arm anywhere in the table (524 cells, 11.89%) and the worst-agreeing (6 of 12); the three OA compartments
+are 1-of-2, 2-of-5 and 1-of-4. Pooled, 10 of 23 annotated subthreshold cells under a size rule are
+annotated POSITIVE. `severity_boundary` was built for that boundary and two competitors report the same
+effusion sentence annotated both ways (topic 735826). The report's size word does not predict the
+radiologist's size judgement on the image — so on those five columns the gap is not "our reader was given
+the wrong rule", it is "the report does not carry the information the label was made from".
 
-```
-                       subthreshold cells   annotated positive   ours positive     accepted bucket
-Meniscus                                3                    0               3     23 of 27 agree
-ACL                                     1                    0               0     10 of 12 agree
-MCL                                     7                    3               7      2 of  2 agree
-```
+## Meniscus is the arm that survives, and MCL is the one that cost the most to lose
 
-Meniscus is the clean one: every subthreshold cell is annotated 0 while our target calls all three
-positive, and in the other direction the accepted bucket agrees 23 of 27 — so the ruler is not simply
-strict, and the disagreement is specific to the class the host named. The pilot table
-(`2026-08-20_label_contest_pilot_tables.md`, row 33) had already flagged one of these by hand as a
+Of the 58 annotated studies, 27 are English. Meniscus is the clean one: every subthreshold cell is
+annotated 0 while our target calls all three positive, and in the OTHER direction the accepted bucket
+agrees 23 of 27 — so the ruler is not simply strict, and the disagreement is specific to the class the
+host named. That two-sided check is what a pass should look like, and only meniscus has it. The pilot
+table (`2026-08-20_label_contest_pilot_tables.md`, row 33) had already flagged one of these by hand as a
 READER error; it was a RUBRIC error all along, and studies 059, 062, 088 and 090 are the same shape.
 
-**MCL is the largest arm and the least trustworthy one, and the annotation says so.** 3 of its 7
-subthreshold cells are annotated POSITIVE — the ruler and the radiologist disagree 43% of the time on
-exactly the class the count rests on.
+**MCL was the largest tear-word arm and it does not survive.** 3 of its 7 subthreshold cells are
+annotated POSITIVE — the ruler and the radiologist disagree 43% of the time on exactly the class the
+count rests on.
 
-The flag paid immediately, and it paid in the ruler rather than in the rule. Reading topic 733343
-verbatim rather than from a summary of it gives the MCL criterion as *"a high-grade partial or complete
-acute tear … **with disrupted fibers and edema within and adjacent to the ligament**"* — so edema belongs
-to the POSITIVE class, and the first version of this ruler had `oedema|edema|thicken` in MCL's
-SUBTHRESHOLD vocabulary. It was reading the accepted class as the negative one. Corrected (edema and
-thickening dropped from subthreshold, `disrupt` added to accepted), MCL falls **207 → 185** and the total
-**470 → 448**.
+One fix was available and it paid in the ruler rather than in the rule. Reading topic 733343 verbatim
+rather than from a summary of it gives the MCL criterion as *"a high-grade partial or complete acute tear
+… **with disrupted fibers and edema within and adjacent to the ligament**"* — so edema belongs to the
+POSITIVE class, and the first version of this ruler had `oedema|edema|thicken` in MCL's SUBTHRESHOLD
+vocabulary. It was reading the accepted class as the negative one. Corrected (edema and thickening
+dropped from subthreshold, `disrupt` added to accepted), MCL falls **207 → 185**.
 
 The 3-of-7 annotation disagreement is UNCHANGED by that fix — those seven cells are named-but-under-
-threshold on other words. So MCL stays flagged: treat 185 as an upper bound whose true share is
-unmeasured, and do not quote the 448 total without this line attached. ACL's 1 annotated cell settles
-nothing either way.
+threshold on other words. So MCL's 185 stays out of the banked total: it is not evidence the column is
+clean, it is evidence this ruler cannot read it. ACL's and Baker's single annotated cells settle almost
+nothing in the other direction either, which is why the table above prints n beside every verdict.
 
-The general lesson is the one the house rule already states and I broke anyway: I wrote a vocabulary for
-a published rule from my own knowledge of MCL injury instead of from the published rule. The criteria now
-live once, quoted, in `core.findings.CRITERIA`, and both the ruler and the reader's prompt render from
-there — so a paraphrase cannot drift from the thing it is scored against.
+The general lesson, and it is the second time in one day: I wrote a vocabulary for a published rule from
+my own knowledge instead of from the published rule, and then wrote a majority test for that vocabulary
+from convenience instead of from what the rule claims. Both were caught by the annotations rather than by
+review.
 
-The honest summary: **meniscus is measured, ACL is plausible and thin, MCL is flagged.**
+The criteria now live once, quoted, in `core.findings.CRITERIA`, and both the ruler and the reader's
+prompt render from there — so a paraphrase cannot drift from the thing it is scored against.
+
+The honest summary: **meniscus is measured; ACL and Baker's are thin passes on one cell each; MCL and the
+whole SIZE family are refused.**
 
 ## And the prompt was broken in a second way nobody had read
 
@@ -147,17 +174,25 @@ Lateral Meniscus also carries this project's worst supervision gap (−0.193).
 
 ## What it is worth, and what it is not
 
-Do not oversell it. Four of twelve columns, so a per-column gain divides by three on the mean; and
+Do not oversell it, and the annotation gate has just made it smaller. Four columns are BACKED — the two
+meniscus columns, ACL, Baker's — so a per-column gain divides by three on the twelve-label mean; and
 `calibsix`'s measured board pass-through is 23%. An AUC gain of 0.03–0.05 on each of the four would be
-about +0.010–0.017 on the twelve-label mean and +0.002–0.004 on the board — **directional under the 1.5%
-bar on the board, and only at the bar on the holdout mean if all four move and MCL survives its own
-caveat.** It is worth doing anyway for three reasons the bar does not capture: it
-is a data fix rather than a knob, it is the first correction this project has that a HOST statement
-licenses rather than a measurement of our own, and it composes with everything already banked.
+about +0.010–0.017 on the mean and +0.002–0.004 on the board — **directional under the 1.5% bar on the
+board, and only at the bar on the holdout mean if all four move.**
+
+The 1098 refused cells do not simply vanish from the price, but they change what they can be worth. Where
+the criterion is a SIZE, the report may not carry the information the label was made from at all, in
+which case no reader recovers it and the ceiling on those five columns is lower than the supervision gap
+suggests. That is itself worth knowing, and it is the first evidence this project has for WHICH columns
+are reader-limited versus report-limited.
+
+It is worth doing anyway for three reasons the bar does not capture: it is a data fix rather than a knob,
+it is the first correction this project has that a HOST statement licenses rather than a measurement of
+our own, and it composes with everything already banked.
 
 ## Two fixes, and only one of them is right
 
-**(a) Post-hoc, English only.** Write `report_labels_v3` with the 470 cells set to absent. Minutes, no
+**(a) Post-hoc, English only.** Write `report_labels_v3` with the 502 backed cells set to absent. Minutes, no
 card. Rejected as the end state: it corrects 40% of the corpus and leaves 60% wrong, which converts a
 uniform label error into a **language-dependent** one. That is a new defect, not obviously smaller than
 the one it fixes.
@@ -169,9 +204,11 @@ a regex, and it covers the nine findings this ruler cannot see as well as the th
 LLM pass over the corpus and no submission slot.
 
 (b) is the one to run, gated on the card clearing its current queue. The measurement above is what makes
-it priceable: the re-read is scored by whether those 470 cells move — meniscus's 165 in particular,
-which is the arm the annotations back — and a re-read that leaves them where they are has failed loudly
-instead of silently. Second gate, which must not regress: `kneemri.evaluation.annotated_readings`.
+it priceable: the re-read is scored by whether the 502 backed cells move — meniscus's 165 in particular,
+the only arm with a two-sided pass — and a re-read that leaves them where they are has failed loudly
+instead of silently. It must NOT be scored on the 1098 refused cells, which would reward the reader for
+agreeing with a ruler the radiologists do not. Second gate, which must not regress:
+`kneemri.evaluation.annotated_readings`.
 
 ## What this does NOT reopen
 

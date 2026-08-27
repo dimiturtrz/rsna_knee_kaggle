@@ -15,10 +15,12 @@ transcription and the wrong one here: a report reading "intrasubstance degenerat
 tear", "mild ACL signal change without discontinuity" or "low-grade MCL sprain" earns a grade above
 absent, and the competition's own label for each is 0.
 
-THREE OF THE TWELVE RULES HAVE THE SAME SHAPE, so one ruler measures them all: a MENTION of the
+NINE OF THE TWELVE COLUMNS HAVE THE SAME SHAPE, so one ruler measures them all: a MENTION of the
 structure, a vocabulary the rubric ACCEPTS, a vocabulary it names and calls NEGATIVE anyway, and a
 denial that must be subtracted before either is searched for. `RUBRIC` holds one `RubricRule` per
-finding; adding a fourth is a rule, not a module.
+finding; adding another is a rule, not a module. They come in two shapes — a TEAR word (meniscus, ACL,
+MCL) and a SIZE word (effusion, Baker's, the three OA compartments) — and the size vocabulary is
+imported from `severity_boundary`, which owns it.
 
 THE RULES SUPPLY THE ANSWER, SO THIS NEEDS NO GROUND TRUTH. Unlike `severity_boundary`, which can only
 cross-tab inside the 58 annotated studies, the subthreshold class is negative BY THE STATED RULE. So the
@@ -43,6 +45,7 @@ import pandas as pd
 from core import cli
 from core.data.labels.reader_agreement import ENGLISH, MIDPOINT
 from core.data.labels.report_language import ReportLanguages
+from core.data.labels.severity_boundary import LARGE_WORDS, MENTIONS, SMALL_WORDS
 from core.findings import COMPARTMENT_PAIRS, CRITERIA, STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
@@ -135,10 +138,77 @@ EDEMA WITHIN AND ADJACENT TO THE LIGAMENT" — so oedema is part of what makes a
 listing it as subthreshold read the positive class as the negative one. It cost 3 of 7 annotated cells
 disagreeing with the ruler before the thread was read verbatim rather than from a summary of it.
 """
-RUBRIC: tuple[RubricRule, ...] = (MENISCUS_RULE, ACL_RULE, MCL_RULE)
-"""The three published criteria whose negative class the report's own words name. The other nine findings
-turn on a size or an image feature ("moderate or large", "one centimetre of >50%-thickness loss") that a
-report states in its own units — `severity_boundary` is that shape, and it needs the annotations."""
+SIZE_ACCEPTED = "|".join(LARGE_WORDS)
+SIZE_SUBTHRESHOLD = "|".join(SMALL_WORDS)
+"""The size threshold, from `severity_boundary`, which owns this vocabulary and cross-tabs it on Effusion.
+
+Five more of the twelve criteria are stated as a SIZE — "a moderate or large amount of fluid", "a
+moderate or large fluid collection", "a moderate or large area of high-grade cartilage loss" — and a size
+word is the same shape as a tear word: a vocabulary the rule accepts, one it names and calls negative, and
+a denial that must come out first. So they are `RubricRule`s here rather than a second module, and the
+words are IMPORTED rather than restated, because two homes for one threshold is how the two drift apart.
+"""
+
+CARTILAGE_ACCEPTED = r"|severe|advanced|high.?grade|full.?thickness|bone.on.bone|grade\s*(?:3|4|III|IV)\b"
+CARTILAGE_SUBTHRESHOLD = r"|early|low.?grade|fibrillat|fissur|grade\s*(?:1|2|I{1,2})\b"
+"""What the OA criterion adds to the size words: it names a cartilage-loss GRADE as well as an area.
+
+"A moderate or large area (roughly 1 cm or greater) of high-grade cartilage loss, defined as greater than
+50 percent of cartilage thickness" — so a report saying "grade 2 chondromalacia" or "early degenerative
+change" is under the stated threshold however it words the area, and "full-thickness cartilage loss" meets
+it however it words the size.
+"""
+
+EFFUSION_RULE = RubricRule(
+    columns=("Effusion",),
+    mention="|".join(MENTIONS),
+    accepted=SIZE_ACCEPTED,
+    subthreshold=SIZE_SUBTHRESHOLD,
+)
+BAKERS_RULE = RubricRule(
+    columns=("Baker's",),
+    mention=r"baker|popliteal\s+cyst|gastrocnemio",
+    accepted=SIZE_ACCEPTED,
+    subthreshold=SIZE_SUBTHRESHOLD,
+)
+MEDIAL_OA_RULE = RubricRule(
+    columns=("Medial OA",),
+    mention=r"medial\s+(?:compartment|femorotibial|tibiofemoral|joint\s+space)",
+    accepted=SIZE_ACCEPTED + CARTILAGE_ACCEPTED,
+    subthreshold=SIZE_SUBTHRESHOLD + CARTILAGE_SUBTHRESHOLD,
+)
+LATERAL_OA_RULE = RubricRule(
+    columns=("Lateral OA",),
+    mention=r"lateral\s+(?:compartment|femorotibial|tibiofemoral|joint\s+space)",
+    accepted=SIZE_ACCEPTED + CARTILAGE_ACCEPTED,
+    subthreshold=SIZE_SUBTHRESHOLD + CARTILAGE_SUBTHRESHOLD,
+)
+PF_OA_RULE = RubricRule(
+    columns=("PF OA",),
+    mention=r"patellofemoral|patellar\s+cartilage|trochlea|retropatellar",
+    accepted=SIZE_ACCEPTED + CARTILAGE_ACCEPTED,
+    subthreshold=SIZE_SUBTHRESHOLD + CARTILAGE_SUBTHRESHOLD,
+)
+
+RUBRIC: tuple[RubricRule, ...] = (
+    MENISCUS_RULE,
+    ACL_RULE,
+    MCL_RULE,
+    EFFUSION_RULE,
+    BAKERS_RULE,
+    MEDIAL_OA_RULE,
+    LATERAL_OA_RULE,
+    PF_OA_RULE,
+)
+"""Nine of the twelve columns, in the two shapes a report states an image criterion in: a TEAR word and a
+SIZE word. The other three — Synovitis, Contusion, Fracture — name an image feature the report either
+asserts or does not, with no threshold vocabulary for the rule to read, so this ruler is blind to them.
+
+Every one of these is worth exactly as much as its annotation cross-check says (`backed`), which is what
+caught MCL and what disqualifies the SIZE family — the report's size word does not predict the
+radiologist's size judgement, and the largest arm in the table is the least trustworthy one. A rule being
+in this tuple is not a claim that its cells are mislabelled; `main` prints the two totals apart.
+"""
 
 
 class RubricGap:
@@ -229,6 +299,45 @@ class RubricGap:
         """
         return table[(table["bucket"] == SUBTHRESHOLD) & table["positive"]]
 
+    def backed(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> bool:
+        """Do the radiologists' own annotations agree that this rule's subthreshold class is negative?
+
+        THE COUNT IS ONLY WORTH WHAT THIS SAYS. A rule earns its cells by predicting the annotation where
+        both exist: every subthreshold cell should be annotated 0, because that is what the stated rule
+        claims. A rule whose subthreshold cells are annotated positive half the time is not measuring a
+        mislabelled corpus — it is measuring its own disagreement with the radiologist, and no re-read
+        recovers those cells because there is nothing wrong with them.
+
+        ZERO COUNTEREXAMPLES, NOT A MAJORITY. The rule's claim is that this class is negative — a rate of
+        0, not a rate under a half — so one annotated positive refutes it and no threshold has to be
+        invented. A majority test was written first and called MCL backed at 3 of 7, which is the arm this
+        project had already flagged by hand; that disagreement is what showed the test, not the arm, was
+        wrong. A rule with no annotated subthreshold cell is NOT backed either: unmeasured is not agreed.
+
+        It disqualifies the whole SIZE family. Effusion — the largest arm of all at 524 cells — has 6 of
+        its 12 annotated subthreshold cells annotated POSITIVE. `severity_boundary` was built for exactly
+        that boundary, and two competitors report the same effusion sentence annotated both ways (topic
+        735826). A size word in a report does not predict the radiologist's size judgement on the image.
+
+        n is 1 to 12 per rule, so a pass here is weak evidence and a fail is strong evidence. `annotated`
+        prints the cell counts beside the verdict for that reason — read them, do not read the word alone.
+        """
+        sub = self.subthreshold(rule, table, truth)
+        return bool(len(sub)) and not int(sub["truth"].sum())
+
+    def subthreshold(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> pd.DataFrame:
+        """The annotated cells this rule calls subthreshold — the only class its claim is falsifiable on."""
+        rows = self._annotated_rows(rule, table, truth)
+        return rows[rows["bucket"] == SUBTHRESHOLD]
+
+    def _annotated_rows(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> pd.DataFrame:
+        """This rule's buckets over the annotated studies, with the radiologist's verdict beside ours."""
+        graded = truth.dropna(subset=TARGETS, how="all")
+        cells = self._cells(graded, rule.columns)
+        rows = table[table["study"].isin(cells[rule.columns[0]])].copy()
+        rows["truth"] = [cells[str(row.column)][str(row.study)] > MIDPOINT for row in rows.itertuples()]
+        return rows
+
     def annotated(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> list[str]:
         """The same buckets read against the 58 radiologist annotations — a check on the RULE, not on us.
 
@@ -236,11 +345,14 @@ class RubricGap:
         stated rule where both exist, the rule is worth re-reading the whole corpus under; if it does not,
         the defect is in the ruler and no better reader recovers it.
         """
-        graded = truth.dropna(subset=TARGETS, how="all")
-        cells = self._cells(graded, rule.columns)
-        rows = table[table["study"].isin(cells[rule.columns[0]])].copy()
-        rows["truth"] = [cells[str(row.column)][str(row.study)] > MIDPOINT for row in rows.itertuples()]
-        lines = [f"  {rows['study'].nunique()} of the {len(graded)} annotated studies are English:"]
+        rows = self._annotated_rows(rule, table, truth)
+        graded = len(truth.dropna(subset=TARGETS, how="all"))
+        sub = self.subthreshold(rule, table, truth)
+        verdict = "BACKED" if self.backed(rule, table, truth) else "NOT BACKED — do not bank this rule's cells"
+        lines = [
+            f"  {rows['study'].nunique()} of the {graded} annotated studies are English: {verdict}"
+            f" ({int(sub['truth'].sum())} of {len(sub)} subthreshold cells annotated positive)"
+        ]
         for bucket in BUCKETS:
             seen = rows[rows["bucket"] == bucket]
             if seen.empty:
@@ -264,16 +376,22 @@ def main() -> None:
 
     gap = RubricGap()
     reports = truth[[STUDY, "Report"]]
-    total = 0
+    totals = {True: 0, False: 0}
     for rule in RUBRIC:
         table = gap.table(rule, reports, labels)
         command.report(gap.report(rule, table, len(truth)))
         command.report(gap.annotated(rule, table, truth))
         wrong = gap.contradicted(table)
-        total += len(wrong)
+        totals[gap.backed(rule, table, truth)] += len(wrong)
         # The identifiers, because a count of contradicted cells is a claim and the studies are evidence.
         command.report([f"    {row.study}  {row.column}" for row in wrong.head(MENTIONED).itertuples()])
-    command.report([f"{total} contradicted cells over the three rules whose negative class the report names"])
+    # Two totals, never one: summing a rule the annotations refuse into the headline is how 448 became 1600.
+    command.report(
+        [
+            f"{totals[True]} contradicted cells over the rules the annotations BACK",
+            f"{totals[False]} more under rules they do NOT — measuring the ruler, not the corpus",
+        ]
+    )
 
 
 if __name__ == "__main__":

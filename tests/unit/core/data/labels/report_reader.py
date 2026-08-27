@@ -47,7 +47,8 @@ def test_system():
     """The instruction names the grades, forbids silence-as-normal, and states the host's threshold.
 
     The last two assertions are the point of the rubric-bearing prompt: without them the reader grades
-    "intrasubstance degeneration without a definite tear" above absent, which is 448 measured cells.
+    "intrasubstance degeneration without a definite tear" above absent, which is 502 measured cells whose
+    negative class the radiologists' own annotations back.
     """
     system = ReadingPrompt().system()
     assert all(grade.value in system for grade in ReportGrade)
