@@ -4997,3 +4997,92 @@ The instrument paid for itself as an instrument. The knob space is now CLOSED BY
 than by survey: sixty-one keys, every one varied at least once, none of the remaining ones moving the
 number. Nothing in the schedule changes — which is the point of running it. A null that licenses the
 plan is worth its twenty minutes; it would not have been worth an hour.
+
+### Aggregation beats input: fourteen arms split by WHAT they changed, not by how much — 2026-08-27
+
+`kneemri.evaluation.run_comparison --split`, control `lr4e-5_ws_s2026`, deltas on the six
+model-bottlenecked findings (ACL, Lateral Meniscus, Lateral OA, MCL, Medial Meniscus, PF OA). Zero card,
+zero slot: every one of these arms had written its metrics file months ago and nobody had read them
+side by side on this axis.
+
+| arm | what it changed | focal six | regional | mean |
+|---|---|---|---|---|
+| sided_pool | `--pool sided` | **+0.0076** | +0.0007 | +0.0036 |
+| attend_dense | `--slice-pooling attend` | **+0.0059** | +0.0046 | +0.0043 |
+| depth_regions | `--slice-regions 4` | **+0.0016** | +0.0048 | +0.0024 |
+| through_dense | `--through-plane` | **+0.0005** | +0.0065 | +0.0033 |
+| res392 | 392 px | −0.0022 | +0.0032 | −0.0002 |
+| depth_regions_span | regions + wider band | −0.0052 | −0.0017 | −0.0039 |
+| attend_true | attention, other variant | −0.0068 | −0.0039 | −0.0050 |
+| intensity392 | 392 px + intensity aug | −0.0076 | −0.0040 | −0.0066 |
+| crop80_span | 80 mm crop, tissue centre | −0.0098 | −0.0025 | −0.0059 |
+| sliceattn | slice attention | −0.0117 | +0.0016 | −0.0053 |
+| slotmean | mean over slots | −0.0134 | −0.0099 | −0.0120 |
+| focal_pool | focal pooling | −0.0144 | −0.0023 | −0.0094 |
+| slices16 | 12 → 16 slices | −0.0177 | −0.0026 | −0.0114 |
+| pair_memory | paired memory | −0.0448 | −0.0263 | −0.0371 |
+
+**The split is by KIND and it is total.** Every arm that gave the model MORE INPUT — more pixels, more
+slices, a tighter crop — lost on the focal findings. Every arm that changed HOW THE SLICES ARE
+AGGREGATED gained. Four positives, four unrelated mechanisms, no exceptions in either direction.
+
+**The mechanism, and it predicts the sign of both halves.** A thin focal structure — the ACL, a
+meniscal tear, the MCL — lives on two or three slices of twenty. Any pooling that averages over depth
+divides its evidence by the slice count. Adding slices makes the dilution WORSE, which is why
+`slices16` is the single worst non-broken arm of the fourteen and why the effect is concentrated in
+MCL (−0.0497) and Lateral Meniscus (−0.0262) rather than spread. Adding pixels does not touch the
+dilution at all: `res392` INVERTS, reading regional +0.0032 against focal −0.0027 — it helped exactly
+the findings a tighter view should have cost. Only a pooling that can concentrate on the slices where
+the structure lives recovers it.
+
+**What this kills.** The 512 px / focal-crop lane, which the supervision gap (`knee-cwpk`: the model
+loses to its own reader by −0.193 on Lateral Meniscus, −0.123 on ACL) had made look like the obvious
+next card job. Three resolution arms and two crop arms, all negative on the term they were built for.
+Resolution is not the mechanism behind that gap. That reading cost twenty minutes and saved a day of
+card.
+
+**What this does NOT license.** Each of the four positives is individually inside the 0.0062 paired
+floor, and the focal six is a SUBSET — a delta over six of twelve labels is half a mean, not a board
+number. This is a DIRECTION, established by fourteen readings agreeing on a sign, not a result. The
+mean column is the one the board scores and none of the four clears anything there either.
+
+**The consequence, and it is the only thing here worth card.** The four act at three different points —
+`--through-plane` before the encoder sees a slice, `attend` across the slice axis, `--pool sided`
+across the slots — and have never been run together. `experiments/arms/fuse_attend.sh` and
+`fuse_regions.sh` are that stack, priced in `knee-7d53` at ~45 min each and P(clears the floor) = 0.35.
+
+**A defect found on the way.** `model.py:322` returns the attend path and never reaches `over_depth`,
+so `--slice-regions` passed beside `--slice-pooling attend` is **silently ignored** — no error, no log
+line, and the run records a region count it never used. That is why the stack is two arms and not one.
+
+### The seat ruler is unanimous about which champion seat is weak — 2026-08-27
+
+`record_mix --vote logit`, roster = the five holdout twins of the shipped champion six (`final_ws` has
+no twin and cannot have one), 909 shared studies, roster reads 0.8701.
+
+Ten candidates were priced both as an ADD and as a SWAP. Every single one gains more by replacing
+`lr4e-5_ws` than by taking a seventh seat, and no candidate's best swap is against any other seat:
+
+| candidate | as a 6th seat | best swap (all for `lr4e-5_ws`) |
+|---|---|---|
+| margin_seat | +0.0018 | **+0.0023** |
+| small_batch6 | +0.0009 | +0.0013 |
+| band_dense_long | +0.0007 | +0.0011 |
+| sided_pool | +0.0007 | +0.0010 |
+| attend_dense | +0.0005 | +0.0010 |
+| crop80_span | +0.0004 | +0.0006 |
+| depth_regions | +0.0000 | +0.0004 |
+| base_dense | −0.0001 | +0.0001 |
+| res392 | −0.0004 | −0.0001 |
+
+**The board has already confirmed the bottom of this ordering.** `resseat` swapped `lr4e-5_ws_ff` for
+`res392_ws_s2026` and scored 0.938 against `calibsix`'s 0.941 — three ticks down, from the candidate
+this ruler ranks last of ten. The ordering transfers at the bottom, which is the only end it has been
+tested at.
+
+**And the top of it is not shippable.** `margin_seat` is the only candidate clearing the +0.0015 under
+which this ruler has never picked a board tick, and it has no full-fit twin; the two candidates that
+ARE packaged full-fit (`small_batch6_ff`, `base_dense_ff`) read +0.0013 and +0.0001, both inside the
+ruler's own resolution. So the best-priced move this project can currently SHIP is one the instrument
+cannot distinguish from the incumbent — which is the same wall `knee-97ib` hit from the other side when
+it measured the marginal seat at exactly 0.000.
