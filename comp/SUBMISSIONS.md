@@ -2433,3 +2433,37 @@ opens that lane: `fitted_encoder.py` has always been able to warm-start an arm f
 decode path re-run with a different loss.
 
 Kit `fec94e7`, submission `55816263`. Slot 3 of 5 on 2026-08-27.
+
+## `honest12` — 0.937, and the offline seat selector is refuted as an instrument
+
+The greedy-12 seating, fitted on half of 909 shared holdout studies and scored on the other half in both
+directions. Offline peak **0.8751** at twelve seats against the champion five-twin shadow's 0.8701 —
+**+0.0050**, the largest offline seating gain this project has measured. Seven of the twelve had never
+been on the board, including `calib_dense_hold_s2026` (0.8634 solo, the best single member we own and the
+greedy's first pick), which no board entry had ever held. The variable it isolates is member **quality at
+the seat level** — the one thing `calibsix`'s calibration read and `pixgroup`'s diversity read could not
+separate from count.
+
+**The bottom rung of its own pre-registered ladder fired**: `<=0.938 the weak seats dilute`. At 0.937 it
+is the worst of the four entries spent today and one tick below `resseat`.
+
+**This is a sign flip, not a compression.** +0.0050 offline became −0.004 on the board. Every prior
+board/offline mismatch in this project has been a *shrunken* gain — `board_transfer`'s +0.74 slope,
+`knee-nas5`'s 2.4× the other way. A selector whose gains arrive on the board with the opposite sign is
+not a weak instrument, it is a broken one, and **no further slot should be spent on an offline-greedy
+seating.** The mechanism is legible: the greedy fits on 454 studies, which cannot resolve a seat worth
+less than the 0.0062 three-seed floor, so it seats `mae_matched_s2026` (0.6735 solo) at the honest
+curve's own dip and calls it a gain.
+
+**Six entries now close the seating axis from both ends.** honest12 0.937 (12) · resseat 0.938 (6) ·
+blendseat 0.939 (7) · blendthree 0.939 (7) · pixgroup 0.940 (8) · calibsix 0.941 (6) · calibmix 0.941
+(11). The ordering is **inverse** to offline holdout gain.
+
+**What it does NOT close.** The members. `calib_dense_hold_s2026` at 0.8634 solo has still never been read
+alone on the board, and seven of these twelve remain individually unpriced. A bad seating of good members
+is not evidence about the members.
+
+**Where it sends us.** Every remaining card hour and slot 5 to a better single member. `knee-wbwq` — warm
+restarts from fitted encoders, which 0 of 131 arms have ever used — is the open lane.
+
+Kit `fec94e7`, submission `55817896`. Slot 4 of 5 on 2026-08-27.
