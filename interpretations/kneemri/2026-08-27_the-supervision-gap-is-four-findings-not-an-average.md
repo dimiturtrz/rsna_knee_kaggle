@@ -112,6 +112,42 @@ have been tomorrow's first card arm: the capacity argument this page licensed po
 coverage and architecture, not in-plane sampling — consistent with `band_dense` (20 slices, +0.0053)
 being the one geometry change that ever moved this family.
 
+## And through-plane density COSTS the deficit findings — the champion is dense
+
+Same instrument, the other geometry axis, also free: `band_wide_s2026` (16 slices) against
+`band_dense_s2026` (20), `slices 16→20` the only diff the tool prints.
+
+```
+PF OA +0.0194*   Medial OA +0.0122*   Synovitis +0.0135        MEAN +0.0025
+MCL   -0.0111    ACL      -0.0037    Lateral Meniscus -0.0007
+```
+
+Two marked gains, both central — patellofemoral and medial-compartment. And **all three resolved deficit
+findings move negative together**, MCL the largest negative on the table. None of the three is marked
+individually against the ±0.0315 band, so no single one is a finding; three same-sign moves on the three
+findings named in advance by a different measurement is a pattern, and it is the one the ledger already
+described in prose as *"the centre comes back, the collaterals `band_wide` bought largely go."*
+
+So `band_dense`'s +0.0025 is not a general gain. It is a **trade**: central structures bought with the
+collaterals and cruciates, on an axis orthogonal to the pixels. The champion family is dense, so the
+champion holds the losing side of exactly the three findings the supervision gap resolves as its deficit.
+
+**That makes `band_wide` a diversity seat with a mechanism rather than a hopeful one.** It is not a
+better member — it is 0.0025 worse on the mean — it is a member that is better where the roster is
+measurably weak, which is the difference between averaging seven copies of one number and covering an
+axis.
+
+The honest discounts, both large. First, `2026-08-27_every-no-card-axis-is-priced-and-flat.md` prices
+every seat permutation on this board between −0.004 and +0.001, and this is a seat permutation. What is
+new is only the SELECTION RULE — chosen on a resolved per-finding deficit instead of on the offline mean
+— which is a different die, not a better roll of the same one. Second and decisively for tonight,
+`band_wide_s2026` is an `_s2026` member and the champion's seats are `_cf`/`_ff`; swapping across fit
+regimes gives back the +0.004 the regime itself is worth, which is more than the whole axis could pay.
+
+**So this is a card question, not a slot question**: a `band_wide` twin at the champion's fit regime, as a
+seat covering the deficit axis. It is better argued than the calibrated-blend cross the other page filed,
+because it aims at a bounded weakness rather than at the sum of two treatments that both worked.
+
 ## The instrument
 
 `SupervisionGap.separation` now prints the band beside the aggregate, and the CLI calls it unconditionally
