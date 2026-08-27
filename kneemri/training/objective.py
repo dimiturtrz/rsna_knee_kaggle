@@ -29,6 +29,7 @@ about only slightly, or that rests on a guess, pulls proportionally less.
 from dataclasses import dataclass, field
 from typing import override
 
+import torch
 from jaxtyping import Float
 from torch import Tensor, nn
 
@@ -122,9 +123,32 @@ silently and with no number afterwards that would say so — `test_the_margin_cu
 is what keeps the two equal.
 """
 
+CONTRAST_WEIGHT = 1.0
+"""How hard the supervised-contrastive term pulls relative to cross-entropy when it is enabled at all.
+
+Parity, for `RANK_WEIGHT`'s reason: both terms are means over their own populations and both sit near
+`log(b)` ~ 2.5 versus cross-entropy's ~0.7 at initialisation. That is not equal in magnitude, which is
+the honest statement — the contrastive term starts about three times larger and falls fastest, so this
+default is the neutral START and not a claim that the two are balanced. Sweeping it before the term has
+shown any signal would be measuring a method that has not yet worked.
+"""
+
+_EXCLUDED = -1e4
+"""What a similarity a study forms with ITSELF becomes before the log-sum-exp: negligible after the
+exponential, finite in fp16. A hard `-inf` would produce a NaN gradient rather than a zero one."""
+
+CONTRAST_TEMPERATURE = 0.1
+"""The softmax temperature the similarities are read at — Khosla et al.'s published value, not ours.
+
+Their ablation puts the optimum near 0.1 across ImageNet and CIFAR, and it is the value the reference
+implementation ships. Taken as published rather than tuned, because a temperature swept on 4,407 studies
+with twelve batch members would be fitting the sweep, not the temperature.
+"""
+
 RANK_TERM = "rank_weight"
 DISTILL_TERM = "distill_weight"
 DISSENT_TERM = "dissent_weight"
+CONTRAST_TERM = "contrast_weight"
 MARGIN_TERM = "auc_margin"
 PAIR_POOL = "pair_memory"
 PER_LABEL = "per_label_loss"
@@ -215,6 +239,7 @@ class Objective:
             DISTILL_TERM: 0.0,
             DISSENT_TERM: 0.0,
             MARGIN_TERM: 0.0,
+            CONTRAST_TERM: 0.0,
             PAIR_POOL: 0,
             PER_LABEL: self.per_label,
             COUNT_NORMALISED: self.normalise_by_count,
@@ -567,3 +592,127 @@ class MarginObjective(Objective):
         ).sum(dim=0) / negative_mass.clamp(min=PAIR_FLOOR)
         shortfall = (self.margin - (positive_mean - negative_mean)).clamp(min=0.0)
         return (spread + shortfall**2)[live].mean()
+
+
+class ContrastiveObjective(RankedObjective):
+    """Cross-entropy plus a per-finding supervised-contrastive term over what the head actually READ.
+
+    THE ONE TERM HERE THAT IS NOT A FUNCTION OF THE LOGITS. Ranking, distillation, dissent and the AUC
+    margin all reshape the same twelve numbers; each is a per-finding dot product of the head's context
+    against one learned direction. Two studies can share that projection while the head read them for
+    entirely different reasons, and no term above this one can say so. This one is written against
+    `Readout.context` — the vector before the collapse — so it constrains the REPRESENTATION and not the
+    decision.
+
+    THE OWNER'S ARGUMENT, WHICH IS WHY IT IS PER FINDING AND NOT PER STUDY. "Torn meniscus is probably
+    physically separated as a link": the claim is that intact and pathological differ in a structured,
+    finding-specific way, not that pathological studies are globally unlike healthy ones. A study is
+    typically torn in one compartment and intact in eleven other respects, so one embedding per study
+    would ask a single vector to be near the torn cluster and the intact cluster at once. Twelve
+    contexts already exist — the head computes them — so the term runs per finding, and a study is an
+    anchor twelve times over with a different partition each time.
+
+    WHY THIS IS NOT THE FLAT SPATIAL-POOLING RESULT AGAIN. Every locality lever this repo has measured
+    (`cls_mean_focal`, the three `depth_regions` arms, `--anatomical-prior`, `--focus-label`) is an
+    INTENSITY STATISTIC over patch tokens or slices, and all are flat to negative. They answer "how
+    bright, where". This answers "what does the difference between torn and intact look like", which no
+    pooling operator at any percentile expresses. The flat pooling results kill that USE of the
+    intuition, not the intuition — see knee-ek5s.
+
+    THE SUPERVISION IS BINARISED AT THE SCORER'S CUT, `POSITIVE_AT`, for `MarginObjective`'s reason: our
+    targets carry five levels, a contrast needs a partition, and the partition that matters is the one
+    the twelve AUCs are computed against. The graded confidence survives as the anchor's WEIGHT, so a
+    cell resting on the reader's 0.28 guess pulls proportionally less than one it read plainly.
+
+    THE KNOWN WEAKNESS, STATED BEFORE THE RUN, and it is the same one `MarginObjective` carries. A batch
+    holds twelve studies, so a finding positive in 7% of the corpus supplies an anchor with a positive
+    partner in a minority of steps and contributes nothing in the rest, while cross-entropy contributes
+    in all of them. Contrastive learning is conventionally run at batch sizes two orders of magnitude
+    larger than this. That biases the term toward the COMMON findings, which is the opposite of where
+    `DistilledObjective` predicts its own gain, so a rare-label regression here is a batch-size artefact
+    before it is a refutation — and `RememberedRanking` already proves the fix in this repo if the term
+    shows signal at all.
+
+    WHAT WOULD REFUTE IT. A member whose solo holdout lands within noise of its control says the
+    representation was already separating these classes as well as the labels can ask, and that the
+    remaining error is not a representation failure. That is a real reading and the reason to run this
+    as an INSTRUMENT for the topology question rather than as a board bet: member quality is bounded by
+    calibsix's measured 23% board pass-through, so nothing here reaches the gap on its own.
+
+    IT EXTENDS THE RANKING OBJECTIVE RATHER THAN REPLACING IT, for `DistilledObjective`'s reason and one
+    of its own. The house recipe carries `--rank-weight 1.0`, so EVERY dense arm this project has run —
+    including `calib_dense_hold`, the 0.8634 control this term is measured against — descends a ranking
+    term. Excluding it would have made the contrastive arm a two-variable change (term added, ranking
+    removed) against the only control worth comparing to, and a difference then says nothing about the
+    representation. Carrying `rank_weight` through keeps the arm single-variable, which is the whole
+    claim the run rests on.
+    """
+
+    def __init__(
+        self,
+        weight: float = CONTRAST_WEIGHT,
+        shaping: Shaping | None = None,
+        *,
+        rank_weight: float = 0.0,
+        temperature: float = CONTRAST_TEMPERATURE,
+    ) -> None:
+        super().__init__(rank_weight, shaping)
+        self.contrast_weight = weight
+        self.temperature = temperature
+
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
+        """Everything the ranking objective descends, plus the contrastive term at its own strength.
+
+        `super()` is `RankedObjective`, so a zero `rank_weight` leaves this the plain cross-entropy plus
+        the contrast, and the house recipe's 1.0 leaves the control's objective intact underneath it.
+        """
+        focused = self.structure.focused(batch)
+        return super().__call__(focused) + self.contrast_weight * self.contrast(focused)
+
+    @override
+    def settings(self) -> dict[str, object]:
+        """The base account with this term's real strength, not the flag that asked for it."""
+        return {**super().settings(), CONTRAST_TERM: self.contrast_weight}
+
+    def contrast(self, batch: Predicted) -> Float[Tensor, ""]:
+        """Khosla et al.'s SupCon, computed per finding over the head's own per-finding contexts.
+
+        RAISES on a batch carrying no embedding, rather than contributing zero. A contrastive arm whose
+        context never arrived would descend plain cross-entropy under this class's name and report a
+        number that reads as a refutation of the mechanism — the failure `RANK_TERM`'s docstring was
+        written about, and one this repo has already paid for in other flags.
+
+        An anchor with no positive OTHER than itself forms no term and is dropped rather than
+        contributing a zero, which would read as a finding already separated. A label in which every
+        study of the batch falls on one side of the cut therefore drops out entirely, which is the
+        batch-size weakness the class docstring states rather than a special case being hidden here.
+        """
+        if batch.embedding is None:
+            message = (
+                "a contrastive objective was handed a batch with no embedding, so the term it exists "
+                "for would contribute nothing — this is a plumbing failure, not an empty batch"
+            )
+            raise ValueError(message)
+        z = nn.functional.normalize(batch.embedding.float(), dim=-1).permute(1, 0, 2)
+        similarity = torch.einsum("obh,och->obc", z, z) / self.temperature
+        studies = z.shape[1]
+        other = ~torch.eye(studies, dtype=torch.bool, device=z.device)
+        positive = (batch.scores > POSITIVE_AT).T
+        # A PAIR IS POSITIVE WHEN BOTH STUDIES FALL ON THE SAME SIDE OF THE SCORER'S CUT — intact with
+        # intact as much as torn with torn. Contrasting only the positives against everything would ask
+        # the healthy studies to be mutually unlike, which the anatomy says they are not.
+        pairs = (positive.unsqueeze(2) == positive.unsqueeze(1)) & other.unsqueeze(0)
+        # log-sum-exp over EVERY other study, positives included, which is the denominator SupCon uses:
+        # the term is the log-probability of drawing a same-class study out of the whole batch.
+        denominator = similarity.masked_fill(~other.unsqueeze(0), _EXCLUDED).logsumexp(dim=2)
+        share = pairs.sum(dim=2)
+        live = share > 0
+        if not bool(live.any()):
+            return z.sum() * 0.0
+        agreement = (similarity * pairs).sum(dim=2) / share.clamp(min=1)
+        # THE ANCHOR'S OWN CONFIDENCE, not the pair's. `pairs` already averages over the partners, so a
+        # per-pair weight would be a second average inside the first; what this asks is how much the
+        # reader's reading of THIS study should count, which is exactly `weights`.
+        mass = (batch.weights.T * live).clamp(min=0.0)
+        loss = (denominator - agreement) * mass
+        return loss.sum() / mass.sum().clamp(min=PAIR_FLOOR)

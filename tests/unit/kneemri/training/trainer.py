@@ -18,6 +18,7 @@ from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import (
+    CONTRAST_TERM,
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
@@ -275,6 +276,7 @@ def test_policies():
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
+        CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,

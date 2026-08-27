@@ -113,6 +113,7 @@ class TrainingOptions:
     rank_weight: float = 0.0
     distill_weight: float = 0.0
     dissent_weight: float = 0.0
+    contrast_weight: float = 0.0
     auc_margin: float = 0.0
     teacher_targets: Path | None = None
     side_weight: float = 0.0

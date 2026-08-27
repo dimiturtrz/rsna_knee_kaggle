@@ -262,6 +262,20 @@ class FlagVocabulary:
             "for in the direction the reports order it. Requires --teacher-targets.",
         )
         parser.add_argument(
+            "--contrast-weight",
+            type=float,
+            default=0.0,
+            help="add a per-finding supervised-contrastive term at this strength over what each "
+            "diagnosis READ from the study, before the readout collapsed it to a logit (0 = off). Every "
+            "other term here is a function of the logits — a dot product against one learned direction — "
+            "so two studies read for different reasons can share it. This one asks the representation "
+            "itself to put torn beside torn and intact beside intact, per finding, which is the only "
+            "phrasing this repo has for 'is the tissue CONNECTED' rather than 'how bright, and where'. "
+            "Composes with --rank-weight, which the house recipe always passes, so a contrastive arm "
+            "stays a single-variable change against its control; not composed with --distill-weight, "
+            "--dissent-weight or --pair-memory, whose dispatch returns a different objective.",
+        )
+        parser.add_argument(
             "--auc-margin",
             type=float,
             default=0.0,

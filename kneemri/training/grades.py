@@ -48,6 +48,18 @@ class Predicted:
     is the only part of a teacher an AUC can read.
     """
 
+    embedding: Float[Tensor, "b o h"] | None = None
+    """What each diagnosis READ from the study, before the readout collapsed it to one number.
+
+    `Model.Readout.context`, carried here so a loss can shape the representation rather than only the
+    decision. Every term above this one is a function of `logits`, which is a per-finding dot product
+    against one learned direction: two studies whose readings differ can share that projection, and
+    nothing in a logit says whether the head is separating them for the right reason.
+
+    A FIELD rather than a fifth argument, for the reason `teacher` gives, and `None` by default so every
+    member in the ledger constructs the identical readout it always did.
+    """
+
 
 class Grades:
     """How the loss reads a five-level reading: as one value to hit, which is what we have always done.

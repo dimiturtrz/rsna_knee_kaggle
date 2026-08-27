@@ -79,6 +79,9 @@ NOT_IN_CONFIG = {
     "auc_margin": "objective policy — it swaps WHICH scalar the same twelve logits descend, adds no "
     "parameter (its per-label constants are solved in closed form inside the loss, never stored), and "
     "leaves the head a rebuild serves byte-identical",
+    "contrast_weight": "objective policy — it shapes the head's per-finding context vector inside the "
+    "loss, and that vector is already computed on every forward pass; the term adds no parameter and "
+    "the head a rebuild serves is byte-identical",
     "dissent_weight": "objective policy — it re-weights the mass of the SAME label-ordering term by how "
     "badly a teacher pool orders each pair, inside the loss, adding no parameter; the head a rebuild "
     "serves is byte-identical",

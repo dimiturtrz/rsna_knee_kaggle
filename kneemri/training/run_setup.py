@@ -28,6 +28,7 @@ from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
 from kneemri.training.objective import (
+    ContrastiveObjective,
     DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
@@ -132,6 +133,7 @@ class RunSetup:
             rank_weight=options.rank_weight,
             distill_weight=options.distill_weight,
             dissent_weight=options.dissent_weight,
+            contrast_weight=options.contrast_weight,
             auc_margin=options.auc_margin,
             teaching=options.teacher_targets is not None,
             pair_memory=options.pair_memory,
@@ -161,34 +163,7 @@ class RunSetup:
         after it has already waited forty minutes for the card.
         """
         options = self.options
-        # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
-        # every other objective here is built on, so a composition it cannot honour has to be named
-        # against THIS flag rather than against whichever term was stacked on top of it.
-        if options.auc_margin:
-            self._check_margin_alone()
-        # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
-        # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
-        if options.dissent_weight:
-            self._check_dissent_alone()
-        if options.pair_memory and not options.rank_weight:
-            # LOUD, for the reason `reports` gives below: a memory with no ranking term to feed is a
-            # silent no-op that trains the plain recipe under the arm's name, and would be read as a
-            # refutation of the mechanism rather than of the invocation.
-            message = (
-                f"--pair-memory {options.pair_memory} widens the ranking term's pair pool and no "
-                "--rank-weight was given, so there is no ranking term for it to widen"
-            )
-            raise ValueError(message)
-        if options.distill_weight and options.pair_memory:
-            # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
-            # and knows nothing about a teacher, so the two together would train a distilling arm whose
-            # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
-            message = (
-                f"--distill-weight {options.distill_weight} and --pair-memory {options.pair_memory} are "
-                "not composed: the remembered pool widens the label term only, so the teacher would be "
-                "dropped for every remembered step"
-            )
-            raise ValueError(message)
+        self._check_composed()
         structure = LabelStructure(
             grades=OrdinalGrades() if options.grade_ladder else Grades(),
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
@@ -208,11 +183,55 @@ class RunSetup:
             # the owner's design is one training that runs both terms, so this is the composed objective
             # rather than a third alternative to the other two.
             return DistilledObjective(options.distill_weight, shaping, rank_weight=options.rank_weight)
+        if options.contrast_weight:
+            # BEFORE the ranking branch and carrying `rank_weight` through, for `DistilledObjective`'s
+            # reason: the house recipe passes --rank-weight 1.0, so excluding it would make every
+            # contrastive arm a two-variable change against the control it is measured on.
+            return ContrastiveObjective(options.contrast_weight, shaping, rank_weight=options.rank_weight)
         if options.pair_memory:
             return RememberedRanking(options.rank_weight, shaping, capacity=options.pair_memory)
         if options.rank_weight:
             return RankedObjective(options.rank_weight, shaping)
         return Objective(shaping)
+
+    def _check_composed(self) -> None:
+        """Every way the loss flags fail to compose, raised before the card is touched.
+
+        SEPARATE from `objective` because the two answer different questions — which objective, and
+        whether the flags asking for it can be honoured together — and because holding both put the
+        dispatch over the complexity ceiling, which is the gate saying the same thing.
+        """
+        options = self.options
+        # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
+        # every other objective here is built on, so a composition it cannot honour has to be named
+        # against THIS flag rather than against whichever term was stacked on top of it.
+        if options.auc_margin:
+            self._check_margin_alone()
+        # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
+        # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
+        if options.dissent_weight:
+            self._check_dissent_alone()
+        if options.contrast_weight:
+            self._check_contrast_alone()
+        if options.pair_memory and not options.rank_weight:
+            # LOUD, for the reason `reports` gives below: a memory with no ranking term to feed is a
+            # silent no-op that trains the plain recipe under the arm's name, and would be read as a
+            # refutation of the mechanism rather than of the invocation.
+            message = (
+                f"--pair-memory {options.pair_memory} widens the ranking term's pair pool and no "
+                "--rank-weight was given, so there is no ranking term for it to widen"
+            )
+            raise ValueError(message)
+        if options.distill_weight and options.pair_memory:
+            # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
+            # and knows nothing about a teacher, so the two together would train a distilling arm whose
+            # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
+            message = (
+                f"--distill-weight {options.distill_weight} and --pair-memory {options.pair_memory} are "
+                "not composed: the remembered pool widens the label term only, so the teacher would be "
+                "dropped for every remembered step"
+            )
+            raise ValueError(message)
 
     def _check_margin_alone(self) -> None:
         """The four flags `--auc-margin` cannot be composed with, each LOUD for `objective`'s reason.
@@ -227,6 +246,7 @@ class RunSetup:
             "--rank-weight": options.rank_weight,
             "--distill-weight": options.distill_weight,
             "--dissent-weight": options.dissent_weight,
+            "--contrast-weight": options.contrast_weight,
             "--pair-memory": options.pair_memory,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
@@ -261,6 +281,34 @@ class RunSetup:
                 f"--dissent-weight {options.dissent_weight} is not composed with {', '.join(named)}: it "
                 "IS the label ranking term at a re-weighted pair mass, and each of those either "
                 "descends that same ordering a second time or feeds it pairs with no teacher"
+            )
+            raise ValueError(message)
+
+    def _check_contrast_alone(self) -> None:
+        """The three flags `--contrast-weight` cannot be composed with, each LOUD for `objective`'s reason.
+
+        Not because the terms disagree — a representation term and a pairwise ordering term compose fine,
+        and `--rank-weight` is deliberately absent from this list because `ContrastiveObjective` extends
+        `RankedObjective` and carries it — but because the DISPATCH here is a single chain returning one
+        class, and each of these three returns a different subclass that this branch would silently lose.
+        A run passing both would train the other term's recipe under this arm's name and report a number
+        about the wrong mechanism, which is the failure every guard in this file exists to prevent.
+
+        `--pair-memory` is the one that is a real follow-up rather than a rejected idea: `RememberedRanking`
+        is the named fix for this term's small-batch weakness, and reaching it means a mixin, not a branch.
+        """
+        options = self.options
+        conflicts = {
+            "--distill-weight": options.distill_weight,
+            "--dissent-weight": options.dissent_weight,
+            "--pair-memory": options.pair_memory,
+        }
+        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
+        if named:
+            message = (
+                f"--contrast-weight {options.contrast_weight} is not composed with {', '.join(named)}: "
+                "the objective chain returns ONE class, so this branch would win and the term those "
+                "flags asked for would never be built"
             )
             raise ValueError(message)
 

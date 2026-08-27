@@ -389,9 +389,9 @@ class Trainer:
             with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.
-                logits, report = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
+                readout = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
                 judged = Predicted(
-                    logits.float(),
+                    readout.logits.float(),
                     torch.from_numpy(score).to(self.device),
                     torch.from_numpy(weight).to(self.device),
                     # INDEXED BY THE SAME `batch` the labels are, which is what makes the alignment a
@@ -405,8 +405,9 @@ class Trainer:
                         if self.teacher is None
                         else torch.from_numpy(blend.rows(self.teacher.rows(batch))).to(self.device)
                     ),
+                    embedding=readout.context.float(),
                 )
-                loss = self.objective(judged) + self.reports(report.float(), batch)
+                loss = self.objective(judged) + self.reports(readout.report.float(), batch)
             self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
             # THE SCHEDULE AND THE WEIGHT AVERAGE MOVE WITH THE OPTIMISER, not with the reader. Stepping

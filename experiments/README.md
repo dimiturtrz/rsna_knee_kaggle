@@ -5086,3 +5086,21 @@ ARE packaged full-fit (`small_batch6_ff`, `base_dense_ff`) read +0.0013 and +0.0
 ruler's own resolution. So the best-priced move this project can currently SHIP is one the instrument
 cannot distinguish from the incumbent — which is the same wall `knee-97ib` hit from the other side when
 it measured the marginal seat at exactly 0.000.
+
+### The first of the two fusion arms lands under its own components — 2026-08-27
+
+`fuse_attend` (`--through-plane` + `--slice-pooling attend` + `--pool sided`, twelve epochs, held split)
+reads a best holdout of **0.8509** at epoch 8. `convergence_check` does not list it as truncated, so the
+number is the recipe's and not a killed process's. Its control `calib_dense_hold` reads 0.8634, and
+`band_dense` — the plain member the four positives were each measured against — reads 0.8578.
+
+**Stacking the four did not add them.** Each acts at a different point and each was individually inside
+the 0.0062 paired floor; the stack is −0.0125 against the control, which is OUTSIDE that floor in the
+wrong direction. The three that combine here all reduce depth dilution, so the honest reading is that
+they are not independent mechanisms adding up but three spellings of one, and running all three
+concentrates past the point where the evidence is.
+
+`fuse_regions` — the other half, and the arm the `model.py:322` defect forces to be separate — died eight
+seconds in on a torn source snapshot (an uncommitted mid-edit tree, `knee-2dcp`) and has been
+requeued. `stackfit.sh` (`knee-orjq`) stays gated on both singles landing non-negative, and this one did
+not: on this reading the gate is closed by half already.

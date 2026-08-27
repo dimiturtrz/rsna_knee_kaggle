@@ -38,6 +38,7 @@ from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.objective import (
+    CONTRAST_TERM,
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
@@ -210,6 +211,7 @@ class Request:
     rank_weight: float
     distill_weight: float
     dissent_weight: float
+    contrast_weight: float
     auc_margin: float
     teaching: bool
     pair_memory: int
@@ -260,6 +262,7 @@ class Request:
             RANK_TERM: self.rank_weight,
             DISTILL_TERM: self.distill_weight,
             DISSENT_TERM: self.dissent_weight,
+            CONTRAST_TERM: self.contrast_weight,
             MARGIN_TERM: self.auc_margin,
             TEACHER: self.teaching,
             PAIR_POOL: self.pair_memory,

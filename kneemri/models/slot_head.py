@@ -87,13 +87,27 @@ class SlotHead(nn.Module):
         att = att + self.prior.unsqueeze(0)
         return att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
 
+    def context(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o h"]:
+        """What each diagnosis has read from the study, one vector per finding, before it becomes a logit.
+
+        Split out of `forward` rather than recomputed, because it is the LAST representation that still
+        has an axis a loss can shape: `out` collapses each of these vectors onto a single learned
+        direction, and everything a contrastive term wants to say about "torn looks unlike intact" is
+        about the vector, not about its projection onto that one direction. `forward` composes the two,
+        so every member on disk computes exactly what it computed before.
+        """
+        h = self.proj(self.per_diagnosis(x)) + self.slot_emb.unsqueeze(1)
+        return self.drop(torch.einsum("bos,bsoh->boh", self.attention(h, mask), h))
+
+    def logits(self, ctx: Float[Tensor, "b o h"]) -> Float[Tensor, "b o"]:
+        """Each diagnosis's context read out by its own row of the readout — a per-finding dot product."""
+        readout = self.out
+        return (ctx * readout.weight.unsqueeze(0)).sum(-1) + readout.bias
+
     @override
     def forward(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o"]:
         """Attend each diagnosis's query over the present slots and read out one logit per diagnosis."""
-        h = self.proj(self.per_diagnosis(x)) + self.slot_emb.unsqueeze(1)
-        ctx = self.drop(torch.einsum("bos,bsoh->boh", self.attention(h, mask), h))
-        readout = self.out
-        return (ctx * readout.weight.unsqueeze(0)).sum(-1) + readout.bias
+        return self.logits(self.context(x, mask))
 
     def report_vector(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b r"]:
         """Predict the study's report embedding from the mean of its PRESENT slots.

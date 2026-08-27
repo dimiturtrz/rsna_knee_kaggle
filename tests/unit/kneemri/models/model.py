@@ -687,11 +687,12 @@ def test_supervised(study_model: StudyModel):
     mask = torch.ones(2, SLOTS)
 
     with torch.no_grad():
-        logits, report = model.supervised(imgs, mask, 14)
+        readout = model.supervised(imgs, mask, 14)
         plain = model(imgs, mask, 14)
 
-    assert torch.allclose(logits, plain, atol=1e-6), "training and inference must be the same function"
-    assert report.shape == (2, REPORT_DIMS)
+    assert torch.allclose(readout.logits, plain, atol=1e-6), "training and inference must be the same function"
+    assert readout.report.shape == (2, REPORT_DIMS)
+    assert readout.context.shape[:2] == (2, len(TARGETS)), "one context vector per finding, per study"
 
 
 def test_applied():

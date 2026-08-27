@@ -399,15 +399,20 @@ class StudyModel(nn.Module):
         imgs: UInt8[Tensor, "b s g p q"],
         mask: Float[Tensor, "b s"],
         img_size: int | None = None,
-    ) -> tuple[Float[Tensor, "b o"], Float[Tensor, "b r"]]:
-        """The diagnosis logits AND the predicted report embedding, from one pass over the encoder.
+    ) -> "Readout":
+        """Everything a training step can be judged on, from one pass over the encoder.
 
         Training-only, and deliberately NOT what `forward` returns: the fingerprint, the kernel and
         every published member read `forward`, so the inference contract stays exactly as it was and a
         member fitted with report supervision loads into the old path unchanged.
         """
         features = self.slot_features(imgs, img_size)
-        return self.head(features, mask), self.head.report_vector(features, mask)
+        context = self.head.context(features, mask)
+        return Readout(
+            logits=self.head.logits(context),
+            report=self.head.report_vector(features, mask),
+            context=context,
+        )
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
         """This model's answer to the one seeded question, as a portable identity — see `Fingerprint`."""
@@ -524,3 +529,28 @@ class StudyModel(nn.Module):
         # average and the worst thing to hand a top-k. The count comes off the backbone's own config,
         # so a v2 member is unchanged (no registers, prefix of one) and nothing re-fingerprints.
         return TOKEN_POOLINGS[self.pool].reduce(tokens, self.prefix_tokens)
+
+
+@dataclass(frozen=True)
+class Readout:
+    """One training pass's three answers, which one encoder pass produces together.
+
+    A TYPE rather than a widening tuple, because the tuple was already two long and every term a loss
+    is allowed to read has to reach the trainer through here. The encoder is essentially the whole cost
+    of a step, so recomputing it to obtain a second view would double training time to add an auxiliary
+    loss — which is the argument `slot_features` was split out for, stated once and now carried by a
+    field instead of by a position.
+
+    Nothing on the INFERENCE path constructs one: `forward` still returns the logits alone, so the
+    kernel, the fingerprint and every published member read exactly the contract they always did.
+    """
+
+    logits: Float[Tensor, "b o"]
+    report: Float[Tensor, "b r"]
+    context: Float[Tensor, "b o h"]
+    """What each diagnosis read from the study before `out` collapsed it onto one direction.
+
+    The representation, not the decision — the only tensor here with an axis a contrastive term can
+    shape. It is DETACHED from nothing and carries a gradient, so a loss written against it trains the
+    head and the encoder that produced it.
+    """

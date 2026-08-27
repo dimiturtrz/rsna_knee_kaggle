@@ -6547,9 +6547,21 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.ReportReading.row",
+      "target": "core.data.labels.report_reader.ReportReading.verdict_of",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.labels.report_reader.main",
       "target": "core.data.labels.report_reader.LocalReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.report_reader.main",
+      "target": "core.data.labels.report_reader.LocalReader.annotated",
       "weight": 1
     },
     {
@@ -14787,6 +14799,12 @@
     {
       "kind": "references",
       "source": "kneemri.models.model.StudyModel",
+      "target": "kneemri.models.model.Readout",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.model.StudyModel",
       "target": "kneemri.models.model.StudyDesign",
       "weight": 1
     },
@@ -14917,6 +14935,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.models.model.StudyModel.supervised",
+      "target": "kneemri.models.model.Readout",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.supervised",
       "target": "kneemri.models.model.StudyModel.slot_features",
@@ -14930,14 +14954,26 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.models.slot_head.SlotHead.forward",
+      "source": "kneemri.models.slot_head.SlotHead.context",
       "target": "kneemri.models.slot_head.SlotHead.attention",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.models.slot_head.SlotHead.forward",
+      "source": "kneemri.models.slot_head.SlotHead.context",
       "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.forward",
+      "target": "kneemri.models.slot_head.SlotHead.context",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.forward",
+      "target": "kneemri.models.slot_head.SlotHead.logits",
       "weight": 1
     },
     {
@@ -16004,6 +16040,30 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.objective.ContrastiveObjective",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.objective.ContrastiveObjective",
+      "target": "kneemri.training.objective.RankedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.objective.ContrastiveObjective",
+      "target": "kneemri.training.objective.Shaping",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective.ContrastiveObjective.__call__",
+      "target": "kneemri.training.objective.ContrastiveObjective.contrast",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.objective.DecorrelatedObjective",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -16615,6 +16675,24 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup._check_composed",
+      "target": "kneemri.training.run_setup.RunSetup._check_contrast_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup._check_composed",
+      "target": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup._check_composed",
+      "target": "kneemri.training.run_setup.RunSetup._check_margin_alone",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.adaptation",
       "target": "kneemri.training.trainer.Adaptation",
@@ -16689,6 +16767,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective.ContrastiveObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.DecorrelatedObjective",
       "weight": 1
     },
@@ -16737,13 +16821,7 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.run_setup.RunSetup._check_margin_alone",
+      "target": "kneemri.training.run_setup.RunSetup._check_composed",
       "weight": 1
     },
     {
@@ -20900,6 +20978,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.model.Readout",
+      "label": "Readout",
+      "level": "class",
+      "parent": "kneemri.models.model",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.model.StudyDesign",
       "label": "StudyDesign",
       "level": "class",
@@ -21296,6 +21382,14 @@
       "label": "Mixup",
       "level": "class",
       "parent": "kneemri.training.mixup",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective",
+      "label": "ContrastiveObjective",
+      "level": "class",
+      "parent": "kneemri.training.objective",
       "role": "satellite"
     },
     {
@@ -23940,6 +24034,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.report_reader.LocalReader.annotated",
+      "label": "annotated",
+      "level": "method",
+      "parent": "core.data.labels.report_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.report_reader.LocalReader.answer",
       "label": "answer",
       "level": "method",
@@ -24028,24 +24130,16 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.report_reader.annotated_reports",
-      "label": "annotated_reports",
+      "id": "core.data.labels.report_reader.ReportReading.verdict_of",
+      "label": "verdict_of",
       "level": "method",
-      "parent": "core.data.labels.report_reader",
+      "parent": "core.data.labels.report_reader.ReportReading",
       "role": null
     },
     {
       "descendants": 0,
       "id": "core.data.labels.report_reader.main",
       "label": "main",
-      "level": "method",
-      "parent": "core.data.labels.report_reader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.report_reader.verdict_of",
-      "label": "verdict_of",
       "level": "method",
       "parent": "core.data.labels.report_reader",
       "role": null
@@ -30636,8 +30730,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.context",
+      "label": "context",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.slot_head.SlotHead.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.logits",
+      "label": "logits",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
       "role": null
@@ -31876,6 +31986,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.objective.ContrastiveObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.objective.ContrastiveObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective.contrast",
+      "label": "contrast",
+      "level": "method",
+      "parent": "kneemri.training.objective.ContrastiveObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.objective.ContrastiveObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.DecorrelatedObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -32392,6 +32534,22 @@
       "label": "from_file",
       "level": "method",
       "parent": "kneemri.training.report_supervision.ReportSupervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._check_composed",
+      "label": "_check_composed",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._check_contrast_alone",
+      "label": "_check_contrast_alone",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
     },
     {

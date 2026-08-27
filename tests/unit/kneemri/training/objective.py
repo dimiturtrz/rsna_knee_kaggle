@@ -5,6 +5,7 @@ from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
 from kneemri.training.label_focus import FOCUS, LabelFocus
 from kneemri.training.objective import (
+    CONTRAST_TERM,
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
@@ -13,6 +14,7 @@ from kneemri.training.objective import (
     PER_LABEL,
     POSITIVE_AT,
     RANK_TERM,
+    ContrastiveObjective,
     DecorrelatedObjective,
     DistilledObjective,
     LabelStructure,
@@ -45,6 +47,7 @@ def test_objective_settings():
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
+        CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: True,
@@ -61,6 +64,7 @@ def test_ranked_objective_settings():
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
         DISSENT_TERM: 0.0,
+        CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
         PAIR_POOL: 0,
         PER_LABEL: False,
@@ -584,3 +588,52 @@ def test_auc_margin_carries_a_gradient_to_every_study_it_has_not_separated():
 
     assert logits.grad is not None
     assert bool((logits.grad.abs() > 0).all()), "a study with no gradient is a study the term cannot fix"
+
+
+def _embedded(directions: list[list[float]], positive: list[float]) -> Predicted:
+    """One finding's worth of unit-ish embeddings beside the labels that say which should sit together."""
+    embedding = torch.tensor(directions).unsqueeze(1)
+    scores = torch.tensor(positive).reshape(-1, 1)
+    logits = torch.zeros_like(scores)
+    return Predicted(logits, scores, torch.ones_like(scores), embedding=embedding)
+
+
+def test_contrast():
+    """A representation that already groups torn with torn owes far less than one that scatters them.
+
+    The direction is the whole claim of the term: it is a statement about the VECTOR the head read, and
+    it must be blind to the logits, which are identical (zero) in both batches here.
+    """
+    labels = [1.0, 1.0, 0.0, 0.0]
+    grouped = _embedded([[1.0, 0.0], [0.9, 0.1], [0.0, 1.0], [0.1, 0.9]], labels)
+    scattered = _embedded([[1.0, 0.0], [0.0, 1.0], [0.9, 0.1], [0.1, 0.9]], labels)
+    objective = ContrastiveObjective()
+
+    assert float(objective.contrast(grouped)) < float(objective.contrast(scattered))
+
+
+def test_contrast_refuses_a_batch_with_no_embedding():
+    """LOUD, because the silent alternative descends plain cross-entropy under a contrastive arm's name."""
+    with pytest.raises(ValueError, match="no embedding"):
+        ContrastiveObjective().contrast(_batch([1.0, 1.0, 1.0, -1.0, -1.0, -1.0]))
+
+
+def test_contrastive_objective_settings():
+    """It reports the term's real strength, so a queued arm can be checked for it before the card."""
+    assert ContrastiveObjective(0.5).settings()[CONTRAST_TERM] == 0.5
+    assert Objective().settings()[CONTRAST_TERM] == 0.0, "the plain one reports it OFF, never omits it"
+
+
+def test_contrastive_objective_carries_the_ranking_term():
+    """The house recipe passes --rank-weight, so dropping it would make every contrastive arm two changes.
+
+    Both halves are asserted: the settings must SAY the ranking term is on, and the scalar must actually
+    differ from the same objective with the term at zero — a reported weight that changes no loss is the
+    silent no-op this file's guards exist against.
+    """
+    composed = ContrastiveObjective(1.0, rank_weight=1.0)
+    batch = _embedded([[1.0, 0.0], [0.9, 0.1], [0.0, 1.0], [0.1, 0.9]], [1.0, 1.0, 0.0, 0.0])
+
+    assert composed.settings()[RANK_TERM] == 1.0
+    assert ContrastiveObjective(1.0).settings()[RANK_TERM] == 0.0
+    assert float(composed(batch)) != float(ContrastiveObjective(1.0)(batch))

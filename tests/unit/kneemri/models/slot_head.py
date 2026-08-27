@@ -173,3 +173,26 @@ def test_forward_reads_each_diagnosis_from_its_own_slot_features():
     assert not torch.allclose(before[:, 3], after[:, 3], atol=1e-4), "the corrupted diagnosis must move"
     untouched = [index for index in range(OUT) if index != 3]
     assert torch.allclose(before[:, untouched], after[:, untouched], atol=1e-6), "the others must not"
+
+
+def test_context():
+    """The per-finding vector the readout collapses — one per diagnosis, at the head's hidden width."""
+    torch.manual_seed(SEED)
+    head = SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT).eval()
+    with torch.no_grad():
+        ctx = head.context(torch.randn(3, SLOTS, DIM), torch.ones(3, SLOTS))
+    assert ctx.shape == (3, OUT, head.out.weight.shape[1])
+
+
+def test_logits():
+    """`context` then `logits` composes to exactly `forward`, for every head shape.
+
+    The equality is the whole safety of the split: every member on disk was fitted through `forward`,
+    and a readout that differed by even a projection would make those weights a different function.
+    """
+    torch.manual_seed(SEED)
+    for head in (SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT), MeanSlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT)):
+        head.eval()
+        x, mask = torch.randn(2, SLOTS, DIM), torch.ones(2, SLOTS)
+        with torch.no_grad():
+            assert torch.allclose(head.logits(head.context(x, mask)), head.forward(x, mask), atol=1e-6)
