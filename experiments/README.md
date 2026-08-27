@@ -4855,3 +4855,47 @@ pixel-group add, which is the only diversity move with a measured super-linear b
 **What it costs to have learned this: zero slots and eleven minutes of CPU.** Both runs are on the ledger
 rather than on the board, which is the point — the seat lane now has a NUMBER saying stop, instead of
 `knee-xuj5`'s policy saying stop.
+
+### `finding_calib_dense` — un-pooling the agreement map is FLAT; the pooled map already carried it — 2026-08-27
+
+**PRIMARY reading (`noise_binding`, the ruler the arm pre-registered): tracking +0.507 [+0.434, +0.579]
+against `calib_dense_hold`'s +0.550 [+0.470, +0.630]. The pre-registered FLAT branch fired**
+(`<= +0.475` lever · `+0.475..+0.625` FLAT · `>= +0.625` worse). The move is −0.043 on a ±0.075 band
+whose width is the CI half-width the instrument reports on 58 studies, and the two intervals overlap
+across almost their whole length. This is a no-op, read on the ruler chosen before the run.
+
+**Single variable, verified in the printed recipe**: `--finding-calibration` and nothing else against
+`calib_dense_hold` — same corner (336 px, 20 slices, whole-stack, `cls_mean`/`attend`, band 0.1–0.9,
+`--calibrated-targets`, `--hold-annotations`, fold 0, seed 2026, 12 epochs, one-cycle).
+
+**Holdout FLOOR (biased against this arm by construction, so not the verdict): 0.8595 @ epoch 7**
+against `calib_dense_hold`'s 0.8634 @ epoch 6, **−0.0039** — inside the 0.0062 three-seed floor.
+Converged, not budget-bound: 0.7476 / 0.7919 / 0.8340 / 0.8446 / 0.8476 / 0.8548 / 0.8563 / **0.8595** /
+0.8587 / 0.8591 / 0.8595 / 0.8594, twelve of twelve epochs at ~370 s. The proxy is scored against the
+REPORT labels, which carry the very defect these offsets correct, so a small negative here is what a
+correct offset would also produce — which is exactly why the arm named `noise_binding` as primary in
+advance, and why this row does not read the −0.0039 as evidence either way.
+
+**WHAT IT SETTLES.** `--calibrated-targets` replaces the reader's five levels with a POOLED agreement
+rate; `ReaderAgreement.by_label` shows that map hides a 37-point spread (Contusion 44.4%, Synovitis
+81.2%) failing in opposite directions. The natural next move is one shrunk logit offset per finding.
+It buys nothing. Twelve scalars fitted over ~57 cells each cannot resolve what the pooled rate already
+approximates at 684 cells — the shrinkage that keeps them from fitting sampling noise also shrinks them
+back toward the pooled value. **Per-finding calibration is retired at this corner**, and the label lane's
+remaining headroom is not in the LEVELS of the map.
+
+**WHAT IT DOES NOT SETTLE, and this is the part worth keeping.** The lane is still LIVE. Both members
+sit near +0.5 on the over-called cells — half a true positive of confident reader error inherited, on
+15.8% of every annotated cell — and `--calibrated-targets` is still the only axis measured to move it
+(+0.683/+0.700 uncalibrated → +0.538/+0.550 calibrated, −0.145 and −0.150 at two independent corners).
+This arm says the residual +0.5 is not reachable by refining the same map per finding. It says nothing
+about reaching it by a different mechanism — a per-STUDY confidence rather than a per-FINDING constant,
+or supervision that is not the reader at all.
+
+**One incidental reading, noted and not acted on.** The arm's agreed-negative pole sits at 0.0725
+against the control's 0.1310, and its agreed-positive at 0.7362 against 0.6920 — a WIDER pole
+separation on both ends. Tracking is a ratio on that separation, so the arm is better separated and
+tracks marginally less; the two effects nearly cancel. A member with cleaner poles and the same
+tracking ratio is not obviously worse than the control, and the holdout's −0.0039 is inside the floor.
+Not a finding — a reason not to write `finding_calib_dense` off as a strictly worse member if a seat
+ever wants a differently-calibrated one.
