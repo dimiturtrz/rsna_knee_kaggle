@@ -2404,3 +2404,32 @@ in the mounted package, taking pixel groups 1 → 3) is untouched by either resu
 `res392` only as a SWAP, dropping a full-fit member for it, and read 0.938 — the pure ADD has never run.
 
 Kit `fec94e7`, submission `55813714`. Slot 2 of 5 on 2026-08-27.
+
+## `pixgroup_v1` — 0.940, the pure pixel-group ADD, and the entry that closes the seating axis
+
+`calibsix`'s six calibrated seats unchanged, plus two pixel-group adds — `res392_ws_s2026` at 392 px and
+`crop80_span_s2026` at crop 80 — taking the entry from one pixel group to three. Same vote, same overlap,
+same kit. This was the one seat-lane mechanism `calibmix`'s close explicitly left open: `knee-nas5`
+measured the decode-path / pixel-group axis at 0.0059 offline against **0.014 on the board**, a 2.4×
+compression and the only super-linear board transfer this project has measured. `resseat` had tested
+`res392` only as a *swap* and read 0.938; the pure add had never run.
+
+**The pre-registered FLAT branch fired** (0.939–0.941), at 0.940 — one tick *below* `calibsix` at six
+seats. The 2.4× multiplier did not reproduce as an add onto a calibrated base.
+
+**Read together, five entries now close the axis.** blendseat 0.939 (7 seats) · blendthree 0.939 (7) ·
+pixgroup 0.940 (8) · calibsix 0.941 (6) · calibmix 0.941 (11 names resolving to 5 recipes). A **0.002
+range across five different seatings**, against a 0.0053 Hanley–McNeil floor. Count, fit-duplication and
+now targeted pixel diversity all read the same number. **The seating axis is saturated for us at ~0.941.**
+
+**What it does NOT close.** Both adds are weak solos chosen for disagreement (`res392_ws` scores 0.8523
+alone). This prices *the add at this base*, not pixel diversity as a mechanism — a member that is both
+pixel-diverse and *strong* has never been seated.
+
+**Where it sends us.** The champion's own 0.938 → 0.941 climb came from calibration — member **quality**,
+not seating. With five entries flat, the remaining card hours go to better single members. `knee-wbwq`
+opens that lane: `fitted_encoder.py` has always been able to warm-start an arm from a fitted member, and
+**0 of 131 arms ever used it**, so every member on disk is a cold fit while a third of the roster is one
+decode path re-run with a different loss.
+
+Kit `fec94e7`, submission `55816263`. Slot 3 of 5 on 2026-08-27.
