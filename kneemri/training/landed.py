@@ -33,7 +33,14 @@ from core.data.labels.targets import (
     WEIGHT_FLOOR,
     Targets,
 )
-from kneemri.models.model import ADAPTERS, COMPILED_ENCODER, OPENED_BLOCKS, RECOMPUTING, StudyModel
+from kneemri.models.model import (
+    ADAPTERS,
+    COMPILED_ENCODER,
+    DEPTH_REGIONS,
+    OPENED_BLOCKS,
+    RECOMPUTING,
+    StudyModel,
+)
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS
@@ -102,8 +109,6 @@ NOT_A_SWITCH = {
     "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
     "pool": "constructed — `POOL_PARTS[self.pool]` raises on a pooling that does not exist",
     "slice_pooling": "constructed — `SLICE_POOLINGS[...]` raises before any weight is fetched",
-    "slice_regions": "constructed into `StudyDesign` and stamped into the manifest, where a rebuild that "
-    "defaults it moves the member's own fingerprint",
     "through_plane": "constructed into `StudyDesign` and stamped into the manifest: the encoder's three "
     "input channels hold (i-1, i, i+1) instead of three copies of i, so a rebuild that defaults it feeds "
     "the trunk different pixels and moves the member's own fingerprint",
@@ -199,6 +204,7 @@ class Request:
     """
 
     lora_rank: int
+    slice_regions: int
     recompute: bool
     compiling: bool
     bf16: bool
@@ -244,6 +250,12 @@ class Request:
         equality — the alternative was a second loose key, which is the thing `ADAPTERS` had to be and
         which buys the check nothing anywhere else.
 
+        THE DEPTH REGIONS ARE ASKED FOR AS THE FLAG and answered by the model with the count it will
+        actually split on, which is 1 whenever another aggregator owns the slice axis. That asymmetry is
+        the whole point: `--slice-regions 4 --slice-pooling attend` parsed, recorded and trained for the
+        life of the flag while splitting nothing, so the ledger carried a fact about an arm that did not
+        run. Here it is a plain equality that fails before the card is spent.
+
         THE ONE DELIBERATE EXCEPTION is the weight floor, whose bool-to-value rule `TrainingOptions`
         also spells. Taking the resolved `supervision.floor` instead would compare that property's
         output against itself and pass on any value it produced; re-deriving from the FLAG is what
@@ -251,6 +263,7 @@ class Request:
         """
         return {
             ADAPTERS: self.lora_rank,
+            DEPTH_REGIONS: self.slice_regions,
             RECOMPUTING: self.recompute,
             COMPILED_ENCODER: self.compiling,
             AUTOCAST: torch.bfloat16 if self.bf16 else torch.float16,

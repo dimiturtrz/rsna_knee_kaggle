@@ -120,6 +120,7 @@ class RunSetup:
         options = self.options
         return Request(
             lora_rank=options.lora_rank,
+            slice_regions=options.slice_regions,
             recompute=options.recompute_activations,
             compiling=options.compile_encoder and device.type == "cuda",
             bf16=options.bf16,

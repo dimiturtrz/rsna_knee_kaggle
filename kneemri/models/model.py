@@ -41,6 +41,7 @@ ADAPTERS = "lora_adapters"
 RECOMPUTING = "recompute_activations"
 COMPILED_ENCODER = "compile_encoder"
 OPENED_BLOCKS = "opened_blocks"
+DEPTH_REGIONS = "depth_regions"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
 
 DEFAULT_VARIANT = SMALL
@@ -460,12 +461,22 @@ class StudyModel(nn.Module):
 
         `_compiled_call_impl` is the only place an in-place `compile()` leaves a mark, the module not
         being rebound to an `OptimizedModule` so that parameter names stay loadable.
+
+        DEPTH_REGIONS IS THE COUNT `over_depth` WILL ACTUALLY SPLIT ON, which is not the design's field
+        whenever another aggregator owns the slice axis: `slot_features` reaches `over_depth` only when
+        no `SLICE_POOLINGS` aggregator was built and each slice is encoded alone, so `--slice-regions 4`
+        beside `--slice-pooling attend` splits nothing and the run records a region count it never used.
+        That was silent for the whole life of the flag — no error, no log line — and it is why
+        `fuse_attend` and `fuse_regions` had to be two arms. Reporting the EFFECTIVE count is what lets
+        `landed` refuse the combination before the card is spent instead of after.
         """
+        aggregated_elsewhere = self.slices is not None or not self.per_slice
         return {
             ADAPTERS: self.surgery.adapters(),
             RECOMPUTING: bool(getattr(self.backbone, "is_gradient_checkpointing", False)),
             COMPILED_ENCODER: self.backbone._compiled_call_impl is not None,  # noqa: SLF001 - see above
             OPENED_BLOCKS: self.surgery.opened_blocks(),
+            DEPTH_REGIONS: 1 if aggregated_elsewhere else self.design.slice_regions,
         }
 
     def parameter_groups(

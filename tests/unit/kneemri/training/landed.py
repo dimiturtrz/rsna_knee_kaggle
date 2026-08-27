@@ -18,13 +18,14 @@ from core.data.labels.targets import (
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
+    DEPTH_REGIONS,
     NO_LAYER_DECAY,
     OPENED_BLOCKS,
     RECOMPUTING,
     StudyDesign,
     StudyModel,
 )
-from kneemri.models.slice_pooling import MAXIMUM
+from kneemri.models.slice_pooling import ATTEND, CHANNELS, MAXIMUM
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
@@ -80,6 +81,7 @@ class _FakeBackbone(nn.Module):
 
 PLAIN = Request(
     lora_rank=0,
+    slice_regions=1,
     recompute=False,
     compiling=False,
     bf16=False,
@@ -303,6 +305,32 @@ def test_missing_depth() -> None:
     head_only = Trainer(frozen, torch.device("cpu"), adaptation=Adaptation(unfreeze_last=0))
 
     assert Landed(frozen, head_only, _targets()).missing(replace(PLAIN, unfreeze_last=0)) == []
+
+
+def test_missing_depth_regions() -> None:
+    """THE FLAG THAT SPLIT NOTHING FOR ITS WHOLE LIFE. `slot_features` reaches `over_depth` only when no
+    slice aggregator was built, so `--slice-regions 4 --slice-pooling attend` parsed, was recorded in the
+    manifest and trained — splitting nothing, with no error and no log line. Two fusion arms had to be
+    run separately because of it and the ledger carried a region count no run ever used.
+
+    The ask is the flag and the answer is the count `over_depth` will actually split on, which is what
+    turns a silent misrecord into a refusal before the card is spent.
+    """
+    regions = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=MAXIMUM, slice_regions=4))
+
+    assert _pair(regions).missing(replace(PLAIN, slice_regions=4)) == []
+
+    attended = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=ATTEND, slice_regions=4))
+
+    assert _pair(attended).missing(replace(PLAIN, slice_regions=4)) == [
+        f"{DEPTH_REGIONS}: asked 4, the model shows 1"
+    ], "attention owns the slice axis, so the regions are inert and the run must not be allowed to start"
+
+    stacked = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=CHANNELS, slice_regions=4))
+
+    assert _pair(stacked).missing(replace(PLAIN, slice_regions=4)) != [], (
+        "channel stacking removes the slice axis entirely, which is the same hole from the other side"
+    )
 
 
 def test_not_a_switch() -> None:

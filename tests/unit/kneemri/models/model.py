@@ -13,6 +13,7 @@ from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
     COMPILED_PREFIX,
+    DEPTH_REGIONS,
     OPENED_BLOCKS,
     RECOMPUTING,
     TARGETS,
@@ -701,16 +702,32 @@ def test_applied():
     Read off the module tree rather than off a flag, because the failure being guarded against is a
     wrapper that runs and changes nothing: `low_rank` picks Linears by structure, so an encoder whose
     blocks hold none adapts zero layers while the run's config still says rank 2.
+
+    The depth regions read 1 under the default design because channel stacking removes the slice axis
+    before `over_depth` can split it — the count a run ASKS for is only the count it gets when nothing
+    else has already consumed that axis.
     """
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
 
-    assert model.applied() == {ADAPTERS: 0, RECOMPUTING: False, COMPILED_ENCODER: False, OPENED_BLOCKS: 12}
+    assert model.applied() == {
+        ADAPTERS: 0,
+        RECOMPUTING: False,
+        COMPILED_ENCODER: False,
+        OPENED_BLOCKS: 12,
+        DEPTH_REGIONS: 1,
+    }
 
     model.low_rank(rank=2)
     model.recompute_activations()
 
-    assert model.applied() == {ADAPTERS: 36, RECOMPUTING: True, COMPILED_ENCODER: False, OPENED_BLOCKS: 0}, (
+    assert model.applied() == {
+        ADAPTERS: 36,
+        RECOMPUTING: True,
+        COMPILED_ENCODER: False,
+        OPENED_BLOCKS: 0,
+        DEPTH_REGIONS: 1,
+    }, (
         "adaptation freezes every base weight, so no block is open on the axis unfreeze_last moves — "
         "counting trainable-anything would say twelve here and make the check unreadable under LoRA"
     )
