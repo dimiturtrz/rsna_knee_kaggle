@@ -4498,3 +4498,71 @@ way — quality-adjusted its ambiguity gain is **+0.0025**, not +0.0018. Caveat:
 LIMIT, as pre-registered: all fifteen pairs share one anchor. These are fifteen readings of `band_dense`'s
 neighbourhood, not of the corpus. A second anchor costs nothing and is the honest follow-up if this is
 ever leaned on harder than it is here.
+
+## 2026-08-27 — the per-diagnosis head and its own named follow-up, BOTH closed on one control
+
+Two arms against the same control, `native224_s2026` = **0.8502** (12 slices, 224 px, fold 0, scored on
+`report_labels_v2`). They are not independent: `labelwise224`'s pre-registration, written before it ran,
+named the window geometry as the follow-up if the head came back flat. It came back flat. The follow-up
+ran anyway, and it is worse than flat.
+
+| arm | best | vs control | pre-registered branch |
+|---|---|---|---|
+| `labelwise224_s2026` | 0.8517 (epoch 9) | **+0.0015** | within +/- 0.006 -> "per-diagnosis pooling is not the lever at 12 slices" |
+| `adjacent224_s2026` | 0.8462 | **-0.0040** | within +/- 0.006 -> not the lever; and the ONE marked delta has the wrong sign |
+
+Both converged — `convergence_check` lists neither as TRUNCATED, STOPPED or UNDERTRAINED, so these are
+facts about the architectures and not about a killed process.
+
+### `labelwise224` — the direction is right and the size is a fifth of the floor
+
+Twelve attention channels, one per diagnosis, over the same trunk. Per-label against the control:
+
+MCL **+0.0126** · Medial Meniscus +0.0065 · Lateral OA +0.0053 · Lateral Meniscus +0.0051 · Medial OA
++0.0046 · Baker's +0.0016 · PF OA +0.0015 · Fracture +0.0015 · **MEAN +0.0015** · Synovitis -0.0012 ·
+Contusion -0.0009 · ACL -0.0087 · Effusion -0.0095.
+
+By structure scale: **focal +0.0038, regional -0.0017**. On the six findings the ruler work called
+model-bottlenecked: **+0.0037**. That signature is the one the mechanism predicts — a per-diagnosis
+channel should buy the small, localised findings and not the diffuse ones — and it is worth writing down
+that the direction held. What did NOT hold is the size. Paired half-widths run to **+/-0.0326** and **no
+delta is marked significant**, MCL's +0.0126 included. The pre-registration asked for >= +0.010 on the
+mean *with MCL and Lateral Meniscus among the movers*; the mean is +0.0015, MCL moved and Lateral
+Meniscus did not. Half of one ruler, at a fifteenth of the required mean.
+
+**The reading the pre-registration wrote for this branch stands: 58 image-read labels cannot supervise
+twelve separate attention channels.** The head has the capacity; the supervision does not have the
+resolution to fill it. The axis closes as a lever. It does NOT close as a member — +0.0015 with a
+different internal structure is exactly the profile of a diversity seat, and it costs nothing to try in
+one, which is the only follow-up this arm earns.
+
+### `adjacent224` — the marked delta is on the finding contiguity was supposed to buy
+
+Three consecutive slices as RGB, centres spread by linspace, against the same control:
+
+MCL +0.0088 · ACL +0.0045 · Lateral OA +0.0026 · Effusion +0.0005 · Medial OA +0.0002 · Fracture -0.0010 ·
+**MEAN -0.0041** · Lateral Meniscus -0.0058 · Contusion -0.0081 · PF OA -0.0092 · Baker's -0.0129 ·
+**Medial Meniscus -0.0136\*** · Synovitis -0.0149. Focal -0.0018, regional -0.0073; the six
+model-bottlenecked findings -0.0021.
+
+The mean lands inside the noise band and by itself would be "not the lever". The reading is stronger than
+that, and it comes from the one delta that IS marked against its own interval: **Medial Meniscus
+-0.0136\***. A meniscal tear is the textbook case for wanting three touching slices instead of three
+spread ones — it is small, it is contiguous, and it is the finding this arm was written for. It is the
+single worst-hit label but one, and it is the only one the interval will vouch for. The mechanism did not
+fail to fire; it fired and it cost.
+
+Best guess at why, and it is a cheap one to hold: at 12 slices over a 0.2-0.8 band the stack is already
+sparse, and spending three of the trunk's channels on neighbours of one centre buys local contiguity by
+throwing away a third of the SPAN. That is the same trade `depth_regions` lost — a substitute for span
+dressed as a complement.
+
+### What this pair closes
+
+The head axis and the window axis were the last two shapes that did not touch the data. Both are now
+measured, both on the same control, and neither pays. Written next to the rest of the ledger: resolution
+(-0.0002), crop extent (-0.0099 / -0.0011), depth regions (substitute for span), trunk family (53rd of
+67), SSL-as-init (five collapses), the vote, the count and the seventh seat. **Every decode and
+architecture axis this project owns is now closed on its own measurement**, and the only two numbers
+still moving — `merged_blend_cf` 0.8597 and `merged_blend_s2026` 0.8589 — are both the CORPUS axis.
+`merged_dense_cf` (knee-4hxv) is the arm that follows from that, and it is the only one queued.
