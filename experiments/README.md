@@ -4789,3 +4789,36 @@ Note what CANNOT be recovered: EMA alone in the hold family was never run, so th
 INTERACTION is not computable from this arm at any landing. It measures a conditional effect, not a
 composition. The composition question is answered by the 2x2 above, on different levers, for that
 holdout only.
+
+### `stackfit` — EMA buys nothing on top of calibration; the FLAT branch fired — 2026-08-27
+
+**0.8631, best epoch 7 of 12**, against `calib_dense_hold`'s **0.8634**. **−0.0003**, a twentieth of the
+0.0062 three-seed paired floor. The pre-registration's own most-likely branch, and the only branch that
+was named FLAT.
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| holdout | .7467 | .7994 | .8330 | .8502 | .8579 | .8618 | .8624 | **.8631** | .8618 | .8621 | .8614 | .8609 |
+
+Twelve epochs of twelve, a peak at 7 and a four-epoch slide after it, so this is a CONVERGED reading and
+not a budget-bound one — nothing is owed to a longer schedule.
+
+**What it settles.** Read as the matched single-variable pair it actually is (one flag, `--ema`, same
+hold family / 20 slices / 0.1–0.9 band / 336 px / labels / `--calibrated-targets` / 12 epochs / seed),
+EMA's conditional effect on top of calibration at the dense corner is **zero to within a twentieth of the
+floor**. EMA's own non-hold single read +0.0010; this says that +0.0010 does not survive being added to a
+term worth +0.0061. Not substitution — the bottom rung asked for ≤0.8572 and nothing like that happened —
+just nothing. EMA closes as a lever at roster scale, measured rather than untried.
+
+**What it does NOT settle, restated because the arm was designed to answer it and cannot.** EMA alone in
+the hold family was never run, so calibration × EMA is a conditional effect here and not an interaction.
+The broken second term (an `ema_dense` delta measured at `hold_annotations: False`, transported onto a
+HOLD baseline) is why the original three-term additivity prediction was retired at 07:02Z, before the
+number, rather than scored against it.
+
+**One number worth carrying out of it.** At 0.8631 `stackfit` is the second-best solo checkpoint in the
+pool, behind its own control at 0.8634 and ahead of `band_dense`'s 0.8578 by +0.0053. The
+`--hold-annotations` + `--calibrated-targets` dense corner is where our best single members now live, and
+NEITHER of the two is mounted or named by any kernel. That is a roster fact, not a result, and it is
+priced by the seat ruler before it is priced by enthusiasm — the 23% pass-through measured on `calibsix`
+says six simultaneous member gains buy about one member's worth of board.
