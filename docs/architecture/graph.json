@@ -1869,6 +1869,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.supervision_gap",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.supervision_gap",
       "target": "core.cli",
       "weight": 1
     },
@@ -10924,6 +10930,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.supervision_gap.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.separation",
       "weight": 1
     },
     {
@@ -27904,6 +27916,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap.reported",
       "label": "reported",
+      "level": "method",
+      "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.SupervisionGap.separation",
+      "label": "separation",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "role": null
