@@ -5248,3 +5248,50 @@ one_cycle), and it is not the cell the mechanism argument lives in. The rewritte
 capacity arm, which needs a LoRA parent (`dinov3_base_lora_s2026` or `lora_r8_v3small_224_s2026`)
 warm-started WITH a fresh `--lora-rank`; **C** `warm_calib_dense_short.sh` stays gated on A or B clearing.
 Both are blocked on the card, which is with celltrack.
+
+### `margin_calib` — the empty quadrant is occupied, and the two terms are ANTAGONISTIC, not the same lever — 2026-08-27
+
+`margin_calib_s2026` best holdout **0.8235** @ epoch 10 of 12 (`convergence_check`: converged, not
+truncated, not undertrained). The arm `knee-myl0` designed as the deliberate occupation of the
+strong-and-distant cell — `--auc-margin 1.0 --rank-weight 0` (distance) together with
+`--calibrated-targets` (quality), at the identical corner where each had measured positive alone.
+
+| | solo | vs |
+|---|---|---|
+| `margin_seat` — the margin term alone | 0.8525 | — |
+| `calib_dense_hold` — the calibration term alone | 0.8634 | — |
+| additive prediction | 0.8581 | the bead's own arithmetic |
+| **`margin_calib` — both** | **0.8235** | **−0.0346 against the prediction** |
+
+**The harness branch fired and came back clean, which is what makes the number quotable.** The bead
+pre-registered "solo < 0.8525 → suspect the harness before the mechanism; diff the recorded recipe stamps
+key by key." Done, both ways: against `calib_dense_hold` only `auc_margin` (1.0 vs 0.0) and `rank_weight`
+(0.0 vs 1.0) differ — the substitution as designed; against `margin_seat` only `calibrated_targets` and
+`hold_annotations` differ. Both flags landed, the corner is exact, and the arm ran its full schedule. The
+−0.0346 is the mechanism, not the plumbing.
+
+**The pre-registered SAME-LEVER branch is REFUTED, and by the column it was read on.** That branch
+predicted `seat < +0.0015` *and* `nearest ≥ 0.92` — calibration and the margin turning out to be one axis,
+the distance collapsing to `calib_dense_hold`'s 0.9273. `seat_value --against gradeswap_v1`:
+
+```
+  +margin_seat        0.8709  (+0.0015)  [+0.0007, +0.0023]   nearest 0.8628  mean 0.8400
+  +calib_dense_hold   0.8704  (+0.0010)  [+0.0005, +0.0015]   nearest 0.9273  mean 0.8925
+  +margin_calib       0.8682  (-0.0013)  [-0.0021, -0.0005]   nearest 0.8298  mean 0.8101
+```
+
+The seat is **negative with a band that excludes zero** — it does not merely fail to help, it subtracts —
+while the distance went the OPPOSITE way to the prediction: `nearest 0.8298` is the most distant candidate
+this project has ever priced, further out than `margin_seat` itself. So the two terms are not one lever.
+They are mechanically distinct exactly as the bead argued, and combining them is destructive.
+
+**A mechanism, offered as a hypothesis and not measured here.** An AUC-margin loss ranks pairs across a
+positive/negative boundary; `--calibrated-targets` deliberately smears where that boundary is. The margin
+term then optimises a separation the targets have been changed to blur. That predicts the pair is
+antagonistic wherever both are on, at any corner — which is a cheap thing to falsify later and is the only
+part of this worth carrying forward.
+
+**`knee-bxp2` is confirmed on its own terms: distance is a twin detector, never a merit column.** This is
+the cleanest distant-and-weak member on file — maximal distance, negative seat — and a selector reading the
+distance column alone would have picked it first. Cost: ~85 min of card, zero slots. The quadrant is
+occupied and it was empty for a reason.
