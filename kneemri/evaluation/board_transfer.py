@@ -36,6 +36,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from random import Random
 from statistics import median
 
 from core import cli
@@ -68,6 +69,19 @@ REGIME_QUANTILES = (0.5, 0.75)
 Not invented levels. The whole point of re-reading is that the ratio moves with the score being priced,
 so the only cut points that are not a thumb on the scale are the ones the record supplies. Two are
 enough to show the direction; more would only invite a reader to quote the smallest cell as a number.
+"""
+
+
+SPREAD_DRAWS = 2000
+SPREAD_SEED = 2026
+SPREAD_TAILS = 0.025
+"""A percentile interval on the regime-local median, by resampling the ratios that produced it.
+
+Why the local cell needs one and the whole-record median does not: the top regime is always the
+thinnest cell, and a median of a handful of pairs quoted bare is exactly the failure this module was
+written against — a constant repeated from prose while the instrument was saying "direction". The
+interval is what stops the local number becoming the next 1.72. Seeded, because a gate that re-draws
+its own answer is not a gate.
 """
 
 
@@ -230,16 +244,36 @@ class BoardTransfer:
         beside the median because the top cell is always the thinnest, and a median of a handful of
         pairs is a direction rather than a constant.
         """
-        ratios = [pair.ratio() for pair in self.pairs() if pair.resolved and pair.worse.offline >= floor]
+        ratios = self.ratios_above(floor)
         return len(ratios), median(ratios) if ratios else 0.0
 
-    def regimes(self) -> list[tuple[float, int, float]]:
-        """The compression re-read at each quantile floor: (floor, resolved pairs, median ratio)."""
+    def ratios_above(self, floor: float) -> list[float]:
+        """Every resolved pair's ratio where BOTH entries sit at or above `floor`."""
+        return [pair.ratio() for pair in self.pairs() if pair.resolved and pair.worse.offline >= floor]
+
+    def spread(self, ratios: list[float]) -> tuple[float, float]:
+        """A percentile interval on the median of `ratios`, by seeded bootstrap.
+
+        Returns the median twice when there is nothing to resample, so a caller never has to branch on
+        emptiness to print a line: a one-pair cell honestly reports an interval of zero width, which
+        reads as "one pair" rather than as a precision it does not have.
+        """
+        if len(ratios) < 2:  # noqa: PLR2004 - one draw resamples to itself; the interval is the point
+            only = median(ratios) if ratios else 0.0
+            return only, only
+        random = Random(SPREAD_SEED)
+        drawn = sorted(median(random.choices(ratios, k=len(ratios))) for _ in range(SPREAD_DRAWS))
+        low = drawn[int(SPREAD_TAILS * SPREAD_DRAWS)]
+        high = drawn[min(int((1.0 - SPREAD_TAILS) * SPREAD_DRAWS), SPREAD_DRAWS - 1)]
+        return low, high
+
+    def regimes(self) -> list[tuple[float, int, float, tuple[float, float]]]:
+        """The compression re-read at each quantile floor: (floor, pairs, median, interval)."""
         found = []
         for fraction in REGIME_QUANTILES:
             floor = self.floor_at(fraction)
             count, value = self.compression_above(floor)
-            found.append((floor, count, value))
+            found.append((floor, count, value, self.spread(self.ratios_above(floor))))
         return found
 
     def report(self, near: float | None = None) -> str:
@@ -261,12 +295,17 @@ class BoardTransfer:
             f"over the WHOLE record — the wrong number to price an arm with, see below",
         ]
         lines += [
-            f"  among entries at or above {floor:.4f}: {count} resolved pairs, median {value:+.2f}"
-            for floor, count, value in self.regimes()
+            f"  among entries at or above {floor:.4f}: {count} resolved pairs, "
+            f"median {value:+.2f} [{low:+.2f}, {high:+.2f}]"
+            for floor, count, value, (low, high) in self.regimes()
         ]
         if near is not None:
             count, value = self.compression_above(near)
-            lines.append(f"  among entries at or above {near:.4f} (asked for): {count} pairs, median {value:+.2f}")
+            low, high = self.spread(self.ratios_above(near))
+            lines.append(
+                f"  PRICE AN ARM AT THIS ONE: at or above {near:.4f} (asked for), {count} pairs, "
+                f"median {value:+.2f} [{low:+.2f}, {high:+.2f}]"
+            )
         lines += [
             f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
             f"{sum(pair.inverted for pair in pairs if pair.resolved)}/"

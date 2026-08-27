@@ -103,13 +103,37 @@ def test_compression_above(tmp_path: Path):
     assert transfer.compression_above(0.8600) == (0, 0.0), "no resolved pair survives the floor"
 
 
+def test_ratios_above(tmp_path: Path):
+    """The ratios the regime median is taken over, so a thin cell can be seen to be thin."""
+    transfer = BoardTransfer(_record(tmp_path))
+
+    assert sorted(transfer.ratios_above(0.0)) == [
+        pytest.approx(2.3077, abs=1e-4),
+        pytest.approx(4.0),
+    ], "both resolved pairs"
+    assert transfer.ratios_above(0.8600) == [], "the only pair starting that high is UNRESOLVED"
+
+
+def test_spread(tmp_path: Path):
+    """A median quoted without its interval is how 1.72 became a constant; the interval brackets it."""
+    transfer = BoardTransfer(_record(tmp_path))
+
+    assert transfer.spread([]) == (0.0, 0.0), "nothing measured is not a point estimate of zero spread"
+    assert transfer.spread([4.0]) == (4.0, 4.0), "one draw resamples to itself"
+    low, high = transfer.spread(transfer.ratios_above(0.0))
+    assert low <= high
+    assert low >= 2.3, "a bootstrap cannot leave the ratios it drew from"
+    assert high <= 4.0, "nor exceed the largest of them"
+
+
 def test_regimes(tmp_path: Path):
     """Every floor is reported with its own pair count, because the top cell is always the thinnest."""
     regimes = BoardTransfer(_record(tmp_path)).regimes()
 
     assert len(regimes) == len(REGIME_QUANTILES)
-    assert [count for _, count, _ in regimes] == [0, 0], "nothing above the median is resolved here"
-    assert all(floor >= 0.8500 for floor, _, _ in regimes), "floors come from the entries themselves"
+    assert [count for _, count, _, _ in regimes] == [0, 0], "nothing above the median is resolved here"
+    assert all(floor >= 0.8500 for floor, _, _, _ in regimes), "floors come from the entries themselves"
+    assert all(low <= high for *_, (low, high) in regimes), "every regime carries an interval"
 
 
 def test_report(tmp_path: Path):
