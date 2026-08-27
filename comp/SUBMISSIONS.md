@@ -2467,3 +2467,28 @@ is not evidence about the members.
 restarts from fitted encoders, which 0 of 131 arms have ever used — is the open lane.
 
 Kit `fec94e7`, submission `55817896`. Slot 4 of 5 on 2026-08-27.
+
+## calibsolo — 0.923 · one seat of the champion, to price the bonus
+
+Seat 1 of `calibsix` (`final_ws_cf`) served **alone**. Same kit, same feed, same witness-clean member as
+the six-seat champion, so the only thing that changed is the count.
+
+**The ensemble bonus is +0.018.** 0.941 at six seats against 0.923 at one. Six prior seating entries span
+0.937–0.941 and none of them could separate that bonus from seat count or member choice, because none of
+them ever read one seat.
+
+**It lands in the middle pre-registered band** (0.921–0.931: no reordering). Ensembling is not the whole
+engine (that needed ≤0.920) and member quality is not the whole remaining lane (that needed ≥0.932). Both
+halves stay live.
+
+**No offline number, and the null is the honest entry.** `final_ws_cf.metrics.jsonl` carries a recipe and
+no holdout mean. This seat has been on the board inside the champion for days and has never been read on
+our own ruler — worth fixing before it is trusted further.
+
+**Where it sends us, and it is not where slot 4 pointed.** 0.923 against `soloseat_v1`'s 0.925 says our
+best board single has not moved. The same day's foreign read put `raptor_v4_swa` at **0.8938** on our
+909-study holdout against our best member's 0.8634 — +0.030 of member quality that has never been on the
+board at all. The +0.018 measured here is what a better seat 1 gets **added to**, not what it competes
+with. See `interpretations/kneemri/2026-08-27_the-feed-was-the-whole-shortfall.md`.
+
+Kit `a642ba8`, submission `55828490`. Slot 5 of 5 on 2026-08-27.

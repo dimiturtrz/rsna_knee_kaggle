@@ -15,6 +15,33 @@ through **their** decode over **our** fold-0 holdout:
 +0.0281, against this pair's own 0.0062 paired floor. 0 of 909 studies fell back (0.0%), so the number
 is over the whole holdout and not over the subset the adapter happened to parse.
 
+## All six, and the adapter validating itself
+
+The other five ran the same way, every one at 0.0% fallback:
+
+| member | our 909 | vs our best | their published gold (58) |
+|---|---|---|---|
+| `raptor_v4_swa` | **0.8938** | +0.0304 | 0.9150 |
+| `raptor_v4` | 0.8915 | +0.0281 | 0.9167 |
+| `raptor_v9` | 0.8769 | +0.0135 | 0.9031 |
+| `raptor_effv2l480` | 0.8703 | +0.0069 | 0.8716 |
+| `raptor_cnv2b336` | 0.8550 | −0.0084 | 0.8901 |
+| `raptor_coat384` | 0.8508 | −0.0126 | 0.9025 |
+
+Four of six beat our best member. Three clear the paired floor by a wide margin; the fourth only just.
+
+**The two rulers agree on the top three, in order** — v4 and its SWA twin first and second, v9 third — on
+sets fifteen times apart in size. A plumbing bug does not preserve a rival's own ranking of six checkpoints
+it knows nothing about. That is the self-check no single checkpoint could provide.
+
+Where they disagree, `coat384` and `cnv2b336` invert. At n=58 with per-label SE 0.031–0.072 those three are
+one indistinguishable clump on their ruler, so the inversion is what small-sample noise looks like — and it
+is confined to the checkpoints not worth seating.
+
+**The family has one signature.** All six are worse than our member at Synovitis (−0.052 to −0.094), five of
+six worse at Effusion, all six better at Fracture. Independently, on every checkpoint. The large fluid
+collections are ours and the focal findings are theirs — a structural trade, not one member's scatter.
+
 ## The denominator, first, because three numbers in this story live on two different sets
 
 Their published **0.9167** and our earlier cache read of **0.8819** are both over the **58 gold-annotated
@@ -68,5 +95,28 @@ Seating `raptor_v4` is the next slot. It was not spent tonight on purpose: the l
 mounting and witnessing it could not have finished before the 00:00Z reset. A rushed seat would have spent
 the slot on the packaging rather than on the member.
 
-`knee-tlba`, the five remaining checkpoints, is no longer speculative: the adapter is proven end to end at
-0.0% fallback, and the five are running.
+Seating is `knee-p0gk`, and the member is `raptor_v4_swa`. `calibsolo` scored 0.923 the same evening, which
+puts the six-seat ensemble bonus at +0.018 over its own first seat — the +0.030 measured here is what a
+better seat 1 gets **added to**, not what it competes with.
+
+The remaining question is not the member. It is whether their **decode** can be served inside a Kaggle
+kernel without vendoring third-party code, which `knee-p0gk` states as the thing to decide before building.
+
+## A ruler that disagrees with itself
+
+`knee-3uje` read the same checkpoint against `calib_span_hold_s2026` on the 58 gold studies and found a
+genuine null: 0.9167 against 0.9152. On the 909, that same member is **0.8565** — behind by 0.0350.
+
+Going from the 58 to the 909, our member falls 0.0587 and theirs falls 0.0252. The small set flatters ours
+by more than twice as much.
+
+The first suspect is **our own selection**, not their model. The 58 are held out of training on both sides,
+which is what that bead checked. They are not held out of member *choice*: `calib_span_hold` is the best of
+105 arms as read on that set, and a maximum over 105 draws at a per-label SE of 0.031–0.072 buys several
+hundredths for free. Raptor's number is one self-reported figure with no such search behind it. `knee-3uje`
+made exactly this argument against its own per-label oracle; it applies to the macro too, with 105 draws
+rather than two.
+
+So `knee-rh4t`'s member gap is not retired after all. Removing the two-ruler artefact does not leave a null —
+it leaves a gap measured on our own ruler, which is a stronger form of the same claim than the forum numbers
+ever were.
