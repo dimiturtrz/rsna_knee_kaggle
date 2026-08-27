@@ -79,3 +79,15 @@ own artefacts rather than inferred from someone else's pipeline description.
 The forum claims are also unaudited. Every number in the "what the field is saying" section is a
 participant's self-report during a live competition, and this project has already learned once
 (biohub's 0.913) that a claimed replication is unknowable until it is on the board.
+
+## POSTSCRIPT 2026-08-27 — the 0.027 was bounded, and it spans zero
+
+The paragraph above asked for an interval and one now exists: paired over the same 58 studies, the gap
+reads **+0.0266 [−0.0082, +0.0610]**. It includes zero, so the aggregate cannot say which half of the
+pipeline is weaker, and the headline of this page — that our model sits below its own teacher — is not
+supported by the evidence this page is built on. It was a direction; it is not a finding.
+
+What survives is the SPLIT, not the average: four per-finding bands exclude zero — ACL, MCL and Lateral
+Meniscus on the deficit side, Effusion on the label side — which is the dilution `Bottleneck`'s docstring
+predicted. The full reading is `2026-08-27_the-supervision-gap-is-four-findings-not-an-average.md`, and
+`SupervisionGap.separation` now prints the band so this number cannot be quoted bare again.

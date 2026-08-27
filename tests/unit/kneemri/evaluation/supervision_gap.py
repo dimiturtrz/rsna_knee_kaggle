@@ -10,6 +10,9 @@ from core.findings import TARGETS
 from kneemri.evaluation.supervision_gap import SupervisionGap
 
 STUDIES = 8
+SEED = 2026
+RESAMPLES = 200
+"""Enough resamples for a band to be stable at these separations, few enough to keep the unit fast."""
 
 
 def _train_table(path: Path, *, annotate: int) -> Path:
@@ -117,6 +120,32 @@ def test_against():
 
     inverted = gap.against(1.0 - truth, truth)
     assert inverted[TARGETS[0]] == 0.0, "the same measurement either way round, not an absolute value"
+
+
+def test_separation():
+    """The aggregate gap carries a band, and the band answers the question the point estimate cannot.
+
+    Two equivalence classes, because only the two verdicts matter: labels that genuinely beat the
+    model, where the paired interval must exclude zero and say so; and labels IDENTICAL to the model,
+    where the difference is exactly zero on every resample and no reading may claim a weaker half.
+    """
+    generator = np.random.default_rng(SEED)
+    truth = (generator.random((80, len(TARGETS))) > 0.5).astype(np.float32)
+    values = truth + generator.normal(0.0, 0.25, truth.shape).astype(np.float32)
+    predictions = truth + generator.normal(0.0, 1.4, truth.shape).astype(np.float32)
+    gap = SupervisionGap()
+
+    separated = gap.separation(values, predictions, truth, resamples=RESAMPLES)
+
+    assert separated[0].startswith("labels - model: +"), "the noisier column is the weaker half"
+    assert "over 80 studies" in separated[0], "the denominator is stated, never left to the reader"
+    assert "EXCLUDES zero" in separated[1]
+    assert "of 12 per-finding bands" in separated[2]
+
+    tied = gap.separation(values, values.copy(), truth, resamples=RESAMPLES)
+
+    assert tied[0].startswith("labels - model: +0.0000")
+    assert "SPANS zero" in tied[1], "a column against itself may never be called the weaker half"
 
 
 def test_bottlenecked():

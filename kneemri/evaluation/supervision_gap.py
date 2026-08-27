@@ -37,6 +37,7 @@ import pandas as pd
 from jaxtyping import Float
 
 from core import cli
+from core.bootstrap import STUDY_RESAMPLES
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import LabelScores
@@ -224,6 +225,44 @@ class SupervisionGap:
             model_side=model_side,
         )
 
+    def separation(
+        self,
+        values: Float[np.ndarray, "kept targets"],
+        predictions: Float[np.ndarray, "kept targets"],
+        truth: Float[np.ndarray, "kept targets"],
+        resamples: int = STUDY_RESAMPLES,
+    ) -> list[str]:
+        """How far the model is from its own labels, WITH the interval the aggregate never carried.
+
+        `report` prints two aggregates and their difference. That difference is the number this project
+        reasons from — it decides whether the next arm buys a better READER or a better MODEL — and it
+        was published unbounded: `2026-08-25_forum-bottleneck-vs-our-own-diagnostic.md` says so in its
+        own words, that 58 studies and ~696 cells separate the 0.027 from zero by nothing stated. A
+        number that steers the queue and cannot say whether it is zero is not a measurement yet.
+
+        PAIRED, and it must be. Both columns are scored on the SAME studies against the SAME
+        annotations, so the difficulty of a study — which dominates either absolute AUC on 58 rows —
+        cancels in the difference. `mean_interval` on each column separately would report two wide bands
+        that overlap heavily and say nothing about whether one beats the other, which is the exact
+        mistake `paired_mean_interval` was written to stop.
+
+        The per-finding count comes with the same warning `MemberCurve` prints for a searched roster:
+        twelve bands read together are twelve chances to exclude zero, so the count is a shape of the
+        evidence and never twelve findings. The AGGREGATE is the one comparison named in advance.
+        """
+        low, high = self.scores.paired_mean_interval(predictions, values, truth, resamples)
+        bands = self.scores.paired_interval(predictions, values, truth, resamples)
+        resolved = [target for target, (lower, upper) in bands.items() if lower > 0.0 or upper < 0.0]
+        return [
+            f"labels - model: {self.scores.mean(values, truth) - self.scores.mean(predictions, truth):+.4f}  "
+            f"[{low:+.4f}, {high:+.4f}]  over {truth.shape[0]} studies",
+            "  the interval EXCLUDES zero: the model is the weaker half on our own evidence"
+            if low > 0.0
+            else "  the interval SPANS zero: these studies cannot say which half is weaker",
+            f"  {len(resolved)} of {len(bands)} per-finding bands exclude zero — twelve reads, so a shape, "
+            f"not twelve findings: {', '.join(resolved) or 'none'}",
+        ]
+
     def report(self, reference: dict[str, float], achieved: dict[str, float]) -> list[str]:
         """Every finding ordered by what holds it back, with the dividing line drawn explicitly.
 
@@ -287,6 +326,8 @@ def main() -> None:
     logger.info("%d annotated studies with a held-out prediction", len(values))
 
     command.report(gap.report(gap.against(values, annotations), gap.against(predictions, annotations)))
+    # The aggregate above steers which arm gets built next, so it never prints without its interval.
+    command.report(gap.separation(values, predictions, annotations))
     # WHERE the graded label becomes a positive, which decides the base rate our ruler scores against.
     command.report(gap.thresholds(values, annotations))
 
