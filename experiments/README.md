@@ -4668,11 +4668,38 @@ and "EMA did nothing and calibration survived" are the same rung. That arm can s
 substitution, which is worth the 85 minutes it is already spending, but it cannot license the route. This
 table can.
 
-**The honest limits.** One seed per cell, so the interaction - a difference of differences - carries
-roughly 1.4x a single comparison's noise, about 0.0088. -0.0011 is well inside that: this establishes
-that the two terms do not SUBSTITUTE, not that they add to the last decimal. And "best epoch" selection
-on a noisy curve lifts every cell by roughly its local jitter, which largely cancels in a
-difference-of-differences but does not vanish.
+**The honest limits, and the largest one was nearly missed.** All four cells carry
+`--hold-annotations` (verified in each recipe stamp, along with the same labels file and the full
+12-epoch budget), so the 2x2 is internally matched. But the SAME contrasts exist in the non-hold family
+and they do not agree:
+
+| contrast | hold family | non-hold family | gap |
+|---|---|---|---|
+| calibration at the span corner | `band_span_hold` 0.8493 -> `calib_span_hold` 0.8565 = **+0.0072** | `band_span` 0.8565 -> `calib_span` 0.8545 = **-0.0020** | **0.0092, SIGN INVERTED** |
+| slice count without calibration | `band_span_hold` -> `band_dense_hold` = **+0.0080** | `band_span` -> `band_dense` = **+0.0013** | 0.0067 |
+
+`--hold-annotations` removes the 58 annotated studies from TRAINING and changes what is evaluated, so
+the two families are different denominators and neither is wrong. What it means is that **both main
+effects of this 2x2 are properties of the holdout definition as much as of the levers**, at 1.1-1.5
+floors. The INTERACTION is computed entirely within the matched hold family and stays valid there; its
+generality is untested, and the non-hold interaction CANNOT be computed because `calib_dense` was never
+launched. So: additivity is established for this holdout, not globally, and the honest claim is that the
+two terms do not substitute HERE.
+
+One seed per cell besides, so the difference of differences carries roughly 1.4x a single comparison's
+noise, about 0.0088, and -0.0011 sits well inside it. Best-epoch selection on a noisy curve lifts every
+cell by roughly its local jitter, which largely cancels in a difference of differences but does not
+vanish.
+
+**AND IT CONTRADICTS THE REASONING THAT KILLED AN ARM.** The `calib_span` row above concluded "a
+calibration that is negative on the span corner cannot be positive on the denser one for any reason this
+evidence supports", and `calib_dense` (knee-ep74) was cancelled unlaunched on that inference.
+`calib_dense_hold` reads **+0.0061** - positive on the denser corner, in the family where the span corner
+is also positive. That does not restore `calib_span`'s number, which stands as measured on its own
+holdout; it shows the inference from one corner's SIGN to another's was the step that failed, and it is
+the same step this table exists to test. The cancellation was reasonable on what was known and is now
+superseded: whether calibration pays at the dense corner is answered YES on one holdout and untested on
+the other.
 
 **Set against the only other composition measurement this project owns, the pair now tells a mechanism
 story rather than a verdict.** `merged_dense_cf` read the SAME slice-count move as -0.0028 on the merged
