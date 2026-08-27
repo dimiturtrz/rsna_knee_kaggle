@@ -4638,3 +4638,77 @@ structure), where `--calibrated-targets` and `--ema` are mechanically independen
 targets say, the other changes which weights are kept. But it moves the honest prior on `stackfit` off
 "additive unless shown otherwise", and it means an additive read there should be believed *less*, not
 more. Stated before that number lands, so it cannot be fitted to it afterwards.
+
+### The additivity question `knee-orjq` gates the whole route on is ALREADY ANSWERED, on disk, and it reads ADDITIVE
+
+Found 2026-08-27 06:55Z, card-free, while `stackfit` was at epoch 1 of 12 betting on the same question
+with less power. Nothing was trained for this. Four checkpoints the project already held form a complete,
+matched 2x2, and no one had ever put them in a table.
+
+The four cells are matched on everything except two axes: slice count (12 vs 20) and
+`--calibrated-targets`. All four are 336 px, band 0.1-0.9, `ema False`, `patience 0`, seed 2026, fold 0
+holdout, and all four ran their full 12 epochs.
+
+|  | calib OFF | calib ON | calibration effect |
+|---|---|---|---|
+| **12 slices** | `band_span_hold` **0.8493** (e7) | `calib_span_hold` **0.8565** (e9) | **+0.0072** |
+| **20 slices** | `band_dense_hold` **0.8573** (e7) | `calib_dense_hold` **0.8634** (e6) | **+0.0061** |
+| **slice-count effect** | **+0.0080** | **+0.0069** | |
+
+Additive prediction for the far corner: 0.8493 + 0.0072 + 0.0080 = **0.8645**. Observed **0.8634**.
+
+**Interaction = -0.0011**, against a 0.0062 three-seed paired floor. One sixth of it. **ADDITIVE.**
+
+**Why this one has power where `stackfit` does not.** `knee-orjq` needs two terms EACH worth more than
+the floor, or an additive reading is consistent with a stack of one. Here both main effects clear it:
++0.0072 and +0.0080. `stackfit`'s second term does not - `ema_dense` 0.8588 against `band_dense` 0.8573
+is **+0.0015**, and the singles decompose its 0.8644 prediction into +0.0061 of calibration and +0.0015
+of EMA. Its ADDITIVE band, 0.8582-0.8706, CONTAINS `calib_dense_hold`'s own 0.8634, so "both terms added"
+and "EMA did nothing and calibration survived" are the same rung. That arm can still refute gross
+substitution, which is worth the 85 minutes it is already spending, but it cannot license the route. This
+table can.
+
+**The honest limits.** One seed per cell, so the interaction - a difference of differences - carries
+roughly 1.4x a single comparison's noise, about 0.0088. -0.0011 is well inside that: this establishes
+that the two terms do not SUBSTITUTE, not that they add to the last decimal. And "best epoch" selection
+on a noisy curve lifts every cell by roughly its local jitter, which largely cancels in a
+difference-of-differences but does not vanish.
+
+**Set against the only other composition measurement this project owns, the pair now tells a mechanism
+story rather than a verdict.** `merged_dense_cf` read the SAME slice-count move as -0.0028 on the merged
+corpus against +0.0053 on ours: 0.0081 apart, sign inverted, 1.3 floors - SUBSTITUTION. Here calibration
+and slice count compose at -0.0011 - ADDITIVE. The difference is exactly the channel argument written
+into the merged entry before either number landed: a better-labelled corpus and a denser read are two
+ways of resolving the same fine structure and eat each other, while what the targets SAY and how many
+slices are READ are mechanically independent and do not. Composition is not a property of this project's
+gains in general; it is a property of whether two levers touch the same channel. That is a usable rule,
+and it is the first one the additivity question has produced.
+
+**What it licenses, and the arm it does NOT license - checked before proposing rather than after.**
+Stacking independent-channel terms is now evidenced, so the member-quality lane's ceiling is set by how
+many such terms exist, not by whether they compose. The obvious next arm is the slice-count term, worth
++0.0080 offline - LARGER than calibration's +0.0061 - applied at roster scale the way `calibsix_v1`
+applied calibration. **That arm is void, and the reason is the finding.** The champion is already MIXED:
+
+| seat | slices | band | 
+|---|---|---|
+| `final_ws_cf`, `grade_ladder_cf`, `through_dense_cf` | 20 | 0.1-0.9 |
+| `calib_span_ff` | 12 | 0.1-0.9 |
+| `merged_blend_cf`, `lr4e-5_ws_cf` | 12 | 0.2-0.8 |
+
+Three seats already carry the term; moving the other three does not ADD a lever, it COLLAPSES the pixel
+groups onto one. That collapse is measured: `knee-nas5` read it as 0.0059 offline and **0.014 on the
+board**, a 2.4x compression, and it is the only ensemble axis with a board transfer at all. So the arm
+trades a +0.0080 offline floor-raise on three seats against a -0.014 board diversity loss, using the
+weaker of the two rulers to buy the trade. It would lose, and it would take four hours of card to find
+out.
+
+**Which turns the additivity result into a sharper statement about the route than the one it was asked
+for.** Terms compose when they touch different channels - established above. But a ROSTER has a fixed
+number of seats, and quality and decode-path diversity both spend the same seat. So at member level the
+gains add, and at roster level they compete, and `calibsix_v1`'s 23% pass-through is what that competition
+looks like from the board: six seats' worth of offline gain arriving as one seat's worth of board gain.
+The member-quality lane ceilings near 0.943 not because the terms fail to stack but because the roster
+cannot hold more of them without giving up what it already holds. Reaching 0.950 therefore needs a seat
+that is BOTH high-quality and in a pixel group nothing else occupies - which is external data and a
+different decode path in the same member, not another term on an existing seat.
