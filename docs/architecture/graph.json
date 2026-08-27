@@ -8324,12 +8324,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
-      "target": "kneemri.evaluation.foreign_member.ForeignMember.series",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.evaluation.foreign_member.ForeignMember.record",
       "target": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
       "weight": 1
@@ -26756,14 +26750,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_member.ForeignMember.record",
       "label": "record",
-      "level": "method",
-      "parent": "kneemri.evaluation.foreign_member.ForeignMember",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.foreign_member.ForeignMember.series",
-      "label": "series",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_member.ForeignMember",
       "role": null
