@@ -116,7 +116,16 @@ dinov3_base_lora_s2026.pt   # 0.8268 — the only DINOv3-BASE member, and the po
 # the board, a 2.4x under-pricing of diversity (knee-nas5, knee-7d1), and an encoder change is a strictly
 # larger diversity step than a decode change. `calib_span` is the precedent — mounted at -0.0020, it
 # carried the 0.929 entry.
-base_dense_s2026.pt         # 0.8512 — the only DINOv2-BASE member; the encoder SIZE axis, never varied on the board
+base_dense_s2026.pt         # 0.8512 — the only DINOv2-BASE member; the encoder SIZE axis
+#
+# CORRECTION 2026-08-27. The tail of that line read "never varied on the board" until today, and it is
+# now false by twenty-three kernels: every entry from `basedense` onward names a base member, and the
+# axis has been priced. Board-scored entries that seat one span 0.934–0.939; the two best entries this
+# competition has produced — `calibsix` 0.941 and the 0.939 above it — do NOT seat one. So the encoder
+# SIZE axis is measured, not unmeasured, and it is measured FLAT-to-DOWN at the top of the board. Read
+# this before pricing a base seat: the stale line very nearly bought a slot on 2026-08-27 as "an axis
+# never tried", which is the second time a roster CLAIM outlived the measurement that made it true.
+#
 # Added 2026-08-20. Every one of the eight scored entries is 100% DINOv2-SMALL, and the two pending ones
 # (`crossenc`, `maxdiv`) vary the encoder FAMILY with a weak member (`dinov3_base_lora`, 0.8268). This
 # varies the SIZE with a strong one: 768 wide against small's 384, twelve layers deeper, trained on the
