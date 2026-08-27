@@ -64,8 +64,10 @@ PRE-REGISTRATION, written before the number, against the 0.937 that BOTH control
   suspect is the kernel loading vitb16 differently than training wrote it; `witness_check` covers exactly
   that and must be re-run before the number is believed.
 
-`board_transfer` currently reads **+1.82** board points per holdout point. Any inherited prose in this
-directory quoting 4.67, 2.14 or 1.92 is stale.
+`board_transfer` currently reads **+1.72** board points per holdout point (2026-08-27, fitted on the
+completed `comp/board.jsonl` — the +1.82 it read before was fitted on 34 of 58 submissions). Any
+inherited prose in this directory quoting 4.67, 2.14, 1.92 or 1.82 is stale; `board_check --live` is the
+only place to read it from.
 """
 
 # >>> KERNEL-BOOTSTRAP

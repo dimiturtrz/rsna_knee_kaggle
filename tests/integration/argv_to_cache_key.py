@@ -18,7 +18,7 @@ import pytest
 from core.data.corpus import build_cache
 from core.data.corpus.crop_centre import CENTRES, DEFAULT_CENTRE, Crop
 from core.data.corpus.slot_reader import Band, Reading
-from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, TIES, Routing
+from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, FOREIGN_SCHEMES, SCHEMES, TIES, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.paths import COMPETITION
 
@@ -88,8 +88,14 @@ def test_the_scheme_reaches_the_key(root: Path, monkeypatch: pytest.MonkeyPatch,
     assert "extended" in printed
 
 
+OWN_SCHEMES = tuple(name for name in SCHEMES if name not in FOREIGN_SCHEMES)
+"""The schemes `build_cache` will decode. It refuses the foreign ones outright — it reads OUR study list
+whatever `--scheme` says, so naming another corpus there writes our studies under that corpus's filename
+(knee-48br). Their keys are exercised by their own builders; the refusal itself is pinned in
+`tests/unit/core/data/corpus/build_cache.py`, so no name in `SCHEMES` goes unexercised."""
+
 READING_VOCABULARIES = {
-    "--scheme": (tuple(SCHEMES), CANONICAL_SCHEME),
+    "--scheme": (OWN_SCHEMES, CANONICAL_SCHEME),
     "--centre": (tuple(CENTRES), DEFAULT_CENTRE),
     "--tie": (TIES, FIRST_MAXIMAL),
 }

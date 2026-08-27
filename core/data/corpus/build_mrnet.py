@@ -24,11 +24,13 @@ def main() -> None:
     CacheFlags.add_to(command.parser)
     command.parser.add_argument("--archive", type=Path, required=True, help="the MRNet-v1.0 dataset zip")
     command.parser.add_argument(
-        "--spacing",
+        "--pixel-spacing",
         type=float,
         default=MRNET_SPACING,
         help="millimetres per pixel in plane. Derived rather than recorded — the corpus states no "
-        "spacing — and weaker evidence than Rijeka's; see MRNET_SPACING.",
+        "spacing — and weaker evidence than Rijeka's; see MRNET_SPACING. Named apart from CacheFlags' "
+        "`--spacing`, which selects how slices sit inside the band: two subjects, one word, and argparse "
+        "refused the collision rather than letting either flag win.",
     )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
@@ -43,7 +45,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, arguments.out or root.processed())
-    corpus = MRNetCorpus(arguments.archive, cache, spacing=arguments.spacing)
+    corpus = MRNetCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing)
 
     corpus.labels(root.processed() / "labels" / LABELS)
     logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")

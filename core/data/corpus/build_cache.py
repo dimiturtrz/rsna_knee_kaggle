@@ -12,6 +12,7 @@ from pathlib import Path
 from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.folds import ReportFolds
+from core.data.corpus.slots import FOREIGN_SCHEMES
 from core.data.corpus.study_cache import CorpusSplit
 from core.wakelock import Wakelock
 
@@ -32,6 +33,15 @@ def main() -> None:
     command.parser.add_argument("--holdout-fold", type=int, default=None, help="cache only this fold's holdout studies")
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
+
+    if arguments.scheme in FOREIGN_SCHEMES:
+        # This builder always decodes OUR study list; the scheme only names the output file. So a
+        # foreign scheme here writes our corpus under a name that promises another one, and for
+        # `merged` the shape matches too — see FOREIGN_SCHEMES for the 59.7 GB that cost.
+        command.parser.error(
+            f"--scheme {arguments.scheme} names a corpus this builder cannot decode: it would write OUR "
+            f"studies under that name. Use core.data.corpus.build_{arguments.scheme}"
+        )
 
     root = command.rooted(arguments)
     raw = root.raw()

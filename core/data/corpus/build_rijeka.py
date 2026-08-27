@@ -24,11 +24,13 @@ def main() -> None:
     CacheFlags.add_to(command.parser)
     command.parser.add_argument("--archive", type=Path, required=True, help="the kneeMRI dataset zip")
     command.parser.add_argument(
-        "--spacing",
+        "--pixel-spacing",
         type=float,
         default=RIJEKA_SPACING,
         help="millimetres per pixel in plane. Derived rather than recorded — the corpus states no "
-        "spacing — and checked against its own ACL bounding boxes; see RIJEKA_SPACING.",
+        "spacing — and checked against its own ACL bounding boxes; see RIJEKA_SPACING. Named apart "
+        "from CacheFlags' `--spacing`, which selects how slices sit inside the band: two subjects, "
+        "one word, and argparse refused the collision rather than letting either flag win.",
     )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
@@ -42,7 +44,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, arguments.out or root.processed())
-    corpus = RijekaCorpus(arguments.archive, cache, spacing=arguments.spacing)
+    corpus = RijekaCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing)
 
     corpus.labels(root.processed() / "labels" / LABELS)
     logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")

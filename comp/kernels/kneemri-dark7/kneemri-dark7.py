@@ -28,12 +28,15 @@ retired member SELECTION as a lever. It cannot retire member COUNT on the one me
   all-data recipe rather than the count, and the harness is the first suspect, not the idea.
 
 **STALE-CONSTANT WARNING, since this file was cloned from `dark6` and that entry's header carries it:**
-`board_transfer` reads **+1.82** board points per holdout point as of 2026-08-24, not the +2.14 quoted
-below and not the 4.67 this project priced against for three months. It is fitted entirely on entries at
-or below 0.933, so any figure derived from it at the top of the board is a floor, not an estimate.
+`board_transfer` reads **+1.72** board points per holdout point as of 2026-08-27, not the +2.14 quoted
+below, not the +1.82 this header carried until then, and not the 4.67 this project priced against for
+three months. The +1.82 was fitted on an INCOMPLETE record: `comp/board.jsonl` held 34 of the
+competition's 58 submissions, and the fifteen scored all-ours entries it was missing pull the slope down.
+It is fitted entirely on entries at or below 0.939, so any figure derived from it at the top of the board
+is a floor, not an estimate. Re-read it with `board_check --live` rather than trusting this line.
 
 The inherited discussion below is `dark6`'s and is kept because its reasoning about the blind axis is what
-licensed this entry; read its arithmetic against +1.82.
+licensed this entry; read its arithmetic against +1.72.
 
 --- inherited from kneemri-dark6 ---
 

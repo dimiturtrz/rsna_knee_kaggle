@@ -219,6 +219,20 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 
+FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, MERGED_SCHEME)
+"""Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
+
+WHY THIS TUPLE EXISTS. `--scheme` selects a FILENAME, not a corpus: `Routing.suffix()` appends it and
+nothing else consults it, so `build_cache --scheme merged` decodes our own 4407 studies and writes them
+to `images_336px_20sl_0.1-0.9band_merged.npy` — a file named for 5143 studies from two corpora. Shape
+cannot catch it, because `SCHEMES[MERGED_SCHEME]` IS `SLOTS`: our corpus under the merged name has the
+identical six-slot shape the real merged cache has, and differs only in the length of axis 0. That is
+59.7 GB and an hour, spent on 2026-08-27 (knee-48br), and it is the same failure `RIJEKA_SCHEME`'s own
+docstring already records escaping three times in the other direction.
+
+Each of these belongs to a builder that reads a different source: `build_rijeka` for the kneeMRI archive,
+`build_merged` for the concatenation. `build_cache` refuses all three rather than assuming."""
+
 
 class SlotScheme:
     """Assigns each study's series to slots, leaving a slot empty when nothing matches its predicate."""
