@@ -1,10 +1,11 @@
 # The rubric our reader was never given
 
-2026-08-27 · `python -m core.data.labels.tear_rubric` · no GPU, no slot · bead `knee-rwcy`
+2026-08-27 · `python -m core.data.labels.rubric_gap` · no GPU, no slot · beads `knee-rwcy`, `knee-ufz5`
 
 ## The host said what the labels mean, and it is not what our reader was asked
 
-Discussion topic 733491, answered by the competition host today:
+Discussion topic 733491, answered by the competition host today, and topic 733343 (the Overview thread
+it points to), which publishes the image-review criteria for all twelve findings:
 
 > For meniscal tears, the target is a definite tear; intrasubstance degenerative signals that do not
 > reach the articular surface are negative. … marrow edema, cartilage findings, and terminology in the
@@ -25,46 +26,59 @@ and not a faulty test or a faulty idea.
 
 ## How big
 
-`core.data.labels.tear_rubric` buckets each English report's meniscus sentences, side by side, and reads
-our derived target beside the bucket. The stated rule supplies the correct answer for the degenerative
+Three of the twelve published rules have the same shape — a MENTION of the structure, a vocabulary the
+rubric ACCEPTS, a vocabulary it names and calls NEGATIVE anyway, and a denial that must be subtracted
+before either is searched for. `core.data.labels.rubric_gap` holds one `RubricRule` per finding and reads
+our derived target beside the bucket. The stated rules supply the correct answer for the subthreshold
 class without needing any annotation, so the denominator is the corpus rather than the 58.
 
+The other nine turn on a size the report states in its own units ("moderate or large", "one centimetre
+of >50%-thickness loss"). That is `severity_boundary`'s shape, and it needs the annotations.
+
 ```
-1768 English studies of 4407 in the corpus (40.1%), both meniscus sides
-  degenerative signal, no definite tear   194 sides   our target positive  163
-  definite tear                          1015 sides   our target positive  972
-  tear denied, no degeneration            483 sides   our target positive    6
-  meniscus mentioned, neither word       1631 sides   our target positive   43
-sides the stated rule calls negative and our target calls positive: 163
+                                 subthreshold cells   ours positive   contradicted   of that finding's cells
+Medial/Lateral Meniscus                        196             165            165                     1.87%
+ACL                                            102              98             98                     2.22%
+MCL                                            213             207            207                     4.70%
+                                                                              ---
+                                                                              470
 ```
 
-**163 cells = 1.85% of the corpus's 8814 meniscus cells, and that is a FLOOR.** The tool reads 40.1% of
-the corpus; the other 59.9% is Spanish, Turkish, Croatian, Greek, German, Bulgarian, Dutch or French and
-carries the same wording in its own language. If the class rate is language-flat the corpus figure is
-nearer **4.6%**. The rate is stated over the corpus, not over the subset that parsed, because a rate
-computed inside the subset that happened to parse is not a rate over the corpus.
+**470 cells, and every one of them a FLOOR.** The tool reads 40.1% of the corpus; the other 59.9% is
+Spanish, Turkish, Croatian, Greek, German, Bulgarian, Dutch or French and carries the same wording in its
+own language. If the class rate is language-flat the corpus figures are nearer 4.7% / 5.5% / 11.7%. The
+rates are stated over the corpus, not over the subset that parsed, because a rate computed inside the
+subset that happened to parse is not a rate over the corpus.
 
-Concentration matters more than the raw share: 163 of the 194 degenerate-only sides — **84%** — are
-flipped, and they are flipped in one direction, onto the positive class of a finding whose prevalence is
-28%. That is not symmetric noise a bigger model averages out; it is a bias that moves the decision
-boundary.
+Concentration matters more than the raw share. **165 of 196, 98 of 102 and 207 of 213 — 84%, 96% and 97%
+— are flipped**, and all in one direction, onto the positive class. That is not symmetric noise a bigger
+model averages out; it is a bias that moves the decision boundary. Four of the twelve columns carry it.
 
-## The annotations agree with the host, not with us
+## The annotations agree with the host on two arms and hedge on the third
 
 Of the 58 annotated studies, 27 are English. Bucketed the same way:
 
 ```
-  degenerative signal, no definite tear   3 sides   annotated positive 0   our target positive 3
-  definite tear                          27 sides   annotated positive 23  our target positive 26
-  tear denied, no degeneration           10 sides   annotated positive 0   our target positive 1
+                       subthreshold cells   annotated positive   ours positive     accepted bucket
+Meniscus                                3                    0               3     23 of 27 agree
+ACL                                     1                    0               0     10 of 12 agree
+MCL                                     7                    3               7      2 of  2 agree
 ```
 
-3 of 3 settles nothing on its own. What makes it worth reading is the direction and the control: every
-degenerate-only cell is annotated 0 while our target calls all three positive, and in the other
-direction the tear bucket agrees 23 of 27 — so the ruler is not simply strict, and the disagreement is
-specific to the class the host named. The pilot table
+Meniscus is the clean one: every subthreshold cell is annotated 0 while our target calls all three
+positive, and in the other direction the accepted bucket agrees 23 of 27 — so the ruler is not simply
+strict, and the disagreement is specific to the class the host named. The pilot table
 (`2026-08-20_label_contest_pilot_tables.md`, row 33) had already flagged one of these by hand as a
 READER error; it was a RUBRIC error all along, and studies 059, 062, 088 and 090 are the same shape.
+
+**MCL is the largest arm and the least trustworthy one, and the annotation says so.** 3 of its 7
+subthreshold cells are annotated POSITIVE — the ruler and the radiologist disagree 43% of the time on
+exactly the class the count rests on. The likely cause is in the ruler, not the rule: `oedema|edema`,
+`thicken` and `strain` sit in the MCL subthreshold vocabulary, and a high-grade acute injury is
+described with all three. So treat 207 as an upper bound whose true share is unmeasured, and do not
+quote the 470 total without this line attached. ACL's 1 annotated cell settles nothing either way.
+
+The honest summary: **meniscus is measured, ACL is plausible and thin, MCL is flagged.**
 
 ## Why the blendlabels precedent does not price this down
 
@@ -81,27 +95,37 @@ Lateral Meniscus also carries this project's worst supervision gap (−0.193).
 
 ## What it is worth, and what it is not
 
-Do not oversell it. Two of twelve columns, so a per-column gain divides by six on the mean; and
-`calibsix`'s measured board pass-through is 23%. A meniscus AUC gain of 0.03–0.05 per side would be
-about +0.005–0.008 on the twelve-label mean and under +0.006 on the board — **directional under the 1.5%
-bar, not a finding on its own.** It is worth doing anyway for three reasons the bar does not capture: it
+Do not oversell it. Four of twelve columns, so a per-column gain divides by three on the mean; and
+`calibsix`'s measured board pass-through is 23%. An AUC gain of 0.03–0.05 on each of the four would be
+about +0.010–0.017 on the twelve-label mean and +0.002–0.004 on the board — **directional under the 1.5%
+bar on the board, and only at the bar on the holdout mean if all four move and MCL survives its own
+caveat.** It is worth doing anyway for three reasons the bar does not capture: it
 is a data fix rather than a knob, it is the first correction this project has that a HOST statement
 licenses rather than a measurement of our own, and it composes with everything already banked.
 
 ## Two fixes, and only one of them is right
 
-**(a) Post-hoc, English only.** Write `report_labels_v3` with the 163 cells set to absent. Minutes, no
+**(a) Post-hoc, English only.** Write `report_labels_v3` with the 470 cells set to absent. Minutes, no
 card. Rejected as the end state: it corrects 40% of the corpus and leaves 60% wrong, which converts a
 uniform label error into a **language-dependent** one. That is a new defect, not obviously smaller than
 the one it fixes.
 
-**(b) Re-read with a rubric-bearing prompt.** Three sentences added to `ReadingPrompt.system()` — the
-target is a definite tear reaching the articular surface; intrasubstance degenerative signal is
-negative; marrow-edema and cartilage terminology do not by themselves set Contusion or the OA columns —
-then re-read all 4406. It reaches every language because the READER does, not a regex, and it fixes the
-two classes beyond meniscus that the host named in the same answer. Costs one LLM pass over the corpus
-and no submission slot.
+**(b) Re-read with a rubric-bearing prompt** (`knee-ufz5`). The host's twelve criteria plus the global
+*"ambiguous or borderline findings were graded as negative to favor specificity"*, added to
+`ReadingPrompt.system()`, then re-read all 4406. It reaches every language because the READER does, not
+a regex, and it covers the nine findings this ruler cannot see as well as the three it can. Costs one
+LLM pass over the corpus and no submission slot.
 
 (b) is the one to run, gated on the card clearing its current queue. The measurement above is what makes
-it priceable: the re-read is scored by whether those 163 cells move, and a re-read that leaves them
-where they are has failed loudly instead of silently.
+it priceable: the re-read is scored by whether those 470 cells move — meniscus's 165 in particular,
+which is the arm the annotations back — and a re-read that leaves them where they are has failed loudly
+instead of silently. Second gate, which must not regress: `kneemri.evaluation.annotated_readings`.
+
+## What this does NOT reopen
+
+The confidence ladder. `0.68` for a hedge sits above the midpoint on 6461 cells (12.2% of the label
+matrix), which looks like it contradicts *"on the fence → negative"* — and it does not. `level_agreement`
+already measures that rung's pooled constant at **0.378** on our own annotated cells, consistent with
+pooling (χ² p=0.100) and settled on disjoint halves (0.9σ); and `calib_span` already spent an arm
+remapping every rung to its measured agreement, returning **−0.0020** with its per-label prediction
+inverted. This finding changes which RUNG a report earns. It says nothing about what a rung is worth.

@@ -734,6 +734,30 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.rubric_gap",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.rubric_gap",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.rubric_gap",
+      "target": "core.data.labels.report_language",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.rubric_gap",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.severity_boundary",
       "target": "core.cli",
       "weight": 1
@@ -777,30 +801,6 @@
     {
       "kind": "import",
       "source": "core.data.labels.targets",
-      "target": "core.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.labels.tear_rubric",
-      "target": "core.cli",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.labels.tear_rubric",
-      "target": "core.data.labels.reader_agreement",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.labels.tear_rubric",
-      "target": "core.data.labels.report_language",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.labels.tear_rubric",
       "target": "core.findings",
       "weight": 1
     },
@@ -6596,6 +6596,90 @@
     },
     {
       "kind": "references",
+      "source": "core.data.labels.rubric_gap.RubricGap",
+      "target": "core.data.labels.report_language.ReportLanguages",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.rubric_gap.RubricGap",
+      "target": "core.data.labels.rubric_gap.RubricRule",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.rubric_gap.RubricGap.__init__",
+      "target": "core.data.labels.report_language.ReportLanguages",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "target": "core.data.labels.rubric_gap.RubricGap._cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.bucket",
+      "target": "core.data.labels.rubric_gap.RubricGap.sentences",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.report",
+      "target": "core.data.labels.rubric_gap.RubricGap.contradicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.sentences",
+      "target": "core.data.labels.rubric_gap.RubricRule.sided",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.table",
+      "target": "core.data.labels.rubric_gap.RubricGap._cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.RubricGap.table",
+      "target": "core.data.labels.rubric_gap.RubricGap.bucket",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap.contradicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RubricGap.table",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.labels.severity_boundary.SeverityBoundary",
       "target": "core.data.labels.report_language.ReportLanguages",
       "weight": 1
@@ -6754,78 +6838,6 @@
       "kind": "calls",
       "source": "core.data.labels.targets.Targets.pair",
       "target": "core.data.labels.targets.Supervision.moves_the_ruler",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.labels.tear_rubric.TearRubric",
-      "target": "core.data.labels.report_language.ReportLanguages",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.labels.tear_rubric.TearRubric.__init__",
-      "target": "core.data.labels.report_language.ReportLanguages",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.TearRubric.annotated",
-      "target": "core.data.labels.tear_rubric.TearRubric._cells",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.TearRubric.bucket",
-      "target": "core.data.labels.tear_rubric.TearRubric.sentences",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.TearRubric.report",
-      "target": "core.data.labels.tear_rubric.TearRubric.contradicted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.TearRubric.table",
-      "target": "core.data.labels.tear_rubric.TearRubric._cells",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.TearRubric.table",
-      "target": "core.data.labels.tear_rubric.TearRubric.bucket",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.labels.tear_rubric.main",
-      "target": "core.data.labels.tear_rubric.TearRubric",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.main",
-      "target": "core.data.labels.tear_rubric.TearRubric.annotated",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.main",
-      "target": "core.data.labels.tear_rubric.TearRubric.contradicted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.main",
-      "target": "core.data.labels.tear_rubric.TearRubric.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.tear_rubric.main",
-      "target": "core.data.labels.tear_rubric.TearRubric.table",
       "weight": 1
     },
     {
@@ -17850,6 +17862,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.rubric_gap",
+      "label": "rubric_gap",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.severity_boundary",
       "label": "severity_boundary",
       "level": "module",
@@ -17868,14 +17888,6 @@
       "descendants": 0,
       "id": "core.data.labels.targets",
       "label": "targets",
-      "level": "module",
-      "parent": "core.data.labels",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric",
-      "label": "tear_rubric",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -19666,6 +19678,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap",
+      "label": "RubricGap",
+      "level": "class",
+      "parent": "core.data.labels.rubric_gap",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricRule",
+      "label": "RubricRule",
+      "level": "class",
+      "parent": "core.data.labels.rubric_gap",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.severity_boundary.SeverityBoundary",
       "label": "SeverityBoundary",
       "level": "class",
@@ -19703,14 +19731,6 @@
       "level": "class",
       "parent": "core.data.labels.targets",
       "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric",
-      "label": "TearRubric",
-      "level": "class",
-      "parent": "core.data.labels.tear_rubric",
-      "role": "primary"
     },
     {
       "descendants": 0,
@@ -24258,6 +24278,94 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap._cells",
+      "label": "_cells",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.annotated",
+      "label": "annotated",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.bucket",
+      "label": "bucket",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.contradicted",
+      "label": "contradicted",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.sentences",
+      "label": "sentences",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricGap.table",
+      "label": "table",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricRule.__post_init__",
+      "label": "__post_init__",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RubricRule.sided",
+      "label": "sided",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap.RubricRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.rubric_gap",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.severity_boundary.SeverityBoundary.__init__",
       "label": "__init__",
       "level": "method",
@@ -24478,78 +24586,6 @@
       "label": "supervised",
       "level": "method",
       "parent": "core.data.labels.targets.Targets",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric._cells",
-      "label": "_cells",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.annotated",
-      "label": "annotated",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.bucket",
-      "label": "bucket",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.contradicted",
-      "label": "contradicted",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.report",
-      "label": "report",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.sentences",
-      "label": "sentences",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.TearRubric.table",
-      "label": "table",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric.TearRubric",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.tear_rubric.main",
-      "label": "main",
-      "level": "method",
-      "parent": "core.data.labels.tear_rubric",
       "role": null
     },
     {
