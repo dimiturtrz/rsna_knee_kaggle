@@ -1094,6 +1094,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_ruler",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_ruler",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_ruler",
+      "target": "kneemri.evaluation.protocol_prior",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_ruler",
+      "target": "kneemri.evaluation.supervision_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.holdout_metrics",
       "target": "kneemri.evaluation.scores",
       "weight": 1
@@ -7948,6 +7972,108 @@
       "kind": "calls",
       "source": "kneemri.evaluation.encoder_drift.main",
       "target": "kneemri.evaluation.encoder_drift.EncoderDrift.repository",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignReading",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "target": "kneemri.evaluation.foreign_ruler.OracleNull",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "target": "kneemri.evaluation.protocol_prior.Ordering",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.against",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.auc",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.foreign",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignReading.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.oracle",
+      "target": "kneemri.evaluation.foreign_ruler.OracleNull",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.ours",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.against",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.ours",
+      "target": "kneemri.evaluation.foreign_ruler.StudyOrderError",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.report",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.oracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.ForeignRuler.report",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.standard_error",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.foreign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.ours",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.foreign_ruler.ForeignRuler.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_ruler.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
       "weight": 1
     },
     {
@@ -18003,7 +18129,7 @@
       "role": null
     },
     {
-      "descendants": 139,
+      "descendants": 140,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -18059,7 +18185,7 @@
       "role": null
     },
     {
-      "descendants": 31,
+      "descendants": 32,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -18102,6 +18228,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.encoder_drift",
       "label": "encoder_drift",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler",
+      "label": "foreign_ruler",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -20009,6 +20143,38 @@
       "level": "class",
       "parent": "kneemri.evaluation.encoder_drift",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignReading",
+      "label": "ForeignReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_ruler",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "label": "ForeignRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_ruler",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.OracleNull",
+      "label": "OracleNull",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_ruler",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.StudyOrderError",
+      "label": "StudyOrderError",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_ruler",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -25560,6 +25726,78 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.encoder_drift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignReading.load",
+      "label": "load",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.against",
+      "label": "against",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.foreign",
+      "label": "foreign",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.oracle",
+      "label": "oracle",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.ours",
+      "label": "ours",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.ForeignRuler.standard_error",
+      "label": "standard_error",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.ForeignRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.OracleNull.explained",
+      "label": "explained",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler.OracleNull",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_ruler.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_ruler",
       "role": null
     },
     {
