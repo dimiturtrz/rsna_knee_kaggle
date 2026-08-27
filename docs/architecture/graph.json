@@ -1076,6 +1076,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.competence_axis",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.competence_axis",
+      "target": "core.data.corpus.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.competence_axis",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.competence_axis",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.competence_axis",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.encoder_drift",
       "target": "core.cli",
       "weight": 1
@@ -8002,6 +8032,120 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.main",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.AxisReading.lines",
+      "target": "core.data.corpus.anatomy.ScaleProfile.of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "target": "kneemri.evaluation.competence_axis.AxisReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis._null",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._share",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "target": "kneemri.evaluation.competence_axis.AxisReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._null",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._share",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -18561,7 +18705,7 @@
       "role": null
     },
     {
-      "descendants": 145,
+      "descendants": 146,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -18617,7 +18761,7 @@
       "role": null
     },
     {
-      "descendants": 34,
+      "descendants": 35,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -18652,6 +18796,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer",
       "label": "board_transfer",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis",
+      "label": "competence_axis",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -20606,6 +20758,22 @@
       "label": "BoardTransfer",
       "level": "class",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.AxisReading",
+      "label": "AxisReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.competence_axis",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "label": "CompetenceAxis",
+      "level": "class",
+      "parent": "kneemri.evaluation.competence_axis",
       "role": "primary"
     },
     {
@@ -26190,6 +26358,86 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.AxisReading.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.AxisReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.AxisReading.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.AxisReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis._null",
+      "label": "_null",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
+      "label": "_residual",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis._share",
+      "label": "_share",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
+      "label": "strongest",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis",
       "role": null
     },
     {

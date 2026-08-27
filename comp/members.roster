@@ -190,7 +190,7 @@ through_dense_s2026.pt      # 0.8558 — the ONLY member whose input PIXELS diff
 # can do at any window size, and what knee-jucq's volume-pretrained trunk actually buys.
 small_accum_s2026.pt        # 0.8579 — ordinal concordance 0.784, the HIGHEST in the whole 67-member pool
 severity_weight_s2026.pt    # 0.8530 — ordinal 0.783; the severity axis the owner kept alive by name
-small_batch6_s2026.pt       # 0.8598 — the best SOLO member this project has, ordinal 0.781, best eighth seat (+0.0005)
+small_batch6_s2026.pt       # 0.8598 — SECOND-best solo (calib_dense_hold_s2026 0.8634 leads), ordinal 0.781, best eighth seat (+0.0005)
 aprior_dense_s2026.pt       # 0.8557 — ordinal 0.778
 focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # Added 2026-08-22, and this push is bought by a RULER rather than by any member's own number. On
