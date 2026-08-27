@@ -80,6 +80,38 @@ It does not price an arm. The deficit structures being real does not say what fi
 next step is the cheapest instrument that separates resolution from capacity on those three specifically,
 not a bigger backbone armed on the strength of this page.
 
+## The first instrument it licensed, run the same hour: it is NOT in-plane resolution
+
+The section above asks for the cheapest thing that separates resolution from capacity on ACL, MCL and
+Lateral Meniscus. That instrument cost no card and no training, because the pair already exists on disk:
+`lr4e-5_ws_s2026` (336 px) against `res392_ws_s2026` (392 px, 448 cache), identical on every other flag —
+`run_comparison` prints the diff itself as `image_size 336→448, train_size 0→392`.
+
+The ledger had already read this pair, twice, at two encoder rates, and called it flat: +0.0002 and
+−0.0002 against a 0.0062 floor. **Both readings are MEANS**, and this page's whole content is that the
+mean dilutes. So the question was live in a way the ledger could not answer: does the pixel axis pay on
+the three thin structures even though it is flat over twelve?
+
+Pre-registered before running, from `band_dense` being the axis that moved collaterals: flat on the three
+as well. It is.
+
+```
+ACL +0.0109   MCL -0.0088   Lateral Meniscus -0.0001      MEAN -0.0002
+```
+
+Mixed signs, no delta marked against its own paired band (half-widths to ±0.0353), and the tool flags
+the pair as INDICATIVE because one run's predictions were re-derived. Nothing resolves. `run_comparison`
+also prints its own structure-scale summary as **INVERTED** — focal −0.0027 against regional +0.0032,
+*"the tighter view helped exactly the findings it should have cost"* — which is the opposite of what a
+real resolution effect looks like.
+
+**So the deficit is not pixels.** That properly retires `knee-jk3`'s *"336 px for findings a few voxels
+across"*, which the ledger had already read down at the mean and which is now read down on precisely the
+findings it was a claim about. And it is worth more than a null usually is, because it would otherwise
+have been tomorrow's first card arm: the capacity argument this page licensed points at through-plane
+coverage and architecture, not in-plane sampling — consistent with `band_dense` (20 slices, +0.0053)
+being the one geometry change that ever moved this family.
+
 ## The instrument
 
 `SupervisionGap.separation` now prints the band beside the aggregate, and the CLI calls it unconditionally
