@@ -239,6 +239,15 @@ def main() -> None:
     command.parser.add_argument("--cache", type=Path, required=True, help="the annotated_predictions directory")
     command.parser.add_argument("--foreign", type=Path, required=True, help="a directory of foreign .pt files")
     command.parser.add_argument("--train", type=Path, required=True, help="train.csv, which carries the gold rows")
+    command.parser.add_argument(
+        "--member",
+        default=None,
+        help="read THIS member instead of the best one on these 58 studies. knee-3uje: the maximum over "
+        "our cached members is chosen on the same 58 it is then scored on, so the macro it reports "
+        "carries a selection term that the foreign checkpoint's single self-reported number does not. "
+        "Naming a member fixed in advance -- by the 909-study holdout, or by anything but this set -- "
+        "is the only way to tell a selection effect from a ruler effect.",
+    )
     arguments = command.parsed()
 
     ruler = ForeignRuler()
@@ -250,9 +259,16 @@ def main() -> None:
         for member, values in sorted(ours.items(), key=lambda item: -item[1].mean())
     )
 
-    best = max(ours, key=lambda member: ours[member].mean())
+    chosen = arguments.member or max(ours, key=lambda member: ours[member].mean())
+    if chosen not in ours:
+        message = f"{chosen} is not in the cache; it holds {sorted(ours)}"
+        raise SystemExit(message)
+    lines.append(
+        f"reading {chosen}, "
+        + ("named in advance" if arguments.member else "SELECTED ON THESE 58 -- the macro below is a maximum")
+    )
     for reading in ruler.foreign(arguments.foreign).values():
-        lines.extend(["", *ruler.report(ours[best], reading, annotations, name=best)])
+        lines.extend(["", *ruler.report(ours[chosen], reading, annotations, name=chosen)])
     command.report(lines)
 
 
