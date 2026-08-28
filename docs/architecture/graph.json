@@ -1671,6 +1671,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.raptor_model",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.raptor_model",
       "target": "kneemri.evaluation.foreign_member",
       "weight": 1
     },
@@ -3028,6 +3034,36 @@
       "kind": "import",
       "source": "kneemri.kaggle.priceable_entries",
       "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_run",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_run",
+      "target": "core.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_run",
+      "target": "kneemri.evaluation.raptor_feed",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_run",
+      "target": "kneemri.evaluation.raptor_model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_run",
+      "target": "kneemri.kaggle.submission",
       "weight": 1
     },
     {
@@ -10262,6 +10298,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.raptor_model.RaptorMember.ordered",
+      "target": "kneemri.evaluation.raptor_model.RaptorMember.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.raptor_model.RaptorMember.scored",
       "target": "kneemri.evaluation.raptor_model.RaptorMember.probs",
       "weight": 1
@@ -15655,6 +15697,78 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "target": "kneemri.evaluation.raptor_model.RaptorMember",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "target": "kneemri.kaggle.submission.Split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "target": "kneemri.evaluation.raptor_feed.RaptorFeed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "target": "kneemri.evaluation.raptor_feed.RaptorFeed.study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "target": "kneemri.evaluation.raptor_model.RaptorMember.ordered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "target": "kneemri.kaggle.submission.Split.series",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
+      "target": "kneemri.evaluation.raptor_feed.RaptorFeed.records",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.table",
+      "target": "kneemri.kaggle.submission.Submission.check",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.weights",
+      "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -19163,7 +19277,7 @@
       "role": null
     },
     {
-      "descendants": 149,
+      "descendants": 150,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -19779,7 +19893,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 21,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -19918,6 +20032,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.priceable_entries",
       "label": "priceable_entries",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run",
+      "label": "raptor_run",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -22473,6 +22595,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.priceable_entries",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "label": "RaptorEntry",
+      "level": "class",
+      "parent": "kneemri.kaggle.raptor_run",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -28364,6 +28494,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.raptor_model.RaptorMember.ordered",
+      "label": "ordered",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_model.RaptorMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.raptor_model.RaptorMember.probs",
       "label": "probs",
       "level": "method",
@@ -32488,6 +32626,38 @@
       "label": "suggestion",
       "level": "method",
       "parent": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
+      "label": "predictions",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry.weights",
+      "label": "weights",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
       "role": null
     },
     {

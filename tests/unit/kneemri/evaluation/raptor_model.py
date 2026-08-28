@@ -14,6 +14,8 @@ import pytest
 import torch
 from torch import Tensor, nn
 
+from core.findings import TARGETS
+from kneemri.evaluation.raptor_feed import STACK_DEPTH
 from kneemri.evaluation.raptor_model import (
     ATTENTION_WIDTH,
     FINDINGS,
@@ -152,12 +154,30 @@ def test_probs() -> None:
     assert probabilities.min() >= 0.0 and probabilities.max() <= 1.0
 
 
+def test_ordered() -> None:
+    """A head that emits its findings in another order must be REORDERED, not read positionally."""
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
+    volume[2:20] = 200
+    mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
+    architecture = Architecture(TEST_ARCHITECTURE, SIDE * 2)
+    member = RaptorMember(classifier(), architecture)
+    reversed_labels = RaptorMember(member.model, architecture, tuple(reversed(TARGETS)))
+
+    straight = member.ordered(volume, mask, "cpu")
+    swapped = reversed_labels.ordered(volume, mask, "cpu")
+
+    assert np.array_equal(straight, member.scored(volume, mask, "cpu"))
+    assert np.array_equal(swapped, straight[::-1]), (
+        "read positionally, every finding would be scored under another finding's column and the "
+        "entry would land near chance while every other check stayed green"
+    )
+
+
 def test_scored() -> None:
     """A decoded study goes in whole: the member windows it at its OWN resolution, not the volume's."""
-    depth = 64
-    volume = np.zeros((depth, SIDE, SIDE), np.uint8)
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
     volume[2:20] = 200
-    mask = (volume.reshape(depth, -1).sum(1) > 0).astype(np.uint8)
+    mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
     member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE * 2))
 
     assert member.scored(volume, mask, "cpu").shape == (FINDINGS,)

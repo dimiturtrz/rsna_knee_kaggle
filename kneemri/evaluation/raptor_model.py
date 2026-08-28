@@ -36,6 +36,7 @@ from numpy.typing import NDArray
 from torch import Tensor, nn
 
 from core import cli
+from core.findings import TARGETS
 from kneemri.evaluation import foreign_member, raptor_feed
 
 logger = logging.getLogger(__name__)
@@ -146,6 +147,11 @@ class RaptorMember:
 
     model: RaptorClassifier
     architecture: Architecture
+    labels: tuple[str, ...] = TARGETS
+    """The findings in the order the HEAD emits them, read from the checkpoint's own `lab` key.
+
+    Carried rather than assumed: the two orders agree today, and a submission whose columns were
+    assigned positionally would keep scoring — around chance — the day an arm's did not."""
 
     @classmethod
     def loaded(
@@ -162,7 +168,8 @@ class RaptorMember:
         model = RaptorClassifier(backbone, features=Architecture.width(backbone))
         model.load_state_dict(state["model"], strict=True)
         model.eval().to(device)
-        return cls(model, named)
+        labels = tuple(str(name) for name in state.get("lab", TARGETS))
+        return cls(model, named, labels)
 
     @torch.no_grad()
     def probs(
@@ -181,6 +188,16 @@ class RaptorMember:
         """The whole serving step for one decoded study: window it, then read the member."""
         windows = raptor_feed.Windows().stacked(volume, mask, self.architecture.resolution)
         return self.probs(windows, device)
+
+    def ordered(
+        self,
+        volume: Float[NDArray[np.uint8], "depth height width"],
+        mask: Float[NDArray[np.uint8], " depth"],
+        device: str,
+    ) -> Float[NDArray[np.float32], " findings"]:
+        """One study scored and put in `TARGETS` order — the order a submission's columns are in."""
+        scored = self.scored(volume, mask, device)
+        return scored[[self.labels.index(target) for target in TARGETS]]
 
 
 def main() -> None:

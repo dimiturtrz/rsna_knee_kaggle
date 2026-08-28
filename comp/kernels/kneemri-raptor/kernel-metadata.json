@@ -1,0 +1,8 @@
+{"id": "dimiturnt/kneemri-raptor", "title": "kneemri-raptor",
+ "code_file": "kneemri-raptor.py", "language": "python", "kernel_type": "script",
+ "is_private": true, "enable_gpu": true, "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": ["dimiturnt/kneemri-kit", "dreaddevelopment/raptor-knee-widedense"],
+ "competition_sources": ["rsna-knee-abnormality-detection"],
+ "kernel_sources": [],
+ "model_sources": []}
