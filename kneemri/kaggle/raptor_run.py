@@ -16,6 +16,7 @@ failure never fires, and across a hidden test set of thousands it is close to ce
 """
 
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -56,23 +57,44 @@ class RaptorEntry:
         finder = mounts or Mounts()
         return finder.one(filename, f"the raptor checkpoint {filename}") / filename
 
+    def readings(
+        self, identifiers: list[str], records: Records, members: Mapping[str, RaptorMember], device: str
+    ) -> dict[str, NDArray[np.float64]]:
+        """Score every study through EVERY member, decoding each study exactly once.
+
+        The decode is the cost: a pass over our corpus measured the card at 0% while pydicom worked, so
+        thirteen members scored one at a time would pay for thirteen decodes of the same pixels. The
+        members share the volume instead, which turns a fleet pass from thirteen passes into one.
+
+        A failed DECODE costs one row in every member's array; a failed FORWARD costs one row in that
+        member's alone. Keeping the two apart matters here in a way it does not for a single member: a
+        checkpoint that cannot run must not silently hand the other twelve a corpus full of 0.5s.
+        """
+        feed = RaptorFeed(self.split.series(self.competition))
+        rows = {name: np.full((len(identifiers), len(TARGETS)), FALLBACK_PROBABILITY) for name in members}
+        for index, study in enumerate(identifiers):
+            try:
+                volume, mask = feed.study(study, records)
+            # Broad on purpose, and logged with its traceback: pydicom, the filesystem and the slot
+            # match each fail in their own way, and none of them may cost the other studies.
+            except Exception:
+                logger.exception("study %s could not be decoded — contributing %s", study, FALLBACK_PROBABILITY)
+                continue
+            for name, member in members.items():
+                try:
+                    rows[name][index] = member.ordered(volume, mask, device)
+                # A member's failure is that member's alone — the other twelve keep their reading.
+                except Exception:
+                    logger.exception("member %s could not score study %s", name, study)
+            if (index + 1) % PROGRESS_EVERY == 0:
+                logger.info("scored %d of %d studies", index + 1, len(identifiers))
+        return rows
+
     def predictions(
         self, identifiers: list[str], records: Records, member: RaptorMember, device: str
     ) -> NDArray[np.float64]:
         """Score every study, in `TARGETS` column order, a failed decode costing one row and no more."""
-        feed = RaptorFeed(self.split.series(self.competition))
-        rows = np.full((len(identifiers), len(TARGETS)), FALLBACK_PROBABILITY)
-        for index, study in enumerate(identifiers):
-            try:
-                volume, mask = feed.study(study, records)
-                rows[index] = member.ordered(volume, mask, device)
-            # Broad on purpose, and logged with its traceback: pydicom, the filesystem and the slot
-            # match each fail in their own way, and none of them may cost the other studies.
-            except Exception:
-                logger.exception("study %s could not be scored — contributing %s", study, FALLBACK_PROBABILITY)
-            if (index + 1) % PROGRESS_EVERY == 0:
-                logger.info("scored %d of %d studies", index + 1, len(identifiers))
-        return rows
+        return self.readings(identifiers, records, {DEFAULT_WEIGHTS: member}, device)[DEFAULT_WEIGHTS]
 
     def table(self, identifiers: list[str], probabilities: NDArray[np.float64]) -> pd.DataFrame:
         """The wide submission frame, held to the same refusal every other entry is held to."""

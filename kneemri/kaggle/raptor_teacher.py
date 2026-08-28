@@ -31,6 +31,7 @@ teacher file with a hole in it would be a silent training bug rather than a loud
 """
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -98,17 +99,35 @@ class TeacherPass:
         """
         return RaptorEntry(self.competition, working=self.destination.parent, split=self.split)
 
-    def written(self, identifiers: list[str], scores: Float[np.ndarray, "n t"]) -> Path:
-        """Write the readings under the two names the training side looks them up by."""
-        TeacherFile.write(self.destination, identifiers, scores)
-        logger.info("wrote %d studies x %d findings to %s", *scores.shape, self.destination)
-        return self.destination
+    def written(self, path: Path, identifiers: list[str], scores: Float[np.ndarray, "n t"]) -> Path:
+        """Write one member's readings under the two names the training side looks them up by.
+
+        The path is a parameter rather than always `self.destination` because a fleet pass writes one
+        file per member out of a single decode, and the alternative — a `TeacherPass` per member — would
+        re-read the split's tables thirteen times to name thirteen files.
+        """
+        path.parent.mkdir(parents=True, exist_ok=True)
+        TeacherFile.write(path, identifiers, scores)
+        logger.info("wrote %d studies x %d findings to %s", *scores.shape, path)
+        return path
+
+    @staticmethod
+    def fleet(weights: Sequence[Path], device: str) -> dict[str, RaptorMember]:
+        """Every checkpoint loaded at once, keyed by its filename stem.
+
+        They fit together because a member is a backbone and a forty-line head: thirteen of them are a
+        few gigabytes on a card that holds thirty-two, and holding them all is what lets one decode feed
+        all of them. The stem is the key because it is what the teacher file is then named for, so the
+        distance report reads back the checkpoint rather than an index into an argument list.
+        """
+        return {path.stem: RaptorMember.loaded(path, device) for path in weights}
 
 
 def main() -> None:
     """Score the train split through the foreign member and write its readings as a teacher file."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--weights", type=Path, required=True, help="the raptor checkpoint")
+    command.parser.add_argument("--weights", type=Path, nargs="+", required=True, help="raptor checkpoints")
+    command.parser.add_argument("--fleet", type=Path, default=None, help="write one file per checkpoint here")
     command.parser.add_argument("--split", default=TRAIN, help="which split to teach over")
     command.parser.add_argument("--out", type=Path, default=None, help="destination npz")
     command.parser.add_argument("--studies", type=int, default=0, help="cap the pass, for a smoke")
@@ -130,9 +149,16 @@ def main() -> None:
     logger.info("teaching over %d %s studies", len(identifiers), arguments.split)
 
     device = str(VisibleCards().device())
-    member = RaptorMember.loaded(arguments.weights, device)
-    scores = teaching.entry().predictions(identifiers, teaching.records(), member, device)
-    teaching.written(identifiers, scores.astype(np.float32))
+    members = TeacherPass.fleet(arguments.weights, device)
+    logger.info("loaded %d members onto %s", len(members), device)
+    readings = teaching.entry().readings(identifiers, teaching.records(), members, device)
+
+    for name, scores in readings.items():
+        teaching.written(
+            arguments.fleet / f"{name}.npz" if arguments.fleet else destination,
+            identifiers,
+            scores.astype(np.float32),
+        )
 
 
 if __name__ == "__main__":

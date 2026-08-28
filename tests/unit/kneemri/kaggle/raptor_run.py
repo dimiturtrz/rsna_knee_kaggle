@@ -12,6 +12,7 @@ from typing import cast, override
 import numpy as np
 import pandas as pd
 import pytest
+import torch
 from torch import Tensor, nn
 
 from core.findings import STUDY, TARGETS
@@ -30,6 +31,15 @@ class Refusing(nn.Module):
         """Refuse, the way an arm served on the wrong resolution or a broken study would."""
         message = f"this model refuses every study, including one of {tuple(windows.shape)}"
         raise RuntimeError(message)
+
+
+class Constant(nn.Module):
+    """A model that scores every study the same, so a reading can be told apart from a fallback."""
+
+    @override
+    def forward(self, windows: Tensor) -> Tensor:
+        """One logit per finding, well away from the 0.5 an unscored study contributes."""
+        return torch.full((windows.shape[0], len(TARGETS)), 4.0)
 
 
 def member() -> RaptorMember:
@@ -74,6 +84,26 @@ def test_predictions(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     assert rows.shape == (len(studies), len(TARGETS))
     assert np.array_equal(rows, np.full(rows.shape, FALLBACK_PROBABILITY))
     assert len(caplog.records) == len(studies), "a silent fallback is a chance-scoring entry nobody reads"
+
+
+def test_readings(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    """Each member gets its OWN array out of one decode, and one member's failure stays that member's.
+
+    The equivalence class this covers is the one a fleet pass introduces and a single pass cannot have:
+    a checkpoint that will not run beside twelve that will. Charging its failure to the shared decode
+    would hand the other twelve a corpus of 0.5s, which trains and serves and scores around chance.
+    """
+    studies = ["study-a", "study-b"]
+    entry = RaptorEntry(competition(tmp_path / "comp", studies), working=tmp_path)
+    scoring = RaptorMember(cast("RaptorClassifier", Constant()), Architecture("resnet18", RESOLUTION))
+
+    with caplog.at_level(logging.ERROR):
+        rows = entry.readings(studies, {}, {"refusing": member(), "scoring": scoring}, "cpu")
+
+    assert list(rows) == ["refusing", "scoring"]
+    assert np.array_equal(rows["refusing"], np.full((len(studies), len(TARGETS)), FALLBACK_PROBABILITY))
+    assert not np.any(rows["scoring"] == FALLBACK_PROBABILITY)
+    assert len(caplog.records) == len(studies), "only the refusing member may be charged for a failure"
 
 
 def test_table(tmp_path: Path) -> None:
