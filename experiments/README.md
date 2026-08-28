@@ -5295,3 +5295,23 @@ part of this worth carrying forward.
 the cleanest distant-and-weak member on file — maximal distance, negative seat — and a selector reading the
 distance column alone would have picked it first. Cost: ~85 min of card, zero slots. The quadrant is
 occupied and it was empty for a reason.
+
+### `mixup_dense` — mixup at 0.2 on the dense recipe reads NULL, and the last epoch was still climbing
+
+Ran 2026-08-28, twelve epochs, `band_dense`'s invocation with `--mixup 0.2` and nothing else moved, so
+the control is `band_dense` 0.8578 (peak e8) at zero extra card.
+
+| | holdout mean AUC | vs control |
+|---|---|---|
+| `band_dense` (control, peak e8) | 0.8578 | — |
+| **`mixup_dense` (peak e11)** | **0.8552** | **−0.0026** |
+
+Inside the 0.0062 paired floor in the negative direction: **null, not a refutation of mixup**, and the
+shape says why. The run peaked on its LAST epoch (e11, 0.8552, still up from e10's 0.8546) — UNDERTRAINED
+in `convergence_check`'s sense, the budget bound it rather than the schedule. Mixup slows fitting by
+construction, so twelve epochs buys a mixup arm less than it buys its control, and the honest reading is
+"at THIS budget mixup pays nothing", not "mixup does not work here". A longer arm is the only thing that
+would separate those, and at ~50 min for +6 epochs against a mechanism already reading flat it loses the
+ratio to the distillation lane.
+
+Cost: ~73 min of card, zero slots. `knee-x580`.

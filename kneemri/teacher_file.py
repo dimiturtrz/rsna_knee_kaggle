@@ -8,6 +8,7 @@ rename would then surface as a `KeyError` against a file that cost thirty-six mi
 """
 
 import os
+from collections.abc import Sequence
 
 import numpy as np
 from jaxtyping import Float
@@ -31,3 +32,18 @@ class TeacherFile:
         is the only form in which one half cannot drift from the other.
         """
         np.savez(path, identifiers=np.array(identifiers), scores=scores)
+
+    @staticmethod
+    def merged(parts: Sequence[os.PathLike[str]], path: os.PathLike[str]) -> int:
+        """Join shard files into one, and return how many studies the joined file holds.
+
+        A teacher pass is DECODE-bound — the card sat at 0% while pydicom worked — so the pass is run as
+        several processes over disjoint slices of the same split. The join lives here, beside `write`, for
+        the reason the module exists at all: the two array names are spelled in exactly one place, and a
+        merge that spelled them itself would be the drift this file was written to make impossible.
+        """
+        loaded = [np.load(part) for part in parts]
+        identifiers = np.concatenate([part[TeacherFile.IDENTIFIERS] for part in loaded])
+        scores = np.concatenate([part[TeacherFile.SCORES] for part in loaded])
+        np.savez(path, identifiers=identifiers, scores=scores)
+        return len(identifiers)
