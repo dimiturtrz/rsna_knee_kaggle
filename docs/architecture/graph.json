@@ -1664,6 +1664,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.raptor_inventory",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.raptor_inventory",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.raptor_inventory",
+      "target": "kneemri.evaluation.raptor_model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.raptor_model",
       "target": "core.cli",
       "weight": 1
@@ -10300,6 +10318,42 @@
       "kind": "calls",
       "source": "kneemri.evaluation.raptor_feed.main",
       "target": "kneemri.evaluation.raptor_feed.RaptorFeed.study",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "target": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.raptor_inventory.Inventory",
+      "target": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.raptor_inventory.Inventory",
+      "target": "kneemri.evaluation.raptor_inventory.Inventory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_inventory.Inventory.report",
+      "target": "kneemri.evaluation.raptor_inventory.Inventory.families",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_inventory.Inventory.scanned",
+      "target": "kneemri.evaluation.raptor_inventory.CheckpointEntry.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_inventory.main",
+      "target": "kneemri.evaluation.raptor_inventory.Inventory.scanned",
       "weight": 1
     },
     {
@@ -19439,7 +19493,7 @@
       "role": null
     },
     {
-      "descendants": 152,
+      "descendants": 153,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -19495,7 +19549,7 @@
       "role": null
     },
     {
-      "descendants": 38,
+      "descendants": 39,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -19690,6 +19744,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.raptor_feed",
       "label": "raptor_feed",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory",
+      "label": "raptor_inventory",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -21908,6 +21970,22 @@
       "label": "Windows",
       "level": "class",
       "parent": "kneemri.evaluation.raptor_feed",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "label": "CheckpointEntry",
+      "level": "class",
+      "parent": "kneemri.evaluation.raptor_inventory",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.Inventory",
+      "label": "Inventory",
+      "level": "class",
+      "parent": "kneemri.evaluation.raptor_inventory",
       "role": "satellite"
     },
     {
@@ -28620,6 +28698,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.raptor_feed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.CheckpointEntry.family",
+      "label": "family",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.CheckpointEntry.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.CheckpointEntry.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.CheckpointEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.Inventory.families",
+      "label": "families",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.Inventory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.Inventory.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.Inventory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.Inventory.scanned",
+      "label": "scanned",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory.Inventory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_inventory.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_inventory",
       "role": null
     },
     {
