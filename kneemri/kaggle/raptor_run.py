@@ -90,11 +90,20 @@ class RaptorEntry:
                 logger.info("scored %d of %d studies", index + 1, len(identifiers))
         return rows
 
-    def predictions(
-        self, identifiers: list[str], records: Records, member: RaptorMember, device: str
-    ) -> NDArray[np.float64]:
-        """Score every study, in `TARGETS` column order, a failed decode costing one row and no more."""
-        return self.readings(identifiers, records, {DEFAULT_WEIGHTS: member}, device)[DEFAULT_WEIGHTS]
+    def tables(self, members: Mapping[str, RaptorMember], device: str) -> dict[str, pd.DataFrame]:
+        """One submission frame per member, out of a SINGLE decode of the split.
+
+        A kernel seating two foreign members would otherwise pay for the split twice, and the decode is
+        the whole cost — a pass measured the card at 0% while pydicom worked. Reading the split's tables
+        lives here rather than in the caller so that a fleet entry and a single entry cannot disagree
+        about which CSV names the studies.
+        """
+        test = pd.read_csv(self.competition / f"{self.split.name}.csv")
+        identifiers = [str(study) for study in test[STUDY].tolist()]
+        records = RaptorFeed.records(self.competition / f"{self.split.name}_series.csv")
+        logger.info("%d studies, %d with series rows", len(identifiers), len(records))
+        scored = self.readings(identifiers, records, members, device)
+        return {name: self.table(identifiers, rows) for name, rows in scored.items()}
 
     def table(self, identifiers: list[str], probabilities: NDArray[np.float64]) -> pd.DataFrame:
         """The wide submission frame, held to the same refusal every other entry is held to."""
@@ -105,12 +114,7 @@ class RaptorEntry:
 
     def run(self, member: RaptorMember, device: str) -> pd.DataFrame:
         """Read the split's tables, score it, and write `submission.csv` — or write nothing at all."""
-        test = pd.read_csv(self.competition / f"{self.split.name}.csv")
-        identifiers = [str(study) for study in test[STUDY].tolist()]
-        records = RaptorFeed.records(self.competition / f"{self.split.name}_series.csv")
-        logger.info("%d studies, %d with series rows", len(identifiers), len(records))
-
-        frame = self.table(identifiers, self.predictions(identifiers, records, member, device))
+        frame = self.tables({DEFAULT_WEIGHTS: member}, device)[DEFAULT_WEIGHTS]
         frame.to_csv(self.working / "submission.csv", index=False)
         logger.info("wrote %d rows", len(frame))
         return frame

@@ -73,17 +73,26 @@ def test_weights(tmp_path: Path) -> None:
     assert found == tmp_path / "raptor" / "arms" / DEFAULT_WEIGHTS
 
 
-def test_predictions(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
-    """A study that cannot be decoded costs ONE row, and says so — it never costs the entry."""
-    studies = ["study-a", "study-b"]
+def test_tables(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    """Two members, ONE decode of the split, and a frame each in the submission's own column order.
+
+    One study, because this fixture has no pixels: every decode falls back, and a second study would
+    make the fallback CONSTANT down each column, which `table` refuses on purpose. The equivalence class
+    here is the fan-out — one split read, one frame per member — not the fallback, which `test_readings`
+    already covers over two studies.
+    """
+    studies = ["study-a"]
     entry = RaptorEntry(competition(tmp_path / "comp", studies), working=tmp_path)
+    scoring = RaptorMember(cast("RaptorClassifier", Constant()), Architecture("resnet18", RESOLUTION))
 
     with caplog.at_level(logging.ERROR):
-        rows = entry.predictions(studies, {}, member(), "cpu")
+        frames = entry.tables({"refusing": member(), "scoring": scoring}, "cpu")
 
-    assert rows.shape == (len(studies), len(TARGETS))
-    assert np.array_equal(rows, np.full(rows.shape, FALLBACK_PROBABILITY))
-    assert len(caplog.records) == len(studies), "a silent fallback is a chance-scoring entry nobody reads"
+    assert list(frames) == ["refusing", "scoring"]
+    for frame in frames.values():
+        assert list(frame.columns) == [STUDY, *TARGETS]
+        assert frame[STUDY].tolist() == studies
+    assert len(caplog.records) == len(studies), "only the refusing member may be charged for a failure"
 
 
 def test_readings(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:

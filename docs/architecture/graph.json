@@ -15913,12 +15913,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
-      "target": "kneemri.kaggle.raptor_run.RaptorEntry.readings",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.kaggle.raptor_run.RaptorEntry.readings",
       "target": "kneemri.evaluation.raptor_feed.RaptorFeed",
@@ -15939,25 +15933,31 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
-      "target": "kneemri.evaluation.raptor_feed.RaptorFeed.records",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
-      "target": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.raptor_run.RaptorEntry.run",
-      "target": "kneemri.kaggle.raptor_run.RaptorEntry.table",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.tables",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.raptor_run.RaptorEntry.table",
       "target": "kneemri.kaggle.submission.Submission.check",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.tables",
+      "target": "kneemri.evaluation.raptor_feed.RaptorFeed.records",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.tables",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry.tables",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.table",
       "weight": 1
     },
     {
@@ -33154,14 +33154,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.raptor_run.RaptorEntry.predictions",
-      "label": "predictions",
-      "level": "method",
-      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.kaggle.raptor_run.RaptorEntry.readings",
       "label": "readings",
       "level": "method",
@@ -33180,6 +33172,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_run.RaptorEntry.table",
       "label": "table",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_run.RaptorEntry.tables",
+      "label": "tables",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
       "role": null
