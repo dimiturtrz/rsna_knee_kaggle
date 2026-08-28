@@ -3068,6 +3068,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.raptor_seat",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.raptor_seat",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
       "weight": 1
@@ -15769,6 +15781,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -19277,7 +19295,7 @@
       "role": null
     },
     {
-      "descendants": 150,
+      "descendants": 151,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -19893,7 +19911,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 22,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -20040,6 +20058,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_run",
       "label": "raptor_run",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat",
+      "label": "raptor_seat",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -22602,6 +22628,14 @@
       "label": "RaptorEntry",
       "level": "class",
       "parent": "kneemri.kaggle.raptor_run",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat.RaptorSeat",
+      "label": "RaptorSeat",
+      "level": "class",
+      "parent": "kneemri.kaggle.raptor_seat",
       "role": "satellite"
     },
     {
@@ -32658,6 +32692,14 @@
       "label": "weights",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
+      "label": "blended",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
       "role": null
     },
     {
