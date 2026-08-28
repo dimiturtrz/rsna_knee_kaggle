@@ -38,6 +38,10 @@ dependencies = [
     # checkpoints name the arch in a `arch` field and nothing else can rebuild it. Present in Kaggle's
     # image, so it needs no wheel in the kit; declared here because the local inference layer imports it.
     "timm",
+    # The raptor decode (`kneemri.evaluation.raptor_feed`) resizes with cv2's INTER_AREA. It was an
+    # opt-in extra while cv2 belonged only to THEIR reader; the reimplementation makes it ours, and a
+    # kit that serves that feed cannot have it optional. Present in Kaggle's image, so it needs no wheel.
+    "opencv-python-headless",
 ]
 
 [project.optional-dependencies]
@@ -47,10 +51,10 @@ dev = ["pytest", "pytest-cov"]
 # `uv sync` stops silently uninstalling it. Invoke the venv entrypoint (.venv/Scripts/kaggle.exe) by path.
 submit = ["kaggle"]
 # Serving a FOREIGN checkpoint through its own decode (`kneemri.evaluation.foreign_member`). Their
-# published reader opens with `import pydicom, cv2` — pydicom we already have, cv2 we did not, and the
-# absence is invisible until `_make_reader()` is called, i.e. after the model and the DICOM tree are
-# already loaded. An EXTRA rather than a runtime dep because nothing of OURS imports cv2 and nothing
-# should: it belongs to their decode, and a foreign member is opt-in.
+# published reader opens with `import pydicom, cv2`, and the absence of cv2 is invisible until
+# `_make_reader()` is called, i.e. after the model and the DICOM tree are already loaded. Both are now
+# runtime dependencies because `kneemri.evaluation.raptor_feed` reimplements that decode as OUR code and
+# a shipped kit cannot have its resize be optional; the extra is kept as the name to sync against.
 foreign = ["opencv-python-headless"]
 # The guardrail ANALYZERS are an installed package pinned by scaffold tag (not vendored source) — an engine
 # update is a one-line `devtools_ref` bump on `copier update`, no source diff in your PRs. Imports as
@@ -108,8 +112,6 @@ DEP002 = [
     "pydantic",
     "kaggle",
     "triton-windows",
-    # cv2 is imported by THEIR reader, never by ours — see the `foreign` extra.
-    "opencv-python-headless",
 ]
 # <<< LOCAL-SLOT: deptry-unused
 

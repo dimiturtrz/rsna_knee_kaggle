@@ -168,6 +168,16 @@ dataset push, which is how it escaped the first time. It fired on its first real
     prohibition. Everything we rely on qualifies: DINOv2 (free, and the competition mounts it itself),
     DINOv3 (free behind a click-through Meta licence), and pilkwang's two datasets (CC0-1.0). No forum
     disclosure of external data is required by these rules.
+  - **The raptor member, settled 2026-08-28.** Two questions, and they have different answers. The
+    **weights** are `dreaddevelopment/raptor-knee-{widedense,arms,finespacing}`, all three **CC0-1.0**
+    (read from the Kaggle metadata endpoint, not from the page) — public, free, equally accessible, so
+    §2.6.a is met outright and CC0 grants more than §8.a will ever ask for. The **code** was the real
+    question: `external/raptor` is two notebook exports with no LICENSE file, so it could not be
+    vendored into a kit at all. That is now moot rather than resolved — `kneemri/evaluation/raptor_feed`
+    and `raptor_model` reimplement the decode and the forward pass from their published prose spec, and
+    both are proven against theirs by an EXACT oracle (200 studies byte-identical volumes; probabilities
+    equal element for element on CPU). The serving path holds no foreign code; their checkpoint is
+    mounted as the public dataset it already is.
   - **Nothing here conditions a SUBMISSION.** The obligations attach to winners (§2.8, §8), which is why
     the entry that went out while this was open was never at risk — only a prize claim was.
   - **The winner licence is CC-BY-NC 4.0**, and §2.5.a carves out exactly our awkward case: "in the event
