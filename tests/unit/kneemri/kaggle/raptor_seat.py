@@ -6,7 +6,7 @@ import pytest
 
 from core.findings import STUDY, TARGETS
 from kneemri.inference.vote import Vote
-from kneemri.kaggle.raptor_seat import SEATS, RaptorSeat
+from kneemri.kaggle.raptor_seat import OUR_SEATS, SEATS, RaptorSeat
 
 
 def _table(studies: list[str], values: np.ndarray) -> pd.DataFrame:
@@ -46,7 +46,7 @@ def test_a_missing_study_is_refused() -> None:
     """Half a blend is not a submission; the roster's own table would silently carry the gap."""
     mine = _table(["a", "b", "c"], _rising(3))
     theirs = _table(["a", "b"], _rising(2))
-    with pytest.raises(ValueError, match="absent from the raptor table"):
+    with pytest.raises(ValueError, match="absent from a raptor table"):
         RaptorSeat().blended(mine, theirs)
 
 
@@ -55,6 +55,44 @@ def test_a_weight_outside_a_fraction_is_refused() -> None:
     mine = _table(["a", "b"], _rising(2))
     with pytest.raises(ValueError, match="is not one"):
         RaptorSeat(weight=1.5).blended(mine, mine)
+
+
+def test_fleet() -> None:
+    """Three foreign members take THREE seats of nine, not one seat split three ways.
+
+    The distinction is the whole design: the roster they join is six members wide either way, so a
+    fleet seated at 1/7 total would price three architectures as cheaply as one and read as flat for a
+    reason that is arithmetic rather than diversity.
+    """
+    studies = ["a", "b", "c", "d"]
+    mine = _table(studies, _rising(len(studies)))
+    theirs: dict[str, pd.DataFrame] = {
+        str(name): _table(studies, _rising(len(studies), offset=step / 10)[::-1]) for step, name in enumerate("xyz")
+    }
+
+    blended = RaptorSeat.fleet(mine, theirs)
+
+    share = 1.0 / (OUR_SEATS + len(theirs))
+    expected = (1.0 - share * len(theirs)) * Vote.ranks(mine[list(TARGETS)].to_numpy())
+    for table in theirs.values():
+        expected = expected + share * Vote.ranks(table[list(TARGETS)].to_numpy())
+    np.testing.assert_allclose(blended[list(TARGETS)].to_numpy(), expected)
+
+
+def test_combined() -> None:
+    """Explicit per-table weights, and a refusal when they sum past the whole blend.
+
+    Summing past 1 is the case worth its own assertion: it gives OUR table a negative weight, which
+    reverses our own ranking and still writes a perfectly well-formed CSV.
+    """
+    studies = ["a", "b"]
+    mine = _table(studies, _rising(len(studies)))
+
+    blended = RaptorSeat.combined(mine, [mine], [0.25])
+    np.testing.assert_allclose(blended[list(TARGETS)].to_numpy(), Vote.ranks(mine[list(TARGETS)].to_numpy()))
+
+    with pytest.raises(ValueError, match="not a fraction"):
+        RaptorSeat.combined(mine, [mine, mine], [0.7, 0.7])
 
 
 def test_a_zero_weight_returns_our_own_ranks() -> None:

@@ -21,6 +21,7 @@ and it fails the same way: quietly, near chance, with every other check green.
 """
 
 import logging
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -31,13 +32,16 @@ from kneemri.inference.vote import Vote
 
 logger = logging.getLogger(__name__)
 
-SEATS = 7
+OUR_SEATS = 6
+"""The champion roster's own member count, which is what a foreign seat is a share OF."""
+
+SEATS = OUR_SEATS + 1
 """Six of ours plus theirs. The weight is one seat's share, not a tuned coefficient."""
 
 
 @dataclass(frozen=True)
 class RaptorSeat:
-    """One weighted rank blend of our roster's table with the raptor member's."""
+    """One weighted rank blend of our roster's table with one or more foreign members'."""
 
     weight: float = 1.0 / SEATS
 
@@ -46,17 +50,46 @@ class RaptorSeat:
         if not 0.0 <= self.weight <= 1.0:
             message = f"a seat's share is a fraction; {self.weight} is not one"
             raise ValueError(message)
-        aligned = theirs.set_index(STUDY).reindex(ours[STUDY])
-        missing = int(aligned[list(TARGETS)].isna().any(axis=1).sum())
-        if missing:
-            message = f"{missing} of {len(ours)} studies are absent from the raptor table"
+        return self.combined(ours, [theirs], [self.weight])
+
+    @staticmethod
+    def fleet(ours: pd.DataFrame, theirs: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
+        """Several foreign members seated at once, each taking ONE seat of the widened roster.
+
+        The share is `1 / (OUR_SEATS + len(theirs))` per foreign member rather than a fitted vector, for
+        the same reason the single seat is 1/7: their arms are `--fold -1`, so every study of our holdout
+        sits inside their training set and no offline pairing exists to fit a weight on. Fitting one on
+        the board costs a slot per value; equal seats cost none and are named before the number.
+
+        It is the count that changes, not the rule — three foreign members are three seats, not one seat
+        split three ways, because the roster they join is six members wide either way.
+        """
+        share = 1.0 / (OUR_SEATS + len(theirs))
+        logger.info("seating %d foreign members at %.4f each", len(theirs), share)
+        return RaptorSeat.combined(ours, list(theirs.values()), [share] * len(theirs))
+
+    @staticmethod
+    def combined(ours: pd.DataFrame, theirs: Sequence[pd.DataFrame], weights: Sequence[float]) -> pd.DataFrame:
+        """Our table and every foreign table joined BY STUDY and averaged in rank space.
+
+        Written once for both the single seat and the fleet: a second copy of the join is exactly the
+        kind of silent, near-chance pairing bug the module docstring names.
+        """
+        share = sum(weights)
+        if not 0.0 <= share <= 1.0:
+            message = f"the foreign seats take {share} of the blend, which is not a fraction"
             raise ValueError(message)
 
-        mine = Vote.ranks(ours[list(TARGETS)].to_numpy(dtype=np.float64))
-        yours = Vote.ranks(aligned[list(TARGETS)].to_numpy(dtype=np.float64))
-        combined = (1.0 - self.weight) * mine + self.weight * yours
+        combined = (1.0 - share) * Vote.ranks(ours[list(TARGETS)].to_numpy(dtype=np.float64))
+        for table, weight in zip(theirs, weights, strict=True):
+            aligned = table.set_index(STUDY).reindex(ours[STUDY])
+            missing = int(aligned[list(TARGETS)].isna().any(axis=1).sum())
+            if missing:
+                message = f"{missing} of {len(ours)} studies are absent from a raptor table"
+                raise ValueError(message)
+            combined += weight * Vote.ranks(aligned[list(TARGETS)].to_numpy(dtype=np.float64))
 
         frame = pd.DataFrame(combined, columns=list(TARGETS))
         frame.insert(0, STUDY, ours[STUDY].to_numpy())
-        logger.info("seated the raptor member at %.4f over %d studies", self.weight, len(frame))
+        logger.info("seated %d foreign members over %d studies", len(theirs), len(frame))
         return frame

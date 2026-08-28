@@ -15969,7 +15969,19 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
+      "target": "kneemri.kaggle.raptor_seat.RaptorSeat.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_seat.RaptorSeat.combined",
       "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_seat.RaptorSeat.fleet",
+      "target": "kneemri.kaggle.raptor_seat.RaptorSeat.combined",
       "weight": 1
     },
     {
@@ -33184,6 +33196,22 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
       "label": "blended",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat.RaptorSeat.combined",
+      "label": "combined",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat.RaptorSeat.fleet",
+      "label": "fleet",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
       "role": null
