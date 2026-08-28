@@ -2519,3 +2519,53 @@ quality — those two readings predict opposite things about every remaining mem
 cannot separate them.
 
 Kit `9eea9b8`, submission `55829913`. Slot 1 of 5 on 2026-08-28.
+
+## raptorseat_v1 — **0.943, the new board best** · one foreign seat, and the monoculture is the plateau
+
+Ref 55831424, submitted 02:28Z, scored 05:06Z (2h38m in the queue). Kit `b8d76a6`. The champion six
+served exactly as `calibsix` serves them — `overlap=False`, `LogitAverage`, no views — then rank-blended
+with `raptor_v4_swa` at `RaptorSeat`'s default 1/7.
+
+**Pre-registered in the kernel docstring, before the number:** ≥0.945 diversity pays past member quality,
+re-pin on that alone · **0.9425–0.944 real gain, next question is a second foreign arm** · 0.9395–0.9424
+flat, does NOT license a fitted weight · <0.9395 diluting, closes the seating question.
+
+**0.943 lands in the real-gain band.**
+
+### Why this is the cleanest diversity test the project has run
+
+Member quality is held equal *to three decimals, on the board's own ruler, on the same day*:
+
+| entry | ref | what | board |
+| --- | --- | --- | --- |
+| `calibsolo` | 55828490 | one of our six, alone | **0.923** |
+| `raptor_solo` | 55829913 | `raptor_v4_swa` alone, on our decode and our writer | **0.923** |
+| `calibsix` | 55810756 | our six | 0.941 |
+| **`raptorseat_v1`** | **55831424** | our six + that foreign member at 1/7 | **0.943** |
+
+Every previous seating entry moved membership *and* quality together and could attribute its result to
+neither. Here the seventh seat is worth exactly what our own best single is worth, so the +0.002 is
+attributable to the architecture, the decode and the training corpus, and to nothing else.
+
+### What it does and does not license
+
+**+0.002 is below the owner's 1.5% bar. It is not a finding as a SCORE and must not be planned around as
+one.** What it is, is the first non-flat reading in **twelve** on ensemble construction — seat count,
+membership across five different sevenths, per-label selection (`label_combine`), the vote (`votefit_v1`),
+overlap TTA, external corpus, all flat — and the axis it moved is the one axis the pool never varied.
+See `interpretations/kneemri/2026-08-28_architecture-monoculture.md`.
+
+It licenses precisely what its own band says and nothing more: **a second foreign arm**, seated by
+`RaptorSeat.fleet` at 1/(6+n). It does NOT license a fitted weight (that branch was reserved for the
+flat band and would cost a slot per value against a holdout every foreign arm has already seen).
+
+**Do not seat all thirteen.** The inventory is four families, not thirteen lenses: 10× `coatnet_rmlp_2_rw_384`
+@384, 1× `convnext_small`@336, 1× `convnextv2_base`@336, 1× `tf_efficientnetv2_l`@480. Ten coatnets at
+1/16 each would outvote our six for arithmetic reasons and read flat on a mechanism that never got tested.
+The fleet teacher pass + `teacher_distance` pick the distinct set first.
+
+### The pin moved
+
+`comp/champion.json` now pins this entry. `members` stays our six — `champion_check` holds that field to
+what `comp/members.roster` can rebuild, and the foreign seat is rebuilt by a **Kaggle mount** of the public
+CC0-1.0 `raptor-knee-widedense` dataset — so it is declared under `serving.foreign_seat` instead.

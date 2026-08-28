@@ -1,11 +1,11 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "calibsix",
-  "kernel": "kneemri-calibsix",
-  "submission": 55810756,
-  "date": "2026-08-27",
-  "board": 0.941,
-  "kit": "fec94e7",
+  "entry": "raptorseat_v1",
+  "kernel": "kneemri-raptorseat",
+  "submission": "55831424",
+  "date": "2026-08-28",
+  "board": 0.943,
+  "kit": "b8d76a6",
   "members": [
     "final_ws_cf",
     "calib_span_ff",
@@ -16,11 +16,15 @@
   ],
   "serving": {
     "overlap": false,
-    "vote": "LogitAverage",
+    "vote": "LogitAverage for our six, then Vote.ranks at 1/7 for the foreign seat",
     "views": null,
-    "precision": "each member's own"
+    "precision": "each member's own",
+    "foreign_weight": 0.14285714285714285,
+    "foreign_seat": "raptor_v4_swa (raptor_ft_coatnet_v4_full_swa.pt), mounted from the public CC0-1.0 dreaddevelopment/raptor-knee-widedense dataset, NOT packaged by comp/members.roster. It is a seventh SEAT, not a seventh member of ours, which is why it is declared here and not in members: champion_check holds members to what the roster can rebuild, and this one is rebuilt by a Kaggle mount."
   },
   "principles": [
+    "ALL-OURS NO LONGER BEATS GRAFTED, AND THIS ENTRY IS WHY. The principle below it was fitted on a graft of twenty CC0 members of UNKNOWN and mostly poor quality, which is a statement about THOSE members and was read as one about grafting. raptor_v4_swa scored 0.923 solo on the board, EXACTLY level with our own best single (calibsolo 0.923) on the same day, and seating it seventh at 1/7 took 0.941 to 0.943. Member quality held equal to three decimals; the only variables were the architecture, the decode and the training corpus. Read the old principle as bounded to weak grafts.",
+    "THE POOL IS AN ARCHITECTURE MONOCULTURE AND THAT IS THE PLATEAU. All six of our members are facebook/dinov2-small at 336 px with one head (cls_mean token pool, max slice pool, attend slot pool), one six-slot list, whole_stack=True, backbone_lr=4e-5; only slices (12/20), band and a single through_plane flag vary. Seven differently-seated entries span 0.937-0.941 against a 0.0053 Hanley-McNeil floor because they are seven reseatings of one lens. The +0.002 here is below the 1.5 percent bar as a SCORE and is not a finding, but it is the first non-flat reading in twelve on ensemble construction, and the axis it moved is the one the pool never varied. See interpretations/kneemri/2026-08-28_architecture-monoculture.md.",
     "ALL-OURS BEATS GRAFTED. Five of ours plus twenty CC0 members scored 0.894 against this entry's 0.925 on the same hidden set, and the offline holdout agreed in sign and under-priced the penalty. A published member fitted elsewhere is not a free member.",
     "WHOLE-STACK, overlap=False. Averaging overlapping three-slice windows is another way of showing the model every slice, which a whole-stack member already does in feature space: +0.0146 for a windowed member, nothing here.",
     "NOT FOUR MEMBERS - FIVE, AND THE FIFTH MUST BE STRONG. This entry retires the 'FOUR MEMBERS' principle every champion before it carried. That principle was read off a board where member COUNT and member QUALITY were perfectly confounded: every entry at or above 0.927 named four, and the only five- and six-member entries (crossenc 0.926, maxdiv 0.925) had each added an individually WEAK member (0.8268, 0.8345, taken 16th and 15th by greedy over eighteen). This entry holds the count at five and moves only the quality - base_dense at 0.8512, taken 7th - and it moved 0.930 to 0.931. So the four ticks crossenc and maxdiv lost were paid for member quality, not for the seat count, and the earlier 'falls monotonically past five' reading was a statement about the pool that was available then, not about ensemble size.",
