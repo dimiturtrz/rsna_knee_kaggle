@@ -126,12 +126,15 @@ def boot() -> Path:
 def main() -> None:
     boot()
 
+    import time  # noqa: PLC0415 - the bootstrap block above is byte-identical across kernels
+
     import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
     import torch  # noqa: PLC0415 - same
 
     from core.mounts import Mounts  # noqa: PLC0415 - same
     from kneemri.device import VisibleCards  # noqa: PLC0415 - same
     from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
+    from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
     from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
     from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
@@ -142,6 +145,7 @@ def main() -> None:
     # called `submission.csv` and the one that runs last is the one Kaggle would otherwise score.
     scratch = WORKING / "raptor"
     scratch.mkdir(parents=True, exist_ok=True)
+    started = time.time()
     mounts = Mounts()
     device = str(VisibleCards().device())
     member = RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)
@@ -161,7 +165,13 @@ def main() -> None:
         "lr4e-5_ws_cf",
         "through_dense_cf",
     )
-    KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage())).run()
+    # What the raptor pass cost, handed to the six so their nine-hour budget is the SESSION's and not
+    # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
+    # real one with no submission — a budget defeated by its own assumption that it starts at zero.
+    spent = time.time() - started
+    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the six get what is left")
+    left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
+    KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage(), budget=left)).run()
     ours = pd.read_csv(WORKING / "submission.csv")
 
     RaptorSeat().blended(ours, theirs).to_csv(WORKING / "submission.csv", index=False)

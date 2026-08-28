@@ -7,6 +7,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from core.mounts import Mounts
+from kneemri.inference.budget import DEADLINE_MARGIN, Budget
 from kneemri.inference.ensemble import Serving
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage
@@ -76,6 +77,15 @@ def test_served():
     assert declared.views is views
     assert declared.vote is vote
     assert declared.budget is not None, "declaring a vote must not cost the deadline"
+
+    # A kernel that ran a second producer first gets the REMAINING session, not a fresh nine hours.
+    # Both aiming at the same ceiling is how a two-pass entry is killed at the real one with nothing
+    # written — the budget defeated by its own assumption that it starts at zero.
+    hour = 3600.0
+    shortened = Budget(seconds=hour)
+    after = KernelRun(serving=Serving(budget=shortened)).served()
+    assert after.budget is shortened, "a second-producer kernel's shortened deadline must survive"
+    assert shortened.seconds == pytest.approx(hour * DEADLINE_MARGIN)
 
 
 def test_served_states_the_serving_in_the_log(caplog: pytest.LogCaptureFixture):

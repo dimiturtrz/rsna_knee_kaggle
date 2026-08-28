@@ -163,17 +163,26 @@ class KernelRun:
         declares views or a vote does not have to also remember to declare the budget — forgetting it
         is a nine-hour kill, and the kernel is the only caller that knows it is inside one.
 
+        AN ENTRY THAT DID DECLARE ONE KEEPS IT. This used to overwrite unconditionally, which is right
+        for every entry that is the session's only producer and wrong for one that is not: a kernel
+        running a second pass first would hand the members a fresh nine hours with part of the session
+        already gone, so both passes aim at the same ceiling and the run is killed at the real one with
+        no submission written. That is the exact failure the budget exists to prevent, reintroduced by
+        the budget's own assumption that it starts at zero. Defaulting still catches the forgetful case.
+
         AND IT SAYS WHAT IT SERVES UNDER, because the log is the only place a submission's serving is
         visible after the fact. The first `kneemri-vote` run logged the kit, the members and the
         studies and said nothing about the vote — so the one thing that entry was bought to vary was
         the one thing its log could not confirm had landed, which is a slot spent on an unasserted flag.
         """
-        served = replace(self.serving, budget=Budget())
+        budget = self.serving.budget or Budget()
+        served = replace(self.serving, budget=budget)
         logger.info(
-            "serving: vote=%s views=%s precision=%s",
+            "serving: vote=%s views=%s precision=%s deadline=%.0fs",
             type(served.vote).__name__ if served.vote else "RankAverage (default)",
             served.views or "identity only (default)",
             served.precision or "each member's own (default)",
+            budget.seconds,
         )
         return served
 
