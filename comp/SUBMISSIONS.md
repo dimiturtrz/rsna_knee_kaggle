@@ -2492,3 +2492,30 @@ board at all. The +0.018 measured here is what a better seat 1 gets **added to**
 with. See `interpretations/kneemri/2026-08-27_the-feed-was-the-whole-shortfall.md`.
 
 Kit `a642ba8`, submission `55828490`. Slot 5 of 5 on 2026-08-27.
+
+## raptor_solo — 0.923 · the foreign member alone, and the +0.030 gap does not exist
+
+`raptor_v4_swa` — dreaddevelopment's published `raptor-knee-widedense` checkpoint — served **alone** on our
+decode, our forward pass and our submission writer, after `foreign_ruler` proved our runner reproduces
+their own published table. Same kit and same one-seat serving as `calibsolo`; only the checkpoint changed.
+
+**0.923. Exactly `calibsolo`'s 0.923, on the same day.** Two members, two architectures, two training
+corpora, one board score.
+
+**This closes the largest lever on the planning list.** `knee-9g28` read raptor at 0.8938 on our 909-study
+holdout against our best member's 0.8634 and priced the difference as +0.030 of member quality nobody had
+put on the board. `knee-3uje` then argued it was a two-ruler artefact — 0.9152 against 0.9167 when both are
+scored on the 58 gold-annotated studies, level. The board has now settled it in `knee-3uje`'s favour on the
+only ruler that counts. It also removes `knee-rh4t`'s member-gap reading of the 0.938–0.942 forum singles:
+whatever those posters have, it is not in the one foreign checkpoint we can actually run.
+
+**What it opens.** This member is now the cleanest **diversity** probe this project owns, because its
+quality is held equal by measurement rather than by assumption. Everything a seven-seat blend with it gains
+is diversity, with member quality controlled — which is exactly what `raptorseat` was pushed to read.
+
+**What it does not say.** Nothing about their unreleased `finespacing`/`arms` checkpoints. And two members
+agreeing at 0.923 is as consistent with a shared **label-noise ceiling** (`knee-fuhq`) as with shared
+quality — those two readings predict opposite things about every remaining member arm, and this entry
+cannot separate them.
+
+Kit `9eea9b8`, submission `55829913`. Slot 1 of 5 on 2026-08-28.
