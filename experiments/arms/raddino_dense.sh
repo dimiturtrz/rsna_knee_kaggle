@@ -74,4 +74,4 @@ require "$LABELS"
 run_train raddino_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant raddino --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --labels "$LABELS" --out "$PROCESSED/raddino_dense_s2026.pt"
+  --labels "$LABELS" --out "$PROCESSED/raddino_normfix_s2026.pt"
