@@ -5375,3 +5375,58 @@ WHAT IT DOES NOT CLOSE. The teacher pass over 4,406 studies is on disk and free 
 axis, so a different `--distill-weight`, a different teacher, or distillation onto a NON-DINOv2 trunk each
 cost one student and no teacher. None of them is licensed by this number: the constraint found is about
 where a student lands in pixel space, and the first two variants do not move it.
+
+### `calib_dense_hold_ff` — a member with no number, and that is by construction
+
+Finished 13:35Z on 2026-08-29, twelve epochs at 415 s, training loss 0.6765 (e5) → 0.5126 (e10), 27.01 GB
+peak reserved. `--fold -1 --ema --calibrated-targets --hold-annotations`, 336 px, 20 slices.
+
+**It reports `holdout mean AUC nan` and there is nothing wrong with it.** `--fold -1` trains on every
+study, so there is no held-out set to score against; the number the ledger normally carries does not exist
+for this arm and cannot be manufactured. It is a SHELF member — a checkpoint whose only ruler is what it
+does to a roster it is seated in.
+
+**And it cannot be priced against the champion either.** `seat_value` refuses: of `raptorseat_v1`'s six
+members exactly one carries a holdout record, and a marginal contribution needs at least two. The five it
+cannot read (`calib_span_ff`, `final_ws_cf`, `grade_ladder_cf`, `lr4e-5_ws_cf`, `through_dense_cf`) are all
+`--fold -1` themselves — they have seen every holdout study, so a score over those studies is a score over
+their own training set. The tool's own suggestion is the honest one: price against a fully scoreable entry
+(`honest12`, 0.937, twelve members) and read the seat delta there, not against the 0.943 board row.
+
+**Which is the standing cost of the whole-corpus decision, stated plainly.** Fitting on everything buys the
+member the studies a fold would have withheld and spends the ability to say what the member is worth
+without a slot. Both halves of that trade are real; the ledger should stop being surprised by the second.
+
+### The reader gate fired NOT DISTINGUISHABLE, and it cost twenty minutes instead of the sweep
+
+`Qwen/Qwen3-8B`, bf16, on the 57 image-annotated studies, scored by `core.data.labels.reader_upgrade`:
+
+```
+177 pairs the lexicon left blank; the candidate speaks on 81 (45.8%)
+blank-pair accuracy 0.840 against a majority-class 0.840
+the lexicon's own 463 answered pairs: candidate accuracy 0.812
+blank-pair accuracy interval [0.737, 0.911] over studies
+```
+
+**Read the first number before the third.** The reader DOES speak where the lexicon abstained — 45.8% of
+the blank pairs, which is the coverage the whole lane was arguing for. It is the second number that closes
+it: 0.840 against a majority class of 0.840, to three decimals, with an interval [0.737, 0.911] that
+brackets the baseline rather than clearing it. On the blank cells the prevalence is 13.6% (24 positives in
+177), so "absent everywhere" scores 0.864 on the FULL blank set and 0.840 on the subset this reader chose
+to speak on. It has matched that and added nothing.
+
+**And it does not hold the ground the lexicon already had**: 0.812 on the 463 answered pairs, below the
+lexicon's own 0.8705 macro against the same annotations. So the trade on offer is coverage that carries no
+information bought with a regression where supervision already worked.
+
+**What this refutes and what it does not.** It refutes an 8B reader as a source of supervision on the
+blank cells, on this prompt, against this truth. It does NOT refute `knee-fuhq`'s finding that label noise
+outranks architecture — that finding rests on our labels reading 0.8705 while a published coatnet reads
+0.9167 on the same studies, and this arm did not touch it. The lane's real blocker is unchanged and is not
+a result: BOTH cached 35B readers fail to load under transformers 5.15 (gptqmodel imports the removed
+`no_init_weights`; the NVFP4 twin declares `modelopt`, absent from `AUTO_QUANTIZER_MAPPING`), and vLLM is
+Linux-only here. A 35B is a different reader, not a bigger version of this one.
+
+**The gate is the deliverable, not the verdict.** Pre-registering the blank-pair comparison turned an
+open-ended sweep of 4,406 reports into a twenty-minute question with a written branch, and the branch it
+fired was the one that forbids spending the card. That is the instrument paying for itself on first use.

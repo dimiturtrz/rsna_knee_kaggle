@@ -334,14 +334,18 @@ class LocalReader:
         for position, (study, report) in enumerate(pairs):
             reading = self.read(str(study), str(report))
             rows.append(reading.row())
-            if position % LOG_EVERY == 0:
+            if position % max(1, len(reports) // PULSES) == 0:
                 logger.info("read %d of %d, %d unclear", position, len(reports), reading.unread())
         return pd.DataFrame(rows)
 
 
-LOG_EVERY = 100
-"""How often the sweep says where it is. 4,406 reports is long enough to want a pulse, short enough
-that a line per report would be the majority of the log."""
+PULSES = 20
+"""How many progress lines a run emits, whatever its length — a FRACTION, not a fixed stride.
+
+A stride of 100 gave the 58-study gate run exactly one line, at position 0, and then went silent for the
+whole run. Watching that line convinced me the reader was managing one study every two minutes; the pace
+was invented out of a pulse that did not exist. Twenty lines is a pulse on the gate and still a small
+minority of a 4,406-report sweep's log."""
 
 
 def main() -> None:
