@@ -2569,3 +2569,40 @@ The fleet teacher pass + `teacher_distance` pick the distinct set first.
 `comp/champion.json` now pins this entry. `members` stays our six — `champion_check` holds that field to
 what `comp/members.roster` can rebuild, and the foreign seat is rebuilt by a **Kaggle mount** of the public
 CC0-1.0 `raptor-knee-widedense` dataset — so it is declared under `serving.foreign_seat` instead.
+
+## 2026-08-28 · `kneemri-onepair` — 0.936, two seats buy 65% of what seven buy
+
+`final_ws_cf` + the foreign `raptor_v4_swa` at 1/2 each. Ref 55834982.
+
+**An instrument, not a champion attempt** — its expected score was below the pinned 0.943, and what it
+buys is whether an ensemble's bonus comes from member COUNT or member DISTANCE. That decides where the
+remaining slots and card-hours go, which is worth more than a tick on the board.
+
+It is the fourth cell of a square whose other three were already on this ruler. The two solos agree to
+three decimals, so member quality is held fixed and only count and distance vary:
+
+| entry | seats | board | bonus over solo | per extra seat |
+|---|---|---|---|---|
+| `calibsolo` (`final_ws_cf` alone) | 1 | 0.923 | — | — |
+| `raptor_solo` (the foreign member alone) | 1 | 0.923 | — | — |
+| **`onepair`** | **2** | **0.936** | **+0.013** | **+0.013** |
+| `calibsix` | 6 | 0.941 | +0.018 | +0.0036 |
+| `raptorseat` | 7 | 0.943 | +0.020 | +0.0033 |
+
+**The 6th and 7th members are worth ~0.0035 each; the 2nd distant one is worth 0.013 — 4× per seat.**
+Two seats capture 65% of the seven-seat bonus. The gap to the champion is 0.007, under the owner's 0.02
+bar, so a two-member ensemble is not *notably* worse than the six-member one at a third the runtime —
+which is also the first thing this project has that speaks to the Efficiency LB (`knee-5bv`).
+
+**The pre-registered 0.933–0.940 band fired**: distance is worth much more per seat than count, which
+licenses a foreign-heavy roster via `RaptorSeat.fleet` over the distance-selected families.
+
+**Stated limit, written before the number.** No all-ours two-member board entry exists, so the count term
+at n=2 is inferred from the n=1 and n=6 endpoints. A reading inside 0.926–0.932 could not have separated
+"distance is ordinary" from "our own pairs would do this too"; 0.936 sits *above* that band, which is what
+licenses the distance reading — but the separating slot (a second all-ours pair) was deliberately not
+spent, so the inference rests on the endpoints, not on a measured n=2 control.
+
+**What it does NOT say.** It does not license dropping to two seats. `raptorseat` at 0.943 is still the
+best row on the board and still the pin; 0.936 < 0.943 whatever the per-seat arithmetic says. The finding
+is about where the NEXT seat should come from, not about how many to keep.
