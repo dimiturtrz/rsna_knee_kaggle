@@ -119,3 +119,43 @@ board scatter"* band).
 has not moved in days, which says the same thing from the other side. The rational use of a last slot
 is the highest-expected-value single bet with the honest expectation attached — +0.000 to +0.003 — not
 a claim that the gap closes today.
+
+## DEPTH SATURATES AT 20 SLICES — 2026-08-29
+
+The decomposition above left one term open: depth bought +0.0027 (12->16) and then +0.0046 (16->20)
+and was NOT flattening, so "cache deeper" was the last unexhausted reading axis. Asking it over the
+whole corpus is 84 GB at 28 slices and 95 GB at 32. Asking it over the 58 studies `foreign_gate`
+actually scores is 1.1 GB each, which is why `build_cache --only-studies` exists.
+
+Same checkpoint (`raptor_ft_coatnet_v4_full`), same 58 gold studies, same band and resolution, only
+the slice count moving:
+
+| key                       | macro  | vs 20sl |
+|---------------------------|--------|---------|
+| `336px_20sl_0.1-0.9band`  | 0.8819 | control |
+| `336px_24sl_0.1-0.9band`  | 0.8820 | +0.0001 |
+| `336px_28sl_0.1-0.9band`  | 0.8793 | -0.0026 |
+| `336px_32sl_0.1-0.9band`  | 0.8802 | -0.0017 |
+
+THE CONTROL PASSES FIRST. The 58-study cache at 20 slices reproduces 0.8819 to the digit — the same
+number the whole-corpus cache produced — so the restriction is sound and the three readings beside it
+are comparable to everything already in this file.
+
+DEPTH IS DONE. Every delta past 20 is inside the n=58 macro sampling error (~0.012), and the two
+deepest are NEGATIVE. There is no continuation of the 12->16->20 climb; it was a saturating curve and
+20 is at the knee. This retires the axis for ~4 GB and three minutes of decode instead of 95 GB and
+two hours, and it is the reading that matters most for what NOT to do next: a deeper training cache
+was the obvious next arm and it would have bought nothing.
+
+WHAT THAT LEAVES THE -0.0348 TO. Every reading knob we can turn is now priced: resolution 224->448 is
++0.0053, band trim is +0.0046, spacing is already at its better setting, and depth is +0.0073 spent
+and exhausted. Their sum is under half the shortfall even taken at face value and with no overlap.
+So the residual is NOT reachable by how we read the pixels. It is train/serve mismatch (their weights
+were fit through their decode) or something structural in their 42-window layout that our
+(slots, slices, H, W) cache cannot express at any depth. Only training one of ours through
+`raptor_feed` separates those, and that arm still costs a new ~62 GB cache in a different layout on a
+95%-full disk, for a member whose decode-diversity seat is already bought (`raptorseat_v1`, 0.943).
+
+SCOPE. This is a SERVING measurement through foreign weights: it says their model extracts nothing
+further past 20 slices at this band. A model TRAINED at 28 could in principle differ, but nothing here
+argues it would, and the cost asymmetry is enormous.
