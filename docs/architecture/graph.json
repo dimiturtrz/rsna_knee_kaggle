@@ -1220,6 +1220,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_overlap",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_overlap",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_overlap",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_ruler",
       "target": "core.cli",
       "weight": 1
@@ -8986,6 +9004,48 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_member.main",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_overlap.ForeignOverlap.holdout",
+      "target": "core.data.corpus.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_overlap.ForeignOverlap.holdout",
+      "target": "core.data.corpus.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_overlap.ForeignOverlap.holdout",
+      "target": "core.data.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_overlap.main",
+      "target": "kneemri.evaluation.foreign_overlap.ForeignOverlap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_overlap.main",
+      "target": "kneemri.evaluation.foreign_overlap.ForeignOverlap.covered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_overlap.main",
+      "target": "kneemri.evaluation.foreign_overlap.ForeignOverlap.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_overlap.main",
+      "target": "kneemri.evaluation.foreign_overlap.ForeignOverlap.verdict",
       "weight": 1
     },
     {
@@ -20411,7 +20471,7 @@
       "role": null
     },
     {
-      "descendants": 158,
+      "descendants": 159,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -20467,7 +20527,7 @@
       "role": null
     },
     {
-      "descendants": 42,
+      "descendants": 43,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -20534,6 +20594,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_member",
       "label": "foreign_member",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap",
+      "label": "foreign_overlap",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -22673,6 +22741,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.foreign_member",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap.ForeignOverlap",
+      "label": "ForeignOverlap",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_overlap",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -28920,6 +28996,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap.ForeignOverlap.covered",
+      "label": "covered",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_overlap.ForeignOverlap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap.ForeignOverlap.holdout",
+      "label": "holdout",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_overlap.ForeignOverlap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap.ForeignOverlap.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_overlap.ForeignOverlap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_overlap.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_overlap",
       "role": null
     },
     {

@@ -162,3 +162,21 @@ rather than two.
 So `knee-rh4t`'s member gap is not retired after all. Removing the two-ruler artefact does not leave a null —
 it leaves a gap measured on our own ruler, which is a stronger form of the same claim than the forum numbers
 ever were.
+
+## CORRECTED 2026-08-29: the 909 is the contaminated ruler, and the gap IS retired
+
+The section above reads the two-ruler split the wrong way round. It is right that the rulers disagree and
+right that our 105-arm selection inflates our number on the 58. It is wrong about which side the artefact
+sits on, and its closing sentence — *"`knee-rh4t`'s member gap is not retired after all"* — does not survive.
+
+`labels_llm_soft.csv`, their own published row set, contains **896 of our 909 fold-0 holdout studies
+(98.6%)**; the 13 it lacks are exactly the gold studies falling in fold 0. Their table is the corpus minus
+the 58 and nothing else. So the 909 is the ruler THEY trained on and we did not, and the +0.030 there is
+in-sample against held-out.
+
+That makes the board the tiebreaker, and it had already spoken: `raptor_v4_swa` solo scored **0.923, level
+with our own best single**. Two rulers where both models are honest (gold 58, board) read null; the one
+ruler where only one model is honest reads +0.030. The gap is retired.
+
+`python -m kneemri.evaluation.foreign_overlap --foreign <their table>` now runs this check before a foreign
+number is read. Full reading: `interpretations/kneemri/2026-08-29_the-foreign-member-trained-on-our-holdout.md`.
