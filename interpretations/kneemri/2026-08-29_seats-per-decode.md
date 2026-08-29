@@ -755,3 +755,43 @@ read where it sits. At an end of the existing axis it is another draw from the s
 solo score; off the axis — small loading on component 1 with its own quality high — it is the first
 genuinely new competence profile this pool has held, and that is precisely what a seat value and a
 residual distance cannot report.
+
+## The two ends are not the same kind of end (2026-08-29, later)
+
+The paragraph above calls the axis's ends "already populated" and names one member at each:
+`depth_regions_span_run1` at −0.158 and `contrast_dense` at +0.041. Those are the three-per-end extremes
+the reading printed, and three numbers per end cannot tell a spanned trade from a tail against a bulk.
+`AxisReading.balance` now prints the distribution the reading had already computed and was discarding:
+
+```
+along the axis: 30 of 109 members below zero holding 50% of the displacement,
+                reach [-0.158, +0.041] — both ends populated
+```
+
+The first thing it says refutes the guess that prompted it. The displacement is split **50/50**, so the
+pool does span its own trade and there is no missing counterweight to go and train. That is the verdict
+this statistic exists to give and it goes against the prior that asked for it.
+
+The second thing it says is sharper than the question. The halves are equal in displacement and nothing
+like equal in population: **30 members carry the negative half and reach −0.158, while 79 carry the
+positive half and reach only +0.041.** The diffuse-fluid end is a small group of deep specialists. The
+focal end — Baker's +0.647, Fracture +0.313, Medial Meniscus +0.214 — is a broad shallow bulk with no
+specialist anywhere in it. Both ends of a trade are populated; only one of them is populated by members
+that went far.
+
+And the deep end is named by MECHANISM, not by knob: `depth_regions_span` (region depth),
+`mae_matched` (MAE pretraining), `encoder_adapt` (encoder adaptation). The bulk is knob-variation on one
+supervised dense recipe. So the pool is roughly 79 draws from a single mechanism plus 30 from a few
+others, which is the aggregation ceiling stated in the pool's own terms rather than in the strategies'.
+
+**This replaces the pre-registration in the section above.** "A member placed off the axis" was the wrong
+target: 79 members already sit off it, near zero, and another one is the eightieth. The target that has
+never been held is a member as far toward the FOCAL end as the diffuse specialists reach on theirs —
+order +0.15 rather than +0.04. Any new checkpoint gets its axis score for free from a `--largest-pool`
+rerun, so this costs no card to read; what it constrains is which recipe is worth arming, and the deep
+end's own membership says the lever is a different MECHANISM and not another knob.
+
+It also sharpens the prediction for `raddino_dense` before it lands, which is the point of writing it
+down first: raddino is a whole-stack dense member on the majority table, so the bulk is where it should
+land. A bulk position at a good solo score is the head-monoculture reading. A position past +0.10 would
+make it the first member at the focal end and would be worth more than its mean AUC.

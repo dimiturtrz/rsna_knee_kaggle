@@ -75,6 +75,14 @@ RANKED = 12
 MINIMUM_MEMBERS = 3
 """Below this a double-centred matrix has at most one degree of freedom left and every share reads 1.0."""
 
+BALANCED = 0.60
+"""Share of the axis displacement on ONE side above which the pool is lopsided rather than a spanned trade.
+
+A trade a seat search could exploit needs members at BOTH ends. If most of the displacement sits on one
+side, the other end is a bulk near zero, no permutation of the pool reaches it, and the counterweight is
+not present to be SELECTED — it has to be trained.
+"""
+
 
 @dataclass(frozen=True)
 class AxisReading:
@@ -103,6 +111,27 @@ class AxisReading:
         """Whether the pool has a shared axis at all — the one verdict this reading is allowed to state."""
         return self.share > self.null
 
+    def balance(self) -> str:
+        """Which side of the trade the pool's members sit on, and whether both of its ends are populated.
+
+        The loadings say what the axis IS and say nothing about whether the pool REACHES both of its ends.
+        Three members named per end cannot tell a spanned trade from a one-sided tail against a bulk near
+        zero, and the two license opposite work: a trade the pool spans is a seat-search problem, while a
+        tail against a bulk means the counterweight cannot be selected out of what exists and has to be
+        trained. The statistic is each side's share of the total absolute displacement rather than a count,
+        because a hundred members sitting at +0.002 are a bulk however many of them there are.
+        """
+        values = [value for _, value in self.extremes]
+        below = [value for value in values if value < 0]
+        displacement = sum(abs(value) for value in values) or 1.0
+        share = sum(abs(value) for value in below) / displacement
+        spanned = max(share, 1.0 - share) <= BALANCED
+        verdict = "both ends populated" if spanned else "LOPSIDED: the lighter end is a bulk near zero"
+        return (
+            f"  along the axis: {len(below)} of {len(values)} members below zero holding {share:.0%} of the "
+            f"displacement, reach [{min(values):+.3f}, {max(values):+.3f}] — {verdict}"
+        )
+
     def lines(self) -> list[str]:
         """The reading, with the bar beside the number so the share is never quoted alone."""
         ordered = sorted(self.loadings.items(), key=lambda pair: pair[1])
@@ -124,6 +153,7 @@ class AxisReading:
             + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[:EXTREMES])
             + "  ...  "
             + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[-EXTREMES:]),
+            self.balance(),
         ]
 
 

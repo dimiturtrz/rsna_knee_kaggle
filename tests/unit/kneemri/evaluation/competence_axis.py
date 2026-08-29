@@ -129,3 +129,16 @@ def test_lines():
     assert "82.0%" in text, "and the quality share it was separated from"
     assert "+0.200 (0.0140)" in text, "a loading is unreadable without its finding's own spread"
     assert "by structure scale" in text
+    assert "along the axis" in text, "the ends never print without the distribution that reads them"
+
+
+def test_balance():
+    """A spanned trade and a one-sided tail both have two ends; only the displacement share tells them apart."""
+    fields = {"findings": list(TARGETS), "share": 0.46, "null": 0.28, "quality": 0.82, "loadings": {}, "spread": {}}
+    spanned = AxisReading(extremes=[("low", -0.10), ("mid", 0.0), ("high", 0.10)], **fields)
+    tailed = AxisReading(extremes=[("tail", -0.90), ("bulk", 0.01), ("bulk2", 0.02)], **fields)
+
+    assert "both ends populated" in spanned.balance()
+    assert "LOPSIDED" in tailed.balance(), "one member carrying the displacement is not a trade the pool spans"
+    assert "97%" in tailed.balance(), "the share is of displacement, so a bulk of many stays a bulk"
+    assert "1 of 3 members below zero" in spanned.balance(), "the side's count prints against the pool's"
