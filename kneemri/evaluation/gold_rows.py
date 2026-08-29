@@ -12,13 +12,17 @@ published path shares with it has to sit BELOW both or the published reading pay
 never uses.
 """
 
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
+from core import cli
 from core.findings import TARGETS
+
+logger = logging.getLogger(__name__)
 
 PRESENT = 0.5
 """Where a graded value becomes a positive, matching `LabelScores.per_label`'s own binarisation."""
@@ -57,3 +61,23 @@ class GoldRows:
         table = pd.read_csv(labels).set_index("StudyInstanceUID").reindex(identifiers)
         values = table.reindex(columns=list(TARGETS)).to_numpy(dtype=np.float32)
         return np.asarray(np.nan_to_num(values, nan=PRESENT), dtype=np.float32)
+
+
+def main() -> None:
+    """Write the annotated identifiers one per line, which is what `build_cache --only-studies` reads.
+
+    A cache restricted to these studies is how a feed question gets asked at 58 studies instead of 4,407:
+    `foreign_gate` scores a published checkpoint against its own `gold_auc` on exactly this set, so a
+    depth or band the full corpus cannot afford to cache is affordable here at a thousandth of the bytes.
+    """
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--out", type=Path, required=True, help="where to write the identifiers")
+    arguments = command.parsed()
+
+    identifiers, _ = GoldRows().annotated(command.rooted(arguments).raw() / "train.csv")
+    arguments.out.write_text("\n".join(identifiers) + "\n", encoding="utf-8")
+    logger.info(f"wrote {len(identifiers)} annotated identifiers to {arguments.out}")
+
+
+if __name__ == "__main__":
+    main()

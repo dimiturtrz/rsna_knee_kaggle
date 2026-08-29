@@ -31,6 +31,15 @@ def main() -> None:
     command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
     command.parser.add_argument("--split", default="train_series", help="which split to decode")
     command.parser.add_argument("--holdout-fold", type=int, default=None, help="cache only this fold's holdout studies")
+    command.parser.add_argument(
+        "--only-studies",
+        type=Path,
+        default=None,
+        help="a text file of study identifiers, one per line: decode only those, in split order. The "
+        "generic form of --holdout-fold, for a subset no flag here can name — the 58 gold-annotated "
+        "studies being the one that matters, since `foreign_gate` scores a published checkpoint on "
+        "exactly them and a whole-corpus cache at 28 slices is 84 GB to answer a 58-study question.",
+    )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
 
@@ -48,13 +57,17 @@ def main() -> None:
     split = CorpusSplit(raw, arguments.split)
     identifiers = split.identifiers()
 
-    if arguments.holdout_fold is not None and arguments.out is None:
+    if (arguments.holdout_fold is not None or arguments.only_studies is not None) and arguments.out is None:
         # A FOLD RESTRICTION IS NOT IN THE KEY, unlike `--cache-studies`, so a fold cache written into
         # the processed root lands on the full corpus's own filename and destroys it — 71.6 GB that
         # cost two hours, differing only in one axis length. It cannot be named for itself either:
         # `train.py` has no fold-restriction flag, so a suffix here would make the arrays it already
         # reads unaddressable. So the directory is what separates them, and it is now required.
-        command.parser.error("--holdout-fold writes a partial corpus under the FULL cache's name: pass --out")
+        command.parser.error("a study restriction writes a partial corpus under the FULL cache's name: pass --out")
+
+    if arguments.only_studies is not None:
+        identifiers = split.named(arguments.only_studies).chosen
+        logger.info(f"restricted to {arguments.only_studies}: {len(identifiers)} studies")
 
     if arguments.holdout_fold is not None:
         # A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's

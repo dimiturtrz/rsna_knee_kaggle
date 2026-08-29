@@ -9,6 +9,7 @@ filesystem work, so it is the whole of the defect and none of the decode.
 """
 
 from importlib import import_module
+from pathlib import Path
 
 import pytest
 
@@ -43,3 +44,19 @@ def test_foreign_scheme_refused(scheme: str, monkeypatch: pytest.MonkeyPatch):
         main()
 
     assert exit_code.value.code == 2, f"--scheme {scheme} must be refused, not decoded under our corpus"
+
+
+def _listing(tmp_path: Path, *identifiers: str) -> Path:
+    path = tmp_path / "wanted.txt"
+    path.write_text("\n".join(identifiers) + "\n", encoding="utf-8")
+    return path
+
+
+def test_only_studies_refused_without_an_out_directory(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A restricted decode under the FULL cache's name destroys it — the same guard --holdout-fold has."""
+    monkeypatch.setattr("sys.argv", ["build_cache", "--only-studies", str(_listing(tmp_path, "a"))])
+
+    with pytest.raises(SystemExit) as exit_code:
+        main()
+
+    assert exit_code.value.code == 2, "a partial corpus must not be written under the full cache's name"

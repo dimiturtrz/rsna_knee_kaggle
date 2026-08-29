@@ -4,9 +4,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.gold_rows import GoldRows
+from core.paths import ENV_OVERRIDE, DataRoot
+from kneemri.evaluation.gold_rows import GoldRows, main
 
 STUDIES = 8
 
@@ -43,3 +45,17 @@ def test_reported(tmp_path: Path):
     assert values.shape == (3, len(TARGETS))
     assert values[0, 0] < values[1, 0], "reindexed to the order asked for, not the order on disk"
     assert values[2, 0] == 0.5, "an unlabelled study sits at the default rather than at zero"
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The identifiers land one per line, which is the shape `build_cache --only-studies` reads."""
+    root = DataRoot(tmp_path)
+    root.raw().mkdir(parents=True)
+    _train_table(root.raw() / "train.csv", annotate=2)
+    listing = tmp_path / "gold.txt"
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    monkeypatch.setattr("sys.argv", ["gold_rows", "--out", str(listing)])
+
+    main()
+
+    assert listing.read_text(encoding="utf-8").split() == ["s0", "s1"]

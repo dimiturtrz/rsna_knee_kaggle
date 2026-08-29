@@ -1263,6 +1263,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.gold_rows",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.gold_rows",
       "target": "core.findings",
       "weight": 1
     },
@@ -4684,6 +4690,12 @@
       "kind": "calls",
       "source": "core.data.corpus.build_cache.main",
       "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_cache.main",
+      "target": "core.data.corpus.study_cache.CorpusSplit.named",
       "weight": 1
     },
     {
@@ -9154,6 +9166,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_ruler.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.gold_rows.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_rows.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
       "weight": 1
     },
     {
@@ -29388,6 +29412,14 @@
       "label": "reported",
       "level": "method",
       "parent": "kneemri.evaluation.gold_rows.GoldRows",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_rows.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_rows",
       "role": null
     },
     {
