@@ -33,6 +33,21 @@
 # at 2.4x (0.0059 offline arriving as 0.014 on the board), the only ensemble axis in this project that
 # amplifies rather than compresses. A candidate inside the floor offline is therefore not obviously dead
 # — but it is not evidence either, and a slot is not spent on one.
+# THE CONTROL IS `honest12`, NOT THE PINNED CHAMPION, and the reason is a structural limit rather than a
+# preference. Every one of `raptorseat_v1`'s six members is a `_cf` checkpoint — fold -1, fitted on the
+# whole corpus including every holdout study — which is exactly why it is the champion and exactly why it
+# can never be priced offline. `seat_value` said so itself on 2026-08-29:
+#
+#   NO SEAT VALUE against raptorseat_v1: 1 of 6 members carry a holdout record, and pricing a marginal
+#   contribution needs at least 2
+#   unscoreable (fold -1, they have seen every holdout study): calib_span_ff, final_ws_cf,
+#   grade_ladder_cf, lr4e-5_ws_cf, through_dense_cf
+#
+# So `honest12` (0.937 on the board, twelve members, every one fold-0 and scoreable) is the control. It
+# is a WEAKER roster than the champion by 0.006 board, which biases every seat value here UPWARD: a seat
+# is easier to earn in a weaker roster, and `seat_value`'s own docstring records the shrinking-edge
+# effect a rising champion produces. Read a positive as a RANKING over candidates, not as a predicted
+# gain against the champion — the ordering is what has transferred here, never the value.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 # The three seats trioseat already holds are excluded: `--against` supplies them.
@@ -60,14 +75,21 @@ CANDIDATES=(
 # Priced TWICE on purpose, because the two answers are different questions:
 #   * against `trioseat_v1` — can a cheap second group sit beside the treatment group, i.e. do the two
 #     one-decode groups compose? This is the efficiency-track roster: two decodes, many seats.
-#   * against the pinned champion — is there a seat for a cheap decode in our BEST roster at all? A
+#   * against honest12 — is there a seat for a cheap decode in a scoreable strong roster at all? A
 #     positive here is a score result and outranks the first; a negative with the first positive means
 #     the 224 group is an efficiency play only, which is still a prize we are entered for.
 GROUP224=(
-  adjacent224_s2026 base224_s2026 blendhold_s2026 confident224_s2026 holdannot_s2026
+  adjacent224_s2026 base224_s2026 blendhold_s2026 holdannot_s2026
   labelwise224_s2026 mixup224_long_s2026 mixup224_s2026 mixup224_strong_s2026
   native224_long_s2026 native224_s2026 nocycle224_long_s2026 normcount224_s2026 tissue224_s2026
 )
+
+# `confident224_s2026` IS EXCLUDED FROM BOTH LISTS, by a guard rather than by judgement. `RecordMix`
+# refuses it: "confident224_s2026.pt was scored by a different label table over the 909 shared studies".
+# Its recorded per-study scores are not comparable with the rest, so mixing it in would produce a seat
+# value computed against a different ground truth — a number that looks fine and means nothing. It is not
+# a bad member; it is an unrescored one, and it becomes a candidate again the moment it is rescored under
+# the current table.
 
 resolve() {
   local out=()
@@ -81,13 +103,13 @@ mapfile -t treatment_paths < <(resolve "${CANDIDATES[@]}")
 mapfile -t group224_paths < <(resolve "${GROUP224[@]}")
 
 echo "=== treatment group (20sl, 0.1-0.9, 336px) against trioseat_v1 ==="
-python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${treatment_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${treatment_paths[@]}"
 
 echo "=== 224 group (12sl, 0.2-0.8, 224px) against trioseat_v1 ==="
-python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${group224_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${group224_paths[@]}"
 
-echo "=== 224 group against the pinned champion ==="
-python -m kneemri.kaggle.seat_value --candidates "${group224_paths[@]}"
+echo "=== 224 group against honest12 ==="
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${group224_paths[@]}"
 
 # THE CHAMPION'S OWN SECOND DECODE, and the reading that made the 224 pool the wrong unit.
 #
@@ -111,12 +133,11 @@ python -m kneemri.kaggle.seat_value --candidates "${group224_paths[@]}"
 # whose seats are free; they are still priceable candidates, but each costs a read and belongs to the
 # decode-distance question, not this one.
 #
-# HOW IT IS READ. `seat_value` with no `--against` prices into the pinned champion, which already holds
-# this read. Any candidate at or above the 0.0062 holdout floor is a seat that costs NO decode: take it.
+# HOW IT IS READ. `seat_value --against honest12` prices into a scoreable roster that already holds this read. Any candidate at or above the 0.0062 holdout floor is a seat that costs NO decode: take it.
 # The floor is the whole bar here — there is no decode budget to trade against, which is what separates
 # this pricing from every seat question this project has asked before.
 GROUP2=(
-  confident224_s2026 holdannot_s2026 labelwise224_s2026 mixup224_long_s2026
+  holdannot_s2026 labelwise224_s2026 mixup224_long_s2026
   mixup224_s2026 mixup224_strong_s2026 native224_long_s2026 native224_s2026 nocycle224_long_s2026
   normcount224_s2026 attend_true_s2026 blendlabels_s2026
   depth_true_s2026 ema_ws_s2026 encoder_layer_9_s2026 focal_pool_s2026 lr2e-4_ws_s2026
@@ -128,4 +149,4 @@ GROUP2=(
 mapfile -t group2_paths < <(resolve "${GROUP2[@]}")
 
 echo "=== the champion's own second decode (canonical, 12sl, 0.2-0.8, any size) against the champion ==="
-python -m kneemri.kaggle.seat_value --candidates "${group2_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${group2_paths[@]}"

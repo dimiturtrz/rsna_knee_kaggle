@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# packaged_seats.sh — price the free seats that are ALREADY UPLOADED, against the pinned champion.
+# packaged_seats.sh — price the free seats that are ALREADY UPLOADED, on the champion's own decodes.
 #
 # bead: knee-z652
 #
@@ -33,8 +33,8 @@
 # the largest pool AND the only read carrying three resolutions, so its unseated members bring resolution
 # diversity as well as treatment diversity for a decode already bought.
 #
-# HOW IT IS READ, written before the number. `seat_value` with no `--against` prices each candidate's
-# marginal contribution to the pinned champion on the fold-0 holdout. The bar is the 0.0062 holdout floor
+# HOW IT IS READ, written before the number. `seat_value --against honest12` prices each candidate's
+# marginal contribution to that roster on the fold-0 holdout. The bar is the 0.0062 holdout floor
 # and NOTHING ELSE — there is no decode budget to trade against here, which is what separates this
 # pricing from every seat question this project has asked before.
 #   * Any candidate at or above the floor. Take the best into a kernel edit off the champion's own
@@ -50,6 +50,21 @@
 # (0.0059 offline arriving as 0.014 on the board), the only ensemble axis here that AMPLIFIES. A
 # candidate inside the floor offline is therefore not dead — but it is not evidence, and a slot is not
 # spent on one.
+# THE CONTROL IS `honest12`, NOT THE PINNED CHAMPION, and the reason is a structural limit rather than a
+# preference. Every one of `raptorseat_v1`'s six members is a `_cf` checkpoint — fold -1, fitted on the
+# whole corpus including every holdout study — which is exactly why it is the champion and exactly why it
+# can never be priced offline. `seat_value` said so itself on 2026-08-29:
+#
+#   NO SEAT VALUE against raptorseat_v1: 1 of 6 members carry a holdout record, and pricing a marginal
+#   contribution needs at least 2
+#   unscoreable (fold -1, they have seen every holdout study): calib_span_ff, final_ws_cf,
+#   grade_ladder_cf, lr4e-5_ws_cf, through_dense_cf
+#
+# So `honest12` (0.937 on the board, twelve members, every one fold-0 and scoreable) is the control. It
+# is a WEAKER roster than the champion by 0.006 board, which biases every seat value here UPWARD: a seat
+# is easier to earn in a weaker roster, and `seat_value`'s own docstring records the shrinking-edge
+# effect a rising champion produces. Read a positive as a RANKING over candidates, not as a predicted
+# gain against the champion — the ordering is what has transferred here, never the value.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 # READ B, packaged, unseated. `merged_blend_cf` and `lr4e-5_ws_cf` are excluded: the champion holds them.
@@ -97,15 +112,15 @@ mapfile -t read_span_paths < <(resolve "${READ_SPAN[@]}")
 # framing above is wrong for that list. Cheap to check, and the failure it prevents is a slot spent on an
 # entry that serves five decodes while its write-up claims three.
 echo "=== cost assertion: each list must be exactly ONE decode ==="
-python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_b_paths[@]}"
-python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_a_paths[@]}"
-python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_span_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_b_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_a_paths[@]}"
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.roster_reads --max-decodes 1 --candidates "${read_span_paths[@]}"
 
-echo "=== read B (12sl, 0.2-0.8, any size) packaged+unseated, against the pinned champion ==="
-python -m kneemri.kaggle.seat_value --candidates "${read_b_paths[@]}"
+echo "=== read B (12sl, 0.2-0.8, any size) packaged+unseated, against honest12 ==="
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${read_b_paths[@]}"
 
-echo "=== read A (20sl, 0.1-0.9, 336) packaged+unseated, against the pinned champion ==="
-python -m kneemri.kaggle.seat_value --candidates "${read_a_paths[@]}"
+echo "=== read A (20sl, 0.1-0.9, 336) packaged+unseated, against honest12 ==="
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${read_a_paths[@]}"
 
-echo "=== the span read (12sl, 0.1-0.9, 336) packaged+unseated, against the pinned champion ==="
-python -m kneemri.kaggle.seat_value --candidates "${read_span_paths[@]}"
+echo "=== the span read (12sl, 0.1-0.9, 336) packaged+unseated, against honest12 ==="
+uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${read_span_paths[@]}"

@@ -147,3 +147,55 @@ which is rare enough here to be worth naming.
 - `logs/dryrun_probe224.log`, `logs/dryrun_group2.log` (the decode counts the serve path actually ran)
 - beads `knee-z652` (this lane), `knee-vfnr` (the trio result that opened it), `knee-nas5` (pixel-group
   collapse, which constrains groups and not seats), `knee-s9cr` (224 throughput)
+
+## The seats were free and they are worth nothing — priced, 2026-08-29
+
+The cost result above said the seats cost no decode. It said explicitly that it said nothing about
+whether they are worth taking. They were then priced, and the answer is a clean null.
+
+`seat_value --against honest12` over every PACKAGED, UNSEATED member on each of the champion's three
+own reads — 24 candidates, no card fit, no dataset push:
+
+| read | priced | best marginal | best swap | bands excluding zero |
+|---|---|---|---|---|
+| B — 12sl, 0.2-0.8, 224+336+448 | 11 | +0.0003 | +0.0003 | 0 |
+| A — 20sl, 0.1-0.9, 336 | 12 | +0.0001 | +0.0003 | 0 |
+| span — 12sl, 0.1-0.9, 336 | 1 | -0.0003 | +0.0000 | 0 |
+
+Nothing clears +0.0015, the separation under which this ruler has never been shown to pick a board tick,
+let alone the 0.0062 holdout floor. `merged_span_cf`, priced the same way the same morning, is the best
+of everything measured today at +0.0003 marginal / +0.0005 as a swap — still inside the ruler.
+
+**The null is stronger than it looks, not weaker.** The control had to be `honest12` (0.937, twelve
+members) rather than the pinned champion, because every one of `raptorseat_v1`'s members is a `_cf`
+checkpoint — fold -1, fitted on the whole corpus including every holdout study. That is exactly why it is
+the champion and exactly why it can never be priced offline; `seat_value` refuses it by name. `honest12`
+is 0.006 weaker on the board, and a seat is EASIER to earn in a weaker roster. The pools read zero
+against the easier target.
+
+So the pre-registered second branch fired: the reads are saturated at the seats they already hold, and
+seats-per-decode is a COST result only. It is still the right lens for the efficiency track — an entry
+that serves fewer decodes for the same score is cheaper by the metric that prize measures — but it buys
+no score. **The next slot goes to decode DISTANCE — a genuinely new read — not to a wider one.**
+
+That is not a retraction of the cost finding, which stands and is measured. It is the answer to the
+question the cost finding deliberately left open, and the honest reading is that our pools are deep in
+members and shallow in mechanisms: 188 checkpoints, 13 reads, one architecture. The champion's own
+`architecture-monoculture` principle said this from the other direction, and this pricing is its
+independent confirmation from the seat side.
+
+### Three harness defects, found by running it
+
+None of them was the idea failing, and all three would have produced a confident wrong number.
+
+1. **The pinned champion is unpriceable offline.** All-`_cf` members carry no holdout record. Every
+   `seat_value` invocation in `trio_seat_value.sh` that omitted `--against` was asking a question that
+   cannot be answered — as was the same arm's `--against trioseat_v1` (three members, all fold -1).
+2. **Arms must use `uv run --no-sync --project "$REPO" python`, never bare `python`.** `lib.sh` points
+   arms at an isolated `.venv-arm` precisely so a gate run cannot rewrite the interpreter underneath a
+   live arm. Both pricing arms called bare `python` and died on `ModuleNotFoundError: jaxtyping` — a
+   defect `trio_seat_value.sh` had carried since it was written, which read exactly like a broken venv.
+3. **`confident224_s2026` was scored under a different label table.** `RecordMix` refuses it over the
+   909 shared studies. Mixing it would have produced a seat value against a different ground truth: a
+   number that looks fine and means nothing. Dropped from both candidate lists; a rescore makes it a
+   candidate again.
