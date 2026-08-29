@@ -33,20 +33,17 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 from jaxtyping import Float
 
 from core import cli
 from core.bootstrap import STUDY_RESAMPLES
 from core.findings import TARGETS
+from kneemri.evaluation.gold_rows import PRESENT, GoldRows
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import RankAverage
 
 logger = logging.getLogger(__name__)
-
-PRESENT = 0.5
-"""Where a graded value becomes a positive, matching `LabelScores.per_label`'s own binarisation."""
 
 CUTS = (0.5, 0.6, 0.75, 0.88)
 """The reader emits 0.08/0.28/0.68/0.82/0.94, so these cuts fall BETWEEN its levels: 0.5 admits the
@@ -78,37 +75,15 @@ class SupervisionGap:
 
     def __init__(self, scores: LabelScores | None = None) -> None:
         self.scores = scores or LabelScores()
+        self.gold = GoldRows()
 
     def annotated(self, train_table: Path) -> tuple[list[str], Float[np.ndarray, "studies targets"]]:
-        """The studies a radiologist annotated on EVERY finding, and those annotations.
-
-        All-or-nothing rather than per-cell: train.csv annotates a study on all twelve or none, so a
-        partial row would be a study whose columns mean different things, and there are none to
-        scavenge. Returned in table order so a caller can align predictions to it.
-        """
-        table = pd.read_csv(train_table).set_index("StudyInstanceUID")
-        columns = [target for target in TARGETS if target in table.columns]
-        complete = table[columns].dropna(how="any")
-        return list(complete.index), complete.to_numpy(dtype=np.float32)
+        """The annotated studies and their annotations — see `GoldRows`, which owns the read."""
+        return self.gold.annotated(train_table)
 
     def reported(self, labels: Path, identifiers: list[str]) -> Float[np.ndarray, "studies targets"]:
-        """The report-derived table for exactly these studies, in their order, READ RAW.
-
-        Raw is the load-bearing word. `Targets.load` overwrites the derived label with the radiologist
-        annotation wherever a study has one, which is right for training and would make any measurement
-        against those annotations compare them with themselves — a perfect score, and a meaningless one.
-
-        A study the table does not carry, or a finding the reader could not read, lands at PRESENT: the
-        same 0.5 default the rest of the project uses, which binarises to absent.
-
-        ALL TWELVE COLUMNS, ALWAYS, even ones the table does not carry. `against` names its columns by
-        position — `TARGETS[column]` — so a table missing one finding would return eleven columns and
-        every finding after the gap would be scored under its neighbour's name. Ours carries all twelve
-        and the bug never fired; a foreign reader is not owed that assumption.
-        """
-        table = pd.read_csv(labels).set_index("StudyInstanceUID").reindex(identifiers)
-        values = table.reindex(columns=list(TARGETS)).to_numpy(dtype=np.float32)
-        return np.asarray(np.nan_to_num(values, nan=PRESENT), dtype=np.float32)
+        """A report table on those studies in that order — see `GoldRows`, which owns the read."""
+        return self.gold.reported(labels, identifiers)
 
     def against(
         self, values: Float[np.ndarray, "studies targets"], truth: Float[np.ndarray, "studies targets"]
@@ -225,6 +200,25 @@ class SupervisionGap:
             model_side=model_side,
         )
 
+    def verdict(self, low: float, high: float) -> str:
+        """Which half the paired interval convicts, and it has THREE answers, not two.
+
+        The sign convention is `labels - model`, so a wholly POSITIVE interval says the labels score
+        higher and the model is the weaker half, and a wholly NEGATIVE one says the model beats its own
+        supervision and the READER is what to improve. Only an interval containing zero is silent.
+
+        This was one-sided until 2026-08-29 and tested `low > 0` alone, so the model-wins case printed
+        "SPANS zero" over an interval of [-0.0742, -0.0255] — the first time our own held-annotation
+        members were read through it, and the exact reading that would have steered the queue. The
+        per-finding count on the next line had been two-sided all along, so the block contradicted
+        itself in the same breath: two resolved bands under an aggregate calling itself unresolved.
+        """
+        if low > 0.0:
+            return "  the interval EXCLUDES zero: the model is the weaker half on our own evidence"
+        if high < 0.0:
+            return "  the interval EXCLUDES zero: the model beats its own labels, so the READER is the weaker half"
+        return "  the interval SPANS zero: these studies cannot say which half is weaker"
+
     def separation(
         self,
         values: Float[np.ndarray, "kept targets"],
@@ -256,9 +250,7 @@ class SupervisionGap:
         return [
             f"labels - model: {self.scores.mean(values, truth) - self.scores.mean(predictions, truth):+.4f}  "
             f"[{low:+.4f}, {high:+.4f}]  over {truth.shape[0]} studies",
-            "  the interval EXCLUDES zero: the model is the weaker half on our own evidence"
-            if low > 0.0
-            else "  the interval SPANS zero: these studies cannot say which half is weaker",
+            self.verdict(low, high),
             f"  {len(resolved)} of {len(bands)} per-finding bands exclude zero — twelve reads, so a shape, "
             f"not twelve findings: {', '.join(resolved) or 'none'}",
         ]

@@ -1244,6 +1244,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.gold_rows",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.holdout_metrics",
       "target": "kneemri.evaluation.scores",
       "weight": 1
@@ -8193,6 +8199,18 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.annotated_readings.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.annotated_readings.main",
       "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
@@ -8200,18 +8218,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.annotated_readings.main",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.annotated_readings.main",
-      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.annotated_readings.main",
-      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
       "weight": 1
     },
     {
@@ -11845,6 +11851,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -11854,6 +11866,12 @@
       "kind": "references",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "target": "kneemri.evaluation.supervision_gap.Bottleneck",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.__init__",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
       "weight": 1
     },
     {
@@ -11890,6 +11908,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap.aligned",
       "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
       "weight": 1
     },
     {
@@ -11932,6 +11956,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap.report",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.bottlenecked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.reported",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.reported",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.supervision_gap.SupervisionGap.separation",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.verdict",
       "weight": 1
     },
     {
@@ -20375,7 +20411,7 @@
       "role": null
     },
     {
-      "descendants": 157,
+      "descendants": 158,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -20431,7 +20467,7 @@
       "role": null
     },
     {
-      "descendants": 41,
+      "descendants": 42,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -20506,6 +20542,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler",
       "label": "foreign_ruler",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_rows",
+      "label": "gold_rows",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -22661,6 +22705,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.foreign_ruler",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_rows.GoldRows",
+      "label": "GoldRows",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_rows",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -28944,6 +28996,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.gold_rows.GoldRows.annotated",
+      "label": "annotated",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_rows.GoldRows",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_rows.GoldRows.reported",
+      "label": "reported",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_rows.GoldRows",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.__init__",
       "label": "__init__",
       "level": "method",
@@ -30770,6 +30838,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap.SupervisionGap.thresholds",
       "label": "thresholds",
+      "level": "method",
+      "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.supervision_gap.SupervisionGap.verdict",
+      "label": "verdict",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "role": null

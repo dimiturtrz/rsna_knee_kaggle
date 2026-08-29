@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 
 from core.findings import TARGETS
+from kneemri.evaluation.gold_rows import GoldRows
 from kneemri.evaluation.supervision_gap import SupervisionGap
 
 STUDIES = 8
@@ -88,25 +89,23 @@ def test_measured(tmp_path: Path):
 
 
 def test_annotated(tmp_path: Path):
-    """Only the studies annotated on EVERY finding, since a partial row means nothing coherent."""
-    identifiers, truth = SupervisionGap().annotated(_train_table(tmp_path / "train.csv", annotate=3))
+    """The gold rows reach every caller through here unchanged; `GoldRows` owns what they mean."""
+    train = _train_table(tmp_path / "train.csv", annotate=3)
+    identifiers, truth = SupervisionGap().annotated(train)
+    expected_names, expected = GoldRows().annotated(train)
 
-    assert identifiers == ["s0", "s1", "s2"], "the unannotated studies are dropped whole"
-    assert truth.shape == (3, len(TARGETS))
-    assert set(np.unique(truth)) <= {0.0, 1.0}
+    assert identifiers == expected_names
+    assert np.array_equal(truth, expected), "a delegation that reshaped its answer would be a second reader"
 
 
 def test_reported(tmp_path: Path):
-    """The report table in the CALLER's order, with a missing study defaulted rather than dropped."""
+    """Same delegation on the report side, so the two readers can never drift into different defaults."""
     path = tmp_path / "labels.csv"
     rows = [{"StudyInstanceUID": f"s{index}"} | dict.fromkeys(TARGETS, 0.94 - 0.1 * index) for index in (0, 1)]
     pd.DataFrame(rows).to_csv(path, index=False)
+    order = ["s1", "s0", "absent"]
 
-    values = SupervisionGap().reported(path, ["s1", "s0", "absent"])
-
-    assert values.shape == (3, len(TARGETS))
-    assert values[0, 0] < values[1, 0], "reindexed to the order asked for, not the order on disk"
-    assert values[2, 0] == 0.5, "an unlabelled study sits at the default rather than at zero"
+    assert np.array_equal(SupervisionGap().reported(path, order), GoldRows().reported(path, order))
 
 
 def test_against():
@@ -146,6 +145,27 @@ def test_separation():
 
     assert tied[0].startswith("labels - model: +0.0000")
     assert "SPANS zero" in tied[1], "a column against itself may never be called the weaker half"
+
+    swapped = gap.separation(predictions, values, truth, resamples=RESAMPLES)
+
+    assert swapped[0].startswith("labels - model: -"), "the third class: the model beats its supervision"
+    assert "EXCLUDES zero" in swapped[1] and "READER is the weaker half" in swapped[1], (
+        "a wholly negative interval is as resolved as a wholly positive one"
+    )
+
+
+def test_verdict():
+    """Three equivalence classes over one signed interval, because the reading has three answers.
+
+    The middle class is the only one that was ever right by accident: until 2026-08-29 the negative
+    interval fell through to it and a decisive model-wins result printed as silence.
+    """
+    gap = SupervisionGap()
+
+    assert "model is the weaker half" in gap.verdict(0.02, 0.06)
+    assert "READER is the weaker half" in gap.verdict(-0.0742, -0.0255), "the branch the real run needed"
+    assert "SPANS zero" in gap.verdict(-0.01, 0.03)
+    assert "SPANS zero" in gap.verdict(0.0, 0.03), "a boundary touching zero is not an exclusion"
 
 
 def test_bottlenecked():

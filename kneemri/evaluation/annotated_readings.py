@@ -51,6 +51,7 @@ from core import cli
 from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
+from kneemri.evaluation.gold_rows import GoldRows
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
@@ -139,12 +140,10 @@ def main() -> None:
     arguments = command.parsed()
 
     from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
-    from kneemri.evaluation.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
 
     root = command.rooted(arguments)
-    gap = SupervisionGap()
-    identifiers, truth = gap.annotated(root.raw() / "train.csv")
+    identifiers, truth = GoldRows().annotated(root.raw() / "train.csv")
     views = SpatialViews() if arguments.tta else None
     reader = AnnotatedReadings(root, torch.device(arguments.device), views)
     names, per_member = reader.readings(arguments.checkpoints, identifiers, overlap=arguments.overlap)
