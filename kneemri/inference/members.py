@@ -461,6 +461,25 @@ class Member:
         }
         return json.dumps(pixels, sort_keys=True)
 
+    @property
+    def decode_key(self) -> tuple[str, int, str, Reading]:
+        """Members sharing this key share ONE decode of the corpus, whatever size each then wants.
+
+        NARROWER THAN `pixel_group` BY EXACTLY ONE AXIS, and that axis is the whole point.
+        `pixel_group` is the unit of PREDICTION: a member is fed the cache size it was fitted from, so
+        two resolutions are two sets of pixels to a model. Decoding is upstream of that —
+        `SlotReader.cropped` stops before the resize and `Study.bags` returns every requested size from
+        one cropped stack, each byte-identical to a native read — so resolution costs no read at all.
+
+        It lived inline in `Ensemble.reads`, where nothing outside the serve path could ask the
+        question. That mattered on 2026-08-29: the answer is that thirty-odd checkpoints we already own
+        ride the decode our champion already pays for, and finding it out required building a throwaway
+        package and dry-running it, because the key was only reachable through an `Ensemble`. Here, any
+        tool holding checkpoints can group them, and — because it is the SAME property the serve path
+        keys on — a tool's answer cannot drift from what a kernel will actually do.
+        """
+        return (self.scheme, self.slices, self.tie, self.reading)
+
 
 SHIPPED_PACKAGE = "all_ours"
 """The directory under the processed root that `package_members` writes and `push.sh` uploads."""

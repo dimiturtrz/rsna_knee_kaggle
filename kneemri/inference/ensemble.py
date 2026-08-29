@@ -200,11 +200,16 @@ class Ensemble:
         THE CROP JOINS THAT LIST for the same reason the scheme is in it: it changes which pixels exist,
         not merely how they are sampled, so two members that crop differently cannot share one read.
         `Member.pixel_group` has always included it; this is the decode side finally agreeing.
+
+        THE KEY ITSELF IS `Member.decode_key`, not a tuple spelled out here. Written inline, it was
+        reachable only through a mounted package and an `Ensemble`, so answering "which of our
+        checkpoints share a decode?" meant building a throwaway package and dry-running it. On the
+        member, an analysis tool groups raw checkpoints by the SAME property the kernel keys on, and
+        cannot answer a decode count the serve path would contradict.
         """
         gathered: dict[tuple[str, int, str, Reading], list[Member]] = {}
         for member in self.package.members:
-            key = (member.scheme, member.slices, member.tie, member.reading)
-            gathered.setdefault(key, []).append(member)
+            gathered.setdefault(member.decode_key, []).append(member)
         return list(gathered.values())
 
     def _asked(self, members: list[Member] | None) -> list[Member]:

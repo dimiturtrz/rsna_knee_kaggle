@@ -3164,6 +3164,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.roster_reads",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_reads",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_reads",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_reads",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_reads",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
       "weight": 1
@@ -16154,6 +16184,84 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.kaggle.roster_reads.ReadGroup",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.roster_reads.RosterReads",
+      "target": "core.data.corpus.slot_reader.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.roster_reads.RosterReads",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.roster_reads.RosterReads",
+      "target": "kneemri.kaggle.roster_reads.ReadGroup",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.roster_reads.RosterReads",
+      "target": "kneemri.kaggle.roster_reads.RosterReads",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.roster_reads.RosterReads.over",
+      "target": "kneemri.kaggle.roster_reads.ReadGroup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.RosterReads.read_members",
+      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.over",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.read_members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
       "weight": 1
@@ -19669,7 +19777,7 @@
       "role": null
     },
     {
-      "descendants": 154,
+      "descendants": 155,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -20301,7 +20409,7 @@
       "role": null
     },
     {
-      "descendants": 23,
+      "descendants": 24,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -20464,6 +20572,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_teacher",
       "label": "raptor_teacher",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads",
+      "label": "roster_reads",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -23098,6 +23214,22 @@
       "label": "TeacherPass",
       "level": "class",
       "parent": "kneemri.kaggle.raptor_teacher",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.ReadGroup",
+      "label": "ReadGroup",
+      "level": "class",
+      "parent": "kneemri.kaggle.roster_reads",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads",
+      "label": "RosterReads",
+      "level": "class",
+      "parent": "kneemri.kaggle.roster_reads",
       "role": "satellite"
     },
     {
@@ -31686,6 +31818,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.members.Member.decode_key",
+      "label": "decode_key",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.members.Member.from_checkpoint",
       "label": "from_checkpoint",
       "level": "method",
@@ -33426,6 +33566,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_teacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.ReadGroup.description",
+      "label": "description",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.ReadGroup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.ReadGroup.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.ReadGroup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.ReadGroup.sizes",
+      "label": "sizes",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.ReadGroup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.keyed",
+      "label": "keyed",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.per_decode",
+      "label": "per_decode",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.placed",
+      "label": "placed",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.read_members",
+      "label": "read_members",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.RosterReads.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads.RosterReads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_reads.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_reads",
       "role": null
     },
     {

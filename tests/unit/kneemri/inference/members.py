@@ -276,7 +276,7 @@ def test_pixel_group():
         holdout=0.1,
         annot=0.1,
     )
-    assert resized.pixel_group != same, "a different resolution is a different decode"
+    assert resized.pixel_group != same, "a different resolution is a different input to the model"
 
     without_depth = {key: value for key, value in _config().items() if key != "slices"}
     legacy = Member(
@@ -301,6 +301,39 @@ def test_pixel_group():
     # indexed the config raw and raised KeyError here instead — one fact answered two ways, and this is
     # the answer that decides which decode a member shares.
     assert legacy.pixel_group == stated.pixel_group
+
+
+def test_decode_key():
+    """The decode key is `pixel_group` MINUS resolution, which is the whole seats-per-decode result.
+
+    A member is fed the cache size it was fitted from, so two resolutions are two inputs to a model —
+    but `SlotReader.cropped` stops before the resize and one read returns them all, so they are ONE
+    decode. If this ever ties them together again, every entry carrying more than one size silently
+    doubles its serve cost, which is the state this project shipped in until 2026-08-29.
+    """
+    member = _member()
+    resized = Member(
+        identifier="r",
+        file=Path("m_r.pt"),
+        fold=0,
+        config=_config() | {"img": 224},
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    assert resized.decode_key == member.decode_key, "resolution costs no read"
+    assert resized.pixel_group != member.pixel_group, "and is still a different input to the model"
+
+    cropped = Member(
+        identifier="c",
+        file=Path("m_c.pt"),
+        fold=0,
+        config=_config() | {"crop_mm": 80.0},
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    assert cropped.decode_key != member.decode_key, "a different crop is different pixels, so a second read"
 
 
 def test_state_dict_of(tmp_path: Path):

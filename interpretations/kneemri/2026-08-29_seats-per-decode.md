@@ -84,27 +84,38 @@ seats is a measured effect on the board and not only a cost identity.
 
 ## The whole map, both reads
 
-The same grouping applied to the other large family — and `crop_mm` joins `centre` as a reading field,
-which the numbers show directly:
+The hand grouping that produced the first version of this section was replaced by a tool the same
+morning — `python -m kneemri.kaggle.roster_reads`, which groups raw checkpoints by the same
+`Member.decode_key` the kernel serves under, so its answer cannot drift from what a submission does.
+Pointed at every `.pt` under the processed root (195 files, 7 of which describe no reading and are
+teachers or partial saves rather than members):
 
-    canonical / 20 slices / band 0.1-0.9 / centre image / crop 130mm   49 members
-    canonical / 20 slices / band 0.1-0.9 / centre image / crop 140mm    1 member   (band140)
-    merged    / 20 slices / band 0.1-0.9 / centre image / crop 130mm    1 member
+    108 members at [224, 336, 448]  canonical / 12 slices / band 0.2-0.8 / centre image / crop 130mm
+     58 members at [336]            canonical / 20 slices / band 0.1-0.9 / centre image / crop 130mm
+      9 members at [336]            canonical / 12 slices / band 0.1-0.9 / centre image / crop 130mm
+      3 members at [336]            canonical / 20 slices / band 0.2-0.8 / centre image / crop 130mm
+      ... nine more reads of one or two members each
+    188 seats on 13 decodes = 14.5 seats per decode
 
 So we own two large reads, and they are not equivalent:
 
-| read | members owned | seated today | resolutions present |
-|---|---|---|---|
-| A — canonical, 20 slices, 0.1-0.9 | 49 | 3 (`trioseat_v1`) | 336 only |
-| B — canonical, 12 slices, 0.2-0.8 | ~30 | 1 (the champion's `lr4e-5_ws_cf`) | 224, 336, 448 |
+| read | members on disk | packaged | seated today | resolutions present |
+|---|---|---|---|---|
+| A — canonical, 20 slices, 0.1-0.9 | 58 | 27 | 3 (`trioseat_v1`) | 336 only |
+| B — canonical, 12 slices, 0.2-0.8 | 108 | 19 | 1 (the champion's `lr4e-5_ws_cf`) | 224, 336, 448 |
 
-Read A is where `trioseat_v1` proved seats compose, and it is the larger pool — but every one of its
-members was fitted at 336, so its only free diversity is treatment. Read B is smaller and carries three
-resolutions, so it offers treatment AND resolution diversity for the same single decode. **Read B is the
-better read, and it is the one seated once.**
+Read A is where `trioseat_v1` proved seats compose, but every one of its members was fitted at 336, so
+its only free diversity is treatment. Read B is both the larger pool AND the one carrying three
+resolutions, so it offers treatment and resolution diversity for the same single decode — and it is the
+read that is seated once. **Read B is the better read, and it is the one we barely use.**
 
-Two decodes could therefore seat roughly seventy-nine members we already own. The pinned champion spends
-about four decodes to seat seven.
+The packaged column is the one that decides what is buildable TODAY. Forty-six members are already in
+`dimiturnt/kneemri-members` on those two reads, so an entry seating all of them costs **two decodes, no
+card time and no dataset push** — a kernel edit and a slot. The pinned champion spends about four
+decodes to seat seven.
+
+The full-disk numbers were wrong in the first draft of this section (49 and ~30, from a hand grouping
+over a filtered subset). Writing the tool was what corrected them, which is the argument for the tool.
 
 ## What it does not change
 
@@ -130,6 +141,9 @@ which is rare enough here to be worth naming.
 ## Provenance
 
 - `kneemri/inference/ensemble.py:179-208` (`reads`), `:433-442` (`sizes`), `:497` (`sized[...]`)
-- `logs/dryrun_probe224.log`, `logs/dryrun_group2.log`
+- `kneemri/inference/members.py` (`Member.decode_key`, the key both the serve path and the tool take)
+- `kneemri/kaggle/roster_reads.py` — `--roster <file>` or `--candidates <names>`, and `--max-decodes N`
+  to refuse a roster that costs more reads than an entry budgeted for
+- `logs/dryrun_probe224.log`, `logs/dryrun_group2.log` (the decode counts the serve path actually ran)
 - beads `knee-z652` (this lane), `knee-vfnr` (the trio result that opened it), `knee-nas5` (pixel-group
   collapse, which constrains groups and not seats), `knee-s9cr` (224 throughput)
