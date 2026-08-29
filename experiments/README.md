@@ -5768,3 +5768,34 @@ the efficiency lane has, and it was bought for free by a run that was aimed at s
 **A caveat the number carries and the plateau does not remove.** This is offline on 909 fold-0 studies,
 and it is a statement about SEATING, not about weighting: the greedy seats members it then averages
 under one rule. A weighted fit over the same pool is a different question and this does not answer it.
+
+### The weighting caveat, discharged the same hour: no rule beats the one already shipped
+
+The saturation entry above closed on a caveat — "this is a statement about SEATING, not about weighting;
+a weighted fit over the same pool is a different question and this does not answer it." `vote_ceiling`
+answers it, over the roster the fix had just enlarged, and it costs nothing (holdout records are on disk;
+no card, no slot, no inference). Weights fitted on one half of the studies, scored on the other, both
+directions, flat scored on the identical halves so the paired inflation cancels:
+
+```
+reading 77 members over 909 studies
+  RankAverage            honest 0.8710  vs flat +0.0000  (fit-on-self 0.8710, overfit gap +0.0000)
+  QualityWeightedRank    honest 0.8710  vs flat -0.0000  (fit-on-self 0.8710, overfit gap +0.0000)
+  LabelQualityRank       honest 0.8711  vs flat +0.0001  (fit-on-self 0.8715, overfit gap +0.0004)
+  LogitAverage           honest 0.8720  vs flat +0.0010  (fit-on-self 0.8720, overfit gap +0.0000)
+  MedianLogit            honest 0.8707  vs flat -0.0003  (fit-on-self 0.8707, overfit gap +0.0000)
+BEST honest rule: LogitAverage at 0.8720 (+0.0010 vs flat)
+```
+
+**The best rule is the one already shipped**, and its margin over flat rank is +0.0010 — a tenth of the
+noise bar. `QualityWeightedRank`, the rule whose own docstring asked for exactly this read, comes in at
+−0.0000: after its weights are paid for it is indistinguishable from not weighting at all.
+`LabelQualityRank` is the only rule that overfits measurably (+0.0004 fit-on-self over honest), and even
+its overfit number does not reach flat plus the floor. So the vote axis is closed on the enlarged
+roster the same way the count axis is: not "we picked well", but "there is nothing here to pick".
+
+**One ordering fact worth keeping, because the two runs share a ruler.** All 77 packaged members flat
+reads 0.8720. The honest greedy's chosen 28 read 0.8753. **Choosing beats including by +0.0033** — more
+than any vote rule buys over any other. The lever on this pool was never the rule and is not the count;
+it is which members, and even that lands on a plateau. Both axes now say the same thing from opposite
+sides: this pool is one architecture, measured out.
