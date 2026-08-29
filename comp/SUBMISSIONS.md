@@ -2606,3 +2606,42 @@ spent, so the inference rests on the endpoints, not on a measured n=2 control.
 **What it does NOT say.** It does not license dropping to two seats. `raptorseat` at 0.943 is still the
 best row on the board and still the pin; 0.936 < 0.943 whatever the per-seat arithmetic says. The finding
 is about where the NEXT seat should come from, not about how many to keep.
+
+## 2026-08-29 · `kneemri-trioseat` — 0.938, and the prediction that missed it by 0.011
+
+`final_ws_cf` + `grade_ladder_cf` + `through_dense_cf` at 1/3 each. Ref 55862930.
+
+**The pre-registration named 0.925-0.929 and the board read 0.938.** That is the arm's own `>=0.938`
+branch, written down as the surprise rather than the expectation. The reasoning behind the prior was
+that all three seats sit in one pixel group — 20 slices, band 0.1-0.9 — so `knee-nas5`'s measured
+pixel-group collapse should have eaten the count term and left the trio near its own first seat. It
+missed by +0.009 to +0.013, several times the 0.0053 Hanley-McNeil floor. The prediction is what the
+number refutes; the arm did what it was built to do.
+
+| entry | seats | decodes | board | bonus over solo |
+|---|---|---|---|---|
+| `soloseat` | 1 | 1 | 0.925 | — |
+| `onepair` | 2 | 2 | 0.936 | +0.011 |
+| **`trioseat`** | **3** | **1** | **0.938** | **+0.013** |
+| `calibsix` | 6 | ~3 | 0.941 | +0.016 |
+| `raptorseat` | 7 | ~4 | 0.943 | +0.018 |
+
+**What it actually measured.** Every other multi-seat entry on this board moves decode geometry and
+supervision treatment together, so no entry before this one could separate them. These three seats are
+matched on slices, band, resolution and backbone, and differ only in treatment — final weight-averaging,
+the grade ladder, the through-plane read. Their +0.013 over solo is therefore a clean read of
+supervision-treatment diversity alone, and it lands level with the +0.011 that `onepair` bought by
+crossing an architecture boundary. Treatment diversity buys what architecture distance buys, for half
+the decode cost.
+
+**Which corrects how `knee-nas5` was being quoted.** That result constrains PIXEL groups; it was being
+carried into planning as if it constrained SEATS, a strictly stronger claim it never measured. Three
+seats in one pixel group are not one seat. The monoculture plateau survives — 0.938 is still under
+`calibsix` 0.941 and `raptorseat` 0.943, so treatment diversity is a cheaper source of the same kind of
+gain, not a replacement for the other four seats.
+
+**Stated limit.** One board read, one hidden test set. The 0.002 over `onepair` is instrument noise and
+nothing is claimed from it. The load-bearing quantity is 0.938 against a pre-registered 0.927.
+
+**Efficiency track.** Three members, one decode, 0.005 behind a seven-seat nine-hour kernel. This is the
+entry to pin there.
