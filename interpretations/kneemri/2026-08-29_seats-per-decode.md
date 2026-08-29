@@ -709,3 +709,49 @@ So the ceiling now holds against four strategies that share nothing but the pool
 label, honest greedy seats, a flat rank-average of a curated eight, and learned weights. The
 conclusion above does not change, it only stops being provisional — and the aggregation lane is closed
 rather than merely unpromising. The champion already serves `LogitAverage`, which is the honest maximum.
+
+## Why the ceiling exists: the pool spans one competence TRADE, and we cannot pick along it
+
+Four aggregation strategies tying is a strong negative but not an explanation. `competence_axis` — also
+never run over a pool until today, also free — supplies the mechanism.
+
+```
+109 members x 12 findings, over 909 shared studies
+member quality took 81.7% of the spread and was removed before the axis was read
+component 1: 45.7% of what is left, against a permutation null bar of 27.4%
+  ONE shared axis: the pool's spread is a trade
+```
+
+Loading, most negative first: Synovitis −0.454, Effusion −0.389, Medial OA −0.199, Lateral OA −0.181,
+Contusion −0.057, PF OA −0.003, ACL +0.015, Lateral Meniscus +0.032, MCL +0.060, Medial Meniscus +0.214,
+Fracture +0.313, Baker's +0.647. By structure scale, focal −0.0086 against regional +0.0121.
+
+So a member that is better at the diffuse fluid findings is measurably worse at the focal ones, and
+after member quality is stripped out that trade takes 45.7% of what remains against a 27.4% null. On the
+competence axis the pool is **not** a monoculture, whatever it is on the architecture axis.
+
+Two things follow, and the second is the one that matters.
+
+**It explains the ceiling.** Averaging members drawn from opposite ends of a trade cancels the trade.
+Four strategies that share nothing but the pool land inside 0.003 of one another because every one of
+them is averaging along an axis whose ends subtract.
+
+**It explains why routing failed anyway.** Routed top-k per label measured negative this morning, which
+sits badly beside a proven per-label trade — routing is exactly the tool for a trade. The reconciliation
+is the denominator. The routing choice is fitted on 909 studies with as few as 62 Fracture positives, so
+an ordering that is real in aggregate over 109 members cannot be recovered one label at a time at that
+sample size. The axis is real *and* our ruler cannot pick along it. Those are not in tension; the first
+is a statement about the pool and the second about the holdout.
+
+What this does **not** license is a per-label loss or a focus-label member — the house rule is to keep
+the objective general and fix needs with balanced data. What it does license, and what nothing here has
+ever held, is a member placed **off** the axis rather than at an end of it: the ends are already
+populated (`depth_regions_span_run1` at −0.158, `contrast_dense` at +0.041). That needs its own
+pre-registration before any card is spent.
+
+Its immediate use is as a third read for `raddino_dense`, and a sharper one than the two seat-and-
+distance gates already pre-registered on `knee-fzpy`. Re-run this with the new checkpoint present and
+read where it sits. At an end of the existing axis it is another draw from the same pool whatever its
+solo score; off the axis — small loading on component 1 with its own quality high — it is the first
+genuinely new competence profile this pool has held, and that is precisely what a seat value and a
+residual distance cannot report.
