@@ -16,13 +16,17 @@ AND IT CARRIES ITS OWN CONTROL. Selecting the top `k` members per label at `k = 
 flat rank-average, so one k curve holds both the candidate and its matched baseline under the SAME
 estimator. Comparing a split-half number against a whole-holdout one would compare two rulers.
 
-No GPU: arithmetic over the arrays `HoldoutPredictions.cached` returns.
+No GPU FOR A MEMBER THE PREDICTION STORE HAS ALREADY SEEN: arithmetic over the arrays
+`HoldoutPredictions.cached` returns. A member it has NOT seen runs its encoder, and this line said the
+unconditional "No GPU" until 2026-08-29, when two of these read 4.2 GB onto a card a trainer had reserved
+29,992 MiB of. Run `card_check` first and pass `--device` — the condition is cache warmth, not the tool.
 """
 
 import logging
 from pathlib import Path
 
 import numpy as np
+import torch
 from jaxtyping import Float
 from numpy.typing import NDArray
 
@@ -165,6 +169,15 @@ def main() -> None:
     command.parser.add_argument("--seed", type=int, default=2026, help="the half-split, NOT the fold split")
     command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
     command.parser.add_argument("--refresh", action="store_true", help="recompute rather than reuse stored predictions")
+    command.parser.add_argument(
+        "--device",
+        default=VisibleCards().device().type,
+        choices=("cuda", "cpu"),
+        help="where to read cache MISSES. The docstring's 'costs no card' holds only for members the "
+        "store has already seen; a cold member runs its encoder, and on 2026-08-29 two of these read "
+        "4.2 GB onto a card a trainer had reserved 29,992 MiB of, leaving 634 MiB free. `member_curve` "
+        "has taken this flag for exactly that reason and this CLI could not say cpu at all.",
+    )
     arguments = command.parsed()
 
     root = command.rooted(arguments)
@@ -179,7 +192,7 @@ def main() -> None:
     _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
 
-    predictions = HoldoutPredictions(VisibleCards().device())
+    predictions = HoldoutPredictions(torch.device(arguments.device))
     store = PredictionCache(
         root.processed() / "holdout_predictions",
         [identifiers[position] for position in holdout],
