@@ -44,6 +44,31 @@ offline ruler involved.
 Two independent lines, one offline and one on the board, agree that decodes two and three are not
 earning their runtime.
 
+## WHICH decode matters more than HOW MANY
+
+Same tool, one budget, three pools — each read searched alone:
+
+| the one decode | best score | seats |
+|---|---|---|
+| read A — canonical / 20 slices / band 0.1-0.9 / 336 | **0.8736** | 7 |
+| read B — canonical / 12 slices / band 0.2-0.8 / 224+336+448 | 0.8669 | 4 |
+| span — canonical / 12 slices / band 0.1-0.9 / 336 | 0.8654 | 3 |
+
+Read A beats read B by **+0.0067**, which CLEARS the 0.0062 floor — the only separation measured today
+that does. So the decode budget is the wrong knob and the decode CHOICE is the right one: adding a
+second read buys +0.0008, and picking the better single read buys eight times that.
+
+`trioseat_v1` already serves read A (`final_ws_cf`, `grade_ladder_cf`, `through_dense_cf`), so the
+offline ruler and the board's best one-decode entry independently chose the same decode. That is a
+harness check passing, not a new fact — but it is the check that would have caught the ruler pointing at
+the wrong read.
+
+One thing read A's walk says that is not yet spent: it reaches 0.8705 at three seats and 0.8736 at
+seven. +0.0031 for four more seats on a decode already paid for — under the floor, over the +0.0015
+ruler, and on the ONE axis `knee-nas5` measured AMPLIFYING to the board at 2.4x. Whether those four
+seats exist as `_cf` checkpoints in the packaged roster is what decides if it is a kernel edit or a
+push.
+
 ## What it does and does not license
 
 It licenses the efficiency entry being a ONE-DECODE entry, and we already have one: `trioseat_v1` at
