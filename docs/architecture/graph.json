@@ -728,6 +728,18 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.reader_upgrade",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.reader_upgrade",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.report_language",
       "target": "core.cli",
       "weight": 1
@@ -7078,6 +7090,60 @@
       "kind": "calls",
       "source": "core.data.labels.reader_disagreement.main",
       "target": "core.data.labels.table_blend.LabelBlend.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.accuracy",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.answered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.blank",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.resampled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.reader_upgrade.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.cells",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.reader_upgrade.main",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.main",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
       "weight": 1
     },
     {
@@ -19827,7 +19893,7 @@
   ],
   "nodes": [
     {
-      "descendants": 56,
+      "descendants": 57,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -19851,7 +19917,7 @@
       "role": null
     },
     {
-      "descendants": 46,
+      "descendants": 47,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -20107,7 +20173,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 15,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -20166,6 +20232,14 @@
       "descendants": 0,
       "id": "core.data.labels.reader_disagreement",
       "label": "reader_disagreement",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade",
+      "label": "reader_upgrade",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -22144,6 +22218,14 @@
       "label": "ReaderDisagreement",
       "level": "class",
       "parent": "core.data.labels.reader_disagreement",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "label": "ReaderUpgrade",
+      "level": "class",
+      "parent": "core.data.labels.reader_upgrade",
       "role": "primary"
     },
     {
@@ -27056,6 +27138,62 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.reader_disagreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.accuracy",
+      "label": "accuracy",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.answered",
+      "label": "answered",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.blank",
+      "label": "blank",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.resampled",
+      "label": "resampled",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade",
       "role": null
     },
     {

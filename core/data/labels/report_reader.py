@@ -291,21 +291,32 @@ class LocalReader:
         return table.dropna(subset=list(TARGETS), how="any")[[STUDY, REPORT]]
 
     def load(self) -> tuple[object, object]:  # devtools-ignore: test-mirror
-        """Tokenizer and model, once. Imported here because a unit test may never pay for transformers."""
+        """Tokenizer and model, once. Imported here because a unit test may never pay for transformers.
+
+        `dtype="auto"` takes the checkpoint's own precision rather than the float32 default. An 8B read in
+        float32 is 32 GB of weights and does not fit the card at all; the same weights at the bfloat16 they
+        were saved in are 16 GB, and the arithmetic is the checkpoint's, not a cast of it.
+        """
         if self._loaded is None:
             from transformers import AutoModelForCausalLM, AutoTokenizer  # noqa: PLC0415
 
             logger.info("loading reader %s", self.model_id)
             tokenizer = AutoTokenizer.from_pretrained(self.model_id)
-            model = AutoModelForCausalLM.from_pretrained(self.model_id, device_map="auto")
+            model = AutoModelForCausalLM.from_pretrained(self.model_id, dtype="auto", device_map="auto")
             self._loaded = (tokenizer, model)
         return self._loaded
 
     def answer(self, report: str) -> str:  # devtools-ignore: test-mirror
-        """The model's raw text for one report."""
+        """The model's raw text for one report.
+
+        `enable_thinking=False` because the reasoning-capable readers default their template to ON, and a
+        reader that thinks first spends `MAX_NEW_TOKENS` on the preamble and emits no JSON at all — twelve
+        findings falling to `UNCLEAR` for a reason that has nothing to do with the report. A template
+        without the variable is unaffected: Jinja binds it and never reads it.
+        """
         tokenizer, model = self.load()
         text = tokenizer.apply_chat_template(  # type: ignore[attr-defined]
-            self.prompt.messages(report), tokenize=False, add_generation_prompt=True
+            self.prompt.messages(report), tokenize=False, add_generation_prompt=True, enable_thinking=False
         )
         inputs = tokenizer(text, return_tensors="pt").to(model.device)  # type: ignore[operator, attr-defined]
         generated = model.generate(**inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=False)  # type: ignore[attr-defined]

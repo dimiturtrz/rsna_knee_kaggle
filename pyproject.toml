@@ -60,6 +60,11 @@ foreign = ["opencv-python-headless"]
 # update is a one-line `devtools_ref` bump on `copier update`, no source diff in your PRs. Imports as
 # `devtools` (`python -m devtools.graph.fitness …`); grimp/networkx arrive transitively. ast-grep/jscpd configs are
 # located from the install via `python -m devtools.tools.config`. Pin lives in .copier-answers.yml (devtools_ref).
+# Reading the radiology reports with LOCAL open weights (`core.data.labels.report_reader`). The reader
+# loads a multi-shard checkpoint with `device_map="auto"`, which transformers delegates to accelerate —
+# absent, the failure appears only once the model is on the card, i.e. after the shards are read. It is an
+# extra rather than a base dependency because nothing in a shipped kit reads a report.
+reader = ["accelerate"]
 devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools"]
 
 [[tool.uv.index]]
@@ -112,6 +117,9 @@ DEP002 = [
     "pydantic",
     "kaggle",
     "triton-windows",
+    # Never imported by us either: transformers loads it when `report_reader` asks for `device_map="auto"`,
+    # and its absence surfaces only after the shards have been read off disk.
+    "accelerate",
 ]
 # <<< LOCAL-SLOT: deptry-unused
 
