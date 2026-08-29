@@ -2677,3 +2677,38 @@ its holdout sits inside its training set. 0.942 is equally consistent with "a se
 nothing" and with "this particular foreign arm is weak". Separating those costs a solo slot on
 `effv2l480`, which was deliberately not spent then and is not worth spending now that the axis reads
 flat under either reading. `raptorseat` is not retracted: `v4_swa` is board-measured at 0.923 solo.
+
+## 2026-08-29 · kneemri-fourseat — 0.937, and the seating axis is exhausted
+
+`fourseat_v1` (ref 55866570) added `small_batch6_ff` to trioseat's three seats, all four inside read A,
+so the entry still cost one decode. It read **0.937** against trioseat's 0.938 — inside the
+pre-registered 0.936-0.938 band, whose own text was *"the seat term is spent at three, do NOT run the
+refits."* That branch fired, and the ~4-hour refit lane it gated is cancelled.
+
+Every seating variant now has a board number, and they say one thing together:
+
+| entry | seats | decodes | board |
+|---|---|---|---|
+| `soloseat_v1` | 1 | 1 | 0.925 |
+| `onepair_v1` | 2 | 2 | 0.936 |
+| **`trioseat_v1`** | **3** | **1** | **0.938** |
+| `fourseat_v1` | 4 | 1 | 0.937 |
+| `calibsix_v1` | 6 | 3 | 0.941 |
+| `fleettwo_v1` | 8 | 4 | 0.942 |
+| `raptorseat_v1` | 7 | 3 | **0.943** |
+
+From three seats upward everything lands in 0.937-0.943 — a 0.006 span against a 0.0053 Hanley-McNeil
+floor. The count term is real from one seat to three and indistinguishable from noise after that, on the
+cheap decode budget and the expensive one alike. Adding a foreign architecture buys one step
+(`raptorseat` +0.002) and a second one buys nothing (`fleettwo` flat).
+
+**The consequence, which is the point of writing this down:** the seating axis is exhausted. Further
+board movement has to come from a *better member*, not from another arrangement of the members already
+trained. The eight whole-corpus read-A checkpoints found on disk are still worth having — but as
+*candidates to beat*, not as seats to add.
+
+**Efficiency track:** the pin stays `trioseat_v1`, 0.938 at one decode, 0.005 behind a seven-seat
+nine-hour kernel. It is now known to be the cheap lane's ceiling rather than its first sample.
+
+**Stated limit:** as with `fleettwo`, this cannot separate "a fourth seat adds nothing" from
+"`small_batch6_ff` specifically adds nothing" — a `--fold -1` member has no offline quality number.
