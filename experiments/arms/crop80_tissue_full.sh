@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# crop80_tissue_full.sh — the most decorrelated read we own, given the budget every other member got.
+#
+# bead: knee-17kn
+#
+# That is the seats lane, and this arm also closes a defect the ledger has carried since 2026-08-14.
+#
+# WHY THIS ARM EXISTS, and it is not the reason `crop80_tissue` was first run. Two seat-value nulls on
+# 2026-08-29 priced 30 candidates against `honest12` and not one band excluded zero. The second of them
+# — the decode-DISTANCE pool, six members each buying a genuinely new read — came back NEGATIVE across
+# the board, and its nearest-neighbour column is what makes it worth another arm rather than a verdict:
+#
+#     candidate              nearest   alone holdout   marginal
+#     crop80_tissue_s2026     0.8375       0.8345       -0.0006
+#     adjacent224_s2026       0.8617       0.8462       -0.0002
+#     extended_ws_s2026       0.8775       0.8459       -0.0003
+#     centre_tissue_s2026     0.8784       0.8409       -0.0009
+#     tissue224_s2026         0.8979       0.8491       -0.0005
+#     band_wide_s2026         0.9116       0.8553       -0.0003
+#
+# Seat value tracks ALONE QUALITY, and distance anti-tracks it. That is not evidence that distance is
+# worthless; it is evidence that every distant member we own is also a weak one, which is a confound and
+# not a finding. `crop80_tissue` is the extreme case at both ends: the most decorrelated checkpoint on
+# disk (nearest 0.8375, below every seated member's own nearest except the `mae_matched` dud) and among
+# the weakest.
+#
+# AND ITS WEAKNESS HAS A NAMED, RECORDED CAUSE THAT IS NOT THE MECHANISM. The ledger's own entry says so
+# in its heading — "the control is not schedule-matched" — because the arm ran `--epochs 8` against the
+# 12 every canonical member is fitted with. So the one member that could refute "distant members are
+# just weak" has never been asked the question on equal terms. Four epochs is the whole experiment.
+#
+# THE CACHE IS ALREADY ON DISK: `images_336px_12sl_80mm_tissue.npy`, 33.4 GB, written for the original
+# arm. No decode, no build, no RAM contention with a trainer — the cost of this arm is card time and
+# nothing else, which is why it is worth running against a confound rather than a hypothesis.
+#
+# control  `crop80_tissue_s2026` itself at 8 epochs (0.8345, nearest 0.8375). Same fold, same labels,
+#          same cache, same recipe — the ONLY change is the budget, so a delta is attributable.
+#
+# WHAT EACH OUTCOME MEANS, written before the number.
+#
+#   * holdout >= 0.850 AND nearest still <= 0.86. The first strong-AND-distant member we own. The
+#     distance nulls of 2026-08-29 were a budget artefact, and the seat is priced immediately against
+#     `honest12` — a member this decorrelated has a route to a seat that no near-twin in either null had.
+#   * holdout 0.8345-0.850. The budget was not the binding constraint. The 80 mm read trades field of
+#     view for resolution and pays for its distance in accuracy; the distance lane closes on the mean,
+#     this time without the confound, and the next slot goes to a new MECHANISM rather than a new read.
+#   * nearest RISES above 0.88 while the holdout rises. THE INSTRUMENT BRANCH, and the most valuable of
+#     the three. It would mean the 0.8375 was never about which pixels were read — a noisy member is
+#     decorrelated from everything, which is exactly why the `mae_matched` dud reads nearest 0.4691 at a
+#     0.6735 holdout. That retires "decode distance" as a diversity axis measured this way, and with it
+#     the nearest-neighbour column as a twin detector on weak members. It costs one arm to learn, and it
+#     is currently load-bearing in three write-ups.
+#
+# THE BUDGET IS THE ONLY CHANGE. Not the rate, not the pooling, not the cache, not the fold. A second
+# difference would make every branch above unreadable, which is the failure the original arm's own
+# header warned about when it changed crop and centre together.
+#
+# `--slices 12 --band-low 0.2 --band-high 0.8` are written out rather than inherited, at exactly the
+# values the original arm inherited in silence. The decode key is unchanged (`336px_12sl_80mm_tissue`,
+# the cache above), and the control claim is now checkable from this file instead of from a default.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train crop80_tissue_full \
+  $RECIPE --epochs 12 \
+  --slice-pooling max --whole-stack --recompute-activations \
+  --crop-mm 80 --centre tissue --slices 12 --band-low 0.2 --band-high 0.8 \
+  --labels "$LABELS" --out "$PROCESSED/crop80_tissue_full_s2026.pt"

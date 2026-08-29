@@ -177,12 +177,64 @@ So the pre-registered second branch fired: the reads are saturated at the seats 
 seats-per-decode is a COST result only. It is still the right lens for the efficiency track — an entry
 that serves fewer decodes for the same score is cheaper by the metric that prize measures — but it buys
 no score. **The next slot goes to decode DISTANCE — a genuinely new read — not to a wider one.**
+(That instruction was carried out within the hour and came back negative as well — see "Decode distance
+priced too" below, which also names why the distance pool cannot answer the question it was asked.)
 
 That is not a retraction of the cost finding, which stands and is measured. It is the answer to the
 question the cost finding deliberately left open, and the honest reading is that our pools are deep in
 members and shallow in mechanisms: 188 checkpoints, 13 reads, one architecture. The champion's own
 `architecture-monoculture` principle said this from the other direction, and this pricing is its
 independent confirmation from the seat side.
+
+## Decode distance priced too, and it is negative — but the pool is confounded
+
+The section above ended by saying the next slot goes to decode DISTANCE rather than to a wider read.
+That was priced the same morning, against the same control, and it is a second null — this time with
+every candidate NEGATIVE:
+
+| candidate | nearest neighbour | alone holdout | marginal | best swap |
+|---|---|---|---|---|
+| `crop80_tissue_s2026` | 0.8375 | 0.8345 | −0.0006 | −0.0004 |
+| `adjacent224_s2026` | 0.8617 | 0.8462 | −0.0002 | −0.0002 |
+| `extended_ws_s2026` | 0.8775 | 0.8459 | −0.0003 | −0.0001 |
+| `centre_tissue_s2026` | 0.8784 | 0.8409 | −0.0009 | −0.0007 |
+| `tissue224_s2026` | 0.8979 | 0.8491 | −0.0005 | −0.0002 |
+| `band_wide_s2026` | 0.9116 | 0.8553 | −0.0003 | −0.0001 |
+
+Six seats on five decodes — 1.2 seats per decode, the opposite trade to the free seats — and every one
+of them costs a read the champion does not already pay for. Best is −0.0001, and `seat_value` charges a
+negative at about 3×, so roughly −0.0002 on the board. Not one band excludes zero.
+
+**But read the two middle columns together before concluding anything about distance.** Seat value
+tracks ALONE QUALITY almost monotonically here, and distance ANTI-tracks it: the most decorrelated
+candidate (`crop80_tissue`, nearest 0.8375) is the weakest and prices second-worst, while the nearest
+twin (`band_wide`, nearest 0.9116) is the strongest and prices best. Every distant member we own is
+also a weak one. That is a **confound, not a finding** — this pool cannot separate "a new read buys
+nothing" from "we have never trained a strong member on a new read".
+
+And the confound has a recorded, named cause in at least the extreme case. The ledger's own
+`crop80_tissue` heading says *"the control is not schedule-matched"*: it ran `--epochs 8` against the 12
+every canonical member is fitted with. So the single member that could refute "distant members are just
+weak" has never been asked the question on equal terms. Its cache
+(`images_336px_12sl_80mm_tissue.npy`, 33.4 GB) is still on disk, so the re-ask costs card time and
+nothing else — `experiments/arms/crop80_tissue_full.sh`, bead `knee-17kn`, branches pre-registered
+there.
+
+There is a third possibility that arm also tests, and it is the one worth the most. **A noisy member is
+decorrelated from everything.** `mae_matched_s2026` reads nearest 0.4691 at a 0.6735 holdout — it is not
+distant, it is wrong. If `crop80_tissue`'s 0.8375 is the same effect one order milder, then the
+nearest-neighbour column is not a twin detector on weak members at all, and it is currently load-bearing
+in three write-ups.
+
+So the correct statement today is narrower than the last section's: **the distance pool as it exists
+prices negative, and the pool cannot distinguish the read from the member.** The lane is not closed; it
+is unmeasured.
+
+### One thing both nulls agree on
+
+In every list priced this morning — 24 free seats and 6 distant ones, 30 candidates, three reads and
+five — the only positive move anywhere is a swap for `mae_matched_s2026`. `honest12` carries a dud, and
+it is the one seat in that roster any of thirty candidates can improve on.
 
 ### Three harness defects, found by running it
 
