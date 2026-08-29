@@ -2,7 +2,15 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from kneemri.inference.vote import CHANCE, LogitAverage, MedianLogit, QualityWeightedRank, RankAverage, Vote
+from kneemri.inference.vote import (
+    CHANCE,
+    LabelQualityRank,
+    LogitAverage,
+    MedianLogit,
+    QualityWeightedRank,
+    RankAverage,
+    Vote,
+)
 
 STUDIES = 40
 LABELS = 3
@@ -129,3 +137,32 @@ def test_agreement_is_blind_to_a_monotone_rescale():
     """
     member = _members(1)[0]
     assert RankAverage.agreement(member, member * 7.0 - 2.0) == 1.0
+
+
+def test_label_quality_rank_combine():
+    """A member at chance ON ONE LABEL is excluded THERE and still votes everywhere else.
+
+    That is the whole difference from `QualityWeightedRank`, which has one weight per member and so
+    cannot express a member that knows fractures and not menisci — the case the per-label profiles in
+    `weights_gap` say the pool actually contains.
+    """
+    strong, mixed = _members(2)
+    per_label = np.full((2, strong.shape[1]), 0.9)
+    per_label[1, 0] = CHANCE
+
+    weighted = LabelQualityRank(per_label).combine([strong, mixed])
+
+    assert np.allclose(weighted[:, 0], Vote.ranks(strong)[:, 0]), "a member at chance on a label gets no vote there"
+    assert not np.allclose(weighted[:, 1], Vote.ranks(strong)[:, 1]), "and still votes on the labels it knows"
+
+
+def test_label_quality_rank_votes_flat_on_a_label_nobody_beats_chance_on():
+    """Emptiness is a PER-LABEL fact, so the fallback is per label and not a whole-rule flat vote."""
+    members = _members(3)
+    per_label = np.full((3, members[0].shape[1]), 0.9)
+    per_label[:, 2] = 0.3
+
+    rule = LabelQualityRank(per_label)
+
+    assert rule.weights[:, 2] == pytest.approx([1 / 3, 1 / 3, 1 / 3])
+    assert rule.weights[:, 0] == pytest.approx([1 / 3, 1 / 3, 1 / 3]), "equal knowledge is equal say"

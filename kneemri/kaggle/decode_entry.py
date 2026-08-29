@@ -157,9 +157,9 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    processed = DataRoot.from_config(arguments.paths).processed()
+    root = DataRoot.from_config(arguments.paths)
     named = arguments.roster.read_text(encoding="utf-8").splitlines() if arguments.roster else arguments.candidates
-    paths = RosterReads.resolved(list(named), processed)
+    paths = root.checkpoints(list(named))
     Denominator(len(paths), "no checkpoint named by --roster or --candidates").refuse_empty()
 
     scores = LabelScores()

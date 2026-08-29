@@ -2144,6 +2144,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vote_ceiling",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.weights_gap",
       "target": "core.cli",
       "weight": 1
@@ -7514,6 +7556,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.paths.DataRoot.checkpoints",
+      "target": "core.paths.DataRoot.processed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.paths.DataRoot.from_config",
       "target": "core.native_path.NativePath.resolve",
       "weight": 1
@@ -12127,6 +12175,180 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "target": "kneemri.evaluation.vote_ceiling.RuleReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.lines",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.quality",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "target": "kneemri.evaluation.vote_ceiling.RuleReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.quality",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.LabelQualityRank",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.LogitAverage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.MedianLogit",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.QualityWeightedRank",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.scored",
+      "target": "kneemri.inference.vote.Vote.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vote_ceiling.main",
+      "target": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.weights_gap.MatchedRuler",
       "target": "kneemri.evaluation.published_ruler.PublishedFold",
@@ -14780,6 +15002,18 @@
     },
     {
       "kind": "inherits",
+      "source": "kneemri.inference.vote.LabelQualityRank",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.LabelQualityRank.combine",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
       "source": "kneemri.inference.vote.LogitAverage",
       "target": "kneemri.inference.vote.Vote",
       "weight": 1
@@ -15346,12 +15580,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.decode_entry.main",
       "target": "kneemri.kaggle.decode_entry.DecodeEntry.over",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.decode_entry.main",
-      "target": "kneemri.kaggle.roster_reads.RosterReads.resolved",
       "weight": 1
     },
     {
@@ -16438,12 +16666,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.roster_reads.main",
       "target": "kneemri.kaggle.roster_reads.RosterReads.read_members",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_reads.main",
-      "target": "kneemri.kaggle.roster_reads.RosterReads.resolved",
       "weight": 1
     },
     {
@@ -19963,7 +20185,7 @@
       "role": null
     },
     {
-      "descendants": 156,
+      "descendants": 157,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -20019,7 +20241,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 41,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -20334,6 +20556,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.unsure_cost",
       "label": "unsure_cost",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling",
+      "label": "vote_ceiling",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -22724,6 +22954,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.RuleReading",
+      "label": "RuleReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.vote_ceiling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "label": "VoteCeiling",
+      "level": "class",
+      "parent": "kneemri.evaluation.vote_ceiling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.weights_gap.MatchedRuler",
       "label": "MatchedRuler",
       "level": "class",
@@ -23112,6 +23358,14 @@
       "label": "SpatialViews",
       "level": "class",
       "parent": "kneemri.inference.test_time",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.LabelQualityRank",
+      "label": "LabelQualityRank",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
       "role": "satellite"
     },
     {
@@ -27340,6 +27594,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.paths.DataRoot.checkpoints",
+      "label": "checkpoints",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.paths.DataRoot.from_config",
       "label": "from_config",
       "level": "method",
@@ -30428,6 +30690,78 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.RuleReading.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.RuleReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.halves",
+      "label": "halves",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.quality",
+      "label": "quality",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "label": "rules",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.VoteCeiling.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling.VoteCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vote_ceiling.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.vote_ceiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.weights_gap.MatchedRuler.__init__",
       "label": "__init__",
       "level": "method",
@@ -32468,6 +32802,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.vote.LabelQualityRank.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.vote.LabelQualityRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.LabelQualityRank.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.LabelQualityRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.vote.LogitAverage.combine",
       "label": "combine",
       "level": "method",
@@ -33902,14 +34252,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_reads.RosterReads.read_members",
       "label": "read_members",
-      "level": "method",
-      "parent": "kneemri.kaggle.roster_reads.RosterReads",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.roster_reads.RosterReads.resolved",
-      "label": "resolved",
       "level": "method",
       "parent": "kneemri.kaggle.roster_reads.RosterReads",
       "role": null

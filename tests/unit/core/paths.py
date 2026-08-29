@@ -61,3 +61,18 @@ def test_raw_defaults_to_the_competition(tmp_path: Path):
 def test_processed(tmp_path: Path):
     """Derived artefacts are written, so the directory has to exist by the time the caller has the path."""
     assert DataRoot(tmp_path).processed("dataset").is_dir()
+
+
+def test_checkpoints(tmp_path: Path):
+    """A roster line carries a comment and may omit the suffix; both resolve to the same checkpoint.
+
+    It is tested here rather than beside the roster reader because two layers that may not import each
+    other now speak this resolver, which is what moved it onto the root.
+    """
+    root = DataRoot(tmp_path)
+    lines = ["native224_s2026.pt  # DARK, never scored", "native224_s2026", "", "# a whole-line note"]
+
+    paths = root.checkpoints(lines)
+
+    expected = root.processed() / "native224_s2026.pt"
+    assert paths == [expected, expected], "comments strip, suffix fills"

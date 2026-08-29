@@ -128,11 +128,3 @@ def test_read_group_lines():
 def test_read_members(tmp_path: Path):
     """A named checkpoint that is not on disk is reported, not raised on — a candidate list is edited."""
     assert RosterReads.read_members([tmp_path / "absent.pt"]) == [], "an absent checkpoint contributes no member"
-
-
-def test_resolved(tmp_path: Path):
-    """A roster line carries a comment and may omit the suffix; both resolve to the same checkpoint."""
-    lines = ["native224_s2026.pt  # DARK, never scored", "native224_s2026", "", "# a whole-line note"]
-    paths = RosterReads.resolved(lines, tmp_path)
-
-    assert paths == [tmp_path / "native224_s2026.pt", tmp_path / "native224_s2026.pt"], "comments strip, suffix fills"

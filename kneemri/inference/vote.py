@@ -227,3 +227,39 @@ class MedianLogit(Vote):
         clipped = np.clip(np.stack(per_member), PROBABILITY_FLOOR, 1 - PROBABILITY_FLOOR)
         logits = np.log(clipped / (1 - clipped))
         return 1 / (1 + np.exp(-np.median(logits, axis=0)))
+
+
+class LabelQualityRank(Vote):
+    """Rank-average weighted by what each member knows ABOUT EACH LABEL, not about the corpus.
+
+    The ceiling of the weighting family, and the rule that says whether the family is worth anything.
+    `QualityWeightedRank` gives a member ONE weight for all twelve findings, which asserts that a member
+    good at fractures is good at menisci in the same proportion. The ledger says otherwise: the per-label
+    profiles in `weights_gap` disagree about which finding is even the cheapest, and members here are
+    fitted at different crops, bands and slice counts — geometry that acts on some findings and not
+    others. If weighting pays at all, it pays here, with twelve weights per member instead of one.
+
+    IT IS ALSO THE MOST OVERFITTABLE RULE IN THE MODULE, and that is deliberate. Six members times twelve
+    labels is 72 fitted numbers against a few hundred studies per label, so a fit-on-self reading of it
+    is guaranteed to look good and means nothing. It exists to be read on a SPLIT HALF by
+    `vote_ceiling`, next to its own fit-on-self number, because the gap between those two is the
+    measurement — not either one alone. Per-label SELECTION already failed exactly this test, and
+    weighting is the softer version of the same idea, so the prior is that it fails too.
+
+    The weights come in already fitted rather than being fitted here, for the reason the `Vote` interface
+    names: a rule that needs the holdout at combine time cannot run at submission time.
+    """
+
+    def __init__(self, per_label: NDArray[np.float64]) -> None:
+        above = np.maximum(per_label - CHANCE, 0.0)
+        totals = above.sum(axis=0, keepdims=True)
+        # A label no member beats chance on has no basis for preferring any of them, so it votes flat
+        # there rather than dividing by zero — per label, because that emptiness is a per-label fact.
+        flat = np.full_like(above, 1 / above.shape[0])
+        self.weights = np.where(totals > 0, above / np.where(totals > 0, totals, 1.0), flat)
+
+    @override
+    def combine(self, per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
+        """The same per-label ranks every rank rule builds, averaged with this label's own weights."""
+        stacked = np.stack([self.ranks(member) for member in per_member])
+        return (stacked * self.weights[:, np.newaxis, :]).sum(axis=0)

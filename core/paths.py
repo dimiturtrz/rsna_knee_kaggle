@@ -35,6 +35,10 @@ RAW = "raw"
 PROCESSED = "processed"
 """Derived artefacts — caches, checkpoints, holdout records. Created on demand."""
 
+CHECKPOINT_SUFFIX = ".pt"
+"""What a member is stored as. Named here because the resolver below writes it and the submission layer
+reads it, and a literal spelled in two layers is a literal that will one day disagree with itself."""
+
 
 class DataRoot:
     """The data root. Datasets sit under `raw/` untouched; derived artefacts go to `processed/`."""
@@ -78,3 +82,24 @@ class DataRoot:
         destination = self.kind(PROCESSED) / dataset
         destination.mkdir(parents=True, exist_ok=True)
         return destination
+
+    def checkpoints(self, names: list[str]) -> list[Path]:
+        """Roster lines or bare paths, as checkpoint paths, tolerating a missing suffix and a comment.
+
+        It lives on the root rather than on a roster reader because three layers now name members the
+        same way — the submission layer packages them, the evaluation layer prices them, and neither may
+        import the other. A resolver both of them speak is shared vocabulary, and the root is where the
+        `processed/` half of the answer already lives.
+
+        `comp/members.roster` writes `name.pt   # why this member exists`, so the comment is stripped
+        here rather than by every caller — a roster read with its comments attached resolves to nothing
+        and reports every member absent, which reads exactly like an empty roster.
+        """
+        paths = []
+        for line in names:
+            name = line.split("#")[0].strip()
+            if not name:
+                continue
+            path = Path(name)
+            paths.append(path if path.parent != Path() else self.processed() / f"{path.stem}{CHECKPOINT_SUFFIX}")
+        return paths

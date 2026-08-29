@@ -37,11 +37,6 @@ from kneemri.inference.members import Member
 
 logger = logging.getLogger(__name__)
 
-CHECKPOINT_SUFFIX = ".pt"
-"""What a roster line carries and a `--candidates` path may omit. `comp/members.roster` writes the
-suffix; a name typed by hand usually does not, and a tool that accepts only one of the two spellings
-teaches its operator to try both."""
-
 
 @dataclass(frozen=True)
 class ReadGroup:
@@ -155,23 +150,6 @@ class RosterReads:
             logger.warning("no checkpoint at %s", absent)
         return [Member.from_checkpoint(path) for path in found]
 
-    @staticmethod
-    def resolved(names: list[str], processed: Path) -> list[Path]:
-        """Roster names or bare paths, as checkpoint paths, tolerating a missing `.pt` and a comment.
-
-        `comp/members.roster` writes `name.pt   # why this member exists`, so the comment is stripped here
-        rather than by every caller — a roster read with its comments attached resolves to nothing and
-        reports every member absent, which reads exactly like an empty roster.
-        """
-        paths = []
-        for line in names:
-            name = line.split("#")[0].strip()
-            if not name:
-                continue
-            path = Path(name)
-            paths.append(path if path.parent != Path() else processed / f"{Path(name).stem}{CHECKPOINT_SUFFIX}")
-        return paths
-
     def lines(self) -> list[str]:
         """Every read with its members, then the trade."""
         rows = [line for group in self.groups for line in group.lines()]
@@ -194,9 +172,9 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    processed = DataRoot.from_config(arguments.paths).processed()
+    root = DataRoot.from_config(arguments.paths)
     named = arguments.roster.read_text(encoding="utf-8").splitlines() if arguments.roster else arguments.candidates
-    members = RosterReads.read_members(RosterReads.resolved(list(named), processed))
+    members = RosterReads.read_members(root.checkpoints(list(named)))
     # THE DENOMINATOR, refused rather than divided by: a roster whose every line resolved to nothing
     # would otherwise print "0 seats on 0 decodes" through a ZeroDivisionError, or worse, "0 decodes"
     # as if the entry were free.

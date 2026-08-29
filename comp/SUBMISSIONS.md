@@ -2645,3 +2645,35 @@ nothing is claimed from it. The load-bearing quantity is 0.938 against a pre-reg
 
 **Efficiency track.** Three members, one decode, 0.005 behind a seven-seat nine-hour kernel. This is the
 entry to pin there.
+
+## 2026-08-29 · `kneemri-fleettwo` — 0.942, and the foreign-seating axis closes at one seat
+
+`raptorseat_v1` (0.943) named exactly one follow-up in its own pre-registration: *whether a second
+foreign arm adds again or whether one foreign decode is the whole of the effect.* This entry is that
+follow-up — the champion seven plus `raptor_ft_effv2l480`, seated at 1/8 by the same `RaptorSeat.fleet`
+rule, on one extra forward pass over the existing raptor decode.
+
+| entry | our seats | foreign seats | board |
+|---|---|---|---|
+| `calibsix` | 6 | 0 | 0.941 |
+| **`raptorseat`** | **6** | **1** | **0.943** |
+| `fleettwo` | 6 | 2 | 0.942 |
+
+**0.942 is the pre-registered FLAT branch** (0.9415-0.9444). Its text, written before the number: *one
+foreign decode WAS the whole of the effect… closes the foreign-seating axis at one seat. Do not spend a
+further slot widening it.* The remaining raptor families (`cnv2b336`, `cnn336`) are therefore not
+queued. The gain `raptorseat` measured came from crossing the architecture boundary **once**, not from
+distance accumulating across seats.
+
+**Why the member was the most defensible one available.** `teacher_distance` scored all thirteen public
+raptor checkpoints over 400 shared studies with `RankAverage.agreement` — no labels, no slot — and found
+four families and nine copies (`v4_full` × `v4_full_swa` agree at 0.9955; they are one model twice).
+`effv2l480` is the most isolated of the thirteen, nearest-neighbour agreement 0.8223. If distance
+accumulated, this is the seat that would have shown it.
+
+**Stated limit, pre-registered before the number.** The entry cannot attribute the null to the SEAT
+versus to the MEMBER. Every raptor arm is `--fold -1`, so `effv2l480` has no measured quality at all —
+its holdout sits inside its training set. 0.942 is equally consistent with "a second foreign arm adds
+nothing" and with "this particular foreign arm is weak". Separating those costs a solo slot on
+`effv2l480`, which was deliberately not spent then and is not worth spending now that the axis reads
+flat under either reading. `raptorseat` is not retracted: `v4_swa` is board-measured at 0.923 solo.
