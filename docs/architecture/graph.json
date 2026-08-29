@@ -11864,6 +11864,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.seat_bonus.SeatBonus.matched",
+      "target": "kneemri.evaluation.seat_bonus.SeatBonus.anchors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_bonus.SeatBonus.matched",
+      "target": "kneemri.evaluation.seat_bonus.SeatBonus.curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.seat_bonus.SeatBonus.report",
       "target": "kneemri.evaluation.seat_bonus.SeatBonus.alternatives",
       "weight": 1
@@ -11890,6 +11902,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.seat_bonus.SeatBonus.report",
       "target": "kneemri.evaluation.seat_bonus.SeatBonus.knee",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_bonus.SeatBonus.report",
+      "target": "kneemri.evaluation.seat_bonus.SeatBonus.matched",
       "weight": 1
     },
     {
@@ -31072,6 +31090,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.seat_bonus.SeatBonus.knee",
       "label": "knee",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_bonus.SeatBonus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_bonus.SeatBonus.matched",
+      "label": "matched",
       "level": "method",
       "parent": "kneemri.evaluation.seat_bonus.SeatBonus",
       "role": null
