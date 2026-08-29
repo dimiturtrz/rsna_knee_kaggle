@@ -667,3 +667,45 @@ ceiling is a property of the members, not of the arithmetic applied to them.
 
 Everything downstream follows. There is no aggregation work left worth a slot, and the next number can
 only come from a member of a different KIND. That is exactly what is on the card.
+
+## A fourth strategy, and the first one that was allowed to fit weights (knee-669u)
+
+The three strategies above all *select* members; none of them *weights* them. `vote_ceiling` closes that
+hole, and it closes it honestly: weights are fitted on one half of the 909 studies and scored on the
+other, both directions, with the fit-on-self number printed beside each honest one so the overfit is
+visible rather than assumed. It is the read `QualityWeightedRank` asked for in its own docstring and
+never got. No card, no slot — the holdout records were already on disk.
+
+Over all 109 scoreable members:
+
+| rule | honest | vs flat | overfit gap |
+| --- | --- | --- | --- |
+| `RankAverage` | 0.8661 | — | +0.0000 |
+| `QualityWeightedRank` | 0.8670 | +0.0009 | +0.0001 |
+| `LabelQualityRank` | 0.8672 | +0.0011 | +0.0007 |
+| `MedianLogit` | 0.8677 | +0.0015 | +0.0000 |
+| `LogitAverage` | 0.8688 | +0.0027 | +0.0000 |
+
+Over four members — the greedy top of the whole-stack pool, and the shape that actually ships:
+
+| rule | honest | vs flat |
+| --- | --- | --- |
+| `RankAverage` | 0.8616 | — |
+| `QualityWeightedRank` | 0.8616 | −0.0000 |
+| `LabelQualityRank` | 0.8617 | +0.0000 |
+| `LogitAverage` | 0.8619 | +0.0003 |
+| `MedianLogit` | 0.8611 | −0.0005 |
+
+At the pool size that ships, all five rules lie inside 0.0005 against a 0.0053 Hanley-McNeil floor. The
+winner at BOTH sizes is the one rule with zero fitted parameters, so nothing here is bought by fitting;
+the two fitted rules carry overfit gaps of +0.0001 and +0.0007, which is small in the reassuring sense
+and worthless in the useful one — they do not overfit because there is nothing left for them to fit.
+
+Read the +0.0027 at 109 members for what it is. It is `LogitAverage` tolerating a mostly-junk pool
+better than `RankAverage` does, and it collapses to +0.0003 the moment the pool is four good members.
+Quoting it as a weighting gain would be quoting a statement about the junk.
+
+So the ceiling now holds against four strategies that share nothing but the pool: routed top-k per
+label, honest greedy seats, a flat rank-average of a curated eight, and learned weights. The
+conclusion above does not change, it only stops being provisional — and the aggregation lane is closed
+rather than merely unpromising. The champion already serves `LogitAverage`, which is the honest maximum.
