@@ -8,6 +8,8 @@ from kneemri.evaluation.seat_bonus import SeatBonus, SeatEntry, Seating
 RECORD = [
     {"note": "a comment line names no roster and must not be read as an entry"},
     {"id": "solo_a", "board": 0.920, "members_named": ["a"], "kit": "k1", "scope": "ensemble"},
+    # Two entries at one seat count: `matched()` must report the anchor's BEST there, not its first.
+    {"id": "pair_a_worse", "board": 0.931, "members_named": ["a", "c"], "kit": "k1", "scope": "ensemble"},
     {"id": "pair_a", "board": 0.933, "members_named": ["a", "b"], "kit": "k1", "scope": "ensemble"},
     {"id": "four_a", "board": 0.936, "members_named": ["a", "b", "c", "d"], "kit": "k2", "scope": "ensemble"},
     {"id": "six_a", "board": 0.935, "members_named": ["a", "b", "c", "d", "e", "f"], "kit": "k2", "scope": "ensemble"},
@@ -36,6 +38,7 @@ def test_entries(tmp_path: Path):
     assert [entry.seats for entry in entries] == sorted(entry.seats for entry in entries)
     assert {entry.id for entry in entries} == {
         "solo_a",
+        "pair_a_worse",
         "pair_a",
         "four_a",
         "six_a",
@@ -98,6 +101,7 @@ def test_curve(tmp_path: Path):
     curve = SeatBonus(_record(tmp_path)).curve()
 
     assert [(seating.entry.seats, round(seating.bonus, 3)) for seating in curve] == [
+        (2, 0.011),
         (2, 0.013),
         (4, 0.016),
         (6, 0.015),
@@ -130,6 +134,16 @@ def test_alternatives(tmp_path: Path):
     }
 
 
+def test_matched(tmp_path: Path):
+    """Held at one seat count the differing zeros drop out and only the roster is left."""
+    matched = SeatBonus(_record(tmp_path)).matched()
+
+    assert set(matched) == {2}, "4 and 6 seats are reached by one anchor only, so they compare nothing"
+    assert matched[2]["a"].id == "pair_a", "the anchor's BEST entry at that count, not its first"
+    assert matched[2]["b"].id == "pair_b"
+    assert matched[2]["a"].board > matched[2]["b"].board
+
+
 def test_kits(tmp_path: Path):
     """The confound this reading cannot hold fixed, counted rather than left unsaid."""
     assert SeatBonus(_record(tmp_path)).kits() == {"k1", "k2"}
@@ -144,6 +158,7 @@ def test_report(tmp_path: Path):
     assert "needs a single at 0.934 board" in report
     assert "2 distinct kits" in report
     assert "other anchors: a +0.016, b +0.005" in report
+    assert "at 2 seats the zeros drop out: a 0.933 (pair_a)  b 0.930 (pair_b)" in report
 
 
 def _entry(*members: str) -> SeatEntry:

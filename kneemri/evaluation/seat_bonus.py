@@ -34,12 +34,31 @@ which would be invisible if this lived in prose:
   * TWO ENTRIES BUY THEIR TOP SEATS WITH A FOREIGN CHECKPOINT. `raptorseat_v1` and `fleettwo_v1` seat
     published foreign members, which is a different kind of diversity from another of our own arms.
 
-THERE IS MORE THAN ONE ANCHOR AND THEY DISAGREE. `final_ws_e12` leads fourteen scored entries and was
-itself scored alone at 0.925; its curve saturates at **+0.014**. `final_ws_cf` leads nine and was scored
-alone at 0.923; its curve saturates at **+0.020**. Both anchors' ensembles land in the same 0.936-0.943
-band, so most of that 0.006 disagreement is the two ZEROS differing, not the seats buying more. This is
-why `anchors()` and `alternatives()` are public and the report prints both: a module that quoted the
-larger candidate would have turned a confound into a constant.
+THERE IS MORE THAN ONE ANCHOR AND THEY DISAGREE, AND THE DISAGREEMENT IS NOT THE ZEROS. `final_ws_e12`
+leads fourteen scored entries and was itself scored alone at 0.925; its curve saturates at **+0.014**.
+`final_ws_cf` leads nine and was scored alone at 0.923; its curve saturates at **+0.020**. The obvious
+reading of that 0.006 is that the two zeros differ — and it is wrong, because they differ by 0.002 in the
+direction that makes `final_ws_cf`'s bonus LARGER, not smaller. `matched()` decomposes it at held seat
+count instead:
+
+    6 seats   final_ws_e12  0.939 (blendseat_v1)    final_ws_cf  0.941 (calibsix_v1)   +0.002
+    7 seats   final_ws_e12  0.937 (allfit_v1)       final_ws_cf  0.943 (raptorseat_v1) +0.006
+
+So about a third of the 0.006 is the zeros, and the rest is that the `_cf` roster genuinely scores higher
+with the same number of seats. At six seats the two entries are the same six ROLES — `blendseat_v1` is
+`final_ws_e12, calib_span_ff, grade_ladder_ff, merged_blend_s2026, lr4e-5_ws_ff, through_dense_ff` and
+`calibsix_v1` swaps five of them for their `_cf` twins — so that +0.002 is a like-for-like member swap,
+sitting just over `BOARD_RESOLVABLE` and worth exactly one directional reading. At seven seats the +0.006
+is NOT like-for-like: `raptorseat_v1` buys its extra seat with a foreign checkpoint, which is a different
+kind of diversity, not a better member.
+
+The consequence for planning is the opposite of what the anchor spread suggests. `_cf` is a SUPERVISION
+policy (`finding_calibration`, which shifts each finding's level in the training targets), so those
+members are individually WORSE on the board (0.923 alone against 0.925) and collectively BETTER. The gain
+is therefore label-side DIVERSITY, not member quality and not a post-hoc output transform — rank
+averaging would be invariant to the latter. This is why `anchors()`, `alternatives()` and `matched()` are
+public and the report prints all three: a module that quoted the larger candidate would have sold a 0.002
+member swap plus a foreign checkpoint as a 0.006 law about seats.
 
 WHAT IT PRICES. A 0.950 board entry needs a single at `TARGET - saturation()`: **0.930 to 0.936**
 depending on the anchor, against our best measured single of 0.925. So the standing target on ONE MEMBER
@@ -185,6 +204,21 @@ class SeatBonus:
             if SeatBonus(self.record, self.scope, member).curve()
         }
 
+    def matched(self) -> dict[int, dict[str, SeatEntry]]:
+        """Each seat count MORE THAN ONE anchor reached, with that anchor's best entry there.
+
+        The anchor curves are read against different zeros, so their saturations are not subtractable.
+        Held at one seat count the zeros drop out entirely and what is left is which members sat in the
+        seats — the only comparison in this module that separates counting from choosing.
+        """
+        best: dict[int, dict[str, SeatEntry]] = {}
+        for member in self.anchors():
+            for seating in SeatBonus(self.record, self.scope, member).curve():
+                standing = best.setdefault(seating.entry.seats, {})
+                if seating.entry.board > standing.get(member, seating.entry).board or member not in standing:
+                    standing[member] = seating.entry
+        return {seats: found for seats, found in sorted(best.items()) if len(found) > 1}
+
     def solo(self) -> SeatEntry:
         """The scored entry that is the anchor ALONE, which is the curve's zero.
 
@@ -244,6 +278,11 @@ class SeatBonus:
             f"{len(self.kits())} distinct kits across these points, so the zero itself is not held fixed; "
             f"spreads under {BOARD_RESOLVABLE} are not orderings",
             "other anchors: " + ", ".join(f"{member} {value:+.3f}" for member, value in self.alternatives().items()),
+        ]
+        lines += [
+            f"at {seats} seats the zeros drop out: "
+            + "  ".join(f"{member} {entry.board:.3f} ({entry.id})" for member, entry in found.items())
+            for seats, found in self.matched().items()
         ]
         return lines
 
