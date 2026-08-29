@@ -82,6 +82,30 @@ Compare the trades:
 written pre-registration of 0.925-0.929 by seating three members on one decode, so a read holding several
 seats is a measured effect on the board and not only a cost identity.
 
+## The whole map, both reads
+
+The same grouping applied to the other large family — and `crop_mm` joins `centre` as a reading field,
+which the numbers show directly:
+
+    canonical / 20 slices / band 0.1-0.9 / centre image / crop 130mm   49 members
+    canonical / 20 slices / band 0.1-0.9 / centre image / crop 140mm    1 member   (band140)
+    merged    / 20 slices / band 0.1-0.9 / centre image / crop 130mm    1 member
+
+So we own two large reads, and they are not equivalent:
+
+| read | members owned | seated today | resolutions present |
+|---|---|---|---|
+| A — canonical, 20 slices, 0.1-0.9 | 49 | 3 (`trioseat_v1`) | 336 only |
+| B — canonical, 12 slices, 0.2-0.8 | ~30 | 1 (the champion's `lr4e-5_ws_cf`) | 224, 336, 448 |
+
+Read A is where `trioseat_v1` proved seats compose, and it is the larger pool — but every one of its
+members was fitted at 336, so its only free diversity is treatment. Read B is smaller and carries three
+resolutions, so it offers treatment AND resolution diversity for the same single decode. **Read B is the
+better read, and it is the one seated once.**
+
+Two decodes could therefore seat roughly seventy-nine members we already own. The pinned champion spends
+about four decodes to seat seven.
+
 ## What it does not change
 
 This is a COST result. It says the seats are free; it says nothing about whether they are worth taking.
