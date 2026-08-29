@@ -5851,3 +5851,39 @@ tenth and eleventh best seats in the pool.
 **What it does NOT license.** Two seats out of eleven is not a rule, the run is in-sample (the honest
 curve is the one that may be quoted), and the same seats are inside the plateau where +0.0024 buys
 twenty-five members. It licenses keeping the exemption, not building for it.
+
+### The efficiency row went 16 to 245 because we improved, and the gradient there is the steepest thing we can see
+
+`efficiency_read --live`, 2026-08-29 22:56Z, free — no slot, no card:
+
+```
+Dimitar Terziev: accuracy rank 29 at 0.943, efficiency rank 245 at 0.941
+  232 teams rank above us on efficiency while scoring BELOW us — runtime alone
+  OUR efficiency row is STALE (2026-08-28 22:37 snapshot; we submitted after it)
+18 teams within 0.002 of 0.941 hold efficiency ranks 4 to 2140 (median 1287) — that span is runtime
+top 20 efficiency ranks score 0.923 to 0.952 (median 0.937)
+```
+
+Fifteen hours earlier the same tool read **rank 16 at 0.925**, and `knee-7lyz` concluded from the zero
+teams then above us that "runtime has stopped being the binding constraint; SCORE AT THIS RUNTIME is."
+That conclusion is now inverted by 232. Nothing about the board changed — **we did**: the entry holding
+our efficiency row moved from `soloseat` (one member, 0.925) to a multi-decode entry at 0.941. We bought
+0.016 of accuracy and paid **229 ranks** for it.
+
+**The gradient is the steepest quantity either board exposes.** Eighteen teams sit within 0.002 of our
+accuracy and spread across efficiency ranks 4 to 2140. At a fixed score, runtime alone moves 2136 ranks.
+The entire main board spans 0.930–0.952 and buys 2600 ranks with score; this axis buys 2136 with runtime
+at score held flat. Any lane that pays that steeply deserves pricing before another seat is bought on a
+plateau that has been flat for twelve entries.
+
+**And it cannot be priced yet, which is the actionable half.** The efficiency snapshot is dated
+2026-08-28 22:37 and `trioseat_v1` — 0.938 on **three seats and ONE decode**, the entry built exactly for
+this lane — scored on 2026-08-29, *after* it. So the row describing us is a board we have already moved
+on from, and the one entry whose whole design targets this axis has never appeared on it. The next read
+after the snapshot refreshes is worth more than any submission we could fire into the lane now, and it
+costs nothing. Do not spend a slot here until it lands.
+
+**Open mechanism, named so it is not assumed:** this read does not establish how our row got reassigned
+from 0.925 to 0.941. 473 of 2160 settled teams carry an efficiency entry below their public best and
+none carry a better one, so the slot is separately held by design — but by what selection is unknown,
+and the rules file (`comp/COMPETITION_RULES.txt` 61-64) states only the three prizes.
