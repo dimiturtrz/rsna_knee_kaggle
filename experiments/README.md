@@ -5420,6 +5420,55 @@ decode (it rides the champion's own feed), it is the best solo checkpoint on the
 having available the next time a roster is rebuilt around a genuinely new axis — but swapping it in is not
 that axis, and the pinned champion (0.943) is not at risk from a +0.0004 offline delta.
 
+### Diversity as a SELECTION RULE is refuted — 2026-08-29 20:50Z
+
+Last tick closed member QUALITY as a lever (a +0.0045 member bought +0.0004 seated). The obvious successor
+was the owner's own framing — "it's about diversity, not averaging 7 numbers that are the same number". So
+run it as a rule, not a slogan. `record_mix --seats diverse` picks each next seat by rank-space distance from
+what is already seated and NEVER OPENS THE LABELS; `--seats greedy` picks by the holdout mean. Same pool,
+same vote, same evening:
+
+| rule | peak | at seats | selection bias |
+|---|---|---|---|
+| `diverse` (rank distance, labels closed) | 0.8695 | 88 | none — it cannot overfit a score it never reads |
+| `greedy` (holdout mean) | 0.8777 | 13 | +0.0032 |
+| `honest` (greedy refit on half, scored on the other half) | **0.8753** | 28 | — |
+
+**Honest-to-honest, quality beats distance by 0.0058 with a third of the seats.** And `diverse` is not
+merely worse, it is worse in a diagnosable way: its first seven picks run 0.8634 → 0.8613 → 0.8579 → 0.8431
+→ 0.8412 → 0.8335 → 0.8331. Maximising distance from the seated set walks straight at the pool's WORST
+members, because the thing furthest from a good prediction is a bad one. Distance cannot tell a member that
+disagrees usefully from a member that is simply wrong; only the labels can, and that rule refuses to look.
+
+**What survives.** Diversity is real as a PROPERTY — greedy's own thirteen span calibration, blend, span,
+margin, warm-start and MAE mechanisms, and it seats `focus_mcl_s2026` at eleven despite that arm regressing
+its own target label. It is not usable as a SELECTION CRITERION. The honest curve is also the number to plan
+against: **0.8753 at 28 seats**, not the 0.8777 the in-sample peak advertises, and the +0.0032 gap is the
+size of every seat-count claim this ledger has made off a greedy curve.
+
+### `merged_span_cf` — declined as undocumented at 20:37Z, seated at 20:52Z
+
+The roster audit found this checkpoint on disk with zero mentions here and declined it on the rule that an
+undocumented checkpoint is a file, not a member. The rule is right. Applying it as terminal was not: the
+matched seat curves above put `merged_span_cf` at **greedy seat two, the largest single jump in the entire
+111-member curve** (0.8634 → 0.8709, +0.0075), and its own `merged_span_cf.metrics.jsonl` carried the whole
+recipe. The entry was one read away, not unrecoverable.
+
+Solo **0.8618**, peak epoch 8 of 12 and flat after — converged, not truncated. Second-best solo member the
+project owns, behind `calib_dense_hold_s2026` (0.8634). Recipe: merged scheme, 336 px, 20 slices, band
+0.2-0.8, crop 130 mm, centre image, spacing spread, tie first, `--calibrated-targets --whole-stack
+--one-cycle --weight-floor`, batch 12, **fold 0**, seed 2026, no EMA, 438 s an epoch, 26.92 GB peak.
+
+**It is fold 0 despite the `_cf` suffix**, so unlike every other `_cf` in the roster it is scoreable and the
+0.8618 is honest. Its band 0.2-0.8 puts it on the roster's SECOND decode group, so seating it beside the
+champion's six costs one extra read — which is exactly the trade `decode_entry` prices, and the first member
+in a while with a large enough seat delta to be worth paying it for.
+
+**The process lesson, since it is the second one this evening.** An audit that finds an undocumented artefact
+should recover its provenance before ruling on it — `metrics.jsonl` holds the full recipe for every run this
+trainer has ever written. Declining costs nothing to write and cost, here, the roster's second-best seat for
+fifteen minutes.
+
 ### The reader gate fired NOT DISTINGUISHABLE, and it cost twenty minutes instead of the sweep
 
 `Qwen/Qwen3-8B`, bf16, on the 57 image-annotated studies, scored by `core.data.labels.reader_upgrade`:

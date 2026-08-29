@@ -472,6 +472,15 @@ calib_dense_hold_ff.pt      # DARK. calib_dense_hold_s2026's flags plus --fold -
 # seen every holdout study, no offline score exists or can be manufactured for it, it must never enter a
 # pool that reports an offline mean, and no board-per-holdout compression converts anything about it.
 #
-# NOT ADDED, and recorded here so the next audit does not re-find it: merged_span_cf.pt is also on disk and
-# also absent from this file, but it has ZERO mentions in experiments/README.md — no recipe, no finish time,
-# no section. An undocumented checkpoint is not a member; it is a file. Give it a ledger entry first.
+# DECLINED AT 20:37Z AND SEATED AT 20:52Z THE SAME EVENING. merged_span_cf.pt was left out above because it
+# had zero mentions in experiments/README.md — an undocumented checkpoint is a file, not a member. That rule
+# is right; what was wrong was treating "undocumented" as terminal. The matched greedy/diverse seat curves
+# run fifteen minutes later put it at greedy seat TWO, the largest single jump in the whole 111-member curve
+# (+0.0075), and its own metrics.jsonl carries the complete recipe — the ledger entry was recoverable in one
+# read, not unrecoverable. Documented now (experiments/README.md), so it is a member now.
+merged_span_cf.pt           # 0.8618 solo, converged at epoch 8 of 12. Second-best solo member in the project.
+# merged scheme, 336 px, 20 slices, band 0.2-0.8, crop 130 mm, centre image, spacing spread, tie first,
+# --calibrated-targets --whole-stack --one-cycle --weight-floor, batch 12, fold 0, seed 2026, no EMA.
+# FOLD 0 DESPITE THE _cf SUFFIX, so unlike every other _cf here it IS scoreable and its holdout number is
+# honest. Band 0.2-0.8 puts it on the SECOND decode group, not the champion's — seating it beside the
+# champion's six costs one extra read.
