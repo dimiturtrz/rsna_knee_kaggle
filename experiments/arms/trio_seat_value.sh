@@ -51,8 +51,16 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 # The three seats trioseat already holds are excluded: `--against` supplies them.
+#
+# MEASURED, not assumed, the same way GROUP2's pool was: `python -m kneemri.kaggle.roster_reads
+# --candidates <these>` reports 22 of the 23 originally listed on ONE decode (canonical / 20 slices /
+# band 0.1-0.9 / centre image / crop 130mm / tie first / spacing spread) and one splitter, `band140_s2026`,
+# whose 140 mm crop lives inside `reading` and costs a second read. It is dropped here for that reason
+# alone — it is still a priceable candidate, but it belongs to the decode-distance question, not to this
+# one, where the whole claim is that a seat costs no decode. Every member of this pool is 336 px, so read
+# A's free diversity is TREATMENT only; that is what makes GROUP2, which spans 224/336/448, the better read.
 CANDIDATES=(
-  band_dense_s2026 band_dense_long_s2026 base_dense_s2026 grade_ladder_s2026 band140_s2026
+  band_dense_s2026 band_dense_long_s2026 base_dense_s2026 grade_ladder_s2026
   aug_long_s2026 small_accum_s2026 severity_weight_s2026 small_batch6_s2026 aprior_dense_s2026
   focal_dense_s2026 margin_seat_s2026 sided_pool_s2026 v3base_dense_s2026 calib_dense_hold_s2026
   finding_calib_dense_s2026 mae_matched_s2026 merged_dense_cf
