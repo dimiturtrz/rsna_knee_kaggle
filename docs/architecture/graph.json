@@ -8659,6 +8659,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.AxisReading.lines",
+      "target": "kneemri.evaluation.competence_axis.AxisReading.balance",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
       "target": "kneemri.evaluation.competence_axis.AxisReading",
@@ -28614,6 +28620,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.AxisReading.balance",
+      "label": "balance",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.AxisReading",
       "role": null
     },
     {
