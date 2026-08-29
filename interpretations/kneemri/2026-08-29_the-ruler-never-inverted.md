@@ -55,10 +55,19 @@ Nothing about raptor as a member: `raptor_v4_swa` is board-measured at 0.923 sol
 `raptorseat_v1` stands. Nothing about the level of the two scores — the estimator is pairwise by
 construction and refuses the level question.
 
-And the top regime is still **three resolved pairs**. Thirty-five of sixty ensemble rows carry a
-board number and no offline at all, the pinned champion among them, so the cell that prices today's
-decisions is fitted on almost nothing. That is the next thing to fix and it costs no card and no
-slot — see `knee-*` on backfilling offline reads for the recent entries.
+And, correcting the paragraph above rather than qualifying it: **the top regime does not reach the
+champion.** Its six entries span board 0.930–0.937 (`basedense_v1`, `longseat_v1`, `gradeswap_v1`,
+`greedy7_v1`, `peak8_v1`, `honest12`), and it forms three resolved pairs. Everything above 0.937 —
+`votefit_v1` 0.938, `calibsix_v1` 0.941, `raptorseat_v1` 0.943 — carries no offline number and
+`kneemri.kaggle.priceable_entries` says why it never can: those entries are built from `_ff` members
+fitted at `--fold -1`, which have seen every holdout study. Thirty-five of sixty ensemble rows are
+in that class. So "+0.99 near the top" is measured in the 0.930–0.937 band and the compression at
+0.943 is **unmeasured, not measured at 1.0**. What the refit establishes is that the collapse to
+zero was an artefact; it does not establish that no collapse happens above 0.937.
+
+Filling the gap would need an entry near the champion built entirely from fold-0 members — which
+is a slot and an arm, not a free re-read. `knee-awxb` holds the cheap half: the rows that CAN be
+honestly filled.
 
 ## The generalisable lesson
 
