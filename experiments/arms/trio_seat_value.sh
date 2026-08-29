@@ -88,3 +88,41 @@ python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${group2
 
 echo "=== 224 group against the pinned champion ==="
 python -m kneemri.kaggle.seat_value --candidates "${group224_paths[@]}"
+
+# THE CHAMPION'S OWN SECOND DECODE, and the reading that made the 224 pool the wrong unit.
+#
+# `Ensemble.reads` keys a decode on (scheme, slices, tie, reading). SIZE IS NOT IN IT, and neither is
+# either pooling — those are model properties, not read properties. Measured, not asserted: a probe
+# package of `lr4e-5_ws_cf` (336) plus `native224_s2026` (224) dry-runs as `decode 10s at [224, 336]`,
+# ONE read carrying both sizes.
+#
+# So the unit is not "the 224 family". Thirty-six fold-0 checkpoints share the champion member
+# `lr4e-5_ws_cf`'s decode — canonical, 12 slices, band 0.2-0.8 — spread across 224, 336 and 448, and the
+# champion seats ONE of them. Seven are packaged. Every other seat on that read is free in decode terms,
+# whatever resolution it was fitted at, and the resolution is then diversity we are not paying for.
+#
+# WHAT IS NOT YET MEASURED, and why this list is not hand-filtered. The crop lives inside `reading`, so a
+# `crop80_` or `tissue` member may split off into a second read even though it agrees on scheme, slices
+# and band. Filtering those out by NAME would be a guess dressed as a fact; the decode count answers it,
+# and a separate 32-member dry_run is running for exactly that. If it reports one decode line, the whole
+# list shares a read; if it reports several, the groups it prints are the true pools and this pricing is
+# read per group rather than as one.
+#
+# HOW IT IS READ. `seat_value` with no `--against` prices into the pinned champion, which already holds
+# this read. Any candidate at or above the 0.0062 holdout floor is a seat that costs NO decode: take it.
+# The floor is the whole bar here — there is no decode budget to trade against, which is what separates
+# this pricing from every seat question this project has asked before.
+GROUP2=(
+  adjacent224_s2026 confident224_s2026 holdannot_s2026 labelwise224_s2026 mixup224_long_s2026
+  mixup224_s2026 mixup224_strong_s2026 native224_long_s2026 native224_s2026 nocycle224_long_s2026
+  normcount224_s2026 tissue224_s2026 attend_true_s2026 blendlabels_s2026 centre_tissue_s2026
+  depth_true_s2026 ema_ws_s2026 encoder_layer_9_s2026 focal_pool_s2026 lr2e-4_ws_s2026
+  pair_memory_s2026 per_label_loss_s2026 slotmean_s2026 unfreeze4_s2026 res392_lr8e-6_ws_s2026
+  base224_s2026 blendhold_s2026 crop80_tissue_s2026 depth_regions_narrow_s2026
+  dinov3_base_lora_s2026 lr1e-4_ws_s2026 lr4e-5_ws_s2026
+)
+
+mapfile -t group2_paths < <(resolve "${GROUP2[@]}")
+
+echo "=== the champion's own second decode (canonical, 12sl, 0.2-0.8, any size) against the champion ==="
+python -m kneemri.kaggle.seat_value --candidates "${group2_paths[@]}"
