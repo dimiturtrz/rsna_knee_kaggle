@@ -5887,3 +5887,43 @@ costs nothing. Do not spend a slot here until it lands.
 from 0.925 to 0.941. 473 of 2160 settled teams carry an efficiency entry below their public best and
 none carry a better one, so the slot is separately held by design — but by what selection is unknown,
 and the rules file (`comp/COMPETITION_RULES.txt` 61-64) states only the three prizes.
+
+### Kernel logs cannot price the efficiency lane: the public rerun scores THREE studies
+
+The efficiency board's snapshot predates `trioseat_v1`, so the lane cannot be priced until it refreshes.
+Kaggle's kernel log looked like a way around the wait — it is a JSON list of `{stream_name, time, data}`
+with per-record elapsed seconds, so the last record's `time` is the run's wall clock, free for any
+shipped entry:
+
+```
+soloseat     (1 member,  1 decode)  63.6 s   board 0.925
+calibsix     (6 members, 3 decodes) 73.4 s   board 0.941   <- holds our efficiency row
+trioseat     (3 members, 1 decode)  93.5 s   board 0.938   <- built AS the cheap entry
+fourseat     (4 members, 1 decode)  98.4 s   board 0.937
+raptorseat   (7 seats,   3 decodes) 96.5 s   board 0.943   <- champion
+raptorweight (7 seats,   3 decodes) 89.0 s   scoring
+```
+
+**The lead is dead and one log line kills it.** Every kernel prints `studies 1-3`: the public rerun
+scores THREE studies. The gaps put 20–35 s in imports, 15–35 s in weight loading, and 4–8 s in all
+decode-and-forward work combined. The 63–98 s spread is startup jitter. Worse than uninformative, the
+apparent ordering is BACKWARDS from the design — the "cheap" three-seat one-decode entry reads 20 s
+slower than the six-member three-decode entry holding our efficiency row — which is exactly how a bad
+instrument does damage rather than nothing.
+
+**A second reading, nearly filed, caught by opening the source.** `calibsix` and `raptorseat` print
+`projecting 0.0h of 7.7h` and `0.0h of 7.6h`, which read as projected full-test runtimes; from them I
+had already derived a hidden test set of about 8300 studies. `kneemri/inference/budget.py:81` formats it
+`projecting {projected}h of {seconds}h` where `seconds` is the **ceiling**. The projection is 0.0h.
+There is no projected runtime in any log we hold, and there never was.
+
+**What remains.** The private rerun over the full hidden test is where the efficiency metric's runtime is
+measured and we cannot observe it. The efficiency board snapshot stays the only instrument, and waiting
+for it to refresh past `trioseat_v1` stays the move — still free, still worth more than a slot.
+
+**One real gap, filed rather than fixed.** `Budget.report()` returns nothing until `measured()`, which
+needs `index + fraction > 0`. A single-decode entry running a single chunk prints no projection on the
+only chunk line it has. The entries built for the efficiency track are one-decode by design, so they are
+precisely the ones that can never self-report a projection — on a private run where nothing else can
+either. Low priority (the guard's real job is stopping a 9 h overrun, and a one-group entry is least at
+risk of that), but it is the wrong way round.
