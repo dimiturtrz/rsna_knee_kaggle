@@ -492,5 +492,5 @@ class FlagVocabulary:
             "and "
             "so cannot repair; the top blocks the head reads are the ones a reconstruction objective "
             "rewrites hardest, and two full loads measured on 2026-08-20 lost 0.17 with block 11 moved "
-            "55% and 21% of its own norm.",
+            "55%% and 21%% of its own norm.",
         )
