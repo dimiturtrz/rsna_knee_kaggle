@@ -1,12 +1,14 @@
 """Reader-radiologist agreement per language, on constructed studies whose right answer is known by hand."""
 
 import math
+from pathlib import Path
 
 import pandas as pd
 import pytest
 
 from core.data.labels.reader_agreement import GRADED, HEDGED, ReaderAgreement
 from core.findings import TARGETS
+from core.paths import DataRoot
 
 ENGLISH = "There is a tear of the medial meniscus with mild joint effusion and normal signal throughout."
 SPANISH = "Técnica: RMN de la rodilla. Resultados: rotura parcial del menisco interno con derrame articular."
@@ -25,6 +27,32 @@ def _studies(reports: list[str], truths: list[list[float | None]]) -> tuple[pd.D
         columns[target] = [row[position] if position < len(row) else None for row in truths]
         verdicts[f"{target}__verdict"] = ["YES" if position < len(row) else "UNK" for row in truths]
     return pd.DataFrame(columns), pd.DataFrame(verdicts)
+
+
+def test_annotated(tmp_path: Path):
+    """A study with no radiologist column at all is not annotated; a partly graded one is.
+
+    All-or-nothing is the shape the corpus happens to have, not a rule the loader enforces, so the
+    `how="all"` drop is the line that decides which studies every reading of the reader is measured on.
+    """
+    root = DataRoot(tmp_path)
+    raw = root.raw()
+    raw.mkdir(parents=True)
+    frame = pd.DataFrame(
+        {
+            "StudyInstanceUID": ["graded", "partly", "unread"],
+            "Report": ["a", "b", "c"],
+            "Extra": [1, 2, 3],
+            **{target: [1.0, None, None] for target in TARGETS},
+        }
+    )
+    frame.loc[1, TARGETS[0]] = 0.0
+    frame.to_csv(raw / "train.csv", index=False)
+
+    annotated = ReaderAgreement.annotated(root)
+
+    assert list(annotated["StudyInstanceUID"]) == ["graded", "partly"], "an ungraded study is not truth"
+    assert "Extra" not in annotated.columns, "only the columns `cells` joins on survive"
 
 
 def test_cells():

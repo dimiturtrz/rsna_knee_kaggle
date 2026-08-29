@@ -27,6 +27,7 @@ from numpy.typing import NDArray
 from core import cli
 from core.data.labels.report_language import ReportLanguages
 from core.findings import STUDY, TARGETS
+from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,16 @@ class ReaderAgreement:
             "DEFAULT table and say so in the language of a reading — score the numeric column with "
             "`kneemri.evaluation.table_separation` or `supervision_gap` instead"
         )
+
+    @staticmethod
+    def annotated(root: DataRoot) -> pd.DataFrame:
+        """The studies a radiologist graded, in the columns `cells` joins on.
+
+        Lives beside `cells` rather than in each caller because it is the JOIN KEY of every reading of
+        the reader — a second copy is a second definition of which studies count.
+        """
+        truth = pd.read_csv(root.raw() / "train.csv")
+        return truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     def cells(self, annotated: pd.DataFrame, read: pd.DataFrame) -> pd.DataFrame:
         """One row per (study, finding) the radiologist annotated AND the reader gave a verdict on.
@@ -338,12 +349,11 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    truth = pd.read_csv(root.raw() / "train.csv")
     fallback = root.processed() / "labels" / DEFAULT_TABLE
     read = pd.read_csv(arguments.labels or fallback)
-    annotated = truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     agreement = ReaderAgreement()
+    annotated = agreement.annotated(root)
     if arguments.labels and (refusal := agreement.blind(read, pd.read_csv(fallback))):
         logger.error(refusal)
         raise SystemExit(BLIND)
