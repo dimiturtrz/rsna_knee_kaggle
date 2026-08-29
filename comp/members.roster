@@ -190,7 +190,7 @@ through_dense_s2026.pt      # 0.8558 — the ONLY member whose input PIXELS diff
 # can do at any window size, and what knee-jucq's volume-pretrained trunk actually buys.
 small_accum_s2026.pt        # 0.8579 — ordinal concordance 0.784, the HIGHEST in the whole 67-member pool
 severity_weight_s2026.pt    # 0.8530 — ordinal 0.783; the severity axis the owner kept alive by name
-small_batch6_s2026.pt       # 0.8598 — SECOND-best solo (calib_dense_hold_s2026 0.8634 leads), ordinal 0.781, best eighth seat (+0.0005)
+small_batch6_s2026.pt       # 0.8598 — fourth-best solo (calib_dense_hold 0.8634, stackfit 0.8631, raptor_distill 0.8613 lead), ordinal 0.781, best eighth seat (+0.0005)
 aprior_dense_s2026.pt       # 0.8557 — ordinal 0.778
 focal_dense_s2026.pt        # 0.8534 — ordinal 0.777
 # Added 2026-08-22, and this push is bought by a RULER rather than by any member's own number. On
@@ -505,3 +505,41 @@ focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that nu
 # takes greedy seat 11 over 111 candidates, because what a vote wants from an eleventh member is
 # disagreement it can average away, not a good number. Do not read 0.5332 as a reason to drop it; a seat is
 # not a solo score. See experiments/README.md for the paired refutation and for this seat.
+
+# Added 2026-08-30 by `kneemri.kaggle.roster_check`, which found 76 scoreable members in neither
+# this file nor `comp/members.declines` — `stackfit_s2026` at 0.8631 among them, the SECOND-BEST solo
+# checkpoint the project owns, and unshippable for as long as nobody remembered to type it. Every member
+# below clears 0.8460, the solo of `extended_ws_s2026` — the weakest member this roster has ever
+# added on MERIT. Everything packaged below that level is there as a NAMED instrument (the only
+# non-DINOv2 trunk, the only different physical crop, the only medical pretraining), which is a reason
+# and not a score. Solo under LogitAverage on the 909-study fold-0 holdout, 111 same-ruler records.
+stackfit_s2026.pt                    # 0.8631
+raptor_distill_s2026.pt              # 0.8613
+distill_pairs_s2026.pt               # 0.8594
+ema_dense_s2026.pt                   # 0.8588
+band_dense_hold_s2026.pt             # 0.8573
+attend_dense_s2026.pt                # 0.8569
+mixup_dense_s2026.pt                 # 0.8552
+depth_regions_s2026.pt               # 0.8549
+merged_corpus_s2026.pt               # 0.8545
+band_density_s2026.pt                # 0.8540
+blendlabels_s2026.pt                 # 0.8537
+fuse_regions_s2026.pt                # 0.8518
+labelwise224_s2026.pt                # 0.8517
+mixup224_strong_s2026.pt             # 0.8516
+fuse_attend_s2026.pt                 # 0.8509
+dissent_seat_s2026.pt                # 0.8509
+holdannot_s2026.pt                   # 0.8506
+mixup224_long_s2026.pt               # 0.8505
+native224_s2026.pt                   # 0.8502
+normcount224_s2026.pt                # 0.8498
+mixup224_s2026.pt                    # 0.8496
+band_span_hold_s2026.pt              # 0.8493
+tissue224_s2026.pt                   # 0.8491
+native224_long_s2026.pt              # 0.8490
+depth_regions_span_s2026.pt          # 0.8487
+band_dense_llrd_s2026.pt             # 0.8483
+attend_true_s2026.pt                 # 0.8476
+adjacent224_s2026.pt                 # 0.8462
+depth_true_s2026.pt                  # 0.8461
+ema_ws_s2026.pt                      # 0.8460

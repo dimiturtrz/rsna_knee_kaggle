@@ -5680,3 +5680,51 @@ blank-cell claim is being asked of denominators of 7 to 24. That cannot resolve 
 size, and no bigger model changes it. The narrow route therefore does not need a loadable 35B — it needs a
 truth set with more annotated studies, which we do not have. Retire it as unmeasurable here rather than
 leaving it open as if a stronger reader would settle it.
+
+## 2026-08-30 — the roster was hand-written, and the project's second-best solo was unshippable (`knee-0dtv`)
+
+`comp/members.roster` is the ONLY definition of what a package contains: a member absent from it cannot
+be shipped no matter what any other file says. Nothing writes it. A run that finishes writes a
+checkpoint, a holdout record and a ledger section — and then the roster is edited by hand, so every
+member in it is there because somebody remembered.
+
+`knee-0dtv` was filed on five seats: building a sixteen-seat entry found five of its sixteen best
+members missing from the roster. The bead was three times too small. The new check
+(`python -m kneemri.kaggle.roster_check`, the thirteenth) swept the whole processed root and read
+
+```
+123 scoreable of 200 checkpoints: 47 packaged, 0 declined, 76 undocumented
+```
+
+Seventy-six, not five. And the worst of them is not `labelwise_dense_s2026`. It is
+**`stackfit_s2026`, 0.8631 solo** under LogitAverage on the 909-study fold-0 holdout — the
+**second-best single checkpoint this project owns** (behind `calib_dense_hold_s2026` 0.8634, ahead of
+`merged_span_cf` 0.8618), and it could not take a seat in any entry ever shipped. `raptor_distill_s2026`
+0.8613 and `distill_pairs_s2026` 0.8594 were in the same state.
+
+**THE RULE IS NOT A SCORE FLOOR, and checking that is what stopped this becoming a second bug.** The
+first instinct was to package everything above some cut. Measured against the pool the roster ALREADY
+packages, that would have declined this project's own instruments: the packaged set descends to
+`focus_mcl_s2026` 0.5332, `mae_matched_s2026` 0.6735, `lora_r8_v3small_224_s2026` 0.8215,
+`dinov3_base_lora_s2026` 0.8268, `crop80_tissue_s2026` 0.8345. Every one of those is a NAMED INSTRUMENT
+— the only non-DINOv2 trunk, the only different physical crop, the MCL specialist, the medical
+pretraining. So the cut is `MERIT = 0.8460`, the solo of `extended_ws_s2026`: the weakest member this
+roster has ever added on merit rather than as an instrument. Above it, ship. Below it, decline IN WRITING,
+and the way back on is to name the instrument the member would be — never to re-quote the number.
+
+**The split: 30 added, 46 declined.** Thirty undocumented members clear 0.8460 and joined the roster
+(0.8631 down to 0.8460). Forty-six are declined in `comp/members.declines`, each with its reason:
+thirty-four below merit, eleven smoke/probe runs that never became members, and `confident224_s2026` —
+a REAL arm scored under an older label table, written down as such so it is not mistaken for a twelfth
+smoke run and so `knee-8hau`'s rescore has somewhere to land. After: `123 scoreable, 77 packaged, 46
+declined, 0 undocumented`, exit 0.
+
+**Why the check is two-sided.** "Everything scoreable ships" would be the wrong rule — twelve of the
+finds genuinely should not ship. What was missing is not a policy that everything ships; it is a PLACE
+TO WRITE DOWN that something does not, so the set difference is taken by a machine instead of by memory.
+And a bare name in the declines file is a finding too: it records that somebody once decided, not what
+they decided, which is the same defect one file over.
+
+**What this does NOT do.** It does not push the package. Thirty new roster lines mean a dataset push
+before any of them can be mounted — a separate, deliberate step. `knee-0dtv` was about the definition,
+and the definition is now enforced.

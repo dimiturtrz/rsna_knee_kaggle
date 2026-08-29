@@ -166,7 +166,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Twelve checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Thirteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -214,6 +214,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   read on studies the entry did NOT train on: on 2026-08-29 `raptor_solo`'s 0.8938 was voided because
   `foreign_overlap` shows it was 98.6% in-sample, and that one cell was carrying the whole "compression goes
   negative at the top" reading plus eleven of fifteen apparent ruler inversions.
+  `python -m kneemri.kaggle.roster_check` after ANY run finishes, and before building an entry out of the pool —
+  the check that guards what can be SHIPPED. Nothing writes `comp/members.roster`; it is hand-edited, so every
+  member on it is there because somebody remembered. On 2026-08-29 five of a sixteen-seat entry's best seats were
+  not on it, and the sweep that followed found **76 scoreable members in neither the roster nor anywhere else** —
+  `stackfit_s2026` at 0.8631 among them, the second-best solo the project owns, unshippable for as long as nobody
+  typed a line. It asserts every checkpoint with a holdout record is named in the roster OR in
+  `comp/members.declines` WITH A REASON (a bare name is a finding too: it records that somebody decided, not what).
+  Anything in neither is the defect. Thirty members joined the roster on that sweep and forty-six were declined in
+  writing; a decline is an argument, and it is re-opened by answering it, never by re-quoting a number.
  A recipe is smoked with `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. `--smoke` takes the DIRECTORY the throwaway checkpoints go to and `--only` takes the arm; `--studies`/`--epochs` are `train`'s flags, not this tool's, and passing the arm path to `--smoke` costs a run that dies on `FileExistsError` against the arm script itself.
   A recipe on a reading axis NOBODY HAS DECODED cannot be smoked until something writes the truncated cache, and
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct

@@ -1,0 +1,74 @@
+# The scoreable members that deliberately do NOT ship, one per line, each with the reason it does not.
+# Read by `python -m kneemri.kaggle.roster_check`, which asserts that every checkpoint under the
+# processed root with a holdout record is either named in `comp/members.roster` or named HERE.
+#
+# WHY THE FILE EXISTS. Nothing writes the roster. A finished run leaves a checkpoint, a holdout record
+# and usually a ledger section, and then somebody has to remember to type a line. On 2026-08-29 five of
+# a sixteen-seat entry's best seats turned out not to be on the roster, and the sweep that followed found
+# 76 scoreable members in neither file — `stackfit_s2026` at 0.8631 among them, the second-best solo the
+# project owns. The fix is not "everything ships": twelve of these are smoke runs. The fix is a place to
+# write down that something does not ship, so the set difference is taken by a machine and not by memory.
+#
+# A BARE NAME IS A FINDING TOO. `roster_check` refuses a decline with no prose, because a name alone
+# records that somebody once decided and not what they decided — which is the same failure one file over.
+#
+# Nothing here is permanent. A decline is an argument, and it is re-opened by answering it.
+
+# --- Below the merit level, 2026-08-30 -------------------------------------------------------------
+# Every member here scores below 0.8460 solo — `extended_ws_s2026`, the weakest member the roster has
+# ever added on MERIT. The roster does package weaker checkpoints than these, but each of those is a
+# named INSTRUMENT (the only non-DINOv2 trunk at 0.8215, the only different physical crop at 0.8345, the
+# MCL specialist at 0.5332), which is a reason and not a score. So the way back onto the roster from here
+# is to name the instrument the member would be, not to re-quote its number.
+res392_lr8e-6_ws_s2026.pt            # 0.8459 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+wsfold0_e6.pt                        # 0.8457 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+nocycle224_long_s2026.pt             # 0.8442 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+focal_pool_s2026.pt                  # 0.8432 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+schedule_8_s2026.pt                  # 0.8429 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+per_label_loss_s2026.pt              # 0.8414 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+slices16_ws_s2026.pt                 # 0.8411 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+centre_tissue_s2026.pt               # 0.8409 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+slotmean_s2026.pt                    # 0.8406 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base20_fold0.pt                      # 0.8358 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+half_data_s2026.pt                   # 0.8344 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+crop80_tissue_full_s2026.pt          # 0.8343 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+unfreeze4_s2026.pt                   # 0.8320 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+conf24_s7.pt                         # 0.8269 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+conf24_s2026.pt                      # 0.8259 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base_s7_fold0.pt                     # 0.8240 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+adapt_null_s2026.pt                  # 0.8240 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base_fold0.pt                        # 0.8238 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+margin_calib_s2026.pt                # 0.8235 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_layer_9_s2026.pt             # 0.8230 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+cnx_own_recipe_s2026.pt              # 0.8186 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+raddino_normfix_s2026.pt             # 0.8155 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+pair_memory_s2026.pt                 # 0.8155 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+raddino_dense_s2026.pt               # 0.8141 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+dinov3_v3small_224_s2026.pt          # 0.8057 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+side_dense_s2026.pt                  # 0.7937 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+cnx_dense_s2026.pt                   # 0.7927 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+quarter_data_s2026.pt                # 0.7907 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+depth_regions_span_s2026_run1.pt     # 0.7455 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+lr2e-4_ws_s2026.pt                   # 0.7391 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_lower_s2026.pt         # 0.7309 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_thawed_s2026.pt        # 0.7162 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_s2026.pt               # 0.6902 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_gentle_s2026.pt        # 0.6875 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+
+# --- Not members on the current label table, 2026-08-30 --------------------------------------------
+# `record_mix` narrows to the largest same-ruler pool and these fall out of it: they never became members
+# at all. Eleven are smoke or probe runs, which is what they were for. The twelfth is a real arm.
+_probe420.pt                         # not a member on the current label table — a smoke/probe run, or scored under an older table
+base_smoke.pt                        # not a member on the current label table — a smoke/probe run, or scored under an older table
+cnx_smoke.pt                         # not a member on the current label table — a smoke/probe run, or scored under an older table
+depth_smoke.pt                       # not a member on the current label table — a smoke/probe run, or scored under an older table
+depth_smoke_run1.pt                  # not a member on the current label table — a smoke/probe run, or scored under an older table
+ema_smoke.pt                         # not a member on the current label table — a smoke/probe run, or scored under an older table
+member_fold0.pt                      # not a member on the current label table — a smoke/probe run, or scored under an older table
+merged_smoke.pt                      # not a member on the current label table — a smoke/probe run, or scored under an older table
+smoke_loop.pt                        # not a member on the current label table — a smoke/probe run, or scored under an older table
+smoke_v3base.pt                      # not a member on the current label table — a smoke/probe run, or scored under an older table
+v3lora_smoke.pt                      # not a member on the current label table — a smoke/probe run, or scored under an older table
+confident224_s2026.pt          # a real arm, NOT a smoke run: it was scored under an older label table and
+                               # falls out of the same-ruler pool. knee-8hau holds the rescore; it returns to
+                               # the roster or to the section above on a number, not on this line.

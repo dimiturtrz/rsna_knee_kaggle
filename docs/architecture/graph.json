@@ -3344,6 +3344,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.roster_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_check",
+      "target": "kneemri.kaggle.package_members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_check",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.roster_reads",
       "target": "core.cli",
       "weight": 1
@@ -17299,6 +17317,174 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.roster_check.MemberDeclines",
+      "target": "kneemri.kaggle.roster_check.MemberDeclines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.phantom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
+      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.patterns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.patterns",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.phantom",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.phantom",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.patterns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
+      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.roster_check.main",
+      "target": "kneemri.kaggle.roster_check.RosterDrift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.main",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.main",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.roster_reads.ReadGroup",
       "target": "kneemri.inference.members.Member",
@@ -20903,7 +21089,7 @@
       "role": null
     },
     {
-      "descendants": 161,
+      "descendants": 162,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -21567,7 +21753,7 @@
       "role": null
     },
     {
-      "descendants": 26,
+      "descendants": 27,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -21746,6 +21932,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_teacher",
       "label": "raptor_teacher",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check",
+      "label": "roster_check",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -24493,6 +24687,22 @@
       "level": "class",
       "parent": "kneemri.kaggle.raptor_teacher",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.MemberDeclines",
+      "label": "MemberDeclines",
+      "level": "class",
+      "parent": "kneemri.kaggle.roster_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift",
+      "label": "RosterDrift",
+      "level": "class",
+      "parent": "kneemri.kaggle.roster_check",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -35412,6 +35622,118 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_teacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.MemberDeclines",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.MemberDeclines.reasons",
+      "label": "reasons",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.MemberDeclines",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
+      "label": "checkpoints",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "label": "complaints",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
+      "label": "contradictory",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.packaged",
+      "label": "packaged",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.patterns",
+      "label": "patterns",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.phantom",
+      "label": "phantom",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
+      "label": "reasonless",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "label": "scoreable",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
+      "label": "undocumented",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check",
       "role": null
     },
     {
