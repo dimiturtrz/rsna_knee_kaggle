@@ -5446,6 +5446,41 @@ its own target label. It is not usable as a SELECTION CRITERION. The honest curv
 against: **0.8753 at 28 seats**, not the 0.8777 the in-sample peak advertises, and the +0.0032 gap is the
 size of every seat-count claim this ledger has made off a greedy curve.
 
+### The honest curve reopens seat count, and 16 seats dominate 28 — 2026-08-29 20:55Z
+
+The honest peak is **0.8753 at 28 seats** against the shipped champion's five-twin shadow at 0.8701:
+**+0.0052**, the first offline delta in days at the 0.0053 floor rather than a tenth of it, and it comes
+from COUNT after quality (knee-07b0) and rank-distance (above) both closed.
+
+**The board says count is saturated. It says so over 6 to 11 seats.** `champion.json` records five entries
+spanning 0.939-0.941 at 6, 7, 7, 8 and 11 seats and concludes "THE SEATING AXIS IS SATURATED FOR US at
+~0.941". Every one of those was seated off a GREEDY curve, whose in-sample peak sits at 13 and overstates by
++0.0032. Nothing has ever been shipped past 11 seats, so the saturation reading covers a range the honest
+peak lies outside of. That is not a refutation of it — it is the boundary of what it was measured on.
+
+**Compression, read from the tool and not from prose.** `board_transfer` at our own score band (entries
+≥0.8690) is **+0.98 board points per holdout point [+0.70, +1.17]**, three resolved pairs. Not the +2.14 in
+`champion.json`, not the +1.55 whole-record median the tool itself labels "the wrong number to price an arm
+with". So +0.0052 offline prices at about **+0.005 board** — 0.943 → ~0.948, which is inside the top ten
+(0.946). The interval is entirely positive. **This is the third time this constant has been quoted wrong
+from prose in this repo; read it from the tool.**
+
+**And the shipment is 16 seats, not 28.** `roster_reads` prices both:
+
+| seats | decodes | honest held-out |
+|---|---|---|
+| 16 | **5** | 0.8746 |
+| 28 | **5** | 0.8753 |
+
+Identical read cost — the extra twelve members all land in decode groups already being paid for. So 28 buys
++0.0007 (a seventh of the floor, deep noise) for 1.75× the forward passes. **16 seats dominates: same I/O,
+statistically the same score, far less runtime.** Runtime matters twice here — a kernel that times out
+wastes the slot outright, and the efficiency track ranks us 16th at 0.925 on runtime alone.
+
+Pre-registered before any slot is spent: the 16-seat entry should read **0.945-0.950** if the honest curve
+transfers, and **0.940-0.943** if the board's saturation reading extends past 11 seats after all. Those two
+branches are separated by more than one board tick, which is why the entry is worth a slot at all.
+
 ### `merged_span_cf` — declined as undocumented at 20:37Z, seated at 20:52Z
 
 The roster audit found this checkpoint on disk with zero mentions here and declined it on the rule that an
