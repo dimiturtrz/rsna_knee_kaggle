@@ -21,6 +21,21 @@ ON THIS RULER — 58 studies is a small ruler and this is the expected outcome, 
 say the tables are equivalent as SUPERVISION: a table trains on ~4,400 studies and is judged by a board
 score, and a reader that is better on the training corpus can be unresolvable on 58 gold rows. It removes
 the licence to prefer one over another on THIS evidence, which is the licence that has been used.
+
+AND A SEPARATION HERE IS NOT A QUALITY GAP EITHER — read this before acting on one. Run over the eight
+tables on disk on 2026-08-29, every blend separates from `report_labels_v2` by about +0.025 with an
+interval clear of zero, while the four blends are mutually unresolved. That looks like a ranking and is
+not one: `blendlabels.sh` had already established that the gap is TIE MASS. Our reader emits five levels
+and ties 38.5% of cell pairs, an 85-level LLM probability ties 17.3%, and AUC breaks no ties — quantise
+the public table onto our five levels and it falls to 0.8445, BELOW ours. This module measures the
+tables AS RULERS at their native resolution, so a resolution difference arrives here wearing a quality
+difference's clothes, bracketed and significant.
+
+The training question it prompts is also already answered: `blendlabels` trained the control's recipe on
+`blend_three_v1` with the holdout ruler pinned to v2 and read MEAN +0.0034 against 0.8502, inside its own
+pre-registered +/-0.006 band, which its header wrote as the axis CLOSING. So a separation printed here
+buys a follow-up only if it survives quantisation to a common number of levels — otherwise it is a
+statement about tie-breaking, and the gradient has already been shown not to care.
 """
 
 import logging
