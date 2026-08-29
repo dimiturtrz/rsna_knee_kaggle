@@ -65,9 +65,19 @@ the wrong read.
 
 One thing read A's walk says that is not yet spent: it reaches 0.8705 at three seats and 0.8736 at
 seven. +0.0031 for four more seats on a decode already paid for — under the floor, over the +0.0015
-ruler, and on the ONE axis `knee-nas5` measured AMPLIFYING to the board at 2.4x. Whether those four
-seats exist as `_cf` checkpoints in the packaged roster is what decides if it is a kernel edit or a
-push.
+ruler, and on the ONE axis `knee-nas5` measured AMPLIFYING to the board at 2.4x.
+
+**But the obvious way to spend it is already refuted, by the ledger rather than by a slot.** Those four
+seats exist only as `_s2026` — fold-0 — and `greedy7_v1` is exactly that experiment: seven fold-0
+members, 0.8712 offline, **0.933** on the board, against `trioseat_v1`'s three `_cf` seats at **0.938**.
+The one-decode seven here is 0.8736 offline, +0.0024 over greedy7, which interpolates to roughly 0.9355
+— still under the trio it would be extending. Bolting fold-0 seats onto an all-`_cf` roster dilutes it
+faster than the seat count repays.
+
+So the seat term on read A is real and the cheap route to it is closed. The route that stays open is
+refitting those four members at `--fold -1`, which costs card time rather than a slot, and turns
+`trioseat_v1` into a seven-seat entry on the same single decode. That is the efficiency play worth
+running: about three hours of card against a podium with three places on it, where we are rank 16.
 
 ## What it does and does not license
 

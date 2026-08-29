@@ -615,6 +615,29 @@ disagree per label in a way any rule could exploit. The same run prices the DINO
 `best 4` (0.8612) excludes both v3 members, `best 6` with them scores 0.8603, `best 7` 0.8588. Full
 reading: `interpretations/kneemri/2026-08-17_the-oracle-ceiling-is-the-average.md`.
 
+### `crop80_tissue_full` — the schedule defect is CLOSED, and it was never the explanation
+
+2026-08-29. The arm below carried a recorded defect for fifteen days: its control ran 12 epochs and it
+ran 8. `crop80_tissue_full` re-runs it at 12 on the same cache, same fold, same labels, same recipe —
+the budget as the only change, as its header pre-registered.
+
+| | epochs | peak holdout | nearest neighbour | seat value vs `honest12` |
+|---|---|---|---|---|
+| `crop80_tissue_s2026` | 8 | 0.8345 | 0.8375 | −0.0006 [−0.0011, −0.0001] |
+| `crop80_tissue_full_s2026` | 12 | **0.8343** (epoch 6) | 0.8492 | **−0.0006** [−0.0011, −0.0001] |
+
+Four extra epochs bought **−0.0002**, and the marginal seat value reproduced to four decimal places.
+That is the arm's **branch two**, written before the number: *"the budget was not the binding
+constraint… the distance lane closes on the mean, this time without the confound."* The −0.0084
+adjustment computed below is therefore not needed — the 80 mm read costs what it costs, and its weakness
+is a property of the read rather than of a short schedule.
+
+Two things worth keeping. The 12-epoch run **peaked at epoch 6 and slid 0.0055 to the finish**, the same
+shape `band_dense_long` recorded at 24 — under `one_cycle` this family does not use a longer budget.
+And the nearest-neighbour column moved **+0.0117** (0.8375 → 0.8492) at a holdout that moved −0.0002,
+on the identical read: that is a precision bound on the twin detector, and it means differences of about
+a hundredth in that column are run-to-run wobble rather than decode distance.
+
 ### `crop80_tissue` — the control is not schedule-matched, and the mean was never the gate
 
 Two things have to be said before that −0.0112 is quoted anywhere. **First, the control is 12 epochs and this
