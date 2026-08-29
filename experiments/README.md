@@ -5315,3 +5315,40 @@ would separate those, and at ~50 min for +6 epochs against a mechanism already r
 ratio to the distillation lane.
 
 Cost: ~73 min of card, zero slots. `knee-x580`.
+
+### `raptor_distill` — the foreign teacher IS partly learnable, and the student is still a member we already hold — 2026-08-28
+
+`--distill-weight 0.3` with `--teacher-targets raptor_teacher.npz`, the dense recipe otherwise untouched,
+12 epochs, fold 0. The teacher is `raptor_v4_swa`: board-measured at 0.923 solo, EXACTLY level with our
+own best single, and the first teacher from another architecture, another decode and another corpus.
+`distill_pairs` diagnosed its own null as "a rank average cannot pay for an ordering it already holds";
+this arm removes that defect by construction and asks whether the ordering was the whole story.
+
+```
+peak 0.8613 at e8 of 12, converged (e9 0.8606, e10 0.8593, e11 declining) — convergence_check clean
+vs band_dense 0.8578  = +0.0035, inside the 0.0062 holdout floor
+greedy entry position 44 of 121, at 0.8810 — the greedy peak is 0.8978 at position 5
+```
+
+THE SIGN THE BEAD PREDICTED IS THERE, AND IT IS NOT WORTH A SEAT. `distill_pairs` read +0.0016 from a
+DINOv2 self-teacher; this reads +0.0035 from an architecture-distant one. The ordering of the two is the
+mechanism's own prediction and it holds: a teacher outside the family transfers more than a teacher
+inside it. Both are under the floor, so the pair is directional evidence about distillation, not a result.
+
+THE DISTANCE RULER DECLINES IT, WHICH IS THE ONLY QUESTION `knee-for6` LEFT OPEN. The bead pre-registered
+"a seat is licensed only if the distance is genuinely new, not by the solo number". Greedy admits it 44th
+of 121 records, 39 positions after the peak set closes — our own `calib_dense_hold` enters 17th. Whatever
+distance the teacher had, the student did not inherit it: a student trained on our decode, our corpus and
+our trunk lands back in our pixel group no matter whose ordering it was taught. That is the finding, and
+it is a constraint on the whole distillation lane rather than on this arm — distillation moves ORDERING
+and the seat ruler prices PIXEL GROUP.
+
+READ THE GREEDY'S TOP WITH ITS CONTAMINATION IN MIND. Positions 1, 2, 4, 7, 8 and 18 are raptor
+checkpoints, every one `--fold -1`, so their holdout sits inside their training set and the 0.8978 peak is
+not a number about anything. Only the relative position of two honestly-trained members is readable here,
+which is exactly the comparison drawn above.
+
+WHAT IT DOES NOT CLOSE. The teacher pass over 4,406 studies is on disk and free to every later arm on this
+axis, so a different `--distill-weight`, a different teacher, or distillation onto a NON-DINOv2 trunk each
+cost one student and no teacher. None of them is licensed by this number: the constraint found is about
+where a student lands in pixel space, and the first two variants do not move it.
