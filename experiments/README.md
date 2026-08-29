@@ -5397,6 +5397,29 @@ their own training set. The tool's own suggestion is the honest one: price again
 member the studies a fold would have withheld and spends the ability to say what the member is worth
 without a slot. Both halves of that trade are real; the ledger should stop being surprised by the second.
 
+**Priced anyway, through the fold-0 TWINS, 2026-08-29 20:41Z — and it does not license a slot.** The
+champion's five `--fold -1` seats each have a fold-0 twin, and those twins are scoreable, so the swap can be
+read on the shadow the roster already records. Arms differ in exactly one member: `through_dense_s2026`
+(0.8558, the champion's weakest twin) out, `calib_dense_hold_s2026` (0.8634, the best solo member this
+project owns) in. `record_mix --vote logit`, same five-way pool both sides:
+
+| arm | best single | RankAverage | LogitAverage | best-4 subset |
+|---|---|---|---|---|
+| shadow (`through_dense`) | 0.8589 | 0.8701 | 0.8705 | 0.8708 |
+| swap (`calib_dense_hold`) | 0.8634 | **0.8705** | **0.8707** | 0.8710 |
+
+**+0.0004 rank, +0.0002 logit, off a member that is +0.0045 better alone.** The sign is positive and that is
+all that transfers on a member swap ([[member-swap-transfers-one-to-one]]), but the size is a quarter of the
+0.0053 floor and an eighth of the 0.02 bar. The mechanism is the same dilution `fourseat_v1` already paid a
+slot to learn: a strictly better member seated among four it already agrees with returns almost nothing.
+Read it in the oracle row — headroom improves from −0.0048 to −0.0027, so the swap makes the ensemble MORE
+agreeing, not more diverse.
+
+**So `calib_dense_hold_ff` is seated in the roster and stays off the submission queue.** It costs no extra
+decode (it rides the champion's own feed), it is the best solo checkpoint on the shelf, and it is worth
+having available the next time a roster is rebuilt around a genuinely new axis — but swapping it in is not
+that axis, and the pinned champion (0.943) is not at risk from a +0.0004 offline delta.
+
 ### The reader gate fired NOT DISTINGUISHABLE, and it cost twenty minutes instead of the sweep
 
 `Qwen/Qwen3-8B`, bf16, on the 57 image-annotated studies, scored by `core.data.labels.reader_upgrade`:

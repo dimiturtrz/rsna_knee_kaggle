@@ -458,3 +458,20 @@ mae_matched_s2026.pt        # ninth seat
 base224_s2026.pt            # tenth seat — the only 224 px base-trunk member in the twelve
 calib_span_hold_s2026.pt    # 0.8565 — eleventh seat, and the champion's own calib_span_ff twin
 merged_dense_cf.pt          # twelfth seat
+
+# Added 2026-08-29 20:37Z. AN ORPHAN, FOUND BY AUDIT RATHER THAN BY BUILDING ANYTHING. The checkpoint
+# finished at 13:35Z the same day and experiments/README.md gives it its own section, but it was never
+# written here — and the roster is what a kit can package, so a member absent from this file cannot be
+# shipped no matter what any other file says about it. Nothing decided to leave it out; it fell between
+# a run finishing and a roster edit.
+calib_dense_hold_ff.pt      # DARK. calib_dense_hold_s2026's flags plus --fold -1 --ema --calibrated-targets.
+# The full-data twin of the BEST SOLO MEMBER THIS PROJECT OWNS (0.8634 fold-0, the greedy's first seat,
+# +0.0076 over through_dense_s2026 and +0.0069 over grade_ladder_s2026 — the fold-0 twins of two seats the
+# champion actually uses). It rides the champion's own decode (336 px / 20 slices / band 0.1-0.9), so
+# seating it costs no extra read. Every dark caveat above applies without exception: --fold -1 means it has
+# seen every holdout study, no offline score exists or can be manufactured for it, it must never enter a
+# pool that reports an offline mean, and no board-per-holdout compression converts anything about it.
+#
+# NOT ADDED, and recorded here so the next audit does not re-find it: merged_span_cf.pt is also on disk and
+# also absent from this file, but it has ZERO mentions in experiments/README.md — no recipe, no finish time,
+# no section. An undocumented checkpoint is not a member; it is a file. Give it a ledger entry first.
