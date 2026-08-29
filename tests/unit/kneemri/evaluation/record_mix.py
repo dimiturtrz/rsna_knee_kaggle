@@ -165,13 +165,22 @@ def test_lines(tmp_path: Path):
     mixed = RecordMix([tmp_path / "shipped.pt", tmp_path / "candidate.pt"]).per_member()
     curve = MemberCurve(LabelScores())
 
-    priced = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(curve, "greedy", paired=False, labels=False)
-    built = MixReading(mixed, []).lines(curve, "greedy", paired=False, labels=False)
-    opened = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(curve, "greedy", paired=False, labels=True)
+    priced = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(
+        curve, "greedy", paired=False, labels=False, routing=False
+    )
+    built = MixReading(mixed, []).lines(curve, "greedy", paired=False, labels=False, routing=False)
+    opened = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(
+        curve, "greedy", paired=False, labels=True, routing=False
+    )
+    routed = MixReading(mixed, [tmp_path / "shipped.pt"]).lines(
+        curve, "greedy", paired=False, labels=True, routing=True
+    )
 
     assert priced[0].startswith("roster of 1:"), "the roster is honoured even with --seats greedy also passed"
     assert built[0].startswith("greedy 1:"), "with no roster the same call builds an ensemble instead"
     assert opened[0].startswith("mix of 1:"), "--labels opens the roster up rather than pricing against it"
+    assert routed[0].startswith("top- 1 per label:"), "--routing wins the dispatch over every other reading"
+    assert len(routed) == len(mixed.names), "one row per k, over the WHOLE pool rather than the roster"
 
 
 def test_narrow(tmp_path: Path):

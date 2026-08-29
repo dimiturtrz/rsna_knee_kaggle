@@ -415,8 +415,9 @@ greedy was real and the distrust turned out to be cheap — worth recording, bec
 ordering can be read for POSITION (which is what `knee-fzpy` gates raddino on) without an honest re-run
 each time.
 
-**WHAT I ALMOST QUOTED, AND WHY IT IS WRONG.** Three members of this pool end in `_cf` — fold −1, trained
-on every study including the fold-0 holdout these numbers are computed on. Their "holdout" AUC is a
+**A LEAK I REPORTED HERE AND THEN REFUTED — RETRACTED 15:09Z, the text kept because the retraction is the
+finding.** Three members of this pool end in `_cf`, and I wrote that `_cf` meant fold −1: trained on every
+study including the fold-0 holdout these numbers are computed on, so their "holdout" AUC would be a
 training-set AUC. Two of them are seated inside the first eight:
 
 ```
@@ -425,25 +426,40 @@ greedy  8: +merged_blend_cf.pt
 greedy 18: +merged_dense_cf.pt
 ```
 
-A split-half estimator does not touch this. It removes optimism from the CHOICE, by fitting the choice on
-studies it does not score; it cannot remove leakage from a MEMBER, because both halves are inside that
-member's training set. So the honest column is fitted-elsewhere and still contaminated, and the absolute
-0.8743-0.8748 is not a number about held-out performance.
+The reasoning was right and the premise was invented. A split-half estimator genuinely cannot touch member
+leakage — it removes optimism from the CHOICE by fitting the choice on studies it does not score, while
+both halves would still lie inside a leaked member's training set. All of that stands. What does not
+stand is that any member here is leaked.
 
-I knew this. The routed `blendlabels` pricing launched an hour earlier dropped exactly these two from
-honest12's roster for exactly this reason, and I did not carry the rule across to the pool run. The
-denominator discipline is not a thing you apply once per session.
+**`_cf` DOES NOT MEAN FOLD −1. IT MEANS THE MERGED CORPUS.** The checkpoints say so themselves:
 
-**WHAT SURVIVES THE LEAK.** The SHAPE probably does and the LEVEL does not. Two leaked members inflate
-every row from the second onward by roughly the same amount, so a curve that is flat from eight to
-twenty-four stays flat when they are removed — leakage shifts a level, it does not manufacture a plateau.
-The bias column survives for the same reason. What must be re-measured is the level, and with it the
-question of whether eight is still the saturation point once two of the eight are gone (the honest answer
-is that it may become ten, and that ten and eight are the same claim about a spent pool).
+```
+merged_blend_cf   fold=0 folds=5 split_seed=2026 scheme=merged train_fraction=1.0
+merged_span_cf    fold=0 folds=5 split_seed=2026 scheme=merged train_fraction=1.0
+merged_dense_cf   fold=0 folds=5 split_seed=2026 scheme=merged train_fraction=1.0
+```
 
-**THE CORRECTED RUN IS QUEUED, NOT DONE.** Re-run with the `_cf` members excluded from `--records` once
-the card frees — it is offline arithmetic over cached predictions, but it is CPU-heavy enough to have
-already cost the running arm a measurable epoch, which is the other half of `knee-8hau`.
+Fold 0 of 5 on split seed 2026 — the same split every other member in the pool holds out. `merged` is a
+`FOREIGN_SCHEME`: the training corpus carries foreign studies alongside the RSNA ones, and the fold
+assignment still holds out RSNA fold 0. There is no leak, and **0.8743–0.8748 is quotable as it stands.**
+The `_cf`-free re-run is cancelled; there is nothing to correct.
+
+**WHAT ACTUALLY WENT WRONG, which is worth more than the false alarm.** `RecordMix` raises "a whole-corpus
+member (--fold -1) writes no `.holdout.npz`" — so the existence of `merged_*_cf.holdout.npz` was already
+proof, on disk and in the source, that these are not fold −1. I had the rule and the counter-evidence in
+the same session and asserted the opposite from a NAME. Two suffix letters carried a claim about training
+data that one `torch.load` of the checkpoint's own `options` refutes in nine seconds.
+
+The tell I ignored: I "remembered" that the routed `blendlabels` pricing had dropped these two for this
+reason. It had. That earlier drop was the same unverified inference, repeated — which is how a guess
+becomes a fact about the repo. A belief that arrives already attached to a justification is the one to
+check, because the justification is what makes it feel checked.
+
+**AND IT WAS THE SECOND ONE THIS HOUR.** The transfer-slope section below records nearly filing `+1.82` as
+refuted off a range-restricted eyeball. Both were caught, neither by a gate — by re-deriving a premise
+that had only ever been asserted. The difference between the two is that the slope check took a minute and
+this one takes nine seconds, and the nine-second one had already produced an interpretation section and a
+P2 bead before it was run.
 
 **WHAT IT IS WORTH IF IT HOLDS.** Eight seats scoring what twenty-four score is a score-lane null and an
 efficiency-lane result: the shipped champion seats twelve. A roster a third smaller for a held-out
@@ -451,3 +467,203 @@ difference of +0.0005 is the shape of an efficiency-prize entry, and it costs a 
 whether the board agrees. It is not worth a slot on its own today — but if raddino enters the peak set
 under `knee-fzpy`'s gate, the eight-seat roster rebuilt around it is one submission that serves both
 prizes, and that is the shot worth holding the slot for.
+
+## What the offline ruler can actually resolve on the board — 2026-08-29 15:06Z
+
+The leak above raised a second question worth one minute of arithmetic: two `_cf` members sit in the
+SHIPPED champion (`honest12`), so is its offline number inflated relative to the board the way the honest
+curve's is? `comp/board.jsonl` answers it directly — 22 scored entries whose offline column is our own
+ruler on our own members, `raptor_solo` excluded because its offline is a foreign member's number on a
+different ruler.
+
+**The `_cf` confound does not survive contact with the board — and it turned out not to exist at all.**
+This check was run BEFORE the retraction above, against a leak that was never there, and it is kept
+because it independently reached the right answer and because it is the measurement the transfer finding
+came out of. Ranked by board score, the gap
+`board - offline` runs +0.058 to +0.064 across seventeen consecutive entries from 0.919 to 0.937.
+`honest12`, the only `_cf`-carrying entry among them, sits at +0.0619 against a pack mean of ~+0.0613 —
+its offline is about +0.0006 high, which is a third of the scatter. Two leaked members out of twelve are
+real and unmeasurable at the roster level. The shipped champion's offline number stays usable.
+
+Read against the retraction, this is a null explained: the gap is ordinary because the members are
+ordinary. A +0.0006 residual on the one entry I had singled out is what a roster with NO leaked member
+looks like, and I read it as an upper bound on a leak instead of as its absence. **An effect that is
+merely small when your hypothesis predicts small is not confirmation — check the premise before you
+spend a section bounding the size of something.**
+
+**I nearly filed the transfer constant as wrong, and the reason I was wrong is worth more than the check.**
+Reading down the top eighteen entries the gap looked like a flat OFFSET of +0.061, not a slope — which
+would have contradicted `board_transfer ≈ +1.82` outright. It does not. Those eighteen span an offline
+range of 0.017; fitting over all 22 (offline 0.8518-0.8751) gives:
+
+```
+slope 2.099   95% CI [1.197, 3.012]   r = 0.855   residual sd 0.0078
+forced slope 1.00 -> residual sd 0.0101
+forced slope 1.82 -> residual sd 0.0078
+```
+
+Range restriction flattens a slope toward zero, and eyeballing the top of a sorted list is range
+restriction. **+1.82 sits comfortably inside the interval and fits as well as the free slope.** The
+constant stands.
+
+**BUT THE INTERVAL IS THE FINDING, NOT THE POINT ESTIMATE.** [1.20, 3.01] is not a number to multiply an
+offline gain by and believe the product. And the residual sd is the sharper statement: **0.0078**. That
+is what predicting a board score from an offline score is worth — and it is comparable to the ENTIRE gap
+to first place (0.009 at the 14:00Z read). Two consequences, both about how slots get spent:
+
+1. **An offline difference under ~0.004 predicts nothing about the board.** Below that the two rosters'
+   predicted board scores overlap almost completely. This is the quantitative reason sixteen board entries
+   sit inside 0.005 of each other despite being chosen as improvements — the ruler that chose them cannot
+   resolve them.
+2. **It prices the honest curve's plateau.** Eight seats to twenty-four is +0.0005 offline, an eighth of
+   the resolution floor. Submitting to find out which is better is spending a slot on a coin flip.
+
+The lane where a slot buys knowledge is a change big enough to clear 0.004 offline, and nothing in the
+current pool is. That is the case for the raddino arm and against another reseating, stated in the
+instrument's own units.
+
+## One number explains the sign flip, the plateau, and why I had to rewrite my own gate — 15:12Z
+
+`knee-0ceh` has stood since 2026-08-27 as the strongest negative result on this project's instruments:
+offline-greedy seat selection **refuted**, because `honest12` turned a +0.0050 offline gain into 0.937 on
+a board where six seatings ordered themselves *inverse* to their offline gains. A selector whose gains
+arrive with the opposite sign is broken, not weak.
+
+The transfer residual measured above says otherwise, and says it arithmetically. **Residual sd 0.0078.**
+`honest12`'s +0.0050 is 0.64 of one residual sd. The six entries span 0.937–0.941 — a board range of
+0.004 — against an offline spread of ~0.005 whose *predicted* board spread is ~0.009. Six points inside
+half a residual sd, ordered at random. That is not an instrument returning the wrong sign. It is an
+instrument returning noise, which has an even chance of looking like the wrong sign and did.
+
+**The two diagnoses differ in what they forbid.** "Broken" forbids offline-greedy seating forever.
+"Below resolution" forbids it under ~0.004 and says nothing above. The six-entry set cannot distinguish
+them, because nothing in it was ever more than 0.005 apart — and `knee-0ceh` chose the stronger reading.
+Its own stated mechanism (a 454-study fit cannot resolve a seat worth less than the 0.0062 paired floor)
+*is* the weaker reading, already written down.
+
+The honest curve closes the circle from the other side: +0.0005 across thirteen seats is a sixteenth of
+the transfer resolution. **The seat axis has nothing left to resolve, so every selector ranking those
+seatings must return noise.** Saturation, the sign flip, and the plateau are one fact seen three ways.
+
+**AND IT COST ME MY OWN PRE-REGISTRATION.** `knee-fzpy` gated raddino on greedy POSITION — control 51,
+peak 10–11. But the greedy curve reads 0.8767 at ten and 0.8733 at fifty-one: those two branches are
+~0.003 apart, under both the holdout floor and the transfer residual. **A gate that cannot resolve its own
+two branches is not a gate.** Worse, I had cited `knee-0ceh`'s surviving half — "offline holdout still
+rules a SINGLE member" — to license reading position, when position is not a single-member number at all.
+It is a seating rank, which is precisely the half that issue refutes.
+
+Rewritten before the arm landed, which is the only honest time to change a pre-registration: raddino is
+now gated on whether the **honest eight-seat held-out number moves**, ≥ +0.004 to be a real member,
+≤ +0.001 to confirm the head-monoculture prediction. Stricter than what it replaced — the roster's score
+must actually move, on the one ruler that fits its choice on studies it does not score.
+
+**The through-line of this whole session is one habit.** Three claims re-derived from their premises today:
+`_cf` meaning fold −1 (false — two suffix letters, refuted by one `torch.load`), `board_transfer` being
+refuted (false — range restriction), and greedy position being a usable gate (false — below resolution).
+None was caught by a gate. All three were caught by asking what a number was measured *on*, and all three
+had already produced downstream writing before the question was asked.
+
+## Per-finding routing, measured at last — and the cheat loses — 2026-08-29 15:20Z
+
+The seat lane closed on the mean. The obvious next question is whether the mean was the wrong ruler:
+the competition metric is twelve independent AUCs, so a pool with no marginal member could still hold
+members that are *each* strong on a different finding. Nothing in this repository had ever asked. The
+per-label module was written on 2026-08-20 and cited twice as prior art without producing a number.
+
+It turns out it had produced one all along, in a reading nobody read: `record_mix` with no flag runs
+`MemberCurve.logged`, and `logged` has called `LabelCombine.curve` the whole time. I discovered this by
+starting to add a `--records` mode to `label_combine` and getting an import cycle —
+`label_combine -> record_mix -> member_curve -> label_combine`. The cycle was not an obstacle. It was
+the gate saying the feature already had a home, and it took nine minutes to hear it. Reverted.
+
+Over the eight honest seats, 909 shared studies, no encoder and no card:
+
+```
+top- 1 per label:  in-sample 0.8736   split-half 0.8669
+top- 2 per label:  in-sample 0.8796   split-half 0.8737
+top- 3 per label:  in-sample 0.8808   split-half 0.8767
+top- 4 per label:  in-sample 0.8806   split-half 0.8770
+top- 5 per label:  in-sample 0.8798   split-half 0.8774   <- best routed
+top- 6 per label:  in-sample 0.8789   split-half 0.8772
+top- 7 per label:  in-sample 0.8775   split-half 0.8772
+top- 8 per label:  in-sample 0.8764   split-half 0.8766   (= the flat rank-average)
+oracle 0.8736  vs plain average 0.8764  vs best single 0.8634  (headroom -0.0029)
+```
+
+Routing is worth **+0.0008** against its own matched control under one estimator — an eighth of the
+holdout floor, a fifth of what the board can resolve. The number to keep is not that one. It is the
+**negative oracle**: selecting per label WITH THE ANSWERS scores 0.8736 against the flat average's
+0.8764. The cheat loses to the thing it is supposed to bound.
+
+Read carefully, the oracle compares one member per label against an eight-member average, so
+correlation alone would favour the average and the headroom is not a clean ceiling. The top-k curve is
+the fair test, and it says the same thing more slowly: a small rise to k=5, then a walk back to the
+control. Both agree there is no per-label specialism here to route on.
+
+That is head-monoculture, measured on the axis where it had not yet been measured. The seat curve said
+the members carry the same information in the mean; this says they carry it in the same PLACES. Two
+rulers, one shape. And it sharpens what a new member has to be: not a better score, a different
+per-label profile. If raddino lands with one, this curve is a minute of CPU to re-run — the axis has a
+re-run condition, not a verdict.
+
+### The label headroom on the same mix, and why it is not a lever
+
+The same records answer the other per-label question for free — where the eight-seat mix's score
+actually lives:
+
+```
+mix of 8: 0.8764 over 12 labels, each worth 0.0833
+  MCL                0.8243  n= 171   to 0.90: 0.8827  (+0.0063)
+  Lateral OA         0.8374  n= 233   to 0.90: 0.8816  (+0.0052)
+  Fracture           0.8409  n=  68   to 0.90: 0.8814  (+0.0049)
+  ...
+  Baker's            0.9246  n= 217   to 0.90: 0.8744  (-0.0021)
+```
+
+Three findings hold +0.0164 between them, which clears the bar — and it is the trap the ledger already
+disarmed on 2026-08-23. That column is a PHYSICAL headroom, not a purchasable one: put our columns and
+the published weights on the same 909 studies and we beat their average single member on ten of twelve
+labels, losing only MCL (−0.0346) and Fracture (−0.0167). Closing both completely, against weights that
+demonstrably exist, is +0.0043 — the ceiling of the entire weak-label programme, a quarter of the bar.
+`focus_mcl` was cancelled on that arithmetic and stays cancelled.
+
+Recorded here only because the routing run printed the headroom column beside the routing curve, and a
++0.0164 sitting unlabelled in a log is how a settled question gets re-opened by whoever reads it next.
+
+## The pool has an aggregation ceiling near 0.876, and the method does not matter — 15:27Z
+
+Eight curated members is the wrong pool to ask about specialists. One specialist among a hundred is
+exactly what a mean-based seat scan hides, so the routing question gets SHARPER with pool size — and the
+109-member pool was the one pool the reading could not reach, because the only door to it also
+enumerated 2**109 subsets. Splitting `MemberCurve.routing` out of `logged` is one method and no new
+logic, and it is the difference between a question that can be asked and one that cannot.
+
+```
+top-  1 per label:  in-sample 0.8760   split-half 0.8652
+top-  9 per label:  in-sample 0.8827   split-half 0.8761   <- best
+top-109 per label:  in-sample 0.8663   split-half 0.8664   (= the flat rank-average of all 109)
+```
+
+**+0.0097 over its own control, and that number is not routing's value.** The control is the flat
+average of 109 members, most of them weak; nearly all of that gap is ordinary member selection, which
+the greedy scan already performs. A matched control has to hold selection fixed and vary only the
+per-label part. Put every honest reading of this same pool on one line:
+
+| strategy, all split-half over the same 909 studies | score |
+| --- | --- |
+| routed top-9 over 109 members | 0.8761 |
+| honest greedy seats over 109 members (peak at 21) | 0.8748 |
+| flat rank-average of the curated 8 | 0.8766 |
+
+Routing beats mean-greedy by **+0.0013** and loses to a flat average of eight hand-picked members by
+**−0.0005**. Three strategies that share nothing but the pool — pick by label, pick by mean, pick by
+hand and then do not pick at all — land inside 0.0018 of one another.
+
+That is the result, and it is larger than any of its rows. **The pool has an aggregation ceiling near
+0.876 and the method of combining does not matter.** The seat curve said the members carry the same
+information in the mean. The per-label curve said they carry it in the same places. This says no
+combining rule finds anything the others missed, which is the strongest form the claim can take: the
+ceiling is a property of the members, not of the arithmetic applied to them.
+
+Everything downstream follows. There is no aggregation work left worth a slot, and the next number can
+only come from a member of a different KIND. That is exactly what is on the card.

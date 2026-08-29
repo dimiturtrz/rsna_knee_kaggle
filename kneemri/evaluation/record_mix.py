@@ -313,8 +313,13 @@ class MixReading:
     pool: Pool
     roster: list[Path]
 
-    def lines(self, curve: MemberCurve, seats: str | None, *, paired: bool, labels: bool) -> list[str]:
+    def lines(self, curve: MemberCurve, seats: str | None, *, paired: bool, labels: bool, routing: bool) -> list[str]:
         """The reading this invocation asked for, as report lines."""
+        if routing:
+            # FIRST, because it is the one reading that survives a large pool. The default reading
+            # contains it, but the default also enumerates every subset, so on more than a dozen members
+            # the routing curve was unreachable through the only door it had.
+            return curve.routing(self.pool)
         if labels:
             # BEFORE the roster branch, because a label reading of the SHIPPED mix is the common case
             # and it is named with the same `--roster` the seat scan is named with. A roster plus
@@ -367,6 +372,14 @@ def main() -> None:
         help="the mix's own per-label AUCs, worst first, each priced in units of the final score",
     )
     command.parser.add_argument(
+        "--routing",
+        action="store_true",
+        help="per-label member selection at every k — whether any member is a SPECIALIST rather than "
+        "generally good. The default reading already prints this curve, but it enumerates every subset "
+        "first, so this flag is the only way to ask a pool of more than a dozen. Read the split-half "
+        "column against its own last row, which is the flat rank-average under the same estimator.",
+    )
+    command.parser.add_argument(
         "--vote",
         choices=tuple(VOTE_RULES),
         default="rank",
@@ -405,7 +418,9 @@ def main() -> None:
         logger.info(line)
     curve = MemberCurve(scores, arguments.combine_seed)
     reading = MixReading(mixed, roster)
-    for line in reading.lines(curve, arguments.seats, paired=arguments.paired, labels=arguments.labels):
+    for line in reading.lines(
+        curve, arguments.seats, paired=arguments.paired, labels=arguments.labels, routing=arguments.routing
+    ):
         logger.info(line)
 
 

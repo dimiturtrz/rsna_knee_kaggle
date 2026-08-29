@@ -116,6 +116,20 @@ def test_oracle():
     assert ceiling["average"] >= 0.0
 
 
+def test_routing():
+    """One row per k, the last one naming itself the flat rank-average this reading is measured against."""
+    generator = np.random.default_rng(29)
+    truth = _truth()
+    signal = np.repeat((truth[:, 0].astype(np.float64) * 3.0)[:, None], len(TARGETS), axis=1)
+    members = [signal + generator.normal(0.0, 1.0, signal.shape) for _ in range(3)]
+
+    lines = MemberCurve(LabelScores()).routing(Pool(_names(members), members, truth))
+
+    assert len(lines) == len(members), "one row per k, and k runs to every member"
+    assert lines[0].startswith("top- 1 per label:")
+    assert "(= the flat rank-average)" in lines[-1], "the matched control is the last row, one estimator"
+
+
 def test_labels():
     """The mix's weakest label leads, and its headroom line prices exactly 1/12 of the lift it names."""
     generator = np.random.default_rng(23)

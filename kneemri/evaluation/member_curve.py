@@ -398,6 +398,20 @@ class MemberCurve:
             lines.append(f"best {size}: {score:.4f}  {pool.named(subset)}")
         return lines
 
+    def routing(self, pool: Pool) -> list[str]:
+        """Per-label member selection at every k, split-half beside in-sample — routing, priced honestly.
+
+        A method rather than the inline call `logged` used to make, because `logged` ALSO enumerates every
+        subset and that is 2**n: past a dozen members the only reading of this pool that can run at all is
+        this one, and it was reachable only through the reading that cannot. The routing question gets
+        SHARPER with pool size — one specialist among a hundred members is exactly what a mean-based seat
+        scan hides — so the reading and the enumeration had to come apart.
+
+        Its last row IS the flat rank-average under the same estimator, which is why no separate control
+        run is needed and why the two columns may be subtracted.
+        """
+        return LabelCombine(self.scores).curve(pool.predictions, pool.truth, self.combine_seed)
+
     def labels(self, pool: Pool) -> list[str]:
         """The MIX's own per-label AUCs, worst first, each priced in units of the final score.
 
@@ -558,7 +572,7 @@ class MemberCurve:
         # the answers were available; this says what is left once they are not. Its last row is the flat
         # rank-average under the same split-half estimator, so the two columns are a matched comparison
         # rather than a number beside a differently-measured number.
-        lines += LabelCombine(self.scores).curve(pool.predictions, pool.truth, self.combine_seed)
+        lines += self.routing(pool)
         # THE VOTE ITSELF, last, because every line above it was produced BY the flat rule and this
         # is the one row that asks whether that rule was the right one to produce them with.
         return lines + self.votes(pool)

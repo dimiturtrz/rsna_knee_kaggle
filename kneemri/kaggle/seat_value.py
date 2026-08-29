@@ -168,7 +168,7 @@ class SeatValue:
         )
         return [
             denominator,
-            *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False),
+            *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False, routing=False),
             *MemberDistance(held, rest).report(),
         ]
 

@@ -9541,18 +9541,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
-      "target": "kneemri.evaluation.label_combine.LabelCombine",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
-      "target": "kneemri.evaluation.label_combine.LabelCombine.curve",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
       "target": "kneemri.evaluation.member_curve.MemberCurve.best",
@@ -9574,6 +9562,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
       "target": "kneemri.evaluation.member_curve.MemberCurve.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.logged",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.routing",
       "weight": 1
     },
     {
@@ -9676,6 +9670,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.quality_weighted",
       "target": "kneemri.inference.vote.QualityWeightedRank.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.routing",
+      "target": "kneemri.evaluation.label_combine.LabelCombine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.routing",
+      "target": "kneemri.evaluation.label_combine.LabelCombine.curve",
       "weight": 1
     },
     {
@@ -10810,6 +10816,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.record_mix.MixReading.lines",
       "target": "kneemri.evaluation.member_curve.MemberCurve.marginal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.MixReading.lines",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.routing",
       "weight": 1
     },
     {
@@ -29216,6 +29228,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.routing",
+      "label": "routing",
       "level": "method",
       "parent": "kneemri.evaluation.member_curve.MemberCurve",
       "role": null
