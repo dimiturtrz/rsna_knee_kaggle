@@ -5809,3 +5809,45 @@ same day over 42 members and reached the same conclusion: `LogitAverage` 0.8725 
 weight either. What is new here is only the denominator and the direction of the drift; the finding is
 `knee-xsfc`'s. The ordering fact (77 flat 0.8720 against the greedy's chosen 28 at 0.8753) IS new, because
 it needed the full-pool greedy that did not exist until tonight.
+
+### The named seat order says WHY the thirty bought nothing, and it seats the two worst members in the pool
+
+The honest curve gives counts; `--seats greedy` over the same 111 gives the ORDER, which is what actually
+explains the null:
+
+```
+greedy  1: 0.8634  +calib_dense_hold_s2026
+greedy  2: 0.8709  +merged_span_cf
+greedy  3: 0.8741  +labelwise_dense_s2026
+greedy  4: 0.8748  +blendhold_s2026
+greedy  5: 0.8756  +finding_calib_dense_s2026
+greedy  6: 0.8762  +margin_seat_s2026
+greedy  7: 0.8768  +warm_calib_dense_s2026
+greedy  8: 0.8771  +merged_blend_cf
+greedy  9: 0.8773  +calib_span_s2026
+greedy 10: 0.8775  +mae_matched_s2026
+greedy 11: 0.8776  +focus_mcl_s2026
+greedy 12: 0.8776  +through_dense_s2026
+greedy 13: 0.8777  +contrast_dense_s2026
+greedy 14: 0.8777  +small_batch6_s2026
+```
+
+**`stackfit_s2026` is not in it.** The project's second-best solo at 0.8631 — the member whose
+unshippability was tonight's headline defect — earns no seat in the first fourteen. That is not a
+disappointment, it is the mechanism: the greedy already had `calib_dense_hold` at 0.8634, and `stackfit`
+IS `calib_dense_hold` plus EMA, measured flat when it was run (`knee-orjq`, the FLAT branch fired). A
+member that differs from the incumbent by a lever measured flat has nothing to add to it. The roster bug
+cost us a checkpoint we could not ship; the seat ruler says it would not have been seated. Both are true
+and neither excuses the other — the bug was real, and the thing it hid happened to be a twin.
+
+**The two WORST members in the whole pool are seated tenth and eleventh.** `mae_matched_s2026` scores
+0.6735 solo and `focus_mcl_s2026` scores 0.5332 — near chance on a twelve-label mean — and the greedy
+takes them ahead of every remaining member scoring 0.85-plus. This is the strongest direct evidence the
+project has that **quality is not the seat criterion at the margin**, and it independently vindicates the
+merit-level EXEMPTION written into `comp/members.declines` hours earlier: the instruments packaged below
+the 0.8460 cut are not sentiment, they are seats. A score floor on the roster would have deleted the
+tenth and eleventh best seats in the pool.
+
+**What it does NOT license.** Two seats out of eleven is not a rule, the run is in-sample (the honest
+curve is the one that may be quoted), and the same seats are inside the plateau where +0.0024 buys
+twenty-five members. It licenses keeping the exemption, not building for it.
