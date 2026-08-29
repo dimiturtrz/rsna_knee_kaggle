@@ -834,3 +834,47 @@ instrument built one tick after the finding itself. The general lesson is the on
 now carries: removing a confound's LEVEL is not removing the confound, and a decomposition that reports
 how much quality it stripped can still be reporting quality afterwards. Any future reading of a resolved
 axis quotes `maturity` beside it or means nothing.
+
+## raddino landed: the most distant member the pool has ever held, and it adds nothing (2026-08-29, 17:20Z)
+
+The pre-registration above survived its own section's retraction because it was a prediction about WHERE
+raddino would land, and the axis still places members whatever the axis turns out to mean. It said the
+bulk. It got the bulk.
+
+```
+12/12 epochs, best 0.8155 at epoch 7   (converged; convergence_check does not flag it)
+seat value against honest12:  -0.0007,  0 of 1 seats clearing +0.0015
+distance:                     nearest 0.7987, mean 0.7502
+competence axis:              31 of 110 members below zero (was 30 of 109) — bulk, neither tail
+```
+
+The champion `raptorseat_v1` cannot price a candidate at all: five of its six members carry `fold -1`
+and have seen every holdout study, and `seat_value` refuses below two scoreable members rather than
+quoting a contaminated one. `honest12` (0.937, twelve scoreable members) is the substitute.
+
+**The verdict and the mechanism disagree, and that is the finding.** The ladder said <= +0.001 confirms
+the head-monoculture reading — that members are interchangeable because the head does the work and the
+encoder is a formality. It reads -0.0007, so the VERDICT lands where the monoculture branch predicted.
+But the distance column refutes the reason. A seated member's nearest neighbour in this roster runs
+0.8660 to 0.9014; raddino's is **0.7987**. It is not a twin of anything, by a margin nothing else in the
+pool comes close to. A genuinely foreign encoder, pretrained on medical images, producing a genuinely
+different ordering of the studies — and it is worth nothing at the margin.
+
+So the members are not interchangeable because the head flattens them. They are interchangeable-in-VALUE
+because the pool is a quality ladder, which is what the section above landed on from an entirely
+different direction. raddino sits 0.045 below the roster, and 0.045 of quality is more than any amount
+of distance can pay for.
+
+**This does not contradict the repo's measured "diversity beats member quality"** (six board entries
+built to isolate it). That was measured among members of comparable quality; a 0.045 gap is far outside
+the range it was fitted over. The two readings compose into one rule rather than colliding: *among
+members of comparable quality, prefer the distant one; below that band, distance buys nothing.*
+
+**And it is not undertrained.** The curve peaks at epoch 7 (0.8155) and falls through the `one_cycle`
+anneal to 0.8124 — the shape of overfitting, not of a budget bound. More epochs at this recipe buy
+nothing, so the cheap follow-up does not exist. A raddino at competitive quality would be a strong seat
+on that distance alone, but closing 0.045 is a recipe question, not a knob, and it is not priced yet.
+
+One cost worth recording: epoch 2 took **3183s** against a 912s steady state, a 3.5x stall from the CPU
+scan running beside it. That is `knee-8hau`'s unfixed half — `--device cpu` keeps a tool off the card
+but not out of the trainer's dataloader — and it cost this arm about 38 minutes of wall-clock.
