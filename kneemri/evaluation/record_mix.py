@@ -174,6 +174,12 @@ class RecordMix:
         is the wrong-denominator failure this file already refuses twice.
         """
         readings = self.readings()
+        if not readings:
+            message = (
+                f"none of the {len(self.records)} named records carries a holdout array — a whole-corpus "
+                f"member (--fold -1) writes no .holdout.npz, so it has nothing to be narrowed against"
+            )
+            raise ValueError(message)
         kept, off_split = self._on_widest_split(readings)
         self._readings = kept
         kept, off_ruler = self._largest_ruler_group(kept)

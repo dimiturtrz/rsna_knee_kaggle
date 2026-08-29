@@ -195,6 +195,21 @@ def test_narrow(tmp_path: Path):
     assert [name for name, _ in mix.readings()] == ["a.pt", "b.pt", "c.pt"], "the majority ruler is the pool"
 
 
+def test_narrow_refuses_a_pool_where_nothing_carries_a_record(tmp_path: Path):
+    """A pool of whole-corpus members is refused by name, not crashed on inside the widest-split read.
+
+    `--fold -1` writes no `.holdout.npz`, so every reading is skipped and `_on_widest_split` took
+    `max()` over an empty list. That reads as a tool defect rather than as the true answer, which is
+    that a whole-corpus member has nothing to be narrowed against.
+    """
+    for name in ("wc_one.pt", "wc_two.pt"):
+        (tmp_path / name).write_bytes(b"")
+    mix = RecordMix(sorted(tmp_path.glob("*.pt")))
+
+    with pytest.raises(ValueError, match="carries a holdout array"):
+        mix.narrow()
+
+
 def test_narrow_keeps_the_majority_even_when_the_foreign_ruler_sorts_first(tmp_path: Path):
     """Two agreeing members beat one that sorts ahead of them — the failure the hand bisect walked into."""
     studies = [f"s{index}" for index in range(20)]
