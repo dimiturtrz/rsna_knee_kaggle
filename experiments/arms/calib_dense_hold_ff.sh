@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# calib_dense_hold_ff.sh — the strongest single read-A seat, refit at whole-corpus fit.
+#
+# bead: knee-y44t
+#
+# WHY THIS ONE FIRST. The one-decode greedy walk (`logs/decode_entry_1.log`, 2026-08-29) opens on
+# `calib_dense_hold_s2026` at 0.8634 — it is the best member read A owns, and every later seat in that
+# walk is priced as a marginal contribution ON TOP of it. If exactly one member of the lane gets refit,
+# it is the one the walk chose first.
+#
+# WHY A REFIT AND NOT A SEAT. `greedy7_v1` already spent a slot on the cheap route: seven fold-0 members,
+# 0.8712 offline, **0.933** on the board, against `trioseat_v1`'s three whole-corpus seats at **0.938**.
+# Bolting a fold-0 member onto an all-`_cf` roster dilutes it faster than the seat count repays, so the
+# read-A seat term past three is only reachable through refits. That costs card time and no slot.
+#
+# ONE MOVED FLAG against `calib_dense_hold_s2026`: the fit. `--fold -1 --ema` in place of fold 0, which
+# is the same swap `small_batch6_ff` and `through_dense_cf` already carry. Slices, band, rate, pooling,
+# epochs, `--calibrated-targets` and `--hold-annotations` all held.
+#
+# THIS ARM IS A HEDGE AND SAYS SO. `fourseat_v1` (submitted 2026-08-29) is the measurement that decides
+# whether the seat term past three is real, and it was still scoring when this was armed. Forty-five
+# minutes of otherwise-idle card against a member that is useful to ANY whole-corpus read-A roster is
+# the trade taken here; if `fourseat_v1` lands under 0.936 the remaining refits are not run and this
+# checkpoint is simply an unseated member, not a wasted slot.
+#
+# NO HOLDOUT NUMBER WILL EXIST FOR IT, BY CONSTRUCTION. A `--fold -1` member has seen every holdout
+# study, so `RecordMix` excludes it and neither `seat_value` nor `decode_entry` can price it. That is
+# not a defect of this arm — it is the whole reason the lane is gated on a board reading instead of an
+# offline one. Do not enter a holdout score for this member in the ledger; there is none to enter.
+#
+# HARNESS CHECK. The printed recipe must read `"fold": "-1"`, `"ema": "True"`, `"slices": "20"`,
+# band [0.1, 0.9], `calibrated_targets true` and `hold_annotations true`. Three runs have entered this
+# ledger as facts about an architecture when they were facts about a flag that never landed.
+#
+# VRAM. 20 slices at 336 px reserve 28.26 GB by DeviceBudget's own derivation — the card fits it with
+# no room for a second job. Check `card_check`.
+#
+# deliberate: --fold
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+FIT="--fold -1 --ema"
+
+run_train calib_dense_hold_ff \
+  $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --labels "$LABELS" --out "$PROCESSED/calib_dense_hold_ff.pt"
