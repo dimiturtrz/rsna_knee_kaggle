@@ -5481,6 +5481,41 @@ Pre-registered before any slot is spent: the 16-seat entry should read **0.945-0
 transfers, and **0.940-0.943** if the board's saturation reading extends past 11 seats after all. Those two
 branches are separated by more than one board tick, which is why the entry is worth a slot at all.
 
+### Five of the sixteen best seats were not in the roster at all — 2026-08-29 21:05Z
+
+Building the 16-seat entry meant checking each seat against `comp/members.roster`, and five of the sixteen
+were absent — `merged_span_cf` (seat 2, written up above) plus four more at seats 3, 7, 11 and 13. All four
+are fold 0, all ride the CHAMPION'S OWN DECODE, so seating any of them costs no extra read, and all four
+recipes came out of their own `metrics.jsonl` in one call.
+
+| member | solo | seat | what it is |
+|---|---|---|---|
+| `labelwise_dense_s2026` | **0.8613** | 3 | `--slice-pooling labelwise`; **0 ledger mentions before now** |
+| `warm_calib_dense_s2026` | 0.8562 | 7 | `--encoder-weights encoders/calib_dense_hold.enc.pt` — a warm restart |
+| `focus_mcl_s2026` | 0.5332 | 11 | the `--focus-label MCL` arm refuted earlier the same day |
+| `contrast_dense_s2026` | 0.8547 | 13 | `--contrast-weight 1.0` |
+
+**`labelwise_dense_s2026` is the third-best solo member the project owns** — behind only
+`calib_dense_hold_s2026` (0.8634) and `merged_span_cf` (0.8618, itself unrostered until an hour ago) — and
+it pools slices LABELWISE, which nothing else in the roster does; every other member pools with `max`. That
+is quality and an unshared mechanism in one checkpoint, and it had zero mentions anywhere in this file.
+
+**`warm_calib_dense_s2026` is a warm restart from a fitted encoder.** `champion.json` names that lane as the
+one "0 of 131 arms have ever used" and sends card hours at it (knee-wbwq). One arm had already used it. The
+checkpoint was on disk, scored, and unrostered.
+
+**`focus_mcl_s2026` takes seat 11 at a solo of 0.5332.** That arm was refuted the same day — it regressed
+its own target label by −0.0576 paired, because eleven of twelve heads carried no gradient. It still beats
+110 other candidates for the eleventh seat. What a vote wants from a late member is disagreement it can
+average away, not a good number, which is the owner's own point about not averaging seven copies of one
+number. A seat is not a solo score, in either direction.
+
+**The pattern, now four for four.** Every audit this evening found a member that existed, was scored, was
+good, and was invisible to the only file that can ship it. Nothing decided to leave any of them out. The gap
+is structural: a run finishing writes a checkpoint and a ledger section, and NOTHING writes the roster. Worth
+a check of its own — a roster that is a strict subset of the scoreable pool minus a documented decline is
+mechanically verifiable, and would have caught all five.
+
 ### `merged_span_cf` — declined as undocumented at 20:37Z, seated at 20:52Z
 
 The roster audit found this checkpoint on disk with zero mentions here and declined it on the rule that an

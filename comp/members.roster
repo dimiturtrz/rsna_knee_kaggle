@@ -484,3 +484,24 @@ merged_span_cf.pt           # 0.8618 solo, converged at epoch 8 of 12. Second-be
 # FOLD 0 DESPITE THE _cf SUFFIX, so unlike every other _cf here it IS scoreable and its holdout number is
 # honest. Band 0.2-0.8 puts it on the SECOND decode group, not the champion's — seating it beside the
 # champion's six costs one extra read.
+
+# Added 2026-08-29 21:05Z, all four found by the SAME audit that seated merged_span_cf: they hold greedy
+# seats 3, 7, 11 and 13 over the 111-member scoreable pool and none of them was in this file. All four are
+# fold 0, all ride the CHAMPION'S OWN DECODE (canonical / 336 px / 20 slices / band 0.1-0.9 / crop 130 mm /
+# centre image / tie first / spacing spread), so seating any of them costs no extra read. Recipes recovered
+# from each run's own metrics.jsonl, which is where a recipe always is.
+labelwise_dense_s2026.pt    # 0.8613 solo, peak epoch 7 of 12. THIRD-BEST SOLO MEMBER IN THE PROJECT.
+# --slice-pooling labelwise, which NOTHING ELSE IN THIS FILE uses — every other member pools slices with
+# max. Quality and a mechanism nobody else has, in one checkpoint. Otherwise the dense recipe:
+# --calibrated-targets --hold-annotations --whole-stack --one-cycle --weight-floor, variant small,
+# unfreeze-last 6, head-lr 1e-3, backbone-lr 4e-5, slot-pooling attend, pool cls_mean.
+warm_calib_dense_s2026.pt   # 0.8562 solo, peak epoch 6 of 12. A WARM RESTART FROM A FITTED ENCODER
+# (--encoder-weights encoders/calib_dense_hold.enc.pt), which champion.json records as the lane "0 of 131
+# arms have ever used" — one arm had, and its checkpoint was sitting unrostered. Same dense recipe otherwise.
+contrast_dense_s2026.pt     # 0.8547 solo, peak epoch 5 of 12. --contrast-weight 1.0 on the dense recipe.
+focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that number.
+# The --focus-label MCL arm: eleven of twelve heads carry no gradient and collapsed toward chance, so the
+# solo score is near-worthless and the member REGRESSED its own target label (-0.0576 paired). It still
+# takes greedy seat 11 over 111 candidates, because what a vote wants from an eleventh member is
+# disagreement it can average away, not a good number. Do not read 0.5332 as a reason to drop it; a seat is
+# not a solo score. See experiments/README.md for the paired refutation and for this seat.
