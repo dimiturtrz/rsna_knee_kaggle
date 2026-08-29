@@ -208,9 +208,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   or a transfer constant — the check that guards the RECORD. `comp/board.jsonl` held 34 of the competition's 58
   submissions until 2026-08-25: fifteen scored all-ours entries were absent, `basedense_v1` and `votefit_v1`
   (the entry `comp/champion.json` now pins) among them, and the compression
-  constant `board_transfer` fits from that file read +1.82 against a complete set's +1.72. It joins on the Kaggle
+  constant `board_transfer` fits from that file read +1.82 against a complete set's +1.55. It joins on the Kaggle
   submission REF, never a name — asking Kaggle for the list spends no slot — so every submission carries a row,
-  the ones this file will not price included (`scope: excluded` plus the reason). A recipe is smoked with `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. `--smoke` takes the DIRECTORY the throwaway checkpoints go to and `--only` takes the arm; `--studies`/`--epochs` are `train`'s flags, not this tool's, and passing the arm path to `--smoke` costs a run that dies on `FileExistsError` against the arm script itself.
+  the ones this file will not price included (`scope: excluded` plus the reason). A row's `offline` must be a number
+  read on studies the entry did NOT train on: on 2026-08-29 `raptor_solo`'s 0.8938 was voided because
+  `foreign_overlap` shows it was 98.6% in-sample, and that one cell was carrying the whole "compression goes
+  negative at the top" reading plus eleven of fifteen apparent ruler inversions.
+ A recipe is smoked with `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. `--smoke` takes the DIRECTORY the throwaway checkpoints go to and `--only` takes the arm; `--studies`/`--epochs` are `train`'s flags, not this tool's, and passing the arm path to `--smoke` costs a run that dies on `FileExistsError` against the arm script itself.
   A recipe on a reading axis NOBODY HAS DECODED cannot be smoked until something writes the truncated cache, and
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct
   filename (`_first60`) so it can never overwrite a full array. Reach for that before hand-building one: on 2026-08-19

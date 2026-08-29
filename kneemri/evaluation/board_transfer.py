@@ -20,16 +20,31 @@ pairwise ratio is a confounded read and only the DISTRIBUTION is worth quoting; 
 the ruler and the board disagreed, not that the ruler is wrong about the axis its entry was built on.
 
 ONE MEDIAN IS THE WRONG SHAPE FOR THIS, and the report says so in its own output. The ratio is not
-constant across the record: re-read over only the strongest entries it FALLS, from +1.72 over
-everything to under +1.00 among the entries at the top. Whatever that is - a real saturation, or the
-attenuation you get from dividing a board gap by an offline gap barely wider than the offline noise -
-it decides how far a target is. Pricing an arm against today's champion at the whole-record median
-reports what a holdout point USED to be worth, and the two differ by about a factor of two, which is
-the difference between a goal one arm away and a goal nothing on the queue can reach. So `regimes`
-re-reads the same estimator at floors the record itself supplies, and `report` prints the fall rather
-than a number a reader could quote alone. For PRICING, the local cell is the right one even if the
-saturation is only attenuation: an arm is priced from an OBSERVED offline reading, which carries
-exactly the noise that attenuates the estimate.
+constant across the record: re-read over only the strongest entries it FALLS, from +1.55 over
+everything to +0.99 [+0.77, +1.18] among the entries at the top. Whatever that is - a real saturation,
+or the attenuation you get from dividing a board gap by an offline gap barely wider than the offline
+noise - it decides how far a target is. Pricing an arm against today's champion at the whole-record
+median reports what a holdout point USED to be worth, and the two differ by about a third. So
+`regimes` re-reads the same estimator at floors the record itself supplies, and `report` prints the
+fall rather than a number a reader could quote alone. For PRICING, the local cell is the right one
+even if the saturation is only attenuation: an arm is priced from an OBSERVED offline reading, which
+carries exactly the noise that attenuates the estimate.
+
+THE NUMBERS ABOVE MOVED ON 2026-08-29 AND THE OLD ONES WERE ONE CONTAMINATED ROW. `raptor_solo` sat on
+the ensemble scope carrying offline 0.8938 against board 0.923, and `kneemri.evaluation.foreign_overlap`
+had already shown 896 of the 909 studies that number was read on to be inside raptor's published
+training row set: 98.6% in-sample. Voiding that one offline (the board number is honest and stays) is
+the whole difference between these two readings:
+
+    with it     +1.30 whole-record, top regime -0.41 [-0.44, +0.70], 15/149 resolved pairs inverted
+    without it  +1.55 whole-record, top regime +0.99 [+0.77, +1.18],  0/127 resolved pairs inverted
+
+So the "the ratio goes NEGATIVE at the top" reading was an artefact - eleven of those fifteen
+inversions were that single entry's in-sample offline being disagreed with by an honest board - and
+the remaining four are all UNDER the 0.0053 floor, which is to say the holdout never expressed a
+preference for the board to reverse. **This ruler has never once mis-ordered a pair it resolved.** The
+lesson is not about raptor: a guard whose default is guilt only guards what actually calls it, and
+nothing in this fitter asked whether an offline number was honest before dividing by it.
 """
 
 import json
