@@ -5446,6 +5446,57 @@ its own target label. It is not usable as a SELECTION CRITERION. The honest curv
 against: **0.8753 at 28 seats**, not the 0.8777 the in-sample peak advertises, and the +0.0032 gap is the
 size of every seat-count claim this ledger has made off a greedy curve.
 
+### The honest curve DID transfer — the "sign flip" was a fold-0 offline paired with an `_ff` board score — 2026-08-29 21:45Z
+
+Half a retraction of the retraction below, and the half that dies is the general claim, not the decision.
+
+`kneemri.kaggle.entry_offline` filled the ten board rows that could honestly carry an offline number
+(knee-awxb). With those in, the fold-0 family is resolvable end to end for the first time:
+
+| entry | offline | board | seats |
+|---|---|---|---|
+| **honest12** | **0.8751** | **0.937** | 12 |
+| peak8_v1 | 0.8731 | 0.932 | 8 |
+| greedy7_v1 | 0.8712 | 0.933 | 7 |
+| accumseat_v1 | 0.8695 | 0.933 | 7 |
+| sevenplane_v1 | 0.8695 | 0.932 | 7 |
+| sixstrong_v1 | 0.8692 | 0.930 | 6 |
+| basedense_v1 | 0.8690 | 0.931 | 5 |
+
+**`honest12` is the top of its own family on BOTH rulers.** The instrument picked the best-scoring entry
+of every entry it can be compared with, and `board_transfer` now reports **0 inversions in 233 resolved
+pairs**. "Its rankings do not transfer" is refuted by the record.
+
+**Where the sign flip came from.** It was computed against the champion's **0.943** — an entry built from
+`_ff` members fitted at `--fold -1`, whose offline is not merely missing but unmeasurable, and which
+`entry_offline` now marks `offline_scope: in-sample` for exactly that reason. Pairing a fold-0 offline
+against an `_ff` board score is the same contamination class that voided `raptor_solo`'s 0.8938, one level
+up: the two entries differ in TRAINING DATA DOSE, not in seating, and the difference was charged to the
+seating.
+
+**What still stands, and it is the part that governed the decision.** A fold-0 seating cannot beat an `_ff`
+champion — 0.937 against 0.943 is the measured dose gap, and the retraction below was still right to
+cancel a 16-seat fold-0 entry priced at 0.945+. What changes is WHY: not "the instrument is broken" but
+"the instrument is measured in a family that tops out at 0.937". The two readings differ in what they
+license next, which is why this is worth correcting rather than leaving.
+
+**What it opens (`knee-l5dx`).** The honest seating and the full-fit dose are separable terms that
+have never been combined: seats chosen by the offline greedy, then served from `_ff` refits of those same
+recipes. The dose term is measured at roughly +0.003 (`finalfit_v1` 0.934 → `allfit_v1` 0.937) and it
+saturates; the seating term is measured at +0.004 to +0.006 inside the fold-0 family. Both are below the
+1.5% bar on their own and the sum is not obviously above the champion, so this is a candidate, not a plan
+— and it costs a training run per unrefit member, which is the expensive half.
+
+**And it closed the same hour, for free, on the bead's own pre-test.** `record_mix --seats honest --vote
+logit` restricted to the seven roster recipes that HAVE an `_ff` twin (`base_dense`, `calib_dense_hold`,
+`calib_span`, `grade_ladder`, `lr4e-5_ws`, `small_batch6`, `through_dense`) peaks at **0.8705 on seven
+members** — against unrestricted `honest12`'s 0.8751, that is **−0.0046**, half again the entire dose term,
+given up before the dose term is paid. Under the +0.97 top-regime slope 0.8705 predicts board ~0.932–0.933
+(it sits between `basedense_v1` 0.8690/0.931 and `peak8_v1` 0.8731/0.932); adding the saturating dose lands
+~0.936 against a pinned 0.943. **The seating term lives in the five members with NO `_ff` twin**, so buying
+it costs five training runs to land below what is already shipped. Closed without arming anything — the
+cheap pre-test was worth more than the run it refused.
+
 ### RETRACTED BEFORE IT COST A SLOT: the honest curve is the instrument `honest12` already refuted — 2026-08-29 21:12Z
 
 The section below reopened seat count off a `record_mix --seats honest --vote logit` curve and priced a

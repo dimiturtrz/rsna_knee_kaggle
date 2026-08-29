@@ -48,10 +48,6 @@ flat". Every raptor arm is `--fold -1`, so none of them has an offline quality n
 already carries the same limit for the count dimension.
 """
 
-FOREIGN_WEIGHT = 1.0 / 3.0
-"""The foreign side's share of the rank blend. `raptorseat_v1` shipped 1/7 = 0.1429 as a convention about
-SEAT COUNT; this is a quality-weighted share of two SYSTEMS, named before the number and never fitted."""
-
 # >>> KERNEL-BOOTSTRAP
 import logging
 import os
@@ -134,6 +130,15 @@ def boot() -> Path:
 
 
 # <<< KERNEL-BOOTSTRAP
+
+FOREIGN_WEIGHT = 1.0 / 3.0
+"""The foreign side's share of the rank blend. `raptorseat_v1` shipped 1/7 = 0.1429 as a convention about
+SEAT COUNT; this is a quality-weighted share of two SYSTEMS, named before the number and never fitted.
+
+Below the bootstrap block rather than above it: the block opens with imports, and a constant in front of
+them makes every one of them E402. The kernel that RAN carried it above and the ruff gate caught it after
+the fact — the number is identical either way.
+"""
 
 
 def main() -> None:

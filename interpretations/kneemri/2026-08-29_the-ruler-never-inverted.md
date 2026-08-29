@@ -75,3 +75,36 @@ A guard only guards what calls it. `foreign_overlap` was written, tested, docume
 and the contaminated number went on being divided by for a day because the fitter never asked. The
 cheap structural fix is not another detector; it is that a row's `offline` must be a number read on
 studies the entry did not train on, asserted where the row is written.
+
+## The cheap half, filled — 2026-08-29 21:38Z
+
+`kneemri.kaggle.entry_offline` surveys every board row whose `offline` is null and either fills it or
+records WHY it stays null. Of 34 such rows, **10 could be filled honestly** and 24 could not: 20 hold an
+`_ff`/`final_ws_e12` member fitted at `--fold -1`, 2 hold the foreign `raptor_v4_swa` whose published
+training rows cover our holdout, and 2 hold `_cf` merges that wrote no holdout record. Each of those 24
+now carries an `offline_scope` field naming its reason, so the null is a recorded decision rather than an
+absence — the same move `board_check` made with `scope: excluded`.
+
+The ten are `ratepair_v1`, `solotop_v1`, `rateviews_v1`, `topviews_v1`, `sixstrong_v1`, `sixfresh_v1`,
+`sevengrade_v1`, `sixfresh_v2`, `sevenplane_v1`, `accumseat_v1` — board 0.921 to 0.933, scored under
+`RankAverage` because every one of them shipped before `kneemri-vote` served `LogitAverage`.
+
+Re-fit of `board_transfer` on the filled record:
+
+| | before | after |
+|---|---|---|
+| whole record | +1.55 | +1.25 |
+| at or above 0.8668 | +0.99 [+0.77, +1.18], **3 pairs** | **+0.97 [+0.94, +1.11], 15 pairs** |
+| at or above 0.8691 | — | +0.89 [+0.70, +1.19], 5 pairs |
+| resolved pairs inverted | 0/127 | **0/233** |
+
+**The reading that changes is the CONFIDENCE, not the constant.** The top-regime slope moved 0.02 — well
+inside its own interval — while the number of pairs carrying it went from three to fifteen and the
+interval narrowed from 0.41 wide to 0.17. The premise every slot decision is priced against ("a holdout
+point near the top is worth about a board point") was, until this pass, a three-point fit; it is now a
+fifteen-point one saying the same thing. That is the whole value: nothing was learned about the board,
+and a great deal was learned about how much to trust what we already believed.
+
+The unmeasurable half is unchanged and now says so in the file itself: compression above board 0.937
+stays unmeasured, because every entry up there is built from members that have seen the holdout. Reaching
+it still needs a near-champion entry built entirely from fold-0 members — a slot and an arm.
