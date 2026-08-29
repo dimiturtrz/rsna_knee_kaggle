@@ -5728,3 +5728,43 @@ they decided, which is the same defect one file over.
 **What this does NOT do.** It does not push the package. Thirty new roster lines mean a dataset push
 before any of them can be mounted — a separate, deliberate step. `knee-0dtv` was about the definition,
 and the definition is now enforced.
+
+### The 30 newly-shippable members buy +0.0002, and the honest curve is flat from THREE seats
+
+Same evening, immediately after the roster fix, because the fix is what made the question askable: the
+honest greedy had never once been run over the whole pool. `record_mix --largest-pool --vote logit
+--seats honest` over all 200 checkpoints on disk — 111 survive the split-and-label-table narrowing
+(the eleven smoke runs plus `confident224_s2026` drop out as a group, named in the log) — reads
+
+```
+   1 members: held-out 0.8624   in-sample 0.8634   bias +0.0010
+   3 members: held-out 0.8729   in-sample 0.8741   bias +0.0012
+  12 members: held-out 0.8743   in-sample 0.8776   bias +0.0034
+  20 members: held-out 0.8750   in-sample 0.8773   bias +0.0023
+best honest count 28 at 0.8753, against the in-sample peak 0.8777 at 13
+```
+
+**Against the previous unrestricted `honest12` at 0.8751 that is +0.0002.** Thirty members that could
+not take a seat in any entry ever shipped — `stackfit_s2026` 0.8631, the project's second-best solo,
+among them — were added to the pool, and the honest curve did not move. The member-count axis is
+saturated: the pool already spanned whatever these thirty span.
+
+**Read the shape, not just the peak.** Three seats reach 0.8729. The next TWENTY-FIVE buy +0.0024 in
+total, and every step of it is inside the bias term the same rows report. The in-sample peak sits at 13
+and the honest peak at 28, which is the estimator wandering on a flat surface, not a real optimum at
+either count. A "best count 28" that is +0.0010 over count 8 is a coordinate on a plateau.
+
+**Two consequences, and they point opposite ways.**
+
+For SCORE: this closes "add more members of the kind we already build" as a lever, on our own honest
+ruler and at full pool size. It was already narrowed by the 23% quality pass-through; it is now closed
+by saturation, which is a stronger statement — pass-through says gains arrive small, saturation says
+there are no gains left to pass through. What stays open is a genuinely different DECODE or CORPUS
+(`knee-nj4l`, `knee-ombx`), which is exactly what a saturated pool of one architecture predicts.
+
+For EFFICIENCY: three seats deliver 99.7% of what twenty-eight deliver. That is the strongest support
+the efficiency lane has, and it was bought for free by a run that was aimed at score.
+
+**A caveat the number carries and the plateau does not remove.** This is offline on 909 fold-0 studies,
+and it is a statement about SEATING, not about weighting: the greedy seats members it then averages
+under one rule. A weighted fit over the same pool is a different question and this does not answer it.
