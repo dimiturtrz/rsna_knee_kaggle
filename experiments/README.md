@@ -5446,7 +5446,45 @@ its own target label. It is not usable as a SELECTION CRITERION. The honest curv
 against: **0.8753 at 28 seats**, not the 0.8777 the in-sample peak advertises, and the +0.0032 gap is the
 size of every seat-count claim this ledger has made off a greedy curve.
 
+### RETRACTED BEFORE IT COST A SLOT: the honest curve is the instrument `honest12` already refuted — 2026-08-29 21:12Z
+
+The section below reopened seat count off a `record_mix --seats honest --vote logit` curve and priced a
+16-seat entry at +0.0044 board. **It is the same instrument that has already been on the board and lost.**
+
+`honest12` (ref 55817896, 2026-08-27, kit `fec94e7`) shipped the peak of that same curve — twelve seats,
+offline **0.8751**, board **0.937**. Against the champion's 0.943 that is **−0.006**, while its own holdout
+said **+0.0050**. Not a compression: a SIGN FLIP. Its board row states the closure in its own words —
+*"offline-greedy seat selection as an instrument … has now picked a seating that LOSES on the board while
+gaining on its own holdout, so its rankings do not transfer and no further slot should be spent on one."*
+
+**It is the same tool, the same flags and nearly the same number.** honest12 peaked at 12 / 0.8751 over 89
+records; this window's run peaked at 28 / 0.8753 over 111, with 16 reading 0.8746. Ten of honest12's twelve
+recipes are in the sixteen. The 16-seat set is honest12 plus six more seats drawn by the same greedy.
+
+So the pricing below is wrong in the DIRECTION, not the magnitude: the honest curve's transfer coefficient
+has one measured value, and it is **negative**. Pre-registered branches (0.945–0.950 / 0.940–0.943) both
+omitted the only branch with evidence behind it, ~0.937.
+
+**What I did wrong, since the rule that would have caught this is written in `CLAUDE.md`:** I read
+`champion.json`'s saturation principle (six seatings, 6–11 seats, ~0.941) and treated the honest peak as
+outside its range — without reading `comp/board.jsonl`, where a TWELVE-seat entry off this exact curve sits
+with a score and a written verdict. The prose I checked was two days stale about the tool; the record was
+not. `board_check --live` guards that file precisely so it can be read instead of the prose, and I read the
+prose.
+
+**What survives.** The six members this hunt surfaced are real and now rostered (`merged_span_cf` 0.8618,
+`labelwise_dense_s2026` 0.8613, `warm_calib_dense_s2026` 0.8562, `contrast_dense_s2026` 0.8547,
+`focus_mcl_s2026`, `calib_dense_hold_ff`) — that work is kept, and the roster-drift bug it exposed
+(`knee-0dtv`) is real. What dies is the SEATING, not the members. honest12's own verdict points where:
+*"the members themselves … remain unpriced individually"*, and `warm_calib_dense_s2026` is exactly the
+warm-restart lane (`knee-wbwq`) that row sent the next slot to.
+
+**The slot is unspent.** One spendable, one held for the owner's go, UTC day not yet rolled.
+
 ### The honest curve reopens seat count, and 16 seats dominate 28 — 2026-08-29 20:55Z
+
+*(SUPERSEDED — see the retraction immediately above. Kept because the decode-cost reading and the
+compression re-derivation in it are correct and reusable.)*
 
 The honest peak is **0.8753 at 28 seats** against the shipped champion's five-twin shadow at 0.8701:
 **+0.0052**, the first offline delta in days at the 0.0053 floor rather than a tenth of it, and it comes
