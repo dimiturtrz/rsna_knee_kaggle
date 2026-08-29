@@ -795,3 +795,42 @@ It also sharpens the prediction for `raddino_dense` before it lands, which is th
 down first: raddino is a whole-stack dense member on the majority table, so the bulk is where it should
 land. A bulk position at a good solo score is the head-monoculture reading. A position past +0.10 would
 make it the first member at the focal end and would be worth more than its mean AUC.
+
+## The trade is mostly the fitting gradient — this retracts both sections above (2026-08-29, later still)
+
+Widening the tails to fifteen members a side put two names in the diffuse end that do not belong to a
+mechanism story: `lr2e-4_ws` is a learning-rate knob and `quarter_data` is a data fraction. Both are
+plausibly members that simply learned less. That is a confound with a mechanism of its own — Synovitis
+and Effusion are high-prevalence, large-signal findings while Baker's and Fracture are rare and focal, so
+an under-fitted member is relatively good at the first pair and relatively bad at the second, and lands
+at the diffuse end for a reason that has nothing to do with competence being traded.
+
+`AxisReading.maturity` now correlates each member's axis position with its own holdout mean. Over the
+same 109-member pool:
+
+```
+against member quality: r = +0.90 — CONFOUNDED: position on this axis is
+                        partly the member's own level, not only its trade
+```
+
+**+0.90.** The axis is very largely member quality. The row-centring removed each member's LEVEL, and
+the share it took (81.7%) is exactly what the reading reports; what it could not remove is the SHAPE of
+being under-fitted, and that shape is a direction in this matrix. So the first component is mostly the
+fitting gradient — what improves as a member gets better — read back as pool structure.
+
+**What this retracts.** The two sections above claimed the pool spans one competence TRADE, used it to
+explain the aggregation ceiling as a trade cancelling under averaging, and pre-registered a member at
++0.15 toward the focal end as the target nothing had held. All three go. There is no trade to cancel and
+no counterweight to train: a member at the focal end is just a better member, which was never news, and
+"seat the opposite end" seats a worse one.
+
+**What survives, and it is smaller and duller.** The ceiling still has an explanation and now an ordinary
+one — the pool is one quality ladder with a long weak tail, so averaging it is averaging strong with weak
+and every strategy that does so lands in the same place. The four-strategy tie and the closed vote axis
+are untouched: those were measured on held-out score, not on this decomposition.
+
+**What was worth the hour.** Nothing was submitted, no card was spent, and the finding was killed by an
+instrument built one tick after the finding itself. The general lesson is the one the module docstring
+now carries: removing a confound's LEVEL is not removing the confound, and a decomposition that reports
+how much quality it stripped can still be reporting quality afterwards. Any future reading of a resolved
+axis quotes `maturity` beside it or means nothing.

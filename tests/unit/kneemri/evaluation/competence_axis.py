@@ -105,7 +105,7 @@ def test_strongest():
 
 def test_resolved():
     """The verdict is the share against the bar, and a share BELOW its own null is never a finding."""
-    fields = {"findings": list(TARGETS), "quality": 0.5, "loadings": {}, "spread": {}, "extremes": []}
+    fields = {"findings": list(TARGETS), "quality": 0.5, "loadings": {}, "spread": {}, "extremes": [], "maturity": 0.0}
 
     assert AxisReading(share=0.6, null=0.3, **fields).resolved
     assert not AxisReading(share=0.3, null=0.3, **fields).resolved, "ties go to no-axis, not to the claim"
@@ -120,6 +120,7 @@ def test_lines():
         quality=0.82,
         loadings=dict.fromkeys(TARGETS, 0.2),
         spread=dict.fromkeys(TARGETS, 0.014),
+        maturity=0.9,
         extremes=[(f"m{index}", 0.01 * index) for index in range(MEMBERS)],
     )
 
@@ -130,11 +131,20 @@ def test_lines():
     assert "+0.200 (0.0140)" in text, "a loading is unreadable without its finding's own spread"
     assert "by structure scale" in text
     assert "along the axis" in text, "the ends never print without the distribution that reads them"
+    assert "r = +0.90" in text and "CONFOUNDED" in text, "an axis that tracks member quality says so"
 
 
 def test_balance():
     """A spanned trade and a one-sided tail both have two ends; only the displacement share tells them apart."""
-    fields = {"findings": list(TARGETS), "share": 0.46, "null": 0.28, "quality": 0.82, "loadings": {}, "spread": {}}
+    fields = {
+        "findings": list(TARGETS),
+        "share": 0.46,
+        "null": 0.28,
+        "quality": 0.82,
+        "loadings": {},
+        "spread": {},
+        "maturity": 0.0,
+    }
     spanned = AxisReading(extremes=[("low", -0.10), ("mid", 0.0), ("high", 0.10)], **fields)
     tailed = AxisReading(extremes=[("tail", -0.90), ("bulk", 0.01), ("bulk2", 0.02)], **fields)
 

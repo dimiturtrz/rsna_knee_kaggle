@@ -35,6 +35,22 @@ members — which destroys any coupling between findings while keeping every fin
 as measured. The null's 95th percentile is the bar. Below it, the pool has no shared axis and the flat
 seat search has some other explanation; well above it, the pool has one and the loadings say what it is.
 
+AND THE QUALITY REMOVAL IS WEAKER THAN THIS DOC CLAIMED, which is the module's own first real finding
+against itself (2026-08-29). Row-centring removes each member's LEVEL and the share it took is reported,
+so the paragraph above says quality "is priced rather than hidden". It is priced as a level and it is not
+gone: over the 109-member pool the first component of the residual still correlates with each member's
+own holdout mean at r = +0.90. Better members sit at the focal end (Baker's, Fracture, Medial Meniscus),
+weaker ones at the diffuse end (Synovitis, Effusion) — `quarter_data`, `lr2e-4_ws`, `adapt_null` and
+`dinov3_v3small` among them. The reason is that centring cannot remove the SHAPE of being under-fitted:
+the high-prevalence, large-signal findings come first and the rare focal ones come last, so a member's
+progress along its own training IS a direction in this matrix.
+
+So a resolved axis is not by itself a trade. `AxisReading.maturity` prints that correlation beside the
+verdict for exactly this reason, and above `CONFOUNDED` the ends may not be described by their recipes.
+A pool whose one shared direction is the fitting gradient has a ceiling for an ordinary reason — it is
+one quality ladder — and "seat the opposite end" and "train the counterweight" are both empty there,
+because one end is simply worse.
+
 WHAT IT DOES NOT DO. It does not price a seat, name a member to build, or say a high-share pool cannot
 be improved by permutation — a one-axis pool with members spread WIDELY along it still has a best point.
 It says whether the spread that exists is one-dimensional, which is a statement about what a new member
@@ -75,6 +91,14 @@ RANKED = 12
 MINIMUM_MEMBERS = 3
 """Below this a double-centred matrix has at most one degree of freedom left and every share reads 1.0."""
 
+CONFOUNDED = 0.40
+"""Correlation between axis position and member quality above which the axis is not purely a trade.
+
+Legislated, not fitted: at |r| = 0.4 the member's own overall level explains about a sixth of where it
+sits on the axis, which is enough that the ends cannot be described by their recipes alone. Below it the
+ordering may still contain some maturity and the report says so rather than pretending to a clean split.
+"""
+
 BALANCED = 0.60
 """Share of the axis displacement on ONE side above which the pool is lopsided rather than a spanned trade.
 
@@ -104,6 +128,18 @@ class AxisReading:
     only the second says a seat permutation can never move that finding. Printed beside the loading so
     the two are never confused, which is the mistake this reading exists to be safe against.
     """
+    maturity: float
+    """Correlation between a member's position on the axis and its own overall holdout mean.
+
+    THE CONFOUND THE TRADE HAS TO SURVIVE, and it is not removed by the row-centring. Centring takes each
+    member's LEVEL out; it does not take out the SHAPE of being under-fitted. Synovitis and Effusion are
+    high-prevalence, large-signal findings and Baker's and Fracture are rare and focal, so a member that
+    simply has not learned much yet is relatively good at the first pair and relatively bad at the second
+    — which lands it at the diffuse end of this axis for a reason that has nothing to do with competence
+    being traded. A strongly negative correlation here means the axis is partly a MATURITY ordering
+    wearing a trade's clothes, and "train a focal-end specialist" collapses into "train a better member",
+    which is not news. Near zero, the trade stands on its own.
+    """
     extremes: list[tuple[str, float]]
 
     @property
@@ -132,8 +168,14 @@ class AxisReading:
             f"displacement, reach [{min(values):+.3f}, {max(values):+.3f}] — {verdict}"
         )
 
-    def lines(self) -> list[str]:
-        """The reading, with the bar beside the number so the share is never quoted alone."""
+    def lines(self, ends: int = EXTREMES) -> list[str]:
+        """The reading, with the bar beside the number so the share is never quoted alone.
+
+        `ends` widens the two tails for a reader whose question IS the tail's composition — what KIND of
+        member reaches an end. `EXTREMES` stays the default and stays legislated: it is how many names a
+        report can carry and still be read, not how many the evidence needs. Widening it in the config
+        would make every future reading longer to answer one reading's question.
+        """
         ordered = sorted(self.loadings.items(), key=lambda pair: pair[1])
         profile = ScaleProfile.of(self.loadings)
         verdict = (
@@ -150,10 +192,16 @@ class AxisReading:
             + ", ".join(f"{finding} {loading:+.3f} ({self.spread[finding]:.4f})" for finding, loading in ordered),
             profile.line(),
             "  ends of the axis: "
-            + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[:EXTREMES])
+            + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[:ends])
             + "  ...  "
-            + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[-EXTREMES:]),
+            + ", ".join(f"{name} {value:+.3f}" for name, value in self.extremes[-ends:]),
             self.balance(),
+            f"  against member quality: r = {self.maturity:+.2f} — "
+            + (
+                "CONFOUNDED: position on this axis is partly the member's own level, not only its trade"
+                if abs(self.maturity) >= CONFOUNDED
+                else "the ends are not simply the weak members and the strong ones"
+            ),
         ]
 
 
@@ -206,6 +254,7 @@ class CompetenceAxis:
             quality=quality,
             loadings=dict(zip(findings, loadings.tolist(), strict=True)),
             spread=dict(zip(findings, residual.std(axis=0).tolist(), strict=True)),
+            maturity=float(np.corrcoef(projections, matrix.mean(axis=1))[0, 1]),
             extremes=[(names[index], float(projections[index])) for index in order],
         )
 
@@ -287,6 +336,13 @@ def main() -> None:
         "is there than its own overall level predicts. Name them from a measurement made BEFORE this one; "
         "a subset chosen off the matrix is chosen and scored on the same data.",
     )
+    command.parser.add_argument(
+        "--ends",
+        type=int,
+        default=EXTREMES,
+        help="members named at each end of the axis, for when the tail's COMPOSITION is the question and "
+        "not the axis itself",
+    )
     arguments = command.parsed()
     mix = RecordMix(list(arguments.records))
     if arguments.largest_pool and (narrowed := mix.narrow()):
@@ -300,7 +356,7 @@ def main() -> None:
     )
     axis = CompetenceAxis(LabelScores())
     findings, matrix = axis.table(pool)
-    command.report(axis.read(pool.names, matrix, findings, arguments.resamples).lines())
+    command.report(axis.read(pool.names, matrix, findings, arguments.resamples).lines(arguments.ends))
     if wanted := tuple(arguments.on):
         ranked = axis.strongest(pool.names, matrix, findings, wanted)
         command.report(
