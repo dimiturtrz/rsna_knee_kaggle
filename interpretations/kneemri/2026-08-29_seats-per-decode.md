@@ -251,3 +251,44 @@ None of them was the idea failing, and all three would have produced a confident
    909 shared studies. Mixing it would have produced a seat value against a different ground truth: a
    number that looks fine and means nothing. Dropped from both candidate lists; a rescore makes it a
    candidate again.
+
+## The null holds on the WHOLE pool, not a sample of it — 41 candidates, 2026-08-29 14:12Z
+
+The pricing above ran over the members that were PACKAGED: 24 candidates across three reads. That is a
+sample of a pool, and a null on a sample is a weaker claim than it reads as — the members we happened to
+have pushed to a Kaggle dataset are not a random draw from the members we own.
+
+So the pool was enumerated instead of listed. `roster_reads` over all 198 checkpoints on disk gives the
+complete decode map: **191 members on 13 reads, 14.7 seats per decode**, and read B alone holds 108 of
+them.
+
+| members | resolutions | read |
+|---|---|---|
+| 108 | 224, 336, 448 | canonical / 12sl / 0.2-0.8 / centre image / 130mm / tie first / spread |
+| 59 | 336 | canonical / 20sl / 0.1-0.9 / centre image / 130mm / tie first / spread |
+| 9 | 336 | canonical / 12sl / 0.1-0.9 / centre image / 130mm / tie first / spread |
+| 4 | 336 | canonical / 20sl / 0.2-0.8 / centre image / 130mm / tie first / spread |
+| 11 | mixed | nine further reads, one or two members each |
+
+Of read B's 108, five are smoke runs or other folds (`RecordMix` refuses them by split), one is
+`confident224_s2026` (refused by label table), and the rest carry no holdout record — which leaves **41
+scoreable candidates**, against the eleven the packaged pricing could reach.
+
+**The number is the same to the fourth decimal.** Best move anywhere: `merged_blend_s2026` at **+0.0003**,
+inside the +0.0015 separation floor, and `seat_value` says so itself — *"best is +0.0003, inside +0.0015:
+this ruler cannot tell it from the incumbent"*. Second is `blendlabels_s2026` at +0.0001. Everything else
+is zero or negative, down to −0.0005.
+
+And the pattern the packaged run noticed in passing is now unmissable at 41 candidates: **every single
+one of the 41 has the same best move — swap out `mae_matched_s2026`.** Not one of them is a marginal
+ADDITION to the roster. The only value any member of this read carries is that it is not the dud.
+
+So the lane closes on the widest pool available rather than on a sample: **read B is saturated at the
+seats it holds**, and the free-seat design of `knee-3yq5` buys no score. The COST finding is untouched —
+44 candidate seats on 2 decodes against the champion's 7 on about 4 — and it remains the right lens for
+the efficiency track, where an entry that serves fewer decodes at the same score is cheaper by the metric
+that prize measures.
+
+What this does NOT close is decode DISTANCE, which the section above showed is confounded: every distant
+member we own is also a weak one. `crop80_tissue_full.sh` (bead `knee-17kn`) is queued behind
+`raddino_dense` to ask that one on equal terms.
