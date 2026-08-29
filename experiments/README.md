@@ -5430,3 +5430,22 @@ Linux-only here. A 35B is a different reader, not a bigger version of this one.
 **The gate is the deliverable, not the verdict.** Pre-registering the blank-pair comparison turned an
 open-ended sweep of 4,406 reports into a twenty-minute question with a written branch, and the branch it
 fired was the one that forbids spending the card. That is the instrument paying for itself on first use.
+
+**And the NARROW claim the audit left open is now measured too — on the cells it named.** `knee-07wb` /
+`knee-pju4` survived `confident224` only as a claim about the three labels whose UNK share is extreme, so
+the gate's blank set was checked per label rather than in aggregate:
+
+| finding | blank pairs | the reader speaks on | its accuracy | majority class |
+|---|---|---|---|---|
+| Synovitis | 41 | 11 | 0.727 | 0.659 |
+| Baker's | 29 | 7 | 0.857 | **0.966** |
+| Fracture | 26 | 24 | 0.875 | 0.846 |
+
+Baker's is a straight loss. The other two lead by +0.068 and +0.029 on ELEVEN and twenty-four asserted
+cells — a single flipped cell moves Synovitis by 0.09, which is larger than the lead itself.
+
+**The finding is about the RULER, not the reader.** The image-annotated set is 57 studies, so a per-label
+blank-cell claim is being asked of denominators of 7 to 24. That cannot resolve anything at any reader
+size, and no bigger model changes it. The narrow route therefore does not need a loadable 35B — it needs a
+truth set with more annotated studies, which we do not have. Retire it as unmeasurable here rather than
+leaving it open as if a stronger reader would settle it.
