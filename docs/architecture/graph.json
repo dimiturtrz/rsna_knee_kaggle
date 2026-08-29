@@ -2852,6 +2852,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.decode_entry",
+      "target": "kneemri.kaggle.roster_reads",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.discussion_read",
       "target": "core.cli",
       "weight": 1
@@ -15169,6 +15211,150 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "target": "kneemri.kaggle.decode_entry.BudgetedRoster",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "target": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.lines",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.lines",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.lines",
+      "target": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.keyed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.read_members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "target": "kneemri.kaggle.decode_entry.BudgetedRoster",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "target": "kneemri.kaggle.decode_entry.DecodeEntry.cost",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.decode_entry.main",
+      "target": "kneemri.kaggle.roster_reads.RosterReads.resolved",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.discussion_read.Discussion",
       "target": "kneemri.kaggle.discussion_read.Discussion",
@@ -19777,7 +19963,7 @@
       "role": null
     },
     {
-      "descendants": 155,
+      "descendants": 156,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -20409,7 +20595,7 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -20436,6 +20622,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.champion_check",
       "label": "champion_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry",
+      "label": "decode_entry",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -23030,6 +23224,22 @@
       "label": "Champion",
       "level": "class",
       "parent": "kneemri.kaggle.champion_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.BudgetedRoster",
+      "label": "BudgetedRoster",
+      "level": "class",
+      "parent": "kneemri.kaggle.decode_entry",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "label": "DecodeEntry",
+      "level": "class",
+      "parent": "kneemri.kaggle.decode_entry",
       "role": "satellite"
     },
     {
@@ -32702,6 +32912,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.champion_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.BudgetedRoster.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.BudgetedRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.BudgetedRoster.per_decode",
+      "label": "per_decode",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.BudgetedRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.DecodeEntry.cost",
+      "label": "cost",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.DecodeEntry.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.DecodeEntry.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.DecodeEntry.walk",
+      "label": "walk",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry.DecodeEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.decode_entry.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.decode_entry",
       "role": null
     },
     {
