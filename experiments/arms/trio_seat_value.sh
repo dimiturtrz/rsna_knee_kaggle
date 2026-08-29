@@ -19,8 +19,11 @@
 # roster therefore costs ZERO card time and ZERO packaging — a kernel push and a slot. What it does not
 # cost, it also does not justify: a slot is spent only if a member prices positive here first.
 #
-# HOW IT IS READ, written before the number. `seat_value --against trioseat_v1` reports each candidate's
-# marginal contribution to that roster on the fold-0 holdout.
+# HOW IT IS READ, written before the number. The control is `honest12`, NOT `trioseat_v1` — that
+# substitution is forced, not preferred, and the three branches below are unchanged by it: all three of
+# trioseat's members are fold -1 and carry no holdout record, so `seat_value` refuses the roster by name
+# and the question cannot be asked against it offline at all. `seat_value --against honest12` reports each
+# candidate's marginal contribution to that roster on the fold-0 holdout.
 #   * Any candidate at or above the 0.0062 holdout floor. Take the best two or three into a wide-trio
 #     kernel; the lane is real and the one-decode roster is not yet saturated at three.
 #   * Every candidate inside the floor. Three treatments already span what this decode can see, and the
@@ -108,16 +111,26 @@ resolve() {
 }
 
 mapfile -t treatment_paths < <(resolve "${CANDIDATES[@]}")
+
+# READ A IS ALREADY PRICED, so its pool is resolved here and NOT re-run. Of these 23 members, five are
+# fold -1 (`_ff`/`final_ws_e12`) and carry no holdout record, and `band140_s2026` splits the decode — which
+# leaves exactly the twelve the 2026-08-29 pricing already put against `honest12` for a best marginal of
+# +0.0001. Re-running it would spend the chain on a settled null. The list stays because it is what the
+# roster_reads check above is stated over, and because a rescored member re-enters it.
+
 mapfile -t group224_paths < <(resolve "${GROUP224[@]}")
 
-echo "=== treatment group (20sl, 0.1-0.9, 336px) against trioseat_v1 ==="
-uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${treatment_paths[@]}"
-
-echo "=== 224 group (12sl, 0.2-0.8, 224px) against trioseat_v1 ==="
-uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against trioseat_v1 --candidates "${group224_paths[@]}"
-
-echo "=== 224 group against honest12 ==="
-uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value --against honest12 --candidates "${group224_paths[@]}"
+# THE TWO `--against trioseat_v1` INVOCATIONS THIS ARM OPENED WITH ARE GONE, and not for tidiness.
+# `trioseat_v1`'s three members are all fold -1: they have seen every holdout study, so they carry no
+# holdout record, and `seat_value` refuses the control by name. Both calls were asking a question that
+# cannot be answered offline — the first of the three harness defects recorded in
+# interpretations/kneemri/2026-08-29_seats-per-decode.md. `honest12` is the only scoreable control we own.
+#
+# THE `GROUP224` PRICING IS GONE TOO, because it is contained in the one below. Eleven of its thirteen are
+# in `GROUP2`, and the other two — `adjacent224_s2026` and `tissue224_s2026` — split the decode and were
+# priced in the distance table the same day at −0.0002 and −0.0005. Running it would ask one question
+# twice and call the second answer a confirmation. `GROUP224` stays declared because it names the
+# resolution family as a family, which is the thing the header argues about.
 
 # THE CHAMPION'S OWN SECOND DECODE, and the reading that made the 224 pool the wrong unit.
 #
