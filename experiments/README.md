@@ -5799,3 +5799,13 @@ reads 0.8720. The honest greedy's chosen 28 read 0.8753. **Choosing beats includ
 than any vote rule buys over any other. The lever on this pool was never the rule and is not the count;
 it is which members, and even that lands on a plateau. Both axes now say the same thing from opposite
 sides: this pool is one architecture, measured out.
+
+**Provenance correction, written minutes later against `interpretations/kneemri/2026-08-29_the-vote-has-nothing-to-weight.md`.**
+This is a REPLICATION at a larger pool, not a discovery. `knee-xsfc` ran the same instrument earlier the
+same day over 42 members and reached the same conclusion: `LogitAverage` 0.8725 (+0.0014 vs flat),
+`QualityWeightedRank` +0.0000, `LabelQualityRank` +0.0002 with a +0.0004 overfit gap. The enlarged
+77-member roster moves every one of those slightly DOWN — `LogitAverage` +0.0014 → +0.0010,
+`LabelQualityRank` +0.0002 → +0.0001 — so the thirty new members did not give the vote anything more to
+weight either. What is new here is only the denominator and the direction of the drift; the finding is
+`knee-xsfc`'s. The ordering fact (77 flat 0.8720 against the greedy's chosen 28 at 0.8753) IS new, because
+it needed the full-pool greedy that did not exist until tonight.
