@@ -11,6 +11,7 @@ from pathlib import Path
 from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.mrnet_corpus import MRNET_SPACING, MRNetCorpus
+from core.data.corpus.mrnet_labels import TableLabels
 from core.data.corpus.slots import MRNET_SCHEME
 from core.wakelock import Wakelock
 
@@ -32,6 +33,14 @@ def main() -> None:
         "`--spacing`, which selects how slices sit inside the band: two subjects, one word, and argparse "
         "refused the collision rather than letting either flag win.",
     )
+    command.parser.add_argument(
+        "--labels-dir",
+        type=Path,
+        default=None,
+        help="directory holding the ACL tables, when the archive ships PIXELS ALONE. The Redivis export "
+        "of this corpus does exactly that — 3,750 arrays and no CSV — and its tables are a separate "
+        "download. Omit for the Stanford archive, which carries them inside.",
+    )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
 
@@ -45,7 +54,8 @@ def main() -> None:
 
     root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, arguments.out or root.processed())
-    corpus = MRNetCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing)
+    tables = TableLabels(arguments.labels_dir) if arguments.labels_dir else None
+    corpus = MRNetCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing, tables=tables)
 
     corpus.labels(root.processed() / "labels" / LABELS)
     logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")

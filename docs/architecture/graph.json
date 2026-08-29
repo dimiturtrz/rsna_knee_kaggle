@@ -4599,6 +4599,12 @@
     {
       "kind": "construct",
       "source": "core.data.corpus.build_mrnet.main",
+      "target": "core.data.corpus.mrnet_labels.TableLabels",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_mrnet.main",
       "target": "core.wakelock.Wakelock",
       "weight": 1
     },
@@ -5479,9 +5485,39 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus",
       "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.__init__",
+      "target": "core.data.corpus.mrnet_labels.ArchiveLabels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._members",
+      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._split_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._members",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.case_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._split_at",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.split_of",
       "weight": 1
     },
     {
@@ -5541,12 +5577,6 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
-      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._labels_of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
       "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._members",
       "weight": 1
     },
@@ -5566,6 +5596,36 @@
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
       "target": "core.data.corpus.study_cache.StudyCache.enrolled",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "core.data.corpus.mrnet_labels.ArchiveLabels",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_labels.ArchiveLabels.table",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.verdicts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_labels.MRNetLabels.verdicts",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.case_of",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "core.data.corpus.mrnet_labels.TableLabels",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_labels.TableLabels.table",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.verdicts",
       "weight": 1
     },
     {
@@ -19161,7 +19221,7 @@
   ],
   "nodes": [
     {
-      "descendants": 54,
+      "descendants": 55,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -19185,7 +19245,7 @@
       "role": null
     },
     {
-      "descendants": 44,
+      "descendants": 45,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -19193,7 +19253,7 @@
       "role": null
     },
     {
-      "descendants": 29,
+      "descendants": 30,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -19356,6 +19416,14 @@
       "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus",
       "label": "mrnet_corpus",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels",
+      "label": "mrnet_labels",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -21134,6 +21202,30 @@
       "label": "MRNetExam",
       "level": "class",
       "parent": "core.data.corpus.mrnet_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.ArchiveLabels",
+      "label": "ArchiveLabels",
+      "level": "class",
+      "parent": "core.data.corpus.mrnet_labels",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "label": "MRNetLabels",
+      "level": "class",
+      "parent": "core.data.corpus.mrnet_labels",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.TableLabels",
+      "label": "TableLabels",
+      "level": "class",
+      "parent": "core.data.corpus.mrnet_labels",
       "role": "satellite"
     },
     {
@@ -24674,14 +24766,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._labels_of",
-      "label": "_labels_of",
-      "level": "method",
-      "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._members",
       "label": "_members",
       "level": "method",
@@ -24700,6 +24784,14 @@
       "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._share",
       "label": "_share",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._split_at",
+      "label": "_split_at",
       "level": "method",
       "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
       "role": null
@@ -24750,6 +24842,70 @@
       "label": "present",
       "level": "method",
       "parent": "core.data.corpus.mrnet_corpus.MRNetExam",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.ArchiveLabels.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.ArchiveLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.ArchiveLabels.table",
+      "label": "table",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.ArchiveLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.MRNetLabels.case_of",
+      "label": "case_of",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.MRNetLabels.split_of",
+      "label": "split_of",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.MRNetLabels.table",
+      "label": "table",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.MRNetLabels.verdicts",
+      "label": "verdicts",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.TableLabels.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.TableLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_labels.TableLabels.table",
+      "label": "table",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_labels.TableLabels",
       "role": null
     },
     {

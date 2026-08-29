@@ -36,15 +36,13 @@ from jaxtyping import UInt8
 from numpy.typing import NDArray
 from torch import Tensor
 
+from core.data.corpus.mrnet_labels import SPLITS, ArchiveLabels, MRNetLabels
 from core.data.corpus.study_cache import StudyCache
 from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
 
 VOLUME_SUFFIX = ".npy"
-SPLITS: tuple[str, ...] = ("train", "valid")
-"""Both downloadable splits are TRAINING data here. We never score on them — the ruler is our own
-fold-0 holdout — so holding 120 exams back would cost data and buy nothing."""
 
 PLANES: tuple[str, ...] = ("sagittal", "axial", "coronal")
 """The archive's directory names, in the order of `slots.MRNET_SLOTS`. The two are one fact and must
@@ -58,13 +56,22 @@ back as the integer 0 and stops joining to the index. The prefix also makes `Mer
 guarantee hold by construction rather than by luck.
 """
 
-ACL_LABEL = "acl"
 ACL = "ACL"
 CONFIDENCE = f"{ACL}__conf"
 
-VOLUME_DEPTH = 3
-"""How many path components a volume is identified by: `<split>/<plane>/<case>.npy`. Anything shallower
-is a label table or an archive stub, never pixels."""
+VOLUME_DEPTH = 2
+"""How many path components a volume is identified by AT LEAST: `<plane>/<case>.npy`. Anything shallower
+is a label table or an archive stub, never pixels.
+
+It was 3, for the `<split>/<plane>/<case>.npy` the Stanford download ships. The Redivis export of the
+same corpus FLATTENS the split away — see `MRNetLabels.split_of` for how it is recovered — so the split component
+is now optional and the plane is read from the tail either way.
+"""
+
+NESTED_DEPTH = 3
+"""The depth at which `parts[-3]` could be a split rather than a wrapper directory. Both layouts put a
+directory there; only one of them puts a SPLIT there, which is why the name is checked and not the depth
+alone."""
 
 PROGRESS_EVERY = 50
 """Decoded exams between progress lines — 1,250 of them at three planes each runs unattended."""
@@ -134,10 +141,17 @@ class MRNetCorpus:
     and a second copy on disk buys nothing.
     """
 
-    def __init__(self, archive: Path, cache: StudyCache, spacing: float = MRNET_SPACING) -> None:
+    def __init__(
+        self,
+        archive: Path,
+        cache: StudyCache,
+        spacing: float = MRNET_SPACING,
+        tables: MRNetLabels | None = None,
+    ) -> None:
         self.archive = archive
         self.cache = cache
         self.spacing = spacing
+        self.tables = tables or ArchiveLabels(archive)
 
     def volumes(self) -> list[MRNetExam]:
         """The exams whose PIXELS ship, in split then case order, joined against the archive's members.
@@ -148,7 +162,7 @@ class MRNetCorpus:
         """
         with zipfile.ZipFile(self.archive) as archive:
             names = archive.namelist()
-            labels = {split: self._labels_of(archive, names, split) for split in SPLITS}
+        labels = {split: self.tables.table(split) for split in SPLITS}
         members = self._members(names)
         exams = [
             MRNetExam(identifier=f"{PREFIX}{case}", members=members[(split, case)], acl=int(verdict))
@@ -174,27 +188,30 @@ class MRNetCorpus:
         """Every volume in the archive, keyed by (split, case) and then by plane.
 
         Matched on the tail of the path rather than on a fixed root, because the top-level directory
-        name differs between the Stanford download and every mirror of it.
+        name differs between the Stanford download and every mirror of it — and because one export has
+        no split directory at all, which is the case `_split_at` covers.
         """
         found: dict[tuple[str, str], dict[str, str]] = {}
         for name in names:
             path = Path(name)
-            if path.suffix != VOLUME_SUFFIX or len(path.parts) < VOLUME_DEPTH:
+            case = MRNetLabels.case_of(path.stem)
+            if path.suffix != VOLUME_SUFFIX or len(path.parts) < VOLUME_DEPTH or case is None:
                 continue
-            split, plane = path.parts[-3], path.parts[-2]
-            if split in SPLITS and plane in PLANES:
-                found.setdefault((split, path.stem), {})[plane] = name
+            plane = path.parts[-2]
+            if plane in PLANES:
+                found.setdefault((MRNetCorpus._split_at(path, case), case), {})[plane] = name
         return found
 
     @staticmethod
-    def _labels_of(archive: zipfile.ZipFile, names: list[str], split: str) -> dict[str, int]:
-        """One split's ACL table: case number to 0/1, read from the headerless CSV the corpus ships."""
-        wanted = f"{split}-{ACL_LABEL}.csv"
-        for name in names:
-            if Path(name).name == wanted:
-                table = pd.read_csv(io.BytesIO(archive.read(name)), header=None, dtype={0: str})
-                return {str(case): int(verdict) for case, verdict in zip(table[0], table[1], strict=True)}
-        raise FileNotFoundError(f"{wanted} is not in this archive")
+    def _split_at(path: Path, case: str) -> str:
+        """The split a volume belongs to: the directory that says so, or the case number that implies it.
+
+        The stated one WINS where it exists. The two agree on every case MRNet publishes, so this only
+        ever matters if a mirror re-splits the corpus — and then the mirror's own word is the better
+        evidence than an arithmetic rule fitted to the original.
+        """
+        stated = path.parts[-3] if len(path.parts) >= NESTED_DEPTH else ""
+        return stated if stated in SPLITS else MRNetLabels.split_of(case)
 
     def stack(self, volume: NDArray[np.float32], slices: int) -> UInt8[Tensor, "s h w"]:
         """One plane's volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.

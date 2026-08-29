@@ -17,6 +17,7 @@ from core.data.corpus.mrnet_corpus import (
     MRNetCorpus,
     MRNetExam,
 )
+from core.data.corpus.mrnet_labels import TableLabels
 from core.data.corpus.slots import MRNET_SCHEME, SLOTS, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.findings import STUDY
@@ -53,6 +54,29 @@ def _archive(tmp_path: Path, shipped: int = 2) -> Path:
         for plane in PLANES:
             archive.writestr(f"{ROOT}/valid/{plane}/{VALID_CASE}.npy", _volume())
     return path
+
+
+def _flat_archive(tmp_path: Path) -> Path:
+    """The Redivis export's layout: `<plane>/<case>.npy` and NO label table anywhere in the zip.
+
+    Both differences are measured, not assumed — the 7.74 GB download of 2026-08-29 held 3,750 arrays,
+    1,250 per plane, case 0000 to 1249, and zero non-`.npy` members.
+    """
+    path = tmp_path / "flat.zip"
+    with zipfile.ZipFile(path, "w") as archive:
+        for case in (*TRAIN_CASES[:2], VALID_CASE):
+            for plane in PLANES:
+                archive.writestr(f"{plane}/{case}.npy", _volume())
+    return path
+
+
+def _tables(tmp_path: Path) -> Path:
+    """The ACL tables as a separate download, unpadded and with a header — the two ways an export differs."""
+    directory = tmp_path / "tables"
+    directory.mkdir()
+    (directory / "mrnet-train-acl.csv").write_text("case,acl\n0,0\n1,1\n", encoding="utf-8")
+    (directory / "mrnet-valid-acl.csv").write_text(f"case,acl\n{int(VALID_CASE)},1\n", encoding="utf-8")
+    return directory
 
 
 def _cache(tmp_path: Path) -> StudyCache:
@@ -97,6 +121,21 @@ def test_volumes_honours_the_cache_truncation(tmp_path: Path):
     exams = MRNetCorpus(_archive(tmp_path), cache).volumes()
 
     assert [exam.identifier for exam in exams] == [f"{PREFIX}0000", f"{PREFIX}0001"]
+
+
+def test_volumes_reads_a_flat_archive_with_external_tables(tmp_path: Path):
+    """Pixels with no split directory and labels from outside the zip build the same exam list.
+
+    This is the export we actually hold: `<plane>/<case>.npy` and not one CSV. If the split could not be
+    recovered from the case number, the 120 validation exams would be unreachable.
+    """
+    corpus = MRNetCorpus(_flat_archive(tmp_path), _cache(tmp_path), tables=TableLabels(_tables(tmp_path)))
+
+    exams = corpus.volumes()
+
+    assert [exam.identifier for exam in exams] == [f"{PREFIX}0000", f"{PREFIX}0001", f"{PREFIX}{VALID_CASE}"]
+    assert sorted(exams[2].members) == sorted(PLANES), "the validation exam is found without a valid/ directory"
+    assert exams[2].acl == 1
 
 
 def test_stack(tmp_path: Path):
