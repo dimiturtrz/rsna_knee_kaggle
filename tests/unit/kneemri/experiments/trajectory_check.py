@@ -5,7 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.experiments.trajectory_check import GATE_EPOCH, RunTrajectory, Spread, TrajectoryGate, main
+from kneemri.experiments.trajectory_check import (
+    GATE_EPOCH,
+    MIN_CORPUS,
+    RunTrajectory,
+    Spread,
+    TrajectoryGate,
+    main,
+)
 from kneemri.runs.run_metrics import RunMetrics
 
 CEILING = 0.05
@@ -32,9 +39,13 @@ def climbing(start: float, gain: float, epochs: int = 12) -> list[float]:
     return [start - 0.05, start - 0.02, start - 0.01, start] + [start + gain] * (epochs - GATE_EPOCH - 1)
 
 
+SPAN = (0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, CEILING)
+"""The corpus gains: one more than `MIN_CORPUS`, so the median is a member rather than a midpoint."""
+
+
 def corpus(directory: Path) -> Path:
     """A processed root of twelve-epoch runs whose gate-to-peak gains span 0.01 to `CEILING`."""
-    for index, gain in enumerate((0.01, 0.02, 0.03, 0.04, CEILING)):
+    for index, gain in enumerate(SPAN):
         write_curve(directory, f"member_{index}", climbing(0.80, gain), asked=12)
     return directory
 
@@ -73,23 +84,38 @@ def test_gain(tmp_path: Path) -> None:
     stitched = write_curve(tmp_path, "lora_r8_v3small_224", climbing(0.69, 0.135, epochs=16), asked=12)
     assert gate.gain(stitched, 12) is None, "more rows than the budget is two runs, not one trajectory"
 
-    short = write_curve(tmp_path, "adapt_null", climbing(0.80, 0.02, epochs=5), asked=5)
-    assert gate.gain(short, 5) is None, "a run too short to show its peak understates every longer one"
+    short = write_curve(tmp_path, "adapt_null", climbing(0.80, 0.02, epochs=9), asked=12)
+    assert gate.gain(short, 12) is None, "a run too short to show its peak understates every longer one"
+
+    # The floor is a SHARE of its OWN budget, not an absolute epoch count. cnx_warm_anneal asked for six
+    # and an absolute ten made every short schedule structurally unreadable — a second budget filter
+    # wearing a completeness filter's name, refusing the whole warm lane it was built to arbitrate.
+    warm = write_curve(tmp_path, "cnx_warm_anneal", climbing(0.80, 0.02, epochs=5), asked=6)
+    assert gate.gain(warm, 6) == pytest.approx(0.02), "five of six is as much anneal on record as ten of twelve"
+    died = write_curve(tmp_path, "cnx_warm_died", climbing(0.80, 0.02, epochs=4), asked=6)
+    assert gate.gain(died, 6) is None, "the share holds at every budget, it does not only move the bar down"
 
 
 def test_spread(tmp_path: Path) -> None:
-    """The distribution, and its refusal to be read off an empty root."""
+    """The distribution, and its refusal to be read off a root too thin to have one."""
     spread = TrajectoryGate().spread(corpus(tmp_path), 12)
-    assert spread.runs == 5
+    assert spread.runs == len(SPAN)
     assert spread.largest == pytest.approx(CEILING)
     assert spread.median == pytest.approx(0.03)
     assert spread.high == pytest.approx(CEILING)
 
-    empty = tmp_path / "unmounted"
-    empty.mkdir()
+    thin = tmp_path / "unmounted"
+    thin.mkdir()
     with pytest.raises(SystemExit):
         # An unmounted root would otherwise make every arm truncatable against a corpus of nothing.
-        TrajectoryGate().spread(empty, 12)
+        TrajectoryGate().spread(thin, 12)
+
+    for index in range(MIN_CORPUS - 1):
+        write_curve(thin, f"few_{index}", climbing(0.80, 0.02), asked=12)
+    with pytest.raises(SystemExit):
+        # The ceiling is the MAXIMUM, and a maximum over seven draws states which seven runs happened to
+        # use the schedule, not what a trajectory on it can do. Being wrong in that direction kills a member.
+        TrajectoryGate().spread(thin, 12)
 
 
 def test_reading(tmp_path: Path) -> None:

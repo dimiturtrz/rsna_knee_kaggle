@@ -4,10 +4,10 @@
 it is the only check here that can end a job. A twelve-epoch `one_cycle` arm costs about three hours; the
 question it exists to answer is whether the remaining two of them can change which branch the arm lands in.
 
-WHAT LICENSES IT. Across every run under the processed root with at least `MIN_EPOCHS` recorded epochs and
-the same epoch BUDGET as the arm under test, the gain from the gate epoch to the run's peak is a measured
-distribution rather than a guess. On 2026-08-30, matched to a twelve-epoch schedule, it read median +0.0210,
-p90 +0.0380, max +0.0529 over n=96 — the maximum being `encoder_adapt_gentle`, a run that started very low
+WHAT LICENSES IT. Across every run under the processed root that recorded at least `FLOOR_SHARE` of its own
+budget and asked for the same epoch BUDGET as the arm under test, the gain from the gate epoch to the peak is a measured
+distribution rather than a guess. On 2026-08-30, matched to a twelve-epoch schedule, it read median +0.0208,
+p90 +0.0368, max +0.0529 over n=102 — the maximum being `encoder_adapt_gentle`, a run that started very low
 and so had the most room to climb. So an arm sitting at the gate more than the MAXIMUM
 such gain below its own SEAT threshold cannot reach that threshold by any trajectory this project has ever
 recorded, and the epochs left decide nothing.
@@ -31,7 +31,24 @@ WHAT IT MAY NOT DO, and these are the failure modes it would otherwise invite.
 - The distribution is over THIS harness's runs, most of them DINOv2 at twelve epochs. An arm on a trunk
   with a genuinely different shape is outside it, and the honest move there is to widen the corpus rather
   than to trust the ceiling. A different SCHEDULE is handled — the corpus is matched on the epoch budget —
-  but that only narrows the sample, so a budget with two runs on it is not an instrument.
+  but that only narrows the sample, so a budget with two runs on it is not an instrument. `MIN_CORPUS`
+  now enforces that sentence rather than only stating it.
+
+AND THE EPOCH FLOOR WAS BLIND TO SHORT BUDGETS, found 2026-08-30 on `cnx_warm_anneal` (knee-e8sm). The floor
+was an absolute ten recorded epochs, which no six-epoch run can ever meet, so every budget under ten was
+structurally unreadable no matter how large its corpus grew. That constant's own docstring said it was there
+to "keep the corpus at the twelve-epoch schedule" — a job the explicit budget match already does, so it was
+selecting the schedule twice and excluding every other one on the second pass. It matters because the warm
+lane is now a commitment: `warm_calib_lowlr` measured warm starting as a TIME mechanism, which makes the arms
+it recommends SHORT, and the only check that can end a bad job was blind to exactly them. `FLOOR_SHARE`
+replaces it and is calibrated to change nothing at twelve — the twelve-epoch corpus is 102 runs under both
+rules on the same tree, verified rather than argued, and the n=96 this file used to quote was the same
+corpus six runs earlier that morning.
+
+The fix does NOT make `cnx_warm_anneal` readable, and that is the honest outcome: its budget now MATCHES,
+and the answer is that one run on this tree has ever asked for six epochs. The refusal changed from a
+misleading "no run reached epoch 3 with 10 recorded" — which described a floor no six-epoch run could ever
+clear — to "only 1 run matches a 6-epoch budget, and 8 are needed", which names the thing to go build.
 
 AND THE CORPUS ITSELF NEEDED A GUARD, which is the first thing this tool found that the hand reading missed.
 Before runs recording more epochs than they asked for were refused, the twelve-epoch maximum read +0.1350
@@ -66,12 +83,28 @@ reference curve (`swin_supervised`) epochs 0-2 climb 0.7441 -> 0.8110 and are do
 learning to read a frozen trunk at all, while the ordering between arms only settles once the backbone has
 moved. A gate at e1 would refute arms that go on to win."""
 
-MIN_EPOCHS = 10
-"""How many recorded epochs a run needs to enter the distribution.
+FLOOR_SHARE = 10 / 12
+"""What share of its OWN budget a run must have recorded to enter the distribution.
 
-A short run has not shown where its peak is, so its gate-to-peak gain understates every longer run's — and
-this ceiling is only sound if it is generous. Ten keeps the corpus at the twelve-epoch schedule the gate is
-used on."""
+A run that died early has not shown where its peak is, so its gate-to-peak gain understates a completed
+run's — and this ceiling is only sound if it is generous. What makes a run short is therefore how much of
+its own schedule it missed, not an epoch count: ten of twelve and five of six have each seen the same share
+of their anneal, while an absolute floor of ten calls the second one incomplete and the corpus it belongs to
+empty.
+
+Ten twelfths rather than a rounder number because it is exactly the previous absolute floor at the budget
+the gate was calibrated on — `ceil(FLOOR_SHARE * 12) == 10` — so the twelve-epoch reading this tool's
+numbers are quoted from is unchanged by the fix: both floors admit exactly 102 runs on the same tree. A
+threshold that moves the existing corpus is a different instrument wearing the same name."""
+
+MIN_CORPUS = 8
+"""How many runs a budget needs before its spread may decide anything.
+
+The module docstring has said since it was written that "a budget with two runs on it is not an instrument";
+this is that sentence as a refusal. The ceiling is the MAXIMUM of the distribution, and a maximum over three
+draws is a statement about which three runs happened to use that schedule, not about what a trajectory on it
+can do — and being wrong here kills a member. Eight is the point at which the maximum stops moving on every
+addition; it is a legislated bound, not a count read off the current tree."""
 
 HIGH = 0.9
 """The reported quantile. Printed for the reader, never used to decide — see the module docstring."""
@@ -151,7 +184,7 @@ class TrajectoryGate:
         if asked is None or (budget is not None and asked != budget):
             return None
         scored = self.scored(run)
-        if len(scored) > asked or len(scored) < MIN_EPOCHS or len(scored) <= GATE_EPOCH:
+        if len(scored) > asked or len(scored) < math.ceil(FLOOR_SHARE * asked) or len(scored) <= GATE_EPOCH:
             return None
         return max(scored) - scored[GATE_EPOCH]
 
@@ -163,10 +196,15 @@ class TrajectoryGate:
             if (run := RunMetrics(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
             if (gain := self.gain(run, budget)) is not None
         ]
-        # An unmounted data root would otherwise make every arm truncatable against an empty corpus, which
-        # is the one direction this gate must never fail in.
+        # An unmounted data root, or a budget too thinly used to have a distribution, would otherwise make
+        # every arm truncatable against a corpus that cannot answer — the one direction this gate must
+        # never fail in. A thin corpus is reported with its real count, because "3 runs" and "none at all"
+        # send the reader to different fixes.
+        schedule = "any schedule" if budget is None else f"a {budget}-epoch budget"
         Denominator(
-            len(gains), f"no run under {processed} reached epoch {GATE_EPOCH} with {MIN_EPOCHS} recorded"
+            len(gains) if len(gains) >= MIN_CORPUS else 0,
+            f"only {len(gains)} run(s) under {processed} match {schedule} past epoch {GATE_EPOCH}, "
+            f"and {MIN_CORPUS} are needed before a spread may decide anything",
         ).refuse_empty()
         ranked = sorted(gains)
         return Spread(
