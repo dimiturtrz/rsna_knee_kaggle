@@ -116,6 +116,21 @@ class Member:
     annot: float
 
     @property
+    def reads_pixels(self) -> bool:
+        """Whether this checkpoint records a reading policy at all — i.e. whether it is a member.
+
+        The processed directory holds artifacts that were never members: the SSL encoders, whose config
+        carries `mask_ratio` and `spectral_weight` instead of a read size, and `vjepa_member_e5.encoder`,
+        which carries the member it was cut from. They have no head, cannot be scored and cannot be
+        seated, but they sit beside the members and every tool that globbed `*.pt` died on the first one
+        with `KeyError: 'img'` before reading a single real member (knee, 2026-08-30).
+
+        `img` is the honest test because every member records the size it was fed; an artifact without
+        one has no reading to group by, which is exactly what makes it not a member.
+        """
+        return "img" in self.config
+
+    @property
     def image_size(self) -> int:
         """Pixels per side the encoder is fed — with the crop, this fixes the effective mm/pixel."""
         return int(self.config["img"])

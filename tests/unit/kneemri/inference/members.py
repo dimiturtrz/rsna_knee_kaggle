@@ -195,6 +195,19 @@ def _member() -> Member:
     )
 
 
+def test_reads_pixels():
+    """An SSL encoder sits beside the members on disk and is not one — it has to say so, not raise.
+
+    The encoder config is the real shape: the pretraining knobs, and no read size at all. Before this,
+    `image_size` raised `KeyError: 'img'` and a pool sweep over the processed directory died on the
+    first encoder, ahead of every real member.
+    """
+    encoder = replace(_member(), config=cast(MemberConfig, {"mask_ratio": 0.75, "epochs": 8}))
+
+    assert _member().reads_pixels
+    assert not encoder.reads_pixels
+
+
 def test_image_size():
     assert _member().image_size == IMAGE
 

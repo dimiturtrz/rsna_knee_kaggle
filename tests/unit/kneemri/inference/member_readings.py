@@ -1,13 +1,15 @@
 """Members grouped by the cache each one names, on tiny caches built here so the grouping is known."""
 
+from dataclasses import replace
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pytest
 
 from core.data.corpus.study_cache import StudyCache
 from kneemri.inference.member_readings import MemberReadings
-from kneemri.inference.members import Member
+from kneemri.inference.members import Member, MemberConfig
 from tests.unit.conftest import write_series
 
 
@@ -55,6 +57,22 @@ def test_keys(tmp_path: Path):
 
     assert readings.keys == ["8px_2sl", "8px_2sl_80mm"], "first-listed first, one entry per distinct reading"
     assert [member.identifier for member in readings.owners["8px_2sl"]] == ["a", "b"]
+
+
+def test_an_encoder_beside_the_members_is_skipped_rather_than_raising(tmp_path: Path):
+    """A pool sweep globs the processed directory and gets the SSL encoders with it.
+
+    They record pretraining knobs and no read size, so there is no cache to group them by. Grouping used
+    to ask every checkpoint for its `image_size`, which raised `KeyError: 'img'` on the first encoder —
+    before a single real member had been read, over a directory where 7 of 200 files are encoders.
+    """
+    encoder = replace(_member(tmp_path, "enc"), config=cast(MemberConfig, {"mask_ratio": 0.75}))
+
+    readings = MemberReadings([_member(tmp_path, "a"), encoder], tmp_path)
+
+    assert [member.identifier for member in readings.members] == ["a"]
+    assert [member.identifier for member in readings.skipped] == ["enc"]
+    assert readings.keys == ["8px_2sl"], "the encoder names no reading, so it adds no cache"
 
 
 def test_reference(tmp_path: Path):

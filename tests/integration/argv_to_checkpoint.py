@@ -273,6 +273,16 @@ that lands in this set is a switch losing its ratchet, which is what the set exi
 """
 
 
+NOT_A_READING = {"reads_pixels"}
+"""Properties of `Member` that describe the RECORD rather than the reading, so no argv moves them.
+
+Kept apart from `FIXED_BY_THE_BUILD`, which is a ratchet: a name there is a switch whose flag was lost,
+and diluting it with things that were never switches is how it stops meaning that. `reads_pixels` asks
+whether the checkpoint records a reading AT ALL — it is the test that separates a member from the SSL
+encoders sitting beside it on disk, and it answers True for every member by construction.
+"""
+
+
 def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: pytest.MonkeyPatch):
     """Every reading `Member` exposes must come back as the run's own, not as a legacy manifest's default.
 
@@ -341,7 +351,7 @@ def test_every_reading_survives_argv_to_the_member(corpus: Path, monkeypatch: py
     readings = [name for name, value in vars(Member).items() if isinstance(value, property)]
     assert set(FIXED_BY_THE_BUILD) < set(readings), "a name here that is not a reading is a stale exemption"
     for name in readings:
-        if name in FIXED_BY_THE_BUILD:
+        if name in FIXED_BY_THE_BUILD | NOT_A_READING:
             continue
         assert getattr(stated, name) != getattr(legacy, name), (
             f"{name} answers what a manifest predating it means, so the run's own value never arrived"

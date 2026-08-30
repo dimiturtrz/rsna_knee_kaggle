@@ -23,8 +23,10 @@ CORRECTED 2026-08-30 (knee-rxwc): this paragraph claimed `LogitAverage` was held
 `main` passes no `serving`, so this entry served the `RankAverage` default while the champion
 `kneemri-raptorseat` passes `Serving(vote=LogitAverage())`. The 0.938 stands — `vote_ceiling1.log`
 prices the two rules 0.8720 against 0.8710, about one tick and under the floor — but it is a
-measurement of three champion seats under a DIFFERENT vote, and must not be quoted as the champion's. The entry differs from `calibsix` by dropping the three seats that would each add a
-DECODE, and from `soloseat` by adding two that do not.
+measurement of three champion seats under a DIFFERENT vote, and must not be quoted as the champion's.
+
+The entry differs from `calibsix` by dropping the three seats that would each add a DECODE, and from
+`soloseat` by adding two that do not.
 
 PRE-REGISTRATION, written before the number, against `soloseat` = 0.925 (1 seat), `onepair_v1` = 0.936
 (2 seats, one of them a foreign decode) and `calibsix_v1` = 0.941 (6 seats, three decodes).

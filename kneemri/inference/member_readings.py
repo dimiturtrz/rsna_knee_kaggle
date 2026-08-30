@@ -11,6 +11,7 @@ indexes the corpus differently is refused, because its rows would line up agains
 produce a wrong number rather than an error.
 """
 
+import logging
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -21,11 +22,20 @@ from core.data.corpus.study_cache import CachedCorpus, StudyCache
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 
+logger = logging.getLogger(__name__)
+
 
 class MemberReadings:
     """Every member with the cache it names, grouped so each cache is loaded once."""
 
     def __init__(self, members: list[Member], directory: Path) -> None:
+        # SKIPPED RATHER THAN REFUSED, the way a member with no holdout record is skipped. A caller that
+        # globs the processed directory hands us the SSL encoders too, and they have no reading to group
+        # by; raising here killed a pool sweep before its first real member (knee-o5m2).
+        self.skipped = [member for member in members if not member.reads_pixels]
+        for member in self.skipped:
+            logger.info("%s: no reading recorded, not a member — skipped", member.file.name)
+        members = [member for member in members if member.reads_pixels]
         self.members = members
         self.caches: dict[str, StudyCache] = {}
         self.owners: dict[str, list[Member]] = {}
