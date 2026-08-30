@@ -31,7 +31,7 @@ class MemberReadings:
     def __init__(self, members: list[Member], directory: Path) -> None:
         # SKIPPED RATHER THAN REFUSED, the way a member with no holdout record is skipped. A caller that
         # globs the processed directory hands us the SSL encoders too, and they have no reading to group
-        # by; raising here killed a pool sweep before its first real member (knee-o5m2).
+        # by; raising here killed a pool sweep before its first real member (knee-nzjj).
         self.skipped = [member for member in members if not member.reads_pixels]
         for member in self.skipped:
             logger.info("%s: no reading recorded, not a member — skipped", member.file.name)
