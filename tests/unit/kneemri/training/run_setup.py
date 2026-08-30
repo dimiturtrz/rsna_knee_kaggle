@@ -9,8 +9,16 @@ from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.landed import Request
-from kneemri.training.objective import DISSENT_TERM, MARGIN_TERM, MarginObjective, Objective, RankedObjective
+from kneemri.training.objective import (
+    DISSENT_TERM,
+    MARGIN_TERM,
+    ContrastiveObjective,
+    MarginObjective,
+    Objective,
+    RankedObjective,
+)
 from kneemri.training.options import TrainingOptions
+from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.trainer import Adaptation
@@ -51,8 +59,28 @@ def test_objective_pair_memory():
     assert remembered.memory.remembered.maxlen == 64, "the flag must reach the pool it sizes"
     assert remembered.weight == 0.5
 
-    with pytest.raises(ValueError, match="no ranking term"):
+    with pytest.raises(ValueError, match="nothing for it to widen"):
         _setup(pair_memory=64).objective()
+
+
+def test_objective_composes_the_pool_with_the_contrastive_term():
+    """The pool composes with the contrastive term, and the flag has to REACH the memory it sizes.
+
+    `--pair-memory` was refused beside `--contrast-weight` until today, and not because the terms
+    disagree: the chain returned one class and lost whichever branch came second. The composition is the
+    fix `contrast_dense` pre-registered against its own reading, so what this pins is that asking for it
+    builds the widened class AND that the capacity is the one the flag named — a memory silently left at
+    the default would make the arm a reading about `PAIR_MEMORY` instead.
+    """
+    widened = _setup(contrast_weight=1.0, rank_weight=1.0, pair_memory=32).objective()
+    assert isinstance(widened, RememberedContrast)
+    assert widened.memory.capacity() == 32, "the flag must reach the pool it sizes"
+    assert widened.contrast_weight == 1.0
+    assert widened.weight == 1.0, "the house recipe's ranking term survives, or the arm is two changes"
+
+    plain = _setup(contrast_weight=1.0).objective()
+    assert isinstance(plain, ContrastiveObjective)
+    assert not isinstance(plain, RememberedContrast), "no memory asked for, no memory built"
 
 
 def test_adaptation():

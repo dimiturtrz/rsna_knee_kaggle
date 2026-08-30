@@ -39,6 +39,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
+from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import PairedSides, SideRanking
@@ -185,15 +186,33 @@ class RunSetup:
             # rather than a third alternative to the other two.
             return DistilledObjective(options.distill_weight, shaping, rank_weight=options.rank_weight)
         if options.contrast_weight:
-            # BEFORE the ranking branch and carrying `rank_weight` through, for `DistilledObjective`'s
-            # reason: the house recipe passes --rank-weight 1.0, so excluding it would make every
-            # contrastive arm a two-variable change against the control it is measured on.
-            return ContrastiveObjective(options.contrast_weight, shaping, rank_weight=options.rank_weight)
+            return self._contrastive(shaping)
         if options.pair_memory:
             return RememberedRanking(options.rank_weight, shaping, capacity=options.pair_memory)
         if options.rank_weight:
             return RankedObjective(options.rank_weight, shaping)
         return Objective(shaping)
+
+    def _contrastive(self, shaping: Shaping) -> ContrastiveObjective:
+        """The contrastive objective these flags ask for, widened by a remembered pool or not.
+
+        A METHOD RATHER THAN TWO MORE BRANCHES IN `objective`. That chain sits at the complexity ceiling
+        already, and the choice here is not a fifth alternative to the other terms — it is one term with
+        one option, so it reads as one branch up there and its own question down here.
+
+        `rank_weight` is carried through in both, for `DistilledObjective`'s reason: the house recipe
+        passes --rank-weight 1.0, so excluding it would make every contrastive arm a two-variable change
+        against the control it is measured on.
+        """
+        options = self.options
+        if options.pair_memory:
+            return RememberedContrast(
+                options.contrast_weight,
+                shaping,
+                rank_weight=options.rank_weight,
+                capacity=options.pair_memory,
+            )
+        return ContrastiveObjective(options.contrast_weight, shaping, rank_weight=options.rank_weight)
 
     def _check_composed(self) -> None:
         """Every way the loss flags fail to compose, raised before the card is touched.
@@ -214,13 +233,14 @@ class RunSetup:
             self._check_dissent_alone()
         if options.contrast_weight:
             self._check_contrast_alone()
-        if options.pair_memory and not options.rank_weight:
-            # LOUD, for the reason `reports` gives below: a memory with no ranking term to feed is a
-            # silent no-op that trains the plain recipe under the arm's name, and would be read as a
+        if options.pair_memory and not (options.rank_weight or options.contrast_weight):
+            # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
+            # no-op that trains the plain recipe under the arm's name, and would be read as a
             # refutation of the mechanism rather than of the invocation.
             message = (
-                f"--pair-memory {options.pair_memory} widens the ranking term's pair pool and no "
-                "--rank-weight was given, so there is no ranking term for it to widen"
+                f"--pair-memory {options.pair_memory} widens the pool of a ranking or a contrastive "
+                "term and neither --rank-weight nor --contrast-weight was given, so there is nothing "
+                "for it to widen"
             )
             raise ValueError(message)
         if options.distill_weight and options.pair_memory:
@@ -286,23 +306,25 @@ class RunSetup:
             raise ValueError(message)
 
     def _check_contrast_alone(self) -> None:
-        """The three flags `--contrast-weight` cannot be composed with, each LOUD for `objective`'s reason.
+        """The two flags `--contrast-weight` cannot be composed with, each LOUD for `objective`'s reason.
 
         Not because the terms disagree — a representation term and a pairwise ordering term compose fine,
         and `--rank-weight` is deliberately absent from this list because `ContrastiveObjective` extends
         `RankedObjective` and carries it — but because the DISPATCH here is a single chain returning one
-        class, and each of these three returns a different subclass that this branch would silently lose.
+        class, and each of these two returns a different subclass that this branch would silently lose.
         A run passing both would train the other term's recipe under this arm's name and report a number
         about the wrong mechanism, which is the failure every guard in this file exists to prevent.
 
-        `--pair-memory` is the one that is a real follow-up rather than a rejected idea: `RememberedRanking`
-        is the named fix for this term's small-batch weakness, and reaching it means a mixin, not a branch.
+        `--pair-memory` WAS on this list and is not any more, and it was never a rejected idea: the pool
+        is the named fix for this term's small-batch weakness — `contrast_dense` pre-registered exactly
+        that suspect against its own -0.0087 — and it was refused only because the chain returned before
+        reaching `RememberedRanking`. `contrastive` now dispatches on the pair, so the composition the
+        ledger asked for is the one that runs.
         """
         options = self.options
         conflicts = {
             "--distill-weight": options.distill_weight,
             "--dissent-weight": options.dissent_weight,
-            "--pair-memory": options.pair_memory,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:

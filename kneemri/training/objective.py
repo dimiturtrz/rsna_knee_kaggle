@@ -687,21 +687,38 @@ class ContrastiveObjective(RankedObjective):
         study of the batch falls on one side of the cut therefore drops out entirely, which is the
         batch-size weakness the class docstring states rather than a special case being hidden here.
         """
-        if batch.embedding is None:
+        return self.supcon(batch, batch)
+
+    def supcon(self, anchors: Predicted, keys: Predicted) -> Float[Tensor, ""]:
+        """SupCon with the anchors and the compared population named separately.
+
+        THE CONTRACT, AND IT IS WHAT THE SELF-EXCLUSION RESTS ON: `keys` BEGINS WITH `anchors`. Every
+        anchor is its own first key, so the diagonal of the leading block is the study compared with
+        itself and is the only entry masked out. A caller that appended its keys in the other order
+        would mask the wrong column and quietly contrast each study against itself — so the widened
+        term builds its pool as `[live, remembered]` and never the reverse.
+
+        SPLIT OUT OF `contrast` rather than copied into the remembered subclass. The two differ only in
+        which population the denominator ranges over, and a second copy of a log-sum-exp would be the
+        kind of drift where one side gets a fix and the other keeps the bug.
+        """
+        if anchors.embedding is None or keys.embedding is None:
             message = (
                 "a contrastive objective was handed a batch with no embedding, so the term it exists "
                 "for would contribute nothing — this is a plumbing failure, not an empty batch"
             )
             raise ValueError(message)
-        z = nn.functional.normalize(batch.embedding.float(), dim=-1).permute(1, 0, 2)
-        similarity = torch.einsum("obh,och->obc", z, z) / self.temperature
-        studies = z.shape[1]
-        other = ~torch.eye(studies, dtype=torch.bool, device=z.device)
-        positive = (batch.scores > POSITIVE_AT).T
+        z = nn.functional.normalize(anchors.embedding.float(), dim=-1).permute(1, 0, 2)
+        against = nn.functional.normalize(keys.embedding.float(), dim=-1).permute(1, 0, 2)
+        similarity = torch.einsum("obh,och->obc", z, against) / self.temperature
+        studies, compared = z.shape[1], against.shape[1]
+        other = ~torch.eye(studies, compared, dtype=torch.bool, device=z.device)
+        positive = (anchors.scores > POSITIVE_AT).T
+        opposite = (keys.scores > POSITIVE_AT).T
         # A PAIR IS POSITIVE WHEN BOTH STUDIES FALL ON THE SAME SIDE OF THE SCORER'S CUT — intact with
         # intact as much as torn with torn. Contrasting only the positives against everything would ask
         # the healthy studies to be mutually unlike, which the anatomy says they are not.
-        pairs = (positive.unsqueeze(2) == positive.unsqueeze(1)) & other.unsqueeze(0)
+        pairs = (positive.unsqueeze(2) == opposite.unsqueeze(1)) & other.unsqueeze(0)
         # log-sum-exp over EVERY other study, positives included, which is the denominator SupCon uses:
         # the term is the log-probability of drawing a same-class study out of the whole batch.
         denominator = similarity.masked_fill(~other.unsqueeze(0), _EXCLUDED).logsumexp(dim=2)
@@ -713,6 +730,6 @@ class ContrastiveObjective(RankedObjective):
         # THE ANCHOR'S OWN CONFIDENCE, not the pair's. `pairs` already averages over the partners, so a
         # per-pair weight would be a second average inside the first; what this asks is how much the
         # reader's reading of THIS study should count, which is exactly `weights`.
-        mass = (batch.weights.T * live).clamp(min=0.0)
+        mass = (anchors.weights.T * live).clamp(min=0.0)
         loss = (denominator - agreement) * mass
         return loss.sum() / mass.sum().clamp(min=PAIR_FLOOR)

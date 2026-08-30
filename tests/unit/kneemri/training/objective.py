@@ -612,6 +612,22 @@ def test_contrast():
     assert float(objective.contrast(grouped)) < float(objective.contrast(scattered))
 
 
+def test_supcon():
+    """Widening the key population must leave the term alone when the keys ARE the anchors.
+
+    The equality is the contract `RememberedContrast` builds on: `contrast` is `supcon(batch, batch)`, so
+    a pool that appends nothing has to reproduce it exactly, and a pool that appends a disagreeing study
+    has to cost more. Anything else and the widened arm's number would carry the refactor as well as the
+    mechanism.
+    """
+    batch = _embedded([[1.0, 0.0], [0.9, 0.1], [0.0, 1.0], [0.1, 0.9]], [1.0, 1.0, 0.0, 0.0])
+    against = _embedded([[1.0, 0.0], [0.9, 0.1], [0.0, 1.0], [0.1, 0.9], [-1.0, 0.0]], [1.0, 1.0, 0.0, 0.0, 1.0])
+    objective = ContrastiveObjective()
+
+    assert torch.equal(objective.supcon(batch, batch), objective.contrast(batch))
+    assert float(objective.supcon(batch, against)) > float(objective.contrast(batch))
+
+
 def test_contrast_refuses_a_batch_with_no_embedding():
     """LOUD, because the silent alternative descends plain cross-entropy under a contrastive arm's name."""
     with pytest.raises(ValueError, match="no embedding"):

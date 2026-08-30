@@ -14,6 +14,12 @@ class PairMemory:
     Small enough to ignore: twelve studies of twelve labels is 144 floats a step, three tensors of
     them, against activations measured in gigabytes. It holds DETACHED copies, so nothing here keeps a
     graph alive past its step.
+
+    THE EMBEDDING IS THE ONE FIELD THAT CHANGES THAT COST STORY, and it is still small. A context is
+    `b o h` rather than `b o`, so at twelve studies, twelve findings and a 1024-wide trunk one step is
+    ~590 KB and a full ring ~5 MB — three orders above the logits and three below the activations. It
+    is remembered here rather than in a sibling memory because a second ring would keep the same
+    studies under two capacities, and the field it would hold already exists on `Predicted`.
     """
 
     def __init__(self, capacity: int = PAIR_MEMORY) -> None:
@@ -33,6 +39,7 @@ class PairMemory:
         if not self.remembered:
             return None
         taught = [step.teacher for step in self.remembered if step.teacher is not None]
+        read = [step.embedding for step in self.remembered if step.embedding is not None]
         return Predicted(
             logits=torch.cat([step.logits for step in self.remembered]),
             scores=torch.cat([step.scores for step in self.remembered]),
@@ -42,6 +49,10 @@ class PairMemory:
             # is homogeneous in practice — a run either distils or does not — so this is a guard rather
             # than a case, and the `None` it falls back to is what a distilling objective raises on.
             teacher=torch.cat(taught) if len(taught) == len(self.remembered) else None,
+            # ALL OR NOTHING for `teacher`'s reason, and the consequence differs: a contrastive term
+            # handed a pool with no embedding raises rather than quietly contrasting a narrower batch,
+            # so a half-filled ring is caught at the step instead of read as a weak result.
+            embedding=torch.cat(read) if len(read) == len(self.remembered) else None,
         )
 
     def remember(self, batch: Predicted) -> None:
@@ -52,5 +63,6 @@ class PairMemory:
                 scores=batch.scores.detach(),
                 weights=batch.weights.detach(),
                 teacher=None if batch.teacher is None else batch.teacher.detach(),
+                embedding=None if batch.embedding is None else batch.embedding.detach(),
             )
         )

@@ -4142,6 +4142,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.remembered_contrast",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.remembered_contrast",
+      "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.remembered_contrast",
+      "target": "kneemri.training.pair_memory",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.remembered_ranking",
       "target": "kneemri.training.grades",
       "weight": 1
@@ -4216,6 +4234,12 @@
       "kind": "import",
       "source": "kneemri.training.run_setup",
       "target": "kneemri.training.pretrained_encoder",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.remembered_contrast",
       "weight": 1
     },
     {
@@ -19411,6 +19435,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.objective.ContrastiveObjective.contrast",
+      "target": "kneemri.training.objective.ContrastiveObjective.supcon",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.objective.DecorrelatedObjective",
       "target": "kneemri.training.grades.Predicted",
@@ -19892,6 +19922,78 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast",
+      "target": "kneemri.training.objective.ContrastiveObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast",
+      "target": "kneemri.training.objective.Shaping",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast",
+      "target": "kneemri.training.pair_memory.PairMemory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.__init__",
+      "target": "kneemri.training.pair_memory.PairMemory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "target": "kneemri.training.objective.ContrastiveObjective.supcon",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "target": "kneemri.training.pair_memory.PairMemory.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "target": "kneemri.training.pair_memory.PairMemory.remember",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "target": "kneemri.training.remembered_contrast.RememberedContrast.widened",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.settings",
+      "target": "kneemri.training.pair_memory.PairMemory.capacity",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.widened",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered_contrast.RememberedContrast.widened",
+      "target": "kneemri.training.remembered_contrast.RememberedContrast.joined",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.remembered_ranking.RememberedRanking",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -19989,7 +20091,19 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.objective.ContrastiveObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -20038,6 +20152,18 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup._check_composed",
       "target": "kneemri.training.run_setup.RunSetup._check_margin_alone",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup._contrastive",
+      "target": "kneemri.training.objective.ContrastiveObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup._contrastive",
+      "target": "kneemri.training.remembered_contrast.RememberedContrast",
       "weight": 1
     },
     {
@@ -20115,12 +20241,6 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.objective.ContrastiveObjective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.DecorrelatedObjective",
       "weight": 1
     },
@@ -20170,6 +20290,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.run_setup.RunSetup._check_composed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.run_setup.RunSetup._contrastive",
       "weight": 1
     },
     {
@@ -21221,7 +21347,7 @@
       "role": null
     },
     {
-      "descendants": 163,
+      "descendants": 164,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22309,7 +22435,7 @@
       "role": null
     },
     {
-      "descendants": 27,
+      "descendants": 28,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -22464,6 +22590,14 @@
       "descendants": 0,
       "id": "kneemri.training.pretrained_encoder",
       "label": "pretrained_encoder",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast",
+      "label": "remembered_contrast",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -25538,6 +25672,14 @@
       "label": "PretrainedEncoder",
       "level": "class",
       "parent": "kneemri.training.pretrained_encoder",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast",
+      "label": "RememberedContrast",
+      "level": "class",
+      "parent": "kneemri.training.remembered_contrast",
       "role": "primary"
     },
     {
@@ -38102,6 +38244,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective.ContrastiveObjective.supcon",
+      "label": "supcon",
+      "level": "method",
+      "parent": "kneemri.training.objective.ContrastiveObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.DecorrelatedObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -38566,6 +38716,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "label": "contrast",
+      "level": "method",
+      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast.joined",
+      "label": "joined",
+      "level": "method",
+      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered_contrast.RememberedContrast.widened",
+      "label": "widened",
+      "level": "method",
+      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
       "label": "__init__",
       "level": "method",
@@ -38648,6 +38838,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup._check_margin_alone",
       "label": "_check_margin_alone",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._contrastive",
+      "label": "_contrastive",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
