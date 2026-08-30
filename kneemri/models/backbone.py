@@ -9,7 +9,7 @@ a load, or not at all if the head happens to accept it.
 The variant is the only free choice; the repository and the feature width follow from it.
 """
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast, override
@@ -27,12 +27,14 @@ V3_BASE = "v3base"
 CONVNEXT_BASE = "cnxbase"
 VJEPA2_LARGE = "vjepa2l"
 RAD_DINO = "raddino"
+SWIN_BASE = "swinbase"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
 CONVNEXT = "convnext"
 VJEPA2 = "vjepa2"
 RADDINO = "rad-dino"
+SWIN = "swin"
 
 
 @dataclass(frozen=True)
@@ -130,21 +132,37 @@ class TokenOutput:
 
     last_hidden_state: Float[Tensor, "n t d"]
 
+    @classmethod
+    def from_spatial(cls, spatial: Float[Tensor, "n t d"]) -> "TokenOutput":
+        """Spatial tokens with their own mean prepended, which is the slot a class token occupies.
 
-class MapAsTokens(nn.Module):
-    """A convolutional trunk wearing the vision transformer's output contract.
+        Mean-over-space is what a hierarchical trunk pools before its linear layer, so the prefix is not
+        a placeholder: it holds the quantity a class token holds. It lives on the OUTPUT type because
+        every trunk short of the contract needs it whatever layout it started from, and this is the type
+        they all end at. Keeping it here is what holds `prefix_tokens` at 1 for every family, so the head's
+        `tokens[:, 1:]` still selects exactly the spatial grid.
+        """
+        return cls(torch.cat([spatial.mean(dim=1, keepdim=True), spatial], dim=1))
 
-    A ConvNeXt emits `last_hidden_state` of shape (n, dim, h, w) — a feature MAP, where a ViT emits
-    (n, 1 + patches, dim) — a token SEQUENCE with a class token in front. The head consumes the second
-    shape, and teaching it the first would put a family test in the one place this project has kept
-    free of them: the head is structural on purpose, so any module callable as `backbone(pixel_values=)`
-    can be substituted as a constructor argument.
 
-    So the map is flattened in row-major order — which is the same ordering a ViT's patch tokens
-    already carry — and the map's global mean is prepended as a pseudo class token. That prefix is not
-    a placeholder: mean-over-space is what a CNN classifier head pools before its linear layer, so the
-    slot exists and holds the quantity a class token holds. Keeping it means `prefix_tokens` stays 1
-    for every family and the head's `tokens[:, 1:]` still selects exactly the spatial grid.
+class TrunkAsTokens(nn.Module):
+    """A trunk that does not already speak the vision transformer's output contract, wearing it.
+
+    The head consumes (n, 1 + patches, dim) — a token SEQUENCE with a class token in front — and
+    teaching it anything else would put a family test in the one place this project has kept free of
+    them: the head is structural on purpose, so any module callable as `backbone(pixel_values=)` can be
+    substituted as a constructor argument. Two families arrive short of that contract, and they are
+    short of DIFFERENT halves of it:
+
+    - a ConvNeXt emits a feature MAP, (n, dim, h, w), and no prefix token;
+    - a Swin emits a token SEQUENCE already, (n, t, d), but still no prefix token — it pools its final
+      grid inside its own classifier, so what it hands back is spatial tokens and nothing else.
+
+    Handing either one straight to the head puts a real spatial token where `tokens[:, 1:]` expects the
+    prefix to have been, losing the grid's first cell with no shape error to announce it. The missing
+    prefix is therefore shared and lives in `TokenOutput.from_spatial`; the only thing that differs is
+    how the spatial tokens are reached, which is `to_spatial` — a strategy rather than a rank test,
+    because a rank test would silently pick an arm for a trunk nobody had classified.
     """
 
     config: TokenConfig
@@ -152,16 +170,27 @@ class MapAsTokens(nn.Module):
     `Tensor | Module`, so a reader of `backbone.config.hidden_size` would otherwise be reading a
     Tensor as far as the type checker is concerned."""
 
-    def __init__(self, trunk: nn.Module, dim: int) -> None:
+    def __init__(self, trunk: nn.Module, dim: int, to_spatial: Callable[[Tensor], Float[Tensor, "n t d"]]) -> None:
         super().__init__()
         self.trunk = trunk
+        self.to_spatial = to_spatial
         self.config = TokenConfig(dim)
+
+    @classmethod
+    def from_map(cls, trunk: nn.Module, dim: int) -> "TrunkAsTokens":
+        """For a trunk emitting (n, dim, h, w): flatten row-major, which is the ordering ViT patch
+        tokens already carry, so the head's positional reading of the grid is unchanged."""
+        return cls(trunk, dim, lambda emitted: emitted.flatten(2).transpose(1, 2))
+
+    @classmethod
+    def from_sequence(cls, trunk: nn.Module, dim: int) -> "TrunkAsTokens":
+        """For a trunk emitting (n, t, d) with no prefix: the layout is already right and only the
+        missing slot has to be supplied."""
+        return cls(trunk, dim, lambda emitted: emitted)
 
     @override
     def forward(self, pixel_values: Float[Tensor, "n c h w"]) -> TokenOutput:
-        feature_map = self.trunk(pixel_values=pixel_values).last_hidden_state
-        spatial = feature_map.flatten(2).transpose(1, 2)
-        return TokenOutput(torch.cat([spatial.mean(dim=1, keepdim=True), spatial], dim=1))
+        return TokenOutput.from_spatial(self.to_spatial(self.trunk(pixel_values=pixel_values).last_hidden_state))
 
 
 @dataclass(frozen=True)
@@ -252,6 +281,16 @@ class Encoder:
 
     Carried here as well because a tubelet transformer states no `stages`: `depth`, `patch` and `dim`
     still describe it, and the depth-axis stride is the one thing that shorthand cannot say."""
+
+    adapter: Callable[[nn.Module, int], nn.Module] | None = None
+    """What to wrap the loaded trunk in so it speaks the head's output contract, or None if it already does.
+
+    Held as a strategy rather than decided by a family test inside `load`, because the family test was
+    `if self.family != CONVNEXT` and it was correct exactly until a second non-conforming family arrived.
+    Swin is that second one and it does NOT want the same adapter — it emits a sequence already and is
+    missing a prefix token, where ConvNeXt emits a map and is missing both. A branch keyed on family
+    would have had to grow one arm per trunk in the one method whose docstring says it exists so that
+    adding a family costs no branch per consumer; this way the entry states its own answer."""
 
     params_m: float = 22.0
     """Trunk parameters in millions — the quantity the OPTIMISER's memory is a function of.
@@ -379,9 +418,7 @@ class Encoder:
         from transformers import AutoModel  # noqa: PLC0415 - see above
 
         trunk = AutoModel.from_pretrained(source or self.repository)
-        if self.family != CONVNEXT:
-            return trunk
-        return MapAsTokens(trunk, self.dim)
+        return trunk if self.adapter is None else self.adapter(trunk, self.dim)
 
     @property
     def mounted_source(self) -> str:
@@ -529,10 +566,49 @@ ENCODERS: dict[str, Encoder] = {
         family=CONVNEXT,
         leaf="convnextv2-base",
         params_m=87.7,
+        adapter=TrunkAsTokens.from_map,
         # `depths` and `hidden_sizes` off ConvNeXtV2-base's own config, at the strides the four stages
         # run at. Stated rather than read from the loaded config because the cap has to be derived
         # BEFORE any weights are fetched — the whole point of it is to refuse a run that will not fit.
         stages=(Stage(3, 4, 128), Stage(3, 8, 256), Stage(27, 16, 512), Stage(3, 32, 1024)),
+    ),
+    # THE FIRST TRUNK THAT WAS NOT PRETRAINED WITHOUT LABELS, added 2026-08-30. Every encoder above is
+    # self-supervised — DINOv2 and DINOv3 by distillation, ConvNeXtV2 by masked autoencoding, V-JEPA2 by
+    # latent prediction — so "a different trunk" has so far always meant a different way of having no
+    # labels. Swin-base is IN-22k SUPERVISED: 21,841 human-assigned classes, an objective that rewards
+    # exactly the discriminative structure our head is then asked to find, and the one axis of pretraining
+    # this project has never once varied. That is the diversity claim, and it is about the OBJECTIVE
+    # rather than about the architecture, which is why it is worth a run after ConvNeXtV2's read PARTIAL.
+    #
+    # THE ARCHITECTURE DIFFERS TOO, and differently from ConvNeXt's. Shifted-window attention is neither
+    # global attention over a flat grid (DINOv2) nor pure local convolution (ConvNeXtV2): attention within
+    # a 12x12 window, with the windows displaced every other block so information crosses their seams.
+    # `knee-y59c` measured distance-from-DINOv2 anti-correlating with solo strength across seven trunks,
+    # so this sits deliberately in the MIDDLE of that axis rather than at the far end where `mae_matched`
+    # (0.6735) and `focus_mcl` (0.5332) died.
+    #
+    # 384 IS THE ONLY LEGAL READ, and `require_tiling` is NOT sufficient to enforce it. The window size is
+    # baked into the pretrained relative-position tables at 12, and a 12x12 window tiles a 384 px read at
+    # stride 32 exactly. 352 tiles the stride and NOT the window: transformers will pad and interpolate
+    # rather than refuse, handing back a plausible answer computed on a geometry the tables never saw.
+    # The arm therefore pins --train-size 384 and this comment is the reason it may not be swept.
+    #
+    # NO MOUNT YET, so it trains here and cannot be submitted until the weights are mirrored. Apache-2.0,
+    # so mirroring is permitted outright — no licence question of the kind DINOv3 needed — and it is the
+    # same dataset upload `dinov3-hf` already is. Deferred until a member earns the seat.
+    SWIN_BASE: Encoder(
+        SWIN_BASE,
+        "microsoft/swin-base-patch4-window12-384-in22k",
+        1024,
+        patch=32,
+        family=SWIN,
+        leaf="swin-base",
+        params_m=86.9,
+        adapter=TrunkAsTokens.from_sequence,
+        # `depths` and `embed_dim` off Swin-base's own config, at the strides its four stages run at —
+        # stated ahead of any fetch for the same reason ConvNeXtV2's are: the cap refuses a run that
+        # will not fit, so it cannot wait for the weights to say.
+        stages=(Stage(2, 4, 128), Stage(2, 8, 256), Stage(18, 16, 512), Stage(2, 32, 1024)),
     ),
     # THE FIRST TRUNK THAT WAS NOT PRETRAINED ON FLAT IMAGES, added 2026-08-21 after `through_dense`
     # answered the cheap version of this question and answered it flat. That arm put slices i-1, i, i+1

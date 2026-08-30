@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# swin_supervised.sh — the first trunk on this registry that was pretrained WITH LABELS.
+#
+# WHY THIS ARM EXISTS. Nine encoders are registered and every one of them is self-supervised: DINOv2 and
+# DINOv3 by distillation, ConvNeXtV2 by masked autoencoding, V-JEPA2 by latent prediction, RAD-DINO by
+# distillation on chest films. So "try a different trunk" has always meant a different way of having no
+# labels, and the pretraining OBJECTIVE is the one axis this project has never varied — nine runs to zero.
+# Swin-base-384-in22k is 21,841 human-assigned classes, an objective that rewards exactly the
+# discriminative structure the head is then asked to find.
+#
+# AND IT IS NOT AT THE FAR END OF THE DIVERSITY AXIS, deliberately. knee-y59c measured distance from
+# DINOv2 anti-correlating with solo strength across seven trunks: mae_matched sat at 0.4333 nearest
+# correlation and scored 0.6735 solo, focus_mcl at 0.0445 scored 0.5332. Shifted-window attention is
+# neither global attention over a flat grid nor pure local convolution — attention inside a 12x12 window,
+# the windows displaced every other block so information crosses their seams — which puts it in the
+# MIDDLE of that axis rather than at the end where the decorrelated members died.
+#
+# 384 IS THE ONLY LEGAL READ AND --train-size MAY NOT BE SWEPT. The window size is baked into the
+# pretrained relative-position tables at 12. At stride 32 a 384 px read gives a 12x12 grid the window
+# tiles exactly. 352 tiles the STRIDE and not the WINDOW, and `Encoder.require_tiling` therefore ACCEPTS
+# it — transformers pads and interpolates rather than refusing, and hands back a plausible answer
+# computed on a geometry the position tables never saw. That is the quiet failure, so the size is pinned.
+#
+# THE BACKBONE RATE IS THE ONE GUESS IN THIS ARM AND IT IS DECLARED AS ONE. 4e-5 is what DINOv2 wants and
+# what higher rates cost it (lr1e-4_ws 0.8490, lr2e-4_ws 0.7391 against lr4e-5_ws 0.8525). 4e-4 is what
+# the only non-DINOv2 trunk we have fitted needed — cnx_own_recipe 0.8186 against cnx_dense 0.7927, worth
+# +0.026. The two arguments point opposite ways: a SUPERVISED trunk's features are already task-adjacent,
+# which argues for less adaptation, while the one hierarchical data point argues for more. 1e-4 is the
+# geometric middle, and the STARVED branch below is what settles it rather than a sweep.
+#
+# control  cnx_own_recipe = 0.8186 — NOT a dense DINOv2 member. This is the honest control for a first arm
+#          on a new trunk, because it is what this recipe did the last time it left the DINOv2 family. The
+#          0.855-0.863 dense band is the BAR, quoted in the branches, not the comparison.
+# seat     priced afterwards with record_mix against a FULLY SCOREABLE entry (honest12, greedyseat_v1) and
+#          never against raptorweight_v1, five of whose six members are fold -1 and carry no holdout row.
+# cost     12 epochs at 384 px on an 87M trunk of 24 blocks, priced off cnx_own_recipe's 448 px run = ~90 min.
+#
+# PRE-REGISTERED. Floor 0.0062, board resolution 0.0015. P(clears the floor solo) is LOW and stated in the
+# bead: this run is priced as an INSTRUMENT and a seat candidate, not as an improvement.
+#   LANDS — solo at or above 0.8560. Within 0.008 of the dense members, from a supervised trunk on its
+#     first arm. Mirror the weights to a Kaggle dataset (Apache-2.0 — no licence question of the kind
+#     DINOv3 needed), add the mount, build an entry and spend a slot on it.
+#   SEAT-ONLY — solo 0.8300 to 0.8559. Not competitive alone but plausibly a different opinion. Mount it
+#     only if the priced seat delta is at or above +0.002 offline, which transfers one-for-one.
+#   STARVED — solo 0.8000 to 0.8299, the band cnx_own_recipe landed in. The reading is then about the
+#     RECIPE and not the trunk, and the follow-up is one arm at --backbone-lr 4e-4, not another family.
+#   REFUTES — solo below 0.8000. Supervised IN-22k pretraining does not transfer to knee MRI, which closes
+#     the pretraining-objective axis and is the cheapest way this project could have learned it.
+#
+# bead: knee-ryzy
+#
+# deliberate: --variant       (swinbase — the whole point of the arm)
+# deliberate: --train-size    (384, pinned by the window tables — see above, do not sweep)
+# deliberate: --backbone-lr   (1e-4, the declared guess)
+# deliberate: --batch
+# deliberate: --accumulate
+# deliberate: --recompute-activations  (the control predates $THROUGHPUT; it trades compute for memory and
+#                                       cannot move a score, so it is declared rather than dropped to match)
+# deliberate: --vram-gb       (8, not the control's 16 — `vram_need` prices this recipe at 8014 MiB, and a
+#                              cap 8 GB above the need is what knee-ylp0 exists to catch)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train swin_supervised \
+  $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack $THROUGHPUT \
+  --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
+  --vram-gb 8 \
+  --labels "$LABELS" --out "$PROCESSED/swin_supervised_s2026.pt"

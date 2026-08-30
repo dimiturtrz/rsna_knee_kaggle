@@ -96,7 +96,17 @@ than these six (which share a recipe lineage). Neither is worth building before 
 
 > **Corrected 2026-08-23.** "Every spread is an order below the board floor" compares an OFFLINE delta
 > against a BOARD threshold — the units error `knee-7d1` later corrected. At 4.67 board points per
-> holdout point, +0.0005 offline is +0.0023 board, so the dismissal above was not earned. The axis was
+> holdout point, +0.0005 offline is +0.0023 board, so the dismissal above was not earned.
+>
+> **The 4.67 IS ITSELF WRONG, corrected 2026-08-30 (knee-24bx).** `python -m
+> kneemri.evaluation.board_transfer`, refit on the completed 76-row record, reads **+1.23** board points
+> per holdout point over the whole record and **+0.98 [+0.94, +1.08]** among entries at or above 0.8670 —
+> one-for-one, not four-and-a-half-for-one. So +0.0005 offline is +0.0005 board, which is a THIRD of the
+> board's own 0.0015 resolution, and the dismissal this note overturned was closer to right than the
+> overturning was. The slope has now been quoted wrong three times in this repo — +4.67 here, +0.23 in
+> the 2026-08-30 mixing file, both from PROSE rather than from the module. Run the module.
+>
+> The axis was
 > re-priced on the champion seven, which IS the more-disagreeing pool this section asks for, and
 > LogitAverage bought +0.0002 there against +0.0005 here — it shrinks with disagreement rather than
 > growing. The verdict stands; the reasoning above does not. The second clause of "not ruled out" is now

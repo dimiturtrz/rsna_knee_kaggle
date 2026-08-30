@@ -14,15 +14,16 @@ from kneemri.models.backbone import (
     LARGE,
     RAD_DINO,
     SMALL,
+    SWIN_BASE,
     V3_BASE,
     V3_SMALL,
     V3_SMALL_PLUS,
     VJEPA2_LARGE,
     Encoder,
-    MapAsTokens,
     Normalization,
     Stage,
     TokenOutput,
+    TrunkAsTokens,
 )
 
 
@@ -38,6 +39,19 @@ class _FeatureMap(nn.Module):
         rows = torch.arange(self.side * self.side, dtype=torch.float32)
         emitted = rows.view(1, 1, self.side, self.side).expand(len(pixel_values), self.dim, self.side, self.side)
         return TokenOutput(emitted)
+
+
+class _TokenSequence(nn.Module):
+    """A hierarchical transformer's contract: `last_hidden_state` of shape (n, t, dim), and no prefix."""
+
+    def __init__(self, dim: int, tokens: int) -> None:
+        super().__init__()
+        self.dim, self.tokens = dim, tokens
+
+    @override
+    def forward(self, pixel_values: Tensor) -> TokenOutput:
+        rows = torch.arange(self.tokens, dtype=torch.float32)
+        return TokenOutput(rows.view(1, self.tokens, 1).expand(len(pixel_values), self.tokens, self.dim))
 
 
 RAD_DINO_PREPROCESSOR = {
@@ -182,12 +196,45 @@ def test_forward():
     prefix slot, that slice would silently eat the first spatial token and the model would train on a
     grid missing its top-left corner — a defect with no shape error to announce it.
     """
-    adapter = MapAsTokens(_FeatureMap(dim=4, side=3), 4)
-    emitted = adapter.forward(torch.zeros(2, 3, 96, 96)).last_hidden_state
+    emitted = TrunkAsTokens.from_map(_FeatureMap(dim=4, side=3), 4).forward(torch.zeros(2, 3, 96, 96))
+    tokens = emitted.last_hidden_state
 
-    assert emitted.shape == (2, 1 + 9, 4), "one prefix token, then the 3x3 grid, at the trunk's own width"
-    assert torch.equal(emitted[0, 1:, 0], torch.arange(9, dtype=torch.float32)), "row-major, like a ViT's patches"
-    assert emitted[0, 0, 0] == pytest.approx(4.0), "the prefix holds the map's mean, which is what a CNN pools"
+    assert tokens.shape == (2, 1 + 9, 4), "one prefix token, then the 3x3 grid, at the trunk's own width"
+    assert torch.equal(tokens[0, 1:, 0], torch.arange(9, dtype=torch.float32)), "row-major, like a ViT's patches"
+    assert tokens[0, 0, 0] == pytest.approx(4.0), "the prefix holds the map's mean, which is what a CNN pools"
+
+    same = TrunkAsTokens.from_sequence(_TokenSequence(dim=4, tokens=9), 4).forward(torch.zeros(2, 3, 96, 96))
+
+    assert torch.equal(same.last_hidden_state, tokens), (
+        "both constructions end at the same contract, whatever layout they started from"
+    )
+
+
+def test_from_map():
+    """The map arm is the one that moves axes, and moving them wrongly has no shape error to announce it."""
+    adapted = TrunkAsTokens.from_map(_FeatureMap(dim=4, side=3), 4)
+
+    assert adapted.config.hidden_size == 4, "the width the trunk was declared at, not one read off a tensor"
+    assert adapted.forward(torch.zeros(1, 3, 96, 96)).last_hidden_state.shape == (1, 1 + 9, 4), "(n, d, h, w) flattened"
+
+
+def test_from_sequence():
+    """The sequence arm moves nothing: the layout is already right and only the prefix slot is missing."""
+    adapted = TrunkAsTokens.from_sequence(_TokenSequence(dim=4, tokens=9), 4)
+
+    assert adapted.config.hidden_size == 4, "the width the trunk was declared at, not one read off a tensor"
+    assert adapted.forward(torch.zeros(1, 3, 96, 96)).last_hidden_state.shape == (1, 1 + 9, 4), "one slot, no reshape"
+
+
+def test_from_spatial():
+    """The prefix is the mean over TOKENS, not over width — the axis a silent bug would swap."""
+    spatial = torch.tensor([[[0.0, 10.0], [2.0, 20.0]]])
+
+    prefixed = TokenOutput.from_spatial(spatial).last_hidden_state
+
+    assert prefixed.shape == (1, 3, 2), "one slot is added, and the width is untouched"
+    assert torch.equal(prefixed[0, 0], torch.tensor([1.0, 15.0])), "each channel averaged over its own tokens"
+    assert torch.equal(prefixed[0, 1:], spatial[0]), "the spatial tokens survive in their original order"
 
 
 def test_load(monkeypatch: pytest.MonkeyPatch):
@@ -200,10 +247,20 @@ def test_load(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda source: _FeatureMap(dim=1024, side=11))
 
     adapted = ENCODERS[CONVNEXT_BASE].load()
-    assert isinstance(adapted, MapAsTokens), "a feature map needs the adapter"
+    assert isinstance(adapted, TrunkAsTokens), "a feature map needs the adapter"
     assert adapted.config.hidden_size == 1024, "the head reads its width off the config"
     assert adapted.config.num_register_tokens == 0, "a CNN has no registers to exclude"
-    assert not isinstance(ENCODERS[SMALL].load(), MapAsTokens), "a transformer already speaks the contract"
+    assert adapted.forward(torch.zeros(1, 3, 352, 352)).last_hidden_state.shape == (1, 1 + 121, 1024), (
+        "the map arm, so the 11x11 grid arrives flattened rather than as three surviving axes"
+    )
+    assert not isinstance(ENCODERS[SMALL].load(), TrunkAsTokens), "a transformer already speaks the contract"
+
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda source: _TokenSequence(dim=1024, tokens=144))
+    wrapped = ENCODERS[SWIN_BASE].load()
+    assert isinstance(wrapped, TrunkAsTokens), "a prefixless sequence still needs the prefix supplied"
+    assert wrapped.forward(torch.zeros(1, 3, 384, 384)).last_hidden_state.shape == (1, 1 + 144, 1024), (
+        "the SEQUENCE arm: the entry states which one it wants, and a flatten here would be a silent reshape"
+    )
 
 
 def test_units():
