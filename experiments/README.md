@@ -6051,3 +6051,35 @@ The six-arm roster retrain (~7 h of card) that ADDITIVE would have licensed is *
 control, and each is still worth its own size on the board if it is the only thing changed. What is
 refuted is that they SUM. It also leaves the non-DINOv2 trunk lane standing as the only remaining branch
 of `knee-m69u`, which is where the card went next (`swin_supervised`).
+
+## swin_supervised — the supervised trunk, and the reading it cannot support (2026-08-30)
+
+`knee-ryzy` armed the first trunk on this registry pretrained WITH LABELS: `microsoft/swin-base-patch4-window12-384-in22k`,
+21,841 human-assigned classes against nine self-supervised encoders. `swin_supervised_s2026` read **0.8331** at epoch 6, and
+epochs 7-11 declined monotonically (0.8261, 0.8255, 0.8269, 0.8268, 0.8256), so it converged and overfit
+rather than being truncated — `convergence_check` calls it STOPPED, not a floor.
+
+**0.8331 lands in the pre-registered SEAT-ONLY band (0.8300-0.8559), at that band's floor.** Priced with
+`seat_value --candidates swin_supervised_s2026.pt --against greedyseat_v1`: the roster of 7 scores 0.8763
+and the roster plus Swin scores 0.8751, **-0.0012**, band [-0.0020, -0.0003]. The best possible swap is
+-0.0013, so there is no seat to be had by displacement either. A negative costs roughly 3x on the board,
+so ~-0.0040 there. **No seat, no slot**, exactly as the arm's own SEAT-ONLY branch required (+0.002 or
+nothing).
+
+**And it is the most decorrelated member the project has produced.** Its nearest-neighbour correlation to
+any seated member is **0.8346**, mean 0.8132, against seated members' 0.8772-0.9225. That is the finding
+in the row: maximal diversity could not pay for a 0.020 solo deficit. Diversity is a multiplier on a
+competitive member, not a substitute for one — which is the same thing the routing and vote-rule nulls
+said from the combiner side.
+
+**The number is QUALIFIED, and by a defect in our own harness rather than by the trunk.** `EncoderSurgery.blocks()`
+took the longest `ModuleList` in the tree as the encoder's blocks. Swin holds its 24 `SwinLayer` as
+2/2/18/2 across four stages, so discovery found only stage 2's eighteen, `--unfreeze-last 6` opened
+`layers.2.blocks.12-17`, and **`layers.3` — the final two blocks, 1024 wide, the top of the network — was
+frozen for the whole run**. `cnx_own_recipe` (0.8186) and `cnx_dense` (0.7927) carry the same handicap,
+27 of 36. Fixed in `knee-94ec` by grouping lists on their element type; every flat trunk returns the same
+twelve objects it always did, so no other number in this ledger moves.
+
+So the honest reading is **"this Swin run, at this recipe, with its top frozen, earns no seat"** — not
+"supervised pretraining is dead". `swin_wholetop` (`knee-tsiz`) re-runs the byte-identical invocation on
+the fixed discovery, and it is the arm that decides which of those two sentences is true.

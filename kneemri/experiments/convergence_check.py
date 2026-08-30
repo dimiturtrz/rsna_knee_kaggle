@@ -215,7 +215,16 @@ def main() -> None:
 
     check = ConvergenceCheck()
     if arguments.run is not None:
-        seen = [check.verdict(RunMetrics(arguments.run))]
+        # A PATH, and a name is not one. `--run swin_supervised_s2026` resolves against the working
+        # directory, finds nothing, and reports UNSCORED — a verdict that describes a real state and
+        # hides a typo, which is how a converged run was read as having no score at all. The whole point
+        # of this check is that a number is not quoted from a run that cannot support it, so a reading
+        # taken of no file is the one thing it may never return quietly.
+        record = RunMetrics(arguments.run)
+        if not record.exists():
+            message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
+            raise SystemExit(message)
+        seen = [check.verdict(record)]
     else:
         processed = command.rooted(arguments).processed()
         seen = check.audit(processed)

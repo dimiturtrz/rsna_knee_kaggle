@@ -150,3 +150,9 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     converged = write_run(tmp_path, "v3base_dense", peak=SETTLED_PEAK, epochs=12, asked=12)
     monkeypatch.setattr("sys.argv", ["convergence_check", "--run", str(converged.path)])
     main()
+
+    # A run NAME resolves to a path that is not there, and reading no file used to return UNSCORED —
+    # a verdict about a real state that hides a typo, which read a converged run as having no score.
+    monkeypatch.setattr("sys.argv", ["convergence_check", "--run", "v3base_dense_s2026"])
+    with pytest.raises(SystemExit, match="not on disk"):
+        main()
