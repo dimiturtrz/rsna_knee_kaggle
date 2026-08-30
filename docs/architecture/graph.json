@@ -11114,6 +11114,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.record_mix.RecordMix.foreign_dropped",
+      "target": "kneemri.evaluation.record_mix.RecordMix.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "target": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
       "weight": 1
@@ -31320,6 +31326,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.record_mix.RecordMix.dropped",
       "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.evaluation.record_mix.RecordMix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.record_mix.RecordMix.foreign_dropped",
+      "label": "foreign_dropped",
       "level": "method",
       "parent": "kneemri.evaluation.record_mix.RecordMix",
       "role": null
