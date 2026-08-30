@@ -9,6 +9,7 @@ from kneemri.models.lora import LoRALinear
 
 DIM = 8
 BLOCKS = 12
+STAGE_DEPTHS = (2, 2, 18, 2)
 SEED = 2026
 
 
@@ -47,8 +48,32 @@ def _surgery(depth: int = BLOCKS) -> EncoderSurgery:
     return EncoderSurgery(_Backbone(depth))
 
 
+class _StagedBlock(nn.Module):
+    """One block of a staged trunk, given its own type because that type is what groups them."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.mlp = nn.Linear(DIM, DIM)
+
+
+class _Stage(nn.Module):
+    """A stage holding its own `blocks` list — Swin's `layers.N.blocks`, ConvNeXt's `stages.N.layers`."""
+
+    def __init__(self, depth: int) -> None:
+        super().__init__()
+        self.blocks = nn.ModuleList([_StagedBlock() for _ in range(depth)])
+
+
+class _StagedBackbone(nn.Module):
+    """Swin's shape: 24 blocks as 2/2/18/2, so no single list holds more than eighteen of them."""
+
+    def __init__(self, depths: tuple[int, ...] = STAGE_DEPTHS) -> None:
+        super().__init__()
+        self.layers = nn.ModuleList([_Stage(depth) for depth in depths])
+
+
 def test_blocks():
-    """The deepest ModuleList, wherever it hangs — not `encoder.layer`, which is one encoder's path."""
+    """The most repeated element type, wherever it hangs — not `encoder.layer`, which is one path."""
     surgery = _surgery()
     assert len(surgery.blocks()) == BLOCKS
 
@@ -57,6 +82,16 @@ def test_blocks():
     moved.model.layer = moved.encoder.layer
     del moved.encoder
     assert len(EncoderSurgery(moved).blocks()) == BLOCKS, "a DINOv3 tree keeps its blocks somewhere else"
+    assert EncoderSurgery(moved).blocks() == list(moved.model.layer), (
+        "a flat trunk must come back byte-identical: every ledger number was measured under the old rule"
+    )
+
+    staged = _StagedBackbone()
+    found = EncoderSurgery(staged).blocks()
+    assert len(found) == sum(STAGE_DEPTHS), "the longest list holds 18 of 24; the other three stages count"
+    assert found[-1] is staged.layers[-1].blocks[-1], (
+        "and the LAST block must be the last stage's — opening the top is the whole point of unfreeze_last"
+    )
 
 
 def test_blocks_refuses_what_it_cannot_read():

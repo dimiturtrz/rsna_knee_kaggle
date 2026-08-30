@@ -537,11 +537,16 @@ def test_parameter_groups_refuses_a_backbone_with_no_blocks():
 
 
 def test_parameter_groups_refuses_ambiguous_blocks():
-    """Two equally long ModuleLists give no answer, and guessing opens modules that are not the top."""
+    """Two block TYPES tied on total count give no answer, and guessing opens what is not the top.
+
+    Ambiguity is counted per element type since staged trunks landed: several lists of the SAME type
+    are one family in tree order, which is how Swin's 2/2/18/2 becomes 24 blocks rather than 18. So
+    the decoder here holds a different module type — same type would now be concatenation, not a tie.
+    """
     torch.manual_seed(SEED)
     backbone = _FakeBackbone()
     backbone.decoder = torch.nn.Module()
-    backbone.decoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+    backbone.decoder.layer = torch.nn.ModuleList([torch.nn.Conv1d(DIM, DIM, 1) for _ in range(12)])
     model = StudyModel(backbone, DIM, SLOTS)
     with pytest.raises(ValueError, match="ambiguous"):
         model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)

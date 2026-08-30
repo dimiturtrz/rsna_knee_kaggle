@@ -18,6 +18,13 @@
 # the matched control and this comparison a clean objective swap. At 336 px and patch 16 the token count
 # is identical too — 441 either way — so even the compute is matched.
 #
+# THE EFFECTIVE BATCH IS 6, SPLIT. `--batch 6` OOMs on a verified-free card: AugReg keeps no memory-saving
+# path DINOv3 has, and the smoke asked 23.3 GB of a 26.1 GB allowance before dying. `--batch 2
+# --accumulate 3` restores the gradient of six studies at the activation memory of two, so the optimiser
+# sees the control's batch. It is not byte-identical: anything pooled WITHIN a step now sees two studies
+# rather than six. With `--slice-pooling max` over slices of one study that pooling is intra-study, so no
+# cross-study statistic changes; the residual difference is the gradient noise of three smaller forwards.
+#
 # WHERE IT SITS ON THE knee-y59c CURVE, and this is the argument for expecting a real number. That
 # measurement anti-correlates solo strength with distance-from-DINOv2 across seven trunks, and the two
 # far-end deaths are `mae_matched` (0.6735) and `focus_mcl` (0.5332). An architectural twin sits at ~0 on
@@ -61,6 +68,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train vit_in21k \
-  $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --batch 2 --accumulate 3 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant vitin21k --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --labels "$LABELS" --out "$PROCESSED/vit_in21k_s2026.pt"

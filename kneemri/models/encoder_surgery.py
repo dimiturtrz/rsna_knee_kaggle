@@ -12,6 +12,7 @@ for an encoder it never touched.
 """
 
 import logging
+from collections import defaultdict
 from collections.abc import Iterator
 
 import torch
@@ -46,24 +47,34 @@ class EncoderSurgery:
         value that travels in a config while some consumer reads a default: the bug shape this project
         has now hit seven times.
 
-        The blocks are instead the longest `ModuleList` in the tree, which is what "the layers a
-        transformer repeats" means structurally in both trees and in any third one. Ambiguity raises
-        rather than picking, because opening the wrong six modules trains something that is not the
-        encoder's top and reports a clean number for it.
+        The blocks are instead every module of the encoder's most repeated ELEMENT TYPE, in tree order.
+        "The longest single `ModuleList`" was the earlier rule, and it is correct for a flat trunk and
+        wrong for a staged one: Swin holds its 24 `SwinLayer` as 2/2/18/2 across four stages, so the
+        longest list is stage 2's eighteen and `--unfreeze-last 6` opened `layers.2.blocks.12-17` while
+        stage 3 — the widest, highest-level blocks in the network — stayed frozen for the whole run.
+        ConvNeXt has the same shape (27 of 36). Both families were measured that way, and the docstring
+        above had already named the cost: a clean number for an encoder whose top was never touched.
+
+        Grouping by element type finds the same objects in the same order for a flat trunk, where one
+        list holds all twelve, so no number already in the ledger moves. Ambiguity — two types tied on
+        total count — still raises rather than picking, for the reason it always did.
         """
-        lists = [module for module in self.backbone.modules() if isinstance(module, nn.ModuleList)]
-        if not lists:
+        families: dict[str, list[nn.Module]] = defaultdict(list)
+        for holder in self.backbone.modules():
+            if isinstance(holder, nn.ModuleList) and len(holder) > 0:
+                families[type(holder[0]).__name__].extend(holder)
+        if not families:
             message = f"{type(self.backbone).__name__} has no ModuleList, so it has no blocks to unfreeze"
             raise ValueError(message)
-        deepest = max(len(module) for module in lists)
-        candidates = [module for module in lists if len(module) == deepest]
+        deepest = max(len(members) for members in families.values())
+        candidates = sorted(name for name, members in families.items() if len(members) == deepest)
         if len(candidates) > 1:
             message = (
-                f"{type(self.backbone).__name__} has {len(candidates)} ModuleLists of {deepest}, "
-                "so its blocks are ambiguous"
+                f"{type(self.backbone).__name__} has {len(candidates)} block types of {deepest} "
+                f"({', '.join(candidates)}), so its blocks are ambiguous"
             )
             raise ValueError(message)
-        return list(candidates[0])
+        return families[candidates[0]]
 
     def adapters(self) -> int:
         """How many LoRA adapters this encoder currently carries — zero when it was never adapted.
