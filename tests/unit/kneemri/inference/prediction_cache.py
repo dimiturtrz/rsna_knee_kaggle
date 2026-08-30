@@ -115,3 +115,21 @@ def test_read_treats_a_killed_write_as_a_miss(tmp_path: Path):
     cache.write(key, np.array([[0.3, 0.7]]))
     assert cache.read(key) is not None, "and the recomputation lands"
     assert not list((tmp_path / "cached").glob("*.pending")), "nothing is left half-committed"
+
+
+def test_remembered(tmp_path: Path):
+    """Produced once, then never again — and the producer is handed the studies it must answer for."""
+    cache = _cache(tmp_path, ["s1", "s2"])
+    checkpoint = _checkpoint(tmp_path)
+    window = Window(starts=[0], width=GROUP, size=SIZE)
+    asked: list[list[str]] = []
+
+    def produce(studies: list[str]) -> np.ndarray:
+        asked.append(studies)
+        return np.array([[0.25, 0.75], [0.5, 0.5]])
+
+    first = cache.remembered(checkpoint, window, torch.float16, produce)
+    again = cache.remembered(checkpoint, window, torch.float16, produce)
+
+    assert (first == again).all()
+    assert asked == [["s1", "s2"]], "a held reading must not be produced a second time"

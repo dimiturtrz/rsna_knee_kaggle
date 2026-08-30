@@ -5,6 +5,7 @@ methods require a download, and a method that cannot be constructed in a test is
 nothing checks.
 """
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import override
 
@@ -13,7 +14,6 @@ import pytest
 import torch
 
 from core.data.corpus.slot_reader import GROUP
-from core.data.corpus.study_cache import CachedCorpus
 from core.findings import TARGETS
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
@@ -31,8 +31,8 @@ SLICES = 6
 SIZE = 14
 SEED = 2026
 
-ROWS = np.array([0, 1])
-"""Rows the trap corpus does not hold, so any read of it raises instead of quietly returning."""
+PLAIN = SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
+"""One unwarped pass — the reading every ledger number was taken under."""
 
 
 class _FakeBackbone(torch.nn.Module):
@@ -155,9 +155,7 @@ def test_predict_averages_over_views():
     window = Window(starts=[0], width=GROUP, size=SIZE)
 
     plain = HoldoutPredictions(torch.device("cpu")).predict(model, HoldoutSlab.of(images, mask), window)
-    identity = HoldoutPredictions(torch.device("cpu"), SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))).predict(
-        model, HoldoutSlab.of(images, mask), window
-    )
+    identity = HoldoutPredictions(torch.device("cpu"), PLAIN).predict(model, HoldoutSlab.of(images, mask), window)
     rotated = HoldoutPredictions(torch.device("cpu"), SpatialViews()).predict(
         model, HoldoutSlab.of(images, mask), window
     )
@@ -167,31 +165,7 @@ def test_predict_averages_over_views():
     assert not (rotated == plain).all(), "rotating the input must move the answer, or the average is a no-op"
 
 
-def _reading(tmp_path: Path) -> Member:
-    """A member whose checkpoint exists on disk, because the cache key stats it."""
-    checkpoint = tmp_path / "m_x.pt"
-    checkpoint.write_bytes(b"weights")
-    return Member(
-        identifier="x",
-        file=checkpoint,
-        fold=0,
-        config={
-            "img": 336,
-            "slices": 12,
-            "group": 3,
-            "crop_mm": 130.0,
-            "band": [0.2, 0.8],
-            "slots": ["a", "b"],
-            "variant": "small",
-            "pool": "cls_mean",
-        },
-        fingerprint=np.zeros((2, 12), np.float32),
-        holdout=0.8,
-        annot=0.8,
-    )
-
-
-def test_cached(tmp_path: Path):
+def test_cached(tmp_path: Path, reading: Callable[[Path], Member], unreadable_slab: Callable[[int], HoldoutSlab]):
     """A cached reading comes back without materialising the pixels — which is the point of caching at all.
 
     The slab is one that CANNOT be read — its holdout names rows the corpus does not have — so a hit
@@ -200,15 +174,34 @@ def test_cached(tmp_path: Path):
     any machine that happens to have a free card, which is the state this cache exists to stop
     depending on.
     """
-    reading = _reading(tmp_path)
-    cache = PredictionCache(tmp_path / "cached", ["s1", "s2"], SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),)))
+    member = reading(tmp_path)
+    cache = PredictionCache(tmp_path / "cached", ["s1", "s2"], PLAIN)
     window = Window(starts=[0], width=3, size=336)
     stored = np.array([[0.25, 0.75], [0.5, 0.5]])
-    cache.write(cache.key(reading.file, window, reading.precision), stored)
-    unreadable = HoldoutSlab(CachedCorpus(np.zeros((0, 1, 1, 1, 1), np.uint8), np.zeros((0, 1), np.float32)), ROWS)
+    cache.write(cache.key(member.file, window, member.precision), stored)
+    unreadable = unreadable_slab(1)
 
-    scored = HoldoutPredictions(torch.device("cpu")).cached(reading, unreadable, cache, window)
+    scored = HoldoutPredictions(torch.device("cpu")).cached(member, unreadable, cache, window)
 
     assert (scored == stored).all()
     with pytest.raises(IndexError):
         unreadable.batch(0, 2)
+
+
+def test_cached_prefers_the_record_over_the_card(
+    tmp_path: Path, recorded: Callable[..., Member], unreadable_slab: Callable[[int], HoldoutSlab]
+):
+    """With no cache entry and no GPU, a recorded member still answers — and the answer is then cached.
+
+    The slab holds no pixels at all, so reaching the encoder raises. That is the assertion: before this,
+    every uncached member cost a full inference pass, measured at over fifteen minutes on a ConvNeXtV2
+    base, which is what made a ninety-five member sweep unfinishable.
+    """
+    member = recorded(tmp_path, ["s1", "s2"])
+    cache = PredictionCache(tmp_path / "prefer", ["s2", "s1"], PLAIN)
+    window = member.window(SLICES, overlap=False)
+
+    scored = HoldoutPredictions(torch.device("cpu")).cached(member, unreadable_slab(SLICES), cache, window)
+
+    assert scored == pytest.approx(np.array([[0.2, 0.3], [0.0, 0.1]]))
+    assert cache.read(cache.key(member.file, window, member.precision)) == pytest.approx(scored)

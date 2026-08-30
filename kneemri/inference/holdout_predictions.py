@@ -19,6 +19,7 @@ from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member, Window
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.trainer_record import TrainerRecord
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyModel
 
@@ -41,6 +42,7 @@ class HoldoutPredictions:
         # rotation is the only test-time average left. The ruler has to apply whatever deployment will,
         # or it ranks members under a policy they will not ship under.
         self.views = views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
+        self.record = TrainerRecord(self.views)
 
     def load(self, checkpoint: Path, backbone: torch.nn.Module, dim: int, slots: int) -> StudyModel:
         """One member, rebuilt in the shape its own config records.
@@ -106,7 +108,12 @@ class HoldoutPredictions:
     def cached(
         self, reading: Member, slab: HoldoutSlab, cache: PredictionCache, window: Window
     ) -> Float[np.ndarray, "studies targets"]:
-        """One member's probabilities — from the cache when it holds them, from the encoder when not.
+        """One member's probabilities — from the cache, then the run's own record, and only then the card.
+
+        THREE SOURCES IN COST ORDER. The cache answers in milliseconds. `TrainerRecord` answers from the
+        array training already wrote, in the same order of magnitude and with no card at all, whenever
+        the reading asked for is the one the trainer used. The encoder runs only when neither can, which
+        for this pool is 38 members of 200 rather than all of them.
 
         The encoder, its download, the holdout's pixels and the GPU are ALL reached only on a miss. That
         is the difference between an analysis that can run while the card belongs to something else and
@@ -116,10 +123,21 @@ class HoldoutPredictions:
         `load` takes its backbone as an argument so it can be tested without a network; this method is
         the caller that does the fetching, and it does it inside the miss branch for the same reason.
         """
-        entry = cache.key(reading.file, window, reading.precision)
-        stored = cache.read(entry)
-        if stored is not None:
-            return stored
+        return cache.remembered(
+            reading.file,
+            window,
+            reading.precision,
+            lambda studies: self._uncached(reading, slab, window, studies),
+        )
+
+    def _uncached(
+        self, reading: Member, slab: HoldoutSlab, window: Window, studies: list[str]
+    ) -> Float[np.ndarray, "studies targets"]:
+        """The two sources the cache does not hold: the run's own record, else the encoder."""
+        recorded = self.record.instead_of(reading, slab, window, studies)
+        if recorded is not None:
+            logger.info("%s: read from the run's own holdout record, not the card", reading.file.name)
+            return recorded
         # A MISS SAYS SO. The hit path returns in milliseconds and the miss path is a full inference
         # pass over the holdout — minutes on the card, hours on a CPU. Silent, the two are one
         # unexplained wait, and on 2026-08-19 two CPU subset searches were killed as hung while they
@@ -129,6 +147,4 @@ class HoldoutPredictions:
         logger.info("%s: cache MISS, computing on %s", reading.file.name, self.device)
         encoder = ENCODERS[reading.variant]
         model = self.load(reading.file, encoder.load(), encoder.dim, reading.slot_count)
-        values = self.predict(model, slab, window, reading.precision)
-        cache.write(entry, values)
-        return values
+        return self.predict(model, slab, window, reading.precision)

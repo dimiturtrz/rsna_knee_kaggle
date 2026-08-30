@@ -62,6 +62,16 @@ class SpatialViews:
         """How many forward passes this multiplies the cost by."""
         return len(self.degrees) * len(self.shifts)
 
+    @property
+    def identity(self) -> bool:
+        """Whether this averages over nothing — the single unwarped view, so a read is the plain model.
+
+        A LENGTH of one does not answer that question: `SpatialViews(degrees=(6.0,))` is also one pass,
+        and it is a different function. The distinction matters to whoever asks whether an array
+        computed under some other policy may stand in for this one.
+        """
+        return self.degrees == (0.0,) and self.shifts == ((0.0, 0.0),)
+
     def apply(self, images: UInt8[Tensor, "b n s h w"]) -> Iterator[UInt8[Tensor, "b n s h w"]]:
         """Each view of the batch, the identity view first so a single-view run is a no-op."""
         for degrees in self.degrees:

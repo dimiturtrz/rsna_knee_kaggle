@@ -2727,6 +2727,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_predictions",
+      "target": "kneemri.inference.trainer_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_predictions",
       "target": "kneemri.models.backbone",
       "weight": 1
     },
@@ -2914,6 +2920,30 @@
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "kneemri.teacher_file",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.trainer_record",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.trainer_record",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.trainer_record",
+      "target": "kneemri.inference.test_time",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.trainer_record",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -14977,6 +15007,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.inference.trainer_record.TrainerRecord",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
       "target": "kneemri.models.model.StudyModel",
@@ -14989,33 +15025,39 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.__init__",
+      "target": "kneemri.inference.trainer_record.TrainerRecord",
+      "weight": 1
+    },
+    {
       "kind": "calls",
-      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
-      "target": "kneemri.inference.prediction_cache.PredictionCache.key",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
+      "target": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
-      "target": "kneemri.inference.prediction_cache.PredictionCache.read",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
-      "target": "kneemri.inference.prediction_cache.PredictionCache.write",
+      "target": "kneemri.inference.prediction_cache.PredictionCache.remembered",
       "weight": 1
     },
     {
@@ -15326,6 +15368,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.inference.prediction_cache.PredictionCache.remembered",
+      "target": "kneemri.inference.prediction_cache.PredictionCache.key",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.prediction_cache.PredictionCache.remembered",
+      "target": "kneemri.inference.prediction_cache.PredictionCache.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.prediction_cache.PredictionCache.remembered",
+      "target": "kneemri.inference.prediction_cache.PredictionCache.write",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.inference.prediction_cache.PredictionCache.write",
       "target": "kneemri.inference.prediction_cache.PredictionCache._path",
       "weight": 1
@@ -15580,6 +15640,48 @@
       "kind": "calls",
       "source": "kneemri.inference.test_time.SpatialViews.apply",
       "target": "kneemri.inference.test_time.SpatialViews._warp",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.trainer_record.TrainerRecord",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.trainer_record.TrainerRecord",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.trainer_record.TrainerRecord",
+      "target": "kneemri.inference.members.Window",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.trainer_record.TrainerRecord",
+      "target": "kneemri.inference.test_time.SpatialViews",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
+      "target": "kneemri.inference.members.Member.window",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -21089,7 +21191,7 @@
       "role": null
     },
     {
-      "descendants": 162,
+      "descendants": 163,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -21625,7 +21727,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -21740,6 +21842,14 @@
       "descendants": 0,
       "id": "kneemri.inference.test_time",
       "label": "test_time",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.trainer_record",
+      "label": "trainer_record",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -24359,6 +24469,14 @@
       "level": "class",
       "parent": "kneemri.inference.test_time",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.trainer_record.TrainerRecord",
+      "label": "TrainerRecord",
+      "level": "class",
+      "parent": "kneemri.inference.trainer_record",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -33602,6 +33720,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
+      "label": "_uncached",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
       "label": "cached",
       "level": "method",
@@ -34050,6 +34176,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.prediction_cache.PredictionCache.remembered",
+      "label": "remembered",
+      "level": "method",
+      "parent": "kneemri.inference.prediction_cache.PredictionCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.prediction_cache.PredictionCache.write",
       "label": "write",
       "level": "method",
@@ -34182,6 +34316,30 @@
       "label": "apply",
       "level": "method",
       "parent": "kneemri.inference.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.test_time.SpatialViews.identity",
+      "label": "identity",
+      "level": "method",
+      "parent": "kneemri.inference.test_time.SpatialViews",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.trainer_record.TrainerRecord.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.trainer_record.TrainerRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
+      "label": "instead_of",
+      "level": "method",
+      "parent": "kneemri.inference.trainer_record.TrainerRecord",
       "role": null
     },
     {

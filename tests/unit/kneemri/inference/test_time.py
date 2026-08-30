@@ -51,3 +51,14 @@ def test_warp_is_indifferent_to_the_chunk_size(monkeypatch: pytest.MonkeyPatch) 
 
     assert whole.shape == images.shape
     assert torch.equal(whole, pieces), "a chunk boundary changed a pixel, so the fix moved the answer"
+
+
+def test_identity() -> None:
+    """One unwarped view is the plain model; one ROTATED view is not, and length cannot tell them apart.
+
+    Whoever asks whether an array computed elsewhere may stand in for this reading needs that
+    distinction: `SpatialViews(degrees=(6.0,))` is also a single forward pass and a different function.
+    """
+    assert SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),)).identity
+    assert not SpatialViews(degrees=(6.0,), shifts=((0.0, 0.0),)).identity
+    assert not SpatialViews().identity

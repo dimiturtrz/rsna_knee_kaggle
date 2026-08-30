@@ -6,6 +6,7 @@ these studies, and this answers whether anyone already asked.
 
 import hashlib
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
@@ -64,6 +65,29 @@ class PredictionCache:
             },
             sort_keys=True,
         )
+
+    def remembered(
+        self,
+        checkpoint: Path,
+        window: Window,
+        precision: torch.dtype,
+        produce: Callable[[list[str]], Float[np.ndarray, "studies targets"]],
+    ) -> Float[np.ndarray, "studies targets"]:
+        """This reading's probabilities, computed only if they are not already held.
+
+        The key-read-else-produce-write dance is THIS class's protocol, not its caller's. A caller that
+        open-codes it reaches into the store four times to do one thing, which is what the feature-envy
+        gate saw the moment a second source of arrays was added beside the encoder: the caller had begun
+        to be about the cache rather than about members. `produce` is handed the studies it must answer
+        for, so a caller never needs `self.studies` either.
+        """
+        entry = self.key(checkpoint, window, precision)
+        stored = self.read(entry)
+        if stored is not None:
+            return stored
+        values = produce(self.studies)
+        self.write(entry, values)
+        return values
 
     def read(self, key: str) -> Float[np.ndarray, "studies targets"] | None:
         """The stored probabilities for this exact reading, or None if it was never computed.
