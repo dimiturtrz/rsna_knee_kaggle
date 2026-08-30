@@ -520,6 +520,14 @@ focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that nu
 # value is priced with record_mix like any other, never assumed from the solo.
 stack_increments_s2026.pt            # 0.8642
 stackfit_s2026.pt                    # 0.8631
+# `recal_dense` is packaged on its solo alone and carries a warning about the seat, because pool_census
+# reads it as `calib_dense_hold`'s TWIN: identical nearest agreement (0.9496) and identical nearest
+# divergence (0.0065 bits) to four decimals, the two of them being each other's nearest neighbour out of
+# 117 members. It is also 0.0024 the weaker of the pair. So it is shippable and it is very unlikely to be
+# worth a seat NEXT TO the member it duplicates — price the pair, never both on the solo. Its own open
+# question is a different one and is not answered here: knee-9198 owes it a GOLD read (`supervision_gap`,
+# on the card, never from the training log), which prices the v3 supervision table, not the seat.
+recal_dense_s2026.pt                 # 0.8610 — CONVERGED. Twin of calib_dense_hold, see above.
 raptor_distill_s2026.pt              # 0.8613
 distill_pairs_s2026.pt               # 0.8594
 ema_dense_s2026.pt                   # 0.8588

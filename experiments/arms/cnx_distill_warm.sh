@@ -44,7 +44,14 @@
 #     knee-for6's third cause is the one that mattered, the distillation axis re-opens on TRUNK rather
 #     than on teacher strength, and the next arm is the champion-ensemble teacher (knee-7ybf's second
 #     cell) on this same student — teacher strength varied with the trunk term now known to move.
-#   DISTANT BUT FLAT — inside +/-0.0062 with a nearest-neighbour distance BELOW the pool's own median.
+#   DISTANT BUT FLAT — inside +/-0.0062 with a nearest agreement BELOW 0.90. The cut was written as
+#     "below the pool's own median" and that is CORRECTED here, before the run, on a measurement that
+#     post-dates this arm: `pool_census` (2026-08-30) reads the median as a line drawn through a tight
+#     cluster — about half of 117 members fall under it by construction — while every one of the fourteen
+#     strong members sits at 0.9011 or above. A median cut would therefore have called this student
+#     distant for sitting two thousandths inside a crowd. 0.90 is the band's own floor, read off the pool
+#     rather than chosen, and the parent already clears it at 0.8496, so the branch now asks whether the
+#     student HELD its inherited distance instead of whether it beat a median.
 #     The student is where the mechanism said it would be and carries no quality. Keep it if free, read
 #     it as a seat candidate through `record_mix` and nothing more; do NOT spend a second cnx distill arm.
 #   NEITHER — inside +/-0.0062 and near the pool anyway. Then the pixel-group story is wrong: a 448 px

@@ -63,10 +63,35 @@
 #     This does not close warm starts; it sends one more arm to 2.5e-5 and closes them only if that also
 #     lands here.
 #
+# WHAT THE CENSUS ADDED AFTER THIS ARM WAS WRITTEN, AND WHY IT RAISES THE ARM'S VALUE WITHOUT MOVING A
+# BRANCH. `pool_census` measured all 117 members on quality and rank-agreement at once (2026-08-30). Every
+# one of the fourteen STRONG members has a nearest neighbour at 0.9011 or above; the distance axis spans
+# 0.90 in the pool and 0.05 among the strong. So the pool's shortage is not distance in general — it is a
+# member that is far AND not weak, and knee-nj4l's open form has no occupant that means anything.
+#
+# This arm's parent is one of the six members that ARE far and not junk: `cnx_own_recipe` reads nearest
+# agreement 0.8496, five hundredths clear of the band every strong member occupies. The lane therefore
+# already passes the distance half of the census bar (solo >= 0.8580 AND nearest agreement < 0.90) and
+# fails only the strength half, by 0.039. That gap is not hopeful arithmetic: `cnx_dense` ->
+# `cnx_own_recipe` bought +0.0259 on the recipe axis alone, which is the axis this arm is on.
+#
+# The branches below are UNCHANGED — they were written before the census and are read against the
+# parent's peak exactly as pre-registered. What the census changes is what THE TRUNK HAD MORE would then
+# license: not merely "the non-DINO deficit is partly recipe", but a measured position on a ladder whose
+# top is known and whose rung size has been paid for once. It also means a CONVERGED read here is more
+# expensive than this arm first priced it — it would say the only lane holding real distance cannot be
+# moved by recipe, which sends the lane's remaining hope to corpus or trunk rather than to a rate.
+#
 # WHAT NO BRANCH LICENSES. None of them says anything about the ConvNeXt RATE axis, which the parent's
 # trajectory brackets on its own. None re-opens knee-uk4f's frozen-stage pair. A warm-started member is
 # correlated with its parent by construction (knee-wbwq), so no branch here buys SEAT diversity — this
-# arm prices member QUALITY only, and a seat claim would need `record_mix` against the roster after.
+# arm prices member QUALITY only, and a seat claim would need `record_mix` against the roster after. The
+# census sharpens that rather than softening it: the PARENT's distance is measured and good, and a warm
+# restart from its encoder is the one change least likely to move it, so distance here is INHERITED and
+# must be re-measured on the child (`pool_census --show cnx_warm_anneal`) rather than assumed from the
+# paragraph above. RAD-DINO is the standing warning — two members of the most different pretraining
+# objective this project holds read 0.9421, inside the strong band, so a trunk argument does not survive
+# without the measurement.
 #
 # THE VRAM ASK IS THE PARENT'S, AND IT IS DELIBERATELY OVERSTATED. `arm_check` reports 16 GB as 1.90 GB
 # above what 20 slices reserve, and that is correct arithmetic on a token count. `cnx_own_recipe` names
