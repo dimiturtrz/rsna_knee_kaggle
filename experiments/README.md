@@ -6295,3 +6295,49 @@ WHAT THIS DOES NOT LICENSE. It does not re-open the three declined trunks as MEM
 search result above stands. It licenses ONE board reading of the composition axis, on a newly trained
 trunk, to find out whether a maximally-decorrelated member transfers differently than the offline ruler
 can see. One slot, one question, and the answer prices the whole axis either way.
+
+### The fixed discovery made the Swin WORSE, and the seat went to the trunk that was already packaged (2026-08-30)
+
+`swin_wholetop` finished 12 of 12 epochs, converged: 0.7444, 0.7816, 0.8109, 0.8164, 0.8168, 0.8189,
+**0.8274 (peak, e6)**, 0.8228, 0.8223, 0.8197, 0.8186, 0.8180. `convergence_check` reads it CONVERGED, so
+the number is the recipe's and not a killed process's.
+
+It was the re-run of `swin_supervised` byte-identical on the fixed block discovery (knee-94ec), which
+doubled trainable parameters to 37,869,696 and opened both 1024-wide stage-3 blocks. It came out **0.0057
+below** the handicapped run it was built to correct, and the deficit was visible from e1: +0.0003, +0.0013,
+-0.0001, -0.0028, -0.0041, and it never came back. This is the outcome `swin_wholetop.sh` pre-registered
+under REFUTES: the frozen stage 3 was not a handicap on this trunk at this rate, it was the right amount of
+trunk to move. The correction that follows is a RATE arm, and it is already queued as `swin_calib_dense`
+(knee-csxq) at 4e-5 with `--calibrated-targets`.
+
+THE MID-CURVE TIE-BREAK IS RETIRED AGAINST THE FINISHED CURVE. At e7 the deficit narrowed (-0.0033 against
+e6's -0.0057) and I recorded that it broke the monotone-widening premise the knee-tsiz/knee-tild ruling had
+rested on. The finished curve settles it: e8 -0.0108, e9 -0.0134, e10 -0.0145, e11 -0.0151 against
+`swin_supervised`'s own epochs. e7 was scatter, and the ruling stands for the right reason rather than the
+one first given.
+
+WHAT IT COST THE ENTRY THAT WAS BUILT FOR IT. `kneemri-swinseat` was written, bootstrap-verified and
+committed before this curve finished, seating `swin_wholetop_s2026` as a seventh member of the champion
+six. `mount_check` REFUSED it — the member is not in the package — and rather than package a checkpoint
+that had just failed its own bar, the kernel was retired and the entry rebuilt as `kneemri-vjepaseat`.
+
+THE SEAT RULE WAS WRITTEN BEFORE THE NUMBER (knee-wqfz) and then overtaken by a better member. The rule
+said: seat `swin_wholetop` if its finished peak reaches 0.8331, else seat `swin_supervised`. It reached
+0.8274, so the Swin seat was `swin_supervised`'s. But `vjepa_warm_s2026` beats BOTH on every axis measured
+on a shared ruler — 0.8337 solo against 0.8331 and 0.8274, nearest-neighbour agreement 0.8119 against
+0.8346 — and unlike either Swin it is ALREADY on the roster, already in `dimiturnt/kneemri-members`, and
+already mounted from `dimiturnt/vjepa2-hf`. So the entry costs no 7.5 GB re-upload and the slot is spent
+hours earlier.
+
+THE HONEST STATEMENT ABOUT THE GOAL. The goal was to train a non-DINO trunk and spend a submission on it.
+The training half ran and did not produce a seatable member: `swin_wholetop` is 0.0186 under the 0.8460
+merit level and under its own control. Shipping it anyway would be spending the slot on the checkpoint's
+provenance rather than on the axis. The axis is what the goal is for, so the slot goes to the strongest
+non-DINO member the project owns, and the training half continues in `swin_calib_dense`.
+
+WHAT NONE OF THIS LICENSES. It does not re-open the ConvNeXt pair (knee-uk4f): that re-open was always
+priced off `swin_wholetop`'s delta, which is now negative at every epoch of a finished curve, so it is
+priced worse than before rather than better. And it does not make distance a seat argument — knee-053z has
+failed the distance-to-seat inference three times. Distance is why `vjepa_warm` and not another non-DINO
+member; the reason the entry is worth a slot is that the champion is six `--fold -1` members and no offline
+ruler can price it at all.

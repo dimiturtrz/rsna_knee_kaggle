@@ -1,4 +1,4 @@
-"""swinseat — the champion eight: our own non-DINO trunk in the seat its pin says is the plateau.
+"""vjepaseat — the champion seven: our most DISTANT trunk in the seat the pin calls the plateau.
 
 WHY THIS ENTRY EXISTS, and the argument is the champion's own record rather than a fresh idea.
 `comp/champion.json` states in its principles that THE POOL IS AN ARCHITECTURE MONOCULTURE AND THAT IS
@@ -7,7 +7,18 @@ and seven differently-seated entries span 0.937-0.941 because they are seven res
 same file's arithmetic says the member-quality lane ceilings near 0.943 against a 0.952 leader, and
 knee-orjq closed stacking at 7/7 (p = 0.008). The ONE entry that left that plateau did it by seating a
 different ARCHITECTURE — the foreign raptor CoAtNet, 0.941 -> 0.943/0.944. This entry runs that axis from
-the side we control: a supervised Swin-base trunk of ours, which is neither DINO nor raptor.
+the side we control, with the most distant member we own: `vjepa_warm_s2026`, a V-JEPA2 ViT-L warm-started
+from VIDEO pretraining. Neither DINO nor raptor, and not a still-image trunk at all.
+
+WHY THIS MEMBER AND NOT THE SWIN THIS ENTRY WAS FIRST WRITTEN FOR. `kneemri-swinseat` (knee-o1eg) named
+`swin_wholetop_s2026`. That arm finished and did not produce a seatable member — it peaked 0.8274 at epoch
+6 and declined, BELOW the 0.8331 of the handicapped `swin_supervised` run it was built to correct. Of the
+three non-DINO members the project owns, `vjepa_warm` is ahead on every axis measured on a shared ruler:
+0.8337 solo against 0.8331 and 0.8274, and nearest-neighbour agreement 0.8119 against 0.8346 — the most
+decorrelated member this project has ever produced, against a pool that agrees at 0.91-0.94. It is also
+ALREADY packaged in `dimiturnt/kneemri-members` and already mounted from `dimiturnt/vjepa2-hf`, so it
+costs no 7.5 GB re-upload and the slot is spent hours sooner. Seating the weaker trunk to make a newer
+checkpoint the one that shipped would be spending the slot on provenance instead of on the axis.
 
 WHY NO OFFLINE READING DECIDES THIS, which is what earns a slot rather than another scan. The champion is
 six `--fold -1` members and is fully blind by construction. `champion.json` records, measured, that
@@ -17,40 +28,56 @@ substituting fold-0 twins to score it produces a confident wrong answer — a fo
 fold-0 pool sharing ZERO members with the shipped entry. Those readings are sound about that pool and
 say nothing about this one; carrying them across the fold line is the error the pin names.
 
-AND THE NUMBER THEY DID PRODUCE IS UNRESOLVED, NOT NEGATIVE. The honest block delta was -0.0038 against a
-0.0053 paired floor. `board_transfer` reports 9 inversions in 392 pairs and all nine are pairs the holdout
-left UNRESOLVED, against 0 of the 252 it resolved. The offline ruler is not entitled to a verdict here.
+AND THE NUMBER THEY DID PRODUCE IS UNRESOLVED, NOT NEGATIVE. `vjepa_warm`'s seat value against
+`greedyseat_v1` was -0.0007 with a band of [-0.0016, +0.0002] — a band that CROSSES ZERO, on a pool that
+cannot price this pin anyway. The honest block delta for the non-DINO lane was -0.0038 against a 0.0053
+paired floor. `board_transfer` reports 9 inversions in 392 pairs and all nine are pairs the holdout left
+UNRESOLVED, against 0 of the 252 it resolved. The offline ruler is not entitled to a verdict here.
+
+WHAT THE ROSTER WARNS AGAINST, and this entry has to answer it rather than ignore it. knee-053z has failed
+the distance-to-seat inference three times: being decorrelated has not, on this project's own measurements,
+predicted seat value. So distance is NOT the claim. The claim is that the offline ruler is blind to this
+pin by construction, that the axis is the one the pin itself names as its plateau, and that on that axis
+the only board-moving evidence the project holds is a foreign different-architecture seat. Distance is why
+THIS member and not another non-DINO one; it is not why the entry is worth a slot.
 
 PRECEDENT FOR SEATING A MEMBER ITS OWN SCORE ARGUES AGAINST. `base_dense` lost its matched control by
 0.0066 and bought a board tick; `lora_r8_v3small` is rostered at 0.8215 as the only non-DINOv2 member;
 `focus_mcl` is seated deliberately at 0.5332. `champion.json` states the rule outright: a member that
 failed its own matched control can still win a seat, because alone-quality and seat-value are different
-quantities. `swin_wholetop` is seated on the axis, not on its solo number.
+quantities. `vjepa_warm` is seated on the axis, not on its solo number.
 
 ONE VARIABLE MOVES. `raptorweight_v1`'s exact six, the same raptor foreign seat at 1/3, the same
-`LogitAverage`, the same kit, the same rank-space join — plus `swin_wholetop_s2026` as a SEVENTH member of
+`LogitAverage`, the same kit, the same rank-space join — plus `vjepa_warm_s2026` as a SEVENTH member of
 ours. Count and architecture move together and this entry cannot separate them; `fleettwo_v1` already read
 the foreign COUNT axis flat, which is the control that makes the architecture reading the live one.
+
+WHAT ONE SEAT IS WORTH, stated before the number so a small move is not read as a null. A seventh member of
+ours takes 1/7 of our side, and our side is 2/3 of the blend: about 9.5% of the entry. The raptor seat that
+bought the pin its tick carries 33%. So a proportional effect would be roughly a tick — right at the board's
+0.001 quantisation — and the FLAT band below is drawn wide enough to absorb that case honestly rather than
+letting an unresolvable read be reported as a refutation.
 
 PRE-REGISTERED, and the band is drawn against the board's own 0.001 quantisation so it cannot be mis-drawn
 the way `raptorweight`'s was. Champion 0.944.
 - **0.946 or above** — architecture diversity from our own side is a real lever, two ticks clear of board
   resolution, and it lands in the top ten. Then the lane is open regardless of what `swin_calib_dense`
-  reads, and the follow-up is a BETTER non-DINO member in the same seat.
-- **0.943-0.945** — FLAT, inside one tick either way. Then our own non-DINO trunk does not do for us what
-  the foreign CoAtNet did, and the question worth chasing is what makes the foreign seat different —
-  corpus, or architecture, or both — rather than another trunk.
-- **0.942 or below** — the eighth seat harms. Read it WITH `fleettwo_v1`'s flat count reading before
+  reads, and the follow-up is a SECOND non-DINO seat, raising the share past the resolution question.
+- **0.943-0.945** — FLAT, inside one tick either way, and at 9.5% weight that is the outcome a
+  proportional effect predicts. It does NOT close the axis: the follow-up that would is the same entry
+  with the non-DINO share raised, not another trunk.
+- **0.942 or below** — the seventh seat harms. Read it WITH `fleettwo_v1`'s flat count reading before
   concluding anything about the axis: a cost here is as consistent with seat count as with architecture.
 
 THE REFUTATION THIS CANNOT MAKE: it cannot say whether a non-DINO trunk trained on the recipe that
 actually seats members would do better. That is `swin_calib_dense` (knee-csxq), which runs tonight and is
 not gated on this result either way.
 
-BUDGET. Seven of ours plus the raptor pass on one T4. The Swin member reads 384 px at 20 slices, which is
-the heaviest member in the entry, and `Budget` is handed what the raptor pass already spent so both
-producers aim at the SAME ceiling. If the session runs short, `KernelRun` drops members — which is the
-one failure that would score this entry without the thing it is for, so read the log's member list.
+BUDGET, and it is the risk this entry carries that `swinseat` did not. V-JEPA2 ViT-L is the largest trunk
+in any entry the project has shipped, several times Swin-base's 86.9 M. Seven of ours plus the raptor pass
+run on one T4, and `Budget` is handed what the raptor pass already spent so both producers aim at the SAME
+ceiling. If the session runs short, `KernelRun` drops members — which is the one failure that would score
+this entry without the thing it is for, so READ THE LOG'S MEMBER LIST before reading the score.
 
 bead: knee-o1eg
 """
@@ -190,9 +217,10 @@ def main() -> None:
         "lr4e-5_ws_cf",
         "through_dense_cf",
         # The seventh of ours and the reason this entry exists: the only member here that is not
-        # dinov2-small. It reads 384 px because Swin-base's window tables are baked at 12 and only a
-        # 384 px read tiles them exactly — see backbone.py SWIN_BASE, where that is why the arm pins it.
-        "swin_wholetop_s2026",
+        # dinov2-small. A V-JEPA2 ViT-L trunk warm-started from video pretraining — the most distant
+        # member this project has ever produced, nearest-neighbour agreement 0.8119 against the pool's
+        # 0.91-0.94, and 0.8337 solo. Its weights mount from `dimiturnt/vjepa2-hf`.
+        "vjepa_warm_s2026",
     )
     # What the raptor pass cost, handed to the six so their nine-hour budget is the SESSION's and not
     # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
