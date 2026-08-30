@@ -602,7 +602,12 @@ ENCODERS: dict[str, Encoder] = {
         1024,
         patch=32,
         family=SWIN,
-        leaf="swin-base",
+        # THE DATASET'S SLUG, not a prettier name for the trunk. `leaf` has exactly one consumer,
+        # `locates`, which requires it as an exact path SEGMENT of the mounted directory — and a flat
+        # mount's directory IS the slug, `/kaggle/input/swin-base-384`. Spelled `swin-base` this entry
+        # matched no mount, so `find_encoder` raised and `kernel_run` dropped the member from the entry
+        # with the other members still loading: a submission that scores, without the thing it was for.
+        leaf="swin-base-384",
         params_m=86.9,
         adapter=TrunkAsTokens.from_sequence,
         # FLAT, like `dimiturnt/rad-dino` and unlike `dimiturnt/dinov3-hf/<leaf>`: the leaf shape exists

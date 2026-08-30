@@ -116,6 +116,27 @@ def test_mounted_source():
     )
 
 
+def test_every_mount_is_locatable():
+    """Every mounted encoder must RECOGNISE the directory its own mount arrives in.
+
+    `mount` and `leaf` are two independent strings and nothing tied them together: `mount` is what a
+    kernel declares, `leaf` is what `locates` matches once Kaggle has mounted it. Swin was added with
+    mount `dimiturnt/swin-base-384` and leaf `swin-base`, which agree to a reader and not to
+    `str.split`. The cost of that disagreement is not an error: `find_encoder` raises, `kernel_run`
+    catches it per member and drops that one, and the entry SCORES — without the member it was built
+    for, on a slot that cannot be spent twice.
+
+    Kaggle mounts a source under `/kaggle/input` without its owner, so the path is the mount minus its
+    first segment. That covers both kinds: a model source keeps its whole framework path
+    (`dinov2/PyTorch/small/1`), a dataset source is its slug and any directory inside it.
+    """
+    for encoder in ENCODERS.values():
+        if encoder.mount is None:
+            continue
+        mounted = "/kaggle/input/" + encoder.mount.split("/", 1)[1]
+        assert encoder.locates(mounted), f"{encoder.variant} would not find its own mount at {mounted}"
+
+
 def test_every_variant_states_its_own_width():
     """The width follows from the variant — it is what three separate constants used to disagree about."""
     assert ENCODERS[SMALL].dim == 384
