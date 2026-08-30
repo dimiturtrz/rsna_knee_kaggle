@@ -97,6 +97,42 @@ class LiveDataset:
         names = (row.split(",", 1)[0].strip() for row in rows[1:] if row.strip())
         return {name.removesuffix(".pt") for name in names if name.endswith(".pt")}
 
+    def paths(self) -> set[str]:
+        """Every file path the live dataset lists, as the kernel will see them under its mount root.
+
+        `members` asks which `.pt` files are there and throws the directories away, which is the right
+        question for the members package and blind to the one that cost `farseat_v1`. An ENCODER dataset
+        is addressed by a PATH: `Encoder.locates` matches its `leaf` as a path SEGMENT, so
+        `dimiturnt/dinov3-hf/vits16` needs a `vits16/` prefix to exist inside the dataset and not merely
+        the dataset to exist. On 2026-08-24 `dimiturnt/vjepa2-hf` was pushed with `--dir-mode zip`, which
+        unpacks a subdirectory into the ROOT, so the declared `vjepa2-vitl` segment was never published.
+        Every check stayed green — the kernel declared the dataset, the dataset existed, the member was
+        packaged — and the kernel then dropped the member and scored as a smaller ensemble.
+
+        Truncation is refused for the same reason `members` refuses it, and it matters more here: a
+        listing that pages out the one prefix being asked about answers NO to a question whose true
+        answer is yes, and the caller cannot tell that from a real absence.
+        """
+        rows = self.listing(self.identifier).splitlines()
+        if any(row.startswith(NEXT_PAGE_MARKER) for row in rows):
+            raise TruncatedListingError(
+                f"{self.identifier} listed more than {LIVE_PAGE_SIZE} files, so a prefix missing from "
+                f"this page is not a prefix the dataset lacks - raise LIVE_PAGE_SIZE or page the listing"
+            )
+        return {row.split(",", 1)[0].strip() for row in rows[1:] if row.strip()}
+
+    def holds(self, subpath: str) -> bool:
+        """Whether the live dataset publishes anything under a subpath — the mount's own leaf question.
+
+        An empty subpath is the flat layout (`dimiturnt/rad-dino`, `dimiturnt/vjepa2-hf`), where the
+        dataset name IS the leaf and any file at all answers it.
+        """
+        listed = self.paths()
+        if not subpath:
+            return bool(listed)
+        prefix = subpath.strip("/") + "/"
+        return any(path.replace("\\", "/").startswith(prefix) for path in listed)
+
     @staticmethod
     def identified(root: Path) -> str:
         """The dataset id a package ships under, read from the metadata that is pushed with it."""

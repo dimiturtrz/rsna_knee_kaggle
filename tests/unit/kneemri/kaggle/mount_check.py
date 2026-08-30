@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from kneemri.inference.members import MemberPackage
-from kneemri.kaggle.mount_check import LiveReading, MountCheck, MountSweep
+from kneemri.kaggle.mount_check import EncoderMounts, LiveReading, MountCheck, MountSweep
 
 DINOV2 = "metaresearch/dinov2/PyTorch/small/1"
 DINOV3 = "dimiturnt/dinov3-hf"
@@ -213,7 +213,7 @@ def _swept(tmp_path: Path) -> MountSweep:
     return MountSweep.over(MountCheck(_package(tmp_path)), tmp_path)
 
 
-def test_over(tmp_path: Path):
+def test_mount_sweep_over(tmp_path: Path):
     """Every entry judged, and the WALKED count read from the directory rather than from the verdicts.
 
     Those two numbers are the point of the class: the buckets are computed from the verdicts and so can
@@ -248,3 +248,20 @@ def test_lines(tmp_path: Path):
     assert len(lines) == 4, "three verdicts and one tally"
     assert lines[-1].startswith("1 ok, 1 skipped, 1 refused of 3 kernel directories")
     assert "(2 others" in lines[-1], "the directories the sweep declined to judge are counted out loud"
+
+
+def test_encoder_mounts_over():
+    """A mount is unresolved when its dataset does not publish the subpath the mount names.
+
+    The flat case is `farseat_v1`'s: the dataset exists, the kernel declares it, and the leaf the
+    encoder resolves on was never published — so the member is dropped at run time and the entry
+    scores as a smaller ensemble than the one that was designed.
+    """
+    nested = "name,size,creationDate\nvits16/config.json,785,2026-08-23 12:42:39\n"
+    flat = "name,size,creationDate\nconfig.json,785,2026-08-24 12:42:39\n"
+
+    assert EncoderMounts.over(["dimiturnt/dinov3-hf/vits16"], lambda _: nested).missing == {}
+    assert EncoderMounts.over(["dimiturnt/vjepa2-hf"], lambda _: flat).missing == {}
+    assert EncoderMounts.over(["dimiturnt/vjepa2-hf/vjepa2-vitl"], lambda _: flat).missing == {
+        "dimiturnt/vjepa2-hf/vjepa2-vitl": "dimiturnt/vjepa2-hf"
+    }

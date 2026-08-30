@@ -201,6 +201,47 @@ class LiveReading:
         return cls(held, unsettled)
 
 
+DATASET_SEGMENTS = 2
+"""`owner/name` — what a Kaggle dataset id is, and where a mount's in-dataset subpath starts."""
+
+
+@dataclass(frozen=True)
+class EncoderMounts:
+    """Do the ENCODER datasets publish the paths their mounts name? The other half of the live question.
+
+    `absent` asks whether the members dataset holds the `.pt` files, which is a question about
+    FILENAMES. An encoder is addressed by a PATH instead: `Encoder.locates` matches its leaf as a path
+    segment, so `dimiturnt/dinov3-hf/vits16` needs that directory to exist INSIDE the dataset. Nothing
+    asked, and on 2026-08-24 `dimiturnt/vjepa2-hf` was pushed with `--dir-mode zip`, which unpacks a
+    subdirectory into the root and dropped the `vjepa2-vitl` segment the mount declared.
+
+    Every other gate stayed green through that, correctly and uselessly: the kernel DECLARED the
+    dataset, the dataset EXISTED, the member was packaged and rostered and witness-checked. The kernel
+    dropped the member, printed `ENTRY IDENTITY CHANGED`, and `farseat_v1` scored as six members under a
+    seven-member name — a flat read that was then recorded as closing the cross-family diversity axis.
+    Five days and one closed axis, for a check that is one listing per encoder dataset. See knee-nbk3.
+    """
+
+    missing: dict[str, str]
+    """Mount string to the dataset id it resolves to, for every mount the live dataset does not hold."""
+
+    @classmethod
+    def over(
+        cls,
+        mounts: list[str],
+        listing: Callable[[str], str] | None = None,
+    ) -> "EncoderMounts":
+        """Ask each distinct encoder dataset once whether it publishes the subpath its mount names."""
+        missing: dict[str, str] = {}
+        for mount in sorted(set(mounts)):
+            segments = mount.strip("/").split("/")
+            identifier = "/".join(segments[:DATASET_SEGMENTS])
+            subpath = "/".join(segments[DATASET_SEGMENTS:])
+            if not LiveDataset(identifier, listing).holds(subpath):
+                missing[mount] = identifier
+        return cls(missing)
+
+
 @dataclass(frozen=True)
 class MountSweep:
     """Every kernel's verdict, bucketed, carrying the count of directories the sweep WALKED.
@@ -301,6 +342,18 @@ def main() -> None:
             len(package.members),
             ", ".join(absent),
         )
+    # THE SAME QUESTION ONE LEVEL DOWN, and only under --live because it is a listing per encoder
+    # dataset. A mount whose leaf was never published refuses every kernel that names a member on that
+    # encoder, and does it SILENTLY at run time by dropping the member rather than failing the run.
+    unresolved: dict[str, str] = EncoderMounts.over(package.mounts(None)).missing if reading.live is not None else {}
+    for mount, identifier in unresolved.items():
+        logger.error(
+            "mount %s names a path %s does not publish — a kernel declaring this dataset will still fail "
+            "to find the encoder and will DROP the member, scoring as a smaller ensemble. Re-push the "
+            "dataset with that directory, or name the mount for the dataset itself (see rad-dino).",
+            mount,
+            identifier,
+        )
     sweep = MountSweep.over(check, arguments.kernels)
     for line in sweep.lines(arguments.kernels):
         logger.info(line)
@@ -308,7 +361,7 @@ def main() -> None:
     # skips, both leave a pre-flight that checked no mount and said so in the words of a clean one.
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
     Denominator(sweep.passed, empty).refuse_empty()
-    if sweep.refused or absent or reading.unsettled:
+    if sweep.refused or absent or reading.unsettled or unresolved:
         sys.exit(1)
 
 
