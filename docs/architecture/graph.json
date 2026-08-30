@@ -999,13 +999,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.annotated_readings",
-      "target": "kneemri.evaluation.scores",
+      "target": "kneemri.evaluation.gold_rows",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.evaluation.annotated_readings",
-      "target": "kneemri.evaluation.supervision_gap",
+      "target": "kneemri.evaluation.scores",
       "weight": 1
     },
     {
@@ -2080,6 +2080,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.supervision_gap",
       "target": "kneemri.evaluation.annotated_readings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.supervision_gap",
+      "target": "kneemri.evaluation.gold_rows",
       "weight": 1
     },
     {

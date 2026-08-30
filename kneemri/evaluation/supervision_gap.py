@@ -311,7 +311,7 @@ def main() -> None:
         identifiers, _ = gap.annotated(train_table)
         names, per_member = AnnotatedReadings(root, device).readings(arguments.records, identifiers)
         values, predictions, annotations = gap.matched(
-            arguments.labels, train_table, names, RankAverage().combine(per_member)
+            arguments.labels, train_table, names, RankAverage().combine([values for _, values in per_member])
         )
     else:
         values, predictions, annotations = gap.aligned(arguments.labels, train_table, root.processed() / "published")

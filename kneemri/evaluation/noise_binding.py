@@ -250,8 +250,8 @@ def main() -> None:
 
     binding = NoiseBinding()
     grouped = binding.groups(cells)
-    for checkpoint, member in zip(arguments.checkpoints, per_member, strict=True):
-        scored = binding.probabilities(grouped, names, member)
+    for checkpoint, values in per_member:
+        scored = binding.probabilities(grouped, names, values)
         command.report([f"=== {checkpoint.name} ===", *binding.report(binding.tracking(scored))])
 
 

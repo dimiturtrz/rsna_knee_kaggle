@@ -106,12 +106,22 @@ class AnnotatedReadings:
 
     def readings(  # devtools-ignore: test-mirror
         self, checkpoints: list[Path], annotated: list[str], *, overlap: bool = False
-    ) -> tuple[list[str], list[NDArray[np.float64]]]:
+    ) -> tuple[list[str], list[tuple[Path, NDArray[np.float64]]]]:
         """The annotated studies and each member's probabilities over them, aligned by construction.
 
         Grouped through `MemberReadings` so members sharing a cache pay one decode, and cached through the
         same store the curve uses, keyed on the studies actually scored — so a second reading of the same
         member over the same set costs no encoder at all.
+
+        EACH ARRAY CARRIES THE CHECKPOINT THAT PRODUCED IT, and that is the whole reason for the pair.
+        The grouping above walks members in CACHE order, not in the order they were asked for, so a caller
+        that zipped the returned arrays back against its own `--checkpoints` list read every member's score
+        under another member's name. `strict=True` did not catch it and could not: the lengths always
+        match, and it is the IDENTITIES that were crossed. It was found on 2026-08-30 by a six-member read
+        whose `--overlap` table came back byte-identical to its plain one, and it silently misreported five
+        of those six rows — in the instrument that scores members against the ruler the board actually
+        uses. Returning the pairing from the one place that knows it is what makes the re-derivation
+        impossible rather than merely discouraged; the same defect under another name is `knee-y8y`.
         """
         for checkpoint in checkpoints:
             self.withheld(checkpoint)
@@ -121,11 +131,11 @@ class AnnotatedReadings:
         names = [reference[index] for index in rows]
         cache = PredictionCache(self.root.processed() / "annotated_predictions", names, self.predictions.views)
         logger.info("%d annotated studies of %d requested are in the corpus", len(names), len(annotated))
-        per_member: list[NDArray[np.float64]] = []
+        per_member: list[tuple[Path, NDArray[np.float64]]] = []
         with Wakelock():
             for member, slab, held in grouped.slabs(rows, reference, corpus):
                 window = member.window(held.slices, overlap=overlap)
-                per_member.append(self.predictions.cached(member, slab, cache, window))
+                per_member.append((member.file, self.predictions.cached(member, slab, cache, window)))
                 logger.info("%s: read over %d annotated studies", member.file.name, len(names))
         return names, per_member
 
@@ -151,11 +161,10 @@ def main() -> None:
     position = {name: index for index, name in enumerate(identifiers)}
     annotations = truth[np.array([position[name] for name in names], dtype=np.int64)]
     scores = LabelScores()
-    combined = RankAverage().combine(per_member)
-    read = zip(arguments.checkpoints, per_member, strict=True)
+    combined = RankAverage().combine([values for _, values in per_member])
     command.report(
         [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them trained on these cells"]
-        + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in read]
+        + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
     )
 
