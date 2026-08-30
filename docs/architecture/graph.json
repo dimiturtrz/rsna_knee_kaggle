@@ -14493,6 +14493,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "target": "kneemri.experiments.queue_check.QueuedArms._invokes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.watchers",
       "target": "kneemri.process_table.ProcessTable.parentage",
       "weight": 1
     },
@@ -33928,6 +33934,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms._armed",
       "label": "_armed",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._invokes",
+      "label": "_invokes",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
