@@ -53,6 +53,15 @@ seated member and a rank average cannot charge for contributing one ordering twi
 appends the label-free distance reading to this report for that reason. The two columns disagree on that
 pair, deliberately visibly — quoting this one without the other is quoting the ruler that was wrong about
 the last decision it was asked to make.
+
+AND SINCE 2026-08-30 THERE IS A THIRD COLUMN, for an axis neither of the first two can see.
+`MemberDistance` reads rank correlation, which is invariant to any monotone rescaling of a member's
+scores, so two members that order every study identically read as twins there however confidently they
+predict. `MemberDivergence` reads Jensen-Shannon between the same members' beliefs, which is the axis a
+LOGIT average combines on and the one the champion has shipped since `kneemri-vote`. It is the weakest of
+the three and must be read that way: it was written from a mechanism rather than from a board split, and
+a member that is merely differently CALIBRATED scores high on it while buying nothing a temperature knob
+would not. High divergence AND low correlation is the pair worth a seat; high divergence alone is not.
 """
 
 import logging
@@ -61,6 +70,7 @@ from pathlib import Path
 from core import cli
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.member_distance import MemberDistance
+from kneemri.evaluation.member_divergence import MemberDivergence
 from kneemri.evaluation.record_mix import MixReading, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.champion_check import BOARD, Champion
@@ -170,6 +180,7 @@ class SeatValue:
             denominator,
             *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False, routing=False),
             *MemberDistance(held, rest).report(),
+            *MemberDivergence(held, rest).report(),
         ]
 
 
