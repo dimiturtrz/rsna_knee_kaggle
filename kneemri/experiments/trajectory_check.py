@@ -1,0 +1,237 @@
+"""Can a running arm still reach its branch: `python -m kneemri.experiments.trajectory_check`.
+
+`convergence_check` guards a number AFTER a run ends. This guards the CARD while it is still running, and
+it is the only check here that can end a job. A twelve-epoch `one_cycle` arm costs about three hours; the
+question it exists to answer is whether the remaining two of them can change which branch the arm lands in.
+
+WHAT LICENSES IT. Across every run under the processed root with at least `MIN_EPOCHS` recorded epochs and
+the same epoch BUDGET as the arm under test, the gain from the gate epoch to the run's peak is a measured
+distribution rather than a guess. On 2026-08-30, matched to a twelve-epoch schedule, it read median +0.0210,
+p90 +0.0380, max +0.0529 over n=96 — the maximum being `encoder_adapt_gentle`, a run that started very low
+and so had the most room to climb. So an arm sitting at the gate more than the MAXIMUM
+such gain below its own SEAT threshold cannot reach that threshold by any trajectory this project has ever
+recorded, and the epochs left decide nothing.
+
+FIRST USE, and the reason the numbers above are quoted from a real reading rather than from a design: on
+2026-08-30 `vit_in21k` sat at 0.7847 at epoch 4 against a pre-registered seat branch of 0.8393. It needed
++0.0546 — larger than the largest gain in the distribution, and that largest gain was itself measured from
+an EARLIER epoch of a longer run, so the comparison was generous in the arm's favour twice over. It was
+truncated and the card went to `swin_wholetop`. The second anchor is a matched one: `swin_supervised` sat
+at 0.8192 at epoch 3 and was still declined as too weak, so the band a seat-worthy arm occupies at the gate
+is known from the other side too.
+
+WHAT IT MAY NOT DO, and these are the failure modes it would otherwise invite.
+
+- It may only TRUNCATE. It must never promote an arm, never rank two arms, and never close a family: a high
+  value at the gate says the run is not yet refuted, which is not the same as a result.
+- It may only truncate against a branch that was PRE-REGISTERED before the run started. Reading a target
+  off the curve is fitting the gate to the arm, and then every arm passes.
+- A truncated `one_cycle` score is a FLOOR — the anneal never ran — so the record must carry it as one.
+  `convergence_check` reports exactly that verdict, and the ledger row has to say it in prose too.
+- The distribution is over THIS harness's runs, most of them DINOv2 at twelve epochs. An arm on a trunk
+  with a genuinely different shape is outside it, and the honest move there is to widen the corpus rather
+  than to trust the ceiling. A different SCHEDULE is handled — the corpus is matched on the epoch budget —
+  but that only narrows the sample, so a budget with two runs on it is not an instrument.
+
+AND THE CORPUS ITSELF NEEDED A GUARD, which is the first thing this tool found that the hand reading missed.
+Before runs recording more epochs than they asked for were refused, the twelve-epoch maximum read +0.1350
+rather than +0.0529: `lora_r8_v3small_224` holds 16 rows against a 12-epoch recipe, so its gate value and its
+peak belong to different runs. One stitched series, and the ceiling is two and a half times the largest real
+gain — which for a gate decided by the MAXIMUM means it can barely fire at all.
+
+WHY THE CEILING IS THE MAXIMUM AND NOT THE p90. A gate that fires at p90 is wrong one time in ten, and the
+thing it costs when it is wrong is a member — the asymmetry runs entirely one way, since the thing it saves
+when it is right is two hours of a card that is not otherwise scarce today. Both numbers are printed, and
+only the maximum decides.
+"""
+
+import logging
+import math
+import statistics
+from dataclasses import dataclass
+from pathlib import Path
+
+from core import cli
+from core.denominator import Denominator
+from kneemri.experiments.convergence_check import AUC, ConvergenceCheck
+from kneemri.runs.run_metrics import RunMetrics
+
+logger = logging.getLogger(__name__)
+
+GATE_EPOCH = 3
+"""The epoch the distribution is measured FROM, zero-indexed.
+
+Early enough to save most of a run and late enough to be past the noise of the first epochs: over the
+reference curve (`swin_supervised`) epochs 0-2 climb 0.7441 -> 0.8110 and are dominated by the head
+learning to read a frozen trunk at all, while the ordering between arms only settles once the backbone has
+moved. A gate at e1 would refute arms that go on to win."""
+
+MIN_EPOCHS = 10
+"""How many recorded epochs a run needs to enter the distribution.
+
+A short run has not shown where its peak is, so its gate-to-peak gain understates every longer run's — and
+this ceiling is only sound if it is generous. Ten keeps the corpus at the twelve-epoch schedule the gate is
+used on."""
+
+HIGH = 0.9
+"""The reported quantile. Printed for the reader, never used to decide — see the module docstring."""
+
+
+@dataclass(frozen=True)
+class Spread:
+    """The measured gate-to-peak gains, as the three numbers a ceiling is read from."""
+
+    runs: int
+    median: float
+    high: float
+    largest: float
+
+    def line(self) -> str:
+        """The distribution as one line, so a truncation decision can be quoted with its evidence."""
+        return (
+            f"gain from e{GATE_EPOCH} to peak over {self.runs} runs: "
+            f"median +{self.median:.4f}, p{int(HIGH * 100)} +{self.high:.4f}, max +{self.largest:.4f}"
+        )
+
+
+@dataclass(frozen=True)
+class RunTrajectory:
+    """One arm read against a target it was given before it started."""
+
+    name: str
+    epoch: int
+    auc: float
+    target: float
+    ceiling: float
+
+    def truncatable(self) -> bool:
+        """Whether no trajectory in the corpus takes this arm from where it is to where it must be."""
+        return self.ceiling < self.target
+
+    def line(self) -> str:
+        """The finding with the arithmetic in it, rather than only the verdict."""
+        verdict = "CANNOT REACH" if self.truncatable() else "still open"
+        return (
+            f"{verdict:13s} {self.name:34s} e{self.epoch} {self.auc:.4f}, "
+            f"needs +{self.target - self.auc:.4f} for {self.target:.4f}, generous ceiling {self.ceiling:.4f}"
+        )
+
+
+class TrajectoryGate:
+    """The gate-to-peak distribution, and one arm read against it."""
+
+    def __init__(self) -> None:
+        self._runs = ConvergenceCheck()
+
+    def scored(self, run: RunMetrics) -> list[float]:
+        """The run's holdout series, NaN rows dropped.
+
+        A `--fold -1` member holds nothing back and records NaN rather than omitting the key, so a filter
+        on `is not None` keeps them — and one NaN in the list makes the median and the maximum NaN too.
+        The first run of this check reported `median +nan, max +nan` over 119 runs for exactly that."""
+        return [value for row in run.rows() if isinstance(value := row.get(AUC), float) and math.isfinite(value)]
+
+    def gain(self, run: RunMetrics, budget: int | None) -> float | None:
+        """This run's gain from the gate epoch to its peak, or None if it does not belong in the corpus.
+
+        `budget` matches on the epoch count the recipe ASKED for, because the gain is a statement about a
+        SCHEDULE and not about a model: a 24-epoch `one_cycle` run has twice the anneal left after the gate
+        and reads median +0.0339 against a 12-epoch run's +0.0210. Comparing across the two would let a
+        long schedule's headroom excuse a short arm.
+
+        A run recording MORE epochs than it asked for is refused outright. `RunMetrics.rows()` is supposed
+        to return the last run's group, and `lora_r8_v3small_224` shows it does not always: 16 rows against
+        a 12-epoch recipe, so its e3 belongs to one run and its peak to another. Read as one trajectory it
+        contributes +0.1350 — two and a half times the largest real gain in the corpus — and since the
+        maximum is what decides here, that single stitched series would have made the gate almost unable
+        to fire. See knee-gnzx.
+        """
+        asked = self._runs.asked(run)
+        if asked is None or (budget is not None and asked != budget):
+            return None
+        scored = self.scored(run)
+        if len(scored) > asked or len(scored) < MIN_EPOCHS or len(scored) <= GATE_EPOCH:
+            return None
+        return max(scored) - scored[GATE_EPOCH]
+
+    def spread(self, processed: Path, budget: int | None = None) -> Spread:
+        """The distribution over every non-smoke run under the root that ran long enough to have one."""
+        gains = [
+            gain
+            for metrics in sorted(processed.glob("*.metrics.jsonl"))
+            if (run := RunMetrics(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
+            if (gain := self.gain(run, budget)) is not None
+        ]
+        # An unmounted data root would otherwise make every arm truncatable against an empty corpus, which
+        # is the one direction this gate must never fail in.
+        Denominator(
+            len(gains), f"no run under {processed} reached epoch {GATE_EPOCH} with {MIN_EPOCHS} recorded"
+        ).refuse_empty()
+        ranked = sorted(gains)
+        return Spread(
+            runs=len(ranked),
+            median=statistics.median(ranked),
+            high=ranked[min(int(HIGH * len(ranked)), len(ranked) - 1)],
+            largest=ranked[-1],
+        )
+
+    def reading(self, run: RunMetrics, target: float, spread: Spread) -> RunTrajectory:
+        """Where the arm stands now, and the best it could still do by the corpus's own maximum gain.
+
+        Read from the LAST recorded epoch rather than from the gate, which is generous in the arm's favour:
+        the corpus's gains are measured from the gate, so an arm already past it is credited with a climb
+        it has partly spent. That is deliberate — the gate may only truncate, so every approximation in it
+        leans towards letting the run continue.
+        """
+        scored = self.scored(run)
+        return RunTrajectory(
+            name=run.name(),
+            epoch=len(scored) - 1,
+            auc=scored[-1],
+            target=target,
+            ceiling=scored[-1] + spread.largest,
+        )
+
+
+def main() -> None:
+    """Report the gate distribution, and whether one named arm can still reach a pre-registered target."""
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--run", type=Path, help="a metrics file or checkpoint for the arm under test")
+    command.parser.add_argument(
+        "--target", type=float, help="the PRE-REGISTERED score the arm must reach; read off no curve"
+    )
+    arguments = command.parsed()
+
+    gate = TrajectoryGate()
+    processed = command.rooted(arguments).processed()
+    if arguments.run is None:
+        logger.info("%s", gate.spread(processed).line())
+        return
+
+    record = RunMetrics(arguments.run)
+    if not record.exists():
+        message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
+        raise SystemExit(message)
+    if arguments.target is None:
+        message = "--run needs --target: this gate compares against a branch registered BEFORE the run started"
+        raise SystemExit(message)
+    # MATCHED on the arm's own epoch budget, so the ceiling it is measured against is one a run on this
+    # schedule actually achieved. Falls back to the whole corpus only for an arm that recorded no recipe.
+    spread = gate.spread(processed, ConvergenceCheck().asked(record))
+    logger.info("%s", spread.line())
+    scored = gate.scored(record)
+    if len(scored) <= GATE_EPOCH:
+        message = f"{record.name()} has {len(scored)} scored epochs - nothing to read before e{GATE_EPOCH}"
+        raise SystemExit(message)
+
+    reading = gate.reading(record, arguments.target, spread)
+    logger.info("%s", reading.line())
+    if reading.truncatable():
+        # Non-zero so a watcher can act on it, and the sentence is the record: what it licenses is ending
+        # THIS run, never a statement about the recipe, whose score becomes a floor the moment it is killed.
+        logger.info("no trajectory in the corpus reaches the target - truncating leaves a FLOOR, not a number")
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

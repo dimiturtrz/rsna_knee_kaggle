@@ -1,0 +1,143 @@
+"""The gate, against the two readings that motivated it and the stitched series that nearly broke it."""
+
+import json
+from pathlib import Path
+
+import pytest
+
+from kneemri.experiments.trajectory_check import GATE_EPOCH, RunTrajectory, Spread, TrajectoryGate, main
+from kneemri.runs.run_metrics import RunMetrics
+
+CEILING = 0.05
+"""The largest gain the fixture corpus offers, so a target more than this above an arm is unreachable."""
+
+
+def write_curve(directory: Path, name: str, scores: list[float], asked: int) -> RunMetrics:
+    """A metrics file holding exactly `scores`, describing a recipe that asked for `asked` epochs.
+
+    Written line by line rather than through `RunMetrics.record`, which reads the CUDA allocator: a unit
+    test may touch nothing it did not create, and the device is not ours.
+    """
+    path = directory / f"{name}.metrics.jsonl"
+    lines = [json.dumps({"recipe": {"fold": "0", "epochs": str(asked), "patience": "0", "studies": "0"}})]
+    lines += [
+        json.dumps({"epoch": epoch, "loss": 1.0, "auc": score, "per_label": {}}) for epoch, score in enumerate(scores)
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return RunMetrics(path)
+
+
+def climbing(start: float, gain: float, epochs: int = 12) -> list[float]:
+    """A curve that reaches `start + gain` after the gate epoch and then holds."""
+    return [start - 0.05, start - 0.02, start - 0.01, start] + [start + gain] * (epochs - GATE_EPOCH - 1)
+
+
+def corpus(directory: Path) -> Path:
+    """A processed root of twelve-epoch runs whose gate-to-peak gains span 0.01 to `CEILING`."""
+    for index, gain in enumerate((0.01, 0.02, 0.03, 0.04, CEILING)):
+        write_curve(directory, f"member_{index}", climbing(0.80, gain), asked=12)
+    return directory
+
+
+def test_scored(tmp_path: Path) -> None:
+    """The holdout series, with the NaN rows a dark member writes dropped."""
+    path = tmp_path / "dark.metrics.jsonl"
+    path.write_text(
+        "\n".join(
+            [
+                json.dumps({"recipe": {"epochs": "12"}}),
+                json.dumps({"epoch": 0, "auc": 0.81}),
+                json.dumps({"epoch": 1, "auc": float("nan")}),
+                json.dumps({"epoch": 2, "auc": 0.83}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    assert TrajectoryGate().scored(RunMetrics(path)) == [0.81, 0.83], "one NaN makes the median and max NaN too"
+
+
+def test_gain(tmp_path: Path) -> None:
+    """The gate-to-peak gain, and the three runs that do not belong in the corpus."""
+    gate = TrajectoryGate()
+
+    assert gate.gain(write_curve(tmp_path, "ordinary", climbing(0.80, 0.02), asked=12), 12) == pytest.approx(0.02)
+
+    # A 24-epoch run has twice the anneal left after the gate: median +0.0339 against a 12-epoch +0.0210.
+    long_run = write_curve(tmp_path, "nocycle224_long", climbing(0.79, 0.05, epochs=24), asked=24)
+    assert gate.gain(long_run, 24) is not None
+    assert gate.gain(long_run, 12) is None, "a schedule's headroom may not excuse an arm on another one"
+
+    # lora_r8_v3small_224: 16 rows against a 12-epoch recipe, so its e3 and its peak are different runs.
+    # Read as one trajectory it contributes +0.1350, and the maximum is what decides here.
+    stitched = write_curve(tmp_path, "lora_r8_v3small_224", climbing(0.69, 0.135, epochs=16), asked=12)
+    assert gate.gain(stitched, 12) is None, "more rows than the budget is two runs, not one trajectory"
+
+    short = write_curve(tmp_path, "adapt_null", climbing(0.80, 0.02, epochs=5), asked=5)
+    assert gate.gain(short, 5) is None, "a run too short to show its peak understates every longer one"
+
+
+def test_spread(tmp_path: Path) -> None:
+    """The distribution, and its refusal to be read off an empty root."""
+    spread = TrajectoryGate().spread(corpus(tmp_path), 12)
+    assert spread.runs == 5
+    assert spread.largest == pytest.approx(CEILING)
+    assert spread.median == pytest.approx(0.03)
+    assert spread.high == pytest.approx(CEILING)
+
+    empty = tmp_path / "unmounted"
+    empty.mkdir()
+    with pytest.raises(SystemExit):
+        # An unmounted root would otherwise make every arm truncatable against a corpus of nothing.
+        TrajectoryGate().spread(empty, 12)
+
+
+def test_reading(tmp_path: Path) -> None:
+    """One arm against the corpus, read from its LAST epoch so the approximation favours the run."""
+    gate = TrajectoryGate()
+    spread = gate.spread(corpus(tmp_path), 12)
+    aside = tmp_path / "arm"
+    aside.mkdir()
+    arm = write_curve(aside, "vit_in21k", [0.7239, 0.7541, 0.7751, 0.7755, 0.7847], asked=12)
+
+    reading = gate.reading(arm, 0.8393, spread)
+    assert reading.epoch == 4, "the last recorded epoch, not the gate - the arm is credited with the climb it spent"
+    assert reading.auc == pytest.approx(0.7847)
+    assert reading.ceiling == pytest.approx(0.7847 + CEILING)
+
+
+def test_truncatable(tmp_path: Path) -> None:
+    """The verdict: unreachable only when NO trajectory in the corpus closes the distance."""
+    unreachable = RunTrajectory(name="vit_in21k", epoch=4, auc=0.7847, target=0.8393, ceiling=0.7847 + CEILING)
+    assert unreachable.truncatable(), "needs +0.0546 against a corpus whose largest gain is smaller"
+
+    # swin_supervised sat at 0.8192 at the gate and was declined LATER, on its finished number. The gate
+    # may only truncate, so an arm the corpus could still carry has to survive it.
+    open_arm = RunTrajectory(name="swin_supervised", epoch=3, auc=0.8192, target=0.8393, ceiling=0.8192 + CEILING)
+    assert not open_arm.truncatable()
+
+
+def test_spread_line() -> None:
+    """The distribution line carries all three numbers, so a truncation can be quoted with its evidence."""
+    assert "max +0.0529" in Spread(runs=96, median=0.0210, high=0.0380, largest=0.0529).line()
+
+
+def test_run_trajectory_line() -> None:
+    """The arm's line carries the arithmetic and not only the verdict."""
+    stated = RunTrajectory(name="vit_in21k", epoch=4, auc=0.7847, target=0.8393, ceiling=0.8376).line()
+    assert "CANNOT REACH" in stated
+    assert "needs +0.0546" in stated
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The CLI refuses a run name that is not a path, and a `--run` given no pre-registered target."""
+    monkeypatch.setattr("sys.argv", ["trajectory_check", "--run", str(tmp_path / "absent.metrics.jsonl")])
+    with pytest.raises(SystemExit) as missing:
+        main()
+    assert "not on disk" in str(missing.value)
+
+    arm = write_curve(tmp_path, "arm", climbing(0.80, 0.02), asked=12)
+    monkeypatch.setattr("sys.argv", ["trajectory_check", "--run", str(arm.path)])
+    with pytest.raises(SystemExit) as untargeted:
+        main()
+    assert "--target" in str(untargeted.value), "reading a target off the curve is fitting the gate to the arm"

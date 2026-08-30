@@ -2540,6 +2540,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.trajectory_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.trajectory_check",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.trajectory_check",
+      "target": "kneemri.experiments.convergence_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.trajectory_check",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.vram_need",
       "target": "kneemri.training.options",
       "weight": 1
@@ -14516,6 +14540,174 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.RunTrajectory.line",
+      "target": "kneemri.experiments.trajectory_check.RunTrajectory.truncatable",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "target": "kneemri.experiments.trajectory_check.RunTrajectory",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "target": "kneemri.experiments.trajectory_check.Spread",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.__init__",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.gain",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.gain",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.reading",
+      "target": "kneemri.experiments.trajectory_check.RunTrajectory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.reading",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.reading",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.scored",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.benchmark",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.smoke",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "kneemri.experiments.trajectory_check.Spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.gain",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.vram_need.main",
       "target": "kneemri.training.options.TrainingOptions.parse",
       "weight": 1
@@ -21485,7 +21677,7 @@
       "role": null
     },
     {
-      "descendants": 167,
+      "descendants": 168,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -21909,7 +22101,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 15,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -22016,6 +22208,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.switch_coverage",
       "label": "switch_coverage",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check",
+      "label": "trajectory_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -24594,6 +24794,30 @@
       "label": "SwitchCoverage",
       "level": "class",
       "parent": "kneemri.experiments.switch_coverage",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.RunTrajectory",
+      "label": "RunTrajectory",
+      "level": "class",
+      "parent": "kneemri.experiments.trajectory_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.Spread",
+      "label": "Spread",
+      "level": "class",
+      "parent": "kneemri.experiments.trajectory_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "label": "TrajectoryGate",
+      "level": "class",
+      "parent": "kneemri.experiments.trajectory_check",
       "role": "primary"
     },
     {
@@ -33754,6 +33978,78 @@
       "label": "unaccounted",
       "level": "method",
       "parent": "kneemri.experiments.switch_coverage.SwitchCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.RunTrajectory.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.RunTrajectory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.RunTrajectory.truncatable",
+      "label": "truncatable",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.RunTrajectory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.Spread.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.Spread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.gain",
+      "label": "gain",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check",
       "role": null
     },
     {

@@ -166,7 +166,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Thirteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Fourteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -197,6 +197,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   00:00 UTC, so an older read describes a board that has since been spent). The pinned gap read 0.008
   while the API said 0.015 and nothing noticed, which is the same way `board_transfer`'s slope was quoted
   wrong from prose twice. And
+  `python -m kneemri.experiments.trajectory_check --run <metrics path> --target <pre-registered score>` while an
+  arm is STILL RUNNING — the only check that can end a job, and the only one whose subject is the card rather than
+  a shipment or a number. It measures the gain from epoch 3 to the peak across every run on disk matched to the
+  arm's own epoch budget (twelve epochs: median +0.0210, p90 +0.0380, max +0.0529 over n=96) and exits non-zero
+  only when the arm plus the LARGEST such gain still misses the branch it was given before it started. It may
+  only TRUNCATE — never promote, never rank, never close a family — and a truncated `one_cycle` score is a FLOOR,
+  which is what `convergence_check` will then say about it. Its own first run found the corpus defect that would
+  have disarmed it: `lora_r8_v3small_224` holds 16 rows against a 12-epoch recipe, one stitched series whose gate
+  and peak are different runs, reading +0.1350 and lifting the ceiling two and a half times. See knee-gnzx. And
   `python -m kneemri.experiments.convergence_check` before quoting ANY run's score — the only one that guards a
   NUMBER rather than a shipment. It compares a run's best epoch, its last recorded epoch and the epochs its recipe
   ASKED for, and separates TRUNCATED (died early; under `one_cycle` the anneal never ran, so the score is a FLOOR)
