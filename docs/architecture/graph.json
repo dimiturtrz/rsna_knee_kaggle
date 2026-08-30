@@ -13850,6 +13850,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.convergence_check.ConvergenceCheck.rising",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck.smoke",
       "target": "kneemri.runs.recorded_run.RecordedRun.of",
       "weight": 1
@@ -13870,6 +13876,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck.verdict",
       "target": "kneemri.experiments.convergence_check.ConvergenceCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.convergence_check.ConvergenceCheck.verdict",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.rising",
       "weight": 1
     },
     {
@@ -33126,6 +33138,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.convergence_check.ConvergenceCheck.benchmark",
       "label": "benchmark",
+      "level": "method",
+      "parent": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.convergence_check.ConvergenceCheck.rising",
+      "label": "rising",
       "level": "method",
       "parent": "kneemri.experiments.convergence_check.ConvergenceCheck",
       "role": null
