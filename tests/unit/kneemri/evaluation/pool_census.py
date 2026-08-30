@@ -164,6 +164,22 @@ def test_report_of_a_pool_too_small_to_have_a_median():
     assert "2 members" in lines[0], "with the denominator that makes it a fact"
 
 
+def test_named():
+    """A named member prints its row even when the ranked table would never reach it.
+
+    The distances are the ones measured against the WHOLE pool, which is the property that makes the
+    filter safe: it selects what is PRINTED, never what a member was compared against.
+    """
+    pool = _twinned()
+    census = PoolCensus(pool, LabelScores(), ["reordered"])
+    rows = census.rows()
+    lines = census.named(rows)
+
+    assert "1 member(s) named" in lines[0]
+    assert "reordered.pt" in lines[1]
+    assert lines[1] == rows[2].line(), "the printed row is the census row, not a re-measured one"
+
+
 def test_spread():
     """Both ranges, each with the count it was read over — the reading that does not rest on the cut."""
     census = _census(_twinned())

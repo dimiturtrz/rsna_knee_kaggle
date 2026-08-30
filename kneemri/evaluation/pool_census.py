@@ -93,9 +93,10 @@ class MemberCensus:
 class PoolCensus:
     """Every member on disk, on the quality axis and both distance axes at once."""
 
-    def __init__(self, pool: Pool, scores: LabelScores) -> None:
+    def __init__(self, pool: Pool, scores: LabelScores, shown: list[str] | None = None) -> None:
         self.pool = pool
         self.scores = scores
+        self.shown = shown or []
 
     def solo(self, member: Float[np.ndarray, "studies targets"]) -> float:
         """One member's own mean score over the shared studies — the quality axis of the census."""
@@ -170,6 +171,20 @@ class PoolCensus:
             f"  nearest-agreement range across all {len(everyone)}: {min(everyone):.4f} to {max(everyone):.4f}",
         ]
 
+    def named(self, rows: list[MemberCensus]) -> list[str]:
+        """Rows for the members asked for by name, whatever their rank — measured against the WHOLE pool.
+
+        The ranked table shows the pool's head, which is where its mass sits and is the wrong place to
+        look for a member seated on a distance argument rather than a quality one. A named member is
+        censused against every other member exactly as the table's are; only the printing is filtered, so
+        this cannot be used to compute a member's distance against a hand-picked comparison set.
+        """
+        wanted = [row for row in rows if any(name in row.name for name in self.shown)]
+        return [
+            f"the {len(wanted)} member(s) named, ranked by how far they sit from their nearest neighbour:",
+            *(row.line() for row in sorted(wanted, key=lambda row: row.agreement)),
+        ]
+
     def report(self) -> list[str]:
         """The cell first, because it is the decision; the ranked table after it, as orientation."""
         rows = self.rows()
@@ -180,6 +195,7 @@ class PoolCensus:
             *self.verdict(rows),
             f"the pool by solo score, best first (showing {min(REPORTED, len(ranked))} of {len(ranked)}):",
             *(row.line() for row in ranked[:REPORTED]),
+            *(self.named(rows) if self.shown else []),
         ]
 
 
@@ -193,6 +209,12 @@ def main() -> None:
         default=None,
         help="checkpoints to census; every one with a holdout record by default",
     )
+    command.parser.add_argument(
+        "--show",
+        nargs="*",
+        default=None,
+        help="also print these members by name substring, whatever their rank in the pool",
+    )
     arguments = command.parsed()
 
     processed = command.rooted(arguments).processed()
@@ -201,7 +223,7 @@ def main() -> None:
     logger.info("censusing %d checkpoints", len(records))
     for dropped in mixed.narrow():
         logger.info("%s", dropped)
-    command.report(PoolCensus(mixed.per_member(), LabelScores()).report())
+    command.report(PoolCensus(mixed.per_member(), LabelScores(), arguments.show).report())
 
 
 if __name__ == "__main__":
