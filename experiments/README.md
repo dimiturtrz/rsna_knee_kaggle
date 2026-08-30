@@ -6267,3 +6267,31 @@ cannot, at the solo scores they have (0.8331, 0.8337, 0.8186) against a 0.8460 m
 no seat criterion available rescues them. The open question is unchanged and is what `swin_calib_dense`
 (knee-csxq) asks: whether the lane's ceiling is the architecture or the recipe it was read on. Answer
 that with a number, never by re-running a seat search over the same three members under a fourth rule.
+
+### The non-DINO seat delta is UNRESOLVED, not negative — and that is what earns it a slot (2026-08-30)
+
+A correction to the entry above, from running `board_transfer` rather than quoting a slope out of prose.
+
+The compression SATURATES and the whole-record number does not describe us. Median +1.23 board points
+per holdout point over all 392 orderable pairs; among entries at or above 0.8670 it is +0.98
+[+0.94, +1.08] over 16 pairs, and at or above 0.8692 it is +0.80 [+0.70, +1.19]. The +1.55 and +1.82
+figures that circulate are whole-record fits, and every entry this project would now ship sits in the
+saturated part of the curve where the slope is ~1.0 or below.
+
+THE READING THAT CORRECTS THE PREVIOUS ENTRY. That entry priced the non-DINO block at -0.0038 honest
+and called the axis closed for shipping. The number is right and the conclusion did not follow: the
+paired holdout floor is 0.0053, so -0.0038 is an UNRESOLVED pair on our own ruler, not a negative one.
+`board_transfer` makes that distinction load-bearing rather than pedantic — it reports 9 inversions in
+392 pairs, and ALL NINE are pairs the holdout left unresolved. Among the 252 pairs the holdout did
+resolve at a gap of 0.0053 or more, the board has never once ordered the other way.
+
+So the honest statement about a non-DINO entry is not that it is measured to lose. It is that our
+offline ruler cannot settle it, and that the board is the only instrument that can — which is this
+project's own standing test for what earns one of five daily slots, and the same argument
+`recal_holdannot`'s TRANSFERS branch is pre-registered on.
+
+WHAT THIS DOES NOT LICENSE. It does not re-open the three declined trunks as MEMBERS: their solo scores
+(0.8331, 0.8337, 0.8186) are resolved against the 0.8460 merit level by a wide margin, and the diverse
+search result above stands. It licenses ONE board reading of the composition axis, on a newly trained
+trunk, to find out whether a maximally-decorrelated member transfers differently than the offline ruler
+can see. One slot, one question, and the answer prices the whole axis either way.
