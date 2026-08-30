@@ -2775,3 +2775,41 @@ comparison crosses the fold boundary and the dose is an estimate, not a matched 
 anchor does not make the greedy ORDER a ranking: the search is in-sample over 111 members, and its
 seats 10–11 go to the pool's two worst inside a plateau where +0.0024 buys twenty-five seats. The
 champion pin does not move.
+
+## `vjepaseat_v1` — 0.943, and the board says what the holdout said
+
+`vjepaseat_v1` (ref 55895006, 2026-08-30, kit `53f81d3`) is `raptorweight_v1`'s exact eight-seat serving
+with **one seat added**: `vjepa_warm_s2026`, the only non-`dinov2-small` member this project has ever
+shipped. A V-JEPA2 ViT-L trunk warm-started from video pretraining, nearest-neighbour agreement **0.8119**
+against the pool's 0.91–0.94, and the most distant member the project owns. Vote (`LogitAverage`), foreign
+weight (1/3), kit and every other seat are the champion's, untouched.
+
+It scored **0.943** against the matched control's **0.944**. That is −0.001, inside this entry's own
+`BOARD_RESOLVABLE` = 0.0015 and an order of magnitude under the house bar. The honest reading is **flat**:
+the most architecturally distant member the project owns bought nothing in the champion's own seating, and
+cost nothing either. The pin does not move.
+
+**What earns the slot is that this is a board-level confirmation of an offline seat measurement**, on the
+axis the ledger has been arguing about for days. Offline, `swin_supervised` prices at seat value −0.0012
+(band [−0.0020, −0.0003], best possible swap −0.0013) despite being the most decorrelated member the
+project owns at 0.8346 nearest-neighbour. This entry runs that experiment on the board, with a *different*
+distant member, and returns the same answer to the same resolution.
+
+| ruler | member | distance | verdict |
+|---|---|---|---|
+| holdout seat value | `swin_supervised` | 0.8346 NN | −0.0012 |
+| board, matched control | `vjepa_warm_s2026` | 0.8119 NN | −0.001 |
+
+Two rulers, two members, one sign. **The non-DINOv2 lane is quality-bound, not diversity-bound**, and that
+now rests on a board reading and not only on a holdout one. The consequence is a size: a member at this
+correlation needs roughly **+0.017 to +0.020** solo over the lane's current 0.8331 to buy a seat rather
+than sit inert in one. See `interpretations/kneemri/2026-08-30_the-non-dino-lane-is-quality-bound.md`.
+
+**Clean mount, verified.** `run_check` on the kernel log reads `loaded 7 of 7 members`, and the log's own
+line says `loaded and fingerprint-checked 7 of 7`. Unlike `farseat_v1`, this entry IS what it was named as,
+so the flat is a reading about the member and not about a silent drop.
+
+**What it cannot separate:** "a distant member is inert in this seating" from "*this* member is inert", and
+both from "the eighth seat is inert regardless of who fills it" — `knee-uco3`'s inert-seat reading, which
+gains a third support here and is now the most economical account of `raptorseat_v1`, `raptorweight_v1` and
+this entry together.

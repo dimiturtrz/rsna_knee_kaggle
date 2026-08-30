@@ -29,6 +29,21 @@ It is **the most decorrelated member this project has produced**, by a clear mar
 a seat — best possible swap −0.0013. So the non-DINO trunk already supplies the diversity the seat ruler pays
 for. It is refused purely on solo strength.
 
+**And the board has now said the same thing, with a different member.** `vjepaseat_v1` (ref 55895006,
+2026-08-30) is `raptorweight_v1`'s exact seating with one seat ADDED — `vjepa_warm_s2026`, a V-JEPA2 ViT-L
+at 0.8119 nearest-neighbour agreement, the most distant member the project owns. Vote, foreign weight, kit
+and every other seat held. It read **0.943 against the control's 0.944**: −0.001, inside the entry's own
+0.0015 board resolution. `run_check` confirms 7 of 7 members mounted, so this is a reading about the member
+and not a silent drop of the `farseat_v1` kind.
+
+| ruler | member | nearest-neighbour | verdict |
+|---|---|---|---|
+| holdout seat value | `swin_supervised` | 0.8346 | −0.0012 |
+| board, matched control | `vjepa_warm_s2026` | 0.8119 | −0.001 |
+
+Two rulers, two different members, one sign, at the same resolution. The claim below is no longer an
+offline one.
+
 That inverts the standing reading of this lane. Every argument for it so far has been a diversity argument —
 "even if a single model doesn't outperform, an ensemble with it may" — and that argument is now *confirmed and
 spent*: the distance is there, it has been bought, and it is not enough on its own. The deficit left to attack
