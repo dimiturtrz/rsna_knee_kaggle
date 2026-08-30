@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# after.sh <completion-marker> <file-to-watch> <arm.sh> [more-arms.sh...]
+# after.sh [--smoke <dir>] <completion-marker> <file-to-watch> <arm.sh> [more-arms.sh...]
 #
 # Run arms, in order, once something else finishes. MEASURED 2026-08-11: one base arm with max slice
 # pooling holds 21.6 GB of the 32 GB card, and two of them together drove it to 31.5 GB - so arms are
@@ -25,7 +25,19 @@
 # That check earned itself on its first run: the entry spelled "resolution.sh 448" - this comment's own
 # example until 2026-08-17 - OOMed in seconds, because the arm kept batch 12 at a size knee-d2fc had
 # measured as needing 9.
+#
+# --smoke <dir> RUNS EACH ARM'S SMOKE FIRST, on the card the producer just freed, and abandons the queue
+# if it fails. A recipe is supposed to be smoked before it is queued for forty minutes, but the card is
+# usually BUSY at the moment of queueing - which is the whole reason there is something to queue behind -
+# so the smoke has to happen after the wait, not before it. Without this the only way to gate a run on
+# its own smoke was a hand-rolled `nohup bash -c 'wait_for ...; arm_check --smoke ... && arm.sh'`, and
+# such a chain is invisible to `queue_check`, which enumerates watchers by globbing logs/after_*.log for
+# the "waiting for" line below - so it reported every owed arm gated while owing one it could not see
+# (knee-61ez).
 source "$(dirname "$0")/lib.sh"
+
+SMOKE=""
+if [ "$1" = "--smoke" ]; then SMOKE="$2"; shift 2; fi
 
 MARKER="$1"; WATCH="$2"; shift 2
 for entry in "$@"; do
@@ -39,6 +51,10 @@ case "$MARKER" in
 esac
 for entry in "$@"; do
   echo "=== $entry ==="
+  # --as-queued takes the entry in the SPELLING it will run in, arguments included, which is the only
+  # spelling worth smoking. The directory is per-arm because arm_check refuses one that already exists.
+  [ -n "$SMOKE" ] && { uv run --no-sync python -m kneemri.experiments.arm_check \
+    --as-queued "$entry" --smoke "$SMOKE/$(basename "${entry%% *}" .sh)" --smoke-studies 60 || exit 1; }
   # Unquoted on purpose: an entry is "<arm.sh> [args...]" and has to word-split into run_snapshot,
   # which forwards everything after the arm path to the arm itself.
   # shellcheck disable=SC2086
