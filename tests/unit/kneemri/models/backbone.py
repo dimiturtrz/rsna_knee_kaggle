@@ -111,6 +111,9 @@ def test_mounted_source():
     """
     assert ENCODERS[SMALL].mounted_source == "metaresearch/dinov2/PyTorch/small/1"
     assert ENCODERS[V3_SMALL].mounted_source == "dimiturnt/dinov3-hf/vits16"
+    assert ENCODERS[SWIN_BASE].mounted_source == "dimiturnt/swin-base-384", (
+        "flat, because the leaf shape exists for a dataset holding four variants and there is one Swin"
+    )
 
 
 def test_every_variant_states_its_own_width():

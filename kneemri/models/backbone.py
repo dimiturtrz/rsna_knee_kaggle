@@ -605,6 +605,13 @@ ENCODERS: dict[str, Encoder] = {
         leaf="swin-base",
         params_m=86.9,
         adapter=TrunkAsTokens.from_sequence,
+        # FLAT, like `dimiturnt/rad-dino` and unlike `dimiturnt/dinov3-hf/<leaf>`: the leaf shape exists
+        # because DINOv3 ships four variants from one dataset, and there is one Swin. Written with
+        # `SwinModel.save_pretrained`, so the mirror holds exactly what `load` reads back — verified by
+        # loading it from disk through this entry, which is what a kernel does with a mounted dataset.
+        # Apache-2.0 and ungated (read from the HF API, not the model card), so §2.6.a is met by the
+        # upstream repository and the mirror exists only because a kernel has no internet.
+        mount="dimiturnt/swin-base-384",
         # `depths` and `embed_dim` off Swin-base's own config, at the strides its four stages run at —
         # stated ahead of any fetch for the same reason ConvNeXtV2's are: the cap refuses a run that
         # will not fit, so it cannot wait for the weights to say.
