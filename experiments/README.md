@@ -6228,3 +6228,42 @@ predicted to. The goal is reached by making a non-DINO member good enough to sea
 **What it does not say**, and the limit is the same one the seat reading carries: this is a fact about
 members at 0.819-0.834 against a roster starting at 0.8525, not about non-DINO architectures. It bounds
 the LEVEL at which diversity stops paying. A non-DINO trunk at 0.85+ is untouched by it, and untried.
+
+### The diversity search seats every non-DINO member first, and pays for each one (2026-08-30)
+
+The earlier block reading — roster plus the three non-DINO trunks, honest greedy, no gain — left two
+harness suspects standing, and both are now tested.
+
+VOTE RULE, cleared. That reading did not name a vote rule while the board serves `LogitAverage`, and
+this tool's own docs warn the seat curve moves with the rule. Re-run under `--vote logit` over the
+roster plus `swin_supervised`, `vjepa_warm` and `cnx_own_recipe`: 80 of 95 records became members over
+909 shared studies, and the honest peak is 19 seats / 0.8763 — the same count and the same number, to
+four decimals, as the roster alone. None of the three is seated at any count from 1 to 24.
+
+SEAT CRITERION, cleared, and this is the stronger reading. The honest search is quality-driven, so
+"the greedy never took them" could always be answered with "the greedy was not looking for spread".
+`--seats diverse` looks for exactly that: it takes the member least correlated with anything already
+seated, and never opens the labels. It seats all three non-DINO trunks immediately —
+
+  diverse 4: 0.8636  +lora_r8_v3small_224  (nearest 0.8083)
+  diverse 5: 0.8642  +vjepa_warm           (nearest 0.8179)
+  diverse 6: 0.8624  +cnx_own_recipe       (nearest 0.8200)
+  diverse 7: 0.8622  +swin_supervised      (nearest 0.8425)
+
+— because they ARE the most decorrelated members this project owns: nearest neighbours 0.818 to 0.843
+against the rest of the pool's 0.91 to 0.94. The claim that these trunks buy disagreement is correct
+and is confirmed here on the widest pool yet measured. What is refuted is that the disagreement pays.
+The curve falls at each of the three, and the spread-built ensemble peaks 0.8725 at 50-52 seats against
+the quality-built 0.8763 at 19 — diversity-first loses by 0.0038, six times the paired floor's sixth
+and comparable to the floor itself.
+
+READ THE DIVERSE NUMBERS AS ORDER, NOT AS SCORE. `diverse` chooses and scores on the same studies, so
+its curve reports its own overfitting and only `honest` may be quoted. The seat ORDER is not a score,
+and the non-seating is established independently on the honest curve above; the diverse curve is here
+to show WHY, not to price anything.
+
+WHAT THIS DOES AND DOES NOT CLOSE. It does not say a non-DINO trunk cannot seat — it says these three
+cannot, at the solo scores they have (0.8331, 0.8337, 0.8186) against a 0.8460 merit level, and that
+no seat criterion available rescues them. The open question is unchanged and is what `swin_calib_dense`
+(knee-csxq) asks: whether the lane's ceiling is the architecture or the recipe it was read on. Answer
+that with a number, never by re-running a seat search over the same three members under a fourth rule.
