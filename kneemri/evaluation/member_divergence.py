@@ -53,6 +53,17 @@ Same bar and same reason as `MemberDistance.NEIGHBOURED`: the roster's own sprea
 these numbers have, a roster of one has no spread, and inventing one is worse than printing its absence.
 """
 
+PRESENT = 0.5
+"""Where a soft target counts as the finding being present, for the support column only.
+
+MEASURED ON ITS OWN FIRST RUN, 2026-08-30, and it is the reason this constant exists rather than a bare
+`> 0`. The truth vector `RecordMix` builds is NOT a binary indicator — over the 909-study fold-0 holdout
+it takes seven values (0, 0.08, 0.28, 0.68, 0.82, 0.94, 1.0), a reader-agreement scale rather than a
+label. Counting anything above zero reports 99% support on every one of the twelve findings, which is a
+statement about how rarely all readers agree on absence and says nothing about prevalence. At 0.5 the
+same columns read 0.23 to 0.51, which is the prevalence the ledger quotes.
+"""
+
 BOUND = 1e-6
 """How far a probability is held off 0 and 1 before its logarithm is taken.
 
@@ -122,6 +133,10 @@ class MemberDivergence:
         members' NEGATIVE confidence is — a real quantity, and not the one a reader assumes they are
         looking at. knee-c2ew's counter asks for the count to be printed next to the number rather than
         for the thin labels to be dropped, because which labels are thin is itself a reading.
+
+        The count is taken at `PRESENT`, and the denominator is printed beside it, because the truth
+        vector here is a reader-agreement scale rather than a binary label — see that constant for what
+        the naive count reported instead.
         """
         if len(self.roster.predictions) < NEIGHBOURED:
             return ["  no per-label spread: a roster of one has no pair to diverge"]
@@ -130,11 +145,18 @@ class MemberDivergence:
             for left in range(len(self.roster.predictions))
             for right in range(left + 1, len(self.roster.predictions))
         ]
-        lines = ["per label, median divergence within the roster (support = positive studies):"]
+        lines = [
+            "per label, median divergence within the roster (support = studies whose soft target "
+            f"reaches {PRESENT}, not a count of non-zero ones):"
+        ]
         for label in range(self.roster.truth.shape[1]):
             divergences = [self.js(one[:, label : label + 1], other[:, label : label + 1]) for one, other in pairs]
-            support = int(np.sum(self.roster.truth[:, label] > 0))
-            lines.append(f"  label {label}: median {float(np.median(divergences)):.4f} bits  support {support}")
+            column = self.roster.truth[:, label]
+            support = int(np.sum(column >= PRESENT))
+            lines.append(
+                f"  label {label}: median {float(np.median(divergences)):.4f} bits  "
+                f"support {support}/{len(column)} at >= {PRESENT}"
+            )
         return lines
 
     def report(self) -> list[str]:

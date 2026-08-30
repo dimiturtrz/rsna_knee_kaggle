@@ -9,6 +9,8 @@ from kneemri.evaluation.member_divergence import MemberDivergence
 from kneemri.evaluation.pool import Pool
 
 STUDIES = 60
+PRESENT_STUDIES = STUDIES // 3
+"""How many fixture studies sit at or above `PRESENT`; another third sit below it but above zero."""
 SATURATED = 4.0
 HEDGED = 0.15
 IDENTICAL_RANKING = 0.999
@@ -17,8 +19,12 @@ CLAMP_COST = 1e-4
 
 
 def _truth() -> np.ndarray:
-    """Read only by `labelled`, and only for its positive counts."""
-    column = np.array([1.0] * (STUDIES // 2) + [0.0] * (STUDIES // 2), dtype=np.float64)
+    """Read only by `labelled`, and only for its support counts.
+
+    SOFT, like the real one: `RecordMix` builds a reader-agreement scale, not a binary label, so a
+    fixture of ones and zeros would let a `> 0` count pass a test that the real holdout fails.
+    """
+    column = np.array([1.0] * PRESENT_STUDIES + [0.28] * PRESENT_STUDIES + [0.0] * PRESENT_STUDIES)
     return np.repeat(column[:, None], len(TARGETS), axis=1)
 
 
@@ -103,7 +109,11 @@ def test_labelled():
     lines = MemberDivergence(roster, _pool([])).labelled()
 
     assert len(lines) == len(TARGETS) + 1
-    assert f"support {STUDIES // 2}" in lines[1], "the support is a count of positive studies, not a score"
+    assert f"support {PRESENT_STUDIES}/{STUDIES} at >= 0.5" in lines[1], (
+        "the support is a count over a stated denominator at a stated threshold, and the third of the "
+        "fixture that is non-zero but under it does NOT count as present — the defect the real holdout "
+        "showed on this module's first run, where a bare > 0 read 99% support on every label"
+    )
 
 
 def test_report():
