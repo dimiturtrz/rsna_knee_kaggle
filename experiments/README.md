@@ -6156,3 +6156,43 @@ replaced with `after.sh ... "pid:50388"` — the pid gate, on the trainer's WIND
 it through `tasklist` rather than through a `kill -0` that fails open across bash sessions — **armed
 before the kill**, so the queue was never unarmed. No marker was hand-written: a fake `ARM DONE` would
 have entered the record as a completed run. Beads `knee-gnzx` (the epoch-3 gate), `knee-tsiz`.
+
+## The non-DINO lane does not seat by distance, and the favourable test is the one that failed (2026-08-30)
+
+Two of the project's non-DINO trunks score within 0.0006 of each other solo and were given opposite
+verdicts: `vjepa_warm_s2026` (0.8337) sits on the roster, `swin_supervised_s2026` (0.8331) was declined.
+The roster line for the first is an argument about distance — the most decorrelated member the project has
+ever produced — so the pair is a clean test of whether that argument is worth a seat. Both were priced on
+one ruler, card-free, against the same 7-member champion roster (`seat_value --against greedyseat_v1`):
+
+```
+roster of 7: 0.8763
+  +vjepa_warm_s2026.pt:      0.8756  (-0.0007)  [-0.0016, +0.0002]   nearest 0.8119  mean 0.8012
+  +swin_supervised_s2026.pt: 0.8751  (-0.0012)  [-0.0020, -0.0003]   nearest 0.8346  mean 0.8132
+```
+
+**`vjepa_warm` never seated on merit.** Priced against the champion roster it is negative, like the member
+that was declined. Its band includes zero, so it is unreadable rather than convicted — but it is nowhere
+near the +0.0015 under which this ruler has never been shown to pick up a board tick.
+
+**And the more favourable test is the one that failed.** `vjepa_warm` is the more distant member by a wide
+margin (nearest neighbour 0.8119 against 0.8346, mean 0.8012 against 0.8132) *and* scores higher solo, and
+it still prices no better in any way that clears the floor. So "maximal diversity pays for a solo deficit"
+has now been tested twice at the ~0.833 level, the second time under the conditions most favourable to it,
+and failed both times. Distance is not the missing ingredient here: it is already spent, and it is not
+enough.
+
+The consequence is a bar, and it is higher than the arms in this family were written against.
+`swin_toprate`'s SEAT branch (0.8393) was derived from its frozen-top control rather than from the roster,
+and the measurement says the roster will not take a non-DINO member at 0.8393 either — closing from
+-0.0007 to +0.0015 has to come from solo quality now that distance is maxed. The roster's merit level is
+0.8460 and every seated member is above it, so ~0.846 is the real bar, against a family ceiling of 0.8331.
+
+**No slope is fitted through these two points**, and the reading does not extrapolate: only the sign
+transfers between roster pairs, and a third point has broken an ordering before. The claim is the sign,
+twice, at maximum distance — nothing about the value.
+
+What it does not say: the non-DINO lane is not dead. This is a fact about the LEVEL, not the architecture —
+a non-DINO trunk reading 0.85+ solo has never been tried and is untouched by it. Nor does it unroster
+`vjepa_warm`; an unreadable band is not a conviction, and that member's line is answered with a number.
+See `knee-tild`, `knee-tsiz`.
