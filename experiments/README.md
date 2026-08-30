@@ -5927,3 +5927,36 @@ only chunk line it has. The entries built for the efficiency track are one-decod
 precisely the ones that can never self-report a projection — on a private run where nothing else can
 either. Low priority (the guard's real job is stopping a 9 h overrun, and a one-group entry is least at
 risk of that), but it is the wrong way round.
+
+### `cnx_mid_rate` is not a result about learning rates — it ran one epoch and left a `.partial` — 2026-08-30
+
+`ledger_check` reported one UNRECORDED run: `cnx_mid_rate_s2026`, best **0.7177**, appearing in neither
+this file nor the interpretations. That number should never be quoted, and this entry exists to say why
+rather than to leave it unrecorded a second time.
+
+**Its metrics file holds two lines: the recipe, and epoch 0.** The recipe asked for **12**. There is a
+`.partial` on disk dated 2026-08-29 10:47 and **no `.pt`** — which is also why it is absent from the
+112-member pool sweep, and why `convergence_check` returns `1 runs: 1 unscored` rather than a verdict.
+The run was killed after its first epoch. 0.7177 is a fact about a killed process, exactly the class of
+mistake that put three runs into this ledger as facts about architectures (`convergence_check` exists
+for it).
+
+**What it was going to test matters more than what it scored.** The recipe:
+
+```
+variant cnxbase   backbone_lr 1.2e-4   train_size 448   slices 20   batch 1   epochs 12   fold 0
+```
+
+That is **both** follow-ups the `cnx_dense` entry demanded and neither of which had been run: the 448 px
+retry its own pre-registration named *before the trunk is judged*, and a backbone rate 3× the 4e-5
+adapter rate that was chosen for a ViT. So the fair-budget ConvNeXt question has now been **attempted
+and left incomplete**, not answered. `knee-y59c` / `knee-zfgn` stay open on the evidence they already
+had.
+
+**Why it probably died.** `batch 1` at 448 px over 20 slices is the slowest configuration this project
+has ever queued; twelve epochs of it is a many-hour arm. Anything that re-opens this axis should price
+the wall-clock first — the trunk question is worth answering, but not at a ratio nobody computed.
+
+**Not re-armed here.** Every arrangement of the members we own is already priced behind the champion
+(`interpretations/kneemri/2026-08-30_the-board-priced-an-offline-constant.md`), and a second weak-trunk
+member does not pay the +0.0042 that a top-10 spot costs. This is bookkeeping, not a plan.
