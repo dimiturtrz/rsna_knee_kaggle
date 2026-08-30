@@ -95,8 +95,13 @@ class EntryOffline:
         return None
 
     def scored(self, row: BoardRow) -> float:
-        """This entry's members, combined under the vote rule and scored on the studies they all held out."""
-        mix = RecordMix([self.processed / f"{name}.pt" for name in row.members_named])
+        """This entry's members, combined under the vote rule and scored on the studies they all held out.
+
+        Foreign records are seated here, against the mixer's default, because this reproduces an entry
+        that WENT TO THE BOARD — dropping a member it shipped would price a different ensemble under its
+        name. The contamination such a member carries is the concern of `declined`, which voids the row.
+        """
+        mix = RecordMix([self.processed / f"{name}.pt" for name in row.members_named], foreign=True)
         pool = mix.per_member(VOTE_RULES[self.vote]())
         return LabelScores().mean(pool.combined(list(range(len(pool)))), pool.truth)
 

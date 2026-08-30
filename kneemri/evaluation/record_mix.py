@@ -40,6 +40,11 @@ twelve) — more seats buys a steadier estimate, not a better one. Do not spend 
 and do NOT apply the `board_transfer` slope to a count delta: that slope was fitted on member QUALITY and
 does not carry across axes. See `interpretations/kneemri/2026-08-27_seat-count-is-flat-both-rulers.md`.
 
+A FOURTH READING, AND IT CONFIRMS THE NOISE. 2026-08-30, 113 records over the members we trained (the
+six foreign ones now refused by default): the honest peak is NINETEEN / 0.8763 under logit, against the
+thirteen / 0.8754 above. Nine more records, six more seats, +0.0009 — a sixth of the paired floor, and
+inside the 0.0030 span this table has spread across four pools. The count is not a quantity to optimise.
+
 READ THE NUMBER AS A SIGN, NOT AS A SCORE. Two reasons, both recorded. A training-time record was
 produced by the TRAINER's reading of the holdout, so a member fitted under a different window is
 scored here as it scored itself and not as the submission path would read it — comparable across
@@ -65,7 +70,7 @@ from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import LogitAverage, MedianLogit, RankAverage, Vote
-from kneemri.runs.holdout_record import RULER_TOLERANCE, HoldoutReading, HoldoutRecord
+from kneemri.runs.holdout_record import FOREIGN, RULER_TOLERANCE, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -92,10 +97,12 @@ remain need nothing but the members' arrays, which is what makes them askable of
 class RecordMix:
     """The members' recorded holdout predictions, joined onto the studies all of them held out."""
 
-    def __init__(self, records: list[Path]) -> None:
+    def __init__(self, records: list[Path], *, foreign: bool = False) -> None:
         self.records = records
+        self.foreign = foreign
         self._readings: list[tuple[str, HoldoutReading]] | None = None
         self._dead: list[str] = []
+        self._foreign: list[str] = []
         self._narrowed: list[str] = []
 
     def readings(self) -> list[tuple[str, HoldoutReading]]:
@@ -122,6 +129,22 @@ class RecordMix:
         decided by its worst member. Named through `dropped`, because a pool silently one member shorter
         than the caller asked for is the wrong-denominator failure again.
 
+        A record stamped `FOREIGN` is dropped and named unless the caller asked for one. A foreign
+        record is someone else's weights served through someone else's decode, and it is decoded onto
+        OUR studies under OUR label table — which is exactly what makes it mixable here and exactly what
+        makes it contaminated. On 2026-08-30 a glob of every record under the processed root put the six
+        of them into a seat search and returned an honest peak of 0.8994 at six seats against the 0.8754
+        the ledger carries, off nothing but their presence: `raptor_v4_swa` alone reads 0.8938, and
+        `foreign_overlap` had already measured 896 of our 909 holdout studies inside the labels it was
+        distilled from. `foreign_overlap` cannot catch this — it takes a foreign LABEL TABLE, so it
+        guards where a foreign model is PRICED and not where one is SEATED.
+
+        Guilt by default, as `foreign_gate` already states the rule, and the pool needs no back-fill to
+        obey it: `HoldoutRecord.write` has always written `source`, so all 144 records on disk carry a
+        stamp and the six that are foreign say so. A caller reproducing a SHIPPED entry passes
+        `foreign=True` — an entry that went to the board with a foreign member in it is a fact to be
+        reproduced, not a search that seated one.
+
         Read once and held: `shared` and `per_member` both want them, so an uncached read decodes every
         npz three times and prints each skipped member's line three times, which reads as three
         different missing records rather than one.
@@ -145,9 +168,26 @@ class RecordMix:
                     path.name,
                 )
                 continue
+            if reading.source == FOREIGN and not self.foreign:
+                self._foreign.append(path.name)
+                logger.warning(
+                    "%s: someone else's weights through someone else's decode — dropped, pass --foreign to seat it",
+                    path.name,
+                )
+                continue
             found.append((path.name, reading))
         self._readings = found
         return found
+
+    def foreign_dropped(self) -> list[str]:
+        """The foreign records this pool refused, in the order they were given.
+
+        Named for the same reason `dropped` is: the pool that ran IS the denominator, and a search
+        silently shorter than the paths handed to it is the wrong-denominator failure. Empty when the
+        caller asked for foreign members, since then nothing was refused.
+        """
+        self.readings()
+        return self._foreign
 
     def dropped(self) -> list[str]:
         """The records that had no checkpoint, in the order they were given — what left the pool, and why.
@@ -396,12 +436,20 @@ def main() -> None:
         "group rather than one refusal at a time. The pool that survives is the denominator — read it "
         "off the log line, not off the number of paths passed in.",
     )
+    command.parser.add_argument(
+        "--foreign",
+        action="store_true",
+        help="seat records stamped `foreign` — someone else's weights through someone else's decode. Off "
+        "by default: they are decoded onto OUR studies, which makes them mixable AND contaminated, and a "
+        "glob of the processed root that seated the six of them read 0.8994 at six honest seats against "
+        "0.8754 over the members we trained. Ask for this only to reproduce an entry that shipped one.",
+    )
     command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
     arguments = command.parsed()
     scores = LabelScores()
     roster = list(arguments.roster)
     everything = list(dict.fromkeys([*arguments.records, *roster]))
-    mix = RecordMix(everything)
+    mix = RecordMix(everything, foreign=arguments.foreign)
     if arguments.largest_pool and (narrowed := mix.narrow()):
         logger.warning("not mixable with the majority, dropped: %s", " ".join(narrowed))
     mixed = mix.per_member(VOTE_RULES[arguments.vote]())

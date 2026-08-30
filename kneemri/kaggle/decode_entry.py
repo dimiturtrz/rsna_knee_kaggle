@@ -94,7 +94,9 @@ class DecodeEntry:
             if RosterReads.keyed(member) is not None
         }
         Denominator(len(keys), f"none of the {len(paths)} named checkpoints describes a decode").refuse_empty()
-        mix = RecordMix([path for path in paths if path.name in keys])
+        # Foreign records are seated here, against the mixer's default: this search is ABOUT the decodes,
+        # and a foreign member is where a distinct one comes from. What it may never do is price a seat.
+        mix = RecordMix([path for path in paths if path.name in keys], foreign=True)
         for dropped in mix.narrow():
             logger.warning("%s cannot be mixed with the rest, dropped from the search", dropped)
         pool = mix.per_member()
