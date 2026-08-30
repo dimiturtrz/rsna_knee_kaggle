@@ -6385,3 +6385,45 @@ better table to build the lane's members on rather than a path to 0.950 by itsel
 arms. (2) A dense-corner replication (`band_dense_hold` has a matched control on both rulers and costs one
 arm) would say whether +0.0105 is a property of the re-map or of the 224 corner. (3) Only then a roster
 rebuild, which is many arms and should not be bought on a single n=58 read.
+
+### `warm_calib_lowlr` — a 4x lower rate moved the warm start by less than the noise floor, so the ramp was NOT the cause — 2026-08-30
+
+`warm_calib_lowlr_s2026` best holdout **0.8577** @ epoch 4 of 12 (`convergence_check`: not truncated —
+it ran all twelve and declined through eight of them). Against its two references: the warm control
+`warm_calib_dense_s2026` **0.8562** (+0.0015) and the cold parent `calib_dense_hold_s2026` **0.8634**
+(−0.0057).
+
+**The single flag is `--backbone-lr`, 4e-5 to 1e-5**, exactly as `warm_calib_dense`'s own verdict sent
+it — same encoder file, same twelve epochs, same recipe. The flag landed: the log opens `encoder
+initialised from calib_dense_hold.enc.pt, adapted on cache 0 (223 tensors, 0 left stock)`.
+
+**The number lands in the arm's `0.8572–0.8643` band by five ten-thousandths, and the band's own reading
+does not survive the trajectory.** That branch reads "THE RAMP WAS THE CAUSE, QUALITY IS STILL FLAT". But
+the branch boundary was drawn at the warm control plus 0.0010, which is INSIDE the 0.0062 arm-vs-arm
+floor — so the pre-registration wrote a band a noise-sized delta could enter. Quartering the backbone rate
+moved the outcome by +0.0015. **A lever that is the cause does not survive a 4x reduction of itself
+unchanged.** The honest reading is the opposite of the band's label: the ramp is not what costs the warm
+start its 0.0057.
+
+**What the epoch curve says instead.** 0.8540 · 0.8572 · 0.8546 · 0.8530 · **0.8577** · 0.8526 · 0.8536 ·
+0.8506 · 0.8481 · 0.8486 · 0.8489 · 0.8491. Training loss falls monotonically 0.8206 → 0.4467 across the
+same twelve epochs. **The model is at 0.8540 before it has trained at all, and every epoch after that
+trades holdout for loss.** That is the same shape the 4e-5 arm drew. A warm encoder arrives already
+holding what twelve cold epochs would have built — and fine-tuning on top of it, at either rate, only
+fits the training set.
+
+**So warm starting is a TIME mechanism with no quality term, and that is a usable result rather than a
+null.** One epoch of a warm start ≈ twelve cold ones, to within 0.009 of the cold parent's converged
+number; the eight-epoch saving `warm_calib_lowlr.sh:14` was written to buy is real. What it does not buy
+is a better member, and no rate makes it one. Members stay cold-trained; the warm path is for arms whose
+question is not the checkpoint's quality.
+
+**Which cell of the grid this closes, and which it does not.** rank-0 × warm × {4e-5, 1e-5} is now
+measured twice and flat both times. Branch **A** of `knee-wbwq`'s chain (schedule) is SPENT. Branch **B**
+— the actual capacity arm, a LoRA parent warm-started WITH a fresh `--lora-rank`, where `fitted_encoder.py`
+merges instead of falling through — is untouched by this and is the only live cell. `warm_calib_dense_short`
+(**C**) was gated on A or B clearing; A did not clear, so it stays gated on B alone.
+
+**Card note, so the epoch times read right.** Epoch 10 took 648s against the run's own ~365s median
+because I ran `witness_check` on the same card mid-arm. That is the contention `card_check` exists to
+prevent, and it is mine.
