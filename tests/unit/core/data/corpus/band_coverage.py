@@ -79,7 +79,7 @@ def test_of():
 
 def test_row():
     """The share restated as the distance: a 100 mm span cut at 0.20 loses 20 mm from each end."""
-    shares = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 100.0)
+    shares = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 100.0, np.full(4, 100.0))
 
     row = shares.row(BandCoverage())
 
@@ -87,6 +87,21 @@ def test_row():
     assert "0.3000" in row
     assert "20.0" in row
     assert row.endswith("     4"), "the row states how many series it averaged"
+
+
+def test_spread():
+    """How differently the SAME fraction reads across studies — the question a mean span cannot answer."""
+    identical = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 100.0, np.full(4, 100.0))
+
+    assert identical.spread().split() == ["100.0", "100.0", "1.00"], "one protocol, one distance, ratio one"
+
+    varied = SlotShares(
+        "SAG_T1", np.full(101, 0.3), np.full(101, 0.1), np.full(101, 0.2), 100.0, np.linspace(50.0, 150.0, 101)
+    )
+    assert varied.spread().split() == ["60.0", "140.0", "2.33"], "p10 and p90 of the spans, and their ratio"
+
+    unknown = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 0.0, np.array([]))
+    assert unknown.spread().split() == ["-", "-", "-"], "no spacing tag reports unknown, never a fabricated ratio"
 
 
 def test_report():

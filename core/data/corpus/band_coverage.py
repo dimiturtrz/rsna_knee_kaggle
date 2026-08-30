@@ -93,6 +93,14 @@ class SlotShares:
     low_end: NDArray[np.float64]
     high_end: NDArray[np.float64]
     span_mm: float
+    spans: NDArray[np.float64]
+    """Every measured series' physical through-plane span, kept because the MEAN of it hides the question.
+
+    The band is a FRACTION of the stack, so the millimetres it keeps are whatever the protocol acquired.
+    Two studies read at 0.1-0.9 see the same share of their own series and a different extent of knee, and
+    a mean span cannot say how far apart those two are. The spread is what prices normalising the band to
+    millimetres: a narrow one says the fraction is already a distance and there is nothing to normalise.
+    """
 
     @classmethod
     def of(cls, slot: str, measured: list[tuple[str, dict[str, float]]]) -> "SlotShares":
@@ -107,6 +115,7 @@ class SlotShares:
             # Zero where no series in this slot carried a spacing tag: an unknown extent reports as
             # unknown rather than as a millimetre nobody measured.
             span_mm=float(np.mean(spans)) if spans else 0.0,
+            spans=np.array(spans),
         )
 
     def row(self, coverage: "BandCoverage") -> str:
@@ -116,8 +125,16 @@ class SlotShares:
             f"{self.slot:16s} {self.discarded.mean():10.4f} [{low:+.4f}, {high:+.4f}] "
             f"{np.percentile(self.discarded, PERCENTILE_HIGH):7.4f} "
             f"{self.low_end.mean():8.4f} {self.high_end.mean():9.4f} "
-            f"{self.span_mm:8.1f} {self.span_mm * coverage.band.low:8.1f} {self.discarded.size:6d}"
+            f"{self.span_mm:8.1f} {self.span_mm * coverage.band.low:8.1f} {self.spread()} "
+            f"{self.discarded.size:6d}"
         )
+
+    def spread(self) -> str:
+        """The span's p10, p90 and their ratio — how differently the SAME fraction reads across studies."""
+        if not self.spans.size:
+            return f"{'-':>7s} {'-':>7s} {'-':>6s}"
+        low, high = (float(np.percentile(self.spans, edge)) for edge in (100 - PERCENTILE_HIGH, PERCENTILE_HIGH))
+        return f"{low:7.1f} {high:7.1f} {(high / low if low else 0.0):6.2f}"
 
 
 @dataclass(frozen=True)
@@ -173,7 +190,7 @@ class BandCoverage:
             f"uniform tissue along the axis would discard {1.0 - (self.band.high - self.band.low):.4f} — "
             f"a share BELOW that is the constant's claim, at or above it is knee",
             f"{'slot':16s} {'discarded':>10s} {'95% CI':>18s} {'p90':>7s} {'low end':>8s} {'high end':>9s} "
-            f"{'span mm':>8s} {'cut/end':>8s} {'n':>6s}",
+            f"{'span mm':>8s} {'cut/end':>8s} {'span p10':>7s} {'span p90':>7s} {'ratio':>6s} {'n':>6s}",
         ]
         slots = sorted({name for name, _ in measured})
         return header + [SlotShares.of(slot, measured).row(self) for slot in slots]
