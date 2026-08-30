@@ -6427,3 +6427,38 @@ merges instead of falling through — is untouched by this and is the only live 
 **Card note, so the epoch times read right.** Epoch 10 took 648s against the run's own ~365s median
 because I ran `witness_check` on the same card mid-arm. That is the contention `card_check` exists to
 prevent, and it is mine.
+
+### `cnx_warm_anneal` — a second trunk, a second warm restart, and the same absence of a quality term — 2026-08-30
+
+**`cnx_warm_anneal_s2026` peaks at 0.8142, epoch 2 of 6, against a parent peak of 0.8186.** The
+pre-registration named four bands
+before the run started; this lands in **CONVERGED (0.8126–0.8225)** — "the trunk was already at its
+ceiling and the restart adds nothing". Not the DIRECTIONAL band, not the ramp band.
+
+| epoch | 0 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|
+| holdout AUC | 0.8141 | 0.8136 | **0.8142** | 0.8105 | 0.8074 | 0.8068 |
+| train loss | — | — | 0.4636 | 0.4393 | 0.4240 | 0.4172 |
+
+**The shape is the finding, not the peak.** Loss falls monotonically from 0.4636 to 0.4172 while the
+holdout AUC falls with it, every epoch after the second. The `one_cycle` anneal at epoch 5 — the part
+of the schedule that is supposed to collect the gain — produced the run's *worst* number. This is not a
+run that was cut off before it could pay; it is a run that paid nothing and then took some back.
+
+**It reproduces `warm_calib_lowlr` on a different trunk.** That arm (dense, 12 epochs, 4× lower rate)
+concluded warm starting is a TIME mechanism with no quality term. This is cnx, 6 epochs, the parent's
+own rate, and it says the same thing from a different direction: the restart opened 0.0045 *below* the
+parent it started from (0.8141 vs 0.8186) and never got back. Two trunks, two schedules, two rates, one
+absence. The mechanism is not "the ramp walked it off" — a 4× rate cut did not rescue the first one, and
+here the decline continues through the anneal, where a rate artefact would have reversed.
+
+**What this does NOT rule out.** Warm starting still buys wall-clock: one warm epoch reached within
+0.009 of the converged parent. That use is untouched. What is now measured twice is that it does not
+buy QUALITY, so a warm restart may be used to reach a known number faster and never to exceed one.
+
+**`trajectory_check` could not arbitrate it, and the arm ran to completion because of that.** The gate
+refused: `only 1 run(s) match a 6-epoch budget past epoch 3, and 8 are needed before a spread may decide
+anything`. The floor fix (knee-e8sm) made short budgets readable, not read — the 6-epoch corpus is one
+run deep, and it is this one. Killing on judgment while the instrument refuses is the exact state that
+check exists to remove, so the arm was left alone and read afterwards by `convergence_check`, which
+found it clean: six epochs asked, six recorded, peak at e2. The number is a peak, not a floor.
