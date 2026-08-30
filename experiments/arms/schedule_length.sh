@@ -22,6 +22,12 @@
 #
 # control  wsfold0_e6 = 0.8457 - the same recipe at 12 epochs, whose per-epoch curve is above.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# twin-of: whole_stack
+# RUN BARE THIS ARM IS `whole_stack`. EPOCHS is an argument and its default reproduces that arm's
+# flag line exactly, so a queue entry spelled `experiments/arms/schedule_length.sh` with no argument
+# spends a card slot on a run already on disk. Queue it as `schedule_length.sh <n>` and check that
+# spelling with `arm_check --as-queued`, which is the only spelling worth checking.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 EPOCHS="${1:-8}"
 require "$LABELS"

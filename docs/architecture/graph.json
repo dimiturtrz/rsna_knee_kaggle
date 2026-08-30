@@ -2343,6 +2343,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.experiments.arm_diff",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.experiments.arm_header",
       "weight": 1
     },
@@ -2386,6 +2392,12 @@
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "kneemri.training.run_setup",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_diff",
+      "target": "kneemri.experiments.arm_header",
       "weight": 1
     },
     {
@@ -13251,6 +13263,12 @@
     {
       "kind": "holds",
       "source": "kneemri.experiments.arm_check.ArmCheck",
+      "target": "kneemri.experiments.arm_diff.ArmDiff",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.arm_check.ArmCheck",
       "target": "kneemri.experiments.arm_header.ArmHeader",
       "weight": 1
     },
@@ -13264,6 +13282,12 @@
       "kind": "references",
       "source": "kneemri.experiments.arm_check.ArmCheck",
       "target": "kneemri.training.options.TrainingOptions",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck.__init__",
+      "target": "kneemri.experiments.arm_diff.ArmDiff",
       "weight": 1
     },
     {
@@ -13333,30 +13357,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "target": "kneemri.experiments.arm_check.ArmCheck._flag_values",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "target": "kneemri.experiments.arm_check.ArmCheck._same",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "target": "kneemri.experiments.arm_header.ArmHeader.controls",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "target": "kneemri.experiments.arm_header.ArmHeader.deliberate",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "target": "core.data.labels.ruler.Ruler",
@@ -13366,6 +13366,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "target": "core.data.labels.ruler.Ruler.moved_cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.values",
       "weight": 1
     },
     {
@@ -13455,12 +13461,6 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
-      "target": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "weight": 1
     },
@@ -13480,6 +13480,18 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.unstated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.twinned",
       "weight": 1
     },
     {
@@ -13633,6 +13645,48 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.experiments.arm_diff.ArmDiff",
+      "target": "kneemri.experiments.arm_header.ArmHeader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "target": "kneemri.experiments.arm_diff.ArmDiff._same",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.values",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "target": "kneemri.experiments.arm_header.ArmHeader.controls",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "target": "kneemri.experiments.arm_header.ArmHeader.deliberate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.twinned",
+      "target": "kneemri.experiments.arm_diff.ArmDiff._identity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.twinned",
+      "target": "kneemri.experiments.arm_header.ArmHeader.paired",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.arm_gate.ArmGate",
       "target": "kneemri.experiments.arm_gate.ArmGate",
@@ -13671,6 +13725,24 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_header.ArmHeader.gated",
+      "target": "kneemri.experiments.arm_header.ArmHeader.text",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_header.ArmHeader.paired",
+      "target": "kneemri.experiments.arm_header.ArmHeader.shell",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_header.ArmHeader.paired",
+      "target": "kneemri.experiments.arm_header.ArmHeader.twins",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_header.ArmHeader.twins",
       "target": "kneemri.experiments.arm_header.ArmHeader.text",
       "weight": 1
     },
@@ -21811,7 +21883,7 @@
       "role": null
     },
     {
-      "descendants": 169,
+      "descendants": 170,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22235,7 +22307,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -22246,6 +22318,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check",
       "label": "arm_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff",
+      "label": "arm_diff",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -24801,6 +24881,14 @@
       "level": "class",
       "parent": "kneemri.experiments.arm_check",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff",
+      "label": "ArmDiff",
+      "level": "class",
+      "parent": "kneemri.experiments.arm_diff",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -33164,14 +33252,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.arm_check.ArmCheck._flag_values",
-      "label": "_flag_values",
-      "level": "method",
-      "parent": "kneemri.experiments.arm_check.ArmCheck",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck._parsed",
       "label": "_parsed",
       "level": "method",
@@ -33182,14 +33262,6 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck._printed",
       "label": "_printed",
-      "level": "method",
-      "parent": "kneemri.experiments.arm_check.ArmCheck",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.arm_check.ArmCheck._same",
-      "label": "_same",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
@@ -33214,14 +33286,6 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.invocations",
       "label": "invocations",
-      "level": "method",
-      "parent": "kneemri.experiments.arm_check.ArmCheck",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.arm_check.ArmCheck.mismatched",
-      "label": "mismatched",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
@@ -33356,6 +33420,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff._identity",
+      "label": "_identity",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff._same",
+      "label": "_same",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
+      "label": "mismatched",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff.twinned",
+      "label": "twinned",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff.values",
+      "label": "values",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_gate.ArmGate.declared",
       "label": "declared",
       "level": "method",
@@ -33420,6 +33532,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_header.ArmHeader.paired",
+      "label": "paired",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_header.ArmHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_header.ArmHeader.record",
       "label": "record",
       "level": "method",
@@ -33428,8 +33548,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_header.ArmHeader.shell",
+      "label": "shell",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_header.ArmHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_header.ArmHeader.text",
       "label": "text",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_header.ArmHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_header.ArmHeader.twins",
+      "label": "twins",
       "level": "method",
       "parent": "kneemri.experiments.arm_header.ArmHeader",
       "role": null

@@ -33,6 +33,17 @@ An arm exists to move something, so a diff against the control is not by itself 
 UNDECLARED diff is. This is the declaration, and it costs the author one line per variable, which is
 also the moment they notice they are moving two."""
 
+TWIN_LINE = re.compile(r"^#\s*twin-of:\s*([A-Za-z0-9_]+)", re.MULTILINE)
+"""How an arm says IN WRITING that its flag line is deliberately another arm's, byte for byte.
+
+The counterpart of `deliberate:` for the arms whose variable is NOT a flag. `swin_wholetop` re-runs
+`swin_supervised`'s exact invocation across a code change — `EncoderSurgery.blocks()` grouping Swin's
+stages by element type — and the flag-for-flag identity is the whole point of it, because it is what
+makes the comparison against 0.8331 clean. An undeclared twin is a duplicate; a declared one is a
+before/after across something the flag line cannot express.
+
+One line per arm it twins, and it costs the author the sentence that says WHICH thing changed instead."""
+
 ARMS = Path("experiments/arms")
 
 
@@ -94,6 +105,33 @@ class ArmHeader:
     def deliberate(self, name: str) -> set[str]:
         """The flags this arm declares it moves on purpose, so a diff on them is the experiment."""
         return set(DELIBERATE_LINE.findall(self.text(name)))
+
+    def shell(self, name: str) -> Path | None:
+        """The shell file that printed this invocation, where one did — the arm file, else its source.
+
+        Two invocations from ONE shell are two runs the author wrote side by side; from two shells they
+        are two experiments. That distinction is not in a flag line and only this mapping holds it.
+        """
+        path = self.arms / f"{name}.sh"
+        return path if path.exists() else self._sources.get(name)
+
+    def twins(self, name: str) -> set[str]:
+        """The arms this one declares it deliberately re-runs flag for flag, its variable being code."""
+        return set(TWIN_LINE.findall(self.text(name)))
+
+    def paired(self, one: str, other: str) -> bool:
+        """Whether two names sharing a flag line are ONE experiment by their author's own account.
+
+        Two ways an author says so, and both are declarations rather than inferences. EITHER SIDE'S
+        `# twin-of:` line covers the pair — the arm written second is the one that knows the identity is
+        deliberate, and the control it re-runs predates the reason entirely. And two names printed by ONE
+        shell are never a duplicate: a multi-run arm timing plain against compiled against bf16 calls
+        `run_train` several times under different ENVIRONMENT, which no flag line carries, so reporting
+        the pair would be a check crying about a shell working as specified.
+        """
+        shell = self.shell(one)
+        declared = one in self.twins(other) or other in self.twins(one)
+        return declared or (shell is not None and shell == self.shell(other))
 
     def gated(self, names: Iterable[str], board: Path = BOARD) -> dict[str, str]:
         """Each arm whose declared `# gate:` the board does NOT currently satisfy, and why.

@@ -271,7 +271,7 @@ def test_missing_labels() -> None:
 def test_missing_held_annotations() -> None:
     """The withheld annotations, which is the switch whose silent no-op would cost the WHOLE instrument.
 
-    `annot_holdout` exists only to produce predictions that never saw the 58 image-read annotations. A
+    `band_dense_hold` exists only to produce predictions that never saw the 58 image-read annotations. A
     `--hold-annotations` that never reached `Supervision` trains the ordinary table, scores within the
     floor of its control — exactly the pre-registered read — and hands `supervision_gap` a member as
     tainted as every other. Nothing downstream would say a word, which is why it is compared here.

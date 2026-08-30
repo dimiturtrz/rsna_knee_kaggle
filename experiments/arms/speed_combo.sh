@@ -20,6 +20,12 @@
 #   bf16      0.7589 holdout, 322 s,  865 img/s
 #   plain     0.7600 holdout, 365 s,  817 img/s
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# twin-of: throughput_bf16
+# twin-of: throughput_compiled
+# Same flag line as either half of `throughput.sh`: compile and bf16 are ENVIRONMENT, not flags, and
+# this arm runs both at once where that shell ran each alone. The identity is what makes the three
+# wall-clocks comparable.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

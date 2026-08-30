@@ -106,3 +106,66 @@ def test_gated(tmp_path: Path):
 
     assert list(found) == ["expensive"], "only the arm the board refuses is named"
     assert "0.934" in found["expensive"], "and the sentence carries the reading it was refused on"
+
+
+def test_shell(tmp_path: Path):
+    """Which file printed a name — the arm's own, else the shell recorded for it, else nothing.
+
+    Two invocations printed by ONE shell are two runs an author wrote side by side; from two shells
+    they are two experiments. Nothing in a flag line carries that distinction, so the TWIN check reads
+    it from here, and a wrong answer costs a legitimate multi-run arm a refusal it cannot argue with.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "solo.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    pair = tmp_path / "throughput.sh"
+    pair.write_text("run_train throughput_bf16\nrun_train throughput_compiled\n", encoding="utf-8")
+    headers = ArmHeader(arms)
+    headers.record("throughput_bf16", pair)
+    headers.record("throughput_compiled", pair)
+
+    assert headers.shell("solo") == arms / "solo.sh"
+    assert headers.shell("throughput_bf16") == headers.shell("throughput_compiled") == pair
+    assert headers.shell("rung_12") is None, "a synthesised recipe was printed by no shell of the tree"
+
+
+def test_twins(tmp_path: Path):
+    """The arms this one says it re-runs flag for flag, its variable being code rather than a flag.
+
+    `swin_wholetop` carries `swin_supervised`'s exact invocation across `EncoderSurgery.blocks()`
+    (knee-94ec), and the identity IS the experiment. Undeclared, that pair is a duplicate; declared, it
+    is a before/after across something a flag line cannot express.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "after.sh").write_text("# twin-of: before\n# twin-of: also_before\n", encoding="utf-8")
+    (arms / "before.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    headers = ArmHeader(arms)
+
+    assert headers.twins("after") == {"before", "also_before"}
+    assert headers.twins("before") == set(), "an undeclared twin is a duplicate, so silence declares nothing"
+
+
+def test_paired(tmp_path: Path):
+    """The two ways an author says a shared flag line is deliberate, and the pair that says neither.
+
+    Either side's `# twin-of:` line covers the pair, because the arm written second is the one that knows
+    the identity is deliberate. One shell printing both names covers it too — a multi-run arm's variable
+    is the environment, which no flag line carries. Anything else is one recipe under two names.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "recoded.sh").write_text("# twin-of: staged\n", encoding="utf-8")
+    (arms / "staged.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    (arms / "copy.sh").write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    shell = tmp_path / "throughput.sh"
+    shell.write_text("# bead: knee-yuqf\n", encoding="utf-8")
+    headers = ArmHeader(arms)
+    headers.record("bf16", shell)
+    headers.record("compiled", shell)
+
+    assert headers.paired("recoded", "staged"), "the declaring arm's line covers the pair"
+    assert headers.paired("staged", "recoded"), "and it covers the pair read from the other side too"
+    assert headers.paired("bf16", "compiled"), "two runs an author wrote side by side in one shell"
+    assert not headers.paired("copy", "staged"), "no declaration and two shells is a duplicate"
+    assert not headers.paired("rung_8", "rung_12"), "two shell-less recipes are not paired by both being absent"

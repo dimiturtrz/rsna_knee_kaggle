@@ -46,6 +46,12 @@
 #     stage 3's wider blocks and the follow-up is a rate arm, not another family.
 #
 # bead: knee-tsiz
+#
+# twin-of: swin_supervised
+# The flag line IS the control's, byte for byte, and that is the arm. What moved is code:
+# `EncoderSurgery.blocks()` now groups a staged trunk by element type (knee-94ec), so the same
+# `--unfreeze-last 6` opens `layers.2.blocks.14-17` plus both of stage 3 rather than leaving the
+# whole top frozen. A flag line cannot express that, so the identity is the experiment.
 # The defect this arm answers is knee-94ec; the original arm is knee-ryzy.
 #
 # deliberate: every flag — see above, they are the control's and may not be touched in this arm.

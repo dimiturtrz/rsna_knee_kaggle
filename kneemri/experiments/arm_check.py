@@ -34,6 +34,7 @@ from core.data.corpus.study_cache import CorpusSplit, StudyCache
 from core.data.labels.ruler import DEFAULT_LABELS, Ruler
 from core.denominator import Denominator
 from core.paths import DataRoot
+from kneemri.experiments.arm_diff import ArmDiff
 from kneemri.experiments.arm_header import ARMS, ArmHeader
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.arm_verdict import ArmVerdict
@@ -48,9 +49,6 @@ logger = logging.getLogger(__name__)
 PRICE_MARKS = ("PRICE:", "P(clears")
 """What a priced bead says: a cost AND the odds it clears the bar. Both, because a cost alone is the
 argument that let the 140 mm build run unpriced. knee-yuqf carries the format."""
-
-INCIDENTAL_FLAGS = frozenset({"--out", "--labels", "--paths"})
-"""Flags that differ between any two arms by construction and say nothing about the experiment."""
 
 STUB = Path("experiments/stub_lib.sh")
 SHELLS = Path("experiments")
@@ -139,6 +137,7 @@ class ArmCheck:
         self.stub = stub
         self.shells = shells
         self.headers = ArmHeader(arms)
+        self.diff = ArmDiff(self.headers)
 
     def _environment(self) -> dict[str, str]:
         """The inherited environment, plus ARM_LIB, the resolved data root, and coreutils on PATH.
@@ -295,67 +294,6 @@ class ArmCheck:
         return {str(path.as_posix()): count for path, count in counted if count}
 
     @staticmethod
-    def _flag_values(flags: str) -> dict[str, str]:
-        """One arm's flag line as flag -> value, with a bare switch mapping to the empty string.
-
-        Values are normalised through `float` where both sides are numbers, because `4e-5` and `4e-05`
-        are the same learning rate and a diff that reports them is a diff nobody reads twice.
-        """
-        tokens = shlex.split(flags)
-        values: dict[str, str] = {}
-        for index, token in enumerate(tokens):
-            if not token.startswith("--"):
-                continue
-            following = tokens[index + 1] if index + 1 < len(tokens) else ""
-            values[token] = "" if following.startswith("--") else following
-        return values
-
-    @staticmethod
-    def _same(one: str, other: str) -> bool:
-        """Whether two flag values mean the same thing — numerically where both are numbers."""
-        try:
-            return float(one) == float(other)
-        except ValueError:
-            return one == other
-
-    def mismatched(self, invocations: Mapping[str, str], against: Mapping[str, str]) -> dict[str, list[str]]:
-        """Each arm's UNDECLARED flag differences from the control it names, as `flag: control -> arm`.
-
-        THE HOLE THIS CLOSES, and it cost 75 minutes of card on 2026-08-24. `distill_pairs.sh` declared
-        "the control is band_dense byte-for-byte" and "ONE VARIABLE: --distill-weight", then omitted
-        `--backbone-lr` and trained at the trainer's 8e-6 default against a control at 4e-5. Every check
-        in this module passed it: they ask whether the flags PRESENT are real, and have no notion of the
-        flags that should have been. The number it produced could not be read against anything.
-
-        The diff itself already existed — `kneemri.evaluation.run_comparison` prints
-        `backbone_lr 4e-05->8e-06` — but AFTER the card is spent. This is that diff, before.
-
-        AN ARM IS SUPPOSED TO DIFFER, so a difference is reported only where the arm has not DECLARED it
-        with a `# deliberate: <flag>` line. The declaration is the check: an experiment moving one thing
-        writes one line, and an author writing three lines is being shown that their arm moves three.
-
-        `against` is the FULL printed set rather than the selection, because `--only margin_seat` is
-        exactly the invocation that must still resolve `band_dense`.
-        """
-        differences: dict[str, list[str]] = {}
-        for name, control in self.headers.controls(invocations).items():
-            if control not in against or control == name:
-                continue
-            declared = self.headers.deliberate(name)
-            mine = self._flag_values(invocations[name])
-            theirs = self._flag_values(against[control])
-            found = [
-                f"{flag}: {theirs.get(flag, 'absent')} -> {mine.get(flag, 'absent')}"
-                for flag in sorted(set(mine) | set(theirs))
-                if flag not in INCIDENTAL_FLAGS
-                and flag not in declared
-                and not (flag in mine and flag in theirs and self._same(mine[flag], theirs[flag]))
-            ]
-            if found:
-                differences[name] = found
-        return differences
-
-    @staticmethod
     def unpriced(descriptions: Mapping[str, str]) -> list[str]:
         """The beads whose text carries no wall-clock/gain price, given each bead's own description.
 
@@ -494,7 +432,7 @@ class ArmCheck:
                 "MISMATCHED",
                 {
                     name: f"undeclared against its own control — {'; '.join(found)}"
-                    for name, found in self.mismatched(invocations, against).items()
+                    for name, found in self.diff.mismatched(invocations, against).items()
                 },
                 clause="differ from the control they name without a `# deliberate:` line saying so",
                 bead="knee-f8j9",
@@ -506,6 +444,15 @@ class ArmCheck:
                 clause="re-map their labels without pinning --eval-labels, so their holdout truth moves "
                 "with their targets and their score is two rulers rather than a result",
                 bead="knee-df7t",
+                always=True,
+                refuses=True,
+            ),
+            ArmVerdict(
+                "TWIN",
+                self.diff.twinned(invocations, against),
+                clause="carry a flag line another arm already carries, differing only in the file they "
+                "write — so the card is spent twice on one recipe under two names",
+                bead="knee-7uoq",
                 always=True,
                 refuses=True,
             ),
@@ -614,7 +561,7 @@ class ArmCheck:
         """
         moved: dict[str, str] = {}
         for name, flags in invocations.items():
-            values = cls._flag_values(flags)
+            values = ArmDiff.values(flags)
             table = Path(values.get("--labels", DEFAULT_LABELS))
             if table.name == DEFAULT_LABELS or "--eval-labels" in values:
                 continue

@@ -405,6 +405,7 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "UNMET-GATE",
         "MISMATCHED",
         "MOVING-RULER",
+        "TWIN",
         "UNBEADED",
         "UNPRICED",
     ]
@@ -421,6 +422,10 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "a moved ruler does not merely mis-arm: it makes the run's own number unreadable, so it refuses "
         "on any run the way a flag typo does"
     )
+    assert policy["TWIN"] == (True, False), (
+        "one recipe under two names refuses on any run: the card it spends is spent whether or not the "
+        "duplicate is the arm being armed"
+    )
     assert policy["UNMET-GATE"] == (False, True), (
         "an unmet gate is a fact about ONE arm: it must not fail a sweep, and must stop that arm arming"
     )
@@ -432,33 +437,4 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     )
     assert {verdict.label for verdict in verdicts if verdict.found} == {"UNSTATED", "UNBEADED"}, (
         "the arm states no operating point and names no bead; nothing else has a finding to make"
-    )
-
-
-def test_mismatched(tmp_path: Path):
-    """The defect that cost 75 minutes of card, and the three ways an arm is allowed to differ anyway.
-
-    Partitioned on what a flag does relative to the control it names: OMITTED (the real defect —
-    `distill_pairs` dropped `--backbone-lr` and silently took the trainer's 8e-6 against a control at
-    4e-5), ADDED without a declaration, DECLARED with a `# deliberate:` line, INCIDENTAL (`--out`, which
-    differs between any two arms by construction), and EQUAL-BUT-SPELLED-DIFFERENTLY (`4e-5` against
-    `4e-05`, the same learning rate).
-    """
-    arms = tmp_path / "arms"
-    arms.mkdir()
-    (arms / "silent.sh").write_text("# control  base = 0.85\n", encoding="utf-8")
-    (arms / "declaring.sh").write_text("# deliberate: --distill-weight\n# control  base = 0.85\n", encoding="utf-8")
-    check = ArmCheck(arms, tmp_path / "stub_lib.sh", tmp_path)
-    against = {"base": "--epochs 8 --backbone-lr 4e-5 --out base.pt"}
-
-    found = check.mismatched(
-        {
-            "silent": "--epochs 8 --distill-weight 0.3 --out silent.pt",
-            "declaring": "--epochs 8 --backbone-lr 4e-05 --distill-weight 0.3 --out declaring.pt",
-        },
-        against,
-    )
-
-    assert found == {"silent": ["--backbone-lr: 4e-5 -> absent", "--distill-weight: absent -> 0.3"]}, (
-        "a declared flag, an incidental one and the same rate spelled twice are not differences"
     )
