@@ -55,6 +55,19 @@ EPOCHS = "epochs"
 STUDIES = "studies"
 """The recipe key a smoke caps. A smoke is short BY CONSTRUCTION and reporting it truncated would teach
 the reader to skip this output, which is the failure the check exists to prevent."""
+AUC = "auc"
+"""The row key holding an epoch's holdout score — the series a budget verdict is a statement about."""
+TAIL = 3
+"""How many epochs back the final gain is measured over.
+
+One step is a single noisy difference and cannot separate a plateau from a wobble; three is the shortest
+window over which `one_cycle`'s final descent is a trend rather than a pair of points. It is also the
+window every four-epoch run on disk can still answer."""
+RISING_MARGIN = 0.0062
+"""The gain over `TAIL` epochs below which a run was not still gaining, only ending high.
+
+The project's paired holdout floor, legislated elsewhere and reused here with the same argument: it is the
+smallest difference this 909-study holdout resolves, so a tail gain under it is not a measured gain at all."""
 PATIENCE = "patience"
 """The recipe key holding the stopper, and the difference between a kill and a decision.
 
@@ -94,6 +107,10 @@ class Convergence(StrEnum):
     observed e5-e11 range would give. It is rarer than chance, and all three carry a recipe defect confirmed
     from somewhere else — `cnx_dense` (+0.0259 once its rate was fitted) and the two `encoder_adapt` runs.
     n=3 makes that a direction, not a rule.
+
+    AND PEAKING LAST IS NOT ENOUGH, since 2026-08-30. The argmax alone reported eleven runs, seven of them
+    plateaus that had gained 0.0004-0.0020 over their final three epochs. `rising` now requires the tail gain
+    to clear the holdout floor, so this verdict means the score was still MOVING when the budget ended.
     """
 
     UNSCORED = "UNSCORED"
@@ -161,6 +178,24 @@ class ConvergenceCheck:
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and int(recipe.get(PATIENCE, 0)) > 0
 
+    def rising(self, run: RunMetrics) -> bool:
+        """Whether the run was still GAINING at the end, rather than merely peaking there.
+
+        Peaking on the last epoch is an ARGMAX; being bound by a budget is a SLOPE. Seven of the eleven runs
+        the argmax rule called UNDERTRAINED had gained 0.0004-0.0020 across their last three epochs —
+        `mixup_dense` 0.8548, 0.8541, 0.8546, 0.8552 is the shape — which is a plateau whose highest point
+        happened to be the final one. Reading those as budget-bound argues for a longer schedule, and a
+        longer schedule is the one fix this repo has already measured as HARMFUL: an oversized budget
+        stretches `one_cycle`'s anneal and leaves the rate far from annealed where the model converges.
+
+        A run with no more epochs than the window cannot be asked, and stays undertrained: `lora_r8_small_336`
+        and `adapt_null` ran four and gained 0.078, which is what a budget binding actually looks like.
+        """
+        scored = [row[AUC] for row in run.rows() if row.get(AUC) is not None]
+        if len(scored) <= TAIL:
+            return True
+        return scored[-1] - scored[-1 - TAIL] > RISING_MARGIN
+
     def verdict(self, run: RunMetrics) -> RunConvergence:
         """Read one run's record and say whether its number is finished.
 
@@ -181,19 +216,21 @@ class ConvergenceCheck:
         asked = self.asked(run)
         return RunConvergence(
             name=run.name(),
-            verdict=self._judge(peak=peak, done=done, asked=asked, stoppable=self.stoppable(run)),
+            verdict=self._judge(
+                peak=peak, done=done, asked=asked, stoppable=self.stoppable(run), rising=self.rising(run)
+            ),
             best_epoch=peak,
             epochs_done=done,
             epochs_asked=asked,
         )
 
-    def _judge(self, *, peak: int | None, done: int, asked: int | None, stoppable: bool) -> Convergence:
+    def _judge(self, *, peak: int | None, done: int, asked: int | None, stoppable: bool, rising: bool) -> Convergence:
         """The rule, kept apart from the reading so each can be read on its own."""
         if asked is not None and done < asked:
             return Convergence.STOPPED if stoppable else Convergence.TRUNCATED
         if peak is None:
             return Convergence.UNSCORED
-        if peak >= done - 1:
+        if peak >= done - 1 and rising:
             return Convergence.UNDERTRAINED
         return Convergence.CONVERGED
 

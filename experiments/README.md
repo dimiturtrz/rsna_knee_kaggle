@@ -6083,3 +6083,37 @@ twelve objects it always did, so no other number in this ledger moves.
 So the honest reading is **"this Swin run, at this recipe, with its top frozen, earns no seat"** — not
 "supervised pretraining is dead". `swin_wholetop` (`knee-tsiz`) re-runs the byte-identical invocation on
 the fixed discovery, and it is the arm that decides which of those two sentences is true.
+
+## Seven "undertrained" runs were plateaus — the budget axis does not reopen (2026-08-30)
+
+Card-free, no slot. `convergence_check` over the whole processed root read 135 runs and called **eleven**
+UNDERTRAINED. Seven of those eleven had gained between 0.0004 and 0.0020 across their final three epochs:
+
+| run | last four epochs | gain over three |
+| --- | --- | --- |
+| `mixup_dense_s2026` | 0.8548 0.8541 0.8546 **0.8552** | +0.0004 |
+| `mixup224_strong_s2026` | 0.8510 0.8514 0.8515 **0.8516** | +0.0006 |
+| `cnx_dense_s2026` | 0.7921 0.7909 0.7927 **0.7927** | +0.0006 |
+| `encoder_adapt_s2026` | 0.6887 0.6888 0.6902 **0.6902** | +0.0015 |
+| `crop80_tissue_s2026`, `schedule_8_s2026` | — | +0.0020 each |
+
+**The rule was an argmax over a flat tail.** `peak >= done - 1` asks where the maximum sits, and on a
+plateau the maximum sits wherever the noise put it. Being bound by a budget is a SLOPE, not an argmax.
+
+**And the false verdict pointed at the one fix already refuted.** UNDERTRAINED argues for a longer
+schedule; the 24-epoch arm measured a longer schedule as actively harmful under `one_cycle` — an oversized
+budget stretches the anneal and leaves the rate far from annealed where the model actually converges. So
+seven plateaus were standing recommendations to re-run a closed axis.
+
+`rising()` now requires the tail gain to clear **0.0062**, the paired holdout floor — the smallest
+difference this 909-study holdout resolves, reused here with the same argument rather than a fresh constant.
+The corpus reads **102 converged, 9 truncated, 3 stopped, 5 undertrained, 16 unscored**.
+
+**The five that survive are the check on the fix**: `lora_r8_small_336` (+0.0784), `adapt_null` (+0.0789),
+`mae_matched` (+0.0901), `encoder_adapt_lower` (+0.0073) and `wholestack_fold2` — and the first three ran
+FOUR epochs, where a budget genuinely binds. The rule keeps exactly the runs whose budget was short.
+
+**What this changes about numbers already quoted.** `cnx_dense`'s 0.7927 and `mixup_dense`'s 0.8552 are
+their recipes' own numbers, not floors owed a longer run. `cnx_dense` remains handicapped for the separate
+reason `knee-94ec` names (its top 9 blocks of 36 never trained), which a longer budget would not have fixed
+either. Bead `knee-25wj`.

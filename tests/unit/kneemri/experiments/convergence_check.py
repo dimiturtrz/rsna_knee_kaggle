@@ -64,6 +64,33 @@ def test_verdict(tmp_path: Path) -> None:
     assert dark.best_epoch is None
 
 
+def write_plateau(directory: Path, name: str, tail: list[float]) -> RunMetrics:
+    """A twelve-epoch run whose last four scores are given, the rest flat below them."""
+    path = directory / f"{name}.metrics.jsonl"
+    scores = [tail[0]] * (12 - len(tail)) + tail
+    lines = [json.dumps({"recipe": {"fold": "0", "epochs": "12", "patience": "0"}})]
+    lines += [
+        json.dumps({"epoch": epoch, "loss": 1.0, "auc": auc, "per_label": {}}) for epoch, auc in enumerate(scores)
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return RunMetrics(path)
+
+
+def test_rising(tmp_path: Path) -> None:
+    """A budget binds by SLOPE, not by argmax — the plateau that ends high is finished."""
+    check = ConvergenceCheck()
+
+    # mixup_dense, off disk: the highest point is the last one and the run gained 0.0004 reaching it.
+    plateau = write_plateau(tmp_path, "mixup_dense", [0.8548, 0.8541, 0.8546, 0.8552])
+    assert not check.rising(plateau)
+    assert check.verdict(plateau).verdict is Convergence.CONVERGED, "a plateau argues for no longer budget"
+
+    # adapt_null, off disk: four epochs, still climbing 0.078 when the budget ended.
+    climbing = write_plateau(tmp_path, "adapt_null", [0.7451, 0.7880, 0.8180, 0.8240])
+    assert check.rising(climbing)
+    assert check.verdict(climbing).verdict is Convergence.UNDERTRAINED
+
+
 def test_asked(tmp_path: Path) -> None:
     """The budget comes from the recipe, and is None when the file predates recipes."""
     check = ConvergenceCheck()
