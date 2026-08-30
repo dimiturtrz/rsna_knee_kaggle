@@ -139,12 +139,13 @@ class TrajectoryGate:
         and reads median +0.0339 against a 12-epoch run's +0.0210. Comparing across the two would let a
         long schedule's headroom excuse a short arm.
 
-        A run recording MORE epochs than it asked for is refused outright. `RunMetrics.rows()` is supposed
-        to return the last run's group, and `lora_r8_v3small_224` shows it does not always: 16 rows against
-        a 12-epoch recipe, so its e3 belongs to one run and its peak to another. Read as one trajectory it
-        contributes +0.1350 — two and a half times the largest real gain in the corpus — and since the
-        maximum is what decides here, that single stitched series would have made the gate almost unable
-        to fire. See knee-gnzx.
+        A run recording MORE epochs than it asked for is refused outright, and it stays refused now that
+        `RunMetrics.rows()` splits on a restarting epoch as well as on a recipe line (knee-v5lb). That fix
+        is what makes `lora_r8_v3small_224` readable at all — 16 rows against a 12-epoch recipe, its e3 in
+        one run and its peak in another, contributing +0.1350 as one series against a corpus whose largest
+        real gain is +0.0529, and the maximum is what decides here. This guard caught it BEFORE the reader
+        was fixed, so it is kept: a series stitched by some future shape the reader does not know about
+        would arrive the same way, and a gate that can barely fire fails silently. See knee-gnzx.
         """
         asked = self._runs.asked(run)
         if asked is None or (budget is not None and asked != budget):

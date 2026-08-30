@@ -254,13 +254,27 @@ class RunMetrics:
         `recipe()` has always answered for the last run alone. Rows answering for all of them meant one
         file described one run and scored another, which is the same failure as an unmatched control
         wearing a matched one's name.
+
+        AND A RESTARTING EPOCH IS A BOUNDARY TOO, because the recipe line is not always where the
+        boundary is. A back-filled recipe sits at the END of the file, so splitting on recipes alone
+        puts every run before it into one group: `lora_r8_v3small_224_s2026` is four epochs of an
+        aborted run (peaking 0.6867) followed by the real twelve (peaking 0.8217) and then its recipe,
+        which reads as one sixteen-epoch trajectory climbing +0.1350 — two and a half times the largest
+        real gain in the corpus, and `trajectory_check` decides on a maximum. The boundary was in the
+        data the whole time: a run's `epoch` counts up, so a value that does not increase is a new run.
+        Three of 142 files on disk need it, and no SHIPPED number moves — the roster quotes
+        `lora_r8_v3small_224` at 0.8215 and its clean last-run peak is 0.8217, the same epoch either
+        way. What moves is every TRAJECTORY read across such a file. See knee-v5lb.
         """
         groups: list[list[EpochRow]] = [[]]
         for entry in self._entries():
             if RECIPE in entry:
                 groups.append([])
             elif "epoch" in entry:
-                groups[-1].append(cast(EpochRow, entry))
+                row = cast(EpochRow, entry)
+                if groups[-1] and row["epoch"] <= groups[-1][-1]["epoch"]:
+                    groups.append([])
+                groups[-1].append(row)
         return next((group for group in reversed(groups) if group), [])
 
     def epoch_seconds(self) -> float:

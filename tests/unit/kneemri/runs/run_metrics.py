@@ -87,6 +87,23 @@ def test_rows_reads_a_run_whose_recipe_was_back_filled(tmp_path: Path):
     assert [row["auc"] for row in metrics.rows()] == [0.73, 0.83], "described late is still described"
 
 
+def test_rows_splits_where_the_epoch_restarts(tmp_path: Path):
+    """A back-filled recipe puts every run before it in one group, so the epoch has to say where they part.
+
+    This is `lora_r8_v3small_224_s2026`: four epochs of an aborted run peaking 0.6867, then the real
+    twelve peaking 0.8217, then the recipe. Read as one series it climbs +0.1350 from the gate epoch —
+    two and a half times the largest real gain in the corpus `trajectory_check` decides a truncation on.
+    """
+    metrics = RunMetrics(tmp_path / "stitched.pt")
+    for epoch, auc in enumerate([0.61, 0.65, 0.69]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=auc, seconds=233, per_label={}))
+    for epoch, auc in enumerate([0.79, 0.82]):
+        metrics.record(EpochRow(epoch=epoch, loss=1.0, auc=auc, seconds=233, per_label={}))
+    metrics.describe({"fold": "0", "epochs": "2"})
+
+    assert [row["auc"] for row in metrics.rows()] == [0.79, 0.82], "an epoch that does not increase is a new run"
+
+
 def test_epoch_seconds(tmp_path: Path):
     """One stalled epoch must not move the cost of a run, because on disk one already does.
 
