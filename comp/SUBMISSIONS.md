@@ -2737,3 +2737,41 @@ clearing the resolution floor, which it did not.
 
 **Stated limit:** this cannot separate "the weight is flat" from "THIS foreign member is inert at any
 weight". Six of the seven seats are `--fold -1`, so no offline number exists or can exist for this pool.
+
+## `greedyseat_v1` — 0.936, and the board priced an offline constant to +0.0001
+
+`greedyseat_v1` (ref 55877491, 2026-08-30) is the first **procedurally selected** entry this project
+has shipped. Seven seats named by a greedy forward search over 111 holdout records — not hand-picked:
+`calib_dense_hold_s2026`, `merged_span_cf`, `labelwise_dense_s2026`, `blendhold_s2026`,
+`finding_calib_dense_s2026`, `margin_seat_s2026`, `warm_calib_dense_s2026`. It was fired to buy back an
+offline ruler, because `comp/champion.json`'s pin has six `--fold -1` seats and therefore no offline
+number by construction.
+
+It scored **0.936**, the bottom edge of the pre-registered 0.936–0.942 "as predicted" band.
+
+**The instrument landed, and it validated an offline measurement on the board.** The two prior fold-0
+anchors are 0.8712 → 0.933 and 0.8751 → 0.937, a slope of 1.026 board points per holdout point. Through
+that line:
+
+| offline fed in | predicted | board rounds to | actual | error |
+|---|---|---|---|---|
+| 0.8768 — the greedy's raw in-sample figure | 0.9387 | 0.939 | 0.936 | −0.0027 |
+| 0.8740 — bias-corrected | 0.9359 | **0.936** | 0.936 | **+0.0001** |
+
+The greedy selection bias was measured purely offline at **+0.0028** (111 records, seven seats,
+`knee-jsgb`). The board independently prices the same correction at **+0.0027**. That cross-ruler
+agreement is worth more than the row's score. It also disposes of an apparent **ruler inversion** —
+offline up 0.0017 against the previous anchor while the board went down 0.001 — which is not an
+inversion at all, but the greedy bias; correcting for it restores the ordering. `comp/board.jsonl`
+records the corrected 0.8740, never the raw figure.
+
+**Procedural selection does not beat hand-picking.** 0.936 against `raptorweight_v1`'s 0.944 is a 0.008
+shortfall. The fold-0 all-data dose accounts for roughly half (−0.004/−0.005, previously measured),
+leaving ~0.003–0.004 for "greedy is worse than curated" — present, but only a couple of ticks above the
+0.0015 board resolution.
+
+**Stated limit:** this cannot separate those two terms. No hand-picked fold-0 seven exists, so the
+comparison crosses the fold boundary and the dose is an estimate, not a matched control. And a landed
+anchor does not make the greedy ORDER a ranking: the search is in-sample over 111 members, and its
+seats 10–11 go to the pool's two worst inside a plateau where +0.0024 buys twenty-five seats. The
+champion pin does not move.
