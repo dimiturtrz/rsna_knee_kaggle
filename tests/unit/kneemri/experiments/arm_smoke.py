@@ -158,6 +158,25 @@ def test_reported(tmp_path: Path):
     assert out.is_dir(), "the smoke makes its own output directory"
 
 
+def test_complaint():
+    """The exception wins over whatever `transformers` logged to stderr after it.
+
+    A crashed smoke's LAST stderr line is routinely an HTTP 302, because the library keeps logging its
+    cache and discussions lookups past the traceback. Reporting that line named a fetch that was never
+    broken and cost two smoke runs on 2026-08-30.
+    """
+    crashed = [
+        "HTTP Request: HEAD https://huggingface.co/microsoft/swin/resolve/main/config.json 200 OK",
+        "Traceback (most recent call last):",
+        "AttributeError: 'TrunkAsTokens' object has no attribute 'gradient_checkpointing_enable'",
+        'HTTP Request: HEAD https://huggingface.co/microsoft/swin/resolve/refs%2Fpr%2F1/model.safetensors "302"',
+    ]
+
+    assert ArmSmoke.complaint(crashed) == crashed[2], "the raise, not the line that happened to be last"
+    assert ArmSmoke.complaint(crashed[:1]) == crashed[0], "with nothing raised, the last line is all there is"
+    assert ArmSmoke.complaint([]) == "", "a failure that said nothing has nothing to report"
+
+
 def test_timeout():
     """A CPU smoke gets a bound that is not already inside its own expected runtime.
 

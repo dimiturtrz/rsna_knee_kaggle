@@ -6008,3 +6008,46 @@ the one the arm named as the outcome worth having.
 weight 1.0) at one operating point. A representation term that shapes a different space, or attaches at a
 different stage, is untested and is not answered by this. What is answered is the specific suspect, which
 is what the 72 minutes were bought for.
+
+## `stack_increments` — the two banked increments do not compose, and the bank-them branch closes
+
+**2026-08-30, one 12-epoch fit, 363 s an epoch, 73 min of card. No slot.**
+
+`knee-24bx` re-opened four increments that had each been measured alone, filed as under-floor, and
+discarded on an arithmetic error: `board_transfer` was quoted at a 23% pass-through when the module fits
+**+0.98 [+0.94, +1.08] at or above 0.8670** — one-for-one. Under a one-for-one transfer an offline
++0.003 is +0.003 on the board, twice the board's own resolution, so a stack of increments summing past
+the 0.0062 paired floor is worth building. The arm stacked the two whose mechanisms are prima facie
+disjoint: the **label TABLE swap** (+0.0034, moves the target) and **architecture-distant distillation**
+(+0.0035, adds an ordering term from a foreign teacher).
+
+| run | increments | best | epoch |
+|---|---|---|---|
+| `calib_dense_hold_s2026` | none (control) | **0.8634** | 6 |
+| additive prediction | table + distillation | *0.8703* | — |
+| `stack_increments_s2026` | table + distillation | **0.8642** | 9 |
+
+**+0.0008 against its control, against a predicted +0.0069.** The paired floor is 0.0062; this is an
+eighth of it. The pre-registered NULL band was 0.8600–0.8668 and the run landed inside it, at 0.8642.
+
+Epoch trace: 0.7525, 0.7883, 0.8346, 0.8347, 0.8519, 0.8565, 0.8596, 0.8609, 0.8625, **0.8642**. The peak
+is the last recorded epoch of ten under a twelve-epoch budget, so `convergence_check` reads it as bound by
+the budget rather than converged — but the gap to close is 0.0061 and the last three epochs moved 0.0033
+in total, so a longer fit does not reach the prediction.
+
+**What the NULL says, and it is the sharper of the two branches.** Additivity was declared an ASSUMPTION
+in the bead, not a measurement, and the named risk was that the terms share mechanism — *"the increments
+are one increment wearing two names"*. That is what the number says: one term's worth arrived, and not
+even that cleanly. Both terms act on what the model is asked to ORDER — the label swap by changing the
+target table, distillation by adding a teacher's ordering — so they compete for the same headroom rather
+than stacking.
+
+**It closes the bank-the-increments branch of `knee-m69u`.** The remaining two unstacked increments
+(specialist per column +0.0043, supervision policy +0.0034) are not re-armed on this reading: their sum
+with these two was the whole case, and the case required composition that has now been measured absent.
+The six-arm roster retrain (~7 h of card) that ADDITIVE would have licensed is **not armed**.
+
+**What it does NOT close.** The individual increments are unharmed — each still reproduces against its own
+control, and each is still worth its own size on the board if it is the only thing changed. What is
+refuted is that they SUM. It also leaves the non-DINOv2 trunk lane standing as the only remaining branch
+of `knee-m69u`, which is where the card went next (`swin_supervised`).

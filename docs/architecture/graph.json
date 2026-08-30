@@ -3500,6 +3500,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.backbone",
+      "target": "kneemri.models.trunk_tokens",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.depth_attention",
       "target": "kneemri.models.slice_attention",
       "weight": 1
@@ -13503,6 +13509,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
+      "target": "kneemri.experiments.arm_smoke.ArmSmoke.complaint",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_smoke.ArmSmoke._subprocess",
       "target": "kneemri.experiments.arm_smoke.ArmSmoke.timeout",
       "weight": 1
     },
@@ -18025,42 +18037,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.models.backbone.TokenOutput",
-      "target": "kneemri.models.backbone.TokenOutput",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.models.backbone.TrunkAsTokens",
-      "target": "kneemri.models.backbone.TokenConfig",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.models.backbone.TrunkAsTokens",
-      "target": "kneemri.models.backbone.TokenOutput",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.models.backbone.TrunkAsTokens",
-      "target": "kneemri.models.backbone.TrunkAsTokens",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.models.backbone.TrunkAsTokens.__init__",
-      "target": "kneemri.models.backbone.TokenConfig",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.backbone.TrunkAsTokens.forward",
-      "target": "kneemri.models.backbone.TokenOutput.from_spatial",
-      "weight": 1
-    },
-    {
       "kind": "holds",
       "source": "kneemri.models.depth_attention.DepthAttention",
       "target": "kneemri.models.slice_attention.SliceAttention",
@@ -18382,6 +18358,42 @@
       "kind": "inherits",
       "source": "kneemri.models.token_pooling.PatchMean",
       "target": "kneemri.models.token_pooling.TokenPooling",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.trunk_tokens.TokenOutput",
+      "target": "kneemri.models.trunk_tokens.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "target": "kneemri.models.trunk_tokens.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "target": "kneemri.models.trunk_tokens.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "target": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.trunk_tokens.TrunkAsTokens.__init__",
+      "target": "kneemri.models.trunk_tokens.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.trunk_tokens.TrunkAsTokens.forward",
+      "target": "kneemri.models.trunk_tokens.TokenOutput.from_spatial",
       "weight": 1
     },
     {
@@ -21353,7 +21365,7 @@
       "role": null
     },
     {
-      "descendants": 164,
+      "descendants": 165,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22249,7 +22261,7 @@
       "role": null
     },
     {
-      "descendants": 14,
+      "descendants": 15,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -22356,6 +22368,14 @@
       "descendants": 0,
       "id": "kneemri.models.token_pooling",
       "label": "token_pooling",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens",
+      "label": "trunk_tokens",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -25066,30 +25086,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.models.backbone.TokenConfig",
-      "label": "TokenConfig",
-      "level": "class",
-      "parent": "kneemri.models.backbone",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TokenOutput",
-      "label": "TokenOutput",
-      "level": "class",
-      "parent": "kneemri.models.backbone",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TrunkAsTokens",
-      "label": "TrunkAsTokens",
-      "level": "class",
-      "parent": "kneemri.models.backbone",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.models.depth_attention.DepthAttention",
       "label": "DepthAttention",
       "level": "class",
@@ -25247,6 +25243,30 @@
       "level": "class",
       "parent": "kneemri.models.token_pooling",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TokenConfig",
+      "label": "TokenConfig",
+      "level": "class",
+      "parent": "kneemri.models.trunk_tokens",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TokenOutput",
+      "label": "TokenOutput",
+      "level": "class",
+      "parent": "kneemri.models.trunk_tokens",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "label": "TrunkAsTokens",
+      "level": "class",
+      "parent": "kneemri.models.trunk_tokens",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -32802,6 +32822,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_smoke.ArmSmoke.complaint",
+      "label": "complaint",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_smoke.ArmSmoke",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_smoke.ArmSmoke.failed",
       "label": "failed",
       "level": "method",
@@ -36498,46 +36526,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.models.backbone.TokenOutput.from_spatial",
-      "label": "from_spatial",
-      "level": "method",
-      "parent": "kneemri.models.backbone.TokenOutput",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TrunkAsTokens.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.models.backbone.TrunkAsTokens",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TrunkAsTokens.forward",
-      "label": "forward",
-      "level": "method",
-      "parent": "kneemri.models.backbone.TrunkAsTokens",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TrunkAsTokens.from_map",
-      "label": "from_map",
-      "level": "method",
-      "parent": "kneemri.models.backbone.TrunkAsTokens",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.backbone.TrunkAsTokens.from_sequence",
-      "label": "from_sequence",
-      "level": "method",
-      "parent": "kneemri.models.backbone.TrunkAsTokens",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.models.depth_attention.DepthAttention.__init__",
       "label": "__init__",
       "level": "method",
@@ -37054,6 +37042,62 @@
       "label": "reduce",
       "level": "method",
       "parent": "kneemri.models.token_pooling.TokenPooling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TokenOutput.from_spatial",
+      "label": "from_spatial",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TokenOutput",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.from_map",
+      "label": "from_map",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.from_sequence",
+      "label": "from_sequence",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.gradient_checkpointing_enable",
+      "label": "gradient_checkpointing_enable",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.trunk_tokens.TrunkAsTokens.is_gradient_checkpointing",
+      "label": "is_gradient_checkpointing",
+      "level": "method",
+      "parent": "kneemri.models.trunk_tokens.TrunkAsTokens",
       "role": null
     },
     {

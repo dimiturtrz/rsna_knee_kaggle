@@ -12,11 +12,11 @@ The variant is the only free choice; the repository and the feature width follow
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast, override
+from typing import cast
 
-import torch
-from jaxtyping import Float
-from torch import Tensor, nn
+from torch import nn
+
+from kneemri.models.trunk_tokens import TrunkAsTokens
 
 SMALL = "small"
 BASE = "base"
@@ -109,88 +109,6 @@ A VIDEO trunk states the same two constants under a different filename: V-JEPA2 
 the one encoder here whose pretraining corpus is not images as having no declaration AT ALL — which is
 the quiet half of the failure `Normalization` exists to make loud, since an unread declaration and an
 agreeing one are indistinguishable from the outside."""
-
-
-@dataclass(frozen=True)
-class TokenConfig:
-    """The two fields the head reads off a backbone's config, for a trunk whose config lacks them.
-
-    `ConvNextV2Config` carries `hidden_sizes` — one width per stage — and no `hidden_size`, and it has
-    no notion of register tokens at all. The head derives its feature width and its prefix count from
-    whatever the loaded weights say, deliberately, because the weights are the only authority on what
-    they emit. So a trunk that does not answer those questions is given something that does, rather
-    than the head being taught a second way to ask.
-    """
-
-    hidden_size: int
-    num_register_tokens: int = 0
-
-
-@dataclass(frozen=True)
-class TokenOutput:
-    """What a transformers backbone returns, for a trunk that returns a feature map instead."""
-
-    last_hidden_state: Float[Tensor, "n t d"]
-
-    @classmethod
-    def from_spatial(cls, spatial: Float[Tensor, "n t d"]) -> "TokenOutput":
-        """Spatial tokens with their own mean prepended, which is the slot a class token occupies.
-
-        Mean-over-space is what a hierarchical trunk pools before its linear layer, so the prefix is not
-        a placeholder: it holds the quantity a class token holds. It lives on the OUTPUT type because
-        every trunk short of the contract needs it whatever layout it started from, and this is the type
-        they all end at. Keeping it here is what holds `prefix_tokens` at 1 for every family, so the head's
-        `tokens[:, 1:]` still selects exactly the spatial grid.
-        """
-        return cls(torch.cat([spatial.mean(dim=1, keepdim=True), spatial], dim=1))
-
-
-class TrunkAsTokens(nn.Module):
-    """A trunk that does not already speak the vision transformer's output contract, wearing it.
-
-    The head consumes (n, 1 + patches, dim) — a token SEQUENCE with a class token in front — and
-    teaching it anything else would put a family test in the one place this project has kept free of
-    them: the head is structural on purpose, so any module callable as `backbone(pixel_values=)` can be
-    substituted as a constructor argument. Two families arrive short of that contract, and they are
-    short of DIFFERENT halves of it:
-
-    - a ConvNeXt emits a feature MAP, (n, dim, h, w), and no prefix token;
-    - a Swin emits a token SEQUENCE already, (n, t, d), but still no prefix token — it pools its final
-      grid inside its own classifier, so what it hands back is spatial tokens and nothing else.
-
-    Handing either one straight to the head puts a real spatial token where `tokens[:, 1:]` expects the
-    prefix to have been, losing the grid's first cell with no shape error to announce it. The missing
-    prefix is therefore shared and lives in `TokenOutput.from_spatial`; the only thing that differs is
-    how the spatial tokens are reached, which is `to_spatial` — a strategy rather than a rank test,
-    because a rank test would silently pick an arm for a trunk nobody had classified.
-    """
-
-    config: TokenConfig
-    """Annotated at class level because `nn.Module.__getattr__` types every attribute it serves as
-    `Tensor | Module`, so a reader of `backbone.config.hidden_size` would otherwise be reading a
-    Tensor as far as the type checker is concerned."""
-
-    def __init__(self, trunk: nn.Module, dim: int, to_spatial: Callable[[Tensor], Float[Tensor, "n t d"]]) -> None:
-        super().__init__()
-        self.trunk = trunk
-        self.to_spatial = to_spatial
-        self.config = TokenConfig(dim)
-
-    @classmethod
-    def from_map(cls, trunk: nn.Module, dim: int) -> "TrunkAsTokens":
-        """For a trunk emitting (n, dim, h, w): flatten row-major, which is the ordering ViT patch
-        tokens already carry, so the head's positional reading of the grid is unchanged."""
-        return cls(trunk, dim, lambda emitted: emitted.flatten(2).transpose(1, 2))
-
-    @classmethod
-    def from_sequence(cls, trunk: nn.Module, dim: int) -> "TrunkAsTokens":
-        """For a trunk emitting (n, t, d) with no prefix: the layout is already right and only the
-        missing slot has to be supplied."""
-        return cls(trunk, dim, lambda emitted: emitted)
-
-    @override
-    def forward(self, pixel_values: Float[Tensor, "n c h w"]) -> TokenOutput:
-        return TokenOutput.from_spatial(self.to_spatial(self.trunk(pixel_values=pixel_values).last_hidden_state))
 
 
 @dataclass(frozen=True)

@@ -11,6 +11,7 @@ minutes into the real run.
 import json
 import logging
 import math
+import re
 import shlex
 import subprocess
 import sys
@@ -62,6 +63,13 @@ Six times the card's bound rather than a tuned figure: on CPU the thing being bo
 anything under an hour is inside the honest spread of a device whose epoch time nobody has pinned per
 arm."""
 
+RAISED = re.compile(r"^[A-Za-z_][\w.]*(Error|Exception|Exit|Interrupt)(:|$)")
+"""What a Python exception's final line looks like — `ValueError: ...`, `torch.OutOfMemoryError: ...`.
+
+Anchored at the start so an INFO log that merely mentions an error name does not qualify, and the name
+must END the match (at a colon, or at the line's end for a bare `AssertionError`) so `HTTP Request:` and
+its kin cannot claim it."""
+
 TIMED_OUT = 124
 """The exit code a timeout is reported under — `timeout(1)`'s, so the number in the log means the thing
 it means everywhere else. The process was killed, so it has no code of its own to report."""
@@ -101,6 +109,16 @@ class ArmSmoke:
         — took the whole sweep down with it, after the arms already smoked had been reported and before
         any of the remaining ones ran, leaving that arm's artifacts behind because the cleanup lives
         past the call. The arm that hung is the one thing such a sweep must be able to name.
+
+        THE LAST LINE IS NOT THE COMPLAINT. `transformers` logs its HTTP requests to stderr at INFO and
+        keeps logging them AFTER the traceback — a cache scan, a discussions lookup, a resolve — so the
+        final line of a crashed smoke is routinely `HTTP/1.1 302 Found` and the exception is eighteen
+        lines above it. On 2026-08-30 `swin_supervised` was reported BROKEN with a 302 and the real
+        cause (`AttributeError: 'TrunkAsTokens' object has no attribute
+        'gradient_checkpointing_enable'`) was only read by re-running the recipe by hand outside this
+        tool. A smoke that names the wrong line is worse than one that names none: it invites the repair
+        of a fetch that was never broken. So the LAST EXCEPTION-SHAPED line wins, and `lines[-1]` is the
+        fallback for a failure that raised nothing.
         """
         bound = ArmSmoke.timeout(on_card=torch.cuda.is_available())
         try:
@@ -109,7 +127,13 @@ class ArmSmoke:
         except subprocess.TimeoutExpired:
             return TIMED_OUT, f"still running after {bound}s on {SMOKE_STUDIES} studies"
         lines = done.stderr.strip().splitlines()
-        return done.returncode, lines[-1] if lines else ""
+        return done.returncode, ArmSmoke.complaint(lines)
+
+    @staticmethod
+    def complaint(lines: list[str]) -> str:
+        """The line of stderr that says what went wrong, which is rarely the last one — see `_subprocess`."""
+        raised = [line for line in lines if RAISED.match(line)]
+        return raised[-1] if raised else (lines[-1] if lines else "")
 
     @staticmethod
     def reserves(flags: str) -> int:
