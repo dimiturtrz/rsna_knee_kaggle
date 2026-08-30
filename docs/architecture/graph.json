@@ -1400,6 +1400,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.level_calibration",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.level_calibration",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.level_calibration",
+      "target": "kneemri.evaluation.gold_rows",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.member_curve",
       "target": "core.cli",
       "weight": 1
@@ -9682,6 +9700,66 @@
       "kind": "calls",
       "source": "kneemri.evaluation.label_stability.main",
       "target": "kneemri.evaluation.label_stability.LabelStability.report",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "target": "kneemri.evaluation.level_calibration.LevelRates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.LevelCalibration.observed",
+      "target": "kneemri.evaluation.level_calibration.LevelCalibration.monotone",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.level_calibration.LevelCalibration.observed",
+      "target": "kneemri.evaluation.level_calibration.LevelRates",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.reported",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.level_calibration.LevelCalibration.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.level_calibration.LevelCalibration.observed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.level_calibration.main",
+      "target": "kneemri.evaluation.level_calibration.LevelCalibration.vocabulary",
       "weight": 1
     },
     {
@@ -21407,7 +21485,7 @@
       "role": null
     },
     {
-      "descendants": 166,
+      "descendants": 167,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -21463,7 +21541,7 @@
       "role": null
     },
     {
-      "descendants": 44,
+      "descendants": 45,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -21586,6 +21664,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.label_stability",
       "label": "label_stability",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration",
+      "label": "level_calibration",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -23821,6 +23907,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.label_stability",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "label": "LevelCalibration",
+      "level": "class",
+      "parent": "kneemri.evaluation.level_calibration",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelRates",
+      "label": "LevelRates",
+      "level": "class",
+      "parent": "kneemri.evaluation.level_calibration",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -30388,6 +30490,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.label_stability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelCalibration.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelCalibration.monotone",
+      "label": "monotone",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelCalibration.observed",
+      "label": "observed",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelCalibration.vocabulary",
+      "label": "vocabulary",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration.LevelCalibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.LevelRates.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration.LevelRates",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.level_calibration.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.level_calibration",
       "role": null
     },
     {

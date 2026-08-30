@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# recal_holdannot.sh — the holdannot control on a supervision table whose VALUES were fitted to the
+# annotations, and the only arm in the tree that can be read on both rulers.
+#
+# WHY THIS ARM EXISTS. Against the 58 radiologist-annotated studies (684 read cells) the report reader
+# ORDERS well and SCALES badly: mean per-finding rank AUC 0.866, ACL 0.987, while binarised agreement at
+# the 0.5 used everywhere is 0.789 and ten of twelve findings want a threshold above it. Pooled, its five
+# levels are positive at 0.041 / 0.136 / 0.378 / 0.688 / 0.958. `report_labels_v3.csv` replaces each
+# level with its measured rate (`kneemri.evaluation.level_calibration`). The map is strictly increasing,
+# so every per-label rank AUC of the TABLE is identical and this cannot be a scoring effect — it changes
+# only what the model is asked to fit.
+#
+# WHAT THE CHEAP PRE-TEST TOOK BACK, before any card was spent. Five members on disk were asked where
+# they actually put a cell labelled 0.68. Mean over the 909-study holdout: 0.469, against a v2 target of
+# 0.68 and a fitted 0.378. At level 0.82 they sit at 0.681 against a fitted 0.688 — dead on. THE MODELS
+# ALREADY FOUND MOST OF THIS CORRECTION UNSUPERVISED. At the ends they go the other way (0.188 for a
+# fitted 0.041), but that is regression to the mean, and rank AUC is invariant to monotone squashing, so
+# decompressing the ends buys nothing on the metric.
+#
+# SO THE MECHANISM UNDER TEST IS GRADIENT DIRECTION, NOT CALIBRATION. For the 1,319 holdout cells at
+# level 0.68 the model sits at 0.469: v2 pulls them UP toward 0.68, v3 pushes them DOWN toward 0.378.
+# That flips the sign of the loss's pressure on 12% of the corpus — the 12% where the reader is
+# measurably most wrong — and re-weights the rest. Reordering can follow from that. It cannot follow from
+# the squashing.
+#
+# WHY THE HOLDANNOT RECIPE AND NOT THE DENSE ONE. knee-9198: a checkpoint is REFUSED on the gold ruler
+# (TrainedOnAnnotationsError) unless it was trained with --hold-annotations, and this is a LABEL-SIDE arm,
+# which is the exact class that bead requires to report both numbers. The proxy holdout truth IS the
+# report-derived table, so it is biased AGAINST label-side movement by up to the measured +0.045 level
+# shift. An arm read only on the proxy is an arm read on the ruler that cannot see it.
+#
+# Cloning holdannot rather than adding the flag to v3base_dense also buys two things. A matched control
+# already exists on BOTH rulers, so nothing extra goes on the card. And 224 px is three times the arms
+# per hour (knee-s9cr), which is the right price for a mechanism the pre-test already deflated.
+#
+# AND IT CLOSES A LEAK. The re-map was fitted ON the 58 annotated studies. Without --hold-annotations the
+# model would train on those same rows, and the gold ruler would then be scoring a model that had seen
+# the cells the map was fitted to. Holding them out makes the gold reading clean rather than merely
+# available.
+#
+# THE SINGLE VARIABLE IS THE TABLE. Every other flag is byte-identical to `holdannot.sh`.
+#
+# control  holdannot = 0.8487 proxy, 0.8932 gold (supervision_gap over the 58).
+#
+# PRE-REGISTERED, on GOLD first, because the proxy is the biased ruler here:
+#   LANDS — gold above 0.8932 by the floor or more, proxy at or above 0.8487. The reader's scale was a
+#     real defect and nothing was paid for fixing it. Rebuild the roster's members on v3, spend a slot.
+#   TRANSFERS — gold up, proxy down by less than 0.0062. The predicted shape, and the reason this arm is
+#     read in this order. Worth a slot on its own, because only the board can settle it.
+#   FLAT — gold within 0.0062, proxy within 0.0062. The models were already inverting the miscalibration
+#     for themselves, exactly as the pre-test suggested. Keep v3 as the table — it costs nothing — and
+#     stop spending on the axis.
+#   REFUTES — gold down by the floor or more. The re-map moved training AWAY from the image-read process,
+#     which would say the reader's over-calling carries signal the annotations do not, and the follow-up
+#     is per-finding rather than pooled.
+#
+# READING IT. Proxy: the ledger row. Gold: `python -m kneemri.evaluation.supervision_gap --records
+# $PROCESSED/recal_holdannot_s2026.pt`. Both, per knee-9198. n=58 is a level, not a selector: it cannot
+# resolve 0.002 (knee-kddo), so only a difference at or above the floor is readable on it.
+#
+# bead: knee-8wa0
+# The measurement it rests on is knee-7oep; the two-ruler rule is knee-9198.
+#
+# deliberate: --hold-annotations (the gold ruler refuses the checkpoint without it, and it closes the
+#   leak from fitting the map on those rows)
+# deliberate: every other flag — they are holdannot's and may not be touched in this arm.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+RECAL="$PROCESSED/labels/report_labels_v3.csv"
+require "$RECAL"
+
+run_train recal_holdannot \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --image-size 224 --hold-annotations \
+  --labels "$RECAL" --out "$PROCESSED/recal_holdannot_s2026.pt"
