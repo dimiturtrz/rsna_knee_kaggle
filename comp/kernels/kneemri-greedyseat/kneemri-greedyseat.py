@@ -125,6 +125,8 @@ def boot() -> Path:
 def main() -> None:
     boot()
 
+    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
+    from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     # The greedy's first seven over 111 members (logs/greedy_named.log), named rather than ranked so the
@@ -138,7 +140,10 @@ def main() -> None:
         "margin_seat_s2026",
         "warm_calib_dense_s2026",
     )
-    KernelRun(names=chosen, overlap=False).run()
+    # LogitAverage, not the RankAverage default: the champion serves it, and holding the vote rule is
+    # what leaves SELECTION as the only moving variable. Version 1 of this kernel served the default
+    # and was rerun before any slot was spent.
+    KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage())).run()
 
 
 if __name__ == "__main__":

@@ -17,8 +17,13 @@ decode. So this entry costs `soloseat`'s decode plus two extra forward passes on
 during the decode anyway.
 
 **WHAT IS HELD.** These are the champion's OWN seats, unmodified: same checkpoints, same
-`--calibrated-targets` refit, same `LogitAverage`, same `overlap=False`. Nothing is retrained and no
-weight is tuned. The entry differs from `calibsix` by dropping the three seats that would each add a
+`--calibrated-targets` refit, same `overlap=False`. Nothing is retrained and no weight is tuned.
+
+CORRECTED 2026-08-30 (knee-rxwc): this paragraph claimed `LogitAverage` was held too, and it was not.
+`main` passes no `serving`, so this entry served the `RankAverage` default while the champion
+`kneemri-raptorseat` passes `Serving(vote=LogitAverage())`. The 0.938 stands — `vote_ceiling1.log`
+prices the two rules 0.8720 against 0.8710, about one tick and under the floor — but it is a
+measurement of three champion seats under a DIFFERENT vote, and must not be quoted as the champion's. The entry differs from `calibsix` by dropping the three seats that would each add a
 DECODE, and from `soloseat` by adding two that do not.
 
 PRE-REGISTRATION, written before the number, against `soloseat` = 0.925 (1 seat), `onepair_v1` = 0.936
