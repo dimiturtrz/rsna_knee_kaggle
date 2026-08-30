@@ -28,6 +28,7 @@ CONVNEXT_BASE = "cnxbase"
 VJEPA2_LARGE = "vjepa2l"
 RAD_DINO = "raddino"
 SWIN_BASE = "swinbase"
+VIT_IN21K = "vitin21k"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
@@ -35,6 +36,7 @@ CONVNEXT = "convnext"
 VJEPA2 = "vjepa2"
 RADDINO = "rad-dino"
 SWIN = "swin"
+VIT = "vit"
 
 
 @dataclass(frozen=True)
@@ -100,6 +102,16 @@ class Normalization:
 IMAGENET = Normalization((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 """What every natural-image trunk in this registry was pretrained under, and the reason a per-encoder
 field looked unnecessary for as long as the registry held only natural-image trunks."""
+
+HALF = Normalization((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+"""The AugReg convention: centre on 0.5 and scale by 0.5, so a byte image lands on [-1, 1].
+
+The SECOND trunk here that does not declare ImageNet, and it is worth naming that it is the second
+rather than folding it into RAD-DINO's comment. RAD-DINO's constants are a property of its CORPUS —
+greyscale radiographs really do have a different mean. These are a property of a pretraining CODEBASE:
+every AugReg-trained ViT states them regardless of what it was trained on, because that pipeline never
+adopted the ImageNet statistics. So a trunk's normalization cannot be predicted from its data any more
+than from its architecture, which is the whole argument for the field existing."""
 
 PREPROCESSOR_FILES = ("preprocessor_config.json", "video_preprocessor_config.json")
 """The documents a HuggingFace snapshot may state `image_mean`/`image_std` in, in the order to try.
@@ -539,6 +551,37 @@ ENCODERS: dict[str, Encoder] = {
         # stated ahead of any fetch for the same reason ConvNeXtV2's are: the cap refuses a run that
         # will not fit, so it cannot wait for the weights to say.
         stages=(Stage(2, 4, 128), Stage(2, 8, 256), Stage(18, 16, 512), Stage(2, 32, 1024)),
+    ),
+    # THE OBJECTIVE AXIS WITH THE ARCHITECTURE HELD FIXED, added 2026-08-30. `swinbase` above is this
+    # registry's first supervised trunk and it varies TWO things at once against every incumbent: the
+    # pretraining objective AND the architecture. Whatever it reads, it cannot say which half carried it.
+    # This entry can. It is an exact architectural twin of `v3base` — ViT-B/16, twelve blocks, 768 wide,
+    # global attention over the same patch grid — and differs from it in the objective ALONE: AugReg
+    # supervised IN-21k against DINOv3 self-distillation on LVD-1689M. `v3base_dense` already ran the
+    # dense recipe on the twin and read -0.0007 as a sixth seat, so the control is on disk.
+    #
+    # `knee-y59c` MEASURED SOLO STRENGTH ANTI-CORRELATING WITH DISTANCE FROM DINOv2 across seven trunks,
+    # and an architectural twin sits at ~0 on that axis — which is why this is expected to produce a real
+    # number rather than another `mae_matched` (0.6735) or `focus_mcl` (0.5332). A strong solo with a
+    # worthless seat would itself be the finding: it would say the objective moves the trunk's COMPETENCE
+    # and not its OPINION, which is the quantity `knee-m69u` asks about and the one Swin confounds.
+    #
+    # NOT IMAGENET, and this one is not a corpus story. See `HALF`.
+    #
+    # 224 IS THE PRETRAINED READ and 16 tiles it at 14x14. Larger reads interpolate the position
+    # embeddings, which every ViT here already does — so unlike Swin's window tables this may be swept.
+    #
+    # NO MOUNT YET. Apache-2.0 and ungated, so mirroring is permitted outright and is the same dataset
+    # upload `dimiturnt/swin-base-384` is; deferred until a member earns the seat.
+    VIT_IN21K: Encoder(
+        VIT_IN21K,
+        "google/vit-base-patch16-224-in21k",
+        768,
+        patch=16,
+        family=VIT,
+        normalization=HALF,
+        leaf="vit-base-in21k",
+        params_m=86.4,
     ),
     # THE FIRST TRUNK THAT WAS NOT PRETRAINED ON FLAT IMAGES, added 2026-08-21 after `through_dense`
     # answered the cheap version of this question and answered it flat. That arm put slices i-1, i, i+1
