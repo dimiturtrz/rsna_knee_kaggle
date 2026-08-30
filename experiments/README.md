@@ -5960,3 +5960,51 @@ the wall-clock first — the trunk question is worth answering, but not at a rat
 **Not re-armed here.** Every arrangement of the members we own is already priced behind the champion
 (`interpretations/kneemri/2026-08-30_the-board-priced-an-offline-constant.md`), and a second weak-trunk
 member does not pay the +0.0042 that a top-10 spot costs. This is bookkeeping, not a plan.
+
+## `contrast_pool` — the batch-size explanation is refuted, and the representation lane closes on mechanism
+
+**2026-08-30, one 12-epoch fit, 362 s an epoch, 72 min of card. No slot.**
+
+`contrast_dense_s2026` read 0.8547 against `calib_dense_hold_s2026`'s 0.8634 — **−0.0087**, eleven of
+twelve labels down. Its own header, written before the run, named the suspect: *"a batch of twelve sees a
+7%-prevalence finding roughly once"*, so for most findings the positives a supervised-contrastive term
+needs are absent, the anchor forms no term, and the label drops out of the loss. The reading the ledger
+recorded was deliberately narrow — *"supervised contrastive AT BATCH 12 costs 0.009"* — and the named
+precondition for reading it any wider was a remembered pool of past readouts.
+
+`RememberedContrast` supplies exactly that (`knee-agrj`). At capacity 8 each anchor is contrasted against
+96 keys instead of 12, so a 7% finding is expected in ~7 of them rather than in ~1.
+
+| run | contrast | keys per anchor | best | epoch |
+|---|---|---|---|---|
+| `calib_dense_hold_s2026` | none | — | **0.8634** | 6 |
+| `contrast_dense_s2026` | SupCon | 12 | 0.8547 | 5 |
+| `contrast_pool_s2026` | SupCon + memory | 96 | **0.8515** | 5 |
+
+**−0.0032 against its single-variable control, inside the 0.0062 paired floor. −0.0119 against the
+no-contrast control, well outside it.** The two contrastive curves are near-superimposed: same peak
+epoch, and tails of 0.8487 against 0.8483.
+
+**The mechanism fired, and that is what makes this a refutation rather than a null.** Training loss runs
+5.859 against the control's 3.605 at epoch 0 and stays ~2.2 higher throughout — which is what widening a
+log-sum-exp denominator eightfold does, and is not something a stale binary or an unlanded flag can
+produce. The flag pair is in the recorded recipe as well, but the loss is the evidence.
+
+**Seat value 0.0000.** The honest greedy over the 77 roster-named members peaks at 0.8763 with twenty
+seats; adding this member makes it 78 records and the curve is identical at every count, to four decimals.
+That is the sharp contrast with `contrast_dense`, which lost 0.0087 solo and still seats fifth — a solo
+loss does not decide a member, and here the seat ruler agrees with the solo one.
+
+**So none of the three pre-registered readings is the right one.** The arm was written expecting flat
+against the no-contrast control (supervision not binding), a gain over `contrast_dense` (batch-size
+artefact confirmed), or a loss against it (harmful independent of batch size). What happened is the
+fourth: **eight times the contrastive population changed nothing measurable.** The positives were
+supplied, the loss moved where the mechanism says it must, and the holdout did not follow. The batch-size
+explanation `contrast_dense` offered for its own −0.0087 is therefore refuted on measurement, and the
+supervised-contrastive term closes at this operating point on **mechanism** — the stronger closure, and
+the one the arm named as the outcome worth having.
+
+**What it does NOT close.** This is one contrastive formulation (SupCon over the readout, temperature 0.1,
+weight 1.0) at one operating point. A representation term that shapes a different space, or attaches at a
+different stage, is untested and is not answered by this. What is answered is the specific suspect, which
+is what the 72 minutes were bought for.
