@@ -6196,3 +6196,35 @@ What it does not say: the non-DINO lane is not dead. This is a fact about the LE
 a non-DINO trunk reading 0.85+ solo has never been tried and is untouched by it. Nor does it unroster
 `vjepa_warm`; an unreadable band is not a conviction, and that member's line is answered with a number.
 See `knee-tild`, `knee-tsiz`.
+
+### The non-DINO trio as a BLOCK buys nothing either, and the greedy never seats one (2026-08-30)
+
+The seat measurement above priced each non-DINO member alone. The remaining version of the diversity
+argument is that mutually distant members contribute as a GROUP where none of them earns a seat singly —
+three trunks that disagree with the roster and with each other. `record_mix` answers it from the holdout
+arrays already on disk, with no card and no inference pass:
+
+```
+A: roster alone            7 members: held-out 0.8766  in-sample 0.8763   <- peak
+B: roster + 3 non-DINO     7 members: held-out 0.8766  in-sample 0.8763   <- same peak, same seats
+                           8 members: held-out 0.8758  (-0.0008)
+                           9 members: held-out 0.8748  (-0.0018)
+                          10 members: held-out 0.8728  (-0.0038)
+```
+
+`vjepa_warm` 0.8337, `swin_supervised` 0.8331, `cnx_own_recipe` 0.8186 against a roster whose weakest
+member is 0.8525. **The honest greedy does not seat any of them, and the peak is identical to four
+decimals with and without them.** Forcing them in costs monotonically in the order they are forced.
+
+So the block form of the argument fails the same way the single form did, and it fails without the
+band-includes-zero ambiguity that made `vjepa_warm`'s -0.0007 unreadable: 8, 9 and 10 seats are all worse
+than 7, in both directions of the honest split.
+
+**Consequence for the slot.** There is no ensemble containing a non-DINO member that beats the roster, so
+a submission built to satisfy the "use it on a submission" goal is measured to lose rather than merely
+predicted to. The goal is reached by making a non-DINO member good enough to seat, which is
+`swin_calib_dense` (`knee-csxq`), not by spending a slot on the members that exist.
+
+**What it does not say**, and the limit is the same one the seat reading carries: this is a fact about
+members at 0.819-0.834 against a roster starting at 0.8525, not about non-DINO architectures. It bounds
+the LEVEL at which diversity stops paying. A non-DINO trunk at 0.85+ is untouched by it, and untried.
