@@ -1006,7 +1006,7 @@
       "kind": "import",
       "source": "kneemri.evaluation.annotated_readings",
       "target": "kneemri.evaluation.scores",
-      "weight": 1
+      "weight": 2
     },
     {
       "kind": "import",
@@ -8209,6 +8209,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
@@ -8224,6 +8230,18 @@
       "kind": "construct",
       "source": "kneemri.evaluation.annotated_readings.AnnotatedReadings.__init__",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
+      "target": "kneemri.evaluation.scores.LabelScores.paired_mean_interval",
       "weight": 1
     },
     {
@@ -8308,6 +8326,12 @@
       "kind": "construct",
       "source": "kneemri.evaluation.annotated_readings.main",
       "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.main",
+      "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
       "weight": 1
     },
     {
@@ -29248,6 +29272,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
+      "label": "paired",
       "level": "method",
       "parent": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
       "role": null

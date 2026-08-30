@@ -42,6 +42,7 @@ retrain, and no arm has spent one.
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import torch
@@ -57,6 +58,9 @@ from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
+
+if TYPE_CHECKING:
+    from kneemri.evaluation.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +143,42 @@ class AnnotatedReadings:
                 logger.info("%s: read over %d annotated studies", member.file.name, len(names))
         return names, per_member
 
+    def paired(
+        self,
+        scores: "LabelScores",
+        per_member: list[tuple[Path, NDArray[np.float64]]],
+        baseline: Path,
+        annotations: NDArray[np.float32],
+    ) -> list[str]:
+        """Each member's difference from a baseline NAMED ON THE COMMAND LINE, with a paired interval.
+
+        A bare mean over 58 studies is not a reading. `label_power` puts the per-label standard error here
+        at 0.04-0.09, and six members spanning 0.014 will never separate pairwise on that denominator — so
+        the means alone cannot say whether an ordering difference is a fact about the members or about the
+        draw. The paired interval is what answers it: two members scored on the SAME 58 studies share the
+        difficulty almost entirely, and the difference does not carry it.
+
+        It exists because a bare six-member table read Spearman 0.14 against the proxy ordering and was
+        about to be written up as the gold ruler REORDERING members. Under the intervals the whole apparent
+        reorder is one pair moving +0.0035 inside a band twelve times its width, and a low rank correlation
+        is what ranking six indistinguishable members produces by construction.
+
+        THE BASELINE IS AN ARGUMENT, NOT THE WINNER OF THIS READ. `LabelScores.paired_mean_interval` is
+        honest for one pair named in advance and selection-optimistic on the top row of a table it was used
+        to sort. Defaulting to the FIRST checkpoint given keeps that choice in the caller's hands where it
+        can be pre-registered, rather than silently picking whichever member happened to score highest.
+        """
+        reference = dict(per_member)[baseline]
+        lines = [f"paired against {baseline.stem} (95% interval over studies, resampled):"]
+        for member, values in per_member:
+            if member == baseline:
+                continue
+            low, high = scores.paired_mean_interval(reference, values, annotations)
+            delta = scores.mean(values, annotations) - scores.mean(reference, annotations)
+            separates = "clears" if low > 0.0 or high < 0.0 else "INSIDE the interval — no pairwise claim"
+            lines.append(f"  {member.stem:28s} {delta:+.4f} [{low:+.4f}, {high:+.4f}] {separates}")
+        return lines
+
 
 def main() -> None:
     """Read the given members over the annotated studies and report their agreement with the radiologist."""
@@ -147,6 +187,7 @@ def main() -> None:
     command.parser.add_argument("--device", default=VisibleCards().device().type, choices=("cuda", "cpu"))
     command.parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
     command.parser.add_argument("--tta", action="store_true", help="average over rotations as the curve can")
+    command.parser.add_argument("--against", type=Path, default=None, help="baseline for paired deltas; default first")
     arguments = command.parsed()
 
     from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
@@ -166,6 +207,7 @@ def main() -> None:
         [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them trained on these cells"]
         + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
+        + ([""] + reader.paired(scores, per_member, arguments.against or arguments.checkpoints[0], annotations))
     )
 
 
