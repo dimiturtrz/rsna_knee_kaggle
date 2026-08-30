@@ -166,7 +166,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Fourteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Fifteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -238,6 +238,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   `comp/members.declines` WITH A REASON (a bare name is a finding too: it records that somebody decided, not what).
   Anything in neither is the defect. Thirty members joined the roster on that sweep and forty-six were declined in
   writing; a decline is an argument, and it is re-opened by answering it, never by re-quoting a number.
+  `python -m kneemri.kaggle.run_check --log <downloaded kernel log>` BETWEEN a kernel completing and the slot
+  being spent — the check that guards what an entry IS. `KernelRun` DROPS a member whose encoder it cannot mount
+  and keeps going, so the failure is silent everywhere a human looks: COMPLETE kernel, real `submission.csv`, a
+  score, and a board row under the name of an entry that was never assembled. `farseat_v1` shipped six of seven
+  named members, was `dark6` seat-for-seat, read `dark6`'s exact 0.937, and that flat was written down as
+  closing the cross-family ensemble-diversity axis — for five days, on a member that never loaded. It refuses on
+  the drop line, on `ENTRY IDENTITY CHANGED`, and on a census that reads `N of M` with N < M. Run it BEFORE the
+  slot: `kaggle kernels output` serves the LATEST version's log, so a row written days later can never be
+  re-checked. `mount_check --live` asks the same question one step earlier, of the encoder datasets. See knee-nbk3.
  A recipe is smoked with `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. `--smoke` takes the DIRECTORY the throwaway checkpoints go to and `--only` takes the arm; `--studies`/`--epochs` are `train`'s flags, not this tool's, and passing the arm path to `--smoke` costs a run that dies on `FileExistsError` against the arm script itself.
   A recipe on a reading axis NOBODY HAS DECODED cannot be smoked until something writes the truncated cache, and
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct

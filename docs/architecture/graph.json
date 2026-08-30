@@ -3470,6 +3470,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.run_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
       "weight": 1
@@ -18061,6 +18067,36 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.run_check.KernelLog",
+      "target": "kneemri.kaggle.run_check.KernelLog",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "target": "kneemri.kaggle.run_check.KernelLog.changed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "target": "kneemri.kaggle.run_check.KernelLog.dropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "target": "kneemri.kaggle.run_check.KernelLog.seats",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.run_check.main",
+      "target": "kneemri.kaggle.run_check.KernelLog.read",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -21713,7 +21749,7 @@
       "role": null
     },
     {
-      "descendants": 168,
+      "descendants": 169,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22401,7 +22437,7 @@
       "role": null
     },
     {
-      "descendants": 27,
+      "descendants": 28,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -22596,6 +22632,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_reads",
       "label": "roster_reads",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check",
+      "label": "run_check",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -25446,6 +25490,14 @@
       "label": "RosterReads",
       "level": "class",
       "parent": "kneemri.kaggle.roster_reads",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog",
+      "label": "KernelLog",
+      "level": "class",
+      "parent": "kneemri.kaggle.run_check",
       "role": "satellite"
     },
     {
@@ -36798,6 +36850,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.roster_reads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.changed",
+      "label": "changed",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "label": "refusals",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check",
       "role": null
     },
     {
