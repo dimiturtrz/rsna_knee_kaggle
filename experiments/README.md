@@ -6117,3 +6117,42 @@ FOUR epochs, where a budget genuinely binds. The rule keeps exactly the runs who
 their recipes' own numbers, not floors owed a longer run. `cnx_dense` remains handicapped for the separate
 reason `knee-94ec` names (its top 9 blocks of 36 never trained), which a longer budget would not have fixed
 either. Bead `knee-25wj`.
+
+## vit_in21k truncated at epoch 5 of 12, on a trajectory instrument rather than on its score (2026-08-30)
+
+`vit_in21k_s2026` (ViT-B/16 in21k, 336 px, `--unfreeze-last 6`, `--backbone-lr 4e-5`, 12 epochs
+`one_cycle`, whole-stack, fold 0) was killed after epoch 4 with the card handed to `swin_wholetop`. Its
+score is a **FLOOR of 0.7847**, not the trunk's number, and `convergence_check` will read it TRUNCATED.
+
+| epoch | 0 | 1 | 2 | 3 | 4 |
+| --- | --- | --- | --- | --- | --- |
+| holdout mean AUC | 0.7239 | 0.7541 | 0.7751 | 0.7755 | 0.7847 |
+
+**The kill was decided on a distribution, not on the stall at epoch 3.** Across the **99 runs in the
+processed root with ten or more recorded epochs**, the gain from epoch 3 to the run's peak is median
+**+0.0215**, p90 **+0.0383**, and **max +0.0529** (`encoder_adapt_gentle`). The arm's pre-registration
+needed **0.8393** to earn a seat. From epoch 4 at 0.7847 that is **+0.0546** — larger than the biggest
+epoch-3-to-peak gain this project has ever recorded, and the comparison is generous twice over because
+that maximum is measured from an EARLIER epoch and belongs to a 24-epoch run.
+
+The other anchor points the same way: `swin_supervised` sat at **0.8192 at epoch 3** and was still
+DECLINED as too weak. `vit_in21k` was **0.044 below that** at the same epoch.
+
+So the seven remaining epochs (2.3 h of card) could only decide COSTS (0.8000-0.8392) versus REFUTES
+(<0.8000), and **both branches close the trunk for seating identically**. No action hung on the
+difference, which is what makes the truncation a saving rather than a lost result.
+
+**What this does NOT say.** It is not a verdict on ViT-in21k, and it is not a verdict on supervised
+ImageNet pretraining. It is one recipe, one rate, fold 0, stopped early. Re-opening it means answering
+the trajectory argument — an arm whose epoch-3 value sits in the band seat-worthy runs occupy (0.82-0.84)
+— not re-quoting 0.7847. The plumbing suspects were cleared BEFORE the read and none of them fired:
+`GridFit` passes `interpolate_pos_encoding` (the class exists for exactly this trunk), `normalization=HALF`
+is declared, block discovery finds all twelve `ViTLayer`, and the recipe log confirms every flag landed.
+
+**The queue surgery, because it is the part that can go silently wrong.** `run_train` emits `ARM DONE`
+**on success only** (`lib.sh:616`), so a killed trainer writes `ARM FAILED` and the watcher gated on
+`ARM DONE vit_in21k` would have waited forever with the card idle. The stalled watcher was killed and
+replaced with `after.sh ... "pid:50388"` — the pid gate, on the trainer's WINDOWS pid so `_alive` resolves
+it through `tasklist` rather than through a `kill -0` that fails open across bash sessions — **armed
+before the kill**, so the queue was never unarmed. No marker was hand-written: a fake `ARM DONE` would
+have entered the record as a completed run. Beads `knee-gnzx` (the epoch-3 gate), `knee-tsiz`.
