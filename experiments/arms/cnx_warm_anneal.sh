@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# cnx_warm_anneal.sh — the ConvNeXt run threw away its own best encoder, and this restarts from it.
+#
+# WHAT THE PARENT'S PER-EPOCH TRAJECTORY SAYS, which nobody read until 2026-08-30. `cnx_own_recipe_s2026`
+# is quoted everywhere as 0.8186, and it is, but the shape behind that number is the finding:
+#
+#   4e-4  .7314 .7394 .7789 .8003 .8058 .8102 [.8186] .8167 .8157 .8143 .8136 .8130
+#   4e-5  .7050 .7350 .7495 .7659 .7681 .7760  .7858  .7908 .7921 .7909 .7927 .7927   (cnx_dense)
+#
+# The trunk PEAKS AT EPOCH 6 and then declines for five consecutive epochs. It is not underfit — it is
+# overfit past its own halfway point, and it does that while one_cycle is already ANNEALING (the schedule
+# peaks near epoch 2), so the decline is the corpus, not the rate. That kills the reading I reached for
+# first, which was that the rate axis is open above 4e-4 because 4e-4 is the best rate ever tried. It is
+# the best rate tried AND the run it produced was already past its optimum for five epochs; a larger rate
+# gets there sooner, not higher. The rate axis on this trunk is bracketed, not open, and is not this arm.
+#
+# WHAT IS ON DISK, AND WHY THAT IS THE OPPORTUNITY. `cnx_own_recipe_s2026.pt` stores `epoch 6`,
+# `holdout 0.8186` — the checkpoint is the PEAK, not the last epoch, so the un-degraded encoder survived
+# the five epochs that degraded the score. `kneemri/training/fitted_encoder.py` converted it in one call:
+# 378 tensors, variant cnxbase. That conversion is itself new information — `FittedEncoder` was written
+# for LoRA ViT members and this is the first time it has been run on a convolutional trunk, and it neither
+# refused the variant nor tripped the key check.
+#
+# SO THE QUESTION. Six more epochs from the peak encoder, at a quarter of the parent's rate: does a
+# converged non-DINO trunk have anything left, or is 0.8186 what this architecture is worth on this
+# corpus? Either answer is worth twenty minutes, and no other arm this project can run gets an answer to
+# it for that price — the parent cost 2.5 hours.
+#
+# THE ONE HONEST DEDUCTION FROM THE CAPACITY ARGUMENT. knee-wbwq prices warm starts partly on
+# `merge_adapters` folding a parent's LoRA correction into the base weights so that `--lora-rank` can
+# build a FRESH adaptation on top — doubled adaptation capacity at no serve cost. That argument does NOT
+# apply here: `cnx_own_recipe` ran at `lora_rank 0`, a full fine-tune, so there was nothing to merge and
+# nothing is doubled. What is left is the weaker and more testable claim — a second anneal from a better
+# starting point than stock ImageNet weights. Said plainly because it cuts against the arm.
+#
+# THE RATE, AND THE HARNESS SUSPECT IT IS CHOSEN AGAINST. 1e-4, a quarter of the parent's 4e-4. A warm
+# restart does NOT resume the optimiser; one_cycle starts over and RAMPS, and knee-wbwq names the failure
+# that follows — a ramp can walk a converged trunk off its optimum, which shows up as a score well below
+# the parent and reads like a refutation of warm starting when it is a schedule artifact. Capping the peak
+# rate at a quarter is what bounds how far the ramp can walk it. If this lands far under 0.8186 the first
+# suspect is therefore the ramp, and the next arm is a lower rate — not the graveyard.
+#
+# SINGLE VARIABLE, ALMOST. Against the parent's own recorded options, three flags move and they are the
+# three that MAKE it a warm restart: `--encoder-weights`, `--epochs 6` (not 12 — the parent proved epochs
+# 7-12 are where it loses score), `--backbone-lr 1e-4`. Everything else is copied from the checkpoint's
+# stored options: cnxbase, train-size 448, 20 slices, band 0.1-0.9, whole-stack, max slice pooling,
+# batch 1 / accumulate 6, vram-gb 16, pool cls_mean, unfreeze_last 6, head-lr 1e-3, calibration off.
+#
+# cost   ~20 min at 6 epochs against the parent's 2.5 h. Zero submission slots.
+#
+# PRE-REGISTERED, before the run, against the parent's peak 0.8186. Floor 0.0062.
+#   THE TRUNK HAD MORE — >= 0.8286 (+0.010). A converged non-DINO encoder gains from a second anneal, so
+#     0.8186 was a schedule ceiling and not the architecture's worth. This licenses the same cheap warm
+#     restart on swinbase and vjepa2l from their own peak checkpoints, and it is the first evidence in
+#     this project that the non-DINO deficit is partly recipe. Run those next, in that order.
+#   DIRECTIONAL — 0.8226 to 0.8285. Real but under the bar. Keep the member if it is free, do NOT plan
+#     around it, and do NOT spend a second cnx arm.
+#   CONVERGED — 0.8126 to 0.8225. The trunk is done at ~0.8186 and a second anneal buys nothing. Then
+#     ConvNeXt's number IS the architecture's worth on this corpus, and the warm-start mechanism is a
+#     TIME saving with no quality term — still worth having, a different claim, and knee-wbwq should be
+#     read that way for the ViT arm too.
+#   THE RAMP WALKED IT — <= 0.8125. Suspect the SCHEDULE before the mechanism (see the rate paragraph).
+#     This does not close warm starts; it sends one more arm to 2.5e-5 and closes them only if that also
+#     lands here.
+#
+# WHAT NO BRANCH LICENSES. None of them says anything about the ConvNeXt RATE axis, which the parent's
+# trajectory brackets on its own. None re-opens knee-uk4f's frozen-stage pair. A warm-started member is
+# correlated with its parent by construction (knee-wbwq), so no branch here buys SEAT diversity — this
+# arm prices member QUALITY only, and a seat claim would need `record_mix` against the roster after.
+#
+# THE VRAM ASK IS THE PARENT'S, AND IT IS DELIBERATELY OVERSTATED. `arm_check` reports 16 GB as 1.90 GB
+# above what 20 slices reserve, and that is correct arithmetic on a token count. `cnx_own_recipe` names
+# the reason the arithmetic does not apply here: DeviceBudget derives its ceiling from FINAL token count
+# and cannot see that a convolutional trunk's memory lives in its early high-resolution stages. 16 is the
+# number the parent actually RAN at 448 px, so it is measured rather than predicted, and a hand-named
+# `--vram-gb` is left exactly as typed (device_budget.py:390).
+#
+# bead: knee-wbwq
+# bead: knee-nj4l
+#
+# deliberate: --backbone-lr
+# deliberate: --epochs
+# deliberate: --train-size
+# deliberate: --batch
+# deliberate: --accumulate
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+require "$PROCESSED/encoders/cnx_own_recipe.enc.pt"
+
+run_train cnx_warm_anneal \
+  $RECIPE --epochs 6 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
+  --variant cnxbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 448 \
+  --encoder-weights "$PROCESSED/encoders/cnx_own_recipe.enc.pt" \
+  --vram-gb 16 \
+  --labels "$LABELS" --out "$PROCESSED/cnx_warm_anneal_s2026.pt"
