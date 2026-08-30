@@ -616,14 +616,30 @@ ENCODERS: dict[str, Encoder] = {
         1024,
         patch=16,
         family=VJEPA2,
-        leaf="vjepa2-vitl",
+        leaf="vjepa2-hf",
         # V-JEPA2 has no official Kaggle mirror, so the snapshot is published as a private dataset the
-        # same way DINOv3 is, one directory per variant named for the leaf `locates` matches on. Without
-        # this the variant trains locally and cannot ship: `package_members.shippable` refuses a member
-        # whose encoder no dataset mirrors, which is the half `knee-rpkw`'s recorded shippability
-        # clearance did not check — it verified the kit carried the CODE and concluded the member could
-        # fire, while a kernel has no internet and reaches weights only through a mount.
-        mount="dimiturnt/vjepa2-hf/vjepa2-vitl",
+        # same way DINOv3 is. Without this the variant trains locally and cannot ship:
+        # `package_members.shippable` refuses a member whose encoder no dataset mirrors, which is the
+        # half `knee-rpkw`'s recorded shippability clearance did not check — it verified the kit carried
+        # the CODE and concluded the member could fire, while a kernel has no internet and reaches
+        # weights only through a mount.
+        #
+        # FLAT, NAMED FOR ITS OWN LEAF — `dimiturnt/vjepa2-hf`, not a `vjepa2-vitl/` directory under it.
+        # This line said the latter from the mount until 2026-08-30 and the member could not load on
+        # Kaggle for a single day of that. The staging tree on disk is correct
+        # (`kaggle_upload/vjepa2-hf/vjepa2-vitl/`) and the upload flattened it: `--dir-mode zip` zips a
+        # subdirectory and Kaggle unpacks it into the ROOT, so the published dataset holds `config.json`
+        # at top level and the segment `locates` matches on does not exist. That is the SAME trap
+        # `rad-dino` hit and documented one day earlier, and V-JEPA2 was uploaded into it anyway, so the
+        # lesson is now spent in the only place that enforces it: the declared mount, which needs no
+        # directory when the dataset is named for the encoder.
+        #
+        # WHAT IT COST, because a mount bug that merely fails loudly costs nothing. `KernelRun` DROPS an
+        # unloadable member and prints `ENTRY IDENTITY CHANGED`, so `farseat_v1` shipped six members
+        # under a seven-member name, scored dark6's exact 0.937, and that flat read was recorded as
+        # closing the cross-family ensemble-diversity axis. It closed nothing; the seventh seat was never
+        # in the entry. See knee-nbk3.
+        mount="dimiturnt/vjepa2-hf",
         depth=24,
         # The only tubelet trunk in the registry: `fpc64` tokenises TWO frames per token, so the same
         # window costs half the per-slice activations a 2D ViT-L would. Without this the cap OVERSTATES

@@ -57,6 +57,18 @@ MEASURED AGAIN 2026-08-19 on the card (knee-djk8 leg b), where the arithmetic MA
 is only kernel nondeterminism: three float16 members land at EXACTLY 0, and the bf16 members land at
 0.63-2.47x bf16 eps. That is the same 1.6-2.4x band the cross-precision calibration measured, so the
 two regimes never needed two numbers — see `tolerance`.
+
+MEASURED A THIRD TIME 2026-08-30, and the cpu regime has a ceiling the first calibration could not see.
+`vjepa_warm_s2026` — a V-JEPA2 ViT-L, the deepest trunk this project ships — re-derived on cpu at
+0.0456, 5.8x bf16 eps, against 0.0209 on cuda. Every member in the 2026-08-13 calibration was a
+twelve-block ViT-S or ViT-B; the cpu residual is an ACCUMULATION over blocks, so a trunk with three
+times the depth carries three times the drift and walks out of a band fitted on shallow members. The
+answer is not a wider bound, which would blunt the only thing separating this from the 0.05-0.5 that
+every real reading defect produced. The answer is to re-derive on the device the member SERVES on,
+where the arithmetic matches and the residual is nondeterminism rather than a precision gap. `--device
+auto` already does that; the project's convention said `--device cpu` and was fixed with this. Note
+that a cpu refusal is therefore NOT evidence of a reading defect on a deep trunk — check cuda before
+believing it — while a cuda refusal still is. See knee-j99t.
 """
 
 

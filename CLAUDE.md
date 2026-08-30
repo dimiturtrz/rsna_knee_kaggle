@@ -181,8 +181,14 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   blocks only on TWO OF OURS, since the other project shares this card by arrangement),
   `python -m kneemri.kaggle.kit_check` before shipping a kit and `--mounted` before a
   submission (two slots went to code the repo had already fixed; `--mounted` asks Kaggle what it will
-  actually run, since uploading is manual), and `python comp/witness_check.py --device cpu` before a
-  submission (it found three defects on first use), and `python -m kneemri.kaggle.mount_check` before a
+  actually run, since uploading is manual), and `python comp/witness_check.py --device auto` before a
+  submission (it found three defects on first use). Run it on the device the member SERVES on — `auto`
+  picks the card when one is visible. This line said `--device cpu` until 2026-08-30, when that
+  invocation refused `vjepa_warm_s2026` at 0.0456 of a 0.0312 bound and the same member on cuda read
+  0.0209. On cpu autocast is off, so a half-precision witness is compared against float32, and that
+  residual grows with trunk depth: the four members the bound was calibrated on landed at 1.6-2.4x eps,
+  and the project's largest trunk lands at 5.8x. The bound is NOT the thing to widen — it is what
+  separates this from the 0.05-0.5 that every real reading defect produced. See knee-j99t. And `python -m kneemri.kaggle.mount_check` before a
   submission (it caught `kneemri-solo` ranking over a package that had gained a DINOv3 member while its
   metadata still declared DINOv2 only — a kernel that loads every member and then cannot build one), and
   `python -m kneemri.kaggle.champion_check` whenever the roster or a champion kernel is edited — the only
