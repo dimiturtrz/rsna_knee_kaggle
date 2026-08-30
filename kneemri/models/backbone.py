@@ -523,9 +523,12 @@ ENCODERS: dict[str, Encoder] = {
     # rather than refuse, handing back a plausible answer computed on a geometry the tables never saw.
     # The arm therefore pins --train-size 384 and this comment is the reason it may not be swept.
     #
-    # NO MOUNT YET, so it trains here and cannot be submitted until the weights are mirrored. Apache-2.0,
-    # so mirroring is permitted outright — no licence question of the kind DINOv3 needed — and it is the
-    # same dataset upload `dinov3-hf` already is. Deferred until a member earns the seat.
+    # MIRRORED 2026-08-30, so this trunk is shippable: `dimiturnt/swin-base-384` exists and `mount` below
+    # names it. Apache-2.0, so mirroring was permitted outright — no licence question of the kind DINOv3
+    # needed. This header read "NO MOUNT YET ... deferred until a member earns the seat" for hours after
+    # the upload landed, while the entry's own `mount` and `leaf` comments described the mirror as built
+    # and verified. A stale header here is not cosmetic: it is the line a reader checks before deciding
+    # whether a finished arm can be submitted at all.
     SWIN_BASE: Encoder(
         SWIN_BASE,
         "microsoft/swin-base-patch4-window12-384-in22k",
