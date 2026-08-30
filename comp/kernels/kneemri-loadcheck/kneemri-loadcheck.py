@@ -133,7 +133,6 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
     actually sends fits in its memory.
     """
     import torch  # noqa: PLC0415 - after the kit is on sys.path
-    from transformers import AutoModel  # noqa: PLC0415 - after the kit is on sys.path
 
     from kneemri.kaggle.submission import STUDY_CHUNK  # noqa: PLC0415 - the chunk a submission actually sends
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - after the kit is on sys.path
@@ -146,7 +145,13 @@ def check(  # noqa: PLR0913 - a probe collecting a runtime's answers, not an API
         # name, reported as "FORWARD FAILED". On 2026-08-14 that read as six members failing on a T4
         # when all six had in fact loaded their 223 weights cleanly. A probe that manufactures the
         # failure it is looking for is worse than no probe.
-        loaded[member.identifier] = package.load(member, AutoModel.from_pretrained(weights), encoder.dim, device)
+        # THROUGH THE REGISTRY, which is what `kernel_run` does and what this probe exists to imitate.
+        # Spelled `AutoModel.from_pretrained(weights)` it built the trunk RAW, skipping the adapter the
+        # entry names — so a ConvNeXt member would arrive as a feature map and a Swin one as a sequence
+        # with no prefix, and `tokens[:, 1:]` would eat the grid's first cell with no error to announce
+        # it. A load probe that loads a member differently from the way it ships can only certify the
+        # families it happens not to differ on.
+        loaded[member.identifier] = package.load(member, encoder.load(weights), encoder.dim, device)
     except Exception as error:  # noqa: BLE001 - reporting every member beats stopping at the first
         logger.error("LOAD FAILED %s (%s): %s", member.identifier, member.variant, str(error)[:200])
         return False

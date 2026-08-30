@@ -21,6 +21,12 @@
 # it — transformers pads and interpolates rather than refusing, and hands back a plausible answer
 # computed on a geometry the position tables never saw. That is the quiet failure, so the size is pinned.
 #
+# AND 384 BUYS GEOMETRY, NOT PIXELS. The decode cache is 336px_20sl_0.1-0.9band and --train-size
+# resamples inside the trainer (run_setup.resample_to), so this run is 336 px of information upsampled
+# to a 384 px grid — the same path res392_ws and intensity392_ws took. The extra tokens carry no extra
+# detail. What they carry is the 12x12 grid the pretrained relative-position tables were fitted on,
+# which is the whole reason the size is pinned, and it means no cache has to be built for this arm.
+#
 # THE BACKBONE RATE IS THE ONE GUESS IN THIS ARM AND IT IS DECLARED AS ONE. 4e-5 is what DINOv2 wants and
 # what higher rates cost it (lr1e-4_ws 0.8490, lr2e-4_ws 0.7391 against lr4e-5_ws 0.8525). 4e-4 is what
 # the only non-DINOv2 trunk we have fitted needed — cnx_own_recipe 0.8186 against cnx_dense 0.7927, worth
