@@ -513,6 +513,12 @@ focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that nu
 # added on MERIT. Everything packaged below that level is there as a NAMED instrument (the only
 # non-DINOv2 trunk, the only different physical crop, the only medical pretraining), which is a reason
 # and not a score. Solo under LogitAverage on the 909-study fold-0 holdout, 111 same-ruler records.
+# `stack_increments` REFUTED its own hypothesis — the calibrated-target table and the distillation term
+# were predicted to sum to +0.0069 over calib_dense_hold and delivered +0.0008, an eighth of the paired
+# floor, because both act on ORDERING and compete for the same headroom. The MEMBER is unharmed by that:
+# it is the highest solo this project owns, and a refuted mechanism is still a different opinion. Seat
+# value is priced with record_mix like any other, never assumed from the solo.
+stack_increments_s2026.pt            # 0.8642
 stackfit_s2026.pt                    # 0.8631
 raptor_distill_s2026.pt              # 0.8613
 distill_pairs_s2026.pt               # 0.8594
