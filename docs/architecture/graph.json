@@ -3567,6 +3567,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.grid_fit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
@@ -18140,6 +18146,12 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.models.grid_fit.GridFit",
+      "target": "kneemri.models.grid_fit.GridFit",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.models.model.StudyDesign",
       "target": "kneemri.models.model.StudyDesign",
       "weight": 1
@@ -18190,6 +18202,12 @@
       "kind": "construct",
       "source": "kneemri.models.model.StudyModel.__init__",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel.__init__",
+      "target": "kneemri.models.grid_fit.GridFit.of",
       "weight": 1
     },
     {
@@ -21371,7 +21389,7 @@
       "role": null
     },
     {
-      "descendants": 165,
+      "descendants": 166,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22267,7 +22285,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -22318,6 +22336,14 @@
       "descendants": 0,
       "id": "kneemri.models.fingerprint",
       "label": "fingerprint",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.grid_fit",
+      "label": "grid_fit",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -25136,6 +25162,14 @@
       "label": "Fingerprint",
       "level": "class",
       "parent": "kneemri.models.fingerprint",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.grid_fit.GridFit",
+      "label": "GridFit",
+      "level": "class",
+      "parent": "kneemri.models.grid_fit",
       "role": "satellite"
     },
     {
@@ -36720,6 +36754,22 @@
       "label": "of",
       "level": "method",
       "parent": "kneemri.models.fingerprint.Fingerprint",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.grid_fit.GridFit.extra",
+      "label": "extra",
+      "level": "method",
+      "parent": "kneemri.models.grid_fit.GridFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.grid_fit.GridFit.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.models.grid_fit.GridFit",
       "role": null
     },
     {

@@ -22,6 +22,7 @@ from kneemri.models.backbone import ENCODERS, IMAGENET, SMALL, Normalization
 from kneemri.models.depth_window import DepthWindow
 from kneemri.models.encoder_surgery import NO_LAYER_DECAY, EncoderSurgery
 from kneemri.models.fingerprint import FINGERPRINT
+from kneemri.models.grid_fit import GridFit
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
@@ -202,6 +203,9 @@ class StudyModel(nn.Module):
         # A VOLUMETRIC TRUNK ANNOUNCES ITSELF BY ITS TUBELET; `VolumeRead` is None for an ordinary 2D
         # one, and holds every fact the depth axis changes when it is not.
         self.volume = VolumeRead.of(config, self.design.pool, self.design.slice_pooling)
+        # A FIXED-GRID TRUNK REFUSES A READ IT WAS NOT FITTED AT unless the forward is told to resample
+        # its position embeddings. Derived once here beside the other facts the loaded weights own.
+        self.grid = GridFit.of(backbone)
         # No class token to skip on a tubelet trunk, and no registers either — the first token is a
         # patch. Getting this wrong is silent: the head accepts the width and the score comes out
         # plausible, which is the failure `prefix_tokens` exists to prevent.
@@ -528,9 +532,12 @@ class StudyModel(nn.Module):
         # failure — transformers rejects an unknown keyword — but it is a failure deep inside a fetched
         # model rather than here, so the branch is stated where the shape is known.
         keyword = "pixel_values_videos" if self.volume else "pixel_values"
+        # AND A FIXED-GRID TRUNK TAKES ONE MORE, for the same reason and with the same failure mode one
+        # step earlier — see `GridFit`, which reads it off the trunk rather than off the registry.
+        extra = self.grid.extra()
         if self.design.layer == -1:
-            return self.backbone(**{keyword: x}).last_hidden_state
-        return self.backbone(**{keyword: x}, output_hidden_states=True).hidden_states[self.design.layer]
+            return self.backbone(**{keyword: x}, **extra).last_hidden_state
+        return self.backbone(**{keyword: x}, **extra, output_hidden_states=True).hidden_states[self.design.layer]
 
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce this read's tokens to one vector, by the design's named pooling."""
