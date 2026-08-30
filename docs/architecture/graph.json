@@ -1694,6 +1694,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "kneemri.evaluation.member_distance",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "kneemri.evaluation.member_divergence",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pool_census",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.prevalence_match",
       "target": "core.bootstrap",
       "weight": 1
@@ -10864,6 +10900,114 @@
       "kind": "calls",
       "source": "kneemri.evaluation.pool.Pool.combined",
       "target": "kneemri.inference.vote.Vote.combine",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.pool_census.PoolCensus",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.pool_census.PoolCensus",
+      "target": "kneemri.evaluation.pool_census.MemberCensus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.pool_census.PoolCensus",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.report",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.report",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.verdict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "target": "kneemri.evaluation.member_distance.MemberDistance",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "target": "kneemri.evaluation.pool_census.MemberCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.solo",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.solo",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.verdict",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.occupants",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.verdict",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.spread",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.pool_census.PoolCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pool_census.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -21955,7 +22099,7 @@
       "role": null
     },
     {
-      "descendants": 171,
+      "descendants": 172,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22011,7 +22155,7 @@
       "role": null
     },
     {
-      "descendants": 46,
+      "descendants": 47,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -22206,6 +22350,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.pool",
       "label": "pool",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census",
+      "label": "pool_census",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -24569,6 +24721,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.pool",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.MemberCensus",
+      "label": "MemberCensus",
+      "level": "class",
+      "parent": "kneemri.evaluation.pool_census",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus",
+      "label": "PoolCensus",
+      "level": "class",
+      "parent": "kneemri.evaluation.pool_census",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -31712,6 +31880,78 @@
       "label": "split",
       "level": "method",
       "parent": "kneemri.evaluation.pool.Pool",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.MemberCensus.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.MemberCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.occupants",
+      "label": "occupants",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.solo",
+      "label": "solo",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census",
       "role": null
     },
     {
