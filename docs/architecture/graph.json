@@ -10023,7 +10023,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.member_curve.main",
-      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "target": "kneemri.inference.members.Member.held_out_from",
       "weight": 1
     },
     {
@@ -33748,6 +33748,14 @@
       "descendants": 0,
       "id": "kneemri.inference.members.Member.group",
       "label": "group",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.members.Member.held_out_from",
+      "label": "held_out_from",
       "level": "method",
       "parent": "kneemri.inference.members.Member",
       "role": null
