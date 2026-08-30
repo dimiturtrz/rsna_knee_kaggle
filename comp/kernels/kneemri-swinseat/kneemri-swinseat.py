@@ -148,8 +148,11 @@ between this entry and the champion is the member that enters below.
 SWIN_SEAT = "swin_wholetop_s2026"
 """The entering member: Swin-B at 384, ours, trained on our corpus, at the fixed block discovery.
 
-Named as a constant rather than inlined in `chosen` because it IS the hypothesis. A reader checking what
-this entry moves against the champion should find it in one place.
+Documented here because it IS the hypothesis, but INLINED in `chosen` below rather than referenced, and
+that is not a style choice. `mount_check` reads the member names statically, and a name it cannot resolve
+to a literal is not an error there — the tuple reads as the WHOLE package, so the check then demands every
+mount any member could need. This entry was refused for an undeclared `dimiturnt/vjepa2-hf` that none of
+its seven members use, purely because one element of the tuple was a constant.
 """
 
 
@@ -198,7 +201,7 @@ def main() -> None:
         "merged_blend_cf",
         "lr4e-5_ws_cf",
         "through_dense_cf",
-        SWIN_SEAT,
+        "swin_wholetop_s2026",  # SWIN_SEAT, inlined so `mount_check` can resolve it — see that constant
     )
     # What the raptor pass cost, handed to the seven so their nine-hour budget is the SESSION's and not
     # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
