@@ -6,6 +6,7 @@ import pytest
 from core.data.corpus.crop_centre import Crop
 from core.data.corpus.slot_reader import Reading
 from core.data.corpus.study_cache import StudyCache
+from core.data.labels.ruler import DEFAULT_LABELS, STUDY_COLUMN
 from core.paths import COMPETITION
 from kneemri.experiments.arm_check import ArmCheck
 from tests.unit.conftest import write_series
@@ -102,6 +103,39 @@ def test_unstated():
     assert "narrow_on_purpose" not in unstated, "the old values, STATED, are a choice rather than a defect"
     assert unstated["half_stated"] == ["--band-low", "--band-high"], "only the flags it left silent"
     assert unstated["silent"] == ["--slices", "--band-low", "--band-high"]
+
+
+def _label_table(path: Path, acl: list[float | None]) -> Path:
+    """A minimal label table: one graded column with its two companions, one row per value."""
+    rows = "\n".join(f"study{index},{'' if value is None else value},0.95,YES" for index, value in enumerate(acl))
+    path.write_text(f"{STUDY_COLUMN},ACL,ACL__conf,ACL__verdict\n{rows}\n", encoding="utf-8")
+    return path
+
+
+def test_moving_ruler(tmp_path: Path):
+    """An arm re-mapping its targets without pinning --eval-labels is named; the three exemptions are not.
+
+    `recal_holdannot`'s shape verbatim (knee-8wa0): `--labels report_labels_v3.csv`, no `--eval-labels`,
+    a printed 0.8964 against a 0.8487 control that is two rulers rather than a +0.0477.
+    """
+    ruler = _label_table(tmp_path / DEFAULT_LABELS, [0.82, 0.28])
+    crossed = _label_table(tmp_path / "report_labels_v3.csv", [0.42, 0.28])
+    base = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack"
+    moved = ArmCheck().moving_ruler(
+        {
+            "recal_holdannot": f"{base} --labels {crossed.as_posix()}",
+            "recal_dense": f"{base} --labels {crossed.as_posix()} --eval-labels {ruler.as_posix()}",
+            "ordinary": f"{base} --labels {ruler.as_posix()}",
+            "silent": base,
+            "absent_tables": f"{base} --labels {(tmp_path / 'never_written.csv').as_posix()}",
+        }
+    )
+
+    assert "report_labels_v3.csv" in moved["recal_holdannot"]
+    assert "recal_dense" not in moved, "a pinned --eval-labels is what makes the re-map readable"
+    assert "ordinary" not in moved
+    assert "silent" not in moved, "an arm naming no table inherits the shared one and moves nothing"
+    assert "absent_tables" not in moved, "gitignored tables are absent in CI; a lint must not fail on that"
 
 
 def test_selected():
@@ -346,7 +380,7 @@ def test_prices(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Every check this tool runs, with the POLICY each one carries — the composition, not the detectors.
 
-    Each detector is partitioned by its own test; what is under test here is that the nine are all
+    Each detector is partitioned by its own test; what is under test here is that the ten are all
     present and that each is handed the refusal policy the tool's rules give it. That mapping is the part
     a refactor can silently invert — a REFUSED that stops refusing, or an OVERSTATED that starts, would
     leave every detector test green.
@@ -370,6 +404,7 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         "UNSTATED",
         "UNMET-GATE",
         "MISMATCHED",
+        "MOVING-RULER",
         "UNBEADED",
         "UNPRICED",
     ]
@@ -381,6 +416,10 @@ def test_verdicts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     )
     assert policy["MISMATCHED"] == policy["UNBEADED"] == policy["UNPRICED"] == (False, True), (
         "the advisory rules stop MOMENTUM, so they refuse the run that arms an arm and no other"
+    )
+    assert policy["MOVING-RULER"] == (True, False), (
+        "a moved ruler does not merely mis-arm: it makes the run's own number unreadable, so it refuses "
+        "on any run the way a flag typo does"
     )
     assert policy["UNMET-GATE"] == (False, True), (
         "an unmet gate is a fact about ONE arm: it must not fail a sweep, and must stop that arm arming"

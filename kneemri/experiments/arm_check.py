@@ -31,6 +31,7 @@ from pathlib import Path
 
 from core import cli
 from core.data.corpus.study_cache import CorpusSplit, StudyCache
+from core.data.labels.ruler import DEFAULT_LABELS, Ruler
 from core.denominator import Denominator
 from core.paths import DataRoot
 from kneemri.experiments.arm_header import ARMS, ArmHeader
@@ -499,6 +500,15 @@ class ArmCheck:
                 bead="knee-f8j9",
                 arming_refuses=True,
             ),
+            ArmVerdict(
+                "MOVING-RULER",
+                self.moving_ruler(invocations),
+                clause="re-map their labels without pinning --eval-labels, so their holdout truth moves "
+                "with their targets and their score is two rulers rather than a result",
+                bead="knee-df7t",
+                always=True,
+                refuses=True,
+            ),
             *self.prices(invocations),
         ]
 
@@ -586,6 +596,42 @@ class ArmCheck:
             name: [flag for flag in OPERATING_POINT_FLAGS if flag not in flags] for name, flags in invocations.items()
         }
         return {name: missing for name, missing in silent.items() if missing}
+
+    @classmethod
+    def moving_ruler(cls, invocations: dict[str, str]) -> dict[str, str]:
+        """The arms that re-map their training targets without pinning what their holdout is scored by.
+
+        `Ruler` holds what makes two tables different rulers and counts the cells; this is the arm-side
+        half, and it asks the FLAG LINE the way `unstated` does — after parsing, an arm that pinned
+        `--eval-labels` to the default table and one that inherited it are the same object.
+
+        WHAT IT COST. `recal_holdannot` (knee-8wa0) ended `best holdout mean AUC 0.8964` against a
+        control's 0.8487 — a +0.0477 that would have entered the ledger as the largest single-arm gain
+        the project has recorded. It is two rulers. Re-scored against the shared table the gain is
+        +0.0009 on the proxy and +0.0105 on gold. `run_comparison` refuses the pair outright, which is
+        the only reason it was caught, and it refuses AFTER the card has been spent. `blendlabels` got
+        this right on 2026-08-25 by pinning `--eval-labels`; nothing made that a rule until now.
+        """
+        moved: dict[str, str] = {}
+        for name, flags in invocations.items():
+            values = cls._flag_values(flags)
+            table = Path(values.get("--labels", DEFAULT_LABELS))
+            if table.name == DEFAULT_LABELS or "--eval-labels" in values:
+                continue
+            ruler = table.with_name(DEFAULT_LABELS)
+            if not (ruler.is_file() and table.is_file()):
+                # SILENT WITHOUT THE TABLES, like `readings`: they are gitignored, so every clone and CI
+                # would fail this check on the absence of data rather than on a defect. The moment this
+                # rule exists for is arming, and the tables are on disk then.
+                continue
+            cells = Ruler(ruler).moved_cells(Ruler(table))
+            if cells:
+                moved[name] = (
+                    f"--labels names {table.name} with no --eval-labels, and that table scores {cells} "
+                    f"holdout cells differently from {DEFAULT_LABELS} — so its score is measured against "
+                    f"a ruler no other run was measured against, and differs for that reason alone"
+                )
+        return moved
 
     def decode_smoke_caches(
         self,

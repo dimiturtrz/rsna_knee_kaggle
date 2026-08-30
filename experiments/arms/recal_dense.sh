@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# recal_dense.sh — does the reader re-map survive the move off the 224 corner? `band_dense_hold` with v3.
+#
+# WHAT IT REPLICATES. `recal_holdannot` landed its own LANDS branch on 2026-08-30: the report reader's six
+# confidence levels replaced by their measured positive rates on the 58 annotated studies
+# (`report_labels_v3.csv`, fitted by `kneemri.evaluation.level_calibration` under knee-7oep) bought
+# GOLD 0.8932 -> 0.9037 (+0.0105, above the 0.0062 floor) at a matched proxy cost of +0.0009 — free.
+#
+# WHY THIS ARM AND NOT A ROSTER REBUILD. That is one arm, at one corner (224 px, 12 slices), read on a
+# gold ruler of n=58 which is a level and not a selector (knee-kddo). +0.0105 clears the floor and does
+# not clear it by much. A roster rebuild is many arms and must not be bought on a single such read. This
+# asks the one question that decides whether to buy it: is the gain a property of the RE-MAP, or of the
+# 224 corner it was measured at?
+#
+# WHY `band_dense_hold` IS THE CONTROL. It already carries `--hold-annotations`, so the gold ruler will
+# accept the checkpoint (knee-9198 refuses one that trained on the annotated rows with
+# TrainedOnAnnotationsError), and it is already measured on BOTH rulers — 0.8573 proxy. So the control
+# costs nothing and only the arm goes on the card. Every flag below is `band_dense_hold`'s.
+#
+# --eval-labels IS PINNED, AND THAT IS THE POINT. `recal_holdannot` left it unset, so its holdout truth
+# was binarised at 0.5 against the RE-MAPPED values and the ruler moved with the arm: its log ends
+# `best holdout mean AUC 0.8964` against a control of 0.8487, a +0.0477 that is two rulers rather than a
+# result. `run_comparison` refuses the pair outright and the matched number had to be recovered by
+# re-scoring the stored holdout record. `blendlabels` got this right on 2026-08-25 by pinning
+# --eval-labels; this arm does the same, so its ledger row can be read directly.
+#
+# PRE-REGISTERED, on GOLD first, because the proxy's truth IS the report table and is biased against
+# label-side movement. Floor 0.0062 on both.
+#   REPLICATES — gold above `band_dense_hold`'s by the floor or more, proxy not down by the floor. The
+#     re-map is a property of the TABLE and not of a corner. Price a roster rebuild on v3 and spend a slot.
+#   CORNER — gold within the floor, or down. The +0.0105 belongs to 224 px, and the label lane stays where
+#     `blendlabels` left it: live and small. Keep v3 as the default table (it costs nothing) and stop.
+#   COSTS — gold down by the floor or more. Two corners disagreeing in SIGN would say the re-map interacts
+#     with resolution, and the follow-up is per-finding rather than pooled.
+#
+# READING IT. Proxy: the ledger row, directly, because --eval-labels is pinned. Gold: `python -m
+# kneemri.evaluation.supervision_gap --labels $PROCESSED/labels/report_labels_v2.csv --records
+# $PROCESSED/recal_dense_s2026.pt --device cpu`, ONE record at a time — passing two records pools them
+# and prints a single aggregate.
+#
+# bead: knee-qxyj
+# The arm this replicates is knee-8wa0; the two-ruler rule is knee-9198.
+#
+# deliberate: --eval-labels (the ruler must not move with the arm)
+# deliberate: --hold-annotations (the gold ruler refuses the checkpoint without it)
+# deliberate: every other flag — they are band_dense_hold's and may not be touched in this arm.
+#
+# NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+RECAL="$PROCESSED/labels/report_labels_v3.csv"
+require "$RECAL"
+require "$LABELS"
+
+run_train recal_dense \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --hold-annotations \
+  --labels "$RECAL" --eval-labels "$LABELS" --out "$PROCESSED/recal_dense_s2026.pt"

@@ -812,6 +812,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.ruler",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.severity_boundary",
       "target": "core.cli",
       "weight": 1
@@ -2314,6 +2320,12 @@
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
+      "target": "core.data.labels.ruler",
       "weight": 1
     },
     {
@@ -7696,6 +7708,18 @@
       "kind": "calls",
       "source": "core.data.labels.rubric_gap.main",
       "target": "core.data.labels.rubric_gap.RubricGap.table",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.ruler.Ruler",
+      "target": "core.data.labels.ruler.Ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.ruler.Ruler.moved_cells",
+      "target": "core.data.labels.ruler.Ruler.graded",
       "weight": 1
     },
     {
@@ -13327,6 +13351,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
+      "target": "core.data.labels.ruler.Ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
+      "target": "core.data.labels.ruler.Ruler.moved_cells",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
       "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
@@ -13414,6 +13450,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.mismatched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "weight": 1
     },
     {
@@ -21285,7 +21327,7 @@
   ],
   "nodes": [
     {
-      "descendants": 57,
+      "descendants": 58,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -21309,7 +21351,7 @@
       "role": null
     },
     {
-      "descendants": 47,
+      "descendants": 48,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -21565,7 +21607,7 @@
       "role": null
     },
     {
-      "descendants": 15,
+      "descendants": 16,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -21664,6 +21706,14 @@
       "descendants": 0,
       "id": "core.data.labels.rubric_gap",
       "label": "rubric_gap",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.ruler",
+      "label": "ruler",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -23786,6 +23836,14 @@
       "label": "RubricRule",
       "level": "class",
       "parent": "core.data.labels.rubric_gap",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.ruler.Ruler",
+      "label": "Ruler",
+      "level": "class",
+      "parent": "core.data.labels.ruler",
       "role": "satellite"
     },
     {
@@ -29206,6 +29264,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.ruler.Ruler.graded",
+      "label": "graded",
+      "level": "method",
+      "parent": "core.data.labels.ruler.Ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.ruler.Ruler.moved_cells",
+      "label": "moved_cells",
+      "level": "method",
+      "parent": "core.data.labels.ruler.Ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.severity_boundary.SeverityBoundary.__init__",
       "label": "__init__",
       "level": "method",
@@ -33128,6 +33202,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.mismatched",
       "label": "mismatched",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_check.ArmCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
+      "label": "moving_ruler",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
