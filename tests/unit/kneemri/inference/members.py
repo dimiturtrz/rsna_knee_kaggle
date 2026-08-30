@@ -195,6 +195,34 @@ def _member() -> Member:
     )
 
 
+def _fold_checkpoint(directory: Path, name: str, fold: int | None) -> Path:
+    """A checkpoint recording the fold it held out, or — for `None` — recording no fold at all."""
+    path = directory / f"{name}.pt"
+    options: dict[str, int] = {} if fold is None else {"fold": fold}
+    torch.save({"options": options, "config": {"img": 8, "slices": 2}}, path)
+    return path
+
+
+def test_held_out_from(tmp_path: Path):
+    """A member fitted under another fold TRAINED on the studies being scored, so it cannot be scored there.
+
+    THE DEFECT THIS PINS: `member_curve` scored `--fold -1` members on the fold-0 holdout, in-sample.
+    `base_dense_ff` read 0.9035 against every honest member's 0.83-0.86, and the curve seats in SCORE
+    order, so the leaked member was seated FIRST and the ordering was junk (knee-vq46).
+
+    The unrecorded case is the same leak reopened by a default: thirteen checkpoints carry no
+    `options.fold` and were read as fold 0, four of them being `member_fold1` … `member_fold4`.
+    """
+    honest = _fold_checkpoint(tmp_path, "fold0", 0)
+    full_fit = _fold_checkpoint(tmp_path, "ff", -1)
+    other_fold = _fold_checkpoint(tmp_path, "fold2", 2)
+    unknown = _fold_checkpoint(tmp_path, "member_fold1", None)
+
+    kept = Member.held_out_from(0, [honest, full_fit, other_fold, unknown])
+
+    assert [member.identifier for member in kept] == ["fold0"], "only the member shown to be held out from fold 0"
+
+
 def test_reads_pixels():
     """An SSL encoder sits beside the members on disk and is not one — it has to say so, not raise.
 

@@ -114,6 +114,9 @@ class Member:
     fingerprint: NDArray[np.float32]
     holdout: float
     annot: float
+    fold_recorded: bool = True
+    """Whether `fold` was READ from the checkpoint or defaulted — see `held_out_from`, which acts on it.
+    Defaults True so the package manifest, which always records a fold, is unaffected."""
 
     @property
     def reads_pixels(self) -> bool:
@@ -412,6 +415,33 @@ class Member:
         return Window(starts=starts, width=self.group, size=self.read_size)
 
     @classmethod
+    def held_out_from(cls, fold: int, checkpoints: list[Path]) -> list["Member"]:
+        """The members that did NOT train on the fold being scored, with the rest named and dropped.
+
+        A member records the fold it held out. One fitted under a different fold — `--fold -1` above all,
+        which holds out nothing — trained on the studies a holdout tool is about to score it on, so its
+        number is in-sample and reads high: `base_dense_ff` came back 0.9035 on 2026-08-30 against every
+        honest member's 0.83-0.86. `member_curve` seats in SCORE ORDER, so a leaked member is seated
+        FIRST and the whole ordering is junk, silently, in a log indistinguishable from a clean sweep.
+        `record_mix` has always refused these (`no holdout record, skipped`) and `member_curve` averaged
+        them in; the asymmetry between two tools answering one question is the defect (knee-vq46).
+
+        A member that records NO fold is refused too — `from_checkpoint` defaults those to 0, which is
+        the same leak reopened by a default. Thirteen checkpoints carry no `options.fold`: nine named
+        `*_fold0` where the default is right, and `member_fold1` … `member_fold4` where it is wrong. So
+        the refusal costs nine honest members out of 162, and it is worth the loss — reading a fold off
+        the FILENAME would be guessing dressed as a rule, and `MemberReadings` already refuses a cache
+        whose study order disagrees rather than averaging over it.
+        """
+        named = [cls.from_checkpoint(path) for path in checkpoints]
+        for member in named:
+            if not member.fold_recorded:
+                logger.info("%s: records no fold, cannot be shown held out — skipped", member.file.name)
+            elif member.fold != fold:
+                logger.info("%s: fitted at fold %d, trained on these studies — skipped", member.file.name, member.fold)
+        return [member for member in named if member.fold_recorded and member.fold == fold]
+
+    @classmethod
     def from_checkpoint(cls, path: Path) -> "Member":
         """A member read straight from a training checkpoint, without a package around it.
 
@@ -435,6 +465,7 @@ class Member:
             identifier=path.stem,
             file=path,
             fold=int(str(saved.get("options", {}).get("fold", 0))),
+            fold_recorded="fold" in saved.get("options", {}),
             config=config,
             fingerprint=np.asarray(saved.get("fingerprint", []), np.float32),
             holdout=holdout,

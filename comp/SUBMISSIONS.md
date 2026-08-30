@@ -2712,3 +2712,28 @@ nine-hour kernel. It is now known to be the cheap lane's ceiling rather than its
 
 **Stated limit:** as with `fleettwo`, this cannot separate "a fourth seat adds nothing" from
 "`small_batch6_ff` specifically adds nothing" — a `--fold -1` member has no offline quality number.
+
+## `raptorweight_v1` — 0.944, the pin, and the weight is still not a lever
+
+The table above closed at `raptorseat_v1` = 0.943 and declared the seating axis exhausted. One entry
+landed after it and the doc did not say so for a day, which `board_check` is what caught (a row priced
+in `comp/board.jsonl` and named nowhere here).
+
+`raptorweight_v1` (ref 55875622, 2026-08-30) is `raptorseat_v1` with ONE float changed:
+`RaptorSeat.weight` 1/7 → 1/3. Same seven members, same `LogitAverage`, same kit, same raptor
+checkpoint, same rank-space join. It scored **0.944 — the best board row this project owns**, and
+`comp/champion.json` pins it.
+
+**The band label and the arithmetic disagreed, and the arithmetic won.** 0.944 − 0.943 is +0.001, under
+this entry's own pre-registered `BOARD_RESOLVABLE` = 0.0015, and the band's 0.9435 edge is not an
+attainable score at all since the board quantises to 0.001. So a 2.3× change in the foreign share moved
+the board by one unresolvable tick. What is true is narrow: the pin moves because this is the best row,
+NOT because the weight was shown to be a lever. With `fleettwo_v1`'s flat count reading beside it,
+neither dimension of the foreign-seating axis has produced a resolvable move, and `knee-uco3`'s
+inert-seat reading gains its second support.
+
+**Do NOT sweep the weight to 1/2.** The gain branch's own instruction to do so was conditional on
+clearing the resolution floor, which it did not.
+
+**Stated limit:** this cannot separate "the weight is flat" from "THIS foreign member is inert at any
+weight". Six of the seven seats are `--fold -1`, so no offline number exists or can exist for this pool.

@@ -654,7 +654,13 @@ def main() -> None:
     # pixels. This grouped by size, depth and scheme — three of the six fields that name a cache — so
     # two members differing in crop, band or tie-break shared one decode, and the member built its own
     # `StudyCache` from the three it happened to remember.
-    readings = MemberReadings([Member.from_checkpoint(path) for path in arguments.checkpoints], root.processed())
+    # ONLY MEMBERS THAT WERE HELD OUT FROM THESE STUDIES. A member records the fold it held out, and a
+    # member whose fold is not the one being scored TRAINED on these studies — `--fold -1` trained on all
+    # of them. Scoring it here is in-sample and reads high: `base_dense_ff` came back 0.9035 on 2026-08-30
+    # against every honest member's 0.83-0.86. The greedy then seats in score order, so a leaked member is
+    # seated FIRST and the whole ordering is junk — silently, in a log that looks like any other sweep.
+    # `record_mix` has always refused them; this tool averaged them in (knee-vq46).
+    readings = MemberReadings(Member.held_out_from(arguments.fold, arguments.checkpoints), root.processed())
 
     # The split is taken from the FIRST cache and reused, so every member is scored on the same studies
     # in the same order. Any other cache that disagrees about that order is refused: its rows would be
