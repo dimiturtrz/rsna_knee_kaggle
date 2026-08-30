@@ -10923,6 +10923,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.pool_census.PoolCensus.report",
+      "target": "kneemri.evaluation.pool_census.PoolCensus.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool_census.PoolCensus.report",
       "target": "kneemri.evaluation.pool_census.PoolCensus.rows",
       "weight": 1
     },
@@ -31894,6 +31900,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.pool_census.PoolCensus.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool_census.PoolCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool_census.PoolCensus.named",
+      "label": "named",
       "level": "method",
       "parent": "kneemri.evaluation.pool_census.PoolCensus",
       "role": null
