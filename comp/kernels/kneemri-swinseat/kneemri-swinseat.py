@@ -1,57 +1,58 @@
-"""swinseat — the champion, plus the first seat this pool has ever held on the ARCHITECTURE axis.
+"""swinseat — the champion eight: our own non-DINO trunk in the seat its pin says is the plateau.
 
-**THE HOLE IN THE RECORD, and it is a hole in exactly one dimension.** Three entries have now moved the
-foreign seat: `raptorseat_v1` added one foreign decode and took 0.941 -> 0.943; `fleettwo_v1` added a
-SECOND and read 0.942; `raptorweight_v1` moved the foreign share 1/7 -> 1/3 and read 0.944. The last two
-are flat inside `BOARD_RESOLVABLE = 0.0015`, and the ledger closed the axis on them. But both flat reads
-added ANOTHER RAPTOR — the same family, drawn from the same thirteen public checkpoints. The axis has
-never been moved with a different ARCHITECTURE at all.
+WHY THIS ENTRY EXISTS, and the argument is the champion's own record rather than a fresh idea.
+`comp/champion.json` states in its principles that THE POOL IS AN ARCHITECTURE MONOCULTURE AND THAT IS
+THE PLATEAU: all six of `raptorweight_v1`'s members are `facebook/dinov2-small` at 336 px with one head,
+and seven differently-seated entries span 0.937-0.941 because they are seven reseatings of one lens. The
+same file's arithmetic says the member-quality lane ceilings near 0.943 against a 0.952 leader, and
+knee-orjq closed stacking at 7/7 (p = 0.008). The ONE entry that left that plateau did it by seating a
+different ARCHITECTURE — the foreign raptor CoAtNet, 0.941 -> 0.943/0.944. This entry runs that axis from
+the side we control: a supervised Swin-base trunk of ours, which is neither DINO nor raptor.
 
-`comp/champion.json` says so in its own words, twice. *"THE POOL IS AN ARCHITECTURE MONOCULTURE AND THAT
-IS THE PLATEAU. All six of our members are facebook/dinov2-small at 336 px with one head ... Seven
-differently-seated entries span 0.937-0.941 ... because they are seven reseatings of one lens."* And
-*"THE SEAT COUNT IS NOT THE VARIABLE - THE SEVENTH MEMBER'S TYPE OF DISTANCE IS ... Buy a seat on the
-axis, not on the count and not on the solo score."* A Swin-B trained by us on our corpus is the one type
-of distance the pool has never bought.
+WHY NO OFFLINE READING DECIDES THIS, which is what earns a slot rather than another scan. The champion is
+six `--fold -1` members and is fully blind by construction. `champion.json` records, measured, that
+substituting fold-0 twins to score it produces a confident wrong answer — a fourteen-tick miss on
+`peak8_v1`. Every offline reading this project has taken of the non-DINO lane (`seat_value` against
+`greedyseat_v1`; `record_mix --seats honest` and `--seats diverse` under both vote rules) ran over a
+fold-0 pool sharing ZERO members with the shipped entry. Those readings are sound about that pool and
+say nothing about this one; carrying them across the fold line is the error the pin names.
 
-**WHY THIS MEMBER AND NOT `swin_supervised_s2026`.** That checkpoint is DECLINED in
-`comp/members.declines`, and the decline's own closing instruction is *"Re-open on THAT number, not on
-this one"* — `swin_wholetop`, the byte-identical re-run on the block discovery `knee-94ec` fixed. Under
-the old discovery `--unfreeze-last 6` opened `layers.2.blocks.12-17` and left stage 3 (1024 wide, the top
-of the network) FROZEN for the whole run, so 0.8331 is a fact about a handicapped run. This entry seats
-the un-handicapped one, which is answering the decline rather than overriding it.
+AND THE NUMBER THEY DID PRODUCE IS UNRESOLVED, NOT NEGATIVE. The honest block delta was -0.0038 against a
+0.0053 paired floor. `board_transfer` reports 9 inversions in 392 pairs and all nine are pairs the holdout
+left UNRESOLVED, against 0 of the 252 it resolved. The offline ruler is not entitled to a verdict here.
 
-**WHAT THE OFFLINE RULER CAN AND CANNOT SAY HERE.** The decline priced the seat at -0.0012 (later -0.0003
-against `honest12`) on the fold-0 proxy. That is not this question. Six of the seven seats below are
-`--fold -1`, and this pin's own principle is unambiguous: *"an offline number may only be compared to
-another offline number fitted on the SAME studies, and there is no comparison across the --fold -1
-line."* So this entry carries NO offline number by construction, exactly as its three predecessors did.
-The fold-0 seat itself is not a confound — `lastseat_v1` (fold-0) against `dark7_v1` (the same member
-refit at `--fold -1`) read 0.937 both ways.
+PRECEDENT FOR SEATING A MEMBER ITS OWN SCORE ARGUES AGAINST. `base_dense` lost its matched control by
+0.0066 and bought a board tick; `lora_r8_v3small` is rostered at 0.8215 as the only non-DINOv2 member;
+`focus_mcl` is seated deliberately at 0.5332. `champion.json` states the rule outright: a member that
+failed its own matched control can still win a seat, because alone-quality and seat-value are different
+quantities. `swin_wholetop` is seated on the axis, not on its solo number.
 
-**EVERYTHING ELSE IS THE CHAMPION, UNCHANGED.** Same six, same order, same `overlap=False`, same
-`LogitAverage`, same kit, same raptor checkpoint at the same `FOREIGN_WEIGHT = 1/3`, same rank-space
-join. One member enters. That is what makes the read attributable.
+ONE VARIABLE MOVES. `raptorweight_v1`'s exact six, the same raptor foreign seat at 1/3, the same
+`LogitAverage`, the same kit, the same rank-space join — plus `swin_wholetop_s2026` as a SEVENTH member of
+ours. Count and architecture move together and this entry cannot separate them; `fleettwo_v1` already read
+the foreign COUNT axis flat, which is the control that makes the architecture reading the live one.
 
-PRE-REGISTRATION, written before the number, against the champion's 0.944 and `BOARD_RESOLVABLE = 0.0015`.
+PRE-REGISTERED, and the band is drawn against the board's own 0.001 quantisation so it cannot be mis-drawn
+the way `raptorweight`'s was. Champion 0.944.
+- **0.946 or above** — architecture diversity from our own side is a real lever, two ticks clear of board
+  resolution, and it lands in the top ten. Then the lane is open regardless of what `swin_calib_dense`
+  reads, and the follow-up is a BETTER non-DINO member in the same seat.
+- **0.943-0.945** — FLAT, inside one tick either way. Then our own non-DINO trunk does not do for us what
+  the foreign CoAtNet did, and the question worth chasing is what makes the foreign seat different —
+  corpus, or architecture, or both — rather than another trunk.
+- **0.942 or below** — the eighth seat harms. Read it WITH `fleettwo_v1`'s flat count reading before
+  concluding anything about the axis: a cost here is as consistent with seat count as with architecture.
 
-- **0.946 or above** — architecture distance is a live lever AND the entry is inside the top ten (0.946
-  floor). Re-pin `comp/champion.json`. The follow-up is a SECOND architecture (ConvNeXt-V2 at the fixed
-  discovery), not a second Swin and not a weight sweep.
-- **0.945** — a resolvable gain over 0.944. Architecture distance pays where family distance did not.
-  Re-pin, and price a second architecture before any further seating work. Note there is no band edge
-  between 0.944 and 0.945: the board quantises to 0.001, and stating a fractional edge is the error
-  `raptorweight_v1` made when it put a "clears the floor" label on a value below its own resolution.
-- **0.943-0.944** — FLAT. The seat is inert on the architecture axis too, which is the third independent
-  support for `knee-uco3` and closes ensemble construction as a lever outright. The remaining routes are
-  the ones `champion.json` already names: external data and stacking. Do NOT seat a third architecture.
-- **0.942 or below** — the Swin member DILUTES. Its solo deficit against the DINOv2 members is real and
-  is not paid for by decorrelation, which would CONFIRM the decline's argument on the board rather than
-  offline, and retire the trunk for seating.
+THE REFUTATION THIS CANNOT MAKE: it cannot say whether a non-DINO trunk trained on the recipe that
+actually seats members would do better. That is `swin_calib_dense` (knee-csxq), which runs tonight and is
+not gated on this result either way.
 
-The refutation this cannot make: it cannot separate "architecture distance is inert" from "THIS Swin
-member is too weak to carry it". Its solo number is the guard — the entry is built only on the arm's
-LANDS branch (0.8560 or above), so it is not made out of a member the deficit argument already covers.
+BUDGET. Seven of ours plus the raptor pass on one T4. The Swin member reads 384 px at 20 slices, which is
+the heaviest member in the entry, and `Budget` is handed what the raptor pass already spent so both
+producers aim at the SAME ceiling. If the session runs short, `KernelRun` drops members — which is the
+one failure that would score this entry without the thing it is for, so read the log's member list.
+
+bead: knee-o1eg
 """
 
 # >>> KERNEL-BOOTSTRAP
@@ -138,21 +139,12 @@ def boot() -> Path:
 # <<< KERNEL-BOOTSTRAP
 
 FOREIGN_WEIGHT = 1.0 / 3.0
-"""The foreign side's share of the rank blend, held at the champion's value.
+"""The foreign side's share of the rank blend. `raptorseat_v1` shipped 1/7 = 0.1429 as a convention about
+SEAT COUNT; this is a quality-weighted share of two SYSTEMS, named before the number and never fitted.
 
-`raptorweight_v1` moved this 1/7 -> 1/3 and read one unresolvable tick, so it is NOT shown to be a lever
-and it is NOT the variable here. It stays where the pinned entry left it, so that the single difference
-between this entry and the champion is the member that enters below.
-"""
-
-SWIN_SEAT = "swin_wholetop_s2026"
-"""The entering member: Swin-B at 384, ours, trained on our corpus, at the fixed block discovery.
-
-Documented here because it IS the hypothesis, but INLINED in `chosen` below rather than referenced, and
-that is not a style choice. `mount_check` reads the member names statically, and a name it cannot resolve
-to a literal is not an error there — the tuple reads as the WHOLE package, so the check then demands every
-mount any member could need. This entry was refused for an undeclared `dimiturnt/vjepa2-hf` that none of
-its seven members use, purely because one element of the tuple was a constant.
+Below the bootstrap block rather than above it: the block opens with imports, and a constant in front of
+them makes every one of them E402. The kernel that RAN carried it above and the ruff gate caught it after
+the fact — the number is identical either way.
 """
 
 
@@ -190,10 +182,6 @@ def main() -> None:
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-    # The champion's six in the champion's order, then the entering seat LAST. The order is not a free
-    # choice: `Budget` drops members from the tail when the session runs short, so the member under test
-    # is the one that goes if the T4 cannot afford it — which fails the entry back to the champion
-    # rather than shipping a truncated pool that scores as neither.
     chosen = (
         "final_ws_cf",
         "calib_span_ff",
@@ -201,13 +189,16 @@ def main() -> None:
         "merged_blend_cf",
         "lr4e-5_ws_cf",
         "through_dense_cf",
-        "swin_wholetop_s2026",  # SWIN_SEAT, inlined so `mount_check` can resolve it — see that constant
+        # The seventh of ours and the reason this entry exists: the only member here that is not
+        # dinov2-small. It reads 384 px because Swin-base's window tables are baked at 12 and only a
+        # 384 px read tiles them exactly — see backbone.py SWIN_BASE, where that is why the arm pins it.
+        "swin_wholetop_s2026",
     )
-    # What the raptor pass cost, handed to the seven so their nine-hour budget is the SESSION's and not
+    # What the raptor pass cost, handed to the six so their nine-hour budget is the SESSION's and not
     # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
     # real one with no submission — a budget defeated by its own assumption that it starts at zero.
     spent = time.time() - started
-    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the seven get what is left")
+    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the six get what is left")
     left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
     KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage(), budget=left)).run()
     ours = pd.read_csv(WORKING / "submission.csv")
