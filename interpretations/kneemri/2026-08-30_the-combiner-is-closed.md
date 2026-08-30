@@ -1,4 +1,4 @@
-# The combiner is closed: two selection rules that share no structure agree to 0.0003
+# The combiner is closed: three axes, one pool, one day, none of them a lever
 
 *2026-08-30, morning. Every number here is CPU arithmetic over holdout records already on disk. No GPU,
 no submission slot, no training.*
@@ -6,20 +6,21 @@ no submission slot, no training.*
 For most of this project the ensemble has been the place where score came from. The champion is an
 ensemble, the board's best entries are ensembles, and the last several design questions were about how
 to combine members rather than about what a member is. This is the measurement that says that door is
-shut, and it is worth writing down because it was shut by two experiments that were each aimed at
+shut, and it is worth writing down because it was shut by three experiments that were each aimed at
 opening it.
 
 ## The pool, stated once, because it is the denominator for everything below
 
 `record_mix --largest-pool` over the processed root: **113 of 202 records became members, over 909
 shared studies, voting `LogitAverage`.** The other 89 are checkpoints with no holdout record, twelve
-smokes and one member scored under an older label table, all named in the log. Both measurements below
-were taken on that same pool on the same day, which is what makes them comparable at all — a routing
-number from one pool against a seat number from another would have been two facts about two
+smokes and one member scored under an older label table, all named in the log. All three measurements
+below were taken on that same pool on the same day, which is what makes them comparable at all — a
+routing number from one pool against a seat number from another would have been two facts about two
 denominators.
 
-`logit` and not `rank` because the shipped champion serves logit. Every number in the ledger was taken
-under `rank`, so this is also the first reading of both axes in the vote rule that actually ships.
+The first two doors are read under `logit` because the shipped champion serves logit; every number in
+the ledger was taken under `rank`, so these are also the first readings of those axes in the rule that
+actually ships. The third door reads all three rules against each other.
 
 ## First door: does the ensemble want more members?
 
@@ -66,14 +67,38 @@ monotonically for a hundred more, back to the flat average at 113. Members here 
 competence, not in what they are good at; per-label freedom buys only the noise of choosing on fewer
 studies.
 
-## Why the two together are stronger than either alone
+## Third door: does the vote rule matter?
+
+The first two doors are about which members vote. This one is about how their votes are added, and
+unlike the other two it was not hypothetical — the shipped champion serves `LogitAverage` while every
+number in the ledger was measured under `RankAverage`, so the axis was already live in production and
+had never been read head to head. Pre-registered as a null on `knee-og02` before the runs finished.
+
+    rank    0.8752 at 23 seats   greedy bias +0.0013
+    median  0.8756 at 23 seats   greedy bias +0.0015
+    logit   0.8763 at 19 seats   greedy bias +0.0012
+
+**0.0011 across all three — 0.18 of a floor.** Both pre-registered trip-wires stayed down. Median did
+not win, so nothing in the pool behaves as an outlier the mean is absorbing; that confirms the routing
+reading from the opposite direction, since routing says no member is special on a subset of LABELS and
+median says none is special on a subset of STUDIES. And logit did not lose to rank, so the ledger's
+rank-measured numbers do not overstate what the champion ships.
+
+Two directional notes, each about a fifth of a floor, kept because they are free and mechanism-sound.
+Logit is nominally the best of the three AND is already what ships — nothing to change, which is the
+most useful shape a null can take. It also carries the lowest selection bias at every count, so the
+greedy overfits its own choice least there. That argues for reading future seat work under logit rather
+than rank: a change to the INSTRUMENT, costing nothing, not a change to any entry.
+
+## Why the three together are stronger than any alone
 
 Each experiment was designed to find a lever and found a ceiling, and they are not the same experiment.
-One varied HOW MANY members vote, the other varied WHICH members vote on WHICH label. They agree that
-this pool tops out at ~0.876 under the honest estimator however you pick among it.
+One varied HOW MANY members vote, one varied WHICH members vote on WHICH label, one varied HOW the votes
+are added. They agree that this pool tops out at ~0.876 under the honest estimator however you combine
+it.
 
-That agreement relocates the ceiling. It is not a fact about the combining rule — two rules with nothing
-in common found the same wall — so it is a fact about the members. And `comp/champion.json` already
+That agreement relocates the ceiling. It is not a fact about any one combining rule — three axes with
+nothing in common found the same wall — so it is a fact about the members. And `comp/champion.json` already
 names what the members are: an architecture monoculture, overwhelmingly `facebook/dinov2-small` at
 336 px with one head. Every axis this project has closed was closed INSIDE that monoculture.
 
@@ -84,16 +109,16 @@ exactly what `swin_supervised` (supervised IN-22k pretraining, shifted-window at
 `vit_in21k` (the same objective swap at ZERO architectural distance from `v3base`) were built to test,
 and it is why card time is going to trunks rather than to ensembling.
 
-It also says what NOT to do. Do not spend a submission on either combiner axis: the count curve is flat
-and the shipped champion already votes logit over a globally-chosen seat set, which is the better of the
-two selection mechanisms measured here. There is nothing to ship from this document — its value is the
-two experiments it means nobody has to run again.
+It also says what NOT to do. Do not spend a submission on any combiner axis: the count curve is flat,
+and the shipped champion already votes logit over a globally-chosen seat set — which is the better of
+the two selection mechanisms measured here AND the nominally best of the three vote rules. There is
+nothing to ship from this document; its value is the three experiments it means nobody has to run again.
 
 ## The honest caveat
 
-Both numbers are split-half honest on 909 studies, and the floor those studies support is 0.0062. A
-0.0003 gap and a 0.0009 gap are far below it; they are reported as "indistinguishable", never as "equal".
-What the measurement supports is that neither axis delivers anything CLOSE to the ~1.5% a result needs —
-not that the true effects are zero.
+Every number here is split-half honest on 909 studies, and the floor those studies support is 0.0062.
+A 0.0003 gap, a 0.0009 gap and a 0.0011 spread are far below it; they are reported as
+"indistinguishable", never as "equal". What the measurement supports is that no axis here delivers
+anything CLOSE to the ~1.5% a result needs — not that the true effects are zero.
 
-Beads: `knee-m69u` (count), `knee-ymek` (routing).
+Beads: `knee-m69u` (count), `knee-ymek` (routing), `knee-og02` (vote rule).
