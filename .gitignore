@@ -83,3 +83,7 @@ logs/kout/*.csv
 # A pulled Kaggle leaderboard snapshot, not ours: 124 KB of third-party rows whose one useful
 # cell (our efficiency row) is quoted in knee-7lyz. Data stays out of the repo.
 /comp/efficiency_lb/
+
+# kernel outputs downloaded for reading — evidence, not source
+comp/kout*/
+comp/fout*/
