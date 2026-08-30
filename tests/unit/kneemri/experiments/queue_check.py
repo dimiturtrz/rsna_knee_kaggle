@@ -78,6 +78,25 @@ def test_watchers_drops_the_launching_shell(tmp_path: Path):
     assert QueuedArms(tmp_path, wrapper + LIVE).watchers() == [LIVE.rstrip()]
 
 
+def test_watchers_drops_a_launching_shell_that_is_not_the_parent(tmp_path: Path):
+    """The Windows probe's launcher is NOT the watcher's parent, so parentage alone cannot drop it.
+
+    MEASURED 2026-08-30. `nohup … & disown` under MSYS re-parents through an intermediate: the
+    launching shell read pid 30016 while the watcher it started read a parent of 37388. The drop
+    above is written against the POSIX shape and silently does nothing here, so a healthy three-arm
+    queue reported DOUBLE-QUEUED on `recal_dense` — the second false blocking verdict this one check
+    has produced, and the reason the test is now WHERE the token sits rather than whose child it is.
+    """
+    wrapper = f'"C:/Git/bash.exe" -c nohup bash experiments/after.sh {MARKER} /d/x.log {ARMS} & disown\n'
+    assert QueuedArms(tmp_path, f"User 30016 99999 ? {wrapper}" + LIVE).watchers() == [LIVE.rstrip()]
+
+
+def test_watchers_drops_an_onlooker_that_merely_names_the_script(tmp_path: Path):
+    """A grep or a checker naming `after.sh` in its argv is not a gate, and has no pids to drop it by."""
+    onlooker = f"grep -n after.sh {ARMS}\n"
+    assert QueuedArms(tmp_path, onlooker + LIVE).watchers() == [LIVE.rstrip()]
+
+
 def test_doubled(tmp_path: Path):
     """Two live watchers each owing one arm — 2.5 h of slot, and two of that geometry overflow the card."""
     _log(tmp_path, "after_chain.log", MARKER, ARMS)

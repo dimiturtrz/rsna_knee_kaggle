@@ -48,7 +48,7 @@ two strings and the unit test needs no process to kill.
 
 import logging
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from core import cli
 from kneemri.process_table import PROBES, ProcessTable
@@ -140,15 +140,51 @@ class QueuedArms:
         carrying the same arm path, and counting that as a second gate would report every arm on the
         card as doubly queued.
 
-        THE LAUNCHING SHELL IS DROPPED BY PARENTAGE, and it has to be: a watcher is started as
-        `nohup bash experiments/after.sh …` from a harness shell whose own `-c` string embeds that whole
-        command, so the table holds two lines carrying the same argv for ONE queue. Dropping any line
-        that is the PARENT of another watcher line removes exactly that wrapper, while two genuinely
-        separate watchers — neither one's parent — both survive to be counted.
+        A LINE MUST *BE* `after.sh`, NOT MERELY NAME IT — see `_invokes`. Naming was the test until
+        2026-08-30, and it reported a false DOUBLE-QUEUED on a healthy three-arm queue.
+
+        The parentage drop below is kept as a second line of defence for the POSIX probe, where a
+        launcher really is its watcher's parent. It cannot carry the rule alone: on the Windows probe
+        `nohup … & disown` re-parents through an intermediate, so the launcher's pid is not the
+        watcher's parent (measured: 30016 against a parent of 37388) and nothing gets dropped.
         """
-        lines = [line for line in self.running.splitlines() if WATCHER in line]
+        lines = [line for line in self.running.splitlines() if self._invokes(line)]
         parents = {ProcessTable.parentage(line)[1] for line in lines} - {""}
         return [line for line in lines if ProcessTable.parentage(line)[0] not in parents]
+
+    @staticmethod
+    def _invokes(line: str) -> bool:
+        """Whether this process IS a watcher, rather than a process whose argv mentions one.
+
+        MEASURED 2026-08-30 on a queue that was correct. Two kinds of impostor were being counted,
+        and both are ordinary traffic rather than anything exotic:
+
+        THE LAUNCHER. A watcher is started as `nohup bash experiments/after.sh … & disown` from a
+        harness shell whose own `-c` string embeds that entire command, so the table holds two lines
+        naming the same arms for ONE queue. That is what fired here: `recal_dense` was owed by exactly
+        one live watcher and reported as doubly queued, which would have sent someone to kill a chain
+        that had nothing wrong with it.
+
+        THE ONLOOKER. Any grep, editor or checker whose command line carries `after.sh` matched too —
+        including the very probe used to diagnose this. Those lines have no pid columns to parse, so
+        `parentage` reads blank and the drop below could never remove them either.
+
+        Both are excluded by asking WHERE the token sits. A shell running a `-c` string is a launcher
+        and never a watcher, whatever it embeds; and in a real invocation the script is the token
+        immediately after the interpreter, which is the one arrangement both probe formats share
+        (`bash experiments/after.sh …`, quoted executable or not). An onlooker's mention is preceded
+        by something else entirely.
+        """
+        tokens = line.split()
+        if "-c" in tokens:
+            return False
+        interpreters = ("bash", "bash.exe", "sh", "sh.exe")
+        return any(
+            token.strip('"').endswith(WATCHER)
+            and index > 0
+            and PurePosixPath(tokens[index - 1].strip('"').replace("\\", "/")).name in interpreters
+            for index, token in enumerate(tokens)
+        )
 
     def alive(self, watch: Watch) -> bool:
         """Whether a live `after.sh` carries this watch's marker AND the exact arms it names.
