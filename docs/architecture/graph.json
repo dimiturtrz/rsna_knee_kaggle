@@ -4789,6 +4789,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.band_coverage.SlotShares.row",
+      "target": "core.data.corpus.band_coverage.SlotShares.spread",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.corpus.band_coverage.main",
       "target": "core.data.corpus.band_coverage.BandCoverage",
@@ -26674,6 +26680,14 @@
       "descendants": 0,
       "id": "core.data.corpus.band_coverage.SlotShares.row",
       "label": "row",
+      "level": "method",
+      "parent": "core.data.corpus.band_coverage.SlotShares",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.band_coverage.SlotShares.spread",
+      "label": "spread",
       "level": "method",
       "parent": "core.data.corpus.band_coverage.SlotShares",
       "role": null
