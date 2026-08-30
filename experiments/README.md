@@ -6341,3 +6341,47 @@ priced worse than before rather than better. And it does not make distance a sea
 failed the distance-to-seat inference three times. Distance is why `vjepa_warm` and not another non-DINO
 member; the reason the entry is worth a slot is that the champion is six `--fold -1` members and no offline
 ruler can price it at all.
+
+## 2026-08-30 — recal_holdannot LANDS: the reader's scale was a real defect, and fixing it is free (`knee-8wa0`)
+
+`recal_holdannot` = `holdannot`'s recipe with the supervision table swapped for `report_labels_v3.csv`,
+whose six reader levels are replaced by their measured positive rates on the 58 radiologist-read studies
+(`kneemri.evaluation.level_calibration`, fitted under knee-7oep). Every other flag byte-identical. The map
+is strictly increasing, so the TABLE's own per-label rank AUC does not move — only what the model is asked
+to fit does.
+
+Read on both rulers as knee-9198 requires, and on GOLD first as the arm pre-registered, because the proxy's
+truth IS the report table and is therefore biased against label-side movement.
+
+| ruler | control `holdannot` | `recal_holdannot` | delta |
+|---|---|---|---|
+| **GOLD** (`supervision_gap`, 58 annotated studies) | 0.8932 | **0.9037** | **+0.0105** |
+| **proxy** (`ruler_check` on `report_labels_v2`, 909 studies) | 0.8506 | 0.8515 | +0.0009 |
+| proxy, confident-only ruler (71.0% of cells kept) | 0.8740 | 0.8754 | +0.0014 |
+
+**This is the arm's own LANDS branch: gold up by more than the 0.0062 floor, proxy not down.** The reader
+over-calls in the middle of its scale — the 0.68 level is 62% negative and was trained as 0.68 positive on
+12% of cells — and re-pointing the gradient at the measured rate moves the model toward the image-read
+process at no cost on the report-derived one. It is worth a slot on its own terms.
+
+**READ THE PROXY NUMBERS FROM `ruler_check`, NOT FROM THE TRAINING LOG.** `recal_holdannot`'s own log ends
+`best holdout mean AUC 0.8964`, which is +0.0477 over the control and is NOT a result: the arm passed
+`--labels v3` with `--eval-labels` unset, so its holdout truth was binarised at 0.5 against the RE-MAPPED
+values and the ruler moved with the arm. `run_comparison` refuses the pair outright — *"the two runs were
+scored by different label tables over their 909 shared studies"* — which is the guard working. The matched
+proxy above comes from re-scoring the run's stored holdout record against v2. Any future label-VALUE arm
+must pin `--eval-labels report_labels_v2.csv`, the way `blendlabels` did; `holdannot.sh`'s clone did not,
+and the 0.8964 sat in the log for an hour looking like the largest single-arm gain the project has ever
+measured.
+
+**HONEST SIZE.** n=58 on the gold ruler is a level, not a selector (knee-kddo): +0.0105 clears the 0.0062
+floor but not by much, and the printed interval is on the reader-model GAP, not on the arm-control delta.
+One arm, one recipe corner (224 px, whole-stack, 12 slices). What it establishes is a SIGN and a free
+lunch, not a size. It is also an order of magnitude under the 1.5% bar on its own, exactly as the label
+lane was priced on 2026-08-25 (`blendlabels`, +0.0034): the lane is LIVE and SMALL, and v3 is now the
+better table to build the lane's members on rather than a path to 0.950 by itself.
+
+**FOLLOW-UP, in cost order.** (1) v3 is free — make it the default supervision table for new label-side
+arms. (2) A dense-corner replication (`band_dense_hold` has a matched control on both rulers and costs one
+arm) would say whether +0.0105 is a property of the re-map or of the 224 corner. (3) Only then a roster
+rebuild, which is many arms and should not be bought on a single n=58 read.

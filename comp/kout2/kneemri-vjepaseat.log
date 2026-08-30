@@ -1,0 +1,50 @@
+[{"stream_name":"stderr","time":0.969850059,"data":"installing ['jaxtyping-0.3.11-py3-none-any.whl', 'safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl', 'transformers-5.15.0-py3-none-any.whl', 'wadler_lindig-0.1.7-py3-none-any.whl']\n"}
+,{"stream_name":"stderr","time":17.20061706,"data":"NumExpr defaulting to 4 threads.\n"}
+,{"stream_name":"stderr","time":34.76549924,"data":"The 'pydicom.pixel_data_handlers' module will be removed in v4.0, please use 'from pydicom.pixels import apply_modality_lut' instead\n"}
+,{"stream_name":"stderr","time":40.179534596,"data":"3 studies, 3 with series rows\n"}
+,{"stream_name":"stderr","time":51.506308179,"data":"wrote 3 rows\n"}
+,{"stream_name":"stderr","time":51.556424515,"data":"the raptor pass cost 17s; the six get what is left\n"}
+,{"stream_name":"stderr","time":51.561824126,"data":"kit 53f81d3\n"}
+,{"stream_name":"stderr","time":67.271304494,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 11018.40it/s]\n"}
+,{"stream_name":"stderr","time":69.593573257,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 10866.07it/s]\n"}
+,{"stream_name":"stderr","time":71.161979496,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8553.46it/s]\n"}
+,{"stream_name":"stderr","time":72.524276694,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 11463.36it/s]\n"}
+,{"stream_name":"stderr","time":73.780812395,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8953.52it/s]\n"}
+,{"stream_name":"stderr","time":75.0316862,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8428.82it/s]\n"}
+,{"stream_name":"stderr","time":77.31626627,"data":"\rLoading weights:   0%|          | 0/587 [00:00\u003c?, ?it/s]\rLoading weights:  12%|█▏        | 69/587 [00:00\u003c00:00, 658.27it/s]\rLoading weights:  25%|██▍       | 146/587 [00:00\u003c00:00, 689.66it/s]\rLoading weights:  37%|███▋      | 215/587 [00:00\u003c00:00, 680.67it/s]\rLoading weights:  49%|████▉     | 290/587 [00:00\u003c00:00, 705.73it/s]\rLoading weights:  62%|██████▏   | 363/587 [00:00\u003c00:00, 714.25it/s]\rLoading weights:  74%|███████▍  | 435/587 [00:00\u003c00:00, 595.13it/s]\rLoading weights:  86%|████████▌ | 502/587 [00:00\u003c00:00, 615.52it/s]\rLoading weights:  97%|█████████▋| 568/587 [00:00\u003c00:00, 626.96it/s]\rLoading weights: 100%|██████████| 587/587 [00:00\u003c00:00, 665.04it/s]\n"}
+,{"stream_name":"stderr","time":93.042761156,"data":"loaded and fingerprint-checked 7 of 7 members from /kaggle/input/datasets/dimiturnt/kneemri-members\n"}
+,{"stream_name":"stderr","time":93.043052036,"data":"overlap=False requested, INERT — all 7 members are whole-stack\n"}
+,{"stream_name":"stderr","time":93.08485007,"data":"serving: vote=LogitAverage views=identity only (default) precision=each member's own (default) deadline=27526s\n"}
+,{"stream_name":"stderr","time":93.094926389,"data":"3 studies, 15 series\n"}
+,{"stream_name":"stderr","time":96.677867929,"data":"  studies 1-3: decode 4s at [336], elapsed 4s, peak 7.2 GB vram, 4.5 GB host\n"}
+,{"stream_name":"stderr","time":96.68879407,"data":"final_ws_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":97.967317558,"data":"grade_ladder_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":99.018945775,"data":"through_dense_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":100.084048476,"data":"vjepa_warm_s2026 asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":106.630238346,"data":"  studies 1-3: decode 2s at [336], elapsed 2s, projecting 0.0h of 7.6h, peak 7.2 GB vram, 4.5 GB host\n"}
+,{"stream_name":"stderr","time":106.637480108,"data":"calib_span_ff asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":108.982071245,"data":"  studies 1-3: decode 2s at [336], elapsed 2s, projecting 0.0h of 7.6h, peak 7.2 GB vram, 4.5 GB host\n"}
+,{"stream_name":"stderr","time":108.989446925,"data":"merged_blend_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":109.629674785,"data":"lr4e-5_ws_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":110.277525368,"data":"slot fill SAG_FLUID_FS: 0.667\n"}
+,{"stream_name":"stderr","time":110.277563629,"data":"slot fill COR_FLUID_FS: 1.000\n"}
+,{"stream_name":"stderr","time":110.277641837,"data":"slot fill AX_FLUID_FS: 1.000\n"}
+,{"stream_name":"stderr","time":110.277669247,"data":"slot fill SAG_FLUID_NOFS: 0.667\n"}
+,{"stream_name":"stderr","time":110.277799207,"data":"slot fill COR_T1: 0.333\n"}
+,{"stream_name":"stderr","time":110.277868769,"data":"slot fill SAG_T1: 0.333\n"}
+,{"stream_name":"stderr","time":110.2779458,"data":"studies with no slot at all: 0/9\n"}
+,{"stream_name":"stderr","time":110.280187079,"data":"wrote 3 rows\n"}
+,{"stream_name":"stderr","time":110.301339023,"data":"                                    StudyInstanceUID  ...  Fracture\n"}
+,{"stream_name":"stderr","time":110.301359206,"data":"0  1.2.826.0.1.3680043.8.498.10047035057544427318...  ...  0.030930\n"}
+,{"stream_name":"stderr","time":110.301365491,"data":"1  1.2.826.0.1.3680043.8.498.10062861783145312629...  ...  0.077467\n"}
+,{"stream_name":"stderr","time":110.301370794,"data":"2  1.2.826.0.1.3680043.8.498.10067514707072572280...  ...  0.053277\n"}
+,{"stream_name":"stderr","time":110.301375418,"data":"\n"}
+,{"stream_name":"stderr","time":110.301380368,"data":"[3 rows x 13 columns]\n"}
+,{"stream_name":"stderr","time":110.315210646,"data":"seated 1 foreign members over 3 studies\n"}
+,{"stream_name":"stderr","time":115.96266702,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":115.962720054,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":116.203427561,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":116.203456843,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":116.89410513199999,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":118.20350085,"data":"[NbConvertApp] Writing 305466 bytes to __results__.html\n"}
+]
