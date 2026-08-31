@@ -75,7 +75,13 @@ reader = ["accelerate"]
 # docstring, knee-wgaa). An extra rather than a base dependency because nothing in a shipped kit scores
 # an attribution.
 attribution = ["captum"]
-devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools"]
+# Confident learning over out-of-fold predictions (`kneemri.evaluation.label_errors`). cleanlab is the
+# reference implementation of Northcutt et al. 2021 (JAIR 70:1373-1411) — the confident-joint estimator,
+# its calibration, and the per-example self-confidence ranking. Hand-rolling that arithmetic is how a
+# thresholding bug becomes a finding, and the library carries the authors' own test suite. scikit-learn
+# arrives with it. An extra rather than a base dependency because nothing in a shipped kit scores a label.
+labelnoise = ["cleanlab"]
+devtools =["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools"]
 
 [[tool.uv.index]]
 url = "https://download.pytorch.org/whl/cu128"
