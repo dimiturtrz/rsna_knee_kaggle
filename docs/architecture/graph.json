@@ -14318,6 +14318,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.report",
+      "target": "kneemri.experiments.arm_read.ArmRead.produced",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_read.ArmRead.uncontrolled",
       "target": "kneemri.experiments.arm_read.ArmRead.control",
       "weight": 1
@@ -34622,6 +34628,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_read.ArmRead.control",
       "label": "control",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_read.ArmRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_read.ArmRead.produced",
+      "label": "produced",
       "level": "method",
       "parent": "kneemri.experiments.arm_read.ArmRead",
       "role": null
