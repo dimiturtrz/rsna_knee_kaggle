@@ -557,3 +557,14 @@ attend_true_s2026.pt                 # 0.8476
 adjacent224_s2026.pt                 # 0.8462
 depth_true_s2026.pt                  # 0.8461
 ema_ws_s2026.pt                      # 0.8460
+
+# Added 2026-08-31 00:49Z. The blind full-fit of merged_span_cf, trained for the spanseat entry after
+# holdswap_v1 read 0.944 against the champion's 0.944 and closed the near-equal single-seat swap axis.
+# It carries NO holdout number and never can: --fold -1 has seen every holdout study, so RecordMix
+# excludes it and neither seat_value nor decode_entry can price it. The 0.8618 belongs to the fold-0
+# parent, which is a different model fitted on 3,497 studies, and may not be quoted for this file.
+# Twelve epochs recorded of twelve asked, loss 1.1580 -> 0.4745 monotone.
+merged_span_ff.pt           # DARK. merged_span_cf's flags plus --fold -1 --ema. External corpus
+                            # (merged_blend_v1) at 20 slices, band 0.2-0.8 - a decode cell no champion
+                            # seat occupies. Parent is greedy seat two with the largest single jump in
+                            # the 111-member curve (+0.0075).
