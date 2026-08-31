@@ -29,11 +29,14 @@
 # untouched, so the result is matched against BOTH `stack224` (aggregator moved, coverage held) and
 # `native224` (the standing 224 control, 0.8502).
 #
-# `$THROUGHPUT` IS DROPPED. `--recompute-activations` costs a measured 19% (798 img/s against 946,
-# `kneemri/models/encoder_surgery.py:285`) and was calibrated on a 336-px geometry about 4.5x larger than
-# this one; `stack224` peaked at 21.9 GB of 32.6 WITH it on. Recomputation trades memory for compute, so
-# the peak rises here — predicted near 29 GB. An OOM is itself the finding that the threshold sits between
-# 20 and 36 slices at 224, and the relaunch with `$THROUGHPUT` restored changes nothing about the score.
+# `$THROUGHPUT` IS KEPT, AND THE FIRST LAUNCH IS WHY. `--recompute-activations` costs a measured 19% (798
+# img/s against 946, `kneemri/models/encoder_surgery.py:285`) and was calibrated on a 336-px geometry about
+# 4.5x larger than this one, so knee-ujd3 argued it was a tax on a memory problem 224 px no longer has.
+# It is not. Launched without it at 08:02 on 2026-08-31 this arm died with
+# `torch.OutOfMemoryError: Tried to allocate 488.00 MiB ... 25.50 GiB allowed; 25.09 GiB is allocated`,
+# against the 21.9 GB `stack224` peaked at WITH the flag. So the threshold sits between 20 and 36 slices
+# at 224 px: the flag is dead weight at 20 and load-bearing at 36, and the 19% is bought, not wasted.
+# That is the whole of knee-ujd3's throughput half, answered by one launch and costing three minutes.
 #
 # READ IT PER LABEL, and against BOTH controls. The mean is the last thing to look at: the whole reason
 # this arm exists is that a mean averaged a two-label effect away and nearly closed a live axis.
@@ -41,14 +44,14 @@
 # HARNESS CHECK BEFORE ANY READING. The printed recipe must show `"image_size": "224"`, `"slices": "36"`,
 # band [0.05, 0.95], `"whole_stack": "True"`, `"fold": "0"`, and `"slice_pooling": "labelwise"` — that
 # last one is the entire arm, and a run that silently kept `max` would repeat `stack224` at full price.
-# `"recompute_activations"` must read "False".
+# `"recompute_activations"` must read "True".
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train cover_labelwise \
-  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 36 --band-low 0.05 --band-high 0.95 \
   --image-size 224 \
   --labels "$LABELS" --out "$PROCESSED/cover_labelwise_s2026.pt"
