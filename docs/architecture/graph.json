@@ -644,6 +644,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.finding_mentions",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.label_power",
       "target": "core.cli",
       "weight": 1
@@ -670,6 +676,42 @@
       "kind": "import",
       "source": "core.data.labels.level_agreement",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.negation_scope",
+      "target": "core.data.labels.finding_mentions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.data.labels.finding_mentions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.data.labels.negation_scope",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.data.labels.report_language",
       "weight": 1
     },
     {
@@ -7466,6 +7508,30 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.finding_mentions.FindingMentions.coverage",
+      "target": "core.data.labels.finding_mentions.FindingMentions.elsewhere",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_mentions.FindingMentions.coverage",
+      "target": "core.data.labels.finding_mentions.FindingMentions.mentions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_mentions.FindingMentions.elsewhere",
+      "target": "core.data.labels.finding_mentions.FindingMentions.mentions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.finding_mentions.FindingMentions.mentions",
+      "target": "core.data.labels.finding_mentions.FindingMentions.sentences",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.label_power.LabelPower.report",
       "target": "core.data.labels.label_power.LabelPower.positives",
       "weight": 1
@@ -7552,6 +7618,174 @@
       "kind": "calls",
       "source": "core.data.labels.level_agreement.main",
       "target": "core.data.labels.level_agreement.LevelAgreement.stability",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.negation_scope.NegationScope",
+      "target": "core.data.labels.finding_mentions.FindingMentions",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.negation_scope.NegationScope.__init__",
+      "target": "core.data.labels.finding_mentions.FindingMentions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.negation_scope.NegationScope.__init__",
+      "target": "core.data.labels.negation_scope.NegationScope._compiled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.negation_scope.NegationScope.denied",
+      "target": "core.data.labels.negation_scope.NegationScope.about",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.negation_scope.NegationScope.denied",
+      "target": "core.data.labels.negation_scope.NegationScope.governed",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.overcall_audit.OvercallAudit",
+      "target": "core.data.labels.finding_mentions.FindingMentions",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.labels.overcall_audit.OvercallAudit",
+      "target": "core.data.labels.negation_scope.NegationScope",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.overcall_audit.OvercallAudit",
+      "target": "core.data.labels.overcall_audit.Judgement",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.overcall_audit.OvercallAudit",
+      "target": "core.data.labels.report_language.ReportLanguages",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.__init__",
+      "target": "core.data.labels.finding_mentions.FindingMentions",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.__init__",
+      "target": "core.data.labels.negation_scope.NegationScope",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.__init__",
+      "target": "core.data.labels.report_language.ReportLanguages",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.OvercallAudit._cells",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit._cells",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit._cells",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.audit",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.classify",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.classify",
+      "target": "core.data.labels.overcall_audit.Judgement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.classify",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.fired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.compare",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.census",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.compare",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallAudit.fired",
+      "target": "core.data.labels.negation_scope.NegationScope.denied",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit._cells",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.audit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.compare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.coverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.incidence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallAudit.limits",
       "weight": 1
     },
     {
@@ -23493,7 +23727,7 @@
   ],
   "nodes": [
     {
-      "descendants": 58,
+      "descendants": 61,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -23517,7 +23751,7 @@
       "role": null
     },
     {
-      "descendants": 48,
+      "descendants": 51,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -23773,7 +24007,7 @@
       "role": null
     },
     {
-      "descendants": 16,
+      "descendants": 19,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -23798,6 +24032,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.finding_mentions",
+      "label": "finding_mentions",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power",
       "label": "label_power",
       "level": "module",
@@ -23808,6 +24050,22 @@
       "descendants": 0,
       "id": "core.data.labels.level_agreement",
       "label": "level_agreement",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope",
+      "label": "negation_scope",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit",
+      "label": "overcall_audit",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -26022,6 +26280,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions",
+      "label": "FindingMentions",
+      "level": "class",
+      "parent": "core.data.labels.finding_mentions",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower",
       "label": "LabelPower",
       "level": "class",
@@ -26034,6 +26300,30 @@
       "label": "LevelAgreement",
       "level": "class",
       "parent": "core.data.labels.level_agreement",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope",
+      "label": "NegationScope",
+      "level": "class",
+      "parent": "core.data.labels.negation_scope",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.Judgement",
+      "label": "Judgement",
+      "level": "class",
+      "parent": "core.data.labels.overcall_audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit",
+      "label": "OvercallAudit",
+      "level": "class",
+      "parent": "core.data.labels.overcall_audit",
       "role": "primary"
     },
     {
@@ -31046,6 +31336,70 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.covers",
+      "label": "covers",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.elsewhere",
+      "label": "elsewhere",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.known",
+      "label": "known",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.mentions",
+      "label": "mentions",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.names",
+      "label": "names",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.finding_mentions.FindingMentions.sentences",
+      "label": "sentences",
+      "level": "method",
+      "parent": "core.data.labels.finding_mentions.FindingMentions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower.__init__",
       "label": "__init__",
       "level": "method",
@@ -31178,6 +31532,150 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.level_agreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.negation_scope.NegationScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope._compiled",
+      "label": "_compiled",
+      "level": "method",
+      "parent": "core.data.labels.negation_scope.NegationScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope.about",
+      "label": "about",
+      "level": "method",
+      "parent": "core.data.labels.negation_scope.NegationScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope.denied",
+      "label": "denied",
+      "level": "method",
+      "parent": "core.data.labels.negation_scope.NegationScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.negation_scope.NegationScope.governed",
+      "label": "governed",
+      "level": "method",
+      "parent": "core.data.labels.negation_scope.NegationScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.Judgement.row",
+      "label": "row",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.Judgement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit._cells",
+      "label": "_cells",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.audit",
+      "label": "audit",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.census",
+      "label": "census",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.classify",
+      "label": "classify",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.compare",
+      "label": "compare",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.fired",
+      "label": "fired",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.incidence",
+      "label": "incidence",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallAudit.limits",
+      "label": "limits",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit",
       "role": null
     },
     {
