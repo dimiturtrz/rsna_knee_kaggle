@@ -68,6 +68,7 @@ import logging
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.member_axes import MemberAxes
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.member_divergence import MemberDivergence
@@ -181,6 +182,7 @@ class SeatValue:
             *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False, routing=False),
             *MemberDistance(held, rest).report(),
             *MemberDivergence(held, rest).report(),
+            *MemberAxes(held, rest).report(),
         ]
 
 

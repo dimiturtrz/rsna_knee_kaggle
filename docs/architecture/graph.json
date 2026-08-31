@@ -1424,6 +1424,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.member_distance",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.member_divergence",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.member_mahalanobis",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.member_space",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_axes",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.member_curve",
       "target": "core.cli",
       "weight": 1
@@ -1521,6 +1563,30 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.member_divergence",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_mahalanobis",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_mahalanobis",
+      "target": "kneemri.evaluation.member_space",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_mahalanobis",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_space",
       "target": "kneemri.evaluation.pool",
       "weight": 1
     },
@@ -3568,6 +3634,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_value",
+      "target": "kneemri.evaluation.member_axes",
       "weight": 1
     },
     {
@@ -9908,6 +9980,144 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.member_axes.MemberAxes",
+      "target": "kneemri.evaluation.member_axes.MemberReading",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_axes.MemberAxes",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.celled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_axes.MemberReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_distance.MemberDistance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_distance.MemberDistance.against",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence.against",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.report",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.report",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "target": "kneemri.evaluation.member_distance.MemberDistance",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.distances",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "target": "kneemri.evaluation.member_space.MemberSpace",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.main",
+      "target": "kneemri.evaluation.member_axes.MemberAxes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.main",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_axes.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_axes.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.member_curve.MemberCurve",
       "target": "kneemri.evaluation.pool.Pool",
       "weight": 1
@@ -10432,6 +10642,96 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_divergence.MemberDivergence.spread",
       "target": "kneemri.evaluation.member_divergence.MemberDivergence.against",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "target": "kneemri.evaluation.member_space.MemberSpace",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.coordinates",
+      "target": "kneemri.evaluation.member_space.MemberSpace.matrix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.distances",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.coordinates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.nearest",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.distances",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.report",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.nearest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.report",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.unstable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.sensitivity",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.nearest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.unstable",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.sensitivity",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_mahalanobis.main",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.main",
+      "target": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_mahalanobis.main",
+      "target": "kneemri.evaluation.member_space.MemberSpace",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_mahalanobis.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_mahalanobis.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_space.MemberSpace",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_space.MemberSpace.matrix",
+      "target": "kneemri.evaluation.member_space.MemberSpace.ranked",
       "weight": 1
     },
     {
@@ -18531,6 +18831,18 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.evaluation.member_axes.MemberAxes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.evaluation.member_axes.MemberAxes.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.evaluation.member_curve.MemberCurve",
       "weight": 1
     },
@@ -22195,7 +22507,7 @@
       "role": null
     },
     {
-      "descendants": 173,
+      "descendants": 176,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22251,7 +22563,7 @@
       "role": null
     },
     {
-      "descendants": 47,
+      "descendants": 50,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -22388,6 +22700,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_axes",
+      "label": "member_axes",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve",
       "label": "member_curve",
       "level": "module",
@@ -22406,6 +22726,22 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_divergence",
       "label": "member_divergence",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis",
+      "label": "member_mahalanobis",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_space",
+      "label": "member_space",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -24692,6 +25028,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes",
+      "label": "MemberAxes",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_axes",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberReading",
+      "label": "MemberReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_axes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve",
       "label": "MemberCurve",
       "level": "class",
@@ -24712,6 +25064,22 @@
       "label": "MemberDivergence",
       "level": "class",
       "parent": "kneemri.evaluation.member_divergence",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "label": "MemberMahalanobis",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_mahalanobis",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_space.MemberSpace",
+      "label": "MemberSpace",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_space",
       "role": "primary"
     },
     {
@@ -31420,6 +31788,70 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.celled",
+      "label": "celled",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.scale",
+      "label": "scale",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberAxes.whitened",
+      "label": "whitened",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.MemberReading.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes.MemberReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_axes.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_axes",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.__init__",
       "label": "__init__",
       "level": "method",
@@ -31672,6 +32104,94 @@
       "label": "spread",
       "level": "method",
       "parent": "kneemri.evaluation.member_divergence.MemberDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.coordinates",
+      "label": "coordinates",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.distances",
+      "label": "distances",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.nearest",
+      "label": "nearest",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.sensitivity",
+      "label": "sensitivity",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis.unstable",
+      "label": "unstable",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis.MemberMahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_mahalanobis.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_mahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_space.MemberSpace.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_space.MemberSpace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_space.MemberSpace.matrix",
+      "label": "matrix",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_space.MemberSpace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_space.MemberSpace.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_space.MemberSpace",
       "role": null
     },
     {
