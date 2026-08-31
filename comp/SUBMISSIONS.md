@@ -2813,3 +2813,52 @@ so the flat is a reading about the member and not about a silent drop.
 both from "the eighth seat is inert regardless of who fills it" — `knee-uco3`'s inert-seat reading, which
 gains a third support here and is now the most economical account of `raptorseat_v1`, `raptorweight_v1` and
 this entry together.
+
+## `holdswap_v1` — 0.944, exactly the champion's number, and the bands were anchored at the wrong score
+
+`holdswap_v1` (ref 55900461, 2026-08-30, kit `53f81d3`) is `raptorweight_v1`'s exact seven-seat serving
+with ONE seat exchanged: `lr4e-5_ws_cf` out, `calib_dense_hold_ff` in. Vote (`LogitAverage`), foreign
+weight (1/3), count, kit and every other seat held. The entering member was named by a fold-0 swap table
+as the highest-priced single-seat swap available, at +0.0022 seat value — above the entry's own
+`BOARD_RESOLVABLE = 0.0015`. The question was not whether that member is good; it was whether a **fold-0
+proxy can ORDER blind seats**, which is the only cheap instrument that would let the roster improve
+without spending a slot per candidate.
+
+**It read 0.944 against the matched control's 0.944. Not a small gain — no gain, the same number to the
+board's full precision.**
+
+### The pre-registered bands were mis-drawn, and their labels must not be quoted
+
+The kernel wrote its bands against "the champion's 0.944" in prose and then anchored the arithmetic at
+0.941. Its "a real gain over the champion, above the resolution floor" band opens at **0.9425 — below the
+champion** — and its FLAT band (0.9415–0.9424) sits lower still. So this score lands numerically inside a
+band labelled *a real gain* while being arithmetically identical to the control.
+
+This is the **second** time in this project that a band edge was written at a score that could not mean
+what its label said. `comp/champion.json` records the first, for `raptorweight_v1`, where the "real gain"
+edge of 0.9435 was not an attainable score at all because the board quantises to 0.001. A pre-registration
+is worth what its ARITHMETIC says, never what its label says — and the error is caught by subtracting the
+control, not by reading the band. The reading taken here is FLAT, on the delta. The band structure is
+discarded.
+
+### What the flat buys, which is the whole value of the slot
+
+**The fold-0 proxy does not order blind seats.** It priced this swap at the top of its table and the board
+returned nothing, so the champion's six are interchangeable at this quality level and the cheap instrument
+does not survive the `--fold -1` crossing. That closes the **single-seat swap axis**: no further slot goes
+to exchanging one champion seat for a near-equal member, and the two blind refits queued behind it
+(`merged_span_ff`, `labelwise_dense_ff`) are pool members rather than swap entrants.
+
+### Third flat on the seating axis, and the pattern is the finding
+
+`raptorweight_v1` moved the foreign SHARE by 2.3× for one unresolvable tick. `vjepaseat_v1` ADDED the most
+architecturally distant member the project owns for −0.001. This entry EXCHANGES a seat for the
+best-priced alternative for 0.000. Three different operations on the seating — reweight, add, swap — and
+not one produced a resolvable move. `knee-uco3`'s inert-seat reading gains its **fourth** support and is
+now the most economical explanation of all of them: at this pool's quality the *arrangement* of seats is
+not a lever. What is left are the levers that change what a member SEES (corpus, decode) or WHAT IT IS
+(trunk).
+
+**Clean mount, verified.** `run_check` reads `loaded 6 of 6 members` and the log's own line agrees, so the
+flat is a reading about the swap and not a silent drop. Kit clean, not DIRTY. **The champion pin does not
+move** — 0.944 ties the pinned row, and `champion_check` pins the best row, not an equal one.
