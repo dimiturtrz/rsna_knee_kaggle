@@ -32,6 +32,7 @@ the table the header asked to be read.
 """
 
 import logging
+import re
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -40,6 +41,10 @@ from kneemri.evaluation.run_comparison import RunComparison
 from kneemri.experiments.arm_header import ArmHeader
 
 logger = logging.getLogger(__name__)
+
+OUT_FLAG = re.compile(r'--out\s+"?([^"\s]+)"?')
+"""What an arm writes, read off its own invocation. The quotes are optional because an arm may spell the
+path either way, and `$PROCESSED/` expands to nothing here — only the stem is wanted."""
 
 
 class ArmRead:
@@ -55,6 +60,22 @@ class ArmRead:
         requires is the same line `arm_check` reports on and there is one regex in the tree for it.
         """
         return self.headers.controls([arm]).get(arm)
+
+    def produced(self, arm: str) -> str:
+        """The run name this arm's `--out` writes, which is NOT the arm's own name.
+
+        An arm is a shell called `cover_labelwise.sh` and it writes `cover_labelwise_s2026.pt`, so the
+        metrics beside it are `cover_labelwise_s2026.metrics.jsonl`. This tool resolved the ARM name and
+        reported `cover_labelwise.metrics NOT READ: does not exist` — a real, finished, converged run
+        reading as a missing one, for every arm in the tree whose checkpoint carries the suffix, which is
+        nearly all of them. Passing the checkpoint name instead then fails the other way, because the
+        HEADER is keyed on the shell. Both names are needed and they are read from their own sources.
+
+        Falls back to the arm name when no `--out` is parsed, which is the pre-suffix convention and the
+        spelling this module's own docstring was written against.
+        """
+        found = OUT_FLAG.search(self.headers.text(arm))
+        return Path(found.group(1)).stem if found else arm
 
     def uncontrolled(self, arms: Iterable[str]) -> list[str]:
         """The arms declaring no control — the ones whose every reading is against a remembered number.
@@ -86,7 +107,8 @@ class ArmRead:
             message = f"{arm} declares no `# control  <name> = <score>` line, so it has no denominator"
             raise SystemExit(message)
         control = RunComparison.resolved(Path(named), processed)
-        return RunComparison(control, [RunComparison.resolved(Path(arm), processed)], labels, None).report()
+        run = RunComparison.resolved(Path(self.produced(arm)), processed)
+        return RunComparison(control, [run], labels, None).report()
 
 
 def main() -> None:

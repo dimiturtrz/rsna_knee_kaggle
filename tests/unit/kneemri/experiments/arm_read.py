@@ -12,7 +12,7 @@ CONTROLLED = """#!/usr/bin/env bash
 #
 # bead: knee-test
 # control  band_dense = 0.8578
-run_train controlled $RECIPE
+run_train controlled $RECIPE --out "$PROCESSED/controlled_s2026.pt"
 """
 
 SILENT = """#!/usr/bin/env bash
@@ -33,6 +33,11 @@ def _read(tmp_path: Path) -> ArmRead:
 def test_control(read: ArmRead) -> None:
     assert read.control("controlled") == "band_dense"
     assert read.control("silent") is None
+
+
+def test_produced(read: ArmRead) -> None:
+    assert read.produced("controlled") == "controlled_s2026"
+    assert read.produced("silent") == "silent"
 
 
 def test_uncontrolled(read: ArmRead) -> None:

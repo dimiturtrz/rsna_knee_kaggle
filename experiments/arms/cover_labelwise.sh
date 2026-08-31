@@ -2,7 +2,7 @@
 # cover_labelwise.sh — the same whole stack, read by an aggregator that a thin finding survives.
 #
 # bead: knee-tlya
-# control  stack224 = 0.8476
+# control  stack224_s2026 = 0.8476
 #
 # The declared control is `stack224`, not `native224`, because it is the arm this one moves ONE flag
 # against; `native224` (0.8502) is the standing 224 reading and is checked by hand alongside. Declaring it
