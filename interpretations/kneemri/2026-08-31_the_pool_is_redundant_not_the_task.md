@@ -93,6 +93,23 @@ is too thin for a per-finding split, but it is not too thin for a pooled one, an
 gap between gold-aleatoric and report-aleatoric is the whole answer. That is the next read, and it costs
 no card.
 
+## A caveat the field supplies, added the same day
+
+`arXiv 2508.04457` benchmarks thirteen uncertainty-quantification methods for MULTI-LABEL chest X-ray
+classification and reports that **"almost all methods show significant correlations between EU and AU"**,
+that many methods fail to disentangle the two at all, and that the information-theoretic framework used
+here should be applied "with caution". That is the same decomposition this page runs.
+
+Two things keep the reading standing. Ours is computed over a **deep ensemble** of separately trained
+members, which is the method class that won that benchmark on every axis it measured — the degeneracy it
+reports is worst for single-model evidential heads. And the number is used as an **upper bound on what
+another member can buy**, not as a per-cell signal, which is the use least sensitive to the two terms
+bleeding into each other.
+
+What the caveat does change is the wording. "87.3% aleatoric" should be read as **"at most 12.7% is
+addressable by adding members"**, not as a clean partition of the world into imaging ambiguity and model
+ignorance. The bound is the claim; the partition is not.
+
 ## One thing this could not measure
 
 The pinned champion `raptorweight_v1` **carries no split at all**. One of its six members has a holdout
