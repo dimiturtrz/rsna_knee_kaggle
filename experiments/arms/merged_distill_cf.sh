@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# merged_distill_cf.sh — the two levers that made the best two members, in the same member.
+#
+# bead: knee-m4r4
+#
+# WHY THIS AND NOT ANOTHER SEAT. knee-urvf: the ensemble tracks best-single + ~0.015 and that bonus has
+# not grown in fourteen days, so member quality is the only free term left. On 2026-08-31 both halves of
+# the seat explanation were closed from opposite sides on the same roster — `stack_increments_s2026`
+# (the best solo the project owns, ordinary diversity) priced +0.0002 as an eighth seat, and
+# `merged_labelwise_cf` (the most decode-diverse candidate ever priced here, nearest 0.8873 against a
+# seated spread of 0.8772-0.9225) priced +0.0005. Neither quality alone nor diversity alone buys a seat.
+# So the card goes to the member, not to the seating.
+#
+# THE CELL. `stack_increments_s2026` is the only member that distils from `raptor_teacher.npz`, and it
+# is the highest-scoring solo here. The merged-corpus members (`merged_span_cf`, `merged_labelwise_cf`)
+# are the ones trained on the better-labelled corpus, and none of them distils. The two quality levers
+# have never been in the same run.
+#
+# ONE VARIABLE against `stack_increments`: the corpus, `blend_three_v1.csv` -> `merged_blend_v1.csv`.
+# Distill weight, teacher, `--hold-annotations`, `--calibrated-targets`, band 0.1-0.9, slices 20, max
+# pooling, backbone rate, epochs and the eval ruler are all held, so the pair is a matched read of what
+# the merged corpus does to a DISTILLED member — a question neither parent can answer alone.
+#
+# `--hold-annotations` is CARRIED, not introduced. It is the control's own flag and dropping it would
+# make this a two-variable arm. knee-9198 bans retraining the ROSTER under it, not carrying it here.
+#
+# THE EXPECTED COLLISION, stated before the number. `merged_dense_cf` showed the merged corpus
+# SUBSTITUTES for a denser read (-0.0028 against `merged_blend_cf`), and `merged_labelwise_cf` repeated
+# it on the pooling axis (0.8587 against its 0.8618 parent). A distillation teacher is a better-labelled
+# signal by the same argument, so a third collision is the live branch, not the surprise.
+#
+# HOW IT IS READ — as DELTAS against the control, never as absolute scores (knee-nh3w). Control is
+# `stack_increments_s2026` on the same fold-0 holdout and the same `report_labels_v2.csv` ruler.
+#   * delta >= +0.0062. The levers are independent, the merged corpus does not eat a teacher, and the
+#     member-quality lane reopens — which is the only lane knee-urvf leaves open.
+#   * -0.0062 < delta < +0.0062. Inside the paired floor. NOT a verdict. Keep if and only if greedy over
+#     the roster picks it, same rule its two parents were read under.
+#   * delta <= -0.0062. The THIRD collision, which promotes "the merged corpus substitutes for any finer
+#     signal" from an observation to a property of the corpus. Then the corpus lane is one cell wide and
+#     the next lever is a genuinely different external corpus (MRNet, knee-ombx), not another cross.
+#
+# HARNESS CHECK BEFORE READING ANY OF THAT. The printed recipe must name `merged_blend_v1.csv` on
+# "labels", `report_labels_v2.csv` on "eval_labels", `"slice_pooling": "max"`, band [0.1, 0.9],
+# `"slices": "20"`, `calibrated_targets true`, a non-zero distill weight and the raptor teacher path.
+# Three runs have entered this ledger as facts about an architecture when they were facts about a flag
+# that never landed.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"
+require "$LABELS"
+require "$MERGED_BLEND"
+require "$PROCESSED/raptor_teacher.npz"
+
+run_train merged_distill_cf \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --distill-weight 0.3 --teacher-targets "$PROCESSED/raptor_teacher.npz" \
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$PROCESSED/merged_distill_cf.pt"
