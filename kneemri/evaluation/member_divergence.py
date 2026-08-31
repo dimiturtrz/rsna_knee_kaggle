@@ -93,14 +93,21 @@ class MemberDivergence:
         left = np.clip(one, BOUND, 1.0 - BOUND)
         right = np.clip(other, BOUND, 1.0 - BOUND)
         middle = (left + right) / 2.0
-        per_study = (MemberDivergence._kl(left, middle) + MemberDivergence._kl(right, middle)) / 2.0
+        per_study = (MemberDivergence.kl(left, middle) + MemberDivergence.kl(right, middle)) / 2.0
         return float(np.mean(np.mean(per_study, axis=0)))
 
     @staticmethod
-    def _kl(
+    def kl(
         belief: Float[np.ndarray, "studies targets"], reference: Float[np.ndarray, "studies targets"]
     ) -> Float[np.ndarray, "studies targets"]:
-        """Per-study Bernoulli KL in bits, both arms of it — the half a JS is built from."""
+        """Per-study Bernoulli KL in bits, both arms of it — the half a JS is built from.
+
+        PUBLIC since `UncertaintySplit`, which reads a Bernoulli ENTROPY through it rather than adding
+        a second spelling of the same logarithms: `H(p) = 1 bit - KL(p || 0.5)` exactly, so the one
+        clamped log lives here and the decomposition beside it inherits `BOUND` instead of choosing
+        its own. Two entropy helpers that disagree by a clamp is how a divergence and a total stop
+        summing to each other.
+        """
         return belief * np.log2(belief / reference) + (1.0 - belief) * np.log2((1.0 - belief) / (1.0 - reference))
 
     def against(self, member: Float[np.ndarray, "studies targets"], skip: int | None = None) -> list[float]:

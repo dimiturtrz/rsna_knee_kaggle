@@ -2462,6 +2462,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "kneemri.evaluation.member_divergence",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.uncertainty_split",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.unsure_cost",
       "target": "core.bootstrap",
       "weight": 1
@@ -3328,6 +3364,42 @@
       "kind": "import",
       "source": "kneemri.kaggle.champion_check",
       "target": "kneemri.kaggle.package_members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "kneemri.evaluation.uncertainty_split",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "kneemri.kaggle.champion_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "kneemri.kaggle.package_members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "kneemri.kaggle.priceable_entries",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_uncertainty",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -11139,7 +11211,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.member_divergence.MemberDivergence.js",
-      "target": "kneemri.evaluation.member_divergence.MemberDivergence._kl",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence.kl",
       "weight": 1
     },
     {
@@ -14014,6 +14086,102 @@
       "kind": "calls",
       "source": "kneemri.evaluation.tie_divergence.main",
       "target": "kneemri.evaluation.tie_divergence.TieDivergenceReport.lines",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.entropy",
+      "target": "kneemri.evaluation.member_divergence.MemberDivergence.kl",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.per_label",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.per_label",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.entropy",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.pooled",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.pooled",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.report",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.report",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit.report",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.uncertainty_split.main",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
       "weight": 1
     },
     {
@@ -17782,6 +17950,90 @@
       "kind": "calls",
       "source": "kneemri.kaggle.champion_check.main",
       "target": "kneemri.kaggle.champion_check.Champion.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "target": "kneemri.kaggle.champion_check.Champion",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.held",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.held",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.report",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.report",
+      "target": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.held",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.report",
+      "target": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.undecomposable",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.undecomposable",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.undecomposable",
+      "target": "kneemri.kaggle.priceable_entries.PriceableEntries.suggestion",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.champion_check.Champion.from_board",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.champion_check.Champion.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_uncertainty.main",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
       "weight": 1
     },
     {
@@ -23083,7 +23335,7 @@
       "role": null
     },
     {
-      "descendants": 180,
+      "descendants": 182,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -23139,7 +23391,7 @@
       "role": null
     },
     {
-      "descendants": 54,
+      "descendants": 55,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -23556,6 +23808,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split",
+      "label": "uncertainty_split",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.unsure_cost",
       "label": "unsure_cost",
       "level": "module",
@@ -23859,7 +24119,7 @@
       "role": null
     },
     {
-      "descendants": 28,
+      "descendants": 29,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -23886,6 +24146,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.champion_check",
       "label": "champion_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty",
+      "label": "champion_uncertainty",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -26220,6 +26488,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "label": "UncertaintyShare",
+      "level": "class",
+      "parent": "kneemri.evaluation.uncertainty_split",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "label": "UncertaintySplit",
+      "level": "class",
+      "parent": "kneemri.evaluation.uncertainty_split",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.unsure_cost.UnsureCost",
       "label": "UnsureCost",
       "level": "class",
@@ -26809,6 +27093,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.champion_check",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "label": "ChampionUncertainty",
+      "level": "class",
+      "parent": "kneemri.kaggle.champion_uncertainty",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -32956,14 +33248,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.member_divergence.MemberDivergence._kl",
-      "label": "_kl",
-      "level": "method",
-      "parent": "kneemri.evaluation.member_divergence.MemberDivergence",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.member_divergence.MemberDivergence.against",
       "label": "against",
       "level": "method",
@@ -32974,6 +33258,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_divergence.MemberDivergence.js",
       "label": "js",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_divergence.MemberDivergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_divergence.MemberDivergence.kl",
+      "label": "kl",
       "level": "method",
       "parent": "kneemri.evaluation.member_divergence.MemberDivergence",
       "role": null
@@ -34992,6 +35284,94 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.tie_divergence",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintyShare.epistemic",
+      "label": "epistemic",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintyShare.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintyShare.reducible",
+      "label": "reducible",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintyShare",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.denominator",
+      "label": "denominator",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.entropy",
+      "label": "entropy",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.per_label",
+      "label": "per_label",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.UncertaintySplit.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.uncertainty_split.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.uncertainty_split",
       "role": null
     },
     {
@@ -37896,6 +38276,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.champion_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.held",
+      "label": "held",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.members",
+      "label": "members",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty.undecomposable",
+      "label": "undecomposable",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.champion_uncertainty.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.champion_uncertainty",
       "role": null
     },
     {

@@ -56,6 +56,20 @@ def test_js():
     assert MemberDivergence.js(member, _member(2)) == MemberDivergence.js(_member(2), member)
 
 
+def test_kl():
+    """The clamped logarithm the JS is built from, and the identity `UncertaintySplit` reads entropy by.
+
+    Public since that module, which takes a Bernoulli entropy as `1 bit - KL(p || 0.5)` rather than
+    spelling the logarithms a second time — so the identity is asserted here, where the arithmetic is.
+    """
+    member = _member(1)
+    uniform = np.full_like(member, 0.5)
+
+    assert np.allclose(MemberDivergence.kl(member, member), 0.0)
+    entropy = -member * np.log2(member) - (1.0 - member) * np.log2(1.0 - member)
+    assert np.allclose(1.0 - MemberDivergence.kl(member, uniform), entropy)
+
+
 def test_js_sees_what_rank_correlation_cannot():
     """THE ORACLE: same ordering, different confidence — the case that motivates the whole module.
 
