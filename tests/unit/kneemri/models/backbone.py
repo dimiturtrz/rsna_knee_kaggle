@@ -9,9 +9,11 @@ from torch import nn
 from kneemri.models.backbone import (
     BASE,
     CONVNEXT_BASE,
+    DATASET_MOUNT,
     ENCODERS,
     IMAGENET,
     LARGE,
+    MODEL_MOUNT,
     RAD_DINO,
     SMALL,
     SWIN_BASE,
@@ -85,6 +87,31 @@ def test_mounted_source():
     assert ENCODERS[SWIN_BASE].mounted_source == "dimiturnt/swin-base-384", (
         "flat, because the leaf shape exists for a dataset holding four variants and there is one Swin"
     )
+
+
+def test_kind_of():
+    """A mount STRING resolves back to the Kaggle API that publishes it, both kinds and the fallback.
+
+    The subpath case is the one that matters: callers hold `dimiturnt/dinov3-hf/vits16`, not the bare
+    dataset id, so a rule matching only whole mounts would read every dataset encoder as unknown.
+    """
+    assert Encoder.kind_of("metaresearch/dinov2/PyTorch/small/1") == MODEL_MOUNT
+    assert Encoder.kind_of("dimiturnt/dinov3-hf/vits16") == DATASET_MOUNT
+    assert Encoder.kind_of("someone/never-declared/leaf") == DATASET_MOUNT
+
+
+def test_every_model_mount_is_a_kaggle_model_and_ours_are_datasets():
+    """The kinds are declared per encoder, so the registry is held to the two owners it actually has.
+
+    Everything under `metaresearch/` is Kaggle's own published model; everything under `dimiturnt/` is a
+    dataset we pushed. Nothing enforces that in the dataclass, and a mount typed with the wrong kind
+    sends the live check to an endpoint that answers 403 rather than an absence.
+    """
+    for encoder in ENCODERS.values():
+        if encoder.mount is None:
+            continue
+        expected = MODEL_MOUNT if encoder.mount.startswith("metaresearch/") else DATASET_MOUNT
+        assert encoder.mount_kind == expected, f"{encoder.variant} declares {encoder.mount_kind} for {encoder.mount}"
 
 
 def test_every_mount_is_locatable():

@@ -25,7 +25,8 @@ from core.denominator import Denominator
 from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
-from kneemri.kaggle.live_dataset import LiveDataset, TruncatedListingError
+from kneemri.kaggle.live_dataset import LiveDataset, LiveModel, TruncatedListingError
+from kneemri.models.backbone import MODEL_MOUNT, Encoder
 
 logger = logging.getLogger(__name__)
 
@@ -231,13 +232,20 @@ class EncoderMounts:
         mounts: list[str],
         listing: Callable[[str], str] | None = None,
     ) -> "EncoderMounts":
-        """Ask each distinct encoder dataset once whether it publishes the subpath its mount names."""
+        """Ask each distinct encoder source once whether it publishes the subpath its mount names.
+
+        A MODEL mount is the whole slug and has no subpath inside it; a DATASET mount is `owner/name`
+        plus the directory the encoder lives in. Which one a mount is comes from `Encoder.kind_of`,
+        never from counting its segments — Kaggle's URL grammar is not ours to encode here.
+        """
         missing: dict[str, str] = {}
         for mount in sorted(set(mounts)):
             segments = mount.strip("/").split("/")
-            identifier = "/".join(segments[:DATASET_SEGMENTS])
-            subpath = "/".join(segments[DATASET_SEGMENTS:])
-            if not LiveDataset(identifier, listing).holds(subpath):
+            model = Encoder.kind_of(mount) == MODEL_MOUNT
+            reader = LiveModel if model else LiveDataset
+            identifier = mount if model else "/".join(segments[:DATASET_SEGMENTS])
+            subpath = "" if model else "/".join(segments[DATASET_SEGMENTS:])
+            if not reader(identifier, listing).holds(subpath):
                 missing[mount] = identifier
         return cls(missing)
 

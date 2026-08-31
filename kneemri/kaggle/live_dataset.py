@@ -56,14 +56,16 @@ class LiveDataset:
         beside = Path(sys.executable).parent / "kaggle.exe"
         return str(beside) if beside.exists() else "kaggle"
 
+    subcommand: tuple[str, ...] = ("datasets", "files")
+    """The CLI verbs that list this KIND of Kaggle thing — see `LiveModel` for the other one."""
+
     def _cli(self, identifier: str) -> str:
         """The CLI's own CSV listing, which is the read path that works without a bearer token."""
         # fixed argv, a dataset id from our own metadata, no shell
         done = Spawn().ran(
             [
                 self.entrypoint(),
-                "datasets",
-                "files",
+                *self.subcommand,
                 identifier,
                 "--csv",
                 "--page-size",
@@ -137,3 +139,21 @@ class LiveDataset:
     def identified(root: Path) -> str:
         """The dataset id a package ships under, read from the metadata that is pushed with it."""
         return str(json.loads((root / DATASET_METADATA).read_text(encoding="utf-8"))["id"])
+
+
+class LiveModel(LiveDataset):
+    """The same question asked of a Kaggle MODEL VERSION, which answers on a different endpoint.
+
+    `metaresearch/dinov2/PyTorch/small/1` is not a dataset, and the datasets endpoint does not say so
+    politely: `kaggle datasets files metaresearch/dinov2` returns `403 Forbidden`, which the CLI raises
+    as a non-zero exit and the caller sees as a traceback out of a gate that was asking about something
+    else. That is how the encoder-mount check crashed on its first live run over the whole package,
+    twenty minutes into a submission window, on the three mounts every champion entry has always used.
+
+    A model version publishes a FLAT list of files (`config.json`, `pytorch_model.bin`), so the whole
+    slug is the identifier and there is no subpath inside it to ask about — the mount IS the leaf. The
+    inherited `holds("")` is therefore the right question, and it is a real one: a model version that
+    was renamed or withdrawn lists nothing.
+    """
+
+    subcommand: tuple[str, ...] = ("models", "instances", "versions", "files")

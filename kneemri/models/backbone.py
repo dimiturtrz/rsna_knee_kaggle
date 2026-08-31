@@ -38,6 +38,14 @@ RADDINO = "rad-dino"
 SWIN = "swin"
 VIT = "vit"
 
+DATASET_MOUNT = "dataset"
+MODEL_MOUNT = "model"
+"""Which Kaggle THING publishes a mount, because the two are read through different APIs and one of them
+answers 403 to the other's endpoint. A kernel does not care — it mounts a path either way — but anything
+asking Kaggle what a mount actually publishes has to address the right endpoint, and only the registry
+that declared the mount knows which. `metaresearch/dinov2/PyTorch/small/1` is a model version;
+`dimiturnt/dinov3-hf/vits16` is a directory inside a private dataset."""
+
 
 @dataclass(frozen=True)
 class Normalization:
@@ -177,6 +185,14 @@ class Encoder:
     mount: str | None = None
     """Where a kernel finds these weights. None means there is no Kaggle mirror, so a member fitted on
     this encoder can be TRAINED here and cannot be submitted until one is arranged."""
+
+    mount_kind: str = DATASET_MOUNT
+    """Whether `mount` names a Kaggle DATASET or a Kaggle MODEL version — see the constants.
+
+    Declared beside the mount rather than derived from its shape. A model slug happens to carry five
+    segments today and a dataset mount two or three, and counting them would be a rule about Kaggle's
+    current URL grammar dressed up as a fact about our weights. The registry that types the mount is the
+    only place that knows what it typed."""
 
     patch: int = 14
     """DINOv2 is patch 14 and DINOv3 is patch 16, which decides which read sizes tile cleanly."""
@@ -372,10 +388,33 @@ class Encoder:
             raise ValueError(message)
         return self.mount
 
+    @staticmethod
+    def kind_of(mount: str) -> str:
+        """Which Kaggle API publishes this mount, answered by the registry that declared it.
+
+        A caller holding a mount STRING — every pre-flight check does, because `MemberPackage.mounts`
+        returns strings — cannot otherwise tell a model version from a dataset subpath, and asking the
+        wrong endpoint is not a soft failure: `kaggle datasets files metaresearch/dinov2` answers 403,
+        which surfaces as a traceback out of a gate that was checking something else entirely.
+
+        An unknown mount reads as a DATASET because that is what ours are; a mount no encoder declares
+        is a question for the caller that invented it, not a kind this registry can invent an answer for.
+        """
+        for encoder in ENCODERS.values():
+            if encoder.mount and (mount == encoder.mount or mount.startswith(f"{encoder.mount}/")):
+                return encoder.mount_kind
+        return DATASET_MOUNT
+
 
 ENCODERS: dict[str, Encoder] = {
     SMALL: Encoder(
-        SMALL, "facebook/dinov2-small", 384, mount="metaresearch/dinov2/PyTorch/small/1", family=DINOV2, leaf="small"
+        SMALL,
+        "facebook/dinov2-small",
+        384,
+        mount="metaresearch/dinov2/PyTorch/small/1",
+        mount_kind=MODEL_MOUNT,
+        family=DINOV2,
+        leaf="small",
     ),
     # 86M parameters against 22M, and 768-wide features. The strongest public notebooks here run base.
     #
@@ -392,6 +431,7 @@ ENCODERS: dict[str, Encoder] = {
         "facebook/dinov2-base",
         768,
         mount="metaresearch/dinov2/PyTorch/base/1",
+        mount_kind=MODEL_MOUNT,
         family=DINOV2,
         leaf="base",
         params_m=86.6,
@@ -411,6 +451,7 @@ ENCODERS: dict[str, Encoder] = {
         "facebook/dinov2-large",
         1024,
         mount="metaresearch/dinov2/PyTorch/large/1",
+        mount_kind=MODEL_MOUNT,
         family=DINOV2,
         leaf="large",
         params_m=304.0,

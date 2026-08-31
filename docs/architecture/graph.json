@@ -3362,6 +3362,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.mount_check",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.mounted_kit",
       "target": "kneemri.spawn",
       "weight": 1
@@ -17671,21 +17677,21 @@
       "weight": 1
     },
     {
+      "kind": "inherits",
+      "source": "kneemri.kaggle.live_dataset.LiveModel",
+      "target": "kneemri.kaggle.live_dataset.LiveDataset",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.mount_check.EncoderMounts",
       "target": "kneemri.kaggle.mount_check.EncoderMounts",
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.kaggle.mount_check.EncoderMounts.over",
-      "target": "kneemri.kaggle.live_dataset.LiveDataset",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.EncoderMounts.over",
-      "target": "kneemri.kaggle.live_dataset.LiveDataset.holds",
+      "target": "kneemri.models.backbone.Encoder.kind_of",
       "weight": 1
     },
     {
@@ -25775,6 +25781,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.live_dataset",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.live_dataset.LiveModel",
+      "label": "LiveModel",
+      "level": "class",
+      "parent": "kneemri.kaggle.live_dataset",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -37780,6 +37794,14 @@
       "descendants": 0,
       "id": "kneemri.models.backbone.Encoder.blocks",
       "label": "blocks",
+      "level": "method",
+      "parent": "kneemri.models.backbone.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.backbone.Encoder.kind_of",
+      "label": "kind_of",
       "level": "method",
       "parent": "kneemri.models.backbone.Encoder",
       "role": null

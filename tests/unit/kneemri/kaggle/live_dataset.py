@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.kaggle.live_dataset import LiveDataset, TruncatedListingError
+from kneemri.kaggle.live_dataset import LiveDataset, LiveModel, TruncatedListingError
 
 LISTING = "name,size,creationDate\nv2member.pt,89,2026-08-19 05:30:55\nmanifest.json,12,2026-08-19 05:30:55\n"
 PAGED = LISTING + "Next Page Token: eyJvZmZzZXQiOjIwfQ==\n"
@@ -70,3 +70,17 @@ def test_holds():
     assert LiveDataset("dimiturnt/dinov3-hf", lambda _: NESTED).holds("vits16")
     assert not LiveDataset("dimiturnt/vjepa2-hf", lambda _: FLAT).holds("vjepa2-vitl")
     assert LiveDataset("dimiturnt/vjepa2-hf", lambda _: FLAT).holds(""), "a flat mount is its own leaf"
+
+
+def test_live_model_reads_the_model_endpoint():
+    """A model version answers on `models instances versions files`, and its whole slug is the id.
+
+    The subcommand is the entire difference between the two readers, and getting it wrong is not a soft
+    failure: `kaggle datasets files metaresearch/dinov2` returns 403, which surfaces as a traceback out
+    of a gate asking about something else. Asserted as a value rather than by spawning the CLI, because
+    a unit test touches nothing it did not create.
+    """
+    assert LiveModel.subcommand == ("models", "instances", "versions", "files")
+    assert LiveDataset.subcommand == ("datasets", "files")
+    flat = "name,size,creationDate\nconfig.json,547,2023-08-08\npytorch_model.bin,88297097,2023-08-08\n"
+    assert LiveModel("metaresearch/dinov2/PyTorch/small/1", lambda _: flat).holds("")
