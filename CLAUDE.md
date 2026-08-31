@@ -252,6 +252,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct
   filename (`_first60`) so it can never overwrite a full array. Reach for that before hand-building one: on 2026-08-19
   I decoded `crop80_span`'s by hand and only then found the tool already had the step. See `experiments/README.md`.
+- **Pace submissions UNIFORMLY across the UTC day, last one ~23:30 UTC** (owner directive 2026-08-31).
+  Five slots reset at 00:00 UTC; spread the unspent ones evenly over the time left until 23:30. Work lands
+  all day, so a slot spent early can only read the pool as it stood then, and slots dumped together all
+  read the same pool. Equally forbidden: three in one afternoon because arms finished together, and four
+  unspent at 23:00 because nothing felt ready. Unspent slots are destroyed at 00:00 UTC, never banked.
+  Pacing is not licence to ship a reseating: with nothing mechanism-backed to beat the champion, spend the
+  slot on an INSTRUMENT instead, and say which of the two it is in the submission message.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint
