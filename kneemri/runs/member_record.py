@@ -85,8 +85,13 @@ NOT_IN_CONFIG = {
     "dissent_weight": "objective policy — it re-weights the mass of the SAME label-ordering term by how "
     "badly a teacher pool orders each pair, inside the loss, adding no parameter; the head a rebuild "
     "serves is byte-identical",
+    "feature_weight": "objective policy — it pulls the head's per-finding context toward a teacher's "
+    "representation through a projection that lives on the LOSS and is thrown away with it, so the "
+    "twelve logits a rebuild serves come out of the same head, byte-identical",
     "teacher_targets": "the ensemble that taught it, which is a fact about how these weights were "
     "REACHED — a rebuild loads the student, and the teacher is not part of the function it is",
+    "teacher_features": "the representations that taught it — the same fact about how the weights were "
+    "reached, one level below the verdict, and equally not part of the function they are",
     "encoder_weights": "where the encoder STARTED, which the fitted weights have already absorbed — a "
     "rebuild loads this member, not the initialisation it grew out of",
     "encoder_adapt_depth": "how much of that starting point was taken — a fact about the run's history, "

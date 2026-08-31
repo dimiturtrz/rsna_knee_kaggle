@@ -128,12 +128,32 @@ class RaptorClassifier(nn.Module):
         flat = self.backbone(windows.flatten(0, 1))
         return flat.view(batch, count, -1)
 
-    def head(self, features: Float[Tensor, "batch windows features"]) -> Float[Tensor, "batch findings"]:
-        """Pool the windows once PER FINDING — the gate is softmaxed over windows, not over findings."""
+    def pooled(self, features: Float[Tensor, "batch windows features"]) -> Float[Tensor, "batch findings features"]:
+        """Pool the windows once PER FINDING — the gate is softmaxed over windows, not over findings.
+
+        Split out of `head` rather than duplicated, because this is what a DISTILLATION target is read
+        from and a second spelling of an attention pool is a second thing that can drift from the
+        checkpoint we did not train. `head` is unchanged in behaviour, which `main`'s equality oracle is
+        the witness for.
+        """
         normed = self.norm(features)
         attention = torch.softmax(self.att(normed), dim=1)
-        pooled = torch.einsum("bkn,bkf->bnf", attention, normed)
+        return torch.einsum("bkn,bkf->bnf", attention, normed)
+
+    def head(self, features: Float[Tensor, "batch windows features"]) -> Float[Tensor, "batch findings"]:
+        """Twelve logits from the per-finding pooled features — one learned direction each."""
+        pooled = self.pooled(features)
         return (pooled * self.clsW).sum(-1) + self.clsb
+
+    def embedding(self, windows: Float[Tensor, "batch windows channels size size"]) -> Float[Tensor, "batch features"]:
+        """What this member READ from each study, before its head split that reading twelve ways.
+
+        The mean over the FINDING axis, so the target a student is pulled onto is the study's
+        representation rather than the twelve directions this particular head happens to project it
+        along. Distilling the latter teaches the teacher's head, which is the level `swin_distill_fit`
+        measured at -0.0077 against a cold control.
+        """
+        return self.pooled(self.encode(windows)).mean(dim=1)
 
     @override
     def forward(self, windows: Float[Tensor, "batch windows channels size size"]) -> Float[Tensor, "batch findings"]:
@@ -188,6 +208,34 @@ class RaptorMember:
         """The whole serving step for one decoded study: window it, then read the member."""
         windows = raptor_feed.Windows().stacked(volume, mask, self.architecture.resolution)
         return self.probs(windows, device)
+
+    @torch.no_grad()
+    def embedded(
+        self, windows: Float[Tensor, "windows channels size size"], device: str
+    ) -> Float[NDArray[np.float32], " features"]:
+        """One study's pooled representation, from the windows `raptor_feed` stacked for it."""
+        return self.model.embedding(windows.unsqueeze(0).to(device)).float()[0].cpu().numpy()
+
+    def represented(
+        self,
+        volume: Float[NDArray[np.uint8], "depth height width"],
+        mask: Float[NDArray[np.uint8], " depth"],
+        device: str,
+    ) -> Float[NDArray[np.float32], " features"]:
+        """The whole teaching step for one decoded study: window it, then read what the member READ.
+
+        `scored`'s sibling and windowed identically, which is the point — a representation taken under a
+        different windowing would be a target the member never actually produces at serving time.
+
+        NO `TARGETS` REORDER, unlike `ordered`, and that is not an omission: the finding axis has already
+        been averaged away, so there is no column order left for a label list to disagree about.
+        """
+        windows = raptor_feed.Windows().stacked(volume, mask, self.architecture.resolution)
+        return self.embedded(windows, device)
+
+    def width(self) -> int:
+        """How wide this member's reading is — the teacher side of a student's projection."""
+        return Architecture.width(self.model.backbone)
 
     def ordered(
         self,

@@ -49,12 +49,14 @@ from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
+    FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
     PER_LABEL,
     RANK_TERM,
 )
 from kneemri.training.side_ranking import SIDE_TERM
+from kneemri.training.teacher_features import FEATURE_TEACHER
 from kneemri.training.teacher_targets import TEACHER
 from kneemri.training.trainer import (
     ACCUMULATION,
@@ -104,6 +106,9 @@ NOT_A_SWITCH = {
     "report_vectors": "resolved into `Request.reports`",
     "teacher_targets": "resolved into `Request.teaching`: the check asks whether readings ARRIVED, and "
     "WHICH file they came from is recorded by `member_record` rather than compared here",
+    "teacher_features": "resolved into `Request.teaching_features`, for the reason above and separately "
+    "from it: a run may carry one file, the other, both or neither, and one merged switch would answer "
+    "'a teacher arrived' for the arm whose teacher did not",
     "report_weight": "resolved into `Request.reports` alongside it",
     "variant": "chosen by CONSTRUCTION: the registry raises on a name it cannot build",
     "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
@@ -216,10 +221,12 @@ class Request:
     reports: bool
     rank_weight: float
     distill_weight: float
+    feature_weight: float
     dissent_weight: float
     contrast_weight: float
     auc_margin: float
     teaching: bool
+    teaching_features: bool
     pair_memory: int
     per_label_loss: bool
     normalise_by_count: bool
@@ -274,10 +281,12 @@ class Request:
             REPORTS: self.reports,
             RANK_TERM: self.rank_weight,
             DISTILL_TERM: self.distill_weight,
+            FEATURE_TERM: self.feature_weight,
             DISSENT_TERM: self.dissent_weight,
             CONTRAST_TERM: self.contrast_weight,
             MARGIN_TERM: self.auc_margin,
             TEACHER: self.teaching,
+            FEATURE_TEACHER: self.teaching_features,
             PAIR_POOL: self.pair_memory,
             PER_LABEL: self.per_label_loss,
             COUNT_NORMALISED: self.normalise_by_count,

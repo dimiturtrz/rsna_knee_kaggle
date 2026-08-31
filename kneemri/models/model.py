@@ -217,7 +217,11 @@ class StudyModel(nn.Module):
             message = f"encoder emits {width}-wide features and the registry says {dim}"
             raise ValueError(message)
         prior = SlotAffinity(ANATOMY).requested(TARGETS, n_slot, wanted=self.design.anatomical_prior)
-        head_width = dim * POOL_PARTS[self.pool]
+        # STORED as well as used, because it is the width of `Readout.context` and a loss term that
+        # projects out of the representation has to be built from it BEFORE the first batch — asking the
+        # tensor at step one is too late, since the optimiser was assembled at construction.
+        self.head_width = dim * POOL_PARTS[self.pool]
+        head_width = self.head_width
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
         # The lookup, not just a read: an unknown pooling raises HERE, before weights are fetched and
@@ -483,8 +487,23 @@ class StudyModel(nn.Module):
             DEPTH_REGIONS: 1 if aggregated_elsewhere else self.design.slice_regions,
         }
 
+    def context_width(self) -> int:
+        """How wide one finding's reading is in `Readout.context` — the student side of a projection.
+
+        A method rather than a caller reaching for `model.head_width`, because that is what the coupling
+        gate calls navigating into a stranger, and because the width is a fact about the READOUT that a
+        change of pooling moves: `POOL_PARTS` doubles it under a concat pooling, and a caller doing that
+        arithmetic itself would be a second copy of the rule.
+        """
+        return self.head_width
+
     def parameter_groups(
-        self, head_lr: float, backbone_lr: float, unfreeze_last: int, layer_decay: float = NO_LAYER_DECAY
+        self,
+        head_lr: float,
+        backbone_lr: float,
+        unfreeze_last: int,
+        layer_decay: float = NO_LAYER_DECAY,
+        attached: list[torch.nn.Parameter] | None = None,
     ) -> list[dict[str, object]]:
         """Freeze the encoder except its last blocks, and give what remains its learning rate — per DEPTH.
 
@@ -492,8 +511,15 @@ class StudyModel(nn.Module):
         be opened, is a fact about the encoder, not about the fitting procedure. It owns only the
         COMPOSITION — the readout at its own rate, then whatever the encoder says its groups are, which
         is `EncoderSurgery.backbone_groups` and carries the whole depth argument with it.
+
+        `attached` are parameters owned by something OUTSIDE this module that must still be stepped at
+        the head's rate — today only a distillation term's projection. They join the head group rather
+        than a group of their own because `Trainer.encoder_rate_decay` reads `param_groups[1:]` as the
+        backbone and `one_cycle` sizes its `max_lr` list off this list; a trailing group corrupts both.
+        Composed here for the reason the rest of this method is: the group layout is one fact, and a
+        caller assembling its own would be a second copy of it, free to disagree.
         """
-        head: dict[str, object] = {"params": self._readout_parameters(), "lr": head_lr}
+        head: dict[str, object] = {"params": [*self._readout_parameters(), *(attached or [])], "lr": head_lr}
         return [head, *self.surgery.backbone_groups(backbone_lr, unfreeze_last, layer_decay)]
 
     def _readout_parameters(self) -> list[torch.nn.Parameter]:

@@ -14,6 +14,7 @@ from core.findings import TARGETS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
+from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.mixup import OFF
@@ -22,6 +23,7 @@ from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
+    FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
     PER_LABEL,
@@ -31,6 +33,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import SIDE_TERM
+from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 from kneemri.training.trainer import (
     ACCUMULATION,
@@ -257,6 +260,48 @@ def test_teach_from():
     assert trainer.teacher.rows(np.array([1])).shape == (1, len(TARGETS))
 
 
+def test_teach_features_from():
+    """A SEPARATE witness from `teach_from`, because a run may carry one teacher file, the other, or both.
+
+    Merged into one switch, the check before the card would answer "a teacher arrived" for the arm whose
+    teacher did not — and a feature arm whose npz joined on nothing descends the plain recipe under the
+    distilling arm's name, which is the whole failure this pair of witnesses exists against.
+    """
+    width = 5
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+    )
+    assert trainer.policies()[FEATURE_TEACHER] is False
+    assert trainer.policies()[TEACHER] is False
+
+    trainer.teach_features_from(TeacherFeatures(np.zeros((2, width), dtype=np.float32)))
+
+    assert trainer.policies()[FEATURE_TEACHER] is True
+    assert trainer.policies()[TEACHER] is False, "the two witnesses are independent"
+    assert trainer.feature_teacher is not None
+    assert trainer.feature_teacher.rows(np.array([1])).shape == (1, width)
+
+
+def test_optimiser_steps_a_parameter_the_objective_owns():
+    """The projection a feature objective holds must be IN the optimiser, not merely reachable.
+
+    `parameter_groups` collects the head by exclusion from the backbone, so a tensor owned by the LOSS
+    is in no group unless it is handed over at construction — and the optimiser is built once, in
+    `Trainer.__init__`, so there is no later place to repair it. Unattached it would stay at its
+    initialisation for the whole arm and the cosine would report a fact about a random map (knee-7gyw).
+    """
+    objective = FeatureDistilledObjective(Widths(DIM, 7))
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+        objective=objective,
+    )
+
+    stepped = {id(parameter) for group in trainer.optimiser.param_groups for parameter in group["params"]}
+    assert id(objective.projection.weight) in stepped
+
+
 def test_policies():
     """The trainer's own account of which optional policies are attached, before and after attaching.
 
@@ -275,6 +320,7 @@ def test_policies():
     constructed = {
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
+        FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,
         CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
@@ -296,6 +342,7 @@ def test_policies():
         SCHEDULED: False,
         REPORTS: False,
         TEACHER: False,
+        FEATURE_TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,
@@ -316,6 +363,7 @@ def test_policies():
         SCHEDULED: True,
         REPORTS: False,
         TEACHER: False,
+        FEATURE_TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,

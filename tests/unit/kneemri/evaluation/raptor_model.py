@@ -74,7 +74,7 @@ def test_built() -> None:
     assert output.shape == (1, backbone.num_features)
 
 
-def test_width() -> None:
+def test_architecture_width() -> None:
     """The head is sized from the backbone's own width — a wrong one refuses the checkpoint outright."""
     backbone = Architecture(TEST_ARCHITECTURE, TEST_RESOLUTION).built()
 
@@ -106,6 +106,70 @@ def test_head() -> None:
     )
     pooled = torch.einsum("bkn,bkf->bnf", attention, normed)
     assert torch.allclose(logits, (pooled * model.clsW).sum(-1) + model.clsb)
+
+
+def test_pooled() -> None:
+    """The attention pool alone: one vector per FINDING, and the same one the head reads from.
+
+    Split out of `head` so the feature exporter reads the teacher's representation rather than a second
+    spelling of the pool — two spellings would let the exported vector drift from the one the twelve
+    logits were actually taken out of, and nothing downstream could tell.
+    """
+    model = classifier()
+    features = torch.rand(1, WINDOWS, FEATURES)
+    pooled = model.pooled(features)
+
+    assert pooled.shape == (1, FINDINGS, FEATURES)
+    assert torch.allclose(model.head(features), (pooled * model.clsW).sum(-1) + model.clsb)
+
+
+def test_embedding() -> None:
+    """One study, one vector of the BACKBONE's width — the findings axis is meaned away.
+
+    Meaned rather than flattened: a student is pulled onto the direction the teacher read the study
+    along, and a per-finding concatenation would teach it the teacher's head layout instead.
+    """
+    model = classifier()
+    windows = torch.rand(2, WINDOWS, 3, SIDE, SIDE)
+    embedded = model.embedding(windows)
+
+    assert embedded.shape == (2, FEATURES)
+    assert torch.allclose(embedded, model.pooled(model.encode(windows)).mean(dim=1))
+
+
+def test_embedded() -> None:
+    """The batch axis is added and removed here, and the result comes back as float32 on the host."""
+    member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE))
+    reading = member.embedded(torch.rand(WINDOWS, 3, SIDE, SIDE), "cpu")
+
+    assert reading.shape == (FEATURES,)
+    assert reading.dtype == np.float32
+
+
+def test_represented() -> None:
+    """A decoded study goes in whole and comes back as one vector — the same windowing `scored` uses.
+
+    The same windowing on purpose: the teacher file and the teacher's own submitted readings have to be
+    facts about the same pass, or the student is pulled onto a representation nothing was ever scored on.
+    """
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
+    volume[2:20] = 200
+    mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
+    member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE * 2))
+
+    assert member.represented(volume, mask, "cpu").shape == (member.width(),)
+
+
+def test_raptor_member_width() -> None:
+    """The member answers its BACKBONE's width, which is what sizes a student's projection into it.
+
+    Read from the loaded head rather than from the architecture name: a projection built at the wrong
+    width fails at the first step, and one built at a plausible-but-wrong width would train against a
+    representation nobody exported.
+    """
+    member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE * 2))
+
+    assert member.width() == FEATURES
 
 
 def test_forward() -> None:

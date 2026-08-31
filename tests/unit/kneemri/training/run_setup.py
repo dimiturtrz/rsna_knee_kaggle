@@ -8,9 +8,11 @@ import torch
 from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.landed import Request
 from kneemri.training.objective import (
     DISSENT_TERM,
+    FEATURE_TERM,
     MARGIN_TERM,
     ContrastiveObjective,
     MarginObjective,
@@ -196,6 +198,62 @@ def test_teacher(tmp_path: Path):
     assert _setup(dissent_weight=0.3, teacher_targets=readings).teacher(["s0"], np.array([0])) is not None
 
 
+def test_teacher_embeddings(tmp_path: Path):
+    """All-or-nothing, refused BEFORE the card, and a SEPARATE mechanism from the targets teacher.
+
+    A `--feature-weight` with no npz would descend the plain recipe under a representation arm's name,
+    and a `--teacher-features` with no weight would load an array nothing reads. Both halves are checked
+    here rather than on the first batch, because the first batch is forty minutes into a card.
+    """
+    width = 4
+    features = tmp_path / "features.npz"
+    np.savez(features, identifiers=np.array(["s0"]), embeddings=np.zeros((1, width), dtype=np.float32))
+
+    assert _setup().teacher_embeddings([], np.array([], dtype=np.int64)) is None
+
+    with pytest.raises(ValueError, match="two halves of one mechanism"):
+        _setup(feature_weight=20.0).teacher_embeddings(["s0"], np.array([0]))
+    with pytest.raises(ValueError, match="two halves of one mechanism"):
+        _setup(teacher_features=features).teacher_embeddings(["s0"], np.array([0]))
+
+    teacher = _setup(feature_weight=20.0, teacher_features=features).teacher_embeddings(["s0"], np.array([0]))
+    assert teacher is not None
+    assert teacher.width() == width, "the teacher's own width, which is what sizes the projection"
+
+
+def test_objective_builds_the_feature_term_only_against_measured_widths():
+    """The representation objective is reached by its flag, and it REFUSES to guess either width.
+
+    Neither number is on the command line — one is a fact about the built model and the other about the
+    loaded npz — so a call that reached here without them is a call that would fit a projection between
+    two numbers nobody measured. The pre-fit callers (`arm_check`, `vram_need`) never reach it, since
+    the branch they take is decided by a flag that is off.
+    """
+    widths = Widths(8, 5)
+    chosen = _setup(feature_weight=20.0, rank_weight=1.0).objective(widths)
+
+    assert isinstance(chosen, FeatureDistilledObjective)
+    assert chosen.settings()[FEATURE_TERM] == 20.0
+    assert chosen.weight == 1.0, "the house recipe's ranking term survives, or the arm is two changes"
+    assert (chosen.projection.in_features, chosen.projection.out_features) == (8, 5)
+
+    with pytest.raises(ValueError, match="must not guess"):
+        _setup(feature_weight=20.0).objective()
+
+
+def test_objective_refuses_to_compose_the_feature_term_with_the_terms_the_chain_would_drop():
+    """The dispatch returns ONE class, so a second term flag is silently built or silently lost.
+
+    `--rank-weight` is deliberately absent from the refusal: `FeatureDistilledObjective` extends the
+    ranked one and carries it, which is what keeps the arm a one-variable change against its control.
+    """
+    for conflict in ({"distill_weight": 0.3}, {"dissent_weight": 0.3}, {"contrast_weight": 0.3}, {"pair_memory": 8}):
+        with pytest.raises(ValueError, match="not composed"):
+            _setup(feature_weight=20.0, **conflict).objective(Widths(8, 5))
+
+    assert _setup(feature_weight=20.0, rank_weight=1.0).objective(Widths(8, 5)) is not None
+
+
 def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
     """A dissenting arm that also passes one of these would have that flag SILENTLY dropped.
 
@@ -300,7 +358,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 29, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 30, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

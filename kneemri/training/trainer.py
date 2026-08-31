@@ -40,6 +40,7 @@ from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.mixup import Mixup
 from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
+from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 
 logger = logging.getLogger(__name__)
@@ -112,11 +113,16 @@ class Trainer:
         self.adaptation = adaptation or Adaptation()
         self.augmentation = Augmentation(augment_config)
         self.objective = objective or Objective()
+        # THE OBJECTIVE'S OWN PARAMETERS ARE HANDED TO THE HEAD GROUP, and every term but one owns none.
+        # `parameter_groups` collects the head BY EXCLUSION from the backbone, so a tensor the LOSS holds
+        # would sit in no group at all: never stepped, left at its initialisation, and the arm would
+        # report a fact about a random map — knee-7gyw's defect exactly, and silent.
         groups = self.model.parameter_groups(
             self.adaptation.head_lr,
             self.adaptation.backbone_lr,
             self.adaptation.unfreeze_last,
             self.adaptation.layer_decay,
+            self.objective.attached(device),
         )
         self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
         # fp16 until a run says otherwise, because that is what every number in the ledger was measured
@@ -144,6 +150,10 @@ class Trainer:
         # harmless zero for a teacher: a distilling objective handed an absent teacher must raise
         # rather than descend the label term alone under a distilling arm's name.
         self.teacher: TeacherTargets | None = None
+        # None for the same reason, and a SECOND field rather than a widening of the one above: a run may
+        # distil logits, features, both or neither, and folding them together would make "which of the
+        # two arrived" unanswerable at exactly the moment `landed` asks it.
+        self.feature_teacher: TeacherFeatures | None = None
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
@@ -170,6 +180,7 @@ class Trainer:
             SCHEDULED: self.schedule is not None,
             REPORTS: isinstance(self.reports, ReportSupervision),
             TEACHER: self.teacher is not None,
+            FEATURE_TEACHER: self.feature_teacher is not None,
             ACCUMULATION: self.accumulation.every,
             LAYER_DECAY: self.encoder_rate_decay(),
             MIXUP: self.mixup.alpha,
@@ -199,6 +210,10 @@ class Trainer:
     def teach_from(self, teacher: TeacherTargets) -> None:
         """Carry an ensemble's readings of these same studies into every batch, for a distilling term."""
         self.teacher = teacher
+
+    def teach_features_from(self, teacher: TeacherFeatures) -> None:
+        """Carry a teacher's REPRESENTATIONS of these same studies into every batch, for a cosine term."""
+        self.feature_teacher = teacher
 
     def bfloat16(self) -> None:
         """Autocast in bf16 and drop the loss scaler with it.
@@ -406,6 +421,14 @@ class Trainer:
                         else torch.from_numpy(blend.rows(self.teacher.rows(batch))).to(self.device)
                     ),
                     embedding=readout.context.float(),
+                    # BLENDED BY THE SAME DRAW, for the reason the teacher table above is: an un-mixed
+                    # target would pull the blended reading onto the first study's features alone, which
+                    # is the feature arm silently descending toward a study it is not looking at.
+                    teacher_embedding=(
+                        None
+                        if self.feature_teacher is None
+                        else torch.from_numpy(blend.rows(self.feature_teacher.rows(batch))).to(self.device)
+                    ),
                 )
                 loss = self.objective(judged) + self.reports(readout.report.float(), batch)
             self.scaler.scale(self.accumulation.share(loss)).backward()

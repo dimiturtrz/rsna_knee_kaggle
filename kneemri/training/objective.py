@@ -147,6 +147,7 @@ with twelve batch members would be fitting the sweep, not the temperature.
 
 RANK_TERM = "rank_weight"
 DISTILL_TERM = "distill_weight"
+FEATURE_TERM = "feature_weight"
 DISSENT_TERM = "dissent_weight"
 CONTRAST_TERM = "contrast_weight"
 MARGIN_TERM = "auc_margin"
@@ -237,6 +238,7 @@ class Objective:
         return {
             RANK_TERM: 0.0,
             DISTILL_TERM: 0.0,
+            FEATURE_TERM: 0.0,
             DISSENT_TERM: 0.0,
             MARGIN_TERM: 0.0,
             CONTRAST_TERM: 0.0,
@@ -245,6 +247,17 @@ class Objective:
             COUNT_NORMALISED: self.normalise_by_count,
             **self.structure.settings(),
         }
+
+    def attached(self, device: torch.device) -> list[nn.Parameter]:
+        """Parameters this objective OWNS and the optimiser must step — none, for every term but one.
+
+        A term holding a learned projection would otherwise sit in no parameter group at all: the
+        optimiser is built from `StudyModel.parameter_groups`, which collects by EXCLUSION from the
+        backbone and cannot see a tensor the loss holds. That is knee-7gyw's defect exactly, and it is
+        silent — the projection stays at its initialisation and the arm reads as a fact about the term.
+        """
+        del device
+        return []
 
     def cross_entropy(self, batch: Predicted) -> Float[Tensor, ""]:
         """The weighted BCE term, which every objective here is built on top of.

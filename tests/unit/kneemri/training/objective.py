@@ -9,6 +9,7 @@ from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
+    FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
     PER_LABEL,
@@ -46,6 +47,7 @@ def test_objective_settings():
     assert Objective(Shaping(per_label=True)).settings() == {
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
+        FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,
         CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
@@ -63,6 +65,7 @@ def test_ranked_objective_settings():
     assert RankedObjective(0.3, Shaping(normalise_by_count=True)).settings() == {
         RANK_TERM: 0.3,
         DISTILL_TERM: 0.0,
+        FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,
         CONTRAST_TERM: 0.0,
         MARGIN_TERM: 0.0,
@@ -653,3 +656,14 @@ def test_contrastive_objective_carries_the_ranking_term():
     assert composed.settings()[RANK_TERM] == 1.0
     assert ContrastiveObjective(1.0).settings()[RANK_TERM] == 0.0
     assert float(composed(batch)) != float(ContrastiveObjective(1.0)(batch))
+
+
+def test_attached():
+    """Every term but one owns NO weights, and the base hook has to say so rather than be optional.
+
+    A hook that objectives could omit would put the burden on the optimiser's builder to know which
+    class holds tensors; answering an empty list from the base makes the composition total, and the one
+    subclass that does own a projection is then the only place the question is answered differently.
+    """
+    for objective in (Objective(), RankedObjective(0.3), DistilledObjective(0.3), ContrastiveObjective(0.5)):
+        assert objective.attached(torch.device("cpu")) == []

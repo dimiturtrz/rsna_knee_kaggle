@@ -45,34 +45,21 @@ class TeacherTargets:
     def from_file(cls, path: os.PathLike[str], identifiers: list[str], training: NDArray[np.int64]) -> "TeacherTargets":
         """Read the npz and reorder it into the CORPUS's study order, failing loudly on a gap or a shape.
 
-        Reordering rather than trusting the file's order is the discipline both the label loader and
-        the report term follow, and it matters more here than in either: a misaligned teacher trains
-        every study against ANOTHER STUDY'S ORDER while every log line, every gate and every ledger row
-        continues to read normally, and the arm then reports a clean refutation of a mechanism that was
-        never tested. There is no oracle downstream that would catch it, so the check is at load.
+        The reorder itself is `TeacherFile.aligned`, beside the format it reads, because the FEATURE
+        loader performs the identical join and two spellings of it are how one consumer comes to
+        disagree with the other about which row belongs to which study. What stays here is the part
+        that is about TARGETS specifically: twelve columns, and nothing else is a teacher file.
 
-        ONLY THE TRAINING POSITIONS ARE REQUIRED TO BE PRESENT, and that is the file's whole shape: a
-        teacher that read this run's holdout would be a teacher that had been SCORED on it, which is the
-        leak this mechanism exists on the safe side of. Every other row is filled with NaN rather than
-        with a plausible number, so a fold mismatch that reaches a batch surfaces as a NaN loss on the
-        first step instead of as a quiet 0.5 the student can learn.
+        The column check is made BEFORE the alignment for the reason the alignment is made at all — a
+        file with the wrong width is a file of the wrong KIND, most likely a features npz handed to
+        `--teacher-targets`, and naming that is more useful than a shape error twelve layers down.
         """
         stored = np.load(path, allow_pickle=True)
-        position = {str(name): index for index, name in enumerate(stored[TeacherFile.IDENTIFIERS])}
-        taught = [identifiers[index] for index in training]
-        missing = [name for name in taught if name not in position]
-        if missing:
-            message = (
-                f"{len(missing)} of the {len(taught)} training studies have no teacher reading, first {missing[0]}"
-            )
-            raise KeyError(message)
         stored_scores = stored[TeacherFile.SCORES]
         if stored_scores.shape[1] != len(TARGETS):
             message = f"teacher readings have {stored_scores.shape[1]} columns, not the {len(TARGETS)} targets"
             raise ValueError(message)
-        scores = np.full((len(identifiers), len(TARGETS)), np.nan, dtype=np.float32)
-        scores[training] = stored_scores[[position[name] for name in taught]].astype(np.float32)
-        return cls(scores)
+        return cls(TeacherFile.aligned(stored[TeacherFile.IDENTIFIERS], stored_scores, identifiers, training))
 
     def rows(self, positions: NDArray[np.int64]) -> Float[np.ndarray, "b t"]:
         """The teacher's scores for a batch of study positions, indexed the way the labels are.

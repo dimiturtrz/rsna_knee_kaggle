@@ -24,6 +24,7 @@ from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.device_budget import DeviceBudget
+from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
@@ -43,6 +44,7 @@ from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.side_ranking import PairedSides, SideRanking
+from kneemri.training.teacher_features import TeacherFeatures
 from kneemri.training.teacher_targets import TeacherTargets
 from kneemri.training.trainer import Adaptation, Trainer
 
@@ -134,10 +136,12 @@ class RunSetup:
             reports=options.report_vectors is not None,
             rank_weight=options.rank_weight,
             distill_weight=options.distill_weight,
+            feature_weight=options.feature_weight,
             dissent_weight=options.dissent_weight,
             contrast_weight=options.contrast_weight,
             auc_margin=options.auc_margin,
             teaching=options.teacher_targets is not None,
+            teaching_features=options.teacher_features is not None,
             pair_memory=options.pair_memory,
             per_label_loss=options.per_label_loss,
             normalise_by_count=options.normalise_by_count,
@@ -157,12 +161,17 @@ class RunSetup:
             mixup=options.mixup,
         )
 
-    def objective(self) -> Objective:
+    def objective(self, widths: Widths | None = None) -> Objective:
         """The loss policy these flags ask for.
 
         Off the command line rather than inside `main` so the choice can be checked without a GPU, a
         corpus or a downloaded encoder. The alternative is finding out that a queued arm was miswired
         after it has already waited forty minutes for the card.
+
+        `widths` is the ONE thing the flags cannot say: a feature term projects the student's context
+        onto the teacher's width, and neither number is on the command line — one is a fact about the
+        built model and the other about the loaded npz. It defaults to None so every caller that only
+        wants to know WHICH objective a recipe asks for keeps working without either.
         """
         options = self.options
         self._check_composed()
@@ -185,6 +194,8 @@ class RunSetup:
             # the owner's design is one training that runs both terms, so this is the composed objective
             # rather than a third alternative to the other two.
             return DistilledObjective(options.distill_weight, shaping, rank_weight=options.rank_weight)
+        if options.feature_weight:
+            return self._features(shaping, widths)
         if options.contrast_weight:
             return self._contrastive(shaping)
         if options.pair_memory:
@@ -192,6 +203,30 @@ class RunSetup:
         if options.rank_weight:
             return RankedObjective(options.rank_weight, shaping)
         return Objective(shaping)
+
+    def _features(self, shaping: Shaping, widths: Widths | None) -> FeatureDistilledObjective:
+        """The feature-distillation objective, built against the two widths it projects between.
+
+        A METHOD RATHER THAN A BRANCH WITH A GUARD IN IT, for `_contrastive`'s reason: the chain above
+        sits at the complexity ceiling and this is one term with one precondition.
+
+        RAISES when the widths are absent rather than assuming they are equal. A caller asking which
+        objective a recipe wants — `arm_check`, `vram_need` — never reaches here because the flag it
+        dispatches on is off; a caller that reached here with no widths is one that will fit, and
+        guessing on its behalf would build a projection between two numbers nobody measured.
+
+        `rank_weight` is carried through, for `DistilledObjective`'s reason: the house recipe passes
+        --rank-weight 1.0, so excluding it would make every feature arm a two-variable change.
+        """
+        options = self.options
+        if widths is None:
+            message = (
+                f"--feature-weight {options.feature_weight} builds a projection from the student's "
+                "context width to the teacher's, and neither was supplied — this call cannot know "
+                "either number, so it must not guess one"
+            )
+            raise ValueError(message)
+        return FeatureDistilledObjective(widths, options.feature_weight, shaping, rank_weight=options.rank_weight)
 
     def _contrastive(self, shaping: Shaping) -> ContrastiveObjective:
         """The contrastive objective these flags ask for, widened by a remembered pool or not.
@@ -233,6 +268,10 @@ class RunSetup:
             self._check_dissent_alone()
         if options.contrast_weight:
             self._check_contrast_alone()
+        # BEFORE the pair-memory rule below, so `--feature-weight --pair-memory` is answered by the flag
+        # that would have been silently dropped rather than by one about an unfed pool.
+        if options.feature_weight:
+            self._check_feature_alone()
         if options.pair_memory and not (options.rank_weight or options.contrast_weight):
             # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
             # no-op that trains the plain recipe under the arm's name, and would be read as a
@@ -266,6 +305,7 @@ class RunSetup:
         conflicts = {
             "--rank-weight": options.rank_weight,
             "--distill-weight": options.distill_weight,
+            "--feature-weight": options.feature_weight,
             "--dissent-weight": options.dissent_weight,
             "--contrast-weight": options.contrast_weight,
             "--pair-memory": options.pair_memory,
@@ -335,6 +375,32 @@ class RunSetup:
             )
             raise ValueError(message)
 
+    def _check_feature_alone(self) -> None:
+        """The four flags `--feature-weight` cannot be composed with, each LOUD for `objective`'s reason.
+
+        Not because a representation target and a pairwise one disagree — `--rank-weight` is deliberately
+        absent from this list, since `FeatureDistilledObjective` extends `RankedObjective` and carries it
+        — but because the DISPATCH is a single chain returning one class. `--distill-weight` and
+        `--dissent-weight` are ahead of this branch and would win; `--contrast-weight` and `--pair-memory`
+        are behind it and would be lost. Either way a run would train one mechanism under the other's
+        name, which is what every guard in this file exists to prevent.
+        """
+        options = self.options
+        conflicts = {
+            "--distill-weight": options.distill_weight,
+            "--dissent-weight": options.dissent_weight,
+            "--contrast-weight": options.contrast_weight,
+            "--pair-memory": options.pair_memory,
+        }
+        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
+        if named:
+            message = (
+                f"--feature-weight {options.feature_weight} is not composed with {', '.join(named)}: the "
+                "objective chain returns ONE class, so only one of these terms would be built and the "
+                "run would report the other's recipe under this arm's name"
+            )
+            raise ValueError(message)
+
     def reports(self, identifiers: list[str]) -> ReportSupervision | None:
         """The report-embedding supervision this run asked for, or None — and never half of it.
 
@@ -376,6 +442,24 @@ class RunSetup:
             )
             raise ValueError(message)
         return TeacherTargets.from_file(options.teacher_targets, identifiers, training)
+
+    def teacher_embeddings(self, identifiers: list[str], training: NDArray[np.int64]) -> TeacherFeatures | None:
+        """The teacher REPRESENTATIONS this run asked for, or None — never half, for `teacher`'s reason.
+
+        A `--teacher-features` with no `--feature-weight` loads an array nothing reads, and a weight with
+        no file would descend the plain recipe under a feature arm's name; both raise here, before the
+        card is touched, rather than on the first batch.
+        """
+        options = self.options
+        if not options.feature_weight and options.teacher_features is None:
+            return None
+        if options.teacher_features is None or not options.feature_weight:
+            message = (
+                f"--feature-weight {options.feature_weight} and --teacher-features "
+                f"{options.teacher_features} are two halves of one mechanism, and only one was given"
+            )
+            raise ValueError(message)
+        return TeacherFeatures.from_file(options.teacher_features, identifiers, training)
 
     def model(self, encoder: Encoder, slots: int, design: StudyDesign, device: torch.device) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
@@ -426,12 +510,16 @@ class RunSetup:
         them grows every time a flag is added.
         """
         options = self.options
+        # LOADED BEFORE THE TRAINER, which is the one ordering constraint in this method: the objective's
+        # projection is sized from the teacher's width, the optimiser is assembled from the objective at
+        # construction, and neither can be revised afterwards.
+        features = self.teacher_embeddings(identifiers, training)
         trainer = Trainer(
             model,
             device,
             augment_config=AugmentConfig() if options.intensity_aug else AugmentConfig.geometric_only(),
             adaptation=self.adaptation(),
-            objective=self.objective(),
+            objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),
         )
         if options.bf16:
             trainer.bfloat16()
@@ -445,6 +533,8 @@ class RunSetup:
         teacher = self.teacher(identifiers, training)
         if teacher is not None:
             trainer.teach_from(teacher)
+        if features is not None:
+            trainer.teach_features_from(features)
         if options.ema:
             trainer.exponential_average()
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps

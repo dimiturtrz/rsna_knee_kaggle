@@ -60,6 +60,20 @@ class Predicted:
     member in the ledger constructs the identical readout it always did.
     """
 
+    teacher_embedding: Float[Tensor, "b d"] | None = None
+    """What a TEACHER read from these same studies, pooled to one vector per study — `None` otherwise.
+
+    SEPARATE from `teacher`, and not a widening of it, because the two are different objects: that one
+    is twelve scores in [0, 1] and this one is a `d`-wide representation whose width is the teacher's
+    own and has no reason to equal the student's. A term reading this must project before it compares,
+    which is why `FeatureDistilledObjective` owns a linear map and every other term here owns none.
+
+    One vector per STUDY rather than one per finding. The teacher pools its windows once per finding
+    and this is the mean over that axis, so the target is what the teacher read about the knee rather
+    than the twelve directions its own head happened to split that reading along — the second would
+    teach the student the teacher's head, which is the level `swin_distill_fit` measured at -0.0077.
+    """
+
 
 class Grades:
     """How the loss reads a five-level reading: as one value to hit, which is what we have always done.

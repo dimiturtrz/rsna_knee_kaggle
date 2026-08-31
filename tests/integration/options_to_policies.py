@@ -52,6 +52,7 @@ chooses them and no builder attaches them."""
 
 NOT_A_WRAPPER = {
     "check_whole_stack",
+    "context_width",
     "fingerprint",
     "forward",
     "from_config",
@@ -67,7 +68,10 @@ NOT_A_WRAPPER = {
 
 `check_whole_stack` is a REFUSAL, not a wrapper: `--whole-stack` is switched on by the trainer, and the
 model's part is to say at startup whether it can take the window at all. It attaches nothing, so a
-builder calling it would be attaching a policy that does not exist."""
+builder calling it would be attaching a policy that does not exist.
+
+`context_width` is a MEASUREMENT for the same reason: the feature term has to be built at the student's
+real head width, and asking the model is what keeps that from being a guess. It switches nothing on."""
 
 TRAINER_REPORTER = {"policies", "encoder_rate_decay"}
 MODEL_REPORTER = {"applied"}
@@ -105,6 +109,25 @@ def _options() -> TrainingOptions:
     )
 
 
+class _FakeFeatures:
+    """A teacher-features stand-in that answers a WIDTH, which is the only thing the builder asks it."""
+
+    @staticmethod
+    def width() -> int:
+        return DIM
+
+
+def _features_arm() -> TrainingOptions:
+    """The same run with the REPRESENTATION teacher instead of the logit one, the terms it excludes off."""
+    return replace(
+        _options(),
+        distill_weight=0.0,
+        teacher_targets=None,
+        feature_weight=1.0,
+        teacher_features=Path("features.npz"),
+    )
+
+
 def _policies(owner: type, exempt: set[str]) -> list[str]:
     named = [
         name
@@ -136,11 +159,16 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
     """A switch parsed and stamped but never attached is a run that trains the recipe before it."""
     monkeypatch.setattr(build_module.ReportSupervision, "from_file", lambda *arguments: object())
     monkeypatch.setattr(build_module.TeacherTargets, "from_file", lambda *arguments: object())
+    monkeypatch.setattr(build_module.TeacherFeatures, "from_file", lambda *arguments: _FakeFeatures())
     policies = _policies(Trainer, THE_LOOP | TRAINER_REPORTER)
     called = _recorded(monkeypatch, Trainer, policies)
 
+    # TWO runs, because the two distillations are exclusive by construction: `--feature-weight` refuses
+    # to compose with `--distill-weight`, so one options object cannot reach both teachers and a single
+    # arm would read the one it left out as a policy no run can turn on.
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign())
     RunSetup(_options()).trainer(model, DEVICE, ["study"], np.arange(16))
+    RunSetup(_features_arm()).trainer(model, DEVICE, ["study"], np.arange(16))
 
     assert set(policies) == called, f"{sorted(set(policies) - called)} is a policy no run can turn on"
 

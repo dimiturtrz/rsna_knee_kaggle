@@ -9,6 +9,7 @@ from kneemri.training.objective import (
     COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
+    FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
     PER_LABEL,
@@ -32,6 +33,7 @@ def test_settings():
     assert RememberedContrast(0.3, capacity=4).settings() == {
         RANK_TERM: 0.0,
         DISTILL_TERM: 0.0,
+        FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,
         CONTRAST_TERM: 0.3,
         MARGIN_TERM: 0.0,

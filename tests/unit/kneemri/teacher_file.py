@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from kneemri.teacher_file import TeacherFile
 
@@ -22,6 +23,41 @@ def test_write(tmp_path: Path) -> None:
 
     assert stored[TeacherFile.IDENTIFIERS].tolist() == ["s0"]
     assert stored[TeacherFile.SCORES].shape == (1, 12)
+
+
+def test_write_embeddings(tmp_path: Path) -> None:
+    """Representations land under a name a targets file does not carry, and that is the point.
+
+    Both files are identifiers plus a float matrix, so under one shared name `--teacher-features
+    raptor_teacher.npz` would load twelve probabilities as a twelve-wide 'embedding', build a projection
+    into it and report a representation arm that had distilled logits. Separate names make that a
+    KeyError before the card is touched.
+    """
+    assert TeacherFile.EMBEDDINGS == "embeddings"
+
+    path = tmp_path / "features.npz"
+    TeacherFile.write_embeddings(path, ["s0"], np.zeros((1, 7), dtype=np.float32))
+    stored = np.load(path, allow_pickle=True)
+
+    assert stored[TeacherFile.EMBEDDINGS].shape == (1, 7)
+    assert TeacherFile.SCORES not in stored
+
+
+def test_aligned() -> None:
+    """The corpus's order wins over the file's, and only the TRAINING studies must be present.
+
+    A holdout row that the teacher DID hold would mean a teacher scored on this run's holdout, so it is
+    never required; every untaught position is NaN rather than a plausible number, which is what makes a
+    fold mismatch surface on the first step instead of as a value the student can quietly learn.
+    """
+    values = np.array([[3.0], [1.0], [2.0]], dtype=np.float32)
+    rows = TeacherFile.aligned(["c", "a", "b"], values, ["a", "b", "c", "held_out"], np.array([0, 1, 2]))
+
+    assert rows[:3, 0].tolist() == [1.0, 2.0, 3.0]
+    assert np.isnan(rows[3]).all()
+
+    with pytest.raises(KeyError, match="no teacher reading"):
+        TeacherFile.aligned(["a"], values[:1], ["a", "missing"], np.array([0, 1]))
 
 
 def test_merged(tmp_path: Path) -> None:
@@ -44,3 +80,13 @@ def test_merged(tmp_path: Path) -> None:
     assert count == 3
     assert stored[TeacherFile.IDENTIFIERS].tolist() == ["s0", "s2", "s1"]
     assert stored[TeacherFile.SCORES][:, 0].tolist() == [0.0, 0.0, 1.0]
+
+    # The SAME join over the other format, named at the call: a features merge that wrote a `scores`
+    # key would produce a file the feature loader refuses, after the whole decode had been paid for.
+    features = [tmp_path / "featshard0.npz", tmp_path / "featshard1.npz"]
+    TeacherFile.write_embeddings(features[0], ["s0"], np.zeros((1, 4), dtype=np.float32))
+    TeacherFile.write_embeddings(features[1], ["s1"], np.ones((1, 4), dtype=np.float32))
+    joined_features = tmp_path / "features.npz"
+
+    assert TeacherFile.merged(features, joined_features, TeacherFile.EMBEDDINGS) == 2
+    assert np.load(joined_features)[TeacherFile.EMBEDDINGS].shape == (2, 4)

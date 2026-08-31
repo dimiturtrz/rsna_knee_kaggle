@@ -459,6 +459,39 @@ def test_parameter_groups_hold_every_trainable_tensor():
         assert len(seen) == len(set(seen)), f"{name} hands the same tensor to two groups"
 
 
+def test_parameter_groups_carry_a_tensor_the_LOSS_owns():
+    """A parameter the OBJECTIVE holds must land in the head group, or nothing ever steps it.
+
+    The head is collected BY EXCLUSION from the backbone, so a module outside `self.backbone` that is
+    also not a child of the model is in no group at all — it would sit at its initialisation for the
+    whole arm and the term reading it would report a fact about a random map. That is knee-7gyw's defect
+    exactly, and the feature-distillation projection is the first tensor a loss has owned.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
+    owned = torch.nn.Parameter(torch.zeros(DIM))
+
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2, attached=[owned])
+
+    head = cast("list[torch.nn.Parameter]", groups[0]["params"])
+    assert any(parameter is owned for parameter in head), "identity, not shape — a copy is not stepped"
+    assert [group["lr"] for group in groups] == [1e-3, 8e-6], "and the group SHAPE is unchanged"
+
+
+def test_context_width():
+    """The width of one finding's reading — the student side of a projection onto a teacher.
+
+    Read off the model rather than recomputed by the caller: it is `dim` times whatever the pooling
+    multiplies by, and a second spelling of that arithmetic would size a projection that fits the trunk
+    it was written against and silently mismatches the next one.
+    """
+    torch.manual_seed(SEED)
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS)
+
+    assert model.context_width() == DIM * POOL_PARTS[model.pool]
+    assert model.context_width() == model.head_width, "the head is built from the same number"
+
+
 def test_parameter_groups_layer_decay():
     """One group per opened block, the TOP one still at `backbone_lr`, everything below it divided down.
 

@@ -239,28 +239,7 @@ class FlagVocabulary:
             "a mean of per-label AUCs, which reads ORDER and discards calibration; this term pays only "
             "for pairs of studies ordered the wrong way round.",
         )
-        parser.add_argument(
-            "--distill-weight",
-            type=float,
-            default=0.0,
-            help="add a pairwise term at this strength asking the student to reproduce an ENSEMBLE's "
-            "ordering of these studies (0 = off). Not the usual KL on softened probabilities, which "
-            "targets calibration the metric discards. The reader emits five levels, so a pair of studies "
-            "on the SAME level teaches the label term nothing — and a finding present in 7%% of studies "
-            "strands roughly 87%% of its pairs that way. A continuous teacher orders all of them, so the "
-            "gain should concentrate on the rarest findings. Requires --teacher-targets.",
-        )
-        parser.add_argument(
-            "--dissent-weight",
-            type=float,
-            default=0.0,
-            help="add a pairwise ranking term at this strength whose pairs are re-weighted toward the "
-            "ones an ENSEMBLE orders WRONG (0 = off). The same teacher file --distill-weight reads, for "
-            "the opposite purpose: not to reproduce the pool's ordering but to spend the member's "
-            "capacity where that ordering fails, which is the one way to raise ensemble ambiguity "
-            "without raising member error. Anchored to the labels throughout — a pair is only ever paid "
-            "for in the direction the reports order it. Requires --teacher-targets.",
-        )
+        cls._teacher_arguments(parser)
         parser.add_argument(
             "--contrast-weight",
             type=float,
@@ -374,6 +353,18 @@ class FlagVocabulary:
             "this cuts one side only, so the score is comparable to every full-data row in the ledger.",
         )
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
+        parser.add_argument("--out", type=Path, default=None)
+        parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
+        return parser
+
+    @staticmethod
+    def _teacher_arguments(parser: argparse.ArgumentParser) -> None:
+        """What a TEACHER teaches and where its readings come from — every flag that needs another model.
+
+        Split out of `parser` for the same reason `_encoder_arguments` was, on the same ceiling: adding
+        the representation pair crossed it. The group comes out whole — each weight here is dead without
+        one of the two files, and neither file is read by anything else.
+        """
         parser.add_argument(
             "--teacher-targets",
             type=Path,
@@ -383,9 +374,50 @@ class FlagVocabulary:
             "Its members must not have seen the holdout this arm is scored on: a --fold -1 member saw "
             "every study, so teaching from one leaks the evaluation labels into the student.",
         )
-        parser.add_argument("--out", type=Path, default=None)
-        parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-        return parser
+        parser.add_argument(
+            "--teacher-features",
+            type=Path,
+            default=None,
+            help="npz of a teacher's pooled REPRESENTATIONS of the TRAINING studies, read by "
+            "--feature-weight. A different file from --teacher-targets and under a different array name, "
+            "so handing one where the other belongs raises before the card is touched. "
+            "Its members must not have seen the holdout this arm is scored on: a --fold -1 member saw "
+            "every study, so teaching from one leaks the evaluation labels into the student.",
+        )
+        parser.add_argument(
+            "--distill-weight",
+            type=float,
+            default=0.0,
+            help="add a pairwise term at this strength asking the student to reproduce an ENSEMBLE's "
+            "ordering of these studies (0 = off). Not the usual KL on softened probabilities, which "
+            "targets calibration the metric discards. The reader emits five levels, so a pair of studies "
+            "on the SAME level teaches the label term nothing — and a finding present in 7%% of studies "
+            "strands roughly 87%% of its pairs that way. A continuous teacher orders all of them, so the "
+            "gain should concentrate on the rarest findings. Requires --teacher-targets.",
+        )
+        parser.add_argument(
+            "--feature-weight",
+            type=float,
+            default=0.0,
+            help="add a cosine term at this strength pulling what the student READ from a study onto "
+            "what a TEACHER read from it, through a learned projection between the two widths (0 = off). "
+            "Distillation at the representation rather than at the verdict: --distill-weight teaches the "
+            "teacher's twelve-way ORDERING, which is its head, and swin_distill_fit measured that at "
+            "-0.0077 against a cold control. A large value here makes the label term a probe rather than "
+            "a target, which is what turns a stage into a PRETRAIN whose product is an encoder. "
+            "Requires --teacher-features.",
+        )
+        parser.add_argument(
+            "--dissent-weight",
+            type=float,
+            default=0.0,
+            help="add a pairwise ranking term at this strength whose pairs are re-weighted toward the "
+            "ones an ENSEMBLE orders WRONG (0 = off). The same teacher file --distill-weight reads, for "
+            "the opposite purpose: not to reproduce the pool's ordering but to spend the member's "
+            "capacity where that ordering fails, which is the one way to raise ensemble ambiguity "
+            "without raising member error. Anchored to the labels throughout — a pair is only ever paid "
+            "for in the direction the reports order it. Requires --teacher-targets.",
+        )
 
     @staticmethod
     def _encoder_arguments(parser: argparse.ArgumentParser) -> None:
