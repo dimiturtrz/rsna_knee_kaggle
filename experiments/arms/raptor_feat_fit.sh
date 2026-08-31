@@ -24,7 +24,23 @@
 # read `member_axes` beside it and quote both.
 #
 # control  swin_supervised_s2026 = 0.8331 (cold, the same control the logit arm used).
-# PRICE: ~30 min stage one + ~3.3 h stage two, 0 slots.
+# PRICE: ~30 min stage one + ~3.3 h stage two, 0 slots. The 3.3 h is the MEASURED cost of the logit
+# arm's stage two at this same 12-epoch budget (see its interpretation's Cost section); that arm's own
+# header prices the budget at ~90 min and is wrong. Measurement over header.
+#
+# THE TEACHER IS IN-SAMPLE, AND THAT IS A CAVEAT ON THE CEILING RATHER THAN ON THE SIGN. The raptor
+# checkpoints under `external/raptor/` carry no recorded recipe, so `raptor_features.honest()` cannot
+# refuse them the way it refuses a `fold: -1` of ours — the check passes by absence of evidence, not by
+# evidence. `foreign_overlap` measures raptor at 98.6% in-sample on this corpus, which is what voided
+# `raptor_solo`'s 0.8938. What that buys and does not buy here:
+#   * It does NOT invalidate the comparison. Both arms of this read fit the same labels on the same
+#     folds against the same cold control; the teacher is the only term that moves.
+#   * It DOES mean the teacher's representation of a training study is partly memorised, so a positive
+#     here is an upper bound on what an honest teacher would give, and the follow-on named by the win
+#     branch (the champion-ensemble teacher) must be built from fold-0 twins to be worth anything.
+#   * The logit arms ran under the identical exposure and read +0.0016 and +0.0035, so this is not a new
+#     risk introduced by (b) — it is an inherited one, and it is stated here so that a reader of this
+#     arm does not have to rediscover it from a different file.
 # P(clears +0.0062) ~ 0.25.
 #
 # PRE-REGISTERED, before the run, against the cold control:
