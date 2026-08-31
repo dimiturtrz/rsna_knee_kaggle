@@ -2888,3 +2888,41 @@ What it does say, and this is the part worth acting on, is that the next slot sh
 seat exchange. Either the pool gains a member that is better rather than merely different, or the entry
 changes shape (size, vote rule, or the corpus a member is fitted on) — a candidate that reads DISTINCT
 on `member_axes` rather than one that reads far on rank correlation alone.
+
+## 2026-08-31 — `stackseat_v1` and `peak8`: the fit axis closes, and the offline ruler fails
+
+Two entries went out inside an hour and they answer different questions, so they are read together
+rather than in sequence.
+
+`stackseat_v1` asked the FIT axis. It is `raptorweight_v1` with `stack_increments_ff` in place of
+`merged_blend_cf`, the champion's one remaining fold-0 seat. Count, kit and vote held; the single moved
+term is HOW that seat was fitted — `--fold -1 --ema`, on the project's highest solo (`stack_increments`
+0.8642, the only member distilled from `raptor_teacher`). **It read 0.944 against a control of 0.944:
+exactly 0.000**, the pre-registered flat band, which the entry itself said would close the fit axis
+alongside count and weight.
+
+That is the fifth flat on the champion pool. Reweight (`raptorweight_v1` +0.001), add (`vjepaseat_v1`
+−0.001), swap (`holdswap_v1` 0.000), count (`dark7_v1` flat), kind (`spanseat_v1` 0.944) and now fit
+(0.000). Two axes are closed on this pool: neither WHO sits nor HOW they were fitted moves it. What
+remains is member KIND in the strong sense — what a member SEES (corpus, decode) or WHAT IT IS (trunk).
+
+`peak8` was an INSTRUMENT, and it is the louder of the two. It is the eight-member set the greedy over
+the pool selects as the offline peak — `small_batch6`, `margin_seat`, `calib_span`, `through_dense`,
+`band_dense_long`, `sided_pool`, `aprior_dense`, `crop80_span` — offline **0.8731**, the best offline
+number this project owns, all fold-0, so fully scoreable on 909 held-out studies and never shipped.
+Its low band was pre-registered: at or below 0.9425 the peak is overfit to that holdout.
+
+**It read 0.932.** That is 0.012 below the champion and below `greedyseat_v1`'s 0.936 at seven members —
+the more carefully the set was optimised against the offline holdout, the worse it scored on the board.
+That is the signature of fitting the selection to the holdout's own sampling noise rather than to
+anything about the members.
+
+The consequence is a rule, not a number. `member_curve`'s greedy may no longer be used to JUSTIFY a
+slot, and `seat_value`'s argmax is a holdout artefact rather than a ranking. It also confirms the
+blind-vs-fold-0 structural gap a third time: every all-fold-0 entry now reads 0.932–0.938 while the
+blind champion sits at 0.944, so a fold-0-only entry cannot beat it for reasons that have nothing to do
+with which members are chosen.
+
+Read together the day says the pool is finished as a thing to rearrange. It cannot be improved by
+reselecting its seats, by refitting them blind, or by trusting the offline ruler to choose them — and
+the offline ruler was the cheap instrument the reselection work was standing on.
