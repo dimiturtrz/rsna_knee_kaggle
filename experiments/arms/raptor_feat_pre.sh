@@ -27,10 +27,16 @@
 # hands stage two a trunk that is less shaped than the mechanism allows, so it can only understate the
 # effect; it cannot manufacture one, and it cannot flip a positive to a negative.
 #
-# THE TEACHER IS THE FOREIGN RAPTOR, for (a)'s reason and the same honesty constraint: it was never fitted
-# on this corpus, so it cannot be memorising the holdout — the one assumption the objective cannot check
-# for itself. `raptor_features.npz` is written by `python -m kneemri.kaggle.raptor_features`, which is the
-# feature sibling of `raptor_teacher` and reads the pooled vector rather than the head's twelve.
+# THE TEACHER IS THE FOREIGN RAPTOR, AND IT IS IN-SAMPLE. This header claimed until 2026-08-31 that it
+# "was never fitted on this corpus, so it cannot be memorising the holdout". That is measurably wrong:
+# `foreign_overlap` puts raptor at 98.6% in-sample here, which is what voided `raptor_solo`'s 0.8938. The
+# checkpoints under `external/raptor/` carry no recorded recipe, so `raptor_features.honest()` cannot
+# refuse them the way it refuses a `fold: -1` of ours — it passes by absence of evidence, not by evidence.
+# What that does and does not cost is argued in full on `raptor_feat_fit.sh`, which is where the control
+# and the branches live; in short it caps the CEILING and not the SIGN, because both arms of the read fit
+# the same labels on the same folds against the same cold control. `raptor_features.npz` is written by
+# `python -m kneemri.kaggle.raptor_features`, the feature sibling of `raptor_teacher`, reading the pooled
+# vector rather than the head's twelve.
 #
 # cost   4 epochs at 384 px on an 87M trunk, priced off swin_supervised's 12 epochs at ~90 min = ~30 min.
 #        Zero slots. Stage two is another ~3.3 h.
