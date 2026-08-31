@@ -2889,10 +2889,10 @@ seat exchange. Either the pool gains a member that is better rather than merely 
 changes shape (size, vote rule, or the corpus a member is fitted on) — a candidate that reads DISTINCT
 on `member_axes` rather than one that reads far on rank correlation alone.
 
-## 2026-08-31 — `stackseat_v1` and `peak8`: the fit axis closes, and the offline ruler fails
+## 2026-08-31 — `stackseat_v1` closes the fit axis, and `peak8` prices greedy selection bias
 
-Two entries went out inside an hour and they answer different questions, so they are read together
-rather than in sequence.
+Two entries went out inside an hour. The first is a clean result. The second was first written up here
+as a refutation of the offline ruler; that write-up was wrong, and this section replaces it.
 
 `stackseat_v1` asked the FIT axis. It is `raptorweight_v1` with `stack_increments_ff` in place of
 `merged_blend_cf`, the champion's one remaining fold-0 seat. Count, kit and vote held; the single moved
@@ -2902,27 +2902,40 @@ exactly 0.000**, the pre-registered flat band, which the entry itself said would
 alongside count and weight.
 
 That is the fifth flat on the champion pool. Reweight (`raptorweight_v1` +0.001), add (`vjepaseat_v1`
-−0.001), swap (`holdswap_v1` 0.000), count (`dark7_v1` flat), kind (`spanseat_v1` 0.944) and now fit
-(0.000). Two axes are closed on this pool: neither WHO sits nor HOW they were fitted moves it. What
-remains is member KIND in the strong sense — what a member SEES (corpus, decode) or WHAT IT IS (trunk).
+-0.001), swap (`holdswap_v1` 0.000), count (`dark7_v1` flat), kind (`spanseat_v1` 0.944) and now fit
+(0.000). Two axes are closed on this pool: neither WHO sits nor HOW they were fitted moves it. That is
+also not anomalous — `interpretations/kneemri/2026-08-31_the_pool_is_redundant_not_the_task.md` bounds
+any new member at 12.7% of the pool's remaining uncertainty, so flat is what the redundancy predicts.
 
-`peak8` was an INSTRUMENT, and it is the louder of the two. It is the eight-member set the greedy over
-the pool selects as the offline peak — `small_batch6`, `margin_seat`, `calib_span`, `through_dense`,
-`band_dense_long`, `sided_pool`, `aprior_dense`, `crop80_span` — offline **0.8731**, the best offline
-number this project owns, all fold-0, so fully scoreable on 909 held-out studies and never shipped.
-Its low band was pre-registered: at or below 0.9425 the peak is overfit to that holdout.
+`peak8` shipped the eight-member set `member_curve`'s greedy selects over the pool, RankAverage, all
+fold-0, 8 of 8 loaded. **It read 0.932**, and the first version of this section called that a failure of
+the offline ruler. It is not. Three things were wrong with that reading, and all three are checkable.
 
-**It read 0.932.** That is 0.012 below the champion and below `greedyseat_v1`'s 0.936 at seven members —
-the more carefully the set was optimised against the offline holdout, the worse it scored on the board.
-That is the signature of fitting the selection to the holdout's own sampling noise rather than to
-anything about the members.
+**The row was entered raw.** `knee-jsgb` closed on 2026-08-30 with a standing rule: an entry selected by
+search enters `board.jsonl` bias-corrected, never raw. `member_curve.honest` measures that bias directly
+at +0.0025 to +0.0031 for 7-12 seats over pools of 77-119 members, replicated across four logs.
+Corrected, peak8 is 0.8704, which predicts 0.934 against an actual 0.932. The raw 0.8731 predicts 0.936,
+and that 0.004 of phantom shortfall was the entire basis of the error. `board_check` does not yet assert
+the rule, which is how a raw number got written the day after the rule was made (knee-wz81).
 
-The consequence is a rule, not a number. `member_curve`'s greedy may no longer be used to JUSTIFY a
-slot, and `seat_value`'s argmax is a holdout artefact rather than a ranking. It also confirms the
-blind-vs-fold-0 structural gap a third time: every all-fold-0 entry now reads 0.932–0.938 while the
-blind champion sits at 0.944, so a fold-0-only entry cannot beat it for reasons that have nothing to do
-with which members are chosen.
+**peak8 is not the best offline set the project owns.** It is THIRD — behind `honest12` (0.8751 offline,
+0.937 board) and `greedyseat_v1` (0.8740, 0.936) — and it is third on the board as well. The holdout
+ordered all three correctly. The claim that the offline argmax is not a board argmax rested on peak8
+being that argmax, and it never was.
 
-Read together the day says the pool is finished as a thing to rearrange. It cannot be improved by
-reselecting its seats, by refitting them blind, or by trusting the offline ruler to choose them — and
-the offline ruler was the cheap instrument the reselection work was standing on.
+**The ruler has never mis-ordered a pair it resolves.** `board_transfer`, refitted with this row present,
+reports 11 of 421 pairs the board ordered the other way and **0 of 269** of the pairs the holdout actually
+resolves at a gap above its 0.0053 floor. Both peak8 inversions print UNRESOLVED, at +0.0037 and +0.0036
+against board gaps of a single tick. peak8 extended the clean run from 0/233 to 0/269 — it strengthened
+the ruler's record rather than breaking it.
+
+So `member_curve`'s greedy and `seat_value`'s argmax remain valid instruments and are reinstated; they
+were retired here on a misreading, for the few hours between the two versions of this section. What peak8
+actually bought is the confirmation that greedy selection bias is real, is about 0.0027 at this pool size,
+and must be subtracted before a search-selected entry is priced — plus a defect worth fixing, that no gate
+enforces the rule that would have caught it.
+
+The general lesson is one the repo already writes down: an UNRESOLVED pair is not a refutation. The ruler
+declined to order two pairs and was read as having failed them, and the conclusion drawn from that — that
+offline selection could no longer justify a slot — would have moved every future member decision onto the
+board, at five slots a day.
