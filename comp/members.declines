@@ -93,3 +93,33 @@ cnx_warm_anneal_s2026       # 0.8142 peak at epoch 2 of 6, against a parent peak
                             # would have reversed in the anneal. convergence_check reads it clean (six
                             # asked, six recorded), so 0.8142 is a peak and not a floor. Re-open this by
                             # answering the mechanism, never by re-quoting a number.
+
+# Added 2026-08-31 05:30Z. Both arms of the merged-corpus cross, declined together because one argument
+# covers them: the corpus lane is one cell wide. Each moved ONE variable off a known-good control, each
+# landed INSIDE the paired floor on its own holdout, and each priced at zero as a seat. Neither is a
+# refutation of its mechanism - both are reads that the mechanism is already spent where it was applied.
+merged_distill_cf.pt        # 0.8637 solo, peak epoch 8 of 12, CONVERGED (epochs 9-11 flat at 0.8636 /
+                            # 0.8626 / 0.8627). One variable off `stack_increments_s2026` (0.8642): the
+                            # corpus, blend_three_v1 -> merged_blend_v1, with the distill teacher, the
+                            # band, the pooling, the rate and `--hold-annotations` all held. Delta
+                            # -0.0005, INSIDE the 0.0062 paired floor, so its pre-registration's own
+                            # middle branch applies: keep if and only if greedy over the roster picks it.
+                            # Greedy priced it +0.0000 (band [-0.0005, +0.0006], best possible swap
+                            # +0.0001), so it does not. The arm's value is the ANSWER, not the member:
+                            # the merged corpus does not add to a distilled member, which is the third
+                            # time a better-labelled signal has failed to compose with a finer one
+                            # (merged_dense_cf -0.0028, merged_labelwise_cf below). Re-open only with a
+                            # genuinely different external corpus (MRNet, knee-ombx), never with another
+                            # cross of the two corpora already here.
+merged_labelwise_cf.pt      # 0.8587 solo, peak epoch 9 of 12, CONVERGED. One variable off
+                            # `labelwise_dense_s2026` (0.8613): the corpus again. Delta -0.0026, inside
+                            # the floor. Seat value +0.0005, band [-0.0002, +0.0012], best possible swap
+                            # +0.0005 - all under the +0.0015 this ruler has never been shown to resolve.
+                            # DECLINED DESPITE BEING THE MOST DECODE-DIVERSE CANDIDATE EVER PRICED HERE:
+                            # nearest-neighbour 0.8873 and mean 0.8583 against a seated spread of
+                            # 0.8772-0.9225. That is the finding in the decline, and it is the same sign
+                            # the board returned on the architecture axis the same week (vjepaseat_v1
+                            # 0.943 against 0.944 with the most distant member the project owns).
+                            # Distance without solo strength does not buy a seat - now on two rulers and
+                            # two axes. Re-open on a member that is BOTH distant and at or above the
+                            # seated quality level, never on a distance number alone.

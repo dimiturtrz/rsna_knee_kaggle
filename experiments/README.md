@@ -6497,3 +6497,59 @@ constraint is the roster, not the ruler and not the member.
 does not already hold — `stack_increments` is a table-plus-distillation member on the same corpus and
 the same decode as its neighbours. The route statement's conjunction is untouched by this, and this is
 evidence FOR it: quality alone, at the top of the pool, buys nothing.
+
+## Every operation on the champion's seating is now measured, and all of them are flat (2026-08-31)
+
+Five readings landed within a day, four offline and one on the board, and they close a question rather
+than adding a point to it.
+
+**The three offline zeros.** Each priced a different explanation of what an eighth seat could buy, all
+against `greedyseat_v1` (roster of 7, 0.8763) on the fold-0 holdout and the `report_labels_v2` ruler.
+
+| candidate | what it tested | seat value | band | best swap |
+|---|---|---|---|---|
+| `stack_increments_s2026` | the pool's BEST SOLO, ordinary diversity | +0.0002 | [-0.0002, +0.0007] | +0.0003 |
+| `merged_labelwise_cf` | the MOST DECODE-DIVERSE candidate ever priced here (nearest 0.8873, mean 0.8583, against a seated spread of 0.8772-0.9225) | +0.0005 | [-0.0002, +0.0012] | +0.0005 |
+| `merged_distill_cf` | BOTH quality levers in one member (the distill teacher and the merged corpus) | +0.0000 | [-0.0005, +0.0006] | +0.0001 |
+
+None clears +0.0015, under which this ruler has never been shown to pick a board tick. Quality alone,
+diversity alone, and the two together each return zero, from three different directions.
+
+**The board reading that matters more.** `holdswap_v1` (ref 55900461) is `raptorweight_v1` with
+`calib_dense_hold_ff` for `lr4e-5_ws_cf` — a same-count, blind-for-blind seat SWAP — and it scored
+**0.944 against the control's 0.944**. Dead flat. Put beside `vjepaseat_v1` (0.943, an ADDED seat on the
+architecture axis with the most distant member the project owns), `raptorseat_v1` (0.943),
+`fleettwo` (0.942) and `raptorweight_v1` (+0.001 for a reweight), every operation available on a fixed
+pool — add, reweight, swap, on both the architecture and the corpus axes — now has a flat or negative
+reading on the instrument that can actually see the champion.
+
+**So the standing reframe was wrong, and it is worth saying which part.** The reframe was that the offline
+zeros describe a blind RULER rather than a saturated pool: `seat_value` prices against `greedyseat_v1` at
+0.936, while the shipped champion is 0.944 and five of its six members are `--fold -1` blind fits that
+`RecordMix` excludes by construction, so the champion's lane is unmeasured offline. That much is still
+true and still limits every offline number here. What it does NOT license is the inference drawn from it —
+that a seating gain might be hiding in the champion's lane where the ruler cannot look. `holdswap_v1` looked
+there directly, with the board, and found the same zero. The ruler's blindness is real; it was not
+concealing anything.
+
+**The consequence is a redirection, not a smaller bar.** knee-urvf already said the ensemble tracks
+best-single + ~0.015 and that the bonus has not grown in fourteen days. With the arrangement now measured
+as saturated from every side, MEMBER QUALITY IS THE ONLY FREE TERM, and card spent on rearranging seats is
+card spent on a measured zero. knee-uco3 should be read as evidence for knee-urvf rather than as a separate
+finding.
+
+**What this does not close.** It says nothing about a member that is BOTH distant and at or above the
+seated quality level — every distant member tested so far has been 0.017-0.020 short on solo score, which is
+the size `vjepaseat_v1`'s row puts on the requirement. That is a member-quality problem, so it lands in the
+same lane. It also says nothing about a genuinely different external corpus; the merged-corpus cell is now
+three collisions deep (`merged_dense_cf` -0.0028, `merged_labelwise_cf` -0.0026, `merged_distill_cf`
+-0.0005) and is one cell wide, which is why MRNet (knee-ombx) is still the corpus lever and another cross of
+the two corpora already here is not.
+
+**What was spent, and on what.** `swin_supervised_ff` was armed to put the project's most decorrelated
+member into shippable blind form and was killed seven minutes in, once `vjepaseat_v1`'s row was read: it had
+already run that experiment with a MORE distant member and returned flat. The card went to
+`stack_increments_ff` (knee-8ft1) instead — the pool's best solo refit `--fold -1 --ema`, so that the one
+lane still open can be shipped without paying the ~0.008 blind-vs-fold-0 penalty that has kept it out of the
+champion. The single overnight slot went to `spanseat_v1`, priced at ~10% before it was fired and fired
+anyway because the slot cannot be banked and nothing buildable in the window priced better.
