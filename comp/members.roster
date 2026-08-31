@@ -519,6 +519,13 @@ focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that nu
 # it is the highest solo this project owns, and a refuted mechanism is still a different opinion. Seat
 # value is priced with record_mix like any other, never assumed from the solo.
 stack_increments_s2026.pt            # 0.8642
+# `stack_increments_ff` is the SAME recipe refit `--fold -1 --ema`, one moved flag, and it carries NO
+# holdout number by construction — it has seen all 4,406 studies, so `roster_check` must read it as a
+# blind member and nothing may enter the ledger as its score. It exists because five of the champion's
+# six seats are blind: a fold-0 member entering that entry pays the ~0.008 blind-vs-fold-0 board gap,
+# which is why the pool's best solo has never been shippable into the champion. The board is its only
+# instrument. Seat it in `merged_blend_cf`'s position — the lone fold-0 seat, the one paying the penalty.
+stack_increments_ff.pt               # blind (--fold -1 --ema), no holdout number exists — see above
 stackfit_s2026.pt                    # 0.8631
 # `recal_dense` is packaged on its solo alone and carries a warning about the seat, because pool_census
 # reads it as `calib_dense_hold`'s TWIN: identical nearest agreement (0.9496) and identical nearest
