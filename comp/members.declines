@@ -143,3 +143,5 @@ stack224_s2026              # 0.8476 solo against native224's 0.8502, and the ax
                             # rise, which is what named the aggregator mechanism at all. Re-open only if
                             # something makes 36-slice coverage cost less than it takes, which nothing
                             # currently does.
+swin_distill_pre_s2026.pt            # stage one of the logit two-stage (knee-8009 a), distillation-dominant at weight 20 so its heads were a probe not a target, and UNDERTRAINED at 4 epochs still rising; it exists to produce an encoder, never a seat
+swin_distill_fit_s2026.pt            # 0.8255 against swin_supervised_s2026's 0.8331 cold control, -0.0077, three starred negative labels and zero starred positives, harness branch checked clean; a trunk driven to imitate a teacher's twelve logits is a worse init than the trunk it started from (interpretations/kneemri/2026-08-31_distilling_logits_is_not_pretraining.md)
