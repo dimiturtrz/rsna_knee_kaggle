@@ -65,6 +65,16 @@ foreign = ["opencv-python-headless"]
 # absent, the failure appears only once the model is on the card, i.e. after the shards are read. It is an
 # extra rather than a base dependency because nothing in a shipped kit reads a report.
 reader = ["accelerate"]
+# Scoring an attribution rather than producing one (`kneemri.evaluation.attribution_faithfulness`).
+# The occlusion diagnostics in `kneemri.evaluation.attribution` have never been checked by anything, and
+# captum ships the two metrics that check them — `infidelity` (does the attribution predict what the
+# occlusion actually costs?) and `sensitivity_max` (does it survive a perturbation that should not move
+# it?) — plus `FeatureAblation`, which is the per-study form of the slot drop we already do by hand.
+# PIXEL-SPACE SALIENCY IS STILL DECLINED and the library does not change that argument: nothing in this
+# supervision says WHERE a finding is, so a heatmap has no ground truth here (see `attribution`'s
+# docstring, knee-wgaa). An extra rather than a base dependency because nothing in a shipped kit scores
+# an attribution.
+attribution = ["captum"]
 devtools = ["sdlc-devtools @ git+https://github.com/dimiturtrz/sdlc-scaffold.git@v1.28.0#subdirectory=sdlc-devtools"]
 
 [[tool.uv.index]]

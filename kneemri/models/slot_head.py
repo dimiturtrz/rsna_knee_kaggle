@@ -87,6 +87,33 @@ class SlotHead(nn.Module):
         att = att + self.prior.unsqueeze(0)
         return att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
 
+    def projected(self, x: Float[Tensor, "b s *o d"]) -> Float[Tensor, "b s o h"]:
+        """The slot features in the space the attention scores them in — one line, one home.
+
+        Split out because it was written three times: inside `context`, and twice more by callers that
+        wanted the WEIGHTS rather than the context and had to rebuild the input to `attention` by hand
+        (the head's own mirror test is one of them). A caller reconstructing this line is a caller that
+        can drift from it, and the drift would be silent — a slot embedding added on the wrong side of
+        the projection still produces weights that sum to one.
+        """
+        return self.proj(self.per_diagnosis(x)) + self.slot_emb.unsqueeze(1)
+
+    def slot_weights(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o s"]:
+        """WHERE each diagnosis looked, from the same inputs `forward` takes — a read, never a branch.
+
+        `attention` needs the projected features, which only `context` had; so asking a trained member
+        what its attention did meant either rebuilding that projection outside the head or capturing a
+        tensor from inside `forward`. This is neither: it recomputes the weights from the slot features
+        by calling the same two methods `context` calls, so `forward` keeps its arithmetic and its
+        return type exactly, and a member on disk answers this question without a hook, a flag or a
+        mode. The cost is one projection and one softmax — the encoder is the whole cost of a pass.
+
+        The weights are checkable against a prior in a way a pixel heatmap is not: the slots are NAMED
+        acquisitions and `core.data.corpus.anatomy` already states which plane and weighting each
+        finding is read on. See `kneemri.evaluation.attention_readout`.
+        """
+        return self.attention(self.projected(x), mask)
+
     def context(self, x: Float[Tensor, "b s *o d"], mask: Float[Tensor, "b s"]) -> Float[Tensor, "b o h"]:
         """What each diagnosis has read from the study, one vector per finding, before it becomes a logit.
 
@@ -96,7 +123,7 @@ class SlotHead(nn.Module):
         about the vector, not about its projection onto that one direction. `forward` composes the two,
         so every member on disk computes exactly what it computed before.
         """
-        h = self.proj(self.per_diagnosis(x)) + self.slot_emb.unsqueeze(1)
+        h = self.projected(x)
         return self.drop(torch.einsum("bos,bsoh->boh", self.attention(h, mask), h))
 
     def logits(self, ctx: Float[Tensor, "b o h"]) -> Float[Tensor, "b o"]:

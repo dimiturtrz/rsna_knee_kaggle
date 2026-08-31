@@ -64,7 +64,7 @@ def test_slot_head_attention():
     mask = torch.ones(2, SLOTS)
     mask[0, -1] = 0.0
 
-    weights = head.attention(head.proj(head.per_diagnosis(features)) + head.slot_emb.unsqueeze(1), mask)
+    weights = head.attention(head.projected(features), mask)
 
     assert weights.shape == (2, OUT, SLOTS)
     assert torch.allclose(weights.sum(-1), torch.ones(2, OUT), atol=1e-5)
@@ -196,3 +196,48 @@ def test_logits():
         x, mask = torch.randn(2, SLOTS, DIM), torch.ones(2, SLOTS)
         with torch.no_grad():
             assert torch.allclose(head.logits(head.context(x, mask)), head.forward(x, mask), atol=1e-6)
+
+
+def test_projected():
+    """The one home for the line `attention` scores: the projection plus the slot embedding.
+
+    Asserted against `context` rather than against a re-written copy of the line, because a copy is
+    exactly what this method exists to delete — a second spelling would pass a test written in its own
+    terms while drifting from the arithmetic every member on disk was fitted with.
+    """
+    torch.manual_seed(SEED)
+    head = SlotHead(DIM, SLOTS, OUT).eval()
+    x, mask = torch.randn(2, SLOTS, DIM), torch.ones(2, SLOTS)
+    with torch.no_grad():
+        h = head.projected(x)
+        assert h.shape == (2, SLOTS, OUT, head.hidden)
+        rebuilt = head.drop(torch.einsum("bos,bsoh->boh", head.attention(h, mask), h))
+        assert torch.allclose(rebuilt, head.context(x, mask), atol=1e-6)
+
+
+def test_slot_weights():
+    """WHERE each diagnosis looked, and the proof that asking costs `forward` nothing.
+
+    Two claims, and the second is the load-bearing one. The weights must be the ones `context` actually
+    pools with — otherwise the readout describes a head nobody fitted — and reading them must leave
+    `forward` bit-for-bit where it was, since every member on disk was scored through it.
+    """
+    torch.manual_seed(SEED)
+    head = SlotHead(DIM, SLOTS, OUT).eval()
+    x = torch.randn(2, SLOTS, DIM)
+    mask = torch.ones(2, SLOTS)
+    mask[0, -1] = 0.0
+
+    with torch.no_grad():
+        before = head.forward(x, mask)
+        weights = head.slot_weights(x, mask)
+        after = head.forward(x, mask)
+
+        assert weights.shape == (2, OUT, SLOTS)
+        assert torch.allclose(weights.sum(-1), torch.ones(2, OUT), atol=1e-5)
+        assert weights[0, :, -1].max() < 1e-3, "an absent slot must leave the softmax"
+        assert torch.equal(before, after), "reading the attention must not perturb the forward pass"
+        pooled = torch.einsum("bos,bsoh->boh", weights, head.projected(x))
+        assert torch.allclose(head.logits(head.drop(pooled)), before, atol=1e-6), (
+            "the weights read out must be the weights the logits were pooled with"
+        )

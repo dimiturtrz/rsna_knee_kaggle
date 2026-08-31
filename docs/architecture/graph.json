@@ -1052,6 +1052,96 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "core.data.corpus.anatomy",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "core.data.corpus.slots",
+      "weight": 2
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.evaluation.attention_scan",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.inference.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_readout",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_scan",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_scan",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_scan",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_scan",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "core.cli",
       "weight": 1
@@ -1120,6 +1210,54 @@
       "kind": "import",
       "source": "kneemri.evaluation.attribution",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "kneemri.evaluation.slot_probe",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "kneemri.inference.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attribution_faithfulness",
+      "target": "kneemri.models.backbone",
       "weight": 1
     },
     {
@@ -2134,6 +2272,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.side_blindness",
       "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.slot_probe",
+      "target": "kneemri.models.slot_head",
       "weight": 1
     },
     {
@@ -8654,6 +8798,228 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "target": "core.data.corpus.anatomy.FindingAnatomy",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "target": "core.data.corpus.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "target": "kneemri.evaluation.attention_readout.SlotMass",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout._row",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout._conditional",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout._row",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.affinity",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout._row",
+      "target": "kneemri.evaluation.attention_readout.SlotMass",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout.record",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.presence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout.record",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadout.rows",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout._row",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "target": "kneemri.evaluation.attention_readout.SlotMass",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadoutReport._verdict",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadoutReport._caveat",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.AttentionReadoutReport.lines",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadoutReport._verdict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.SlotMass.line",
+      "target": "kneemri.evaluation.attention_readout.SlotMass.dearest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.SlotMass.line",
+      "target": "kneemri.evaluation.attention_readout.SlotMass.expected",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.presence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadout.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_readout.AttentionReadoutReport.lines",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_scan.AttentionScan",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.evaluation.attention_scan.AttentionScan.weights",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan",
+      "target": "kneemri.inference.members.Window",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan",
+      "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan._batch",
+      "target": "kneemri.models.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan.weights",
+      "target": "kneemri.evaluation.attention_scan.AttentionScan._batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan.weights",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab.batches",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.attribution.Attribution",
       "target": "kneemri.evaluation.attribution.Holdout",
       "weight": 1
@@ -8877,6 +9243,168 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.attribution.main",
+      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport",
+      "target": "kneemri.evaluation.attribution_faithfulness.Faithfulness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport.lines",
+      "target": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport._verdict",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "target": "kneemri.evaluation.attribution_faithfulness.Faithfulness",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.attention",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe.weights",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "target": "kneemri.evaluation.attribution_faithfulness.Faithfulness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.ablation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.attention",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.infidelity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.ablation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.attention",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe.tiled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "core.data.corpus.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "core.data.corpus.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "core.data.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport.lines",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attribution_faithfulness.main",
       "target": "kneemri.inference.members.Member.from_checkpoint",
       "weight": 1
     },
@@ -12916,6 +13444,30 @@
       "kind": "calls",
       "source": "kneemri.evaluation.side_blindness.main",
       "target": "kneemri.evaluation.side_blindness.SideBlindness.lines",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.slot_probe.SlotProbe",
+      "target": "kneemri.models.slot_head.SlotHead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.slot_probe.SlotProbe.probabilities",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe.tiled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.slot_probe.SlotProbe.weights",
+      "target": "kneemri.evaluation.slot_probe.SlotProbe.tiled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.slot_probe.SlotProbe.weights",
+      "target": "kneemri.models.slot_head.SlotHead.slot_weights",
       "weight": 1
     },
     {
@@ -19455,7 +20007,7 @@
     {
       "kind": "calls",
       "source": "kneemri.models.slot_head.SlotHead.context",
-      "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "target": "kneemri.models.slot_head.SlotHead.projected",
       "weight": 1
     },
     {
@@ -19472,8 +20024,26 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.projected",
+      "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.slot_head.SlotHead.report_vector",
       "target": "kneemri.models.slot_head.SlotHead.per_diagnosis",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.slot_weights",
+      "target": "kneemri.models.slot_head.SlotHead.attention",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.slot_weights",
+      "target": "kneemri.models.slot_head.SlotHead.projected",
       "weight": 1
     },
     {
@@ -22513,7 +23083,7 @@
       "role": null
     },
     {
-      "descendants": 176,
+      "descendants": 180,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -22569,7 +23139,7 @@
       "role": null
     },
     {
-      "descendants": 50,
+      "descendants": 54,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -22594,8 +23164,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout",
+      "label": "attention_readout",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_scan",
+      "label": "attention_scan",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.attribution",
       "label": "attribution",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness",
+      "label": "attribution_faithfulness",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -22908,6 +23502,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.side_blindness",
       "label": "side_blindness",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe",
+      "label": "slot_probe",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -24818,6 +25420,38 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "label": "AttentionReadout",
+      "level": "class",
+      "parent": "kneemri.evaluation.attention_readout",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "label": "AttentionReadoutReport",
+      "level": "class",
+      "parent": "kneemri.evaluation.attention_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.SlotMass",
+      "label": "SlotMass",
+      "level": "class",
+      "parent": "kneemri.evaluation.attention_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_scan.AttentionScan",
+      "label": "AttentionScan",
+      "level": "class",
+      "parent": "kneemri.evaluation.attention_scan",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution",
       "label": "Attribution",
       "level": "class",
@@ -24847,6 +25481,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.attribution",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.Faithfulness",
+      "label": "Faithfulness",
+      "level": "class",
+      "parent": "kneemri.evaluation.attribution_faithfulness",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport",
+      "label": "FaithfulnessReport",
+      "level": "class",
+      "parent": "kneemri.evaluation.attribution_faithfulness",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "label": "SlotFaithfulness",
+      "level": "class",
+      "parent": "kneemri.evaluation.attribution_faithfulness",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -25470,6 +26128,14 @@
       "label": "SideBlindness",
       "level": "class",
       "parent": "kneemri.evaluation.side_blindness",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe.SlotProbe",
+      "label": "SlotProbe",
+      "level": "class",
+      "parent": "kneemri.evaluation.slot_probe",
       "role": "primary"
     },
     {
@@ -30898,6 +31564,142 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout._conditional",
+      "label": "_conditional",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout._row",
+      "label": "_row",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout.affinity",
+      "label": "affinity",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout.presence",
+      "label": "presence",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout.record",
+      "label": "record",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadout.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadoutReport._caveat",
+      "label": "_caveat",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadoutReport._verdict",
+      "label": "_verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.AttentionReadoutReport.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.AttentionReadoutReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.SlotMass.dearest",
+      "label": "dearest",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.SlotMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.SlotMass.expected",
+      "label": "expected",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.SlotMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.SlotMass.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout.SlotMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_readout.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_readout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_scan.AttentionScan.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_scan.AttentionScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_scan.AttentionScan._batch",
+      "label": "_batch",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_scan.AttentionScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attention_scan.AttentionScan.weights",
+      "label": "weights",
+      "level": "method",
+      "parent": "kneemri.evaluation.attention_scan.AttentionScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution.__init__",
       "label": "__init__",
       "level": "method",
@@ -31006,6 +31808,94 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.attribution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.Faithfulness.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.Faithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport._verdict",
+      "label": "_verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.FaithfulnessReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.ablation",
+      "label": "ablation",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.attention",
+      "label": "attention",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.infidelity",
+      "label": "infidelity",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.measure",
+      "label": "measure",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.perturb",
+      "label": "perturb",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness.sensitivity",
+      "label": "sensitivity",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness.SlotFaithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution_faithfulness.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution_faithfulness",
       "role": null
     },
     {
@@ -33734,6 +34624,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.side_blindness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe.SlotProbe.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.slot_probe.SlotProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe.SlotProbe.probabilities",
+      "label": "probabilities",
+      "level": "method",
+      "parent": "kneemri.evaluation.slot_probe.SlotProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe.SlotProbe.tiled",
+      "label": "tiled",
+      "level": "method",
+      "parent": "kneemri.evaluation.slot_probe.SlotProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slot_probe.SlotProbe.weights",
+      "label": "weights",
+      "level": "method",
+      "parent": "kneemri.evaluation.slot_probe.SlotProbe",
       "role": null
     },
     {
@@ -39058,8 +39980,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.projected",
+      "label": "projected",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.slot_head.SlotHead.report_vector",
       "label": "report_vector",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.slot_weights",
+      "label": "slot_weights",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
       "role": null
