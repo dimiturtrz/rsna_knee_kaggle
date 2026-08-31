@@ -2862,3 +2862,29 @@ not a lever. What is left are the levers that change what a member SEES (corpus,
 **Clean mount, verified.** `run_check` reads `loaded 6 of 6 members` and the log's own line agrees, so the
 flat is a reading about the swap and not a silent drop. Kit clean, not DIRTY. **The champion pin does not
 move** — 0.944 ties the pinned row, and `champion_check` pins the best row, not an equal one.
+
+## `spanseat_v1` — 0.944, the third single-seat exchange in a row to read flat
+
+`spanseat_v1` (ref 55908066, 2026-08-31, kit `53f81d3`, kernel `kneemri-spanseat`) is the seven-seat
+serving again — the raptor member decoded first into a scratch directory, then six of ours on the
+budget it left — with one seat moved against `holdswap_v1`: `calib_dense_hold_ff` out, `merged_span_ff`
+in. Vote (`LogitAverage`), foreign weight, count, kit and every other seat held.
+
+The point of the swap was KIND rather than fit. `calib_dense_hold_ff` and the seats around it are the
+same recipe family reaching the same ceiling from slightly different directions; `merged_span_ff` is a
+span member trained on the merged corpus, which is the closest thing the roster has to a member that
+saw different data. The owner's framing is the one it was fired on: an ensemble is about diversity, not
+about averaging seven numbers that are the same number.
+
+**It scored 0.944 — flat, to the board's own quantum.** `holdswap_v1` read 0.944 and `vjepaseat_v1`
+read 0.943 before it, each one seat away from the same six. Three consecutive single-seat exchanges at
+the top, one of them a genuinely different kind of member, and none of them moved the board. Read
+plainly, that is what a saturated seating looks like from the outside: at 0.944 the marginal seventh
+seat is worth less than the board can resolve, and no reseating of this pool is the lever. It does not
+say the members are equivalent — the ruler here is the board's 0.001 quantum, and three flats inside it
+bound the effect rather than measuring it.
+
+What it does say, and this is the part worth acting on, is that the next slot should not buy a fourth
+seat exchange. Either the pool gains a member that is better rather than merely different, or the entry
+changes shape (size, vote rule, or the corpus a member is fitted on) — a candidate that reads DISTINCT
+on `member_axes` rather than one that reads far on rank correlation alone.
