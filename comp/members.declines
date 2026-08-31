@@ -123,3 +123,23 @@ merged_labelwise_cf.pt      # 0.8587 solo, peak epoch 9 of 12, CONVERGED. One va
                             # Distance without solo strength does not buy a seat - now on two rulers and
                             # two axes. Re-open on a member that is BOTH distant and at or above the
                             # seated quality level, never on a distance number alone.
+
+cover_labelwise_s2026       # 0.8495 solo, seat value -0.0001 against honest12 [-0.0006, +0.0004], best
+                            # available swap -0.0000: zero of one clears +0.0015. It reads DISTINCT on the
+                            # three-ruler join (rank 0.8587 / js 0.0173 / maha 4.627 against roster
+                            # boundaries 0.8956 / 0.0150 / 4.436), which is exactly why the decline is
+                            # written rather than assumed: DISTINCT is NECESSARY for a seat and never
+                            # sufficient, and a member off the pool's span with nothing to sell is the
+                            # shape the join exists to make visible. Its one real content is MCL +0.0247,
+                            # starred against both of its controls and given back by six other labels.
+                            # Re-open only on a per-finding build that keeps the MCL gain without paying
+                            # for it elsewhere - never on the DISTINCT cell alone.
+
+stack224_s2026              # 0.8476 solo against native224's 0.8502, and the axis it belonged to is
+                            # CLOSED (knee-qphd, 2026-08-31): full 36-slice coverage is refuted as a member
+                            # lever, on cover_labelwise's pre-registered branch. Kept in writing rather
+                            # than deleted because its per-label shape is the evidence - a two-label
+                            # collapse (Lateral Meniscus -0.0263, Fracture -0.0180) inside a nine-label
+                            # rise, which is what named the aggregator mechanism at all. Re-open only if
+                            # something makes 36-slice coverage cost less than it takes, which nothing
+                            # currently does.
