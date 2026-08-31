@@ -19,9 +19,10 @@ from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
+from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
-from kneemri.training.trainer import Adaptation
+from kneemri.training.trainer import ONE_CYCLE_WARMUP, Adaptation
 
 
 class FlagVocabulary:
@@ -344,6 +345,7 @@ class FlagVocabulary:
             "training labels are the variable, or the arms are measured with different rulers.",
         )
         cls._encoder_arguments(parser)
+        cls._optimiser_arguments(parser)
         parser.add_argument(
             "--train-fraction",
             type=float,
@@ -356,6 +358,50 @@ class FlagVocabulary:
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
+
+    @staticmethod
+    def _optimiser_arguments(parser: argparse.ArgumentParser) -> None:
+        """HOW the weights are moved, as opposed to what they read or what they are asked to predict.
+
+        These three are the last constants in `trainer.py` that no arm has ever varied: every number in
+        the ledger was measured at weight decay 0.02, at 15% warmup, and with no gradient ceiling at all.
+        None of the three was chosen against this corpus — they came in with the reference recipe, at a
+        backbone rate 5x lower than the one the rate sweep settled on. They are grouped because they
+        describe the OPTIMISER and its schedule, and because each defaults to the inherited value, so
+        every existing arm parses to exactly the run it already measured.
+        """
+        parser.add_argument(
+            "--grad-clip",
+            type=float,
+            default=UNCLIPPED,
+            help="ceiling on the global gradient norm of one optimiser step (0 = unbounded, which is "
+            "what every number in the ledger was measured under). The failure it addresses is measured: "
+            "native224_long slid -0.0165 over twelve extra epochs while its training loss kept falling, "
+            "which is the shape a few large late steps produce. Clipping bounds how far one batch may "
+            "move the weights; it does not change where the walk is allowed to end up, which is "
+            "--weight-decay. 1.0 is the usual value in the ViT recipes this project's trunk came from.",
+        )
+        parser.add_argument(
+            "--weight-decay",
+            type=float,
+            default=Adaptation().weight_decay,
+            help="AdamW's decoupled weight decay, applied to every parameter group. 0.02 is the "
+            "inherited default and was never re-derived: it was chosen beside a backbone rate of 8e-6, "
+            "and the rate sweep has since moved the trunk 5x to 4e-5, so the same decay now competes "
+            "with steps five times larger. Decay and rate are not independent — the equilibrium norm a "
+            "weight settles at is set by their ratio — so a rate change with the decay held fixed has "
+            "already changed the regularisation, in a direction nobody chose.",
+        )
+        parser.add_argument(
+            "--warmup",
+            type=float,
+            default=ONE_CYCLE_WARMUP,
+            help="share of the one-cycle schedule spent warming UP before the anneal begins (0.15 is "
+            "the inherited default and what every ledger number was measured at). Over twelve epochs "
+            "that is 1.8 epochs climbing to the peak rate on a run whose best epoch is 7, so a seventh "
+            "of the budget is spent below the rate the recipe was tuned for. Read with --one-cycle only "
+            "— without a schedule there is no warmup to size, and the flag is then inert.",
+        )
 
     @staticmethod
     def _teacher_arguments(parser: argparse.ArgumentParser) -> None:

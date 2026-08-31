@@ -36,6 +36,7 @@ from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
 from kneemri.training.grades import Predicted
+from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.mixup import Mixup
 from kneemri.training.objective import Objective
@@ -66,6 +67,15 @@ class Adaptation:
 
     head_lr: float = 1e-3
     backbone_lr: float = 8e-6
+    weight_decay: float = WEIGHT_DECAY
+    """How hard AdamW pulls every trained weight back toward zero — a member of the same entangled set.
+
+    It was a module constant until 2026-08-31 and no arm had ever varied it. 0.02 came in with the
+    reference recipe at a backbone rate of 8e-6; the rate sweep then moved the trunk five-fold to 4e-5
+    without re-deriving it, so the decay every current number was measured under is the one chosen for a
+    trunk that barely moved. Defaults to that constant, which is what keeps every existing arm identical.
+    """
+
     unfreeze_last: int = 6
     """Six of twelve blocks — inherited from the reference, and only meaningful beside the rate above."""
 
@@ -91,6 +101,9 @@ REPORTS = "report_supervision"
 ACCUMULATION = "micro_batches_per_step"
 LAYER_DECAY = "encoder_rate_decay"
 MIXUP = "mixup_alpha"
+OPTIMISER_DECAY = "optimiser_weight_decay"
+WARMUP = "one_cycle_warmup"
+CLIPPING = "gradient_clip_norm"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 NEEDED_FOR_A_RATIO = 2
@@ -124,7 +137,7 @@ class Trainer:
             self.adaptation.layer_decay,
             self.objective.attached(device),
         )
-        self.optimiser = torch.optim.AdamW(groups, weight_decay=WEIGHT_DECAY)
+        self.optimiser = torch.optim.AdamW(groups, weight_decay=self.adaptation.weight_decay)
         # fp16 until a run says otherwise, because that is what every number in the ledger was measured
         # under and a precision change is a numerics change.
         self.autocast_dtype = torch.float16
@@ -144,6 +157,13 @@ class Trainer:
         # Attached and null by default for the same reason: alpha zero draws no blend at all, so the
         # loop is byte-for-byte the one every number in the ledger was measured under.
         self.mixup = Mixup()
+        # Attached and null by default for the same reason: an unbounded step is what every number in
+        # the ledger was measured under, and `GradientClip()` leaves `fit_epoch` doing exactly nothing.
+        self.clipping = GradientClip()
+        # A VALUE rather than a policy object, because there is nothing to dispatch on: the fraction is
+        # read once, by `one_cycle`, as OneCycleLR's `pct_start`. It is a field rather than an argument
+        # to that method so the request can be transcribed the same way every other switch is.
+        self.warmup = ONE_CYCLE_WARMUP
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
         # None rather than a no-op object, unlike every other policy here, because there is no
@@ -184,7 +204,22 @@ class Trainer:
             ACCUMULATION: self.accumulation.every,
             LAYER_DECAY: self.encoder_rate_decay(),
             MIXUP: self.mixup.alpha,
+            OPTIMISER_DECAY: self.weight_decay(),
+            WARMUP: self.warmup,
+            CLIPPING: self.clipping.max_norm,
         }
+
+    def weight_decay(self) -> float:
+        """The decay MEASURED off the optimiser, not read back off the flag that asked for it.
+
+        The positive witness `--weight-decay` would otherwise lack, and the same argument
+        `encoder_rate_decay` makes one line below: a decay that never reached `Adaptation` builds an
+        optimiser at the inherited 0.02, trains perfectly well, and reports the old recipe's number under
+        the new arm's name. Read off the HEAD group, which every configuration has — under LoRA the
+        backbone groups are empty of base blocks, and the head is the one group `parameter_groups` always
+        returns.
+        """
+        return float(self.optimiser.param_groups[0]["weight_decay"])
 
     def encoder_rate_decay(self) -> float:
         """The per-block rate ratio MEASURED off the optimiser, not read back off the flag that asked.
@@ -287,14 +322,27 @@ class Trainer:
         """Mix each batch with a permutation of itself — see `Mixup` for why this axis and not another epoch."""
         self.mixup = Mixup(alpha)
 
+    def clip_gradients(self, max_norm: float) -> None:
+        """Bound the norm of one optimiser step — see `GradientClip` for why this project never had one."""
+        self.clipping = GradientClip(max_norm)
+
+    def warm_up(self, fraction: float) -> None:
+        """Spend this share of the one-cycle schedule warming up, instead of the inherited 0.15.
+
+        BEFORE `one_cycle`, which is the one ordering constraint: the fraction is handed to OneCycleLR at
+        construction and a scheduler already built cannot be told a different `pct_start`. `RunSetup`
+        attaches every policy before it sizes the schedule, so the order holds there by construction.
+        """
+        self.warmup = fraction
+
     def one_cycle(self, total_steps: int) -> None:
         """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
 
         MEASURED REASON: at a constant learning rate our five folds peaked at epochs 13/13/10/12/11 and
         gained ~0 over their final five — saturated at ~12 epochs. A run that improves out to 60 epochs
-        is not training longer, it is training on a decaying learning rate. `pct_start=0.15` spends the
-        first sixth warming up, which also protects the pretrained encoder from the first few hundred
-        steps at full rate.
+        is not training longer, it is training on a decaying learning rate. `pct_start` spends that share
+        of the run warming up, which also protects the pretrained encoder from the first few hundred
+        steps at full rate; it defaults to the inherited 0.15 and `warm_up` is what moves it.
 
         `max_lr` is read back OFF THE OPTIMISER rather than rebuilt from the two `Adaptation` rates it
         used to name. Those two are the peak rates only while `parameter_groups` returns exactly two
@@ -306,7 +354,7 @@ class Trainer:
             self.optimiser,
             max_lr=[group["lr"] for group in self.optimiser.param_groups],
             total_steps=max(total_steps, 1),
-            pct_start=ONE_CYCLE_WARMUP,
+            pct_start=self.warmup,
         )
 
     def augment_bag(self, images: UInt8[Tensor, "b n g h w"]) -> UInt8[Tensor, "b n g h w"]:
@@ -438,6 +486,10 @@ class Trainer:
             # total mid-run, and an EMA updated between accumulations would average weights that never
             # took a step.
             if self.accumulation.closes(steps):
+                # AFTER the last micro-batch's backward and BEFORE the step: the norm has to be the one
+                # the optimiser will actually apply, so clipping a partially accumulated gradient would
+                # bound a quantity that is never used.
+                self.clipping.applied(self.model, self.optimiser, self.scaler)
                 self.scaler.step(self.optimiser)
                 self.scaler.update()
                 self.optimiser.zero_grad(set_to_none=True)

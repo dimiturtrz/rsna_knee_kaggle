@@ -73,7 +73,7 @@ builder calling it would be attaching a policy that does not exist.
 `context_width` is a MEASUREMENT for the same reason: the feature term has to be built at the student's
 real head width, and asking the model is what keeps that from being a guess. It switches nothing on."""
 
-TRAINER_REPORTER = {"policies", "encoder_rate_decay"}
+TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay"}
 MODEL_REPORTER = {"applied"}
 """Each object's account of WHICH policies landed on it — read by `Landed` before the card is spent.
 
@@ -85,6 +85,12 @@ The stale-exemption assert wants names the owner really has, so the two are name
 is BUILT, out of `Adaptation`, so there is no method for a builder to call and nothing for it to attach.
 The method measures the ratio back off the optimiser's own groups, which is precisely what makes it a
 witness rather than a switch — a decay that never landed cannot report itself.
+
+`weight_decay` is the same shape and for the same reason: `--weight-decay` is an `AdamW` CONSTRUCTOR
+keyword carried in `Adaptation`, so there is no attachment step to miss, and the method reads the
+coefficient back off the built optimiser's first group. That read is the whole point — a keyword that
+never arrived leaves the run training at the inherited value with the flag's value in its config, and
+only asking the optimiser can tell the two apart.
 """
 
 

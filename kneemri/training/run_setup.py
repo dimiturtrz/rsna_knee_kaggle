@@ -76,6 +76,7 @@ class RunSetup:
             backbone_lr=self.options.backbone_lr,
             unfreeze_last=self.options.unfreeze_last,
             layer_decay=self.options.layer_decay,
+            weight_decay=self.options.weight_decay,
         )
 
     def budget(self) -> DeviceBudget:
@@ -159,6 +160,9 @@ class RunSetup:
             unfreeze_last=options.unfreeze_last,
             layer_decay=options.layer_decay,
             mixup=options.mixup,
+            weight_decay=options.weight_decay,
+            warmup=options.warmup,
+            grad_clip=options.grad_clip,
         )
 
     def objective(self, widths: Widths | None = None) -> Objective:
@@ -541,6 +545,11 @@ class RunSetup:
         # and the trainer's own accumulation is what converts micro-batches into them.
         trainer.accumulate(options.accumulate)
         trainer.blend(options.mixup)
+        trainer.clip_gradients(options.grad_clip)
+        # BEFORE the schedule too, and for a sharper reason than accumulation's: `one_cycle` reads the
+        # warmup fraction when it BUILDS OneCycleLR, so a warm_up after it would set a field nothing
+        # reads again and the run would anneal on 0.15 while its config recorded the value asked for.
+        trainer.warm_up(options.warmup)
         if options.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR

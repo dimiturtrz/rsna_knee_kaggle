@@ -62,11 +62,14 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    CLIPPING,
     LAYER_DECAY,
     MIXUP,
+    OPTIMISER_DECAY,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
+    WARMUP,
     WINDOW,
     Trainer,
 )
@@ -243,6 +246,9 @@ class Request:
     accumulate: int
     layer_decay: float
     mixup: float
+    weight_decay: float
+    warmup: float
+    grad_clip: float
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -306,4 +312,13 @@ class Request:
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,
+            # THE THREE OPTIMISER-PATH POLICIES, and each is read back off the object that applies it
+            # rather than off the value that was passed in: the decay from the optimiser's first
+            # parameter group, the warmup from the field `one_cycle` hands to `pct_start`, the ceiling
+            # from the `GradientClip` the step calls. A decay that never reached `AdamW` — the shape of
+            # this failure, since it is a constructor keyword and a typo lands in no exception — reads
+            # here as 0.02 against the value asked for.
+            OPTIMISER_DECAY: self.weight_decay,
+            WARMUP: self.warmup,
+            CLIPPING: self.grad_clip,
         }

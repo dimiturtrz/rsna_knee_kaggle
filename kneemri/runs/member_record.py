@@ -51,6 +51,11 @@ NOT_IN_CONFIG = {
     "folds": "banned for the same reason",
     "fold": "which half was held out — a property of the SCORE, and `holdout` is what serves it",
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
+    "warmup": "the share of that schedule spent climbing — a parameter OF the write-off above, and dead without it",
+    "weight_decay": "an optimiser setting: it shapes where the walk settled, and the weights that "
+    "settled are what a rebuild loads. Adds no module and no parameter",
+    "grad_clip": "same path and same write-off — a ceiling on how far one step could move, applied "
+    "between backward and step, with nothing left in the checkpoint to rebuild",
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
     "finding_calibration": "supervision policy, same — it shifts each finding's level in the training "

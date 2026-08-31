@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# attend224.sh — native224's recipe with `--slice-pooling attend` and nothing else moved. The second of
+# four arms transporting the AGGREGATION family onto the 224 control.
+#
+# bead: knee-7d53
+#
+# WHY THE FAMILY. `experiments/README.md:5024-5075`: fourteen arms split by WHAT they changed, and the
+# split is total — more input lost on the focal six, changed aggregation gained, four positives from four
+# unrelated mechanisms. `attend_dense` is the second-largest of them (+0.0059 focal, +0.0046 regional,
+# +0.0043 mean — the only one of the four positive on all three columns). Every one of those readings is
+# at 336 px and 20 slices. This arm is that mechanism at the native read.
+#
+# THE MECHANISM. `native224` pools the slice axis with `--slice-pooling max`: an elementwise maximum over
+# the twelve per-slice feature vectors. That is a FIXED budget with no parameters — every feature
+# dimension independently takes its largest value across depth, so the study's vector is stitched from
+# whichever slice happened to be loudest per dimension, and no slice is ever trusted as a slice.
+# `--slice-pooling attend` (`kneemri/models/slice_pooling.py`, ATTEND) learns a weighting over the depth
+# axis instead, so the model can put its mass on the two or three slices a thin focal structure lives on
+# — the exact failure the dilution mechanism in the README section above predicts.
+#
+# THE RESOLUTION ARGUMENT, WHICH IS WHAT THIS ARM IS FOR. I predict attention over slices matters MORE at
+# 224, and the argument is about what the MAX does with noise. An elementwise maximum is a biased
+# estimator: it takes the largest of twelve draws per dimension, so its value rises with the NOISE of the
+# per-slice features, not only with their signal. At 224 each patch embedding averages a fixed-mm
+# structure with 2.25x more surrounding tissue, so the per-slice features are noisier and the max's
+# upward bias grows — the control degrades faster than a soft, learned combination would. A weighted sum
+# also averages several slices together, which is variance reduction exactly where the evidence per slice
+# has got thinner. Both halves point the same way: less per-slice evidence makes WHICH slices you trust
+# matter more, not less. The competing story — that attention needs a crisp per-slice signal to learn a
+# weighting at all, and a coarse read gives it nothing to key on — predicts LESS, and it is the reading
+# to expect if this comes back flat while 336 read +0.0059. Say it now: a flat 224 against a positive 336
+# on THIS mechanism is a statement that the attention weights are learned off in-plane detail the native
+# read discards, and it would be the strongest single argument the ledger has for paying 3x the card for
+# dense members on the roster.
+#
+# NOT COMBINED WITH --slice-regions, AND THE REASON IS A DEFECT. `model.py:322` returns the attend path
+# and never reaches `over_depth`, so `--slice-regions` passed beside `--slice-pooling attend` is silently
+# ignored — no error, no log line, and the run records a region count it never used
+# (`experiments/README.md:5075`). `regions224.sh` is therefore a separate arm and this one leaves the
+# region count at its default.
+#
+# control  native224 = 0.8502, best at epoch 7, converged not truncated. 12 epochs, 12 slices, 0.20-0.80
+#          band, whole-stack, backbone 4e-5, 224 px, same labels, same 909-study holdout, slice pooling at
+#          `max`. The single variable is --slice-pooling.
+# cost     ~19 min for twelve epochs at 94 s. Same cache as native224; attention over twelve vectors is
+#          negligible against the trunk and adds no encoder pass.
+# price    19 min for P(clears the 0.0062 floor on the MEAN) = 0.20 — the highest of the four transports,
+#          because `attend_dense` is the only one of the four that was positive on ALL THREE columns at
+#          336 (+0.0043 mean), so it needs the least help from the resolution argument to clear here.
+#
+# HARNESS CHECK BEFORE READING ANY NUMBER. The printed recipe must say "slice_pooling": "attend" and
+# "image_size": "224", and the log must load 4,406 studies and hold out 909. The attend head carries
+# parameters the max path does not, so a parameter count equal to native224's means the switch did not
+# land and the delta is a PLUMBING verdict rather than a null.
+#
+# THE FALSIFIABLE PART, written before the run.
+#   CONFIRMED   the mean peak clears 0.8564 (control + floor). Learned depth attention survives the
+#               native read; it becomes the default slice pooling for 224 members and `fuse_attend` is
+#               worth its 45 min at dense.
+#   DIRECTIONAL positive under the floor. Kept — it is free at inference and mechanism-sound — but not a
+#               finding and not planned around.
+#   TRANSPORT LOSS  positive on the focal six and flat on the mean, i.e. the 336 shape reproduced at
+#               lower amplitude. That prices the resolution, which is the reading this window is short of.
+#   REFUTED     the mean falls by more than the floor. Attention weights learned from coarse per-slice
+#               features can concentrate on the wrong slices with more confidence than a max ever does;
+#               `attend_true` already read −0.0068 on a different variant, so this failure mode is
+#               MEASURED, not hypothetical. That closes attention AT 224 and leaves the 336 reading
+#               standing.
+#
+# deliberate: --slice-pooling attend (the arm's thesis — trust slices instead of taking their maximum)
+# deliberate: --image-size 224 (native224's control, per that row's standing instruction)
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train attend224 \
+  $RECIPE --epochs 12 --slice-pooling attend --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --image-size 224 \
+  --labels "$LABELS" --out "$PROCESSED/attend224_s2026.pt"

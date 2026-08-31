@@ -25,9 +25,10 @@ from kneemri.models.slice_pooling import CHANNELS
 from kneemri.models.slot_head import ATTENDED
 from kneemri.models.token_pooling import CLS_MEAN
 from kneemri.training.flag_vocabulary import FlagVocabulary
+from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
-from kneemri.training.trainer import Adaptation
+from kneemri.training.trainer import ONE_CYCLE_WARMUP, Adaptation
 
 NOT_STATED = "None"
 """How `recipe` spells a field that was never given — `str(None)`, since it stringifies every value.
@@ -142,6 +143,16 @@ class TrainingOptions:
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
     layer_decay: float = Adaptation().layer_decay
+
+    weight_decay: float = Adaptation().weight_decay
+    """AdamW's decay on every group. Inherited beside an 8e-6 trunk; the rate has since moved 5x."""
+
+    warmup: float = ONE_CYCLE_WARMUP
+    """Share of a one-cycle schedule spent climbing. Inert without --one-cycle."""
+
+    grad_clip: float = UNCLIPPED
+    """Ceiling on one step's global gradient norm; 0 is the unbounded step the ledger was measured on."""
+
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS
     slice_regions: int = StudyDesign().slice_regions

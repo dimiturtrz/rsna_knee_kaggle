@@ -16,6 +16,7 @@ from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.augmentation import INTENSITY_AUGMENT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
+from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import (
@@ -39,11 +40,16 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    CLIPPING,
     LAYER_DECAY,
     MIXUP,
+    ONE_CYCLE_WARMUP,
+    OPTIMISER_DECAY,
     READ_SIZE,
     REPORTS,
     SCHEDULED,
+    WARMUP,
+    WEIGHT_DECAY,
     WINDOW,
     Adaptation,
     Trainer,
@@ -163,6 +169,72 @@ def test_blend():
     assert trainer.policies()[MIXUP] == OFF, "the default must be the loop every ledger number was measured under"
     trainer.blend(0.2)
     assert trainer.policies()[MIXUP] == pytest.approx(0.2)
+
+
+def test_clip_gradients():
+    """Attaching the ceiling is visible in the trainer's own account of itself, and defaults to off.
+
+    The POSITIVE WITNESS for `--grad-clip`: an unattached clip is a `GradientClip(0.0)` that returns
+    before it touches a gradient, so a value that never reached the trainer trains exactly the ledger's
+    unbounded run and reports it under the clipped arm's name.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[CLIPPING] == UNCLIPPED, "every ledger number was measured unbounded"
+    trainer.clip_gradients(1.0)
+    assert trainer.policies()[CLIPPING] == pytest.approx(1.0)
+
+
+def test_warm_up():
+    """The fraction is what the schedule is BUILT with, so the witness is the rate the cycle starts at.
+
+    Reading the field back would only prove the setter assigns. `one_cycle` reads it once, at
+    construction, which is why `run_setup` attaches this first — a warmup set afterwards would leave the
+    run annealing on 0.15 while its recipe recorded the value asked for.
+
+    THE WITNESS IS THE RATE PART-WAY IN, not the rate at step zero: OneCycleLR starts every cycle at
+    `max_lr / div_factor` whatever the fraction is, so an initial-rate comparison passes on a warmup that
+    never landed. Four steps into forty, a 0.05 warmup has already peaked and turned down while a 0.5
+    warmup is a fifth of the way up.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[WARMUP] == pytest.approx(ONE_CYCLE_WARMUP), "the inherited default"
+
+    trainer.warm_up(0.5)
+    assert trainer.policies()[WARMUP] == pytest.approx(0.5)
+    slow = _rate_after(trainer, warmup_steps=4, total_steps=40)
+    brief = _trainer()
+    brief.warm_up(0.05)
+    assert all(
+        climbing < peaked
+        for climbing, peaked in zip(slow, _rate_after(brief, warmup_steps=4, total_steps=40), strict=True)
+    ), "a longer warmup must still be climbing where a brief one has already turned down"
+
+
+def _rate_after(trainer: Trainer, warmup_steps: int, total_steps: int) -> list[float]:
+    """The group rates a few steps into a freshly attached cycle."""
+    trainer.one_cycle(total_steps=total_steps)
+    assert trainer.schedule is not None
+    for _ in range(warmup_steps):
+        trainer.schedule.step()
+    return [group["lr"] for group in trainer.optimiser.param_groups]
+
+
+def test_weight_decay():
+    """MEASURED off the optimiser's own group, not off the `Adaptation` that was passed in.
+
+    A decay is a keyword to `AdamW`'s constructor, so the way it fails is silent by construction: drop
+    the keyword and every group carries the library default while the config records the value asked
+    for. Reading the built optimiser back is what makes that a refusal before the card is spent.
+    """
+    assert _trainer().weight_decay() == pytest.approx(WEIGHT_DECAY), "the inherited default"
+
+    tighter = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+        Adaptation(weight_decay=0.1),
+    )
+    assert tighter.weight_decay() == pytest.approx(0.1)
+    assert tighter.policies()[OPTIMISER_DECAY] == pytest.approx(0.1), "and it is what the pre-flight check reads"
 
 
 def test_fit_epoch_accumulation_matches_the_larger_batch():
@@ -331,6 +403,13 @@ def test_policies():
         SIDE_TERM: 0.0,
         FOCUS: "",
         INTENSITY_AUGMENT: False,
+        # The three optimiser-path knobs, in `constructed` because they are the same on both sides of
+        # the attachments below: nothing `one_cycle`/`whole_stack`/`exponential_average` does may move
+        # them, and a warmup that changed when the schedule was attached would be the drift the landed
+        # check exists to catch.
+        OPTIMISER_DECAY: WEIGHT_DECAY,
+        WARMUP: ONE_CYCLE_WARMUP,
+        CLIPPING: UNCLIPPED,
     }
 
     assert trainer.policies() == {

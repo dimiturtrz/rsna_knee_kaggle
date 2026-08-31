@@ -104,6 +104,12 @@ def test_adaptation():
     assert _setup().adaptation().layer_decay == NO_LAYER_DECAY, "flat is the shape the ledger was measured in"
     assert _setup(layer_decay=0.7).adaptation().layer_decay == 0.7, "the third member of the triple must land"
 
+    assert _setup().adaptation().weight_decay == Adaptation().weight_decay, "the inherited 0.02"
+    assert _setup(weight_decay=0.1).adaptation().weight_decay == 0.1, (
+        "the decay rides on the adaptation because it is the OTHER half of how far the encoder moves: "
+        "rate and decay set the norm a weight settles at jointly, and the rate sweep moved one of them"
+    )
+
 
 def test_trainer(tmp_path: Path):
     """Every optional policy a run asked for is attached, and nothing it did not ask for is.
@@ -139,6 +145,16 @@ def test_trainer(tmp_path: Path):
     assert type(trainer.average) is WeightAverage, "the EMA is what `evaluated()` scores and the checkpoint keeps"
     assert trainer.autocast_dtype is torch.float16, "--fp16 is the only way back, so it must land"
     assert trainer.scaler is not None, "fp16 has a scale that can collapse, so the scaler comes with it"
+
+    # The warmup has to be attached BEFORE the schedule is built, and this is where that ordering is
+    # observable: `one_cycle` reads the fraction once, into `pct_start`, so an attachment after it would
+    # leave `policies()` reporting the value asked for over a cycle annealing on the inherited 0.15.
+    tuned = _setup(one_cycle=True, epochs=2, warmup=0.4, grad_clip=1.5).trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS), device, [], np.arange(120)
+    )
+    assert tuned.warmup == 0.4
+    assert tuned.clipping.max_norm == 1.5
+    assert tuned.schedule is not None, "the fraction must not cost the run its schedule"
 
     vectors = tmp_path / "reports.npz"
     np.savez(vectors, identifiers=np.array(["s0"]), vectors=np.zeros((1, 4), dtype=np.float32))
@@ -358,7 +374,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 30, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 33, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

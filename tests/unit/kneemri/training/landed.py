@@ -26,6 +26,7 @@ from kneemri.models.model import (
     StudyModel,
 )
 from kneemri.models.slice_pooling import ATTEND, CHANNELS, MAXIMUM
+from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
@@ -34,9 +35,14 @@ from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.trainer import (
     AUTOCAST,
     AVERAGING,
+    CLIPPING,
     LAYER_DECAY,
+    ONE_CYCLE_WARMUP,
+    OPTIMISER_DECAY,
     READ_SIZE,
     SCHEDULED,
+    WARMUP,
+    WEIGHT_DECAY,
     WINDOW,
     Adaptation,
     Trainer,
@@ -118,6 +124,9 @@ PLAIN = Request(
     unfreeze_last=4,
     layer_decay=NO_LAYER_DECAY,
     mixup=OFF,
+    weight_decay=WEIGHT_DECAY,
+    warmup=ONE_CYCLE_WARMUP,
+    grad_clip=UNCLIPPED,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 
@@ -376,3 +385,12 @@ def test_wanted() -> None:
         "open base blocks — asking through the flag would fail every LoRA arm"
     )
     assert replace(PLAIN, unfreeze_last=2).wanted()[OPENED_BLOCKS] == 2
+
+    # The three optimiser-path knobs pass through unchanged — no translation to own, and the default
+    # must be the inherited value, since these are the first flags whose OFF state is a number every
+    # ledger row was measured at rather than a policy nobody attached.
+    assert PLAIN.wanted()[OPTIMISER_DECAY] == WEIGHT_DECAY
+    assert PLAIN.wanted()[WARMUP] == ONE_CYCLE_WARMUP
+    assert PLAIN.wanted()[CLIPPING] == UNCLIPPED
+    tuned = replace(PLAIN, weight_decay=0.1, warmup=0.05, grad_clip=1.0).wanted()
+    assert (tuned[OPTIMISER_DECAY], tuned[WARMUP], tuned[CLIPPING]) == (0.1, 0.05, 1.0)

@@ -4377,6 +4377,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.flag_vocabulary",
+      "target": "kneemri.training.gradient_clip",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.flag_vocabulary",
       "target": "kneemri.training.mixup",
       "weight": 1
     },
@@ -4648,6 +4654,12 @@
       "kind": "import",
       "source": "kneemri.training.options",
       "target": "kneemri.training.flag_vocabulary",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
+      "target": "kneemri.training.gradient_clip",
       "weight": 1
     },
     {
@@ -5014,6 +5026,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.gradient_clip",
       "weight": 1
     },
     {
@@ -21793,6 +21811,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.flag_vocabulary.FlagVocabulary._optimiser_arguments",
+      "target": "kneemri.training.trainer.Adaptation",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.flag_vocabulary.FlagVocabulary.parser",
       "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
@@ -23199,6 +23223,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.clip_gradients",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.exponential_average",
       "weight": 1
     },
@@ -23230,6 +23260,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.teach_from",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.warm_up",
       "weight": 1
     },
     {
@@ -23493,6 +23529,12 @@
     {
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.gradient_clip.GradientClip",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.heartbeat.Heartbeat",
       "weight": 1
     },
@@ -23559,6 +23601,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.gradient_clip.GradientClip",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.heartbeat.Heartbeat",
       "weight": 1
     },
@@ -23602,6 +23650,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.blend",
       "target": "kneemri.training.mixup.Mixup",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.clip_gradients",
+      "target": "kneemri.training.gradient_clip.GradientClip",
       "weight": 1
     },
     {
@@ -23661,6 +23715,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.gradient_clip.GradientClip.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.heartbeat.Heartbeat.tick",
       "weight": 1
     },
@@ -23710,6 +23770,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
       "target": "kneemri.training.trainer.Trainer.encoder_rate_decay",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.policies",
+      "target": "kneemri.training.trainer.Trainer.weight_decay",
       "weight": 1
     },
     {
@@ -24223,7 +24289,7 @@
       "role": null
     },
     {
-      "descendants": 186,
+      "descendants": 187,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -25471,7 +25537,7 @@
       "role": null
     },
     {
-      "descendants": 30,
+      "descendants": 31,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -25546,6 +25612,14 @@
       "descendants": 0,
       "id": "kneemri.training.grades",
       "label": "grades",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.gradient_clip",
+      "label": "gradient_clip",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -28868,6 +28942,14 @@
       "label": "Predicted",
       "level": "class",
       "parent": "kneemri.training.grades",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.gradient_clip.GradientClip",
+      "label": "GradientClip",
+      "level": "class",
+      "parent": "kneemri.training.gradient_clip",
       "role": "satellite"
     },
     {
@@ -42984,6 +43066,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.flag_vocabulary.FlagVocabulary._optimiser_arguments",
+      "label": "_optimiser_arguments",
+      "level": "method",
+      "parent": "kneemri.training.flag_vocabulary.FlagVocabulary",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.flag_vocabulary.FlagVocabulary._teacher_arguments",
       "label": "_teacher_arguments",
       "level": "method",
@@ -43052,6 +43142,14 @@
       "label": "thresholds",
       "level": "method",
       "parent": "kneemri.training.grades.OrdinalGrades",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.gradient_clip.GradientClip.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.training.gradient_clip.GradientClip",
       "role": null
     },
     {
@@ -44248,6 +44346,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.clip_gradients",
+      "label": "clip_gradients",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.encoder_rate_decay",
       "label": "encoder_rate_decay",
       "level": "method",
@@ -44346,6 +44452,22 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.teach_from",
       "label": "teach_from",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.warm_up",
+      "label": "warm_up",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.weight_decay",
+      "label": "weight_decay",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
