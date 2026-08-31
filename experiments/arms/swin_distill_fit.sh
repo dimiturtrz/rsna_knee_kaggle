@@ -48,7 +48,7 @@
 #
 # bead: knee-8009
 # bead: knee-7ybf
-# control  swin_supervised = 0.8331 — this invocation without --encoder-weights, already on disk.
+# control  swin_supervised_s2026 = 0.8331 — this invocation without --encoder-weights, already on disk.
 # deliberate: --encoder-weights  (the distilled trunk — the ONE varied term)
 # deliberate: --variant
 # deliberate: --train-size       (384, pinned by the window tables — see swin_supervised.sh)
