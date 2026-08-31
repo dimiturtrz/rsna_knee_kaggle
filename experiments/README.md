@@ -6462,3 +6462,38 @@ anything`. The floor fix (knee-e8sm) made short budgets readable, not read — t
 run deep, and it is this one. Killing on judgment while the instrument refuses is the exact state that
 check exists to remove, so the arm was left alone and read afterwards by `convergence_check`, which
 found it clean: six epochs asked, six recorded, peak at e2. The number is a peak, not a floor.
+
+## The best solo in the pool is worth +0.0002 as a seat, and it is not a twin (2026-08-31)
+
+`stack_increments_s2026` scores **0.8642** on the fold-0 holdout — the highest solo number this project
+owns — and had never been priced as a seat. `roster_check`'s 2026-08-29 sweep is what surfaced it: it
+was packaged and scoreable and nobody had ever asked what it adds.
+
+`seat_value --candidates stack_increments_s2026.pt --against greedyseat_v1`, card-free, on the 909-study
+fold-0 holdout:
+
+| reading | value |
+|---|---|
+| roster of 7 | 0.8763 |
+| + `stack_increments_s2026` as an 8th seat | 0.8765 (**+0.0002**), band [-0.0002, +0.0007] |
+| best swap it could make (for `calib_dense_hold_s2026`) | 0.8766 (**+0.0003**) |
+| its nearest-neighbour agreement with the roster | 0.9062 (mean 0.8885) |
+
+**The band includes zero and the best swap is a quarter of the +0.0015 this ruler needs to pick a board
+tick.** Zero, on the strongest member available.
+
+**And the twin explanation does not cover it, which is the part worth keeping.** The seated members'
+own nearest-neighbour agreements span 0.8772 to 0.9225; this candidate's 0.9062 sits in the middle of
+that range, so by the roster's own scale it is no closer to its neighbours than the members already
+seated are to theirs. It is not being rejected as a duplicate. It is a genuinely differently-behaved
+model of clearly the best solo quality, and the ensemble cannot use it.
+
+That is the cleanest support yet for `knee-uco3`'s inert-seat reading, and it is the FIFTH: three board
+operations on the seating (reweight, add, swap) each returned an unresolvable move, and now the best
+offline candidate prices at zero offline too — so the board flats are not a board-noise story. The
+constraint is the roster, not the ruler and not the member.
+
+**What it does NOT say.** Nothing here prices a member built on a corpus or a decode path the roster
+does not already hold — `stack_increments` is a table-plus-distillation member on the same corpus and
+the same decode as its neighbours. The route statement's conjunction is untouched by this, and this is
+evidence FOR it: quality alone, at the top of the pool, buys nothing.
