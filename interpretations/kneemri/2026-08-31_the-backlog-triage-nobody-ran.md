@@ -78,9 +78,21 @@ from whether the idea survived its own notes. Two consequences, both actionable:
    really ten.
 2. **Priority is stale where it matters most.** `knee-3oy8` sits at P2 and `knee-blvm` at P3 while
    `knee-blvm` is refuted and `knee-3oy8` is one of two live lanes above the bar. The instruments
-   (`knee-iyad` Mahalanobis, `knee-c2ew` Jensen-Shannon, `knee-l1vy` Captum) are correctly ranked below
-   both — they score zero points by construction — but they were being used as the ANSWER to "what is
-   unexplored", which they are not.
+   (`knee-iyad` Mahalanobis, `knee-c2ew` Jensen-Shannon, `knee-l1vy` Captum) were being used as the
+   ANSWER to "what is unexplored", which they are not.
+
+   That last clause first read "correctly ranked below both — they score zero points by construction",
+   and the owner reversed it the same day: an instrument scores no points ITSELF and raises the
+   information content of every arm that follows it, and the scarce resource here is arm budget, not
+   ideas. The correction survives a check the ranking did not: **the instruments largely already EXIST
+   and are not being RUN.** `knee-c2ew` is fully implemented in `kneemri/evaluation/member_divergence.py`
+   and printed by `seat_value` — closed on audit, not built. `run_comparison` has produced per-label
+   deltas with 95% intervals for weeks. The near-miss on `stack224` was a failure to RUN an instrument,
+   not a missing one, and `kneemri/experiments/arm_read.py` (written the same day) is the fix: it joins
+   the `# control  <name> = <score>` line `ArmHeader` already parses to the comparison `RunComparison`
+   already computes, so the per-label read stops depending on somebody remembering. Its first census:
+   **86 of 162 arms declare no control at all**, including `stack224`, `native224` and
+   `calib_dense_hold` — the arms other arms are read AGAINST.
 
 The honest summary of the whole backlog: **the mapped axes are closed, and the two remaining lanes are
 both about what the encoder KNOWS before supervision starts — one by distilling a representation into a

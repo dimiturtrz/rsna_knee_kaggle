@@ -2,6 +2,12 @@
 # cover_labelwise.sh — the same whole stack, read by an aggregator that a thin finding survives.
 #
 # bead: knee-tlya
+# control  stack224 = 0.8476
+#
+# The declared control is `stack224`, not `native224`, because it is the arm this one moves ONE flag
+# against; `native224` (0.8502) is the standing 224 reading and is checked by hand alongside. Declaring it
+# is what lets `python -m kneemri.experiments.arm_read --arm cover_labelwise --labels "$LABELS"` print the
+# per-label table without anyone remembering to.
 #
 # WHAT stack224 ACTUALLY MEASURED. It read all 36 slices of a 30-40 slice volume, the cell no member has
 # ever occupied, and finished at 0.8476 against `native224`'s 0.8502. Its own header pre-registered the
