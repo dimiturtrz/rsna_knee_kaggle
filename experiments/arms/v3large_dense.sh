@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# The SIZE control `ortho_dense` needs to mean anything. `knee-440m`.
+#
+# WHY THIS ARM EXISTS, AND WHY IT WAS NOT OBVIOUS UNTIL 2026-09-01 23:07Z. `ortho_dense` is a ViT-L
+# whose only control is `base224` = 0.8502, a ViT-B. So the arm as queued moves TWO things at once
+# against its control: the continuation corpus (knee images) AND the trunk size (86M -> 303M). That was
+# invisible while the only prior on this task said bigger trunks help.
+#
+# The prior that arrived says the opposite. The public repo behind the DINOv2-small board number
+# (konradcinkusz/rsna-knee-abnormalities-efficiency-lb) reads DINOv2-base 0.861 and DINOv2-large 0.5 on
+# its own Models tab - large is effectively random there. That is 58 gold labels against our 4,407
+# report-derived ones, so it does not transfer cleanly, but it is a live argument that a 300M trunk
+# overfits this task, and it makes `ortho_dense`'s low branch ambiguous between "knee continuation
+# bought nothing" and "ViT-L is the wrong size here".
+#
+# `ortholarge` IS `v3large` plus 1.25M knee images. Running `v3large` on the identical recipe is
+# therefore the exact subtraction: with it, `ortho_dense - v3large` is the continuation corpus alone,
+# and `v3large - base224` is the size alone. Without it, neither quantity is recoverable from the pair
+# we have, and a lane closes on a number that cannot name its own cause.
+#
+# WHAT THIS IS NOT. It is not `large_deep` (ledger, 0.8304 windowed / 0.8450 with overlap TTA). That is
+# a pre-settlement windowed recipe on a different decode, scored against controls that no longer exist;
+# it cannot be differenced against `base224` and it says nothing about a modern whole-stack fit. No
+# `v3large` member has ever been fitted on this project's current recipe - `grep -l v3large
+# experiments/arms/` returns only the two ortho arms.
+#
+# ONE VARIABLE AGAINST THE CONTROL. Every flag below is `base224`'s except `--variant`, exactly as in
+# `ortho_dense`, and it reads `base224`'s own pixel cache so no decode is owed.
+#
+# PRE-REGISTERED, before it runs, and it is read as a PAIR with `ortho_dense`:
+#
+#   v3large >= 0.8502  SIZE IS FREE ON THIS TASK. Then the public repo's 0.5 is about its 58 gold
+#              labels and not about ViT-L, our report-derived supervision carries a 300M trunk, and
+#              `ortho_dense` minus this number is the knee corpus with nothing else in it.
+#   0.8502 > v3large >= 0.8400  SIZE COSTS A LITTLE. A low `ortho_dense` then has to clear THIS bar
+#              rather than `base224`'s before the in-domain trunk lane may be called closed; the lane
+#              would stay open at ViT-B, where no continued knee checkpoint exists and the question
+#              becomes whether one is worth making.
+#   < 0.8400   SIZE IS THE STORY. The public datapoint replicates under our own supervision, a 300M
+#              trunk does not fit 4,407 studies, and `ortho_dense`'s number says nothing about knee
+#              continuation at all. Every remaining external-encoder price is then quoted at ViT-B.
+#
+# WHY IT IS WORTH THREE HOURS OF CARD. It buys no member and cannot beat anything - `base224` is the
+# ceiling it is written against. It is bought as an INSTRUMENT: it is what makes the only open lane's
+# result readable, and the alternative is closing that lane on a confounded number, which this project
+# has already done once (`res392`, the highest number in the ledger and confounded as a cause to this
+# day). Its own cost is the same three hours `ortho_dense` costs, and it runs after it, so nothing is
+# delayed by it that was not already queued.
+#
+# deliberate: --variant v3large (the subtraction this arm exists to make)
+# deliberate: --slices 12 --image-size 224 (base224's read exactly, and ortho_dense's)
+# deliberate: --band-low 0.2 --band-high 0.8 (base224's band, stated rather than inherited - knee-aixw)
+#
+# bead: knee-440m
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train v3large_dense \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --variant v3large --backbone-lr 4e-5 --slices 12 --image-size 224 \
+  --band-low 0.2 --band-high 0.8 \
+  --labels "$LABELS" --out "$PROCESSED/v3large_dense_s2026.pt"
