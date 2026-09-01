@@ -25,6 +25,7 @@ Key 3D-specific findings:
 - [Pedoia et al., JMRI 2019](https://doi.org/10.1002/jmri.26246): 3D CNN for meniscus and PFJ cartilage degenerative changes, using OAI data. The value was severity staging across a 3D volume, not a solo AUC win over 2D.
 - [Li et al., Eur J Med Res 2022](https://doi.org/10.1186/s40001-022-00883-w): 3D Mask R-CNN for meniscus segmentation + tear detection. Segmentation-first, not end-to-end classification.
 - [Müller-Franzes et al., *Sci Rep* 2025 / arXiv:2411.15802](https://arxiv.org/abs/2411.15802): **Medical Slice Transformer (MST)** — DINOv2 per slice + a Slice Transformer attending across slices. On a 1,199-patient knee-MRI set for meniscus tears, MST reached AUC 0.85 ± 0.04 vs. a 3D ResNet at 0.69 ± 0.05. The win comes from the 2D self-supervised backbone plus inter-slice attention, not from a volumetric convolution.
+- [Zhang et al., *Radiology: AI* 2025 / arXiv:2405.02784](https://arxiv.org/abs/2405.02784): **MR-Transformer** adapts ImageNet-pretrained DeiT-Ti to 3D knee MRI for total-knee-replacement prediction by replicating 2D position embeddings across slices. On OAI/MOST it matched MRNet on three of four contrasts and significantly outperformed 3D CNN baselines (TSE, 3DMeT), but its gain over MRNet was limited to one contrast (COR STIR AUC 0.82 vs. MRNet 0.78). This is another instance where a 3D-aware transformer with natural-image pretraining reaches parity with MRNet but does not clearly surpass the 2D-per-slice recipe.
 
 ## Implications for this project
 
