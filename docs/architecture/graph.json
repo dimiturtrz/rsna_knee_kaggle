@@ -2858,6 +2858,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.claims_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.claims_check",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.claims_check",
+      "target": "kneemri.experiments.ledger_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.claims_check",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.convergence_check",
       "target": "core.cli",
       "weight": 1
@@ -16027,6 +16051,120 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.__init__",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.trimmed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.disputed",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.disputed",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.quoted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.disputed",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.readable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.readable",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.columnar",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.run_metrics.RunMetrics.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.sourced",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.held_by",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.board_entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.disputed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.documents",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.claims_check.ClaimsCheck.sourced",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.main",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.finished",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck",
       "target": "kneemri.experiments.convergence_check.Convergence",
@@ -24397,7 +24535,7 @@
       "role": null
     },
     {
-      "descendants": 189,
+      "descendants": 190,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -24917,7 +25055,7 @@
       "role": null
     },
     {
-      "descendants": 17,
+      "descendants": 18,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -24992,6 +25130,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.card_check",
       "label": "card_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check",
+      "label": "claims_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -27859,6 +28005,14 @@
       "level": "class",
       "parent": "kneemri.experiments.card_check",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck",
+      "label": "ClaimsCheck",
+      "level": "class",
+      "parent": "kneemri.experiments.claims_check",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -37922,6 +38076,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.card_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.board_entries",
+      "label": "board_entries",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.columnar",
+      "label": "columnar",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.disputed",
+      "label": "disputed",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.documents",
+      "label": "documents",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.held_by",
+      "label": "held_by",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.quoted",
+      "label": "quoted",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.readable",
+      "label": "readable",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "label": "recorded_scores",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.ClaimsCheck.sourced",
+      "label": "sourced",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check.ClaimsCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.claims_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.claims_check",
       "role": null
     },
     {

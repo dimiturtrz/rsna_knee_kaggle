@@ -16,7 +16,7 @@ writing down, because any one of them alone is an arm that did not pay.
 
 **Decode closed on its own axes.** `attend_dense` replaced the pooling OPERATOR (elementwise max → a
 learned 64-wide gate): **−0.0009**. `focal_dense` held the operator and widened the pooled vector:
-**−0.0044**. Both are single-variable pairs against `band_dense` (0.8587), both verified in the
+**−0.0044**. Both are single-variable pairs against `band_dense` (0.8578), both verified in the
 checkpoint config and not only in the recorded recipe, and a second ruler that costs no card time —
 ordinal concordance — agrees with the binary one on both
 (`2026-08-20_pooling-is-closed-on-the-mean-but-not-on-lateral-meniscus.md`). The one thing that survives

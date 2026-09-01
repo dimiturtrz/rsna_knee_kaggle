@@ -15,45 +15,49 @@
 # Nothing here is permanent. A decline is an argument, and it is re-opened by answering it.
 
 # --- Below the merit level, 2026-08-30 -------------------------------------------------------------
-# Every member here scores below 0.8460 solo — `extended_ws_s2026`, the weakest member the roster has
+# CORRECTION 2026-09-01 (`claims_check`): the cut is 0.8459, not 0.8460. `extended_ws_s2026` scores
+# 0.845878 and the record spelled its solo three ways — 0.8459 on disk, 0.8460 here and in the ledger,
+# 0.8462 on the roster line itself. One decline turned on the digit: `res392_lr8e-6_ws_s2026` reads
+# 0.845878 too, TIES the merit member exactly, and was declined for being under it (knee-kpq0).
+# Every member here scores below 0.8459 solo — `extended_ws_s2026`, the weakest member the roster has
 # ever added on MERIT. The roster does package weaker checkpoints than these, but each of those is a
 # named INSTRUMENT (the only non-DINOv2 trunk at 0.8215, the only different physical crop at 0.8345, the
 # MCL specialist at 0.5332), which is a reason and not a score. So the way back onto the roster from here
 # is to name the instrument the member would be, not to re-quote its number.
-res392_lr8e-6_ws_s2026.pt            # 0.8459 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-wsfold0_e6.pt                        # 0.8457 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-nocycle224_long_s2026.pt             # 0.8442 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-focal_pool_s2026.pt                  # 0.8432 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-schedule_8_s2026.pt                  # 0.8429 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-per_label_loss_s2026.pt              # 0.8414 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-slices16_ws_s2026.pt                 # 0.8411 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-centre_tissue_s2026.pt               # 0.8409 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-slotmean_s2026.pt                    # 0.8406 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-base20_fold0.pt                      # 0.8358 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-half_data_s2026.pt                   # 0.8344 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-crop80_tissue_full_s2026.pt          # 0.8343 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-unfreeze4_s2026.pt                   # 0.8320 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-conf24_s7.pt                         # 0.8269 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-conf24_s2026.pt                      # 0.8259 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-base_s7_fold0.pt                     # 0.8240 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-adapt_null_s2026.pt                  # 0.8240 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-base_fold0.pt                        # 0.8238 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-margin_calib_s2026.pt                # 0.8235 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-encoder_layer_9_s2026.pt             # 0.8230 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-cnx_own_recipe_s2026.pt              # 0.8186 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be. AND IT RAN HANDICAPPED (knee-uk4f): ConvNeXtV2-base holds 36 blocks as 3/3/27/3, so the block discovery knee-94ec fixed took stage 2's twenty-seven as the whole trunk and `--unfreeze-last 6` opened blocks 21-26 of stage 2 while stage 3 — 1024 wide, the top of the network — stayed frozen for the run. This number is a fact about that run. The re-open is NOT free: swin_wholetop is the same correction on the same $RECIPE at the same flag, and its delta prices this one before any card is spent on it.
-raddino_normfix_s2026.pt             # 0.8155 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-pair_memory_s2026.pt                 # 0.8155 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-raddino_dense_s2026.pt               # 0.8141 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-dinov3_v3small_224_s2026.pt          # 0.8057 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-side_dense_s2026.pt                  # 0.7937 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-cnx_dense_s2026.pt                   # 0.7927 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be. HANDICAPPED the same way as cnx_own_recipe above (knee-uk4f): stage 3 was frozen for the whole run, so this is the trunk's floor at a frozen top on a recipe that was not its own either. Re-open through cnx_own_recipe's line, not this one — two corrections separate this number from a fair reading of the family.
-quarter_data_s2026.pt                # 0.7907 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-depth_regions_span_s2026_run1.pt     # 0.7455 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-lr2e-4_ws_s2026.pt                   # 0.7391 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-encoder_adapt_lower_s2026.pt         # 0.7309 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-encoder_adapt_thawed_s2026.pt        # 0.7162 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-encoder_adapt_s2026.pt               # 0.6902 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
-encoder_adapt_gentle_s2026.pt        # 0.6875 solo — below the 0.8460 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+res392_lr8e-6_ws_s2026.pt            # 0.845878 solo — TIES the merit member `extended_ws_s2026` to the sixth decimal; it was declined on a cut quoted one digit high, not on an argument (knee-kpq0). It stays declined only until that seat is priced, and the re-open is a record_mix reading, not this number
+wsfold0_e6.pt                        # 0.8457 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+nocycle224_long_s2026.pt             # 0.8442 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+focal_pool_s2026.pt                  # 0.8432 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+schedule_8_s2026.pt                  # 0.8429 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+per_label_loss_s2026.pt              # 0.8414 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+slices16_ws_s2026.pt                 # 0.8411 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+centre_tissue_s2026.pt               # 0.8409 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+slotmean_s2026.pt                    # 0.8406 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base20_fold0.pt                      # 0.8358 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+half_data_s2026.pt                   # 0.8344 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+crop80_tissue_full_s2026.pt          # 0.8343 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+unfreeze4_s2026.pt                   # 0.8320 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+conf24_s7.pt                         # 0.8269 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+conf24_s2026.pt                      # 0.8259 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base_s7_fold0.pt                     # 0.8240 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+adapt_null_s2026.pt                  # 0.8240 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+base_fold0.pt                        # 0.8238 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+margin_calib_s2026.pt                # 0.8235 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_layer_9_s2026.pt             # 0.8230 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+cnx_own_recipe_s2026.pt              # 0.8186 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be. AND IT RAN HANDICAPPED (knee-uk4f): ConvNeXtV2-base holds 36 blocks as 3/3/27/3, so the block discovery knee-94ec fixed took stage 2's twenty-seven as the whole trunk and `--unfreeze-last 6` opened blocks 21-26 of stage 2 while stage 3 — 1024 wide, the top of the network — stayed frozen for the run. This number is a fact about that run. The re-open is NOT free: swin_wholetop is the same correction on the same $RECIPE at the same flag, and its delta prices this one before any card is spent on it.
+raddino_normfix_s2026.pt             # 0.8155 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+pair_memory_s2026.pt                 # 0.8155 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+raddino_dense_s2026.pt               # 0.8141 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+dinov3_v3small_224_s2026.pt          # 0.8057 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+side_dense_s2026.pt                  # 0.7937 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+cnx_dense_s2026.pt                   # 0.7927 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be. HANDICAPPED the same way as cnx_own_recipe above (knee-uk4f): stage 3 was frozen for the whole run, so this is the trunk's floor at a frozen top on a recipe that was not its own either. Re-open through cnx_own_recipe's line, not this one — two corrections separate this number from a fair reading of the family.
+quarter_data_s2026.pt                # 0.7907 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+depth_regions_span_s2026_run1.pt     # 0.7455 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+lr2e-4_ws_s2026.pt                   # 0.7391 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_lower_s2026.pt         # 0.7309 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_thawed_s2026.pt        # 0.7162 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_s2026.pt               # 0.6902 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+encoder_adapt_gentle_s2026.pt        # 0.6875 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
 
 # --- Not members on the current label table, 2026-08-30 --------------------------------------------
 # `record_mix` narrows to the largest same-ruler pool and these fall out of it: they never became members
@@ -145,3 +149,11 @@ stack224_s2026              # 0.8476 solo against native224's 0.8502, and the ax
                             # currently does.
 swin_distill_pre_s2026.pt            # stage one of the logit two-stage (knee-8009 a), distillation-dominant at weight 20 so its heads were a probe not a target, and UNDERTRAINED at 4 epochs still rising; it exists to produce an encoder, never a seat
 swin_distill_fit_s2026.pt            # 0.8255 against swin_supervised_s2026's 0.8331 cold control, -0.0077, three starred negative labels and zero starred positives, harness branch checked clean; a trunk driven to imitate a teacher's twelve logits is a worse init than the trunk it started from (interpretations/kneemri/2026-08-31_distilling_logits_is_not_pretraining.md)
+
+# --- Added 2026-09-01 by the rectification pass, same sweep as the roster block of that date ----------
+llrd224_s2026.pt                     # 0.8453 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+decay224_low_s2026.pt                # 0.8454 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+llrd224_flat_s2026.pt                # 0.8440 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+clip224_s2026.pt                     # 0.8439 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+headlr224_s2026.pt                   # 0.8408 solo — below the 0.8459 merit level at which this pool has ever added a member; re-open by naming the instrument it would be
+raptor_feat_pre_s2026.pt             # 0.8201 solo — NOT a member at all: stage one of the feature-distillation pair (knee-8009 b), a trunk fitted to raptor_v4_swa's features whose head exists only to carry the run. It is priced by what stage two does with it (`small_feat_fit`), and its own solo is a diagnostic of the pretrain, not a candidate seat.

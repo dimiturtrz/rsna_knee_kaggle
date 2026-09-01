@@ -163,6 +163,31 @@ narrowed, it is finished.
 
 ## farseat reads 0.937 — the ensemble axis is finished, not narrowed
 
+> **CORRECTION 2026-08-30, re-stated here 2026-09-01 (knee-nbk3, `run_check`; `comp/board.jsonl:61` now
+> carries the row as `scope: excluded`).** **This whole section is void as a cross-family reading.**
+> `KernelRun` DROPS a member whose encoder it cannot mount and keeps going, and that is what happened:
+> the kernel shipped **six of seven** named members and `vjepa_warm_s2026` — the entire point of the
+> entry — was never loaded. `farseat` was therefore `dark6` seat-for-seat, which is exactly why it read
+> `dark6`'s exact 0.937. The paragraph below that reasons from "the kernel logs read `6 of 6` and
+> `7 of 7`" is the specific claim that failed: nobody read farseat's own census line, and the entry sat
+> in the record for five days as the measurement that closed the cross-family ensemble-diversity axis.
+>
+> **WHAT SURVIVES.** The five same-family rows of the table (`dark6`, `dark7`, `allfit`/`lastseat`,
+> `augseat`, `v3seat`) are untouched, and the marginal-seventh-seat conclusion stands on them. The
+> architecture axis was re-tested by `vjepaseat_v1` (ref 55895006, 2026-08-30, eight seats including
+> `vjepa_warm_s2026`), which read **0.943** against a 0.944 control — flat. So the conclusion reached
+> here is probably right; it was simply not measured here. Note that `vjepaseat_v1`'s row records no
+> `run_check` census either (`champviews_v1` is the first that does: "run_check read 6 of 6 members
+> loaded"), so its mount is *unverified* rather than confirmed — the log is no longer retrievable,
+> because `kaggle kernels output` serves only the LATEST version. **The `farseat` row must never be
+> quoted as evidence for the cross-family question.** `run_check --log` now refuses on the drop line,
+> and it is run BETWEEN a kernel completing and the slot being spent.
+>
+> One more number in this section does not reconcile: it gives `vjepa_warm_s2026`'s nearest-neighbour
+> agreement as **0.8210** and `comp/board.jsonl`'s `vjepaseat_v1` row gives **0.8119**, against pools
+> quoted as 0.8801–0.9143 and 0.91–0.94. Neither reading changes any conclusion (it is the most distant
+> member either way) and neither has been re-derived; do not quote either as a fixed constant.
+
 `farseat` (55758082) landed **0.937**, dead inside its pre-registered FLAT band of 0.935–0.939 and
 identical to `dark6`, the six-member control it was built against.
 

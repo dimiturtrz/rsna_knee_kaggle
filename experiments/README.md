@@ -3990,6 +3990,11 @@ every claim that compares an absolute number to something measured somewhere els
   which is far outside any of these bands and remains real.
 - The +1.82 transfer carries our own noise through it: +/-0.0106 offline is **+/-0.019 board points**, which
   is most of the spread the constant was fitted through.
+  *(CORRECTION 2026-09-01: +1.82 was fitted on the 34-of-58-row board record that `board_check` completed;
+  the complete record reads +1.55 whole-record, and in the regime we actually ship in it is +0.99
+  [+0.77, +1.18] — see the 2026-08-30 entry "The non-DINO seat delta is UNRESOLVED". The point this bullet
+  makes survives with a SMALLER multiplier: +/-0.0106 offline is about +/-0.010 board points, still most of
+  the fitted spread.)*
 - The 0.028 board deficit to the field's best reported single reads as 0.0154 holdout. Our side of that
   comparison alone carries +/-0.0106, and the forum's number carries an error of its own that we cannot see.
   So it is about 1.45 half-widths of our own instrument — a real ordering, quoted far too firmly at
@@ -4071,6 +4076,8 @@ regularisation or data, and `mixup224_long` already tested the first of those.
 
 **WHAT IT DOES NOT SAY.** Nothing about 336. Both arms live in the 224 cell, which the resolution rows
 above price at ~0.005 below 336 offline and, through `board_transfer`'s +1.82, ~0.009 below on the board.
+*(CORRECTION 2026-09-01: read that as ~0.005 on the board, not 0.009 — the transfer in our shipping regime
+is +0.99, not +1.82. See the 2026-08-30 entry "The non-DINO seat delta is UNRESOLVED" and knee-8pp8.)*
 224 remains a throughput lever and neither of these numbers is a member.
 
 ### Per-label member selection, finally READ — the flat rank-average is the optimum of its own family (2026-08-26)
@@ -5708,11 +5715,18 @@ packages, that would have declined this project's own instruments: the packaged 
 `focus_mcl_s2026` 0.5332, `mae_matched_s2026` 0.6735, `lora_r8_v3small_224_s2026` 0.8215,
 `dinov3_base_lora_s2026` 0.8268, `crop80_tissue_s2026` 0.8345. Every one of those is a NAMED INSTRUMENT
 — the only non-DINOv2 trunk, the only different physical crop, the MCL specialist, the medical
-pretraining. So the cut is `MERIT = 0.8460`, the solo of `extended_ws_s2026`: the weakest member this
+pretraining. So the cut is `MERIT = 0.8459`, the solo of `extended_ws_s2026`: the weakest member this
 roster has ever added on merit rather than as an instrument. Above it, ship. Below it, decline IN WRITING,
 and the way back on is to name the instrument the member would be — never to re-quote the number.
 
-**The split: 30 added, 46 declined.** Thirty undocumented members clear 0.8460 and joined the roster
+> **CORRECTION 2026-09-01 (`claims_check`, knee-kpq0).** This paragraph read `MERIT = 0.8460` and the
+> roster line for the same member read 0.8462; disk reads **0.845878**. One digit, one consequence:
+> `res392_lr8e-6_ws_s2026` scores 0.845878 as well — it TIES the member the cut is named after — and was
+> written into `comp/members.declines` as "below the merit level". Nothing else moved: the next member
+> under the cut is `wsfold0_e6` at 0.8457 and the next above is `intensity392_ws` at 0.84593, which was
+> added, so the 30/46 split stands with that one line to re-price by `record_mix` rather than by a number.
+
+**The split: 30 added, 46 declined.** Thirty undocumented members clear 0.8459 and joined the roster
 (0.8631 down to 0.8460). Forty-six are declined in `comp/members.declines`, each with its reason:
 thirty-four below merit, eleven smoke/probe runs that never became members, and `confident224_s2026` —
 a REAL arm scored under an older label table, written down as such so it is not mistaken for a twelfth

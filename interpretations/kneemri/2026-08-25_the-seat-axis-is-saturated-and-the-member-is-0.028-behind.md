@@ -2,6 +2,46 @@
 
 **2026-08-25, from `comp/board.jsonl` — 53 scored submissions, our own record, no forum prose.**
 
+> **CORRECTION 2026-09-01 (knee-macc, knee-3uje). Two of this document's three load-bearing claims have since been withdrawn or
+> superseded. Read the corrections before the body.**
+>
+> **1. The title's `0.028` is WITHDRAWN — it is a two-ruler artefact** (knee-3uje, 2026-08-27; already
+> carried in knee-xuj5's notes and never written here). It compared our BOARD single (`soloseat_v1`,
+> Kaggle's hidden test) against rivals' FORUM self-reports. On the 58 radiologist-annotated studies both
+> sides hold out, `calib_span_hold` reads 0.9152 against `raptor_ft_coatnet_v4_full`'s 0.9167 — a delta of
+> 0.0015 against a macro standard error of about 0.012 at n=58. **Our member is level with theirs.** The
+> 0.028 is the distance between the rulers.
+>
+> **2. The best-by-count table below is stale, and the "+0.024 then turns over" shape does not survive.**
+> `board_check` completed the record on 2026-08-25 (it held 34 of 58 submissions; fifteen scored all-ours
+> entries were missing) and 34 further submissions have scored since. Recomputed 2026-09-01 over all 87
+> rows, excluding `scope: excluded`:
+>
+> | members | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 11 | 12 | 25 |
+> |---|---|---|---|---|---|---|---|---|---|---|---|
+> | n | 5 | 5 | 4 | 12 | 5 | 12 | 19 | 5 | 1 | 1 | 1 |
+> | best | 0.925 | 0.936 | 0.938 | 0.937 | 0.931 | 0.943 | 0.944 | 0.943 | 0.941 | 0.937 | 0.894 |
+>
+> Best single is **0.925**, not 0.914; a TWO-member entry reads 0.936 and a THREE-member entry 0.938,
+> where this document recorded 0.921 and 0.913. So the span from one seat to the best entry we own is
+> **+0.019**, not +0.024, and most of it is bought by the second and third seat — everything from four
+> seats up sits inside 0.937–0.944.
+>
+> **What that does NOT license.** Count and member quality are confounded across these rows: the
+> high-reading small entries are late ones built from better members, and no matched count sweep exists.
+> So this is not "count is worth less than we thought" measured — it is the count table no longer
+> supporting the claim it was quoted for. The conclusion the body draws (**slots do not go to seat
+> permutations**) is untouched and is independently measured: nine 6/7-member entries span 0.002, and
+> every single-seat operation at the top since — `holdswap_v1`, `vjepaseat_v1`, `spanseat_v1` — read flat.
+>
+> **3. The `+1.82` transfer constant used throughout the body has the same cause** (knee-8pp8). It was
+> fitted on the incomplete record; the completed one reads +1.55 whole-record, and in the regime this
+> document argues about (offline ≥ 0.867) `board_transfer` reports **+0.99 [+0.77, +1.18]**. Every
+> board→holdout conversion below is therefore roughly 1.8× too small: "0.002 board is 0.0011 holdout"
+> is really ~0.002, and "0.028 board is 0.0154 holdout" would be ~0.028 — except that the 0.028 is
+> withdrawn anyway (correction 1). The document's own section "How firm is that 0.0154 — less than it
+> reads" was already circling this defect from the inside; it is now named.
+
 ## The table that settles it
 
 Best board score at each member count, over every submission we have ever scored:

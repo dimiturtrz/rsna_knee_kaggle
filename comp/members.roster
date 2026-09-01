@@ -19,7 +19,7 @@ intensity392_ws_s2026.pt    # 0.8459
 # of the nine candidates scored on 2026-08-16. The two below are mounted but not in that subset — they
 # are kept because a kernel that names its members costs nothing for an unused one, and dropping them
 # would need a dataset push to undo.
-extended_ws_s2026.pt        # 0.8462 — the best FIFTH member (four + this = 0.8610)
+extended_ws_s2026.pt        # 0.8459 — the best FIFTH member (four + this = 0.8610). Read 0.8462 here until 2026-09-01; disk is 0.845878
 lora_r8_v3small_224_s2026.pt # 0.8215 — the only non-DINOv2 member; the encoder-transfer question
 crop80_tissue_s2026.pt      # 0.8345 — the only member reading a DIFFERENT physical crop
 # Added 2026-08-17 for the one axis this pool does not vary at all. Every other member reads the same
@@ -456,7 +456,13 @@ finding_calib_dense_s2026.pt # 0.8600 — third seat; +0.0017 as a swap for lr4e
 blendhold_s2026.pt          # 0.8575 — fourth seat; the 224 px / 12 slice geometry, a different decode path
 mae_matched_s2026.pt        # ninth seat
 base224_s2026.pt            # tenth seat — the only 224 px base-trunk member in the twelve
-calib_span_hold_s2026.pt    # 0.8565 — eleventh seat, and the champion's own calib_span_ff twin
+calib_span_hold_s2026.pt    # 0.8565 — eleventh seat. CORRECTED 2026-09-01 (knee-31k4): this line read "the
+                            # champion's own calib_span_ff twin" and that is the WRONG twin. experiments/arms/
+                            # final_fit_six.sh:43 builds calib_span_ff from the calib_span recipe WITHOUT
+                            # --hold-annotations (line 371 says so too); this member adds that flag, so it is a
+                            # different arm, not the ff's fold-0 twin. The ff's twin is calib_span_s2026 (0.8545,
+                            # line 80). Nothing downstream moves — the seat was never chosen for the twinning —
+                            # but a blind-seat proxy that ordered on it would have been reading the wrong pair.
 merged_dense_cf.pt          # twelfth seat
 
 # Added 2026-08-29 20:37Z. AN ORPHAN, FOUND BY AUDIT RATHER THAN BY BUILDING ANYTHING. The checkpoint
@@ -509,7 +515,7 @@ focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that nu
 # Added 2026-08-30 by `kneemri.kaggle.roster_check`, which found 76 scoreable members in neither
 # this file nor `comp/members.declines` — `stackfit_s2026` at 0.8631 among them, the SECOND-BEST solo
 # checkpoint the project owns, and unshippable for as long as nobody remembered to type it. Every member
-# below clears 0.8460, the solo of `extended_ws_s2026` — the weakest member this roster has ever
+# below clears 0.8459 (0.845878), the solo of `extended_ws_s2026` — the weakest member this roster has ever
 # added on MERIT. Everything packaged below that level is there as a NAMED instrument (the only
 # non-DINOv2 trunk, the only different physical crop, the only medical pretraining), which is a reason
 # and not a score. Solo under LogitAverage on the 909-study fold-0 holdout, 111 same-ruler records.
@@ -575,3 +581,23 @@ merged_span_ff.pt           # DARK. merged_span_cf's flags plus --fold -1 --ema.
                             # (merged_blend_v1) at 20 slices, band 0.2-0.8 - a decode cell no champion
                             # seat occupies. Parent is greedy seat two with the largest single jump in
                             # the 111-member curve (+0.0075).
+
+# Added 2026-09-01 by the rectification pass (knee-kpq0's sweep, `roster_check` after the merit-cut fix).
+# Eighteen scoreable checkpoints were in neither file — the 224 px knob scan, which predates the ledger's
+# habit of writing a roster line per finished run, plus one full-recipe control. Twelve clear the 0.8459
+# merit cut and are named here on the rule already written above; six sit below it and are declined in
+# `comp/members.declines` with that reason. They are knob arms of one family, so they are expected to be
+# CORRELATED with each other and with the 224 members already packaged (`adjacent224` 0.8462,
+# `tissue224` 0.8491, `native224_long` 0.8490); a seat is still priced by `record_mix`, never by this line.
+base_clean_s2026.pt                  # 0.8570
+ema224_s2026.pt                      # 0.8544
+sided224_s2026.pt                    # 0.8512
+warm224_long_s2026.pt                # 0.8512
+through224_s2026.pt                  # 0.8505
+attend224_s2026.pt                   # 0.8503
+warm224_brief_s2026.pt               # 0.8498
+clip224_tight_s2026.pt               # 0.8488
+focal224_s2026.pt                    # 0.8487
+decay224_high_s2026.pt               # 0.8487
+regions224_s2026.pt                  # 0.8476
+headlr224_slow_s2026.pt              # 0.8475
