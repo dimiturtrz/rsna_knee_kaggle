@@ -21,6 +21,16 @@ Self-reported SINGLE-model public-board scores, topic 735304:
 **Our best six-member ensemble scores 0.939.** A rival's single model is claimed at 0.942, and two more
 sit at or within noise of our ensemble. Our best single-model board entry (`soloseat`) reads 0.925.
 
+> **UPDATE 2026-09-01 — the numbers above are correct as read on 2026-08-26, and the ordering they
+> support has since flipped.** Recomputed over the completed `comp/board.jsonl` (87 rows, `scope:
+> excluded` dropped, joined on the `members` field): our best six now reads **0.943** (`champviews_v1`,
+> 2026-08-31) and our best seven **0.944** (`stackseat_v1`, the current champion's family). So a rival's
+> claimed 0.942 single no longer beats our ensemble — it sits inside it. What does NOT change is the
+> localisation this section draws: their SINGLE is still level with our SIX, and our own best single is
+> still 0.925. The member gap is unclosed; only the sentence "their single beats our ensemble" expired.
+> The 0.914 quoted in the next paragraph was also right on 2026-08-25 — `soloseat_v1` scored 0.925 the
+> following day. See knee-macc for the count-curve recompute this came out of.
+
 **This localises our gap in MEMBER QUALITY and not in ensembling, for the second time.** Every ensemble
 number we own is measured inside our own pool, so it cannot see this; only the forum can. It is also the
 second independent statement of it — topic 735304 said the same on 2026-08-25 with a 0.915-0.942 spread
