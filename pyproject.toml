@@ -42,6 +42,14 @@ dependencies = [
     # opt-in extra while cv2 belonged only to THEIR reader; the reimplementation makes it ours, and a
     # kit that serves that feed cannot have it optional. Present in Kaggle's image, so it needs no wheel.
     "opencv-python-headless",
+    # The RadImageNet trunk is a bare state dict with no `config.json`, so `AutoModel` cannot rebuild it
+    # and the architecture is stated instead (`kneemri/models/state_dict_trunk.py`) — torchvision's
+    # DenseNet-121 is the one its 725 keys are named for. Present in Kaggle's image, so it needs no wheel.
+    "torchvision",
+    # Fetching that same bare state dict by repo + filename, which `AutoModel.from_pretrained` would
+    # otherwise have done for us. Already installed as a transitive of transformers; declared because
+    # `state_dict_trunk` imports it directly and DEP003 is enforced.
+    "huggingface-hub",
 ]
 
 [project.optional-dependencies]

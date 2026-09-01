@@ -883,6 +883,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "beartype" },
+    { name = "huggingface-hub" },
     { name = "jaxtyping" },
     { name = "numpy" },
     { name = "opencv-python-headless" },
@@ -892,6 +893,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "timm" },
     { name = "torch" },
+    { name = "torchvision" },
     { name = "transformers" },
     { name = "triton-windows", marker = "sys_platform == 'win32'" },
 ]
@@ -926,6 +928,7 @@ requires-dist = [
     { name = "beartype" },
     { name = "captum", marker = "extra == 'attribution'" },
     { name = "cleanlab", marker = "extra == 'labelnoise'" },
+    { name = "huggingface-hub" },
     { name = "jaxtyping" },
     { name = "kaggle", marker = "extra == 'submit'" },
     { name = "numpy" },
@@ -940,6 +943,7 @@ requires-dist = [
     { name = "sdlc-devtools", marker = "extra == 'devtools'", git = "https://github.com/dimiturtrz/sdlc-scaffold.git?subdirectory=sdlc-devtools&rev=v1.28.0" },
     { name = "timm" },
     { name = "torch", specifier = ">=2.10" },
+    { name = "torchvision" },
     { name = "transformers" },
     { name = "triton-windows", marker = "sys_platform == 'win32'" },
 ]

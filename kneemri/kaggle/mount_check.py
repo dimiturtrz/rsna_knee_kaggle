@@ -26,7 +26,7 @@ from kneemri.inference.members import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.kaggle.live_dataset import LiveDataset, LiveModel, TruncatedListingError
-from kneemri.models.backbone import MODEL_MOUNT, Encoder
+from kneemri.models.backbone import MODEL_MOUNT, MountKind
 
 logger = logging.getLogger(__name__)
 
@@ -235,13 +235,13 @@ class EncoderMounts:
         """Ask each distinct encoder source once whether it publishes the subpath its mount names.
 
         A MODEL mount is the whole slug and has no subpath inside it; a DATASET mount is `owner/name`
-        plus the directory the encoder lives in. Which one a mount is comes from `Encoder.kind_of`,
+        plus the directory the encoder lives in. Which one a mount is comes from `MountKind.of`,
         never from counting its segments — Kaggle's URL grammar is not ours to encode here.
         """
         missing: dict[str, str] = {}
         for mount in sorted(set(mounts)):
             segments = mount.strip("/").split("/")
-            model = Encoder.kind_of(mount) == MODEL_MOUNT
+            model = MountKind.of(mount) == MODEL_MOUNT
             reader = LiveModel if model else LiveDataset
             identifier = mount if model else "/".join(segments[:DATASET_SEGMENTS])
             subpath = "" if model else "/".join(segments[DATASET_SEGMENTS:])
