@@ -20,7 +20,8 @@ than paraphrased so a later reader can discount it. Our own numbers beside it ar
 
 ### The arithmetic
 
-A **single** model reads 0.942. Our **seven-member** `votefit_v1` reads 0.938. Our best single member is
+A rival's self-reported **single** model reads 0.942 (topic 735304, their number, not ours).
+Our **seven-member** `votefit_v1` reads 0.938 on the board. Our best single member is
 0.8598 holdout; the roster of seven is 0.8694 — so the entire mix buys +0.0096 holdout over its own best
 part, and that is already banked.
 

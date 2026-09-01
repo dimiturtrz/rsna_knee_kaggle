@@ -8,7 +8,7 @@
 > **1. The title's `0.028` is WITHDRAWN — it is a two-ruler artefact** (knee-3uje, 2026-08-27; already
 > carried in knee-xuj5's notes and never written here). It compared our BOARD single (`soloseat_v1`,
 > Kaggle's hidden test) against rivals' FORUM self-reports. On the 58 radiologist-annotated studies both
-> sides hold out, `calib_span_hold` reads 0.9152 against `raptor_ft_coatnet_v4_full`'s 0.9167 — a delta of
+> sides hold out, `calib_span_hold` reads 0.9152 on the gold 58 against `raptor_ft_coatnet_v4_full`'s 0.9167 — a delta of
 > 0.0015 against a macro standard error of about 0.012 at n=58. **Our member is level with theirs.** The
 > 0.028 is the distance between the rulers.
 >

@@ -51,6 +51,23 @@ def test_quoted() -> None:
     assert check().quoted("train loss 0.7493") == set()
 
 
+def test_about() -> None:
+    assert check().about("`band_dense` (0.8578)", "band_dense_s2026") == {"0.8578"}
+    # A number sitting past the window is next to something else on the line, not next to the name.
+    far = "`band_dense` is the control here, and the arm to beat it lands at 0.8501 on the holdout"
+    assert check().about(far, "band_dense_s2026") == set()
+    # Nearer to another backticked identifier is that identifier's number, at any distance.
+    assert check().about("`band_dense` against `attend_dense` = 0.8569", "band_dense_s2026") == set()
+    # Out of the AUC band is not a score at all.
+    assert check().about("`band_dense` at weight 0.3300", "band_dense_s2026") == set()
+
+
+def test_gap() -> None:
+    assert ClaimsCheck.gap(5, (3, 8)) == 0
+    assert ClaimsCheck.gap(10, (3, 8)) == 2
+    assert ClaimsCheck.gap(0, (3, 8)) == 3
+
+
 def test_disputed(tmp_path: Path) -> None:
     good = tmp_path / "right.md"
     good.write_text("Both are pairs against `band_dense` (0.8578).\n", encoding="utf-8")

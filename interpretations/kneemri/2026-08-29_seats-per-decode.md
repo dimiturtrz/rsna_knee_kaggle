@@ -222,7 +222,7 @@ there.
 
 There is a third possibility that arm also tests, and it is the one worth the most. **A noisy member is
 decorrelated from everything.** `mae_matched_s2026` reads nearest 0.4691 at a 0.6735 holdout — it is not
-distant, it is wrong. If `crop80_tissue`'s 0.8375 is the same effect one order milder, then the
+distant, it is wrong. If `crop80_tissue`'s 0.8345 is the same effect one order milder, then the
 nearest-neighbour column is not a twin detector on weak members at all, and it is currently load-bearing
 in three write-ups.
 

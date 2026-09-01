@@ -37,7 +37,7 @@ That closes a class of work before it is written, which is what a ceiling is for
 
 ## What the same run says about the DINOv3 member (knee-98j)
 
-`dinov3_base_lora_s2026` is the strongest v3 member we have (0.8269 alone, against 0.8215 for the
+`dinov3_base_lora_s2026` is the strongest v3 member we have (0.8268 alone, against 0.8217 for the
 v3-small LoRA). It still does not earn a slot:
 
     best 4  0.8612   res392 + intensity392 + calibrated_targets + sliceattn

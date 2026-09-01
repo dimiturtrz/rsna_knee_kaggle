@@ -40,7 +40,7 @@ PRE-REGISTRATION, written before the number, against the champion's 0.944 and `B
   five absorb it. The fit axis joins count and weight as a closed dimension, knee-urvf's free term is
   spent, and the remaining slots go to the KIND of member (knee-ombx, external data) rather than its
   quality.
-- **Below 0.9425** — the incumbent `merged_blend_cf` was carrying something the higher solo does not.
+- **Below 0.9425 nearest agreement** — the incumbent `merged_blend_cf` was carrying something the higher solo does not.
   That would be the first evidence in this project that a seat's VALUE and its SOLO disagree in the
   direction that matters. Read `record_mix` on the pair before touching the roster.
 """

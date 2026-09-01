@@ -52,9 +52,15 @@ WHAT IT CANNOT SEE, measured on its own first sweep of the corpus rather than gu
 
 None of the three is a defect in the record. All three are why this reports and does not block.
 
-ADVISORY BY DEFAULT, `--assert` to block. It is new, it reads 300k words of prose written before it
-existed, and its first job is to produce a list somebody works through — not to fail a merge on a
-sentence from three weeks ago.
+ENFORCED as of 2026-09-01, in `nox -s lint` with `--assert`. It shipped advisory — it read 300k words of
+prose written before it existed, and its first job was a list somebody works through. That list was
+worked through on 2026-09-01: 29 findings, six of them real misquotes corrected against the runs on
+disk, six lines rewritten to name the ruler their number sits on, and the rest false because the check
+lacked the attribution rule its board sibling already had. At zero it graduates, because an advisory
+list nobody sweeps is a defect deferred, not a defect found.
+
+It is enforced in nox and NOT in CI: it needs finished runs under the data root and refuses an empty
+denominator rather than printing a clean corpus's sentence, and the runner has no dataset.
 """
 
 import json
@@ -97,6 +103,18 @@ A floor that hides a run's real score turns a correct sentence into a finding.""
 BOARD = Path("comp/board.jsonl")
 """The board file, read only for its entry ids."""
 
+WINDOW = 40
+"""How far from the run's own name a number may sit and still be read as that run's score, in characters.
+
+A claim about a run is written NEXT to it. Measured over the corpus, the dominant remaining false finding
+was a number further down a sentence than that — a bar, a subset's total, a control's reading — and forty
+characters is the widest span the record's real `name (0.8578)` and `name reads 0.8578` forms need."""
+
+IDENTIFIER = re.compile(r"`([A-Za-z0-9_./-]+)`")
+"""A backticked identifier: the record's own mark for "this is the subject". A number standing NEARER to
+some other identifier than to the run the line names is that other thing's number, whether or not this
+check knows the name — `against \\`native224\\` = 0.8502` names its subject perfectly well."""
+
 QUOTED = re.compile(r"(?<![\d.])0\.\d{4}(?!\d)")
 """A four-decimal score as the record writes them. Bounded on both sides so `0.85` is not read as a
 truncated claim and `0.85781` is not read as `0.8578`."""
@@ -123,7 +141,19 @@ NOT_A_MEMBER_SCORE = (
     "closer",
     "spread",
     "distance",
+    "distant",
     "champion five",
+    "champion seven",
+    "control",
+    "roster",
+    "curve",
+    "pair line",
+    "tighter",
+    "displacing",
+    "boundary",
+    "tta",
+    "bar",
+    "gold 58",
 )
 """Line markers that put the number's subject somewhere other than one member's holdout. Training loss
 lands squarely in the AUC band (`0.7493 -> 0.7113`); a greedy search line reads `greedy 54: 0.8670
@@ -134,7 +164,15 @@ THE LARGEST CLASS IS PAIRWISE AGREEMENT, and it is the one that most looks like 
 measures how alike two members are on the same 0-1 scale it measures accuracy on, and the seating
 arguments are written in it — `ema_dense`'s nearest seated neighbour is 0.9306, `through_dense` sits at
 0.9143 from its closest twin. Every one of those is a claim about a PAIR. Read as a holdout score they
-are all wrong by a mile, which is exactly how they crowded out the six real findings on the first pass."""
+are all wrong by a mile, which is exactly how they crowded out the six real findings on the first pass.
+
+THE SECOND HALF OF THIS TUPLE WAS MEASURED on the 2026-09-01 sweep, by reading all 29 findings by hand:
+twenty-two of them were a number whose subject the line NAMES, in a word this tuple did not yet carry.
+`control`, `roster`, `curve`, `pair line`, `boundary` and `bar` each put the number on something that is
+not one member's holdout; `tighter`, `distant` and `displacing` mark a comparison whose number belongs to
+the thing compared against; `tta` marks the second ruler this check's own docstring already names as a
+blind spot; `champion seven` is `champion five` one champion later. Six real defects survived that sweep
+and were corrected in place."""
 
 
 class ClaimsCheck:
@@ -219,6 +257,33 @@ class ClaimsCheck:
             return set()
         return {text for text in BOUNDED.findall(line) if AUC_FLOOR <= float(text) <= AUC_CEILING}
 
+    def about(self, line: str, name: str) -> set[str]:
+        """The quoted scores the line actually attributes to the run it names.
+
+        Two ways a number belongs to something else even on a line naming exactly one run: it sits too
+        far from the name to be its (`WINDOW`), or some other backticked identifier stands nearer to it
+        (`IDENTIFIER`). Both were read off the corpus rather than guessed.
+        """
+        token = self.stems[name]
+        mine = [match.span() for match in token.finditer(line)]
+        others = [match.span(1) for match in IDENTIFIER.finditer(line) if not token.search(match.group(1))]
+        kept: set[str] = set()
+        for match in BOUNDED.finditer(line):
+            if not AUC_FLOOR <= float(match.group()) <= AUC_CEILING:
+                continue
+            nearest = min((self.gap(match.start(), span) for span in mine), default=WINDOW + 1)
+            if nearest > WINDOW or any(self.gap(match.start(), span) < nearest for span in others):
+                continue
+            kept.add(match.group())
+        return kept
+
+    @staticmethod
+    def gap(start: int, span: tuple[int, int]) -> int:
+        """Characters between a number's first digit and the nearest edge of a name, zero if inside it."""
+        if span[0] <= start <= span[1]:
+            return 0
+        return span[0] - start if start < span[0] else start - span[1]
+
     def disputed(self) -> list[tuple[Path, int, str, set[str], str]]:
         """Every line naming one run and quoting only scores that run never recorded.
 
@@ -237,7 +302,10 @@ class ClaimsCheck:
                 name = self.named(line) if scores else None
                 if name is None or set(QUOTED.findall(line)) & self.recorded.get(name, set()):
                     continue
-                findings.append((document, number, name, scores, f"{self.runs[name]:.4f}"))
+                claimed = self.about(line, name)
+                if not claimed:
+                    continue
+                findings.append((document, number, name, claimed, f"{self.runs[name]:.4f}"))
         return findings
 
     def held_by(self, score: str) -> list[str]:

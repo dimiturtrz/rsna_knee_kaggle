@@ -12,7 +12,7 @@ floor, which is memorisation rather than a schedule wanting room. Against its ma
 
 WHY IT IS IN A KERNEL ANYWAY. Priced in the seat rather than alone, it is the best move available to the
 champion: rank-averaged over the 909-study fold-0 holdout this four reads **0.8691** against greedy4's
-**0.8679**, +0.0012, taking `band_span`'s seat. At the moment it landed, the best swap the entire mounted
+**0.8679** for the roster, +0.0012, taking `band_span`'s seat. At the moment it landed, the best swap the entire mounted
 pool could offer was +0.0002 (`attend_dense`), so this is six times the alternative. The precedent is
 `calib_span`, which this ledger wrote up as a failure against its own control hours before it carried the
 0.929 entry; the shape here is sharper, because it is not merely the member that lost — the arm's whole

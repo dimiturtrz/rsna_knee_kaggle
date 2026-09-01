@@ -63,6 +63,16 @@ def lint(session: nox.Session) -> None:
     # when it finds dead code — success_codes swallows that (0=clean, 3=found), only a usage error blocks.
     session.run("uvx", VULTURE, "--min-confidence", "60", external=True, success_codes=[0, 3])
     session.run("uvx", "--from", "import-linter", "lint-imports", external=True)
+    # ENFORCED prose gate — board_claims: a document, kernel or bead quoting a board entry at a score
+    # `comp/board.jsonl` does not give it, or a rank the last live read has moved past. It reads only
+    # files inside the repo, so it runs here and in CI; its sibling `claims_check` needs the data root
+    # and lives at the pre-push hook instead. GRADUATED 2026-09-01, when the corpus first read zero —
+    # advisory it stayed at 14 findings nobody swept, which is the whole argument for the --assert.
+    session.run("uv", "run", "python", "-m", "kneemri.experiments.board_claims", "--assert", external=True)
+    # Its sibling over the MEMBER ruler (four decimals, holdout AUC). It needs the runs on the data root
+    # and refuses an empty denominator, so it can only be enforced where that root is mounted — this
+    # session, never the CI job, which invokes no nox at all and has no dataset.
+    session.run("uv", "run", "python", "-m", "kneemri.experiments.claims_check", "--assert", external=True)
     # (graph — god-module / import-cycle / god-file / test-mirror — rides the single batch run below.)
     # (ast-grep module-shape rides the single batch run below — `devtools.astgrep` owns locating the
     # packaged config and invoking the CLI, so nox no longer re-encodes that invocation.)

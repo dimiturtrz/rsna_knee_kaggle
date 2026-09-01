@@ -14,7 +14,9 @@ and sits at nearest-neighbour agreement 0.8717, second most distant of the eight
 on a board entry. The holdout prices diversity ~1.9-2.4x more cheaply than the board does, so the two
 members this entry adds are exactly the kind the offline ruler under-reads.
 
-PRE-REGISTRATION, written before the number, against `basedense_v1`'s 0.937.
+PRE-REGISTRATION, written before the number, against `basedense_v1`'s 0.931.
+(This line read 0.937 until 2026-09-01; comp/board.jsonl scores basedense_v1 at 0.931, so the
+bars below were set against a control read 0.006 stronger than the one that actually ran.)
 
 - **0.940 or above** — the board reads the distance-bought seats the way the transfer fit predicts, the
   holdout peak IS the board peak, and member selection by `MemberDistance` is vindicated end to end.

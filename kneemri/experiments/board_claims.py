@@ -38,7 +38,11 @@ RANK IS CHECKED AGAINST THE LATEST READ AND NEVER AGAINST A REMEMBERED ONE, whic
 with the instant that read was taken, because the finding is usually "this sentence is old", not "this
 sentence was wrong" — and a dated sentence that says so itself is not a defect.
 
-ADVISORY BY DEFAULT, `--assert` to block.
+ENFORCED as of 2026-09-01, with `--assert` in `nox -s lint` and in CI (its inputs are all in the repo,
+so a runner with no data root can run it). It shipped advisory and sat at 14 standing findings until
+somebody swept them — canonical entry ids where prose wrote short forms, an inline read-date on every
+historical rank, and one board score genuinely misquoted. At zero it blocks, because a list nobody
+sweeps is the thing this check exists to prevent.
 """
 
 import json

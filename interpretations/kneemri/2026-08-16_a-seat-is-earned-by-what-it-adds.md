@@ -48,6 +48,6 @@ board it is under the floor; on the efficiency board it is strictly negative.
 
 - `kneemri-chosen` — the named best-4, disjoint windows. 0.8612 offline against the 0.8581 of the subset
   behind LB 0.919.
-- `kneemri-onedecode` — calibrated + sliceattn + extended_ws, all one pixel group. 0.8553 offline: 0.0059
+- `kneemri-onedecode` — calibrated + sliceattn + extended_ws, all one pixel group. 0.8553 offline for that roster: 0.0059
   of holdout traded for HALF the decoding. Whether that trade is worth it is the one thing the holdout
   cannot say, because the holdout does not carry a clock — only the efficiency board can price it.

@@ -26,7 +26,7 @@
 
 Three varying axes, all of them recipe. One encoder, one resolution, one head, one slot scheme.
 
-The roster's only non-DINOv2 member ever fitted is `lora_r8_v3small_224_s2026.pt` at 0.8215 — too weak
+The roster's only non-DINOv2 member ever fitted is `lora_r8_v3small_224_s2026.pt` at 0.8217 — too weak
 to have earned a seat.
 
 ## Why that is the explanation and not just a description

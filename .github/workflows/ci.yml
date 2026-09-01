@@ -73,6 +73,12 @@ jobs:
       # default — mechanism identical across repos, only the CONTENTS are a per-repo FACT (bd skr GAP3).
       - name: Command index — enforced (kneemri/README.md is generated from the modules)
         run: uv run python -m kneemri.commands --check
+      # Prose against the board record: no document, kernel or bead may quote an entry at a score
+      # comp/board.jsonl does not give it, or a rank the last live read has moved past. Repo-only inputs,
+      # so it runs on a runner with no data root. Its sibling `claims_check` reads the runs on that root
+      # and therefore lives at the pre-push hook, not here. GRADUATED 2026-09-01, the day it first read 0.
+      - name: Board claims — enforced (no stale board score or rank in prose)
+        run: uv run python -m kneemri.experiments.board_claims --assert
       # <<< LOCAL-SLOT: ci-lint-steps
 
   tests:

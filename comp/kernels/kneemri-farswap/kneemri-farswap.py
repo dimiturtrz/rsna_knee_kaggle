@@ -4,7 +4,7 @@
 0.937 with six dark members plus `band_dense_long_s2026` (0.8587, DINOv2-small, a decode-axis sibling of
 four seats already in the room). This entry holds all six dark seats byte-identical, holds the count at
 seven, holds `RankAverage`, holds `overlap=False`, and moves ONLY who sits seventh — to
-`lora_r8_v3small_224_s2026` (0.8215), the pool's only non-DINOv2 member.
+`lora_r8_v3small_224_s2026` (0.8217), the pool's only non-DINOv2 member.
 
 The ledger's precedent points DOWN and it must be stated first: `crossenc` and `maxdiv` each ADDED an
 individually weak member (0.8268, 0.8345) and gave back four board ticks. But both of those moved member

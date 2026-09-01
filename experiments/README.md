@@ -3893,7 +3893,7 @@ trained on, which would have carried the whole greedy path.
 | seat value | +0.0020 | +0.0014 | +0.0016 | +0.0022 |
 
 **It is in every best subset from one to six, and it is the best single member in the pool** — ahead of
-`band_span` (0.8545) and `res392` (0.8523), the two that have held that place all week. Seat value
+`band_span` (0.8565) and `res392` (0.8523), the two that have held that place all week. Seat value
 +0.0014 to +0.0020 offline, against the ~+0.001 a seat swap has historically been worth; roughly a double
 seat, and still an order of magnitude under the house bar. `LogitAverage` stays ahead of `RankAverage` by
 +0.0005, as the champion's own vote already assumes.
@@ -4360,7 +4360,7 @@ same pooling, agree more, not less.
 **And `margin_seat` inverts the lane.** Solo 0.8525 — **0.0109 WORSE** than `calib_dense_hold` — and it is
 the only candidate of six that clears the bar, at **+0.0018**. A worse member bought a bigger seat, and
 the distance column says why: nearest 0.8628, the most distant candidate that is not simply broken
-(`vjepa_warm` at 0.8210 is distant-and-weak, the other failure mode, worth +0.0001).
+(`vjepa_warm` at 0.8337 is distant-and-weak, the other failure mode, worth +0.0001).
 
 This does NOT restate the retracted "the loss axis buys seats" rule — `dissent_seat`, the other objective
 arm, is the MOST redundant candidate we hold (nearest 0.9292) and reads **−0.0008**. Decorrelation asked
@@ -6344,7 +6344,7 @@ already mounted from `dimiturnt/vjepa2-hf`. So the entry costs no 7.5 GB re-uplo
 hours earlier.
 
 THE HONEST STATEMENT ABOUT THE GOAL. The goal was to train a non-DINO trunk and spend a submission on it.
-The training half ran and did not produce a seatable member: `swin_wholetop` is 0.0186 under the 0.8459
+The training half ran and did not produce a seatable member: `swin_wholetop` is 0.0186 under the 0.8459 seat bar
 merit level and under its own control. Shipping it anyway would be spending the slot on the checkpoint's
 provenance rather than on the axis. The axis is what the goal is for, so the slot goes to the strongest
 non-DINO member the project owns, and the training half continues in `swin_calib_dense`.
@@ -6533,7 +6533,7 @@ diversity alone, and the two together each return zero, from three different dir
 `calib_dense_hold_ff` for `lr4e-5_ws_cf` — a same-count, blind-for-blind seat SWAP — and it scored
 **0.944 against the control's 0.944**. Dead flat. Put beside `vjepaseat_v1` (0.943, an ADDED seat on the
 architecture axis with the most distant member the project owns), `raptorseat_v1` (0.943),
-`fleettwo` (0.942) and `raptorweight_v1` (+0.001 for a reweight), every operation available on a fixed
+`fleettwo_v1` (0.942) and `raptorweight_v1` (+0.001 for a reweight), every operation available on a fixed
 pool — add, reweight, swap, on both the architecture and the corpus axes — now has a flat or negative
 reading on the instrument that can actually see the champion.
 
@@ -6567,3 +6567,30 @@ already run that experiment with a MORE distant member and returned flat. The ca
 lane still open can be shipped without paying the ~0.008 blind-vs-fold-0 penalty that has kept it out of the
 champion. The single overnight slot went to `spanseat_v1`, priced at ~10% before it was fired and fired
 anyway because the slot cannot be banked and nothing buildable in the window priced better.
+
+## Feature distillation from the foreign trunk is FLAT, and that closes knee-8009 on both cells (2026-09-01)
+
+`raptor_feat_pre` → `raptor_feat_fit`, swinbase, 336 px, 20 slices, 12 epochs one_cycle, ~930-1010 s an
+epoch. Stage one shaped the trunk toward `raptor_features.npz` at `feature_weight` 20.0:
+`raptor_feat_pre_s2026` recorded **0.8201**. Stage two fit the labels from that encoder with a cold head:
+`raptor_feat_fit_s2026` peaked at epoch 6 with **0.8334**, then slid to 0.8211 by epoch 11 while the
+loss fell — converged, not truncated.
+
+Against the arm's own pre-registered control, `swin_supervised_s2026` at 0.8331 cold, that is **+0.0003**:
+inside the FLAT branch (-0.0061 to +0.0014), a twentieth of the 0.0062 floor.
+
+**The pre-registration named this outcome a result rather than a null, and it holds.** A REPRESENTATION
+target ties the cold trunk where a LOGIT target lost 0.0077. So what the -0.0077 measured was the LEVEL
+of the target, not distillation as a mechanism — a foreign teacher's features are neither harmful nor
+worth 3.9 hours of card. knee-8009 closes on both of its cells: the trunk cause for distillation is
+spent, and only the corpus cause (knee-ombx, MRNet) is still open.
+
+**No seat reading exists for it.** `run_train` refused to price the seat against the champion —
+`raptorweight_v1` seats five blind `--fold -1` members that carry no holdout record, so 1 of 6 seats is
+scoreable and a marginal contribution needs at least 2. The member is 0.031 under the pool's best solo,
+so a seat pass against `honest12` was not bought either.
+
+**The teacher's in-sample exposure did not have to be discounted.** `foreign_overlap` reads raptor at
+98.6% in-sample on this corpus, which is why a positive here would have been an upper bound. A flat
+reading needs no such correction: the memorised teacher could not lift the student even with the
+advantage.
