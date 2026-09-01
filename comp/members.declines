@@ -159,3 +159,12 @@ headlr224_s2026.pt                   # 0.8408 solo — below the 0.8459 merit le
 raptor_feat_pre_s2026.pt             # 0.8201 solo — NOT a member at all: stage one of the feature-distillation pair (knee-8009 b), a trunk fitted to raptor_v4_swa's features whose head exists only to carry the run. It is priced by what stage two does with it (`small_feat_fit`), and its own solo is a diagnostic of the pretrain, not a candidate seat.
 raptor_feat_fit_s2026.pt             # 0.8334 solo — stage two of the feature-distillation pair (knee-8009 cell b), +0.0003 against its cold control swin_supervised_s2026 (0.8331). Below the 0.8459 merit level and inside the 0.0062 floor against the member it was built to beat, so it seats nothing; it is the arm's RESULT, not a candidate. Re-open only if a distant-seat argument is made for it by score, which would need the merit level met first.
 small_feat_pre_s2026.pt              # NOT a member at all: stage one of the small_feat pair, a trunk fitted to teacher features whose head exists only to carry the run. Priced by what `small_feat_fit` does with it, same as `raptor_feat_pre_s2026`.
+cnx_mid_rate_s2026.pt   # 0.7993 solo. DISTINCT and unshippable, which is the informative pair.
+                        # seat_value --against honest12: rank 0.7598 (boundary 0.8956), js 0.0304
+                        # (boundary 0.0150), maha 4.981 — the most decorrelated candidate measured in
+                        # this sweep. But board ref 55895006 priced what a distant member needs to buy
+                        # a seat rather than sit inert in one: >= 0.8521 solo. This is -0.052 under
+                        # that bar and -0.034 under the non-DINOv2 lane floor it would join. vjepaseat
+                        # already spent a slot proving distance without strength is inert; this would
+                        # spend a second on the same answer. Re-open by ANSWERING the size bar, not by
+                        # re-quoting the divergence.
