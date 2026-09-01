@@ -4305,6 +4305,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.backbone",
+      "target": "kneemri.models.snapshot_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.backbone",
       "target": "kneemri.models.state_dict_trunk",
       "weight": 1
     },
@@ -4438,6 +4444,18 @@
       "kind": "import",
       "source": "kneemri.models.slice_read",
       "target": "kneemri.models.volume_read",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.snapshot_trunk",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.snapshot_trunk",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -22285,6 +22303,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.models.snapshot_trunk.LocalSnapshot.build",
+      "target": "kneemri.models.snapshot_trunk.LocalSnapshot.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.snapshot_trunk.LocalSnapshot.resolve",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.models.state_dict_trunk.StateDictTrunk",
       "target": "kneemri.models.state_dict_trunk.FeatureMapOutput",
@@ -25673,7 +25703,7 @@
       "role": null
     },
     {
-      "descendants": 199,
+      "descendants": 200,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -26777,7 +26807,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -26900,6 +26930,14 @@
       "descendants": 0,
       "id": "kneemri.models.slot_head",
       "label": "slot_head",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.snapshot_trunk",
+      "label": "snapshot_trunk",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -30255,6 +30293,14 @@
       "level": "class",
       "parent": "kneemri.models.slot_head",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.snapshot_trunk.LocalSnapshot",
+      "label": "LocalSnapshot",
+      "level": "class",
+      "parent": "kneemri.models.snapshot_trunk",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -44462,6 +44508,22 @@
       "label": "slot_weights",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.snapshot_trunk.LocalSnapshot.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.models.snapshot_trunk.LocalSnapshot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.snapshot_trunk.LocalSnapshot.resolve",
+      "label": "resolve",
+      "level": "method",
+      "parent": "kneemri.models.snapshot_trunk.LocalSnapshot",
       "role": null
     },
     {

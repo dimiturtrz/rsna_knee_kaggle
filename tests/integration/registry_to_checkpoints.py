@@ -28,6 +28,11 @@ from kneemri.models.backbone import ENCODERS, PREPROCESSOR_FILES, Encoder
 
 def _published_document(encoder: Encoder) -> dict[str, object] | None:
     """The snapshot's own preprocessing config, or None for a release that publishes none."""
+    # Builder-backed encoders ship a converted snapshot from this disk rather than a Hub repository,
+    # so a Hub lookup would read the wrong document or fail on a missing repository. Their
+    # normalization is carried in prose and is checked by `_declaring_document` below.
+    if encoder.builder is not None:
+        return None
     for name in PREPROCESSOR_FILES:
         try:
             path = hf_hub_download(encoder.repository, name)

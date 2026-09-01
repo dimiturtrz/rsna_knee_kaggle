@@ -36,6 +36,7 @@ from kneemri.models.encoder import (
 from kneemri.models.encoder import (
     Stage as Stage,
 )
+from kneemri.models.snapshot_trunk import ORTHOFOUNDATION_L
 from kneemri.models.state_dict_trunk import RADIMAGENET_DENSENET121
 from kneemri.models.trunk_tokens import TrunkAsTokens
 
@@ -45,6 +46,8 @@ LARGE = "large"
 V3_SMALL = "v3small"
 V3_SMALL_PLUS = "v3splus"
 V3_BASE = "v3base"
+V3_LARGE = "v3large"
+ORTHO_LARGE = "ortholarge"
 CONVNEXT_BASE = "cnxbase"
 VJEPA2_LARGE = "vjepa2l"
 RAD_DINO = "raddino"
@@ -189,6 +192,60 @@ ENCODERS: dict[str, Encoder] = {
         family=DINOV3,
         leaf="vitb16",
         params_m=86.6,
+    ),
+    # THE CONTROL FOR `ortholarge`, AND ONLY THAT, added 2026-09-02. Every other DINOv3 entry here was
+    # added to be fitted; this one exists so the knee-continued release below is read against the exact
+    # weights it was continued FROM. Same 24 blocks, 1024 width, 16 heads, patch 16 and 4 register
+    # tokens — the pair differs in 1.25M knee images of continued self-distillation and in nothing else,
+    # which is the only arrangement under which a delta is about the CORPUS rather than about capacity.
+    #
+    # NO MOUNT. It is a ruler, not a seat: a control that never ships needs no Kaggle mirror, and
+    # arranging one before the delta is read would be paying for a decision that has not been made.
+    V3_LARGE: Encoder(
+        V3_LARGE,
+        "facebook/dinov3-vitl16-pretrain-lvd1689m",
+        1024,
+        patch=16,
+        family=DINOV3,
+        leaf="vitl16",
+        params_m=303.1,
+        depth=24,
+    ),
+    # THE FIRST TRUNK PRETRAINED ON THIS ANATOMY, added 2026-09-02. Every encoder above is natural
+    # images (the DINOs, ConvNeXt, Swin, ViT), mixed radiology (RadImageNet, RAD-DINO) or video
+    # (V-JEPA2); none has seen a knee. `radnet_family` closed EMPTY at 0.6716 against a 0.75 floor, and
+    # the reading that survives it is that a mixed-radiology corpus is not an in-domain corpus.
+    #
+    # `knee-y59c` MEASURED SOLO STRENGTH ANTI-CORRELATING WITH DISTANCE FROM DINOv2 across seven trunks,
+    # and this entry is the one point that separates the two readings of that curve. It is DINOv3-L
+    # weights — near DINOv2 on the family axis, where the curve predicts a strong solo — that have then
+    # been moved by 894k knee-MRI slices. If distance from DINOv2 is what the curve is really about, this
+    # reads strong; if the curve was a proxy for natural-image pretraining quality, continuation costs it.
+    #
+    # WHY IT IS THE CHEAPEST TEST OF THE EXTERNAL-DATA LANE. Ilse et al. 2025 price DINO-family
+    # continuation as needing ~100k in-domain images to beat its own open weights, and the unlabelled
+    # knee substrate on this disk is ~72k slices — below the threshold, so running the continuation here
+    # is priced to fail before it starts. This release IS that continuation at 1.25M images, done by
+    # somebody else and licensed MIT. The lane is decided by loading it, not by pretraining.
+    #
+    # NO MOUNT YET. MIT, so mirroring is permitted outright and is the dataset upload `dinov3-hf` already
+    # was; deferred until a probe or a member earns the seat.
+    ORTHO_LARGE: Encoder(
+        ORTHO_LARGE,
+        "",
+        1024,
+        patch=16,
+        family=DINOV3,
+        leaf="orthofoundation",
+        params_m=303.1,
+        depth=24,
+        builder=ORTHOFOUNDATION_L.build,
+        normalization_evidence=(
+            "The release publishes no preprocessing document — it is a bare training checkpoint, and the "
+            "converted snapshot carries only the architecture. Its own paper states DINOv3 preprocessing "
+            "unchanged, and the weights it continues from declare ImageNet constants, so ImageNet is what "
+            "this checkpoint was continued under rather than a default falling through."
+        ),
     ),
     # THE FIRST NON-TRANSFORMER, added 2026-08-21 because the transformer axis closed. `base_dense`
     # (DINOv2-base among seven DINOv2-small members) took the board from 0.930 to 0.931; `v3base_dense`

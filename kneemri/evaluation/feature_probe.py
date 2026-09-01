@@ -42,6 +42,13 @@ TRUNKS: dict[str, str] = {
     "dinov2-small": "features_small_336px_12sl_r336_cls_mean_max",
     "dinov2-large": "features_large_336px_12sl_r252_mean_max",
     "vjepa2-large": "features_vjepa2l_336px_12sl_r256_mean_channels",
+    # The controlled pair, added 2026-09-02 for `knee-440m`: `ortholarge` is `v3large` continued on
+    # 1.25M knee images and identical to it in every other respect, so their difference here is the only
+    # reading this project can take of in-domain SSL continuation without spending the SSL compute. They
+    # share a read size with each other, not with the rows above — a probe compares trunks under one
+    # instrument, and the instrument is the flag set, so only this pair's own delta is controlled.
+    "v3large": "features_v3large_336px_12sl_r256_mean_max",
+    "ortholarge": "features_ortholarge_336px_12sl_r256_mean_max",
 }
 """Trunk name to the cache stem its features were written under. A declaration, not a bucket: every
 entry names an array that exists, and a trunk with no cache cannot be probed at all."""

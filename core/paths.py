@@ -35,6 +35,12 @@ RAW = "raw"
 PROCESSED = "processed"
 """Derived artefacts — caches, checkpoints, holdout records. Created on demand."""
 
+REFERENCE = "reference"
+"""Shared material that is neither a dataset nor ours — foreign weights, converted snapshots, papers.
+
+Distinct from `raw/` because it is not a corpus to read and from `processed/` because nothing here
+derives it: a converted third-party checkpoint is an INPUT that happens to have been reshaped once."""
+
 CHECKPOINT_SUFFIX = ".pt"
 """What a member is stored as. Named here because the resolver below writes it and the submission layer
 reads it, and a literal spelled in two layers is a literal that will one day disagree with itself."""
