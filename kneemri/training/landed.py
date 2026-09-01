@@ -19,6 +19,7 @@ from flags into that vocabulary.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -68,6 +69,7 @@ from kneemri.training.trainer import (
     OPTIMISER_DECAY,
     READ_SIZE,
     REPORTS,
+    SAMPLING,
     SCHEDULED,
     WARMUP,
     WINDOW,
@@ -249,6 +251,8 @@ class Request:
     weight_decay: float
     warmup: float
     grad_clip: float
+    sample_spread: Path | None = None
+    sample_alpha: float = 0.0
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -308,6 +312,9 @@ class Request:
             GRADE_LADDER: self.grade_ladder,
             SIDE_TERM: self.side_weight,
             FOCUS: self.focus_label,
+            # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
+            # nothing, so the honest request there is the uniform draw the run will actually get.
+            SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,

@@ -33,6 +33,7 @@ from kneemri.training.objective import (
     RankedObjective,
 )
 from kneemri.training.report_supervision import ReportSupervision
+from kneemri.training.sampling import Disagreed
 from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
@@ -47,6 +48,7 @@ from kneemri.training.trainer import (
     OPTIMISER_DECAY,
     READ_SIZE,
     REPORTS,
+    SAMPLING,
     SCHEDULED,
     WARMUP,
     WEIGHT_DECAY,
@@ -169,6 +171,19 @@ def test_blend():
     assert trainer.policies()[MIXUP] == OFF, "the default must be the loop every ledger number was measured under"
     trainer.blend(0.2)
     assert trainer.policies()[MIXUP] == pytest.approx(0.2)
+
+
+def test_draw_with():
+    """Attaching the draw policy is visible in the trainer's own account of itself, and defaults to off.
+
+    The POSITIVE WITNESS for `--sample-spread`: an unattached policy is `Uniform`, which returns the
+    positions untouched and does not even advance the generator, so a spread file that never reached the
+    trainer trains exactly the ledger's uniform run and reports it under the sampled arm's name.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[SAMPLING] == OFF, "every ledger number was measured on a uniform draw"
+    trainer.draw_with(Disagreed(np.linspace(0.01, 0.3, 8), alpha=0.5))
+    assert trainer.policies()[SAMPLING] == pytest.approx(0.5)
 
 
 def test_clip_gradients():
@@ -425,6 +440,7 @@ def test_policies():
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,
+        SAMPLING: OFF,
     }
 
     trainer.bfloat16()
@@ -446,6 +462,7 @@ def test_policies():
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,
+        SAMPLING: OFF,
     }
 
 

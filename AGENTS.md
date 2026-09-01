@@ -1,6 +1,9 @@
 # kneemri — agent instructions
 
-Keep this file and `AGENTS.md` IN SYNC (different harnesses read each; same content).
+**`CLAUDE.md` IS THE SOURCE OF TRUTH.** Different harnesses auto-load different filenames, so the same
+content has to exist under several names — but it is authored HERE and copied outward, never the other
+way. Edit this file; run `bash .agent-runtime/agent_md_sync.sh` and it propagates to `AGENTS.md` and
+rebuilds the tier stack. An edit made to a generated copy is an edit the next sync silently destroys.
 ## Issue tracking — beads (bd)
 
 This project uses **bd (beads)** for issue tracking. Run `bd init` once, then `bd prime` for the full
@@ -277,6 +280,23 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   that ensemble diversity beats member quality (six leaderboard entries built to isolate it). Both were
   filed as discoveries and then "corrected" by measurements the repo had already made. `bd search` will
   not find them; grep the ledger.
+- **Mailboxes, one per side, and this file is read from BOTH** — so the rule is written without a
+  first person. Letters TO Claude go to `.claude/inbox/`; letters TO Kimi go to `.agent-runtime/inbox/`.
+  Each side watches only its OWN box, with the listener that sits beside it: Claude runs
+  `python .claude/listen_for_mail.py`, Kimi runs `python .agent-runtime/listen_for_mail.py`. Both boxes
+  hold a `.txt` runtime side plus committed `.md` letter history per their README. Writing into your own
+  box, or watching the other side's, delivers nothing and looks perfectly healthy while doing it — that
+  already armed a watcher on the wrong directory once. Each listener resolves its box from its OWN
+  directory, so MOVING one silently relocates that side's mailbox and kills any arm in flight; that has
+  also happened, and it is why the two scripts are separate files rather than one shared path. A letter
+  is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message per file, written
+  atomically (`.part` then `mv`). The listener is armed as a background task (timeout 86400) — it prints
+  bodies, files letters into its box's `read/`, and exits, so mail arrives as a task notification. On
+  every notification **re-arm FIRST**, then read, then work. Letters and `read/` are gitignored runtime
+  state. `.agent-runtime/agent_md_sync.sh` propagates `CLAUDE.md` OUTWARD — it copies it to
+  `AGENTS.md` (Kimi auto-loads that name) and rebuilds the CLAUDE.md tier stack; the SessionStart
+  hook (`.agent-runtime/kimi-session-start.sh`, wired in `~/.kimi-code/config.toml`) runs it and prints
+  the upward tiers + mailbox digest.
 
 
 

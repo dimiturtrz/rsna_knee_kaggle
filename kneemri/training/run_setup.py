@@ -43,6 +43,7 @@ from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
+from kneemri.training.sampling import Disagreed, Uniform
 from kneemri.training.side_ranking import PairedSides, SideRanking
 from kneemri.training.teacher_features import TeacherFeatures
 from kneemri.training.teacher_targets import TeacherTargets
@@ -163,6 +164,8 @@ class RunSetup:
             weight_decay=options.weight_decay,
             warmup=options.warmup,
             grad_clip=options.grad_clip,
+            sample_spread=options.sample_spread,
+            sample_alpha=options.sample_alpha,
         )
 
     def objective(self, widths: Widths | None = None) -> Objective:
@@ -546,6 +549,15 @@ class RunSetup:
         trainer.accumulate(options.accumulate)
         trainer.blend(options.mixup)
         trainer.clip_gradients(options.grad_clip)
+        # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
+        # not an absence — and because a policy only some runs attach is a policy the options-to-policies
+        # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against
+        # `training`: the policy is asked for a POSITION's weight, and positions index the corpus.
+        trainer.draw_with(
+            Uniform()
+            if options.sample_spread is None
+            else Disagreed.loaded(options.sample_spread, identifiers, options.sample_alpha)
+        )
         # BEFORE the schedule too, and for a sharper reason than accumulation's: `one_cycle` reads the
         # warmup fraction when it BUILDS OneCycleLR, so a warm_up after it would set a field nothing
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.

@@ -121,6 +121,8 @@ class TrainingOptions:
     teacher_features: Path | None = None
     side_weight: float = 0.0
     focus_label: str | None = None
+    sample_spread: Path | None = None
+    sample_alpha: float = 0.5
     pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False

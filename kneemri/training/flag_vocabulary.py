@@ -297,6 +297,7 @@ class FlagVocabulary:
             "are the price of jointness. The head still emits twelve logits, so the checkpoint stays a "
             "member; only the loss narrows.",
         )
+        cls._sampling_arguments(parser)
         parser.add_argument(
             "--slot-pooling",
             choices=tuple(SLOT_POOLINGS),
@@ -358,6 +359,34 @@ class FlagVocabulary:
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
+
+    @staticmethod
+    def _sampling_arguments(parser: argparse.ArgumentParser) -> None:
+        """WHICH studies an epoch descends on, as opposed to what it reads or how it is scored.
+
+        Grouped away from the recipe flags because they are one policy in two halves — an alpha without
+        a spread file weights nothing, and a spread file at alpha zero is the matched control rather
+        than a second recipe.
+        """
+        parser.add_argument(
+            "--sample-spread",
+            type=Path,
+            default=None,
+            help="draw each epoch's studies in proportion to how much a reference pool DISAGREED about "
+            "them, from a file written by kneemri.evaluation.train_disagreement. Every arm on the ledger "
+            "draws a uniform permutation instead; residual_split put ~70% of the pool's errors in the "
+            "band the family splits on, and this is the only lever aimed at it. Loss-ranked mining is "
+            "the conventional alternative and is wrong here: ~87% of the residual is aleatoric, so it "
+            "mines label noise. The epoch keeps its length, so the compute is matched.",
+        )
+        parser.add_argument(
+            "--sample-alpha",
+            type=float,
+            default=0.5,
+            help="the share of the draw --sample-spread controls; the rest is a uniform floor. 0.0 is "
+            "flat weights and is how the arm runs its own matched control — NOT the ledger's uniform "
+            "policy, since the draw is with replacement at every alpha.",
+        )
 
     @staticmethod
     def _optimiser_arguments(parser: argparse.ArgumentParser) -> None:

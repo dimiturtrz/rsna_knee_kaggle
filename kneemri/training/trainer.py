@@ -41,6 +41,7 @@ from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.mixup import Mixup
 from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
+from kneemri.training.sampling import Sampling, Uniform
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 
@@ -104,6 +105,7 @@ MIXUP = "mixup_alpha"
 OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
 CLIPPING = "gradient_clip_norm"
+SAMPLING = "sampling_tilt"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 NEEDED_FOR_A_RATIO = 2
@@ -160,6 +162,11 @@ class Trainer:
         # Attached and null by default for the same reason: an unbounded step is what every number in
         # the ledger was measured under, and `GradientClip()` leaves `fit_epoch` doing exactly nothing.
         self.clipping = GradientClip()
+        # Attached and null by default for the same reason, and here the default matters more than
+        # anywhere else on this list: `Uniform` returns the positions untouched WITHOUT drawing from the
+        # generator, so a run that asks for no sampling policy descends on exactly the stream every
+        # number in the ledger was measured under.
+        self.sampling: Sampling = Uniform()
         # A VALUE rather than a policy object, because there is nothing to dispatch on: the fraction is
         # read once, by `one_cycle`, as OneCycleLR's `pct_start`. It is a field rather than an argument
         # to that method so the request can be transcribed the same way every other switch is.
@@ -207,6 +214,7 @@ class Trainer:
             OPTIMISER_DECAY: self.weight_decay(),
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
+            SAMPLING: self.sampling.tilt(),
         }
 
     def weight_decay(self) -> float:
@@ -326,6 +334,10 @@ class Trainer:
         """Bound the norm of one optimiser step — see `GradientClip` for why this project never had one."""
         self.clipping = GradientClip(max_norm)
 
+    def draw_with(self, sampling: Sampling) -> None:
+        """Attach the policy that decides which studies each epoch descends on."""
+        self.sampling = sampling
+
     def warm_up(self, fraction: float) -> None:
         """Spend this share of the one-cycle schedule warming up, instead of the inherited 0.15.
 
@@ -427,7 +439,11 @@ class Trainer:
         # each float32 loss promoted and added, in step order.
         total = torch.zeros((), dtype=torch.float64, device=self.device)
         steps = 0
-        plan = self.plan(corpus, self.batches(positions, size, generator, shuffle=True), generator)
+        # THE DRAW COMES BEFORE THE SHUFFLE, and the two are different jobs: `sampling` decides WHICH
+        # positions this epoch descends on, `batches` decides in what order. Under the default policy the
+        # first is the identity and this line is the one every arm in the ledger ran.
+        drawn = self.sampling.drawn(positions, generator)
+        plan = self.plan(corpus, self.batches(drawn, size, generator, shuffle=True), generator)
         # TRUNCATED TO COMPLETE GROUPS before the reader is started, so the prefetch never reads a
         # micro-batch whose gradient the epoch will throw away. Without accumulation this is the
         # identity and the loop is the one every arm in the ledger ran.

@@ -73,6 +73,11 @@ NOT_IN_CONFIG = {
     "not a rebuild hazard: a focused member's other eleven columns are untrained, so it is an "
     "INSTRUMENT and never a roster seat, which its arm states and `members.roster` enforces by simply "
     "not naming it",
+    "sample_spread": "a draw policy — it decides WHICH studies the epoch descended on and touches no "
+    "module, no parameter and no loss term, so the function a rebuild serves is byte-identical. The "
+    "file it names is a fact about how these weights were REACHED, like `teacher_targets`, and the "
+    "witness that it landed is the trainer's own `sampling_tilt`, not the checkpoint",
+    "sample_alpha": "the tilt of that same draw policy, same write-off",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",

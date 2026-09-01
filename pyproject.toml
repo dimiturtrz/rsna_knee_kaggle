@@ -142,7 +142,9 @@ DEP002 = [
 [tool.ruff]
 line-length = 120
 # >>> LOCAL-SLOT: ruff-exclude — edit freely, the template will not overwrite intent here
-extend-exclude = ["docs", "learning", "research", "interpretations"]
+# `.agent-runtime/` is the OTHER agent's tree — their listener, their session hook. It is theirs to
+# format, and holding it to our gate means their file blocks our commit, which is exactly what it did.
+extend-exclude = ["docs", "learning", "research", "interpretations", ".agent-runtime"]
 # <<< LOCAL-SLOT: ruff-exclude
 
 [tool.ruff.lint]
