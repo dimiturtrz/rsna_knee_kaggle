@@ -4,7 +4,22 @@
 
 ## Short answer
 
-**Essentially all of the published gain lives in (a) contrastive image–text pretraining.** Papers that report large deltas (ConVIRT, CheXzero, MedCLIP, GLoRIA, BioViL) train vision and text encoders jointly on large collections of paired images and reports, then either use the frozen vision encoder for supervised downstream tasks or do zero-shot matching. There is very little published evidence that adding a text branch or text-alignment auxiliary loss *during* fully supervised fine-tuning improves a model that already has good labels.
+**Essentially all of the published gain lives in (a) contrastive image–text pretraining.** Papers that report large deltas (ConVIRT, CheXzero, MedCLIP, GLoRIA, BioViL) train vision and text encoders jointly on large collections of paired images and reports, then either use the frozen vision encoder for supervised downstream tasks or do zero-shot matching.
+
+A relevant community baseline for this competition — `konradcinkusz/rsna-knee-abnormalities-efficiency-lb` — uses a **multilingual text branch at training time only** (because `test.csv` does not contain a `Report` column), with `paraphrase-multilingual-MiniLM-L12-v2` and a DINOv2-small vision backbone, and reports a public score of **0.906**. This is mechanism (a)/(b) at training, not a text branch at inference. It is still not an auxiliary cosine loss on the readout; it is a two-branch multimodal model whose text path is dropped at test time.
+
+There is very little published evidence that adding a text branch or text-alignment auxiliary loss *during* fully supervised fine-tuning improves a model that already has good labels.
+
+## A competition-specific datapoint: the 0.906 public baseline
+
+The public Kaggle Models tab lists a best public score of **0.906** with **DINOv2-small**, and a community repo documents the architecture as a 2.5D DINOv2 vision branch plus a **multilingual text branch** (`paraphrase-multilingual-MiniLM-L12-v2`) [[GitHub](https://github.com/konradcinkusz/rsna-knee-abnormalities-efficiency-lb)]. Key facts for our question:
+
+- `test.csv` does **not** contain a `Report` column, so the text branch can only be used **during training**.
+- The recommended pipeline is: train a two-branch vision+text model, then at inference run the **vision branch only** (text branch dropped or used only if a report is available, which it is not).
+- This is therefore a **distillation / training-time multimodal signal**, not mechanism (c) (text at inference) and not the mechanism-(b) cosine auxiliary loss the project tested.
+- The same Models tab shows DINOv2-base at 0.861 and DINOv2-large at 0.5 (effectively random), suggesting the 0.906 number is heavily dependent on the small model not overfitting the tiny gold-label set rather than on the text branch alone.
+
+This baseline does not distinguish (a) from (b) cleanly — it could be gaining from report-derived weak labels, from a text-conditional regularizer, or from both — but it confirms that the only text-supervision shape that has scored well in this competition is **training-time multimodal**, not inference-time text.
 
 ## Mechanism (a): contrastive image–text pretraining — this is where the numbers are
 
@@ -45,9 +60,9 @@ Claude listed three possible repairs to the failed `report_supervision.sh` exper
 
 | Mechanism | Literature verdict | Project status | Recommended action |
 |---|---|---|---|
-| (a) Contrastive pretraining on reports | Strong gains in low-label and zero-shot settings | Not tried with the project's own ~4,400 report-labelled studies | **Open axis.** A pilot that continues the DINOv3-L trunk on report–image contrastive learning using the project's own reports is the only text-supervision experiment with literature support. |
-| (b) Auxiliary text-alignment loss during fine-tuning | No published medical gain; project's −0.0063 is consistent | Tested and refuted | **Decline unless a very cheap repair is wanted.** The Findings/Impression repair is plausible but not literature-backed. |
-| (c) Text branch at inference | No published diagnosis gain | Not tested | **Decline.** Feeding the report at inference is not a known classification lever. |
+| (a) Contrastive pretraining on reports | Strong gains in low-label and zero-shot settings; competition baseline uses training-time text branch | Not tried with the project's own ~4,400 report-labelled studies | **Open axis.** A pilot that continues the DINOv3-L trunk on report–image contrastive learning using the project's own reports is the only text-supervision experiment with literature support. The public 0.906 baseline is additional evidence that training-time text helps, though it does not isolate the mechanism. |
+| (b) Auxiliary text-alignment loss during fine-tuning | No published medical gain; project's −0.0063 is consistent | Tested and refuted with whole-report cosine | **Decline unless a very cheap repair is wanted.** The Findings/Impression repair is plausible but not literature-backed. It is also architecturally different from the 0.906 baseline's two-branch training. |
+| (c) Text branch at inference | No published diagnosis gain; competition test set has no report column | Not applicable | **Decline.** Feeding the report at inference is not a known classification lever and is impossible in this competition's test set. |
 
 ## Bottom line
 
