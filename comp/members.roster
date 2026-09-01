@@ -601,3 +601,4 @@ focal224_s2026.pt                    # 0.8487
 decay224_high_s2026.pt               # 0.8487
 regions224_s2026.pt                  # 0.8476
 headlr224_slow_s2026.pt              # 0.8475
+small_feat_fit_s2026.pt              # 0.8571

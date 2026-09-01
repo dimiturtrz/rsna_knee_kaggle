@@ -53,9 +53,52 @@ are the two cells where "the field is ahead" and "we are not stuck at a floor" c
 
 **It points the middle band.** `residual_split` found ~70% of errors in a band that only a genuinely
 different member can reach, and `population_split` found that band is not concentrated in any acquisition
-population. This says *where in the label panel* it is concentrated. A new member should be built and
-judged on Lateral Meniscus and ACL specifically, not on the twelve-label mean that would dilute a real
-gain there by a factor of six.
+population. This says *where in the label panel* it is concentrated.
+
+## AMENDED 2026-09-01: the direction reverses on the ruler that pays
+
+The paragraph above originally ended "a new member should be built and judged on Lateral Meniscus and ACL
+specifically." **That is withdrawn.** It repeats a mistake this repo already made and already wrote down:
+`experiments/arms/focus_mcl.sh:16-25` retired `focus_latmen` on 2026-08-23 for aiming at a deficit that
+belongs to somebody else's encoder, and the checkpoint that arm left behind scores 0.4747.
+
+The competition metric is the unweighted mean of twelve of **our own** columns, so what a label is worth
+is its distance from **our** mean, not from a published specialist's. Measured on the honest12 pool over
+the same 909 studies, ensemble mean AUC 0.8750:
+
+| finding | our AUC | vs our mean | unanimity |
+|---|---|---|---|
+| MCL | 0.8195 | **−0.0555** | 24.4% |
+| Fracture | 0.8328 | −0.0422 | 33.0% |
+| Lateral OA | 0.8357 | −0.0393 | 29.7% |
+| Effusion | 0.8667 | −0.0083 | 29.7% |
+| PF OA | 0.8715 | −0.0035 | 22.9% |
+| Lateral Meniscus | 0.8765 | **+0.0015** | 13.3% |
+| Synovitis | 0.8795 | +0.0045 | 25.0% |
+| Contusion | 0.8891 | +0.0141 | 25.3% |
+| Medial OA | 0.8894 | +0.0144 | 27.5% |
+| Medial Meniscus | 0.9082 | +0.0332 | 22.8% |
+| ACL | 0.9096 | **+0.0346** | 14.4% |
+| Baker's | 0.9215 | +0.0465 | 25.0% |
+
+**The two findings the join nominated have no headroom on our ruler.** Lateral Meniscus is +0.0015 and
+ACL is +0.0346 — mid-pack and second-best respectively. Spearman(own deficit, unanimity) = **−0.403
+(p = 0.19, n = 12)**: the relationship inverts and stops being significant. The +0.952 above is real
+about the foreign column and says nothing about where our score can grow.
+
+**And the inversion is itself the finding.** Our three cheapest columns — MCL, Fracture, Lateral OA —
+carry 24.4%, 33.0% and 29.7% unanimity, all at or above the 24.3% pooled floor. Where we have the most
+to gain, our twelve members are wrong *together*. The low-unanimity cells, which `residual_split` says
+are the reachable ones, are the columns we are already good at. So the middle band is **not** a route to
+our cheap labels: it can reshuffle who is right on ACL and Lateral Meniscus, which pays ~nothing. Closing
+MCL to the mean is worth +0.0046 on the metric, and it needs something that is not a reseating and not
+another member of this family.
+
+**One flag, not a refutation.** `focus_mcl.sh` rests on an existence proof that some other model reaches
+0.8166 on MCL against our best-ever 0.8042. This pool's ensemble reads **0.8195** on MCL — above that
+proof. The denominators differ (their number is the 4,407-study corpus ruler on published weights; ours
+is the 909-study fold-0 report ruler), so this does not retire the arm. It does mean the arm's headline
+argument must be re-derived on a matched denominator before it is priced again.
 
 **It re-reads knee-dtk's partition as confirmed a third time.** The 2026-08-14 model-bottlenecked half was
 ACL, MCL, Medial Meniscus, Lateral Meniscus, Lateral OA, PF OA. The four of those with published
