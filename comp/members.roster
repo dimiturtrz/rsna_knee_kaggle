@@ -603,3 +603,6 @@ regions224_s2026.pt                  # 0.8476
 headlr224_slow_s2026.pt              # 0.8475
 small_feat_fit_s2026.pt              # 0.8571
 merged3_corpus_s2026.pt              # 0.8521
+certainty_ramp_s2026.pt              # 0.8584
+disagreed_uniform_s2026.pt           # 0.8507
+disagreed_full_s2026.pt              # 0.8471
