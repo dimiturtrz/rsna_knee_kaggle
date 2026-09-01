@@ -3405,6 +3405,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.board_check",
+      "target": "kneemri.evaluation.selection_bias",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.board_check",
       "target": "kneemri.kaggle.kernel_script",
       "weight": 1
     },
@@ -18237,7 +18243,19 @@
     {
       "kind": "references",
       "source": "kneemri.kaggle.board_check.BoardCensus",
+      "target": "kneemri.evaluation.selection_bias.SelectionBias",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.board_check.BoardCensus",
       "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.board_check.BoardCensus.__init__",
+      "target": "kneemri.evaluation.selection_bias.SelectionBias",
       "weight": 1
     },
     {
@@ -18345,6 +18363,18 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.uncorrected",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.undeclared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
       "target": "kneemri.kaggle.board_check.BoardCensus.unnamed",
       "weight": 1
     },
@@ -18364,6 +18394,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.rows",
       "target": "kneemri.kaggle.board_check.BoardRow.parsed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.uncorrected",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.undeclared",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
       "weight": 1
     },
     {
@@ -24355,7 +24397,7 @@
       "role": null
     },
     {
-      "descendants": 188,
+      "descendants": 189,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -24411,7 +24453,7 @@
       "role": null
     },
     {
-      "descendants": 56,
+      "descendants": 57,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -24774,6 +24816,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.seat_bonus",
       "label": "seat_bonus",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.selection_bias",
+      "label": "selection_bias",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -27537,6 +27587,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.seat_bonus",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.selection_bias.SelectionBias",
+      "label": "SelectionBias",
+      "level": "class",
+      "parent": "kneemri.evaluation.selection_bias",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -36484,6 +36542,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.selection_bias.SelectionBias.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.selection_bias.SelectionBias",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.selection_bias.SelectionBias.corrects",
+      "label": "corrects",
+      "level": "method",
+      "parent": "kneemri.evaluation.selection_bias.SelectionBias",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.selection_bias.SelectionBias.stated",
+      "label": "stated",
+      "level": "method",
+      "parent": "kneemri.evaluation.selection_bias.SelectionBias",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.side_blindness.Discordant.contrast",
       "label": "contrast",
       "level": "method",
@@ -39620,6 +39702,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.uncorrected",
+      "label": "uncorrected",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.undeclared",
+      "label": "undeclared",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardCensus.unnamed",
       "label": "unnamed",
       "level": "method",
@@ -39654,6 +39752,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardRow.disagrees",
       "label": "disagrees",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardRow.governed",
+      "label": "governed",
       "level": "method",
       "parent": "kneemri.kaggle.board_check.BoardRow",
       "role": null

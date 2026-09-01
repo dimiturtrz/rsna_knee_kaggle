@@ -4,7 +4,19 @@ import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from kneemri.kaggle.board_check import BoardCensus, BoardRow, LiveBoard
+from kneemri.kaggle.board_check import SEARCH, SELECTION_RULE_DATE, BoardCensus, BoardRow, LiveBoard
+
+SEARCHED: Mapping[str, object] = {
+    "id": "greedy_v1",
+    "ref": "1",
+    "date": "2026-08-31",
+    "offline": 0.8704,
+    "offline_raw": 0.8731,
+    "selection": SEARCH,
+    "board": 0.932,
+    "scope": "ensemble",
+}
+"""`peak8`'s shape, corrected: the row the rule was written for, as the rule says it must be written."""
 
 CLEAN: Sequence[Mapping[str, object]] = [
     {"note": "a note carries commentary and no submission, so nothing here counts it"},
@@ -55,6 +67,10 @@ def test_parsed():
     assert excluded.members_named == (), "no members named is an empty tuple, not a crash"
     assert not excluded.names_key, "and an absent key is distinguishable from an empty one"
     assert (excluded.kernel, excluded.members) == (None, None)
+    assert (excluded.selection, excluded.offline_raw) == (None, None), "a row that says nothing parses as silence"
+
+    searched = BoardRow.parsed(SEARCHED)
+    assert (searched.selection, searched.offline_raw, searched.date) == (SEARCH, 0.8731, "2026-08-31")
 
 
 def test_script(tmp_path: Path):
@@ -115,6 +131,55 @@ def test_unpriceable(tmp_path: Path):
     priced = [{"id": "bad_v1", "ref": "1", "offline": 0.87, "board": 0.93, "members_named": ["calib_span_ff"]}]
     found = _census(tmp_path, priced).unpriceable()
     assert len(found) == 1 and "calib_span_ff" in found[0], "the offending seat is named, not just counted"
+
+
+def test_governed():
+    """The rule's own scope: a row that prices something, written after the rule existed."""
+    assert BoardRow.parsed(SEARCHED).governed(SELECTION_RULE_DATE)
+
+    early = BoardRow.parsed({**SEARCHED, "date": "2026-08-24"})
+    assert not early.governed(SELECTION_RULE_DATE), (
+        "a pre-rule row was searched over a pool the measured band does not describe"
+    )
+
+    priceless = BoardRow.parsed({**SEARCHED, "offline": None})
+    assert not priceless.governed(SELECTION_RULE_DATE), "no offline number is no claim to correct"
+
+    assert BoardRow.parsed({**SEARCHED, "date": SELECTION_RULE_DATE}).governed(SELECTION_RULE_DATE), (
+        "the day the rule was written is the first day it binds"
+    )
+
+
+def test_undeclared(tmp_path: Path):
+    """A priced row the rule reaches that never says how its seats were chosen — silence is the finding."""
+    assert _census(tmp_path, [SEARCHED]).undeclared() == []
+    assert _census(tmp_path).undeclared() == [], "alpha predates the rule and is not defaulted into it"
+
+    silent: Mapping[str, object] = {key: value for key, value in SEARCHED.items() if key != "selection"}
+    found = _census(tmp_path, [silent]).undeclared()
+    assert len(found) == 1 and "greedy_v1" in found[0] and "knee-jsgb" in found[0], "the row and the rule are named"
+
+    invented = _census(tmp_path, [{**SEARCHED, "selection": "curated"}]).undeclared()
+    assert len(invented) == 1, "a value outside the vocabulary declares nothing a check can read"
+
+
+def test_uncorrected(tmp_path: Path):
+    """The raw search-selected score — the row that was written the day after the rule forbade it."""
+    assert _census(tmp_path, [SEARCHED]).uncorrected() == []
+    assert _census(tmp_path, [{**SEARCHED, "selection": "designed"}]).uncorrected() == [], (
+        "a hand-picked set was not selected against a field and carries no selection bias"
+    )
+
+    raw = _census(tmp_path, [{**SEARCHED, "offline": 0.8731}]).uncorrected()
+    assert len(raw) == 1, "0.8731 raw against a raw 0.8731 is a correction of zero"
+    assert "0.8700 to 0.8706" in raw[0], "the message says what the row should have carried"
+    assert "+0.0000" in raw[0] and "knee-jsgb" in raw[0], "what it carries, and the rule it breaks"
+
+    unstated = _census(tmp_path, [{key: v for key, v in SEARCHED.items() if key != "offline_raw"}]).uncorrected()
+    assert len(unstated) == 1 and "offline_raw" in unstated[0], "a claim of correction is not arithmetic"
+
+    over = _census(tmp_path, [{**SEARCHED, "offline": 0.8600}]).uncorrected()
+    assert len(over) == 1, "an over-correction buys a transfer residual and is refused too"
 
 
 def test_unnamed(tmp_path: Path):
@@ -195,6 +260,10 @@ def test_refusals(tmp_path: Path):
     assert len(_census(tmp_path).refusals({**LIVE, "99": 0.938})) == 1
     assert _census(tmp_path).refusals({**LIVE, "99": None}) == [], "an entry in flight blocks nothing"
     assert _census(tmp_path).refusals(None) == [], "without a listing the offline rules still pass"
+
+    rawline = [*CLEAN, {**SEARCHED, "ref": "4", "offline": 0.8731}]
+    found = _census(tmp_path, rawline, prose="alpha beta greedy").refusals(None)
+    assert len(found) == 1 and "greedy_v1" in found[0], "a raw search-selected row refuses with no board listing"
 
 
 def test_taken():

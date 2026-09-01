@@ -26,6 +26,15 @@ reason (a mixed fusion whose members were fitted elsewhere, a 0.500 kit failure,
 score) carries `scope: excluded` and the reason, so the exclusion is a recorded decision rather than an
 absence. Only then can the check be an exact set comparison instead of a heuristic about which absences
 were meant.
+
+AN OFFLINE NUMBER MUST ALSO SAY HOW ITS MEMBERS WERE CHOSEN. A set picked by SEARCH over a pool and
+then scored on the studies the search ran on reports its own overfitting as a result, which is the
+mistake `MemberCurve.honest` exists to measure — +0.0025 to +0.0031 at the pool sizes this project
+searches. `knee-jsgb` closed on the rule that such a row enters this file BIAS-CORRECTED, and the
+`peak8` row was written RAW the following day. The 0.004 of phantom shortfall that produced drove a
+write-up titled "the offline ruler fails", which was retracted (knee-wz81) after `board_transfer`
+reported 0 of 269 resolved pairs inverted. No gate stood between the rule and the row; `undeclared`
+and `uncorrected` below are that gate.
 """
 
 import json
@@ -36,6 +45,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.selection_bias import SELECTION_BIAS, SelectionBias
 from kneemri.kaggle.kernel_script import KernelScript
 
 logger = logging.getLogger(__name__)
@@ -64,6 +74,34 @@ beside it is not a held-out number — that is the entity error that produced a 
 This is a NAME rule on purpose: the disk rule (does a holdout record exist) needs the data root, and a
 record check must run in CI where there is none."""
 
+SEARCH = "search"
+DESIGNED = "designed"
+SELECTIONS = frozenset({SEARCH, DESIGNED})
+"""How a row says its seats were chosen. `search` is any argmax over a pool — `member_curve`'s greedy,
+`record_mix --greedy`, `seat_value`'s best-seat scan; `designed` is a set named by an argument, which
+includes a one-seat swap off an existing entry because the candidate was not selected against a field.
+
+A DECLARED FIELD rather than an inference from the score or a phrase in the prose. Nothing about a
+number says which procedure produced it, and `offline_scope` is written to be read by people — the two
+rows that already discuss selection bias spell it two different ways in the same paragraph. A gate that
+grepped prose would pass whichever wording it happened to be taught."""
+
+SELECTION_RULE = (
+    "knee-jsgb: an entry whose members were chosen by SEARCH enters this file with a BIAS-CORRECTED "
+    "offline and a raw one beside it, never a raw score alone"
+)
+
+SELECTION_RULE_DATE = "2026-08-30"
+"""When that rule was written down, and therefore the first date this file enforces it on.
+
+DATED, not retroactive, and the date is the whole argument. The correction is measured over pools of
+77-119 members; the record's early search-selected rows were searched over ten to twenty-two, and
+subtracting a large-pool constant from them moves `board_transfer`'s retro-prediction DOWN rather than
+up (knee-wz81, Spearman 0.961 -> 0.947). So the rows before this date are not silently defaulted to
+`designed` and are not corrected either — they are outside a rule that did not exist and whose constant
+does not describe them. Re-opening one means measuring the bias at ITS pool size, not applying this
+band. ISO dates compare as strings, which is why the record writes them that way."""
+
 
 @dataclass(frozen=True)
 class BoardRow:
@@ -86,6 +124,16 @@ class BoardRow:
     """
     kernel: str | None
     members: int | None
+    date: str
+    selection: str | None
+    """How this row says its seats were chosen, or None when it says nothing — see `SELECTIONS`."""
+    offline_raw: float | None
+    """The search's own in-sample score, when `offline` is that score corrected.
+
+    A SECOND NUMBER rather than a sentence, because the correction has to be checkable arithmetic. Both
+    rows that carried a correction before this field existed stated the raw value in their prose, and a
+    reader could confirm the subtraction by hand; nothing else could, which is the entire defect.
+    """
 
     @classmethod
     def parsed(cls, row: Mapping[str, object]) -> "BoardRow":
@@ -103,7 +151,19 @@ class BoardRow:
             names_key=named is not None,
             kernel=None if row.get("kernel") is None else str(row["kernel"]),
             members=None if row.get("members") is None else int(str(row["members"])),
+            date=str(row.get("date", "")),
+            selection=None if row.get("selection") is None else str(row["selection"]),
+            offline_raw=None if row.get("offline_raw") is None else float(str(row["offline_raw"])),
         )
+
+    def governed(self, since: str) -> bool:
+        """Whether the selection rule reaches this row: it prices something, and it postdates the rule.
+
+        Both halves are the rule's own scope. A row carrying no offline number makes no claim the
+        correction could apply to, and a row written before `SELECTION_RULE_DATE` was searched over a
+        pool the measured band does not describe — see that constant for why neither is a pass.
+        """
+        return self.offline is not None and self.date >= since
 
     def script(self, kernels: Path) -> Path:
         """The kernel script this entry shipped from, its own field first and its id stem as fallback.
@@ -140,10 +200,19 @@ class BoardRow:
 class BoardCensus:
     """The recorded submissions, asked whether they are all of them and whether each says a true thing."""
 
-    def __init__(self, record: Path = RECORD, ledger: Path = LEDGER, kernels: Path = KERNELS) -> None:
+    def __init__(
+        self,
+        record: Path = RECORD,
+        ledger: Path = LEDGER,
+        kernels: Path = KERNELS,
+        bias: SelectionBias | None = None,
+        since: str = SELECTION_RULE_DATE,
+    ) -> None:
         self.record = record
         self.ledger = ledger
         self.kernels = kernels
+        self.bias = bias or SelectionBias()
+        self.since = since
 
     def rows(self) -> list[BoardRow]:
         """Every recorded entry, the notes skipped — they carry commentary and no submission."""
@@ -166,6 +235,53 @@ class BoardCensus:
             for row in self.rows()
             if row.offline is not None and row.all_data()
         ]
+
+    def undeclared(self) -> list[str]:
+        """Priced rows the rule reaches that never say how their seats were chosen.
+
+        Silence is the finding, not a default. `unpriceable` above can only fire on rows that DID name
+        their members for exactly this reason: what a check cannot be told, it must refuse rather than
+        assume. Defaulting a silent row to `designed` would pass every raw search-selected row ever
+        written, which is precisely the row this gate exists for.
+        """
+        return [
+            f"{row.identifier} records offline {row.offline} and declares no `selection`, so nothing "
+            f"says whether its seats were searched; write one of {sorted(SELECTIONS)} — {SELECTION_RULE}"
+            for row in self.rows()
+            if row.governed(self.since) and row.selection not in SELECTIONS
+        ]
+
+    def uncorrected(self) -> list[str]:
+        """Search-selected rows whose offline number is the search's own in-sample score.
+
+        THE ROW THIS FILE WAS MISSING. `peak8` shipped the day after the rule was written and entered
+        the raw 0.8731; through the fold-0 anchors that predicts 0.936 against an actual 0.932, and the
+        0.004 of phantom shortfall was written up as the offline ruler failing. Corrected to 0.8704 it
+        predicts 0.934 and the ruler is intact — `board_transfer` orders 0 of 269 resolved pairs the
+        wrong way with the row present either way.
+
+        The correction is checked as ARITHMETIC against the two numbers the row carries, so a row that
+        merely SAYS it was corrected cannot pass; and it is checked against the measured band rather
+        than a point, so an over-correction that buys a better transfer residual fails as well.
+        """
+        found = []
+        for row in self.rows():
+            if row.selection != SEARCH or row.offline is None:
+                continue
+            if row.offline_raw is None:
+                found.append(
+                    f"{row.identifier} declares selection={SEARCH} and records offline {row.offline} with no "
+                    f"`offline_raw`, so no arithmetic can say the search bias was ever subtracted; carry the "
+                    f"greedy's own in-sample score beside it — {SELECTION_RULE}"
+                )
+            elif not self.bias.corrects(row.offline_raw, row.offline):
+                found.append(
+                    f"{row.identifier} was chosen by SEARCH and records offline {row.offline} against a raw "
+                    f"{row.offline_raw}, a correction of {row.offline_raw - row.offline:+.4f}; the measured "
+                    f"selection bias is {SELECTION_BIAS[0]:+.4f} to {SELECTION_BIAS[1]:+.4f}, so this row "
+                    f"should carry {self.bias.stated(row.offline_raw)} — {SELECTION_RULE}"
+                )
+        return found
 
     def unnamed(self) -> list[str]:
         """Priced entries whose id stem the prose ledger never mentions — the record's other half.
@@ -259,6 +375,8 @@ class BoardCensus:
         found += self.miscounted()
         found += self.recoverable()
         found += self.unpriceable()
+        found += self.undeclared()
+        found += self.uncorrected()
         found += [f"{name} is priced here and named nowhere in {self.ledger}" for name in self.unnamed()]
         if live is None:
             return found
