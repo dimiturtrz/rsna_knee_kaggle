@@ -120,19 +120,34 @@ class ResidualSplit:
         """
         return np.stack([self.mistakes(np.asarray(member)) for member in self.pool.predictions])
 
+    def members(self) -> int:
+        """How many members vote — the count unanimity is measured against."""
+        return len(self.pool)
+
+    def ensemble(self) -> Bool[NDArray[np.bool_], "studies targets"]:
+        """Where the POOL's own vote disagrees with the truth, at the prevalence-matched point."""
+        return self.mistakes(self.pool.combined(list(range(len(self.pool)))))
+
+    def agreement(self) -> Int[NDArray[np.int64], "studies targets"]:
+        """For each cell the ensemble gets wrong, how many members get it wrong too; 0 elsewhere.
+
+        The zero is not a count — it marks a cell the ensemble got RIGHT, which this decomposition has
+        nothing to say about. Callers band on `> 0` for that reason.
+        """
+        return np.where(self.ensemble(), self.per_member().sum(axis=0), 0).astype(np.int64)
+
     def per_label(self) -> list[ResidualRow]:
         """Each finding's row, in `TARGETS` order."""
         truth = self.truth()
-        ensemble = self.mistakes(self.pool.combined(list(range(len(self.pool)))))
-        members = self.per_member()
-        agreeing = np.where(ensemble, members.sum(axis=0), 0)
-        majority = len(self.pool) / 2.0
+        ensemble = self.ensemble()
+        agreeing = self.agreement()
+        majority = self.members() / 2.0
         return [
             ResidualRow(
                 label=label,
                 positives=int(truth[:, column].sum()),
                 missed=int((ensemble[:, column] & truth[:, column].astype(bool)).sum()),
-                unanimous=int((agreeing[:, column] == len(self.pool)).sum()),
+                unanimous=int((agreeing[:, column] == self.members()).sum()),
                 minority=int(((agreeing[:, column] > 0) & (agreeing[:, column] < majority)).sum()),
             )
             for column, label in enumerate(TARGETS)

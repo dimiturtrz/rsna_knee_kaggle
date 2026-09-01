@@ -2036,6 +2036,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "kneemri.evaluation.residual_split",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "kneemri.evaluation.study_series",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.population_split",
+      "target": "kneemri.evaluation.uncertainty_split",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.prevalence_match",
       "target": "core.bootstrap",
       "weight": 1
@@ -12787,6 +12823,150 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.population_split.PopulationSplit",
+      "target": "kneemri.evaluation.population_split.PopulationRow",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.population_split.PopulationSplit",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.population_split.PopulationSplit",
+      "target": "kneemri.evaluation.study_series.StudySeries",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "target": "kneemri.evaluation.population_split.PopulationRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "target": "kneemri.evaluation.population_split.PopulationSplit.per_study_errors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "target": "kneemri.evaluation.population_split.PopulationSplit.per_study_unanimous",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.truth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.per_study_errors",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.per_study_unanimous",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.per_study_unanimous",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "target": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "target": "kneemri.evaluation.study_series.StudySeries.counts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "target": "kneemri.evaluation.study_series.StudySeries.fluid",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "target": "kneemri.evaluation.study_series.StudySeries.redundant",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.population_split.PopulationSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.study_series.StudySeries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.population_split.main",
+      "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.prevalence_match.MatchedGap.line",
       "target": "kneemri.evaluation.prevalence_match.MatchedGap.explained",
@@ -13448,6 +13628,30 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.residual_split.ResidualSplit.agreement",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_split.ResidualSplit.agreement",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.mistakes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.residual_split.ResidualSplit.mistakes",
       "target": "kneemri.evaluation.residual_split.ResidualSplit.called",
       "weight": 1
@@ -13459,12 +13663,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.evaluation.residual_split.ResidualSplit.per_label",
-      "target": "kneemri.evaluation.pool.Pool.combined",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.evaluation.residual_split.ResidualSplit.per_label",
       "target": "kneemri.evaluation.residual_split.ResidualRow",
@@ -13473,13 +13671,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.residual_split.ResidualSplit.per_label",
-      "target": "kneemri.evaluation.residual_split.ResidualSplit.mistakes",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.agreement",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.residual_split.ResidualSplit.per_label",
-      "target": "kneemri.evaluation.residual_split.ResidualSplit.per_member",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.residual_split.ResidualSplit.per_label",
+      "target": "kneemri.evaluation.residual_split.ResidualSplit.members",
       "weight": 1
     },
     {
@@ -24925,7 +25129,7 @@
       "role": null
     },
     {
-      "descendants": 193,
+      "descendants": 195,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -24981,7 +25185,7 @@
       "role": null
     },
     {
-      "descendants": 59,
+      "descendants": 61,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -25254,6 +25458,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.population_split",
+      "label": "population_split",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.prevalence_match",
       "label": "prevalence_match",
       "level": "module",
@@ -25392,6 +25604,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.stack_coverage",
       "label": "stack_coverage",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series",
+      "label": "study_series",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -27934,6 +28154,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationRow",
+      "label": "PopulationRow",
+      "level": "class",
+      "parent": "kneemri.evaluation.population_split",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit",
+      "label": "PopulationSplit",
+      "level": "class",
+      "parent": "kneemri.evaluation.population_split",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.prevalence_match.MatchedGap",
       "label": "MatchedGap",
       "level": "class",
@@ -28235,6 +28471,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.stack_coverage",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series.StudySeries",
+      "label": "StudySeries",
+      "level": "class",
+      "parent": "kneemri.evaluation.study_series",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -36150,6 +36394,86 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationRow.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationRow.per_positive",
+      "label": "per_positive",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationRow.per_study",
+      "label": "per_study",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationRow.unanimous_share",
+      "label": "unanimous_share",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit.banded",
+      "label": "banded",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit.per_study_errors",
+      "label": "per_study_errors",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit.per_study_unanimous",
+      "label": "per_study_unanimous",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.PopulationSplit.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split.PopulationSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.population_split.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.population_split",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.prevalence_match.MatchedGap.explained",
       "label": "explained",
       "level": "method",
@@ -36790,8 +37114,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.residual_split.ResidualSplit.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_split.ResidualSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.residual_split.ResidualSplit.called",
       "label": "called",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_split.ResidualSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_split.ResidualSplit.ensemble",
+      "label": "ensemble",
+      "level": "method",
+      "parent": "kneemri.evaluation.residual_split.ResidualSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.residual_split.ResidualSplit.members",
+      "label": "members",
       "level": "method",
       "parent": "kneemri.evaluation.residual_split.ResidualSplit",
       "role": null
@@ -37522,6 +37870,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.stack_coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series.StudySeries.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_series.StudySeries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series.StudySeries.counts",
+      "label": "counts",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_series.StudySeries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series.StudySeries.fluid",
+      "label": "fluid",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_series.StudySeries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_series.StudySeries.redundant",
+      "label": "redundant",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_series.StudySeries",
       "role": null
     },
     {

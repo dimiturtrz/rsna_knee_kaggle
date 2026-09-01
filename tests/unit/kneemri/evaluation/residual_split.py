@@ -63,6 +63,22 @@ def test_per_member() -> None:
     assert not members[1].any()
 
 
+def test_members() -> None:
+    assert ResidualSplit(_pool()).members() == 3
+
+
+def test_ensemble() -> None:
+    ensemble = ResidualSplit(_pool()).ensemble()
+    assert ensemble.shape == (6, len(TARGETS))
+
+
+def test_agreement() -> None:
+    split = ResidualSplit(_pool())
+    agreeing = split.agreement()
+    assert agreeing.shape == (6, len(TARGETS))
+    assert not agreeing[~split.ensemble()].any()
+
+
 def test_per_label() -> None:
     rows = ResidualSplit(_pool()).per_label()
     assert len(rows) == len(TARGETS)
