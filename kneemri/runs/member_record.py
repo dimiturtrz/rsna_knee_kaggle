@@ -82,6 +82,14 @@ NOT_IN_CONFIG = {
     "file it names is a fact about how these weights were REACHED, like `teacher_targets`, and the "
     "witness that it landed is the trainer's own `sampling_tilt`, not the checkpoint",
     "sample_alpha": "the tilt of that same draw policy, same write-off",
+    "sample_ramp": "WHEN that same tilt arrives rather than whether it does — it changes the order the "
+    "epochs saw the pool in and touches no module, no parameter and no loss term, so the write-off is "
+    "`sample_spread`'s exactly. Its own witness is the trainer's `sampling_ramp`, kept separate from "
+    "`sampling_tilt` precisely because a ramp that failed to attach would otherwise report the static "
+    "arm's tilt and be indistinguishable from it",
+    "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
+    "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
+    "is byte-identical for the same reason `intensity_aug` is",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",

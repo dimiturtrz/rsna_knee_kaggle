@@ -13,7 +13,7 @@ from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
-from kneemri.training.augmentation import INTENSITY_AUGMENT
+from kneemri.training.augmentation import INTENSITY_AUGMENT, SLOT_DROPOUT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
@@ -51,6 +51,7 @@ from kneemri.training.trainer import (
     READ_SIZE,
     REPORTS,
     SAMPLING,
+    SAMPLING_RAMP,
     SCHEDULED,
     WARMUP,
     WEIGHT_DECAY,
@@ -420,6 +421,7 @@ def test_policies():
         SIDE_TERM: 0.0,
         FOCUS: "",
         INTENSITY_AUGMENT: False,
+        SLOT_DROPOUT: 0.0,
         # The three optimiser-path knobs, in `constructed` because they are the same on both sides of
         # the attachments below: nothing `one_cycle`/`whole_stack`/`exponential_average` does may move
         # them, and a warmup that changed when the schedule was attached would be the drift the landed
@@ -444,6 +446,7 @@ def test_policies():
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,
         SAMPLING: OFF,
+        SAMPLING_RAMP: 0,
     }
 
     trainer.bfloat16()
@@ -466,6 +469,7 @@ def test_policies():
         LAYER_DECAY: NO_LAYER_DECAY,
         MIXUP: OFF,
         SAMPLING: OFF,
+        SAMPLING_RAMP: 0,
     }
 
 

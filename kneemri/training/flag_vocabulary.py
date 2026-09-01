@@ -70,6 +70,18 @@ class FlagVocabulary:
             "it fired and the overfitting did not care - band_dense_long peaked at epoch 6 and lost "
             "0.0182 over eighteen more while its train loss halved.",
         )
+        parser.add_argument(
+            "--slot-dropout",
+            type=float,
+            default=0.0,
+            help="withhold each PRESENT slot from a training study with this probability, pixels and "
+            "presence mask together. 0, the default, is off and is what every ledger number was "
+            "measured under. The first SUPERVISION-space regulariser here: --mixup perturbs the label "
+            "and --intensity-aug perturbs the appearance, and neither changes which acquisitions a "
+            "study is made of. This corpus varies on exactly that axis - the axial fluid slot fills "
+            "100%% of studies while both T1 slots fill 55-60%% - so nearly half of all studies reach "
+            "inference with slots the model has only ever seen filled. A study is never emptied.",
+        )
         # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
         # blocks here and eight more in `build_cache`, and the two had already diverged on the band.
         CacheFlags.add_to(parser)
@@ -406,6 +418,17 @@ class FlagVocabulary:
             help="the share of the draw --sample-spread controls; the rest is a uniform floor. 0.0 is "
             "flat weights and is how the arm runs its own matched control — NOT the ledger's uniform "
             "policy, since the draw is with replacement at every alpha.",
+        )
+        parser.add_argument(
+            "--sample-ramp",
+            type=int,
+            default=0,
+            help="reach --sample-alpha over this many epochs instead of at the first step, which turns "
+            "the tilt into a curriculum: the epoch starts near-uniform and spends its later passes on "
+            "the studies the reference pool could not resolve. 0 is the immediate tilt every sampled arm "
+            "so far ran. The static tilt COSTS on this corpus (disagreed_full 0.8471 against its own "
+            "alpha-zero control at 0.8507) while a schedule over label trust PAYS (certainty_ramp "
+            "0.8584), which is the contrast this flag exists to test on the disagreement signal.",
         )
 
     @staticmethod

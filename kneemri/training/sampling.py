@@ -52,6 +52,16 @@ class Sampling(ABC):
         behaviour under the sampled arm's name — the exact failure `landed` exists to catch.
         """
 
+    def ramp(self) -> int:
+        """How many epochs the tilt takes to arrive; zero is a tilt applied from the first step.
+
+        Concrete rather than abstract because it is a MODIFIER on the tilt and not a policy of its own,
+        so every policy that has no ramp answers the same zero. It is reported separately from `tilt`
+        for the reason `tilt` exists at all: a ramp that failed to attach still reports the destination
+        tilt, and the static arm and the curriculum arm would then be indistinguishable in the record.
+        """
+        return 0
+
     @abstractmethod
     def described(self) -> str:
         """What this policy is, for the run's own record."""
@@ -150,3 +160,68 @@ class Disagreed(Sampling):
     def described(self) -> str:
         """This policy and its tilt."""
         return f"disagreement-weighted at alpha {self.alpha:.2f} over {len(self.spread)} studies"
+
+
+class Ramped(Disagreed):
+    """The same disagreement weights, but reached over the first `epochs` epochs instead of at once.
+
+    THE CELL THIS FILLS. Difficulty has two signals here and two ways to spend one. `disagreed_full`
+    tilts toward disagreement from the first step and scores 0.8471 against its own alpha-zero control
+    at 0.8507 — the static tilt COSTS. `certainty_ramp` spends six epochs raising label trust rather
+    than tilting the draw and scores 0.8584 — the SCHEDULE pays. Zhou et al. (ISBI 2023) report the
+    same shape on elbow-fracture radiographs, +0.0245 binary AUC from an easy-to-hard curriculum with
+    no human difficulty annotation. What no arm has run is the schedule applied to the disagreement
+    signal, which is where the two difficulty measures disagree: certainty is what the labeller felt,
+    disagreement is what separately-trained members cannot resolve.
+
+    THE EPOCH COUNTER IS THIS OBJECT'S OWN. `fit_epoch` is handed no epoch index, and threading one
+    through it would change the signature every recorded arm ran under. `drawn` is called exactly once
+    per epoch by exactly one caller, so counting the calls IS counting the epochs — and the count is
+    reported through `tilt`, which `landed` reads, so a policy that was built and never attached still
+    cannot pass itself off as this one.
+    """
+
+    def __init__(self, spread: Float[NDArray[np.float64], " studies"], alpha: float, epochs: int) -> None:
+        super().__init__(spread, 0.0)
+        self.target = alpha
+        self.epochs = epochs
+        self.epoch = 0
+
+    @classmethod
+    @override
+    def loaded(cls, weights: Path, identifiers: list[str], alpha: float, epochs: int = 0) -> "Ramped":
+        """A `Disagreed` read off disk, re-wrapped so its tilt arrives over `epochs` epochs."""
+        flat = Disagreed.loaded(weights, identifiers, alpha)
+        return cls(flat.spread, alpha, epochs)
+
+    @override
+    def drawn(
+        self, positions: Int[NDArray[np.int64], " studies"], generator: np.random.Generator
+    ) -> Int[NDArray[np.int64], " studies"]:
+        """This epoch's draw, at this epoch's alpha, advancing the ramp by one epoch."""
+        self.alpha = self.target if self.epoch >= self.epochs else self.target * (self.epoch / self.epochs)
+        self.epoch += 1
+        return super().drawn(positions, generator)
+
+    @override
+    def tilt(self) -> float:
+        """The tilt this policy is FOR, not the one it happens to hold at epoch zero.
+
+        `landed` reads this before the first epoch, when the ramp is still at alpha zero and
+        indistinguishable from the control. Reporting the destination is what makes the switch
+        checkable; the current value belongs in `described`, which is prose.
+        """
+        return self.target
+
+    @override
+    def ramp(self) -> int:
+        """The epochs this policy takes to reach its tilt — the one thing `tilt` cannot say."""
+        return self.epochs
+
+    @override
+    def described(self) -> str:
+        """This policy, its destination and how long it takes to get there."""
+        return (
+            f"disagreement-weighted ramping to alpha {self.target:.2f} over {self.epochs} epochs "
+            f"(currently {self.alpha:.2f}) over {len(self.spread)} studies"
+        )

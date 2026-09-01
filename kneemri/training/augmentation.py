@@ -17,6 +17,15 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+SLOT_DROPOUT = "slot_dropout"
+"""The key slot dropout answers under when a run checks its switches landed (`kneemri.training.landed`).
+
+A RATE RATHER THAN A FLAG, and it is reported from the config the augmenter will actually use. The
+failure this guards is the one `run_setup` makes reachable: the rate is threaded onto an `AugmentConfig`
+built by one of two branches, so a branch that forgets it trains the geometric recipe under the arm's
+name and reports a number about a run nobody asked for.
+"""
+
 INTENSITY_AUGMENT = "intensity_aug"
 """The key an augmentation answers under when a run checks its switches landed (`kneemri.training.landed`).
 
@@ -56,6 +65,27 @@ class AugmentConfig:
     contrast: tuple[float, float] = (0.85, 1.15)
     noise: float = 0.02
     """Noise is far below the sibling's 0.08: theirs acts on z-scored images, ours on [0, 1]."""
+
+    slot_dropout: float = 0.0
+    """Probability that a PRESENT slot is withheld from a training study — modality dropout.
+
+    Not an intensity op and not a geometric one: it perturbs which ACQUISITIONS the study is made of,
+    which is the axis this corpus varies on and no member has ever been trained against. Fill rates are
+    100% for the axial fluid-weighted slot but 55-60% for sagittal non-fat-sat and both T1 slots, so
+    nearly half of all studies reach inference with slots the model has only ever seen filled. The head
+    already MASKS an absent slot rather than zero-filling it (`SlotScheme.presence`), so the gap is not
+    that absence is misrepresented — it is that absence was never in the training distribution.
+
+    Zero by default, which is the identity and the recipe every member on disk was fitted under.
+
+    PRECEDENT, AT ITS REAL STRENGTH. Grovik et al. 2021 (npj Digital Medicine) report input-level
+    dropout holding AUC exactly flat (0.989 against 0.989) while Dice rose 0.021 and false positives
+    per patient fell from 7.0 to 3.6. Chrysochoou et al. 2026 (npj Precision Oncology) report dropout
+    beating both zero-fill and generative synthesis on every missing-sequence cell. Both are
+    SEGMENTATION, and the one paper that measures our metric measured no gain on it — so this is not
+    armed as a solo-score lever. It is armed because it changes what evidence a member may rely on,
+    which is a supervision axis rather than a seating one.
+    """
 
     @classmethod
     def geometric_only(cls) -> "AugmentConfig":
@@ -170,6 +200,38 @@ class Augmentation:
         if config.noise > 0:
             images = images + torch.randn(images.shape, generator=generator, device=device) * config.noise
         return images.clamp(0, 1)
+
+    def dropped(
+        self,
+        images: UInt8[Tensor, "b n g h w"],
+        presence: Float[Tensor, "b n"],
+        generator: torch.Generator,
+    ) -> tuple[UInt8[Tensor, "b n g h w"], Float[Tensor, "b n"]]:
+        """Withhold present slots at random, moving the PIXELS and the PRESENCE MASK together.
+
+        Both, always. Zeroing pixels while the mask still calls the slot acquired is the exact defect
+        `SlotReader._stacked` records paying for once — the head then attends to a slot that carries
+        nothing, which teaches it that a present slot may be empty rather than that a slot may be
+        absent. Clearing the mask alone would leave real pixels behind a zero flag, which is the value
+        `SlotHead` is documented to refuse to trust.
+
+        NO STUDY IS EMPTIED. A draw that would withhold every present slot is cancelled for that study
+        rather than clamped to one survivor: cancelling keeps the marginal drop rate per slot equal
+        across studies, where keeping a random one would make the effective rate depend on how many
+        slots a study happens to have — and slot count correlates with the acquisition protocol, which
+        is the covariate this whole change exists to stop the model reading.
+
+        An ABSENT slot is never selected, so the rate is a rate over what was actually acquired.
+        """
+        if self.config.slot_dropout <= 0:
+            return images, presence
+        acquired = presence > 0
+        draw = torch.rand(presence.shape, generator=generator, device=presence.device)
+        dropping = (draw < self.config.slot_dropout) & acquired
+        survives = dropping.sum(dim=1) < acquired.sum(dim=1)
+        dropping = dropping & survives.unsqueeze(1)
+        kept = (~dropping).to(presence.dtype)
+        return images * kept.view(*kept.shape, 1, 1, 1).to(images.dtype), presence * kept
 
     def bagged(self, images: UInt8[Tensor, "b n g h w"], generator: torch.Generator) -> UInt8[Tensor, "b n g h w"]:
         """Augment a batch of slot bags, staying in uint8 so the model's own forward is untouched.

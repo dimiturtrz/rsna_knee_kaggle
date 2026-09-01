@@ -23,6 +23,7 @@ from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
+from kneemri.training.sampling import Disagreed, Ramped, Uniform
 from kneemri.training.trainer import Adaptation
 
 
@@ -374,7 +375,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 36, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 38, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
@@ -427,3 +428,27 @@ def test_budget():
         "under LoRA the base weights are frozen and every block still carries a retaining adapter, and "
         "the clamp is the ENCODER's — a caller clamping against `depth` opens 12 of a 36-block trunk"
     )
+
+
+def test_drawing(tmp_path: Path):
+    """The two flags resolve to three policies, and both degenerate cases stay the recipes they were.
+
+    A ramp is a modifier on the tilt, so a ramp asked for without a spread file is still the uniform
+    policy — the alternative is an arm that quietly trains the ledger's default under a curriculum's
+    name.
+    """
+    weights = tmp_path / "spread.npz"
+    np.savez(weights, studies=np.array(["a", "b"]), spread=np.array([0.10, 0.30]))
+    identifiers = ["a", "b"]
+
+    assert isinstance(_setup().drawing(identifiers), Uniform)
+    assert isinstance(_setup(sample_ramp=6).drawing(identifiers), Uniform), "a ramp alone draws nothing"
+
+    static = _setup(sample_spread=weights, sample_alpha=0.5).drawing(identifiers)
+    assert isinstance(static, Disagreed) and not isinstance(static, Ramped)
+    assert static.tilt() == pytest.approx(0.5)
+
+    ramped = _setup(sample_spread=weights, sample_alpha=0.5, sample_ramp=6).drawing(identifiers)
+    assert isinstance(ramped, Ramped)
+    assert ramped.epochs == 6
+    assert ramped.tilt() == pytest.approx(0.5), "the destination is what the switch check reads"

@@ -34,7 +34,12 @@ from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
-from kneemri.training.augmentation import INTENSITY_AUGMENT, Augmentation, AugmentConfig
+from kneemri.training.augmentation import (
+    INTENSITY_AUGMENT,
+    SLOT_DROPOUT,
+    Augmentation,
+    AugmentConfig,
+)
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
@@ -106,6 +111,7 @@ OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
 CLIPPING = "gradient_clip_norm"
 SAMPLING = "sampling_tilt"
+SAMPLING_RAMP = "sampling_ramp"
 CERTAINTY_RAMP = "certainty_ramp"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
@@ -226,6 +232,7 @@ class Trainer:
         return {
             **self.objective.settings(),
             INTENSITY_AUGMENT: self.augmentation.intensity(),
+            SLOT_DROPOUT: self.augmentation.config.slot_dropout,
             AUTOCAST: self.autocast_dtype,
             WINDOW: self.window,
             READ_SIZE: self.read_size,
@@ -241,6 +248,7 @@ class Trainer:
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
             SAMPLING: self.sampling.tilt(),
+            SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
         }
 
@@ -531,6 +539,10 @@ class Trainer:
             blend = self.mixup.draw(len(batch), generator)
             pixels, flags = blend.images(pixels), blend.mask(flags)
             score, weight = blend.rows(score), blend.rows(weight)
+            # AFTER the blend, and that order is forced: `Blend.mask` is an elementwise UNION, so a slot
+            # withheld before it would be restored by any partner study that carries one. Dropout has to
+            # be the last statement about what this step is allowed to see.
+            pixels, flags = self.augmentation.dropped(pixels, flags, self.torch_generator)
             with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
                 # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
                 # gradient when report supervision is off, so the loop needs no branch for it.

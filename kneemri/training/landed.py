@@ -42,7 +42,7 @@ from kneemri.models.model import (
     RECOMPUTING,
     StudyModel,
 )
-from kneemri.training.augmentation import INTENSITY_AUGMENT
+from kneemri.training.augmentation import INTENSITY_AUGMENT, SLOT_DROPOUT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS
 from kneemri.training.objective import (
@@ -71,6 +71,7 @@ from kneemri.training.trainer import (
     READ_SIZE,
     REPORTS,
     SAMPLING,
+    SAMPLING_RAMP,
     SCHEDULED,
     WARMUP,
     WINDOW,
@@ -255,6 +256,8 @@ class Request:
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
+    sample_ramp: int = 0
+    slot_dropout: float = 0.0
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -317,11 +320,13 @@ class Request:
             # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
             # nothing, so the honest request there is the uniform draw the run will actually get.
             SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,
+            SAMPLING_RAMP: self.sample_ramp if self.sample_spread is not None else 0,
             CERTAINTY_RAMP: self.certainty_ramp,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,
+            SLOT_DROPOUT: self.slot_dropout,
             # THE THREE OPTIMISER-PATH POLICIES, and each is read back off the object that applies it
             # rather than off the value that was passed in: the decay from the optimiser's first
             # parameter group, the warmup from the field `one_cycle` hands to `pct_start`, the ceiling

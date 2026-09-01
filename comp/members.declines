@@ -168,3 +168,10 @@ cnx_mid_rate_s2026.pt   # 0.7993 solo. DISTINCT and unshippable, which is the in
                         # already spent a slot proving distance without strength is inert; this would
                         # spend a second on the same answer. Re-open by ANSWERING the size bar, not by
                         # re-quoting the divergence.
+radnet_family_s2026  # 0.6716 peak at 12 epochs against its own pre-registered 0.75 floor, and 0.19 below
+                     # the 0.8521 non-DINOv2 seat bar. RadImageNet DenseNet-121 on band_dense's recipe
+                     # otherwise. Epochs 7-11 read 0.6501/0.6642/0.6681/0.6667/0.6586 — converged, not
+                     # truncated, so this is a fact about the trunk and not about a killed process. A
+                     # member 0.19 below the bar cannot be seat-scored into anything; the pre-registered
+                     # branch THE CELL IS EMPTY FOR A REASON fires and only encoder CAPACITY re-opens it.
+                     # Re-open by answering the capacity question, not by re-quoting this number.

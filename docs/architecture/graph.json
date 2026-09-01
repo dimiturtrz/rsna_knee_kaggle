@@ -21956,6 +21956,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.blocks",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery._repeated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.encoder_surgery.EncoderSurgery.last_blocks",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.open_blocks",
       "weight": 1
@@ -24147,6 +24153,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.sampling.Sampling",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.teacher_features.TeacherFeatures",
       "weight": 1
     },
@@ -24220,6 +24232,24 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.budget",
       "target": "kneemri.training.device_budget.DeviceBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.drawing",
+      "target": "kneemri.training.sampling.Disagreed.loaded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.drawing",
+      "target": "kneemri.training.sampling.Ramped.loaded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.drawing",
+      "target": "kneemri.training.sampling.Uniform",
       "weight": 1
     },
     {
@@ -24411,6 +24441,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.run_setup.RunSetup.drawing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.objective",
       "weight": 1
     },
@@ -24430,18 +24466,6 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.teacher_embeddings",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup.trainer",
-      "target": "kneemri.training.sampling.Disagreed.loaded",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.trainer",
-      "target": "kneemri.training.sampling.Uniform",
       "weight": 1
     },
     {
@@ -24550,6 +24574,24 @@
       "kind": "calls",
       "source": "kneemri.training.sampling.Disagreed.drawn",
       "target": "kneemri.training.sampling.Disagreed.weights",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.sampling.Ramped",
+      "target": "kneemri.training.sampling.Disagreed",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.sampling.Ramped",
+      "target": "kneemri.training.sampling.Ramped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.sampling.Ramped.loaded",
+      "target": "kneemri.training.sampling.Disagreed.loaded",
       "weight": 1
     },
     {
@@ -24997,6 +25039,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.augmentation.Augmentation.dropped",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.grades.Predicted",
@@ -25072,6 +25120,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
       "target": "kneemri.training.augmentation.Augmentation.intensity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.policies",
+      "target": "kneemri.training.sampling.Sampling.ramp",
       "weight": 1
     },
     {
@@ -30790,6 +30844,14 @@
       "descendants": 0,
       "id": "kneemri.training.sampling.Disagreed",
       "label": "Disagreed",
+      "level": "class",
+      "parent": "kneemri.training.sampling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped",
+      "label": "Ramped",
       "level": "class",
       "parent": "kneemri.training.sampling",
       "role": "satellite"
@@ -43932,6 +43994,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.encoder_surgery.EncoderSurgery._repeated",
+      "label": "_repeated",
+      "level": "method",
+      "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.encoder_surgery.EncoderSurgery.adapters",
       "label": "adapters",
       "level": "method",
@@ -45220,6 +45290,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation.intensity",
       "label": "intensity",
       "level": "method",
@@ -46500,6 +46578,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.drawing",
+      "label": "drawing",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.model",
       "label": "model",
       "level": "method",
@@ -46604,6 +46690,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.described",
+      "label": "described",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.drawn",
+      "label": "drawn",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.loaded",
+      "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.ramp",
+      "label": "ramp",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Ramped.tilt",
+      "label": "tilt",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Ramped",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.sampling.Sampling.described",
       "label": "described",
       "level": "method",
@@ -46614,6 +46748,14 @@
       "descendants": 0,
       "id": "kneemri.training.sampling.Sampling.drawn",
       "label": "drawn",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Sampling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Sampling.ramp",
+      "label": "ramp",
       "level": "method",
       "parent": "kneemri.training.sampling.Sampling",
       "role": null

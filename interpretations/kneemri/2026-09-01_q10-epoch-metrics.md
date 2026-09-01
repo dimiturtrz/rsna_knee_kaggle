@@ -1,41 +1,50 @@
-# Q10 (knee-5dfh): what we track per epoch, and which missing metrics would have changed a decision
+# Q10 (knee-5dfh): what we track per epoch, and which missing metrics would change a decision
 
-2026-09-01, Kimi. Audit by a read-only agent, every claim file:line-checked. The headline first:
-**the bead's premise is stale** — per-label AUC is already recorded per epoch, and has been since the
-recorder's layer split (commit fa6e9a16). What is missing is not the field but a per-label
-*trajectory reader*: `run_comparison` reads only the best row's `per_label`
-(`kneemri/evaluation/run_comparison.py:219-220`).
+2026-09-01, Kimi. Read-only audit, every claim file:line-checked.
+
+## Headline
+
+The epoch record already carries more than the bead assumed. **ECE** and **per-study loss quantiles** (`loss_q25`..`loss_q95`) are written by `fitting.py` and tested in `tests/unit/kneemri/runs/run_metrics.py:354-376`. What is still missing are: a **per-label AUC trajectory reader** (per-label AUC is recorded every epoch but only the best epoch is compared), **holdout/validation loss** (the only overfit signal now is AUC declining while train loss falls), **per-label calibration**, **AUPRC for rare labels**, and **optimizer state** (LR, gradient norm).
 
 ## What is recorded per epoch today
 
-`EpochRow` (`kneemri/runs/run_metrics.py:46-80`): `epoch`, `loss`, `auc`, `seconds`,
-`per_label: dict[str, float]` (the twelve holdout AUCs, `kneemri/training/fitting.py:123-124` via
-`LabelScores.per_label`), plus `NotRequired` `vram_peak_gb` / `vram_alloc_gb` / `started`. JSONL, one
-object per line; the headline `auc` is the nanmean over however many labels were defined. Full
-predictions + truth persist in `.holdout.npz` (`kneemri/runs/holdout_record.py:26-46`), so any
-per-study metric is also computable offline at zero marginal cost.
+`EpochRow` (`kneemri/runs/run_metrics.py:46-93`):
 
-## The four candidates, against past decisions
+- required: `epoch`, `loss`, `auc`, `seconds`, `per_label: dict[str, float]`
+- optional: `vram_peak_gb`, `vram_alloc_gb`, `started`, `ece`, `loss_q25..loss_q95`
 
-| metric | status | a decision it would have altered |
+Where each piece comes from:
+
+- `per_label` — the twelve holdout AUCs, computed by `LabelScores.per_label` (`kneemri/evaluation/scores.py:54`) and returned from `Fitting.ranked` (`kneemri/training/fitting.py:144-157`).
+- `ece` — 15 equal-width bins, truth binarised at 0.5, computed in `Fitting.epochs` (`kneemri/training/fitting.py:244-248`).
+- `loss_q*` — per-study BCE quantiles from `Trainer._quantiles_of` (`kneemri/training/trainer.py:388-401`), collected during `fit_epoch` (`kneemri/training/trainer.py:577-583`) and written in `Fitting.epochs` (`kneemri/training/fitting.py:249-269`).
+- VRAM — attached by `RunMetrics.record` from CUDA reserved/allocated (`kneemri/runs/run_metrics.py:226-229`).
+
+## What the files on disk actually contain
+
+Only three production metrics files exist under `logs/` (`band_full_partial_3ep`, `keep_band_full_run1_partial`, `half_data_plumbing`) plus two smoke files in the repo root. None of them contain `ece` or `loss_q*`. The schema's `NotRequired` discipline (`kneemri/runs/run_metrics.py:85-93`) is what lets old and new rows coexist. So the **instrumentation is landed but unexercised** by recent full runs; any new run will write the full set.
+
+## Missing metrics that would change a decision
+
+| missing metric | why it matters | decision it would have altered |
 |---|---|---|
-| per-label AUC | **already recorded per epoch** | the blendlabels read is the proof it matters: mean +0.0034 hid 7 helped / 5 diluted labels (MCL +0.0239, Lateral Meniscus −0.0105), ledger `experiments/README.md:325` (bead says 6/6; the ledger reads **7/5**). The missing piece is a per-epoch per-label READER — zero recording cost |
-| AUPRC | computed nowhere (zero grep hits for average_precision/auprc/precision_recall) | **none on record.** The Fracture arms each "improved" it inside a ±0.061 band (ledger:1063,1071,4129), but at 62 holdout positives AUPRC is at least as noise-dominated as the AUC it replaces. Diagnostic value (top-of-ranking on rare labels), not decisional |
-| calibration error (ECE) | no member-side instrument (`level_calibration.py` calibrates the report READER against 58 gold studies; `inference/ensemble.py:6` decided calibration is worth nothing because the metric is rank-based) | **the divergence/seat readings**: `member_divergence.py:30-32` names the defect (disagreeing only about calibration scores high on divergence), and ledger:4534/4450 record `--calibrated-targets` buying disagreement while moving quality zero. A per-epoch ECE would have said whether that disagreement was calibration or opinion. Caveat: truth is binarised at 0.5 for scoring (`scores.py:20`) |
-| per-example loss distribution | not recorded — `fit_epoch` accumulates a scalar on-device (`trainer.py:440,517`); elementwise BCE exists (`objective.py:270`) but is reduced before return | **the disagreed-sampler premise**: `train_disagreement.py:13-19` rejected loss as the hard-example signal on the strength of `uncertainty_split`'s ~87% aleatoric estimate — an entropy-decomposition argument, never a measured loss distribution of our own runs. Recording quantiles per epoch tests that premise directly. Secondary: the loss-falls-while-AUC-flats overfit shape (ledger:303) is today readable only as a scalar |
+| **per-label AUC trajectory reader** | `per_label` is stored every epoch, but `run_comparison.py:216-223` only reads the best epoch's vector | `blendlabels` (README:325) helped MCL +0.0239 and diluted Lateral Meniscus −0.0105; a reader that showed when each label peaked or declined would separate real supervision gains from epoch noise |
+| **holdout/validation loss** | only train `loss` is recorded; overfit arms show AUC falling while train loss still falls | `attend_true` (README:302), `depth_true` (README:303), and `aug_long` (README:328/1342) all have the converge-and-overfit shape; a held-out loss gap would quantify it and could drive early-stopping or regulariser decisions |
+| **per-label ECE / calibration** | current ECE is pooled across all labels | `calibrated_targets` inverted on Effusion −0.0212 and PF OA +0.0170 (README:318); per-label calibration would show whether the remap helped the labels it targeted |
+| **AUPRC for Fracture** | Fracture has only ~62 holdout positives, so AUC is noisy | past Fracture arms (README:1063,1071,4129) moved inside ±0.061; AUPRC would rank top-of-list performance, which is what matters for a rare finding |
+| **gradient norm + learning rate** | schedule and clipping are policies, but their effect is not logged | would debug `one_cycle` stepping and `GradientClip` interactions; the `encoder_adapt_thawed` collapse (README:304) might have shown exploding gradients |
+| **slot coverage / dropout count** | `slot_dropout` is a policy, but no per-epoch count of dropped slots or missing-slice studies is logged | would gate coverage arms (`extended_slots`, `crop80_span`) by verifying the intended anatomy actually arrived |
 
-## The touch list (for whoever lands the code — Claude's tree)
+## Verdict
 
-- Schema: `run_metrics.py:46-80` — new fields `NotRequired` (line 70's discipline: pre-existing files must still read).
-- Writer: `fitting.py:216-225` — row construction; AUPRC/ECE belong in `ranked` (`fitting.py:111-124`) where predictions and truth are already in hand.
-- Backfill constructor: `kneemri/evaluation/holdout_metrics.py:59-65` — NaN-fill any new required field (its test asserts exactly this discipline for `loss`).
-- Per-example loss quantiles additionally touch `trainer.py:440-527` (`fit_epoch` return + heartbeat).
-- Readers to surface new fields: `trajectory_check.py:159-165`, `convergence_check.py:194`,
-  `ledger_check.py:104`, `claims_check.py:351-353`, `budget_residuals.py:67`, `progress.py:52`,
-  `run_comparison.py:219-220`; mirror tests under `tests/unit/kneemri/{runs,training}/`.
+- Already done: ECE and per-study loss quantiles are in the record and tested.
+- Highest leverage next: (1) a per-label AUC trajectory reader (zero recording cost), (2) holdout loss, (3) per-label ECE, (4) Fracture AUPRC.
 
-## The answer in one line
+## Touch points for whoever implements
 
-Add **ECE** and **per-epoch loss quantiles** (each names a real past decision), skip **AUPRC** (no
-decision at 62 positives), and for per-label AUC spend nothing on recording and a little on a
-per-epoch per-label READER — the data has been sitting in the metrics files all along.
+- Reader: `kneemri/evaluation/run_comparison.py:216-223` plus a new trajectory report.
+- Holdout loss: add to `Fitting.ranked`/`Fitting.epochs`; the objective already computes per-example BCE under `torch.no_grad()` in `trainer.py:577-583`, but that is train-only. Holdout loss needs a second forward on `fold.holdout`.
+- Per-label ECE: refactor `_calibration_error` in `kneemri/training/fitting.py:120-142` to return per-label errors.
+- AUPRC: add to `kneemri/evaluation/scores.py` beside `per_label`.
+- Gradient/LR: log optimiser param-group LR and the return value of `torch.nn.utils.clip_grad_norm_` from `GradientClip`.
+- Slot coverage: count masked slices per batch in `Trainer.fit_epoch` or derive from `corpus.mask`.

@@ -6631,3 +6631,30 @@ ANSWERING the size bar, not by re-quoting the divergence.
 finding — the most distant member we own is also among the weakest, which Kimi's Q-F research
 (2026-09-01, Abe et al. 2024 and the NCL/GNCL lambda sweeps) says is the EXPECTED shape for strong
 modern members rather than an artefact of this pool.
+
+## RadImageNet DenseNet closes the convolutional trunk lane EMPTY, and the difficulty axis opens
+
+`radnet_family` (12 epochs, RadImageNet DenseNet-121, otherwise `band_dense`'s recipe) peaked at
+**0.6716** against its own pre-registered floor of 0.75. Epochs 7-11 read 0.6501 / 0.6642 / 0.6681 /
+0.6667 / 0.6586 — a converged run, not a truncated one, and 0.19 below the non-DINOv2 seat bar of
+0.8521. The pre-registered branch that fires is THE CELL IS EMPTY FOR A REASON: only capacity re-opens
+it. This was the largest open lever on the trunk axis and the one arm this session's plan said could
+plausibly deliver 1.5%. It did not, and the plan was wrong about where the 1.5% is.
+
+What replaced it came out of three arms already on disk, read together for the first time:
+
+| arm | difficulty signal | how it is spent | holdout |
+| --- | --- | --- | --- |
+| `disagreed_full` | member disagreement | static tilt, alpha 1.0 from step one | 0.8471 |
+| `disagreed_uniform` | — | matched control, alpha 0.0 | 0.8507 |
+| `certainty_ramp` | label certainty | schedule, 6 of 12 epochs | **0.8584** |
+| `band_dense` | — | ledger's uniform draw | 0.8578 |
+
+The static tilt COSTS 0.0036 against its own control. The schedule PAYS 0.0077, above the 0.0062
+holdout floor. The two differ in WHEN the intervention lands, not in whether difficulty is used — and
+that is the same shape Zhou et al. (ISBI 2023) report on elbow-fracture radiographs, +0.0245 binary AUC
+from an easy-to-hard curriculum. `certainty_ramp` is on the roster at 0.8584.
+
+The 2x2 therefore has one empty cell, the schedule applied to the signal that lost, and it is the one
+place the two neighbours point opposite ways. `disagreed_ramp` (knee-zer5) fills it: alpha 1.0 reached
+over 6 of 12 epochs, both controls already on disk.

@@ -34,6 +34,65 @@ def test_bagged():
     assert not torch.equal(out, bag), "augmentation must actually perturb the bag"
 
 
+def _study_bag(studies: int = 8) -> tuple[torch.Tensor, torch.Tensor]:
+    """A bag whose LAST slot is absent for every study, which is the case the rate must never count."""
+    torch.manual_seed(SEED)
+    images = torch.randint(1, 256, (studies, SLOTS, 3, 8, 8), dtype=torch.uint8)
+    presence = torch.ones(studies, SLOTS)
+    presence[:, -1] = 0.0
+    images[:, -1] = 0
+    return images, presence
+
+
+def test_dropped():
+    """Pixels and the presence mask move TOGETHER, and the identity rate is a genuine pass-through."""
+    images, presence = _study_bag()
+    generator = torch.Generator().manual_seed(SEED)
+
+    kept_images, kept_presence = Augmentation(AugmentConfig(slot_dropout=0.5)).dropped(images, presence, generator)
+
+    assert kept_images.shape == images.shape
+    assert kept_presence.shape == presence.shape
+    dropped = kept_presence == 0
+    assert bool(dropped[:, :-1].any()), "a rate of 0.5 over eight studies must withhold something"
+    assert float(kept_images[dropped].abs().sum()) == 0.0, (
+        "a slot cleared from the mask must carry no pixels — a zeroed slot still called present "
+        "teaches the head that a present slot may be empty"
+    )
+    survived = ~dropped
+    assert torch.equal(kept_images[survived], images[survived]), "a kept slot is untouched"
+
+    off_images, off_presence = Augmentation(AugmentConfig()).dropped(images, presence, generator)
+    assert torch.equal(off_images, images), "the default rate is off and must not copy or perturb"
+    assert torch.equal(off_presence, presence)
+
+
+def test_dropped_never_empties_a_study():
+    """A draw that would withhold every acquired slot is CANCELLED, not clamped to one survivor."""
+    images, presence = _study_bag(studies=64)
+
+    _, kept = Augmentation(AugmentConfig(slot_dropout=0.99)).dropped(
+        images, presence, torch.Generator().manual_seed(SEED)
+    )
+
+    assert int(kept.sum(dim=1).min()) >= 1, "no study may reach the head with nothing acquired"
+
+
+def test_dropped_never_selects_an_absent_slot():
+    """The rate is a rate over what was ACQUIRED, so an absent slot cannot be spent on."""
+    images, presence = _study_bag(studies=64)
+
+    _, kept = Augmentation(AugmentConfig(slot_dropout=1.0)).dropped(
+        images, presence, torch.Generator().manual_seed(SEED)
+    )
+
+    assert float(kept[:, -1].sum()) == 0.0, "an absent slot stays absent"
+    assert int(kept[:, :-1].sum(dim=1).min()) == SLOTS - 1, (
+        "at rate 1.0 every acquired slot is drawn, the study would empty, and cancelling that draw "
+        "restores the whole acquired set — the degenerate rate is an identity, not a wipe"
+    )
+
+
 def test_augment_config_intensity():
     """The block's presence is read off the WIDTHS, since `geometric_only` disables it by zeroing them."""
     assert AugmentConfig().intensity() is True

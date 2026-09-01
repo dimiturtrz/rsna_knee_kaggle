@@ -75,6 +75,11 @@ class TrainingOptions:
     """Beta concentration for blending each batch with a permutation of itself; 0 is off. The first
     LABEL-SPACE regulariser this project has — see `kneemri.training.mixup` for why the appearance-only
     one it already had left the overfitting untouched."""
+    slot_dropout: float = 0.0
+    """Probability a PRESENT slot is withheld from a training study; 0 is off and is what every member
+    on disk was fitted under. The first SUPERVISION-axis regulariser this project has — mixup perturbs
+    labels and the intensity block perturbs appearance, and neither changes which acquisitions a study
+    is made of. See `kneemri.training.augmentation.AugmentConfig.slot_dropout`."""
     slices: int = 12
     image_size: int = IMAGE_SIZE
     train_size: int = 0
@@ -123,6 +128,7 @@ class TrainingOptions:
     focus_label: str | None = None
     sample_spread: Path | None = None
     sample_alpha: float = 0.5
+    sample_ramp: int = 0
     pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False

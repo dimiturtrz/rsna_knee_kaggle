@@ -3085,3 +3085,32 @@ entry and are **not** being shipped: that would ask the answered question an eig
 
 What a member IS (trunk family) and what it is TAUGHT (supervision). Those are the two levers Kimi's
 letter names and the only two this flat does not touch.
+
+## `fasttrio_v1` — 0.939, and the efficiency track gets an entry that costs the accuracy row nothing
+
+Submitted 2026-09-01 20:32Z, ref `55947454`, kernel `kneemri-fasttrio`, kit `ba241cf4`. Three seats
+(`final_ws_cf`, `grade_ladder_cf`, `through_dense_cf`) — `trioseat_v1`'s same-pixel-group trio, served
+with two arguments moved and nothing reseated: `precision=torch.float16` and `vote=LogitAverage()`.
+The owner selected it for the efficiency track.
+
+**Read 0.939 against `trioseat_v1`'s 0.938.** +0.001, inside the pre-registered FLAT band
+0.9365–0.9395 and under `BOARD_RESOLVABLE` 0.0015.
+
+### What it settles
+
+Both moved arguments were already measured free at SEVEN seats. `halfcham_v1` read its control's score
+exactly in forced fp16. `votefit_v1` put `LogitAverage` above the `RankAverage` default that
+`trioseat_v1` was carrying by omission. This says they are free at THREE seats too. The `>=0.940`
+branch — the vote is worth more where there is least to average — did not fire. Averaging rule and
+serving precision are flat against seat count.
+
+### Why it cost the accuracy row nothing
+
+`efficiency_read` verified the mechanic before the slot went: of 2,143 settled teams, 475 carry an
+efficiency entry strictly BELOW their public best and **0** carry a better one. A deliberately cheap
+submission adds an efficiency candidate rather than displacing the 0.944.
+
+### Not licensed
+
+Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
+to be cheap. The accuracy row stays 0.944, rank 31 of 2856, 0.008 behind a 0.952 leader.
