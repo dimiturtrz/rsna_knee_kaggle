@@ -96,7 +96,7 @@ def test_blocks():
 
 def test_blocks_refuses_what_it_cannot_read():
     """Nothing to find and TWO things to find are both refusals: opening the wrong six is silent."""
-    with pytest.raises(ValueError, match="no ModuleList"):
+    with pytest.raises(ValueError, match="no module container"):
         EncoderSurgery(nn.Linear(DIM, DIM)).blocks()
 
     tied = _Backbone(depth=2)

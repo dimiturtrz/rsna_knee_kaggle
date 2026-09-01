@@ -41,13 +41,15 @@
 # identical flags `vram_need` prices ConvNeXt-base at 14443 MiB and this trunk at 40880, which is above
 # the whole card: dense connectivity concatenates every earlier feature map inside a block, so the cost
 # tracks resolution and depth rather than parameter count. The smoke refused the arm as written (`card
-# had no room: needs 40880 MiB`), and that refusal is the reason `--train-size` is 336 here rather than
-# the 448 the rest of the recipe is inherited from. 336 is the CACHE's own resolution — every member of
-# this project reads a `336px_20sl_0.1-0.9band` array and `cnx_own_recipe` upsamples it to 448 — so the
-# deviation costs an upsampling factor, not information, which is why it was preferred over cutting
-# slices (20 -> 12 fits at 448 and would have cost eight real slices of the stack). It is still a
-# deviation: a difference against `cnx_own_recipe` is a difference in pretraining AND in upsampling, and
-# only the first is what this arm is about. If the cell pays, the ResNet-50 follow-up runs at 448.
+# had no room: needs 40880 MiB`), and that refusal is the reason `--train-size` is 352 here rather than
+# the 448 the rest of the recipe is inherited from. 352 is the smallest stride-32-tileable size at or
+# above the CACHE's own resolution — every member of this project reads a `336px_20sl_0.1-0.9band` array
+# and `cnx_own_recipe` upsamples it to 448 — so the deviation costs an upsampling factor of 1.05 rather
+# than information, which is why it was preferred over cutting slices (20 -> 12 fits at 448 and would
+# have cost eight real slices of the stack). 336 itself was tried first and REFUSED at the trainer:
+# `radnet121 is patch 32, which cannot tile a 336 px read`. It is still a deviation: a difference against
+# `cnx_own_recipe` is a difference in pretraining AND in upsampling, and only the first is what this arm
+# is about. If the cell pays, the ResNet-50 follow-up runs at 448.
 #
 # THE RECIPE IS `cnx_own_recipe`'s, deliberately. It is the best convolutional recipe this project owns
 # (0.8186), and holding it fixed means a difference here is about the PRETRAINING rather than about a
@@ -90,6 +92,6 @@ require "$LABELS"
 
 run_train radnet_family \
   $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
-  --variant radnet121 --backbone-lr 4e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 336 \
-  --vram-gb 24 \
+  --variant radnet121 --backbone-lr 4e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 352 \
+  --vram-gb 26 \
   --labels "$LABELS" --out "$PROCESSED/radnet_family_s2026.pt"

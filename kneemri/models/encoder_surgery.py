@@ -61,10 +61,11 @@ class EncoderSurgery:
         """
         families: dict[str, list[nn.Module]] = defaultdict(list)
         for holder in self.backbone.modules():
-            if isinstance(holder, nn.ModuleList) and len(holder) > 0:
-                families[type(holder[0]).__name__].extend(holder)
+            members = self._repeated(holder)
+            if members:
+                families[type(members[0]).__name__].extend(members)
         if not families:
-            message = f"{type(self.backbone).__name__} has no ModuleList, so it has no blocks to unfreeze"
+            message = f"{type(self.backbone).__name__} has no module container, so it has no blocks to unfreeze"
             raise ValueError(message)
         deepest = max(len(members) for members in families.values())
         candidates = sorted(name for name, members in families.items() if len(members) == deepest)
@@ -75,6 +76,25 @@ class EncoderSurgery:
             )
             raise ValueError(message)
         return families[candidates[0]]
+
+    @staticmethod
+    def _repeated(holder: nn.Module) -> list[nn.Module]:
+        """The repeated children of a bare container, or nothing for a module that computes.
+
+        Both container types are here because a `ModuleList` is where a transformer keeps its blocks and
+        a `ModuleDict` is where a torchvision DenseNet keeps its dense layers — `_DenseBlock` subclasses
+        `ModuleDict`, so a DenseNet-121 holds 58 `_DenseLayer` in four dicts and NO `ModuleList` at all,
+        which read as "no blocks to unfreeze" and refused the whole arm at construction.
+
+        `Sequential` is deliberately not a third case. It is a container that also defines a forward, so
+        it wraps stages, stems and single layers as readily as repeated blocks, and counting its children
+        would make the most-repeated-type vote turn on packaging rather than on structure.
+        """
+        if isinstance(holder, nn.ModuleDict):
+            return list(holder.values())
+        if isinstance(holder, nn.ModuleList):
+            return list(holder)
+        return []
 
     def adapters(self) -> int:
         """How many LoRA adapters this encoder currently carries — zero when it was never adapted.

@@ -567,12 +567,12 @@ def test_parameter_groups_finds_blocks_that_are_not_under_encoder():
 
 
 def test_parameter_groups_refuses_a_backbone_with_no_blocks():
-    """Something with no ModuleList is not a transformer, and silently opening nothing trains nothing."""
+    """Something with no module container is not a trunk, and silently opening nothing trains nothing."""
     torch.manual_seed(SEED)
     backbone = _FakeBackbone()
     del backbone.encoder
     model = StudyModel(backbone, DIM, SLOTS)
-    with pytest.raises(ValueError, match="no ModuleList"):
+    with pytest.raises(ValueError, match="no module container"):
         model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
 
 
