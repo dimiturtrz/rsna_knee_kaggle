@@ -92,3 +92,5 @@ logs/kout/*.csv
 # kernel outputs downloaded for reading — evidence, not source
 comp/kout*/
 comp/fout*/
+/.agent-runtime/notes/
+/.agent-runtime/outbox/
