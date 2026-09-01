@@ -6728,6 +6728,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet.labels",
+      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus.write_labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.mrnet_cached.CachedMRNet.verdicts",
       "target": "core.data.corpus.mrnet_labels.MRNetLabels.table",
       "weight": 1
@@ -6736,6 +6742,12 @@
       "kind": "calls",
       "source": "core.data.corpus.mrnet_cached.CachedMRNet.volumes",
       "target": "core.data.corpus.mrnet_cached.CachedMRNet.verdicts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet.volumes",
+      "target": "core.data.corpus.study_cache.StudyCache.recorded",
       "weight": 1
     },
     {
@@ -6826,6 +6838,12 @@
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.labels",
       "target": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.labels",
+      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus.write_labels",
       "weight": 1
     },
     {
@@ -7726,6 +7744,12 @@
       "kind": "construct",
       "source": "core.data.corpus.study_cache.StudyCache.load",
       "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study_cache.StudyCache.load",
+      "target": "core.data.corpus.study_cache.StudyCache.recorded",
       "weight": 1
     },
     {
@@ -31778,6 +31802,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.mrnet_corpus.MRNetCorpus.write_labels",
+      "label": "write_labels",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetExam.level",
       "label": "level",
       "level": "method",
@@ -31790,14 +31822,6 @@
       "label": "present",
       "level": "method",
       "parent": "core.data.corpus.mrnet_corpus.MRNetExam",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.mrnet_corpus.write_labels",
-      "label": "write_labels",
-      "level": "method",
-      "parent": "core.data.corpus.mrnet_corpus",
       "role": null
     },
     {
@@ -32732,6 +32756,14 @@
       "descendants": 0,
       "id": "core.data.corpus.study_cache.StudyCache.record",
       "label": "record",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study_cache.StudyCache.recorded",
+      "label": "recorded",
       "level": "method",
       "parent": "core.data.corpus.study_cache.StudyCache",
       "role": null
