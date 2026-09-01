@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-Yes. The metadata is **available at inference time** (`test_series.csv` ships the same columns), is **complete and clean** (no missing values), and the literature shows that conditioning a vision model on analogous MRI metadata gives measurable gains. The recommended move is a cheap metadata-conditioning seat, not a metadata-only classifier, because only 58 of 4,407 training studies carry labels.
+The metadata is **available at inference time** and **not a leak**, but it is **mostly redundant with what the pipeline already uses**. Of the three fields, `Anatomical_Plane` is constant (every study has Axial, Coronal and Sagittal), `Fat_Suppression` equals `Fluid_Sensitive` on every row, and `Fluid_Sensitive` is already used upstream to route series to slots. The literature shows metadata conditioning helps when the metadata carries *non-redundant* information (tumor type, multi-field sequence+plane), but is flat/inconclusive when the metadata is an image-inferable contrast flag. The original FiLM/concat seat should be **declined**; the only remaining metadata sub-axis is study-level series count / fluid-sensitive series count, and there is no direct evidence for it.
 
 ## What the CSVs actually contain
 
@@ -25,6 +25,19 @@ Counts:
 - No missing values in any metadata field.
 - `train.csv`: 4,407 studies, all with a free-text `Report`, but only **58 studies have any of the 12 abnormality labels filled in** (and those 58 have all 12 labels filled in).
 
+## Correction: only one of the three fields is informative, and it is already used
+
+`kneemri/evaluation/study_series.py:8-11` documents what the data actually says:
+
+- `Anatomical_Plane` is **constant at the study level**: all 4,407 training studies carry Axial, Coronal and Sagittal series. It is therefore not a discriminative signal for study-level abnormality classification.
+- `Fat_Suppression` equals `Fluid_Sensitive` on **every one of the 24,371 rows**. `StudySeries.redundant()` asserts this.
+- `Fluid_Sensitive` is the only remaining bit, and it is already consumed upstream:
+  - `kneemri/evaluation/raptor_feed.py:263,267` routes series with `row["Anatomical_Plane"] == slot.plane` and `int(row.get("Fluid_Sensitive", 0)) == slot.fluid_sensitive`.
+  - `kneemri/kaggle/slot_fill.py:40` builds the routing map offline from `train_series.csv`.
+  - `kneemri/kaggle/submission.py:346` builds the same map at inference.
+
+So a FiLM/concat seat conditioning on these three fields would re-inject a bit the sampler has already used to choose which slices the trunk sees. The meaningful question is not "condition on Fluid_Sensitive" but "is there any residual signal in *how many* series a study has, or *how many* are fluid-sensitive?" Those counts are computed in `StudySeries.counts()` and `.fluid()` but are not used as model inputs.
+
 ## Leakage check
 
 The metadata is **not a leak**: `test_series.csv` exists and contains the same three predictive fields for every test series. Using it is no different from using DICOM orientation or sequence tags that the test set also carries.
@@ -33,7 +46,16 @@ The only leakage-shaped concern is if the *presence* of a series type were corre
 
 ## Literature evidence
 
-### 1. Meta-D — FiLM/cross-attention conditioning on sequence + plane metadata
+### 1. Lemay 2021 — when metadata helps and when it does not
+
+[Benefits of Linear Conditioning with Metadata for Image Segmentation](https://proceedings.mlr.press/v143/lemay21a/lemay21a.pdf) (Lemay et al., MIDL 2021) is the most important reference for the corrected question. It conditions a 2D U-Net with FiLM on metadata and reports:
+
+- **+5.1% Dice** on spinal-cord tumor segmentation when the metadata is **tumor type** (astrocytoma / ependymoma / hemangioblastoma) — a property not directly readable from a single slice and not used to select input slices.
+- The authors explicitly discuss the case where metadata does **not** help: citing Vincent et al. 2020, they note that conditioning on MRI contrast (T2-weighted vs T2star-weighted) gave **inconclusive gains** because "the modality-related features might already be encoded in the regular U-Net, therefore the metadata added to FiLM is not informative enough".
+
+This maps directly to our case. `Fluid_Sensitive` is an image-inferable contrast flag that is already used to route slices; it matches the Vincent et al. scenario, not the tumor-type scenario.
+
+### 2. Meta-D — FiLM/cross-attention conditioning on sequence + plane metadata
 
 [Meta-D: Metadata-Aware Architectures for Brain Tumor Analysis and Missing-Modality Segmentation](https://arxiv.org/html/2603.04811v1) (Kim et al., arXiv 2026) is the closest direct analog. It treats MRI sequence type and anatomical plane as categorical metadata and conditions a 2D CNN via **Progressive FiLM** and a 3D transformer via **metadata-driven cross-attention**.
 
@@ -83,23 +105,25 @@ The Kaggle notebook [RSNA Knee: Format-Correct Baseline](https://www.kaggle.com/
 
 ## Mechanisms applicable here
 
-The project already has a whole-stack, per-series feature pipeline. Three natural ways to add metadata, from cheapest to most complex:
+Given the correction above, the only unused metadata-derived quantities are:
 
-1. **Late concatenation** — embed the three fields (2 binary + 3-class plane) into a small vector and concatenate to the pooled series embedding before the label heads. Cost: one embedding table + a few fully-connected weights.
-2. **FiLM conditioning** — metadata embedding → MLP → per-channel γ/β applied to backbone feature maps. This is what Meta-D showed +2.6% F1 for. Cost: a lightweight MLP; no extra inference memory for the backbone.
-3. **Cross-attention** — image tokens as queries, metadata tokens as keys/values. This is what Dohmen et al. used for +3 pp over image-only, but it adds a transformer block and is only worthwhile if the gain is shown in a seat test.
+1. **Study-level series count** (`StudySeries.counts()`) — how many series the study has.
+2. **Study-level fluid-sensitive series count** (`StudySeries.fluid()`) — how many of those series are fluid-sensitive.
+3. **Per-series Fluid_Sensitive** — already used to route slices to slots.
 
-Because the fields are *per-series*, not per-slice, late concatenation or series-level FiLM is the natural first step. Per-slice metadata would only make sense if the project moves to per-slice token inputs.
+Conditioning on per-series `Fluid_Sensitive`, `Fat_Suppression` or `Anatomical_Plane` is re-injecting information already in the pipeline. A study-level count vector could in principle carry signal (e.g., complex injuries are scanned with more sequences), but there is no published precedent for this specific feature in knee MRI.
 
 ## Caveats
 
-- **Metadata is coarsely quantized.** There are only 3 effective bits of information per series (2 binary + 3 categories). The image encoder may already learn to infer these properties from pixels, so the marginal gain may be smaller than the literature's +2–3 pp.
-- **Labels are scarce.** A metadata-only model cannot be trained on 58 labeled studies. Metadata must condition a vision model trained on image–label pairs.
-- **Plane/sequence may already be encoded in the slot design.** The repo already treats sagittal/coronal/axial series differently via `extended_slots`. If the existing architecture effectively uses plane, late concatenation may duplicate that signal.
-- **No missing metadata** means the sparsity-aware machinery from Dohmen et al. is not required, but it is a nice robustness feature if future data arrives with blank fields.
+- **The three fields collapse to one bit plus a constant.** After deduplication, the only per-series signal is `Fluid_Sensitive`, and it is already a routing input.
+- **Lemay 2021 warns exactly against this case.** When metadata is an image-inferable contrast property, FiLM gains are inconclusive because the trunk already encodes it.
+- **Meta-D's gain is from multi-field conditioning.** Sequence + plane together resolve both contrast ambiguity and geometric variance; plane is constant here and sequence is already routed.
+- **Study-level counts are speculative.** They are not used upstream, but also not supported by literature the project has located.
 
 ## Verdict and recommended next step
 
-The metadata axis is **real, safe, and under-tested in this repo**. The cheapest proof is a distinct-and-strong seat that adds a metadata embedding (late concat or FiLM) to one of the current whole-stack members and compares it to the image-only control. If that seat clears the project's seat threshold, the mechanism can be rolled into the broader ensemble.
+**Decline the original metadata-conditioning seat (knee-bc1m).** The per-series fields are either redundant with the slot-routing pipeline or constant across studies, and the literature precedent for conditioning on an already-used contrast flag is flat.
 
-A bead has been filed to track the implementation seat: `knee-bc1m`.
+The only remaining sub-hypothesis is whether **study-level series count or fluid-sensitive count** predicts abnormality. That is a different, weaker claim with no direct evidence. If someone wants to test it, the cost is one cheap feature-engineering seat, but it should not be confused with the Meta-D/Dohmen literature.
+
+Bead `knee-bc1m` should be closed as declined; a new bead can be filed if the count hypothesis is worth a smoke run.
