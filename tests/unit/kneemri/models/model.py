@@ -273,8 +273,9 @@ def test_slice_features_reads_a_tubelet_trunk_as_frames():
         features = model.slice_features(imgs, TUBELET_CROP)
 
     assert features.shape == (2, SLOTS, 1, DIM), "a volume trunk keeps the (b, s, 1, w) contract untouched"
-    assert model.volume.tubelet == TUBELET, "the trunk's own config decides this, not our registry"
-    assert model.prefix_tokens == 0, "there is no class token to skip"
+    assert model.reading.volume is not None
+    assert model.reading.volume.tubelet == TUBELET, "the trunk's own config decides this, not our registry"
+    assert model.reading.prefix_tokens == 0, "there is no class token to skip"
 
     with pytest.raises(ValueError, match="fitted at"), torch.no_grad():
         model.slice_features(imgs, TUBELET_CROP * 2)
@@ -481,15 +482,21 @@ def test_parameter_groups_carry_a_tensor_the_LOSS_owns():
 def test_context_width():
     """The width of one finding's reading — the student side of a projection onto a teacher.
 
-    Read off the model rather than recomputed by the caller: it is `dim` times whatever the pooling
-    multiplies by, and a second spelling of that arithmetic would size a projection that fits the trunk
-    it was written against and silently mismatches the next one.
+    Read off the model rather than recomputed by the caller: a second spelling of that arithmetic would
+    size a projection that fits the trunk it was written against and silently mismatches the next one.
+
+    IT IS THE HEAD'S OUTPUT WIDTH, NOT `head_width`, which is what the head is FED. This test asserted
+    the fed one, and agreed with the defect it was supposed to catch: every feature-distillation
+    projection was built with the wrong student side, so `raptor_feat_pre` died at its first step with
+    `mat1 and mat2 shapes cannot be multiplied (1x256 and 2048x1024)` and no distillation arm had ever
+    run. The two are asserted DIFFERENT here, because their being equal is what hid it.
     """
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
 
-    assert model.context_width() == DIM * POOL_PARTS[model.pool]
-    assert model.context_width() == model.head_width, "the head is built from the same number"
+    assert model.head_width == DIM * POOL_PARTS[model.pool], "the head is FED the pooled width"
+    assert model.context_width() == model.head.hidden, "and it EMITS its own"
+    assert model.context_width() != model.head_width, "the slot projection is what separates them"
 
 
 def test_parameter_groups_layer_decay():
@@ -631,7 +638,7 @@ def test_check_whole_stack():
         stacked.check_whole_stack(20)
 
     volumetric = StudyModel(_FakeBackbone(), DIM, SLOTS)
-    volumetric.volume = VolumeRead(2, 16, 256)
+    volumetric.reading = replace(volumetric.reading, volume=VolumeRead(2, 16, 256))
     volumetric.check_whole_stack(20)
     with pytest.raises(ValueError, match="partial tubelet"):
         volumetric.check_whole_stack(15)

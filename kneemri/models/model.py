@@ -19,14 +19,12 @@ from torch import Tensor, nn
 from core.data.corpus.anatomy import ANATOMY, SlotAffinity
 from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, IMAGENET, SMALL, Normalization
-from kneemri.models.depth_window import DepthWindow
 from kneemri.models.encoder_surgery import NO_LAYER_DECAY, EncoderSurgery
 from kneemri.models.fingerprint import FINGERPRINT
-from kneemri.models.grid_fit import GridFit
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
+from kneemri.models.slice_read import SliceRead
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
-from kneemri.models.volume_read import VolumeRead
 
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
@@ -200,16 +198,17 @@ class StudyModel(nn.Module):
         # only authority on what they emit. DINOv2 has one class token and no registers; DINOv3 adds
         # four registers, which must be excluded from the patch pooling below.
         config = getattr(backbone, "config", None)
-        # A VOLUMETRIC TRUNK ANNOUNCES ITSELF BY ITS TUBELET; `VolumeRead` is None for an ordinary 2D
-        # one, and holds every fact the depth axis changes when it is not.
-        self.volume = VolumeRead.of(config, self.design.pool, self.design.slice_pooling)
-        # A FIXED-GRID TRUNK REFUSES A READ IT WAS NOT FITTED AT unless the forward is told to resample
-        # its position embeddings. Derived once here beside the other facts the loaded weights own.
-        self.grid = GridFit.of(backbone)
-        # No class token to skip on a tubelet trunk, and no registers either — the first token is a
-        # patch. Getting this wrong is silent: the head accepts the width and the score comes out
-        # plausible, which is the failure `prefix_tokens` exists to prevent.
-        self.prefix_tokens = 0 if self.volume else 1 + int(getattr(config, "num_register_tokens", 0) or 0)
+        # A PLAIN VALUE, not a submodule: `SliceRead` is not an `nn.Module`, so it registers nothing and
+        # no state-dict key changes. It holds every fact settled before the first pixel moves — the
+        # tubelet, the position grid, the prefix tokens and the through-plane window — and performs the
+        # step that consumes all four. The normalisation buffers stay registered HERE, below, because
+        # they ride in the state dict.
+        self.reading = SliceRead.of(
+            backbone,
+            self.design.pool,
+            self.design.slice_pooling,
+            through_plane=self.design.through_plane,
+        )
         width = int(getattr(config, "hidden_size", dim) or dim)
         if width != dim:
             # A registry that disagrees with the weights is a typo, and it surfaces otherwise as a shape
@@ -288,11 +287,12 @@ class StudyModel(nn.Module):
         exists to widen. Both are the same bug: a caller deciding what a model can be handed. The
         model is the only thing that knows.
         """
-        if self.volume is not None:
-            if slices % self.volume.tubelet:
+        if self.reading.volume is not None:
+            tubelet = self.reading.volume.tubelet
+            if slices % tubelet:
                 message = (
-                    f"this trunk spans {self.volume.tubelet} slices per token, so a {slices}-slice "
-                    f"window leaves a partial tubelet; use a multiple of {self.volume.tubelet}"
+                    f"this trunk spans {tubelet} slices per token, so a {slices}-slice "
+                    f"window leaves a partial tubelet; use a multiple of {tubelet}"
                 )
                 raise ValueError(message)
             return
@@ -364,40 +364,10 @@ class StudyModel(nn.Module):
         channels — so it returns a single position, and pooling over it is the identity.
         """
         batch, slots, group = imgs.shape[:3]
-        # "channels": three consecutive slices become the encoder's three channels — one forward per
-        # slot. "max": each slice is encoded ALONE (replicated across the three channels the encoder
-        # expects) and the slot's embedding is the per-dimension maximum over its slices.
-        #
-        # The difference is not a preference. Channel stacking couples the group's PHYSICAL THICKNESS
-        # to the slice count, which is measurably why raising inference slices from 12 to 32 cost
-        # -0.018 here while the recipe that pools per-slice can do it freely. It also means a finding
-        # is only visible if it falls inside a sampled three-slice group.
         per_slice = self.per_slice
-        if per_slice and self.design.through_plane:
-            x = DepthWindow.channels(imgs).reshape(batch * slots * group, 3, *imgs.shape[3:]).float().div(255.0)
-        elif per_slice:
-            x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
-            x = x.float().div(255.0)
-        elif self.volume:
-            # THE WINDOW IS FRAMES, NOT CHANNELS, and that is the whole difference this trunk buys —
-            # see `VolumeRead` for why no reshaping of a 2D stem reaches it. Each slice is greyscale
-            # replicated to the three channels the trunk was pretrained on; only the depth axis is new,
-            # and it is folded in after the resize and the normalisation so both lines are reused.
-            x = imgs.reshape(batch * slots * group, 1, *imgs.shape[3:]).expand(-1, 3, -1, -1)
-            x = x.float().div(255.0)
-        else:
-            x = imgs.reshape(batch * slots, *imgs.shape[2:]).float().div_(255.0)
-        if img_size is not None and img_size != x.shape[-1]:
-            # The cache is held at the highest resolution any configuration needs and the rest
-            # downsample from it, so every configuration sees the same pixels through a different
-            # sampling grid rather than a different crop.
-            x = nn.functional.interpolate(x, size=(img_size, img_size), mode="bilinear", align_corners=False)
-        x = (x - self.mean) / self.std
-        if self.volume:
-            x = self.volume.frames(x, batch * slots)
+        x = self.reading.pixels(imgs, self.mean, self.std, img_size, per_slice=per_slice)
         tokens = self._tokens(x)
-        if self.volume:
-            self.volume.check_tokens(x, tokens)
+        self.reading.check_tokens(x, tokens)
         pooled = self._pool(tokens)
         if not per_slice:
             return pooled.reshape(batch, slots, 1, -1)
@@ -425,8 +395,7 @@ class StudyModel(nn.Module):
 
     def fingerprint(self, image_size: int, group: int, device: torch.device) -> NDArray[np.float32]:
         """This model's answer to the one seeded question, as a portable identity — see `Fingerprint`."""
-        frames = self.volume.probe_frames(group) if self.volume else group
-        return FINGERPRINT.of(self, self.n_slot, image_size, frames, device)
+        return FINGERPRINT.of(self, self.n_slot, image_size, self.reading.probe_frames(group), device)
 
     def load_trained(self, state: dict[str, Tensor]) -> None:
         """Load weights saved by any earlier version of this model.
@@ -490,12 +459,16 @@ class StudyModel(nn.Module):
     def context_width(self) -> int:
         """How wide one finding's reading is in `Readout.context` — the student side of a projection.
 
-        A method rather than a caller reaching for `model.head_width`, because that is what the coupling
-        gate calls navigating into a stranger, and because the width is a fact about the READOUT that a
-        change of pooling moves: `POOL_PARTS` doubles it under a concat pooling, and a caller doing that
-        arithmetic itself would be a second copy of the rule.
+        A method rather than a caller reaching into the head, because that is what the coupling gate
+        calls navigating into a stranger, and because the width is a fact about the READOUT.
+
+        It is the head's OUTPUT width, not `self.head_width`, which is what the head is FED. Those two
+        differ by the slot projection (2048 in, 256 out on the attend head), and returning the input one
+        built every feature-distillation projection with the wrong student side: `nn.Linear(2048, 1024)`
+        fed a 256-wide tensor, so `raptor_feat_pre` died at its first step with `mat1 and mat2 shapes
+        cannot be multiplied (1x256 and 2048x1024)` and no distillation arm had ever run.
         """
-        return self.head_width
+        return self.head.hidden
 
     def parameter_groups(
         self,
@@ -557,10 +530,10 @@ class StudyModel(nn.Module):
         # A VOLUMETRIC TRUNK TAKES A DIFFERENT KEYWORD, and passing the wrong one is not a silent
         # failure — transformers rejects an unknown keyword — but it is a failure deep inside a fetched
         # model rather than here, so the branch is stated where the shape is known.
-        keyword = "pixel_values_videos" if self.volume else "pixel_values"
+        keyword = "pixel_values_videos" if self.reading.volume else "pixel_values"
         # AND A FIXED-GRID TRUNK TAKES ONE MORE, for the same reason and with the same failure mode one
         # step earlier — see `GridFit`, which reads it off the trunk rather than off the registry.
-        extra = self.grid.extra()
+        extra = self.reading.extra()
         if self.design.layer == -1:
             return self.backbone(**{keyword: x}, **extra).last_hidden_state
         return self.backbone(**{keyword: x}, **extra, output_hidden_states=True).hidden_states[self.design.layer]
@@ -572,7 +545,7 @@ class StudyModel(nn.Module):
         # and registers exist precisely to absorb high-norm outliers, which is the worst thing to
         # average and the worst thing to hand a top-k. The count comes off the backbone's own config,
         # so a v2 member is unchanged (no registers, prefix of one) and nothing re-fingerprints.
-        return TOKEN_POOLINGS[self.pool].reduce(tokens, self.prefix_tokens)
+        return TOKEN_POOLINGS[self.pool].reduce(tokens, self.reading.prefix_tokens)
 
 
 @dataclass(frozen=True)

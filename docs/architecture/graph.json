@@ -4160,6 +4160,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.slice_read",
+      "target": "kneemri.models.depth_window",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_read",
+      "target": "kneemri.models.grid_fit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_read",
+      "target": "kneemri.models.volume_read",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.volume_read",
       "target": "kneemri.models.slice_pooling",
       "weight": 1
@@ -20881,12 +20899,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.models.model.StudyModel.__init__",
-      "target": "kneemri.models.grid_fit.GridFit.of",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.models.model.StudyModel.__init__",
       "target": "kneemri.models.model.StudyDesign",
@@ -20895,7 +20907,7 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.__init__",
-      "target": "kneemri.models.volume_read.VolumeRead.of",
+      "target": "kneemri.models.slice_read.SliceRead.of",
       "weight": 1
     },
     {
@@ -20961,12 +20973,6 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.slice_features",
-      "target": "kneemri.models.depth_window.DepthWindow.channels",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.model.StudyModel.slice_features",
       "target": "kneemri.models.model.StudyModel._pool",
       "weight": 1
     },
@@ -20998,6 +21004,66 @@
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.supervised",
       "target": "kneemri.models.model.StudyModel.slot_features",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.slice_read.SliceRead",
+      "target": "kneemri.models.grid_fit.GridFit",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.slice_read.SliceRead",
+      "target": "kneemri.models.slice_read.SliceRead",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.slice_read.SliceRead",
+      "target": "kneemri.models.volume_read.VolumeRead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.check_tokens",
+      "target": "kneemri.models.volume_read.VolumeRead.check_tokens",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.extra",
+      "target": "kneemri.models.grid_fit.GridFit.extra",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.of",
+      "target": "kneemri.models.grid_fit.GridFit.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.of",
+      "target": "kneemri.models.volume_read.VolumeRead.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.pixels",
+      "target": "kneemri.models.depth_window.DepthWindow.channels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.pixels",
+      "target": "kneemri.models.volume_read.VolumeRead.frames",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slice_read.SliceRead.probe_frames",
+      "target": "kneemri.models.volume_read.VolumeRead.probe_frames",
       "weight": 1
     },
     {
@@ -24289,7 +24355,7 @@
       "role": null
     },
     {
-      "descendants": 187,
+      "descendants": 188,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -25329,7 +25395,7 @@
       "role": null
     },
     {
-      "descendants": 16,
+      "descendants": 17,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -25428,6 +25494,14 @@
       "descendants": 0,
       "id": "kneemri.models.slice_pooling",
       "label": "slice_pooling",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read",
+      "label": "slice_read",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -28622,6 +28696,14 @@
       "label": "SlicePooling",
       "level": "class",
       "parent": "kneemri.models.slice_pooling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead",
+      "label": "SliceRead",
+      "level": "class",
+      "parent": "kneemri.models.slice_read",
       "role": "satellite"
     },
     {
@@ -41934,6 +42016,46 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.slice_attention.SliceAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead.check_tokens",
+      "label": "check_tokens",
+      "level": "method",
+      "parent": "kneemri.models.slice_read.SliceRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead.extra",
+      "label": "extra",
+      "level": "method",
+      "parent": "kneemri.models.slice_read.SliceRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.models.slice_read.SliceRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead.pixels",
+      "label": "pixels",
+      "level": "method",
+      "parent": "kneemri.models.slice_read.SliceRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slice_read.SliceRead.probe_frames",
+      "label": "probe_frames",
+      "level": "method",
+      "parent": "kneemri.models.slice_read.SliceRead",
       "role": null
     },
     {
