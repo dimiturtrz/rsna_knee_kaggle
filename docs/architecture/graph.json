@@ -14247,6 +14247,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison._arm",
+      "target": "kneemri.evaluation.run_comparison.RunComparison._peaks_line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._arm",
       "target": "kneemri.evaluation.run_comparison.RunComparison._stalled",
       "weight": 1
     },
@@ -14308,6 +14314,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison._intervals",
       "target": "core.data.labels.label_power.LabelPower.standard_error",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._peaks",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.run_comparison.RunComparison._peaks_line",
+      "target": "kneemri.evaluation.run_comparison.RunComparison._peaks",
       "weight": 1
     },
     {
@@ -22899,6 +22917,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.fitting.Fitting._calibration_error",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
       "target": "kneemri.training.fitting.Fitting.keep",
       "weight": 1
     },
@@ -24465,6 +24489,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.ramp_certainty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.report_supervision",
       "weight": 1
     },
@@ -25006,6 +25036,18 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.teacher_targets.TeacherTargets.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.trainer.Trainer._quantiles_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.trainer.Trainer._ramped_weights",
       "weight": 1
     },
     {
@@ -37922,6 +37964,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison._peaks",
+      "label": "_peaks",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.run_comparison.RunComparison._peaks_line",
+      "label": "_peaks_line",
+      "level": "method",
+      "parent": "kneemri.evaluation.run_comparison.RunComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.run_comparison.RunComparison._stalled",
       "label": "_stalled",
       "level": "method",
@@ -45266,6 +45324,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.fitting.Fitting._calibration_error",
+      "label": "_calibration_error",
+      "level": "method",
+      "parent": "kneemri.training.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.epochs",
       "label": "epochs",
       "level": "method",
@@ -45310,6 +45376,14 @@
       "label": "scored",
       "level": "method",
       "parent": "kneemri.training.fitting.Fold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.flag_vocabulary.FlagVocabulary._curriculum_arguments",
+      "label": "_curriculum_arguments",
+      "level": "method",
+      "parent": "kneemri.training.flag_vocabulary.FlagVocabulary",
       "role": null
     },
     {
@@ -46666,6 +46740,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._quantiles_of",
+      "label": "_quantiles_of",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._ramped_weights",
+      "label": "_ramped_weights",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.accumulate",
       "label": "accumulate",
       "level": "method",
@@ -46754,6 +46844,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.loss_quantiles",
+      "label": "loss_quantiles",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.one_cycle",
       "label": "one_cycle",
       "level": "method",
@@ -46780,6 +46878,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.predict",
       "label": "predict",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.ramp_certainty",
+      "label": "ramp_certainty",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
