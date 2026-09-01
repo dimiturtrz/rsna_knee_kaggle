@@ -33,6 +33,18 @@
 # resampling alone is a plausible loss (less unique data per epoch) or a plausible gain (implicit
 # bagging). Two runs, identical but for alpha, is what makes the tilt the only difference.
 #
+# THE TILT IS SET BY THE MEASURED SPREAD AND NOT BY TASTE, and the measurement moved it. The report on
+# `train_spread_honest12.npz` reads mean 0.1244, median 0.1267, p90 0.1571, max 0.2128, and bands the
+# corpus as: spread < 0.05 ZERO studies · 0.05-0.10 699 · 0.10-0.15 2175 · >= 0.15 624. Two things follow.
+# First, twelve separately-trained members never unanimously agree ANYWHERE — the empty quiet band says
+# the 24.3% the family all gets wrong is unanimous in VERDICT, not in confidence, which is a fact about
+# the family and not about this arm. Second, and the reason alpha is 1.0 here and not the 0.5 this arm
+# was first written with: at 0.5 the split band drew 1.145 against the quiet band's 0.840, a 1.36x
+# contrast, and twelve epochs of that is a null BY CONSTRUCTION — and the uninformative null, since a
+# flat result would only say "1.36x does nothing" and could not close the axis. At 1.0 the same bands
+# draw 1.29 against 0.68, a 1.9x contrast, for the same runtime and no code change. That is still modest;
+# it is the most contrast this weight HAS, and the arm is priced against it below.
+#
 # PRICE, BEFORE THE NUMBER. 2 x 3.1 h of card = 6.2 h for one axis. The mechanism is aimed at the 70%
 # band, which is by far the biggest block on the residual sheet, so a mechanism that works at all has
 # room for well over the 1.5% bar; P(clears +0.015) ~ 0.15, P(clears the noise floor in either
@@ -47,7 +59,9 @@
 #              not plan the roster around it and do not spend a confirmation seed on it.
 #   -0.004 to +0.004  THE DRAW DOES NOT MATTER AT THIS TILT. The informative null: it says the loop's
 #              uniformity is not what is holding the 70% band, and points the band at the INPUT or the
-#              LABEL rather than at how often the model sees a study. Closes the axis at alpha 0.5.
+#              LABEL rather than at how often the model sees a study. Closes the axis AT THE LARGEST
+#              CONTRAST THIS WEIGHT CAN PRODUCE (1.9x, alpha 1.0) — which is what makes it a closure and
+#              not a knob reading. A sharper weight (a power on spread, a rank tilt) would re-open it.
 #   <= -0.005  THE TILT COSTS. Read it with the spread report before concluding: if the split band is
 #              thin, the tilt concentrated the epoch on a handful of studies and the follow-up is a
 #              lower alpha, not a refutation of the mechanism.
@@ -68,8 +82,8 @@ run_train disagreed_uniform \
   --sample-spread "$SPREAD" --sample-alpha 0.0 \
   --labels "$LABELS" --out "$PROCESSED/disagreed_uniform_s2026.pt"
 
-run_train disagreed_half \
+run_train disagreed_full \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --sample-spread "$SPREAD" --sample-alpha 0.5 \
-  --labels "$LABELS" --out "$PROCESSED/disagreed_half_s2026.pt"
+  --sample-spread "$SPREAD" --sample-alpha 1.0 \
+  --labels "$LABELS" --out "$PROCESSED/disagreed_full_s2026.pt"
