@@ -1072,6 +1072,15 @@ mean:
   see, which is what the resolution arm now targets" — is superseded on PRICE, not on mechanism, and
   `focus_mcl` was cancelled before it ran. See
   `interpretations/kneemri/2026-08-23_the_per_label_axis_is_worth_0.004.md`.
+  **CORRECTED 2026-09-01: `focus_mcl` DID run**, twelve epochs, and this line plus its own header both
+  said otherwise for nine days. On the MCL column it pre-registered it reads 0.7861 against the control's
+  0.7931 — inside the `0.783-0.802` null band, *jointness costs MCL nothing*. Line 5591 below records it
+  as refuted at a solo of 0.5332, which is the twelve-label MEAN the arm explicitly forbids reading
+  (eleven heads carry no gradient). The null's own follow-up is answered by checkpoints already on disk
+  and in the opposite direction: tighter crop is monotonically WORSE on MCL (crop80 0.7469/0.7480/0.7604)
+  and the widest band holds our best-ever 0.8076. MCL now falls to recipe, data volume, encoder family,
+  objective, crop, span and resolution alike. See
+  `interpretations/kneemri/2026-09-01_mcl_falls_to_every_axis_we_own.md`.
 - **A run kept eight of the 881 studies it predicted, and threw the rest away.** `Fitting.ranked`
   already scores the whole holdout to rank each epoch, and that array is what every per-label number in
   this ledger was read off; eight studies of it became the witness and 873 were dropped. They are now

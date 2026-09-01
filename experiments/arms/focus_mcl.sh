@@ -2,7 +2,15 @@
 # bead: knee-9707
 # focus_mcl.sh — is MCL's ceiling the price of JOINTNESS, or something the encoder never sees?
 #
-# CANCELLED BEFORE IT RAN, ON PRICE, NOT ON MECHANISM. Read
+# IT RAN, AND IT LANDED ITS OWN INFORMATIVE NULL. This header said CANCELLED BEFORE IT RAN until
+# 2026-09-01; `focus_mcl_s2026.metrics.jsonl` holds twelve epochs. MCL peaks at 0.7861 (e7) against the
+# control's 0.7931 — inside the pre-registered 0.783-0.802 band, JOINTNESS COSTS MCL NOTHING, at maximum
+# tilt. The ledger had recorded it as refuted at a solo of 0.5332, which is the MEAN this file warns
+# below must not be read. Do NOT re-run it. Its follow-up (mm/px on the medial margin) is answered too,
+# by crop80 and band140 already on disk, and in the other direction. See
+# `interpretations/kneemri/2026-09-01_mcl_falls_to_every_axis_we_own.md`.
+#
+# THE PRICE ARGUMENT BELOW STANDS AND IS NOW MOOT, ON MECHANISM AS WELL. Read
 # `interpretations/kneemri/2026-08-23_the_per_label_axis_is_worth_0.004.md` before running this.
 # `kneemri/evaluation/weights_gap.py` compared our weights against the published members' on the SAME
 # 909 studies with the same labels: ours wins ten of twelve labels and the mean (+0.0198 against their
