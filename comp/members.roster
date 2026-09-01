@@ -606,3 +606,4 @@ merged3_corpus_s2026.pt              # 0.8521
 certainty_ramp_s2026.pt              # 0.8584
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
+slot_dropout_s2026.pt                # 0.8592 - best single member the project owns
