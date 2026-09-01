@@ -440,3 +440,17 @@ def test_resolved_accepts_the_name_the_tool_itself_prints(tmp_path: Path):
     """
     assert RunComparison.resolved(Path("lr4e-5_ws_s2026.metrics"), tmp_path) == tmp_path / "lr4e-5_ws_s2026.pt"
     assert RunComparison.resolved(Path("runs/x.metrics"), tmp_path) == Path("runs/x.metrics"), "a path stays a path"
+
+
+def test_report_shows_each_labels_own_peak_epoch(tmp_path: Path):
+    """A label can peak before the run's mean does; the trajectory reader makes that visible."""
+    arm_rows: list[EpochRow] = [
+        {"epoch": 0, "loss": 1.0, "auc": 0.80, "seconds": 10, "per_label": {"MCL": 0.70, "Effusion": 0.90}},
+        {"epoch": 1, "loss": 0.9, "auc": 0.84, "seconds": 10, "per_label": {"MCL": 0.85, "Effusion": 0.87}},
+    ]
+    comparison = RunComparison(_run(tmp_path, "ctl", CONTROL), [_run(tmp_path, "arm", arm_rows)])
+    report = comparison.report()
+
+    assert "label peaks across epochs" in report
+    assert "MCL 0.8500@e1" in report
+    assert "Effusion 0.9000@e0" in report

@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+import numpy as np
+
 from core import cli
 from core.data.corpus.anatomy import ScaleProfile
 from core.data.labels.label_power import FOLDS, LabelPower
@@ -276,6 +278,7 @@ class RunComparison:
         scored = self.scored(arm)
         return [
             f"\n{arm.path.stem}  " + "  ".join(f"{label} {self._marked(label, v, intervals)}" for label, v in ordered),
+            *self._peaks_line(arm, scored),
             f"  marked against the {named}",
             profile.judged() if self.moved_view(arm) else profile.line(),
             f"  vs control: {self.unmatched(arm)}",
@@ -284,6 +287,43 @@ class RunComparison:
             *self._stalled(arm),
             *([f"  {scored.named()}"] if scored is not None and scored.reconstructed else []),
         ]
+
+    @staticmethod
+    def _peaks(run: RunMetrics) -> dict[str, tuple[float, int]]:
+        """Each label's OWN best AUC across every recorded epoch, and the epoch index it peaked at.
+
+        The delta line reads every label at ONE epoch — the one the run's MEAN peaked at. A label that
+        peaked two epochs earlier and gave it back is invisible there, which is the shape blendlabels
+        wore: a mean of +0.0034 over seven helped and five diluted labels. The per-label trajectory was
+        being recorded all along; this is the reader it never had.
+        """
+        peaks: dict[str, tuple[float, int]] = {}
+        for row in run.rows():
+            for label, value in row["per_label"].items():
+                if np.isnan(value):
+                    continue
+                if label not in peaks or value > peaks[label][0]:
+                    peaks[label] = (value, row["epoch"])
+        return peaks
+
+    def _peaks_line(self, arm: RunMetrics, scored: ScoredEpoch | None) -> list[str]:
+        """Each label's own peak beside its value at the global-best epoch, or nothing when unrecorded.
+
+        A LIST rather than a string, like `_stalled`: a run with no epoch rows contributes no line and
+        needs no branch to say so. A reconstructed arm keeps only its best epoch, so its peak IS the
+        value at best and the line would restate the delta line.
+        """
+        if scored is None:
+            return []
+        peaks = self._peaks(arm)
+        if not peaks:
+            return []
+        at_best = scored.row["per_label"]
+        shown = ", ".join(
+            f"{label} {peak:.4f}@e{epoch} ({at_best.get(label, float('nan')):.4f} at best)"
+            for label, (peak, epoch) in sorted(peaks.items())
+        )
+        return [f"  label peaks across epochs: {shown}"]
 
     @staticmethod
     def _stalled(run: RunMetrics) -> list[str]:

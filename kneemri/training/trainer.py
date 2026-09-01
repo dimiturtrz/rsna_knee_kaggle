@@ -30,7 +30,7 @@ from torch import Tensor
 from core.data.corpus.prefetch import Prefetch
 from core.data.corpus.slot_reader import GROUP
 from core.data.corpus.study_cache import CachedCorpus
-from core.data.labels.targets import Targets
+from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
@@ -106,10 +106,15 @@ OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
 CLIPPING = "gradient_clip_norm"
 SAMPLING = "sampling_tilt"
+CERTAINTY_RAMP = "certainty_ramp"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 NEEDED_FOR_A_RATIO = 2
 """Two backbone groups — below that there is no pair for a per-block ratio to be defined between."""
+
+
+LOSS_QUANTILES = ("q25", "q50", "q75", "q90", "q95")
+"""Which per-study loss quantiles the epoch record carries."""
 
 
 class Trainer:
@@ -171,6 +176,13 @@ class Trainer:
         # read once, by `one_cycle`, as OneCycleLR's `pct_start`. It is a field rather than an argument
         # to that method so the request can be transcribed the same way every other switch is.
         self.warmup = ONE_CYCLE_WARMUP
+        # A curriculum length, not a policy object: 0 means the table is read unchanged, and a positive
+        # value blends it from the confidence floor toward full trust over that many epochs.
+        self.certainty_ramp: int = 0
+        # HOW FAR THE RAMP HAS COME, counted here rather than passed in: the caller already runs one
+        # `fit_epoch` per epoch in order, so an argument would be a second copy of a number this object
+        # can keep itself — and the copy is what a test stub gets wrong.
+        self._epochs_fitted: int = 0
         self.heartbeat = Heartbeat()
         self.reports: NoReportSupervision = NoReportSupervision()
         # None rather than a no-op object, unlike every other policy here, because there is no
@@ -184,6 +196,20 @@ class Trainer:
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
+        # Per-study losses for the CURRENT epoch; reset at the start of `fit_epoch` and turned into
+        # quantiles at the end. Kept here rather than returned, so `fit_epoch`'s contract stays a scalar
+        # and every existing caller is untouched.
+        self._epoch_losses: list[NDArray[np.float64]] = []
+        self._loss_quantiles: dict[str, float] = {}
+
+    @property
+    def loss_quantiles(self) -> dict[str, float]:
+        """The last epoch's per-study loss quantiles, keyed q25/q50/q75/q90/q95.
+
+        Empty before the first `fit_epoch`. NaN when no study contributed a loss, so a final fit that
+        never calls `fit_epoch` still records a number of the right shape.
+        """
+        return self._loss_quantiles
 
     def policies(self) -> dict[str, object]:
         """WHICH OPTIONAL POLICIES ARE ATTACHED, read off this trainer rather than off the run's flags.
@@ -215,6 +241,7 @@ class Trainer:
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
             SAMPLING: self.sampling.tilt(),
+            CERTAINTY_RAMP: self.certainty_ramp,
         }
 
     def weight_decay(self) -> float:
@@ -347,6 +374,42 @@ class Trainer:
         """
         self.warmup = fraction
 
+    def ramp_certainty(self, epochs: int) -> None:
+        """Spend this many epochs raising every cell's weight from the floor to its full trust."""
+        self.certainty_ramp = epochs
+
+    @staticmethod
+    def _quantiles_of(batches: list[NDArray[np.float64]]) -> dict[str, float]:
+        """Quantiles of the per-study losses collected across an epoch.
+
+        NaN when no study contributed, so callers always get the same key shape. The quantiles are
+        computed on CPU after the epoch, because the list is small and this keeps the training loop on
+        the device.
+        """
+        if not batches:
+            return {name: float("nan") for name in LOSS_QUANTILES}
+        values = np.concatenate(batches)
+        if len(values) == 0:
+            return {name: float("nan") for name in LOSS_QUANTILES}
+        levels = (0.25, 0.50, 0.75, 0.90, 0.95)
+        return {name: float(level) for name, level in zip(LOSS_QUANTILES, np.quantile(values, levels), strict=True)}
+
+    def _ramped_weights(self, weights: NDArray[np.float32], epoch: int) -> NDArray[np.float32]:
+        """Blend cell weights from the confidence floor toward their full values.
+
+        At epoch 0 every cell pulls with the floor; by epoch `certainty_ramp` the table is unchanged.
+        The total mass is re-normalised to the full table's sum so the loss scale matches the un-ramped
+        control — the objective's own divide-by-sum then sees the same denominator it would have seen.
+        """
+        if self.certainty_ramp <= 0:
+            return weights
+        alpha = min(epoch, self.certainty_ramp) / self.certainty_ramp
+        full = weights.astype(np.float64)
+        ramped = CONFIDENCE_FLOOR + (full - CONFIDENCE_FLOOR) * alpha
+        # A batch can be all-floor at epoch 0, so the sum is never zero; clamp defensively.
+        ramped = ramped * (full.sum() / max(ramped.sum(), 1e-12))
+        return ramped.astype(np.float32)
+
     def one_cycle(self, total_steps: int) -> None:
         """Attach a one-cycle schedule over the whole run, warming up then decaying to near zero.
 
@@ -431,6 +494,8 @@ class Trainer:
         # the batch and slicing afterwards materialises all twelve (97.5 MB per batch) to discard three
         # quarters of them: measured 35 ms against 3.3 ms, ten seconds of every forty-second epoch.
         self.model.train()
+        # A fresh epoch's quantiles start empty; the list is populated per batch and reduced at the end.
+        self._epoch_losses = []
         # THE RUNNING TOTAL STAYS ON THE DEVICE. Reading a loss back with float() synchronises: the host
         # blocks until the backward that produced it has finished, so it cannot queue the next step while
         # the card works on this one — which is most of what the prefetch in front of the loop just bought.
@@ -458,6 +523,7 @@ class Trainer:
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
+            weight = self._ramped_weights(weight, self._epochs_fitted)
             # AFTER the augmenter and over all four tensors at once. Blending the raw read instead would
             # hand two studies the same warp and the same gain, which is a cheaper draw than it looks:
             # the pair would differ only in anatomy, not in appearance. Under the null policy every one
@@ -495,6 +561,16 @@ class Trainer:
                     ),
                 )
                 loss = self.objective(judged) + self.reports(readout.report.float(), batch)
+            # PER-STUDY LOSS for the epoch's quantiles: the same weighted BCE the scalar is built from,
+            # averaged over labels within each study. Done under no_grad so it cannot feed back into
+            # training, and on the UNSHARED loss so the distribution matches the number the epoch reports.
+            with torch.no_grad():
+                elementwise = torch.nn.functional.binary_cross_entropy_with_logits(
+                    judged.logits, judged.scores, reduction="none"
+                )
+                weighted = elementwise * judged.weights
+                per_study = weighted.sum(dim=1) / judged.weights.sum(dim=1).clamp(min=1e-6)
+                self._epoch_losses.append(per_study.cpu().numpy().astype(np.float64))
             self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
             # THE SCHEDULE AND THE WEIGHT AVERAGE MOVE WITH THE OPTIMISER, not with the reader. Stepping
@@ -524,6 +600,8 @@ class Trainer:
                 lambda accumulated=total, count=steps: float(accumulated) / count,
                 int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]),
             )
+        self._loss_quantiles = self._quantiles_of(self._epoch_losses)
+        self._epochs_fitted += 1
         return float(total) / max(steps, 1)
 
     def predict(

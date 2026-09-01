@@ -68,6 +68,13 @@ class EpochRow(TypedDict):
     inferred into something identifiable. `seconds` alone says an epoch took eight hours; it cannot say
     WHEN, so it cannot be lined up against the suspend/resume the stall is suspected to be. Both fields
     are `NotRequired` because files written before either existed are still read by everything here.
+
+    `ece` is the epoch's expected calibration error: fifteen equal-width bins over [0, 1] of the mean
+    predicted probability against the truth BINARISED AT 0.5 — the cut `LabelScores.per_label` scores
+    the twelve AUCs against — pooled over every (study, label) cell of the holdout with NaN cells
+    excluded. `loss_q25`/`loss_q50`/`loss_q75`/`loss_q90`/`loss_q95` are the epoch's per-study loss
+    quantiles — the distribution the scalar `loss` averages away. All six are `NotRequired` under the
+    same discipline: files written before them must still read.
     """
 
     epoch: int
@@ -78,6 +85,12 @@ class EpochRow(TypedDict):
     vram_peak_gb: NotRequired[float]
     vram_alloc_gb: NotRequired[float]
     started: NotRequired[int]
+    ece: NotRequired[float]
+    loss_q25: NotRequired[float]
+    loss_q50: NotRequired[float]
+    loss_q75: NotRequired[float]
+    loss_q90: NotRequired[float]
+    loss_q95: NotRequired[float]
 
 
 class RunMetrics:

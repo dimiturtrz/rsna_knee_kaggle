@@ -166,6 +166,7 @@ class RunSetup:
             grad_clip=options.grad_clip,
             sample_spread=options.sample_spread,
             sample_alpha=options.sample_alpha,
+            certainty_ramp=options.certainty_ramp,
         )
 
     def objective(self, widths: Widths | None = None) -> Objective:
@@ -562,6 +563,7 @@ class RunSetup:
         # warmup fraction when it BUILDS OneCycleLR, so a warm_up after it would set a field nothing
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.
         trainer.warm_up(options.warmup)
+        trainer.ramp_certainty(options.certainty_ramp)
         if options.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR

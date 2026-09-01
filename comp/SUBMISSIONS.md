@@ -2981,3 +2981,107 @@ already known to be spent (knee-eeo) and the two axes would confound — about f
 recipe is bf16 train / fp16 serve, and this asked only the serving half), or about bf16 serving, a
 different exponent range that remains untested. `witness_check`'s eps was calibrated against
 fitted-precision members and is not re-read by this result.
+
+## 2026-09-01 — `lensseat_v1`: the pooling lens is on the competence scalar, and that is the sixth direction
+
+`lensseat_v1` (ref 55940907) gave the champion's most-swapped seat to a different POOLING LENS.
+`raptorweight_v1`'s seating, count, kit `ba241cf4`, order, `overlap=False`, `LogitAverage` and
+`FOREIGN_WEIGHT=1/3` all held; `lr4e-5_ws_cf` out, `labelwise_dense_s2026` in — the only roster member
+fitted with `--slice-pooling labelwise`, and the project's third-best solo at 0.8613. It read **0.944**
+against a control of **0.944**: exactly 0.000, the pre-registered FLAT band.
+
+The claim it was built to test was that a pooling FUNCTION is not a point on the competence scalar,
+because it changes which slice evidence survives to the head. `competence_axis` reads 81.7–82% of what
+separates 105 members as ONE scalar over 909 studies, and that is the mechanism under the five earlier
+flats (`raptorweight` +0.001, `vjepaseat` −0.001, `holdswap` 0.000, `spanseat` 0.944, `stackseat` 0.000,
+with `halfcham` closing precision alongside). The board says the scalar absorbs the pooling axis too.
+
+**What this retires**: member selection from the CURRENT roster. No further slot goes to choosing,
+weighting, counting or re-lensing members already in the pool.
+
+**What it does not retire**: seating a member that is BOTH distant from the pool and above the lane's
+size bar. Every seating flat on this record moved in a member that was either distant-and-weak
+(`vjepaseat`) or strong-and-twin — `stack_increments` reads SCALED at rank 0.891, and across 26 unshipped
+members priced against `honest12`, solo strength and distinctness are ANTI-correlated: only
+`attend_dense` (rank 0.8916, solo 0.8569), `aprior_dense` (0.8811, 0.8557) and `focal_dense` (0.8887)
+are DISTINCT while clearing the 0.8521 size bar. `distinct14` (ref 55943714) asks that question on a
+fully-scoreable `honest12` base, where every member is matched-fold and no all-data dose confounds it.
+
+**Not licensed**: reading this as "pooling does not matter" at TRAIN time. `labelwise_dense_s2026`'s own
+0.8613 solo says the lens builds a competent member. What is refuted is that the lens buys ENSEMBLE
+diversity against this pool.
+
+## 2026-09-01 — distinct14: the member axis is closed, and this is the flat that closes it
+
+Ref 55943714. Board **0.937**. Control `honest12` **0.937**. Delta **0.000**, dead centre of the
+pre-registered FLAT band (0.936-0.938), whose own text — written into the kernel docstring before any
+number existed — reads *"FLAT; closes the member axis, not just seating."*
+
+The entry is `honest12` plus two seats: `attend_dense_s2026` (rank 0.8916, solo 0.8569) and
+`aprior_dense_s2026` (rank 0.8811, solo 0.8557). They are the only two members in the pool that are
+simultaneously DISTINCT against the roster and above the non-DINOv2 lane's size bar of 0.8521.
+14 of 14 members mounted, verified by `run_check` before the slot was spent.
+
+### Why this flat is not the seventh copy of the six before it
+
+Every prior seating flat moved a member that was either distant-and-weak or strong-and-twin:
+
+| entry | delta | the member it seated | the escape hatch it left open |
+|---|---:|---|---|
+| raptorweight | +0.001 | reweight, no new member | weight is not the axis |
+| vjepaseat | −0.001 | `vjepa_warm` rank 0.8212, solo 0.8337 | 0.018 under the size bar |
+| holdswap | 0.000 | swap at matched strength | no new information added |
+| dark7 | flat | count | seats are not the axis |
+| spanseat | 0.944 | `crop80_span` rank 0.8653, solo 0.8466 | 0.006 under the size bar |
+| lensseat | 0.944 | pooling lens | lens is on the competence scalar |
+| **distinct14** | **0.000** | **distinct AND above the bar** | **none** |
+
+Each of the six had a live alternative explanation: the member was wrong, not the axis. This entry
+removes that explanation by construction. It is the first one that could not be dismissed as a bad pick.
+
+### The measurement underneath it
+
+A sweep of 83 unpriced roster members against `honest12` classified 25 DISTINCT. Joining that column to
+solo AUC gives an almost monotone anti-correlation — only **3 of 25** clear 0.8521, all at rank 0.88-0.89:
+
+```
+PASS  small_feat_fit_s2026        rank 0.8904  solo 0.8571
+PASS  sided_pool_s2026            rank 0.8879  solo 0.8561
+PASS  aprior_dense_s2026          rank 0.8811  solo 0.8557
+under through224_s2026            rank 0.8719  solo 0.8505
+under crop80_span_s2026           rank 0.8653  solo 0.8466
+under vjepa_warm_s2026            rank 0.8212  solo 0.8337
+under dinov3_base_lora_s2026      rank 0.8187  solo 0.8268
+under lora_r8_v3small_224_s2026   rank 0.8176  solo 0.8217
+under focus_mcl_s2026             rank 0.0445  solo 0.5332
+```
+
+`focus_mcl` is the proof of the shape: the most decorrelated object the project owns, scoring 0.533.
+It is distinct because it is broken.
+
+Kimi's Q-F research (`research/2026-09-01_decorrelation_without_solo_cost.md`, 19 sources) says this is
+the **expected** shape near the frontier rather than an artefact of this pool: no published method buys
+strong decorrelation without 1-3 points of solo cost, and Abe et al. 2024 measure diversity pressure
+dropping ImageNet ensemble accuracy 71.49 to 70.16. Their letter pre-committed the reading: *"If
+`distinct14` lands flat, the anti-correlation is effectively a law for our regime and the only open
+levers are supervision and trunk family."* It landed flat.
+
+### What is retired
+
+Member selection from the current pool, entirely — reweight, add, swap, count, precision, pooling lens,
+and now distance-with-quality. `small_feat_fit_s2026` and `sided_pool_s2026` were the natural follow-up
+entry and are **not** being shipped: that would ask the answered question an eighth time.
+
+### What is not licensed
+
+- Not "ensembling is spent". This entry's base scored 0.937, which is 0.007 below the champion,
+  so it measures the member axis on the weaker of the two bases. A 14-seat entry that cannot move
+  0.937 says nothing about whether the same two members would move the champion.
+- Not a refutation of `attend_dense` or `aprior_dense` as members. Both clear the size bar and stay
+  on the roster.
+- Not an argument against diversity. It is an argument that the pool has no more of it to spend.
+
+### What remains
+
+What a member IS (trunk family) and what it is TAUGHT (supervision). Those are the two levers Kimi's
+letter names and the only two this flat does not touch.

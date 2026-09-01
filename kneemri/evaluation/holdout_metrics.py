@@ -62,6 +62,16 @@ class HoldoutMetrics:
             auc=float(np.nanmean(list(per_label.values()))),
             seconds=UNRECOVERABLE_SECONDS,
             per_label=per_label,
+            # NaN rather than a guess, under the same discipline as `loss`: the kept arrays hold the
+            # predictions and the epoch, and none of these was ever in them. A reconstructed ECE could
+            # in principle be computed from the predictions — but the recorder reads it on the SAME
+            # binarised truth, and computing it here would be free to drift from that; absent is honest.
+            ece=float("nan"),
+            loss_q25=float("nan"),
+            loss_q50=float("nan"),
+            loss_q75=float("nan"),
+            loss_q90=float("nan"),
+            loss_q95=float("nan"),
         )
 
     def of(self, metrics: RunMetrics) -> ScoredEpoch | None:

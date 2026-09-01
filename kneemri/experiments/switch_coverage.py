@@ -54,6 +54,7 @@ COVERAGE = {
     "tie": "--tie last",
     "head_lr": "--head-lr 3e-4",
     "side_weight": "--side-weight 0.5",
+    "certainty_ramp": "--certainty-ramp 6",
 }
 """One smoke recipe per switch no arm selects, holding every other flag at its default.
 

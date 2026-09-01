@@ -51,6 +51,10 @@ NOT_IN_CONFIG = {
     "folds": "banned for the same reason",
     "fold": "which half was held out — a property of the SCORE, and `holdout` is what serves it",
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
+    "certainty_ramp": "a curriculum over the LABEL WEIGHTS, which live in the training table rather than "
+    "in the member: it changes how fast the run came to trust each cell and leaves nothing behind to "
+    "rebuild, exactly as the schedule write-off above does. The recipe block carries it, which is where "
+    "an arm's curriculum is read from",
     "warmup": "the share of that schedule spent climbing — a parameter OF the write-off above, and dead without it",
     "weight_decay": "an optimiser setting: it shapes where the walk settled, and the weights that "
     "settled are what a rebuild loads. Adds no module and no parameter",

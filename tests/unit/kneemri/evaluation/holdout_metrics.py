@@ -78,3 +78,20 @@ def test_of(tmp_path: Path):
     )
     _kept(final)
     assert resolver.of(RunMetrics(final)) is None, "a run that held nothing back has no holdout to score"
+
+
+def test_epoch_nan_fills_new_optional_fields(tmp_path: Path):
+    """A reconstructed row must carry the same keys as a recorded one, or downstream readers crash."""
+    checkpoint = tmp_path / "wsfold0_e6.pt"
+    _kept(checkpoint)
+    reading = HoldoutRecord(checkpoint).read()
+    assert reading is not None
+
+    row = HoldoutMetrics().epoch(reading)
+
+    assert np.isnan(row["ece"])
+    assert np.isnan(row["loss_q25"])
+    assert np.isnan(row["loss_q50"])
+    assert np.isnan(row["loss_q75"])
+    assert np.isnan(row["loss_q90"])
+    assert np.isnan(row["loss_q95"])

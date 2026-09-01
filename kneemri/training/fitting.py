@@ -31,7 +31,7 @@ from numpy.typing import NDArray
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.wakelock import Wakelock
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
@@ -42,6 +42,14 @@ logger = logging.getLogger(__name__)
 
 NO_HOLDOUT = float("nan")
 """What a run with nothing held back may report: not a number, because it cannot measure one."""
+
+ECE_BINS = 15
+"""How many equal-width bins over [0, 1] an epoch's calibration error is read over.
+
+Fifteen is the conventional count — Guo et al.'s and every replication's since — and nothing here has
+measured a better one. What matters is that it is FIXED: two epochs' ECEs are the same instrument read
+twice, which is the only way the number can rank anything.
+"""
 
 
 @dataclass(frozen=True)
@@ -107,6 +115,31 @@ class Fitting:
         # so owning it costs no behaviour and removes an argument that could be seeded twice.
         self.generator = np.random.default_rng(plan.seed)
         self.patience = Patience(plan.patience)
+
+    @staticmethod
+    def _calibration_error(predicted: NDArray[np.float64], truth: NDArray[np.float32]) -> float:
+        """One epoch's expected calibration error, over every (study, label) cell of the holdout pooled.
+
+        The truth is BINARISED AT 0.5 — `MIDPOINT`, the cut `LabelScores.per_label` scores the twelve AUCs
+        against — so the calibration reading is taken against the same partition as the ranking reading.
+        Pooled rather than per label, because a per-label ECE is twelve noisy instruments where one will
+        do: the bins are filled by every cell, with NaN cells excluded — a finding whose truth was never
+        read is not a negative.
+
+        `predicted` is already probabilities in [0, 1]: `Trainer.predict` applies the sigmoid, and this
+        relies on that rather than repeating it.
+        """
+        cells = ~(np.isnan(predicted) | np.isnan(truth))
+        if not cells.any():
+            return float("nan")
+        probability = predicted[cells]
+        positive = (truth[cells] > MIDPOINT).astype(np.float64)
+        which = np.minimum((probability * ECE_BINS).astype(np.int64), ECE_BINS - 1)
+        count = np.bincount(which, minlength=ECE_BINS).astype(np.float64)
+        live = count > 0
+        confidence = np.bincount(which, weights=probability, minlength=ECE_BINS)[live] / count[live]
+        accuracy = np.bincount(which, weights=positive, minlength=ECE_BINS)[live] / count[live]
+        return float((np.abs(confidence - accuracy) * count[live]).sum() / count.sum())
 
     def ranked(self, fold: Fold, epoch: int) -> tuple[float, dict[str, float], NDArray[np.float64] | None]:
         """The number this epoch is ranked by, its per-label scores, and what it predicted.
@@ -205,6 +238,15 @@ class Fitting:
             # carries 4.0, which `ledger_check` then quotes as the arm's best — its own docstring says a
             # final fit records NaN, and until now only the checkpoint did.
             scored = ranked if fold.scored else NO_HOLDOUT
+            # The SAME partition the AUCs are scored under, so the calibration number and the ranking
+            # number describe one binarisation. NaN rather than absent when nothing was held out,
+            # matching what a final fit already records in the `auc` column.
+            ece = (
+                self._calibration_error(predicted, fold.evaluation.scores[fold.holdout])
+                if predicted is not None
+                else NO_HOLDOUT
+            )
+            quantiles = self.trainer.loss_quantiles
             # THE DENOMINATOR, WHENEVER IT IS NOT THE COMPETITION'S. `nanmean` drops a finding with only
             # one class present on this holdout, so the headline is a mean over however many survived —
             # and two runs whose means are read against each other may not have averaged the same set.
@@ -218,6 +260,12 @@ class Fitting:
                     epoch=epoch,
                     loss=loss,
                     auc=scored,
+                    ece=ece,
+                    loss_q25=quantiles["q25"],
+                    loss_q50=quantiles["q50"],
+                    loss_q75=quantiles["q75"],
+                    loss_q90=quantiles["q90"],
+                    loss_q95=quantiles["q95"],
                     seconds=seconds,
                     per_label=per_label,
                     started=round(started),

@@ -5953,9 +5953,11 @@ risk of that), but it is the wrong way round.
 
 ### `cnx_mid_rate` is not a result about learning rates — it ran one epoch and left a `.partial` — 2026-08-30
 
-`ledger_check` reported one UNRECORDED run: `cnx_mid_rate_s2026`, best **0.7177**, appearing in neither
-this file nor the interpretations. That number should never be quoted, and this entry exists to say why
-rather than to leave it unrecorded a second time.
+`ledger_check` reported one UNRECORDED run — `cnx_mid_rate_s2026` — appearing in neither this file nor
+the interpretations, holding a single epoch's score
+(**0.7177**, superseded; see the 2026-09-01 entry below, which is the one that ranks the arm).
+That number should never be quoted as the arm's result, and this entry exists to say why rather than
+to leave it unrecorded a second time.
 
 **Its metrics file holds two lines: the recipe, and epoch 0.** The recipe asked for **12**. There is a
 `.partial` on disk dated 2026-08-29 10:47 and **no `.pt`** — which is also why it is absent from the
@@ -6603,3 +6605,29 @@ so a seat pass against `honest12` was not bought either.
 98.6% in-sample on this corpus, which is why a positive here would have been an upper bound. A flat
 reading needs no such correction: the memorised teacher could not lift the student even with the
 advantage.
+
+### `cnx_mid_rate` re-ran and finished — the entry above quotes the ABORTED attempt — 2026-09-01
+
+The entry above ("it ran one epoch and left a `.partial`") was true when written and is now stale. The
+arm was re-run and completed: `cnx_mid_rate_s2026.metrics.jsonl` holds **12 of 12 epochs, best 0.7993 @
+epoch 6**, last 0.7884, and `cnx_mid_rate_s2026.pt` exists. The first attempt survives beside it in a
+`.metrics.1.jsonl` file — one epoch only, and its score is the one the older entry quotes.
+That older score belongs to a killed process rather than to an architecture, which is exactly the
+confusion `convergence_check` exists to prevent, and it is why the ledger now carries both entries
+instead of an edit that would have hidden the first.
+
+**Read 0.7993, never 0.7177.** The run peaked at epoch 6 of 12 and declined to 0.7884, so it is neither
+TRUNCATED nor UNDERTRAINED; the budget was not the binding constraint and the score is a real ceiling
+for this recipe, not a floor.
+
+**It is still not a shippable member, and the reason is not convergence.** Priced against `honest12` by
+`seat_value` on 2026-09-01 it is the most DECORRELATED candidate in the pool — rank 0.7598, JS 0.0304
+bits, mahalanobis 4.981 — and simultaneously **0.052 under the non-DINOv2 lane's size bar of 0.8521**
+(board ref 55895006). That is the exact `vjepaseat` failure mode: distant and weak buys nothing, and
+`vjepaseat` measured -0.001 for it. The full argument is in `comp/members.declines`; re-open it by
+ANSWERING the size bar, not by re-quoting the divergence.
+
+**What this row is worth keeping for.** It is the cleanest single datapoint behind the anti-correlation
+finding — the most distant member we own is also among the weakest, which Kimi's Q-F research
+(2026-09-01, Abe et al. 2024 and the NCL/GNCL lambda sweeps) says is the EXPECTED shape for strong
+modern members rather than an artefact of this pool.

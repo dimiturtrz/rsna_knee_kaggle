@@ -35,12 +35,34 @@ output; nothing here is from memory.
 | `feature_probe` (fbda236c, 09-01) | frozen trunks **tied** (DINOv2-L 0.7996, V-JEPA2-L 0.7985, DINOv2-S 0.7896 on the 909) but **0.019 apart fitted** | the trunk lane is a recipe question (`interpretations/kneemri/2026-09-01_the-trunks-are-tied-frozen-and-not-fitted.md:9-16`) |
 | `train_disagreement` (59b89541 + 7398ea5c, 09-01) | member-spread bands: the quiet band (<0.05) holds **zero studies** (699/2175/624 across the higher bands; mean 0.1244) | drove the sampler tilt to α=1.0 (commit 7398ea5c body) |
 
+## Correction 2026-09-01: the seating closure was misread
+
+`seat_value --against honest12` over the ten strongest unshipped members shows that **solo strength and
+distinctness are anti-correlated in the shipped pool**, not because a distant seat cannot help, but
+because every distant member ever seated was weak. Two members are both DISTINCT and strong enough:
+`aprior_dense_s2026` (rank 0.8811, js 0.0139, solo 0.8557) and `attend_dense_s2026` (rank 0.8916,
+js 0.0128, solo 0.8569). The size bar for a distinct seat was priced on the board at >= 0.8521 solo,
+and both clear it. `vjepaseat` failed because it was distant *and* weak, not because distance buys
+nothing. So `kneemri-distinct14` (honest12 + these two) is the open test, with control honest12's
+LANDED 0.937. This does not reopen the member-count lane (seat bonus still saturates at 6–7 seats),
+but it does reopen the **which-member** lane for seats that are both distinct and strong.
+
+## Correction 2026-09-01 (b): lensseat closes a sixth direction
+
+`lensseat_v1` (ref 55940907) gave the champion's most-swapped seat to `labelwise_dense_s2026`
+(`--slice-pooling labelwise`, third-best solo 0.8613) and read **0.944 vs 0.944** control — flat. A
+pooling FUNCTION should be a distinct axis from the competence scalar `competence_axis` measures, but
+the board says it is not: it lands on the same 81.7–82% one-scalar reading. This is a sixth independent
+direction closing on the same scalar, not a qualification of it.
+
 ## The headline
 
 Every window instrument that produced a decision pointed the same way: combiner / seating /
-member-count lanes are closed from four independent directions (uncertainty 12.7%→8.3%; residual
-5.4% minority; routing null; census twins). The two open levers are **label quality** (108 confident
-FPs, 4.05× detectable, only 14.8% extractor failure) and **non-monoculture trunks** (frozen-tied,
-fitted-apart; the foreign fleet is 4 real members and 9 copies). Two housekeeping findings: the
-attribution instruments were **run but never written up**, and `oof_oracle` sits in the bead's list
-but landed before the window and was never re-run in it.
+member-count / pooling-function lanes are closed from **six** independent directions (uncertainty
+12.7%→8.3%; residual 5.4% minority; routing null; census twins; anti-correlated solo/distinctness in
+the shipped pool; lensseat flat). The open levers are **label quality** (108 confident FPs, 4.05×
+detectable, only 14.8% extractor failure), **non-monoculture trunks** (frozen-tied, fitted-apart; the
+foreign fleet is 4 real members and 9 copies), and the pending **distinct-and-strong seat** test
+(`kneemri-distinct14`). Two housekeeping findings: the attribution instruments were **run but never
+written up**, and `oof_oracle` sits in the bead's list but landed before the window and was never
+re-run in it.

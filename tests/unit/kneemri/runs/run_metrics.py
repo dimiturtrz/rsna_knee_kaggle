@@ -349,3 +349,28 @@ def test_name(tmp_path: Path):
 
     assert from_checkpoint.name() == "band_dense_s2026"
     assert from_record.name() == from_checkpoint.name(), "both spellings name the same run"
+
+
+def test_optional_fields_round_trip(tmp_path: Path):
+    """New NotRequired fields must still be read from files that carry them."""
+    metrics = RunMetrics(tmp_path / "member.pt")
+    metrics.record(
+        EpochRow(
+            epoch=0,
+            loss=1.0,
+            auc=0.8,
+            seconds=10,
+            per_label={"ACL": 0.7},
+            ece=0.05,
+            loss_q25=0.1,
+            loss_q50=0.2,
+            loss_q75=0.3,
+            loss_q90=0.4,
+            loss_q95=0.5,
+        )
+    )
+
+    row = metrics.rows()[0]
+    assert row["ece"] == pytest.approx(0.05)
+    assert row["loss_q25"] == pytest.approx(0.1)
+    assert row["loss_q95"] == pytest.approx(0.5)

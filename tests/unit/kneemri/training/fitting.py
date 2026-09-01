@@ -305,3 +305,20 @@ def test_an_unscored_run_still_witnesses_how_it_must_be_read(tmp_path: Path):
     assert kept.witness, "an all-data member is unverifiable at serve time without this"
     assert kept.witness["studies"], "named studies, re-derivable from a different process"
     assert np.isnan(kept.holdout), "and it still reports no score, because it has none"
+
+
+def test_epochs_record_ece_and_loss_quantiles(tmp_path: Path):
+    """The epoch row carries calibration error and the per-study loss distribution, not just their mean."""
+    fitting = _fitting(tmp_path / "member.pt", epochs=1)
+    predicted = np.full((STUDIES, len(TARGETS)), 0.5, dtype=np.float64)
+    fitting.ranked = lambda fold, epoch: (0.9, dict.fromkeys(TARGETS, 0.9), predicted)  # type: ignore[method-assign]
+    fitting.trainer.fit_epoch = lambda _corpus, _targets, _positions, _size, _generator: 1.23  # type: ignore[method-assign]
+    fitting.trainer._loss_quantiles = {"q25": 0.1, "q50": 0.2, "q75": 0.3, "q90": 0.4, "q95": 0.5}
+
+    fitting.run(_fold())
+
+    row = fitting.metrics.rows()[0]
+    assert row["loss"] == pytest.approx(1.23)
+    assert row["ece"] == pytest.approx(0.0), "predicted 0.5 against a 0.5-positive holdout is perfectly calibrated"
+    assert row["loss_q50"] == pytest.approx(0.2)
+    assert row["loss_q95"] == pytest.approx(0.5)

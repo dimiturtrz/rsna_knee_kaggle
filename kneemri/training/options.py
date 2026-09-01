@@ -135,6 +135,10 @@ class TrainingOptions:
     patience: int = 0
     """Epochs without holdout improvement before stopping; 0 runs the full schedule."""
 
+    certainty_ramp: int = 0
+    """How many epochs it takes for per-cell weights to rise from the confidence floor to their
+    full trust. 0 disables the ramp and keeps the table every existing arm trained on."""
+
     studies: int = 0
     """Corpus positions this run touches at all; 0 is every one of them. A SMOKE knob, never an arm."""
 

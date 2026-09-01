@@ -116,16 +116,7 @@ class FlagVocabulary:
             "Synovitis, and the two fail in OPPOSITE directions. Offsets are empirical-Bayes shrunk "
             "(tau=0.294), so a thin finding keeps the pooled value. REQUIRES --calibrated-targets.",
         )
-        parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
-        parser.add_argument(
-            "--patience",
-            type=int,
-            default=0,
-            help="stop after this many epochs without improving the holdout (0 = run every epoch). "
-            "The twelve-epoch cycle peaks at epoch 6 and never recovers, and the best epoch is the one "
-            "whose weights are kept, so the tail produces checkpoints that are discarded. The SCHEDULE "
-            "is still built for the full count - this ends the loop, it does not compress the anneal.",
-        )
+        cls._curriculum_arguments(parser)
         parser.add_argument(
             "--vram-gb",
             type=float,
@@ -359,6 +350,35 @@ class FlagVocabulary:
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
+
+    @staticmethod
+    def _curriculum_arguments(parser: argparse.ArgumentParser) -> None:
+        """How the epoch loop is shaped OVER TIME — the rate's path, where the loop stops, and how fast
+        the label table is trusted.
+
+        Grouped because each one answers the same question at a different layer: what an epoch is worth
+        relative to the epochs around it. A ramp is a curriculum over weights the way one-cycle is a
+        curriculum over the rate, and patience is where both are allowed to end.
+        """
+        parser.add_argument("--one-cycle", action="store_true", help="attach a OneCycleLR schedule")
+        parser.add_argument(
+            "--patience",
+            type=int,
+            default=0,
+            help="stop after this many epochs without improving the holdout (0 = run every epoch). "
+            "The twelve-epoch cycle peaks at epoch 6 and never recovers, and the best epoch is the one "
+            "whose weights are kept, so the tail produces checkpoints that are discarded. The SCHEDULE "
+            "is still built for the full count - this ends the loop, it does not compress the anneal.",
+        )
+        parser.add_argument(
+            "--certainty-ramp",
+            type=int,
+            default=0,
+            help="epochs over which per-cell weights rise from the confidence floor to their full trust "
+            "(0 = off). Early epochs therefore treat every cell as equally uncertain, and later epochs "
+            "recover the full certainty-weighted table. The total weight mass is held constant so the "
+            "loss scale matches the un-ramped control.",
+        )
 
     @staticmethod
     def _sampling_arguments(parser: argparse.ArgumentParser) -> None:

@@ -112,6 +112,7 @@ def _options() -> TrainingOptions:
         report_vectors=Path("reports.npz"),
         distill_weight=0.3,
         teacher_targets=Path("teacher.npz"),
+        certainty_ramp=6,
     )
 
 

@@ -41,8 +41,10 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    CERTAINTY_RAMP,
     CLIPPING,
     LAYER_DECAY,
+    LOSS_QUANTILES,
     MIXUP,
     ONE_CYCLE_WARMUP,
     OPTIMISER_DECAY,
@@ -424,6 +426,7 @@ def test_policies():
         # check exists to catch.
         OPTIMISER_DECAY: WEIGHT_DECAY,
         WARMUP: ONE_CYCLE_WARMUP,
+        CERTAINTY_RAMP: 0,
         CLIPPING: UNCLIPPED,
     }
 
@@ -706,3 +709,43 @@ def test_plan():
     for (batch, start), expected in zip(planned, batches, strict=True):
         assert np.array_equal(batch, expected)
         assert start == int(per_step.integers(0, corpus.slices - trainer.window + 1))
+
+
+def test_loss_quantiles():
+    """An epoch leaves the per-study loss distribution behind it, keyed the same way every time.
+
+    The keys are fixed rather than derived so two epochs are the same instrument read twice; a fresh
+    trainer has nothing to report and must still answer with the full key set.
+    """
+    trainer = _trainer()
+    assert trainer.loss_quantiles == {}, "nothing has been fitted, so there is no distribution yet"
+
+    trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+
+    quantiles = trainer.loss_quantiles
+    assert tuple(quantiles) == LOSS_QUANTILES
+    assert all(np.isfinite(level) for level in quantiles.values())
+    assert quantiles["q25"] <= quantiles["q50"] <= quantiles["q75"] <= quantiles["q90"] <= quantiles["q95"]
+
+
+def test_ramp_certainty():
+    """The curriculum blends cell weights from the floor toward full trust WITHOUT changing their mass.
+
+    The mass is the point: the objective divides by the weight sum, so a ramp that shrank the total
+    would change the loss scale and make the arm incomparable to its un-ramped control rather than
+    testing a curriculum.
+    """
+    trainer = _trainer()
+    weights = np.array([[1.0, 0.5, 0.25]], dtype=np.float32)
+    assert np.array_equal(trainer._ramped_weights(weights, 0), weights), "off by default"
+
+    trainer.ramp_certainty(4)
+    assert trainer.certainty_ramp == 4
+
+    first = trainer._ramped_weights(weights, 0)
+    assert not np.array_equal(first, weights), "the first epoch reads every cell as equally uncertain"
+    assert first.sum() == pytest.approx(weights.sum(), rel=1e-5), "the ramp moves weight, it does not remove it"
+    assert first.std() < weights.std(), "flattened toward the floor before it is flattened back out"
+
+    assert np.allclose(trainer._ramped_weights(weights, 4), weights, atol=1e-6), "full trust at the ramp's end"
+    assert np.allclose(trainer._ramped_weights(weights, 99), weights, atol=1e-6), "and it never overshoots"

@@ -63,6 +63,7 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    CERTAINTY_RAMP,
     CLIPPING,
     LAYER_DECAY,
     MIXUP,
@@ -253,6 +254,7 @@ class Request:
     grad_clip: float
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
+    certainty_ramp: int = 0
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -315,6 +317,7 @@ class Request:
             # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
             # nothing, so the honest request there is the uniform draw the run will actually get.
             SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,
+            CERTAINTY_RAMP: self.certainty_ramp,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
