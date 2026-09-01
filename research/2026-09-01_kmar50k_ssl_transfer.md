@@ -13,6 +13,8 @@
 
 The published lever for knee-MRI SSL over a strong supervised/generic baseline is therefore **not a 1.5%-class gain**. It is roughly **+0.00 to +0.05 AUC**, concentrated in the low-label regime, and it can be negative at full label budget.
 
+A third relevant result is **SB-SSL (Atito et al., arXiv 2022)**, a slice-based vision-transformer SSL framework trained entirely on the unlabelled MRNet training set using group-masked reconstruction (GMML), then fine-tuned slice-by-slice for ACL tear classification. The reported validation AUC is **0.954** and accuracy 89.17%, with the authors stating this beats ImageNet-1K-pretrained competitors without any external pretraining data [[arXiv](https://arxiv.org/abs/2208.13923)]. This is a stronger SSL signal than SKID and Zhang et al. report, but it is single-task (ACL) and single-plane (sagittal), so the transfer to our 12-label multi-contrast setup is not guaranteed. It does suggest that **masked reconstruction on domain slices can compete with natural-image pretraining** when the pretext task is well-matched to the anatomy.
+
 ## 2. Paired-scan structure: is artifact-pair pretraining a known win over generic SSL?
 
 **No.** Motion-artifact pairs are a restoration asset, not a classification pretraining signal.
