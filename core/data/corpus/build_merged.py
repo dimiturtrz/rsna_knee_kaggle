@@ -26,6 +26,16 @@ def main() -> None:
     command.parser.add_argument(
         "--extra-scheme", default=RIJEKA_SCHEME, choices=sorted(SCHEMES), help="the corpus being added"
     )
+    command.parser.add_argument(
+        "--merged-scheme",
+        default=MERGED_SCHEME,
+        choices=sorted(SCHEMES),
+        help=(
+            f"the cache being written (default: {MERGED_SCHEME}). Name a DIFFERENT one to merge a merge "
+            f"— `--scheme {MERGED_SCHEME} --extra-scheme mrnet --merged-scheme merged3` adds a third "
+            "corpus without growing the cache every merged member on disk was fitted on."
+        ),
+    )
     command.parser.add_argument("--labels", type=Path, default=None, help=f"our labels table (default: {LABELS})")
     command.parser.add_argument("--extra-labels", type=Path, default=None, help=f"theirs (default: {EXTRA_LABELS})")
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
@@ -50,20 +60,20 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    if MERGED_SCHEME in (arguments.scheme, arguments.extra_scheme):
-        # Both flags name a SOURCE; the destination is always the merged one. Letting a source be the
-        # destination too would read the merged cache as its own base and grow it on every run.
-        command.parser.error(f"{MERGED_SCHEME} is the destination, never a source")
+    if arguments.merged_scheme in (arguments.scheme, arguments.extra_scheme):
+        # A source may be a merge — `merged3` is built by merging one — but the DESTINATION may never be
+        # either source, which would read a cache as its own base and grow the same file on every run.
+        command.parser.error(f"{arguments.merged_scheme} is the destination, so it cannot also be a source")
 
     root = command.rooted(arguments)
     directory = arguments.out or root.processed()
     base = CacheFlags.cache(arguments, directory)
-    merger = MergedCache(base, base.under(arguments.extra_scheme), base.under(MERGED_SCHEME))
+    merger = MergedCache(base, base.under(arguments.extra_scheme), base.under(arguments.merged_scheme))
 
     merger.labels(
         arguments.labels or root.processed() / "labels" / LABELS,
         arguments.extra_labels or root.processed() / "labels" / EXTRA_LABELS,
-        arguments.labels_out or root.processed() / "labels" / MERGED_LABELS,
+        arguments.labels_out or root.processed() / "labels" / f"{arguments.merged_scheme}_labels.csv",
     )
     if arguments.labels_only:
         logger.info("LABELS ONLY — the images were left alone")

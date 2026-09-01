@@ -208,6 +208,22 @@ in the length of axis 0. That is the one failure `StudyCache.key` records escapi
 scheme name is what makes it unrepresentable here.
 """
 
+TRIPLE_SCHEME = "merged3"
+"""Our corpus and BOTH foreign ones in one array — the same canonical six slots again.
+
+A SECOND MERGED NAME rather than a bigger `merged`, and the distinction is the whole point. Every
+`merged_*` member on disk was fitted on the 5,143-study canonical+Rijeka cache, and that cache is a
+published number here (`merged_span_cf` 0.8618, the second-best solo the project owns). Growing it in
+place to 6,393 studies would leave those runs unreproducible with every gate still green — the exact
+shape of the failure `MERGED_SCHEME`'s own docstring records. The two caches coexist instead, and the
+2,000-study arm is a control for the 6,393-study one.
+
+IT IS BUILT BY MERGING A MERGE, which `build_merged` allows only because the destination is named
+separately from both sources. `MergedCache` concatenates a base and an extra along the study axis and
+cares about neither's provenance, so canonical+Rijeka is an ordinary base — but a run whose destination
+was ALSO its base would grow the same file on every invocation, and that is what stays refused.
+"""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
@@ -215,11 +231,12 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     RIJEKA_SCHEME: RIJEKA_SLOTS,
     MRNET_SCHEME: MRNET_SLOTS,
     MERGED_SCHEME: SLOTS,
+    TRIPLE_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 
-FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, MERGED_SCHEME)
+FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, MERGED_SCHEME, TRIPLE_SCHEME)
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 
 WHY THIS TUPLE EXISTS. `--scheme` selects a FILENAME, not a corpus: `Routing.suffix()` appends it and
