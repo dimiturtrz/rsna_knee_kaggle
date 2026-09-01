@@ -2939,3 +2939,45 @@ The general lesson is one the repo already writes down: an UNRESOLVED pair is no
 declined to order two pairs and was read as having failed them, and the conclusion drawn from that — that
 offline selection could no longer justify a slot — would have moved every future member decision onto the
 board, at five slots a day.
+
+## 2026-08-31 — `champviews_v1` and `halfcham_v1`: the last two `Serving` knobs, both flat
+
+Two instruments, three and a half hours apart, both on the champion's exact seating with one argument
+moved. Between them they answer the last unasked questions about how an entry is SERVED, and the answer
+is the same twice: nothing.
+
+`champviews_v1` moved `Serving(views=SpatialViews())` and read **0.943** against a control of 0.944 —
+inside the pre-registered flat band, and one tick down, which is under `BOARD_RESOLVABLE` (0.0015), so
+the sign is not readable and the honest word is FLAT rather than a cost. `run_check` read 6 of 6 members
+loaded with no `afford` drop, so this is not the `farseat_v1` defect wearing a null's clothes.
+
+`halfcham_v1` moved `Serving(precision=torch.float16)` and read **0.944** — exactly the control. That
+number is the one this entry had to work hardest to earn, because an entry reading exactly its control is
+ambiguous between "fp16 is free" and "the knob was never connected", and the disconnected case has
+already happened here: an earlier loadcheck wrapped `predict_member` in an OUTER autocast, the inner one
+carried an explicit dtype and overrode it, and twelve arms dutifully reported `max|diff|` of exactly 0.0.
+Only the log separates the two, and it was read before the slot was spent —
+`serving: vote=LogitAverage views=identity only (default) precision=torch.float16`. The knob fired.
+
+So fp16 serving costs nothing measurable on the board. That is worth having for a reason the score does
+not show: the efficiency board scores wall-clock, and a faster session also widens the margin against
+`Ensemble.afford`, which gives up the weakest member rather than the entry when a ceiling is threatened.
+Half precision is the default for every later entry on those grounds alone.
+
+**What the two rows close, together with the six seating flats.** All four `Serving` knobs are now
+answered — vote (`votefit_v1`, 0.938, 2026-08-25, which is why the champion carries `LogitAverage`),
+views (flat), budget (implicit in every entry) and precision (flat). Reweight, add, swap, count, kind and
+fit are six flats on WHO SITS. Neither who sits nor how they are served moves this score, and no further
+slot goes to either. It is also not anomalous: `2026-08-31_the_pool_is_redundant_not_the_task.md` bounds
+any new member at 12.7% of the pool's remaining uncertainty, so flat is what the redundancy predicts.
+
+What the record leaves open is the two axes no serving knob can reach: what a member SEES (corpus, decode
+at TRAIN time) and what it IS (trunk). That is why the standing work is the feature-distillation chain
+rather than another seating.
+
+**Neither row licenses**: anything about the NUMBER of views (three is `SpatialViews`'s default, held,
+never swept), about views on a member that does not read the whole stack — where overlap TTA is not
+already known to be spent (knee-eeo) and the two axes would confound — about fp16 TRAINING (the standing
+recipe is bf16 train / fp16 serve, and this asked only the serving half), or about bf16 serving, a
+different exponent range that remains untested. `witness_check`'s eps was calibrated against
+fitted-precision members and is not re-read by this result.
