@@ -293,6 +293,16 @@ class StudyCache:
         """
         self.index_path.write_text(json.dumps(identifiers), encoding="utf-8")
 
+    def recorded(self) -> list[str]:
+        """The study order a previous build wrote, WITHOUT memory-mapping the pixels.
+
+        The symmetric read of `record`, and the cache's own answer to "which studies are in here" — a
+        caller that spelled the JSON itself could read an order the resume check would reject. `load`
+        goes through it too, so the two can never disagree; this exists apart from `load` because the
+        order alone is a few kilobytes and the array beside it is tens of gigabytes.
+        """
+        return json.loads(self.index_path.read_text(encoding="utf-8"))
+
     def build(self, source: Path, identifiers: list[str], planes: dict[str, str], workers: int = 16) -> None:
         """Decode every study into the cache, in parallel, writing straight into the memory map.
 
@@ -446,8 +456,7 @@ class StudyCache:
         """The cache, memory-mapped read-only, with its study order."""
         images = np.load(self.images_path, mmap_mode="r")
         mask = np.load(self.mask_path)
-        identifiers = json.loads(self.index_path.read_text(encoding="utf-8"))
-        return CachedCorpus(images, mask), identifiers
+        return CachedCorpus(images, mask), self.recorded()
 
     @staticmethod
     def planes_of(series_table: Path) -> dict[str, str]:

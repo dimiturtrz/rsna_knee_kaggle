@@ -98,7 +98,7 @@ def test_present():
     assert exam.present(3) == [1.0, 0.0, 1.0]
 
 
-def test_volumes(tmp_path: Path):
+def test_m_r_net_corpus_volumes(tmp_path: Path):
     """Only exams whose PIXELS ship are returned, across both downloadable splits and prefixed.
 
     Joining on the label tables' length instead would report rates over exams that are not here, which
@@ -114,7 +114,7 @@ def test_volumes(tmp_path: Path):
     assert exams[1].acl == 1
 
 
-def test_volumes_honours_the_cache_truncation(tmp_path: Path):
+def test_m_r_net_corpus_volumes_honours_the_cache_truncation(tmp_path: Path):
     """`--cache-studies` is in the cache's NAME, so the exam list has to be cut to match it."""
     cache = StudyCache(tmp_path, slices=4, image_size=8, routing=Routing(scheme=MRNET_SCHEME), first=2)
 
@@ -123,7 +123,7 @@ def test_volumes_honours_the_cache_truncation(tmp_path: Path):
     assert [exam.identifier for exam in exams] == [f"{PREFIX}0000", f"{PREFIX}0001"]
 
 
-def test_volumes_reads_a_flat_archive_with_external_tables(tmp_path: Path):
+def test_m_r_net_corpus_volumes_reads_a_flat_archive_with_external_tables(tmp_path: Path):
     """Pixels with no split directory and labels from outside the zip build the same exam list.
 
     This is the export we actually hold: `<plane>/<case>.npy` and not one CSV. If the split could not be
@@ -197,7 +197,7 @@ def test_build_writes_under_a_key_that_cannot_hit_our_own_corpus(tmp_path: Path)
     assert cache.slots == 3 < len(SLOTS)
 
 
-def test_labels(tmp_path: Path):
+def test_m_r_net_corpus_labels(tmp_path: Path):
     """The table carries ACL and its confidence and NO column for the other eleven findings.
 
     Absence is the mechanism: `Targets.pair` gives a missing column weight 0.0, so eleven heads take no
@@ -213,4 +213,16 @@ def test_labels(tmp_path: Path):
     assert list(table.columns) == [STUDY, ACL, CONFIDENCE]
     assert table[STUDY].tolist() == [f"{PREFIX}0000", f"{PREFIX}0001", f"{PREFIX}{VALID_CASE}"]
     assert table[ACL].tolist() == [MRNET_LEVEL[0], MRNET_LEVEL[1], MRNET_LEVEL[1]]
+    assert set(table[CONFIDENCE]) == {REPORT_CONFIDENCE}
+
+
+def test_m_r_net_corpus_write_labels(tmp_path: Path):
+    """The shared writer emits the three columns both producers owe, and creates the directory."""
+    destination = tmp_path / "labels" / "mrnet_acl.csv"
+
+    MRNetCorpus.write_labels([("mrnet-0000", MRNET_LEVEL[0]), ("mrnet-0001", MRNET_LEVEL[1])], destination)
+
+    table = pd.read_csv(destination)
+    assert list(table.columns) == [STUDY, ACL, CONFIDENCE]
+    assert table[ACL].tolist() == [MRNET_LEVEL[0], MRNET_LEVEL[1]]
     assert set(table[CONFIDENCE]) == {REPORT_CONFIDENCE}

@@ -265,11 +265,21 @@ class MRNetCorpus:
         Absence is the mechanism, not an omission — see this module's own docstring for why `meniscus`
         and `abnormal` are left out rather than mapped onto columns they do not mean.
         """
-        exams = self.volumes()
+        self.write_labels([(exam.identifier, exam.level()) for exam in self.volumes()], destination)
+
+    @staticmethod
+    def write_labels(rows: list[tuple[str, float]], destination: Path) -> None:
+        """Write the ACL table, one row per exam: one supervised column and one weight.
+
+        Shared with `mrnet_cached.CachedMRNet` rather than duplicated there, because the two producers
+        differ ONLY in where they learn which exams are present — and a table whose columns drifted
+        between them would join cleanly and mean something different, which is the failure this project
+        has paid for most.
+        """
         table = pd.DataFrame(
             {
-                STUDY: [exam.identifier for exam in exams],
-                ACL: [exam.level() for exam in exams],
+                STUDY: [identifier for identifier, _ in rows],
+                ACL: [level for _, level in rows],
                 CONFIDENCE: REPORT_CONFIDENCE,
             }
         )

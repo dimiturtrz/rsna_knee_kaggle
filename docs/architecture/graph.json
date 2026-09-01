@@ -152,6 +152,42 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.data.corpus.build_mrnet",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.data.corpus.mrnet_cached",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.data.corpus.mrnet_labels",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet_labels",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.build_rijeka",
       "target": "core.cli",
       "weight": 1
@@ -435,6 +471,24 @@
     {
       "kind": "import",
       "source": "core.data.corpus.merged_cache",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.mrnet_cached",
+      "target": "core.data.corpus.mrnet_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.mrnet_cached",
+      "target": "core.data.corpus.mrnet_labels",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.mrnet_cached",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
@@ -5756,6 +5810,36 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.build_mrnet_labels.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_mrnet_labels.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_mrnet_labels.main",
+      "target": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_mrnet_labels.main",
+      "target": "core.data.corpus.mrnet_cached.CachedMRNet.labels",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_mrnet_labels.main",
+      "target": "core.data.corpus.mrnet_labels.TableLabels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.build_rijeka.main",
       "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
       "weight": 1
@@ -6622,6 +6706,36 @@
       "kind": "calls",
       "source": "core.data.corpus.merged_cache.MergedCache.build",
       "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet.labels",
+      "target": "core.data.corpus.mrnet_cached.CachedMRNet.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet.verdicts",
+      "target": "core.data.corpus.mrnet_labels.MRNetLabels.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_cached.CachedMRNet.volumes",
+      "target": "core.data.corpus.mrnet_cached.CachedMRNet.verdicts",
       "weight": 1
     },
     {
@@ -24927,7 +25041,7 @@
   ],
   "nodes": [
     {
-      "descendants": 61,
+      "descendants": 63,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -24951,7 +25065,7 @@
       "role": null
     },
     {
-      "descendants": 51,
+      "descendants": 53,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -24959,7 +25073,7 @@
       "role": null
     },
     {
-      "descendants": 30,
+      "descendants": 32,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -25010,6 +25124,14 @@
       "descendants": 0,
       "id": "core.data.corpus.build_mrnet",
       "label": "build_mrnet",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.build_mrnet_labels",
+      "label": "build_mrnet_labels",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -25114,6 +25236,14 @@
       "descendants": 0,
       "id": "core.data.corpus.merged_cache",
       "label": "merged_cache",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached",
+      "label": "mrnet_cached",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -27284,6 +27414,14 @@
       "label": "MergedCache",
       "level": "class",
       "parent": "core.data.corpus.merged_cache",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "label": "CachedMRNet",
+      "level": "class",
+      "parent": "core.data.corpus.mrnet_cached",
       "role": "primary"
     },
     {
@@ -31008,6 +31146,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.build_mrnet_labels.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.build_mrnet_labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.build_rijeka.main",
       "label": "main",
       "level": "method",
@@ -31528,6 +31674,38 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached.CachedMRNet.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached.CachedMRNet.labels",
+      "label": "labels",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached.CachedMRNet.verdicts",
+      "label": "verdicts",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_cached.CachedMRNet.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_cached.CachedMRNet",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetCorpus.__init__",
       "label": "__init__",
       "level": "method",
@@ -31612,6 +31790,14 @@
       "label": "present",
       "level": "method",
       "parent": "core.data.corpus.mrnet_corpus.MRNetExam",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.mrnet_corpus.write_labels",
+      "label": "write_labels",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_corpus",
       "role": null
     },
     {

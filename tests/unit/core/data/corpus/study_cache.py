@@ -66,6 +66,16 @@ def test_record(tmp_path: Path):
     assert json.loads(cache.index_path.read_text(encoding="utf-8")) == ["a", "b"]
 
 
+def test_recorded(tmp_path: Path):
+    """The order round-trips through the cache without touching the pixels, which need not exist."""
+    cache = StudyCache(tmp_path, slices=4, image_size=16)
+    cache.prepare()
+    cache.record(["a", "b"])
+
+    assert cache.recorded() == ["a", "b"]
+    assert not cache.images_path.exists(), "reading the order must not require the array beside it"
+
+
 def test_build_resumes(tmp_path: Path):
     """A study the progress record calls done is not decoded again, and its pixels are left alone.
 
