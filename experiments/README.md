@@ -5727,7 +5727,7 @@ and the way back on is to name the instrument the member would be — never to r
 > added, so the 30/46 split stands with that one line to re-price by `record_mix` rather than by a number.
 
 **The split: 30 added, 46 declined.** Thirty undocumented members clear 0.8459 and joined the roster
-(0.8631 down to 0.8460). Forty-six are declined in `comp/members.declines`, each with its reason:
+(0.8631 down to 0.8459). Forty-six are declined in `comp/members.declines`, each with its reason:
 thirty-four below merit, eleven smoke/probe runs that never became members, and `confident224_s2026` —
 a REAL arm scored under an older label table, written down as such so it is not mistaken for a twelfth
 smoke run and so `knee-8hau`'s rescore has somewhere to land. After: `123 scoreable, 77 packaged, 46
@@ -5859,7 +5859,7 @@ and neither excuses the other — the bug was real, and the thing it hid happene
 takes them ahead of every remaining member scoring 0.85-plus. This is the strongest direct evidence the
 project has that **quality is not the seat criterion at the margin**, and it independently vindicates the
 merit-level EXEMPTION written into `comp/members.declines` hours earlier: the instruments packaged below
-the 0.8460 cut are not sentiment, they are seats. A score floor on the roster would have deleted the
+the 0.8459 cut are not sentiment, they are seats. A score floor on the roster would have deleted the
 tenth and eleventh best seats in the pool.
 
 **What it does NOT license.** Two seats out of eleven is not a rule, the run is in-sample (the honest
@@ -6200,7 +6200,7 @@ The consequence is a bar, and it is higher than the arms in this family were wri
 `swin_toprate`'s SEAT branch (0.8393) was derived from its frozen-top control rather than from the roster,
 and the measurement says the roster will not take a non-DINO member at 0.8393 either — closing from
 -0.0007 to +0.0015 has to come from solo quality now that distance is maxed. The roster's merit level is
-0.8460 and every seated member is above it, so ~0.846 is the real bar, against a family ceiling of 0.8331.
+0.8459 and every seated member is above it, so ~0.846 is the real bar, against a family ceiling of 0.8331.
 
 **No slope is fitted through these two points**, and the reading does not extrapolate: only the sign
 transfers between roster pairs, and a third point has broken an ordering before. The claim is the sign,
@@ -6277,7 +6277,7 @@ and the non-seating is established independently on the honest curve above; the 
 to show WHY, not to price anything.
 
 WHAT THIS DOES AND DOES NOT CLOSE. It does not say a non-DINO trunk cannot seat — it says these three
-cannot, at the solo scores they have (0.8331, 0.8337, 0.8186) against a 0.8460 merit level, and that
+cannot, at the solo scores they have (0.8331, 0.8337, 0.8186) against a 0.8459 merit level, and that
 no seat criterion available rescues them. The open question is unchanged and is what `swin_calib_dense`
 (knee-csxq) asks: whether the lane's ceiling is the architecture or the recipe it was read on. Answer
 that with a number, never by re-running a seat search over the same three members under a fourth rule.
@@ -6305,7 +6305,7 @@ project's own standing test for what earns one of five daily slots, and the same
 `recal_holdannot`'s TRANSFERS branch is pre-registered on.
 
 WHAT THIS DOES NOT LICENSE. It does not re-open the three declined trunks as MEMBERS: their solo scores
-(0.8331, 0.8337, 0.8186) are resolved against the 0.8460 merit level by a wide margin, and the diverse
+(0.8331, 0.8337, 0.8186) are resolved against the 0.8459 merit level by a wide margin, and the diverse
 search result above stands. It licenses ONE board reading of the composition axis, on a newly trained
 trunk, to find out whether a maximally-decorrelated member transfers differently than the offline ruler
 can see. One slot, one question, and the answer prices the whole axis either way.
@@ -6344,7 +6344,7 @@ already mounted from `dimiturnt/vjepa2-hf`. So the entry costs no 7.5 GB re-uplo
 hours earlier.
 
 THE HONEST STATEMENT ABOUT THE GOAL. The goal was to train a non-DINO trunk and spend a submission on it.
-The training half ran and did not produce a seatable member: `swin_wholetop` is 0.0186 under the 0.8460
+The training half ran and did not produce a seatable member: `swin_wholetop` is 0.0186 under the 0.8459
 merit level and under its own control. Shipping it anyway would be spending the slot on the checkpoint's
 provenance rather than on the axis. The axis is what the goal is for, so the slot goes to the strongest
 non-DINO member the project owns, and the training half continues in `swin_calib_dense`.
