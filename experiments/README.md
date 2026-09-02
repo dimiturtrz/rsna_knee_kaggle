@@ -6686,3 +6686,34 @@ What it does NOT license: a seat. `disagreed_ramp` is rostered at 0.8574 — lev
 member (`band_dense` 0.8578) and second to `slot_dropout` (0.8592) — but the member axis is closed on
 seven board flats, and one more dinov2-small member of ordinary quality is exactly what those seven
 flats measured. The ramp's value is as a RECIPE the trunk-family arm inherits, not as a seventh seat.
+
+## The label lane is priced, and it does not pay: `stack_increments_fx` against its twin
+
+| arm | labels | best holdout | delta |
+| --- | --- | --- | --- |
+| `stack_increments_base` | `report_labels_v2.csv` | **0.8635** (e9, e11) | control |
+| `stack_increments_fx` | `blend_hybrid_fx.csv` | **0.8595** (e6) | **−0.0040** |
+
+Byte-identical arms but for `--labels`, run on the same card in the same hours, both twelve epochs,
+neither truncated — `base` peaks at e9 and holds 0.8635 through e11, `fx` peaks at e6 and declines
+monotonically after (0.8559 / 0.8586 / 0.8588 / 0.8579 / 0.8582). So the number is a fact about the
+label table, not about a killed process.
+
+**−0.0040 lands in the band the pre-registration did not name.** It is past NULL (±0.0015) and short of
+REGRESSION (below twin − 0.0062). It cannot be called a regression: 0.0040 is inside the 0.0062 holdout
+floor. It is emphatically not CARRIES (needed 0.8697) or PARTIAL (needed 0.8650).
+
+**In substance the NULL clause fires, and it prices more than one file.** `blend_hybrid_fx` beat the
+plain report label on the only ruler whose truth is not report-derived — the 57 radiologist-annotated
+studies, mean 0.9030 against 0.8955, Fracture 0.9346 against 0.8147 — on a correction that was
+pre-registered before measurement, cleared two independent permutation nulls (p = 0.0022, p = 0.0010),
+carried a bootstrap CI excluding zero, and showed a coherent acute-trauma placebo pattern. All of that
+survived, and **none of it transferred to training.** The finding is therefore about the RULER, not
+about the correction: a gain measured on 57 gold studies does not predict a gain under training, which
+is what the arm was built to find out. That prices the entire label lane — including the blocked rubric
+re-read and the negation pass — and it retires the lane rather than the one file.
+
+**What it does not settle.** The gold ruler is 57 studies; the training holdout is 909. A correction
+worth +0.0075 on the first is well inside the second's noise in both directions, so this arm bounds how
+BIG a label effect can be, not whether one exists. The honest statement is that no label correction this
+project can validate is worth more than the floor, so no further card time goes to the lane.
