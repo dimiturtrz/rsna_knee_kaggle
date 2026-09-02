@@ -24,6 +24,11 @@
 # -0.0406 under `mean`. Read the gap, not the absolute numbers: focal widens every trunk's feature vector
 # threefold, so all three will move up and only the SPREAD is comparable across poolings.
 #
+# With two readouts there are two gaps. The branch below is taken on the SMALLEST of them, because the
+# question is whether ANY fair readout closes the ranking, and a lane is closed only when every readout
+# tried leaves it closed. Report both gaps whichever branch fires: which AXIS moved it is the finding,
+# and the two have different follow-ups (token -> a member at focal; slice -> a learned query head).
+#
 #   gap closes to <= 0.010     THE RANKING WAS THE READOUT. Three closed trunk readings are facts about
 #                              our pooling, and the trunk lane re-opens on an axis costing one probe per
 #                              trunk rather than one fit per trunk. Re-probe every declined trunk next.
@@ -43,11 +48,27 @@ set -euo pipefail
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 cd "$REPO"
 
+# TWO readouts, not one, because there are two poolings between a patch and a score and the closed
+# reading held BOTH at the diluting end. `--pool` is the TOKEN pooling (patches -> one vector per
+# slice); `--slice-read` is the SLICE pooling (slices -> what the probe is handed). The three closed
+# numbers were `--pool mean --slice-read max`: a patch mean, then a whole-stack read that consumes the
+# slices INSIDE the encoder. Kimi's Q-AL (knee-02vn) prices the second axis from AnyMC3D: on a frozen
+# 2D foundation trunk over volumes, max pooling reads 0.946 and a learned query pooling 0.962 (+0.016,
+# and up to +0.11 in their other setup) -- WITHOUT changing the trunk. So the slice axis is the larger
+# published term of the two, and holding it at `max` while sweeping only tokens would answer half the
+# question and close the lane on the other half by omission.
+#
+# `attend` is per_slice=True, so the cache KEEPS a slice axis and `feature_probe` reduces it by mean
+# over slots and slices (feature_probe.py:91). That is not AnyMC3D's LEARNED query -- it is the
+# cheapest readout that stops the encoder max-pooling the depth away, and it costs one flag rather
+# than a head. If the gap moves on this axis and not on tokens, the learned version is the next arm.
 SIZE=256
-for VARIANT in dinov2-large v3large ortholarge; do
-  echo "=== ${VARIANT} focal ==="
-  uv run --no-sync python -m kneemri.embeddings.build_embeddings \
-    --variant "${VARIANT}" --train-size "${SIZE}" --pool focal --slice-read max --batch 4
+for READ in max attend; do
+  for VARIANT in dinov2-large v3large ortholarge; do
+    echo "=== ${VARIANT} focal ${READ} ==="
+    uv run --no-sync python -m kneemri.embeddings.build_embeddings \
+      --variant "${VARIANT}" --train-size "${SIZE}" --pool focal --slice-read "${READ}" --batch 4
+  done
 done
 
 uv run --no-sync python -m kneemri.evaluation.feature_probe --trunks dinov2-large v3large ortholarge
