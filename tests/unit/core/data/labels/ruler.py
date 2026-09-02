@@ -48,3 +48,18 @@ def test_moved_cells_over_shared_studies_only(tmp_path: Path):
     ruler = _table(tmp_path / DEFAULT_LABELS, [0.82, 0.28])
 
     assert ruler.moved_cells(_table(tmp_path / "extended.csv", [0.82, 0.28, 0.91, 0.04])) == 0
+
+
+def test_moved_cells_over_shared_targets_only(tmp_path: Path):
+    """A table grading a DIFFERENT set of targets is answered, not raised on.
+
+    `arm_check` could not check an arm whose `--labels` names a foreign corpus's table: pandas refuses to
+    compare frames with different columns, so the guard that exists to catch a flag typo before it costs a
+    queue slot died with `Can only compare identically-labeled DataFrame objects` instead.
+    """
+    ours = tmp_path / DEFAULT_LABELS
+    ours.write_text(f"{STUDY_COLUMN},ACL,MCL\nstudy0,0.82,0.28\nstudy1,0.28,0.82\n", encoding="utf-8")
+    foreign = tmp_path / "mrnet_acl.csv"
+    foreign.write_text(f"{STUDY_COLUMN},ACL\nstudy0,0.82\nmrnet-0001,0.08\n", encoding="utf-8")
+
+    assert Ruler(ours).moved_cells(Ruler(foreign)) == 0, "one shared study, one shared target, agreeing"

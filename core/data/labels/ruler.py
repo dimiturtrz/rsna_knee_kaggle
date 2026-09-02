@@ -46,10 +46,21 @@ class Ruler:
         return frame[[column for column in frame.columns if not column.endswith(DERIVED_COLUMNS)]]
 
     def moved_cells(self, other: "Ruler") -> int:
-        """How many holdout truth cells `other` scores differently from this table, over shared studies."""
+        """How many holdout truth cells `other` scores differently from this table, over shared cells.
+
+        SHARED IN BOTH AXES. Studies were always intersected; targets were not, and a table carrying a
+        different set of columns raised `Can only compare identically-labeled DataFrame objects` rather
+        than answering. That is not an exotic case — a foreign corpus's table is exactly it: `mrnet_acl.csv`
+        grades one target over studies none of ours appear in, and asking whether it moves OUR ruler is a
+        question with the obvious answer zero. It cost `arm_check` the ability to check an arm that trains
+        on a foreign corpus at all, which is the guard that exists so a flag typo does not cost a queue slot.
+        A target the other table does not carry cannot be scored differently by it; it is a cell outside the
+        comparison, not a moved one.
+        """
         mine, theirs = self.graded(), other.graded()
         shared = mine.index.intersection(theirs.index)
-        mine, theirs = mine.loc[shared], theirs.loc[shared]
+        targets = mine.columns.intersection(theirs.columns)
+        mine, theirs = mine.loc[shared, targets], theirs.loc[shared, targets]
         crossed = (mine > ASSERTS_PRESENCE) != (theirs > ASSERTS_PRESENCE)
         presence = mine.isna() != theirs.isna()
         return int(crossed.to_numpy().sum() + presence.to_numpy().sum())

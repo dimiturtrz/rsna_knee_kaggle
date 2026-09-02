@@ -26,7 +26,6 @@ figure — the denominator is the thing this project has got wrong most often.
 
 import io
 import logging
-import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,12 +36,11 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.data.corpus.mrnet_labels import SPLITS, ArchiveLabels, MRNetLabels
+from core.data.corpus.mrnet_source import VOLUME_SUFFIX, MRNetSource
 from core.data.corpus.study_cache import StudyCache
 from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
-
-VOLUME_SUFFIX = ".npy"
 
 PLANES: tuple[str, ...] = ("sagittal", "axial", "coronal")
 """The archive's directory names, in the order of `slots.MRNET_SLOTS`. The two are one fact and must
@@ -135,11 +133,7 @@ class MRNetExam:
 
 
 class MRNetCorpus:
-    """Reads the MRNet archive into a `StudyCache`-shaped cache and a labels table beside it.
-
-    The archive is read in place rather than extracted: it is 5.7 GB of arrays that are each used once,
-    and a second copy on disk buys nothing.
-    """
+    """Reads the MRNet archive into a `StudyCache`-shaped cache and a labels table beside it."""
 
     def __init__(
         self,
@@ -149,6 +143,7 @@ class MRNetCorpus:
         tables: MRNetLabels | None = None,
     ) -> None:
         self.archive = archive
+        self.source = MRNetSource.at(archive)
         self.cache = cache
         self.spacing = spacing
         self.tables = tables or ArchiveLabels(archive)
@@ -160,8 +155,7 @@ class MRNetCorpus:
         what holds the arrays. Trusting the table's length would report rates over exams that are not
         here — the paper's 1,370 against the 1,250 that download.
         """
-        with zipfile.ZipFile(self.archive) as archive:
-            names = archive.namelist()
+        names = self.source.names()
         labels = {split: self.tables.table(split) for split in SPLITS}
         members = self._members(names)
         exams = [
@@ -239,15 +233,14 @@ class MRNetCorpus:
             self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(exams))
         )
         mask = np.zeros((len(exams), self.cache.slots), dtype=np.float32)
-        with zipfile.ZipFile(self.archive) as archive:
-            for index, exam in enumerate(exams):
-                for position, plane in enumerate(PLANES[: self.cache.slots]):
-                    if plane in exam.members:
-                        pixels = self._pixels(archive, exam.members[plane])
-                        images[index, position] = self.stack(pixels, self.cache.slices).numpy()
-                mask[index] = exam.present(self.cache.slots)
-                if index % PROGRESS_EVERY == 0:
-                    logger.info(f"{index}/{len(exams)} decoded")
+        for index, exam in enumerate(exams):
+            for position, plane in enumerate(PLANES[: self.cache.slots]):
+                if plane in exam.members:
+                    pixels = self._pixels(self.source, exam.members[plane])
+                    images[index, position] = self.stack(pixels, self.cache.slices).numpy()
+            mask[index] = exam.present(self.cache.slots)
+            if index % PROGRESS_EVERY == 0:
+                logger.info(f"{index}/{len(exams)} decoded")
         images.flush()
         self.cache.record([exam.identifier for exam in exams])
         self.cache.report(mask)
@@ -255,9 +248,9 @@ class MRNetCorpus:
         logger.info(f"wrote {self.cache.shape(len(exams))} uint8 -> {self.cache.images_path}")
 
     @staticmethod
-    def _pixels(archive: zipfile.ZipFile, member: str) -> NDArray[np.float32]:
-        """One plane's stack as float32. `.npy` inside the zip, so no pickle is ever unpacked."""
-        return np.asarray(np.load(io.BytesIO(archive.read(member)), allow_pickle=False), dtype=np.float32)
+    def _pixels(source: MRNetSource, member: str) -> NDArray[np.float32]:
+        """One plane's stack as float32. Loaded from bytes, so no pickle is ever unpacked."""
+        return np.asarray(np.load(io.BytesIO(source.read(member)), allow_pickle=False), dtype=np.float32)
 
     def labels(self, destination: Path) -> None:
         """The labels table, carrying the ONE finding this corpus can honestly supervise.
