@@ -3185,3 +3185,31 @@ makes the twin-noise reading much harder to hold.
 
 A third combiner read. `kneemri-rankvote` is built and `run_check`-clean and pre-registers at −0.0003;
 two points already bound this axis inside 0.0015 and a third would spend a slot to confirm a bound.
+
+### Correction, 2026-09-02T20:12Z — `aucvote_v1` closed nothing
+
+The entry above claims this reading closes the combiner as a lever at six seats. That claim is wrong and
+the entry could not have supported it. Measuring the table it actually shipped:
+
+| entry | max deviation from equal share | mean deviation | negative weights |
+|---|---|---|---|
+| `aucvote_v1` (`PER_LABEL`) | **0.54 pp** | 0.10 pp | 0 of 72 |
+| `stackvote_v1` (`STACK_WEIGHTS`) | **24.83 pp** | 5.35 pp | 1 of 72 |
+
+`aucvote_v1` weights each of the six to within half a percentage point of an equal share. That is
+arithmetic, not misfortune: the six members' per-finding AUCs all lie between 0.776 and 0.917, and a
+quality weighting over numbers that close is the identity map. The file that was submitted was the
+champion's file. 0.943 against 0.944 measures the board's own repeatability, not a vote rule.
+
+What survives is narrower and still worth writing down: **AUC-derived weighting over a pool this uniform
+cannot move a board.** That kills the cheap form of the idea. It does not touch weighting itself.
+
+`stackvote_v1` is the one that tested it — a fitted table that puts one seat at 41% of a finding and
+shorts another — and it read the same 0.943. A real tilt matching the equal-weight benchmark is the
+ordinary result when the holdings are CORRELATED, which ours are: one trunk family, one corpus, one
+decode. Weighting pays on dispersion AND low correlation, and this pool has neither.
+
+Both entries inherit the same defect and therefore do not independently confirm each other: five of six
+weight rows in each are fold-0 twins, because the shipped seats are `--fold -1` and have no holdout.
+The axis that is actually closed is twin-derived weighting. Weighting by the shipped members' own
+quality has never been measured and cannot be without retraining the six with a holdout.
