@@ -90,6 +90,11 @@ NOT_A_SWITCH = {
     "labels": "the label table, an input rather than a policy",
     "eval_labels": "the holdout table, same",
     "out": "where the run writes, set per invocation",
+    "init": "the weights the run BEGINS from, and `WarmStart.applied` loads them STRICTLY: a checkpoint "
+    "that does not fit the model this run's flags describe raises there, before the card is spent, and a "
+    "checkpoint that does fit is already in the parameters. There is nothing left for an equality here to "
+    "catch — and the provenance a landed-check would report is the line `applied` returns, which the run "
+    "logs and `member_record` keeps",
     "epochs": "run length, which nothing downstream can silently ignore",
     "studies": "corpus truncation, visible in the split line every run logs",
     "train_fraction": "which TRAINING studies were fitted on — the same kind of thing, and visible in "
