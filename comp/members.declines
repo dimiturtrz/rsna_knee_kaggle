@@ -233,3 +233,13 @@ errors_v3small_s2026 # DECLINED AS A SEAT, 2026-09-02. Best 0.8280 at epoch 6, C
                      # a corpus reading taken on a trunk that was carrying a handicap into it. It closes
                      # the label-error corpus as a SEAT lever; it does not price the corpus on a trunk
                      # that is competitive to begin with.
+
+ramp_dense_gate — 0.8578 at its peak epoch 7, against calib_dense_hold_s2026 0.8634 on the same
+  909-study holdout: -0.0056, just inside the 0.0062 floor and pointing DOWN. The certainty ramp was
+  built to let the model earn its way onto uncertain cells rather than being held at a fixed weight,
+  and the mechanism is sound, but at this corner it buys nothing measurable and the sign is wrong.
+  Declined as a SEAT, not refuted as a mechanism: it is one member at one corner, the delta is under
+  the floor, and the ramp has never been tried anywhere the supervision is actually thin. The narrow
+  place it would be re-opened is the three extreme-UNK labels (Synovitis 84.2%, Fracture 56.4%,
+  Baker's 45.9%) rather than all twelve, which is the same surviving clause confident224 left behind.
+  Answer this decline with a per-label run, never by re-quoting 0.8578. knee-fxgm.
