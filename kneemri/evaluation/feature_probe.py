@@ -68,7 +68,7 @@ TRUNKS: dict[str, str] = {
     # denoising objective rather than a discriminative one. That is why the model's own docstring says a
     # ridge probe here is width-sensitive and a LOSS is confounded with capacity -- only a WIN is clean.
     # Read it against dinov2-large 0.7852 / v3large 0.7446 / ortholarge 0.7387 on that understanding.
-    "orthodiff": "orthodiff_images_336px_12sl_r256_gap256_volume",
+    "orthodiff": "features_orthodiff_336px_12sl_r256_gap256_volume",
     # The readout sweep (`experiments/arms/readout_probe.sh`, knee-n647). The rows above hold BOTH
     # poolings at their diluting end -- `mean` over patches, then `max` over slices -- and the three
     # numbers they produced closed two members. These eight move the two axes independently over the
