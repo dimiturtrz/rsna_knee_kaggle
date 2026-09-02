@@ -74,6 +74,16 @@ def test_line() -> None:
     assert "StackedLogit" in StackResult(rule="StackedLogit", fitted_on=1, scored_on=2, mean=0.87).line()
 
 
+def test_shipped_weights() -> None:
+    """One row per member, one column per finding, fitted on every study handed in."""
+    per_member, truth = _pool(members=3, studies=300, findings=4)
+    members = [
+        MemberHoldout(f"m{index}", np.asarray([f"s{p}" for p in range(300)]), array, truth)
+        for index, array in enumerate(per_member)
+    ]
+    assert StackFit().shipped_weights(members).shape == (3, 4)
+
+
 def test_main() -> None:
     """The entrypoint is a callable the mirror can see; its behaviour is the CLI, exercised by hand."""
     assert callable(main)

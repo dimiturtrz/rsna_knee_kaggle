@@ -130,6 +130,20 @@ class StackFit:
         }
         return max(areas, key=lambda penalty: areas[penalty])
 
+    def shipped_weights(self, members: list[MemberHoldout]) -> Float[NDArray[np.float64], "members findings"]:
+        """Weights fitted on ALL holdout studies, for a kernel that will never see them again.
+
+        Different from `scored` on purpose. `scored` holds a half back because it is REPORTING a number;
+        this is producing a constant to ship, where holding studies back only makes the weights noisier
+        and buys nothing — the kernel is judged on the competition test set, which no fit here can touch.
+        The penalty still comes from a nested split, so it is chosen rather than assumed.
+        """
+        shared = MemberHoldout.aligned(members)
+        truth = shared[0].truth
+        per_member = [member.predictions for member in shared]
+        penalty = self.chosen_penalty(per_member, truth)
+        return StackedLogit.fitted(per_member, truth, penalty).weights
+
     def scored(self, members: list[MemberHoldout]) -> list[StackResult]:
         """Every rule on the same held-out studies, the stacker fitted only on the other half."""
         shared = MemberHoldout.aligned(members)
@@ -161,9 +175,18 @@ def main() -> None:
     parser.add_argument("--holdouts", type=Path, required=True)
     parser.add_argument("--members", type=int, default=0)
     parser.add_argument("--penalty", type=float, default=STACK_PENALTY)
+    parser.add_argument("--only", nargs="+", default=None, help="member names, in the order a kernel seats them")
+    parser.add_argument("--emit-weights", action="store_true", help="print shippable weights instead of a score")
     parsed = parser.parse_args()
-    found = sorted(parsed.holdouts.glob("*.holdout.npz"))
-    loaded = [MemberHoldout.loaded(path) for path in found[: parsed.members or len(found)]]
+    if parsed.only:
+        loaded = [MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in parsed.only]
+    else:
+        found = sorted(parsed.holdouts.glob("*.holdout.npz"))
+        loaded = [MemberHoldout.loaded(path) for path in found[: parsed.members or len(found)]]
+    if parsed.emit_weights:
+        for name, row in zip([member.name for member in loaded], StackFit().shipped_weights(loaded), strict=True):
+            print(f"    ({', '.join(f'{value:.6f}' for value in row)}),  # {name}")  # noqa: T201 - the output
+        return
     for result in StackFit().scored(loaded):
         print(result.line())  # noqa: T201 - a CLI report is the output of this module
 
