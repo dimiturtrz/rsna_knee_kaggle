@@ -66,6 +66,10 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 
 4. **Watch ISMRM 2025 abstract "Self-supervised Pretraining on OAI data for 3D Knee MRI Analysis."** If a pretrained 3D knee encoder emerges from that work, it would change the calculus.
 
+## Update 2026-09-02
+
+A 2026 OAI-based 3D segmentation+classification paper (Moorthy et al., *3D CSFA-UNet*, [PMC12916792](https://pmc.ncbi.nlm.nih.gov/articles/PMC12916792/)) reports 99.15% accuracy on KL grading and strong segmentation Dice on 507 OAI-ZIB DESS volumes. The pipeline is segmentation-first, uses custom attention/feature-selection/spiking-transformer modules, and evaluates on osteoarthritis severity rather than our 12 abnormality labels. No public weights are mentioned. It does not change the conclusion below: there is still no public, knee-specific, multi-label 3D classification foundation model ready to drop into our ensemble.
+
 ## Bottom line
 
 MRNet has modern successors (MR-Transformer, Berrimi's 3D CNN), but none offer a public, knee-specific, large-scale 3D foundation model ready for our multi-label task. A 3D member could add diversity, but the cost/benefit is worse than continuing to exploit strong 2D backbones (OrthoFoundation-L / DINOv3-L) and external 2D pretraining data. Use 3D as an auxiliary or secondary axis, not the main bet.

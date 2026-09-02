@@ -86,15 +86,15 @@ A dataset that requires a research-use agreement is not automatically disqualifi
 
 Most of the corpora above are already on disk under `D:/data/volumetric/mri/raw/`. This changes the practical next step from "download" to "inspect format and decide license risk."
 
-| Corpus | Local path | Format on disk | Notes |
-|--------|-----------|----------------|-------|
-| MRNet | `D:/data/volumetric/mri/raw/mrnet/` | 1,250 exams × 3 planes as `uint8` `.npy` stacks (axial ~44×256×256, sagittal/coronal ~36×256×256) + `train/valid-{abnormal,acl,meniscus}.csv` | Already preprocessed and ready to load. Only license check blocks use. |
-| Rijeka / KneeMRI | `D:/data/volumetric/mri/raw/kneemri_rijeka/kneemridataset.zip` | 917 volumes as `uint16` `.pck` files (32×320×320) + `metadata.csv` with `aclDiagnosis` and ROI coords | License remains CC BY-NC-ND; data is available for internal experiments only. |
-| fastMRI knee | `D:/data/volumetric/mri/raw/fastmri/` | 973 train + val `singlecoil_*.h5` files; `labels/Annotations/knee.csv` has 16,167 bounding boxes across 974 files and 21 pathology labels | This is the strongest immediate lever — labels map directly to RSNA classes (ACL, meniscus, cartilage, bone lesion, effusion, etc.). |
-| SKM-TEA | `D:/data/volumetric/mri/raw/skmtea/` | 155 DICOM studies + annotations + segmentation masks | Small but dense; useful for 3D segmentation pretraining. |
-| KMAR-50K | `D:/data/volumetric/mri/raw/kmar50k/` | ~3,000 `.nii` volumes across `ArtifactData_*` and `GroundTruthData_*` | Unlabeled for pathology; use for SSL/reconstruction/motion augmentation. |
-| knee_clinical_seq | `D:/data/volumetric/mri/raw/knee_clinical_seq/` | DICOM series (batch2) | Unknown labels; needs inventory. |
-| RSNA label tables | `D:/data/volumetric/mri/raw/knee_label_tables/` | Multiple CSVs with LLM/consensus labels and calibrated soft targets for RSNA studies | Potential pseudo-label / teacher sources for Scheme C. |
+| Corpus | Local path | Size on disk | Format on disk | Notes |
+|--------|-----------|--------------|----------------|-------|
+| MRNet | `D:/data/volumetric/mri/raw/mrnet/` | 7.3 GB | 1,250 exams × 3 planes as `uint8` `.npy` stacks (axial ~44×256×256, sagittal/coronal ~36×256×256) + `train/valid-{abnormal,acl,meniscus}.csv` | Already preprocessed and ready to load. Only license check blocks use. |
+| Rijeka / KneeMRI | `D:/data/volumetric/mri/raw/kneemri_rijeka/` | 3.1 GB | 917 volumes as `uint16` `.pck` files (32×320×320) + `metadata.csv` with `aclDiagnosis` and ROI coords | License remains CC BY-NC-ND; data is available for internal experiments only. |
+| fastMRI knee | `D:/data/volumetric/mri/raw/fastmri/` | 194 GB | 973 train + val `singlecoil_*.h5` files; `labels/Annotations/knee.csv` has 16,167 bounding boxes across 974 files and 21 pathology labels | This is the strongest immediate lever — labels map directly to RSNA classes (ACL, meniscus, cartilage, bone lesion, effusion, etc.). |
+| SKM-TEA | `D:/data/volumetric/mri/raw/skmtea/` | 19 GB | 155 DICOM studies + annotations + segmentation masks | Small but dense; useful for 3D segmentation pretraining. |
+| KMAR-50K | `D:/data/volumetric/mri/raw/kmar50k/` | 67 GB | ~3,000 `.nii` volumes across `ArtifactData_*` and `GroundTruthData_*` | Unlabeled for pathology; use for SSL/reconstruction/motion augmentation. |
+| knee_clinical_seq | `D:/data/volumetric/mri/raw/knee_clinical_seq/` | unknown | DICOM series (batch2) | Unknown labels; needs inventory. |
+| RSNA label tables | `D:/data/volumetric/mri/raw/knee_label_tables/` | unknown | Multiple CSVs with LLM/consensus labels and calibrated soft targets for RSNA studies | Potential pseudo-label / teacher sources for Scheme C. |
 
 ### fastMRI knee labels are the big surprise
 
