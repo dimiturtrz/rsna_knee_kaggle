@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inbox listener — arm as a harness background task, exits on mail.
 
-Watches .agent-runtime/inbox/<name>/ for .txt/.md letters.
+Watches Kimi's mailbox at .agent-runtime/inbox/ or Claude's at .claude/inbox/.
 On arrival: prints each letter's body, archives it to the sibling read/
 directory, and exits so the harness delivers the output as a background-task
 completion notification.
@@ -35,10 +35,14 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def _derive_paths(name):
-    """Runtime mailboxes: .agent-runtime/inbox/<name>/ holds live letters; read/ archives them."""
-    agent_dir = os.path.join(SCRIPT_DIR, "inbox", name)
-    inbox_dir = agent_dir
-    read_dir = os.path.join(agent_dir, "read")
+    """Runtime mailboxes: Kimi at .agent-runtime/inbox/, Claude at .claude/inbox/."""
+    if name == "claude":
+        agent_dir = os.path.join(os.path.dirname(SCRIPT_DIR), ".claude")
+        inbox_dir = os.path.join(agent_dir, "inbox")
+    else:
+        agent_dir = SCRIPT_DIR
+        inbox_dir = os.path.join(agent_dir, "inbox")
+    read_dir = os.path.join(inbox_dir, "read")
     pid_file = os.path.join(inbox_dir, f".listener_pid.{name}")
     heartbeat_file = os.path.join(inbox_dir, f".listener_heartbeat.{name}")
     return inbox_dir, read_dir, pid_file, heartbeat_file

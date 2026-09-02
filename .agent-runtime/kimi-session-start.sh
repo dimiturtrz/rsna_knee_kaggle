@@ -11,7 +11,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-INBOX="$SCRIPT_DIR/inbox/kimi"
+INBOX="$SCRIPT_DIR/inbox"
 
 # Regenerate the stack + CLAUDE.md sync (report only the drift line, if any).
 bash "$SCRIPT_DIR/agent_md_sync.sh" | grep -v "^  -" || true
