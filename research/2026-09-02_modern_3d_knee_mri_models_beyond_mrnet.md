@@ -21,6 +21,13 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 - **Performance:** In the MR-Transformer paper, 3DMeT is the weakest baseline (AUC 0.63-0.82 depending on contrast), suggesting that training a 3D transformer from scratch on small knee datasets is brittle.
 - **Relevance to us:** A warning that 3D transformers without strong pretraining underperform.
 
+### OrthoDiffusion (Lan et al., 2026) — game changer for 3D
+- **What it is:** A unified diffusion-based foundation model for musculoskeletal MRI interpretation. Three orientation-specific 3D diffusion backbones (sagittal, coronal, axial) are pretrained on 15,948 unlabeled knee MRI examinations, then used to extract bottleneck features for multi-label diagnosis and segmentation.
+- **Performance:** Macro-average AUROC **0.908** on an 8-class knee abnormality diagnosis task across eight institutions. Strong label efficiency (10% labels retains high precision) and cross-scanner robustness (1.5T vs 3.0T).
+- **Weights:** Available from a Kaggle dataset: [OrthoDiffusion Official Knee MRI Foundation](https://www.kaggle.com/datasets/prvsiyan/orthodiffusion-official-knee-mri-foundation). Code is on GitHub: https://github.com/lt-0123/OrthoDiffusion.
+- **License:** Verify on Kaggle; the paper does not state a license.
+- **Relevance to us:** This is the first public, knee-specific, multi-label-diagnosis 3D foundation model with weights. It is now the primary candidate for a 3D member. The main work is feature extraction (select timestep/block, run U-Net, pool, fuse planes) and adapting the head to our 12 labels.
+
 ## 3D foundation / segmentation models that touch knee MRI
 
 ### SegmentAnyBone (Gu et al., 2025)
@@ -43,28 +50,21 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 
 ### The case for it
 - 3D encoders can model spatial continuity across slices, which 2D slice models ignore.
-- MR-Transformer shows that a 3D ViT with ImageNet pretraining can match or beat MRNet on some knee MRI tasks.
+- **OrthoDiffusion** is the first public, knee-specific, large-scale 3D foundation model with weights and a reported multi-label diagnosis score (macro AUROC 0.908 on 8 abnormalities).
 - External 3D data (fastMRI knee volumes, MRNet .npy stacks, Rijeka .pck volumes, SKM-TEA DICOMs) could in principle support pretraining or fine-tuning a 3D member.
 
 ### The case against it
-- **No public, knee-specific, large-scale 3D foundation model with weights.** The closest is MR-Transformer, which is task-specific to TKR and uses a tiny DeiT-Ti backbone.
-- **Compute cost.** Full 3D attention on knee MRI volumes is expensive; MR-Transformer authors explicitly warn about quadratic complexity.
+- **Inference cost.** Diffusion-based feature extraction requires running a 3D U-Net forward at selected timesteps; it is not a single encoder pass.
 - **Data format mismatch.** The competition and our current pipeline are slice-oriented. Moving to full 3D volumes requires a new dataloader, resampling, and patch strategy.
-- **Unclear headroom.** MR-Transformer's gains over MRNet are real but modest (+0.04 AUC on one contrast, parity elsewhere). In our multi-label setting, the marginal gain from a single 3D member may be small compared with the engineering cost.
+- **License/terms.** The Kaggle weights must be checked for competition-use permission.
 
 ## Recommendations
 
-1. **Do not pursue a full 3D volumetric model as the main lever.** The strongest actionable model for our pipeline remains OrthoFoundation-L (2D, knee-specific, DINOv3-L, MIT weights). A 3D member is a diversification bet, not a primary path to 1.5%.
+1. **OrthoDiffusion is now the primary 3D bet.** Download the Kaggle weights, verify license, and run a smoke experiment as the first 3D member. If it reads positive, it becomes a candidate for the ensemble and may even replace or augment the 2D trunk.
 
-2. **If we want a 3D member anyway, the cheapest experiment is:**
-   - Start from MR-Transformer (open-source, ImageNet-pretrained DeiT-Ti).
-   - Replace the TKR head with our multi-label head.
-   - Train on downsampled 3D volumes from our RSNA data or from MRNet/fastMRI.
-   - Use it as one seat in the ensemble, expecting modest diversity gain at significant compute cost.
+2. **If OrthoDiffusion is blocked, MR-Transformer is the fallback.** It is open-source and ImageNet-pretrained, but task-specific to TKR and uses a tiny DeiT-Ti backbone.
 
-3. **Auxiliary segmentation is more promising than 3D classification.** Foundation segmenters (SAM-Med3D, SegmentAnyBone, VISTA3D) could provide joint-region masks or cartilage/meniscus segmentations as extra input channels to our 2D classifier. This keeps the compute manageable while injecting 3D anatomical structure.
-
-4. **Watch ISMRM 2025 abstract "Self-supervised Pretraining on OAI data for 3D Knee MRI Analysis."** If a pretrained 3D knee encoder emerges from that work, it would change the calculus.
+3. **Auxiliary segmentation remains a parallel path.** Foundation segmenters (SAM-Med3D, SegmentAnyBone, VISTA3D) could provide joint-region masks or cartilage/meniscus segmentations as extra input channels to our 2D classifier.
 
 ## Update 2026-09-02
 
@@ -72,4 +72,4 @@ A 2026 OAI-based 3D segmentation+classification paper (Moorthy et al., *3D CSFA-
 
 ## Bottom line
 
-MRNet has modern successors (MR-Transformer, Berrimi's 3D CNN), but none offer a public, knee-specific, large-scale 3D foundation model ready for our multi-label task. A 3D member could add diversity, but the cost/benefit is worse than continuing to exploit strong 2D backbones (OrthoFoundation-L / DINOv3-L) and external 2D pretraining data. Use 3D as an auxiliary or secondary axis, not the main bet.
+OrthoDiffusion changes the 3D calculus: for the first time there is a public, knee-specific, multi-label-diagnosis 3D foundation model with weights. The first action is to smoke-test it. If it transfers to the RSNA 12-label task, it is both a strong member and a benchmark for any 3D architecture we might train ourselves. If it does not transfer or is license-blocked, the 3D lane reverts to a diversification bet rather than a main lever.

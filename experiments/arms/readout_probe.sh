@@ -62,9 +62,24 @@ cd "$REPO"
 # over slots and slices (feature_probe.py:91). That is not AnyMC3D's LEARNED query -- it is the
 # cheapest readout that stops the encoder max-pooling the depth away, and it costs one flag rather
 # than a head. If the gap moves on this axis and not on tokens, the learned version is the next arm.
+# radnet121 RIDES ALONG, and it is a different question answered by the same pass. `radnet_family`
+# fitted RadImageNet DenseNet-121 at --backbone-lr 4e-4 and read 0.6716 against its pre-registered 0.75
+# floor, which closed the convolutional trunk lane. That number is 0.15 BELOW the stock-init control
+# (0.8240) that the MAE family was priced against, and a pretrained medical trunk landing below random
+# init is not the shape of a weak trunk -- it is the shape of a trunk that did not fit. The recipe is
+# the named suspect: every flag it inherits was measured on DINOv2, and one fitted cell at one LR on a
+# foreign ARCHITECTURE is one cell of a sweep, not a closure (knee-bvnp).
+#
+# The frozen probe separates the two readings without a fit, because it uses no recipe at all. It is
+# ASYMMETRIC and only one direction is conclusive: a probe near the other trunks says the features are
+# THERE and 0.6716 was ours to explain, which re-opens the lane on a recipe sweep. A probe near the
+# bottom is NOT a closure -- knee-bvnp is exactly about probes closing lanes -- it only says the frozen
+# reading agrees with the fitted one, and the conv lane stays shut on two readings instead of one.
+#
+# It costs two builds on a 7M-parameter trunk, inside a pass already being made for three others.
 SIZE=256
 for READ in max attend; do
-  for VARIANT in dinov2-large v3large ortholarge; do
+  for VARIANT in dinov2-large v3large ortholarge radnet121; do
     echo "=== ${VARIANT} focal ${READ} ==="
     uv run --no-sync python -m kneemri.embeddings.build_embeddings \
       --variant "${VARIANT}" --train-size "${SIZE}" --pool focal --slice-read "${READ}" --batch 4
