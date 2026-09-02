@@ -1010,6 +1010,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.table_correction",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.table_correction",
+      "target": "core.data.labels.rubric_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.table_correction",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.targets",
       "target": "core.findings",
       "weight": 1
@@ -9340,6 +9358,66 @@
       "kind": "calls",
       "source": "core.data.labels.table_blend.main",
       "target": "core.data.labels.table_blend.LabelBlend.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.table_correction.Correction",
+      "target": "core.data.labels.table_correction.LabelSources",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.table_correction.PartnerLift",
+      "target": "core.data.labels.table_correction.LabelSources",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.table_correction.RubricPull",
+      "target": "core.data.labels.table_correction.LabelSources",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_correction.RubricPull.applied",
+      "target": "core.data.labels.table_correction.RubricPull.flagged",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.table_correction.RubricPull.flagged",
+      "target": "core.data.labels.rubric_gap.RubricGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_correction.RubricPull.flagged",
+      "target": "core.data.labels.rubric_gap.RubricGap.backed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_correction.RubricPull.flagged",
+      "target": "core.data.labels.rubric_gap.RubricGap.contradicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.table_correction.RubricPull.flagged",
+      "target": "core.data.labels.rubric_gap.RubricGap.table",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.table_correction.corrected",
+      "target": "core.data.labels.table_correction.LabelSources",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.table_correction.main",
+      "target": "core.data.labels.table_correction.LabelSources",
       "weight": 1
     },
     {
@@ -26037,7 +26115,7 @@
   ],
   "nodes": [
     {
-      "descendants": 67,
+      "descendants": 68,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -26061,7 +26139,7 @@
       "role": null
     },
     {
-      "descendants": 57,
+      "descendants": 58,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -26365,7 +26443,7 @@
       "role": null
     },
     {
-      "descendants": 19,
+      "descendants": 20,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -26512,6 +26590,14 @@
       "descendants": 0,
       "id": "core.data.labels.table_blend",
       "label": "table_blend",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction",
+      "label": "table_correction",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -29011,6 +29097,38 @@
       "level": "class",
       "parent": "core.data.labels.table_blend",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.Correction",
+      "label": "Correction",
+      "level": "class",
+      "parent": "core.data.labels.table_correction",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.LabelSources",
+      "label": "LabelSources",
+      "level": "class",
+      "parent": "core.data.labels.table_correction",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.PartnerLift",
+      "label": "PartnerLift",
+      "level": "class",
+      "parent": "core.data.labels.table_correction",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.RubricPull",
+      "label": "RubricPull",
+      "level": "class",
+      "parent": "core.data.labels.table_correction",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -35562,6 +35680,62 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.table_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.Correction.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "core.data.labels.table_correction.Correction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.PartnerLift.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "core.data.labels.table_correction.PartnerLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.RubricPull.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "core.data.labels.table_correction.RubricPull",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.RubricPull.flagged",
+      "label": "flagged",
+      "level": "method",
+      "parent": "core.data.labels.table_correction.RubricPull",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.corrected",
+      "label": "corrected",
+      "level": "method",
+      "parent": "core.data.labels.table_correction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.table_correction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.rescaled",
+      "label": "rescaled",
+      "level": "method",
+      "parent": "core.data.labels.table_correction",
       "role": null
     },
     {
