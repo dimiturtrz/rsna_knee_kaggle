@@ -3213,3 +3213,22 @@ Both entries inherit the same defect and therefore do not independently confirm 
 weight rows in each are fold-0 twins, because the shipped seats are `--fold -1` and have no holdout.
 The axis that is actually closed is twin-derived weighting. Weighting by the shipped members' own
 quality has never been measured and cannot be without retraining the six with a holdout.
+
+## twinfive_v1 — 0.935 (ref 55969178, 2026-09-02 22:04Z)
+
+The five fold-0 twins under `LogitAverage`, shipped as an INSTRUMENT: the first paired
+offline-and-board point the record holds above offline 0.8700 (offline 0.8705, honest — every
+holdout study was withheld from every member's own training).
+
+**Do not read this as a flattening slope.** Its kernel docstring pre-registered 0.930-0.935 as
+"the slope FLATTENS at the top"; that branch was mis-specified before the run (`knee-k6vwv`).
+`peak8` already sits at offline 0.8704 -> board 0.932, so two offline points 0.0001 apart landed
+0.003 apart on the board and no slope is separable from them.
+
+**What the slot bought: the twin-to-shipped gap is 0.009** (champion 0.944 vs this 0.935) — nine
+times the 0.001 spread across the three vote rules. `aucvote_v1` and `stackvote_v1` both fitted
+their tables on exactly these twins and served the `_ff`/`_cf` seats, so their named confound is
+real and an order of magnitude larger than the effect they measured. Confounded in turn by seat
+count (five here, six there), which has read flat across seven entries.
+
+See `comp/board.jsonl` for the full reading.
