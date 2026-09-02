@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from core.findings import TARGETS
-from kneemri.evaluation.feature_probe import FeatureProbe, ProbeCorpus, ProbeResult
+from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult
 from kneemri.evaluation.slice_readout import SliceMax, SliceMean
 
 
@@ -65,6 +65,17 @@ def test_predicted() -> None:
     assert np.allclose(predictions[0], weights[-1])
 
 
+def test_holdout_record() -> None:
+    generator = np.random.default_rng(11)
+    features = generator.normal(size=(40, 3))
+    truth = (features[:, :1] > 0).astype(np.int64).repeat(len(TARGETS), axis=1)
+    holdout = np.arange(10, dtype=np.int64)
+    training = np.arange(10, 40, dtype=np.int64)
+    record = FeatureProbe(penalty=1.0).holdout_record(features, truth, holdout, training)
+    assert record.shape == (len(holdout), len(TARGETS))
+    assert np.isfinite(record).all()
+
+
 def test_scored() -> None:
     generator = np.random.default_rng(7)
     signal = generator.normal(size=(80, 1))
@@ -105,3 +116,22 @@ def test_identifiers(tmp_path: Path) -> None:
 def test_features(tmp_path: Path) -> None:
     corpus = _corpus(tmp_path, ["b", "a"], "features_demo")
     assert corpus.features("features_demo").shape == (2, 2, 2, 3)
+
+
+def _probe_pool(studies: int, dim: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    rng = np.random.default_rng(0)
+    truth = (rng.random((studies, len(TARGETS))) > 0.6).astype(np.int64)
+    features = truth[:, :1] * 0.8 + rng.normal(0.0, 0.4, (studies, dim))
+    return features, truth, np.arange(studies)
+
+
+def test_chosen() -> None:
+    """The penalty comes from the grid, and the caller's holdout never enters the choice."""
+    features, truth, training = _probe_pool(studies=240, dim=6)
+    assert FeatureProbe.chosen(features, truth, training) in set(SELECTION)
+
+
+def test_inner_area() -> None:
+    """A separable pool reads above chance on the inner scoring positions."""
+    features, truth, training = _probe_pool(studies=240, dim=6)
+    assert FeatureProbe(1.0).inner_area(features, truth, training[:120], training[120:]) > 0.5

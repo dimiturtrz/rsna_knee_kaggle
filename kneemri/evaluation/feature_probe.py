@@ -39,6 +39,18 @@ from kneemri.evaluation.slice_readout import READOUTS, SliceMean, SliceReadout
 
 LOGGER = logging.getLogger(__name__)
 
+SELECTION = (0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0)
+"""The penalties a trunk may be read at. Spans five decades because the trunks do: the best penalty
+measured here runs from 0.003 (radnet121) to 10.0 (v3large), and a grid that did not reach both ends
+would reproduce the defect it exists to remove."""
+
+INNER_SHARE = 0.5
+"""Half the training positions choose the penalty, half fit under it."""
+
+SELECTION_SEED = 0
+"""Seeded so two readings of one trunk are comparable. Not a seed experiment — the ban is on averaging
+over seeds to manufacture a result, not on making one measurement reproducible."""
+
 TRUNKS: dict[str, str] = {
     "dinov2-small": "features_small_336px_12sl_r336_cls_mean_max",
     "dinov2-large": "features_large_336px_12sl_r252_mean_max",
@@ -108,6 +120,46 @@ class FeatureProbe:
     def __init__(self, penalty: float = RIDGE) -> None:
         self.penalty = penalty
 
+    @classmethod
+    def chosen(
+        cls,
+        features: Float[NDArray[np.float64], "studies dim"],
+        truth: Int[NDArray[np.int64], "studies findings"],
+        training: Int[NDArray[np.int64], " trained"],
+    ) -> float:
+        """The penalty this trunk is entitled to, chosen inside the TRAINING positions only.
+
+        A shared penalty is not a fair comparison between trunks. Trunk feature magnitudes differ by
+        more than an order of magnitude here (radnet121 tops out at 0.17, v3large at 2.90), and a ridge
+        term that is a mild regulariser for one is annihilation for the other. Read at 100 the two sit
+        0.108 apart; read at the penalty each one wants they sit 0.017 apart the OTHER way. That is not
+        a small correction to a ranking, it is the ranking.
+
+        The choice never touches the caller's holdout, so the reported number stays a held-out number.
+        """
+        order = np.random.default_rng(SELECTION_SEED).permutation(len(training))
+        cut = int(len(training) * INNER_SHARE)
+        inner_fit, inner_score = training[order[:cut]], training[order[cut:]]
+        areas = {penalty: cls(penalty).inner_area(features, truth, inner_fit, inner_score) for penalty in SELECTION}
+        return max(areas, key=lambda penalty: areas[penalty])
+
+    def inner_area(
+        self,
+        features: Float[NDArray[np.float64], "studies dim"],
+        truth: Int[NDArray[np.int64], "studies findings"],
+        inner_fit: Int[NDArray[np.int64], " fit"],
+        inner_score: Int[NDArray[np.int64], " score"],
+    ) -> float:
+        """Mean area over the inner scoring positions, skipping labels they left with one class."""
+        predictions = self.predicted(features[inner_score], self.weights(features[inner_fit], truth[inner_fit]))
+        held = truth[inner_score]
+        areas = [
+            LabelScores.area_under_curve(predictions[:, column], held[:, column])
+            for column in range(held.shape[1])
+            if 0 < held[:, column].sum() < len(held)
+        ]
+        return float(np.mean(areas)) if areas else 0.0
+
     @staticmethod
     def pooled(
         array: Float[NDArray[np.floating], "studies slots slices dim"],
@@ -146,6 +198,22 @@ class FeatureProbe:
     ) -> Float[NDArray[np.float64], "studies findings"]:
         """Apply probe weights to held-out features."""
         return np.hstack([features, np.ones((len(features), 1))]) @ weights
+
+    def holdout_record(
+        self,
+        features: Float[NDArray[np.float64], "studies dim"],
+        truth: Int[NDArray[np.int64], "studies findings"],
+        holdout: Int[NDArray[np.int64], " held"],
+        training: Int[NDArray[np.int64], " trained"],
+    ) -> Float[NDArray[np.float64], "held findings"]:
+        """The held-out predictions themselves, in the shape a member's `.holdout.npz` carries.
+
+        A probe number says whether a trunk CAN be read; it says nothing about whether the trunk adds
+        anything the pool does not already have. Emitting the predictions lets the same stacking harness
+        that judges members judge a probe alongside them, on the studies both were held out on — which
+        is the only way to ask the diversity question without first spending a training run.
+        """
+        return self.predicted(features[holdout], self.weights(features[training], truth[training]))
 
     def scored(
         self,
@@ -194,6 +262,17 @@ def main() -> None:
     command.parser.add_argument("--penalty", type=float, nargs="+", default=[RIDGE], help="ridge penalties to report")
     command.parser.add_argument("--trunks", type=str, nargs="+", default=sorted(TRUNKS), help="trunk names to probe")
     command.parser.add_argument(
+        "--emit-holdout",
+        type=Path,
+        default=None,
+        help="write each probe's held-out predictions as <trunk>_probe.holdout.npz, seatable beside members",
+    )
+    command.parser.add_argument(
+        "--choose-penalty",
+        action="store_true",
+        help="give each trunk the penalty it wants, chosen on a nested split inside the training positions",
+    )
+    command.parser.add_argument(
         "--slice-readout",
         type=str,
         nargs="+",
@@ -213,11 +292,22 @@ def main() -> None:
         truth = corpus.truth(identifiers)
         for readout in arguments.slice_readout:
             features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
-            for penalty in arguments.penalty:
+            penalties = (
+                [FeatureProbe.chosen(features, truth, training)] if arguments.choose_penalty else arguments.penalty
+            )
+            for penalty in penalties:
                 result = FeatureProbe(penalty).scored(f"{name}@{readout}", features, truth, holdout, training)
                 results.append(result)
                 command.report([f"penalty={penalty:<8} {result.line()}"])
                 command.report([f"    {target} {area:.4f}" for target, area in result.per_label.items()])
+                if arguments.emit_holdout is not None:
+                    arguments.emit_holdout.mkdir(parents=True, exist_ok=True)
+                    np.savez(
+                        arguments.emit_holdout / f"{name}_{readout}_probe.holdout.npz",
+                        studies=np.asarray(identifiers)[holdout],
+                        predictions=FeatureProbe(penalty).holdout_record(features, truth, holdout, training),
+                        truth=truth[holdout],
+                    )
     Denominator(len(results), "no trunk had a cached feature array to probe").refuse_empty()
 
 
