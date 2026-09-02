@@ -3151,3 +3151,37 @@ one.
 
 External data itself. A trunk CONTINUED on a foreign corpus is a different mechanism from a member
 TRAINED on one, and `ortho_dense` / `v3large_dense` (knee-440m) ask that question separately.
+
+## `aucvote_v1` — 0.943, and the combiner axis reads flat where it actually ships
+
+**Ref 55965832, 2026-09-02, kit `d350e987`.** The champion's six seats in the champion's order
+(`final_ws_cf`, `calib_span_ff`, `grade_ladder_cf`, `merged_blend_cf`, `lr4e-5_ws_cf`,
+`through_dense_cf`), `overlap=False`, raptor foreign seat at `FOREIGN_WEIGHT=1/3` — and ONE argument
+moved: `LabelQualityRank` (per-finding AUC weighting of ranks) instead of `LogitAverage`.
+
+**Read 0.943 against the champion's 0.944.** −0.001, under `BOARD_RESOLVABLE` 0.0015, which is the
+pre-registered 0.9425-0.9455 FLAT branch.
+
+### Why the slot went to a rule that had already measured null four times
+
+All four nulls were offline, on fold-0 pools. The champion is six-of-six `--fold -1`, so no offline
+ruler can see the seating we ship and none of those four contained it. This is the first reading of the
+vote rule at the arrangement that goes to the board.
+
+### What it closes
+
+The combiner is not a lever at six seats. Ninety-three board rows had never once changed the rule by
+which seats combine; this changes it and nothing moves.
+
+### What it does not separate — declared before the slot
+
+A flat cannot tell *the rule is inert* from *the twin-derived weights are too noisy to act on*. Five of
+the six weights are fold-0 twins' holdout AUCs and `final_ws_cf` took the pool mean, because its
+ancestor `final_ws_e12` is dark and no twin was ever trained. `stackvote_v1` (ref 55966986, StackedLogit
+on the same seating) is the second point: it derives its weights by a different fit, so a flat there
+makes the twin-noise reading much harder to hold.
+
+### Not licensed
+
+A third combiner read. `kneemri-rankvote` is built and `run_check`-clean and pre-registers at −0.0003;
+two points already bound this axis inside 0.0015 and a third would spend a slot to confirm a bound.
