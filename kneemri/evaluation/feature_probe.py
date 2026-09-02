@@ -94,6 +94,11 @@ being one instrument applied three times."""
 HOLDOUT_FOLD = 0
 """The fold every member in this project is ranked on. A probe on any other split would be a second ruler."""
 
+WITNESS_STUDIES = 8
+"""How many studies' reduced features and logits ride along with shipping weights. A served probe rebuilds
+the trunk from a mount and re-encodes pixels, so nothing but a stored input-output pair can prove the served
+function is the fitted one — the same reason a member carries a witness."""
+
 
 @dataclass(frozen=True)
 class ProbeResult:
@@ -268,6 +273,13 @@ def main() -> None:
         help="write each probe's held-out predictions as <trunk>_probe.holdout.npz, seatable beside members",
     )
     command.parser.add_argument(
+        "--emit-weights",
+        type=Path,
+        default=None,
+        help="write each probe's SHIPPING weights, fitted on every study, plus a witness sample to check a "
+        "served probe against",
+    )
+    command.parser.add_argument(
         "--choose-penalty",
         action="store_true",
         help="give each trunk the penalty it wants, chosen on a nested split inside the training positions",
@@ -307,6 +319,21 @@ def main() -> None:
                         studies=np.asarray(identifiers)[holdout],
                         predictions=FeatureProbe(penalty).holdout_record(features, truth, holdout, training),
                         truth=truth[holdout],
+                    )
+                if arguments.emit_weights is not None:
+                    arguments.emit_weights.mkdir(parents=True, exist_ok=True)
+                    everything = np.arange(len(identifiers))
+                    shipped = FeatureProbe(penalty).weights(features, truth)
+                    np.savez(
+                        arguments.emit_weights / f"{name}_{readout}_probe.weights.npz",
+                        weights=shipped,
+                        penalty=np.float64(penalty),
+                        readout=readout,
+                        trunk=name,
+                        stem=stem,
+                        witness_studies=np.asarray(identifiers)[everything[:WITNESS_STUDIES]],
+                        witness_features=features[everything[:WITNESS_STUDIES]],
+                        witness_logits=FeatureProbe.predicted(features[everything[:WITNESS_STUDIES]], shipped),
                     )
     Denominator(len(results), "no trunk had a cached feature array to probe").refuse_empty()
 
