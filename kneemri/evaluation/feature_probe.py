@@ -35,6 +35,7 @@ from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
 from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.slice_readout import READOUTS, SliceMean, SliceReadout
 
 LOGGER = logging.getLogger(__name__)
 
@@ -103,14 +104,15 @@ class FeatureProbe:
     @staticmethod
     def pooled(
         array: Float[NDArray[np.floating], "studies slots slices dim"],
-    ) -> Float[NDArray[np.float64], "studies dim"]:
-        """Average a trunk's cache over slots and slices, which is the shape a head is handed.
+        readout: SliceReadout | None = None,
+    ) -> Float[NDArray[np.float64], "studies width"]:
+        """Reduce a trunk's cache to the shape a head is handed, under the given slice readout.
 
-        The pooling is the one thing this instrument imposes on a trunk. It is the same reduction every
-        slot-pooling head starts from, so it is the fairest single choice; it is also why a trunk whose
-        signal is positional reads low here.
+        The pooling is the one thing this instrument imposes on a trunk, which is why it is a strategy
+        and why the default is stated rather than assumed: `SliceMean` is what every trunk number on
+        the ledger was read with, so leaving it out reproduces those numbers exactly.
         """
-        return np.asarray(array, dtype=np.float64).mean(axis=(1, 2))
+        return (readout or SliceMean()).reduce(array)
 
     def weights(
         self,
@@ -184,6 +186,14 @@ def main() -> None:
     command = cli.Command(__doc__, LOGGER)
     command.parser.add_argument("--penalty", type=float, nargs="+", default=[RIDGE], help="ridge penalties to report")
     command.parser.add_argument("--trunks", type=str, nargs="+", default=sorted(TRUNKS), help="trunk names to probe")
+    command.parser.add_argument(
+        "--slice-readout",
+        type=str,
+        nargs="+",
+        default=[SliceMean.name],
+        choices=sorted(READOUTS),
+        help="how the slice axis is reduced before the ridge",
+    )
     arguments = command.parsed()
     root = command.rooted(arguments)
     corpus = ProbeCorpus(processed=root.processed(), raw=root.raw())
@@ -193,13 +203,14 @@ def main() -> None:
         stem = TRUNKS[name]
         identifiers = corpus.identifiers(stem)
         training, holdout = folds.holdout(folds.assign(str(corpus.raw / "train.csv"), identifiers), HOLDOUT_FOLD)
-        features = FeatureProbe.pooled(corpus.features(stem))
         truth = corpus.truth(identifiers)
-        for penalty in arguments.penalty:
-            result = FeatureProbe(penalty).scored(name, features, truth, holdout, training)
-            results.append(result)
-            command.report([f"penalty={penalty:<8} {result.line()}"])
-            command.report([f"    {target} {area:.4f}" for target, area in result.per_label.items()])
+        for readout in arguments.slice_readout:
+            features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
+            for penalty in arguments.penalty:
+                result = FeatureProbe(penalty).scored(f"{name}@{readout}", features, truth, holdout, training)
+                results.append(result)
+                command.report([f"penalty={penalty:<8} {result.line()}"])
+                command.report([f"    {target} {area:.4f}" for target, area in result.per_label.items()])
     Denominator(len(results), "no trunk had a cached feature array to probe").refuse_empty()
 
 

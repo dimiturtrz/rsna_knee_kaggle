@@ -8,6 +8,7 @@ import pandas as pd
 
 from core.findings import TARGETS
 from kneemri.evaluation.feature_probe import FeatureProbe, ProbeCorpus, ProbeResult
+from kneemri.evaluation.slice_readout import SliceMax, SliceMean
 
 
 def _result() -> ProbeResult:
@@ -24,6 +25,13 @@ def test_line() -> None:
     assert "0.7500" in line
 
 
+def _stack() -> np.ndarray:
+    """One study whose channel varies along the stack, against one that is flat there."""
+    array = np.ones((2, 2, 4, 3), dtype=np.float16)
+    array[0, :, 3, :] = 5.0
+    return array
+
+
 def test_pooled() -> None:
     array = np.ones((3, 2, 5, 4), dtype=np.float16)
     array[0] = 3.0
@@ -31,6 +39,13 @@ def test_pooled() -> None:
     assert pooled.shape == (3, 4)
     assert pooled[0, 0] == 3.0
     assert pooled[1, 0] == 1.0
+
+
+def test_pooled_takes_the_readout_it_is_given() -> None:
+    """The default must stay the mean, or every trunk number on the ledger changes silently."""
+    array = _stack()
+    assert FeatureProbe.pooled(array)[0, 0] == FeatureProbe.pooled(array, SliceMean())[0, 0]
+    assert FeatureProbe.pooled(array, SliceMax())[0, 0] == 5.0
 
 
 def test_weights() -> None:

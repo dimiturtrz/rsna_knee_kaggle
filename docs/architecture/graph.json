@@ -1514,6 +1514,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.feature_probe",
+      "target": "kneemri.evaluation.slice_readout",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_gate",
       "target": "core.cli",
       "weight": 1
@@ -11140,6 +11146,18 @@
       "kind": "references",
       "source": "kneemri.evaluation.feature_probe.FeatureProbe",
       "target": "kneemri.evaluation.feature_probe.ProbeResult",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.feature_probe.FeatureProbe",
+      "target": "kneemri.evaluation.slice_readout.SliceReadout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.feature_probe.FeatureProbe.pooled",
+      "target": "kneemri.evaluation.slice_readout.SliceMean",
       "weight": 1
     },
     {
@@ -26799,7 +26817,7 @@
       "role": null
     },
     {
-      "descendants": 204,
+      "descendants": 205,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -26855,7 +26873,7 @@
       "role": null
     },
     {
-      "descendants": 65,
+      "descendants": 66,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -27266,6 +27284,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.side_blindness",
       "label": "side_blindness",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout",
+      "label": "slice_readout",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -30308,6 +30334,38 @@
       "label": "SideBlindness",
       "level": "class",
       "parent": "kneemri.evaluation.side_blindness",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMax",
+      "label": "SliceMax",
+      "level": "class",
+      "parent": "kneemri.evaluation.slice_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMean",
+      "label": "SliceMean",
+      "level": "class",
+      "parent": "kneemri.evaluation.slice_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMoments",
+      "label": "SliceMoments",
+      "level": "class",
+      "parent": "kneemri.evaluation.slice_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceReadout",
+      "label": "SliceReadout",
+      "level": "class",
+      "parent": "kneemri.evaluation.slice_readout",
       "role": "primary"
     },
     {
@@ -40212,6 +40270,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.side_blindness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMax.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.evaluation.slice_readout.SliceMax",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMean.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.evaluation.slice_readout.SliceMean",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceMoments.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.evaluation.slice_readout.SliceMoments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.slice_readout.SliceReadout.reduce",
+      "label": "reduce",
+      "level": "method",
+      "parent": "kneemri.evaluation.slice_readout.SliceReadout",
       "role": null
     },
     {
