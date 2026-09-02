@@ -12,6 +12,9 @@ from core.data.labels.targets import (
     FINDING,
     FINDING_OFFSETS,
     SEVERITY_WEIGHT,
+    SUSPECT,
+    SUSPECT_STUDY,
+    SUSPECT_TARGET,
     WEIGHT_FLOOR,
     Supervision,
     Targets,
@@ -95,6 +98,7 @@ def test_supervised(tmp_path: Path):
         FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
+        SUSPECT: "",
     }
     assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {
         WEIGHT_FLOOR: 0.0,
@@ -102,6 +106,7 @@ def test_supervised(tmp_path: Path):
         FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
+        SUSPECT: "",
     }
 
 
@@ -299,3 +304,31 @@ def test_pair_without_a_calibration_still_shares_one_table(tmp_path: Path):
     training, ruler = Targets.pair(labels, None, train_table, ["a", "b", "c"])
 
     assert training is ruler
+
+
+def test_pruned(tmp_path: Path):
+    """A flag is a (study, finding) pair, and it has to land on the row THIS table gave that study.
+
+    The detector runs over all 4,407 studies and an arm may be fitted on any subset, so a flag naming a
+    study the table does not carry is dropped rather than raised — otherwise a sixty-study smoke would
+    die on the flags it has no row for, which is the one shape that would make the switch unsmokeable.
+    """
+    flags = tmp_path / "flags.csv"
+    pd.DataFrame(
+        {
+            SUSPECT_STUDY: ["b", "absent"],
+            SUSPECT_TARGET: [TARGETS[0], TARGETS[1]],
+        }
+    ).to_csv(flags, index=False)
+
+    mask = Supervision(suspect=flags).pruned(["a", "b", "c"])
+
+    assert mask.shape == (3, len(TARGETS))
+    assert mask[1, 0], "the flagged cell of a study this table carries"
+    assert not mask[:, 1].any(), "a flag naming an absent study lands nowhere rather than raising"
+    assert mask.sum() == 1
+
+
+def test_pruned_without_a_flag_table_is_empty_rather_than_a_branch_at_every_call_site():
+    """The null case is an all-False mask, so `load` never asks whether the switch is on."""
+    assert not Supervision().pruned(["a", "b"]).any()

@@ -96,7 +96,12 @@ CALIBRATED = "calibrated_targets"
 FINDING = "finding_calibration"
 SEVERITY_WEIGHT = "severity_weight"
 ANNOTATIONS = "annotations"
-"""The five label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+SUSPECT = "label_errors"
+"""The six label switches, named where the object that answers for them lives. See `Targets.supervised`."""
+
+SUSPECT_STUDY = "StudyInstanceUID"
+SUSPECT_TARGET = "target"
+"""The two columns of the flag table `kneemri.evaluation.label_errors --flags` writes."""
 
 
 class UncalibratedFindingShiftError(Exception):
@@ -151,6 +156,24 @@ class Supervision:
     finding: bool = False
     """Whether each finding also carries its own shift on top of the pooled level map. Requires `calibrated`."""
 
+    suspect: Path | None = None
+    """A flag table naming the cells an INDEPENDENT signal says the reader got wrong; they pull with nothing.
+
+    Every other switch on this object is a function of what the reader says about ITSELF — its level, its
+    grade, its `__conf`. The defect they cannot reach is the cell where the reader was confident and
+    wrong: over the 58 annotated studies `reader_agreement.errors` counts 108 confident false positives
+    against 32 misses, and `0.25 + 0.75*conf` weights all 108 near 1.0 by construction.
+
+    The flags come from confident learning over out-of-fold predictions the reader never saw
+    (`kneemri.evaluation.label_errors`), which beats a random flagger of the same size 4.05x on those 108.
+    PRUNING rather than down-weighting is cleanlab's own operating point: the confident joint estimates
+    how many cells to disbelieve, so the size of the flagged set is an estimate and not a threshold this
+    project would otherwise have to fit on its own holdout.
+
+    An annotated cell is never pruned. The radiologist's reading is the truth the detector was gated
+    against; dropping it because a model disagrees would delete the evidence.
+    """
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
 
     offsets: tuple[tuple[str, float], ...] = FINDING_OFFSETS
@@ -163,8 +186,29 @@ class Supervision:
         the annotations moves 696 cells back to what the report said about them. Either way the
         ruler has to be re-read plain or the arm earns credit for the labels agreeing with themselves.
         The floor alone does not: it is applied identically to every arm and the control.
+
+        A prune does, and by the most direct route of the four: it sets some cells' weight to zero, and
+        a holdout AUC over a table missing those cells is not the table the control was read on.
         """
-        return self.calibrated or self.finding or self.severity or not self.annotations
+        return self.calibrated or self.finding or self.severity or not self.annotations or self.suspect is not None
+
+    def pruned(self, identifiers: list[str]) -> NDArray[np.bool_]:
+        """The flagged cells as a mask over this table's study order.
+
+        A flag naming a study this table does not carry is DROPPED rather than raised: the detector runs
+        over the whole corpus and an arm may be fitted on any subset of it, so a smoke run on sixty
+        studies would otherwise die on the 4,347 flags it has no row for.
+        """
+        mask = np.zeros((len(identifiers), len(TARGETS)), dtype=np.bool_)
+        if self.suspect is None:
+            return mask
+        row = {identifier: index for index, identifier in enumerate(identifiers)}
+        column = {target: index for index, target in enumerate(TARGETS)}
+        flags = pd.read_csv(self.suspect)
+        for study, target in zip(flags[SUSPECT_STUDY], flags[SUSPECT_TARGET], strict=True):
+            if study in row and target in column:
+                mask[row[study], column[target]] = True
+        return mask
 
     def __post_init__(self) -> None:
         """A per-finding shift without the pooled map under it is a correction applied to the wrong table."""
@@ -279,6 +323,7 @@ class Targets:
             FINDING: self.supervision.finding,
             SEVERITY_WEIGHT: self.supervision.severity,
             ANNOTATIONS: self.supervision.annotations,
+            SUSPECT: str(self.supervision.suspect) if self.supervision.suspect else "",
         }
 
     @classmethod
@@ -307,6 +352,7 @@ class Targets:
         # multiply in float32 instead lands one ULP away on 22,102 of the pairs. Harmless to training,
         # but it would make this refactor unprovable, and an equality oracle is worth more than an ULP.
         ones = np.ones(len(identifiers), dtype=np.float64)
+        read_by_radiologist = np.zeros((len(identifiers), len(TARGETS)), dtype=np.bool_)
         for column, target in enumerate(TARGETS):
             if target in derived.columns:
                 value = derived[target].to_numpy(dtype=np.float32)
@@ -329,6 +375,8 @@ class Targets:
                 read = ~np.isnan(truth)
                 scores[read, column] = truth[read]
                 weights[read, column] = ANNOTATED_WEIGHT
+                read_by_radiologist[read, column] = True
+        weights[supervision.pruned(identifiers) & ~read_by_radiologist] = 0.0
         return cls(scores, weights, identifiers, supervision)
 
     @classmethod

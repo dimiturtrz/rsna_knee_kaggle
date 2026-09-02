@@ -16,6 +16,7 @@ from kneemri.evaluation.label_errors import (
     FALSE_POSITIVE,
     MISSED,
     VERDICT_SUFFIX,
+    DetectedCells,
     DetectorGate,
     GateRow,
     GoldCensus,
@@ -303,3 +304,55 @@ def test_label_error_audit_report(monkeypatch: pytest.MonkeyPatch):
     assert report.corpus_studies == 2 and report.covered_studies == 2
     assert report.quality.tolist() == [0.5, 0.5], "0.2 and 0.8 average to a cell neither seed reported"
     assert int(report.census.false_positive.sum()) == 1 and int(report.census.missed.sum()) == 1
+
+
+def test_frame():
+    """The detector's mask, written as the (study, finding) pairs `Supervision.pruned` joins on.
+
+    Column NAMES are the contract — a frame with the right values under the wrong headers reads as zero
+    flags at training time and every log line still looks healthy, which is the silent shape this pair
+    of columns exists to make loud.
+    """
+    identifiers = ["a", "b", "c"]
+    flagged = np.zeros((len(identifiers), len(TARGETS)), dtype=bool)
+    flagged[2, 1] = True
+    quality = np.zeros_like(flagged, dtype=np.float64)
+    reader = ReaderTable(identifiers, flagged.copy(), flagged.copy())
+
+    frame = DetectedCells(identifiers, reader, quality, flagged).frame()
+
+    assert list(frame.columns) == ["StudyInstanceUID", "target"]
+    assert len(frame) == 1
+    assert frame.iloc[0]["StudyInstanceUID"] == "c"
+    assert frame.iloc[0]["target"] == TARGETS[1]
+
+
+def test_detected(monkeypatch: pytest.MonkeyPatch):
+    """The gate and the training flags are ONE estimate, so the published ruler is read once.
+
+    A second read would also let the flags an arm trains against drift from the flags the gate passed,
+    which is a disagreement neither number can show on its own.
+    """
+    identifiers = ["s0", "s1"]
+    seeds = [np.full((2, len(TARGETS)), 0.2), np.full((2, len(TARGETS)), 0.8)]
+    calls: list[int] = []
+
+    def _counted(self: object) -> tuple[list[str], list[np.ndarray]]:
+        calls.append(1)
+        return identifiers, seeds
+
+    monkeypatch.setattr(
+        "kneemri.evaluation.label_errors.PublishedRuler",
+        lambda published: type("_Stub", (), {"per_seed": _counted})(),
+    )
+    audit = LabelErrorAudit(
+        table=_reader_table({TARGETS[0]: ["YES", "NO"]}),
+        annotated=_annotated({"s0": 0.0, "s1": 1.0}),
+        published=Path("unused"),
+    )
+
+    found = audit.detected()
+
+    assert calls == [1], "one read, not one per reading"
+    assert found.identifiers == identifiers
+    assert found.flagged.shape == found.quality.shape

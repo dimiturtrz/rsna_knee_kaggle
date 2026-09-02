@@ -116,6 +116,7 @@ PLAIN = Request(
     severity_weight=False,
     hold_annotations=False,
     grade_ladder=False,
+    label_errors="",
     side_weight=0.0,
     focus_label="",
     # FOUR, not the trainer's default six: `_FakeBackbone` holds four blocks, so opening "the last

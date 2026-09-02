@@ -218,15 +218,7 @@ class FlagVocabulary:
             "weights them at 3.0, so every other member is scored against a ruler it trained on. The "
             "holdout ruler is re-read WITH them, so this arm stays comparable to every ledger row.",
         )
-        parser.add_argument(
-            "--grade-ladder",
-            action="store_true",
-            help="read the reader's five levels as four ORDERED THRESHOLDS crossed by one latent score "
-            "rather than as five values a logit must land on. Order is all an AUC scores, so the plain "
-            "loss spends the axis it reads on absolute probabilities the metric never sees. Thresholds "
-            "are derived from the measured agreement rates, and nothing downstream changes: the same "
-            "per-label logit is stored and served.",
-        )
+        cls._label_quality_arguments(parser)
         parser.add_argument(
             "--per-label-loss",
             action="store_true",
@@ -362,6 +354,35 @@ class FlagVocabulary:
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
+
+    @staticmethod
+    def _label_quality_arguments(parser: argparse.ArgumentParser) -> None:
+        """What the loss is asked to BELIEVE about a cell, apart from how the objective is shaped.
+
+        Grouped because each rewrites a supervision value before any term reads it — one re-reads the
+        reader's levels as an order, the other withdraws belief from named cells entirely — rather than
+        adding a term to the objective. `parser` reached its statement ceiling and this is the seam it
+        pointed at.
+        """
+        parser.add_argument(
+            "--grade-ladder",
+            action="store_true",
+            help="read the reader's five levels as four ORDERED THRESHOLDS crossed by one latent score "
+            "rather than as five values a logit must land on. Order is all an AUC scores, so the plain "
+            "loss spends the axis it reads on absolute probabilities the metric never sees. Thresholds "
+            "are derived from the measured agreement rates, and nothing downstream changes: the same "
+            "per-label logit is stored and served.",
+        )
+        parser.add_argument(
+            "--label-errors",
+            type=Path,
+            default=None,
+            help="a two-column table of (StudyInstanceUID, target) cells an independent signal calls "
+            "mislabelled; each is given zero loss weight. Written by "
+            "`kneemri.evaluation.label_errors --flags`, whose confident joint SIZES its own flag set, so "
+            "no threshold is fitted here. An annotated cell is never pruned - the radiologist's reading "
+            "is the truth the detector was gated against.",
+        )
 
     @staticmethod
     def _curriculum_arguments(parser: argparse.ArgumentParser) -> None:

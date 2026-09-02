@@ -31,6 +31,7 @@ from core.data.labels.targets import (
     CONFIDENCE_FLOOR,
     FINDING,
     SEVERITY_WEIGHT,
+    SUSPECT,
     WEIGHT_FLOOR,
     Targets,
 )
@@ -244,6 +245,7 @@ class Request:
     severity_weight: bool
     hold_annotations: bool
     grade_ladder: bool
+    label_errors: str
     side_weight: float
     focus_label: str
     unfreeze_last: int
@@ -310,6 +312,7 @@ class Request:
             CALIBRATED: self.calibrated_targets,
             FINDING: self.finding_calibration,
             SEVERITY_WEIGHT: self.severity_weight,
+            SUSPECT: self.label_errors,
             # Re-derived from the FLAG, and inverted here rather than in the options property, for the
             # reason WEIGHT_FLOOR gives above: taking `supervision.annotations` would compare that
             # property's output against itself and pass on whatever it produced.

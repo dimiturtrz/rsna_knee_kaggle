@@ -116,6 +116,7 @@ class TrainingOptions:
     severity_weight: bool = False
     hold_annotations: bool = False
     grade_ladder: bool = False
+    label_errors: Path | None = None
     rank_weight: float = 0.0
     distill_weight: float = 0.0
     feature_weight: float = 0.0
@@ -285,6 +286,7 @@ class TrainingOptions:
             finding=self.finding_calibration,
             severity=self.severity_weight,
             annotations=not self.hold_annotations,
+            suspect=self.label_errors,
         )
 
     @classmethod

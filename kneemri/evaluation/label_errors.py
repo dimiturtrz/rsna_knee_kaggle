@@ -372,6 +372,31 @@ class LabelErrorReport:
 
 
 @dataclass(frozen=True)
+class DetectedCells:
+    """One run of the detector over the corpus, before anything is asked of it.
+
+    The gate reads these four values on the annotated 58 and the training table reads them on all 4,407,
+    and they are the SAME estimate — `PublishedRuler.per_seed` is minutes of I/O, and a second call would
+    also let the flags an arm trains against drift from the flags the gate passed.
+    """
+
+    identifiers: list[str]
+    reader: ReaderTable
+    quality: Float[np.ndarray, "studies targets"]
+    flagged: Bool[np.ndarray, "studies targets"]
+
+    def frame(self) -> pd.DataFrame:
+        """The flagged cells as the two-column table `core.data.labels.targets.Supervision.pruned` reads."""
+        rows, columns = np.nonzero(self.flagged)
+        return pd.DataFrame(
+            {
+                "StudyInstanceUID": [self.identifiers[row] for row in rows],
+                "target": [TARGETS[column] for column in columns],
+            }
+        )
+
+
+@dataclass(frozen=True)
 class LabelErrorAudit:
     """The whole measurement: a corpus-wide detector, restricted to the cells a radiologist scored.
 
@@ -389,12 +414,17 @@ class LabelErrorAudit:
     published: Path
     """Where the twenty published checkpoints carrying the `oof` blocks were unzipped."""
 
-    def report(self) -> LabelErrorReport:
-        """Run the detector over every study the ruler covers, then gate it on the annotated cells."""
+    def detected(self) -> DetectedCells:
+        """Run the detector over every study the ruler covers."""
         identifiers, per_seed = PublishedRuler(self.published).per_seed()
         reader = ReaderTable.of(self.table, identifiers)
         detector = LabelErrorDetector(np.mean(np.stack(per_seed), axis=0), reader)
-        return self.gated(identifiers, reader, detector.quality(), detector.flagged())
+        return DetectedCells(identifiers, reader, detector.quality(), detector.flagged())
+
+    def report(self) -> LabelErrorReport:
+        """Run the detector over every study the ruler covers, then gate it on the annotated cells."""
+        found = self.detected()
+        return self.gated(found.identifiers, found.reader, found.quality, found.flagged)
 
     def gated(
         self,
@@ -434,13 +464,19 @@ def main() -> None:
     """Score the reader's cells by confident learning, and gate the flags on the annotated 58."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, default=None, help="the reader table to audit")
+    command.parser.add_argument("--flags", type=Path, default=None, help="write the flagged cells here")
     arguments = command.parsed()
 
     root = command.rooted(arguments)
     labels = arguments.labels or root.processed() / DEFAULT_LABELS
     logger.info(f"auditing {labels} against the published out-of-fold ruler")
     audit = LabelErrorAudit(pd.read_csv(labels), ReaderAgreement.annotated(root), root.processed() / "published")
-    command.report(audit.report().lines())
+    found = audit.detected()
+    command.report(audit.gated(found.identifiers, found.reader, found.quality, found.flagged).lines())
+    if arguments.flags is not None:
+        frame = found.frame()
+        frame.to_csv(arguments.flags, index=False)
+        logger.info(f"wrote {len(frame)} flagged cells to {arguments.flags}")
 
 
 if __name__ == "__main__":

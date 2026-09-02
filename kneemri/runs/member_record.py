@@ -90,6 +90,11 @@ NOT_IN_CONFIG = {
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",
+    "label_errors": "a SUPERVISION policy — it zeroes the loss weight of the cells a flag table names "
+    "and touches no module, no parameter and no loss term, so the twelve-logit head a rebuild serves is "
+    "byte-identical. The file it names is a fact about which cells the epochs descended on, like "
+    "`sample_spread`, and the witness that it landed is the run's own recipe block plus the flag "
+    "table's row count, never the checkpoint",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",
