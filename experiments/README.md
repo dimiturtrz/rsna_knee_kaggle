@@ -6717,3 +6717,41 @@ re-read and the negation pass — and it retires the lane rather than the one fi
 worth +0.0075 on the first is well inside the second's noise in both directions, so this arm bounds how
 BIG a label effect can be, not whether one exists. The honest statement is that no label correction this
 project can validate is worth more than the floor, so no further card time goes to the lane.
+
+## crop160_span — the field widened, and the margin story splits (2026-09-02)
+
+`crop160_span` ran 12/12 epochs and peaked **0.8564 at e8** against its control **band_span 0.8565**:
+**-0.0001**, the arm's own NULL branch on the mean. bead knee-ii0q.
+
+The arm was not written for the mean. It was written because `crop80_span` cropped IN, 130 mm -> 80 mm,
+and lost most on the structures at the field's margins — MCL -0.0265, ACL -0.0263, against a mean of
+-0.0099 — and the decode-geometry family was closed on reading that pair as ONE margin effect. Nothing
+had ever been read going out. This is that read, at 420 px so mm/px is held (0.381 vs 0.387) and field
+of view is not confounded with resolution.
+
+**Going out, the pair splits.** Peak-epoch per-label against the same control:
+
+| finding | crop160_span | band_span | delta |
+|---|---|---|---|
+| MCL | 0.7955 | 0.7869 | **+0.0086** |
+| ACL | 0.8730 | 0.8854 | **-0.0124** |
+| Fracture | 0.8184 | 0.8146 | +0.0038 |
+| Lateral Meniscus | 0.8399 | 0.8406 | -0.0007 |
+| Medial Meniscus | 0.9031 | 0.9042 | -0.0011 |
+| mean | 0.8564 | 0.8565 | -0.0001 |
+
+One mechanism cannot lose both structures together when the field narrows and then move them in opposite
+directions when it widens. So the margin explanation is wrong about at least one of MCL and ACL, and the
+likeliest reading is that ACL's loss under crop80 was never about the margins at all — it is central in
+the frame, and what it lost going in was the joint's FRACTION of the frame rather than tissue at the edge.
+Going out, that fraction falls again (60% of series cannot fill a 160 mm frame and are padded), which
+would cost ACL in both directions. That is a testable statement and nothing here tests it.
+
+**What this does NOT do.** It does not re-open the decode-geometry family. Both per-label moves sit inside
+per-label noise: the 0.0062 paired floor is computed on the MEAN over twelve findings, and a single label
+carries fewer positives, so its half-width is WIDER, not narrower. Reading +0.0086 on one label as a
+result would be exactly the denominator error CLAUDE.md names. The closure stands on the mean; what it
+loses is its explanation.
+
+Rostered as shippable (0.8564 clears the 0.8521 non-DINOv2 bar, and it is the pool's only member fitted
+at a field wider than 130 mm), not as a seat claim.

@@ -50,6 +50,13 @@ TRUNKS: dict[str, str] = {
     # instrument, and the instrument is the flag set, so only this pair's own delta is controlled.
     "v3large": "features_v3large_336px_12sl_r256_mean_max",
     "ortholarge": "features_ortholarge_336px_12sl_r256_mean_max",
+    # The only VOLUMETRIC trunk in this table (`knee-6hfi`). OrthoDiffusion reads a whole (16, 256, 256)
+    # stack through three plane-specific 3D U-Nets, so its row is NOT controlled against the ones above:
+    # different read size, different pooling (`gap256` over a volume, not `mean_max` over slices), and a
+    # denoising objective rather than a discriminative one. That is why the model's own docstring says a
+    # ridge probe here is width-sensitive and a LOSS is confounded with capacity -- only a WIN is clean.
+    # Read it against dinov2-large 0.7852 / v3large 0.7446 / ortholarge 0.7387 on that understanding.
+    "orthodiff": "orthodiff_images_336px_12sl_r256_gap256_volume",
     # The readout sweep (`experiments/arms/readout_probe.sh`, knee-n647). The rows above hold BOTH
     # poolings at their diluting end -- `mean` over patches, then `max` over slices -- and the three
     # numbers they produced closed two members. These eight move the two axes independently over the

@@ -180,3 +180,38 @@ them, and one pre-registered target. The lane could still close: if item 1 lands
 instrument moves nothing, then 0.83 is what these architectures are worth on this corpus and the diversity we
 bought with `swin_supervised` has nowhere to be spent. That is a real outcome and it should be written up as
 one, not quietly left open.
+
+## 2026-09-02 — the title survives, the reason changes, and the lane is narrower than "non-dino"
+
+This doc closed the supervised-ImageNet lane on `vit_in21k`'s 0.7847. That run is **TRUNCATED** —
+`convergence_check` reads best epoch 4 of 5 run against 12 asked, and `vit_in21k_s2026.pt` is not on
+disk at all (the number survives only in `metrics.jsonl`). So the number was a FLOOR, and the closure
+rested on a killed process rather than on a ceiling. Q-BA established that our 12-epoch recipe is tuned
+to DINOv2 and that published supervised-IN medical fine-tuning runs 50-150 epochs, with SSL converging
+4-5x faster (Kalapos ECCV 2022, arXiv:2209.00314) — which would have made 12 epochs an unfair budget
+for this trunk regardless of the truncation.
+
+Q-BB asked for the CEILING instead of the rate, and the answer holds the closure up on better evidence:
+
+- **Müller-Franzes et al. 2025** (Sci Rep, arXiv:2411.15802) compare MST-DINOv2 against MST-ResNet —
+  identical downstream architecture, identical budget (AdamW, early stopping at 50-epoch patience), the
+  slice encoder the only difference — on **MRNet knee MRI**. Supervised ImageNet 0.78 +/- 0.04 against
+  self-supervised 0.85 +/- 0.04: a **0.07 gap on knee MRI at matched long budget**. Our `vit_in21k` gap
+  is 0.068. Two different knee-MRI tasks, the same effect size.
+- **Our own disk is the stronger control.** `swin_supervised_s2026` is a converged supervised
+  ImageNet-22k trunk at **0.8331**, only 0.018 under DINOv2-B, while `vit_in21k` sits 0.067 under. The
+  0.049 spread BETWEEN two supervised-ImageNet trunks is far larger than the Swin-to-DINOv2 gap.
+
+So the correction: **supervised ImageNet pretraining is not the thing that fails here — this ViT B/16
+IN-21k checkpoint is.** The doc's title is right about the lane and wrong about the population; "non-dino"
+covers a trunk sitting 0.018 off DINOv2 and one sitting 0.067 off, and treating them as one family is
+what made a single truncated run look like a lane-wide verdict.
+
+**Decision: no 50-epoch `vit_in21k` rerun.** Priced at ~5.7 card-hours to confirm a ceiling the
+literature already reports at the same effect size. What the arm would buy is a number we can predict.
+
+**What this does NOT close.** The supervised-ImageNet axis is answered; the MEDICAL-pretraining axis is
+untouched and is a different mechanism (in-domain features, not a different objective on natural images).
+RadImageNet DenseNet121 remains the open lever. Note the bar it must clear: the non-DINOv2 seat bar is
+**0.8521**, and the best supervised-ImageNet trunk we own reaches 0.8331 — so "beats ViT IN-21k" is not
+the test, and neither is "beats Swin". Only 0.8521 seats.

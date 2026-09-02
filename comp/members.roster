@@ -607,9 +607,26 @@ certainty_ramp_s2026.pt              # 0.8584
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
 slot_dropout_s2026.pt                # 0.8592 - best single member the project owns
-disagreed_ramp_s2026.pt  # THE CERTAINTY RAMP, 0.8574 holdout (converged, peak epoch 7 of 12). Weights a
+disagreed_ramp_s2026.pt  # THE DISAGREEMENT RAMP, 0.8574 holdout (converged, peak epoch 7 of 12). Weights a
                          # study by how much the report's own annotators disagreed, RAMPED over training
                          # rather than applied flat: +0.0067 over disagreed_uniform_s2026's 0.8507, its
                          # matched control, which is the only reading on this pair. Level with the best
                          # member the pool holds (band_dense 0.8578) and second to slot_dropout 0.8592.
                          # Rostered because it is shippable, not because a seat is claimed for it.
+
+crop160_span_s2026.pt       # 0.8564 — the 160 mm field at 420 px, mm/px held (0.381 vs the 130 mm
+# recipe's 0.387). Added 2026-09-02. Rostered as SHIPPABLE, not as a seat claim: it clears the 0.8521
+# non-DINOv2 bar and it is the only member fitted at a field wider than 130 mm, so it is the pool's one
+# reading of coverage going OUT. It is NOT better than its control — band_span 0.8565, delta -0.0001,
+# which is the arm's own NULL branch on the mean.
+#
+# THE PER-FINDING SPLIT IS WHY IT IS HERE. crop80_span cropped IN and lost MCL -0.0265 and ACL -0.0263
+# TOGETHER, and the decode-geometry family was closed on reading those two as one margin effect. Going
+# OUT they move in OPPOSITE directions: MCL +0.0086 (0.7955 vs 0.7869), ACL -0.0124 (0.8730 vs 0.8854).
+# One mechanism cannot produce a paired loss going in and a split going out, so the margin story is
+# wrong about at least one of the two structures.
+#
+# WHAT IT DOES NOT LICENSE. Both moves are inside per-label noise — the 0.0062 floor is on the MEAN and
+# a single label carries fewer positives, so its half-width is wider, not narrower. This is DIRECTIONAL
+# and it does not re-open the decode-geometry family. The ledger's closure stands on the mean; what it
+# loses is the explanation, not the verdict.
