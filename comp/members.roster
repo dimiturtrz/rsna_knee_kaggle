@@ -637,3 +637,15 @@ crop160_span_s2026.pt       # 0.8564 — the 160 mm field at 420 px, mm/px held 
 ramp_dense_gate.pt                  # 0.8579, e7 — the ramp recipe with the dense gate
 stack_increments_base_s2026.pt      # 0.8635, e9 — second-best solo the pool holds
 stack_increments_fx_s2026_run1.pt   # 0.8595, e6 — the fx twin's first run; the second is TRUNCATED
+certainty_ramp_s2026.pt     # 0.8584 peak e8, CONVERGED (12 of 12, convergence_check clean). Clears the 0.8459
+                            # merit level and outscores twenty seated members. Seated on merit, NOT on the ramp
+                            # lever: against its own control calib_dense_hold_s2026 (0.8634) it reads -0.0050,
+                            # and its two siblings land inside noise of it (disagreed_ramp 0.8574,
+                            # ramp_dense_gate 0.8578, which is declined on exactly that control delta). Three
+                            # converged ramp arms spanning 0.8574-0.8584 against a 0.8634 control is a
+                            # three-arm family read pointing DOWN: the certainty ramp does not pay at this
+                            # operating point. What seats here is the CHECKPOINT; the LEVER is closed.
+disagreed_ramp_s2026.pt     # 0.8574 peak e7, CONVERGED. Same argument as certainty_ramp above and the same
+                            # family verdict; seated on merit so the pool is complete, not because the ramp
+                            # earned anything. Re-open the LEVER only where supervision is thin, which is the
+                            # condition ramp_dense_gate's decline named and no ramp arm has ever been run under.

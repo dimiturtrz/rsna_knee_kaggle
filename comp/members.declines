@@ -243,3 +243,11 @@ ramp_dense_gate — 0.8578 at its peak epoch 7, against calib_dense_hold_s2026 0
   place it would be re-opened is the three extreme-UNK labels (Synovitis 84.2%, Fracture 56.4%,
   Baker's 45.9%) rather than all twelve, which is the same surviving clause confident224 left behind.
   Answer this decline with a per-label run, never by re-quoting 0.8578. knee-fxgm.
+ortho_lpft_head.pt          # 0.7537 peak e11 (12 of 12, CONVERGED) — stage ONE of the OrthoDiffusion LP-FT
+                            # pair (knee-6hfi): the ortholarge trunk FROZEN, head-only, unfreeze_last 0. It
+                            # exists to produce a warm start for stage two, never a seat, which is the same
+                            # role swin_distill_pre was declined in. The number is still a real read and the
+                            # one this arm was armed for: a frozen OrthoDiffusion trunk carries 0.7537 against
+                            # base224's 0.8509 on the same 909-study holdout, i.e. -0.097. Stage two
+                            # (ortho_lpft_s2026, unfreeze_last 6, whole stack) is what prices the trunk;
+                            # re-open on THAT number, never on this one.
