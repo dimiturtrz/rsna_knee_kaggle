@@ -8,8 +8,8 @@ competition ships only study-level labels and we cannot annotate spatial labels?
 
 | rank | route | repo | licence | weights today? | fit to our sequences | recommendation |
 |---|---|---|---|---|---|---|
-| 1 | **MRAnnotator** (knee) | https://github.com/lzl199704/MRAnnotator | CC-BY-NC 4.0 | ✅ Google Drive `1bqBmvq84ImOZMDtsXWIyMSvE0m-gDzBL` | **sagittal PD, PD FS, T2, T2 FS** — same clinical family | **Act on tonight.** Bone segmentation defines a stable crop box. |
-| 2 | **CartiMorph-Toolbox** | https://github.com/YongchengYAO/CartiMorph-Toolbox | CC-BY-NC 4.0 | ✅ checkpoints + OAIZIB-CM data (HF/Zenodo/GDrive) | OAI 3D DESS — domain shift to our 2D TSE | Most anatomically complete, but needs resampling/reorientation. |
+| 1 | **MRAnnotator** (knee) | https://github.com/lzl199704/MRAnnotator | CC-BY-NC 4.0 | ❌ README link is dead (`FileURLRetrievalError`; not world-readable) | **sagittal PD, PD FS, T2, T2 FS** — same clinical family | Best sequence fit, but not actionable until authors fix the link. |
+| 2 | **CartiMorph-Toolbox** | https://github.com/YongchengYAO/CartiMorph-Toolbox | CC-BY-NC 4.0 | ✅ `Models/segModel-OAIZIB-19Mar2024.zip` (~229 MB) and `regModel-OAIZIB-19Mar2024.zip` (~22 MB) directly from GitHub | OAI 3D DESS — domain shift to our 2D TSE | Most anatomically complete **and fetchable tonight**. |
 | 3 | **SKM-TEA model zoo** | https://github.com/StanfordMIMI/skm-tea | code MIT; weights not explicitly licensed | ✅ HuggingFace `arjundd/skm-tea-models` | **qDESS echoes only** | Poor transfer to PD/T2; useful if we later add qDESS. |
 | 4 | **IWOAI 2019 / DOSMA** | https://github.com/denizlab/2019_IWOAI_Challenge, https://github.com/ad12/DOSMA | GNU AGPLv3 / GPL v3 | ✅ cartilage weights exist | OAI DESS; TF 1.13 / IBM Power path | Not recommended — licence and stack are hostile. |
 | 5 | attention-rollout / atlas / weak MIL | various | n/a | ❌ no actionable checkpoint | n/a | Thin or no measured evidence for knee MRI stage-one. |
@@ -18,25 +18,27 @@ competition ships only study-level labels and we cannot annotate spatial labels?
 
 ### 1.1 MRAnnotator — the most actionable route
 
-MRAnnotator (Chen et al., *Radiology: Artificial Intelligence* 2025, also arXiv
-2403.16613) releases nnU-Net V2 models for whole-body MRI plus a dedicated
-**Dataset002 Shoulder/Knee** model.
+MRAnnotator (Zhou et al., *Radiology Advances* 2024, arXiv 2402.01031) releases
+nnU-Net V2 models for whole-body MRI plus a dedicated **Dataset002 Shoulder/Knee**
+model.
 
 - **What it outputs:** femur, patella, fibula, tibia masks on sagittal knee MRI.
   Bones-only is enough to define a crop box (e.g. bounding box of all bone masks
   plus margin).
 - **Sequences it was trained on:** sagittal PD, PD FS, T2, T2 FS — the same
   Turbo-Spin-Echo family the RSNA competition uses.
-- **Weights:** Google Drive file id `1bqBmvq84ImOZMDtsXWIyMSvE0m-gDzBL`, linked
-  from the GitHub README.
+- **Weights:** the README lists Google Drive file id
+  `1bqBmvq84ImOZMDtsXWIyMSvE0m-gDzBL`, but as of 2026-09-02 the link is not
+  world-readable (`gdown FileURLRetrievalError`). No HuggingFace, Zenodo,
+  release-asset or in-repo mirror was found.
 - **Licence:** CC-BY-NC 4.0. Non-commercial; a Kaggle research/non-profit
   submission is likely permitted, but the Kaggle rules should be checked before
   a final submission.
-- **Inference:** standard nnUNetv2_predict one-liner once the checkpoint is
-  placed in the nnU-Net results folder.
+- **Inference:** standard nnUNetv2_predict one-liner once a working checkpoint is
+  obtained.
 
-This is the only route with downloadable weights, a permissive-enough licence,
-and training data that overlaps our acquisition family.
+This is the route with the best sequence fit, but it is not actionable until the
+authors refresh the sharing link or provide a mirror.
 
 ### 1.2 CartiMorph-Toolbox — most complete anatomy, but domain shift
 
@@ -47,7 +49,13 @@ registration around the **CLAIR-Knee-103R** template.
   registration.
 - **Training data:** OAI 3D DESS (dual-echo steady-state), which is 3D and has
   different contrast from our 2D TSE PD/T2 FS slices.
-- **Weights:** available via HuggingFace, Zenodo and Google Drive from the repo.
+- **Weights:** fetchable directly from GitHub:
+  - segmentation:
+    https://github.com/YongchengYAO/CartiMorph-Toolbox/raw/main/Models/segModel-OAIZIB-19Mar2024.zip
+    (~229 MB)
+  - registration/template:
+    https://github.com/YongchengYAO/CartiMorph-Toolbox/raw/main/Models/regModel-OAIZIB-19Mar2024.zip
+    (~22 MB)
 - **Licence:** CC-BY-NC 4.0.
 - **Caveat:** the whole pipeline is built around reorientation, resampling and
   central cropping to the DESS space. Transfer to our clinical 2D sequences is
@@ -112,18 +120,24 @@ competition data:
 Where spatial supervision was available, stage-one detectors were trained
 natively. Where it was not, the top solutions still staged, but usually around a
 pretrained anatomy model or a coarse prior. This weakens the raw 9/9 transfer to
-our setting, but does not eliminate it: MRAnnotator gives us a pretrained
-anatomy model without new labels.
+our setting, but does not eliminate it if a pretrained anatomy model can be
+obtained.
 
-## Recommendation
+## Recommendation (updated 2026-09-02)
 
-1. **Tonight:** download MRAnnotator Dataset002, run inference on a few of our
-   sagittal studies, and compute the bounding box of {femur, tibia, patella,
-   fibula}. Replace the fixed 130 mm centre crop with that box (+ margin) and
-   measure the holdout AUC delta on one existing member.
-2. **If MRAnnotator fails to transfer:** try CartiMorph-Toolbox as the more
-   complete but higher-friction fallback.
-3. **File a bead** to track the MRAnnotator experiment and the licence check.
+1. **Fetchable tonight:** download CartiMorph-Toolbox
+   `segModel-OAIZIB-19Mar2024.zip` (~229 MB) and test whether the nnU-Net v1
+   checkpoint can be loaded outside the Matlab app. If yes, run it on a few of
+   our studies (after the required reorientation/resampling) and measure the
+   holdout AUC delta.
+2. **In parallel:** open a GitHub issue on MRAnnotator asking for a refreshed
+   sharing link or a mirror. If the authors respond, MRAnnotator remains the
+   better sequence match.
+3. **If neither works:** the no-label localizer route is blocked; the honest
+   conclusion is that a stage-one crop without spatial labels is not available
+   off-the-shelf today.
+4. **File a bead** to track whichever checkpoint is pursued and the licence
+   check.
 
 ## Sources
 
