@@ -2606,6 +2606,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.study_errors",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.study_errors",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.study_errors",
+      "target": "kneemri.evaluation.gold_rows",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.study_errors",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.study_errors",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.supervision_gap",
       "target": "core.bootstrap",
       "weight": 1
@@ -15379,6 +15409,90 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.study_errors.StudyErrors",
+      "target": "kneemri.evaluation.study_errors.StudyDamage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.StudyErrors.damages",
+      "target": "kneemri.evaluation.study_errors.StudyErrors.discordant",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.study_errors.StudyErrors.ranked",
+      "target": "kneemri.evaluation.study_errors.StudyDamage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.StudyErrors.ranked",
+      "target": "kneemri.evaluation.study_errors.StudyErrors.sided",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.study_errors.TailProfile",
+      "target": "kneemri.evaluation.study_errors.StudyDamage",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.study_errors.TailProfile",
+      "target": "kneemri.evaluation.study_errors.TailProfile",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.study_errors.StudyErrors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.study_errors.StudyErrors.damages",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.study_errors.StudyErrors.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.evaluation.study_errors.TailProfile.cut",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_errors.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.supervision_gap.SupervisionGap",
       "target": "kneemri.evaluation.gold_rows.GoldRows",
@@ -26059,7 +26173,7 @@
       "role": null
     },
     {
-      "descendants": 200,
+      "descendants": 201,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -26115,7 +26229,7 @@
       "role": null
     },
     {
-      "descendants": 62,
+      "descendants": 63,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -26534,6 +26648,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.stack_coverage",
       "label": "stack_coverage",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors",
+      "label": "study_errors",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -29512,6 +29634,30 @@
       "label": "StackCoverageReport",
       "level": "class",
       "parent": "kneemri.evaluation.stack_coverage",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyDamage",
+      "label": "StudyDamage",
+      "level": "class",
+      "parent": "kneemri.evaluation.study_errors",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyErrors",
+      "label": "StudyErrors",
+      "level": "class",
+      "parent": "kneemri.evaluation.study_errors",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.TailProfile",
+      "label": "TailProfile",
+      "level": "class",
+      "parent": "kneemri.evaluation.study_errors",
       "role": "satellite"
     },
     {
@@ -39288,6 +39434,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.stack_coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyDamage.direction",
+      "label": "direction",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.StudyDamage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyErrors.damages",
+      "label": "damages",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.StudyErrors",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyErrors.discordant",
+      "label": "discordant",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.StudyErrors",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyErrors.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.StudyErrors",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.StudyErrors.sided",
+      "label": "sided",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.StudyErrors",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.TailProfile.cut",
+      "label": "cut",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.TailProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.TailProfile.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors.TailProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.study_errors.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.study_errors",
       "role": null
     },
     {
