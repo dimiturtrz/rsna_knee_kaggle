@@ -23,6 +23,7 @@ from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.landed import Landed
 from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
+from kneemri.training.warm_start import WarmStart
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,10 @@ def main() -> None:
     # silent interpolation of the position embeddings onto a grid the weights never saw.
     encoder.require_tiling(arguments.train_size or arguments.image_size)
     model = setup.model(encoder, len(SCHEMES[arguments.scheme]), design, device)
+    # BEFORE the trainer, because the optimiser is assembled against this model's parameters and a
+    # warm start must be the thing it starts optimising, not a load that lands after the first step.
+    if arguments.init is not None:
+        logger.info("%s", WarmStart(arguments.init).applied(model))
     trainer = setup.trainer(model, device, identifiers, training, targets.corpus)
     # BEFORE THE CARD IS SPENT, and this is the last moment it can be asked: from here on the only
     # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once

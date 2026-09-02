@@ -156,6 +156,10 @@ class TrainingOptions:
     cache_studies: int = 0
     """How many studies the cache being READ holds; 0 is the full one. Names a different file (knee-35yc)."""
 
+    init: Path | None = None
+    """A member on disk whose weights this run STARTS from, in place of a fresh head over a published
+    trunk. The second half of LP-FT; see `kneemri.training.warm_start.WarmStart` for the mechanism."""
+
     unfreeze_last: int = Adaptation().unfreeze_last
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr

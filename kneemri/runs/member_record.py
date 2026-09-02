@@ -51,6 +51,11 @@ NOT_IN_CONFIG = {
     "folds": "banned for the same reason",
     "fold": "which half was held out — a property of the SCORE, and `holdout` is what serves it",
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
+    "init": "where the walk STARTED — the second stage of an LP-FT pair loads a member instead of a "
+    "fresh head, which changes nothing about the module a rebuild constructs and everything about "
+    "where its parameters came to rest. Those parameters ARE the checkpoint. The recipe block carries "
+    "the path, which is where a two-stage arm's provenance is read from, and the run's log opens with "
+    "the warm-start line `WarmStart.applied` returns",
     "certainty_ramp": "a curriculum over the LABEL WEIGHTS, which live in the training table rather than "
     "in the member: it changes how fast the run came to trust each cell and leaves nothing behind to "
     "rebuild, exactly as the schedule write-off above does. The recipe block carries it, which is where "

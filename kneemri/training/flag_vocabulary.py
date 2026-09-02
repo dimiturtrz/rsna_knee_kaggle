@@ -427,9 +427,9 @@ class FlagVocabulary:
             default=None,
             help="draw each epoch's studies in proportion to how much a reference pool DISAGREED about "
             "them, from a file written by kneemri.evaluation.train_disagreement. Every arm on the ledger "
-            "draws a uniform permutation instead; residual_split put ~70% of the pool's errors in the "
+            "draws a uniform permutation instead; residual_split put ~70%% of the pool's errors in the "
             "band the family splits on, and this is the only lever aimed at it. Loss-ranked mining is "
-            "the conventional alternative and is wrong here: ~87% of the residual is aleatoric, so it "
+            "the conventional alternative and is wrong here: ~87%% of the residual is aleatoric, so it "
             "mines label noise. The epoch keeps its length, so the compute is matched.",
         )
         parser.add_argument(
@@ -621,6 +621,19 @@ class FlagVocabulary:
             "a measurement: with 58 image-read labels the early generic blocks may have too little "
             "supervision to improve and enough to damage. Capacity is the only axis that has ever "
             "cleared our noise floor, so the hypothesis is worth testing rather than inheriting.",
+        )
+        parser.add_argument(
+            "--init",
+            type=Path,
+            default=None,
+            help="start from a member already on disk instead of from the encoder's published weights "
+            "plus a fresh head. The one flag LP-FT needs: stage one trains a head over a FROZEN trunk "
+            "(--unfreeze-last 0), stage two points --init at that checkpoint and unfreezes at a low "
+            "backbone rate. Kumar et al. (arXiv:2202.10054) measure fine-tuning from a fresh head "
+            "distorting pretrained features ~20x more than fine-tuning from a fitted one, which is the "
+            "shape radnet_family produced here: 0.8197 frozen, 0.6716 fine-tuned, same weights. The "
+            "checkpoint's DESIGN is not read back - this loads weights into the model these flags "
+            "describe, so a mismatched architecture raises here rather than training something else.",
         )
         parser.add_argument("--head-lr", type=float, default=Adaptation().head_lr)
         parser.add_argument(
