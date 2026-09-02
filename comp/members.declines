@@ -216,3 +216,20 @@ errors_dense_s2026   # DECLINED AS A SEAT, 2026-09-02. Greedy seat value -0.0010
                      # saw the same pixels. errors_v3small (running, finishes ~08:05Z 2026-09-02) asks
                      # the same corpus question on a trunk the pool does not hold, and THAT is the arm
                      # this decline defers to.
+
+errors_v3small_s2026 # DECLINED AS A SEAT, 2026-09-02. Best 0.8280 at epoch 6, CONVERGED (patience
+                     # fired; convergence_check reads it converged, not truncated, so the number is a
+                     # decision and not a floor). That is 0.0298 under band_dense 0.8578 and 0.0241
+                     # under the 0.8521 non-DINOv2 seat bar, so it seats nothing and no greedy seat
+                     # trial is owed.
+                     # IT IS THE ARM errors_dense's DECLINE DEFERRED TO, and it answers that deferral
+                     # in the negative. errors_dense asked the label-error-corpus question on the
+                     # pool's own dense monoculture and read -0.0010; this asked it on a trunk the pool
+                     # does NOT hold, so a corpus effect could not hide behind six members that saw the
+                     # same pixels. It did not appear. The label-error-flagged corpus is now measured
+                     # on two trunks, one inside the monoculture and one outside it, and neither pays.
+                     # WHAT IT DOES NOT CLOSE: v3small is the weaker half of a family whose LARGE member
+                     # probes 0.0406 under dinov2-large (see the ortho_dense decline above), so this is
+                     # a corpus reading taken on a trunk that was carrying a handicap into it. It closes
+                     # the label-error corpus as a SEAT lever; it does not price the corpus on a trunk
+                     # that is competitive to begin with.
