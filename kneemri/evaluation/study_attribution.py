@@ -2,7 +2,7 @@
 
 `study_errors` ranks the holdout by the pairs each study loses and stops there. A ranking is not an
 attribution: it says the worst tenth is 84% over-ranked and carries MORE positives than the body, and
-those are facts about the ordering, not about a cause. This module asks the three questions that can
+those are facts about the ordering, not about a cause. This module asks the four questions that can
 actually be settled from evidence already on disk, in the order that makes each one admissible.
 
 FIRST, IS IT THE STUDY AT ALL? A study that only THIS member ranks badly is a fact about the member —
@@ -23,7 +23,15 @@ THE CONTROL IS THE WHOLE MEASUREMENT. Every category rate is quoted against the 
 the body — the study's worst negative cell, classified the same way — because these cue rates are high
 everywhere and a tail number alone would read as a cause when it is a base rate.
 
-THIRD, IS IT ACQUISITION? Plane coverage, fluid sensitivity and fat suppression are recorded per series,
+THIRD, WAS THE CELL SUPERVISED AT ALL? A report-derived zero is not one thing. `NO` carries value 0.08
+and is a read; `UNK` carries 0.28, which is a BASE RATE the reader fell back to because it had nothing to
+say. Both binarise to a negative label and are indistinguishable in the truth array, but only the first
+is supervision. This matters because 2026-08-26 measured that silence tracks ABSENCE — the radiologist
+calls 13.6% of silent cells positive against 41.6% of spoken ones — so a tail enriched in silence is NOT
+licensed to be read as a tail of wrong labels. The `UNK` rate says which of the two it is, and it is read
+here so that the SILENCE grouping above cannot be quoted as label error without it.
+
+FOURTH, IS IT ACQUISITION? Plane coverage, fluid sensitivity and fat suppression are recorded per series,
 so what a study was imaged WITH is a covariate the tail can be compared on. This is the axis most likely
 to come back null: the sequence axis has been swept and re-swept, and it is read here to be RETIRED as an
 explanation rather than in hope.
@@ -46,6 +54,7 @@ from numpy.typing import NDArray
 from core import cli
 from core.data.labels.overcall_audit import CATEGORIES, GENUINE, LATERALITY, UNLOCATED, OvercallAudit
 from core.data.labels.report_language import ReportLanguages
+from core.data.labels.report_reader import UNSURE
 from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT
 from kneemri.evaluation.study_errors import StudyDamage, StudyErrors
@@ -89,6 +98,12 @@ without this floor reported `hedge_dropped` as separating at 2.5 sigma off 0 cel
 4 in the body — a standard error of 0.002 computed at a rate of exactly zero, which is not a small
 uncertainty but an inapplicable formula. A category too rare to model is reported as too rare, and
 the difference is left unread."""
+
+UNREAD_VALUE = 0.28
+"""The value an `UNK` cell carries in `report_labels_v2.csv` — the corpus base rate, not a read.
+
+Quoted in the line rather than computed from the table, because it is the READER's constant and a
+mean taken over this holdout would move with the split while the mechanism did not."""
 
 CHANCE = TAIL_FRACTION
 """What tail overlap means NOTHING. Two independent tenths of the same corpus share a tenth of their
@@ -182,6 +197,36 @@ class LabelCause:
 
 
 @dataclass(frozen=True)
+class SupervisionCause:
+    """How many of each stratum's negative cells were never read at all, only defaulted."""
+
+    tail: int
+    tail_total: int
+    body: int
+    body_total: int
+
+    def lines(self) -> list[str]:
+        """The unread rate on both sides, and what a separation there would mean about the SILENCE row."""
+        tail_rate = self.tail / max(self.tail_total, 1)
+        body_rate = self.body / max(self.body_total, 1)
+        difference = tail_rate - body_rate
+        error = LabelCause.spread(tail_rate, self.tail_total, body_rate, self.body_total)
+        carries = abs(difference) > SIGMA * error
+        return [
+            f"negative cells the reader never read ({UNSURE}, value {UNREAD_VALUE}): "
+            f"tail {self.tail}/{self.tail_total} ({tail_rate:.3f})"
+            f"  body {self.body}/{self.body_total} ({body_rate:.3f})"
+            f"  diff {difference:+.3f} +- {error:.3f}  {'SEPARATES' if carries else 'reads nothing'}",
+            "UNREAD is not MISLABELLED — 2026-08-26 measured the radiologist calling 13.6% of silent cells"
+            " positive against 41.6% of spoken ones, so silence tracks absence and a silent zero is mostly"
+            " a correct zero. A separation here says the tail is UNDER-SUPERVISED, never that it is wrong."
+            if carries
+            else "the tail is read as often as the body, so its SILENCE is a property of the TEXT rather"
+            " than of what the reader managed to extract from it.",
+        ]
+
+
+@dataclass(frozen=True)
 class AcquisitionCause:
     """What the tail studies were imaged with, against what the body studies were imaged with."""
 
@@ -199,7 +244,7 @@ class AcquisitionCause:
 
 
 class StudyAttribution:
-    """The three readings, each against its own control, over one run's ranked holdout."""
+    """The four readings, each against its own control, over one run's ranked holdout."""
 
     def __init__(self, audit: OvercallAudit | None = None, languages: ReportLanguages | None = None) -> None:
         self.languages = languages or ReportLanguages()
@@ -265,6 +310,23 @@ class StudyAttribution:
         )
 
     @staticmethod
+    def supervised(tail: pd.DataFrame, body: pd.DataFrame, verdicts: pd.DataFrame) -> SupervisionCause:
+        """Count the negative cells of each stratum whose verdict asserts nothing.
+
+        Looked up per (study, target) rather than per study, because the verdict is a property of the
+        CELL — a report can be explicit about the ACL and silent about Synovitis in the same sentence.
+        """
+
+        def unread(cells: pd.DataFrame) -> int:
+            return sum(
+                1
+                for study, target in zip(cells["study"], cells["target"], strict=True)
+                if str(study) in verdicts.index and verdicts.at[str(study), f"{target}__verdict"] == UNSURE
+            )
+
+        return SupervisionCause(tail=unread(tail), tail_total=len(tail), body=unread(body), body_total=len(body))
+
+    @staticmethod
     def acquired(tail: set[str], body: set[str], series: pd.DataFrame) -> AcquisitionCause:
         """Per-study acquisition means for both strata: series count, planes, fluid and fat suppression."""
         # NUMERIC, NOT TEXTUAL. Both flags are int64 0/1 in this corpus, and the first version of this
@@ -295,6 +357,7 @@ class AttributionCorpus:
 
     models: Path
     raw: Path
+    processed: Path
 
     def ranked(
         self, run: str
@@ -336,6 +399,15 @@ class AttributionCorpus:
         frame = pd.read_csv(self.raw / "train.csv")
         return dict(zip(frame["StudyInstanceUID"].astype(str), frame["Report"].astype(str), strict=True))
 
+    def verdicts(self) -> pd.DataFrame:
+        """The reader's per-cell verdicts, indexed by study — the only place `UNK` survives.
+
+        The truth array cannot carry this: `NO` and `UNK` both binarise to a negative label, and the
+        distinction between a read zero and a defaulted one is destroyed by the threshold.
+        """
+        frame = pd.read_csv(self.processed / "labels" / "report_labels_v2.csv")
+        return frame.assign(StudyInstanceUID=frame["StudyInstanceUID"].astype(str)).set_index("StudyInstanceUID")
+
     def series(self) -> pd.DataFrame:
         """The per-series acquisition table, unaggregated — the strata decide how it is grouped."""
         return pd.read_csv(self.raw / "train_series.csv")
@@ -348,7 +420,7 @@ def main() -> None:
     command.parser.add_argument("--members", type=int, default=MEMBERS, help="how many other members to compare tails")
     arguments = command.parsed()
     root = command.rooted(arguments)
-    corpus = AttributionCorpus(models=root.models(), raw=root.raw())
+    corpus = AttributionCorpus(models=root.models(), raw=root.raw(), processed=root.processed())
     rows, table, studies, truth = corpus.ranked(arguments.run)
     attribution = StudyAttribution()
     tail_rows, body_rows = attribution.split(rows)
@@ -361,6 +433,8 @@ def main() -> None:
     tail_cells = attribution.negative_cells(tail_rows, studies, table, truth, TARGETS)
     body_cells = attribution.negative_cells(body_rows, studies, table, truth, TARGETS)
     command.report(attribution.caused(tail_cells, body_cells, reports).lines())
+
+    command.report(attribution.supervised(tail_cells, body_cells, corpus.verdicts()).lines())
 
     command.report(
         attribution.acquired(

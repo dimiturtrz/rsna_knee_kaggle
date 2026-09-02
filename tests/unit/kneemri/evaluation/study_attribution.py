@@ -12,6 +12,7 @@ from kneemri.evaluation.study_attribution import (
     LabelCause,
     SharedTail,
     StudyAttribution,
+    SupervisionCause,
 )
 from kneemri.evaluation.study_errors import StudyDamage
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -191,14 +192,14 @@ def test_ranked(tmp_path: Path) -> None:
     truth = np.tile((np.arange(20) % 2).astype(np.float32)[:, None], (1, len(TARGETS)))
     predictions = 1.0 - truth.astype(np.float64)
     written(tmp_path, "run", predictions, truth, studies)
-    rows, table, order, back = AttributionCorpus(models=tmp_path, raw=tmp_path).ranked("run")
+    rows, table, order, back = AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).ranked("run")
     assert order == studies
     assert table.shape == (20, len(TARGETS))
     assert back.shape == truth.shape
     assert rows[0].damage >= rows[-1].damage, "the ranking is worst-first or every tail below is the wrong end"
 
     with pytest.raises(SystemExit):
-        AttributionCorpus(models=tmp_path, raw=tmp_path).ranked("absent")
+        AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).ranked("absent")
 
 
 def test_members(tmp_path: Path) -> None:
@@ -209,17 +210,17 @@ def test_members(tmp_path: Path) -> None:
     written(tmp_path, "run", predictions, truth, studies)
     written(tmp_path, "twin", predictions, truth, studies)
     written(tmp_path, "elsewhere", predictions[:10], truth[:10], studies[:10])
-    found = AttributionCorpus(models=tmp_path, raw=tmp_path).members("run", studies, wanted=12)
+    found = AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).members("run", studies, wanted=12)
     assert set(found) == {"twin"}, "a member on another split has a different population, not a differing opinion"
 
-    assert AttributionCorpus(models=tmp_path, raw=tmp_path).members("run", studies, wanted=0) == {}
+    assert AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).members("run", studies, wanted=0) == {}
 
 
 def test_reports(tmp_path: Path) -> None:
     """Reports come back keyed by study id as text, which is what the audit indexes them by."""
     frame = pd.DataFrame({"StudyInstanceUID": ["a", "b"], "Report": ["intact", "torn"]})
     frame.to_csv(tmp_path / "train.csv", index=False)
-    reports = AttributionCorpus(models=tmp_path, raw=tmp_path).reports()
+    reports = AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).reports()
     assert reports == {"a": "intact", "b": "torn"}
 
 
@@ -227,5 +228,47 @@ def test_series(tmp_path: Path) -> None:
     """The series table is handed over unaggregated, one row per series."""
     frame = pd.DataFrame({"StudyInstanceUID": ["a", "a"], "SeriesInstanceUID": ["1", "2"]})
     frame.to_csv(tmp_path / "train_series.csv", index=False)
-    series = AttributionCorpus(models=tmp_path, raw=tmp_path).series()
+    series = AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).series()
     assert len(series) == 2, "grouping here would decide the strata before the strata are known"
+
+
+def test_supervision_cause_lines():
+    """An unread rate that separates says under-supervised, and says in the same breath what that is not."""
+    apart = SupervisionCause(tail=60, tail_total=90, body=200, body_total=819).lines()
+    assert "0.667" in apart[0]
+    assert "SEPARATES" in apart[0]
+    assert "UNREAD is not MISLABELLED" in apart[1], "a separation here must never be quoted as label error"
+
+    flat = SupervisionCause(tail=20, tail_total=90, body=180, body_total=819).lines()
+    assert "reads nothing" in flat[0]
+    assert "property of the TEXT" in flat[1]
+
+
+def test_supervised():
+    """The verdict is looked up per cell, so one study can be read on one finding and silent on another."""
+    verdicts = pd.DataFrame(
+        {
+            f"{TARGETS[0]}__verdict": ["UNK", "NO"],
+            f"{TARGETS[1]}__verdict": ["NO", "UNK"],
+        },
+        index=pd.Index(["a", "b"], name="StudyInstanceUID"),
+    )
+    tail = pd.DataFrame({"study": ["a"], "target": [TARGETS[0]], "damage": [0.9]})
+    body = pd.DataFrame({"study": ["a", "b"], "target": [TARGETS[1], TARGETS[0]], "damage": [0.1, 0.1]})
+    cause = StudyAttribution.supervised(tail, body, verdicts)
+    assert cause.tail == 1, "the same study is UNK on one finding and read on the other"
+    assert cause.body == 0
+    assert cause.body_total == 2
+
+    absent = pd.DataFrame({"study": ["missing"], "target": [TARGETS[0]], "damage": [0.5]})
+    assert StudyAttribution.supervised(absent, body, verdicts).tail == 0, "a study off the table is not UNK"
+
+
+def test_verdicts(tmp_path: Path) -> None:
+    """Verdicts come back indexed by study id as text, which is how the cells are keyed."""
+    labels = tmp_path / "labels"
+    labels.mkdir()
+    frame = pd.DataFrame({"StudyInstanceUID": ["a"], f"{TARGETS[0]}__verdict": ["UNK"]})
+    frame.to_csv(labels / "report_labels_v2.csv", index=False)
+    read = AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).verdicts()
+    assert read.at["a", f"{TARGETS[0]}__verdict"] == "UNK"

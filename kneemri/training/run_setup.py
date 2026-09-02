@@ -41,6 +41,7 @@ from kneemri.training.objective import (
 from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.remembered_contrast import RememberedContrast
+from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.sampling import Disagreed, Ramped, Sampling, Uniform
@@ -215,6 +216,8 @@ class RunSetup:
             structure=structure,
         )
         if options.auc_margin:
+            if options.pair_memory:
+                return RememberedMargin(options.auc_margin, shaping, capacity=options.pair_memory)
             return MarginObjective(options.auc_margin, shaping)
         if options.dissent_weight:
             return DecorrelatedObjective(options.dissent_weight, shaping)
@@ -301,14 +304,14 @@ class RunSetup:
         # that would have been silently dropped rather than by one about an unfed pool.
         if options.feature_weight:
             self._check_feature_alone()
-        if options.pair_memory and not (options.rank_weight or options.contrast_weight):
+        if options.pair_memory and not (options.rank_weight or options.contrast_weight or options.auc_margin):
             # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
             # no-op that trains the plain recipe under the arm's name, and would be read as a
             # refutation of the mechanism rather than of the invocation.
             message = (
-                f"--pair-memory {options.pair_memory} widens the pool of a ranking or a contrastive "
-                "term and neither --rank-weight nor --contrast-weight was given, so there is nothing "
-                "for it to widen"
+                f"--pair-memory {options.pair_memory} widens the pool of a ranking, contrastive, or "
+                "margin term and none of --rank-weight, --contrast-weight, or --auc-margin was given, "
+                "so there is nothing for it to widen"
             )
             raise ValueError(message)
         if options.distill_weight and options.pair_memory:
@@ -337,7 +340,6 @@ class RunSetup:
             "--feature-weight": options.feature_weight,
             "--dissent-weight": options.dissent_weight,
             "--contrast-weight": options.contrast_weight,
-            "--pair-memory": options.pair_memory,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:
