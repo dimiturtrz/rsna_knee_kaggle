@@ -380,18 +380,21 @@ ENCODERS: dict[str, Encoder] = {
     # `slice_read.py:126` expands one greyscale channel to three identical ones, so any channel
     # permutation is the identity here.
     #
-    # MIRRORED 2026-09-02, so this trunk is shippable: `dimiturnt/radimagenet-densenet121` holds the
-    # 28 MB `DenseNet121.pt` from the upstream release, MIT on both the repository and the mirror, so the
-    # upload was permitted outright. It was deferred, as `cnxbase` and `swinbase` both were, until a member
-    # earned the seat; what earned it is the frozen reading — a ridge probe over this trunk's cached
-    # features reads 0.8197 against the incumbent `v3large`'s 0.8046, and a trained head over the same
-    # caches keeps that ordering (0.7800/0.7841 against 0.7726, knee-j0h5). The mirror exists BEFORE the
-    # member so the seat is not blocked on an upload the night it is wanted.
+    # NOT SHIPPABLE, AND THE MOUNT WAS WITHDRAWN 2026-09-02. A mirror `dimiturnt/radimagenet-densenet121`
+    # was created earlier that day on a reading of MIT from the `Lab-Rasool/RadImageNet` re-host, and the
+    # mount was declared here. That reading does not hold: the RadImageNet weights are request-gated at
+    # source and publish no licence of their own, so a re-host cannot confer one and our public mirror was
+    # redistribution we had no grant for. The mirror is being deleted and `mount` stays absent, which is
+    # what makes this trunk unshippable rather than merely unbuilt — `mount_check` refuses it by design.
+    # The MEASUREMENTS stand and are not withdrawn: a ridge probe over this trunk's cached features reads
+    # 0.8197 against the incumbent `v3large`'s 0.8046, and a trained head over the same caches keeps that
+    # ordering (0.7800/0.7841 against 0.7726, knee-j0h5). They were taken on locally-held weights and they
+    # are why the trunk FAMILY is worth pursuing — through a trunk whose licence permits redistribution.
+    # OrthoDiffusion (knee-6hfi) is that route.
     RADIMAGENET_DENSENET: Encoder(
         RADIMAGENET_DENSENET,
         "Lab-Rasool/RadImageNet",
         1024,
-        mount="dimiturnt/radimagenet-densenet121",
         patch=32,
         family=RADIMAGENET,
         leaf="radimagenet-densenet121",
