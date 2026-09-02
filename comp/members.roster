@@ -630,3 +630,10 @@ crop160_span_s2026.pt       # 0.8564 — the 160 mm field at 420 px, mm/px held 
 # a single label carries fewer positives, so its half-width is wider, not narrower. This is DIRECTIONAL
 # and it does not re-open the decode-geometry family. The ledger's closure stands on the mean; what it
 # loses is the explanation, not the verdict.
+
+# 2026-09-02 — three that finished and were never written down. Scored here before adding: all three
+# clear the 0.8459 merit bar and the 0.8521 non-DINOv2 bar, on the same 909-study holdout as every
+# other seat, so there is no argument for declining them.
+ramp_dense_gate.pt                  # 0.8579, e7 — the ramp recipe with the dense gate
+stack_increments_base_s2026.pt      # 0.8635, e9 — second-best solo the pool holds
+stack_increments_fx_s2026_run1.pt   # 0.8595, e6 — the fx twin's first run; the second is TRUNCATED
