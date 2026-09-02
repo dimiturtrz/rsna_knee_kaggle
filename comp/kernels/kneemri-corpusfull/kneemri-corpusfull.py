@@ -15,8 +15,9 @@ WHAT MOVES, AND THE CONFOUND, stated first because it is the reason this entry i
 a bid. `corpusdose_v1` could hold structure while it raised the dose: it took the pool's whole-stack
 near-twins and left the pixel-distant (`through_dense_cf`) and objective-distant (`grade_ladder_cf`)
 seats standing. Reaching six of six cannot do that. No `merged_*` member exists at either of those two
-corners, so the last two seats go to `merged_corpus_s2026` (0.8545) and `merged_blend_s2026` (0.8587, the fold-0 sibling of a seat that stays),
-which are external-corpus members but NOT twins of what they replace. So TWO quantities move together:
+corners, so the last two seats go to `merged_corpus_s2026` (0.8545) and `merged_blend_s2026` (0.8587,
+the fold-0 sibling of a seat that stays), which are external-corpus members but NOT twins of what they
+replace. So TWO quantities move together:
 the corpus dose rises 4 -> 6, and the pool loses its two most structurally distant seats. Every branch
 below is written knowing that, and the low branch cannot separate them.
 

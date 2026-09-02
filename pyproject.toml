@@ -73,6 +73,16 @@ foreign = ["opencv-python-headless"]
 # absent, the failure appears only once the model is on the card, i.e. after the shards are read. It is an
 # extra rather than a base dependency because nothing in a shipped kit reads a report.
 reader = ["accelerate"]
+# Ingesting the fastMRI knee corpus (`core.data.corpus.fastmri_corpus`). That corpus ships one HDF5 file
+# per exam holding the reconstructed volume and the acquisition attribute that decides its slot, and h5py
+# is the only reader for it. An extra rather than a base dependency for the same reason `reader` is:
+# nothing in a shipped kit opens an .h5, and the ingest runs once on this machine.
+fastmri = ["h5py"]
+
+# Measuring the KMAR-50K motion-artifact pairs (`core.data.corpus.kmar_corpus`). That corpus ships NIfTI
+# volumes and nibabel is the reader for them. An extra for the same reason `fastmri` is: the measurement
+# runs on this machine, and a shipped kit never opens a .nii.
+motion = ["nibabel"]
 # Scoring an attribution rather than producing one (`kneemri.evaluation.attribution_faithfulness`).
 # The occlusion diagnostics in `kneemri.evaluation.attribution` have never been checked by anything, and
 # captum ships the two metrics that check them — `infidelity` (does the attribution predict what the

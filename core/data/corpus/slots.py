@@ -67,9 +67,18 @@ SLOTS: tuple[Slot, ...] = (
 )
 """The order is load-bearing: it is the slot axis of every cached array and of the head's slot embedding."""
 
+COR_FLUID_NOFS = Slot("COR_FLUID_NOFS", Plane.CORONAL, fluid_sensitive=True, fat_suppressed=False)
+"""Coronal fluid-weighted without fat suppression — a standard meniscus sequence, and NOT a T1 slot.
+
+Named rather than spelled inline because two axes now need the same predicate: it is the largest of the
+three combinations the canonical six cannot express, and it is half of `FASTMRI_SLOTS`. The alternative
+was `EXTENDED_SLOTS[6]`, which is a literal index into a tuple whose whole documented property is that
+things get APPENDED to it.
+"""
+
 EXTENDED_SLOTS: tuple[Slot, ...] = (
     *SLOTS,
-    Slot("COR_FLUID_NOFS", Plane.CORONAL, fluid_sensitive=True, fat_suppressed=False),
+    COR_FLUID_NOFS,
     Slot("AX_T1", Plane.AXIAL, fluid_sensitive=False, fat_suppressed=False),
     Slot("AX_FLUID_NOFS", Plane.AXIAL, fluid_sensitive=True, fat_suppressed=False),
 )
@@ -194,6 +203,34 @@ Canonical ORDER is load-bearing: `MergedCache.positions` matches by slot NAME, a
 source block into `[0, 2, 4]` in this tuple's order.
 """
 
+FASTMRI_SCHEME = "fastmri"
+"""The slot axis of the fastMRI knee corpus — coronal proton density, fat-suppressed or not.
+
+Same safety argument as `RIJEKA_SCHEME`: `Routing.suffix()` is empty for the canonical scheme, so a
+foreign corpus decoded under it writes onto the arrays every member on disk was fitted on. The scheme
+name makes that collision unrepresentable.
+"""
+
+FASTMRI_SLOTS: tuple[Slot, ...] = (SLOTS[1], COR_FLUID_NOFS)
+"""COR_FLUID_FS and COR_FLUID_NOFS — the two acquisitions that corpus actually contains.
+
+READ OFF THE FILES, not off a paper. Every exam carries an `acquisition` attribute reading either
+`CORPDFS_FBK` or `CORPD_FBK`, split 131/119 over the first 250 volumes on disk. That is coronal proton
+density with and without fat suppression, which is these two predicates exactly — so this is the one
+foreign corpus whose sequence assignment is a recorded fact per exam rather than a modal claim about the
+corpus, the stated impurity `MRNET_SLOTS` has to carry.
+
+EXACTLY ONE SLOT IS FILLED PER EXAM, and that is a feature. A study is acquired fat-suppressed or not,
+never both, so the presence mask over this corpus is genuinely per-study rather than all-ones. Rijeka
+fills one of six and leaves five zero, which makes "a foreign corpus reads flat" and "a degenerate input
+reads flat" the same measurement; here the mask varies within the corpus itself.
+
+WHAT A CANONICAL MERGE COSTS. `MergedCache.positions` matches by slot NAME, and `COR_FLUID_NOFS` is not
+among the canonical six — so merging this into a `merged` cache carries the fat-suppressed half and drops
+the other. That is a real cost, stated rather than hidden, and it is not a reason to decode only half the
+corpus: the decode is the expensive step, it runs once, and an extended-scheme merge would carry both.
+"""
+
 MERGED_SCHEME = "merged"
 """Our corpus and a foreign one in ONE array — the canonical slot axis under a name of its own.
 
@@ -230,13 +267,14 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     MULTISCALE_SCHEME: MULTISCALE_SLOTS,
     RIJEKA_SCHEME: RIJEKA_SLOTS,
     MRNET_SCHEME: MRNET_SLOTS,
+    FASTMRI_SCHEME: FASTMRI_SLOTS,
     MERGED_SCHEME: SLOTS,
     TRIPLE_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 
-FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, MERGED_SCHEME, TRIPLE_SCHEME)
+FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, FASTMRI_SCHEME, MERGED_SCHEME, TRIPLE_SCHEME)
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 
 WHY THIS TUPLE EXISTS. `--scheme` selects a FILENAME, not a corpus: `Routing.suffix()` appends it and

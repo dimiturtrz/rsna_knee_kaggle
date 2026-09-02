@@ -92,6 +92,36 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.data.corpus.fastmri_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.build_merged",
       "target": "core.cli",
       "weight": 1
@@ -440,6 +470,18 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.fastmri_corpus",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_corpus",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.fetch_bench",
       "target": "core.cli",
       "weight": 1
@@ -454,6 +496,18 @@
       "kind": "import",
       "source": "core.data.corpus.fetch_bench",
       "target": "core.data.corpus.window_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_stats",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_stats",
+      "target": "core.data.corpus.kmar_corpus",
       "weight": 1
     },
     {
@@ -5756,6 +5810,48 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.build_merged.main",
       "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
       "weight": 1
@@ -6578,6 +6674,90 @@
     },
     {
       "kind": "references",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
+      "target": "core.data.corpus.study_cache.StudyCache.reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._slot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._spacing",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.corpus.fetch_bench.FetchBench",
       "target": "core.data.corpus.fetch_bench.Sweep",
       "weight": 1
@@ -6658,6 +6838,108 @@
       "kind": "construct",
       "source": "core.data.corpus.fetch_bench.main",
       "target": "core.data.corpus.window_reader.MappedReader",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "target": "core.data.corpus.kmar_corpus.KmarPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus._key",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus._plane",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus._volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.spacings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "target": "core.data.corpus.kmar_corpus.KmarPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.spacings",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus._key",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.kmar_stats.Measurement",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_stats.Measurement",
+      "target": "core.data.corpus.kmar_corpus.KmarPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_stats.Measurement.report",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.volume",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_stats.Measurement.report",
+      "target": "core.data.corpus.kmar_stats.Residual.measured",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_stats.Measurement.report",
+      "target": "core.data.corpus.kmar_stats.Residual.summarised",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_stats.Residual",
+      "target": "core.data.corpus.kmar_stats.Residual",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_stats.main",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_stats.main",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_stats.main",
+      "target": "core.data.corpus.kmar_stats.Measurement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_stats.main",
+      "target": "core.data.corpus.kmar_stats.Measurement.report",
       "weight": 1
     },
     {
@@ -25227,7 +25509,7 @@
   ],
   "nodes": [
     {
-      "descendants": 63,
+      "descendants": 67,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -25251,7 +25533,7 @@
       "role": null
     },
     {
-      "descendants": 53,
+      "descendants": 57,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -25259,7 +25541,7 @@
       "role": null
     },
     {
-      "descendants": 32,
+      "descendants": 36,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -25294,6 +25576,14 @@
       "descendants": 0,
       "id": "core.data.corpus.build_cache",
       "label": "build_cache",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.build_fastmri",
+      "label": "build_fastmri",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -25396,6 +25686,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus",
+      "label": "fastmri_corpus",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fetch_bench",
       "label": "fetch_bench",
       "level": "module",
@@ -25406,6 +25704,22 @@
       "descendants": 0,
       "id": "core.data.corpus.folds",
       "label": "folds",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus",
+      "label": "kmar_corpus",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats",
+      "label": "kmar_stats",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -27580,6 +27894,30 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "label": "FastmriCorpus",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_corpus",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriVolume",
+      "label": "FastmriVolume",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.Reading",
+      "label": "Reading",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fetch_bench.FetchBench",
       "label": "FetchBench",
       "level": "class",
@@ -27609,6 +27947,38 @@
       "level": "class",
       "parent": "core.data.corpus.folds",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "label": "KmarCorpus",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_corpus",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarPair",
+      "label": "KmarPair",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Measurement",
+      "label": "Measurement",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_stats",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Residual",
+      "label": "Residual",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_stats",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -31396,6 +31766,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.build_fastmri.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.build_fastmri",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.build_merged.main",
       "label": "main",
       "level": "method",
@@ -31748,6 +32126,78 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._slot",
+      "label": "_slot",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._spacing",
+      "label": "_spacing",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
+      "label": "build",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "label": "labels",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
+      "label": "stack",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.Reading.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fetch_bench.FetchBench.rate",
       "label": "rate",
       "level": "method",
@@ -31840,6 +32290,110 @@
       "label": "holdout",
       "level": "method",
       "parent": "core.data.corpus.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus._key",
+      "label": "_key",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus._plane",
+      "label": "_plane",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus._volumes",
+      "label": "_volumes",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus.spacings",
+      "label": "spacings",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus.volume",
+      "label": "volume",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Measurement.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats.Measurement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Measurement.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats.Measurement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Residual.measured",
+      "label": "measured",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats.Residual",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Residual.scaled",
+      "label": "scaled",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats.Residual",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.Residual.summarised",
+      "label": "summarised",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats.Residual",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_stats.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_stats",
       "role": null
     },
     {

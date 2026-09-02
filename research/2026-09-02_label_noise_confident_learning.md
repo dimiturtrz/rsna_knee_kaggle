@@ -122,6 +122,32 @@ I agree with Claude's ordering:
 2. **Threshold rule (Q2)** — needed to avoid tuning the threshold on the holdout. The CL self-confidence rule is the principled answer.
 3. **58-gold bound (Q3)** — bounds the problem size, but does not select a threshold or arm. It is a supporting number.
 
+## Update after `errors_dense` ran (2026-09-02 05:22Z)
+
+`errors_dense` pruned the 5,360 cells cleanlab flagged as mislabelled (10.1% of ~52,872 cells) and retrained. Result: holdout mean AUC **0.8420**, plateaued from epoch 5. Seat value against the roster of 12: **-0.0010**. Pruning is therefore refuted on this data.
+
+### What this changes about Q-XI
+
+- The field effect-size question is no longer theoretical: the project's own pruning arm has measured a **flat-to-negative** effect.
+- The remaining live branch is **re-labeling** (or soft-relabeling toward the model's confident disagreement), not dropping.
+
+### When does re-labeling succeed where pruning fails?
+
+The literature separates the two regimes along a few axes:
+
+- **Flag-set size.** At 10.1% of cells, the flagged set is large enough that dropping it removes material signal. The "Recovering by Relabelling" framing notes that corrected samples contribute full gradients, while pruned/reweighted samples contribute little ([CEUR-WS](https://ceur-ws.org/Vol/3079/ial2021_paper8.pdf)).
+- **Noise structure.** Pruning works best when errors are sparse and random. Re-labeling works best when errors are **systematic and class-conditional** — exactly what the Q-AB taxonomy found (hedged negation, severity thresholds, BME→contusion).
+- **Model confidence is accurate.** Re-labeling succeeds when the model's confident predictions are better than the noisy labels. The cleanlab gate showed the flags beat random 4.05× on the 108 known disagreements, so the confidence signal is real.
+- **Soft vs hard relabeling.** Rather than flipping labels, using the model's predicted probability as a soft target (or as a per-cell weight) avoids the risk of a wrong hard correction. This is the loss-modification / reweighting axis that confident learning explicitly distinguishes from pruning.
+
+### Where 5,360 / 52,872 sits
+
+A 10.1% flag rate is moderate. In the label-noise literature, methods that correct labels often outperform pruning when the noise rate is above ~5–10% because the cost of lost data exceeds the cost of residual noise. The Q-AB taxonomy says ~56% of the gold-observed disagreements are re-extractable construction errors, which is a strong prior that the flagged cells contain correctable signal rather than pure noise.
+
+### Revised verdict
+
+Pruning is refuted. Re-labeling or soft-relabeling is the only branch of the label-noise axis still worth a card, and the Q-AB taxonomy says the highest-ROI correction is a parser fix for explicit negation/intact language before any model-based relabeling.
+
 ## Sources
 
 - Northcutt et al., "Confident Learning: Estimating Uncertainty in Dataset Labels", *JAIR* 2021. ([JAIR](https://www.jair.org/index.php/jair/article/download/12125/26676/26691) / [arXiv:1911.00068](https://arxiv.org/abs/1911.00068))
@@ -130,3 +156,5 @@ I agree with Claude's ordering:
 - Zhou et al., "Combating Medical Noisy Labels by Disentangled Distribution Learning", 2023. ([Beihang](https://research.buaa.edu.cn/en/publications/combating-medical-noisy-labels-by-disentangled-distribution-learn/))
 - Ma et al., "LNMBench: A Benchmark for Medical Label-Noise Learning", arXiv:2512.09315. ([arXiv](https://arxiv.org/abs/2512.09315))
 - Lin et al., "Impact of label noise on deep learning in medical image classification", *npj Digital Medicine* 2025. ([Nature](https://www.nature.com/articles/s41746-024-01424-x))
+- Zheng et al., "Meta Label Correction for Noisy Label Learning", AAAI 2021. ([AAAI](https://cdn.aaai.org/ojs/17319/17319-13-20813-1-2-20210518.pdf))
+- "Recovering by Relabelling", IAL 2021. ([CEUR-WS](https://ceur-ws.org/Vol/3079/ial2021_paper8.pdf))
