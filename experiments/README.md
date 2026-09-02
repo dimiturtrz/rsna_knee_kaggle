@@ -6755,3 +6755,41 @@ loses is its explanation.
 
 Rostered as shippable (0.8564 clears the 0.8521 non-DINOv2 bar, and it is the pool's only member fitted
 at a field wider than 130 mm), not as a seat claim.
+
+## 2026-09-02 — slice coverage: two arms ran on 2026-08-31 and nobody read them
+
+Kimi's Q-BO reply ranks **slice coverage** as the one lever from the published record that is both
+clean-signalled and still unread here: frontier public notebooks decode 64 slices, our arms stop at
+12-20 on VRAM, and Qiu et al. 2024 report +0.056 mean AUC from better ROI/slice geometry. The axis was
+not unread. `stack224` and `cover_labelwise` both finished on 2026-08-31, wrote holdout records and
+metrics, converged (`convergence_check` flags neither), and then entered no ledger section at all — so
+the finding was paid for and thrown away, and a research answer was about to send the card after it a
+second time.
+
+| arm | what moves against `base224` | best AUC | Δ vs `base224` 0.8509 |
+|---|---|---|---|
+| `base224` | the control: 12 slices, band 0.2-0.8, 224 px, `--variant base` | **0.8509** | — |
+| `stack224` | **36 slices**, band opened to 0.05-0.95 | 0.8476 (e9 of 13) | **−0.0033** |
+| `cover_labelwise` | 36 slices, band 0.05-0.95, labelwise slice pooling | 0.8495 (e9 of 14) | **−0.0014** |
+
+**Tripling the slice count buys nothing.** Both deltas are negative and both sit inside the 0.0062 paired
+holdout floor, so the honest reading is FLAT rather than harmful. Neither clears the 0.8521 non-DINOv2
+seat bar; both clear the 0.8459 merit bar.
+
+**What is NOT isolated here, and it matters.** `stack224` moves two flags at once by construction — 36
+slices only reaches new tissue if the band opens with it, which its own header says — and
+`cover_labelwise` moves a third (the pooling operator). So this closes the COVERAGE CONCEPT, not the
+slice count alone. A run at 36 slices inside the 0.2-0.8 band is not on disk and would separate them;
+given both readings land under the floor on the mean, that separation is not worth a card hour.
+
+**The VRAM ceiling is real and is the reason the axis stops here.** Both arms peak at 21.86 GB against
+the 12-slice recipes' 16.24 GB, on the reservation curve already recorded above: allocation is a
+function of slice count and nothing else. 64 slices at 224 px does not fit, so matching the public
+frontier's decode density would need the resolution to drop below 224, which `res392`/`base224` already
+priced as flat in the other direction.
+
+**Consequence for Q-BO.** Of Kimi's four ranked candidates, external labelled data already read flat on
+our external-corpus seat axis, TTA/multi-view is spent through `SlotHead`'s six slots, and slice coverage
+is this section. That leaves label/target engineering as the only one of the four with no arm against it
+— and Kimi's own CheXpert scaling citation bounds it at a few AUC points for a large labeler gain, which
+is under what the 0.008 board gap needs.
