@@ -6658,3 +6658,31 @@ from an easy-to-hard curriculum. `certainty_ramp` is on the roster at 0.8584.
 The 2x2 therefore has one empty cell, the schedule applied to the signal that lost, and it is the one
 place the two neighbours point opposite ways. `disagreed_ramp` (knee-zer5) fills it: alpha 1.0 reached
 over 6 of 12 epochs, both controls already on disk.
+
+### The 2x2 closes: it is the SCHEDULE that pays, not the signal (2026-09-02)
+
+`disagreed_ramp` filled the empty cell and read **0.8574** (converged, peak epoch 7 of 12,
+`convergence_check`: 1 converged). The grid, all four cells now measured against the same control:
+
+| | static, alpha 1.0 from step one | ramped over 6 of 12 epochs |
+| --- | --- | --- |
+| **member disagreement** | `disagreed_full` 0.8471 (**-0.0036**) | `disagreed_ramp` 0.8574 (**+0.0067**) |
+| **label certainty** | not run | `certainty_ramp` 0.8584 (**+0.0077**) |
+| **neither** | `disagreed_uniform` 0.8507 — the control both deltas are taken against | |
+
+The signal that LOST when applied flat is the same signal that PAYS when ramped, and it pays within
+0.0010 of the other signal's ramp — which is noise on a 0.0062 holdout floor. So the two ramps are one
+reading, not two: **the difficulty SIGNAL is nearly free to choose, and the SCHEDULE is the whole
+effect.** Both ramps clear the floor; the static tilt is the only cell below it, and it is below on the
+wrong side of zero.
+
+That is a mechanism and not a knob: a static tilt reweights the loss before the model can tell a hard
+study from a mislabelled one, so it spends capacity fitting the second; a ramp lets the easy mass set
+the representation first and admits the hard mass once there is something for it to correct. It is the
+shape Zhou et al. (ISBI 2023) report on elbow-fracture radiographs (+0.0245 from easy-to-hard), and it
+now holds here across two unrelated difficulty definitions.
+
+What it does NOT license: a seat. `disagreed_ramp` is rostered at 0.8574 — level with the pool's best
+member (`band_dense` 0.8578) and second to `slot_dropout` (0.8592) — but the member axis is closed on
+seven board flats, and one more dinov2-small member of ordinary quality is exactly what those seven
+flats measured. The ramp's value is as a RECIPE the trunk-family arm inherits, not as a seventh seat.

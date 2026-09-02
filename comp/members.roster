@@ -607,3 +607,9 @@ certainty_ramp_s2026.pt              # 0.8584
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
 slot_dropout_s2026.pt                # 0.8592 - best single member the project owns
+disagreed_ramp_s2026.pt  # THE CERTAINTY RAMP, 0.8574 holdout (converged, peak epoch 7 of 12). Weights a
+                         # study by how much the report's own annotators disagreed, RAMPED over training
+                         # rather than applied flat: +0.0067 over disagreed_uniform_s2026's 0.8507, its
+                         # matched control, which is the only reading on this pair. Level with the best
+                         # member the pool holds (band_dense 0.8578) and second to slot_dropout 0.8592.
+                         # Rostered because it is shippable, not because a seat is claimed for it.
