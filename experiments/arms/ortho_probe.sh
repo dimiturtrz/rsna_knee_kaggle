@@ -41,16 +41,17 @@
 # member arm is queued behind it whatever it reads, because the card is otherwise idle and because this
 # is the only lane still open.
 set -euo pipefail
-cd "$(dirname "$0")/../.."
-source experiments/lib.sh
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+cd "$REPO"
 
 SIZE=256
 for VARIANT in v3large ortholarge; do
   echo "=== ${VARIANT} ==="
-  python -m kneemri.embeddings.build_embeddings \
+  uv run --no-sync python -m kneemri.embeddings.build_embeddings \
     --variant "${VARIANT}" --train-size "${SIZE}" --pool mean --slice-read max --batch 4
 done
 
-python -m kneemri.evaluation.feature_probe --trunks dinov2-large v3large ortholarge
+uv run --no-sync python -m kneemri.evaluation.feature_probe --trunks dinov2-large v3large ortholarge
 
 echo "ARM DONE ortho_probe"

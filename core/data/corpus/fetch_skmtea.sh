@@ -5,7 +5,7 @@
 set -u
 SAS=$(cat "D:/life/creds/machine/skmtea_url.txt")
 BASE="${SAS%%\?*}"; QUERY="${SAS#*\?}"
-OUT=/d/data/raw/skmtea
+OUT=/d/data/volumetric/mri/raw/skmtea
 mkdir -p "$OUT/dicoms" "$OUT/segmentation_masks"
 python_list() { grep -oE "<Name>v1-release/(dicoms|segmentation_masks)/[^<]*</Name>" logs/skmtea_list.xml | sed 's/<[^>]*>//g'; }
 total=$(python_list | wc -l); done_count=0

@@ -1,7 +1,7 @@
 # fastMRI+ labels against our twelve targets
 
 Measured on the MIT label repo (github.com/microsoft/fastmri-plus), cloned to
-`D:/data/raw/fastmri/labels/Annotations/knee.csv` on 2026-09-01.
+`D:/data/volumetric/mri/raw/fastmri/labels/Annotations/knee.csv` on 2026-09-01.
 
 ## What the corpus actually is
 

@@ -47,7 +47,7 @@ which is the one thing our own holdout can never be.
   `D:/life/creds/machine/fastmri_urls.txt` (231 URLs across knee, brain, breast, prostate).
 - Fetch: no script. The links file IS the fetch step — pick the archive by name and call it:
   `curl -sfL -C - "$(grep -F '/knee_singlecoil_train.tar.xz?' D:/life/creds/machine/fastmri_urls.txt \
-  | head -1)" -o /d/data/raw/fastmri/knee_singlecoil_train.tar.xz`. `-C -` resumes. A wrapper around
+  | head -1)" -o /d/data/volumetric/mri/raw/fastmri/knee_singlecoil_train.tar.xz`. `-C -` resumes. A wrapper around
   three curl calls would be a file to maintain and a second place for the credential path to be
   written down.
 - Archives worth pulling, in order: `knee_singlecoil_train.tar.xz` (~89 G, carries the annotated
