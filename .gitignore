@@ -94,3 +94,7 @@ comp/kout*/
 comp/fout*/
 /.agent-runtime/notes/
 /.agent-runtime/outbox/
+.claude/inbox/.listener_heartbeat
+.claude/inbox/.listener_pid
+.agent-runtime/inbox/.listener_heartbeat
+.agent-runtime/inbox/.listener_pid

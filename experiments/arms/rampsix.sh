@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # rampsix — the champion's five own-corpus seats refitted with the curriculum RAMP, and nothing else.
+# bead: knee-fxgm
 #
 # THIS IS A UNIFORM-LIFT ARM, WHICH IS THE ONE MEMBER-SIDE MECHANISM THE BOARD HAS NOT FLATTENED.
 # Seven board flats closed the SEATING axis (reweight, add, swap, count, precision, pooling lens,
