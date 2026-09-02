@@ -92,9 +92,45 @@ Meniscus, Lateral Meniscus, ACL and Baker's. Backed means the radiologist annota
 negative — the rubric and the gold agree against our label. The 1,098 refused cells (MCL, Effusion, the
 OA columns) are not targets and rewarding agreement with them would be perverse.
 
-**It is blocked**: it was designed as an LLM re-read with the rubric in the system prompt, and the
-reader's API key does not exist on this machine. Q-AR asks whether the four backed criteria are
-lexically decidable instead, which would unblock it for zero API.
+**It was recorded as blocked and it was not.** The lane was designed as an LLM re-read with the rubric
+in the system prompt, and the reader's API key does not exist on this machine — so it was filed as
+blocked on the key. But `rubric_gap` decides the subthreshold class **lexically, per cell, from the
+published criteria, with no ground truth and no model in the decision** — its own docstring says so:
+"THE RULES SUPPLY THE ANSWER, SO THIS NEEDS NO GROUND TRUTH." The block was a fact about how I had
+imagined executing it, not about the problem. This is the same failure the project keeps paying for in
+the other direction: a harness limit read as a limit on the idea.
+
+It is now built: `core.data.labels.table_correction`, which turns that decision into a table under the
+rules the annotations BACK, with the backing gate evaluated at runtime rather than written down. 502
+cells enter — Medial/Lateral Meniscus 165, ACL 98, Baker's 239; MCL, Effusion and the three OA
+compartments are refused. The module is proved by an equality oracle: `--rule fracture_contusion` over
+`blend_hybrid.csv` reproduces the hand-written `blend_hybrid_fx.csv` to zero difference on all twelve
+target columns.
+
+**The gold reading, and its denominator first.** Only **5 of the 502 corrected cells** fall inside the
+57 annotated studies, so gold is again judging 1% of what the correction touches — the same shape as
+the negation pass, and it is why neither number below is a verdict.
+
+| column | `blend_hybrid_fx` | `blend_hybrid_fxrub` |
+|---|---|---|
+| Medial Meniscus | 0.9573 | **0.9597** |
+| Lateral Meniscus | 0.8776 | **0.8801** |
+| Baker's | 0.9447 | **0.9466** |
+| ACL | 0.9828 | 0.9828 |
+
+Nothing regresses. Over all 696 gold cells — a wider ruler than the five — agreement goes 79.9 → 80.5%
+at the 0.50 cut and precision 66.3 → 67.2% at unchanged recall. That is +0.0006 on a mean of twelve:
+directional, an eighth of what `fracture_contusion` was worth, and far below the bar.
+
+**No arm is queued for it, deliberately.** `stack_increments_fx` already prices the label lane on a gold
+gain ten times larger. If that reads NULL, this is priced out with it and the card is not spent finding
+out twice. Bead `knee-uwjf`.
+
+**Where it could actually become large.** `rubric_gap` is English-only by design, so 502 is a FLOOR:
+59.9% of the corpus is not English and carries the same wording. If the subthreshold vocabulary can be
+written for es/tr/hr/el/de/bg/nl the corrected population is roughly **1250 cells for zero GPU time**.
+Asked as Q-AU, with the per-language sourcing spelled out — that, not another English pass, is the
+version of this lane with a size worth arming.
 
 The `subthreshold` bucket — 46 of 108 false positives, the largest, and a coin flip at 0.49 — is NOT
 free to bank and this file will not propose it. `severity_boundary` measured the size qualifier against
