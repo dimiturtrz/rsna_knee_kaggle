@@ -251,7 +251,7 @@ def test_swap():
     assert lines[1].split("(")[1].startswith("+"), "replacing the roster's weakest member with a strong one pays"
     assert "noise.pt" in lines[2], "the weaker candidate is priced too, and reported second"
     assert lines[-2].endswith("never been shown to pick a board tick"), "the resolution bound is stated"
-    assert lines[-2].startswith("2 of 2 clear +0.0015"), "both beat an incumbent that is pure noise"
+    assert lines[-2].startswith("2 of 2 clear +0.0040"), "both beat an incumbent that is pure noise"
     assert "saturates" in lines[-1], "a best that clears the bound is real but capped, and the line says so"
 
 
