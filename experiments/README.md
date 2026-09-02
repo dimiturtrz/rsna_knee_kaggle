@@ -6793,3 +6793,67 @@ our external-corpus seat axis, TTA/multi-view is spent through `SlotHead`'s six 
 is this section. That leaves label/target engineering as the only one of the four with no arm against it
 — and Kimi's own CheXpert scaling citation bounds it at a few AUC points for a large labeler gain, which
 is under what the 0.008 board gap needs.
+
+## 2026-09-02 — the per-label matrix: a diagnosis, not a lever
+
+Built the full per-label AUC matrix, 102 roster members x 12 labels, on the shared 909-study holdout,
+because the competition score is the UNWEIGHTED MEAN of twelve per-label ROC AUCs and nothing here had
+ever looked at the twelve separately across the pool.
+
+| label | best | median | best member | positives |
+|---|---|---|---|---|
+| MCL | 0.8253 | **0.7897** | merged_blend_s2026 | 171 |
+| Fracture | 0.8440 | **0.8110** | merged_blend_cf | **68** |
+| Lateral OA | 0.8386 | 0.8168 | stack_increments_base_s2026 | 233 |
+| PF OA | 0.8733 | 0.8406 | stackfit_s2026 | 409 |
+| Lateral Meniscus | 0.8700 | 0.8440 | calib_dense_hold_s2026 | 226 |
+| Effusion | 0.8640 | 0.8527 | band_dense_hold_s2026 | 558 |
+| Synovitis | 0.8823 | 0.8627 | crop160_span_s2026 | 124 |
+| Contusion | 0.8867 | 0.8685 | recal_dense_s2026 | 267 |
+| Medial OA | 0.8968 | 0.8733 | labelwise_dense_s2026 | 333 |
+| ACL | 0.8976 | 0.8779 | stackfit_s2026 | 248 |
+| Medial Meniscus | 0.9135 | 0.8961 | small_batch6_s2026 | 482 |
+| Baker's | 0.9279 | 0.9061 | merged_dense_cf | 217 |
+
+### Per-label seat choice is DIRECTIONAL, and the oracle is two-thirds selection bias
+
+Mean of per-label BESTS is 0.8767 against the best single member's 0.8642 — an apparent +0.0125 from
+letting each label pick its own seat. That is an ORACLE: twelve choices over 102 members, all scored on
+the same 909 studies. The honest control, 20 random splits of the holdout, selecting per label on half A
+and scoring on half B, against the single member with the best MEAN on A scored on B:
+
+```
+gain over best-single-member: mean +0.0046  sd 0.0033  min -0.0014  max +0.0134
+splits positive: 19/20
+```
+
+**+0.0046, positive in 19 of 20 splits, against a 0.0062 noise floor.** The SIGN survives out of sample;
+the SIZE does not clear the bar. Directional by this project's own rule — keep it if it is ever free,
+never plan around it. Two-thirds of the oracle was selection bias, which is the number to remember the
+next time a per-label table looks like a lever.
+
+### Why per-label surgery cannot close the gap, in one line of arithmetic
+
+The score is the mean of twelve. A label is worth **1/12 = 0.083** of any move made to it. Dragging MCL
+from its 0.7897 median to 0.85 — a huge per-label move, bigger than anything this repo has ever done to a
+single label — is worth **+0.005** on the board. Closing the 0.008 gap this way needs **+0.096 summed
+across the twelve columns**. Per-label reading says WHICH mechanism is missing; it is not itself the
+mechanism.
+
+### And the specialist route was already refuted, at maximum tilt
+
+`--focus-label MCL` puts the WHOLE encoder behind one finding, which is the strongest tilt the mechanism
+allows. `focus_mcl_s2026` regressed **its own target label by -0.0576 paired**. The arm's own
+pre-registration is what makes that readable: if maximum tilt does not recover the gap, no partial
+reweighting will. It stays ambiguous between "jointness is free" and "one finding starves an encoder" —
+but either way the reweighting family is not worth an arm at 1/12 leverage.
+
+**What this points at instead.** The two weak labels fail for DIFFERENT reasons and only one of them is a
+modelling problem. Fracture has **68 positives in 909** — the rarest label by a factor of two, so its
+column is largely a sample-size floor and the holdout cannot even resolve a change to it. MCL is
+anatomically a CORONAL structure, and the decode is sagittal-dominant; but coronal slots are already in
+the six (`COR_FLUID_FS` 93%, `COR_T1` 60%), so the plane is present and the tilt failed. That leaves
+input GEOMETRY - a localized crop, where a coronal structure occupies a usefully larger fraction of the
+frame - rather than loss weighting, which is the same place Kimi's top-1%-vs-median table points (Q-BP,
+two-stage localize-then-classify, 9 of 9 - though confounded, see Q-BQ: all nine shipped spatial
+supervision).
