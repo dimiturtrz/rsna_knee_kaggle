@@ -3232,3 +3232,22 @@ real and an order of magnitude larger than the effect they measured. Confounded 
 count (five here, six there), which has read flat across seven entries.
 
 See `comp/board.jsonl` for the full reading.
+
+## monotone_v1 — 0.944 (ref 55967974, 2026-09-02 20:42Z)
+
+The champion's six seats held byte-identical, with every target column **cubed** after blending.
+Cubing is strictly increasing, so every within-column ordering survives while every probability
+value moves. An identity test, not a comparison.
+
+**It read exactly 0.944 — the champion's own score.** The metric is per-column rank-based.
+
+**Closed forever:** temperature scaling, threshold shaping, isotonic/Platt fitting, per-label
+probability rescaling, ECE minimisation as a shipping objective. Every monotone post-hoc transform
+of a submitted column is worth zero on this board. No slot may be spent on one, and no offline gain
+reported in ECE terms is a board gain.
+
+**Not closed:** `--calibrated-targets` is a training signal, not a post-hoc transform — it changes
+the column's ordering, which this says nothing about. The `_cf` members stay valid.
+
+Three axes now read flat within 0.001: who SITS, how they are COMBINED, how the output is SHAPED.
+The lever is in the members.
