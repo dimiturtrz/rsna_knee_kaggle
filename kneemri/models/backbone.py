@@ -380,13 +380,18 @@ ENCODERS: dict[str, Encoder] = {
     # `slice_read.py:126` expands one greyscale channel to three identical ones, so any channel
     # permutation is the identity here.
     #
-    # NO MOUNT YET, so this trains here and cannot be submitted. MIT on both the upstream repository and
-    # the mirror, so the Kaggle dataset is permitted and is a dataset upload rather than a code change —
-    # deferred, as `cnxbase` and `swinbase` both were, until a member earns the seat.
+    # MIRRORED 2026-09-02, so this trunk is shippable: `dimiturnt/radimagenet-densenet121` holds the
+    # 28 MB `DenseNet121.pt` from the upstream release, MIT on both the repository and the mirror, so the
+    # upload was permitted outright. It was deferred, as `cnxbase` and `swinbase` both were, until a member
+    # earned the seat; what earned it is the frozen reading — a ridge probe over this trunk's cached
+    # features reads 0.8197 against the incumbent `v3large`'s 0.8046, and a trained head over the same
+    # caches keeps that ordering (0.7800/0.7841 against 0.7726, knee-j0h5). The mirror exists BEFORE the
+    # member so the seat is not blocked on an upload the night it is wanted.
     RADIMAGENET_DENSENET: Encoder(
         RADIMAGENET_DENSENET,
         "Lab-Rasool/RadImageNet",
         1024,
+        mount="dimiturnt/radimagenet-densenet121",
         patch=32,
         family=RADIMAGENET,
         leaf="radimagenet-densenet121",
