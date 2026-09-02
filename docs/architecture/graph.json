@@ -9375,7 +9375,7 @@
     {
       "kind": "calls",
       "source": "core.paths.DataRoot.checkpoints",
-      "target": "core.paths.DataRoot.processed",
+      "target": "core.paths.DataRoot.models",
       "weight": 1
     },
     {
@@ -9388,6 +9388,12 @@
       "kind": "calls",
       "source": "core.paths.DataRoot.kind",
       "target": "core.native_path.NativePath.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.paths.DataRoot.models",
+      "target": "core.paths.DataRoot.kind",
       "weight": 1
     },
     {
@@ -35144,6 +35150,14 @@
       "descendants": 0,
       "id": "core.paths.DataRoot.kind",
       "label": "kind",
+      "level": "method",
+      "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.paths.DataRoot.models",
+      "label": "models",
       "level": "method",
       "parent": "core.paths.DataRoot",
       "role": null
