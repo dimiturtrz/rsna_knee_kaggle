@@ -21,6 +21,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_contrast import RememberedContrast
+from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.sampling import Disagreed, Ramped, Uniform
@@ -51,7 +52,7 @@ def test_objective():
 
 
 def test_objective_pair_memory():
-    """A memory only exists to widen the ranking term, so asking for one without the term must REFUSE.
+    """A memory only exists to widen a term, so asking for one without any term must REFUSE.
 
     Same reason the rest of `objective` is checked here: the failure this guards is an arm that trains the
     plain recipe under the memory arm's name and gets read as a refutation of the mechanism. A refusal at
@@ -84,6 +85,18 @@ def test_objective_composes_the_pool_with_the_contrastive_term():
     plain = _setup(contrast_weight=1.0).objective()
     assert isinstance(plain, ContrastiveObjective)
     assert not isinstance(plain, RememberedContrast), "no memory asked for, no memory built"
+
+
+def test_objective_composes_the_pool_with_the_margin_term():
+    """The pool composes with the AUC-margin term, widening the class-mean comparison across steps."""
+    widened = _setup(auc_margin=0.8, pair_memory=32).objective()
+    assert isinstance(widened, RememberedMargin)
+    assert widened.memory.capacity() == 32, "the flag must reach the pool it sizes"
+    assert widened.margin == 0.8
+
+    plain = _setup(auc_margin=0.8).objective()
+    assert isinstance(plain, MarginObjective)
+    assert not isinstance(plain, RememberedMargin), "no memory asked for, no memory built"
 
 
 def test_adaptation():
@@ -287,13 +300,14 @@ def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
 
 
 def test_objective_refuses_to_compose_the_margin_with_the_term_it_replaces():
-    """`--auc-margin` REMOVES cross-entropy, and all four of those flags add themselves to it.
+    """`--auc-margin` REMOVES cross-entropy, and those flags add themselves to it.
 
     Composed, the run would descend a sum that is neither objective, while its config reported both
     switches landed — the shape that has cost this repo a card slot before. The refusal names the margin
     flag rather than the stacked one, because that is the flag whose meaning the caller has misread.
+    `--pair-memory` is NOT a conflict: it widens the margin term itself rather than adding a second term.
     """
-    for conflict in ({"rank_weight": 0.3}, {"distill_weight": 0.3}, {"dissent_weight": 0.3}, {"pair_memory": 8}):
+    for conflict in ({"rank_weight": 0.3}, {"distill_weight": 0.3}, {"dissent_weight": 0.3}):
         with pytest.raises(ValueError, match="not composed"):
             _setup(auc_margin=1.0, **conflict).objective()
 
