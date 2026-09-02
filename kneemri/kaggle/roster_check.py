@@ -62,11 +62,26 @@ class MemberDeclines:
         live side by side and a member named one way in one and another way in the other would read as
         undocumented and declined at once.
         """
-        declined = {}
+        declined: dict[str, str] = {}
+        latest = ""
         for line in self.text.splitlines():
-            name, _, reason = line.partition(COMMENT)
-            if name.strip():
-                declined[name.strip().removesuffix(CHECKPOINT_SUFFIX)] = reason.strip()
+            name, separator, reason = line.partition(COMMENT)
+            subject = name.strip()
+            if not subject:
+                continue
+            # A CONTINUATION, not an entry. A decline is an argument, and an argument runs past eighty
+            # columns — so the arguments in this file are written as wrapped paragraphs. Every wrapped
+            # line carries no separator, which read as a fresh bare name: eight of the nine findings in
+            # this check's 2026-09-02 run were sentences out of the middle of well-written declines,
+            # and a genuinely bare name would have been indistinguishable among them. A name is one
+            # token; prose has spaces. That is the whole discriminator, and it keeps the bare-name
+            # finding alive rather than trading one hole for another.
+            if not separator and " " in subject:
+                if latest:
+                    declined[latest] = f"{declined[latest]} {subject}".strip()
+                continue
+            latest = subject.removesuffix(CHECKPOINT_SUFFIX)
+            declined[latest] = reason.strip()
         return declined
 
 

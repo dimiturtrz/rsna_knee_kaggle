@@ -91,6 +91,16 @@ def test_reasons(tmp_path: Path):
     assert declines.reasons() == {"a": "a smoke run", "b": ""}, "a whole-line comment names no member"
 
 
+def test_reasons_folds_a_wrapped_argument_into_the_entry_above_it(tmp_path: Path):
+    """A decline is an argument, and an argument wraps. Each wrapped line is prose, never a member."""
+    declines = MemberDeclines("a.pt  # declined because the delta is under the floor\nand the sign is wrong.\nb.pt\n")
+
+    assert declines.reasons() == {
+        "a": "declined because the delta is under the floor and the sign is wrong.",
+        "b": "",
+    }, "the continuation joins its entry, and the bare name after it is still a finding"
+
+
 def test_packaged(tmp_path: Path):
     """A roster line reaches its member whether or not it is written as a glob."""
     drift = _drift(tmp_path, "shipped_*.pt\n", "")
