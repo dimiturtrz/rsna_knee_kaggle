@@ -195,6 +195,18 @@ v3large_dense_s2026  # DECLINED AS A SEAT, 2026-09-02. Greedy seat value -0.0012
                      # ortho_dense its -0.0050; the trunk size on this pool is. Re-open only with a
                      # trunk from a DIFFERENT family (RadImageNet DenseNet, supervised ImageNet
                      # VGG/ResNet), never with another DINOv3 size.
+                     #
+                     # THE FROZEN PROBE SETTLES IT, and it is stronger evidence than either fitted arm
+                     # above, because a frozen read removes the recipe from the question entirely. One
+                     # run, matched flags, n=909: dinov2-large 0.7852, v3large 0.7446, ortholarge 0.7387.
+                     # ortho - v3large = -0.0059 against its OWN control, the weights it continues from,
+                     # with the 1.25M-knee corpus the only free variable. That is ortho_probe.sh's
+                     # pre-registered REVERSED branch: the continuation COSTS signal, the catastrophic-
+                     # forgetting shape Ilse et al. report for RAD-DINO on out-of-domain VinDR. And
+                     # v3large itself sits 0.0406 under dinov2-large, so the family was already the
+                     # weaker one before the continuation subtracted from it. Together these mean 0.8452
+                     # needs no recipe excuse: the features are absent, not mis-fitted. The suspicion
+                     # that a big trunk was starved by an 86M-tuned recipe is RETIRED for this trunk.
 
 errors_dense_s2026   # DECLINED AS A SEAT, 2026-09-02. Greedy seat value -0.0010, inside the noise band
                      # and negative. The label-error-flagged corpus changes WHAT A MEMBER SEES, which is
