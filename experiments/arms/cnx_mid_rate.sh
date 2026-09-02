@@ -67,4 +67,4 @@ run_train cnx_mid_rate \
   $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
   --variant cnxbase --backbone-lr 1.2e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 448 \
   --vram-gb 14 \
-  --labels "$LABELS" --out "$PROCESSED/cnx_mid_rate_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/cnx_mid_rate_s2026.pt"

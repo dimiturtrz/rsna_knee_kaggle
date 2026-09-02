@@ -163,7 +163,8 @@ def main() -> None:
     arguments = command.parsed()
 
     processed = command.rooted(arguments).processed()
-    record = Path(arguments.run) if Path(arguments.run).exists() else processed / f"{arguments.run}.pt"
+    models = command.rooted(arguments).models()
+    record = Path(arguments.run) if Path(arguments.run).exists() else models / f"{arguments.run}.pt"
     rows = MatchedRuler(processed / "published").compared(record)
 
     def line(label: str, cells: list[float], positives: str) -> str:

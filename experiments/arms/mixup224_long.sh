@@ -63,4 +63,4 @@ run_train mixup224_long \
   $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --mixup 0.4 \
-  --labels "$LABELS" --out "$PROCESSED/mixup224_long_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/mixup224_long_s2026.pt"

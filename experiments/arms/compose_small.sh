@@ -16,4 +16,4 @@ require "$LABELS"
 
 run_train compose_small \
   $RECIPE --epochs 24 \
-  --backbone-lr 4e-5 --slice-pooling max --labels "$LABELS" --out "$PROCESSED/compose_small_s2026.pt"
+  --backbone-lr 4e-5 --slice-pooling max --labels "$LABELS" --out "$MODELS/compose_small_s2026.pt"

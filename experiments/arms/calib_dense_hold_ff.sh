@@ -46,4 +46,4 @@ FIT="--fold -1 --ema"
 run_train calib_dense_hold_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
-  --labels "$LABELS" --out "$PROCESSED/calib_dense_hold_ff.pt"
+  --labels "$LABELS" --out "$MODELS/calib_dense_hold_ff.pt"

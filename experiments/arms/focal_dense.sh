@@ -52,4 +52,4 @@ require "$LABELS"
 run_train focal_dense \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --pool cls_mean_focal \
-  --labels "$LABELS" --out "$PROCESSED/focal_dense_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/focal_dense_s2026.pt"

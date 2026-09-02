@@ -55,11 +55,17 @@ _lib_is_stale() { [ "$(_lib_blob)" != "$LIB_PARSED" ]; }
 LIB_PARSED="$(_lib_blob)"
 LIB_PARSED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-PROCESSED="$(uv run --no-sync python -c 'from pathlib import Path
+# Both roots out of ONE interpreter start: a second `uv run` here costs every arm a fresh import of
+# torch's dependency tree before it has read a single study.
+_lib_roots="$(uv run --no-sync python -c 'from pathlib import Path
 from core.paths import DataRoot
-print(DataRoot.from_config(Path("paths.yaml")).processed().as_posix())')"
+root = DataRoot.from_config(Path("paths.yaml"))
+print(root.processed().as_posix())
+print(root.models().as_posix())')"
+PROCESSED="$(echo "$_lib_roots" | sed -n 1p)"
+MODELS="$(echo "$_lib_roots" | sed -n 2p)"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
-LOGS="$PROCESSED/experiments"
+LOGS="$MODELS/experiments"
 
 # Touch this to stop a chain STARTING further arms; the running one finishes. See run_train.
 # In the repo's gitignored logs/ rather than under $PROCESSED, because the request comes from a person

@@ -33,4 +33,4 @@ run_train "dinov3_base_lora" \
   --slice-pooling max --whole-stack --lora-rank 8 --backbone-lr 5e-4 \
   --variant v3base --image-size 336 --train-size 224 \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/dinov3_base_lora_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/dinov3_base_lora_s2026.pt"

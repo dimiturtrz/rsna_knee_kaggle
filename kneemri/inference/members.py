@@ -548,7 +548,7 @@ class MemberPackage:
         The weights are gitignored, so the mirror was never version control's copy of anything — it was a
         second home for a thing that can only have one.
         """
-        return DataRoot.from_config(paths).processed() / SHIPPED_PACKAGE
+        return DataRoot.from_config(paths).models() / SHIPPED_PACKAGE
 
     @classmethod
     def at(cls, root: Path | None, paths: Path = Path("paths.yaml")) -> "MemberPackage":

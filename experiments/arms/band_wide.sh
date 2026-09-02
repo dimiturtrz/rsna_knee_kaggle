@@ -34,4 +34,4 @@ require "$LABELS"
 run_train band_wide \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 16 --band-low 0.1 --band-high 0.9 \
-  --labels "$LABELS" --out "$PROCESSED/band_wide_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/band_wide_s2026.pt"

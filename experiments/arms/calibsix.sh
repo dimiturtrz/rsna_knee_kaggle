@@ -108,17 +108,17 @@ CALIB="--calibrated-targets"
 run_train final_ws_cf \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE $CALIB \
-  --labels "$LABELS" --out "$PROCESSED/final_ws_cf.pt"
+  --labels "$LABELS" --out "$MODELS/final_ws_cf.pt"
 
 run_train grade_ladder_cf \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE --grade-ladder $CALIB \
-  --labels "$LABELS" --out "$PROCESSED/grade_ladder_cf.pt"
+  --labels "$LABELS" --out "$MODELS/grade_ladder_cf.pt"
 
 run_train through_dense_cf \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE --through-plane $CALIB \
-  --labels "$LABELS" --out "$PROCESSED/through_dense_cf.pt"
+  --labels "$LABELS" --out "$MODELS/through_dense_cf.pt"
 
 # The geometry is SPELLED rather than inherited, for the reason final_fit_six.sh states: `rate_wholestack.sh`
 # named neither --slices nor the band, so the original was fitted on the parser defaults. Stating them is
@@ -126,7 +126,7 @@ run_train through_dense_cf \
 run_train lr4e-5_ws_cf \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 $CALIB \
-  --labels "$LABELS" --out "$PROCESSED/lr4e-5_ws_cf.pt"
+  --labels "$LABELS" --out "$MODELS/lr4e-5_ws_cf.pt"
 
 # Seat five stays FOLD-0, exactly as its original is — it is the champion's one non-`_ff` member, and
 # converting it here would change two things at once. It is also the only offline read this arm produces.
@@ -134,4 +134,4 @@ run_train merged_blend_cf \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --scheme merged $CALIB \
-  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$PROCESSED/merged_blend_cf.pt"
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_blend_cf.pt"

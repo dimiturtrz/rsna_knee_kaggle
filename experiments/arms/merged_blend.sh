@@ -67,4 +67,4 @@ run_train merged_blend \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --scheme merged \
-  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$PROCESSED/merged_blend_s2026.pt"
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_blend_s2026.pt"

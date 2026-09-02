@@ -117,7 +117,7 @@ def main() -> None:
         message = "the run asked for switches the built model does not show: " + "; ".join(unlanded)
         raise ValueError(message)
 
-    destination = arguments.out or (root.processed() / f"member_fold{arguments.fold}.pt")
+    destination = arguments.out or (root.models() / f"member_fold{arguments.fold}.pt")
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
     plan = RunPlan(
         destination=destination,

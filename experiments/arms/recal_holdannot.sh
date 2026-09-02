@@ -55,7 +55,7 @@
 #     is per-finding rather than pooled.
 #
 # READING IT. Proxy: the ledger row. Gold: `python -m kneemri.evaluation.supervision_gap --records
-# $PROCESSED/recal_holdannot_s2026.pt`. Both, per knee-9198. n=58 is a level, not a selector: it cannot
+# $MODELS/recal_holdannot_s2026.pt`. Both, per knee-9198. n=58 is a level, not a selector: it cannot
 # resolve 0.002 (knee-kddo), so only a difference at or above the floor is readable on it.
 #
 # bead: knee-8wa0
@@ -75,4 +75,4 @@ run_train recal_holdannot \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --hold-annotations \
-  --labels "$RECAL" --out "$PROCESSED/recal_holdannot_s2026.pt"
+  --labels "$RECAL" --out "$MODELS/recal_holdannot_s2026.pt"

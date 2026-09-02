@@ -76,4 +76,4 @@ require "$LABELS"
 run_train severity_weight \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --severity-weight \
-  --labels "$LABELS" --out "$PROCESSED/severity_weight_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/severity_weight_s2026.pt"

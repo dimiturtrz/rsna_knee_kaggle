@@ -61,4 +61,4 @@ run_train "v3base_band" \
   --variant v3base --image-size 336 --train-size 224 \
   --slices 20 --band-low 0.1 --band-high 0.9 \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/v3base_band_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/v3base_band_s2026.pt"

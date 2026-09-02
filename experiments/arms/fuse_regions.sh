@@ -39,4 +39,4 @@ require "$LABELS"
 run_train fuse_regions \
   $RECIPE --epochs 12 --slice-pooling max --slice-regions 4 --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --pool sided --through-plane \
-  --labels "$LABELS" --out "$PROCESSED/fuse_regions_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/fuse_regions_s2026.pt"

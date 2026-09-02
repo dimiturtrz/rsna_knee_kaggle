@@ -61,14 +61,14 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
-require "$PROCESSED/swin_distill_pre_s2026.pt"
+require "$MODELS/swin_distill_pre_s2026.pt"
 
 uv run --no-sync --project "$REPO" python -m kneemri.training.fitted_encoder \
-  "$PROCESSED/swin_distill_pre_s2026.pt" "$PROCESSED/encoders/swin_distill_pre.enc.pt" || exit 1
+  "$MODELS/swin_distill_pre_s2026.pt" "$MODELS/encoders/swin_distill_pre.enc.pt" || exit 1
 
 run_train swin_distill_fit \
   $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
-  --encoder-weights "$PROCESSED/encoders/swin_distill_pre.enc.pt" \
+  --encoder-weights "$MODELS/encoders/swin_distill_pre.enc.pt" \
   --vram-gb 8 \
-  --labels "$LABELS" --out "$PROCESSED/swin_distill_fit_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/swin_distill_fit_s2026.pt"

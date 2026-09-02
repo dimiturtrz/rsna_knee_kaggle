@@ -105,7 +105,7 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    processed = command.rooted(arguments).processed()
+    processed = command.rooted(arguments).models()
     split = ChampionUncertainty(processed)
     if arguments.roster:
         logger.info("decomposing the members %s packages", arguments.roster)

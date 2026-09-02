@@ -28,4 +28,4 @@ run_train blendsix_smoke \
   $RECIPE --fold -1 --ema --studies 60 --epochs 1 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --scheme merged --labels "$MERGED_BLEND" --eval-labels "$LABELS" \
-  --out "$PROCESSED/blendsix_smoke.pt"
+  --out "$MODELS/blendsix_smoke.pt"

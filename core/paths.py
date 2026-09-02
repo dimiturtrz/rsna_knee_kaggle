@@ -33,7 +33,30 @@ RAW = "raw"
 """The as-downloaded datasets. Never written to."""
 
 PROCESSED = "processed"
-"""Derived artefacts — caches, checkpoints, holdout records. Created on demand."""
+"""Derived DATA — decoded image caches, feature arrays, label tables, prediction caches. On demand.
+
+Not checkpoints, and not a run's records: those are `MODELS`. A parsed study is still the corpus; a
+tensor of weights fitted on it is a different kind of thing that merely happened to be written beside it.
+"""
+
+MODELS = "models"
+"""Trained weights and the record of the run that produced them. NOT under the data root by default.
+
+A model is not data: nothing trains on a checkpoint, and a corpus does not stop being a corpus when a
+member is deleted. They shared `processed/` here for one reason only — 250 checkpoints happened to be
+written beside the arrays they were fitted on — and the address `volumetric/mri/processed` is a claim
+about MRI volumes that a 1.2 GB tensor of weights does not answer.
+
+A run's `.metrics.jsonl` and `.holdout.npz` live HERE, beside their checkpoint, rather than in a
+separate records root. They describe one model, they are named after it, and thirty-two call sites
+derive them with `checkpoint.with_name(...)` — a split would break every one of those to relocate ten
+megabytes.
+
+Redirected in paths.yaml like any other kind, which is what keeps it off the data disk:
+
+    data: D:/data/volumetric/mri
+    models: D:/models
+"""
 
 REFERENCE = "reference"
 """Shared material that is neither a dataset nor ours — foreign weights, converted snapshots, papers.
@@ -89,6 +112,12 @@ class DataRoot:
         destination.mkdir(parents=True, exist_ok=True)
         return destination
 
+    def models(self, dataset: str = COMPETITION) -> Path:
+        """Where a dataset's trained members and their run records go. Created on demand."""
+        destination = self.kind(MODELS) / dataset
+        destination.mkdir(parents=True, exist_ok=True)
+        return destination
+
     def checkpoints(self, names: list[str]) -> list[Path]:
         """Roster lines or bare paths, as checkpoint paths, tolerating a missing suffix and a comment.
 
@@ -107,5 +136,5 @@ class DataRoot:
             if not name:
                 continue
             path = Path(name)
-            paths.append(path if path.parent != Path() else self.processed() / f"{path.stem}{CHECKPOINT_SUFFIX}")
+            paths.append(path if path.parent != Path() else self.models() / f"{path.stem}{CHECKPOINT_SUFFIX}")
         return paths

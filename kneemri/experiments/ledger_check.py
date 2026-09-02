@@ -104,7 +104,7 @@ class LedgerCheck:
         best = RunMetrics(metrics).best()
         return best["auc"] if best else None
 
-    def finished(self, processed: Path) -> dict[str, float]:
+    def finished(self, models: Path) -> dict[str, float]:
         """Every run on disk that scored, by name, from its metrics file or else its checkpoint.
 
         A metrics file wins where both exist: it holds every epoch, so it can say which was best, while
@@ -113,11 +113,11 @@ class LedgerCheck:
         and 50 of the 69 runs here are in exactly that state.
         """
         scores: dict[str, float] = {}
-        for checkpoint in sorted(processed.glob("*.pt")):
+        for checkpoint in sorted(models.glob("*.pt")):
             holdout = torch.load(checkpoint, map_location="cpu", weights_only=True).get("holdout")
             if holdout is not None and float(holdout) == float(holdout):
                 scores[checkpoint.stem] = float(holdout)
-        for metrics in sorted(processed.glob("*.metrics.jsonl")):
+        for metrics in sorted(models.glob("*.metrics.jsonl")):
             score = self.best(metrics)
             if score is not None:
                 scores[metrics.name.removesuffix(".metrics.jsonl")] = score
@@ -125,7 +125,7 @@ class LedgerCheck:
             name: score
             for name, score in scores.items()
             if not any(fragment in name for fragment in UNQUOTABLE)
-            and not self.truncated(RunMetrics(processed / f"{name}.pt"))
+            and not self.truncated(RunMetrics(models / f"{name}.pt"))
         }
 
     def truncated(self, run: RunMetrics) -> bool:
@@ -144,7 +144,7 @@ class LedgerCheck:
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and recipe.get("studies", "0") not in ("0", "")
 
-    def reran(self, processed: Path, name: str) -> int:
+    def reran(self, models: Path, name: str) -> int:
         """How many EARLIER runs wrote to this name, counted from the rotations left beside it.
 
         A re-run to the same `--out` rotates the metrics file (`RunMetrics.begin`, for the `slices16`
@@ -164,7 +164,7 @@ class LedgerCheck:
         teaching a second reader the rotation naming, and the actionable fact needs no number: this
         name trained more than once, so the artefacts belong to the last of them.
         """
-        return len(list(processed.glob(f"{name}{METRICS_SUFFIX}.*.jsonl")))
+        return len(list(models.glob(f"{name}{METRICS_SUFFIX}.*.jsonl")))
 
     def stem(self, name: str) -> str:
         """A run name with its seed or fit-regime suffix dropped, normalised for comparison.
@@ -237,12 +237,12 @@ def main() -> None:
     arguments = command.parsed()
 
     check = LedgerCheck(arguments.ledger, *sorted(arguments.interpretations.rglob("*.md")))
-    processed = command.rooted(arguments).processed()
-    runs = check.finished(processed)
+    models = command.rooted(arguments).models()
+    runs = check.finished(models)
     # The data root is machine-local and gitignored, so an unmounted drive or a paths.yaml pointing at
     # the wrong dataset produces "0 finished runs, 0 unrecorded" — the sentence a fully recorded ledger
     # produces, from a check that read no run at all.
-    Denominator(len(runs), f"no finished run under {processed}").refuse_empty()
+    Denominator(len(runs), f"no finished run under {models}").refuse_empty()
 
     missing = check.unrecorded(runs)
     for name, score in missing.items():
@@ -256,7 +256,7 @@ def main() -> None:
         # A re-run is the likeliest innocent cause, and it is the one the reader cannot see from disk.
         # Said here rather than as its own failure because running a recipe twice is legitimate — what is
         # not legitimate is the number changing without a reason.
-        earlier = check.reran(processed, name)
+        earlier = check.reran(models, name)
         if earlier:
             logger.info(
                 "  ... and it trained %d time(s) before under this name: look for its weights and "

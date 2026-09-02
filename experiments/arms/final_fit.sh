@@ -93,4 +93,4 @@ require "$LABELS"
 # knee-7tq needing four corrections for. The live case is `--rank-weight`, which rank0_dense is measuring
 # now: if the term is refuted the recipe drops it, and a private copy would keep fitting the deliverable
 # with a term the project had just removed, silently and with no holdout to notice.
-run_train "final_fit_e${EPOCHS}" $RECIPE --fold -1 --epochs "$EPOCHS" --slice-pooling max --whole-stack --ema --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$PROCESSED/final_ws_e${EPOCHS}.pt"
+run_train "final_fit_e${EPOCHS}" $RECIPE --fold -1 --epochs "$EPOCHS" --slice-pooling max --whole-stack --ema --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 $THROUGHPUT --labels "$LABELS" --out "$MODELS/final_ws_e${EPOCHS}.pt"

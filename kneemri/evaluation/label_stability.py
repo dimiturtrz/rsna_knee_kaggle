@@ -90,9 +90,9 @@ def main() -> None:
     arguments = command.parsed()
 
     stability = LabelStability()
-    processed = command.rooted(arguments).processed()
+    models = command.rooted(arguments).models()
     runs: dict[str, dict[str, float]] = {}
-    for metrics in sorted(processed.glob("*.metrics.jsonl")):
+    for metrics in sorted(models.glob("*.metrics.jsonl")):
         name = metrics.name.removesuffix(".metrics.jsonl")
         scores = None if THROUGHPUT in name else stability.best(metrics)
         if scores:

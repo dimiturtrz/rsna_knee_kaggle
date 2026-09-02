@@ -138,10 +138,10 @@ export HF_TOKEN
 # purpose: a queue entry that can override any flag is how `resolution` spent a slot re-fitting a member
 # we already had and overwrote its own checkpoint (knee-8hu7). Only these three flags can move.
 SMOKE=""
-[ "${1:-}" = "smoke" ] && SMOKE="--studies 60 --epochs 1 --out $PROCESSED/v3lora_smoke.pt"
+[ "${1:-}" = "smoke" ] && SMOKE="--studies 60 --epochs 1 --out $MODELS/v3lora_smoke.pt"
 
 run_train v3lora_dense \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant v3base --lora-rank 8 --backbone-lr 5e-4 --slices 20 --band-low 0.1 --band-high 0.9 \
   --eager-encoder --vram-gb 29.5 \
-  --labels "$LABELS" --out "$PROCESSED/v3lora_dense_s2026.pt" $SMOKE
+  --labels "$LABELS" --out "$MODELS/v3lora_dense_s2026.pt" $SMOKE

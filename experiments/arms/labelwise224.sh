@@ -67,4 +67,4 @@ run_train labelwise224 \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 \
-  --labels "$LABELS" --out "$PROCESSED/labelwise224_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/labelwise224_s2026.pt"

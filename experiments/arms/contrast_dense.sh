@@ -60,4 +60,4 @@ run_train contrast_dense \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
   --contrast-weight 1.0 \
-  --labels "$LABELS" --out "$PROCESSED/contrast_dense_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/contrast_dense_s2026.pt"

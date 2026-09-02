@@ -53,4 +53,4 @@ run_train distill_v3base \
   $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --distill-weight 0.3 --teacher-targets "$PROCESSED/teacher_fold0.npz" \
-  --labels "$LABELS" --out "$PROCESSED/distill_v3base_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/distill_v3base_s2026.pt"

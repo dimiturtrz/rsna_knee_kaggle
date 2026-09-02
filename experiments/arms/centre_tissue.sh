@@ -33,4 +33,4 @@ run_train centre_tissue \
   $RECIPE --epochs 8 \
   --slice-pooling max --whole-stack --recompute-activations \
   --centre tissue \
-  --labels "$LABELS" --out "$PROCESSED/centre_tissue_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/centre_tissue_s2026.pt"

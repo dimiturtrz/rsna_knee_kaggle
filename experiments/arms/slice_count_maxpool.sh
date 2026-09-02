@@ -18,8 +18,8 @@ require "$LABELS"
 
 run_train maxpool_12 \
   $RECIPE --epochs 24 \
-  --slice-pooling max --labels "$LABELS" --out "$PROCESSED/max12_s2026.pt"
+  --slice-pooling max --labels "$LABELS" --out "$MODELS/max12_s2026.pt"
 
 run_train maxpool_20 \
   $RECIPE --epochs 24 \
-  --slice-pooling max --slices 20 --labels "$LABELS" --out "$PROCESSED/max20_s2026.pt"
+  --slice-pooling max --slices 20 --labels "$LABELS" --out "$MODELS/max20_s2026.pt"

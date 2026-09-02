@@ -46,4 +46,4 @@ run_train small_feat_pre \
   $RECIPE --epochs 4 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --feature-weight 20.0 --teacher-features "$PROCESSED/raptor_features.npz" \
-  --labels "$LABELS" --out "$PROCESSED/small_feat_pre_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/small_feat_pre_s2026.pt"

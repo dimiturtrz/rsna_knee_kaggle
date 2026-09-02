@@ -105,7 +105,7 @@ GROUP224=(
 resolve() {
   local out=()
   for name in "$@"; do
-    out+=("$PROCESSED/$name.pt")
+    out+=("$MODELS/$name.pt")
   done
   printf '%s\n' "${out[@]}"
 }

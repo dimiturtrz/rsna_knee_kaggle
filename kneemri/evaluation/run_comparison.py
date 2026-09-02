@@ -558,8 +558,8 @@ def main() -> None:
     # happen reads as an arm whose claim was not worth printing.
 
     root = command.rooted(arguments)
-    control = RunComparison.resolved(arguments.control, root.processed())
-    arms = [RunComparison.resolved(arm, root.processed()) for arm in arguments.arms]
+    control = RunComparison.resolved(arguments.control, root.models())
+    arms = [RunComparison.resolved(arm, root.models()) for arm in arguments.arms]
     split = None
     if arguments.split:
         if arguments.labels is None:

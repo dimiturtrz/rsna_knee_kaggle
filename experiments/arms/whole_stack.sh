@@ -36,4 +36,4 @@ require "$LABELS"
 run_train whole_stack \
   $RECIPE --epochs 8 \
   --slice-pooling max --whole-stack --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/wholestack_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/wholestack_s2026.pt"

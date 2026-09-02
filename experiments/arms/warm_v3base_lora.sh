@@ -12,7 +12,7 @@
 # THE PARENT IS CHOSEN SO THE MERGE IS NON-EMPTY, and it was checked rather than assumed before this was
 # written: `dinov3_base_lora_s2026` carries 72 adapted layers at rank 8, and merging them moves an example
 # k_proj weight by 0.0056 at the maximum. The encoder file is 211 tensors, variant v3base, written by
-# `python -m kneemri.training.fitted_encoder` to $PROCESSED/encoders/v3base_lora.enc.pt.
+# `python -m kneemri.training.fitted_encoder` to $MODELS/encoders/v3base_lora.enc.pt.
 #
 # THE MECHANISM UNDER TEST, stated so a null is readable. The parent learned a rank-8 correction on a stock
 # trunk. Merging folds that correction into the base weights, and `--lora-rank 8` here builds a SECOND,
@@ -68,7 +68,7 @@
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
-require "$PROCESSED/encoders/v3base_lora.enc.pt"
+require "$MODELS/encoders/v3base_lora.enc.pt"
 
 HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
 export HF_TOKEN
@@ -78,6 +78,6 @@ run_train "warm_v3base_lora" \
   $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --lora-rank 8 --backbone-lr 5e-4 \
   --variant v3base --image-size 336 --train-size 224 \
-  --encoder-weights "$PROCESSED/encoders/v3base_lora.enc.pt" \
+  --encoder-weights "$MODELS/encoders/v3base_lora.enc.pt" \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/warm_v3base_lora_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/warm_v3base_lora_s2026.pt"

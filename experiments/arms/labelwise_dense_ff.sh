@@ -42,4 +42,4 @@ FIT="--fold -1 --ema"
 run_train labelwise_dense_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
-  --labels "$LABELS" --out "$PROCESSED/labelwise_dense_ff.pt"
+  --labels "$LABELS" --out "$MODELS/labelwise_dense_ff.pt"

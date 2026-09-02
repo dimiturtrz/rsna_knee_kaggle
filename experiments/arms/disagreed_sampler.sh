@@ -80,10 +80,10 @@ run_train disagreed_uniform \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --sample-spread "$SPREAD" --sample-alpha 0.0 \
-  --labels "$LABELS" --out "$PROCESSED/disagreed_uniform_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/disagreed_uniform_s2026.pt"
 
 run_train disagreed_full \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --sample-spread "$SPREAD" --sample-alpha 1.0 \
-  --labels "$LABELS" --out "$PROCESSED/disagreed_full_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/disagreed_full_s2026.pt"

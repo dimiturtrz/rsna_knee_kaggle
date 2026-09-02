@@ -70,4 +70,4 @@ FIT="--fold -1 --ema"
 run_train small_batch6_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --batch 6 \
-  --labels "$LABELS" --out "$PROCESSED/small_batch6_ff.pt"
+  --labels "$LABELS" --out "$MODELS/small_batch6_ff.pt"

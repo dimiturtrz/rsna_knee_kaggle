@@ -80,4 +80,4 @@ run_train merged_dense_cf \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --scheme merged --calibrated-targets \
-  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$PROCESSED/merged_dense_cf.pt"
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_dense_cf.pt"

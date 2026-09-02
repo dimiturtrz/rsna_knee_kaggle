@@ -176,7 +176,7 @@ def main() -> None:
     command.parser.add_argument("--owner", default="dimiturnt")
     arguments = command.parsed()
 
-    source = command.rooted(arguments).processed()
+    source = command.rooted(arguments).models()
     checkpoints = MemberRoster.read(arguments.roster).checkpoints(source)
     # Named, not counted: a roster line that matched more than intended is invisible as a number and
     # obvious as a list, and this copies ~89 MB per member.

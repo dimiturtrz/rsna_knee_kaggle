@@ -53,4 +53,4 @@ run_train multiscale \
   $RECIPE --epochs 8 --batch 6 \
   --slice-pooling max --whole-stack --recompute-activations \
   --scheme multiscale --centre tissue \
-  --labels "$LABELS" --out "$PROCESSED/multiscale_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/multiscale_s2026.pt"

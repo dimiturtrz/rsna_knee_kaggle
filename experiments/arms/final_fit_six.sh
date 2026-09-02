@@ -43,17 +43,17 @@ DENSE="--slices 20 --band-low 0.1 --band-high 0.9"
 run_train calib_span_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --calibrated-targets \
-  --labels "$LABELS" --out "$PROCESSED/calib_span_ff.pt"
+  --labels "$LABELS" --out "$MODELS/calib_span_ff.pt"
 
 run_train grade_ladder_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE --grade-ladder \
-  --labels "$LABELS" --out "$PROCESSED/grade_ladder_ff.pt"
+  --labels "$LABELS" --out "$MODELS/grade_ladder_ff.pt"
 
 run_train through_dense_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE --through-plane \
-  --labels "$LABELS" --out "$PROCESSED/through_dense_ff.pt"
+  --labels "$LABELS" --out "$MODELS/through_dense_ff.pt"
 
 # The geometry is SPELLED here although its original arm was silent about it. `rate_wholestack.sh` names
 # neither --slices nor the band, so `lr4e-5_ws_s2026` was fitted on the parser defaults — 12 slices,
@@ -63,14 +63,14 @@ run_train through_dense_ff \
 run_train lr4e-5_ws_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --labels "$LABELS" --out "$PROCESSED/lr4e-5_ws_ff.pt"
+  --labels "$LABELS" --out "$MODELS/lr4e-5_ws_ff.pt"
 
 run_train base_dense_ff \
   $RECIPE $FIT --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant base --backbone-lr 4e-5 $DENSE \
-  --labels "$LABELS" --out "$PROCESSED/base_dense_ff.pt"
+  --labels "$LABELS" --out "$MODELS/base_dense_ff.pt"
 
 run_train band_dense_long_ff \
   $RECIPE $FIT --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $DENSE \
-  --labels "$LABELS" --out "$PROCESSED/band_dense_long_ff.pt"
+  --labels "$LABELS" --out "$MODELS/band_dense_long_ff.pt"

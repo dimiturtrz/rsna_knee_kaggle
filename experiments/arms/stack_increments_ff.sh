@@ -56,4 +56,4 @@ run_train stack_increments_ff \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
   --distill-weight 0.3 --teacher-targets "$PROCESSED/raptor_teacher.npz" $FIT \
-  --labels "$BLEND" --eval-labels "$LABELS" --out "$PROCESSED/stack_increments_ff.pt"
+  --labels "$BLEND" --eval-labels "$LABELS" --out "$MODELS/stack_increments_ff.pt"

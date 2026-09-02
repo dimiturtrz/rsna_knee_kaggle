@@ -33,7 +33,7 @@ run_train speed_combo \
   $RECIPE --epochs 1 \
   --slice-pooling max --whole-stack \
   --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/speed_combo.pt"
+  --labels "$LABELS" --out "$MODELS/speed_combo.pt"
 
 echo "=== steady-state img/s, later steps only ==="
 grep -oE "[0-9]+ img/s" "$LOGS/speed_combo.full.log" | tail -5 | tr '\n' ' '

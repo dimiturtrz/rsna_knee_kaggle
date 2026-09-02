@@ -42,4 +42,4 @@ run_train intensity_392 \
   --slice-pooling max --whole-stack --intensity-aug \
   --image-size 448 --train-size 392 \
   --backbone-lr 4e-5 --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/intensity392_ws_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/intensity392_ws_s2026.pt"

@@ -77,4 +77,4 @@ require "$LABELS"
 run_train labelwise_dense \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
-  --labels "$LABELS" --out "$PROCESSED/labelwise_dense_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/labelwise_dense_s2026.pt"

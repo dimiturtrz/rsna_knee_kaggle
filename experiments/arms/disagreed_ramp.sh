@@ -63,4 +63,4 @@ run_train disagreed_ramp \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --sample-spread "$SPREAD" --sample-alpha 1.0 --sample-ramp 6 \
-  --labels "$LABELS" --out "$PROCESSED/disagreed_ramp_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/disagreed_ramp_s2026.pt"

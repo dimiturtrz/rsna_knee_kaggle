@@ -200,7 +200,7 @@ def main() -> None:
 
     champion = Champion.from_board(arguments.against) if arguments.against else Champion.recorded()
     logger.info("%s scored %.3f on the board with %d members", champion.entry, champion.board, len(champion.members))
-    seats = SeatValue(champion, command.rooted(arguments).processed())
+    seats = SeatValue(champion, command.rooted(arguments).models())
     command.report(seats.report(arguments.candidates, arguments.combine_seed))
 
 

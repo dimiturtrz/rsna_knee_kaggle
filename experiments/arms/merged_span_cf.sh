@@ -67,4 +67,4 @@ run_train merged_span_cf \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.2 --band-high 0.8 \
   --scheme merged --calibrated-targets \
-  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$PROCESSED/merged_span_cf.pt"
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_span_cf.pt"

@@ -35,7 +35,7 @@
 #
 # READING IT. Proxy: the ledger row, directly, because --eval-labels is pinned. Gold: `python -m
 # kneemri.evaluation.supervision_gap --labels $PROCESSED/labels/report_labels_v2.csv --records
-# $PROCESSED/recal_dense_s2026.pt --device cpu`, ONE record at a time — passing two records pools them
+# $MODELS/recal_dense_s2026.pt --device cpu`, ONE record at a time — passing two records pools them
 # and prints a single aggregate.
 #
 # bead: knee-qxyj
@@ -55,4 +55,4 @@ require "$LABELS"
 run_train recal_dense \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --hold-annotations \
-  --labels "$RECAL" --eval-labels "$LABELS" --out "$PROCESSED/recal_dense_s2026.pt"
+  --labels "$RECAL" --eval-labels "$LABELS" --out "$MODELS/recal_dense_s2026.pt"

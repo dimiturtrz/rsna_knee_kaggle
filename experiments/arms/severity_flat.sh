@@ -20,4 +20,4 @@ require "$LABELS" "$FLAT"
 
 run_train severity_flat \
   $RECIPE --epochs 24 \
-  --labels "$FLAT" --eval-labels "$LABELS" --out "$PROCESSED/flatyes_s2026.pt"
+  --labels "$FLAT" --eval-labels "$LABELS" --out "$MODELS/flatyes_s2026.pt"

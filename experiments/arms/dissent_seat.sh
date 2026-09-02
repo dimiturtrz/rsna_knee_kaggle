@@ -75,4 +75,4 @@ run_train dissent_seat \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --rank-weight 0 --dissent-weight 1.0 --teacher-targets "$PROCESSED/teacher_fold0.npz" \
-  --labels "$LABELS" --out "$PROCESSED/dissent_seat_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/dissent_seat_s2026.pt"

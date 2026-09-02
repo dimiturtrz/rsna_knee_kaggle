@@ -26,4 +26,4 @@ require "$LABELS"
 run_train slice_attention \
   $RECIPE --epochs 12 \
   --slice-pooling attend --whole-stack --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/sliceattn_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/sliceattn_s2026.pt"

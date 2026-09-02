@@ -60,4 +60,4 @@ run_train cover_labelwise \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 36 --band-low 0.05 --band-high 0.95 \
   --image-size 224 \
-  --labels "$LABELS" --out "$PROCESSED/cover_labelwise_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/cover_labelwise_s2026.pt"

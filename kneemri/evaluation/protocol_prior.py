@@ -175,7 +175,7 @@ def main() -> None:
     command.parser.add_argument("--members", nargs="*", default=list(CHAMPION))
     arguments = command.parsed()
 
-    holdout = Holdout.load(command.rooted(arguments).processed(), tuple(arguments.members))
+    holdout = Holdout.load(command.rooted(arguments).models(), tuple(arguments.members))
     table = holdout.report()
 
     header = "  ".join(f"w={weight:<5}" for weight in BLENDS)

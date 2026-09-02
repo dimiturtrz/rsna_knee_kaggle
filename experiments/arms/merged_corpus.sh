@@ -66,4 +66,4 @@ run_train merged_corpus \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --scheme merged \
-  --labels "$MERGED_LABELS" --out "$PROCESSED/merged_corpus_s2026.pt"
+  --labels "$MERGED_LABELS" --out "$MODELS/merged_corpus_s2026.pt"

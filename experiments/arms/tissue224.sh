@@ -79,4 +79,4 @@ run_train tissue224 \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --centre tissue \
-  --labels "$LABELS" --out "$PROCESSED/tissue224_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/tissue224_s2026.pt"

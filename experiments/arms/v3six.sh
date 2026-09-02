@@ -70,17 +70,17 @@ V3="--variant v3base --batch 6 --backbone-lr 4e-5"
 run_train v3_calib_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   $V3 $SPAN --calibrated-targets \
-  --labels "$LABELS" --out "$PROCESSED/v3_calib_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_calib_ff.pt"
 
 run_train v3_grade_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   $V3 $SPAN --grade-ladder \
-  --labels "$LABELS" --out "$PROCESSED/v3_grade_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_grade_ff.pt"
 
 run_train v3_through_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   $V3 $SPAN --through-plane \
-  --labels "$LABELS" --out "$PROCESSED/v3_through_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_through_ff.pt"
 
 # The 0.20-0.80 band is `lr4e-5_ws_ff`'s own, kept rather than harmonised: it is the one member of the
 # six that reads a different pixel group, and harmonising it would remove a diversity axis while
@@ -88,14 +88,14 @@ run_train v3_through_ff \
 run_train v3_ws_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   $V3 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --labels "$LABELS" --out "$PROCESSED/v3_ws_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_ws_ff.pt"
 
 run_train v3_attend_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling attend --whole-stack $THROUGHPUT \
   $V3 $SPAN \
-  --labels "$LABELS" --out "$PROCESSED/v3_attend_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_attend_ff.pt"
 
 run_train v3_focal_ff \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   $V3 $SPAN --pool cls_mean_focal \
-  --labels "$LABELS" --out "$PROCESSED/v3_focal_ff.pt"
+  --labels "$LABELS" --out "$MODELS/v3_focal_ff.pt"

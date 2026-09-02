@@ -32,13 +32,13 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
-require "$PROCESSED/small_feat_pre_s2026.pt"
+require "$MODELS/small_feat_pre_s2026.pt"
 
 uv run --no-sync --project "$REPO" python -m kneemri.training.fitted_encoder \
-  "$PROCESSED/small_feat_pre_s2026.pt" "$PROCESSED/encoders/small_feat_pre.enc.pt" || exit 1
+  "$MODELS/small_feat_pre_s2026.pt" "$MODELS/encoders/small_feat_pre.enc.pt" || exit 1
 
 run_train small_feat_fit \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --encoder-weights "$PROCESSED/encoders/small_feat_pre.enc.pt" \
-  --labels "$LABELS" --out "$PROCESSED/small_feat_fit_s2026.pt"
+  --encoder-weights "$MODELS/encoders/small_feat_pre.enc.pt" \
+  --labels "$LABELS" --out "$MODELS/small_feat_fit_s2026.pt"

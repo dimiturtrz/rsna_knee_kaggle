@@ -17,8 +17,8 @@ require "$LABELS"
 SPREAD="$PROCESSED/train_spread_honest12.npz"
 # The spread file is only needed for the explicit control. The ramp arm does not use it.
 
-RAMP_OUT="$PROCESSED/certainty_ramp_s2026.pt"
-CONTROL_OUT="$PROCESSED/disagreed_uniform_s2026.pt"
+RAMP_OUT="$MODELS/certainty_ramp_s2026.pt"
+CONTROL_OUT="$MODELS/disagreed_uniform_s2026.pt"
 
 # The arm: full dense recipe with the certainty curriculum.
 run_train certainty_ramp \

@@ -98,24 +98,24 @@ BLEND="--scheme merged --labels $MERGED_BLEND --eval-labels $LABELS"
 run_train blend_ws \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $GEOMETRY \
-  $BLEND --out "$PROCESSED/blend_ws.pt"
+  $BLEND --out "$MODELS/blend_ws.pt"
 
 run_train blend_calib \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $GEOMETRY --calibrated-targets \
-  $BLEND --out "$PROCESSED/blend_calib.pt"
+  $BLEND --out "$MODELS/blend_calib.pt"
 
 run_train blend_ladder \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $GEOMETRY --grade-ladder \
-  $BLEND --out "$PROCESSED/blend_ladder.pt"
+  $BLEND --out "$MODELS/blend_ladder.pt"
 
 run_train blend_through \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 $GEOMETRY --through-plane \
-  $BLEND --out "$PROCESSED/blend_through.pt"
+  $BLEND --out "$MODELS/blend_through.pt"
 
 run_train blend_base \
   $RECIPE $FIT --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant base --backbone-lr 4e-5 $GEOMETRY \
-  $BLEND --out "$PROCESSED/blend_base.pt"
+  $BLEND --out "$MODELS/blend_base.pt"

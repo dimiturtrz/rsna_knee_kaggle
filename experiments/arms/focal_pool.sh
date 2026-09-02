@@ -35,4 +35,4 @@ run_train focal_pool \
   $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --pool cls_mean_focal \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/focal_pool_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/focal_pool_s2026.pt"

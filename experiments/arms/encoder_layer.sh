@@ -30,4 +30,4 @@ run_train "encoder_layer_${LAYER}" \
   $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --encoder-layer "$LAYER" \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/encoder_layer_${LAYER}_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/encoder_layer_${LAYER}_s2026.pt"

@@ -104,4 +104,4 @@ require "$LABELS"
 run_train cnx_dense_448 \
   $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
   --variant cnxbase --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 448 \
-  --labels "$LABELS" --out "$PROCESSED/cnx_dense_448_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/cnx_dense_448_s2026.pt"

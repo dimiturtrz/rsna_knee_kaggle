@@ -31,4 +31,4 @@ run_train "peak_rate_${PEAK}" \
   $RECIPE --epochs 12 $PATIENCE \
   --slice-pooling max --whole-stack --backbone-lr "$PEAK" \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/peak_rate_${PEAK}_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/peak_rate_${PEAK}_s2026.pt"

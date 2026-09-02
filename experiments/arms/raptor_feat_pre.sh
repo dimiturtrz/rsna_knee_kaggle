@@ -69,4 +69,4 @@ run_train raptor_feat_pre \
   --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
   --feature-weight 20.0 --teacher-features "$PROCESSED/raptor_features.npz" \
   --vram-gb 8 \
-  --labels "$LABELS" --out "$PROCESSED/raptor_feat_pre_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/raptor_feat_pre_s2026.pt"

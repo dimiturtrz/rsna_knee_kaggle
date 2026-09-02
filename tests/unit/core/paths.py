@@ -74,5 +74,20 @@ def test_checkpoints(tmp_path: Path):
 
     paths = root.checkpoints(lines)
 
-    expected = root.processed() / "native224_s2026.pt"
+    expected = root.models() / "native224_s2026.pt"
     assert paths == [expected, expected], "comments strip, suffix fills"
+
+
+def test_models(tmp_path: Path):
+    """Trained weights are written, and they are NOT under the processed root — that is the whole point."""
+    root = DataRoot(tmp_path)
+
+    assert root.models("dataset").is_dir()
+    assert root.models("dataset") != root.processed("dataset")
+
+
+def test_models_takes_a_paths_yaml_redirect(tmp_path: Path):
+    """The kind lands off the data disk entirely, which is what a `models:` key in paths.yaml buys."""
+    stated = (tmp_path / "elsewhere").as_posix()
+
+    assert DataRoot(tmp_path, {"models": stated}).models("dataset") == Path(stated) / "dataset"

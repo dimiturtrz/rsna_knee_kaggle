@@ -18,7 +18,7 @@ FITTED_PEAK = 16.24
 
 def _recorded(root: Path, name: str, options: TrainingOptions, peaks: list[dict[str, float]]) -> RunMetrics:
     """A metrics file as a finished run leaves one: a recipe line, then a row an epoch."""
-    path = root / "processed" / COMPETITION / f"{name}{METRICS_RECORD}"
+    path = root / "models" / COMPETITION / f"{name}{METRICS_RECORD}"
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [json.dumps({"recipe": options.recipe})]
     lines += [json.dumps({"epoch": index, "auc": 0.9, "per_label": {}, **peak}) for index, peak in enumerate(peaks)]
@@ -29,7 +29,7 @@ def _recorded(root: Path, name: str, options: TrainingOptions, peaks: list[dict[
 @pytest.fixture
 def root(tmp_path: Path) -> Path:
     """A data root a command can be pointed at, holding nothing but what a test writes into it."""
-    (tmp_path / "processed" / COMPETITION).mkdir(parents=True)
+    (tmp_path / "models" / COMPETITION).mkdir(parents=True)
     (tmp_path / "paths.yaml").write_text(f"data: {tmp_path.as_posix()}\n", encoding="utf-8")
     return tmp_path
 
@@ -51,7 +51,7 @@ def test_of(root: Path) -> None:
     old = _recorded(root, "old", SETTLED, [{RESERVED: 15.11}])
     assert PricedRun.of(old) is None, "a row from the era when that name meant ALLOCATED cannot grade it"
 
-    unrecorded = RunMetrics(root / "processed" / COMPETITION / f"nothing{METRICS_RECORD}")
+    unrecorded = RunMetrics(root / "models" / COMPETITION / f"nothing{METRICS_RECORD}")
     assert PricedRun.of(unrecorded) is None, "and a run that left no account is silent, not an error"
 
 

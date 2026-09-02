@@ -35,5 +35,5 @@ run_train vjepa_warm \
   $RECIPE --epochs 6 --variant vjepa2l --pool mean --slice-pooling channels \
   --whole-stack $THROUGHPUT --slices 20 --band-low 0.1 --band-high 0.9 --train-size 256 --batch 6 \
   --backbone-lr 4e-5 \
-  --encoder-weights "$PROCESSED/vjepa_member_e5.encoder.pt" \
-  --labels "$LABELS" --out "$PROCESSED/vjepa_warm_s2026.pt"
+  --encoder-weights "$MODELS/vjepa_member_e5.encoder.pt" \
+  --labels "$LABELS" --out "$MODELS/vjepa_warm_s2026.pt"

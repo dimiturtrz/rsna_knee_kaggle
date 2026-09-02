@@ -26,4 +26,4 @@ run_train weight_average \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --ema \
   --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/ema_ws_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/ema_ws_s2026.pt"

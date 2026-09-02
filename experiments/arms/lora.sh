@@ -117,4 +117,4 @@ run_train "$NAME" \
   --slice-pooling max --whole-stack --lora-rank "$RANK" --backbone-lr "$RATE" \
   --variant "$VARIANT" --image-size "$CACHE" --train-size "$SIZE" \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/${NAME}_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/${NAME}_s2026.pt"

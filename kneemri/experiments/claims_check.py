@@ -369,7 +369,7 @@ def main() -> None:
     command.parser.add_argument("--assert", dest="blocking", action="store_true")
     arguments = command.parsed()
 
-    processed = command.rooted(arguments).processed()
+    processed = command.rooted(arguments).models()
     runs = LedgerCheck(*CORPUS[:1]).finished(processed)
     # Same guard as the ledger's, for the same reason: an unmounted data root makes a check that read no
     # run at all print the sentence a clean corpus prints.

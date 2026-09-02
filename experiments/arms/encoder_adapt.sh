@@ -59,10 +59,10 @@
 # control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with the flag off.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
-ADAPTED="$PROCESSED/adapt_small_e6.pt"
+ADAPTED="$MODELS/adapt_small_e6.pt"
 require "$LABELS" "$ADAPTED"
 
 run_train encoder_adapt \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --encoder-weights "$ADAPTED" \
-  --labels "$LABELS" --out "$PROCESSED/encoder_adapt_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/encoder_adapt_s2026.pt"

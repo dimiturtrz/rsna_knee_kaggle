@@ -74,4 +74,4 @@ run_train decay224_low \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --weight-decay 0.005 \
-  --labels "$LABELS" --out "$PROCESSED/decay224_low_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/decay224_low_s2026.pt"

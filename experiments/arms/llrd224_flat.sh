@@ -69,4 +69,4 @@ run_train llrd224_flat \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --layer-decay 0.75 \
-  --labels "$LABELS" --out "$PROCESSED/llrd224_flat_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/llrd224_flat_s2026.pt"

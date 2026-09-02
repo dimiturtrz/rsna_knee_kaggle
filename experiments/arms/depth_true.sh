@@ -56,4 +56,4 @@ require "$LABELS"
 run_train depth_true \
   $RECIPE --epochs 12 --slice-pooling depth --whole-stack $THROUGHPUT \
   --backbone-lr 8e-6 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --labels "$LABELS" --out "$PROCESSED/depth_true_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/depth_true_s2026.pt"

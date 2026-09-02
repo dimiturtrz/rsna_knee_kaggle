@@ -151,7 +151,9 @@ class ArmCheck:
             path = f"{GIT_BASH.parent}{os.pathsep}{path}"
         environment = os.environ | {"ARM_LIB": str(self.stub.resolve()), "PATH": path}
         if PATHS.is_file():
-            environment["ARM_CHECK_PROCESSED"] = DataRoot.from_config(PATHS).processed().as_posix()
+            roots = DataRoot.from_config(PATHS)
+            environment["ARM_CHECK_PROCESSED"] = roots.processed().as_posix()
+            environment["ARM_CHECK_MODELS"] = roots.models().as_posix()
         return environment
 
     def queued(self, entries: list[str]) -> dict[str, str]:

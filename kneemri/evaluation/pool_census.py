@@ -217,8 +217,8 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    processed = command.rooted(arguments).processed()
-    records = arguments.records if arguments.records else sorted(processed.glob("*.pt"))
+    models = command.rooted(arguments).models()
+    records = arguments.records if arguments.records else sorted(models.glob("*.pt"))
     mixed = RecordMix(records)
     logger.info("censusing %d checkpoints", len(records))
     for dropped in mixed.narrow():

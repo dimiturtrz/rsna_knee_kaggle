@@ -819,11 +819,11 @@ def _shipped(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def test_shipped_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """The one home is under the PROCESSED root, not the repo — the mirror it replaced aged two members behind."""
+    """The one home is under the MODELS root, not the repo — the mirror it replaced aged two members behind."""
     root = MemberPackage.shipped_root(_shipped(tmp_path, monkeypatch))
 
     assert root.name == SHIPPED_PACKAGE
-    assert root.parent == tmp_path / "data" / "processed" / COMPETITION
+    assert root.parent == tmp_path / "data" / "models" / COMPETITION
 
 
 def test_at(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):

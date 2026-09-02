@@ -64,4 +64,4 @@ run_train native224_long \
   $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 \
-  --labels "$LABELS" --out "$PROCESSED/native224_long_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/native224_long_s2026.pt"

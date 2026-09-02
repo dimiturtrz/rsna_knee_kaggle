@@ -4,7 +4,7 @@
 it is the only check here that can end a job. A twelve-epoch `one_cycle` arm costs about three hours; the
 question it exists to answer is whether the remaining two of them can change which branch the arm lands in.
 
-WHAT LICENSES IT. Across every run under the processed root that recorded at least `FLOOR_SHARE` of its own
+WHAT LICENSES IT. Across every run under the models root that recorded at least `FLOOR_SHARE` of its own
 budget and asked for the same epoch BUDGET as the arm under test, the gain from the gate epoch to the peak is a measured
 distribution rather than a guess. On 2026-08-30, matched to a twelve-epoch schedule, it read median +0.0208,
 p90 +0.0368, max +0.0529 over n=102 — the maximum being `encoder_adapt_gentle`, a run that started very low
@@ -188,11 +188,11 @@ class TrajectoryGate:
             return None
         return max(scored) - scored[GATE_EPOCH]
 
-    def spread(self, processed: Path, budget: int | None = None) -> Spread:
+    def spread(self, models: Path, budget: int | None = None) -> Spread:
         """The distribution over every non-smoke run under the root that ran long enough to have one."""
         gains = [
             gain
-            for metrics in sorted(processed.glob("*.metrics.jsonl"))
+            for metrics in sorted(models.glob("*.metrics.jsonl"))
             if (run := RunMetrics(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
             if (gain := self.gain(run, budget)) is not None
         ]
@@ -203,7 +203,7 @@ class TrajectoryGate:
         schedule = "any schedule" if budget is None else f"a {budget}-epoch budget"
         Denominator(
             len(gains) if len(gains) >= MIN_CORPUS else 0,
-            f"only {len(gains)} run(s) under {processed} match {schedule} past epoch {GATE_EPOCH}, "
+            f"only {len(gains)} run(s) under {models} match {schedule} past epoch {GATE_EPOCH}, "
             f"and {MIN_CORPUS} are needed before a spread may decide anything",
         ).refuse_empty()
         ranked = sorted(gains)
@@ -242,9 +242,9 @@ def main() -> None:
     arguments = command.parsed()
 
     gate = TrajectoryGate()
-    processed = command.rooted(arguments).processed()
+    models = command.rooted(arguments).models()
     if arguments.run is None:
-        logger.info("%s", gate.spread(processed).line())
+        logger.info("%s", gate.spread(models).line())
         return
 
     record = RunMetrics(arguments.run)
@@ -256,7 +256,7 @@ def main() -> None:
         raise SystemExit(message)
     # MATCHED on the arm's own epoch budget, so the ceiling it is measured against is one a run on this
     # schedule actually achieved. Falls back to the whole corpus only for an arm that recorded no recipe.
-    spread = gate.spread(processed, ConvergenceCheck().asked(record))
+    spread = gate.spread(models, ConvergenceCheck().asked(record))
     logger.info("%s", spread.line())
     scored = gate.scored(record)
     if len(scored) <= GATE_EPOCH:

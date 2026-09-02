@@ -78,4 +78,4 @@ run_train swin_calib_dense \
   --variant swinbase --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
   --calibrated-targets --hold-annotations \
   --vram-gb 8 \
-  --labels "$LABELS" --out "$PROCESSED/swin_calib_dense_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/swin_calib_dense_s2026.pt"

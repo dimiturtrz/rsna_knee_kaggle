@@ -68,4 +68,4 @@ run_train holdannot \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --hold-annotations \
-  --labels "$LABELS" --out "$PROCESSED/holdannot_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/holdannot_s2026.pt"

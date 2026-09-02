@@ -51,4 +51,4 @@ require "$LABELS"
 run_train band_density \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 \
-  --labels "$LABELS" --out "$PROCESSED/band_density_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/band_density_s2026.pt"

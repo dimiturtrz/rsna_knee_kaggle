@@ -68,17 +68,17 @@ require "$LABELS"
 # nothing except the curve distinguishes those two cases. It costs NOTHING extra to serve: it reads 224
 # off the same 336 cache, so it shares that decode and resamples inside the model.
 MEMBERS=(
-  "$PROCESSED/dinov3_v3small_224_s2026.pt"
-  "$PROCESSED/extended_ws_s2026.pt"
-  "$PROCESSED/res392_ws_s2026.pt"
-  "$PROCESSED/intensity392_ws_s2026.pt"
-  "$PROCESSED/sliceattn_s2026.pt"
-  "$PROCESSED/wsfold0_e6.pt"
-  "$PROCESSED/slices16_ws_s2026.pt"
-  "$PROCESSED/lr5x_d6_s2026.pt"
-  "$PROCESSED/max12_s2026.pt"
-  "$PROCESSED/max20_s2026.pt"
-  "$PROCESSED/large_deep_rank24.pt"
+  "$MODELS/dinov3_v3small_224_s2026.pt"
+  "$MODELS/extended_ws_s2026.pt"
+  "$MODELS/res392_ws_s2026.pt"
+  "$MODELS/intensity392_ws_s2026.pt"
+  "$MODELS/sliceattn_s2026.pt"
+  "$MODELS/wsfold0_e6.pt"
+  "$MODELS/slices16_ws_s2026.pt"
+  "$MODELS/lr5x_d6_s2026.pt"
+  "$MODELS/max12_s2026.pt"
+  "$MODELS/max20_s2026.pt"
+  "$MODELS/large_deep_rank24.pt"
 )
 require "${MEMBERS[@]}"
 

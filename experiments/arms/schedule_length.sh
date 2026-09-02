@@ -40,4 +40,4 @@ run_train "schedule_${EPOCHS}" \
   $RECIPE --epochs "$EPOCHS" \
   --slice-pooling max --whole-stack \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/schedule_${EPOCHS}_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/schedule_${EPOCHS}_s2026.pt"

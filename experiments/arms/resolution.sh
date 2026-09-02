@@ -130,4 +130,4 @@ run_train "resolution_${SIZE}${TAG}" \
   --slice-pooling max --whole-stack \
   --image-size "$CACHE_PX" --train-size "$SIZE" \
   --backbone-lr "$RATE" --batch "$BATCH" $PATIENCE $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/res${SIZE}${TAG}_ws_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/res${SIZE}${TAG}_ws_s2026.pt"

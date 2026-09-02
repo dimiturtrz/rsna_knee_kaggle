@@ -155,7 +155,7 @@ def main() -> None:
     command.parser.add_argument("--declines", type=Path, default=DECLINES, help="what deliberately does not")
     arguments = command.parsed()
 
-    drift = RosterDrift(command.rooted(arguments).processed(), arguments.roster, arguments.declines)
+    drift = RosterDrift(command.rooted(arguments).models(), arguments.roster, arguments.declines)
     command.report(drift.report())
     if drift.complaints():
         message = f"{len(drift.complaints())} member(s) the roster no longer describes"

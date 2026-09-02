@@ -65,4 +65,4 @@ require "$CONFIDENT"
 run_train confident_span \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 \
-  --labels "$CONFIDENT" --out "$PROCESSED/confident_span_s2026.pt"
+  --labels "$CONFIDENT" --out "$MODELS/confident_span_s2026.pt"

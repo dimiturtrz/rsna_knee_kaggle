@@ -113,11 +113,11 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
-require "$PROCESSED/encoders/cnx_own_recipe.enc.pt"
+require "$MODELS/encoders/cnx_own_recipe.enc.pt"
 
 run_train cnx_warm_anneal \
   $RECIPE --epochs 6 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
   --variant cnxbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 448 \
-  --encoder-weights "$PROCESSED/encoders/cnx_own_recipe.enc.pt" \
+  --encoder-weights "$MODELS/encoders/cnx_own_recipe.enc.pt" \
   --vram-gb 16 \
-  --labels "$LABELS" --out "$PROCESSED/cnx_warm_anneal_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/cnx_warm_anneal_s2026.pt"

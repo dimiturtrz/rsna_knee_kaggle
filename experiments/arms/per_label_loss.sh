@@ -30,4 +30,4 @@ run_train per_label_loss \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --per-label-loss \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/per_label_loss_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/per_label_loss_s2026.pt"

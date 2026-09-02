@@ -66,4 +66,4 @@ run_train crop80_tissue_full \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --recompute-activations \
   --crop-mm 80 --centre tissue --slices 12 --band-low 0.2 --band-high 0.8 \
-  --labels "$LABELS" --out "$PROCESSED/crop80_tissue_full_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/crop80_tissue_full_s2026.pt"

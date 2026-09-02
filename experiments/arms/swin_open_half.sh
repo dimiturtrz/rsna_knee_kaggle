@@ -79,4 +79,4 @@ run_train swin_open_half \
   --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
   --unfreeze-last 12 --layer-decay 0.7 \
   --vram-gb 9 \
-  --labels "$LABELS" --out "$PROCESSED/swin_open_half_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/swin_open_half_s2026.pt"

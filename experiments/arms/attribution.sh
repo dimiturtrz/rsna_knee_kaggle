@@ -10,7 +10,7 @@
 #   depth   best window at slice 7 = 0.8332, range 0.7976..0.8332 over ten windows
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
-CHECKPOINT="${1:-$PROCESSED/rankbase24_s2026.pt}"
+CHECKPOINT="${1:-$MODELS/rankbase24_s2026.pt}"
 require "$LABELS" "$CHECKPOINT"
 
 # THE LOG IS NAMED AFTER THE MEMBER IT READ. It was `attribution.full.log` whatever checkpoint was

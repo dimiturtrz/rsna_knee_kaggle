@@ -21,5 +21,5 @@ for weight in 0.3 1.0; do
   run_train "report_${weight}" \
     $RECIPE --epochs 24 \
     --report-weight "$weight" --report-vectors "$VECTORS" \
-    --labels "$LABELS" --out "$PROCESSED/report${weight}_s2026.pt"
+    --labels "$LABELS" --out "$MODELS/report${weight}_s2026.pt"
 done

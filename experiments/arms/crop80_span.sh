@@ -43,4 +43,4 @@ require "$LABELS"
 run_train crop80_span \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --crop-mm 80 --centre tissue \
-  --labels "$LABELS" --out "$PROCESSED/crop80_span_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/crop80_span_s2026.pt"

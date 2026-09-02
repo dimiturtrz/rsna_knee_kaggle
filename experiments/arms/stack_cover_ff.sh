@@ -58,4 +58,4 @@ run_train stack_cover_ff \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack \
   --backbone-lr 4e-5 --slices 36 --band-low 0.05 --band-high 0.95 --image-size 224 --calibrated-targets \
   --distill-weight 0.3 --teacher-targets "$PROCESSED/raptor_teacher.npz" $FIT \
-  --labels "$BLEND" --eval-labels "$LABELS" --out "$PROCESSED/stack_cover_ff.pt"
+  --labels "$BLEND" --eval-labels "$LABELS" --out "$MODELS/stack_cover_ff.pt"

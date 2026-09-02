@@ -44,4 +44,4 @@ run_train extended_slots \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --scheme extended \
   $THROUGHPUT \
-  --labels "$LABELS" --out "$PROCESSED/extended_ws_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/extended_ws_s2026.pt"

@@ -72,4 +72,4 @@ run_train warm224_long \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --warmup 0.30 \
-  --labels "$LABELS" --out "$PROCESSED/warm224_long_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/warm224_long_s2026.pt"

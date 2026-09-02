@@ -67,4 +67,4 @@ run_train swin_distill_pre \
   --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
   --distill-weight 20.0 --teacher-targets "$PROCESSED/raptor_teacher.npz" \
   --vram-gb 8 \
-  --labels "$LABELS" --out "$PROCESSED/swin_distill_pre_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/swin_distill_pre_s2026.pt"

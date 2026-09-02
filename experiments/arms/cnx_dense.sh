@@ -81,4 +81,4 @@ run_train cnx_dense \
   $RECIPE --epochs 12 --batch 2 --accumulate 3 --slice-pooling max --whole-stack \
   --variant cnxbase --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 352 \
   --vram-gb 16 \
-  --labels "$LABELS" --out "$PROCESSED/cnx_dense_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/cnx_dense_s2026.pt"

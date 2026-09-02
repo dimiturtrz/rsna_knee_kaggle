@@ -13,4 +13,4 @@ require "$LABELS"
 
 run_train rate_isolate \
   $RECIPE --epochs 24 \
-  --backbone-lr 4e-5 --labels "$LABELS" --out "$PROCESSED/lr5x_d6_s2026.pt"
+  --backbone-lr 4e-5 --labels "$LABELS" --out "$MODELS/lr5x_d6_s2026.pt"

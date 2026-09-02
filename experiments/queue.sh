@@ -19,7 +19,7 @@
 # say which one is training, and a pid does not survive the shell that started it. A checkpoint appears
 # exactly once, when the run it belongs to has written its last epoch.
 #
-#   bash experiments/queue.sh "$PROCESSED/weight_average_s2026.pt" depth_regions_narrow unfreeze_depth
+#   bash experiments/queue.sh "$MODELS/weight_average_s2026.pt" depth_regions_narrow unfreeze_depth
 #
 # Each arm gets its own hard timeout so a wedged run cannot hold the queue: a 12-epoch arm is ~70 min
 # at the current 360 s/epoch, and the ceiling is set well above that rather than near it, because a

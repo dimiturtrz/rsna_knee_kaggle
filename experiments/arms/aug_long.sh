@@ -67,4 +67,4 @@ run_train aug_long \
   $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
   --intensity-aug \
-  --labels "$LABELS" --out "$PROCESSED/aug_long_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/aug_long_s2026.pt"

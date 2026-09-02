@@ -16,4 +16,4 @@ require "$LABELS"
 run_train compose_base \
   $RECIPE --epochs 24 \
   --variant base --backbone-lr 4e-5 --slice-pooling max \
-  --labels "$LABELS" --out "$PROCESSED/compose_base_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/compose_base_s2026.pt"

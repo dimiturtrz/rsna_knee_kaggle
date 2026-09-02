@@ -91,4 +91,4 @@ run_train vjepa_member \
   $RECIPE --epochs 12 --variant vjepa2l --pool mean --slice-pooling channels \
   --whole-stack $THROUGHPUT --slices 20 --band-low 0.1 --band-high 0.9 --train-size 256 --batch 6 \
   --backbone-lr 4e-5 \
-  --labels "$LABELS" --out "$PROCESSED/vjepa_member_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/vjepa_member_s2026.pt"

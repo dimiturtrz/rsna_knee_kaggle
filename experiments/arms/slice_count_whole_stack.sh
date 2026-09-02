@@ -42,4 +42,4 @@ run_train "slices${SLICES}_ws" \
   $RECIPE --epochs 12 \
   --slice-pooling max --whole-stack --slices "$SLICES" \
   --recompute-activations \
-  --labels "$LABELS" --out "$PROCESSED/slices${SLICES}_ws_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/slices${SLICES}_ws_s2026.pt"

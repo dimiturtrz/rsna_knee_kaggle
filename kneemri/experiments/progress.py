@@ -86,7 +86,7 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     arguments = command.parsed()
 
-    processed = command.rooted(arguments).processed()
+    processed = command.rooted(arguments).models()
     now = datetime.now(UTC).timestamp()
     arms = [ArmProgress(RunMetrics(found)) for found in sorted(processed.glob(f"*{METRICS_RECORD}"))]
     producing = [arm for arm in arms if arm.producing(now)]

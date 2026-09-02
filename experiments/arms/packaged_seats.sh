@@ -98,7 +98,7 @@ READ_SPAN=(band_span_s2026 calib_span_s2026 calib_span_hold_s2026)
 resolve() {
   local out=()
   for name in "$@"; do
-    out+=("$PROCESSED/$name.pt")
+    out+=("$MODELS/$name.pt")
   done
   printf '%s\n' "${out[@]}"
 }

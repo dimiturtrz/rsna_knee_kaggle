@@ -127,7 +127,7 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    processed = command.rooted(arguments).processed()
+    processed = command.rooted(arguments).models()
     found = sorted(processed.glob(f"*{METRICS_RECORD}"))
     priced = [run for run in (PricedRun.of(RunMetrics(path)) for path in found) if run is not None]
     logger.info("%d recorded runs, %d priceable against the corrected reading", len(found), len(priced))

@@ -16,4 +16,4 @@ require "$LABELS"
 run_train band_span_hold \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --hold-annotations \
-  --labels "$LABELS" --out "$PROCESSED/band_span_hold_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/band_span_hold_s2026.pt"

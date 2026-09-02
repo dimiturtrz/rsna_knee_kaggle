@@ -234,11 +234,11 @@ class ConvergenceCheck:
             return Convergence.UNDERTRAINED
         return Convergence.CONVERGED
 
-    def audit(self, processed: Path) -> list[RunConvergence]:
-        """Every scored run under the processed root, smokes excluded, worst verdict first."""
+    def audit(self, models: Path) -> list[RunConvergence]:
+        """Every scored run under the models root, smokes excluded, worst verdict first."""
         found = [
             self.verdict(run)
-            for metrics in sorted(processed.glob("*.metrics.jsonl"))
+            for metrics in sorted(models.glob("*.metrics.jsonl"))
             if (run := RunMetrics(metrics)).rows() and not self.smoke(run) and not self.benchmark(run)
         ]
         return sorted(found, key=lambda seen: (seen.settled(), seen.name))
@@ -263,11 +263,11 @@ def main() -> None:
             raise SystemExit(message)
         seen = [check.verdict(record)]
     else:
-        processed = command.rooted(arguments).processed()
-        seen = check.audit(processed)
+        models = command.rooted(arguments).models()
+        seen = check.audit(models)
         # The data root is gitignored and machine-local, so an unmounted drive reports "0 runs, all
         # settled" — the sentence a clean tree produces, from a check that read nothing at all.
-        Denominator(len(seen), f"no scored run under {processed}").refuse_empty()
+        Denominator(len(seen), f"no scored run under {models}").refuse_empty()
 
     for run in seen:
         if not run.settled():

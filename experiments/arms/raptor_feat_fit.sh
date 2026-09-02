@@ -77,14 +77,14 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
-require "$PROCESSED/raptor_feat_pre_s2026.pt"
+require "$MODELS/raptor_feat_pre_s2026.pt"
 
 uv run --no-sync --project "$REPO" python -m kneemri.training.fitted_encoder \
-  "$PROCESSED/raptor_feat_pre_s2026.pt" "$PROCESSED/encoders/raptor_feat_pre.enc.pt" || exit 1
+  "$MODELS/raptor_feat_pre_s2026.pt" "$MODELS/encoders/raptor_feat_pre.enc.pt" || exit 1
 
 run_train raptor_feat_fit \
   $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant swinbase --backbone-lr 1e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 384 \
-  --encoder-weights "$PROCESSED/encoders/raptor_feat_pre.enc.pt" \
+  --encoder-weights "$MODELS/encoders/raptor_feat_pre.enc.pt" \
   --vram-gb 8 \
-  --labels "$LABELS" --out "$PROCESSED/raptor_feat_fit_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/raptor_feat_fit_s2026.pt"
