@@ -24,8 +24,9 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 ### OrthoDiffusion (Lan et al., 2026) — game changer for 3D
 - **What it is:** A unified diffusion-based foundation model for musculoskeletal MRI interpretation. Three orientation-specific 3D diffusion backbones (sagittal, coronal, axial) are pretrained on 15,948 unlabeled knee MRI examinations, then used to extract bottleneck features for multi-label diagnosis and segmentation.
 - **Performance:** Macro-average AUROC **0.908** on an 8-class knee abnormality diagnosis task across eight institutions. Strong label efficiency (10% labels retains high precision) and cross-scanner robustness (1.5T vs 3.0T).
-- **Weights:** Available from a Kaggle dataset: [OrthoDiffusion Official Knee MRI Foundation](https://www.kaggle.com/datasets/prvsiyan/orthodiffusion-official-knee-mri-foundation). Code is on GitHub: https://github.com/lt-0123/OrthoDiffusion.
-- **License:** Verify on Kaggle; the paper does not state a license.
+- **Weights:** Available from [HuggingFace `lanstat0123/orthodiffusion`](https://huggingface.co/lanstat0123/orthodiffusion) and a Kaggle mirror [OrthoDiffusion Official Knee MRI Foundation](https://www.kaggle.com/datasets/prvsiyan/orthodiffusion-official-knee-mri-foundation). Code is on GitHub: https://github.com/lt-0123/OrthoDiffusion.
+- **License:** Code is MIT. The Kaggle dataset metadata lists `"unknown"` license (retrieved 2026-09-02); prefer HuggingFace or seek author clarification before submission use.
+- **The 8 diagnosis labels:** ACL injury, PCL injury, medial meniscus tear, lateral meniscus tear, MCL injury, LCL injury, patellar dislocation, joint effusion. Five of these (ACL, MM, LM, MCL, Effusion) map directly to our RSNA 12 labels; the head must be replaced for the other 7 RSNA findings.
 - **Relevance to us:** This is the first public, knee-specific, multi-label-diagnosis 3D foundation model with weights. It is now the primary candidate for a 3D member. The main work is feature extraction (select timestep/block, run U-Net, pool, fuse planes) and adapting the head to our 12 labels.
 
 ## 3D foundation / segmentation models that touch knee MRI

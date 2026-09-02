@@ -9,10 +9,13 @@ No public corpus matches the RSNA competition's exact 12-label space, so the sco
 1. **Partial-label multi-task pretraining** on overlapping findings (ACL, meniscus, MCL, effusion).
 2. **Pseudo-labeling / self-distillation** from a strong teacher on unlabeled images (KMAR-50K, OAI, SKM-TEA).
 3. **Domain-invariant training** to absorb scanner/protocol differences.
+4. **Replace the trunk with a knee-specific pretrained backbone** (OrthoFoundation-L for 2D, OrthoDiffusion for 3D).
 
-The literature strongly supports the first lever, gives conditional support to the second, and warns that the third is only useful when paired with enough data and anti-forgetting safeguards.
+The literature strongly supports the first lever, gives conditional support to the second, warns that the third is only useful when paired with enough data and anti-forgetting safeguards, and now offers a fourth lever in the form of public knee-specific foundation weights.
 
 **Recommended first experiment:** Scheme B — merged multi-task partial-label pretraining on MRNet + fastMRI+ + Rijeka + RSNA, with masked loss, external oversampling, LP-FT, L2-SP and MixStyle-style augmentation. Expected mean-AUC gain **+0.005 to +0.012**, with ACL/meniscus columns potentially **+0.010 to +0.020**.
+
+**Highest-ceiling single bet:** OrthoDiffusion — a public 3D knee-MRI diffusion foundation model (15,948 knee MRIs, macro AUROC 0.908 on 8 abnormalities, MIT-licensed code, HuggingFace weights). Its backbone is knee-specific and multi-plane, but only 5 of its 8 labels map to RSNA, so it needs a new 12-label head. See `research/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`.
 
 ## Why external data can move the score
 

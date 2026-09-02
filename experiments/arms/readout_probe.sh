@@ -77,15 +77,22 @@ cd "$REPO"
 # reading agrees with the fitted one, and the conv lane stays shut on two readings instead of one.
 #
 # It costs two builds on a 7M-parameter trunk, inside a pass already being made for three others.
-SIZE=256
+# READ SIZE IS PER TRUNK, NOT A CONSTANT, and the closed trio already knew it: dinov2-large's cache stem
+# reads `r252` against v3large's and ortholarge's `r256`. 252 is 18x14 and 256 is 16x16 -- the patch grid
+# is what is matched across trunks, not the pixel count, and a flat SIZE would have re-read the CONTROL at
+# a size it was never measured at while claiming to move only the pooling. radnet121 is patch 32, so 256
+# is 8x32 and it joins the second group.
 for READ in max attend; do
-  for VARIANT in dinov2-large v3large ortholarge radnet121; do
-    echo "=== ${VARIANT} focal ${READ} ==="
+  for PAIR in "large 252" "v3large 256" "ortholarge 256" "radnet121 256"; do
+    set -- $PAIR
+    echo "=== $1 cls_mean_focal ${READ} r$2 ==="
     uv run --no-sync python -m kneemri.embeddings.build_embeddings \
-      --variant "${VARIANT}" --train-size "${SIZE}" --pool focal --slice-read "${READ}" --batch 4
+      --variant "$1" --train-size "$2" --pool cls_mean_focal --slice-read "${READ}" --batch 4
   done
 done
 
-uv run --no-sync python -m kneemri.evaluation.feature_probe --trunks dinov2-large v3large ortholarge
+uv run --no-sync python -m kneemri.evaluation.feature_probe --trunks \
+  dinov2-large@focal-max v3large@focal-max ortholarge@focal-max radnet121@focal-max \
+  dinov2-large@focal-attend v3large@focal-attend ortholarge@focal-attend radnet121@focal-attend
 
 echo "ARM DONE readout_probe"

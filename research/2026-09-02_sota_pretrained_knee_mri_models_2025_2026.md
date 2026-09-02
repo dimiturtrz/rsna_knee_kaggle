@@ -6,12 +6,14 @@ This note surveys recently released foundation and SOTA models that are relevant
 
 | Model | Year | Anatomy focus | Weights available? | License | Relevance to RSNA task |
 |-------|------|---------------|-------------------|---------|------------------------|
-| **OrthoDiffusion** | 2026 | Knee MRI (3D multi-plane) | ✅ Yes, Kaggle dataset | Verify on Kaggle | **Highest** — 3D diffusion backbone pretrained on 15,948 knee MRIs; macro AUROC 0.908 on 8 knee abnormalities; multi-plane fusion |
+| **OrthoDiffusion** | 2026 | Knee MRI (3D multi-plane) | ✅ Yes, HuggingFace + Kaggle mirror | MIT code; Kaggle "unknown" | **Highest** — 3D diffusion backbone pretrained on 15,948 knee MRIs; macro AUROC 0.908 on 8 knee abnormalities; multi-plane fusion |
 | **OrthoFoundation** | 2026 | Knee (X-ray + MRI) | ✅ Yes, `OrthoFoudation-L.pth` | MIT | **High** — trained on 1.25M knee images including OAI+fastMRI; evaluated on ACL/PCL/MCL/Meniscus/Cartilage |
 | **MRI-CORE** | 2024 | General MRI | ✅ Yes, `MRI_CORE_vitb.pth` | Apache 2.0 | High — SAM-based, segmentation feature extractor, 2D slice compatible |
+| **Radio DINO** | 2025 | General radiology | ✅ Yes, HuggingFace | CC BY 4.0 | Medium — radiology-domain DINO/DINOv2 init; lower priority than OrthoFoundation |
 | **MedDINOv3** | 2025 | General medical segmentation | Probably | Unknown | Medium — DINOv3 medical adaptation, segmentation focus |
 | **OmniMRI** | 2025 | General MRI VLM | ❌ Not found | — | Medium-high in principle, but no public weights yet |
 | **MedImageInsight** | 2025–2026 | General medical imaging | ✅ Azure model catalog | Commercial/MS license | Medium — general embedding model, not knee-specific |
+| **OmniRad** | 2026 | General radiology | ❌ Not found | — | Medium — beats Radio DINO on radiology benchmarks, but no public weights listed |
 | **Pillar-0** | 2025 | General radiology | Unknown | Unknown | Medium — radiology FM, mostly CT/chest emphasis in public materials |
 | **Triad** | 2025 | 3D medical (MRI incl.) | Unknown | Unknown | Medium — 3D VFM, no knee-specific eval found |
 | **CARVE** | 2026 | 3D medical volumes | Unknown | Unknown | Low-medium — 3D volume understanding, not knee-specific |
@@ -37,9 +39,29 @@ This note surveys recently released foundation and SOTA models that are relevant
 
 **Why it matters for us.** OrthoDiffusion is the first public 3D knee-MRI foundation model with a multi-label diagnosis score. Its 8 diagnostic labels (not fully listed in the abstract, but likely ACL, meniscus, cartilage, effusion, etc.) overlap with our 12-label set. The Kaggle weights are the fastest path to a 3D member: extract per-plane features from the pretrained diffusion backbones, pool and fuse them, and add our 12-label head. It also gives us a strong baseline to compare against any 3D member we train ourselves.
 
-**Risks.** The input format is 3D volumes of 16 central slices at 256×256, which differs from our slice-oriented pipeline. The model is diffusion-based, so inference requires selecting timesteps and blocks and running the U-Net forward; it is not a simple encoder forward pass. The 8-label task is not identical to our 12-label task, so the head must be replaced. License and Kaggle dataset terms must be verified before use in a competition submission.
+**The 8 knee-abnormality labels (Table 1 of the paper).** OrthoDiffusion's diagnosis head is trained for:
 
-**Recommended next step.** Download the Kaggle weights, inspect the checkpoint structure, and run a smoke experiment: extract features for a small batch of our RSNA studies and train a small linear head. Compare holdout AUC against the DINOv2/DINOv3 baseline.
+| # | OrthoDiffusion label | RSNA 12 mapping |
+|---|----------------------|-----------------|
+| 1 | Anterior cruciate ligament (ACL) injury | **ACL** (direct) |
+| 2 | Posterior cruciate ligament (PCL) injury | **Not in RSNA 12** |
+| 3 | Medial meniscus (MM) tear | **Medial Meniscus** (direct) |
+| 4 | Lateral meniscus (LM) tear | **Lateral Meniscus** (direct) |
+| 5 | Medial collateral ligament (MCL) injury | **MCL** (direct) |
+| 6 | Lateral collateral ligament (LCL) injury | **Not in RSNA 12** |
+| 7 | Patellar dislocation (PD) | **Not in RSNA 12** |
+| 8 | Joint effusion (EFFU) | **Effusion** (direct) |
+
+So **5 of 8 labels map directly** to our task. The model therefore cannot be used as a zero-shot 12-label classifier; its value is the **knee-specific 3D backbone features**, not the released head. The 7 RSNA findings it was never trained to predict are: Medial OA, Lateral OA, PF OA, Synovitis, Baker's, Contusion, Fracture.
+
+**License and weights source.**
+- Code: MIT license at the [GitHub repository](https://github.com/lt-0123/OrthoDiffusion/blob/main/LICENSE) ([raw](https://raw.githubusercontent.com/lt-0123/OrthoDiffusion/main/LICENSE)).
+- Weights: released on both [HuggingFace `lanstat0123/orthodiffusion`](https://huggingface.co/lanstat0123/orthodiffusion) and a [Kaggle dataset `prvsiyan/orthodiffusion-official-knee-mri-foundation`](https://www.kaggle.com/datasets/prvsiyan/orthodiffusion-official-knee-mri-foundation).
+- Kaggle dataset metadata lists license as `"unknown"` (retrieved 2026-09-02 via `kaggle datasets metadata`). This is a yellow flag for competition use; prefer the HuggingFace source or obtain explicit clarification from the authors.
+
+**Risks.** The input format is 3D volumes of 16 central slices at 256×256, which differs from our slice-oriented pipeline. The model is diffusion-based, so inference requires selecting timesteps and blocks and running the U-Net forward; it is not a simple encoder forward pass. The 8-label task is not identical to our 12-label task, so the head must be replaced. The Kaggle dataset's "unknown" license should be resolved before a competition submission; the MIT-licensed code and HuggingFace weights are the safer source.
+
+**Recommended next step.** Download the HuggingFace weights (or Kaggle weights after license clarification), inspect the checkpoint structure, and run a smoke experiment: extract features for a small batch of our RSNA studies and train a small linear head. Compare holdout AUC against the DINOv2/DINOv3 baseline.
 
 ## 2. OrthoFoundation (2026) — strong 2D candidate
 
@@ -103,7 +125,20 @@ OmniMRI is a unified vision-language foundation model trained on 60 public MRI d
 
 **Why it matters for us.** If weights become available, OmniMRI could be used as a feature extractor or even as a zero-shot/radiology-report generator for pseudo-labeling. Without weights, it is only a signal that the field is moving toward VLMs. Keep on watchlist.
 
-## 6. MedImageInsight (2025–2026) — Microsoft general medical embedding model
+## 6. Radio DINO (2025) — general radiology DINO/DINOv2
+
+Radio DINO is a family of self-supervised ViTs pretrained with DINO/DINOv2 on the RadImageNet dataset (~1.35M radiology images across CT, MRI, ultrasound). It is not knee-specific, but it is modality-aware and radiology-domain.
+
+- **Architecture:** DINO/DINOv2 ViT (small/base variants).
+- **Weights:** Available on HuggingFace (`hf_hub:Snarcy/RadioDino-s16`, etc.).
+- **License:** CC BY 4.0.
+- **Use case:** Drop-in 2D trunk initialization where a general medical pretrained model is desired.
+
+([GitHub — Radio DINO](https://github.com/Snarci/Radio-DINO), [paper](https://www.sciencedirect.com/science/article/pii/S0010482525009345))
+
+**Why it matters for us.** It is a safer, more domain-matched alternative to ImageNet DINOv2 for the 2D trunk, but it is not knee-specific. It is lower priority than OrthoFoundation-L (which is knee-specific and also DINOv3-based) and should only be tested if OrthoFoundation is blocked or underperforms.
+
+## 7. MedImageInsight (2025–2026) — Microsoft general medical embedding model
 
 MedImageInsight is a 360M-parameter image encoder + 252M-parameter language encoder released through the Azure AI model catalog. It is a general-domain medical imaging embedding model, not knee-specific.
 
@@ -114,11 +149,12 @@ MedImageInsight is a 360M-parameter image encoder + 252M-parameter language enco
 
 **Why it matters for us.** It is an alternative general embedding model, but it is unlikely to beat OrthoFoundation on knee MRI because it is not trained on a knee-heavy corpus. Useful only if we want a general baseline or if we are already using Microsoft Azure tooling.
 
-## 7. Pillar-0, Triad, CARVE — watchlist
+## 8. Pillar-0, Triad, CARVE, OmniRad — watchlist
 
 - **Pillar-0** (2025): a radiology foundation model pretrained on diverse imaging datasets. Public materials emphasize CT and chest; no clear knee-MRI eval or weights found yet.
 - **Triad** (2025): a 3D vision foundation model for MRI. Potentially relevant for a 3D branch, but no knee-specific pretrained checkpoint identified.
 - **CARVE** (2026): cross-slice anisotropic reallocation for 3D medical volume understanding. Interesting for 3D aggregation, but no public weights yet.
+- **OmniRad** (2026): a 1.2M-image radiology foundation model that beats Radio DINO on MedMNISTv2 and MedSegBench in the published benchmarks, but no public weights or code were listed in the paper's "Code Availability" section.
 
 These are worth monitoring but not actionable today.
 
@@ -126,11 +162,12 @@ These are worth monitoring but not actionable today.
 
 Given our current champion is a DINOv2/DINOv3 slice ensemble and we have fastMRI + MRNet + OAI on disk, the priority order is:
 
-1. **OrthoDiffusion** as a 3D member / trunk candidate. Download the Kaggle weights, verify the license, and run a smoke experiment extracting diffusion features for our RSNA studies and training a 12-label head. This is now the single highest-impact public model for knee-MRI diagnosis.
+1. **OrthoDiffusion** as a 3D member / trunk candidate. Download the HuggingFace weights, inspect the checkpoint, and run a smoke experiment extracting diffusion features for our RSNA studies and training a 12-label head. This is now the single highest-impact public model for knee-MRI diagnosis.
 2. **OrthoFoundation-L** as a 2D trunk replacement. Load the released checkpoint, freeze or LP-FT, and measure RSNA holdout AUC. This is the strongest 2D candidate and a drop-in replacement.
-3. **Continue-pretrain our own DINOv3-L** on OAI + fastMRI slices if neither released model can be used or if we want a fully reproducible pipeline. Use the MedDINOv3 paper's adaptation recipe.
-4. **MRI-CORE** as a segmentation/feature auxiliary, especially if we add a 3D segmentation pretraining branch using SKM-TEA masks.
-5. **Watch OmniMRI / Pillar-0 / Triad** for public weight releases; they are not usable today.
+3. **Radio DINO** as a fallback 2D trunk init if OrthoFoundation-L is blocked — it is radiology-domain and CC BY 4.0, though not knee-specific.
+4. **Continue-pretrain our own DINOv3-L** on OAI + fastMRI slices if no released model can be used or if we want a fully reproducible pipeline. Use the MedDINOv3 paper's adaptation recipe.
+5. **MRI-CORE** as a segmentation/feature auxiliary, especially if we add a 3D segmentation pretraining branch using SKM-TEA masks.
+6. **Watch OmniMRI / OmniRad / Pillar-0 / Triad** for public weight releases; they are not usable today.
 
 ## 9. Concrete next step
 

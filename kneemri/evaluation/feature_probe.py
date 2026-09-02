@@ -49,6 +49,20 @@ TRUNKS: dict[str, str] = {
     # instrument, and the instrument is the flag set, so only this pair's own delta is controlled.
     "v3large": "features_v3large_336px_12sl_r256_mean_max",
     "ortholarge": "features_ortholarge_336px_12sl_r256_mean_max",
+    # The readout sweep (`experiments/arms/readout_probe.sh`, knee-n647). The rows above hold BOTH
+    # poolings at their diluting end -- `mean` over patches, then `max` over slices -- and the three
+    # numbers they produced closed two members. These eight move the two axes independently over the
+    # same trunks, same studies, same patch grid, so the gap can be attributed to an axis rather than
+    # to the pair. `radnet121` joins here and nowhere above because it has no `mean_max` cache: it was
+    # closed on a FIT, not a probe, and this is the first reading of it that spends no recipe.
+    "dinov2-large@focal-max": "features_large_336px_12sl_r252_cls_mean_focal_max",
+    "v3large@focal-max": "features_v3large_336px_12sl_r256_cls_mean_focal_max",
+    "ortholarge@focal-max": "features_ortholarge_336px_12sl_r256_cls_mean_focal_max",
+    "radnet121@focal-max": "features_radnet121_336px_12sl_r256_cls_mean_focal_max",
+    "dinov2-large@focal-attend": "features_large_336px_12sl_r252_cls_mean_focal_attend",
+    "v3large@focal-attend": "features_v3large_336px_12sl_r256_cls_mean_focal_attend",
+    "ortholarge@focal-attend": "features_ortholarge_336px_12sl_r256_cls_mean_focal_attend",
+    "radnet121@focal-attend": "features_radnet121_336px_12sl_r256_cls_mean_focal_attend",
 }
 """Trunk name to the cache stem its features were written under. A declaration, not a bucket: every
 entry names an array that exists, and a trunk with no cache cannot be probed at all."""
