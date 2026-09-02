@@ -129,6 +129,16 @@ def test_await_headroom(monkeypatch: pytest.MonkeyPatch):
     assert DeviceBudget().await_headroom(idle.append) == (31.0, 32.0)
     assert not idle, "a run that named nothing has no need to wait ON, and the whole card is never free"
 
+    oversized: list[float] = []
+    monkeypatch.setattr(DeviceBudget, "headroom", lambda _: (31.0, 32.0))
+
+    assert DeviceBudget(vram_gb=33.0).await_headroom(oversized.append) == (31.0, 32.0)
+    assert not oversized, (
+        "a need larger than the CARD cannot be waiting for a co-tenant: on 2026-09-02 "
+        "ortho_fresh_lowlr wanted 31.9 GB of a 31.8 GiB card and polled the full half hour with the "
+        "card idle at 1229 MiB, mrnet_warm parked behind it, the log reading like contention throughout"
+    )
+
 
 def test_headroom_without_a_card(monkeypatch: pytest.MonkeyPatch):
     """No visible card answers (0, 0) rather than asking the driver, which would raise.

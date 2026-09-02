@@ -442,10 +442,28 @@ class DeviceBudget:
         That holds for a run that named nothing at all and no longer holds for one whose slice count
         says what it will reserve: 16.24 GB IS free most of the time, so waiting for it is a wait that
         ends. A run with neither still does not wait; `select` warns there, as it did before.
+
+        NOT WAITING AT ALL WHEN THE NEED EXCEEDS THE CARD, because then there is no tenant whose
+        departure could satisfy it. `ortho_fresh_lowlr` derives 31.9 GB for `ortholarge` at 12 slices
+        against a 31.8 GiB card and sat in this loop for the full half hour on 2026-09-02 with the card
+        otherwise IDLE at 1229 MiB — a queue stalled behind nobody, with `mrnet_warm` parked behind it,
+        and the log reading like contention the whole time. The condition below is exact rather than a
+        threshold: a run wanting more than the card HAS cannot be waiting for a co-tenant, so it stops
+        pretending to and starts immediately, saying what it is starting into. What it is starting into
+        is still bad — a need over `whole` means paging — but that is a fact about the recipe for
+        `select` to warn about, not a reason to spend thirty minutes first.
         """
         waited = 0.0
         free, whole = self.headroom()
         wanted = self.vram_gb or self.needed()
+        if wanted > whole:
+            logger.warning(
+                "not waiting for VRAM: this run wants %.1f GB and the card holds %.1f — "
+                "no co-tenant can free enough, so the wait would buy nothing",
+                wanted,
+                whole,
+            )
+            return free, whole
         while free < wanted and waited < CONTENTION_WAIT_SECONDS:
             logger.info(
                 "waiting for VRAM: %.1f GB free, this run wants %.1f — %.0f s of %.0f",
