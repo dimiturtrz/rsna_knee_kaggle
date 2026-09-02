@@ -175,3 +175,14 @@ radnet_family_s2026  # 0.6716 peak at 12 epochs against its own pre-registered 0
                      # member 0.19 below the bar cannot be seat-scored into anything; the pre-registered
                      # branch THE CELL IS EMPTY FOR A REASON fires and only encoder CAPACITY re-opens it.
                      # Re-open by answering the capacity question, not by re-quoting this number.
+ortho_dense_s2026    # 0.8452 holdout, 2026-09-02. OrthoFoundation-L (DINOv3-L + 1.25M knee images,
+                     # arXiv:2601.18250, MIT) on base224's exact recipe -- the first member this project
+                     # fitted on a trunk that has seen a knee. Control base224 = 0.8502, so -0.0050,
+                     # INSIDE the 0.0062 holdout floor: flat, not a clean miss. -0.0126 under band_dense
+                     # 0.8578 and -0.0069 under the 0.8521 non-DINOv2 seat bar, so it seats nothing.
+                     # Not a loading defect: printed recipe read variant=ortholarge and the curve climbed
+                     # 0.7524 -> 0.8452 monotonically; a mis-converted trunk probes at chance.
+                     # THIS DECLINE IS THE SEAT DECISION ONLY. It does NOT close the in-domain trunk
+                     # lane: ortho_dense moves trunk size (86M -> 303M) and continuation corpus together
+                     # against its control, and v3large_dense (running, ~05:00Z 2026-09-02) is the
+                     # subtraction that separates them. Re-open by that arm's number, not by this one.

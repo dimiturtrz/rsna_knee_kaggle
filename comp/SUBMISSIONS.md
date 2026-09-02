@@ -3114,3 +3114,40 @@ submission adds an efficiency candidate rather than displacing the 0.944.
 
 Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
 to be cheap. The accuracy row stays 0.944, rank 31 of 2856, 0.008 behind a 0.952 leader.
+
+## corpusdose_v1 (0.943) + corpusfull_v1 (0.940) — the external-corpus dose curve
+
+Two slots, 2026-09-01, refs 55948598 and 55949239, both on kit `ba241cf4`. They complete a four-point
+curve in ONE variable: how many seats of a fixed-size ensemble are members trained on the merged
+external corpus rather than on RSNA alone.
+
+| external seats | entry | board |
+|---|---|---|
+| 1 | champion | 0.944 |
+| 2 | `spanseat_v1` | 0.944 |
+| 4 | `corpusdose_v1` | 0.943 |
+| 6 | `corpusfull_v1` | 0.940 |
+
+### What it settles
+
+The curve is flat to two seats and BENDS DOWN after. The six-seat point is -0.004 against the champion,
+above `BOARD_RESOLVABLE` 0.0015, which fires `corpusfull_v1`'s pre-registered `<= 0.9425` branch. More
+external-corpus members is not more score; the external corpus buys its one seat and no more.
+
+### The confound, declared before the slot went
+
+Reaching six seats forced `grade_ladder_cf` and `through_dense_cf` — the two structurally most distant
+members in the pool — OUT at the same time the external dose rose. So the -0.004 is dose-up AND
+distance-down together, not dose alone.
+
+### Not licensed
+
+Reading the -0.004 as evidence that STRUCTURAL DISTANCE is a newly discovered lever. `distinct14`
+maximized member distinctness and read 0.937, worse than both endpoints of this curve. Distance-up and
+distance-down both underperform the champion, which is the signature of a CLOSED axis, not a discovered
+one.
+
+### What it does NOT close
+
+External data itself. A trunk CONTINUED on a foreign corpus is a different mechanism from a member
+TRAINED on one, and `ortho_dense` / `v3large_dense` (knee-440m) ask that question separately.
