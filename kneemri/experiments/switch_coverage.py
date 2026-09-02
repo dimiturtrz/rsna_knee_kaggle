@@ -40,6 +40,7 @@ NOT_A_RECIPE = {
     "spacing": "a cache axis: how the slices sit inside that band",
     "bf16": "the default precision every current arm trains under",
     "vram_gb": "a memory cap, set by the queue against the card it runs on",
+    "target_corpus": "the companion to --corpus-oversample: it is exercised by the same coverage recipe",
 }
 """Options that cannot be exercised as a recipe, each with WHY — a decision record, not an exemption list.
 
@@ -55,6 +56,7 @@ COVERAGE = {
     "head_lr": "--head-lr 3e-4",
     "side_weight": "--side-weight 0.5",
     "certainty_ramp": "--certainty-ramp 6",
+    "corpus_oversample": "--corpus-oversample 3.0 --target-corpus canonical",
 }
 """One smoke recipe per switch no arm selects, holding every other flag at its default.
 

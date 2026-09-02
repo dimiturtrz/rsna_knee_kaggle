@@ -225,3 +225,53 @@ class Ramped(Disagreed):
             f"disagreement-weighted ramping to alpha {self.target:.2f} over {self.epochs} epochs "
             f"(currently {self.alpha:.2f}) over {len(self.spread)} studies"
         )
+
+
+class MixedCorpus(Sampling):
+    """Oversample non-target corpora so external studies are not drowned by the target domain.
+
+    Scheme B wants roughly half the batch to come from external corpora despite RSNA dominating
+    study count. A pure count draw would make most batches almost entirely RSNA; this sampler
+    up-weights every non-target position by `factor` and draws with replacement, keeping the
+    epoch length unchanged.
+
+    The corpus tag is read from the labels table's `corpus` column rather than guessed from the
+    identifier, because MRNet prefixes its IDs, Rijeka uses filename stems, and fastMRI uses file
+    names — identifier shape is not a reliable corpus signal.
+    """
+
+    def __init__(
+        self,
+        corpus: NDArray[np.str_],
+        target: str,
+        factor: float,
+    ) -> None:
+        self.corpus = np.asarray(corpus)
+        self.target = target
+        self.factor = factor
+        self._weights = np.where(self.corpus == target, 1.0, float(factor)).astype(np.float64)
+
+    @override
+    def drawn(
+        self, positions: Int[NDArray[np.int64], " studies"], generator: np.random.Generator
+    ) -> Int[NDArray[np.int64], " studies"]:
+        """The same number of positions, drawn with replacement against corpus weights."""
+        weights = self._weights[positions]
+        weights = weights / weights.sum()
+        return np.asarray(
+            generator.choice(positions, size=len(positions), replace=True, p=weights),
+            dtype=np.int64,
+        )
+
+    @override
+    def tilt(self) -> float:
+        """How many times heavier a non-target position is than a target one."""
+        return self.factor
+
+    @override
+    def described(self) -> str:
+        """This policy and its factor."""
+        return (
+            f"mixed-corpus oversampling: {self.target} at 1.0, others at {self.factor:.2f} "
+            f"over {len(self.corpus)} studies"
+        )

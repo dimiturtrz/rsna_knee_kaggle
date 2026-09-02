@@ -66,6 +66,7 @@ from kneemri.training.trainer import (
     AVERAGING,
     CERTAINTY_RAMP,
     CLIPPING,
+    CORPUS_OVERSAMPLE,
     LAYER_DECAY,
     MIXUP,
     OPTIMISER_DECAY,
@@ -74,6 +75,7 @@ from kneemri.training.trainer import (
     SAMPLING,
     SAMPLING_RAMP,
     SCHEDULED,
+    TARGET_CORPUS,
     WARMUP,
     WINDOW,
     Trainer,
@@ -259,6 +261,8 @@ class Request:
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
     sample_ramp: int = 0
+    corpus_oversample: float = 0.0
+    target_corpus: str = ""
     slot_dropout: float = 0.0
 
     def wanted(self) -> dict[str, object]:
@@ -324,6 +328,8 @@ class Request:
             # nothing, so the honest request there is the uniform draw the run will actually get.
             SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,
             SAMPLING_RAMP: self.sample_ramp if self.sample_spread is not None else 0,
+            CORPUS_OVERSAMPLE: self.corpus_oversample,
+            TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
             CERTAINTY_RAMP: self.certainty_ramp,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             ACCUMULATION: self.accumulate,

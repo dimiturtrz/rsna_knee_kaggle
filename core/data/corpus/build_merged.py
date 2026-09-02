@@ -74,6 +74,8 @@ def main() -> None:
         arguments.labels or root.processed() / "labels" / LABELS,
         arguments.extra_labels or root.processed() / "labels" / EXTRA_LABELS,
         arguments.labels_out or root.processed() / "labels" / f"{arguments.merged_scheme}_labels.csv",
+        base_name=arguments.scheme,
+        extra_name=arguments.extra_scheme,
     )
     if arguments.labels_only:
         logger.info("LABELS ONLY — the images were left alone")

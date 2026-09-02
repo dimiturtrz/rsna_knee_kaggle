@@ -11,7 +11,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
-INBOX="$SCRIPT_DIR/inbox"
+INBOX="$SCRIPT_DIR/inbox/kimi"
 
 # Regenerate the stack + CLAUDE.md sync (report only the drift line, if any).
 bash "$SCRIPT_DIR/agent_md_sync.sh" | grep -v "^  -" || true
@@ -34,10 +34,10 @@ if [ -d "$INBOX" ]; then
   else
     echo "=== INBOX: empty ==="
   fi
-  HB="$INBOX/.listener_heartbeat"
+  HB="$INBOX/.listener_heartbeat.kimi"
   if [ -f "$HB" ] && [ $(( $(date +%s) - $(date -r "$HB" +%s) )) -lt 30 ]; then
     echo "listener: ARMED"
   else
-    echo "listener: NOT ARMED — arm with: python .agent-runtime/listen_for_mail.py (background task)"
+    echo "listener: NOT ARMED — arm with: python .agent-runtime/listen_for_mail.py --name kimi (background task)"
   fi
 fi

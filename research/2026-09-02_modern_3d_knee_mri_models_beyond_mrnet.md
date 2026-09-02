@@ -21,6 +21,12 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 - **Performance:** In the MR-Transformer paper, 3DMeT is the weakest baseline (AUC 0.63-0.82 depending on contrast), suggesting that training a 3D transformer from scratch on small knee datasets is brittle.
 - **Relevance to us:** A warning that 3D transformers without strong pretraining underperform.
 
+### MedNet-FS (Dang et al., 2025)
+- **What it is:** A 3D few-shot learning framework for knee injury classification based on a ResNet-101 encoder and GE2E loss.
+- **Performance:** AUC 0.76 for ACL tear classification on MRNet with k=40 support samples; AUC 0.62 on the KneeMRI (Rijeka) external test for intact vs. fully ruptured ACL.
+- **Weights:** The paper describes two sets of domain-specific pre-trained weights (ACL-vs-intact and meniscus-vs-non-meniscus) trained on MRNet, but no public checkpoint or code repository was found in our search.
+- **Relevance to us:** Confirms that knee-specific pre-training helps few-shot 3D classification on small support sets, but the absolute numbers are far below our seated members and the weights are not actionable. Adds to the evidence that knee-specific pretraining is not automatically a 1.5% lever.
+
 ### OrthoDiffusion (Lan et al., 2026) — game changer for 3D
 - **What it is:** A unified diffusion-based foundation model for musculoskeletal MRI interpretation. Three orientation-specific 3D diffusion backbones (sagittal, coronal, axial) are pretrained on 15,948 unlabeled knee MRI examinations, then used to extract bottleneck features for multi-label diagnosis and segmentation.
 - **Performance:** Macro-average AUROC **0.908** on an 8-class knee abnormality diagnosis task across eight institutions. Strong label efficiency (10% labels retains high precision) and cross-scanner robustness (1.5T vs 3.0T).
@@ -58,6 +64,7 @@ MRNet (Bien et al., PLOS Medicine 2018) is now seven years old. It uses an Image
 - **Inference cost.** Diffusion-based feature extraction requires running a 3D U-Net forward at selected timesteps; it is not a single encoder pass.
 - **Data format mismatch.** The competition and our current pipeline are slice-oriented. Moving to full 3D volumes requires a new dataloader, resampling, and patch strategy.
 - **License/terms.** The Kaggle weights must be checked for competition-use permission.
+- **Negative prior from 2D knee-specific pretraining.** `OrthoFoundation-L` (DINOv3-L continued on 1.25M knee images) was tried as `ortho_dense_s2026` and **declined**: 0.8452 vs. its DINOv2-base control 0.8502, and the frozen probe read OrthoFoundation-L 0.7387 vs. the DINOv3-L it continues from 0.7446. The knee-specific continuation *lost* signal. OrthoDiffusion is a different mechanism (3D diffusion U-Net, not 2D DINOv3 continuation), so this does not close it; but it removes the default assumption that "knee-specific pretraining must help."
 
 ## Recommendations
 

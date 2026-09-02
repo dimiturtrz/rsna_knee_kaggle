@@ -44,7 +44,7 @@ from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.report_supervision import ReportSupervision
-from kneemri.training.sampling import Disagreed, Ramped, Sampling, Uniform
+from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Sampling, Uniform
 from kneemri.training.side_ranking import PairedSides, SideRanking
 from kneemri.training.teacher_features import TeacherFeatures
 from kneemri.training.teacher_targets import TeacherTargets
@@ -172,24 +172,43 @@ class RunSetup:
             sample_alpha=options.sample_alpha,
             certainty_ramp=options.certainty_ramp,
             sample_ramp=options.sample_ramp,
+            corpus_oversample=options.corpus_oversample,
+            target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
         )
 
-    def drawing(self, identifiers: list[str]) -> Sampling:
+    def drawing(self, identifiers: list[str], corpus: NDArray[np.str_] | None = None) -> Sampling:
         """The draw policy these flags ask for, off the command line and without a card.
 
         `--sample-ramp` is a modifier on `--sample-alpha` rather than a policy of its own: a ramp to a
         tilt of zero is the alpha-zero control, and a ramp of zero epochs is the immediate tilt. Both
         degenerate cases resolve HERE rather than inside the sampler, so the two recipes already in the
         ledger parse to exactly the objects they ran under.
+
+        `--corpus-oversample` is the Scheme B draw: it weights each position by whether its `corpus`
+        tag matches `--target-corpus`. It cannot be combined with `--sample-spread`, because both are
+        epoch-level draw policies.
         """
-        if self.options.sample_spread is None:
-            return Uniform()
-        if self.options.sample_ramp > 0:
-            return Ramped.loaded(
-                self.options.sample_spread, identifiers, self.options.sample_alpha, self.options.sample_ramp
+        options = self.options
+        if options.corpus_oversample > 0.0 and options.sample_spread is not None:
+            message = (
+                f"--corpus-oversample {options.corpus_oversample} and --sample-spread cannot both steer "
+                "the epoch draw; pick one sampling policy"
             )
-        return Disagreed.loaded(self.options.sample_spread, identifiers, self.options.sample_alpha)
+            raise ValueError(message)
+        if options.corpus_oversample > 0.0:
+            if corpus is None:
+                message = (
+                    f"--corpus-oversample {options.corpus_oversample} needs a `corpus` column in the "
+                    "labels table, which this one does not carry"
+                )
+                raise ValueError(message)
+            return MixedCorpus(corpus, options.target_corpus, options.corpus_oversample)
+        if options.sample_spread is None:
+            return Uniform()
+        if options.sample_ramp > 0:
+            return Ramped.loaded(options.sample_spread, identifiers, options.sample_alpha, options.sample_ramp)
+        return Disagreed.loaded(options.sample_spread, identifiers, options.sample_alpha)
 
     def objective(self, widths: Widths | None = None) -> Objective:
         """The loss policy these flags ask for.
@@ -532,6 +551,7 @@ class RunSetup:
         device: torch.device,
         identifiers: list[str],
         training: NDArray[np.int64],
+        corpus: NDArray[np.str_] | None = None,
     ) -> Trainer:
         """A `Trainer` with every optional policy this run asked for already attached.
 
@@ -582,7 +602,7 @@ class RunSetup:
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
         # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against
         # `training`: the policy is asked for a POSITION's weight, and positions index the corpus.
-        trainer.draw_with(self.drawing(identifiers))
+        trainer.draw_with(self.drawing(identifiers, corpus))
         # BEFORE the schedule too, and for a sharper reason than accumulation's: `one_cycle` reads the
         # warmup fraction when it BUILDS OneCycleLR, so a warm_up after it would set a field nothing
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.

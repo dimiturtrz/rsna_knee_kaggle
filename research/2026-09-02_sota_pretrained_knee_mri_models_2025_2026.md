@@ -7,7 +7,7 @@ This note surveys recently released foundation and SOTA models that are relevant
 | Model | Year | Anatomy focus | Weights available? | License | Relevance to RSNA task |
 |-------|------|---------------|-------------------|---------|------------------------|
 | **OrthoDiffusion** | 2026 | Knee MRI (3D multi-plane) | ✅ Yes, HuggingFace + Kaggle mirror | MIT code; Kaggle "unknown" | **Highest** — 3D diffusion backbone pretrained on 15,948 knee MRIs; macro AUROC 0.908 on 8 knee abnormalities; multi-plane fusion |
-| **OrthoFoundation** | 2026 | Knee (X-ray + MRI) | ✅ Yes, `OrthoFoudation-L.pth` | MIT | **High** — trained on 1.25M knee images including OAI+fastMRI; evaluated on ACL/PCL/MCL/Meniscus/Cartilage |
+| **OrthoFoundation** | 2026 | Knee (X-ray + MRI) | ✅ Yes, `OrthoFoudation-L.pth` | MIT | **DECLINED IN THIS PROJECT** — tried as `ortho_dense_s2026`; see §2. Strong 2D candidate in the literature, but knee-specific continuation hurt vs. its DINOv3-L control here. |
 | **MRI-CORE** | 2024 | General MRI | ✅ Yes, `MRI_CORE_vitb.pth` | Apache 2.0 | High — SAM-based, segmentation feature extractor, 2D slice compatible |
 | **Radio DINO** | 2025 | General radiology | ✅ Yes, HuggingFace | CC BY 4.0 | Medium — radiology-domain DINO/DINOv2 init; lower priority than OrthoFoundation |
 | **MedDINOv3** | 2025 | General medical segmentation | Probably | Unknown | Medium — DINOv3 medical adaptation, segmentation focus |
@@ -83,7 +83,9 @@ So **5 of 8 labels map directly** to our task. The model therefore cannot be use
 
 ([Yu et al., 2026, *OrthoFoundation: A multimodal vision foundation model for generalizable knee pathology*](https://arxiv.org/pdf/2601.18250))
 
-**Why it matters for us.** OrthoFoundation is a drop-in replacement candidate for our 2D trunk. It is already initialized from DINOv3-L and then further pretrained on the exact same public corpora we have local (OAI + fastMRI slices). If its representations are better for knee pathology than generic DINOv3, we can load `OrthoFoudation-L.pth` as the trunk and keep the rest of our architecture (slice pooling, slot heads, ensemble) unchanged. It also gives us a strong baseline to compare against if we continue pretraining our own DINOv3 on the same data.
+**Project result: DECLINED.** `ortho_dense_s2026` fitted OrthoFoundation-L on `base224`'s exact recipe (12 slices, 224 px, one-cycle, 4e-5) and read **0.8452** holdout AUC vs. the DINOv2-base control **0.8502** (`experiments/arms/ortho_dense.sh`, `comp/members.declines`). A frozen linear probe was stronger evidence: on matched flags, DINOv2-L 0.7852, DINOv3-L 0.7446, OrthoFoundation-L **0.7387** (`experiments/arms/ortho_probe.sh`). The knee-specific continuation therefore **subtracted signal** from its own DINOv3-L init — the same catastrophic-forgetting shape reported for RAD-DINO on out-of-domain chest data. This closes OrthoFoundation-L as a 2D trunk replacement for this pool.
+
+**Why it still matters for us.** The result is a strong prior against *2D DINOv3-L continuation on knee images* as a lever; it is not evidence about 3D diffusion, different architectures, or non-DINO objectives. Use it to calibrate expectations for other knee-specific pretraining attempts.
 
 **Risks.** The model is slice-based (2D), like our champion, so it will not fix any 3D-context limitation. The reported numbers are on internal test sets and may not transfer directly to the RSNA label definitions (e.g., RSNA excludes low-grade ACL sprains). And the private PUTH cohort is not reproducible, though the public portion is large enough to matter.
 
@@ -162,12 +164,13 @@ These are worth monitoring but not actionable today.
 
 Given our current champion is a DINOv2/DINOv3 slice ensemble and we have fastMRI + MRNet + OAI on disk, the priority order is:
 
-1. **OrthoDiffusion** as a 3D member / trunk candidate. Download the HuggingFace weights, inspect the checkpoint, and run a smoke experiment extracting diffusion features for our RSNA studies and training a 12-label head. This is now the single highest-impact public model for knee-MRI diagnosis.
-2. **OrthoFoundation-L** as a 2D trunk replacement. Load the released checkpoint, freeze or LP-FT, and measure RSNA holdout AUC. This is the strongest 2D candidate and a drop-in replacement.
-3. **Radio DINO** as a fallback 2D trunk init if OrthoFoundation-L is blocked — it is radiology-domain and CC BY 4.0, though not knee-specific.
-4. **Continue-pretrain our own DINOv3-L** on OAI + fastMRI slices if no released model can be used or if we want a fully reproducible pipeline. Use the MedDINOv3 paper's adaptation recipe.
-5. **MRI-CORE** as a segmentation/feature auxiliary, especially if we add a 3D segmentation pretraining branch using SKM-TEA masks.
-6. **Watch OmniMRI / OmniRad / Pillar-0 / Triad** for public weight releases; they are not usable today.
+1. **OrthoDiffusion** as a 3D member / trunk candidate. Download the HuggingFace weights, inspect the checkpoint, and run a smoke experiment extracting diffusion features for our RSNA studies and training a 12-label head. It is now the single highest-impact *untested* public model for knee-MRI diagnosis, but approach with skepticism: the 2D knee-specific continuation (OrthoFoundation-L) hurt rather than helped in this pool.
+2. **Radio DINO** as a fallback 2D trunk init — it is radiology-domain and CC BY 4.0, though not knee-specific. Only if OrthoDiffusion is blocked or negative.
+3. **Continue-pretrain our own DINOv3-L** on OAI + fastMRI slices if no released model can be used or if we want a fully reproducible pipeline. Use the MedDINOv3 paper's adaptation recipe. Note: OrthoFoundation-L is a stronger version of exactly this continuation and was DECLINED, so this path is low expectation unless the objective or data mix differs materially.
+4. **MRI-CORE** as a segmentation/feature auxiliary, especially if we add a 3D segmentation pretraining branch using SKM-TEA masks.
+5. **Watch OmniMRI / OmniRad / Pillar-0 / Triad** for public weight releases; they are not usable today.
+
+**Removed from the list:** OrthoFoundation-L as a 2D trunk replacement. It was tried (`ortho_dense_s2026`, 0.8452 vs. control 0.8502) and declined; the frozen probe showed the knee continuation lost signal vs. DINOv3-L itself.
 
 ## 9. Concrete next step
 

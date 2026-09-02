@@ -95,14 +95,31 @@ class MergedCache:
         np.save(self.merged.mask_path, mask)
         logger.info(f"wrote {self.merged.shape(total)} uint8 -> {self.merged.images_path}")
 
-    def labels(self, base: Path, extra: Path, destination: Path) -> None:
+    def labels(
+        self,
+        base: Path,
+        extra: Path,
+        destination: Path,
+        *,
+        base_name: str = "base",
+        extra_name: str = "extra",
+    ) -> None:
         """One labels table for both corpora, as the union of their columns.
 
         A study is scored on the findings ITS OWN table names and left NaN — weight 0.0, score 0.5 — on
         every other. Filling those cells with 0.5 instead would teach the model that every foreign knee
         is exactly average on eleven findings nobody looked at.
+
+        The `corpus` column is added for Scheme B mixed sampling: it names which corpus each row came
+        from without relying on identifier prefixes, which differ between MRNet (`mrnet-`), Rijeka
+        (filename stems) and fastMRI (file names). Downstream loaders ignore columns they do not use,
+        so adding it is safe for existing members.
         """
-        merged = pd.concat([pd.read_csv(base), pd.read_csv(extra)], ignore_index=True)
+        base_table = pd.read_csv(base)
+        extra_table = pd.read_csv(extra)
+        base_table["corpus"] = base_name
+        extra_table["corpus"] = extra_name
+        merged = pd.concat([base_table, extra_table], ignore_index=True)
         destination.parent.mkdir(parents=True, exist_ok=True)
         merged.to_csv(destination, index=False)
         logger.info(f"{len(merged)} rows, {len(merged.columns)} columns -> {destination}")

@@ -87,6 +87,11 @@ NOT_IN_CONFIG = {
     "`sample_spread`'s exactly. Its own witness is the trainer's `sampling_ramp`, kept separate from "
     "`sampling_tilt` precisely because a ramp that failed to attach would otherwise report the static "
     "arm's tilt and be indistinguishable from it",
+    "corpus_oversample": "a draw policy — it decides WHICH studies the epoch descends on and touches no "
+    "module, no parameter and no loss term, so the function a rebuild serves is byte-identical. The "
+    "corpus tag it weights is a fact about how these weights were REACHED, not part of the function",
+    "target_corpus": "the companion axis of that same draw policy: which tag is treated as the target "
+    "domain changes the epoch order and nothing else, so it is written off with `corpus_oversample`",
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",

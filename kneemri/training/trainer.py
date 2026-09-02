@@ -113,6 +113,8 @@ CLIPPING = "gradient_clip_norm"
 SAMPLING = "sampling_tilt"
 SAMPLING_RAMP = "sampling_ramp"
 CERTAINTY_RAMP = "certainty_ramp"
+CORPUS_OVERSAMPLE = "corpus_oversample"
+TARGET_CORPUS = "target_corpus"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
 
 NEEDED_FOR_A_RATIO = 2
@@ -250,6 +252,10 @@ class Trainer:
             SAMPLING: self.sampling.tilt(),
             SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
+            CORPUS_OVERSAMPLE: getattr(self.sampling, "factor", 0.0),
+            TARGET_CORPUS: (
+                getattr(self.sampling, "target", "") if getattr(self.sampling, "factor", 0.0) > 0.0 else ""
+            ),
         }
 
     def weight_decay(self) -> float:

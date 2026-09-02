@@ -451,6 +451,22 @@ class FlagVocabulary:
             "alpha-zero control at 0.8507) while a schedule over label trust PAYS (certainty_ramp "
             "0.8584), which is the contrast this flag exists to test on the disagreement signal.",
         )
+        parser.add_argument(
+            "--corpus-oversample",
+            type=float,
+            default=0.0,
+            help="up-weight non-target corpora by this factor when drawing each epoch (0 = uniform draw). "
+            "Requires the labels table to carry a `corpus` column, as written by build_merged. Mutually "
+            "exclusive with --sample-spread: both are epoch-level draw policies and cannot both steer the "
+            "same batch.",
+        )
+        parser.add_argument(
+            "--target-corpus",
+            type=str,
+            default="canonical",
+            help="the corpus tag that mixed-corpus sampling treats as the target domain. Default matches "
+            "the scheme name build_merged uses for the RSNA competition corpus.",
+        )
 
     @staticmethod
     def _optimiser_arguments(parser: argparse.ArgumentParser) -> None:

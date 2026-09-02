@@ -295,12 +295,14 @@ class Targets:
         weights: NDArray[np.float32],
         identifiers: list[str],
         supervision: "Supervision | None" = None,
+        corpus: NDArray[np.str_] | None = None,
     ) -> None:
         self.scores = scores
         self.weights = weights
         self.identifiers = identifiers
         self.supervision = supervision or Supervision()
         self.position = {identifier: index for index, identifier in enumerate(identifiers)}
+        self.corpus = corpus
 
     def supervised(self) -> dict[str, object]:
         """The label switches this table was actually built under, for the pre-flight landed check.
@@ -377,7 +379,10 @@ class Targets:
                 weights[read, column] = ANNOTATED_WEIGHT
                 read_by_radiologist[read, column] = True
         weights[supervision.pruned(identifiers) & ~read_by_radiologist] = 0.0
-        return cls(scores, weights, identifiers, supervision)
+        corpus = None
+        if "corpus" in derived.columns:
+            corpus = derived["corpus"].fillna("").to_numpy(dtype=str)
+        return cls(scores, weights, identifiers, supervision, corpus=corpus)
 
     @classmethod
     def pair(

@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.training.sampling import Disagreed, Ramped, Uniform
+from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
 
 STUDIES = 40
 
@@ -149,3 +149,54 @@ def test_ramped_ramp() -> None:
     """The schedule length, which `tilt` cannot say: both arms of the 2x2 report the same tilt."""
     assert _ramped(epochs=6).ramp() == 6
     assert _ramped(epochs=6).tilt() == pytest.approx(0.5), "and the tilt is the destination either way"
+
+
+def _corpus() -> np.ndarray:
+    """A corpus tag for each of the 40 positions: the first 30 are target, the last 10 are external."""
+    corpus = np.full(STUDIES, "canonical", dtype=str)
+    corpus[30:] = "external"
+    return corpus
+
+
+def test_mixed_corpus_drawn() -> None:
+    """A non-target factor above 1 oversamples the external positions in the epoch draw."""
+    positions = _positions()
+    policy = MixedCorpus(_corpus(), target="canonical", factor=3.0)
+    drawn = policy.drawn(positions, np.random.default_rng(4))
+    assert len(drawn) == STUDIES
+    assert drawn.dtype == np.int64
+    # With a 3:1 weight on the 10 external positions, the expected share is
+    # (10 * 3) / (30 * 1 + 10 * 3) = 30 / 60 = 0.5. Allow a wide band for randomness.
+    external_share = (drawn >= 30).sum() / STUDIES
+    assert 0.25 <= external_share <= 0.75, f"external share was {external_share:.2f}"
+
+
+def test_mixed_corpus_uniform_when_factor_is_one() -> None:
+    positions = _positions()
+    policy = MixedCorpus(_corpus(), target="canonical", factor=1.0)
+    drawn = policy.drawn(positions, np.random.default_rng(5))
+    assert len(drawn) == STUDIES
+    # Every position has equal weight, so the draw is a bootstrap resample of the positions.
+    assert set(drawn).issubset(set(positions))
+
+
+def test_mixed_corpus_tilt() -> None:
+    assert MixedCorpus(_corpus(), target="canonical", factor=3.0).tilt() == pytest.approx(3.0)
+
+
+def test_mixed_corpus_described() -> None:
+    described = MixedCorpus(_corpus(), target="canonical", factor=3.0).described()
+    assert "canonical" in described
+    assert "3.00" in described
+
+
+def test_mixed_corpus_respects_subset_positions() -> None:
+    """The sampler is handed training POSITIONS, not the whole corpus, and must weight only those."""
+    positions = np.arange(20, 35, dtype=np.int64)  # 10 target + 5 external
+    corpus = _corpus()
+    policy = MixedCorpus(corpus, target="canonical", factor=3.0)
+    drawn = policy.drawn(positions, np.random.default_rng(6))
+    assert set(drawn).issubset(set(positions))
+    # External weight is 5*3=15, target weight is 10*1=10, total 25, so expected external share is 0.6.
+    external_share = (drawn >= 30).sum() / len(positions)
+    assert 0.35 <= external_share <= 0.85

@@ -24,7 +24,7 @@ from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
-from kneemri.training.sampling import Disagreed, Ramped, Uniform
+from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
 from kneemri.training.trainer import Adaptation
 
 
@@ -389,7 +389,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 39, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 41, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
@@ -466,3 +466,22 @@ def test_drawing(tmp_path: Path):
     assert isinstance(ramped, Ramped)
     assert ramped.epochs == 6
     assert ramped.tilt() == pytest.approx(0.5), "the destination is what the switch check reads"
+
+
+def test_drawing_mixed_corpus() -> None:
+    identifiers = ["a", "b", "c"]
+    corpus = np.array(["canonical", "external", "external"])
+    policy = _setup(corpus_oversample=3.0).drawing(identifiers, corpus)
+    assert isinstance(policy, MixedCorpus)
+    assert policy.factor == pytest.approx(3.0)
+    assert policy.target == "canonical"
+
+
+def test_drawing_mixed_corpus_requires_corpus_column() -> None:
+    with pytest.raises(ValueError, match="corpus"):
+        _setup(corpus_oversample=3.0).drawing(["a", "b"])
+
+
+def test_drawing_mixed_corpus_conflicts_with_disagreed() -> None:
+    with pytest.raises(ValueError, match="sample-spread"):
+        _setup(corpus_oversample=3.0, sample_spread=Path("x.npz")).drawing(["a", "b"])

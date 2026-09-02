@@ -43,6 +43,7 @@ from kneemri.training.trainer import (
     AVERAGING,
     CERTAINTY_RAMP,
     CLIPPING,
+    CORPUS_OVERSAMPLE,
     LAYER_DECAY,
     LOSS_QUANTILES,
     MIXUP,
@@ -53,6 +54,7 @@ from kneemri.training.trainer import (
     SAMPLING,
     SAMPLING_RAMP,
     SCHEDULED,
+    TARGET_CORPUS,
     WARMUP,
     WEIGHT_DECAY,
     WINDOW,
@@ -430,6 +432,8 @@ def test_policies():
         WARMUP: ONE_CYCLE_WARMUP,
         CERTAINTY_RAMP: 0,
         CLIPPING: UNCLIPPED,
+        CORPUS_OVERSAMPLE: 0.0,
+        TARGET_CORPUS: "",
     }
 
     assert trainer.policies() == {

@@ -82,3 +82,17 @@ def test_labels(tmp_path: Path):
     table = pd.read_csv(tmp_path / "both.csv").set_index("StudyInstanceUID")
     assert table.loc["x", "ACL"] == 0.82
     assert table["Effusion"].isna().tolist() == [False, True]
+
+
+def test_labels_carry_corpus_tags(tmp_path: Path):
+    """The merged table names each row's corpus so Scheme B sampling does not guess from identifiers."""
+    merged = merger(tmp_path, ["a"], ["x"])
+    ours, theirs = tmp_path / "ours.csv", tmp_path / "theirs.csv"
+    pd.DataFrame({"StudyInstanceUID": ["a"], "ACL": [0.9]}).to_csv(ours, index=False)
+    pd.DataFrame({"StudyInstanceUID": ["x"], "ACL": [0.82]}).to_csv(theirs, index=False)
+
+    merged.labels(ours, theirs, tmp_path / "both.csv", base_name="canonical", extra_name="rijeka")
+
+    table = pd.read_csv(tmp_path / "both.csv")
+    assert "corpus" in table.columns
+    assert table["corpus"].tolist() == ["canonical", "rijeka"]

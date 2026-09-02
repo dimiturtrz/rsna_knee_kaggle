@@ -130,6 +130,10 @@ class TrainingOptions:
     sample_spread: Path | None = None
     sample_alpha: float = 0.5
     sample_ramp: int = 0
+    corpus_oversample: float = 0.0
+    """How many times heavier each non-target corpus position is in the draw; 0 is a uniform draw."""
+    target_corpus: str = "canonical"
+    """The corpus tag treated as the target domain in mixed-corpus sampling."""
     pair_memory: int = 0
     whole_stack: bool = False
     recompute_activations: bool = False
