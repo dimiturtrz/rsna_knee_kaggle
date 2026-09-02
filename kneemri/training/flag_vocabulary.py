@@ -20,6 +20,7 @@ from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.training.gradient_clip import UNCLIPPED
+from kneemri.training.init_scope import INIT_SCOPES
 from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.trainer import ONE_CYCLE_WARMUP, Adaptation
@@ -634,6 +635,17 @@ class FlagVocabulary:
             "shape radnet_family produced here: 0.8197 frozen, 0.6716 fine-tuned, same weights. The "
             "checkpoint's DESIGN is not read back - this loads weights into the model these flags "
             "describe, so a mismatched architecture raises here rather than training something else.",
+        )
+        parser.add_argument(
+            "--init-scope",
+            choices=sorted(INIT_SCOPES),
+            default="all",
+            help="how much of --init is taken. 'all' is LP-FT's case, where stage one's head IS the head "
+            "stage two wants. 'trunk' is the CROSS-CORPUS case: a checkpoint fitted on MRNet has three "
+            "series slots against this corpus's six, so head.slot_emb is (3, 256) against (6, 256) and a "
+            "whole-model load raises - after stage one has already spent its card. The head is not the "
+            "part that transfers anyway; feature reuse in the early and middle blocks is (Yosinski 2014, "
+            "Raghu 2019, Matsoukas 2022). Everything the scope does take is still shape-checked.",
         )
         parser.add_argument("--head-lr", type=float, default=Adaptation().head_lr)
         parser.add_argument(

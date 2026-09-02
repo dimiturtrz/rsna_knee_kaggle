@@ -157,6 +157,7 @@ class TrainingOptions:
     """How many studies the cache being READ holds; 0 is the full one. Names a different file (knee-35yc)."""
 
     init: Path | None = None
+    init_scope: str = "all"
     """A member on disk whose weights this run STARTS from, in place of a fresh head over a published
     trunk. The second half of LP-FT; see `kneemri.training.warm_start.WarmStart` for the mechanism."""
 

@@ -33,6 +33,11 @@ set -euo pipefail
 # the control twice — the plumbing failure mode, not a null.
 #
 # deliberate: --init mrnet_acl_pretrain_s2026.pt (the whole point of the arm)
+# deliberate: --init-scope trunk. MRNet has three series and this corpus six, so head.slot_emb is
+#             (3, 256) there against (6, 256) here and head.prior (12, 3) against (12, 6): a whole-model
+#             load raises, which is what killed the first launch AFTER stage one had spent its card. The
+#             head fitted over a foreign series layout is not a representation of anything here, and the
+#             transfer mechanism this arm tests is about the trunk.
 # deliberate: every other flag copied from base224.sh verbatim (the control has to stay a control)
 #
 # bead: knee-xlqgm
@@ -44,5 +49,5 @@ require "$MODELS/mrnet_acl_pretrain_s2026.pt"
 run_train mrnet_warm \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant base --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 --image-size 224 \
-  --init "$MODELS/mrnet_acl_pretrain_s2026.pt" \
+  --init "$MODELS/mrnet_acl_pretrain_s2026.pt" --init-scope trunk \
   --labels "$LABELS" --out "$MODELS/mrnet_warm_s2026.pt"

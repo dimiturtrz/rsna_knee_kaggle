@@ -11,6 +11,8 @@ from typing import cast
 import torch
 from torch import Tensor, nn
 
+from kneemri.training.init_scope import InitScope, WholeModel
+
 STATE = "model"
 """The payload key holding a member's parameters — `MemberRecord.payload` writes it under this name."""
 
@@ -37,8 +39,9 @@ class WarmStart:
     here, before the card is spent.
     """
 
-    def __init__(self, checkpoint: Path) -> None:
+    def __init__(self, checkpoint: Path, scope: InitScope | None = None) -> None:
         self.checkpoint = checkpoint
+        self.scope = scope or WholeModel()
 
     def applied(self, model: nn.Module) -> str:
         """Load the checkpoint into `model` and return the line the run should log about it.
@@ -52,6 +55,20 @@ class WarmStart:
             message = f"{self.checkpoint} holds no {STATE!r} state, so it is not a member checkpoint"
             raise ValueError(message)
         state = cast("dict[str, Tensor]", payload[STATE])
-        model.load_state_dict(state)
+        carried = self.scope.carried(state)
+        # STILL STRICT over everything it takes: `strict=False` suppresses only the ABSENCE of a name, and
+        # a shape that disagrees raises here exactly as it did before. What the scope may change is which
+        # names are asked for at all — so a tensor landing in the wrong parameter remains impossible, and
+        # a checkpoint missing something the scope did NOT drop is the failure it always was.
+        incomplete = model.load_state_dict(carried, strict=False)
+        unasked = set(incomplete.missing_keys) - self.scope.dropped(state)
+        if incomplete.unexpected_keys or unasked:
+            message = (
+                f"{self.checkpoint} does not fit this model: "
+                f"{sorted(unasked)} absent, {sorted(incomplete.unexpected_keys)} unknown"
+            )
+            raise ValueError(message)
         epoch = payload.get("epoch")
-        return f"warm start from {self.checkpoint.name} ({len(state)} tensors, its epoch {epoch})"
+        cold = len(state) - len(carried)
+        left = f", {cold} head tensors left cold" if cold else ""
+        return f"warm start from {self.checkpoint.name} ({len(carried)} tensors{left}, its epoch {epoch})"

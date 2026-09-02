@@ -90,6 +90,10 @@ NOT_A_SWITCH = {
     "labels": "the label table, an input rather than a policy",
     "eval_labels": "the holdout table, same",
     "out": "where the run writes, set per invocation",
+    "init_scope": "which of `--init`'s tensors are taken, and the load ANSWERS it: a name outside "
+    "`INIT_SCOPES` raises at parse, and every tensor the scope carries is still shape-checked into the "
+    "parameter it names. A scope that dropped the wrong thing shows up as an absent key, not as a switch "
+    "that quietly did not land",
     "init": "the weights the run BEGINS from, and `WarmStart.applied` loads them STRICTLY: a checkpoint "
     "that does not fit the model this run's flags describe raises there, before the card is spent, and a "
     "checkpoint that does fit is already in the parameters. There is nothing left for an equality here to "
