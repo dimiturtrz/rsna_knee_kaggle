@@ -53,20 +53,31 @@ them on the current disk — and the decision this reading serves is where the c
 ledger puts inside the first ten. The tail is the same members in a fixed order scoring monotonically
 worse and reading it has never changed a roster."""
 
-BOARD_RESOLVABLE = 0.0015
-"""The offline seat delta below which this ruler has never been shown to pick a board tick.
+BOARD_RESOLVABLE = 0.0040
+"""The offline seat delta below which this ruler has been MEASURED to order the board backwards.
 
 IT IS A SPENDING GUARD, NOT A TARGET, and the distinction is the one thing to keep straight about it.
-This project's bar for a RESULT is ~1.5% absolute and its noise floor is 0.0062; 0.0015 is under both by
-an order of magnitude. So nothing here is a number to chase or to plan an arm around — it exists to stop
-a slot being spent on a move the board cannot read, which is a question about a submission rather than
-about a method. An axis worth arming has to argue for 0.015, not for this.
+This project's bar for a RESULT is ~1.5% absolute and its noise floor is 0.0062; 0.0040 is under both. So
+nothing here is a number to chase or to plan an arm around — it exists to stop a slot being spent on a
+move the board cannot read, which is a question about a submission rather than about a method. An axis
+worth arming has to argue for 0.015, not for this.
 
-Six entries pair an offline joint-holdout score with a board score (knee-825t) and the chain rises across
-the first 0.003 of offline spread, then plateaus: `longseat` carried +0.0012 — the largest single move in
-a sweep of all 56 same-split checkpoints, six times the runner-up — and TIED the board. 0.0015 sits above
-that plateau and below the smallest gap the chain does track, so it is a floor on what has been
-DEMONSTRATED, not a threshold anything is known to cross.
+RAISED FROM 0.0015 ON 2026-09-02, and the old value was not merely conservative — it was refuted. It was
+fitted on SIX paired entries (knee-825t) as "the plateau `longseat`'s +0.0012 tie sits above". The record
+now holds 34 rows carrying both an honest offline number and a board number, which is 561 ordered pairs,
+and 35 of them (6.2%) INVERT: the entry with the higher offline scored lower on the board. The largest
+offline separation at which the record still inverts is 0.0037 (`gradeswap_v1` 0.8694 / board 0.933
+against `peak8_v1` 0.8731 / board 0.932). Above ~0.004 the ordering is stable.
+
+So 0.0015 was not a floor on what had been demonstrated; it sat squarely inside the band where this
+ruler is known to get the SIGN wrong, and every arm killed or shipped on a delta between 0.0015 and
+0.0037 was decided by a ruler that inverts there. The value is now the measured inversion ceiling rather
+than a plateau read off six points.
+
+TWO THINGS IT DOES NOT SAY. It is not a claim that a 0.005 offline gain buys a board tick — the board
+quantises to 0.001 and its own sampling error is several times that (Q-BX). And an inversion of one
+board quantum is one rounding step, so the 6.2% rate is an upper bound on real disagreement; what the
+0.0037 figure bounds is the separation at which disagreement stops appearing at all.
 
 It documents this constant rather than the seed above it, which is what it used to do — a copy-paste that
 left the number gating a submission decision described as a corpus partition."""
@@ -268,14 +279,12 @@ class MemberCurve:
         a delta inside the noise floor is an argument for NOT spending the slot rather than a free look.
 
         `BOARD_RESOLVABLE` IS WHERE A POSITIVE STOPS MEANING ANYTHING, and the report says so rather than
-        leaving the reader to remember it. Six entries now pair an offline joint-holdout score with a board
-        score (knee-825t): the chain rises across the first 0.003 of offline spread and then stops, with
-        `longseat` carrying +0.0012 — the largest single move in a sweep of all 56 same-split checkpoints,
-        six times the runner-up — and TYING the board rather than moving it. 0.0015 is the value above
-        that plateau and below the smallest gap the chain does track; it is a floor on what has been
-        DEMONSTRATED, not a threshold anything is known to cross. So the trailing count is deliberately not
-        a filter: the ordering is this tool's product and stays whole, and the line only refuses to let an
-        argmax of +0.0002 read as a submission.
+        leaving the reader to remember it. It is 0.0040 as of 2026-09-02, raised from 0.0015 because the
+        old value was inside the band where this ruler is measured to invert: across the 34 board rows
+        carrying an honest offline number — 561 ordered pairs — 35 invert, and the largest offline
+        separation at which one still does is 0.0037. So the trailing count is deliberately not a filter:
+        the ordering is this tool's product and stays whole, and the line only refuses to let a move the
+        record has been seen to order BACKWARDS read as a submission.
         """
         truth = candidates.truth
         base = self.scores.mean(RankAverage().combine(roster.predictions), truth)
@@ -322,8 +331,8 @@ class MemberCurve:
         SAID ON THE REPORT rather than left in a docstring, because the reading it corrects is the one a
         reader reaches for unprompted: a best seat of -0.0010 sits inside the 0.0062 noise floor and
         looks free. It is not — three paired entries put the board cost at about `BOARD_COST_MULTIPLE`
-        times the offline number (knee-c0u9), which turns that -0.0010 into roughly -0.003, twice the
-        tick the same ruler needs +0.0015 to earn.
+        times the offline number (knee-c0u9), which turns that -0.0010 into roughly -0.003, still short of
+        the +0.0040 the same ruler needs before it stops ordering the board backwards.
         """
         if best >= BOARD_RESOLVABLE:
             return f"best clears +{BOARD_RESOLVABLE:.4f}; above that this ruler orders correctly but saturates"
