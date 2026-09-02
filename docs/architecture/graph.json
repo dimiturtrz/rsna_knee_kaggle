@@ -24824,6 +24824,24 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.init_scope.InitScope",
+      "target": "kneemri.training.init_scope.InitScope",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.init_scope.TrunkOnly",
+      "target": "kneemri.training.init_scope.InitScope",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.init_scope.WholeModel",
+      "target": "kneemri.training.init_scope.InitScope",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.label_focus.LabelFocus",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -26329,6 +26347,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
+      "target": "kneemri.training.init_scope.InitScope.named",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.train.main",
       "target": "kneemri.training.landed.Landed",
@@ -26740,6 +26764,18 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.predict",
       "target": "kneemri.training.trainer.Trainer.batches",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.warm_start.WarmStart",
+      "target": "kneemri.training.init_scope.InitScope",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.warm_start.WarmStart.__init__",
+      "target": "kneemri.training.init_scope.WholeModel",
       "weight": 1
     }
   ],
@@ -27305,7 +27341,7 @@
       "role": null
     },
     {
-      "descendants": 212,
+      "descendants": 213,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -28729,7 +28765,7 @@
       "role": null
     },
     {
-      "descendants": 34,
+      "descendants": 35,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -28828,6 +28864,14 @@
       "descendants": 0,
       "id": "kneemri.training.heartbeat",
       "label": "heartbeat",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope",
+      "label": "init_scope",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -32687,6 +32731,30 @@
       "level": "class",
       "parent": "kneemri.training.heartbeat",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.InitScope",
+      "label": "InitScope",
+      "level": "class",
+      "parent": "kneemri.training.init_scope",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.TrunkOnly",
+      "label": "TrunkOnly",
+      "level": "class",
+      "parent": "kneemri.training.init_scope",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.WholeModel",
+      "label": "WholeModel",
+      "level": "class",
+      "parent": "kneemri.training.init_scope",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -48750,6 +48818,62 @@
       "label": "watch",
       "level": "method",
       "parent": "kneemri.training.heartbeat.Heartbeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.InitScope.carried",
+      "label": "carried",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.InitScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.InitScope.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.InitScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.InitScope.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.InitScope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.TrunkOnly.carried",
+      "label": "carried",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.TrunkOnly",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.TrunkOnly.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.TrunkOnly",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.WholeModel.carried",
+      "label": "carried",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.WholeModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.init_scope.WholeModel.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.training.init_scope.WholeModel",
       "role": null
     },
     {
