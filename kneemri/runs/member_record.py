@@ -56,6 +56,10 @@ NOT_IN_CONFIG = {
     "where its parameters came to rest. Those parameters ARE the checkpoint. The recipe block carries "
     "the path, which is where a two-stage arm's provenance is read from, and the run's log opens with "
     "the warm-start line `WarmStart.applied` returns",
+    "init_scope": "how much of that starting checkpoint was taken — a parameter OF the write-off above, "
+    "and dead without it. It moves where the parameters came to rest, never the module a rebuild "
+    "constructs: a trunk-only start leaves a FRESH head, which is the same head shape this run's own "
+    "flags describe. The recipe block carries it beside the path",
     "certainty_ramp": "a curriculum over the LABEL WEIGHTS, which live in the training table rather than "
     "in the member: it changes how fast the run came to trust each cell and leaves nothing behind to "
     "rebuild, exactly as the schedule write-off above does. The recipe block carries it, which is where "
