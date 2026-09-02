@@ -75,7 +75,21 @@ columns: **Fracture is 0.7827, our second-weakest**, and it is 56.4% unread. A l
 and majority-unread is the one place where "the ruler is thin" and "the model is weak" are the same
 sentence, and it is the only version of the reader project the measurements have not already refuted.
 
-That check is card-free and per-label. It is the next step, not a retrain.
+**CORRECTED SAME DAY — that lever is PRICED OUT, and it was priced before this file was written.**
+The ledger's per-label programme has a CEILING, not an estimate: against twenty published CC0 members we
+lead on ten of twelve columns, and closing BOTH losing columns completely — to weights that provably
+exist — is `(0.0346 + 0.0167) / 12 = +0.0043` on the mean. A quarter of the bar. And Fracture's own share
+of that is attributed to SAMPLING: 68 positives in the comparison. So a Fracture-focused member is worth
+at most +0.0014 before it starts, and the part of it that looks like a deficit is the part that is noise.
+
+The focus mechanism itself is also already spent as a seat. `focus_mcl` DID run, twelve epochs; on the MCL
+column it pre-registered it reads 0.7861 against the control's 0.7931, inside the null band — jointness
+costs MCL nothing. Its solo is 0.5332 because eleven heads carry no gradient, and in the widened-pool
+greedy it enters at seat 16 for **+0.0000**.
+
+So the surviving clause above survives as a MECHANISM and dies on PRICE. It is not refuted, and it must
+not be re-proposed as a lever: the reason is arithmetic, not a failed arm, and no run can change it.
+`see interpretations/kneemri/2026-08-23_the_per_label_axis_is_worth_0.004.md`.
 
 ## Method note
 
