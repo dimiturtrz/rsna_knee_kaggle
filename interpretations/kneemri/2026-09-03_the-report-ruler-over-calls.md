@@ -22,33 +22,40 @@ card and no slot.
 
 ## What the report ruler gets wrong
 
-At the project's 0.5 midpoint, over 58 x 12 = 696 cells:
+At the project's own `POSITIVE = 0.5` cut, applied strictly as `labels > POSITIVE` the way
+`Ordering.auc` applies it, over 58 x 12 = 696 cells:
 
 | | count | rate |
 |---|---|---|
-| cells where report and radiologist disagree | 147 | **0.2112** |
-| report says POSITIVE, radiologist NEGATIVE | 115 | |
-| report says NEGATIVE, radiologist POSITIVE | 32 | |
+| cells where report and radiologist disagree | 145 | **0.2083** |
+| report says POSITIVE, radiologist NEGATIVE | 108 | |
+| report says NEGATIVE, radiologist POSITIVE | 37 | |
 | gold positives | 240 | 0.345 |
-| report positives | 323 | 0.464 |
+| report positives | 311 | 0.447 |
 
-**The error is one-directional. The report reader OVER-CALLS**, by 83 net positives on 240 — about a
-third again as many findings as the radiologist saw. Per label, the over-call is everywhere except one:
+The reader emits six levels — 0.08, 0.28, 0.50, 0.68, 0.82, 0.94 — and **12 of the 696 cells sit exactly
+on 0.5**, so `>` versus `>=` moves the disagreement count between 145 and 147 and the over-call between
+108 and 115. The strict form above is the project's convention and the one every number here uses. The
+reading does not turn on the choice.
+
+**The error is one-directional. The report reader OVER-CALLS**, by 71 net positives on 240 — call it a
+third again as many findings as the radiologist saw, at roughly three over-calls per under-call. Per
+label, the over-call is everywhere except one:
 
 ```
 label              gold+  rep+     FN     FP  disag
-ACL                   24    33      0      9      9
-MCL                    9    19      0     10     10
-Medial Meniscus       26    33      1      8      9
-Lateral Meniscus      23    31      3     11     14
-Medial OA             15    23      1      9     10
-Lateral OA            11    17      2      8     10
-PF OA                 21    25      4      8     12
-Effusion              35    51      0     16     16
-Synovitis             27    17     14      4     18
-Baker's               12    17      1      6      7
-Contusion             19    37      2     20     22
-Fracture              18    20      4      6     10
+ACL                   24    32      1      9     10
+MCL                    9    18      0      9      9
+Medial Meniscus       26    32      1      7      8
+Lateral Meniscus      23    30      3     10     13
+Medial OA             15    22      1      8      9
+Lateral OA            11    16      2      7      9
+PF OA                 21    24      5      8     13
+Effusion              35    50      1     16     17
+Synovitis             27    16     14      3     17
+Baker's               12    16      1      5      6
+Contusion             19    36      3     20     23
+Fracture              18    19      5      6     11
 ```
 
 Synovitis is the single inversion and it inverts hard — 14 under-calls against 4 over-calls. That is the
@@ -101,9 +108,11 @@ what makes this a mechanism rather than a coincidence of two small samples.
 systematic one-directional bias sits between every arm this project has run and the thing it is trying to
 measure. `knee-ds2e` is answered in the LABEL-NOISE direction, with a sign and a size.
 
-**Does not establish the RATE over the corpus.** State the denominator: **58 of 4,407 studies, 1.3%**.
-Nothing here shows the annotated 58 were sampled at random, and if they were chosen as interesting cases
-the 21% is an upper bound rather than an estimate.
+**Does not establish the RATE over the corpus, and the 58 are MEASURABLY not representative.** State the
+denominator: **58 of 4,406 studies, 1.3%**. The same report table calls 30.5% of cells positive over the
+whole corpus and **44.7% over these 58 — a 1.47x enrichment**. The annotated set is finding-rich, it was
+not sampled at random, and over-calls are a per-positive error, so **0.2083 is an upper bound on the
+corpus rate, not an estimate of it**. Every downstream use of the 21% has to carry that word.
 
 **Does not establish which ruler the hidden test uses.** The argument that it is the radiologist form is
 that `train.csv` — the competition's own label file — is where these 58 gold rows come from, so gold is
