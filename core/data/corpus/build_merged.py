@@ -11,6 +11,7 @@ from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.merged_cache import MergedCache
 from core.data.corpus.slots import MERGED_SCHEME, RIJEKA_SCHEME, SCHEMES
+from core.data.corpus.study_metadata import StudyMetadata
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,8 @@ logger = logging.getLogger(__name__)
 LABELS = "report_labels_v2.csv"
 EXTRA_LABELS = "rijeka_acl.csv"
 MERGED_LABELS = "merged_labels.csv"
+METADATA = "metadata"
+"""The directory each corpus's own metadata CSV is written to by its own builder."""
 
 
 def main() -> None:
@@ -76,6 +79,9 @@ def main() -> None:
         arguments.labels_out or root.processed() / "labels" / f"{arguments.merged_scheme}_labels.csv",
         base_name=arguments.scheme,
         extra_name=arguments.extra_scheme,
+    )
+    StudyMetadata.merge_written(
+        root.processed() / METADATA, (arguments.scheme, arguments.extra_scheme), arguments.merged_scheme
     )
     if arguments.labels_only:
         logger.info("LABELS ONLY — the images were left alone")

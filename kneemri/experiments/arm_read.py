@@ -95,19 +95,27 @@ class ArmRead:
         directory = self.headers.arms
         return sorted(shell.stem for shell in directory.glob("*.sh"))
 
-    def report(self, arm: str, processed: Path, labels: Path | None) -> str:
+    def report(self, arm: str, models: Path, labels: Path | None) -> str:
         """The per-label table for one arm against its declared control, error bars included.
 
         Raises rather than printing a mean when the arm declares no control. The whole point of the
         module is that a mean is what gets read when nothing forces the alternative, so falling back to
         one on the failure path would reinstate the defect at exactly the moment it bites.
+
+        The root is the MODELS root, which is where `run_train` writes every `.metrics.jsonl`. It was
+        the PROCESSED root until 2026-09-03, and that is not a near miss: no run's metrics have ever
+        been written under processed, so every name this tool was given resolved to a path that could
+        not exist and came back as `control <name>.metrics.jsonl does not exist`. That reads as a
+        missing RUN rather than as a wrong ROOT, which is why the tool was believed to be waiting on
+        arms that declare a control rather than on this line. `run_comparison`, which does the same
+        resolution one layer down, passes `root.models()` and always did.
         """
         named = self.control(arm)
         if named is None:
             message = f"{arm} declares no `# control  <name> = <score>` line, so it has no denominator"
             raise SystemExit(message)
-        control = RunComparison.resolved(Path(named), processed)
-        run = RunComparison.resolved(Path(self.produced(arm)), processed)
+        control = RunComparison.resolved(Path(named), models)
+        run = RunComparison.resolved(Path(self.produced(arm)), models)
         return RunComparison(control, [run], labels, None).report()
 
 
@@ -134,7 +142,7 @@ def main() -> None:
     if arguments.arm is None:
         raise SystemExit("--arm names the arm to read; only --assert may sweep every arm at once")
     root = command.rooted(arguments)
-    logger.info("%s", read.report(arguments.arm, root.processed(), arguments.labels))
+    logger.info("%s", read.report(arguments.arm, root.models(), arguments.labels))
 
 
 if __name__ == "__main__":

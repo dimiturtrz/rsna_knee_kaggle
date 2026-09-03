@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
+from core.data.corpus.merged_cache import CORPUS
 from core.findings import TARGETS
 
 CONFIDENCE_FLOOR = 0.25
@@ -380,8 +381,8 @@ class Targets:
                 read_by_radiologist[read, column] = True
         weights[supervision.pruned(identifiers) & ~read_by_radiologist] = 0.0
         corpus = None
-        if "corpus" in derived.columns:
-            corpus = derived["corpus"].fillna("").to_numpy(dtype=str)
+        if CORPUS in derived.columns:
+            corpus = derived[CORPUS].fillna("").to_numpy(dtype=str)
         return cls(scores, weights, identifiers, supervision, corpus=corpus)
 
     @classmethod

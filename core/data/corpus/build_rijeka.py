@@ -12,11 +12,13 @@ from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.rijeka_corpus import RIJEKA_SPACING, RijekaCorpus
 from core.data.corpus.slots import RIJEKA_SCHEME
+from core.data.corpus.study_metadata import StudyMetadata
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
 LABELS = "rijeka_acl.csv"
+METADATA = "rijeka_metadata.csv"
 
 
 def main() -> None:
@@ -47,6 +49,7 @@ def main() -> None:
     corpus = RijekaCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing)
 
     corpus.labels(root.processed() / "labels" / LABELS)
+    StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
     logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")
     # The decode runs unattended for minutes and the idle timer counts INPUT rather than load (knee-wyzj).
     with Wakelock():

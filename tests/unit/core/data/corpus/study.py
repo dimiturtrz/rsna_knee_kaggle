@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 
 from core.data.corpus.slot_reader import SlotReader
-from core.data.corpus.slots import EXTENDED_SLOTS, SCHEMES, SLOTS, SlotScheme
+from core.data.corpus.slots import CANONICAL_SCHEME, EXTENDED_SLOTS, SCHEMES, SLOTS, SlotScheme
 from core.data.corpus.study import SlotPipeline, Study
 from tests.unit.conftest import write_series
 
@@ -27,6 +27,37 @@ def test_side(tmp_path: Path):
     """The study's side comes from the tag when the series carry one."""
     root, planes = _study(tmp_path)
     assert Study.from_directory(root, planes).side() == "L"
+
+
+def test_metadata(tmp_path: Path):
+    """The study's own row: the SET for plane and sequence, and unanimity for everything else."""
+    root, planes = _study(tmp_path)
+    row = Study.from_directory(root, planes).metadata()
+    assert row.identifier == "study"
+    assert row.corpus == CANONICAL_SCHEME
+    assert row.plane == "Coronal+Sagittal", "two series, two planes, one flat cell naming both"
+    assert row.sequence == "PD+T1", "recovered from TR/TE and the description, not from a shipped column"
+    assert row.fat_suppressed is None, "the two series disagree, so the study has no one answer"
+    assert row.fluid_sensitive is None
+    assert row.pixel_spacing_mm is not None, "both series were written at the same grid, so it is filled"
+
+
+def test_metadata_of_one_series_fills_the_flags(tmp_path: Path):
+    """A study whose series all agree DOES get the flags — absence is disagreement, not a blanket."""
+    write_series(tmp_path / "sag", description="SAG PD FS")
+    row = Study.from_directory(tmp_path, {"sag": "Sagittal"}).metadata()
+    assert row.plane == "Sagittal"
+    assert row.sequence == "PD"
+    assert row.fat_suppressed is True
+    assert row.fluid_sensitive is True
+
+
+def test_metadata_leaves_an_unshipped_plane_absent(tmp_path: Path):
+    """Plane comes from the series table, so a study whose series are not in it says absent."""
+    root, _ = _study(tmp_path)
+    row = Study.from_directory(root, {}).metadata()
+    assert row.plane is None
+    assert row.sequence == "PD+T1", "the sequence is read off the headers and survives an empty table"
 
 
 def test_bag(tmp_path: Path):

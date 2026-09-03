@@ -140,6 +140,7 @@ def main() -> None:
     import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
     import torch  # noqa: PLC0415 - same
 
+    from core.findings import TARGETS  # noqa: PLC0415 - same
     from core.mounts import Mounts  # noqa: PLC0415 - same
     from kneemri.device import VisibleCards  # noqa: PLC0415 - same
     from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
@@ -149,7 +150,6 @@ def main() -> None:
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
     from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same
     from kneemri.kaggle.raptor_seat import RaptorSeat  # noqa: PLC0415 - same
-    from core.findings import TARGETS  # noqa: PLC0415 - same
 
     # The raptor member runs FIRST and into a scratch directory, because both producers write a file
     # called `submission.csv` and the one that runs last is the one Kaggle would otherwise score.

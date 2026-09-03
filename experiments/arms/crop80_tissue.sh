@@ -28,8 +28,13 @@
 # suspects. centre_tissue.sh isolates the centre alone at 130 mm against the existing baseline, and is
 # the disambiguation to run if this one disappoints.
 #
-# control  the 130 mm image-centred members on the same fold and labels. Read PER LABEL, never on the
-#          mean alone — the mean averages the two halves of the prediction against each other.
+# control  wholestack_s2026 = 0.8457 — the 130 mm image-centred member on the same fold and labels, with the
+#          same `--epochs 8 --slice-pooling max --whole-stack --recompute-activations` and only the crop
+#          moving. Named here in the `<name> = <score>` form on 2026-09-03 so `arm_read --arm crop80_tissue`
+#          can join the two PER LABEL; the prose form it carried before named the comparison without giving
+#          the tool a denominator, so the per-label read this header asks for could not actually be run.
+#          Read PER LABEL, never on the mean alone — the mean averages the two halves of the prediction
+#          against each other, which is exactly how this arm's -0.0112 got recorded as a loss.
 #
 # NEEDS ITS OWN CACHE, which no other arm builds:
 #   experiments/arms/build_cache.sh --image-size 336 --slices 12 --crop-mm 80 --centre tissue

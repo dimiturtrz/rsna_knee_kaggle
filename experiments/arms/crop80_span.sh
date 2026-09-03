@@ -40,6 +40,11 @@ require "$LABELS"
 # so a hand-typed 18 here would be a third statement of a fact --slices already makes - and the third one
 # is the one that goes stale. --crop-mm changes the physical extent the 336 px covers, not the
 # activations, so the derivation holds across this arm's whole reason to exist.
+# control  band_span_s2026 = 0.8565 — the control crop160_span's header already names as "the same
+#          control crop80_span was read against". Written in the `<name> = <score>` form on 2026-09-03
+#          so `arm_read --arm crop80_span` can join the two PER LABEL; the comparison itself is not new.
+#
+
 run_train crop80_span \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 --crop-mm 80 --centre tissue \

@@ -256,6 +256,7 @@ def main() -> None:
 
     import time  # noqa: PLC0415 - the bootstrap block above is byte-identical across kernels
 
+    import numpy as np  # noqa: PLC0415 - same
     import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
     import torch  # noqa: PLC0415 - same
 
@@ -264,8 +265,6 @@ def main() -> None:
     from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
     from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
     from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
-    import numpy as np  # noqa: PLC0415 - same
-
     from kneemri.inference.stacked import StackedLogit  # noqa: PLC0415 - same
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
     from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same

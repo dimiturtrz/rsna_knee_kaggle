@@ -23,7 +23,7 @@
 # resolution axis is measured FLAT here (392 -> 448 read +-0.0000), so paying 1.6x the wall-clock to
 # hold it constant costs compute and buys the clean read.
 #
-# control  band_span 0.8565 — the same control crop80_span was read against, so the two arms are the
+# control  band_span_s2026 = 0.8565 — the same control crop80_span was read against, so the two arms are the
 #          two directions of one axis measured off one point. No control arm of its own.
 # cost     12 epochs at 420 px. The throughput table reads 420/12sl at 23.42 GB and 89 s per 618 img/s
 #          rung, so ~620 s an epoch against band_span's ~395 = ~2 h. Decode was done off-card while

@@ -34,6 +34,11 @@ from core.data.corpus.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
+CORPUS = "corpus"
+"""The origin column both this producer and `Targets.load` name. One spelling, because a table written
+under a different one is not a broken read — it is a silently absent axis, which is how the column came
+to be consumed and never written."""
+
 COPY_STUDIES = 32
 """Studies copied per block. At six slots, twelve slices and 336 px a study is 8.1 MB, so a block is
 260 MB — large enough that the copy is sequential I/O and small enough to hold twice over in RAM."""
@@ -114,15 +119,27 @@ class MergedCache:
         from without relying on identifier prefixes, which differ between MRNet (`mrnet-`), Rijeka
         (filename stems) and fastMRI (file names). Downstream loaders ignore columns they do not use,
         so adding it is safe for existing members.
+
+        A SOURCE THAT ALREADY NAMES ITS CORPORA KEEPS THOSE NAMES. `merged3` is built by merging
+        `merged`, whose rows come from two corpora, so stamping the scheme name over them would answer
+        "which corpus is this study from" with the name of a merge — losing exactly the distinction the
+        column exists to record, and losing it silently, on the only rows a third merge adds nothing to.
         """
-        base_table = pd.read_csv(base)
-        extra_table = pd.read_csv(extra)
-        base_table["corpus"] = base_name
-        extra_table["corpus"] = extra_name
+        base_table = self._tagged(pd.read_csv(base), base_name)
+        extra_table = self._tagged(pd.read_csv(extra), extra_name)
         merged = pd.concat([base_table, extra_table], ignore_index=True)
         destination.parent.mkdir(parents=True, exist_ok=True)
         merged.to_csv(destination, index=False)
         logger.info(f"{len(merged)} rows, {len(merged.columns)} columns -> {destination}")
+
+    @staticmethod
+    def _tagged(table: pd.DataFrame, name: str) -> pd.DataFrame:
+        """One source's table with a `corpus` column, filled with `name` only where it has none."""
+        if CORPUS not in table.columns:
+            table[CORPUS] = name
+            return table
+        table[CORPUS] = table[CORPUS].fillna(name).replace("", name)
+        return table
 
     def _mask(self, base_studies: int, extra_studies: int) -> Float[np.ndarray, "studies slots"]:
         """The merged presence mask: base's own rows, then extra's flags at their matched positions."""

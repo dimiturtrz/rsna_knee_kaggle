@@ -7,7 +7,15 @@ import numpy as np
 import pandas as pd
 import torch
 
-from core.data.corpus.rijeka_corpus import ACL, CONFIDENCE, READER_LEVEL, RijekaCorpus, RijekaVolume
+from core.data.corpus.rijeka_corpus import (
+    ACL,
+    CONFIDENCE,
+    READER_LEVEL,
+    RIJEKA_CORPUS,
+    RIJEKA_SPACING,
+    RijekaCorpus,
+    RijekaVolume,
+)
 from core.data.corpus.slots import RIJEKA_SCHEME, SLOTS, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.findings import STUDY
@@ -62,6 +70,26 @@ def test_volumes(tmp_path: Path):
     assert [volume.identifier for volume in volumes] == ["100-8", "101-8"]
     assert volumes[0].member.endswith("100-8.pck")
     assert volumes[1].diagnosis == 1
+
+
+def test_metadata(tmp_path: Path):
+    rows = RijekaCorpus(_archive(tmp_path), _cache(tmp_path)).metadata()
+    assert len(rows) == 2
+    assert {row.corpus for row in rows} == {RIJEKA_CORPUS}
+    assert rows[0].plane == "Sagittal"
+    assert rows[0].sequence == "PD"
+    assert rows[0].fat_suppressed is True
+    assert rows[0].fluid_sensitive is True
+    assert rows[0].pixel_spacing_mm == RIJEKA_SPACING
+
+
+def test_metadata_leaves_what_the_corpus_cannot_say_absent(tmp_path: Path):
+    row = RijekaCorpus(_archive(tmp_path), _cache(tmp_path)).metadata()[0]
+    assert row.slice_spacing_mm is None
+    assert row.age_years is None
+    assert row.sex is None
+    assert row.scanner is None
+    assert row.field_strength_t is None
 
 
 def test_stack(tmp_path: Path):

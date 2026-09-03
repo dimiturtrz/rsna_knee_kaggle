@@ -39,6 +39,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.data.corpus.study_cache import StudyCache
+from core.data.corpus.study_metadata import StudyMetadata
 from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,18 @@ a great deal for honesty about what the labels claim.
 EXPERT_CONFIDENCE = 1.0
 """Every row is a double-blind read by a diagnostic radiologist, so nothing here is a hedged extraction."""
 
+RIJEKA_CORPUS = "rijeka"
+"""The origin name, spelled as the merged tables already spell it — `merged3_tagged_labels.csv` reads
+canonical 4406, mrnet 1248, rijeka 736, and a second spelling here would split one corpus into two."""
+
+RIJEKA_PLANE = "Sagittal"
+RIJEKA_SEQUENCE = "PD"
+"""The published protocol: sagittal proton-density fat-suppressed, one acquisition for the whole corpus.
+This is the predicate `merged_cache` relies on to place every kneeMRI exam in `SLOTS[0]`."""
+
+RIJEKA_MATRIX = 320
+"""Pixels across, stated by the volumes themselves and the denominator `RIJEKA_SPACING` divides."""
+
 
 @dataclass(frozen=True)
 class RijekaVolume:
@@ -145,6 +158,38 @@ class RijekaCorpus:
                 diagnosis=int(row[DIAGNOSIS]),
             )
             for _, row in present.iterrows()
+        ]
+
+    def metadata(self) -> list[StudyMetadata]:
+        """What this corpus was acquired with, per exam, in the shape every corpus answers in.
+
+        THE ACQUISITION IS A CONSTANT HERE and that is a property of the corpus rather than a shortcut:
+        kneeMRI publishes one protocol, sagittal proton-density fat-suppressed on a 320 px matrix, which
+        is why `merged_cache` can place every one of these exams in `SLOTS[0]` without asking. So the
+        frame is 736 identical rows, and identical is the honest answer.
+
+        THE SPACING IS DERIVED AND SAYS SO. `RIJEKA_SPACING` reconstructs 0.5 mm/px from the matrix and a
+        field of view the corpus never publishes, checked against the ACL box sizes. It is recorded
+        because it is the number this corpus's entire geometry already runs on, and it is recorded under
+        `pixel_spacing_mm` rather than `slice_spacing_mm` because it is an in-plane measure — the
+        through-plane spacing is not known here, and filling it with this value would be a wrong field
+        rather than an absent one.
+
+        EVERYTHING ABOUT THE PATIENT IS ABSENT. `metadata.csv` carries the ligament verdict and the
+        volume filename; no age, no sex, no scanner, no field strength. Those cells stay None.
+        """
+        return [
+            StudyMetadata(
+                identifier=volume.identifier,
+                corpus=RIJEKA_CORPUS,
+                plane=RIJEKA_PLANE,
+                sequence=RIJEKA_SEQUENCE,
+                fat_suppressed=True,
+                fluid_sensitive=True,
+                pixel_spacing_mm=self.spacing,
+                matrix_px=RIJEKA_MATRIX,
+            )
+            for volume in self.volumes()
         ]
 
     @staticmethod

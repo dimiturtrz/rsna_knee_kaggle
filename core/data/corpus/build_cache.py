@@ -13,10 +13,14 @@ from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.folds import ReportFolds
 from core.data.corpus.slots import FOREIGN_SCHEMES
+from core.data.corpus.study import Study
 from core.data.corpus.study_cache import CorpusSplit
+from core.data.corpus.study_metadata import StudyMetadata
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
+
+METADATA = "canonical_metadata.csv"
 
 
 def main() -> None:
@@ -41,6 +45,14 @@ def main() -> None:
         "exactly them and a whole-corpus cache at 28 slices is 84 GB to answer a 58-study question.",
     )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
+    command.parser.add_argument(
+        "--metadata-only",
+        action="store_true",
+        help=f"write this corpus's own {METADATA} table and stop, without decoding a pixel. One header "
+        "per study against a decode that runs for hours, and the two are separable for the reason "
+        "`build_fastmri --labels-only` is: what an axis MEANS is argued about far more often than the "
+        "images change, and every other corpus already writes its metadata beside its labels.",
+    )
     arguments = command.parsed()
 
     if arguments.scheme in FOREIGN_SCHEMES:
@@ -76,6 +88,13 @@ def main() -> None:
         _, holdout = folds.holdout(folds.assign(str(raw / "train.csv"), identifiers), arguments.holdout_fold)
         identifiers = [identifiers[index] for index in holdout]
         logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(identifiers)} studies")
+
+    if arguments.metadata_only:
+        planes = split.planes()
+        entries = [Study.from_directory(split.source / identifier, planes).metadata() for identifier in identifiers]
+        StudyMetadata.write(entries, root.processed() / "metadata" / METADATA)
+        logger.info("CANONICAL METADATA COMPLETE (no decode requested)")
+        return
 
     cache = CacheFlags.cache(arguments, arguments.out or root.processed())
     if arguments.print_key:

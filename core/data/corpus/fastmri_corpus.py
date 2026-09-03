@@ -71,6 +71,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.data.corpus.study_cache import StudyCache
+from core.data.corpus.study_metadata import StudyMetadata
 from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
@@ -94,6 +95,22 @@ FAT_SUPPRESSED_ACQUISITION = "CORPDFS_FBK"
 Matched by equality rather than by an `FS` substring: `CORPD_FBK` contains no `FS`, but a substring rule
 is the kind that survives review and then quietly admits a future acquisition string nobody checked.
 """
+
+FASTMRI_CORPUS = "fastmri"
+"""What this corpus calls itself in the `corpus` column."""
+
+FASTMRI_PLANE = "Coronal"
+"""Every routed exam here is coronal — both acquisitions this scheme knows say so in their own name, and
+that plane is the reason the corpus is worth building (see this module's docstring)."""
+
+FASTMRI_SEQUENCE = "PD"
+"""Proton density, fat-suppressed or not. Read off the acquisition string rather than assumed: an exam on
+neither known string is skipped by `_slot` and never reaches a metadata row."""
+
+FAT_SUPPRESSED_SLOT = 0
+PLAIN_SLOT = 1
+"""Which cache slot each acquisition fills. Named because `metadata` reads fat suppression BACK off the
+slot, so the two would drift silently if the mapping lived only as a literal inside `_slot`."""
 
 PLAIN_ACQUISITION = "CORPD_FBK"
 """Coronal proton-density without fat suppression.
@@ -214,6 +231,17 @@ A size cut chosen without a measurement to set it against is a fitted constant, 
 added to supply labels rather than to have thresholds tuned on it.
 """
 
+EFFUSION_TERMS = ("Joint Effusion ",)
+"""The one blocked term that asserts rather than blocks, because effusion has neither a side nor a
+compartment: a box labelled it IS the finding, in the only column no localisation is owed to.
+
+The bar it has to clear is SIZE, and the boxes clear it by a distance no threshold has to adjudicate.
+Across the 142 studies carrying one, the median box is 36.7 mm on a side and the lower QUARTILE is
+31 mm — measured at 0.4375 mm/px, the 140 mm FOV on a 320 px matrix the ISMRMRD header reports. A cut
+anywhere in the moderate range keeps the whole distribution, so there is no fitted constant here to
+choose; that is exactly what `CARTILAGE_LOSS` cannot say about its own 9.6 mm median.
+"""
+
 BONE_INJURY = ("Bone-Fracture/Contusion/dislocation",)
 """One fastMRI+ term spanning two of our columns, so it can only ever block their negatives.
 
@@ -230,7 +258,7 @@ READINGS: dict[str, Reading] = {
     "Medial OA": Reading(coarse=CARTILAGE_LOSS),
     "Lateral OA": Reading(coarse=CARTILAGE_LOSS),
     "PF OA": Reading(coarse=CARTILAGE_LOSS),
-    "Effusion": Reading(coarse=("Joint Effusion ",)),
+    "Effusion": Reading(positive=EFFUSION_TERMS),
     "Baker's": Reading(coarse=("Periarticular cysts",)),
     "Contusion": Reading(coarse=(*BONE_INJURY, "Bone- Subchondral edema")),
     "Fracture": Reading(coarse=BONE_INJURY),
@@ -256,12 +284,23 @@ grade and partial-thickness cartilage — are absent for the reason `Reading` re
 
 @dataclass(frozen=True)
 class FastmriVolume:
-    """One exam: where its pixels are, which slot its acquisition fills, and how big a pixel is."""
+    """One exam: where its pixels are, which slot its acquisition fills, and the geometry it was recon'd on.
+
+    The matrix and the field of view are kept rather than only their quotient, because they are what the
+    header actually STATES and the spacing is what we compute from them. A metadata row that recorded the
+    quotient alone could not say whether an exam was one of the four in a hundred acquired at 150 mm.
+    """
 
     identifier: str
     path: Path
     slot: int
-    spacing: float
+    matrix_px: int
+    field_of_view_mm: float
+
+    @property
+    def spacing(self) -> float:
+        """Millimetres per pixel in plane — the stated field of view over the stated matrix."""
+        return self.field_of_view_mm / self.matrix_px
 
 
 class FastmriCorpus:
@@ -297,7 +336,8 @@ class FastmriCorpus:
             if slot is None:
                 skipped += 1
                 continue
-            volumes.append(FastmriVolume(path.stem, path, slot, self._spacing(path)))
+            matrix, field_of_view = self._geometry(path)
+            volumes.append(FastmriVolume(path.stem, path, slot, matrix, field_of_view))
         logger.info(f"{len(volumes)} of {len(found)} exams routed, {skipped} on an unknown acquisition")
         return volumes
 
@@ -306,13 +346,13 @@ class FastmriCorpus:
         with h5py.File(path, "r") as handle:
             acquisition = str(handle.attrs.get(ACQUISITION, ""))
         if acquisition == FAT_SUPPRESSED_ACQUISITION:
-            return 0
+            return FAT_SUPPRESSED_SLOT
         if acquisition == PLAIN_ACQUISITION:
-            return 1
+            return PLAIN_SLOT
         return None
 
-    def _spacing(self, path: Path) -> float:
-        """Millimetres per pixel in plane, read from this exam's own ISMRMRD header.
+    def _geometry(self, path: Path) -> tuple[int, float]:
+        """The recon matrix and field of view, read from this exam's own ISMRMRD header.
 
         Read rather than assumed, which is the one place this corpus is on firmer ground than Rijeka:
         140 mm over 320 px on 116 of 120 sampled files and 150 mm on the other 4, so a single constant
@@ -323,7 +363,7 @@ class FastmriCorpus:
         found = FOV_PATTERN.search(header)
         if found is None:
             raise ValueError(f"{path.name} carries no reconSpace field of view")
-        return float(found.group(2)) / float(found.group(1))
+        return int(found.group(1)), float(found.group(2))
 
     def stack(self, volume: NDArray[np.float32], spacing: float, slices: int) -> UInt8[Tensor, "s h w"]:
         """One reconstructed volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.
@@ -392,6 +432,35 @@ class FastmriCorpus:
             seen[str(identifier)] = frozenset(str(label) for label in group[LABEL_COLUMN])
         logger.info(f"{len(seen)} studies read, {sum(1 for terms in seen.values() if terms)} carrying a box")
         return seen
+
+    def metadata(self) -> list[StudyMetadata]:
+        """What each exam was acquired with — the corpus whose geometry is STATED rather than derived.
+
+        Fat suppression is read back off the routed slot, which is read off the acquisition string, which
+        is matched by equality. So a filled `fat_suppressed` cell here traces to a word the corpus wrote
+        about itself, and an exam on an unrecognised acquisition has no row at all rather than a guessed
+        one — `volumes` has already dropped it.
+
+        Both acquisitions are `fluid_sensitive`: coronal PD without fat suppression is a standard meniscus
+        sequence, which is the same reading `PLAIN_ACQUISITION` records and the reason it does not land in
+        a T1 slot. The patient axes stay absent — the corpus is de-identified and publishes no age, sex or
+        scanner — and so does `field_strength_t`, which the ISMRMRD header does carry and this reader does
+        not parse. That last one is an omission with a known fix, not an unanswerable axis.
+        """
+        return [
+            StudyMetadata(
+                identifier=volume.identifier,
+                corpus=FASTMRI_CORPUS,
+                plane=FASTMRI_PLANE,
+                sequence=FASTMRI_SEQUENCE,
+                fat_suppressed=volume.slot == FAT_SUPPRESSED_SLOT,
+                fluid_sensitive=True,
+                pixel_spacing_mm=volume.spacing,
+                matrix_px=volume.matrix_px,
+                field_of_view_mm=volume.field_of_view_mm,
+            )
+            for volume in self.volumes()
+        ]
 
     def labels(self, destination: Path) -> None:
         """The labels table: eleven of our twelve findings, most of them carrying absence.

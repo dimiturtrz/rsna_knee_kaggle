@@ -8,6 +8,9 @@ import torch
 
 from core.data.corpus.fastmri_corpus import (
     ACQUISITION,
+    FASTMRI_CORPUS,
+    FASTMRI_PLANE,
+    FASTMRI_SEQUENCE,
     FAT_SUPPRESSED_ACQUISITION,
     HEADER,
     NEGATIVE_LEVEL,
@@ -133,7 +136,43 @@ def test_volumes(tmp_path: Path):
 
     assert [volume.identifier for volume in volumes] == ["file100", "file101"]
     assert [volume.slot for volume in volumes] == [0, 1], "fat-suppressed and plain fill DIFFERENT slots"
+
+
+def test_spacing(tmp_path: Path):
+    """In-plane spacing comes off the reconstructed field of view, not the acquisition matrix.
+
+    The two differ on this corpus — an exam acquired on a coarser grid is reconstructed onto the finer
+    one — and the physical crop downstream is sized in millimetres, so reading the wrong grid would
+    silently crop the wrong amount of knee.
+    """
+    volumes = _corpus(tmp_path).volumes()
+
     assert volumes[0].spacing == SPACING, "read from reconSpace, not the encoded acquisition grid"
+
+
+def test_metadata(tmp_path: Path):
+    """Both routed exams get a row, and fat suppression follows the SLOT the acquisition string routed to.
+
+    The unrouted third file has no row: `volumes` dropped it, so an acquisition nobody recognised never
+    becomes a metadata cell.
+    """
+    rows = _corpus(tmp_path).metadata()
+
+    assert [row.identifier for row in rows] == ["file100", "file101"]
+    assert {row.corpus for row in rows} == {FASTMRI_CORPUS}
+    assert (rows[0].plane, rows[0].sequence) == (FASTMRI_PLANE, FASTMRI_SEQUENCE)
+    assert rows[0].fat_suppressed is True
+    assert rows[1].fat_suppressed is False, "read back off the slot, not assumed for the corpus"
+    assert rows[0].fluid_sensitive is True and rows[1].fluid_sensitive is True, "coronal PD either way"
+
+
+def test_metadata_keeps_the_geometry_the_header_stated(tmp_path: Path):
+    """Matrix and field of view are recorded, not only their quotient — 4 in 100 exams are acquired at 150 mm."""
+    row = _corpus(tmp_path).metadata()[0]
+
+    assert (row.matrix_px, row.field_of_view_mm) == (RECON_MATRIX, RECON_FOV)
+    assert row.pixel_spacing_mm == SPACING
+    assert row.field_strength_t is None, "the header carries it; this reader does not parse it"
 
 
 def test_stack(tmp_path: Path):

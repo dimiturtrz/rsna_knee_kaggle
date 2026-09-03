@@ -10,7 +10,10 @@ import torch
 from core.data.corpus.mrnet_corpus import (
     ACL,
     CONFIDENCE,
+    MRNET_CORPUS,
     MRNET_LEVEL,
+    MRNET_MATRIX,
+    MRNET_SPACING,
     PLANES,
     PREFIX,
     REPORT_CONFIDENCE,
@@ -136,6 +139,31 @@ def test_m_r_net_corpus_volumes_reads_a_flat_archive_with_external_tables(tmp_pa
     assert [exam.identifier for exam in exams] == [f"{PREFIX}0000", f"{PREFIX}0001", f"{PREFIX}{VALID_CASE}"]
     assert sorted(exams[2].members) == sorted(PLANES), "the validation exam is found without a valid/ directory"
     assert exams[2].acl == 1
+
+
+def test_m_r_net_corpus_metadata(tmp_path: Path):
+    """Every shipped exam gets a row naming its corpus, the planes it ships, and its geometry."""
+    rows = MRNetCorpus(_archive(tmp_path), _cache(tmp_path)).metadata()
+
+    assert [row.identifier for row in rows] == [f"{PREFIX}0000", f"{PREFIX}0001", f"{PREFIX}{VALID_CASE}"]
+    assert {row.corpus for row in rows} == {MRNET_CORPUS}
+    assert rows[0].plane == "Sagittal+Axial+Coronal", "one flat cell naming the SET this exam ships"
+    assert rows[0].pixel_spacing_mm == MRNET_SPACING
+    assert rows[0].matrix_px == MRNET_MATRIX
+
+
+def test_m_r_net_corpus_metadata_leaves_the_sequence_absent(tmp_path: Path):
+    """MRNet publishes no per-exam sequence, so the three sequence axes are unanswerable and stay None.
+
+    Deriving them from the plane would put a guess in a cell that reads identically to Rijeka's, whose
+    same cells come from a published protocol.
+    """
+    row = MRNetCorpus(_archive(tmp_path), _cache(tmp_path)).metadata()[0]
+
+    assert row.sequence is None
+    assert row.fat_suppressed is None
+    assert row.fluid_sensitive is None
+    assert row.age_years is None
 
 
 def test_stack(tmp_path: Path):

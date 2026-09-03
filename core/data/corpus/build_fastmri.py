@@ -16,11 +16,13 @@ from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.fastmri_corpus import READER_CONFIDENCE, FastmriCorpus
 from core.data.corpus.slots import FASTMRI_SCHEME
+from core.data.corpus.study_metadata import StudyMetadata
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
 LABELS = "fastmri_findings.csv"
+METADATA = "fastmri_metadata.csv"
 ANNOTATIONS = "labels/Annotations"
 
 
@@ -42,6 +44,17 @@ def main() -> None:
         "single-reader, single-view reads the corpus itself calls indicative, against Rijeka's "
         "double-blind 1.0. See fastmri_corpus.READER_CONFIDENCE before quoting it.",
     )
+    command.parser.add_argument(
+        "--labels-out",
+        type=Path,
+        default=None,
+        help=(
+            f"where the table is written (default: {LABELS}). A run that changes what a term READS must "
+            "change this too, for the reason `build_merged` gives: the default name is what the members "
+            "on disk were fitted against, and overwriting it leaves them unreproducible with every gate "
+            "still green."
+        ),
+    )
     command.parser.add_argument("--labels-only", action="store_true", help="write the table, skip the decode")
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
@@ -61,7 +74,8 @@ def main() -> None:
         confidence=arguments.reader_confidence,
     )
 
-    corpus.labels(root.processed() / "labels" / LABELS)
+    corpus.labels(arguments.labels_out or root.processed() / "labels" / LABELS)
+    StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
     if arguments.labels_only:
         logger.info("FASTMRI LABELS COMPLETE (no decode requested)")
         return

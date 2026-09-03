@@ -486,12 +486,7 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
     # the depth that scopes an encoder adaptation.
     vectors = corpus / "reports.npz"
     np.savez(vectors, identifiers=np.array(identifiers), vectors=np.zeros((len(identifiers), REPORT_DIMS), np.float32))
-    _WatchedOptions.reads.clear()
-    monkeypatch.setattr(train_module, "TrainingOptions", _WatchedOptions)
-
-    _run(
-        corpus,
-        monkeypatch,
+    shaping = (
         "--whole-stack",
         "--slice-pooling",
         "max",
@@ -504,6 +499,16 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
         "--encoder-adapt-depth",
         str(ADAPT_DEPTH),
     )
+    # `init_scope` is read only where a warm start is asked for, and `WarmStart` loads STRICTLY, so the
+    # checkpoint has to be one this very argv produced — a hand-built payload would be a shape error
+    # rather than a test of the wiring.
+    _run(corpus, monkeypatch, *shaping)
+    seed = corpus / "seed.pt"
+    seed.write_bytes((corpus / "member.pt").read_bytes())
+    _WatchedOptions.reads.clear()
+    monkeypatch.setattr(train_module, "TrainingOptions", _WatchedOptions)
+
+    _run(corpus, monkeypatch, *shaping, "--init", str(seed), "--init-scope", "trunk")
 
     declared = {field.name for field in fields(TrainingOptions)}
     assert declared > STAMPED_ONLY, "a name exempted here is not a field any more — stale exemption"

@@ -24,6 +24,11 @@ cd "$REPO"
 # rewrites the interpreter that arm is executing. The arm dies with exit 127 and NO traceback, which
 # reads as a crashed run rather than as a rewritten venv - it cost three arms before it was named.
 #
+# THE CONVERSE IS FALSE, and this sentence is here because its absence cost a fourth. Exit 127 does NOT
+# imply a rewritten venv. It is the shell's code for `command not found` AND what it holds after a
+# native abort, so a CUDA driver fault presents identically. Read the exception line the failure marker
+# now carries; only a bare interpreter error (`ModuleNotFoundError`, or no traceback at all) is this.
+#
 # .venv-arm is a second, isolated environment nothing else ever syncs. Pointing UV_PROJECT_ENVIRONMENT
 # at it makes the isolation the DEFAULT for every arm instead of a flag each one has to remember.
 export UV_PROJECT_ENVIRONMENT="$REPO/.venv-arm"
@@ -608,7 +613,22 @@ run_train() {
   # truncates, so anything stamped before the trainer runs is erased by the trainer's first line.
   _mark "$name" "LIB $LIB_PARSED parsed $LIB_PARSED_AT (experiments/lib.sh as this shell holds it)"
   if [ "$status" -ne 0 ]; then
-    _mark "$name" "ARM FAILED $name (trainer exit $status) - see $LOGS/$name.full.log"
+    # The STATUS is not the cause and on this platform it is routinely not even a hint: a native abort
+    # inside the CUDA driver leaves the shell holding 127, which is `command not found` and which the
+    # environment note at the top of this file spent three arms teaching everyone to read as a rewritten
+    # venv. On 2026-09-03 `ortho_pool_read` died of `RuntimeError: CUDA driver error: out of memory` and
+    # was diagnosed twice from the marker alone - as a gates kill, then as a host spill - while the real
+    # line sat 295 lines up the same file. `ortho_fresh_lowlr` is very likely the same misreading, filed
+    # as a method failure. The exception line is already IN the log; nothing was carrying it to the one
+    # line an operator reads, so it is carried here.
+    # Two shapes, because the second one is how `ortho_fresh_lowlr` spent a week filed as a method
+    # failure. It raised no exception at all: it asked for 31.9 GB on a 32.6 GB card, waited the full
+    # 1800 s for VRAM that was never coming, and gave up having trained zero epochs. The last line of
+    # its own log said exactly that. So fall back to it when there is no exception to quote.
+    local cause
+    cause="$(grep -E "^[A-Za-z_.]*(Error|Exception):" "$(_arm_log "$name")" | tail -1)"
+    [ -n "$cause" ] || cause="$(grep -vE "^(LIB |ARM )" "$(_arm_log "$name")" | tail -1)"
+    _mark "$name" "ARM FAILED $name (trainer exit $status)${cause:+ - $cause} - see $LOGS/$name.full.log"
     return "$status"
   fi
   # A trainer can also exit 0 having produced nothing useful. The best-score line is the artefact the

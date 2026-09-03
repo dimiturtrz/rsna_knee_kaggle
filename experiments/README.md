@@ -6971,3 +6971,177 @@ decorrelation, never a measurement of it, and `knee-nj4l` says the champion's mo
 mechanical cause of the plateau — which is exactly the claim this member could confirm or refute.
 Filed: `vote_ceiling` over the champion's members plus this one, and the pairwise prediction
 correlation against the DINOv2 seats. If it does not decorrelate, the roster line becomes a decline.
+
+## `recal_dense_s2026` — REPLICATES, four days after it ran, on a reading nobody took
+
+The arm finished on 2026-08-30 and its ledger row carried one number: proxy 0.8610 against
+`band_dense_hold`'s 0.8573. Its header pre-registers on the GOLD delta and says so in the first line,
+*"PRE-REGISTERED, on GOLD first, because the proxy's truth IS the report table and is biased against
+label-side movement."* That gold reading was never taken. Taken now, on CPU, off the cached
+`--hold-annotations` predictions, no card and no slot:
+
+| | gold-58 | proxy-909 |
+|---|---|---|
+| `band_dense_hold_s2026` (control) | 0.8956 | 0.8573 |
+| `recal_dense_s2026` (arm) | **0.9128** | 0.8610 |
+| delta | **+0.0172** | +0.0037 |
+
+**REPLICATES**, verbatim from the header: *"gold above `band_dense_hold`'s by the floor or more, proxy
+not down by the floor. The re-map is a property of the TABLE and not of a corner. Price a roster rebuild
+on v3 and spend a slot."*
+
+So `report_labels_v3.csv` — the reader's six confidence levels replaced by their measured positive rates
+— is gold-positive at **two different corners**: +0.0105 at 224 px / 12 slices (`knee-8wa0`) and +0.0172
+here at 336 px / 20 slices, and **free on the proxy both times** (+0.0009 and +0.0037, both inside the
+floor). Two corners, same sign, and the proxy is blind to both.
+
+**What replicates is the SIGN, not the size.** n=58 on the gold side, a level and not a selector
+(`knee-kddo`); the 58 are 1.47x finding-enriched; and 0.0062 is a REPORT-ruler floor — no gold-ruler
+floor has been measured, so "2.8x the floor" is an argument and not a matched multi-seed number. Nothing
+here licenses quoting +0.017 as a board delta.
+
+**Why it sat unread, and why that is the finding.** The proxy ruler IS the report table. An arm that
+improves the LABEL SIDE moves the thing it is being scored against, so the proxy charges it for the
+correction — which is exactly what `2026-09-03_the-report-ruler-over-calls.md` measured from the other
+direction. Every arm on the label axis is therefore read on the wrong ruler by default, and this project
+has run at least four of them. `knee-v78o1` holds the scope: 24 arms carry `hold_annotations=True`, 8
+had a gold reading, 16 did not. This is the first of the sixteen to be collected and it selected a
+branch. The rest are computing.
+
+**Second reading from the same run, free.** Against the radiologist, `recal_dense` beats its own training
+labels by **-0.0470, CI [-0.0717, -0.0218]**, 11 of 12 findings positive, MCL the lone inversion
+(-0.0692). That is the same shape the eight-member pool showed at +0.0516, on a member that is not in
+that pool — an independent instance of the reader being the weaker half.
+
+### Amendment to the `recal_dense_s2026` entry above — the gold ruler's own floor, measured after the fact
+
+The entry above compares a GOLD delta of +0.0172 against 0.0062 and calls it "2.8x the floor". **0.0062 is
+the REPORT ruler's floor, measured on 909 studies, and applying it to a delta measured on 58 is a category
+error** — a tolerance borrowed from a different instrument. The entry flagged that no gold floor had been
+measured and then quoted the number anyway. Measured now, with `annotated_readings --against`, which
+resamples the 58 studies and reports the paired interval directly:
+
+    against calib_dense_hold_s2026 (gold 0.9117)
+      stackfit_s2026            +0.0101  [-0.0044, +0.0252]   spans zero
+      labelwise_dense_s2026     +0.0054  [-0.0113, +0.0222]   spans zero
+      recal_dense_s2026         +0.0011  [-0.0121, +0.0122]   spans zero
+      stack_increments_s2026    +0.0005  [-0.0115, +0.0142]   spans zero
+
+    against band_dense_hold_s2026 (gold 0.8956) — recal_dense's OWN pre-registered control
+      recal_dense_s2026         +0.0172  [+0.0004, +0.0343]   clears
+
+**The gold-58 paired half-width is roughly ±0.015**, about 2.4x what the 909-study report holdout gives.
+
+**What survives.** `recal_dense`'s REPLICATES selection stands — read against the control its header
+actually names, the interval excludes zero. But it excludes zero by **+0.0004**, so the branch is selected
+and the SIZE is not a number to plan on. "v3 replicates off the 224 corner" is the claim; "+0.0172" is not.
+
+**What does not survive, and it was mine.** `stackfit_s2026` reading +0.0101 on gold while flat on the
+proxy was written up two wakes ago as a member the proxy undervalues. It is not: the interval spans zero,
+its proxy FLAT branch stands unchallenged, and the same goes for `labelwise_dense_s2026` at +0.0054. Both
+are withdrawn as pairwise claims.
+
+**The general consequence, and it bounds this whole sweep.** At ±0.015 the gold set cannot separate two
+members closer than that, which is most of the member field — and no n we can reach fixes it, since
+halving the interval needs about 232 annotated studies against the 58 that exist. `knee-kddo` already said
+these 58 are a LEVEL and not a selector; this puts a number on it. The gold ruler resolves level-scale
+effects — the pool beating the report table by +0.0516, CI [+0.0296, +0.0729], is 3.4x this half-width and
+never depended on member-vs-member resolution — and it resolves nothing member-scale. So the sixteen
+missing readings of `knee-v78o1` can confirm or deny LARGE effects and cannot re-rank the roster. That is
+still worth having: two of the first seven changed what an arm's branch says. It is not a new selector.
+
+## ortho_pool_read attempt 1 — VOID, and the exit code lied about why
+
+Ran 2026-09-03 02:15Z, died 03:58Z at epoch 6 of 12. Six epochs landed: 0.7537, 0.7885, 0.8078, 0.8282,
+0.8331, 0.8408, at ~928 s each and a flat 12.84 GB reserved throughout.
+
+**Do not read 0.8408 against this arm's pre-registered bands.** It is a truncated `one_cycle` score, so it
+is a FLOOR and not a score, and the truncation was operator plumbing rather than anything about the trunk.
+The arm has been relaunched byte-identically at 04:13Z; its recipe line was re-verified as
+`"variant": "ortholarge"` with `"image_size": "336"`, which is the disbelief test its own header demands.
+
+**The cause, and the three readings it took to get there.** The marker said `trainer exit 127`. That code
+is what the environment note at the top of `lib.sh` teaches as the signature of a gate rewriting the venv,
+so it was first diagnosed as a gates kill. It was then diagnosed as a WDDM host spill, on the arm
+docstring's `reserves 67549 MiB on a 32607 MiB card`. Both are wrong. The real line sat 295 lines up the
+same log:
+
+```
+RuntimeError: CUDA driver error: out of memory
+```
+
+and the 67549 figure belongs to the FIRST attempt at `--batch 12`; the configuration that died prints
+`gate: this recipe reserves 25737 MiB`, which fits. A driver-level OOM at a flat 12.84 GB on a 32 GB card
+is host-side or context-level, not an allocator OOM, and it coincides to the minute with the heaviest
+member of a co-running CPU batch starting (`swin_calib_dense_s2026`, 03:58:33). That remains a hypothesis:
+free host RAM at the moment of death was never sampled and now cannot be. `knee-4j0lz` carries it, with
+the instruction to sample it on the next deliberate co-run rather than reason further from one log.
+
+**Two changes came out of it, and the second is worth more than the arm.**
+
+`lib.sh`'s failure marker now quotes the cause — the last exception line, or the last non-marker line when
+there is no exception. The information was always in the log; nothing carried it to the one line an
+operator reads, which is why a wrong diagnosis was cheap to make twice in twenty minutes.
+
+That immediately re-opened `ortho_fresh_lowlr`, which had been carried as a possible method failure. Its
+log is 55 lines with **no epoch line at all**, ending `waiting for VRAM: 30.3 GB free, this run wants
+31.9 — 1530 s of 1800`. It asked for more VRAM than the card has, waited out the full timeout and gave up
+having trained nothing. It is evidence about nothing, its pre-registration stands untouched, and its fix
+is the one just validated here — hold the effective batch with `--batch 4 --accumulate 3`. `knee-9ac93`.
+
+**And a trap found while confirming it.** Relaunching an arm TRUNCATES the failed run's log: `tee` is
+called without `-a`. The evidence for attempt 1 above survives only because it was read before the
+relaunch. Read a dead arm's log BEFORE re-arming it.
+
+## The CNN trunk's rate was already measured, four times, and the ladder that would have re-measured it is retired
+
+2026-09-03. Four `cnxbase` runs sit in the models root, all at 336 px, 20 slices, `--variant cnxbase`,
+differing in the trunk rate and little else:
+
+| `--backbone-lr` | run | mean AUC | note |
+|---|---|---|---|
+| 4e-5 | `cnx_dense_s2026` | **0.7927** | the ViT adapter rate, 12 epochs |
+| 1e-4 | `cnx_warm_anneal_s2026` | 0.8105 | peak at epoch 3 of 6, then declining |
+| 4e-4 | `cnx_own_recipe_s2026` | **0.8186** | 12 epochs — the fair-budget number |
+| 1.2e-3 | `cnx_top_rate_s2026` | 0.7762 | TRUNCATED at epoch 3, still rising — a floor, not a peak |
+
+Moving the trunk rate an order of magnitude is worth **+0.0259**, four times the 0.0062 report-holdout
+noise floor and past the 1.5% bar. `cnx_dense`'s 0.7927 is a fact about a ViT adapter rate applied to a
+convolutional trunk, not about the trunk — which is what its own 2026-08-24 retitle predicted, in a run
+that already existed when the prediction was written.
+
+**`cnx_rate_ladder.sh` is deleted.** It was written this morning to spend ~1.5 h of card on 1.2e-4 and
+4e-4, both inside the range above, at three epochs against these twelve. Sixty lines of header argued the
+case and cited this ledger twice. It was queued and only failed to run because of an unrelated cache miss.
+That is the sprawl tax with a number on it: the scarcest resource, against an answer on disk under four
+names nobody had joined. `knee-n18qi`.
+
+**What is still open is unchanged in shape.** 0.8186 is 0.027 below the 0.8459 seat bar, so the trunk does
+not enter on quality and never claimed to — the argument was always distance (`cnx_dense` reads
+nearest-neighbour 0.7941 against a seated roster flooring at 0.8724, 0.078 further out than any seated
+member's nearest neighbour). Whether a member 0.027 short but genuinely off-family earns a seat is an
+ENSEMBLE question, it costs no card, and `cnx_own_recipe_s2026`'s holdout vectors are already written.
+
+**The refusal that looked like a contradiction is not one, and the reading matters for what these four
+numbers mean.** All four ran at 336 px on `cnxbase`, and on 2026-09-03 `encoder.py:343` refused exactly
+that: `cnxbase is patch 32, which cannot tile a 336 px read — use 320 or 352`. The check is CORRECT and
+postdates the runs. `cnxbase` is stride 32 over four halving stages, so 336/32 = 10.5 and the grid comes
+out truncated — the four runs above read a 10x10 grid, which is a 320 px read wearing a 336 px flag, with
+the outer 16 px silently dropped. That does not invalidate them: they are all truncated identically, so
+the rate comparison between them is clean, and 0.8186 is a real number for this trunk at an effective 320
+px. It does mean a future `cnxbase` arm at the legal 352 is NOT the same read as these, and its delta
+against 0.8186 carries a resolution change as well as whatever else it moves.
+
+**And the ensemble question it left open is now answered, off the card, in the negative.** The standing
+argument for a convolutional seat was never quality — it was distance: `cnx_dense` reads nearest-neighbour
+0.7941 against a seated roster whose own spread floors at 0.8724. `member_curve` over the five best s2026
+seats (`stack_increments` 0.8642, `stackfit` 0.8631, `labelwise_dense` 0.8613, `band_span` 0.8565,
+`depth_regions_narrow` 0.8554) plus `cnx_own_recipe_s2026` reads **best-5 0.8724 without it and best-6
+0.8698 with it forced in**, and it enters no best subset at any size from 2 to 5. The −0.0026 is inside the
+0.0062 report floor, so the claim is not that it hurts but that there is **no evidence of the lift the
+distance predicted** — the one measurement that could have made a 0.027-short trunk shippable. It stays
+declined, and the decline names the re-open: `knee-uk4f` says all four of these runs trained with stage 3
+frozen (ConvNeXtV2-base is 3/3/27/3, so `--unfreeze-last 6` opened blocks 21-26 of stage TWO and left the
+1024-wide top cold), so the family is re-opened by thawing the top and re-running, never by re-quoting the
+distance. The four-row rate table above is unaffected: every run in it is handicapped identically, so the
+comparison between them is clean and 0.8186 is this trunk's number at a frozen top.

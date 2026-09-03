@@ -38,6 +38,7 @@ from torch import Tensor
 from core.data.corpus.mrnet_labels import SPLITS, ArchiveLabels, MRNetLabels
 from core.data.corpus.mrnet_source import VOLUME_SUFFIX, MRNetSource
 from core.data.corpus.study_cache import StudyCache
+from core.data.corpus.study_metadata import SET_JOIN, StudyMetadata
 from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,15 @@ canonical read crops a constant 130 mm, which is 208 px of 256 here, while 0.5 m
 member was fitted at. The two branches are far apart, so this is a value to re-examine if the corpus
 ever reads worse than a random-crop control rather than one to accept quietly.
 """
+
+MRNET_CORPUS = "mrnet"
+"""What this corpus calls itself in the `corpus` column, matching the name `MergedCache.labels` is given
+for it. The prefix on the identifiers is `mrnet-`, and the two are deliberately the same word."""
+
+MRNET_MATRIX = 256
+"""The in-plane grid every exam was resampled onto before release — stated by Bien et al., not derived,
+and the denominator `MRNET_SPACING` divides the field of view by."""
+
 
 MRNET_LEVEL: tuple[float, ...] = (0.08, 0.82)
 """What a negative and a positive ACL row are worth on our level scale.
@@ -251,6 +261,31 @@ class MRNetCorpus:
     def _pixels(source: MRNetSource, member: str) -> NDArray[np.float32]:
         """One plane's stack as float32. Loaded from bytes, so no pickle is ever unpacked."""
         return np.asarray(np.load(io.BytesIO(source.read(member)), allow_pickle=False), dtype=np.float32)
+
+    def metadata(self) -> list[StudyMetadata]:
+        """What each exam was acquired with, as far as MRNet says — which is the geometry and the planes.
+
+        THREE AXES ARE LEFT ABSENT ON PURPOSE AND THE OMISSIONS CARRY THE SAME WEIGHT AS THE FILLED CELLS.
+        MRNet publishes no sequence per plane — the release is stated to mix T1, T2 and PD across the
+        corpus and the per-exam mapping is not distributed — so `sequence`, `fat_suppressed` and
+        `fluid_sensitive` are unanswerable here. Filling them from the plane would be the failure
+        `study_metadata` names: a guessed cell reads exactly like a header read, and Rijeka's cells beside
+        them ARE header-grade.
+
+        The spacing is `MRNET_SPACING`, which that constant's own note calls weaker evidence than Rijeka's
+        — derived from a stated 256 px grid and a field-of-view prior with nothing physical to check it
+        against. It is recorded because it is the number this corpus's whole geometry already runs on.
+        """
+        return [
+            StudyMetadata(
+                identifier=exam.identifier,
+                corpus=MRNET_CORPUS,
+                plane=SET_JOIN.join(plane.capitalize() for plane in PLANES if plane in exam.members),
+                pixel_spacing_mm=self.spacing,
+                matrix_px=MRNET_MATRIX,
+            )
+            for exam in self.volumes()
+        ]
 
     def labels(self, destination: Path) -> None:
         """The labels table, carrying the ONE finding this corpus can honestly supervise.

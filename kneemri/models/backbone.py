@@ -54,6 +54,7 @@ RAD_DINO = "raddino"
 SWIN_BASE = "swinbase"
 VIT_IN21K = "vitin21k"
 RADIMAGENET_DENSENET = "radnet121"
+RADIODINO_BASE = "radiodinob16"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
@@ -63,6 +64,7 @@ RADDINO = "rad-dino"
 SWIN = "swin"
 VIT = "vit"
 RADIMAGENET = "radimagenet"
+RADIODINO = "radiodino"
 
 
 class MountKind:
@@ -568,5 +570,55 @@ ENCODERS: dict[str, Encoder] = {
         leaf="rad-dino",
         params_m=86.6,
         normalization=Normalization((0.5307, 0.5307, 0.5307), (0.2583, 0.2583, 0.2583)),
+    ),
+    # THE CORPUS AXIS WITH EVERYTHING ELSE HELD, added 2026-09-03. This is the one comparison the trunk
+    # table has never been able to make cleanly. RadioDINO is ViT-B/16, twelve blocks, 768 wide, trained
+    # with DINO — the same architecture and the same objective as `v3base` and as `vitin21k`'s twin — and
+    # it differs from them in the PRETRAINING CORPUS alone: 1.35M RadImageNet images against LVD-1689M
+    # natural ones. Every previous family change here moved two or three variables at once, which is why
+    # `knee-m69u` cannot be answered from the existing arms.
+    #
+    # IT IS NOT A REPEAT OF `radnet_family`, and the distinction is the whole reason it is worth a card.
+    # That arm read 0.6716, converged, and closed the medical-SUPERVISED cell of the 2x2 above. These
+    # weights are SELF-SUPERVISED on the same corpus, which is a different cell — so the two together
+    # separate "RadImageNet is the wrong corpus" from "165-way supervision is the wrong objective", and
+    # a flat here would say something the DenseNet result cannot say on its own.
+    #
+    # WHAT THE CURVE PREDICTS. `knee-y59c` measured distance-from-DINOv2 anti-correlating with solo
+    # strength across seven trunks. An architectural and objective twin sits near zero on that axis while
+    # its corpus sits far, so this entry is a direct test of WHICH of those two distances the curve was
+    # actually measuring. That is an instrument reading, not a seat bid, and it should be priced as one.
+    #
+    # NO PUBLISHED KNEE NUMBER exists for these weights — the release benchmarks MedMNIST, BUSI and a
+    # RadImageNet kNN. So there is no precedent to inherit and no number to replicate, only the mechanism.
+    #
+    # IMAGENET, DECLARED RATHER THAN MEASURED, and the two agree: the shipped `pretrained_cfg` names the
+    # ImageNet mean and std outright, unlike RadImageNet's bare OrderedDict which documented two mutually
+    # exclusive recipes and forced the post-`norm0` measurement recorded above.
+    #
+    # 224 IS THE PRETRAINED READ and 16 tiles it at 14x14, the same geometry as `vitin21k`. Larger reads
+    # interpolate position embeddings, which every ViT here already does, so this may be swept — Swin's
+    # window tables are the only geometry in this table that may not.
+    #
+    # NO MOUNT YET. CC-BY-4.0 and ungated, so mirroring is permitted with attribution and is the same
+    # dataset upload `dimiturnt/swin-base-384` was; deferred until a member earns the seat. That licence
+    # is also why this trunk is reachable at all where RadImageNet's own weights are not.
+    RADIODINO_BASE: Encoder(
+        RADIODINO_BASE,
+        "Snarcy/RadioDino-b16",
+        768,
+        patch=16,
+        family=RADIODINO,
+        normalization=IMAGENET,
+        normalization_evidence=(
+            "The repository holds only `config.json` and the weights — a bare `ViTModel` config with no "
+            "preprocessing document — so the recipe comes from the model card's own usage snippet, which "
+            "resizes to 224 and calls `transforms.Normalize(mean=[0.485, 0.456, 0.406], "
+            "std=[0.229, 0.224, 0.225])`. That is IMAGENET exactly. It is also what the DINO framework "
+            "this trunk was pretrained under uses by default, so the card and the pretraining pipeline "
+            "agree rather than the card being the only witness."
+        ),
+        leaf="radiodino-b16",
+        params_m=86.6,
     ),
 }

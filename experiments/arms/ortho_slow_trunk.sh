@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -euo pipefail
+#
+# ortho_slow_trunk - does ortholarge's knee pretraining survive a SLOWER fine-tune?
+#
+# WHAT THIS CHANGES, and it is one variable off a MEASURED point. `ortho_pool_read` is this exact script
+# with `--backbone-lr 4e-5`; this is the same script at `1e-5`. Nothing else moves - same trunk, same 336
+# px, same 12 slices, same band, same four depth regions, same max slice pooling, same batch 4 accumulate
+# 3, same 12 epochs.
+#
+# THE MOTIVATION IS THE INVERSION `ortho_pool_read` JUST MEASURED. At 336 px, frozen, `feature_probe
+# --choose-penalty` read ortholarge at 0.8249 against dinov2-large's 0.8048 and v3large's 0.8046 - +0.0203
+# at focal-max and +0.0202 at mean_max, the SAME delta on both readouts, which is what made it a trunk
+# property rather than a pooling artefact. Fine-tuned at 4e-5 on the pool's own recipe, the same trunk
+# peaked at 0.8464 (epoch 8) against `depth_regions_narrow_s2026` = 0.8554 on a DINOv2 trunk: it gave back
+# the probe's lead and about 0.009 more. A trunk that leads frozen and trails fine-tuned is the signature
+# of the fine-tune WASHING OUT what the pretraining put there - ortholarge is v3large continued on
+# 1,251,655 knee images, so the thing at risk is exactly the continuation, and the rate is what sets how
+# fast it goes.
+#
+# THE COUNTER-EVIDENCE, stated before the run rather than discovered after it. "A lower rate preserves
+# good features" is already REFUTED in this repo for other trunks: the `encoder_adapt` family runs at low
+# rates and its members are among the weakest the project owns (`encoder_adapt_gentle` 0.100 and
+# `encoder_adapt_lower` 0.083 on the competence axis, whose positive end is populated by under-adapted
+# trunks reading coarse regional findings with generic features). The measured axis fact is that the
+# encoder rate moves a member 0.035 while resolution moves it 0.005 - the rate is the strongest single
+# knob on WHERE a member lands, and low is the weak end.
+#
+# What survives that counter-evidence is trunk-specific and it is the whole argument for running this:
+# preserving DINOv2's natural-image features buys nothing, because the fine-tune can rebuild them from
+# 4407 knee studies. Preserving a continuation trained on 1.25M KNEE images is a different proposition,
+# because that is information the fine-tune set does not contain. If the low-rate arms failed because they
+# preserved the wrong thing, this one preserves the right thing. If they failed because low rates simply
+# underfit this head, this arm fails with them.
+#
+# THE PRICE, before it runs. ~3.5 h of card at ~1050 s an epoch x 12, the same as `ortho_pool_read`. The
+# plausible gain is bounded by the probe's own lead: recovering all of +0.020 over `ortho_pool_read`
+# reaches ~0.8664 and clears `depth_regions_narrow`; recovering half reaches ~0.856 and merely ties it.
+# So this arm CANNOT deliver 1.5% on its own and is not sold as one. It is priced as the instrument that
+# CLOSES THE ORTHO TRUNK: after it, either in-domain SSL continuation is a real lever at our read or the
+# probe-to-fine-tune inversion is a fact about this trunk and every external-trunk decline stands. That
+# matters beyond this arm because `feature_probe` is how this project has been RANKING trunks, and an
+# inversion that reproduces at two rates is a statement about the instrument, not about ortholarge.
+#
+# control  ortho_pool_read = 0.8464 peak (epoch 8), byte-identical flags except the rate.
+#          Second anchor depth_regions_narrow_s2026 = 0.8554, the same recipe on a DINOv2 trunk.
+#
+# PRE-REGISTERED against ortho_pool_read = 0.8464, written before the run:
+#
+#   s >= 0.8554            The slow fine-tune RECOVERS the probe's lead and reaches the DINOv2 recipe's
+#              own score. In-domain SSL continuation is a real trunk lever and the 4e-5 read was
+#              destroying it. The next arm is the same rate treatment on the other continued trunks, and
+#              every external-trunk decline taken at 4e-5 is re-opened by argument.
+#   0.8554 > s >= 0.8526   Recovers most of the lead but does not reach the control. The rate is
+#              confirmed as the mechanism of the inversion; ortholarge is a member on merit (bar 0.8459)
+#              and a distant one, so it seats on diversity if Q-CE clears it to ship.
+#   0.8526 > s >= 0.8402   Inside the 0.0062 floor of ortho_pool_read either way: the rate is NOT the
+#              mechanism. The probe-to-fine-tune inversion holds at two rates an order apart, which makes
+#              it a property of the trunk under fine-tuning rather than of the schedule. THE ORTHO TRUNK
+#              CLOSES, and `feature_probe`'s trunk ranking is demoted to a floor that does not predict
+#              fine-tuned order - which is a finding about the instrument and must be written into the
+#              probe's own docs, not just this arm's row.
+#   s < 0.8402             Worse than the fast fine-tune by more than the floor: the low rate underfits
+#              this head exactly as the `encoder_adapt` family did, the counter-evidence above wins, and
+#              nothing is learned about the continuation. Report as a null on the rate hypothesis and do
+#              NOT read it as evidence about the trunk.
+#
+# VERIFY THE FLAG LANDED BEFORE READING ANY SCORE. The recipe line must carry `"variant": "ortholarge"`,
+# `"image_size": "336"` AND `"backbone_lr": "1e-05"` together. A rate that did not land reproduces
+# `ortho_pool_read` exactly and would look like a clean confirmation of branch 3.
+#
+# deliberate: --backbone-lr 4e-5 -> 1e-5 is the ONE variable this arm moves off ortho_pool_read. Every
+# other flag is byte-identical on purpose, because the question is whether the fine-tune rate is what
+# destroys ortholarge's 1.25M-knee-image continuation. A second difference would make the answer unreadable.
+#
+# bead: knee-9ac93
+# also: knee-6hfi, knee-x4yx. knee-9ac93 supersedes its own 224 px form - a null at 224 could not have
+# separated the rate from the resolution, since ortho_lpft already read 0.7537 there.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train ortho_slow_trunk \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --batch 4 --accumulate 3 \
+  --variant ortholarge --backbone-lr 1e-5 --slices 12 --image-size 336 \
+  --band-low 0.2 --band-high 0.8 --slice-regions 4 \
+  --labels "$LABELS" --out "$MODELS/ortho_slow_trunk.pt"

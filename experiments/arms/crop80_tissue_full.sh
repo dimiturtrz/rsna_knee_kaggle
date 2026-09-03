@@ -33,7 +33,7 @@
 # arm. No decode, no build, no RAM contention with a trainer — the cost of this arm is card time and
 # nothing else, which is why it is worth running against a confound rather than a hypothesis.
 #
-# control  `crop80_tissue_s2026` itself at 8 epochs (0.8345, nearest 0.8375). Same fold, same labels,
+# control  crop80_tissue_s2026 = 0.8345 — itself at 8 epochs (0.8345, nearest 0.8375). Same fold, same labels,
 #          same cache, same recipe — the ONLY change is the budget, so a delta is attributable.
 #
 # WHAT EACH OUTCOME MEANS, written before the number.

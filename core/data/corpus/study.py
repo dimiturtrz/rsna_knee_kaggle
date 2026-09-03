@@ -1,5 +1,6 @@
 """One study assembled into the bag of slot images the model reads, plus its presence mask."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -10,7 +11,8 @@ from torch import Tensor
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.laterality import Laterality
 from core.data.corpus.slot_reader import SlotReader
-from core.data.corpus.slots import Slot, SlotScheme
+from core.data.corpus.slots import CANONICAL_SCHEME, Slot, SlotScheme
+from core.data.corpus.study_metadata import SET_JOIN, StudyMetadata
 
 
 @dataclass(frozen=True)
@@ -87,6 +89,48 @@ class Study:
     def side(self) -> str | None:
         """Which knee this is: the tag where present, geometry where not, None inside the dead zone."""
         return self.pipeline.side_of(self.acquisitions)
+
+    def metadata(self) -> StudyMetadata:
+        """What this study was acquired with, from its series' HEADERS rather than the shipped columns.
+
+        THE SHIPPED FLAGS ARE NOT WRITTEN HERE, deliberately. `slots.py` measured them: shipped
+        `Fat_Suppression` matches the header-recovered value on 99.3% of series and shipped
+        `Fluid_Sensitive` on only 78.7%, one axis wearing two names. Putting the 78.7% column into a
+        schema beside axes read off headers is the exact failure this module's docstring warns about,
+        so the recovered value is the one recorded and the shipped one is not recorded at all.
+
+        PLANE AND SEQUENCE RECORD THE SET, joined as MRNet's do, because a study is several series and
+        this schema is one row per study. A study shipping sagittal PD and axial T2 reads
+        `Axial+Sagittal` / `PD+T2`, which is the true answer at this granularity; the per-series truth
+        stays in the routing, which is the artifact that needs it.
+
+        EVERY OTHER AXIS IS FILLED ONLY ON UNANIMITY. Fat suppression, fluid sensitivity and the two
+        spacings are properties of a SERIES, and a study whose series disagree has no single value for
+        them — so it says absent rather than picking one. Absence is a value here. Spacing will
+        therefore be absent on most multi-plane studies, which is honest: there is no one number.
+        """
+        return StudyMetadata(
+            identifier=self.identifier,
+            corpus=CANONICAL_SCHEME,
+            plane=self._joined(self.planes.get(acquisition.series) for acquisition in self.acquisitions),
+            sequence=self._joined(acquisition.weighting for acquisition in self.acquisitions),
+            fat_suppressed=self._agreed(acquisition.fat_suppressed for acquisition in self.acquisitions),
+            fluid_sensitive=self._agreed(acquisition.fluid_sensitive for acquisition in self.acquisitions),
+            pixel_spacing_mm=self._agreed(acquisition.pixel_spacing for acquisition in self.acquisitions),
+            slice_spacing_mm=self._agreed(acquisition.slice_spacing for acquisition in self.acquisitions),
+        )
+
+    @staticmethod
+    def _joined(values: "Iterable[str | None]") -> str | None:
+        """The distinct answers as one flat cell, or absence where no series answered."""
+        distinct = sorted({value for value in values if value})
+        return SET_JOIN.join(distinct) if distinct else None
+
+    @staticmethod
+    def _agreed[T](values: "Iterable[T | None]") -> T | None:
+        """The one value every series that answered agrees on, or absence where they do not."""
+        distinct = {value for value in values if value is not None}
+        return distinct.pop() if len(distinct) == 1 else None
 
     def bag(self, slices: int) -> tuple[UInt8[Tensor, "n s h w"], Float[Tensor, " n"]]:
         """The per-slot image stacks and the presence mask, at this pipeline's own size."""
