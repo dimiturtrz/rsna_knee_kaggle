@@ -649,3 +649,20 @@ disagreed_ramp_s2026.pt     # 0.8574 peak e7, CONVERGED. Same argument as certai
                             # family verdict; seated on merit so the pool is complete, not because the ramp
                             # earned anything. Re-open the LEVER only where supervision is thin, which is the
                             # condition ramp_dense_gate's decline named and no ramp arm has ever been run under.
+mrnet_warm_s2026.pt         # 0.8487 peak e6, CONVERGED (12 of 12 epochs, then flat to 0.8446 at e11 - the
+                            # one_cycle anneal did not lift it, so e6 is the recipe's real ceiling, not a floor).
+                            # THE PROJECT'S FIRST EXTERNAL-CORPUS MEMBER: trunk warm-started from
+                            # mrnet_acl_pretrain_s2026 (its epoch 7, 225 tensors, 11 head tensors left cold),
+                            # pretrained on MRNet knee MRI. Rule 2.6 permits it; the CC/RUA copyright question
+                            # is knee-ib4t and is about redistribution, not about training here.
+                            # Seated on DIVERSITY, and the number does not pretend otherwise: it clears the
+                            # 0.8459 merit bar by +0.0028, which is INSIDE the 0.0062 holdout floor and so is
+                            # directional, and it MISSES the 0.8521 non-DINOv2 seat bar by -0.0034. What it
+                            # brings that no other seat does is a trunk that saw a different knee corpus.
+                            # SECOND READING, and this is why the number is trusted: the first run of this
+                            # exact recipe was killed at epoch 9 and this one reproduced it epoch for epoch -
+                            # e6 0.8487 vs 0.8485, e7 0.8457 vs 0.8443, e8 0.8464 vs 0.8455, e9 0.8455 vs
+                            # 0.8441. Two independent runs, same trajectory, so the peak is the recipe's and
+                            # not a seed's. That is a replicate, not a banned seed sweep - the first run died.
+                            # It has never been in a pool. Its seat is a HYPOTHESIS about diversity and is
+                            # settled by a vote_ceiling reading against the champion's members, not by this line.

@@ -6942,3 +6942,32 @@ batch at 12 and cuts the reservation to roughly a third, so the pre-registration
 `after.sh --smoke`, so the smoke measures the real per-step rate on the card before forty minutes go
 into it. If the smoke still reads a spilled rate, the next cut is slices, and THAT one is a second
 variable and has to be declared.
+
+## `mrnet_warm_s2026` — 0.8487, converged, and the same trajectory twice
+
+The first run of this recipe died at epoch 9 with best 0.8485 and no checkpoint, and the ledger recorded
+it as a FLOOR because `convergence_check` reads a truncated `one_cycle` run that way. The re-run
+finished all twelve epochs and reproduced it epoch for epoch:
+
+    epoch      6        7        8        9       10       11
+    re-run   0.8487   0.8457   0.8464   0.8455   0.8452   0.8446
+    killed   0.8485   0.8443   0.8455   0.8441     —        —
+
+So **0.8485 was never a floor** — it was the peak, and the anneal that the truncation argument said we
+had not seen turns out to lose 0.004 rather than gain. `convergence_check` does not flag the re-run.
+The reading that matters is not the score but the SHAPE: two independent runs of one recipe landing
+within 0.0014 of each other at every shared epoch says the peak belongs to the recipe, not to a seed.
+This is a replicate rather than a banned seed sweep, because the first run died rather than finished.
+
+**Where it sits.** +0.0028 over the 0.8459 merit bar, which is inside the 0.0062 holdout floor and is
+therefore directional; **-0.0034 under the 0.8521 non-DINOv2 seat bar**. On merit alone it would be a
+decline. It is rostered anyway, and on one argument only: it is the project's **first external-corpus
+member**, a trunk warm-started from MRNet knee MRI, and every other seat in the pool is DINOv2. The
+warm start demonstrably fired — epoch 0 opens at 0.759 against `base224`'s 0.8509, which is what a
+foreign trunk being dragged onto this corpus looks like.
+
+**That argument is a hypothesis and is not yet tested.** A distinct trunk is a reason to EXPECT
+decorrelation, never a measurement of it, and `knee-nj4l` says the champion's monoculture is the
+mechanical cause of the plateau — which is exactly the claim this member could confirm or refute.
+Filed: `vote_ceiling` over the champion's members plus this one, and the pairwise prediction
+correlation against the DINOv2 seats. If it does not decorrelate, the roster line becomes a decline.
