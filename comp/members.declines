@@ -207,6 +207,30 @@ v3large_dense_s2026  # DECLINED AS A SEAT, 2026-09-02. Greedy seat value -0.0012
                      # weaker one before the continuation subtracted from it. Together these mean 0.8452
                      # needs no recipe excuse: the features are absent, not mis-fitted. The suspicion
                      # that a big trunk was starved by an 86M-tuned recipe is RETIRED for this trunk.
+                     #
+                     # ANSWERED 2026-09-03, and the probe leg above is WITHDRAWN AT ITS SOURCE. The
+                     # 0.7387 / 0.7446 pair was read at feature_probe's SHARED ridge penalty, the defect
+                     # knee-x4yx filed: trunk feature magnitudes differ ~17x, so one penalty cannot be
+                     # fair to two trunks. Re-read at the penalty each trunk is entitled to (nested
+                     # split, n=909): ortholarge 0.8249, v3large 0.8046 — +0.0203 at focal and +0.0202
+                     # at mean. The sign REVERSES against what this entry recorded.
+                     # The FITTED holdouts for that same pair are v3large 0.8258 and ortholarge 0.8452:
+                     # +0.0194, three times the 0.0062 floor, trunk size held at 303M and only --variant
+                     # differing (identical 12 slices / 224 px / band 0.2-0.8 / 4e-5 / 12 epochs, both
+                     # converged at 13). So the corrected probe and the fitted arm AGREE to 0.001 on a
+                     # +0.020 in-domain continuation gain, measured by two independent instruments.
+                     # The frozen-versus-fitted caution stands separately and is NOT what happened here:
+                     # radnet121 probes 0.8197 at its OWN penalty and still served 0.6716 fitted, so the
+                     # probe is sound for one trunk and inverted for the other. Kimi has that as Q-CV.
+                     # The other leg reads v3large's GREEDY SEAT VALUE (-0.0012) as the subtraction,
+                     # but seat value is measured inside a 100% DINOv2 pool where any ViT-L is redundant
+                     # with nothing, and solo quality is a different question. These two entries remain
+                     # correct AS SEAT DECISIONS. What is withdrawn is the last three lines above: the
+                     # features are not shown to be absent, and the recipe suspicion is NOT retired.
+                     # `ortho_stack` (knee-b7a50) puts ortholarge on band_dense's full recipe — the same
+                     # unit step base224 -> band_dense that paid +0.0069 on the ViT-B — and answers it by
+                     # measurement. This is not a re-open on trunk SIZE, which line 195 forbids: size is
+                     # fixed on both sides of the +0.0194 and the continuation corpus is the free term.
 
 errors_dense_s2026   # DECLINED AS A SEAT, 2026-09-02. Greedy seat value -0.0010, inside the noise band
                      # and negative. The label-error-flagged corpus changes WHAT A MEMBER SEES, which is
