@@ -3288,3 +3288,100 @@ study is in-sample for part of the pool. Writing a twin's score into this row wo
 `board_transfer` the same way `raptor_solo`'s in-sample 0.8938 did.
 
 `run_check` before the slot: loaded 5 of 5 members, no drop, no identity change. No card time.
+
+## `holdfive_v1` — 0.936. The supervision axis is board-flat, and the label lane loses its card claim.
+
+Pre-registered band **0.933-0.936 HIT**, and it is the branch that says stop. Five `--hold-annotations`
+members against `twinfive_v1`'s five ordinary fold-0 members — same count, same fold-0 status, same
+`LogitAverage`, same `overlap=False`, same kit machinery. One term moved: the supervision family. The
+board moved **+0.001**, which is under `BOARD_RESOLVABLE` 0.0015 and therefore not a movement at all.
+
+**THE OFFLINE GAP DID NOT TRANSFER, AND THE TRANSFER IS THE WHOLE READING.** Offline this pool reads
+0.8729 against twinfive's 0.8706 — **+0.0023**, measured before the push by `vote_ceiling` over 909
+shared fold-0 studies, split-half, overfit gap +0.0000. The fitted `board_transfer` slope of +1.55
+predicted 0.938-0.939. It arrived at 0.936. So either the slope is wrong at this end of the record, or
+this particular offline gap is not the kind of gain that transfers — and the second reading is the one
+the de-confounding below supports.
+
+**WHAT THE FLAGS ARE ACTUALLY WORTH, MEASURED THE SAME DAY AND FOR FREE.** The entry's own docstring
+admitted its two supervision flags were fused: all five seated members carry `--calibrated-targets` as
+well as `--hold-annotations`. A calib-only five — `calib_span_s2026`, `calibrated_targets_s2026`,
+`merged_dense_cf`, `merged_labelwise_cf`, `merged_span_cf`, the fold-0 members carrying the calibration
+flag and NOT the hold flag — reads **0.8724** by the identical estimator over the identical 909 studies.
+
+| pool | offline |
+|---|---|
+| ordinary five (`twinfive_v1`) | 0.8706 |
+| calib-only five | **0.8724** |
+| hold + calib five (this entry) | 0.8729 |
+
+So the +0.0023 splits **+0.0018 calibration / +0.0005 hold-annotations**. The flag the entry is named
+for carries about a fifth of a gap that then transferred at zero. Both terms sit under the 0.0062
+report-holdout noise floor individually; the split is the reading, not either number. The caveat is
+real and bounds rather than isolates: the calib-only five is matched on FLAGS, not on members, so
+member identity is confounded with the flag.
+
+**WHAT THIS CLOSES.** The label-supervision axis is board-flat at full pool dose. That is the fourth
+axis to read flat after seating (seven entries), combining (three vote rules) and shaping
+(`monotone_v1` at exactly 0.944). The pre-registration named the consequence in advance and it stands:
+this stops the label lane from consuming card. `reader_agreement`'s 108 confident false positives are
+still a real defect in the labels, and the four `--hold-annotations` checkpoints still read +0.538 to
++0.700 against their controls on the gold cells — but those gains live inside 58 annotated studies,
+1.3% of the corpus, and at pool scale on the board they are worth nothing measurable.
+
+**WHAT IT DOES NOT CLOSE.** It reads five seats, not the champion's seven, so it says nothing about
+whether the same change moves a 0.944. It is fold-0 throughout, so the twin caveat applies to its
+absolute number — which is why every branch was written against `twinfive_v1` and not the champion.
+And `--calibrated-targets` as a TRAINING signal is not what `monotone_v1` closed; `monotone_v1` closed
+post-hoc monotone transforms, and the calibration flag remains the larger of the two supervision terms
+even though neither transferred.
+
+`run_check` before the slot: loaded 5 of 5 members, no drop, no identity change. `mount_check --live`:
+ok. `kit_check`: 0 commits behind. One slot, INSTRUMENT, no card time.
+
+### CORRECTION to the row above, made within the hour, and it inverts the reading.
+
+The pre-registration was written against a `board_transfer` slope of **+1.55 board points per holdout
+point**. That constant is not what the tool says and never was. Run against the record with this entry
+in it, `python -m kneemri.evaluation.board_transfer` reports:
+
+```
+compression: median +1.25 over the WHOLE record — "the wrong number to price an arm with"
+  among entries at or above 0.8678:  13 resolved pairs, median +0.97  [+0.94, +1.17]
+  among entries at or above 0.8694:   3 resolved pairs, median +0.71  [+0.70, +0.89]
+```
+
+The +1.55 came from prose and was carried forward into a pre-registration, a kernel docstring and a
+board row. `CLAUDE.md` already warns that this constant has been quoted wrong from prose twice; this is
+the third time, and it is the first time it changed a verdict.
+
+**AT THE CORRECT SLOPE THE ENTRY DID NOT UNDERPERFORM — IT LANDED EXACTLY ON IT.** This pool sits at
+offline 0.8729, inside the `>= 0.8694` band where the fitted compression is **+0.71**. An offline gap
+of +0.0023 therefore predicts **+0.0016 on the board**, i.e. 0.9366. It scored **0.936**. The band that
+was labelled "the offline gain does not survive" is in fact the band where the gain survives precisely
+as the top-end slope says it must.
+
+**SO THE FINDING IS NOT ABOUT SUPERVISION. IT IS ABOUT THE CEILING.** What this entry actually measures
+is the exchange rate at the top of the record, and the exchange rate is collapsing: +1.25 over the
+whole record, +0.97 above 0.8678, +0.71 above 0.8694. Compression is not a constant to multiply an arm
+by; it is a decreasing function of where the pool already sits, and every arm this project priced with
+a single number was priced at the rate for a weaker pool than the one it would join.
+
+**THE BAR THIS PUTS ON EVERY FUTURE ARM.** `BOARD_RESOLVABLE` is 0.0015. At +0.71, an offline gain must
+exceed **0.0021** before it can move the board by one resolvable quantum. Every knob-sized offline
+delta this project has been chasing — the 0.0005 hold-annotations term, the 0.0018 calibration term,
+the +0.0006 `LogitAverage` margin over flat — is *provably* below the board's ability to see it, not
+merely close to it. And the owner's 1.5% significance bar would need roughly **0.021 offline**, two
+whole points of holdout AUC, which no knob and no seating has ever produced here.
+
+**WHAT SURVIVES FROM THE ROW ABOVE.** The flag decomposition stands on its own offline measurement:
++0.0018 calibration, +0.0005 hold-annotations, calib-only five at 0.8724 over the identical 909
+studies. What does NOT stand is the sentence "the offline +0.0023 did not survive to the board" — it
+survived at exactly the rate the record supports. The label lane's card claim still fails, but for a
+sharper reason than the one first written: not because supervision does nothing, but because its
+offline size is under the 0.0021 the board can resolve at this pool's own position.
+
+**AND THE INVERSIONS AGREE.** All 10 board-order inversions in the record are pairs the holdout left
+UNRESOLVED (gaps of 0.0020-0.0037, under its 0.0053 floor); **0 of the 276 pairs the holdout actually
+resolved were inverted by the board.** The ruler is not broken. It is being read below its resolution,
+which is the same defect in a different coordinate.

@@ -49,8 +49,18 @@ bias at about 0.0027 at this pool size; one bar-based exclusion from a family of
 search than that, but it is not nothing, and the +0.0023 offline gap is inside the range where it
 matters. That is a caveat on the OFFLINE gap, not on the board reading, which is what the slot buys.
 
-PRE-REGISTRATION, written before the board number, against `twinfive_v1`'s 0.935 and the fitted
-`board_transfer` slope of +1.55 board points per offline point (which predicts 0.938-0.939):
+**THE SLOPE THIS PRE-REGISTRATION USED WAS WRONG, AND IT INVERTED THE READING (annotated after the
+score, `knee-` P0 on the constant).** The +1.55 below was carried from prose, never from the tool.
+`python -m kneemri.evaluation.board_transfer` reports compression as a DECREASING function of where
+the pool already sits: +1.25 over the whole record, +0.97 among entries at or above 0.8678, and
+**+0.71 among entries at or above 0.8694** — which is the band this pool's 0.8729 falls in. At +0.71
+the +0.0023 offline gap predicts +0.0016, i.e. **0.9366**. It scored **0.936**. So the gain
+transferred exactly as the record says it must, and the branch it landed in below — "the offline
++0.0023 does not survive" — is the wrong reading of a correct number. The bands are left as written
+because a pre-registration that is edited after the score is not one; this note is the correction.
+
+PRE-REGISTRATION, written before the board number, against `twinfive_v1`'s 0.935 and a
+`board_transfer` slope quoted as +1.55 board points per offline point (which predicts 0.938-0.939):
 
 - **>= 0.941** — the supervision family transfers at MORE than the fitted slope. The label lane is a
   real board lever at pool scale, not just an offline one, and the follow-up is a full re-fit of the
