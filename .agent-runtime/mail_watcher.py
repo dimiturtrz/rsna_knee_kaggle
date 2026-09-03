@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Single-process threaded mail watcher — exits on mail, re-arms on timeout.
 
-Watches Kimi's mailbox at .agent-runtime/inbox/ and Claude's at .claude/inbox/.
-When either mailbox receives a letter, this process exits so the harness raises a
+Watches:
+- Kimi's project mailbox at .agent-runtime/inbox/
+- project-Claude's mailbox at .claude/inbox/
+- claude-main's global mailbox at ~/.claude/inbox/
+
+When any mailbox receives a letter, this process exits so the harness raises a
 background-task completion notification. On listener timeout or error the watcher
 re-arms automatically.
 
@@ -46,11 +50,7 @@ def _log(path, line):
 def _letters(inbox):
     if not os.path.isdir(inbox):
         return []
-    return sorted(
-        f
-        for f in os.listdir(inbox)
-        if f.endswith(EXTENSIONS) and os.path.isfile(os.path.join(inbox, f))
-    )
+    return sorted(f for f in os.listdir(inbox) if f.endswith(EXTENSIONS) and os.path.isfile(os.path.join(inbox, f)))
 
 
 def _archive(inbox, read_dir, basename):
@@ -68,7 +68,9 @@ def _archive(inbox, read_dir, basename):
 
 
 def _derive_paths(name):
-    if name == "claude":
+    if name == "global-claude":
+        agent_dir = os.path.expanduser("~/.claude")
+    elif name == "claude":
         agent_dir = os.path.join(REPO_ROOT, ".claude")
     else:
         agent_dir = SCRIPT_DIR
@@ -136,9 +138,9 @@ def main():
     parser = argparse.ArgumentParser(description="Single-process threaded mail watcher.")
     parser.add_argument(
         "--name",
-        default="both",
-        choices=("kimi", "claude", "both"),
-        help="Which mailbox to watch.",
+        default="all",
+        choices=("kimi", "claude", "global-claude", "both", "all"),
+        help="Which mailbox to watch. 'both' = kimi + project-claude; 'all' adds global claude-main.",
     )
     parser.add_argument(
         "--timeout",
@@ -150,12 +152,15 @@ def main():
 
     log_path = os.path.join(SCRIPT_DIR, "mail_alerts.kimi.log")
     claude_log_path = os.path.join(REPO_ROOT, ".claude", "mail_alerts.claude.log")
+    global_claude_log_path = os.path.join(os.path.expanduser("~/.claude"), "mail_alerts.global-claude.log")
 
     names = []
-    if args.name in ("kimi", "both"):
+    if args.name in ("kimi", "both", "all"):
         names.append(("kimi", log_path))
-    if args.name in ("claude", "both"):
+    if args.name in ("claude", "both", "all"):
         names.append(("claude", claude_log_path))
+    if args.name in ("global-claude", "all"):
+        names.append(("global-claude", global_claude_log_path))
 
     done_event = threading.Event()
     threads = []
