@@ -13,8 +13,11 @@ On a 5090 the best speed/quality trade-off is usually an **NVFP4** weight (Black
 | **Qwen3.8-27B** | 27 B | NVFP4 ~20–22 GB ([unsloth/Qwen3.8-27B-NVFP4](https://huggingface.co/unsloth/Qwen3.8-27B-NVFP4)) | ✅ | general | ✅ | **Best single-model candidate** on this GPU; 128k context, already has FP4 kernels, handles text + images | Apache 2.0 |
 | **Qwen3.8-27B** | 27 B | GGUF Q4 ~16–18 GB | ✅ | general | ❌ | Fallback if NVFP4 vLLM path has issues; slower but proven stack | Apache 2.0 |
 | **MedGemma-1.5-4B-IT** | 4 B | PyTorch/GGUF ~2–3 GB ([google/medgemma-1.5-4b-it](https://huggingface.co/google/medgemma-1.5-4b-it)) | ✅ | ✅ (radiology/chest/derm/path) | ❌ | **Cheap medical sanity-check / candidate-findings model**; maintained, 1000× more usage than Lingshu | Gemma / HADF terms |
-| **MedGemma-27B-IT** (multimodal) | 27 B | GGUF Q4 ~16–17 GB | ✅ | ✅ | ❌ | Stronger medical VLM, but no NVFP4 and heavy; only if 4B is too weak | Gemma / HADF terms |
-| **MedGemma-27B-text-IT** | 27 B | GPTQ-Int4 / GGUF ~16 GB | ❌ | ✅ | ❌ | Purpose-built for medical text, but Qwen3.8-27B likely matches or beats it on extraction/consistency | Gemma / HADF terms |
+| **MedGemma-27B-IT** (multimodal) | 27 B | GGUF / MLX only, ~16–17 GB | ✅ | ✅ | ❌ | **Not runnable in vLLM at all** — llama.cpp / ollama only. Zero vLLM-loadable quants exist | Gemma / HADF terms |
+| **MedGemma-27B-text-IT** | 27 B | bitsandbytes-4bit only, ~16 GB | ❌ | ✅ | ❌ | **No GPTQ, no AWQ, no W4A16, no FP8, no NVFP4** — an HF sweep of 51 quantized repos found only GGUF, MLX and bnb. bnb loads in vLLM but on the slow path (no Marlin/Machete kernels), and the two repos that exist have 740 and 480 downloads | Gemma / HADF terms |
+| **gemma-3-27b-it** | 27 B | GPTQ-4b-128g ~16 GB ([ISTA-DASLab](https://huggingface.co/ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g), 641,658 dl); FP8-Dynamic ([leon-se](https://huggingface.co/leon-se/gemma-3-27b-it-FP8-Dynamic)) | ✅ | general | ❌ | **The decorrelation control.** Same architecture family as MedGemma minus the medical tuning, first-class vLLM support, no self-quantizing. If it matches MedGemma-27B-text on the annotated studies the medical finetune bought nothing on report-reading; if it does not, that difference IS what medical tuning is worth here. Either sign is a reading | Gemma terms |
+| **gemma-3-12b-it** | 12 B | int4-AWQ (233,873 dl) / W4A16 (111,507 dl) | ✅ | general | ❌ | Smaller tier if 27B cannot be co-scheduled. Note MedGemma has **no 12B** — 4B and 27B only, so there is no medical counterpart to control against at this size | Gemma terms |
+| **MedGPT-oss-20B**, **Hulu-Med** | 20 B / — | GGUF only (max 383 dl) | — | ✅ | ❌ | Dead for vLLM. Shortlisted on benchmark strength, dropped on availability | — |
 | **Lingshu-7B / 32B** | 7 / 32 B | GGUF / MLX only (~5–6 GB / ~18–20 GB) | ✅ | ✅ | ❌ | Research artifact — only 698 HF downloads for 32B; skip for a production-ish pipeline on Blackwell | MIT |
 | **Qwen2.5-VL-7B / 32B** | 7 / 32 B | GGUF Q4 (~5–6 GB / ~18–20 GB) | ✅ | general | ❌ | Good general VLMs, but superseded by Qwen3.8 on this hardware | Apache 2.0 |
 
@@ -34,10 +37,40 @@ If you really want **one model**, use **Qwen3.8-27B NVFP4**.  It does text + vis
 
 A pragmatic two-model setup (which still avoids the old Qwen3.8-27B text-only + separate medical VLM bloat):
 1. **Qwen3.8-27B NVFP4** for report text and any bulk extraction.
-2. **MedGemma-1.5-4B-IT** for spot-checking images / generating candidate findings strings.
+2. ~~**MedGemma-1.5-4B-IT** for spot-checking images / generating candidate findings strings.~~
+   **WITHDRAWN 2026-09-03**, by the agent who proposed it, on the argument below: it is a recall
+   instrument pointed at a precision defect, and it would manufacture the exact error class we already
+   have too much of. Nothing replaces it in this slot yet; the over-call question (`knee-pnwar`) is a
+   reading task for a text model, not a generation task for a VLM. The reasoning is kept because it is
+   the argument that kills the option, and because it prices any future VLM proposal:
+   **as a candidate GENERATOR only, never as an adjudicator.** A radiologist reader study
+   (arXiv:2512.00271 / Eur Radiol Jun 2026; 478 ED patients, same-day CXR+CT with CT as ground truth,
+   three blinded thoracic radiologists, no fine-tuning) scored `google/medgemma-4b-it` at 71.4% clinical
+   acceptability against radiologists' 74.3% — close — but at a **5.4% hallucination rate against 0.1%**,
+   and it reaches that acceptability partly by emitting 275-word reports against a 5-word human median.
+   That is high recall by carpet-bombing. Taken at face value it injects false findings at ~5%, which
+   means auditing labels with a hallucinating auditor. Every positive it emits gets vetoed by a second
+   reader. Two caveats bind: the study is CHEST X-RAY, where the medical pretraining corpus is dense, so
+   71.4% does not port across anatomies and its knee behaviour is unmeasured and likely worse; and our own
+   label defect is OVER-CALLING (`reader_agreement`: 108 confident false positives, 15.8% of every
+   annotated cell, against 32 misses of which only 8 are a confident NO), so a carpet-bombing reader is
+   aimed at the end we already have too much of. Point it at the over-called cells (`knee-pnwar`), where
+   its errors land in a direction we can see.
 
 ## Open questions / next steps
 
-- Verify the local vLLM NVFP4 container actually loads on SM120 with FP4 benefit (vLLM issue #47749 warns of silent Marlin W4A16 fallback).
-- Run a small head-to-head on knee MRI slices: Qwen3.8-27B NVFP4 vs MedGemma-1.5-4B-IT vs (if available) MedGemma-27B-IT for label-image consistency.
+- ~~Verify the local vLLM NVFP4 container actually loads on SM120 with FP4 benefit (vLLM issue #47749
+  warns of silent Marlin W4A16 fallback).~~ **RESOLVED 2026-09-03.** Engine logs on the deployed container
+  show `[AutoTuner]: Tuning fp4_gemm` across six tuning passes, so real FP4 kernels are active and it is
+  not the Marlin fallback. KV cache 60,800 tokens, max concurrency 1.57x at 131,072 ctx.
+- Run a head-to-head on the 58 annotated studies: **gemma-3-27b-it-GPTQ against MedGemma**, same harness,
+  same `chat_template_kwargs: {"enable_thinking": false}` discipline. **Do NOT baseline it against our
+  Qwen3.8 candidate table** — `knee-8hyr6` is a P0 saying that run FAILED (687 of 696 cells UNK, 57 of 58
+  studies parsed nothing), so a comparison against it measures the artefact and reads the difference as
+  medical tuning.
+- **The census pattern, worth stating on its own:** general models are quantized to death and medical
+  finetunes are not. Every medical checkpoint here is GGUF/MLX-only with download counts in the hundreds,
+  while their general siblings ship GPTQ/AWQ/FP8 with counts in the hundreds of thousands. Nobody is
+  serving the medical models in production, which is a fact about tooling support rather than about model
+  quality — but it prices every medical option's real cost far above its benchmark row.
 - Continue separate research into 3D knee-MRI architectures that can actually move the Kaggle score (task-specific CNN/ViT, not VLMs).
