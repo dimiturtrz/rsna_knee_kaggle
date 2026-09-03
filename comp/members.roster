@@ -655,3 +655,10 @@ disagreed_ramp_s2026.pt     # 0.8574 peak e7, CONVERGED. Same argument as certai
                             # family verdict; seated on merit so the pool is complete, not because the ramp
                             # earned anything. Re-open the LEVER only where supervision is thin, which is the
                             # condition ramp_dense_gate's decline named and no ramp arm has ever been run under.
+unread_dense_s2026.pt       # 0.8577 peak e11 of 12, CONVERGED. Level with band_dense 0.8578 (-0.0001, well
+                            # inside the 0.0062 floor) while trained on a DIFFERENT supervision signal:
+                            # 27.3% of its targets come from unread-report derivation rather than the gold
+                            # labels. The LABEL LANE it was armed to open is closed — the arm read null at
+                            # +0.0020 on gold-58 and both named fallbacks reach fewer cells, so their ceiling
+                            # is lower. What seats here is the CHECKPOINT, on merit and on the only kind of
+                            # diversity the pool does not already have; the LEVER is closed and stays closed.
