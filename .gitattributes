@@ -22,4 +22,10 @@ docs/architecture/graph.json   -diff linguist-generated=true
 #   tier 1  line file, never read (beads-like):   <path>  -diff linguist-generated=true merge=union
 #   tier 2  structured dump, never read:          <path>  -diff linguist-generated=true
 #   tier 3  generated, diff meaningful:           <path>  linguist-generated=true
+#
+# A frozen split is EVIDENCE, and its sha256 is the whole point of freezing it. Git's default eol
+# handling would rewrite CRLF to LF on the next checkout, so the file a fresh clone gets would hash
+# differently from the file that was frozen — the hash would refute itself and nobody would know why.
+# `-text` keeps the bytes.
+research/splits/** -text
 # <<< LOCAL-SLOT: generated-tracked paths
