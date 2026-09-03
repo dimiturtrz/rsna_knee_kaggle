@@ -12,6 +12,7 @@ from torch import nn
 
 from kneemri.models.depth_attention import DepthAttention
 from kneemri.models.labelwise_attention import LabelwiseAttention
+from kneemri.models.moment_pooling import MomentPooling
 from kneemri.models.slice_attention import SliceAttention
 
 ATTEND = "attend"
@@ -29,6 +30,15 @@ DEPTH = "depth"
 
 Named beside the two order-blind ones because that is the comparison it exists to make. See
 `DepthAttention` for why the axis went untested for this long."""
+
+MOMENTS = "moments"
+"""The mean along the slice axis beside its SPREAD — the one pooling that is not a read of the first
+moment alone.
+
+Named beside the four that are, because that is the comparison it exists to make: `attend`, `depth` and
+`labelwise` all select among slices and measured within +0.0002 of the elementwise maximum. See
+`MomentPooling` for the frozen-feature reading that opened the axis and for why it is not the same
+instrument."""
 
 LABELWISE = "labelwise"
 """`attend` with one set of pooling weights PER FINDING instead of one shared by all twelve.
@@ -61,6 +71,7 @@ SLICE_POOLINGS: dict[str, SlicePooling] = {
     ATTEND: SlicePooling(per_slice=True, aggregator=SliceAttention),
     DEPTH: SlicePooling(per_slice=True, aggregator=DepthAttention),
     LABELWISE: SlicePooling(per_slice=True, aggregator=LabelwiseAttention),
+    MOMENTS: SlicePooling(per_slice=True, aggregator=MomentPooling),
 }
 """The vocabulary, mapped to how the slice axis is read — the fact three call sites each decided.
 

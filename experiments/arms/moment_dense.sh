@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# moment_dense.sh — pool the slice axis by its mean AND its spread, at the corner with slices to spread.
+#
+# bead: knee-2rmdc
+#
+# THE AXIS. `max`, `attend`, `depth` and `labelwise` are all readings of the FIRST moment: an elementwise
+# or learned selection among slices. None of them can express how a channel VARIES along the stack, which
+# is the shape separating a lesion occupying a few slices from a structure present through the volume.
+# The aggregation chapter closed on `attend` +0.0002 and `labelwise` at the same null — correctly, for the
+# axis it tested. Every one of those arms changed WHICH slice is read, never WHAT STATISTIC is read.
+#
+# THE EVIDENCE, AND IT IS OURS. `feature_probe --slice-readout` over frozen caches, fold-0, n=909, each
+# trunk at its own ridge penalty (`interpretations/kneemri/2026-09-03_the-frozen-probe-re-read.md`):
+# eight of nine trunk-readout pairs order `moments > mean > max`, by +0.0116 to +0.0179. `max` is what
+# every member on the roster is fitted and served with. No card was spent producing that reading.
+#
+# ONE VARIABLE. Byte-identical to `calib_dense_hold` (ledger 0.8634, the best solo member this project
+# owns) except `--slice-pooling max` -> `moments`. Same recipe, epochs, backbone rate, slices, band,
+# calibrated targets, held annotations, label table and seed. The control is measured, so no control run
+# is queued.
+#
+# WHAT DIFFERS FROM WHAT WAS MEASURED, WRITTEN BEFORE THE RUN. The probe read the two moments CONCATENATED,
+# at double width. Here the width must survive the pooling — every `SLICE_POOLINGS` aggregator returns the
+# dimension it was given — so `MomentPooling` mixes them back down through a Linear initialised to the
+# identity on the mean half and zeros on the spread half. If this arm reads flat, that is the FIRST thing
+# to suspect: the head may be seeing a learned projection of the mean and nothing else. Note also that
+# `dinov2-small`, the trunk this recipe uses, carries the SMALLEST gap in the probe table (+0.0129), so
+# the frozen number is an upper bound on what this corner can show.
+#
+# PRE-REGISTERED BANDS, against calib_dense_hold 0.8634 and the 0.0062 paired floor:
+#   >= 0.8696  the spread carries signal the first moment discards, and the follow-up is a uniform re-fit
+#              of the calibrated seats under `moments`, not a seventh seat.
+#   0.8666-0.8695  directional and the right size for the frozen delta; NOT a finding on one arm. The
+#              honest next step is the same swap at the SPAN corner, which separates the statistic from
+#              this recipe.
+#   0.8573-0.8665  FLAT. A learned head over a max pool recovers what the standard deviation carries, the
+#              frozen-probe gap does not survive fine-tuning, and the readout axis closes with the
+#              aggregation axis. Still a diversity seat: different internal structure at the same quality.
+#   <= 0.8572  worse than the max. Suspect the mix BEFORE the mechanism — a spread half that stayed at its
+#              zero initialisation makes this arm the arithmetic MEAN, which the probe prices 0.0104 under
+#              `moments` and which is not what this arm claims to test.
+#
+# HARNESS CHECK, BEFORE THE VERDICT AND NOT AFTER. The printed recipe must name "slice_pooling":
+# "moments". Then dump the checkpoint and assert `slices.pool.mix.weight[:, dim:]` is NON-ZERO. The spread
+# half is zero-initialised on purpose, so at step zero this arm IS the mean and a dead mix is INVISIBLE in
+# the score — the exact way `attend_dense` lost its reading (knee-7gyw: the aggregator sat in no parameter
+# group and the arm compared the mean against the max while reporting it as attention).
+#
+# PRICE: ~2.5 h at 20 slices, no submission slot — the reading is offline against a control on the ledger.
+# VRAM: 20 slices reserve 28.26 GB by DeviceBudget's derivation; the mix is one Linear on the POOLED
+# tensor, so the growth does not land on activations. Never run at this size — smoke it before queueing.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train moment_dense \
+  $RECIPE --epochs 12 --slice-pooling moments --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --labels "$LABELS" --out "$MODELS/moment_dense_s2026.pt"

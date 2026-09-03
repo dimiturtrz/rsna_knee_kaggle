@@ -260,6 +260,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   all day, so a slot spent early can only read the pool as it stood then, and slots dumped together all
   read the same pool. Equally forbidden: three in one afternoon because arms finished together, and four
   unspent at 23:00 because nothing felt ready. Unspent slots are destroyed at 00:00 UTC, never banked.
+  **THERE IS NO SKIP.** The mark is always `(23:30Z − now) / slots_left`, recomputed at every check — so a
+  mark that passes unspent does not disappear, it COMPRESSES every later one (4 slots in 11h are 2.9h
+  apart; the same 4 in 8h are 2.0h apart). Deferring buys nothing and shortens the runway, which is why
+  the answer to "nothing is ready" is to go unblock the thing that would make one ready, not to move the
+  clock. Say the compressed interval out loud whenever a mark passes.
   Pacing is not licence to ship a reseating: with nothing mechanism-backed to beat the champion, spend the
   slot on an INSTRUMENT instead, and say which of the two it is in the submission message.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,

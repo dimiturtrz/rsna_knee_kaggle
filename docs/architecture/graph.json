@@ -4815,6 +4815,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.slice_pooling",
+      "target": "kneemri.models.moment_pooling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.slice_pooling",
       "target": "kneemri.models.slice_attention",
       "weight": 1
     },
@@ -27739,7 +27745,7 @@
       "role": null
     },
     {
-      "descendants": 214,
+      "descendants": 215,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -28907,7 +28913,7 @@
       "role": null
     },
     {
-      "descendants": 23,
+      "descendants": 24,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -29006,6 +29012,14 @@
       "descendants": 0,
       "id": "kneemri.models.model",
       "label": "model",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.moment_pooling",
+      "label": "moment_pooling",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -32696,6 +32710,14 @@
       "label": "StudyModel",
       "level": "class",
       "parent": "kneemri.models.model",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.moment_pooling.MomentPooling",
+      "label": "MomentPooling",
+      "level": "class",
+      "parent": "kneemri.models.moment_pooling",
       "role": "primary"
     },
     {
@@ -47864,6 +47886,22 @@
       "label": "supervised",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.moment_pooling.MomentPooling.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.moment_pooling.MomentPooling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.moment_pooling.MomentPooling.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.moment_pooling.MomentPooling",
       "role": null
     },
     {
