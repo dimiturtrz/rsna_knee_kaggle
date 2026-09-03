@@ -45,6 +45,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.board_transfer import EXCLUDED, SCOPES
 from kneemri.evaluation.selection_bias import SELECTION_BIAS, SelectionBias
 from kneemri.kaggle.kernel_script import KernelScript
 
@@ -59,9 +60,6 @@ VERSION_MARK = "_v"
 """How an entry id carries its revision (`chosen_v2`), and the prefix every kernel directory takes. An
 entry that records no `kernel` still names its own script through these two: that join is what found a
 surviving script for thirteen of the fourteen rows this file once called unrecoverable."""
-EXCLUDED = "excluded"
-"""The scope of a submission this record deliberately does not price. `board_transfer` already reports
-per-scope drops, so an excluded row is counted out loud rather than missing."""
 
 SCORE_TOLERANCE = 5e-4
 """A board score is quoted to three decimals; anything wider than half a tick is a transcription error."""
@@ -251,6 +249,29 @@ class BoardCensus:
             if row.governed(self.since) and row.selection not in SELECTIONS
         ]
 
+    def misscoped(self) -> list[str]:
+        """Rows whose `scope` is in neither reader's vocabulary, and are therefore green in both.
+
+        THE ROW THIS FILE WAS MISSING, found 2026-09-04. `scope` names the DENOMINATOR an `offline`
+        number was computed on, and only `board_transfer` acts on that meaning: it fits
+        `row["scope"] == "ensemble"` and reports everything else as a per-scope drop. THIS file reads
+        the same field for one narrower question — is the row priced at all — and tests only
+        `!= EXCLUDED`. So a value in NEITHER vocabulary passes here and silently vanishes there.
+
+        Four rows carried `scope: "included"`, which is the negation of `EXCLUDED` written into a field
+        that does not mean that. Three of them carried honest 909-study ensemble offline numbers, and
+        sat outside the fit every arm in this project is priced against — while both consumers reported
+        clean. `board_transfer` did count the drop; a drop that is COUNTED still reads as intended
+        unless something asserts the vocabulary is closed.
+        """
+        return [
+            f"{row.identifier} carries scope={row.scope!r}, which no reader of this field knows; "
+            f"board_transfer will drop it from the fit while this check stays green — "
+            f"write one of {sorted(SCOPES)}"
+            for row in self.rows()
+            if row.scope not in SCOPES
+        ]
+
     def uncorrected(self) -> list[str]:
         """Search-selected rows whose offline number is the search's own in-sample score.
 
@@ -376,6 +397,7 @@ class BoardCensus:
         found += self.recoverable()
         found += self.unpriceable()
         found += self.undeclared()
+        found += self.misscoped()
         found += self.uncorrected()
         found += [f"{name} is priced here and named nowhere in {self.ledger}" for name in self.unnamed()]
         if live is None:

@@ -117,6 +117,20 @@ member quality held against it.
 """
 
 
+MEMBER_MEAN = "member_mean"
+"""The mean of an entry's members rather than the ensemble they formed — comparable only to itself."""
+
+EXCLUDED = "excluded"
+"""A submission this record deliberately does not price. `board_transfer` reports per-scope drops, so
+an excluded row is counted out loud rather than missing."""
+
+SCOPES = frozenset({ENSEMBLE, MEMBER_MEAN, EXCLUDED})
+"""The CLOSED vocabulary of the `scope` field, owned here because this module owns what it means.
+
+`board_check` enforces it; see `board_check.SCOPES` for the failure that made a closed set necessary
+(a value in neither vocabulary is green in both readers and silently absent from the fit)."""
+
+
 @dataclass(frozen=True)
 class BoardEntry:
     """One submission that carries BOTH numbers: what our ruler said, and what the board said."""

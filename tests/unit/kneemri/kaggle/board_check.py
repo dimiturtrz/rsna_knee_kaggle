@@ -4,6 +4,7 @@ import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
+from kneemri.evaluation.board_transfer import SCOPES
 from kneemri.kaggle.board_check import SEARCH, SELECTION_RULE_DATE, BoardCensus, BoardRow, LiveBoard
 
 SEARCHED: Mapping[str, object] = {
@@ -161,6 +162,24 @@ def test_undeclared(tmp_path: Path):
 
     invented = _census(tmp_path, [{**SEARCHED, "selection": "curated"}]).undeclared()
     assert len(invented) == 1, "a value outside the vocabulary declares nothing a check can read"
+
+
+def test_misscoped(tmp_path: Path):
+    """A scope in neither reader's vocabulary — green here, and silently absent from the fit there.
+
+    MEASURED 2026-09-04: four rows carried `scope: "included"`, the negation of this file's EXCLUDED
+    sentinel written into a field that names the DENOMINATOR instead. Three carried honest ensemble
+    offline numbers and sat outside `board_transfer`'s fit while every check reported clean.
+    """
+    assert _census(tmp_path, [SEARCHED]).misscoped() == []
+
+    for known in sorted(SCOPES):
+        assert _census(tmp_path, [{**SEARCHED, "scope": known}]).misscoped() == [], f"{known} is vocabulary"
+
+    invented = _census(tmp_path, [{**SEARCHED, "scope": "included"}]).misscoped()
+    assert len(invented) == 1, "a value no reader knows is the defect, not a new scope"
+    assert "included" in invented[0] and "greedy_v1" in invented[0], "the row and the value it carries"
+    assert "ensemble" in invented[0], "the message says what may be written instead"
 
 
 def test_uncorrected(tmp_path: Path):
