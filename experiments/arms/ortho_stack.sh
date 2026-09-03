@@ -54,6 +54,22 @@
 #                `members.declines:195` already argued. It would confirm that note by the right
 #                measurement and close the lane for a different reason than the one on file.
 #
+# THE MIDDLE BRANCH IS CONDITIONAL, ANNOTATED 2026-09-04 WHILE THIS ARM WAS STILL RUNNING. It reads
+# "closes the in-domain trunk lane", and it says that on the assumption that OFFLINE ORDER TRANSFERS TO
+# THE BOARD. For this trunk family that assumption is now the thing in question. Fixing a scope defect
+# in comp/board.jsonl put `ortho_solo_v1` into board_transfer's fit for the first time — ortho_dense
+# served alone, the only non-DINOv2 board point the project owns — and it produced the record's first
+# two RESOLVED inversions in 342 pairs, both on its own side: it carries the LOWEST offline of all 37
+# entries (0.8452) and read 0.907, about +0.02 board above where the DINOv2-fitted slope puts it.
+#
+# So an `ortho_stack` that merely MATCHES band_dense offline may be a member that ties the incumbent on
+# our ruler and beats it on the board. The threshold is NOT moved — moving a pre-registered number after
+# seeing a related measurement is how a result becomes an artefact — but the middle branch now closes
+# the lane only if knee-l67zk's two-solo instrument comes back null. That instrument is what separates
+# "ortholarge transfers better than its holdout says" from "the current kit transfers better than the
+# August kits did"; the board record cannot, because offline level and date are collinear across it.
+# See interpretations/kneemri/2026-09-04_the-ruler-had-four-rows-outside-it.md.
+#
 # WHAT IT CANNOT SETTLE. Nothing about SEATING — the pool is DINOv2-monoculture and a seat read here
 # would be confounded exactly as `v3large`'s was. Solo holdout only. If it clears, seat value is the
 # next question and a separate one.
