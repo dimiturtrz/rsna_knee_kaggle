@@ -109,6 +109,12 @@ NOT_IN_CONFIG = {
     "byte-identical. The file it names is a fact about which cells the epochs descended on, like "
     "`sample_spread`, and the witness that it landed is the run's own recipe block plus the flag "
     "table's row count, never the checkpoint",
+    "unread_targets": "the companion supervision policy to `label_errors`, and written off for the same "
+    "reason from the other side: that one zeroes the WEIGHT of a cell the reader got wrong, this one "
+    "replaces the SCORE of a cell the reader never read. Neither adds a module, a parameter or a loss "
+    "term, so the twelve-logit head a rebuild serves is byte-identical; the file it names is a fact "
+    "about what the epochs descended toward, and the witness that it landed is the run's recipe block "
+    "plus the table's row count, never the checkpoint",
     "per_label_loss": "objective policy, same",
     "normalise_by_count": "objective policy, same",
     "intensity_aug": "an input augmentation applied while fitting, never while serving",

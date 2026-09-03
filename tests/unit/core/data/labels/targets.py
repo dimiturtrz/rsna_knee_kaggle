@@ -15,6 +15,8 @@ from core.data.labels.targets import (
     SUSPECT,
     SUSPECT_STUDY,
     SUSPECT_TARGET,
+    UNREAD,
+    UNREAD_VALUE,
     WEIGHT_FLOOR,
     Supervision,
     Targets,
@@ -99,6 +101,7 @@ def test_supervised(tmp_path: Path):
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
         SUSPECT: "",
+        UNREAD: "",
     }
     assert Targets.load(derived_path, annotated_path, ["a"]).supervised() == {
         WEIGHT_FLOOR: 0.0,
@@ -107,6 +110,7 @@ def test_supervised(tmp_path: Path):
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
         SUSPECT: "",
+        UNREAD: "",
     }
 
 
@@ -332,3 +336,51 @@ def test_pruned(tmp_path: Path):
 def test_pruned_without_a_flag_table_is_empty_rather_than_a_branch_at_every_call_site():
     """The null case is an all-False mask, so `load` never asks whether the switch is on."""
     assert not Supervision().pruned(["a", "b"]).any()
+
+
+def _unread(tmp_path: Path, studies: list[str], values: list[float]) -> Path:
+    table = tmp_path / "unread.csv"
+    pd.DataFrame(
+        {
+            SUSPECT_STUDY: studies,
+            SUSPECT_TARGET: [TARGETS[0]] * len(studies),
+            UNREAD_VALUE: values,
+        }
+    ).to_csv(table, index=False)
+    return table
+
+
+def test_taught(tmp_path: Path):
+    """An override lands on the row this table gave that study, and NaN says every other cell is untouched."""
+    table = _unread(tmp_path, ["b", "absent"], [0.73, 0.11])
+
+    taught = Supervision(unread=table).taught(["a", "b", "c"])
+
+    assert taught.shape == (3, len(TARGETS))
+    assert taught[1, 0] == pytest.approx(0.73)
+    assert np.isnan(taught[0, 0]) and np.isnan(taught[2, 0]), "an untouched cell is NaN, not a sentinel"
+    assert np.count_nonzero(~np.isnan(taught)) == 1, "a row naming an absent study is dropped, not raised"
+
+
+def test_taught_without_a_table_is_all_nan_rather_than_a_branch_at_every_call_site():
+    """The null case is an all-NaN table, so `load` never asks whether the switch is on."""
+    assert np.isnan(Supervision().taught(["a", "b"])).all()
+
+
+def test_load_applies_an_unread_override_to_scores_only_and_never_over_an_annotation(tmp_path: Path):
+    """The score moves, the weight does not, and the radiologist still wins on the cells they read."""
+    derived_path, annotated_path = _tables(tmp_path)
+    table = _unread(tmp_path, ["a", "b"], [0.4, 0.73])
+
+    targets = Targets.load(derived_path, annotated_path, ["a", "b", "c"], Supervision(unread=table))
+
+    assert targets.scores[1, 0] == pytest.approx(0.73), "the unread cell takes the taught score"
+    assert targets.weights[1, 0] == pytest.approx(0.25), "and keeps the weight the report's confidence set"
+    assert targets.scores[0, 0] == 0.0, "an annotated cell is never overridden"
+    assert targets.weights[0, 0] == ANNOTATED_WEIGHT
+
+
+def test_an_unread_override_moves_the_ruler(tmp_path: Path):
+    """It rewrites 27.3% of the table's VALUES, so a ruler read from the same file is not a ruler."""
+    assert Supervision(unread=tmp_path / "unread.csv").moves_the_ruler()
+    assert not Supervision().moves_the_ruler()

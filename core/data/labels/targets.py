@@ -100,9 +100,16 @@ ANNOTATIONS = "annotations"
 SUSPECT = "label_errors"
 """The six label switches, named where the object that answers for them lives. See `Targets.supervised`."""
 
+UNREAD = "unread_targets"
+"""The seventh switch. Named `unread` and not `teacher` because `landed` already spends that word on
+distillation, and because it says what the cells have in common rather than where their value comes from."""
+
 SUSPECT_STUDY = "StudyInstanceUID"
 SUSPECT_TARGET = "target"
 """The two columns of the flag table `kneemri.evaluation.label_errors --flags` writes."""
+
+UNREAD_VALUE = "value"
+"""The third column of the unread table, which carries a score where the flag table carries only a name."""
 
 
 class UncalibratedFindingShiftError(Exception):
@@ -175,6 +182,31 @@ class Supervision:
     against; dropping it because a model disagrees would delete the evidence.
     """
 
+    unread: Path | None = None
+    """A (study, target, value) table replacing the SCORE on cells the report never read, weight untouched.
+
+    The complement of `suspect`, and the reason both exist on one object. That switch reaches the cell
+    where the reader was confident and wrong; this one reaches the cell where the reader said NOTHING.
+    27.3% of this project's supervision — 14,445 of 52,872 pairs — carries the constant 0.28 at verdict
+    UNK, concentrated in Synovitis (84.2%), Fracture (56.4%) and Baker's (45.9%).
+
+    THE CLAIM THAT MAKES IT WORTH A SWITCH. Those cells train as weak absence, and `report_reader`
+    measured that the report does not name the structure at all on them (Synovitis 1.8% of 1,424) — so
+    the weak absence is inferred from a silence about something never examined. `supervision_gap` reads
+    the model at 0.794 on Synovitis against the label's 0.687 over the 58 annotated studies, which is a
+    model exceeding a ceiling made of constants rather than out-reading a mis-read label.
+
+    THE WEIGHT IS DELIBERATELY NOT TOUCHED. An unread cell keeps the 0.2875 it pulls with today, so this
+    switch changes what the cell SAYS and never how loudly — otherwise it would be two variables, and
+    `severity` already owns the other one.
+
+    WHAT IT CANNOT BE READ AS. The values come from a member fitted on these same cells at 0.28, so its
+    read of them is partly the prior it was pulled toward. That is bounded rather than absent — the
+    member reads pixels — and it is why the gate is on the pairs the lexicon left BLANK, against
+    radiologist truth the teacher never saw, and never on an average over all 52,872 pairs where the two
+    tables agree by construction. See knee-s6s9r.
+    """
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
 
     offsets: tuple[tuple[str, float], ...] = FINDING_OFFSETS
@@ -190,8 +222,19 @@ class Supervision:
 
         A prune does, and by the most direct route of the four: it sets some cells' weight to zero, and
         a holdout AUC over a table missing those cells is not the table the control was read on.
+
+        An unread override does too, and it is the one that would be easiest to miss: it moves 27.3% of
+        the table's VALUES, so a ruler read from the same file would rank against scores a member was
+        just fitted toward. Pin `--eval-labels`.
         """
-        return self.calibrated or self.finding or self.severity or not self.annotations or self.suspect is not None
+        return (
+            self.calibrated
+            or self.finding
+            or self.severity
+            or not self.annotations
+            or self.suspect is not None
+            or self.unread is not None
+        )
 
     def pruned(self, identifiers: list[str]) -> NDArray[np.bool_]:
         """The flagged cells as a mask over this table's study order.
@@ -210,6 +253,27 @@ class Supervision:
             if study in row and target in column:
                 mask[row[study], column[target]] = True
         return mask
+
+    def taught(self, identifiers: list[str]) -> NDArray[np.float32]:
+        """The override values as a table over this table's study order, NaN where the cell is untouched.
+
+        NaN and not a sentinel, because `load` already spells "this cell was not said" that way and a
+        second spelling of absence is the drift `Supervision` exists to keep out of the label path.
+
+        A row naming a study this table does not carry is DROPPED rather than raised, for the reason
+        `pruned` gives: the teacher runs over the whole corpus and an arm may be fitted on any subset,
+        so a sixty-study smoke would otherwise die on the thousands of rows it has no place for.
+        """
+        taught = np.full((len(identifiers), len(TARGETS)), np.nan, dtype=np.float32)
+        if self.unread is None:
+            return taught
+        row = {identifier: index for index, identifier in enumerate(identifiers)}
+        column = {target: index for index, target in enumerate(TARGETS)}
+        table = pd.read_csv(self.unread)
+        for study, target, value in zip(table[SUSPECT_STUDY], table[SUSPECT_TARGET], table[UNREAD_VALUE], strict=True):
+            if study in row and target in column:
+                taught[row[study], column[target]] = value
+        return taught
 
     def __post_init__(self) -> None:
         """A per-finding shift without the pooled map under it is a correction applied to the wrong table."""
@@ -327,6 +391,7 @@ class Targets:
             SEVERITY_WEIGHT: self.supervision.severity,
             ANNOTATIONS: self.supervision.annotations,
             SUSPECT: str(self.supervision.suspect) if self.supervision.suspect else "",
+            UNREAD: str(self.supervision.unread) if self.supervision.unread else "",
         }
 
     @classmethod
@@ -379,6 +444,11 @@ class Targets:
                 scores[read, column] = truth[read]
                 weights[read, column] = ANNOTATED_WEIGHT
                 read_by_radiologist[read, column] = True
+        # After the loop and not inside it, so the radiologist still wins: an annotated cell is never
+        # an unread one, and the mask says so rather than the statement order.
+        taught = supervision.taught(identifiers)
+        override = ~np.isnan(taught) & ~read_by_radiologist
+        scores[override] = taught[override]
         weights[supervision.pruned(identifiers) & ~read_by_radiologist] = 0.0
         corpus = None
         if CORPUS in derived.columns:

@@ -384,6 +384,16 @@ class FlagVocabulary:
             "no threshold is fitted here. An annotated cell is never pruned - the radiologist's reading "
             "is the truth the detector was gated against.",
         )
+        parser.add_argument(
+            "--unread-targets",
+            type=Path,
+            default=None,
+            help="a three-column table of (StudyInstanceUID, target, value) replacing the SCORE on cells "
+            "the report never read - the 27.3% of pairs carrying the constant 0.28 at verdict UNK. The "
+            "weight is untouched, so this changes what those cells pull toward and not how hard. The "
+            "complement of --label-errors, which reaches the cell the reader got wrong rather than the "
+            "cell the reader left silent. An annotated cell is never overridden.",
+        )
 
     @staticmethod
     def _curriculum_arguments(parser: argparse.ArgumentParser) -> None:

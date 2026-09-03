@@ -98,3 +98,6 @@ comp/fout*/
 .claude/inbox/.listener_pid
 .agent-runtime/inbox/.listener_heartbeat
 .agent-runtime/inbox/.listener_pid
+
+.claude/inbox/.listener_*
+.agent-runtime/inbox/.listener_*

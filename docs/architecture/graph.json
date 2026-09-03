@@ -3098,6 +3098,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.unread_teacher",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.unread_teacher",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.unread_teacher",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.unread_teacher",
+      "target": "kneemri.evaluation.published_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.unread_teacher",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.unsure_cost",
       "target": "core.bootstrap",
       "weight": 1
@@ -5038,6 +5068,12 @@
       "kind": "import",
       "source": "kneemri.training.flag_vocabulary",
       "target": "kneemri.training.gradient_clip",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.flag_vocabulary",
+      "target": "kneemri.training.init_scope",
       "weight": 1
     },
     {
@@ -9898,6 +9934,12 @@
       "kind": "calls",
       "source": "core.data.labels.targets.Targets.load",
       "target": "core.data.labels.targets.Supervision.pruned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.targets.Targets.load",
+      "target": "core.data.labels.targets.Supervision.taught",
       "weight": 1
     },
     {
@@ -17380,6 +17422,54 @@
       "kind": "calls",
       "source": "kneemri.evaluation.uncertainty_split.main",
       "target": "kneemri.evaluation.uncertainty_split.UncertaintySplit.over",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.evaluation.published_ruler.PublishedRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.evaluation.published_ruler.PublishedRuler.per_seed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.evaluation.unread_teacher.UnreadTeacher.band",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.evaluation.unread_teacher.UnreadTeacher.ordered",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.unread_teacher.main",
+      "target": "kneemri.evaluation.unread_teacher.UnreadTeacher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.unread_teacher.main",
+      "target": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
       "weight": 1
     },
     {
@@ -27649,7 +27739,7 @@
       "role": null
     },
     {
-      "descendants": 213,
+      "descendants": 214,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -27713,7 +27803,7 @@
       "role": null
     },
     {
-      "descendants": 67,
+      "descendants": 68,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -28228,6 +28318,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.uncertainty_split",
       "label": "uncertainty_split",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher",
+      "label": "unread_teacher",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -31519,6 +31617,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.uncertainty_split",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher.UnreadTeacher",
+      "label": "UnreadTeacher",
+      "level": "class",
+      "parent": "kneemri.evaluation.unread_teacher",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -37202,6 +37308,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.targets.Supervision.taught",
+      "label": "taught",
+      "level": "method",
+      "parent": "core.data.labels.targets.Supervision",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.targets.Supervision.trusted",
       "label": "trusted",
       "level": "method",
@@ -42382,6 +42496,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.uncertainty_split",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher.UnreadTeacher.band",
+      "label": "band",
+      "level": "method",
+      "parent": "kneemri.evaluation.unread_teacher.UnreadTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher.UnreadTeacher.ordered",
+      "label": "ordered",
+      "level": "method",
+      "parent": "kneemri.evaluation.unread_teacher.UnreadTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher.UnreadTeacher.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.unread_teacher.UnreadTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.unread_teacher.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.unread_teacher",
       "role": null
     },
     {

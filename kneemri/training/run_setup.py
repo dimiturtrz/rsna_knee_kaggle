@@ -158,6 +158,7 @@ class RunSetup:
             # The path as a STRING, and the empty string for the null case, because `Targets.supervised`
             # reports it that way and this comparison is a strict equality against exactly that report.
             label_errors=str(options.label_errors) if options.label_errors else "",
+            unread_targets=str(options.unread_targets) if options.unread_targets else "",
             side_weight=options.side_weight,
             # The EMPTY STRING and not None, because that is what `LabelFocus.settings()` reports for
             # the null policy, and this comparison is a strict equality against exactly that report.

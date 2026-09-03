@@ -117,6 +117,7 @@ class TrainingOptions:
     hold_annotations: bool = False
     grade_ladder: bool = False
     label_errors: Path | None = None
+    unread_targets: Path | None = None
     rank_weight: float = 0.0
     distill_weight: float = 0.0
     feature_weight: float = 0.0
@@ -296,6 +297,7 @@ class TrainingOptions:
             severity=self.severity_weight,
             annotations=not self.hold_annotations,
             suspect=self.label_errors,
+            unread=self.unread_targets,
         )
 
     @classmethod
