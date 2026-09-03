@@ -3436,3 +3436,26 @@ No seating operation is involved: the seating is held fixed across both halves b
 pair's delta will be read against this: `twinfive_v1` 0.8705 → 0.935, this entry 0.8711 → 0.936,
 `holdfive_v1` 0.8729 → 0.936. Three current-kit fold-0 pools spanning 0.0024 offline and one board
 tick — the compression the record already shows near this range, not an anomaly to explain.
+
+## `fitfour_v1` — ref 55995214, 2026-09-03 22:34Z — **0.937**
+
+The full-corpus half of the matched pair. Same four seats as `foldfour_v1`, every one refit at
+`--fold -1`. No offline number and none is possible: each seat has seen all 909 holdout studies, which
+is the arm rather than a gap in it. Board row is `scope: excluded` for that reason, so it never enters
+`board_transfer`'s fit.
+
+### The delta is +0.001, and the pre-registered decisive branch fired
+
+`foldfour` 0.936 → `fitfour` 0.937. The branch declared before either slot was **≤ +0.003 kills the
+last step of the 0.953 chain**. Four seats and a weaker pool are where a concave learning curve says
+the refit term is LARGEST, so +0.001 is an **upper bound** on the term at the champion's seven seats,
+not an estimate of it. The step had been carrying **+0.006**, budgeted from a single measured pair
+(`twinfive` 0.935 → `fiveship` 0.941) and then treated as a constant.
+
+The chain now reads 0.885 offline × 0.97 = 0.947, +0.001 refit = **0.948**, missing 0.953 by 0.005.
+Board 0.953 needs offline ≈ 0.891. Every re-arrangement axis is closed in writing, so the remaining
++0.006 offline has to come from a better member.
+
+Buys back roughly thirty hours of card, and retires the standing tax of keeping fold-0 and full-corpus
+twins of every member. See
+`interpretations/kneemri/2026-09-04_the-refit-step-is-dead-at-its-own-upper-bound.md`.
