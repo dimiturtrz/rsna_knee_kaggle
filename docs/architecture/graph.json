@@ -26659,6 +26659,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup._check_composed",
+      "target": "kneemri.training.run_setup.RunSetup._check_pairs_can_form",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup._contrastive",
       "target": "kneemri.training.objective.ContrastiveObjective",
@@ -51250,6 +51256,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup._check_margin_alone",
       "label": "_check_margin_alone",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup._check_pairs_can_form",
+      "label": "_check_pairs_can_form",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
