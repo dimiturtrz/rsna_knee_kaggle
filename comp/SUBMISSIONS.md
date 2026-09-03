@@ -3425,3 +3425,14 @@ time the pool is good.
 
 No seating operation is involved: the seating is held fixed across both halves by construction.
 `run_check` before the slot: `loaded 4 of 4 members`.
+
+### `foldfour_v1`'s offline, measured after the slot: 0.8711
+
+`record_mix` over the four records (no card, no inference pass): LogitAverage **0.8711**, RankAverage
+0.8711, solos 0.8545–0.8634 (`calib_dense_hold` 0.8634, `small_batch6` 0.8598, `through_dense` 0.8558,
+`calib_span` 0.8545). Four-of-four is the only subset of its size, so the bracket is a point.
+
+**It lands the entry on the record's own line rather than off it**, which is worth stating because the
+pair's delta will be read against this: `twinfive_v1` 0.8705 → 0.935, this entry 0.8711 → 0.936,
+`holdfive_v1` 0.8729 → 0.936. Three current-kit fold-0 pools spanning 0.0024 offline and one board
+tick — the compression the record already shows near this range, not an anomaly to explain.
