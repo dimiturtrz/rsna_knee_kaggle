@@ -40,6 +40,16 @@
 #              zero initialisation makes this arm the arithmetic MEAN, which the probe prices 0.0104 under
 #              `moments` and which is not what this arm claims to test.
 #
+# THE SCALE OF THE SECOND MOMENT, MEASURED BEFORE THE RUN SO A FLAT RESULT IS READABLE. On the frozen
+# `ortholarge` cache (4407, 6, 12, 3072), over 256 studies: mean |mean| = 0.2783, mean |std| = 0.0711,
+# so the spread arrives at the mix at **0.26x** the magnitude of the first moment (rms 0.3680 vs 0.1194).
+# That is the quantity the zero-initialised half of the Linear has to learn against, and a gradient
+# roughly four times smaller is the difference between "the second moment does not help" and "the second
+# moment never got a chance at this head rate". It is not dead — 0.26 is not 1e-3, and the mix has 12
+# epochs — so the arm runs unnormalised and one variable stays one variable. But if it lands FLAT, this
+# ratio is the second thing to suspect after the dead-mix check below, and the follow-up is the same arm
+# with the spread half standardised, not the abandonment of the axis.
+#
 # HARNESS CHECK, BEFORE THE VERDICT AND NOT AFTER. The printed recipe must name "slice_pooling":
 # "moments". Then dump the checkpoint and assert `slices.pool.mix.weight[:, dim:]` is NON-ZERO. The spread
 # half is zero-initialised on purpose, so at step zero this arm IS the mean and a dead mix is INVISIBLE in
