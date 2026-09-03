@@ -21,6 +21,14 @@ On a 5090 the best speed/quality trade-off is usually an **NVFP4** weight (Black
 | **Lingshu-7B / 32B** | 7 / 32 B | GGUF / MLX only (~5–6 GB / ~18–20 GB) | ✅ | ✅ | ❌ | Research artifact — only 698 HF downloads for 32B; skip for a production-ish pipeline on Blackwell | MIT |
 | **Qwen2.5-VL-7B / 32B** | 7 / 32 B | GGUF Q4 (~5–6 GB / ~18–20 GB) | ✅ | general | ❌ | Good general VLMs, but superseded by Qwen3.8 on this hardware | Apache 2.0 |
 
+**THE WHOLE TABLE IS SCOPED TO vLLM, and that scope is doing more work than it looks.** Every "not
+runnable" verdict above means *no vLLM-loadable quant exists*, not *the model does not run here*. Through
+**transformers + bitsandbytes** the constraint lifts: `medgemma-4b-it` is bf16 at ~9 GB and never needed a
+quant at all, and `medgemma-27b-it` multimodal loads in bnb-4bit at ~16-17 GB. The serving stack was
+confused for the model's availability once already in this file (see the withdrawal note below), so the
+distinction is stated here rather than left implicit: the vLLM column prices THROUGHPUT, and a one-off
+audit over 58 studies does not need throughput.
+
 Sources: Qwen3.8-27B NVFP4 ~20 GB and Blackwell-only from Unsloth docs [[1]](https://unsloth.ai/docs/models/qwen3.8); MedGemma-27B Q4 ~16.5 GB [[2]](https://modelscope.cn/models/bartowski/google_medgemma-27b-it-GGUF); MedGemma 1.5 4B release notes [[3]](https://modelscope.cn/models/google/medgemma-1.5-4b-it); Lingshu low adoption and no NVFP4 observed on HF search.
 
 ## Split the use cases
