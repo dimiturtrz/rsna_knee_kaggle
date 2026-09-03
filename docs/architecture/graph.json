@@ -836,6 +836,30 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.image_probe",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.image_probe",
+      "target": "core.data.labels.vision_prompt",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.image_probe",
+      "target": "core.data.labels.vision_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.image_probe",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.label_power",
       "target": "core.cli",
       "weight": 1
@@ -1114,6 +1138,18 @@
       "kind": "import",
       "source": "core.data.labels.targets",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.vision_prompt",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.vision_reader",
+      "target": "core.data.labels.vision_prompt",
       "weight": 1
     },
     {
@@ -8792,6 +8828,180 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.image_probe.Montage.tile",
+      "target": "core.data.labels.image_probe.Montage.slices_of",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.labels.image_probe.ProbeResult",
+      "target": "core.data.labels.image_probe.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.ProbeResult.report",
+      "target": "core.data.labels.image_probe.ProbeResult.auc",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.ProbeResult.report",
+      "target": "core.data.labels.image_probe.ProbeResult.base_rate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.ProbeResult.report",
+      "target": "core.data.labels.image_probe.ProbeResult.call_rate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.ProbeResult.report",
+      "target": "core.data.labels.image_probe.ProbeResult.degenerate_rate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.ProbeResult.report",
+      "target": "core.data.labels.image_probe.ProbeResult.matrix",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.Reading",
+      "target": "core.data.labels.image_probe.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.image_probe.Montage",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.image_probe.ProbeCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.image_probe.ProbeResult",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.image_probe.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.vision_prompt.AclPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.labels.image_probe.VisionProbe",
+      "target": "core.data.labels.vision_reader.Reader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.VisionProbe.__init__",
+      "target": "core.data.labels.image_probe.Montage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.VisionProbe.__init__",
+      "target": "core.data.labels.vision_prompt.AclPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.VisionProbe.over",
+      "target": "core.data.labels.image_probe.ProbeCache.positions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.VisionProbe.over",
+      "target": "core.data.labels.image_probe.ProbeCache.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.VisionProbe.over",
+      "target": "core.data.labels.image_probe.ProbeResult",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.VisionProbe.over",
+      "target": "core.data.labels.image_probe.VisionProbe.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.VisionProbe.read",
+      "target": "core.data.labels.image_probe.Reading.parse",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.VisionProbe.read",
+      "target": "core.data.labels.vision_reader.Reader.answer",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.FrozenSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.FrozenSplit.tune",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.Montage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.ProbeCache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.VisionProbe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.image_probe.VisionProbe.over",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.image_probe.main",
+      "target": "core.data.labels.vision_reader.Reader.for_model",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.label_power.LabelPower.report",
       "target": "core.data.labels.label_power.LabelPower.positives",
       "weight": 1
@@ -9964,6 +10174,102 @@
       "kind": "calls",
       "source": "core.data.labels.targets.Targets.pair",
       "target": "core.data.labels.targets.Supervision.moves_the_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_prompt.AclPrompt.turns",
+      "target": "core.data.labels.vision_prompt.AclPrompt.system",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.vision_reader.LocalReader",
+      "target": "core.data.labels.vision_prompt.AclPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "core.data.labels.vision_reader.LocalReader",
+      "target": "core.data.labels.vision_reader.Reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.LocalReader.answer",
+      "target": "core.data.labels.vision_prompt.AclPrompt.turns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.LocalReader.answer",
+      "target": "core.data.labels.vision_reader.LocalReader.parts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.PngImage.encoded",
+      "target": "core.data.labels.vision_reader.PngImage.chunk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.PngImage.url",
+      "target": "core.data.labels.vision_reader.PngImage.encoded",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.vision_reader.Reader",
+      "target": "core.data.labels.vision_prompt.AclPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.vision_reader.Reader",
+      "target": "core.data.labels.vision_reader.Reader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.vision_reader.Reader.for_model",
+      "target": "core.data.labels.vision_reader.LocalReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.vision_reader.Reader.for_model",
+      "target": "core.data.labels.vision_reader.ServedReader",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.labels.vision_reader.ServedReader",
+      "target": "core.data.labels.vision_prompt.AclPrompt",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "core.data.labels.vision_reader.ServedReader",
+      "target": "core.data.labels.vision_reader.Reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.ServedReader.answer",
+      "target": "core.data.labels.vision_prompt.AclPrompt.turns",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.vision_reader.ServedReader.answer",
+      "target": "core.data.labels.vision_reader.PngImage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.vision_reader.ServedReader.answer",
+      "target": "core.data.labels.vision_reader.PngImage.url",
       "weight": 1
     },
     {
@@ -27177,7 +27483,7 @@
   ],
   "nodes": [
     {
-      "descendants": 70,
+      "descendants": 73,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -27201,7 +27507,7 @@
       "role": null
     },
     {
-      "descendants": 60,
+      "descendants": 63,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -27521,7 +27827,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 23,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -27548,6 +27854,14 @@
       "descendants": 0,
       "id": "core.data.labels.finding_mentions",
       "label": "finding_mentions",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe",
+      "label": "image_probe",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -27684,6 +27998,22 @@
       "descendants": 0,
       "id": "core.data.labels.targets",
       "label": "targets",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_prompt",
+      "label": "vision_prompt",
+      "level": "module",
+      "parent": "core.data.labels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader",
+      "label": "vision_reader",
       "level": "module",
       "parent": "core.data.labels",
       "role": null
@@ -30138,6 +30468,54 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.image_probe.FrozenSplit",
+      "label": "FrozenSplit",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Montage",
+      "label": "Montage",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeCache",
+      "label": "ProbeCache",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult",
+      "label": "ProbeResult",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Reading",
+      "label": "Reading",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.VisionProbe",
+      "label": "VisionProbe",
+      "level": "class",
+      "parent": "core.data.labels.image_probe",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower",
       "label": "LabelPower",
       "level": "class",
@@ -30366,6 +30744,46 @@
       "label": "UncalibratedFindingShiftError",
       "level": "class",
       "parent": "core.data.labels.targets",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_prompt.AclPrompt",
+      "label": "AclPrompt",
+      "level": "class",
+      "parent": "core.data.labels.vision_prompt",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.LocalReader",
+      "label": "LocalReader",
+      "level": "class",
+      "parent": "core.data.labels.vision_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.PngImage",
+      "label": "PngImage",
+      "level": "class",
+      "parent": "core.data.labels.vision_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.Reader",
+      "label": "Reader",
+      "level": "class",
+      "parent": "core.data.labels.vision_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.ServedReader",
+      "label": "ServedReader",
+      "level": "class",
+      "parent": "core.data.labels.vision_reader",
       "role": "satellite"
     },
     {
@@ -36154,6 +36572,150 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.image_probe.FrozenSplit.tune",
+      "label": "tune",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.FrozenSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Montage.slices_of",
+      "label": "slices_of",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.Montage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Montage.tile",
+      "label": "tile",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.Montage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeCache.positions",
+      "label": "positions",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeCache.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.auc",
+      "label": "auc",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.base_rate",
+      "label": "base_rate",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.call_rate",
+      "label": "call_rate",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.degenerate_rate",
+      "label": "degenerate_rate",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.frame",
+      "label": "frame",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.matrix",
+      "label": "matrix",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.ProbeResult.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.ProbeResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Reading.parse",
+      "label": "parse",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.Reading.score",
+      "label": "score",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.VisionProbe.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.VisionProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.VisionProbe.over",
+      "label": "over",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.VisionProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.VisionProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.labels.image_probe.VisionProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.image_probe.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.image_probe",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.label_power.LabelPower.__init__",
       "label": "__init__",
       "level": "method",
@@ -37390,6 +37952,126 @@
       "label": "supervised",
       "level": "method",
       "parent": "core.data.labels.targets.Targets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_prompt.AclPrompt.system",
+      "label": "system",
+      "level": "method",
+      "parent": "core.data.labels.vision_prompt.AclPrompt",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_prompt.AclPrompt.turns",
+      "label": "turns",
+      "level": "method",
+      "parent": "core.data.labels.vision_prompt.AclPrompt",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.LocalReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.LocalReader.answer",
+      "label": "answer",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.LocalReader.label",
+      "label": "label",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.LocalReader.parts",
+      "label": "parts",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.LocalReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.PngImage.chunk",
+      "label": "chunk",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.PngImage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.PngImage.encoded",
+      "label": "encoded",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.PngImage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.PngImage.url",
+      "label": "url",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.PngImage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.Reader.answer",
+      "label": "answer",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.Reader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.Reader.for_model",
+      "label": "for_model",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.Reader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.Reader.label",
+      "label": "label",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.Reader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.ServedReader.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.ServedReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.ServedReader.answer",
+      "label": "answer",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.ServedReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.vision_reader.ServedReader.label",
+      "label": "label",
+      "level": "method",
+      "parent": "core.data.labels.vision_reader.ServedReader",
       "role": null
     },
     {

@@ -1,0 +1,88 @@
+StudyInstanceUID,grade,score,acl,because,raw,model
+1.2.826.0.1.3680043.8.498.11851412923016044948101698015974810604,torn,1.0,0,The ACL appears to be disrupted with a discontinuity of the ligament fibers.,"```json
+{""acl"": ""torn"", ""because"": ""The ACL appears to be disrupted with a discontinuity of the ligament fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.39500553372517290823815606829518305500,intact,0.0,0,The anterior cruciate ligament appears intact in the sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.75187434248356774277526985329346125190,intact,0.0,1,The anterior cruciate ligament appears intact in the sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.11557620559191469069130827959098335840,torn,1.0,1,There is a clear discontinuity of the anterior cruciate ligament fibers.,"```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity of the anterior cruciate ligament fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.15593638897292057356864060466120253309,intact,0.0,0,The anterior cruciate ligament appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.12978510157202852202776899910529174803,torn,1.0,0,"The anterior cruciate ligament appears to be disrupted in multiple slices, with a clear discontinuity of the fibers.","```json
+{""acl"": ""torn"", ""because"": ""The anterior cruciate ligament appears to be disrupted in multiple slices, with a clear discontinuity of the fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.88077418639301174409926781329613570435,intact,0.0,1,The anterior cruciate ligament appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.12606657226568558340797193167488111973,torn,1.0,1,There is a clear discontinuity in the anterior cruciate ligament.,"```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity in the anterior cruciate ligament.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.62465595376489211274225312453216559395,torn,1.0,1,The ACL appears to be disrupted with a discontinuity of the ligament fibers.,"```json
+{""acl"": ""torn"", ""because"": ""The ACL appears to be disrupted with a discontinuity of the ligament fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.67188121544063723837669983597453941774,intact,0.0,1,The anterior cruciate ligament appears intact in the series of sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the series of sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.48946580946665031852355005294734101132,torn,1.0,1,There is a clear discontinuity of the ACL fibers in multiple slices.,"```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity of the ACL fibers in multiple slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.56512564464301544960446419143135447363,torn,1.0,0,"There is a clear discontinuity in the anterior cruciate ligament, with a gap in the fibers.","```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity in the anterior cruciate ligament, with a gap in the fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.64408609256163127278435484217683272910,intact,0.0,0,The anterior cruciate ligament appears intact in all the images.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in all the images.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.32321830776739689645700555055955725945,torn,1.0,1,The anterior cruciate ligament appears disrupted with a discontinuity of the fibers.,"```json
+{""acl"": ""torn"", ""because"": ""The anterior cruciate ligament appears disrupted with a discontinuity of the fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.59483999067816153759785789654766826710,intact,0.0,1,The anterior cruciate ligament appears intact in the sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.73926443729786165628848843707532839995,intact,0.0,0,The ACL appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The ACL appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.11287937729196958426538087439102017580,intact,0.0,0,The anterior cruciate ligament appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.37392127307867238524251864751713143683,torn,1.0,0,There is a clear discontinuity of the ACL fibers in multiple slices.,"```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity of the ACL fibers in multiple slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.12505035424093604269515328931488770819,intact,0.0,1,The anterior cruciate ligament appears intact in the provided images.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the provided images.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.62549354677638403845904556149868367236,intact,0.0,1,The anterior cruciate ligament appears intact in the series of sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the series of sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.54977581323931277817074741182670080450,intact,0.0,0,The anterior cruciate ligament appears intact in the sagittal slices.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the sagittal slices.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.12801308844398614687904447633432197492,torn,1.0,0,There is a discontinuity in the anterior cruciate ligament.,"```json
+{""acl"": ""torn"", ""because"": ""There is a discontinuity in the anterior cruciate ligament.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.48348615349418615469875801439348424274,torn,1.0,0,"There is a clear discontinuity of the anterior cruciate ligament fibers, with a gap present in the midline.","```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity of the anterior cruciate ligament fibers, with a gap present in the midline.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.73527530686853911124431549317032662220,intact,0.0,1,The anterior cruciate ligament appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.30246079718471552972130572444383079911,torn,1.0,1,"There is a clear discontinuity in the anterior cruciate ligament, with a gap in the fibers.","```json
+{""acl"": ""torn"", ""because"": ""There is a clear discontinuity in the anterior cruciate ligament, with a gap in the fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.11771393824519892797114773408583976756,torn,1.0,0,The anterior cruciate ligament appears disrupted with a discontinuity of the fibers.,"```json
+{""acl"": ""torn"", ""because"": ""The anterior cruciate ligament appears disrupted with a discontinuity of the fibers.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.97274720257634584071500649275217521662,intact,0.0,1,The ACL appears intact in the image.,"```json
+{""acl"": ""intact"", ""because"": ""The ACL appears intact in the image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.10306159113324811538703788080836752052,intact,0.0,0,The anterior cruciate ligament appears intact in the provided image.,"```json
+{""acl"": ""intact"", ""because"": ""The anterior cruciate ligament appears intact in the provided image.""}
+```",google/medgemma-4b-it
+1.2.826.0.1.3680043.8.498.72853333220043794904856138561095171921,torn,1.0,0,There is a discontinuity in the anterior cruciate ligament.,"```json
+{""acl"": ""torn"", ""because"": ""There is a discontinuity in the anterior cruciate ligament.""}
+```",google/medgemma-4b-it
