@@ -102,8 +102,11 @@ def _watch_one(name, timeout, log_path, done_event):
                     print(body)
                 print(f"MAIL:{len(pending)}:{','.join(pending)}")
                 _log(log_path, f"[{name}] delivered {len(pending)} letter(s), watcher exiting")
-                done_event.set()
-                return
+                if name == "kimi":
+                    done_event.set()
+                    return
+                # For non-kimi mailboxes (outgoing mail), archive and keep listening.
+                break
 
             while not done_event.is_set():
                 time.sleep(POLL_SECONDS)
@@ -124,8 +127,11 @@ def _watch_one(name, timeout, log_path, done_event):
                         print(body)
                     print(f"MAIL:{len(pending)}:{','.join(pending)}")
                     _log(log_path, f"[{name}] delivered {len(pending)} letter(s), watcher exiting")
-                    done_event.set()
-                    return
+                    if name == "kimi":
+                        done_event.set()
+                        return
+                    # For non-kimi mailboxes (outgoing mail), archive and keep listening.
+                    break
                 if time.time() - start > timeout:
                     _log(log_path, f"[{name}] listener timed out, re-arming")
                     break

@@ -29,7 +29,7 @@ which would be invisible if this lived in prose:
     member is. `soloseat_v1` scores 0.925 on kit 8243a95 with `final_ws_e12` where `calibsolo` scores
     0.923 on a642ba8 — so the ZERO of this curve is itself uncertain by about the size of one seat.
   * THE SPREADS ARE UNDER THE FLOOR. n=3, n=4, n=6, n=8 and n=11 differ by 0.001-0.002, and
-    `BOARD_RESOLVABLE` is 0.0015. The SATURATION is real (0.013 -> 0.020 is not); the ORDERING among
+    `BOARD_RESOLVABLE` is 0.0040. The SATURATION is real (0.013 -> 0.020 is not); the ORDERING among
     the saturated points is not a reading.
   * TWO ENTRIES BUY THEIR TOP SEATS WITH A FOREIGN CHECKPOINT. `raptorseat_v1` and `fleettwo_v1` seat
     published foreign members, which is a different kind of diversity from another of our own arms.
@@ -48,7 +48,10 @@ So about a third of the 0.006 is the zeros, and the rest is that the `_cf` roste
 with the same number of seats. At six seats the two entries are the same six ROLES — `blendseat_v1` is
 `final_ws_e12, calib_span_ff, grade_ladder_ff, merged_blend_s2026, lr4e-5_ws_ff, through_dense_ff` and
 `calibsix_v1` swaps five of them for their `_cf` twins — so that +0.002 is a like-for-like member swap,
-sitting just over `BOARD_RESOLVABLE` and worth exactly one directional reading. At seven seats the +0.006
+sitting UNDER `BOARD_RESOLVABLE` and therefore not a reading at all. It was written as "just over" and
+worth one directional reading against the refuted 0.0015; at 0.0040 the like-for-like `_cf` swap is not
+resolvable by the board, which removes the only evidence here that the `_cf` roster is a better roster at
+held seat count. At seven seats the +0.006
 is NOT like-for-like: `raptorseat_v1` buys its extra seat with a foreign checkpoint, which is a different
 kind of diversity, not a better member.
 
@@ -74,6 +77,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.member_curve import BOARD_RESOLVABLE
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +92,6 @@ SOLO_SEATS = 1
 
 TARGET = 0.950
 """The board score being planned toward: one point above the tenth place of the prize band."""
-
-BOARD_RESOLVABLE = 0.0015
-"""Below this two board numbers are the same number, so a difference of one seat's spread is not read."""
 
 
 @dataclass(frozen=True)
@@ -272,8 +273,9 @@ class SeatBonus:
         ]
         knee = self.knee()
         lines += [
-            f"saturation {self.saturation():+.3f}, first reached at {knee.entry.seats} seats "
-            f"({knee.entry.id}); seats past that are runtime the board does not pay for",
+            f"saturation {self.saturation():+.3f}, matched to within {BOARD_RESOLVABLE} at "
+            f"{knee.entry.seats} seats ({knee.entry.id}); seats past that are runtime the board "
+            f"does not pay for",
             f"a {target:.3f} entry needs a single at {self.required_single(target):.3f} board",
             f"{len(self.kits())} distinct kits across these points, so the zero itself is not held fixed; "
             f"spreads under {BOARD_RESOLVABLE} are not orderings",

@@ -2708,6 +2708,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.seat_bonus",
+      "target": "kneemri.evaluation.member_curve",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.seat_profile",
       "target": "core.cli",
       "weight": 1

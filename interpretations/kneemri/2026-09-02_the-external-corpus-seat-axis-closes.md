@@ -13,8 +13,24 @@ external corpus. Everything else held at champion — count six plus the raptor 
 | 4 | `corpusdose_v1` | 0.943 |
 | 6 | `corpusfull_v1` | 0.940 |
 
-Flat, flat, flat, then **down four ticks**. `BOARD_RESOLVABLE` is 0.0015, so 1→4 is one curve inside
-the resolution and 4→6 is the only resolvable move on the axis — and its sign is negative.
+Flat, flat, flat, then **down four ticks**.
+
+**CORRECTED 2026-09-03, and the correction removes a claim this file made.** As written, this paragraph
+said `BOARD_RESOLVABLE` is 0.0015, so 1→4 sat inside the resolution and 4→6 was "the only resolvable
+move on the axis". The constant was raised to **0.0040** on 2026-09-02 — the same day this was written —
+because the old value had been fitted on six paired entries and the record now holds 561 ordered pairs
+with 6.2% inverting (`member_curve.py:56`). At 0.0040, **4→6 is 0.003 and is NOT resolvable either.** No
+single step on this axis is, and only the full 1→6 span of 0.004 reaches the threshold at all.
+
+What survives and what does not:
+
+* **The closure survives, and is if anything stronger.** Nothing on the axis moves the board by an
+  amount the board can read. That is precisely the condition for spending no further slot on it.
+* **The attribution below does NOT survive as a reading.** "Down four ticks", the step that evicts the
+  pixel- and objective-distant members, and the paragraph that assigns those ticks to the STRUCTURE that
+  left rather than to the corpus that arrived — all of that rests on a 0.003 step being resolvable, and
+  it is not. It is directional and consistent with the champion pin's earlier structural reading, which
+  is why it is worth keeping on the page; it is not evidence, and no arm may be planned on it.
 
 ## What each entry pre-registered, and which branch fired
 

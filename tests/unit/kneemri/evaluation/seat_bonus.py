@@ -117,8 +117,9 @@ def test_saturation(tmp_path: Path):
 
 def test_knee(tmp_path: Path):
     """The fewest seats within the board's resolution of the best; the rest is unpaid runtime."""
-    # Six seats reach 0.015, inside 0.0015 of the 0.016 four seats reach, and cost two more decodes.
-    assert SeatBonus(_record(tmp_path)).knee().entry.seats == 4
+    # Two seats reach 0.013, inside BOARD_RESOLVABLE (0.0040) of the 0.016 four seats reach, so the
+    # two extra decodes buy a spread the board cannot order. At the old 0.0015 this read 4 seats.
+    assert SeatBonus(_record(tmp_path)).knee().entry.seats == 2
 
 
 def test_required_single(tmp_path: Path):
@@ -154,7 +155,7 @@ def test_report(tmp_path: Path):
     report = "\n".join(SeatBonus(_record(tmp_path)).report(0.950))
 
     assert "anchor a, zero solo_a at board 0.920" in report
-    assert "saturation +0.016, first reached at 4 seats" in report
+    assert "saturation +0.016, matched to within 0.004 at 2 seats" in report
     assert "needs a single at 0.934 board" in report
     assert "2 distinct kits" in report
     assert "other anchors: a +0.016, b +0.005" in report
