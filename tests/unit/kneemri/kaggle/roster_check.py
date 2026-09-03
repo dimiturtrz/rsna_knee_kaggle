@@ -3,12 +3,16 @@
 from pathlib import Path
 
 import numpy as np
+import torch
 
+from kneemri.inference.members import Member
 from kneemri.kaggle.roster_check import MemberDeclines, RosterDrift
 from kneemri.runs.holdout_record import HoldoutRecord
 
 LABELS = 3
 STUDIES = 8
+SIZE = 224
+SLICES = 12
 RNG = np.random.default_rng(2026)
 
 SHIPPED = "shipped_s2026"
@@ -22,9 +26,14 @@ FORGOTTEN = "forgotten_s2026"
 
 
 def _member(root: Path, name: str, *, scoreable: bool) -> None:
-    """A checkpoint, with the holdout predictions that make it priceable or without them."""
+    """A checkpoint, with the holdout predictions that make it priceable or without them.
+
+    A REAL torch payload rather than an empty file, because `unreadable` asks each packaged member which
+    pixels it read and a member is the only thing that can answer. The config carries the fields that
+    name a cache and nothing else.
+    """
     path = root / f"{name}.pt"
-    path.write_bytes(b"")
+    torch.save({"config": {"img": SIZE, "slices": SLICES, "slots": ["sag"]}}, path)
     if scoreable:
         truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
         HoldoutRecord(path).write(
@@ -45,13 +54,19 @@ def _drift(tmp_path: Path, roster_text: str, declines_text: str) -> RosterDrift:
 
 
 def _clean(tmp_path: Path) -> RosterDrift:
-    """The state the check exists to hold: every scoreable member accounted for on one side or the other."""
-    return _drift(
+    """The state the check exists to hold: every scoreable member accounted for on one side or the other.
+
+    Its packaged member's pixels are written too — a clean roster is one whose members can still be READ,
+    and leaving the arrays out would make every other test in this file assert against a broken tree.
+    """
+    drift = _drift(
         tmp_path,
         f"# what ships\n{SHIPPED}.pt   # the member\n",
         f"{SMOKE}.pt   # a throwaway smoke run\n{BARE}.pt  # scored under an older label table\n"
         f"{FORGOTTEN}.pt  # superseded\n",
     )
+    _pixels(tmp_path)
+    return drift
 
 
 def test_checkpoints(tmp_path: Path):
@@ -134,6 +149,30 @@ def test_phantom(tmp_path: Path):
     drift = _drift(tmp_path, f"{SHIPPED}.pt\ntypo_s2026.pt\n", "")
 
     assert drift.phantom() == ["typo_s2026.pt"], "the typo matches no checkpoint on disk"
+
+
+def _pixels(root: Path) -> Path:
+    """Write the arrays the fixture's packaged member names, so its cache resolves on disk."""
+    cache = Member.from_checkpoint(root / f"{SHIPPED}.pt").cache(root)
+    cache.images_path.write_bytes(b"")
+    cache.mask_path.write_bytes(b"")
+    return cache.images_path
+
+
+def test_unreadable(tmp_path: Path):
+    """A packaged member whose pixels are gone is a finding, and losing EITHER array is enough.
+
+    `adjacent224_s2026` kept its mask and lost its images, so a check reading one array would have
+    called it healthy while it was unscoreable and unshippable (knee-dhpo9).
+    """
+    drift = _drift(tmp_path, f"{SHIPPED}.pt\n", f"{SMOKE}.pt # smoke\n{BARE}.pt # stale\n{FORGOTTEN}.pt # gone\n")
+    images = _pixels(tmp_path)
+
+    assert drift.unreadable() == [], "both arrays are on disk"
+
+    images.unlink()
+
+    assert drift.unreadable() == [f"{SHIPPED} {images}"], "the mask survived and the member is still gone"
 
 
 def test_complaints(tmp_path: Path):

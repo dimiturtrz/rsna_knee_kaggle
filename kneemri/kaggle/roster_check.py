@@ -20,6 +20,21 @@ something does not, so the set difference can be taken by a machine instead of b
 A DECLINE WITHOUT PROSE IS ALSO A FINDING. A bare name in the declines file is memory again, one file
 over: it records that somebody once decided, not what they decided or why, and the next reader cannot
 tell a smoke run from a member that was overlooked twice.
+
+A ROSTER LINE IS A CLAIM THAT THE MEMBER CAN STILL BE READ, and until 2026-09-03 nothing checked it.
+`adjacent224_s2026` sits in the roster with a holdout record, a checkpoint and every gate in this repo
+green, and its pixels are gone: `images_224px_12sl_adjacent.npy` is absent while `mask_224px_12sl_adjacent.npy`
+survives. Both arrays are asserted rather than one, because that is the shape the defect actually took —
+a check reading only the mask would have called this member healthy (knee-dhpo9).
+
+REPORTED, NOT REFUSED, and the first run says why. Nine of 102 packaged members name a cache that is no
+longer on disk, over eight distinct arrays, against 24 that survive: these are reclaimed decodes, each
+one tens of gigabytes, and deleting them was housekeeping rather than an accident. Such a member can
+still SHIP — the kernel decodes Kaggle's studies at serve time and never opens our cache — and its
+recorded holdout number is still quotable. What it can never do again is be re-scored, re-derived,
+witnessed or curve-read offline, because the pixels it was fitted on are gone. That is worth a named
+line every run, and it is not worth a refusal: a gate that fails nine-strong on every invocation is a
+gate people learn to skip.
 """
 
 import fnmatch
@@ -28,6 +43,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.inference.members import Member
 from kneemri.kaggle.package_members import MemberRoster
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -88,10 +104,15 @@ class MemberDeclines:
 class RosterDrift:
     """Every way the roster has stopped describing the members on disk."""
 
-    def __init__(self, processed: Path, roster: Path = ROSTER, declines: Path = DECLINES) -> None:
+    def __init__(
+        self, processed: Path, roster: Path = ROSTER, declines: Path = DECLINES, pixels: Path | None = None
+    ) -> None:
         self.processed = processed
         self.roster = roster
         self.declines = declines
+        self.pixels = processed if pixels is None else pixels
+        """Where the decoded arrays live. Defaults to the checkpoint directory so every existing caller
+        keeps working; `main` passes the processed root, which is where a cache is actually written."""
 
     def checkpoints(self) -> list[str]:
         """Every checkpoint file under the processed root, named without its suffix."""
@@ -133,6 +154,25 @@ class RosterDrift:
         present = {f"{name}.pt" for name in self.checkpoints()}
         return [pattern for pattern in self.patterns() if not any(fnmatch.fnmatch(name, pattern) for name in present)]
 
+    def unreadable(self) -> list[str]:
+        """Each packaged member whose own cache is not on disk, named with the FIRST array that is gone.
+
+        The member is asked which pixels it read rather than the roster being asked what it expects —
+        `Member.cache` is the one place that knows the axis list, and a second spelling of it here would
+        be the mismatch this check exists to catch, arriving from the checker instead of the reader.
+
+        Both arrays are stated, and the path is printed rather than the member: `adjacent224_s2026` lost
+        its images and kept its mask, so a check that stopped at either one alone would have passed it.
+        """
+        gone: list[str] = []
+        for name in sorted(self.packaged()):
+            member = Member.from_checkpoint(self.processed / f"{name}{CHECKPOINT_SUFFIX}")
+            if not member.reads_pixels:
+                continue
+            cache = member.cache(self.pixels)
+            gone += [f"{name} {path}" for path in (cache.images_path, cache.mask_path) if not path.exists()]
+        return gone
+
     def complaints(self) -> list[str]:
         """Each drift, named with the action that clears it. Empty means the roster still describes disk."""
         found = [
@@ -154,13 +194,17 @@ class RosterDrift:
 
     def report(self) -> list[str]:
         """The survey, whether or not anything drifted."""
+        unreadable = [
+            f"{missing} is gone, so that member can never be re-scored, re-derived or witnessed offline"
+            for missing in self.unreadable()
+        ]
         scoreable = self.scoreable()
         declined = MemberDeclines.read(self.declines).reasons()
         summary = (
             f"{len(scoreable)} scoreable of {len(self.checkpoints())} checkpoints: "
             f"{len(self.packaged())} packaged, {len(declined)} declined, {len(self.undocumented())} undocumented"
         )
-        return [*self.complaints(), summary]
+        return [*self.complaints(), *unreadable, summary]
 
 
 def main() -> None:
@@ -170,7 +214,8 @@ def main() -> None:
     command.parser.add_argument("--declines", type=Path, default=DECLINES, help="what deliberately does not")
     arguments = command.parsed()
 
-    drift = RosterDrift(command.rooted(arguments).models(), arguments.roster, arguments.declines)
+    root = command.rooted(arguments)
+    drift = RosterDrift(root.models(), arguments.roster, arguments.declines, root.processed())
     command.report(drift.report())
     if drift.complaints():
         message = f"{len(drift.complaints())} member(s) the roster no longer describes"

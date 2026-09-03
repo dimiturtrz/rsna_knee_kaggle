@@ -4503,6 +4503,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.roster_check",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_check",
       "target": "kneemri.kaggle.package_members",
       "weight": 1
     },
@@ -23102,6 +23108,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.unreadable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
       "target": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
       "weight": 1
@@ -23134,6 +23146,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
       "target": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.unreadable",
+      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.unreadable",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.packaged",
       "weight": 1
     },
     {
@@ -46740,6 +46764,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
       "label": "undocumented",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.unreadable",
+      "label": "unreadable",
       "level": "method",
       "parent": "kneemri.kaggle.roster_check.RosterDrift",
       "role": null
