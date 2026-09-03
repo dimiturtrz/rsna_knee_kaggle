@@ -73,8 +73,26 @@
 # resolution erases it. 6.5 h ÷ an even shot at covering the whole gap is the best ratio open — every
 # other lane is closed, and the card is otherwise idle.
 #
+# --pair-memory 66, AND WHY THE FIRST LAUNCH OF THIS ARM WAS VOID. The first run reached epoch 2 at
+# 0.8010 against band_dense's 0.8197 and was killed there, because `--batch 1` had silently switched
+# the ranking term OFF. `RankedObjective.ranking` forms pairs WITHIN the micro-batch (`pairs(batch,
+# batch)`) and self-pairs drop out, so a batch of one forms no pairs at all; `--accumulate 12` cannot
+# repair that, since it sums the gradients of micro-batch losses that were each computed alone. The
+# control ran at batch 12 with the term ON. So the arm moved TWO variables against band_dense — the
+# trunk and the objective — while `settings()` recorded `rank_weight: 1.0` on both sides, which is
+# exactly the failure objective.py:159 warns about ("a --rank-weight that never reached the
+# constructor trains plain cross-entropy under a ranking arm's name"), arriving by batch size rather
+# than by dispatch. The middle branch below CLOSES the in-domain trunk lane, and closing the only open
+# lever against a control that trained a different objective is the worst outcome available here.
+#
+# CAPACITY, DERIVED, NOT PICKED. band_dense at batch 12 forms C(12,2) = 66 unordered pairs a label. At
+# batch 1 a memory of M steps supplies M partners, so M = 66 matches the pair mass rather than
+# approximating it. Staleness moves the RIGHT way: 66 micro-batches is 5.5 optimiser steps at
+# accumulate 12, against the remembered default of 8, and 66/3492 = 1.9% of an epoch against
+# 8/291 = 2.7%. The pool is wider AND fresher than the control's.
+#
 # bead: knee-b7a50
-# deliberate: --batch --accumulate --variant
+# deliberate: --batch --accumulate --variant --pair-memory
 # control  band_dense = 0.8578 (best epoch 8), identical flags with the incumbent trunk.
 #          ortho_dense = 0.8452, identical trunk at 224 px / 12 slices.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
@@ -84,5 +102,5 @@ require "$LABELS"
 run_train ortho_stack \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant ortholarge --batch 1 --accumulate 12 \
-  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --pair-memory 66 \
   --labels "$LABELS" --out "$MODELS/ortho_stack_s2026.pt"

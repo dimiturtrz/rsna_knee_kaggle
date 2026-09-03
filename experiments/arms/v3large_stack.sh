@@ -59,8 +59,17 @@
 # project has not closed. Without it, 6.5 h of `ortho_stack` buys a number nobody can interpret, which
 # is the worse ratio of the two.
 #
+# --pair-memory 66, CARRIED FROM `ortho_stack` AND NOT OPTIONAL HERE. Both arms run `--batch 1`, where
+# the ranking term forms no pairs and switches itself off; see `ortho_stack.sh` for the mechanism and
+# the capacity derivation. This arm would have been READABLE without the flag — the pair is internally
+# matched either way, since both halves would have had the term off — but it would have been readable
+# ONLY against its own partner, and both branches above are also stated against `band_dense`. Holding
+# the objective identical to the control is what keeps this pair comparable to the 224 px pair, whose
+# two arms both trained at batch 12 with the term ON. Drop the flag from one arm and the
+# delta-of-deltas compares a rank-trained pair against a cross-entropy-trained one.
+#
 # bead: knee-b7a50
-# deliberate: --batch --accumulate --variant
+# deliberate: --batch --accumulate --variant --pair-memory
 # control  ortho_stack = the paired arm, identical flags with the CONTINUED trunk.
 #          v3large_dense = 0.8258, identical trunk at 224 px / 12 slices.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
@@ -70,5 +79,5 @@ require "$LABELS"
 run_train v3large_stack \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant v3large --batch 1 --accumulate 12 \
-  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --pair-memory 66 \
   --labels "$LABELS" --out "$MODELS/v3large_stack_s2026.pt"
