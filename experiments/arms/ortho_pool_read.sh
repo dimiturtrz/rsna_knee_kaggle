@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # `ortholarge` on the POOL'S OWN read, because the probe says the trunk is not the problem. `knee-6hfi`.
 #
+# bead: knee-6hfi, knee-x4yx, knee-440m
+#
 # WHAT THE PROBE SAYS, measured 2026-09-02 22:22Z with `feature_probe --choose-penalty` (the nested-split
 # penalty fix that `knee-x4yx` demanded; every trunk number below is at the penalty it chose inside the
 # TRAINING positions, so the holdout stayed held out):
