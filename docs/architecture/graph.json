@@ -3104,6 +3104,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "kneemri.evaluation.feature_probe",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "kneemri.evaluation.slice_readout",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.uncertainty_split",
       "target": "core.cli",
       "weight": 1
@@ -17648,6 +17690,138 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.evaluation.transduction.TestAdaptation",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.transduction.TestAdaptation",
+      "target": "kneemri.evaluation.transduction.AdaptationResult",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.__init__",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe.predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe.weights",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "target": "kneemri.evaluation.transduction.AdaptationResult",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "target": "kneemri.evaluation.transduction.TestAdaptation.areas",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "target": "kneemri.evaluation.transduction.TestAdaptation.pseudo_labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.areas",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "core.data.corpus.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "core.data.corpus.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "core.data.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe.chosen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.FeatureProbe.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.ProbeCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.ProbeCorpus.features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.ProbeCorpus.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.feature_probe.ProbeCorpus.truth",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.transduction.TestAdaptation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.main",
+      "target": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
       "target": "kneemri.evaluation.pool.Pool",
       "weight": 1
@@ -28081,7 +28255,7 @@
       "role": null
     },
     {
-      "descendants": 215,
+      "descendants": 216,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -28145,7 +28319,7 @@
       "role": null
     },
     {
-      "descendants": 68,
+      "descendants": 69,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -28652,6 +28826,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.train_disagreement",
       "label": "train_disagreement",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction",
+      "label": "transduction",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -32038,6 +32220,22 @@
       "label": "TrainDisagreement",
       "level": "class",
       "parent": "kneemri.evaluation.train_disagreement",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.AdaptationResult",
+      "label": "AdaptationResult",
+      "level": "class",
+      "parent": "kneemri.evaluation.transduction",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.TestAdaptation",
+      "label": "TestAdaptation",
+      "level": "class",
+      "parent": "kneemri.evaluation.transduction",
       "role": "primary"
     },
     {
@@ -43118,6 +43316,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.train_disagreement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.AdaptationResult.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.AdaptationResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.AdaptationResult.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.AdaptationResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.TestAdaptation.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.TestAdaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.TestAdaptation.adapted",
+      "label": "adapted",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.TestAdaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.TestAdaptation.areas",
+      "label": "areas",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.TestAdaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.TestAdaptation.pseudo_labels",
+      "label": "pseudo_labels",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction.TestAdaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transduction.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.transduction",
       "role": null
     },
     {
