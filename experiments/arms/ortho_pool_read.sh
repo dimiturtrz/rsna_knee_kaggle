@@ -47,6 +47,21 @@
 #          432 s an epoch, so ~950 s x 12. Priced against a probe-backed +0.020: the best ratio on the
 #          board, and the only lever now open whose mechanism could plausibly reach the 1.5% bar.
 #
+# WHY THE BATCH IS 4 WITH ACCUMULATE 3, and why that is not a second variable. The first run of this
+# arm, at `--batch 12`, took 151 MINUTES for epoch 0 - 9.3x the estimate above, which is otherwise
+# sound arithmetic off this trunk's own 224 px number. The gate line explains it: the recipe reserves
+# **67549 MiB on a 32607 MiB card**. It did not OOM; on Windows WDDM the allocator spills to host
+# memory instead, which reads as 100% GPU at 31735 MiB and roughly a tenth of the throughput. That is
+# a MEMORY fault wearing a compute result's clothes, and killing the arm on the wall-clock would have
+# retired the probe question without ever testing it.
+#
+# `--batch 4 --accumulate 3` holds the EFFECTIVE batch at 12, so every number below is still read
+# against `depth_regions_narrow_s2026` = 0.8554 with one variable moved. It cuts the reservation to
+# roughly a third, which fits, and the expected cost returns to ~970 s an epoch.
+#
+# The control is `variant: small` at 250 s an epoch. This arm is a LARGE trunk. The pixel ratio was
+# never the whole multiplier between them - only between this trunk at 224 px and itself at 336 px.
+#
 # PRE-REGISTERED against `depth_regions_narrow_s2026` = 0.8554, written before the run:
 #
 #   s >= 0.8554            THE PROBE TRANSFERS. In-domain SSL continuation is a real trunk lever at the
@@ -76,6 +91,7 @@ require "$LABELS"
 
 run_train ortho_pool_read \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --batch 4 --accumulate 3 \
   --variant ortholarge --backbone-lr 4e-5 --slices 12 --image-size 336 \
   --band-low 0.2 --band-high 0.8 --slice-regions 4 \
   --labels "$LABELS" --out "$MODELS/ortho_pool_read.pt"

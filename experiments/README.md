@@ -6888,3 +6888,57 @@ proven either way, no pre-push pytest runs while an arm holds the card.
 
 Re-run queued behind `ortho_pool_read` on `pid:66204`, because a 44-minute arm that answers a question
 the owner asked is the right thing to put in a card gap.
+
+## `ortho_pool_read` — killed at 75% of epoch 0. The arm was mispriced by 9x, and the probe is untested.
+
+The arm's own cost line said **~950 s an epoch, ~3.2 h total**, derived by scaling the 224 px ortho arms'
+432 s by the 2.25x pixel ratio. Measured: it reached **step 217 of 291 in 113 minutes** with the card at
+100% and `card_check` reporting a single process, so no contention. That is **~151 minutes for epoch 0**
+and a **~30 hour** twelve-epoch arm. Killed at 01:23Z on 2026-09-03 under the rule written into the wake
+before the number was read (kill above ~2500 s an epoch).
+
+**The pixel ratio was the wrong multiplier.** These flags are not the 224 px arms scaled up: this recipe
+reserves **67549 MiB** on a 32607 MiB card, so it runs on `recompute_activations`, which buys the memory
+by recomputing the forward pass in the backward. The 224 px ortho arms did not need it. So the step cost
+carries a gradient-checkpointing factor that the 2.25x estimate never contained, on top of the pixels.
+Anything that flips `recompute_activations` on relative to its anchor must be priced by a throughput
+smoke, not by scaling the anchor's epoch time.
+
+**What this does NOT say.** Nothing about the probe. `feature_probe` reads `ortholarge` +0.0203 above
+`v3large` at focal-max and +0.0202 at mean_max on the same 909 studies, and that pair is still the only
+controlled in-domain-SSL-continuation measurement this project owns. No epoch row was ever written, so
+there is no score, no checkpoint, and no entry for the pre-registered branches. The arm is unrun, not
+refuted — `knee-6hfi` stays open.
+
+**What the re-arm has to do differently.** Get the epoch cost from a measurement before spending the
+card: `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` gives a per-step rate at the
+real flags in under a minute. Then buy the cost down on an axis that is not the trunk — fewer slices, or
+a shallower `unfreeze_last` — accepting that each such change moves a second variable away from the
+`depth_regions_narrow_s2026` = 0.8554 control and has to be declared when the result is read.
+
+### Correction, same hour: the cause is VRAM SPILL, not gradient checkpointing.
+
+The section above blamed `recompute_activations` for the 9.3x. Wrong — that flag is on in the control
+too. The controls, read off their own metrics rows:
+
+    depth_regions_narrow_s2026   variant SMALL   336 px  12 sl  regions 4  recompute True   250 s/epoch
+    lr4e-5_ws_s2026              variant SMALL   336 px  12 sl  regions -  recompute True   235 s/epoch
+    ortho_lpft_s2026             variant ORTHOLARGE  224 px  12 sl  recompute True          432 s/epoch
+
+So the arm's own estimate was sound arithmetic: this trunk at 224 px costs 432 s, and 336 px is 2.25x
+the pixels, giving ~970 s. What it missed is that 970 s only holds if the run FITS. The gate line said
+the recipe reserves **67549 MiB on a 32607 MiB card**. It did not OOM — on Windows WDDM the allocator
+spills to host memory and keeps going, which presents as 100% GPU utilisation at 31735 MiB and about a
+tenth of the throughput. A memory fault that reads as a compute cost.
+
+Note also that the control is a **small** trunk. The arm's docstring called itself the control "with
+`--variant ortholarge` and nothing else moved", which is true of the RECIPE and false of the COST: it
+is a small-to-large swap, and the pixel ratio was only ever the multiplier between this trunk at 224 px
+and itself at 336 px.
+
+**The fix is the batch, and it moves no variable.** `--batch 4 --accumulate 3` holds the effective
+batch at 12 and cuts the reservation to roughly a third, so the pre-registration against
+`depth_regions_narrow_s2026` = 0.8554 stands unchanged. Re-queued behind `mrnet_warm_s2026` with
+`after.sh --smoke`, so the smoke measures the real per-step rate on the card before forty minutes go
+into it. If the smoke still reads a spilled rate, the next cut is slices, and THAT one is a second
+variable and has to be declared.
