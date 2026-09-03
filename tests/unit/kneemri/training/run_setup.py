@@ -14,6 +14,7 @@ from kneemri.training.objective import (
     DISSENT_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
+    RANK_TERM,
     ContrastiveObjective,
     MarginObjective,
     Objective,
@@ -297,6 +298,24 @@ def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
             _setup(dissent_weight=0.3, **conflict).objective()
 
     assert _setup(dissent_weight=0.3).objective().settings()[DISSENT_TERM] == 0.3
+
+
+def test_objective_refuses_a_comparison_term_at_a_batch_that_forms_no_pairs():
+    """A batch of one silences every comparison term in the chain, and records it as landed anyway.
+
+    MEASURED: `ortho_stack` descended nine hundred steps of `--rank-weight 1.0 --batch 1 --accumulate 12`
+    at half the control's loss, with `rank_weight: 1.0` in its recipe line the whole way, because
+    `settings()` reports the constructor's weight and the constructor WAS reached. Only the pair count is
+    zero. `--accumulate` is not a fix and the guard must not accept it as one.
+
+    `--pair-memory` IS the fix for the three terms that take a pool, so a memory at batch one passes.
+    """
+    for silenced in ({"rank_weight": 1.0}, {"auc_margin": 0.8}, {"contrast_weight": 1.0}, {"dissent_weight": 0.3}):
+        with pytest.raises(ValueError, match="forms no pairs"):
+            _setup(batch=1, accumulate=12, **silenced).objective()
+
+    assert _setup(batch=1, rank_weight=1.0, pair_memory=66).objective().settings()[RANK_TERM] == 1.0
+    assert _setup(batch=1).objective().settings()[RANK_TERM] == 0.0
 
 
 def test_objective_refuses_to_compose_the_margin_with_the_term_it_replaces():

@@ -59,6 +59,16 @@ Under LoRA `unfreeze_last` describes BASE weights, which are frozen, while the a
 about sit in every block and retain their activations. So the honest trainable count is the whole trunk,
 and this is how the clamp says that without naming a depth that would go stale."""
 
+LONE_BATCH = 1
+"""The micro-batch at which every comparison term in `objective.py` is STRUCTURALLY zero.
+
+Not a threshold and not a floor picked for comfort: at two studies a label still forms one pair, and one
+thin pair is a recipe judgement. At ONE study there is no second study to compare against, so the term is
+absent rather than weak — `RankedObjective.pairs(batch, batch)` forms only the self-pair, which carries
+`s_i - s_j = 0` and drops out, and `MarginObjective.auc_margin` finds no label holding both a positive and
+a negative and returns its zero. `--accumulate` does not repair it: accumulation sums the gradients of
+micro-batch losses each computed alone, so it never forms a cross-micro-batch pair."""
+
 
 @dataclass(frozen=True)
 class RunSetup:
@@ -344,6 +354,47 @@ class RunSetup:
                 "dropped for every remembered step"
             )
             raise ValueError(message)
+        # LAST, because it is about the BATCH rather than about the flags, and every message above names
+        # a flag the reader can drop. This one names a flag they must ADD.
+        if options.batch <= LONE_BATCH and not options.pair_memory:
+            self._check_pairs_can_form()
+
+    def _check_pairs_can_form(self) -> None:
+        """The comparison terms that are silently OFF at a batch of one, raised before the card is touched.
+
+        MEASURED 2026-09-03, and this guard exists because nothing caught it. `ortho_stack` ran nine
+        hundred steps of `--rank-weight 1.0 --batch 1 --accumulate 12` with the ranking term contributing
+        exactly zero: its epoch-0 loss read 0.6281 where the same recipe at batch 12 read 1.2266, and the
+        recipe line recorded `rank_weight: 1.0` throughout, because `Objective.settings` reports the
+        CONSTRUCTOR's weight and the constructor was reached. The arm was a two-variable change — the
+        trunk AND the objective — against a control that trained the term, and its pre-registered middle
+        branch would have CLOSED the project's only open lever on that comparison.
+
+        This is the failure `objective.py` already warns about ("a --rank-weight that never reached the
+        constructor trains plain cross-entropy under a ranking arm's name and reports a number that reads
+        as a refutation of the mechanism"), arriving by batch size rather than by dispatch, which is why
+        the warning did not cover it.
+
+        `--auc-margin` is the worst of the four and is named the same way: it REPLACES cross-entropy, so a
+        lone batch leaves the side term as the entire loss.
+        """
+        options = self.options
+        silenced = {
+            "--rank-weight": options.rank_weight,
+            "--auc-margin": options.auc_margin,
+            "--contrast-weight": options.contrast_weight,
+            "--dissent-weight": options.dissent_weight,
+        }
+        named = [f"{flag} {value}" for flag, value in silenced.items() if value]
+        if not named:
+            return
+        message = (
+            f"--batch {options.batch} forms no pairs, so {', '.join(named)} would contribute exactly zero "
+            "and the run would descend the plain recipe under the arm's name — pass --pair-memory to form "
+            "pairs across steps, or raise --batch (--accumulate cannot repair this: it sums the gradients "
+            "of micro-batch losses each computed alone)"
+        )
+        raise ValueError(message)
 
     def _check_margin_alone(self) -> None:
         """The four flags `--auc-margin` cannot be composed with, each LOUD for `objective`'s reason.
