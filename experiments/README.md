@@ -7145,3 +7145,53 @@ frozen (ConvNeXtV2-base is 3/3/27/3, so `--unfreeze-last 6` opened blocks 21-26 
 1024-wide top cold), so the family is re-opened by thawing the top and re-running, never by re-quoting the
 distance. The four-row rate table above is unaffected: every run in it is handicapped identically, so the
 comparison between them is clean and 0.8186 is this trunk's number at a frozen top.
+
+### `rampsix` ran on 2026-09-02, left no ledger row, and pre-registered two readings it cannot produce — 2026-09-03
+
+The arm is on disk and finished two of five members before dying on the third. Nothing was written here,
+so for a day the repo's state was: two checkpoints nobody could account for, and an OPEN P1 bead
+(`knee-fxgm`) describing work that had already half-happened.
+
+| member | finished | holdout | note |
+| --- | --- | --- | --- |
+| `final_ws_ramp` | 2026-09-02 20:18, 12 epochs | **none** | `auc: nan` on every row |
+| `through_dense_ramp` | 2026-09-02 22:03, 12 epochs | **none** | `auc: nan` on every row |
+| `grade_ladder_ramp` | died 23:47, no `.pt` | — | `.metrics.jsonl` holds one `recipe` row and nothing else |
+
+**THE RECIPE FIRED — that is checked, not assumed.** The resumed member's recorded recipe carries
+`sample_spread=train_spread_honest12.npz`, `sample_alpha=1.0`, `sample_ramp=6`. The ramp is on. (Note
+`certainty_ramp=0` in the same record: this arm ramps through the `sample_*` flags, and the
+similarly-named key is a different mechanism.)
+
+**WHY BOTH PRE-REGISTERED READINGS ARE UNREADABLE, WHICH IS THE ENTRY.** The arm sets
+`FIT="--fold -1 --ema"`. A dark member holds nothing out, so:
+
+- *Reading 1*, the kill-gate — "the first two members must each clear +0.002 solo over their calibsix
+  originals or the remaining three are not run" — has no holdout to be read on. It is not unrun; it is
+  **unreadable by construction**, and the arm ran past it because there was nothing to stop at.
+- *Reading 2*, the offline ensemble over the champion's six, is null the same way `corpusdose_v1` and
+  `corpusfull_v1` are null in `comp/board.jsonl`: the pool contains dark members, so every holdout study
+  is in-sample for part of it.
+
+The arm's header states "A board slot is NOT pre-committed here; the offline ensemble read is the gate."
+That sentence names as the gate the one number the arm's own `FIT` line makes impossible. Filed P0, and
+it is a live instance of `knee-v78o1` (an arm's second pre-registered reading can silently never be
+taken).
+
+**WHAT IS NOT DAMAGED BY THIS.** The *dose* was measured elsewhere, on readable members with a matched
+control: `certainty_ramp` 0.8584 and `disagreed_ramp` 0.8574 against `disagreed_uniform` 0.8507, both
+ramped over 6 of 12 epochs, both clear of the 0.0062 floor; the same signals applied flat cost -0.0036.
+So the question `rampsix` asks is not "does the ramp work" — that is answered — but "does a uniform lift
+pass through to the ensemble", and `calibsix` is the precedent: +0.0038 pooled solo went to +0.0056 and
++0.0084 ensembled, a pass-through **above one**, because every member moves together and the ambiguity
+term is preserved rather than spent.
+
+**THE GENERAL RULE THIS BUYS, WHICH IS BIGGER THAN THIS ARM.** Five of the champion's six seats are dark.
+Therefore *no member-side change to the champion is offline-measurable at all* — not this one, not the
+next one. An arm that refits dark members must pre-register a **board** reading or declare itself
+unmeasurable BEFORE it spends the card, because the alternative is what happened here: 4.2 h of card for
+a number that never existed. Q-CN was sent to the researcher asking whether any estimator prices a dark
+pool without a slot.
+
+The resumed run continues at member three. Its value is the ensemble question and the board is its only
+ruler.
