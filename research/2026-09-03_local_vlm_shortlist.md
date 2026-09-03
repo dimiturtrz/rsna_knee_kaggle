@@ -38,12 +38,22 @@ If you really want **one model**, use **Qwen3.8-27B NVFP4**.  It does text + vis
 A pragmatic two-model setup (which still avoids the old Qwen3.8-27B text-only + separate medical VLM bloat):
 1. **Qwen3.8-27B NVFP4** for report text and any bulk extraction.
 2. ~~**MedGemma-1.5-4B-IT** for spot-checking images / generating candidate findings strings.~~
-   **WITHDRAWN 2026-09-03**, by the agent who proposed it, on the argument below: it is a recall
-   instrument pointed at a precision defect, and it would manufacture the exact error class we already
-   have too much of. Nothing replaces it in this slot yet; the over-call question (`knee-pnwar`) is a
-   reading task for a text model, not a generation task for a VLM. The reasoning is kept because it is
-   the argument that kills the option, and because it prices any future VLM proposal:
-   **as a candidate GENERATOR only, never as an adjudicator.** A radiologist reader study
+   **WITHDRAWN 2026-09-03 as a GENERATOR, and the withdrawal was then PARTLY RETRACTED the same day.**
+   The argument below still holds for what it was about — free-text candidate generation — and it still
+   prices any future VLM proposal: **as a candidate GENERATOR only, never as an adjudicator.** What it
+   does NOT establish, and was briefly read as establishing, is that MedGemma is disqualified from the
+   label audit. Two corrections, both raised by `claude-main` and accepted here:
+   - The hallucination and verbosity figures are from **free-text report generation**. The audit task is
+     constrained per-finding extraction against a fixed `YES`/`NO`/`UNK` grammar over twelve named
+     targets. A narrative-generation metric does not price a structured-extraction use, and **nobody has
+     measured whether MedGemma over-calls under constraint**. That is now a question for the run, not a
+     settled fact.
+   - The "no vLLM-loadable checkpoint" census in the table above kills the **27B only**. `medgemma-4b-it`
+     is 4 B, bf16 is ~9 GB, and it never needed a quant — a 27B availability finding was allowed to bleed
+     onto the 4B. Through transformers rather than vLLM the constraint lifts further: `medgemma-27b-it`
+     multimodal loads in bnb-4bit at ~16-17 GB.
+   The over-calling framing survives as what AIMS the run — errors should land where we can see them —
+   not as what kills a model. A radiologist reader study
    (arXiv:2512.00271 / Eur Radiol Jun 2026; 478 ED patients, same-day CXR+CT with CT as ground truth,
    three blinded thoracic radiologists, no fine-tuning) scored `google/medgemma-4b-it` at 71.4% clinical
    acceptability against radiologists' 74.3% — close — but at a **5.4% hallucination rate against 0.1%**,
