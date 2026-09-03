@@ -25,9 +25,16 @@ def test_band():
     """The half-width is the NEARER gap to a neighbouring measured level, so the tighter side caps it."""
     teacher = UnreadTeacher(Path("labels.csv"), Path("published"))
 
+    assert teacher.band(0.28) == pytest.approx(0.20, abs=1e-9), (
+        "an uncalibrated centre is measured against the RAW levels 0.08 and 0.68, never against the rates"
+    )
     assert teacher.band(0.136) == pytest.approx(0.095, abs=1e-9), "0.041 below is nearer than 0.378 above"
     assert teacher.band(0.958) == pytest.approx(0.958 - 0.688, abs=1e-9), "at the top only one side exists"
     assert teacher.band(0.041) == pytest.approx(0.136 - 0.041, abs=1e-9)
+    assert teacher.band(float(np.mean(np.full(4096, 0.28)))) == pytest.approx(0.20, abs=1e-9), (
+        "a centre averaged out of one repeated constant is 0.28000000000000003, and the band must not "
+        "read that 1e-17 as a neighbouring level and collapse to zero"
+    )
 
 
 def test_ordered():

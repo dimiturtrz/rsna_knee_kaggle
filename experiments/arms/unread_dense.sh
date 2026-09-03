@@ -27,8 +27,9 @@
 # and a prevalence shift is the one thing a twelve-head trunk transmits between heads.
 #
 # THE BAND IS DERIVED. Its half-width is the NEARER gap from the unread level to a neighbouring level in
-# `MEASURED_AGREEMENT` — 0.095 on the calibrated table, band [0.041, 0.231] — so an override never asserts
-# more about a cell than the reader's own adjacent verdict would have. The pool's discriminative power on
+# `MEASURED_AGREEMENT`, on the axis the label table is written in. This arm runs on the UNCALIBRATED
+# report_labels_v2.csv that lib.sh points every arm at, so the centre is 0.28, the neighbours are 0.08 and
+# 0.68, the half-width is 0.20 and the band is [0.08, 0.48] — so an override never asserts
 # UNK cells cannot be measured corpus-wide (only 58 studies carry an annotation), so the size of the claim
 # is capped by something that WAS measured rather than by a number chosen to make the arm interesting.
 #

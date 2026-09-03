@@ -30,10 +30,13 @@ shift is the one thing a twelve-head trunk transmits between heads.
 
 THE BAND IS DERIVED, NOT CHOSEN. Its half-width is the smaller distance from the UNK level to its
 neighbouring levels in `MEASURED_AGREEMENT`, so an override never asserts more about a cell than the
-reader's own adjacent verdict would have. On the calibrated table that is 0.136 against 0.041 below
-and 0.378 above, so the half-width is 0.095 and the band is [0.041, 0.231]. The conservative side
-binds on purpose: the pool's discriminative power on UNK cells cannot be measured corpus-wide (only
-58 studies carry an annotation), so the size of the claim is capped by something that was measured.
+reader's own adjacent verdict would have. That table pairs the level the reader emits with the rate
+the radiologist confirms, and a label table is written in one space or the other, so the axis is
+chosen by which one the centre sits on rather than assumed: uncalibrated, 0.28 against 0.08 and 0.68
+gives a half-width of 0.20 and a band of [0.08, 0.48]; under `--calibrated-targets`, 0.136 against
+0.041 and 0.378 gives 0.095 and [0.041, 0.231]. The conservative side binds on purpose: the pool's
+discriminative power on UNK cells cannot be measured corpus-wide (only 58 studies carry an
+annotation), so the size of the claim is capped by something that was measured.
 
 WHAT THIS IS NOT. It is not a reading improvement — `report_reader` already showed the text is not
 there to read: on Synovitis UNK cells the report names the structure in 1.8% of 1,424, and on Effusion
@@ -85,9 +88,25 @@ class UnreadTeacher:
         rewrites the levels to and a hard-coded width would silently describe the uncalibrated scale
         after a switch flip. The NEARER neighbour and not the mean of the two, so the claim is capped
         by the tighter side on both sides of the centre.
+
+        THE AXIS IS CHOSEN, NOT ASSUMED, and that is the whole reason this is a method. Each pair in
+        `MEASURED_AGREEMENT` is (level the reader emits, rate the radiologist confirms), and a label
+        table is written in ONE of those two spaces: 0.28 uncalibrated, 0.136 under
+        `--calibrated-targets`. Reading the rate axis for an uncalibrated centre measures 0.28 against
+        neighbours it has no scale in common with — it returns 0.098 where the raw neighbours 0.08 and
+        0.68 say 0.20, so the band comes out half-width with a rationale that does not describe it.
+        The unread centre IS one of the five levels by construction, so the axis it sits nearest to is
+        the space the table is written in, and the gaps are measured from that LEVEL rather than from
+        the centre itself. The centre arrives as the mean of thousands of copies of one constant, so it
+        is 0.28000000000000003 and not 0.28 — measured from there, the level's own gap is 1e-17 instead
+        of zero, it survives any "not the same point" filter, and the band comes back 0.0000 with every
+        override collapsing onto the constant it was meant to spread. Snapping to the level first makes
+        the arithmetic exact rather than tolerant.
         """
-        rates = sorted(rate for _, rate in MEASURED_AGREEMENT)
-        gaps = [abs(rate - centre) for rate in rates if abs(rate - centre) > 0.0]
+        axes = ([level for level, _ in MEASURED_AGREEMENT], [rate for _, rate in MEASURED_AGREEMENT])
+        axis = min(axes, key=lambda values: min(abs(value - centre) for value in values))
+        nearest = min(axis, key=lambda value: abs(value - centre))
+        gaps = [abs(value - nearest) for value in axis if value != nearest]
         return min(gaps) if gaps else 0.0
 
     def ordered(self, values: NDArray[np.float64]) -> NDArray[np.float64]:
