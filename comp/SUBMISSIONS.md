@@ -3251,3 +3251,40 @@ the column's ordering, which this says nothing about. The `_cf` members stay val
 
 Three axes now read flat within 0.001: who SITS, how they are COMBINED, how the output is SHAPED.
 The lever is in the members.
+
+## `fiveship_v1` — 0.941. The 0.009 splits 1:2, and two thirds of it is the twin.
+
+**Ref 55970549, 2026-09-03, kernel `kneemri-fiveship`, kit `6a52c849`. Five members, no offline number.**
+
+The champion's own shipped members with `final_ws_cf` dropped: `calib_span_ff`, `grade_ladder_cf`,
+`merged_blend_cf`, `lr4e-5_ws_cf`, `through_dense_cf`, `overlap=False`, `LogitAverage`. Exactly the
+shipped counterparts of the five `twinfive_v1` shipped as fold-0 twins.
+
+**THE SPLIT.** `twinfive_v1` read 0.935 against the champion's 0.944, and that 0.009 was confounded two
+ways at once — twin-vs-shipped weights, and five seats against six. This entry holds the seats at five
+and the weights at shipped, so the confound comes apart:
+
+- champion 0.944 − fiveship 0.941 = **the SEAT term is 0.003**
+- fiveship 0.941 − twinfive 0.935 = **the TWIN term is 0.006**
+
+Pre-registered at 0.938-0.941 as "the two terms split evenly". They split **1:2**, which lands inside
+that branch — and, importantly, NOT inside 0.942-0.944, the branch that would have made the twin gap
+the whole story and the seat free.
+
+**WHAT THE TWIN TERM COSTS US.** Every number this project infers from a fold-0 twin understates the
+shipped pool by about **0.006 on the board**. That is most of the 0.008 gap to the leader. It is also
+the gap that `aucvote_v1` and `stackvote_v1` were reading across: both fitted their vote rules on twins
+and then served the shipped `_ff` / `_cf` members. Their flats stand as board readings of the combiner
+axis, but they were never measuring the shipped pool's own combiner.
+
+**WHAT IT DOES AND DOES NOT SAY ABOUT SEATING.** One seat out of six costs 0.003 — three board quanta,
+so the seat-count axis is not exactly flat. But the seven entries that read flat all RESEATED at
+constant count; subtraction is a different operation and this is its first reading. It does not reopen
+reweight, swap, precision, lens or distance, and it is emphatically not a licence to add a seventh
+seat: 0.003 is the price of removing the sixth, not the value of a seventh.
+
+No offline number is recorded and none could be: four of the five are `--fold -1`, so every holdout
+study is in-sample for part of the pool. Writing a twin's score into this row would poison
+`board_transfer` the same way `raptor_solo`'s in-sample 0.8938 did.
+
+`run_check` before the slot: loaded 5 of 5 members, no drop, no identity change. No card time.
