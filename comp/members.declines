@@ -234,15 +234,24 @@ errors_v3small_s2026 # DECLINED AS A SEAT, 2026-09-02. Best 0.8280 at epoch 6, C
                      # the label-error corpus as a SEAT lever; it does not price the corpus on a trunk
                      # that is competitive to begin with.
 
-ramp_dense_gate.pt          # 0.8578 at its peak epoch 7, against calib_dense_hold_s2026 0.8634 on the same
-  909-study holdout: -0.0056, just inside the 0.0062 floor and pointing DOWN. The certainty ramp was
-  built to let the model earn its way onto uncertain cells rather than being held at a fixed weight,
-  and the mechanism is sound, but at this corner it buys nothing measurable and the sign is wrong.
-  Declined as a SEAT, not refuted as a mechanism: it is one member at one corner, the delta is under
-  the floor, and the ramp has never been tried anywhere the supervision is actually thin. The narrow
-  place it would be re-opened is the three extreme-UNK labels (Synovitis 84.2%, Fracture 56.4%,
-  Baker's 45.9%) rather than all twelve, which is the same surviving clause confident224 left behind.
-  Answer this decline with a per-label run, never by re-quoting 0.8578. knee-fxgm.
+# ramp_dense_gate.pt — RETIRED 2026-09-03, and the entry is kept as a comment because a decline that is
+#   answered is worth more than one that is deleted. It refused the member on its LEVER reading: 0.8578 at
+#   peak epoch 7 against calib_dense_hold_s2026 0.8634 on the same 909-study holdout, -0.0056, inside the
+#   0.0062 floor and pointing DOWN.
+#
+#   WHAT ANSWERED IT is not a number, it is a distinction the roster already makes twice. On 2026-09-02
+#   both siblings — certainty_ramp 0.8584 and disagreed_ramp 0.8574 — were seated with that same negative
+#   control delta written into their roster notes, on the explicit ground that what seats is the CHECKPOINT
+#   and what closed is the LEVER. ramp_dense_gate sits at 0.8578, between the two, clearing the 0.8459
+#   merit bar and the 0.8521 non-DINOv2 bar. Declining the middle member of three on a delta the outer two
+#   were seated despite is not a policy, it is an inconsistency, and it left the member both packaged and
+#   declined with every gate green until roster_check reached the contradiction.
+#
+#   THE LEVER VERDICT SURVIVES INTACT and did not move one inch: three converged ramp arms spanning
+#   0.8574-0.8584 against a 0.8634 control read DOWN as a family, the ramp does not pay at this operating
+#   point, and it is re-opened only where supervision is thin — the three extreme-UNK labels (Synovitis
+#   84.2%, Fracture 56.4%, Baker's 45.9%) and not all twelve, answered with a per-label run. That clause is
+#   live and lives in certainty_ramp's roster note and in knee-fxgm.
 ortho_lpft_head.pt          # 0.7537 peak e11 (12 of 12, CONVERGED) — stage ONE of the OrthoDiffusion LP-FT
                             # pair (knee-6hfi): the ortholarge trunk FROZEN, head-only, unfreeze_last 0. It
                             # exists to produce a warm start for stage two, never a seat, which is the same
@@ -292,3 +301,17 @@ mrnet_warm_s2026.pt         # DECLINED as a seat, checkpoint kept. 0.8487 peak e
   corpus does - the axis this one holds fixed; (b) a per-label reading on a label where the POOL is weak
   and the external corpus is strong, which ACL is not (MCL 0.8114 and Lateral OA 0.8249 are the pool's
   two weakest, and MRNet supervises neither). The checkpoint is kept; only the seat is refused.
+
+ortho_pool_read.pt  # A PROBE, and it was never a seat candidate. It exists to read one thing: whether
+  `ortholarge` - DINOv3-L weights moved by 1.25M knee-MRI slices - carries knee structure a natural-image
+  trunk does not. Peak 0.8464 at epoch 8, below both the 0.8492 floor edge and the 0.8521 non-DINOv2 seat
+  bar, so it is DIRECTIONAL and nothing more; the reading it was armed for is the LP-FT triple, which is
+  still one control short (knee-6hfi, `ortho_fresh_lowlr`).
+
+  IT IS ALSO NOT SHIPPABLE TODAY, for a reason that has nothing to do with the number. `ortholarge`'s
+  release licence is unresolved against the fastMRI DSA the continuation corpus may draw on - knee-nxthh,
+  and Kimi's Q-CE is outstanding on exactly this. Rostering it would declare shippable a member whose
+  right to ship is an open question, which is the failure mode `mount_check` catches one step too late.
+
+  RE-OPEN BY: Q-CE resolving PERMIT, plus a score that clears 0.8521. Either alone is not enough - the
+  licence gates the seat and the number gates the merit, and this member currently fails both.

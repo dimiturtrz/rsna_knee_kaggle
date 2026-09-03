@@ -634,7 +634,13 @@ crop160_span_s2026.pt       # 0.8564 — the 160 mm field at 420 px, mm/px held 
 # 2026-09-02 — three that finished and were never written down. Scored here before adding: all three
 # clear the 0.8459 merit bar and the 0.8521 non-DINOv2 bar, on the same 909-study holdout as every
 # other seat, so there is no argument for declining them.
-ramp_dense_gate.pt                  # 0.8579, e7 — the ramp recipe with the dense gate
+ramp_dense_gate.pt                  # 0.8578 peak e7 — the ramp recipe with the dense gate. Seated on MERIT
+                                    # and on the same split its two siblings below are seated on: the
+                                    # checkpoint clears both bars, the LEVER is closed by the three-arm
+                                    # family read. It carried a contradicting decline from before that split
+                                    # was drawn, retired 2026-09-03 (the argument is kept, commented, in
+                                    # comp/members.declines). This line read 0.8579 until then; two of the
+                                    # three places that quote it say 0.8578, which is the peak-epoch number.
 stack_increments_base_s2026.pt      # 0.8635, e9 — second-best solo the pool holds
 stack_increments_fx_s2026_run1.pt   # 0.8595, e6 — the fx twin's first run; the second is TRUNCATED
 certainty_ramp_s2026.pt     # 0.8584 peak e8, CONVERGED (12 of 12, convergence_check clean). Clears the 0.8459
