@@ -13,7 +13,7 @@ On a 5090 the best speed/quality trade-off is usually an **NVFP4** weight (Black
 | **Qwen3.8-27B** | 27 B | NVFP4 ~20–22 GB ([unsloth/Qwen3.8-27B-NVFP4](https://huggingface.co/unsloth/Qwen3.8-27B-NVFP4)) | ✅ | general | ✅ | **Best single-model candidate** on this GPU; 128k context, already has FP4 kernels, handles text + images | Apache 2.0 |
 | **Qwen3.8-27B** | 27 B | GGUF Q4 ~16–18 GB | ✅ | general | ❌ | Fallback if NVFP4 vLLM path has issues; slower but proven stack | Apache 2.0 |
 | **MedGemma-1.5-4B-IT** | 4 B | PyTorch/GGUF ~2–3 GB ([google/medgemma-1.5-4b-it](https://huggingface.co/google/medgemma-1.5-4b-it)) | ✅ | ✅ (radiology/chest/derm/path) | ❌ | **Cheap medical sanity-check / candidate-findings model**; maintained, 1000× more usage than Lingshu | Gemma / HADF terms |
-| **MedGemma-27B-IT** (multimodal) | 27 B | GGUF / MLX only, ~16–17 GB | ✅ | ✅ | ❌ | **Not runnable in vLLM at all** — llama.cpp / ollama only. Zero vLLM-loadable quants exist | Gemma / HADF terms |
+| **MedGemma-27B-IT** (multimodal) | 27 B | **FP8-Dynamic** ([ig1](https://huggingface.co/ig1/medgemma-27b-it-FP8-Dynamic), 1,927 dl), ~27 GB; GGUF / MLX / bnb-4bit ~16–17 GB | ✅ | ✅ | ❌ | **FP8 only** — no GPTQ, no AWQ, no W4A16, no NVFP4. FP8 is Blackwell-native so the FP8 row is a real vLLM path. This cell was wrong twice: first as "GGUF/MLX only, zero vLLM-loadable quants" (an `fp8` repo-id census read as covering the text variant only; two of its rows are the multimodal one), then briefly over-corrected. Cited above so the third reading is checkable | Gemma / HADF terms |
 | **MedGemma-27B-text-IT** | 27 B | bitsandbytes-4bit only, ~16 GB | ❌ | ✅ | ❌ | **No GPTQ, no AWQ, no W4A16, no FP8, no NVFP4** — an HF sweep of 51 quantized repos found only GGUF, MLX and bnb. bnb loads in vLLM but on the slow path (no Marlin/Machete kernels), and the two repos that exist have 740 and 480 downloads | Gemma / HADF terms |
 | **gemma-3-27b-it** | 27 B | GPTQ-4b-128g ~16 GB ([ISTA-DASLab](https://huggingface.co/ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g), 641,658 dl); FP8-Dynamic ([leon-se](https://huggingface.co/leon-se/gemma-3-27b-it-FP8-Dynamic)) | ✅ | general | ❌ | **The decorrelation control.** Same architecture family as MedGemma minus the medical tuning, first-class vLLM support, no self-quantizing. If it matches MedGemma-27B-text on the annotated studies the medical finetune bought nothing on report-reading; if it does not, that difference IS what medical tuning is worth here. Either sign is a reading | Gemma terms |
 | **gemma-3-12b-it** | 12 B | int4-AWQ (233,873 dl) / W4A16 (111,507 dl) | ✅ | general | ❌ | Smaller tier if 27B cannot be co-scheduled. Note MedGemma has **no 12B** — 4B and 27B only, so there is no medical counterpart to control against at this size | Gemma terms |
@@ -91,4 +91,15 @@ A pragmatic two-model setup (which still avoids the old Qwen3.8-27B text-only + 
   while their general siblings ship GPTQ/AWQ/FP8 with counts in the hundreds of thousands. Nobody is
   serving the medical models in production, which is a fact about tooling support rather than about model
   quality — but it prices every medical option's real cost far above its benchmark row.
+- **Medical-model family diversity is far thinner than the model count suggests**, and it prices any
+  medical ensemble either lane builds. `Baichuan-M2-32B` reports `Qwen2ForCausalLM` with vocab 152064 —
+  it is Qwen 2.5 under another name, and it was on a roster as a "second family" until that was checked.
+  Lingshu, Hulu-Med and II-Medical are Qwen too. Outside Gemma and Qwen the whole medical space is
+  `Baichuan-M1-14B` (own arch), `HuatuoGPT-Vision` (Yi/LLaVA), `OpenBioLLM` (Llama-3) and `MedFound`
+  (Bloom, 2022). So a five-model medical roster can easily be two families wearing five names — the same
+  correlation trap `distinct14` measured on our own pool, one level up. Census by `architectures` in
+  `config.json`, never by the model card.
+- `ISTA-DASLab/gemma-3-27b-it-GPTQ-4b-128g` reports `Gemma3ForConditionalGeneration` with a live
+  `vision_config` and ships `preprocessor_config.json` — **the GPTQ control keeps its vision tower**, so
+  it stays a valid control if the audit ever goes multimodal.
 - Continue separate research into 3D knee-MRI architectures that can actually move the Kaggle score (task-specific CNN/ViT, not VLMs).

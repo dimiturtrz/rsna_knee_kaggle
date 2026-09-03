@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-09-03T13:05:34.781454Z",
+  "salt": "rsna-knee-vlm-filter-2026-09-03",
+  "n_studies": 58,
+  "n_tune": 29,
+  "n_holdout": 29,
+  "source": "D:\\data\\volumetric\\mri\\raw\\rsna_knee_abnormality\\train.csv",
+  "file": "D:\\personal_projects\\rsna_knee_kaggle\\research\\splits\\2026-09-03_vlm_filter_split58.csv",
+  "sha256": "25e0f65092e8f50c29678aa07892d598ac09b2d99f5084d15db520ecaae57edf",
+  "rule": "study-level split, never cell-level; frozen before any model output exists"
+}
