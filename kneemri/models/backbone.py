@@ -230,15 +230,27 @@ ENCODERS: dict[str, Encoder] = {
     # is priced to fail before it starts. This release IS that continuation at 1.25M images, done by
     # somebody else and licensed MIT. The lane is decided by loading it, not by pretraining.
     #
-    # NO MOUNT YET. MIT, so mirroring is permitted outright and is the dataset upload `dinov3-hf` already
-    # was; deferred until a probe or a member earns the seat.
+    # MOUNTED 2026-09-03 as `dimiturnt/dinov3-orthofoundation-hf`. The slug carries the FAMILY because
+    # `locates` demands both — `family in path` AND `leaf in segments` — and the first upload of this
+    # encoder was flat as `orthofoundation-hf`, which holds no "dinov3" and so could not find itself.
+    # `test_every_mount_is_locatable` caught it; nothing else would have. Its docstring already priced
+    # the failure: `find_encoder` raises, `kernel_run` drops that member, and the entry SCORES without
+    # it. Nesting under the existing `dinov3-hf` would also satisfy the rule, but re-versioning the
+    # dataset the champion kernels mount to tidy a name risks a working entry, so this got its own slug
+    # and the flat upload is an orphan for deletion. Two licences ship inside it because two apply and
+    # both require it: the
+    # release's own MIT text (verified from the file, not from prose), and Meta's DINOv3 Agreement, whose
+    # section 1(b)(i) grants redistribution of DERIVATIVE works only under that same Agreement and only
+    # with a copy provided. This is what separates the upload from the RadImageNet one: there the grant
+    # did not exist, here it does, and the condition is met by shipping the text.
     ORTHO_LARGE: Encoder(
         ORTHO_LARGE,
         "",
         1024,
         patch=16,
         family=DINOV3,
-        leaf="orthofoundation",
+        leaf="dinov3-orthofoundation-hf",
+        mount="dimiturnt/dinov3-orthofoundation-hf",
         params_m=303.1,
         depth=24,
         builder=ORTHOFOUNDATION_L.build,

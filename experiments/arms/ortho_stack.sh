@@ -60,6 +60,12 @@
 #
 # COST, priced before queueing. ViT-L at 20x(336/16)^2 = 8820 tokens a study against the 2352 it ran at
 # 224/12, so ~3.75x the compute of a measured 401 s epoch, at batch 1: ~1950 s an epoch, ~6.5 h for 12.
+# MEASURED, from the trainer's own row rather than a progress line: epoch 0 took 1583 s (`seconds` in
+# ortho_stack_s2026.metrics.jsonl), so ~5.3 h for 12 — the 1950 s estimate was slightly PESSIMISTIC.
+# An earlier note here read ~3200 s an epoch and ~11 h; that was derived from the 309 img/s progress
+# line and was wrong, and it briefly made the control arm conditional on a price that did not exist.
+# Read the epoch time from the metrics row, never from img/s.
+# Peak VRAM measured 6.51 GB against the 13274 MiB `vram_need` priced, so the card has room beside it.
 # ZERO submission slots. Plausible gain +0.019 offline if the term carries, which lands ~0.877 against
 # the best solo on disk (`stack_increments_s2026` 0.8642) — +0.013 over it, and at board transfer
 # +0.97-1.25 that is +0.013-0.016 board against a 0.008 gap to the leader. Odds it carries: even. The

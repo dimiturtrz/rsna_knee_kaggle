@@ -43,8 +43,16 @@
 # reading (b) plus a trunk-size cost, and it is informative; `ortho_stack` on its own would have
 # reported it as "the in-domain lane is empty", which would have been wrong.
 #
-# COST, priced before queueing. Identical geometry to `ortho_stack`: ~1950 s an epoch at batch 1,
-# ~6.5 h for 12, ZERO submission slots. This arm's own plausible gain as a MEMBER is low — v3large_dense
+# RUN IT UNCONDITIONALLY. This header briefly carried a rule making the arm conditional on `ortho_stack`
+# failing to clear `band_dense`, on the grounds that the pair cost ~22 h. That price was wrong: it came
+# from reading a 309 img/s progress line instead of the trainer's recorded epoch time, which is 1583 s
+# (`seconds`, epoch 0). The pair costs ~10.6 h, the control is as close to free as it was when this arm
+# was designed, and the delta-of-deltas is the answer to Q-CW under EVERY branch — including the one
+# where `ortho_stack` wins, where it says whether the continuation gain grew or shrank with the token
+# budget. Nothing about the arm's value changed; only a number I mis-measured did.
+#
+# COST, priced before queueing. Identical geometry to `ortho_stack`: 1583 s an epoch at batch 1
+# (MEASURED from the metrics row), ~5.3 h for 12, ZERO submission slots. This arm's own plausible gain as a MEMBER is low — v3large_dense
 # read 0.8258, the worst non-CNN trunk in the corpus, and nothing suggests the recipe step rescues it
 # past the 0.8459 seat bar. It is priced as an INSTRUMENT, not an improvement: it costs 6.5 h and it
 # converts `ortho_stack`'s three-way ambiguous read into a single-variable delta on the one axis the
