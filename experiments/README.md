@@ -6857,3 +6857,34 @@ input GEOMETRY - a localized crop, where a coronal structure occupies a usefully
 frame - rather than loss weighting, which is the same place Kimi's top-1%-vs-median table points (Q-BP,
 two-stage localize-then-classify, 9 of 9 - though confounded, see Q-BQ: all nine shipped spatial
 supervision).
+
+## `mrnet_warm_s2026` — killed at epoch 9, and the killer is probably my own test run
+
+The owner's question, asked directly: can a finding be learned from the FOREIGN corpora alone and then
+read on ours? `mrnet_warm` is the warm-start half of it — MRNet weights as `--init`, then our canonical
+recipe at 224 px, against the `base224` control at **0.8509**.
+
+It never answered. `convergence_check` reads it **TRUNCATED**: best epoch 6, a 10-epoch run, 12 asked.
+The trajectory was 0.7666 / 0.7985 / — / 0.8319 / 0.8387 / 0.8478 / **0.8485** / 0.8443 / 0.8455 /
+0.8441, at 221 s an epoch. Under `one_cycle` the anneal never ran, so 0.8485 is a **FLOOR**, 0.0024
+under the control and inside the 0.0062 holdout noise floor — which is to say the arm was still open
+when it died, not losing.
+
+**No checkpoint exists.** The process vanished before writing one, so this produced no member, and
+nothing here can be rostered or declined on merit.
+
+Two things it DID establish. The warm start demonstrably fired: epoch 0 read 0.7666 where `base224`
+reads 0.8509, which is the signature of foreign weights being loaded rather than a flag that did
+nothing. And the recipe runs — 221 s an epoch, 15.57 GB reserved, nine clean epochs.
+
+**WHY IT DIED, and this is the expensive part.** `logs/mrnet_warm.log` ends on a clean epoch line: no
+traceback, no OOM, no `ARM DONE`. Two `git push` runs at 23:22Z and 23:27Z each ran the pre-push pytest
+(2213 tests, 73 s), and the arm's last metrics write is 23:25Z, between them. Arms run in `.venv-arm`
+exactly so that a `uv sync` cannot rewrite the interpreter underneath them, and the standing note
+covers `uv sync` — it does NOT cover a plain pytest run, which is what happened here. The mechanism is
+NOT established and must not be written down as if it were; `ortho_fresh_lowlr`'s "exit 127" is the
+other candidate instance, and it was read as a method failure at the time. Filed P1. Until it is
+proven either way, no pre-push pytest runs while an arm holds the card.
+
+Re-run queued behind `ortho_pool_read` on `pid:66204`, because a 44-minute arm that answers a question
+the owner asked is the right thing to put in a card gap.
