@@ -49,6 +49,7 @@
 # and throughput are byte-identical to the control, so `v3base_dense` (0.8455) is the matched control
 # and the single moved flag carries the whole reading.
 #
+# control  v3base_dense = 0.8455 (declared 2026-09-03 from this header's own pre-registration, knee-sgzgc)
 # PRE-REGISTRATION, written before the number, against `v3base_dense`'s 0.8455.
 #
 #   FILLS THE CELL — solo at or above 0.8466 (`crop80_span`, the weakest seated member). For the first

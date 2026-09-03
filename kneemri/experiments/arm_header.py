@@ -19,11 +19,26 @@ from kneemri.experiments.arm_gate import BOARD, ArmGate
 BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+)\s*$", re.MULTILINE)
 """How an arm names the issue that priced it. One line, anywhere in the shell's header."""
 
-CONTROL_LINE = re.compile(r"^#\s*control\s+([A-Za-z0-9_]+)\s*=", re.MULTILINE)
+CONTROL_LINE = re.compile(r"^#\s*control\s+([A-Za-z0-9_][A-Za-z0-9_.-]*)\s*=\s*([01]\.[0-9]+)?", re.MULTILINE)
 """How an arm names the run its number will be read against. `# control  band_dense = 0.8578`.
 
 The name must be followed by `=` because the word also opens prose in several headers ("# control is
 the same recipe..."), and a sentence is not a declaration.
+
+THE HYPHEN IS PART OF A MEMBER NAME. This class read `[A-Za-z0-9_]+` until 2026-09-03, which cannot
+match `lr4e-5_ws` — it consumes `lr4e`, then fails on `-` where it wants `=`. That is not an edge
+case: `lr4e-5_ws = 0.8525` is described in three arm headers as "the control every other member
+reads", and every rate-named control (`lr1e-4_ws`, `lr2e-4_ws`, `res392_lr8e-6_ws`) has the same
+shape. So the tool that exists to say WHICH ARMS HAVE NO DENOMINATOR was blind to the project's most
+common denominator, and reported arms that declared a control correctly as declaring none. The sweep
+that number started was a sweep against a parser bug.
+
+THE SCORE IS THE SECOND GROUP AND IT IS LOAD-BEARING, not decoration. A header names an ARM
+(`lr4e-5_ws`) where the disk holds RUNS (`lr4e-5_ws_cf`, `lr4e-5_ws_ff`, `lr4e-5_ws_s2026`), so the
+name alone does not say which split the number came from — and the split is the difference between a
+fold-0 holdout and a `--fold -1` fit that has seen everything. The declared score picks the run, which
+is why it is parsed rather than skipped. Optional, because seventy pre-convention headers name a
+checkpoint with no number after it and those still resolve directly.
 """
 
 DELIBERATE_LINE = re.compile(r"^#\s*deliberate:\s*(--[a-z0-9-]+)", re.MULTILINE)
@@ -101,6 +116,16 @@ class ArmHeader:
         """
         found = ((name, CONTROL_LINE.search(self.text(name))) for name in names)
         return {name: match.group(1) for name, match in found if match}
+
+    def control_scores(self, names: Iterable[str]) -> dict[str, float]:
+        """The NUMBER each arm's control line declares, by arm name — the half `controls` drops.
+
+        Absent where the header names a control without a score, which is the pre-convention spelling
+        and not a defect. Separate from `controls` rather than widened into it because two callers read
+        the name only, and a tuple return would rewrite both to index past a field they never use.
+        """
+        found = ((name, CONTROL_LINE.search(self.text(name))) for name in names)
+        return {name: float(match.group(2)) for name, match in found if match and match.group(2)}
 
     def deliberate(self, name: str) -> set[str]:
         """The flags this arm declares it moves on purpose, so a diff on them is the experiment."""

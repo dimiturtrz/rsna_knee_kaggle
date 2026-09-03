@@ -39,8 +39,17 @@ from pathlib import Path
 from core import cli
 from kneemri.evaluation.run_comparison import RunComparison
 from kneemri.experiments.arm_header import ArmHeader
+from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
 
 logger = logging.getLogger(__name__)
+
+DECLARED_TOLERANCE = 5e-4
+"""How far a run's best epoch may sit from the score its header quoted and still be that run.
+
+Headers quote four decimals, so the rounding alone is 5e-5; the rest of the width is for a number
+copied off a report that printed a different epoch's rounding. Wide enough to survive transcription,
+far narrower than the 0.0062 report-holdout floor, so it can never merge two genuinely different runs.
+"""
 
 OUT_FLAG = re.compile(r'--out\s+"?([^"\s]+)"?')
 """What an arm writes, read off its own invocation. The quotes are optional because an arm may spell the
@@ -76,6 +85,43 @@ class ArmRead:
         """
         found = OUT_FLAG.search(self.headers.text(arm))
         return Path(found.group(1)).stem if found else arm
+
+    def sibling(self, named: str, declared: float | None, models: Path) -> Path:
+        """The run a control NAME points at, picked out of its split-suffixed siblings by its own score.
+
+        A header names an ARM and the disk holds RUNS. `lr4e-5_ws` — described in three headers as "the
+        control every other member reads" — has no checkpoint of that name at all; it has
+        `lr4e-5_ws_cf`, `lr4e-5_ws_ff` and `lr4e-5_ws_s2026`, and those are three different splits, one
+        of which has seen every holdout study. So the name resolved to a path that could not exist and
+        the tool reported the project's most-used control as a missing run. `produced` cannot help here:
+        it reads the `--out` of a shell, and there is no `lr4e-5_ws.sh` in the tree to read.
+
+        THE DECLARED SCORE IS WHAT DISAMBIGUATES, and it must be — guessing the suffix would pick a
+        split by convention and read a fold-0 arm against a full-fit control without saying so. A
+        sibling matching the number the header wrote down is the run whose score the header quoted, by
+        construction. Ambiguity and silence both raise, naming every candidate and its own best epoch,
+        because a control resolved wrongly is worse than one not resolved at all.
+
+        THE CHECKPOINT ALONE SATISFIES THE DIRECT BRANCH, not just a metrics file. `wsfold0_e6` — the
+        control knee-bot's whole argument rests on — predates the recorder and kept its predictions
+        rather than epoch rows, which `RunComparison.scored` reads and `RunMetrics.exists` does not. On
+        the metrics test alone it fell through to the sibling search, found no siblings either, and a
+        control that resolves perfectly one layer down was reported as matching nothing.
+        """
+        direct = RunComparison.resolved(Path(self.produced(named)), models)
+        if direct.exists() or RunMetrics(direct).exists():
+            return direct
+        records = models.glob(f"{named}_*{METRICS_SUFFIX}.jsonl")
+        runs = [models / f"{record.name.removesuffix(f'{METRICS_SUFFIX}.jsonl')}.pt" for record in records]
+        best = ((run, RunMetrics(run).best()) for run in runs)
+        scored = {run: row["auc"] for run, row in best if row is not None}
+        if declared is not None:
+            matched = [path for path, auc in scored.items() if abs(auc - declared) <= DECLARED_TOLERANCE]
+            if len(matched) == 1:
+                return matched[0]
+        candidates = " ".join(f"{path.stem}={auc:.4f}" for path, auc in sorted(scored.items())) or "none"
+        message = f"control {named} = {declared} matches no single run under {models}; siblings: {candidates}"
+        raise SystemExit(message)
 
     def uncontrolled(self, arms: Iterable[str]) -> list[str]:
         """The arms declaring no control — the ones whose every reading is against a remembered number.
@@ -114,7 +160,7 @@ class ArmRead:
         if named is None:
             message = f"{arm} declares no `# control  <name> = <score>` line, so it has no denominator"
             raise SystemExit(message)
-        control = RunComparison.resolved(Path(named), models)
+        control = self.sibling(named, self.headers.control_scores([arm]).get(arm), models)
         run = RunComparison.resolved(Path(self.produced(arm)), models)
         return RunComparison(control, [run], labels, None).report()
 

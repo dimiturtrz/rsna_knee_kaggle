@@ -26,6 +26,9 @@
 # bias is the ORDERING, and the ordering is all a sampler consumes. Nothing here may be quoted as a
 # held-out measurement.
 #
+# control  disagreed_uniform = 0.8507 (declared 2026-09-03, knee-sgzgc; this arm's OWN alpha-zero run,
+# not a ledger row — it is the second of the two run_train calls below, and the note under this line is
+# the argument for why the ledger's band_dense would be the wrong denominator)
 # THE CONTROL IS THE SECOND RUN AND NOT THE LEDGER, which is the sharp part of this design. At alpha
 # zero the weights go flat but the draw stays WITH REPLACEMENT, so an epoch still holds duplicates and
 # still misses about a third of the pool — a bootstrap resample, not a permutation. Scoring the tilted

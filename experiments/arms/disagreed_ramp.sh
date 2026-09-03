@@ -54,6 +54,7 @@
 # bead: knee-zer5
 #
 # deliberate: --sample-ramp
+# control  disagreed_uniform_s2026 = 0.8507 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 SPREAD="$PROCESSED/train_spread_honest12.npz"

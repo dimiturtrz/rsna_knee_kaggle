@@ -39,6 +39,7 @@
 # holds 19.2 GB total, 99% utilisation and 476-514 W, i.e. roughly 3.4x the throughput in 40% less
 # memory. The cap is what keeps it inside real VRAM, and it leaves ~12 GB for the other project.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  wsfold0_e6 = 0.8457 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 # 392, NOT 448, and the reason is a hard ceiling rather than caution. Tokens go as the square of the

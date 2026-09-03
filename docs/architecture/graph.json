@@ -3314,6 +3314,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.arm_read",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.arm_smoke",
       "target": "kneemri.experiments.vram_need",
       "weight": 1
@@ -18146,6 +18152,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_header.ArmHeader.control_scores",
+      "target": "kneemri.experiments.arm_header.ArmHeader.text",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_header.ArmHeader.controls",
       "target": "kneemri.experiments.arm_header.ArmHeader.text",
       "weight": 1
@@ -18226,6 +18238,42 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_read.ArmRead.report",
       "target": "kneemri.experiments.arm_read.ArmRead.produced",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.report",
+      "target": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "target": "kneemri.evaluation.run_comparison.RunComparison.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "target": "kneemri.experiments.arm_read.ArmRead.produced",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "target": "kneemri.runs.run_metrics.RunMetrics.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "target": "kneemri.runs.run_metrics.RunMetrics.exists",
       "weight": 1
     },
     {
@@ -42786,6 +42834,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_header.ArmHeader.control_scores",
+      "label": "control_scores",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_header.ArmHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_header.ArmHeader.controls",
       "label": "controls",
       "level": "method",
@@ -42884,6 +42940,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_read.ArmRead.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_read.ArmRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_read.ArmRead.sibling",
+      "label": "sibling",
       "level": "method",
       "parent": "kneemri.experiments.arm_read.ArmRead",
       "role": null

@@ -52,6 +52,7 @@
 # deliberate: --distill-weight
 # deliberate: --teacher-targets
 #
+# control  stack_increments_base_s2026 = 0.8635 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 BLEND="$PROCESSED/labels/blend_hybrid_fx.csv"

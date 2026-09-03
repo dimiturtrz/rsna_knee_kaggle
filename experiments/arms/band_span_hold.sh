@@ -11,6 +11,7 @@
 # BOTH halves hold the annotations, which is what buys the second ruler: only a checkpoint carrying
 # hold_annotations=True is readable by `python -m kneemri.evaluation.annotated_readings`, and that reading
 # is the point of the pair. The flag itself is priced at -0.0015 on the proxy (knee-9198).
+# control  band_span_s2026 = 0.8565 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 run_train band_span_hold \

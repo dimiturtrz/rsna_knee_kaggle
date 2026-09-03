@@ -5,7 +5,7 @@
 # The arm adds a cosine term pulling a study-level readout toward a sentence-transformer embedding of
 # the report. Two weights, to separate 'the idea is wrong' from 'the weight is wrong'.
 #
-# control  rank24_s2026            0.8272
+# control  rank24_s2026 = 0.8272
 # N  report term at 0.3            0.8219   -0.0053
 # O  report term at 1.0            0.8209   -0.0063
 #

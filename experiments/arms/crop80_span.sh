@@ -11,6 +11,7 @@
 # opposite trade, on the perpendicular axis. If they are independent the way slices and span were,
 # this reads the two gains together on a pixel group no seated member occupies.
 #
+# control  band_span = 0.8565 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 # THE CONTROL IS band_span (0.8565), not crop80_tissue, and the arm is not expected to beat it. The
 # only 80 mm member the project has scored 0.8345 against a `whole_stack` control at 0.8457 - the
 # tighter crop COST 0.0112 on the mean - and `centre_tissue` since established that the loss is the

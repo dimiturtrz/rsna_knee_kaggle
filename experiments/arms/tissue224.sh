@@ -72,6 +72,7 @@
 # facts about a flag that never landed.
 #
 # bead: knee-2zbi
+# control  native224_s2026 = 0.8502 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

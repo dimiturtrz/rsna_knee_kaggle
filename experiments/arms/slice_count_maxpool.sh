@@ -6,7 +6,7 @@
 # Max pooling encodes each slice alone, which makes a group's physical thickness independent of the
 # slice count. Under it the explanation predicts 20 slices should WIN.
 #
-# control  rank24_s2026            0.8272
+# control  rank24_s2026 = 0.8272
 # Q  12 slices, max pooling        0.8310   +0.0038  (isolates the pooling change)
 # R  20 slices, max pooling        0.8309   -0.0001 against Q - the prediction failed
 #

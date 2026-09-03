@@ -69,6 +69,7 @@
 #               precisely because one such plane is unreliable. Assert the centring fired before blaming
 #               anything.
 # bead: knee-86vi
+# control  sided_pool = 0.8561 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

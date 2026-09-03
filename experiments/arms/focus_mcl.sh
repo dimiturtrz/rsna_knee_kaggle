@@ -75,6 +75,7 @@
 # strong, because it won DESPITE the starvation; a LOSS is ambiguous between "jointness costs nothing"
 # and "one column is too little supervision", and its follow-up is an UPWEIGHT rather than a mask.
 #
+# control  band_dense = 0.8578 (declared 2026-09-03; the name is this header's, the score is the ledger's, knee-sgzgc)
 # THE CONTROL IS `band_dense`, ALREADY FITTED, and this file is its invocation with `--focus-label`
 # added and nothing else changed — same recipe, same 20 slices, same band, same default dinov2-small.
 # Read the MCL COLUMN, not the mean: eleven of twelve heads carry no gradient, so the mean is noise by

@@ -3,6 +3,7 @@
 #
 # WHAT IS HELD AND WHAT MOVES. This is `band_dense`'s invocation with the teacher term added and nothing
 # else touched — same variant, rate, batch, slices, band, pooling, whole-stack, epochs and schedule. So
+# control  band_dense = 0.8578 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 # the control is `band_dense` at 0.8578 (peak e8, 2026-08-19), it is already in the ledger, and this arm
 # costs ZERO extra card to have a matched control. The single variable is `--distill-weight`.
 #

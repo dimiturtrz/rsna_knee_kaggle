@@ -42,5 +42,6 @@
 # string unchanged — so the delegate resolved to `…resolution_420.sh/resolution.sh`, printed nothing,
 # and arm_check reported the arm as not existing. Silent, and exactly the clean-pass-over-nothing shape
 # that module carries two scars from.
+# control  res392_ws_s2026 = 0.8523 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 HERE="${BASH_SOURCE[0]//\\//}"
 exec bash "${HERE%/*}/resolution.sh" 420 448

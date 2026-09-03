@@ -58,6 +58,8 @@
 # when they were facts about a flag that never landed.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  merged_span_cf = 0.8618 (fold 0, scored against report_labels_v2)
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"

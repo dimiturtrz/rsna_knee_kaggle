@@ -77,6 +77,7 @@
 # bead: knee-6hfi
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  ortho_fresh_lowlr = (not yet run; the missing third point of the LP-FT triple, knee-6hfi)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

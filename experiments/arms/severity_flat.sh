@@ -8,7 +8,7 @@
 # Ranking is on because it is the only component that consumes the gradation (pair weight is
 # relu(s_i - s_j)); BCE pulls both toward present and the local evaluation binarises at 0.5.
 #
-# control  rank24_s2026 (graded)   0.8272
+# control  rank24_s2026 = 0.8272 (graded)
 # P  flat YES                      0.8228   -0.0044
 #
 # So the gradation is live signal the model can use, not assertion-strength it ignores. That is the

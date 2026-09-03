@@ -47,6 +47,7 @@
 # EMA IS ON, and this is the case it was argued for: with no holdout there is no best-epoch selection
 # to fall back on, so the answer would otherwise depend entirely on where the last step landed.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  res392 = 0.8523 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # EVERY CHOICE HERE IS NOW THE ONE THAT SURVIVED, and four of them were not on 2026-08-11.
 #

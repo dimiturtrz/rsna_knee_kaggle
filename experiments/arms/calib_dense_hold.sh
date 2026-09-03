@@ -63,6 +63,7 @@
 # bead: knee-ep74
 #
 # NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB.
+# control  band_dense_s2026 = 0.8578 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

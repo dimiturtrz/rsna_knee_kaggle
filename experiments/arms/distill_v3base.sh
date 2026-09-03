@@ -8,6 +8,7 @@
 #
 # WHAT IS HELD AND WHAT MOVES. This is `v3base_dense`'s invocation with the teacher term added and nothing
 # else touched — same variant, rate, batch, slices, band, pooling, whole-stack, epochs and schedule. So the
+# control  v3base_dense = 0.8455 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 # control is `v3base_dense` at 0.8455 (peak e6, 2026-08-21) and it costs ZERO extra card: the control is
 # already in the ledger. The single variable is `--distill-weight`.
 #

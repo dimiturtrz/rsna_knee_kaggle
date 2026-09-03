@@ -26,6 +26,7 @@
 # nothing. Read them with `python -m kneemri.experiments.convergence_check` first: under `one_cycle` a
 # truncated run's score is a FLOOR, and gating on a floor is gating on nothing.
 #
+# control  calib_dense_hold = 0.8634 (declared 2026-09-03; the name is this header's, the score is the ledger's, knee-sgzgc)
 # THE CONTROL IS `calib_dense_hold`, NOT `band_dense_hold`. Against it this arm moves exactly one flag
 # (`--ema`), so the ADDITIVE prediction is a subtraction with no correction terms:
 #

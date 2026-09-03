@@ -75,6 +75,23 @@ def test_controls(tmp_path: Path):
     assert found == {"declared": "band_dense"}, "a sentence beginning with the word is not a declaration"
 
 
+def test_control_scores(tmp_path: Path):
+    """The number beside the name, which is what picks a run out of its split-suffixed siblings.
+
+    THE HYPHEN CASE IS THE REGRESSION. `lr4e-5_ws` is the control three headers call "the control every
+    other member reads", and the name class excluded `-` until 2026-09-03, so it matched nothing and
+    every arm reading it was reported as declaring no control at all.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    (arms / "hyphen.sh").write_text("# control  lr4e-5_ws = 0.8525 (fold 0)\n", encoding="utf-8")
+    (arms / "bare.sh").write_text("# control  wsfold0_e6 =\n", encoding="utf-8")
+    headers = ArmHeader(arms)
+
+    assert headers.controls(["hyphen", "bare"]) == {"hyphen": "lr4e-5_ws", "bare": "wsfold0_e6"}
+    assert headers.control_scores(["hyphen", "bare"]) == {"hyphen": 0.8525}, "a checkpoint quotes no score"
+
+
 def test_deliberate(tmp_path: Path):
     """The flags an arm says it moves on purpose — one line each, so moving three is visible as three."""
     arms = tmp_path / "arms"

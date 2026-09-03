@@ -44,6 +44,7 @@
 # deliberate: --eval-labels report_labels_v2.csv (the proxy must not move with the arm)
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  holdannot_s2026 = 0.8506 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 BLEND="$PROCESSED/labels/blend_three_v1.csv"

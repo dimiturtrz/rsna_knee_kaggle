@@ -37,6 +37,7 @@
 # deliberate: --sample-spread/--sample-alpha/--sample-ramp (the single mechanism under test)
 # deliberate: --calibrated-targets --hold-annotations --slices 20 --band-low 0.1 --band-high 0.9
 # deliberate: (all four copied from calib_dense_hold verbatim, so the pair differs in the ramp alone)
+# control  disagreed_uniform_s2026 = 0.8507 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

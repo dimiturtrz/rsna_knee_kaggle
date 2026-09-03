@@ -5,7 +5,7 @@
 # three-slice group shows it. Different mechanisms, so they should compose - and if they do not, one
 # of them was never doing what its isolated number suggested.
 #
-# control  rank24_s2026            0.8272
+# control  rank24_s2026 = 0.8272
 # rate alone (rate_isolate)        0.8323   +0.0051
 # pooling alone (slice_count Q)    0.8310   +0.0038
 # ADDITIVE PREDICTION              0.8361   - written before the run, so 'as expected' cannot be

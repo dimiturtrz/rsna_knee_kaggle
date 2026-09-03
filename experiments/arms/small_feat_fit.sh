@@ -29,6 +29,7 @@
 # 98.6% in-sample on the holdout, capping the ceiling.
 #
 # PRICE: ~64 min (12 epochs at ~320 s), 0 slots. The pair costs ~1.4h against the swinbase pair's 3.3h.
+# control  band_dense_s2026 = 0.8578 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"

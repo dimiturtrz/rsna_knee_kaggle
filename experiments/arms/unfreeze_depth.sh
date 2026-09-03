@@ -32,6 +32,7 @@
 # kind. WHY IT MIGHT COST SOMETHING: the frozen blocks are the GENERIC ones, and knee MRI is far enough
 # from ImageNet that the specialisation may need to reach deeper than four blocks.
 #
+# control  band_dense = 0.8578 (declared 2026-09-03 from the re-basing note below, knee-sgzgc)
 # CONTROL, RE-BASED 2026-08-20: band_dense = 0.8578, the SAME recipe at the settled operating point
 # (4e-5, 20 slices, band 0.10-0.90, 12 epochs) with the default six blocks unfrozen. The comment here
 # used to name wsfold0_e6 = 0.8457, taken at the default rate and the 0.20-0.80 band. calib_span had
@@ -54,6 +55,7 @@
 # whose question is not about encoder depth, which is what would make this arm worth its own slot.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  band_dense = 0.8578 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 BLOCKS="${1:-4}"
 require "$LABELS"

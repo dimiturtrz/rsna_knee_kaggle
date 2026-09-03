@@ -57,6 +57,8 @@
 # deliberate: measures disagreement with the ruler every other fold-0 row was scored against)
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  lr4e-5_ws = 0.8525 (fold 0, scored against report_labels_v2)
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"

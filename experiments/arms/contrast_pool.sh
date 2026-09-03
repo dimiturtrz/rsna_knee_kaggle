@@ -52,6 +52,7 @@
 #
 # NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB. The memory adds
 # 8 steps of `b o h` contexts, ~5 MB at this trunk, which is three orders below the activations.
+# control  calib_dense_hold_s2026 = 0.8634 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

@@ -51,6 +51,7 @@
 # than halves); the same pooling on a head that also sees depth regions; and the small-weight side
 # REGULARISER `side_dense`'s row left standing, which was explicitly deferred to "a head that sees
 # position" — this arm is what would give it one.
+# control  band_dense = 0.8578 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

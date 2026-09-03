@@ -14,6 +14,7 @@
 # WHY IT IS COMPARABLE TO A RUN THAT ALREADY EXISTS. `ReportFolds.assign` sends an identifier
 # `train.csv` has never heard of to TRAIN_ONLY = -2. Measured on the real merged index: 736 train-only,
 # fold 0's holdout 909 — OUR studies, the same 909 every fold-0 arm in the ledger was scored on. So the
+# control  lr4e-5_ws = 0.8525 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 # control is not run again. It is `lr4e-5_ws = 0.8525`: same 12 slices, same 0.20-0.80 band (the
 # merged cache carries the historic band, which is why the control is NOT band_span), same
 # whole-stack, same 4e-5 backbone rate, same twelve epochs, same label table for our rows.
@@ -57,6 +58,7 @@
 # ledger as facts about an architecture when they were facts about a flag that never landed.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  lr4e-5_ws = 0.8525 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_LABELS="$PROCESSED/labels/merged_labels.csv"

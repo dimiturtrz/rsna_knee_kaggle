@@ -56,6 +56,7 @@
 # deliberate: --epochs 24 (the budget the decline was measured over)
 # deliberate: --image-size 224 (native224's control, per that row's standing instruction)
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  native224_long_s2026 = 0.8490 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

@@ -56,6 +56,8 @@
 # NONE OF THE FOUR `_cf` OUTPUTS CAN EVER BE SCORED OFFLINE. `--fold -1` means each has seen every holdout
 # study, so no output here may be seat-scored, curve-scored or distance-scored. `merged_blend_cf` is the
 # one exception — it is fold-0 like its original — and it is therefore the ONLY offline read this arm
+# control  merged_blend_s2026 = 0.8587 (declared 2026-09-03 from this header's own prose, knee-sgzgc; the
+# ledger reads 0.8589, inside the 5e-4 resolution tolerance, so the run still resolves by this number)
 # produces. Read it against `merged_blend_s2026` 0.8587 with `convergence_check` first; a truncated score
 # under `one_cycle` is a FLOOR. If that one seat reads NEGATIVE, do not ship the entry: it is the only
 # evidence available that the flag transfers to corners outside the two it was measured at.

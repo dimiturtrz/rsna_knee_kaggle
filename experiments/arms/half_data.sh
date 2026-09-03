@@ -60,6 +60,7 @@
 # properly and costs another ~18 min; that is a decision for after this number exists, not a plan.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  band_dense = 0.8578 (declared 2026-09-03 from this header own prose, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

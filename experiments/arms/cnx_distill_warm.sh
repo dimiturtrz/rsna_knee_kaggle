@@ -16,6 +16,8 @@
 # shown to transfer confounds two questions. The student is a 448 px convolutional trunk warm-started
 # from `cnx_own_recipe`'s peak encoder — a different pixel group BY CONSTRUCTION, not by argument.
 #
+# control  cnx_warm_anneal = (declared 2026-09-03; no score quoted here, and none is needed — a shell of
+# that name exists, so the run resolves through its own --out rather than by matching a number, knee-sgzgc)
 # THE CONTROL IS FREE AND IT IS MATCHED. `cnx_warm_anneal` is this invocation with the two teacher flags
 # removed and every other flag identical: cnxbase, 448 px, 20 slices, band 0.1-0.9, whole-stack, max
 # pooling, batch 1 / accumulate 6, vram-gb 16, `--backbone-lr 1e-4`, 6 epochs, the same encoder file. So

@@ -38,6 +38,7 @@
 #
 # bead: knee-teh4
 #
+# control  errors_dense_s2026 = 0.8420 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 FLAGS="$PROCESSED/label_flags.csv"
 require "$LABELS"

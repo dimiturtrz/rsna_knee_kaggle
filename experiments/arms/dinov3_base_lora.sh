@@ -21,6 +21,7 @@
 #
 # control  dinov3_v3small_224 under LoRA = 0.8217, and DINOv2's 0.8457 is the bar that matters.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  lora_r8_v3small_224 = 0.8217 (declared 2026-09-03; the prose above names it as "dinov3_v3small_224 under LoRA", which is this run, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

@@ -55,6 +55,7 @@
 # deliberate: pin makes that an assertion instead of a coincidence; the values are the same either way.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  merged_corpus_s2026 = 0.8545 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED3_LABELS="$PROCESSED/labels/merged3_labels.csv"

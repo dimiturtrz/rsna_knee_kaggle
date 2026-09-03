@@ -19,6 +19,7 @@
 #          The cost is one training slot for a number that prices a mechanism we already ship.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  wsfold0_e6 = 0.8457 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

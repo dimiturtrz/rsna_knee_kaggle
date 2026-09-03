@@ -49,6 +49,7 @@
 # bead: knee-wbwq
 #
 # NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB.
+# control  calib_dense_hold_s2026 = 0.8634 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 require "$MODELS/encoders/calib_dense_hold.enc.pt"
