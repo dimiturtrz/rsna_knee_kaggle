@@ -101,3 +101,10 @@ comp/fout*/
 
 .claude/inbox/.listener_*
 .agent-runtime/inbox/.listener_*
+
+# Mailbox listener side-channels: the alert logs each side's watcher appends to, and the Kimi-side
+# scratch directory. Runtime state like the letters themselves — and a kit build stamps DIRTY off a
+# whole-tree `status --porcelain`, so an untracked runtime file from EITHER side blocks a submission.
+/.claude/mail_alerts.*.log
+/.agent-runtime/mail_alerts.*.log
+/.agent-runtime/scratch/

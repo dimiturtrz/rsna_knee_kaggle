@@ -70,6 +70,7 @@ The named phenomenon is **feature distortion under fine-tuning**, studied by Kum
 | **Transferability estimation** | LogME (You et al., ICML 2021) | Estimates how well frozen features transfer, but Bassignana et al. (*Evidence > Intuition*, EMNLP 2022) find LogME's predictive power drops after full fine-tuning because frozen and fine-tuned representations misalign. |
 | **Surgical / discriminative fine-tuning** | Lee et al., *Surgical Fine-Tuning*, ICLR 2023 / arXiv:2210.11466 | Freezing or differentially updating the right layers can outperform full FT. Useful as a repair when a continued trunk collapses under full FT. |
 | **Discriminative learning rates** | Howard & Ruder, *Universal Language Model Fine-tuning for Text Classification*, 2018 | Lower layers get smaller LR. Mentioned by Kumar et al. as a related idea to prevent feature distortion. |
+| **Medical FM adaptation survey** | Phuntsho et al., *Adaptation of Foundation Models for Medical Image Analysis*, arXiv:2511.01284 (2025) | Reviews SFT, domain pretraining, PEFT, etc.; notes that full fine-tuning can underperform linear probing or partial adaptation when pretrained features are already strong. |
 
 ### What explains a continued trunk that probes best and serves worst
 
@@ -77,7 +78,7 @@ Your controlled pair is strong: `ortholarge` vs `v3large` is the same DINOv3-L a
 
 This pattern has three plausible, non-mutually-exclusive explanations in the literature:
 
-1. **Feature distortion (Kumar).** The continuation produced features that are highly linearly separable on the target domain. Full fine-tuning with a randomly initialized head then moves the trunk away from that good solution before the head has learned to use it. LP-FT is the published repair.
+1. **Feature distortion (Kumar).** The continuation produced features that are highly linearly separable on the target domain. Full fine-tuning with a randomly initialized head then moves the trunk away from that good solution before the head has learned to use it. Kumar et al. identify this as the **alignment error of random head initialization (φ₂)** in their lower-bound analysis. LP-FT is the published repair.
 
 2. **Catastrophic forgetting of the continuation.** Full fine-tuning on 4,407 studies may overwrite the 1.25M-knee statistics that made the trunk good, reverting it toward the base DINOv3-L behavior. This is a specific instance of the stability-plasticity tradeoff studied in continual learning.
 
@@ -154,3 +155,4 @@ The obvious confound is that the 0.8249 ridge uses `moments` while the 0.7537 he
 - Ionescu, Vantzos, Sminchisescu. *Matrix Backpropagation for Deep Networks with Structured Layers.* ICCV 2015 (DeepO2P).
 - *Human activity recognition under low-light conditions using frozen CLIP with lightweight adaptation.* Springer 2026.
 - Yu et al. *A multimodal vision foundation model for generalizable knee pathology.* arXiv:2601.18250 (OrthoFoundation).
+- Phuntsho et al. *Adaptation of Foundation Models for Medical Image Analysis.* arXiv:2511.01284 (2025).
