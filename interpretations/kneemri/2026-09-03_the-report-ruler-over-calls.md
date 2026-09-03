@@ -170,6 +170,39 @@ for changing the ruler**. Read against a common v2 truth the two differ by +0.00
 disk were ever fitted on v3 (`recal_holdannot`, `recal_dense`), and `recal_dense` reads 0.8610 either
 way, so the contamination is contained to the one row.
 
+## What v3 already fixed, and what it did not
+
+`report_labels_v3.csv` replaces each reader level with its measured positive rate, and `knee-8wa0` scored
+it at **+0.0105 on the gold ruler** over a matched control, free on the proxy. Both tables read against
+the radiologist on the same 58 says exactly which half of the defect that bought:
+
+| table | gold-58 AUC | positive rate | disagree | FP | FN |
+|---|---|---|---|---|---|
+| `report_labels_v2` | 0.8658 | 0.447 | 0.2083 | 108 | 37 |
+| `report_labels_v3` | **0.8676** | **0.306** | **0.1739** | **47** | 74 |
+| radiologist gold | — | 0.345 | — | — | — |
+
+**v3 barely changes the ORDERING** — +0.0018, under a third of the 0.0062 floor — because it is close to a
+monotone remap of v2 and AUC is rank-invariant. What it changes is the VALUES: it cuts over-calls from 108
+to 47 and total cell disagreement by a sixth. So the +0.0105 v3 bought is a supervision-scale effect —
+better-calibrated targets for the loss — and not a better-ordered ruler. That is mechanistically clean and
+it is the reading to carry into the queued dense-corner replication.
+
+**And v3 overshoots.** It trades 61 over-calls for 37 new under-calls and lands at a 0.306 positive rate
+against the radiologist's 0.345, so on these 58 it now under-calls. **That is not a licence to build a v4
+that shifts the levels back up.** These 58 are 1.47x finding-enriched, so the corpus-level positive rate
+that would match a radiologist is not knowable from them, and twelve per-label shifts fitted on 58 studies
+would spend the only honest ruler the project owns. A v4 needs a mechanism, and this table does not
+supply one.
+
+**Method note, and it changed a headline.** The report column takes SIX distinct values over 58 rows, so
+it is almost all ties, and `Ordering.auc` breaks ties by argsort order — its docstring justifies that with
+"the members' predictions are continuous floats, so exact ties are vanishing", which is true of a member
+and false of a label table. Measured: on `holdannot`'s continuous predictions it agrees with a tie-averaged
+AUC to **0.000000**; on the v2 label column it reads **+0.0032 high**, half the noise floor and dependent
+on sort order. Every table number above is tie-averaged. Use `Ordering.auc` for members, never for a
+discrete score column.
+
 ## Reproduce
 
 Eight cached prediction arrays under `processed/…/annotated_predictions/`, `GoldRows().annotated()` on
