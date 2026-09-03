@@ -3385,3 +3385,43 @@ offline size is under the 0.0021 the board can resolve at this pool's own positi
 UNRESOLVED (gaps of 0.0020-0.0037, under its 0.0053 floor); **0 of the 276 pairs the holdout actually
 resolved were inverted by the board.** The ruler is not broken. It is being read below its resolution,
 which is the same defect in a different coordinate.
+
+## `ortho_solo_v1` — 0.907. The first non-DINOv2 point, and it cannot be read yet.
+
+`ortho_dense_s2026` served alone (ref 55994354, 2026-09-03 21:00Z). DINOv3 ViT-L continued on 1.25M
+knee slices, honest fold-0, **offline 0.8452 → board 0.907**. Shipped as an instrument on the RULER:
+every pair in `board_transfer` comes from a DINOv2-family trunk, so the offline-to-board slope this
+project prices every arm with has never once been fitted outside one family.
+
+**IT DOES NOT YET LICENSE A FAMILY-SPECIFIC SLOPE, and the temptation to read one is the reason this
+row exists.** A slope needs two comparable points and there is no comparable partner on disk. The only
+other honest-offline solo is `solo_v1` (0.8518 → 0.868), three weeks and several kit revisions older,
+on a different decode. Every solo scoring above 0.914 — `soloseat_v1` 0.925, `calibsolo` 0.923,
+`raptor_solo` 0.923 — is `--fold -1` and carries no offline number at all. So 0.907 against 0.923 is
+**not** a measured family penalty: those three saw the test-adjacent data this one withheld.
+
+What the point IS good for: it is one honest `(offline, board)` pair from outside the family, and the
+mount rehearsal for the ortho encoder dataset (`loaded 1 of 1`). A matched partner — one current-kit
+DINOv2 member at a comparable offline, served alone at fold-0 — would turn it into a reading. That
+partner has not been shipped.
+
+## `foldfour_v1` — 0.936. Half a measurement; the other half is the number that matters.
+
+Four seats, all `--fold 0` (ref 55994671, 2026-09-03 21:31Z): `calib_dense_hold_s2026`,
+`calib_span_s2026`, `through_dense_s2026`, `small_batch6_s2026`. Four because only four members have
+twins on both sides of the fold line.
+
+Its partner `fitfour` is the identical seating at `--fold -1`. **The measurement is the delta between
+the two board numbers, and neither means anything alone** — which is why this row states no branch of
+its own. The branches live on the pair (knee-q18e8, and
+`interpretations/kneemri/2026-09-03_the-0953-chain-is-short.md`).
+
+**THE READING IS ASYMMETRIC, declared before the slot.** Four seats and a weaker pool are exactly
+where a concave learning curve says the refit term is LARGEST, so the pair's delta is an **upper
+bound** on that term at the champion's seven seats. Null or small (≤ +0.003) is decisive: it kills the
+last step of the 0.953 path and saves roughly thirty hours of card. Large (≥ +0.004) is
+**uninformative** — it is consistent with both a constant term and one that decays to nothing by the
+time the pool is good.
+
+No seating operation is involved: the seating is held fixed across both halves by construction.
+`run_check` before the slot: `loaded 4 of 4 members`.
