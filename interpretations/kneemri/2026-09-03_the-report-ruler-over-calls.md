@@ -85,9 +85,10 @@ MCL                0.9762  0.9705  -0.0057
 MEAN               0.8658  0.9174  +0.0516
 ```
 
-Every solo member also beats the report ruler on its own: 0.8964 to 0.9189 against the report's 0.8658.
-The gain is not an ensemble effect. **Models trained on a noisy target already average away a large part
-of that target's per-study noise**, and the labels they are then SCORED against still carry it.
+Every solo member also beats the report ruler on its own — 0.8932 to 0.9152 read without TTA, 0.8964 to
+0.9189 with it, against the report's 0.8658. The gain is not an ensemble effect. **Models trained on a
+noisy target already average away a large part of that target's per-study noise**, and the labels they
+are then SCORED against still carry it.
 
 The ordering of the per-label gains is the same ordering as the over-call: Contusion (20 FP) and
 Effusion (16 FP) are the two labels the report over-calls hardest and the two where the members beat it
@@ -126,6 +127,39 @@ points and does not transfer to a different ruler.
    fitted on 58 studies is a guaranteed overfit and the gold set is then spent — it is the only honest
    ruler this project owns and there is no second one. Derive the shift from the reader's behaviour (the
    UNK cell at 0.28, the over-call direction, the Synovitis silence), then CHECK it on the 58 once.
+
+## Does the report ruler also MIS-RANK members? Not answerable here, and here is why
+
+The level shift above says the report ruler is biased. The sharper question is whether it ORDERS members
+wrongly, because every seat decision this project has taken is an ordering. Both rulers on the same eight,
+report read no-TTA on the 909:
+
+```
+member                       REPORT-909   GOLD-58
+calib_dense_hold_s2026           0.8634    0.9117
+finding_calib_dense_s2026        0.8600    0.9098
+blendhold_s2026                  0.8575    0.8952
+band_dense_hold_s2026            0.8573    0.8956
+calib_span_hold_s2026            0.8565    0.9152
+recal_holdannot_s2026            0.8515    0.9037
+holdannot_s2026                  0.8506    0.8932
+band_span_hold_s2026             0.8493    0.9023
+```
+
+Spearman rho = **+0.38, p = 0.35**. That is NOT evidence of mis-ranking: at n = 8 the interval on rho
+spans nearly everything, and the reason is visible in the column — the report ruler separates these eight
+by **0.0141 end to end**, barely twice the 0.0062 paired floor. There is almost no ordering signal in the
+column to correlate with. The question needs members that actually differ, and the honest reading today
+is that it is OPEN, not that the ruler mis-ranks.
+
+`recal_holdannot`'s row is 0.8515, not the 0.8964 its own training log prints. That arm passed `--labels
+report_labels_v3.csv` with `--eval-labels` unset, so its holdout truth was binarised against the remapped
+table and the RULER moved with the arm; `ruler_check` settled this on 2026-08-30 (`knee-8wa0`) and
+`run_comparison` refuses the pair outright. Re-derived here from the npz and confirmed: `holdannot`, which
+never saw v3, scores 0.8847 against v3 truth versus 0.8506 against v2 — **+0.0341 free, to any member,
+for changing the ruler**. Read against a common v2 truth the two differ by +0.0009. Only two members on
+disk were ever fitted on v3 (`recal_holdannot`, `recal_dense`), and `recal_dense` reads 0.8610 either
+way, so the contamination is contained to the one row.
 
 ## Reproduce
 
