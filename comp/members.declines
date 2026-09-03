@@ -234,7 +234,7 @@ errors_v3small_s2026 # DECLINED AS A SEAT, 2026-09-02. Best 0.8280 at epoch 6, C
                      # the label-error corpus as a SEAT lever; it does not price the corpus on a trunk
                      # that is competitive to begin with.
 
-ramp_dense_gate — 0.8578 at its peak epoch 7, against calib_dense_hold_s2026 0.8634 on the same
+ramp_dense_gate.pt          # 0.8578 at its peak epoch 7, against calib_dense_hold_s2026 0.8634 on the same
   909-study holdout: -0.0056, just inside the 0.0062 floor and pointing DOWN. The certainty ramp was
   built to let the model earn its way onto uncertain cells rather than being held at a fixed weight,
   and the mechanism is sound, but at this corner it buys nothing measurable and the sign is wrong.
@@ -251,3 +251,44 @@ ortho_lpft_head.pt          # 0.7537 peak e11 (12 of 12, CONVERGED) — stage ON
                             # base224's 0.8509 on the same 909-study holdout, i.e. -0.097. Stage two
                             # (ortho_lpft_s2026, unfreeze_last 6, whole stack) is what prices the trunk;
                             # re-open on THAT number, never on this one.
+
+mrnet_warm_s2026.pt         # DECLINED as a seat, checkpoint kept. 0.8487 peak e6, CONVERGED (12 of 12; the one_cycle anneal loses 0.004 rather than
+  gaining, so e6 is the recipe's ceiling and not a floor). THE PROJECT'S FIRST EXTERNAL-CORPUS MEMBER:
+  trunk warm-started from mrnet_acl_pretrain_s2026 (its epoch 7, 225 tensors, 11 head tensors left cold),
+  pretrained on MRNet knee MRI. Rule 2.6 permits it; the CC/RUA copyright question is knee-ib4t and is
+  about redistribution, not about training here. It was ROSTERED on 2026-09-03 as a hypothesis about
+  diversity, with the line saying in writing that the seat was settled by a vote_ceiling reading and not
+  by that line. This is that reading, and it declines it.
+
+  THE SEAT IS WORTH ZERO, measured three ways on the twinfive_v1 pool - the fold-0 five, the only
+  scoreable roster this project still has, since the champion's six are all --fold -1 and unscoreable by
+  construction. Both arms use the SAME pool, so the delta is legitimate; only an absolute number would
+  cross the --fold -1 line.
+    vote_ceiling, LogitAverage, honest split-half:  5 members 0.8706 -> 6 members 0.8705  (-0.0001)
+    seat_value --against twinfive_v1, added sixth:  -0.0000, band [-0.0010, +0.0009]
+    seat_value, best SWAP (for lr4e-5_ws_s2026):    +0.0004, against BOARD_RESOLVABLE 0.0040
+
+  AND THE DECORRELATION IS REAL, WHICH IS WHY THIS IS A DECLINE AND NOT A NULL. MemberDistance puts its
+  nearest neighbour at 0.8892, inside the roster's own nearest spread (0.8696 to 0.8972), so it is not a
+  twin; its MEAN correlation of 0.8552 is lower than any seated member's NEAREST, making it the most
+  globally distant candidate this pool has been offered. It still buys 0.0000. So knee-nj4l's monoculture
+  claim is NOT refuted here - it is untested by this member. Corpus distance on the SAME lens (a DINOv2
+  trunk warm-started elsewhere) produces measurable ordering distance and zero seat value. What remains
+  unmeasured is ARCHITECTURE distance, which is what ortho_pool_read is on the card for.
+
+  THE SPECIALIST RESCUE WAS TRIED AND FAILED. MRNet's pretraining task is ACL tear, and mrnet leads the
+  whole pool on ACL solo: 0.8840 against depth_regions_narrow 0.8737, calib_span 0.8706, lr4e-5_ws 0.8706
+  - plus 0.0103 on the one label its corpus was built for, which is exactly the shape a specialist has.
+  Its 0.8487 mean is dragged down elsewhere (Fracture 0.7954 against 0.8253, PF OA 0.8192), and a
+  per-label rank average charges that weakness eleven times against one strength. So the obvious rescue
+  is to seat it on ACL only. Measured, per label, LogitAverage over the same five vs the same six:
+    ACL +0.0014   MCL +0.0027   MedMen +0.0008   LatMen +0.0003   MedOA -0.0008   LatOA +0.0017
+    PFOA -0.0027  Effusion +0.0006  Synovitis -0.0014  Baker's -0.0021  Contusion +0.0020  Fracture -0.0019
+  Seven up, five down, largest move 0.0027, mean +0.0000. The ACL specialism does not survive into the
+  pool because the pool is ALREADY at 0.9011 on ACL - well above mrnet's 0.8840 solo. A member cannot
+  lift a label it is worse at than the vote already is.
+
+  RE-OPEN BY, and not by re-quoting 0.8487: (a) an external-corpus member whose TRUNK differs, not whose
+  corpus does - the axis this one holds fixed; (b) a per-label reading on a label where the POOL is weak
+  and the external corpus is strong, which ACL is not (MCL 0.8114 and Lateral OA 0.8249 are the pool's
+  two weakest, and MRNet supervises neither). The checkpoint is kept; only the seat is refused.
