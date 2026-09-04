@@ -41094,6 +41094,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.label_errors.DetectedCells.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_errors.DetectedCells",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.label_errors.DetectorGate.at_mask",
       "label": "at_mask",
       "level": "method",
