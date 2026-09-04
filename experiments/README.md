@@ -7276,3 +7276,36 @@ teacher — the seat has to be measured, not inferred from the solo. That measur
 is not queued: the open lever is the trunk lane (`ortho_stack` / `v3large_stack`), and a distilled student
 priced against its own teacher is a cheaper-serving question, not a score question. Recorded so the number
 stops being invisible, not because it opens anything.
+
+## A frozen trunk can now be priced as a SEAT with no card time — and three of them buy nothing — 2026-09-04
+
+`feature_probe --emit-holdout` claimed in its own help to write a file "seatable beside members" and did
+not: three arrays where a member's record carries five, and the binarised label column where a member
+carries `Targets.scores`. Both defects only ever surfaced four frames deep inside `seat_value`, the first
+as `KeyError: epoch` and the second as a ruler refusal. The second is the one worth remembering: the
+graded reader level (0.08 / 0.28 / 0.68 / 0.82 / 0.94) is not the whole difference — `Targets.load` then
+overwrites the 58 image-annotated studies with a hard 0/1, which is 13 of the 909 holdout studies and 156
+cells. A rounding check would have called those two arrays the same table.
+
+With that fixed, a ridge on cached features is priceable against the champion twelve in seconds:
+
+| probe (fold-0 holdout, own ridge penalty) | solo mean | seat into honest12 | best swap |
+| --- | --- | --- | --- |
+| `ortholarge@mean` (dinov3-vitl16, knee-continued) | 0.8170 | +0.0014 [+0.0007, +0.0021] | +0.0019 |
+| `v3large@mean` (dinov3-vitl16) | 0.7968 | +0.0008 [+0.0000, +0.0015] | +0.0014 |
+| `orthodiff@mean` (diffusion U-Net, 256-d GAP) | 0.7435 | +0.0001 [-0.0007, +0.0010] | +0.0012 |
+
+None clears the +0.0040 under which this ruler has never picked a board tick, so none of the three earns
+a fitted arm on its frozen reading alone. OrthoDiffusion is the clearest decline: it is genuinely DISTINCT
+(js 0.0418 against the roster's own 0.0150) and still adds nothing, which is the case the diversity
+argument keeps predicting should work and which keeps not working — distinctness without accuracy is not
+a seat.
+
+WHAT THIS DOES NOT SAY. A probe is not a fitted member: `radnet121` probes 0.8197 and the same trunk
+FITTED reads 0.6716, so the mapping is not even monotone in general and no probe number licenses a seat.
+The narrow claim these three support is the reverse one — a trunk whose FROZEN representation cannot
+reach the readable floor has not been shown to be worth a card, and that is now a minutes-long question
+instead of a forty-minute one. The one ordering they do reproduce is the continuation term: ortholarge
+over v3large, +0.0006 of seat value, the same sign as the +0.0194 the fitted pair reads and the +0.0203
+the frozen probe read at each trunk's own penalty. n=2 orderings is an anecdote, not an oracle; it becomes
+one if a third trunk with both readings agrees.
