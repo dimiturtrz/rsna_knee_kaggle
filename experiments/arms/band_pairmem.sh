@@ -48,7 +48,9 @@
 #
 # reading: logs/band_pairmem_ledger.log
 #
-# deliberate: --batch --accumulate --pair-memory (the three that ARE the variable)
+# deliberate: --batch
+# deliberate: --accumulate
+# deliberate: --pair-memory
 # deliberate: every other flag — they are band_dense's and may not be touched in this arm.
 # control  band_dense = 0.8578 (best epoch 8, variant=small, pair_memory=0, read from its checkpoint)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
