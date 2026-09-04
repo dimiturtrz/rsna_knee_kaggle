@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# The label axis, read at the detector's STRONG end instead of at cleanlab's own operating point. `knee-jom26`.
+#
+# WHY THERE IS A SECOND ARM ON AN AXIS THAT ALREADY LOST. `errors_dense` pruned `LabelQuality.flagged()`
+# — cleanlab's confident-joint mask, 5,360 cells, 10.14% of the corpus — and scored 0.8420 against
+# `band_dense`'s 0.8578, its own lowest pre-registered branch. What that refutes is PRUNE-AT-FULL-BUDGET
+# ON THAT MASK. It does not refute the detector, and the gate log says so in a row nobody read until
+# after the arm had run.
+#
+# THE MASK IS THE WRONG SELECTOR FOR OUR DEFECT, MEASURED. `logs/label_errors.log` reports a budget CURVE
+# over the plain quality ranking and, separately, a row for the mask. On the 108 confident false positives
+# that are 77% of the 140-cell gold census:
+#
+#     ranking @ budget 25   precision 0.640   lift 4.05x
+#     ranking @ budget 50   precision 0.500   lift 3.17x
+#     ranking @ budget 100  precision 0.370   lift 2.34x
+#     cleanlab's own mask   precision 0.258   lift 1.63x
+#
+# The mask is BELOW the ranking at every comparable size on the class our defect actually is, and it is
+# the best row in the whole table on the 32 MISSES (lift 4.83x) — which is what it is tuned for and what
+# we mostly do not have. Our reader over-calls: 108 confident false positives against 32 misses.
+#
+# THE BUDGET IS DERIVED, NOT CHOSEN. The gate's strongest row spends 25 of the 684 scoreable gold cells,
+# 3.655%. The corpus carries 52,872 read cells, so the same rate is 1,932 cells. That is the number, and
+# it is the gate's own operating point rather than a value fitted on our holdout.
+#
+# THE TRADE, ON THE GATE'S OWN PRECISIONS. Scaled from the census to the corpus:
+#
+#                        cells pruned   confident FPs removed   cells the radiologist AGREED with
+#     cleanlab's mask       5,360            ~1,383                        ~2,766
+#     ranking @ 1,932       1,932            ~1,235                          ~540
+#
+# 89% of the errors caught for a FIFTH of the collateral. That five-fold difference is the whole arm.
+#
+# PRICE. ~2 h of card, `band_dense`'s recipe and its pixel cache, so no decode is owed. Expected gain:
+# the mechanism is that the surviving 4.05x cells are genuinely mislabelled and removing them stops the
+# loss pulling the model toward a wrong target. P(clears the 0.0062 floor) ~ 0.25 — the honest case
+# against is that even at 4.05x precision 0.640 means a THIRD of what is dropped is a hard-but-correct
+# cell, and `errors_dense` measured those to be worth 3-4x a random cell. This is priced as an
+# IMPROVEMENT rather than an instrument because a positive result opens the axis, and it is the cheaper
+# of the two survivors: the re-label arm (`knee-f8hv5`) needs a value table this one does not.
+#
+# PRE-REGISTERED, before the arm runs:
+#
+#   >= 0.8640   THE LABEL AXIS OPENS. +0.0062 over the best member the project owns, and the reading is
+#               that the SELECTOR was the defect in `errors_dense`, not the treatment. Next is the dose
+#               curve (budgets 1,000 / 1,932 / 3,000) and only then re-labelling.
+#   0.8640 > s >= 0.8578   DIRECTIONAL. Keep the checkpoint and price its seat; not a finding.
+#   0.8578 > s >= 0.8516   FLAT. Then the treatment is what fails and the selector is not the story:
+#               pruning does not move the mean at ANY budget this detector can reach, and the axis's
+#               remaining hope is re-labelling, which keeps the hard cell contributing a full gradient
+#               against a corrected target instead of discarding it.
+#   < 0.8516    IT COSTS AGAIN, and the reading is the one `errors_dense` already licensed: the cells a
+#               model disagrees with are the highest-gradient cells in the corpus whatever their label
+#               quality, and confident learning selects them BY CONSTRUCTION. Then PRUNING is closed on
+#               this corpus at every budget and the axis lives or dies on `knee-f8hv5`.
+#
+# WHAT WOULD MAKE ME DISBELIEVE IT. The same silent zero `errors_dense`'s header names: `--label-errors`
+# is a PATH, and a path that does not exist reads as no flags at all while every log line looks healthy.
+# Check the recorded recipe prints `label_flags_rank1932.csv` and check that table's row count is 1,932
+# BEFORE reading the score. A table of 5,360 rows means the budget flag was dropped and this is
+# `errors_dense` again.
+#
+# IT MOVES THE RULER exactly as `errors_dense` did — a pruned cell carries zero weight, so
+# `Supervision.moves_the_ruler()` is True and `Targets.pair` scores the holdout against the PLAIN
+# unpruned table. The delta is apples-to-apples; that path is verified in `core/data/labels/targets.py`.
+#
+# deliberate: --label-errors (the arm's thesis, and its only difference from band_dense)
+# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 (band_dense's read exactly — the control)
+#
+# reading: logs/errors_rank_ledger.log
+#
+# bead: knee-jom26
+#
+# control  band_dense_s2026 = 0.8578 (the same control errors_dense declared, verified on disk, knee-sgzgc)
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+FLAGS="$PROCESSED/label_flags_rank1932.csv"
+require "$LABELS"
+require "$FLAGS"
+
+run_train errors_rank \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --label-errors "$FLAGS" \
+  --labels "$LABELS" --out "$MODELS/errors_rank_s2026.pt"

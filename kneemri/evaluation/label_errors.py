@@ -385,9 +385,23 @@ class DetectedCells:
     quality: Float[np.ndarray, "studies targets"]
     flagged: Bool[np.ndarray, "studies targets"]
 
-    def frame(self) -> pd.DataFrame:
+    def ranked(self, budget: int) -> Bool[np.ndarray, "studies targets"]:
+        """The `budget` worst-scoring READ cells — the selector cleanlab's own mask is not.
+
+        `errors_dense` pruned `flagged` at full budget and cost −0.0158, and the gate log says why: on
+        the 108 confident false positives that are 77% of our census the confident-joint mask reads
+        precision 0.258 and lift 1.63x, BELOW the plain ranking at a comparable size, because the mask
+        is tuned for the misses (its own strongest row, lift 4.83x) and our defect is over-calling.
+        Ranking by quality alone and stopping early is the same detector read at its strong end.
+        """
+        scores = np.where(np.isnan(self.quality), np.inf, self.quality)
+        chosen = np.zeros(scores.size, dtype=bool)
+        chosen[np.argsort(scores, axis=None)[:budget]] = True
+        return chosen.reshape(scores.shape) & ~np.isnan(self.quality)
+
+    def frame(self, selected: Bool[np.ndarray, "studies targets"] | None = None) -> pd.DataFrame:
         """The flagged cells as the two-column table `core.data.labels.targets.Supervision.pruned` reads."""
-        rows, columns = np.nonzero(self.flagged)
+        rows, columns = np.nonzero(self.flagged if selected is None else selected)
         return pd.DataFrame(
             {
                 "StudyInstanceUID": [self.identifiers[row] for row in rows],
@@ -465,6 +479,7 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--labels", type=Path, default=None, help="the reader table to audit")
     command.parser.add_argument("--flags", type=Path, default=None, help="write the flagged cells here")
+    command.parser.add_argument("--budget", type=int, default=None, help="write the N worst-ranked cells instead")
     arguments = command.parsed()
 
     root = command.rooted(arguments)
@@ -474,9 +489,11 @@ def main() -> None:
     found = audit.detected()
     command.report(audit.gated(found.identifiers, found.reader, found.quality, found.flagged).lines())
     if arguments.flags is not None:
-        frame = found.frame()
+        selected = None if arguments.budget is None else found.ranked(arguments.budget)
+        frame = found.frame(selected)
         frame.to_csv(arguments.flags, index=False)
-        logger.info(f"wrote {len(frame)} flagged cells to {arguments.flags}")
+        selector = "cleanlab's mask" if selected is None else f"the {arguments.budget} worst-ranked cells"
+        logger.info(f"wrote {len(frame)} flagged cells from {selector} to {arguments.flags}")
 
 
 if __name__ == "__main__":

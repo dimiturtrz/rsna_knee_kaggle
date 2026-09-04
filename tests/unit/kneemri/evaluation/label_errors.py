@@ -327,6 +327,29 @@ def test_frame():
     assert frame.iloc[0]["target"] == TARGETS[1]
 
 
+def test_detected_cells_ranked():
+    """The N worst-scoring READ cells — a budget, and never an unread cell whatever its score sorts as.
+
+    `errors_dense` pruned the mask at full budget and cost −0.0158; the ranking is the same detector
+    read at its strong end, so the one thing this must not do is let a NaN (unread) cell in by sorting.
+    """
+    identifiers = ["a", "b", "c"]
+    quality = np.full((len(identifiers), len(TARGETS)), 0.9)
+    quality[0, 0] = np.nan
+    quality[1, 0] = 0.1
+    quality[2, 0] = 0.2
+    flagged = np.zeros_like(quality, dtype=bool)
+    reader = ReaderTable(identifiers, flagged.copy(), flagged.copy())
+
+    detected = DetectedCells(identifiers, reader, quality, flagged)
+    chosen = detected.ranked(2)
+
+    assert chosen.sum() == 2
+    assert chosen[1, 0] and chosen[2, 0], "the two lowest scores, worst first"
+    assert not chosen[0, 0], "an unread cell has no score to rank and may never be selected"
+    assert list(detected.frame(chosen)["StudyInstanceUID"]) == ["b", "c"]
+
+
 def test_detected(monkeypatch: pytest.MonkeyPatch):
     """The gate and the training flags are ONE estimate, so the published ruler is read once.
 
