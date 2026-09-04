@@ -24433,27 +24433,27 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck",
+      "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
       "kind": "construct",
-      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript.call",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.kaggle.submit_check.ShippedEntries",
-      "target": "kneemri.kaggle.board_check.BoardRow",
       "weight": 1
     },
     {
@@ -24483,37 +24483,37 @@
     {
       "kind": "construct",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.Candidate",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.Candidate.seats",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.ShippedEntries",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.described",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.ShippedEntries.described",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.overlaps",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.ShippedEntries.overlaps",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.repeats",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.ShippedEntries.repeats",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "weight": 1
     },
     {
@@ -33638,16 +33638,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.Candidate",
-      "label": "Candidate",
-      "level": "class",
-      "parent": "kneemri.kaggle.submit_check",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.ShippedEntries",
-      "label": "ShippedEntries",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck",
+      "label": "SubmitCheck",
       "level": "class",
       "parent": "kneemri.kaggle.submit_check",
       "role": "primary"
@@ -48854,64 +48846,56 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.Candidate.__init__",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.__init__",
       "label": "__init__",
       "level": "method",
-      "parent": "kneemri.kaggle.submit_check.Candidate",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.Candidate.seats",
-      "label": "seats",
-      "level": "method",
-      "parent": "kneemri.kaggle.submit_check.Candidate",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.ShippedEntries.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.ShippedEntries.described",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.described",
       "label": "described",
       "level": "method",
-      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.ShippedEntries.overlaps",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.overlaps",
       "label": "overlaps",
       "level": "method",
-      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.ShippedEntries.repeats",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.repeats",
       "label": "repeats",
       "level": "method",
-      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null
     },
     {
       "descendants": 0,
       "id": "kneemri.kaggle.submit_check.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.kaggle.submit_check",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.resolved",
-      "label": "resolved",
       "level": "method",
       "parent": "kneemri.kaggle.submit_check",
       "role": null
