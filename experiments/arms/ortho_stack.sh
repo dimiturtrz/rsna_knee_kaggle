@@ -70,6 +70,22 @@
 # August kits did"; the board record cannot, because offline level and date are collinear across it.
 # See interpretations/kneemri/2026-09-04_the-ruler-had-four-rows-outside-it.md.
 #
+# THE LITERATURE PRIOR, WRITTEN DOWN 2026-09-04 WHILE THIS ARM WAS AT EPOCH 4 AND BEFORE ANY BRANCH
+# COULD BE READ (Kimi, Q-DC). A pretraining-SOURCE advantage shrinks as the fine-tuning signal grows.
+# Entezari et al. (ICLR 2023, arXiv:2302.13602) measure exactly this curve across seven pretraining
+# corpora and nine downstream tasks: the pretraining data source is decisive few-shot and its role
+# DECREASES as fine-tuning data grows. Ahmed et al. (ResearchSquare rs-10630234) resolve it by fraction
+# on brain-tumour MRI: +11.4 pp at 5% of the training pool, ~0.8 pp and not significant at 100%.
+# Resolution and slice count are further axes of the same quantity — more learnable signal.
+#
+# SO THE MIDDLE BRANCH IS THE PREDICTED OUTCOME, AND IT IS NOT A REFUTATION OF THE MECHANISM. The
+# +0.0194 at 224 px / 12 slices is an UPPER BOUND on what 336 px / 20 slices / whole-stack can show,
+# and a residual of ~0.006-0.010 would sit exactly where the prior puts it. THE THRESHOLD IS NOT MOVED
+# — the branches stand as written. What changes is what a within-floor reading LICENSES: it closes the
+# lane for TRANSFERRED continuation at this operating point, and says nothing against continuation on
+# OUR corpus at OUR resolution, which is Q-CR and a different arm. Only a gap clearly above +0.010
+# would be evidence against the shrinkage prior itself.
+#
 # WHAT IT CANNOT SETTLE. Nothing about SEATING — the pool is DINOv2-monoculture and a seat read here
 # would be confounded exactly as `v3large`'s was. Solo holdout only. If it clears, seat value is the
 # next question and a separate one.
