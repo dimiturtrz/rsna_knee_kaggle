@@ -20138,6 +20138,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.collided",
+      "target": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.collided",
+      "target": "kneemri.experiments.queue_check.QueuedArms.producer",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.collided",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.doubled",
       "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
       "weight": 1
@@ -20146,6 +20164,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.doubled",
       "target": "kneemri.experiments.queue_check.QueuedArms.watches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "target": "kneemri.experiments.queue_check.QueuedArms.collided",
       "weight": 1
     },
     {
@@ -45756,6 +45780,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.collided",
+      "label": "collided",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.doubled",
       "label": "doubled",
       "level": "method",
@@ -45806,6 +45838,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.misarmed",
       "label": "misarmed",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.producer",
+      "label": "producer",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
