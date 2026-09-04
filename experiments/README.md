@@ -7228,7 +7228,7 @@ the anneal ran and the arm declined after its peak, which is a fit, not a killed
 | `band_dense` | v3large (incumbent) | batch 12, rank term ON | **0.8578** |
 | `ortho_dense` | ortholarge | 224 px / 12 slices | 0.8452 |
 | `ortho_stack` | ortholarge | whole stack, batch 1 / accumulate 12 / pair-memory 66 | **0.8417** |
-| `v3large_stack` | v3large (incumbent) | identical to the row above | **on the card** |
+| `v3large_stack` | v3large (incumbent) | identical to the row above | **0.8277** |
 
 **THIS NUMBER DOES NOT CLOSE THE IN-DOMAIN TRUNK LANE, and reading it as if it did is the exact failure
 the arm header pre-registered against.** `band_dense` ran at batch 12 with the ranking term ON; this arm
@@ -7245,6 +7245,34 @@ written decline (−0.0050 at the seat, trunk size and continuation corpus movin
 second, geometry-independent point behind it. If `v3large_stack` lands near 0.842 as well, the deficit is
 the RECIPE, both ortho rows were measured under a handicap, and the lane is still undecided — the worst
 outcome available, and the one this pair exists to make visible rather than to hide.
+
+**THE CONTROL LANDED AT 0.8277, AND IT IS THE TOP BRANCH: `ortho_stack` − `v3large_stack` = +0.0140,
+above the 0.0062 floor. The knee continuation carries to the operating point we actually ship.** Neither
+of the two outcomes the paragraph above hedged between happened: the control did not land near
+`band_dense` (it is 0.0301 under it), and it did not land near 0.842 either — it landed 0.0140 BELOW
+`ortho_stack`. So the −0.0161 against `band_dense` is not the trunk. It is the recipe: batch 1 with a
+66-step pair memory costs the incumbent trunk 0.0301, and the ortho trunk pays that same handicap and
+still finishes ahead of it.
+
+| operating point | ortho | v3large | continuation delta |
+| --- | --- | --- | --- |
+| 224 px / 12 slices | `ortho_dense` 0.8452 | `v3large_dense` 0.8258 | **+0.0194** |
+| whole stack / 20 slices | `ortho_stack` 0.8417 | `v3large_stack` 0.8277 | **+0.0140** |
+
+**That is the delta-of-deltas Q-CW asked for: −0.0054 as the token budget goes 2352 → 8820.** It is a
+third of the floor, so the honest reading is that the continuation gain is FLAT in resolution over this
+range, not that it shrinks. Reading (a) — the gain is resolution-bound and the fine-tune recovers it from
+data — is refuted at the point we ship. **The in-domain trunk lane is OPEN**, and `ortho_dense`'s written
+decline now has an argument standing against it rather than beside it: that decline priced the trunk at
+the SEAT (−0.0050) under a recipe we now know handicaps every trunk in it by 0.03.
+
+**WHAT THIS DOES NOT SAY.** It does not say ortholarge belongs on the roster. Both rows sit under
+`band_dense` = 0.8578 on the fitted ruler, so nothing here beats the incumbent member; what moved is which
+VARIABLE owns the deficit. The follow-up the pair licenses is the ortho trunk at `band_dense`'s OWN recipe
+(batch 12, ranking term on, 224/12) — the one contrast the project has never run — and that is a ~40-minute
+arm, not a family. Priced against the 1.5% bar: the continuation is worth +0.014-0.019 solo wherever it has
+been measured, which does not clear it alone, so this lane earns card time as a MEMBER-quality lever behind
+`radnet_pinned`, not ahead of it.
 
 **NEITHER ORTHO ROW WAS IN THIS LEDGER BEFORE TODAY.** `ortho_dense`'s reasoning lived in
 `comp/members.declines` and its number in `interpretations/`, so a grep of this file for the trunk that has
