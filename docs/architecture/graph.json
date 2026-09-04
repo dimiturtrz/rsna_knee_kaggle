@@ -4790,6 +4790,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.submit_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.submit_check",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.submit_check",
+      "target": "kneemri.kaggle.board_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.submit_check",
+      "target": "kneemri.kaggle.kernel_script",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.backbone",
       "target": "kneemri.models.encoder",
       "weight": 9
@@ -24409,6 +24433,90 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.Candidate.seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.submit_check.ShippedEntries",
+      "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.board_check.BoardCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.Candidate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.Candidate.seats",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.ShippedEntries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.ShippedEntries.described",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.ShippedEntries.overlaps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.ShippedEntries.repeats",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.models.depth_attention.DepthAttention",
       "target": "kneemri.models.slice_attention.SliceAttention",
@@ -28537,7 +28645,7 @@
       "role": null
     },
     {
-      "descendants": 219,
+      "descendants": 220,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29473,7 +29581,7 @@
       "role": null
     },
     {
-      "descendants": 30,
+      "descendants": 31,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -29716,6 +29824,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.submission",
       "label": "submission",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check",
+      "label": "submit_check",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -33518,6 +33634,22 @@
       "label": "Submission",
       "level": "class",
       "parent": "kneemri.kaggle.submission",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.Candidate",
+      "label": "Candidate",
+      "level": "class",
+      "parent": "kneemri.kaggle.submit_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.ShippedEntries",
+      "label": "ShippedEntries",
+      "level": "class",
+      "parent": "kneemri.kaggle.submit_check",
       "role": "primary"
     },
     {
@@ -48718,6 +48850,70 @@
       "label": "witnessed",
       "level": "method",
       "parent": "kneemri.kaggle.submission.Submission",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.Candidate.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.Candidate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.Candidate.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.Candidate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.ShippedEntries.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.ShippedEntries.described",
+      "label": "described",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.ShippedEntries.overlaps",
+      "label": "overlaps",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.ShippedEntries.repeats",
+      "label": "repeats",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.ShippedEntries",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check",
       "role": null
     },
     {

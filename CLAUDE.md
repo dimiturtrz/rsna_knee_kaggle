@@ -232,6 +232,14 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   read on studies the entry did NOT train on: on 2026-08-29 `raptor_solo`'s 0.8938 was voided because
   `foreign_overlap` shows it was 98.6% in-sample, and that one cell was carrying the whole "compression goes
   negative at the top" reading plus eleven of fifteen apparent ruler inversions.
+  `python -m kneemri.kaggle.submit_check --kernel <kernel>` before EVERY submission — the only check that
+  asks whether the entry is NEW. Every other pre-flight guards what is IN an entry; none asked whether the
+  board already held it, so a slot went to `kneemri-peak8` seven days after `peak8_v1` (ref 55751365,
+  board 0.932) scored with the identical eight members, with every gate green. It compares SET equality on
+  the members, never the kernel's name — renaming is what happens between one attempt and the next — and a
+  kernel that ranks the package at run time exits 2 (UNKNOWN), because "I did not look" must not read like
+  "it is new". A deliberate re-ship needs `--anyway '<why>'`, and that why belongs in the submission
+  message. See knee-1sgr.
   `python -m kneemri.kaggle.roster_check` after ANY run finishes, and before building an entry out of the pool —
   the check that guards what can be SHIPPED. Nothing writes `comp/members.roster`; it is hand-edited, so every
   member on it is there because somebody remembered. On 2026-08-29 five of a sixteen-seat entry's best seats were
