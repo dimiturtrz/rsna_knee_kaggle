@@ -3048,23 +3048,40 @@ project has ever fitted**, on both rulers, card-free, priced against `greedy7_v1
   mae_matched           MAE pretraining       0.4333    0.6735
   cnx_dense             ConvNeXt (CNN)        0.7941    0.7927
   vjepa_warm            V-JEPA 3D tubelet     0.8212    0.8337
-  lora_r8_v3small       DINOv3 + LoRA         0.8455    0.8217
+  lora_r8_v3small       DINOv3 + LoRA         0.8455    0.8215
   dinov3_base_lora      DINOv3 + LoRA         0.8467    0.8268
-  v3base_dense          DINOv3 full fine-tune 0.8829    0.8512
+  v3base_dense          DINOv3 full fine-tune 0.8829    0.8455
   distill_pairs         DINOv2 self-distill   0.9159    0.8594
 
   roster of 7, its own nearest-neighbour spread: 0.8724 .. 0.8893
 ```
 
+**TWO CELLS OF THE SOLO COLUMN WERE WRONG UNTIL 2026-09-04** (`knee-961w2`), and one of the two claims below
+does not survive the correction. `v3base_dense` read 0.8512, which is its MATCHED CONTROL `base_dense`'s peak
+(:1900 states it as such); its own arm entry peaks at e6 0.8455. `lora_r8_v3small` read 0.8217 where every
+other quotation of it in this file — :3197, :5724 — says 0.8215. Both are corrected above. The defect was
+found the way the `board_transfer` slope was found twice: a prose line quoted from memory disagreed with the
+table, and the table lost.
+
 **Distance orders exactly by architectural distance from DINOv2, seven points, no exception** — a different
 pretraining objective, then a different inductive bias, then a different input geometry, then a frozen base
 of the same family, then a fine-tuned base of the same family, then the same family distilled from itself.
-That is a curve, not scatter. Architecture diversity demonstrably produces different orderings here and the
-amount scales with how different the architecture is.
+That is a curve, not scatter, and it is UNTOUCHED by the correction: the nearest column was never in doubt.
 
-**Solo score is monotone the other way on the same seven points.** Distance and strength are anti-correlated
-across the whole axis. That is why each arm read as a refutation in isolation: every one bought its distance
-with quality and was then judged on quality alone.
+**Solo score is anti-correlated with distance, with ONE EXCEPTION in seven, and this entry claimed "monotone
+the other way" until the correction.** Reading down: 0.6735, 0.7927, 0.8337, 0.8215, 0.8268, 0.8455, 0.8594.
+`vjepa_warm` is the break — MORE distant than either LoRA row (nearest 0.8212 against 0.8455 and 0.8467) and
+yet stronger solo than both (0.8337 against 0.8215 and 0.8268). The exception was in the printed numbers
+before the correction as well, so this is a misreading of the entry's own table rather than a consequence of
+the two bad cells; `knee-961w2` re-checked only the last four rows and so re-affirmed monotonicity across a
+span that excluded the break.
+
+The load-bearing half stands: distance and strength do trade off across the axis, which is why each arm read
+as a refutation in isolation — every one bought its distance with quality and was then judged on quality
+alone. What does not stand is that the trade is EXACT. One point in seven buys distance without paying, and
+that point is a 3D tubelet trunk — the only input-GEOMETRY change on the axis, and the only member here whose
+distance does not come from a different 2D objective. A curve with an exception is a place to look, not a law
+to price against: an arm priced by reading a gap off this column carries whatever that exception is worth.
 
 **CORRECTION TO THIS ENTRY'S FIRST DRAFT, written the same hour.** It claimed the recipe confound was
 unnoticed and named read size and learning rate as the wrong knobs. Both are wrong, and the ledger says so

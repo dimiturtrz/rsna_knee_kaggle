@@ -4,7 +4,10 @@
 # bead: knee-59qqc
 # deliberate: --variant medsam (the arm's thesis — a dense pretraining objective on a medical corpus,
 #             at zero architectural distance from the controls)
-# deliberate: --batch 2 --accumulate 3 (the control's --batch 6 with no accumulation, SPLIT rather than
+# deliberate: --accumulate 3 (the other half of the split below — declared on its own line because
+#             `arm_check` reads the flag at the head of a `# deliberate:` line and credits that one only,
+#             so a two-flag declaration silently declares the first)
+# deliberate: --batch 2 (the control's --batch 6 with no accumulation, SPLIT rather than
 #             changed: 2 x 3 is the same effective batch and the same number of optimiser steps, so the
 #             recipe the controls were measured under is preserved. It is split because this trunk runs
 #             windowed attention at window 14 over a 21x21 grid, which transformers pads to 28x28 inside
