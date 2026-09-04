@@ -74,6 +74,27 @@
 # deliberate: --unread-targets (the arm's thesis, and its only difference from band_dense)
 # deliberate: --slices 20 --band-low 0.1 --band-high 0.9 (band_dense's read exactly — the control)
 #
+#
+# PRIOR DOWNGRADED BEFORE THE ARM RAN (Q-EG, kimi, 2026-09-04T1715Z). The correction literature
+# measures its gains at 20-70% label noise: HLC tests symmetric 30/40/50 and pairflip 20/30/40, the
+# curve RISES with rate, and "Deep Active Re-Labeling" states outright that low noise leaves "limited
+# opportunity for improvement". Our selector touches 3.65% of cells, 5.33% on ACL which is the worst
+# label, and at the selector's own precision of 0.640 the TRUE rate is nearer 2.3% -- below the lowest
+# point anyone has measured, not inside the range. P(clears the 0.0062 floor) goes 0.30 -> 0.15.
+# The arm still runs, for a reason that is not momentum: our noise is not the symmetric synthetic kind
+# those curves are fitted on. The gold census reads 108 confident false positives against 32 misses and
+# the flagged cells sit above the corpus mean on every finding but one, so it is asymmetric,
+# class-conditional and one-directional -- pairflip's shape, not symmetric's. Whether pairflip holds its
+# gain as the rate falls is Q-EH, and it is the question that decides whether this arm keeps its place
+# in the chain.
+#
+# AND IT IS AN INSTRUMENT, NOT A SHIPMENT. A corpus-level label fix lifts every member, so converting a
+# win here into board gain is a retrain of the whole roster, six-plus members at ~2 h each. This arm
+# answers "does this corpus carry a correctable label defect", never "here is a better entry". Q-EG also
+# returned three GAPS rather than citations -- nobody reports per-label prevalence change beside
+# accuracy, nobody measures cross-head transfer under a shared trunk, and there is no standard
+# mean-preserving corrector. We have a twelve-head trunk and `arm_read` already writes the per-label
+# table, so the measurement the field lacks falls out of this arm whichever way the score lands.
 # reading: logs/errors_relabel_ledger.log
 #
 # bead: knee-f8hv5
