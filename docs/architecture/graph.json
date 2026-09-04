@@ -13963,6 +13963,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_distance.MemberDistance.spread",
       "target": "kneemri.evaluation.member_distance.MemberDistance.against",
