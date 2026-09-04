@@ -32,6 +32,8 @@
 # and the arm reports a lift over five of six rather than pretending to six.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: rampsix refits the champion's five own-corpus seats with the curriculum ramp at --fold -1, so the ramp's effect has no holdout to show in. No board entry carries it, so it has no ruler at all — that is the knee-s8kim hole, recorded rather than hidden. It is the arm the dark rule was written from.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

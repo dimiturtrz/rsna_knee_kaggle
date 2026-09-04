@@ -62,6 +62,8 @@
 # deliberate: --fold
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: small_batch6_ff retrains the best member the project owns on all 4,406 studies, which removes the holdout the 'best' was established on. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

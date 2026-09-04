@@ -43,6 +43,8 @@
 # facts about a flag that never landed.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: stack_increments_ff moves the best solo into the champion's shipping lane, which is a --fold -1 lane. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 BLEND="$PROCESSED/labels/blend_three_v1.csv"

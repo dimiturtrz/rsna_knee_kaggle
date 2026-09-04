@@ -97,6 +97,8 @@
 # deliberate: --scheme merged (seat five's own corpus, copied from merged_blend.sh)
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: calibsix refits the champion's five uncalibrated seats at whole-corpus fit, so no seat retains a holdout. Its ruler is the board row `calibsix_v1` in comp/board.jsonl, taken with a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

@@ -18,6 +18,8 @@
 # expected, which is exactly the failure `final_fit_six.sh` names in its NEW NAMES paragraph.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: blendsix_smoke is a two-minute recipe gate, not a measurement — it fits --fold -1 and its whole product is an exit code telling `blendsix` whether seven hours are safe to spend. There is no score to take and none is wanted.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"

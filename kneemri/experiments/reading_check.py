@@ -27,10 +27,11 @@ DARK-AND-UNDECLARED reports. An arm fitting `--fold -1` holds out nothing, so it
 every epoch and its ledger row can never carry one: the only rulers left to it are a board entry or the
 gold set, and both need a declaration. `rampsix` is the live instance — it pre-registered a gate on
 '+0.002 solo over their calibsix originals' that is not merely unrun but unreadable by construction, and
-spent 4.2 h of card before anyone could have noticed (knee-s8kim). Twenty arms are dark today and none of
-them declares, so this rule REPORTS until they do. A gate that fails twenty-strong on its first run is a
-gate people learn to skip, and this one graduates the moment the twenty are written — either with a
-`# reading:` line, or with `# unmeasurable:` and the prose saying an arm knowingly bought no ruler.
+spent 4.2 h of card before anyone could have noticed (knee-s8kim). Thirteen arms were dark when this rule
+was written and none of them declared, so it REPORTED rather than refused — a gate that fails thirteen-strong
+on its first run is a gate people learn to skip. All thirteen were written on 2026-09-04, each with a
+`# unmeasurable:` line naming what it knowingly gave up, so the rule has GRADUATED and now REFUSES: a dark
+arm is a new one, and a new one is the defect (knee-h1k0y).
 """
 
 import logging
@@ -130,12 +131,19 @@ class ReadingDrift:
         ]
 
     def undeclared(self) -> list[str]:
-        """Dark arms with no ruler written down. Reported, never refused, until the twenty are written."""
+        """Dark arms with no ruler written down. GRADUATED 2026-09-04: this refuses now (knee-h1k0y)."""
         return [arm.name for arm in self.declarations() if arm.dark() and not arm.readings() and not arm.unmeasurable()]
 
     def complaints(self) -> list[str]:
-        """The findings that refuse. Only the declared-and-missing rule, which cannot false-positive."""
-        return self.missing()
+        """The findings that refuse: a declared reading never taken, and a dark arm with no ruler at all.
+
+        The dark rule was advisory while thirteen arms fitted `--fold -1` with nothing written down. All
+        thirteen now carry a `# unmeasurable:` line saying what they knowingly gave up, so the tree measures
+        zero and a NEW dark arm is the defect the rule was written for rather than a backlog it inherits.
+        """
+        return self.missing() + [
+            f"{name} fits --fold -1 and declares neither a reading nor why it has none" for name in self.undeclared()
+        ]
 
     def report(self) -> list[str]:
         """The survey, whether or not a reading went missing."""

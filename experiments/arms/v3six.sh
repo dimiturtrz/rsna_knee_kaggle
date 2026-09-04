@@ -56,6 +56,8 @@
 #     concluding anything about the family.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: v3six applies the family swap to all six members at once at whole-corpus fit. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

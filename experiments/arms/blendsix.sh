@@ -83,6 +83,8 @@
 #     both come back clean does this indict the blend supervision itself.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: blendsix fits --fold -1, so every one of the six seats is refit on the whole corpus and none holds a study back. A blend-supervision roster cannot be priced offline. No board entry carries it, so it has no ruler at all — that is the knee-s8kim hole, recorded rather than hidden.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"

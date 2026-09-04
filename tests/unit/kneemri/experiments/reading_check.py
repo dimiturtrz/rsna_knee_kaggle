@@ -90,7 +90,8 @@ def test_undeclared(tmp_path: Path) -> None:
 def test_complaints(tmp_path: Path) -> None:
     drift = _drift(tmp_path)
     _arm(drift.arms, "dark", DARK)
-    assert drift.complaints() == []
+    _arm(drift.arms, "said", DARK + "# unmeasurable: knowingly\n")
+    assert drift.complaints() == ["dark fits --fold -1 and declares neither a reading nor why it has none"]
 
 
 def test_report(tmp_path: Path) -> None:

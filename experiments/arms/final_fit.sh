@@ -48,6 +48,8 @@
 # to fall back on, so the answer would otherwise depend entirely on where the last step landed.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 # control  res392 = 0.8523 (declared 2026-09-03 from this header own prose, knee-sgzgc)
+# unmeasurable: final_fit fits ONE model on EVERY study — that is its definition, and it is why no offline number can exist for it. Its ruler is the board row `finalfit_v1` in comp/board.jsonl.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 # EVERY CHOICE HERE IS NOW THE ONE THAT SURVIVED, and four of them were not on 2026-08-11.
 #

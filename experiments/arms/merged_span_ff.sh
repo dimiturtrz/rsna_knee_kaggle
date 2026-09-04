@@ -41,6 +41,8 @@
 # deliberate: --fold
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: merged_span_ff refits the largest single jump in the 111-member greedy curve blind. The jump was measured on fold 0; this arm deliberately gives that up for the extra data. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"

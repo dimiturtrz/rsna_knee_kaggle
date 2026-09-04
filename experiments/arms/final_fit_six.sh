@@ -34,6 +34,8 @@
 # 12+24+12+12+12+12 = 84 epochs, about 10 h rather than the 7 h the price was first written at. The
 # 24-epoch seat is the one to drop first if the card is contended.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: final_fit_six refits the champion's other six members on 100% of the corpus. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

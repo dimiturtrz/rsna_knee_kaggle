@@ -38,6 +38,8 @@
 # deliberate: --fold
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: calib_dense_hold_ff fits --fold 0's strongest read-A seat on the whole corpus, which is exactly the study set any holdout would have had to come out of. Its only ruler is the board row of the entry it feeds, which costs a slot.
+#
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
