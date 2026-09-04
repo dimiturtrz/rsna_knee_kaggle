@@ -30,9 +30,13 @@
 # the +0.0194. The free variable is the continuation corpus and it stays the free variable here.
 #
 # ONE VARIABLE AGAINST `ortho_dense`: the RECIPE, moved as a unit. This is band_dense's flag set with
-# `--variant ortholarge`, which is the same unit step `base224` -> `band_dense` took on the ViT-B
-# (0.8509 -> 0.8578, +0.0069). If the +0.0194 is a real property of the initialisation it should be
-# visible on top of that step; if it was an artifact of 224 px and 12 slices it will not be.
+# `--variant ortholarge`, which is the same unit step `base224` -> `band_dense` took (0.8509 -> 0.8578,
+# +0.0069). If the +0.0194 is a real property of the initialisation it should be visible on top of that
+# step; if it was an artifact of 224 px and 12 slices it will not be.
+#
+# THAT STEP IS NOT WITHIN ONE TRUNK, and this line claimed it was ("on the ViT-B") until 2026-09-04.
+# `base224` is DINOv2-BASE and `band_dense` is DINOv2-SMALL (ViT-S/14, 22M), so the +0.0069 crosses the
+# trunk as well as the geometry, and it is not a clean unit price for the recipe move. knee-4joaj.
 #
 # THE MEMORY CLAIM IN `ortho_dense.sh` WAS TRUE ONLY AT THE DEFAULT BATCH. That header judged a
 # 1024-wide 24-block ViT-L could not hold 20 slices at 336 px in 32 GB, and at `--batch 12` it cannot:

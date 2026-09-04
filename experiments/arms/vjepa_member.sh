@@ -35,7 +35,10 @@
 #                      card and would have parked the run in `await_headroom` forever on memory it never
 #                      intended to allocate — knee-bj90's failure mode, not an OOM.
 #
-# control  band_dense = 0.8578 (DINOv2-base, 336 px, 20 slices, max pooling, whole-stack), the best
+# control  band_dense = 0.8578 (DINOv2-SMALL, ViT-S/14, 22M — this line said "DINOv2-base" until
+#          2026-09-04 and was wrong; see the ledger's `ortho_stack` entry, knee-4joaj. It is the best
+#          single member on disk and it is a SMALL trunk, which makes the gap to this ViT-L wider than
+#          the header used to imply. 336 px, 20 slices, max pooling, whole-stack), the best
 #          single member on disk. NOT a matched control — the trunk, the crop and the pooling all
 #          differ, and they have to: this trunk refuses the control's reading. So a raw comparison of
 #          means is NOT what this arm buys.
