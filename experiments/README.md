@@ -6687,7 +6687,12 @@ member (`band_dense` 0.8578) and second to `slot_dropout` (0.8592) — but the m
 seven board flats, and one more dinov2-small member of ordinary quality is exactly what those seven
 flats measured. The ramp's value is as a RECIPE the trunk-family arm inherits, not as a seventh seat.
 
-## The label lane is priced, and it does not pay: `stack_increments_fx` against its twin
+## One label table is priced against its twin: `stack_increments_fx` against `stack_increments_base`
+
+This heading read "the label lane is priced, and it does not pay" until 2026-09-04. One twin pair
+prices ONE table; it never closed the lane. The lane closes by exhaustion over every table the
+project can build, and that argument lives in
+`interpretations/kneemri/2026-09-03_the-label-lane-closes-by-exhaustion.md` — read it there, not here.
 
 | arm | labels | best holdout | delta |
 | --- | --- | --- | --- |
