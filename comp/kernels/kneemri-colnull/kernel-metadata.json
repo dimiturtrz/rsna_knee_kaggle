@@ -1,0 +1,18 @@
+{
+ "id": "dimiturnt/kneemri-colnull",
+ "title": "kneemri-colnull",
+ "code_file": "kneemri-colnull.py",
+ "language": "python",
+ "kernel_type": "script",
+ "is_private": true,
+ "enable_gpu": false,
+ "enable_internet": false,
+ "dataset_sources": [
+  "dimiturnt/kneemri-kit"
+ ],
+ "competition_sources": [
+  "rsna-knee-abnormality-detection"
+ ],
+ "kernel_sources": [],
+ "model_sources": []
+}
