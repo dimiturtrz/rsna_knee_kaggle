@@ -18537,6 +18537,12 @@
     {
       "kind": "references",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.transfer_strata.Attribution",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
       "target": "kneemri.evaluation.transfer_strata.Stratum",
       "weight": 1
     },
@@ -18584,6 +18590,24 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.attribution",
+      "target": "kneemri.evaluation.transfer_strata.Attribution",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.attribution",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.attribution",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
       "target": "kneemri.evaluation.board_transfer.BoardEntry",
       "weight": 1
@@ -18622,6 +18646,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
       "target": "kneemri.evaluation.transfer_strata.TransferStrata.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.attribution",
       "weight": 1
     },
     {
@@ -33734,6 +33764,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.Attribution",
+      "label": "Attribution",
+      "level": "class",
+      "parent": "kneemri.evaluation.transfer_strata",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.transfer_strata.Stratum",
       "label": "Stratum",
       "level": "class",
@@ -45352,6 +45390,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.transfer_strata.TransferStrata._rebuildable",
       "label": "_rebuildable",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.attribution",
+      "label": "attribution",
       "level": "method",
       "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
       "role": null
