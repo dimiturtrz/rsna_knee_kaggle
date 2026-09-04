@@ -50,8 +50,18 @@ being measured."""
 
 PENALTIES = tuple(10.0**power for power in range(-3, 5))
 """The ridge grid, spanning from a penalty too small to bend the least-squares answer at all up to one
-that crushes every weight toward zero — i.e. from the unregularised fit to the flat vote. It is a SPAN
-rather than a value: the inner split picks the point, so no constant here is asserted to be right."""
+that pins the fit to the flat vote. It is a SPAN rather than a value: the inner split picks the point, so
+no constant here is asserted to be right.
+
+THE SPAN ONLY REACHES THE VOTE BECAUSE THE PENALTY IS CENTRED ON IT. This line read "crushes every weight
+toward zero — i.e. from the unregularised fit to the flat vote" and the second half did not follow from
+the first. A textbook ridge shrinks the whole weight vector toward the ORIGIN, which scales it down
+without turning it into the all-equal vector; an AUC reads only the ordering, so scaling changes nothing
+and the limit of a large penalty is not the vote but whatever direction the shrinkage happens to leave.
+The combiner therefore could not recover its own control, and the first reading over honest12 measured
+exactly that: -0.0179 own-finding, -0.0076 crossed, -0.0110 at ten blocks. Shrinking toward `prior`
+instead makes the largest penalty the flat vote itself, so the grid's worst case is the control rather
+than an arbitrary rotation of it, and a negative delta now means the learned direction genuinely lost."""
 
 BOTH_CLASSES = 2
 """A fit prices nothing without a positive and a negative on the rows it sees; below that the flat vote
@@ -99,23 +109,47 @@ class StackCombiner:
         """Whether this finding carries both classes on these rows — otherwise there is nothing to learn."""
         return len(set(response.tolist())) >= BOTH_CLASSES
 
+    def prior(self, features: int, target: int) -> Float[np.ndarray, " features"]:
+        """The weight vector that IS the flat vote, which is what the penalty shrinks toward.
+
+        Own-finding features are one column per member, so the vote is their mean. Crossed features hold
+        every finding's columns and the vote still reads only the target's, so the other eleven findings
+        enter at zero — the fit may earn them, and a large penalty takes them back away.
+        """
+        weights = np.zeros(features)
+        members = len(self.pool)
+        span = slice(target * members, (target + 1) * members) if self.cross else slice(None)
+        weights[span] = 1.0 / members
+        return weights
+
     @staticmethod
-    def fitted(design: Float[np.ndarray, "rows features"], response: NDArray[np.int64], penalty: float) -> RidgeFit:
-        """Closed-form ridge on centred features — no solver, so no convergence to argue about."""
+    def fitted(
+        design: Float[np.ndarray, "rows features"],
+        response: NDArray[np.int64],
+        penalty: float,
+        prior: Float[np.ndarray, " features"],
+    ) -> RidgeFit:
+        """Closed-form ridge shrinking toward `prior` — no solver, so no convergence to argue about.
+
+        The prior is what makes the grid honest. Penalising `w` pulls toward the origin and an ordering
+        does not notice a rescaling; penalising `w - prior` pulls toward the flat vote, so the largest
+        penalty reproduces the control exactly and the comparison the module reports is a real one.
+        """
         centre = design.mean(axis=0)
         centred = design - centre
         gram = centred.T @ centred + penalty * np.eye(centred.shape[1])
-        return RidgeFit(centre, np.linalg.solve(gram, centred.T @ (response - response.mean())))
+        return RidgeFit(centre, np.linalg.solve(gram, centred.T @ (response - response.mean()) + penalty * prior))
 
-    def chosen(self, design: Float[np.ndarray, "rows features"], response: NDArray[np.int64]) -> float:
+    def chosen(self, design: Float[np.ndarray, "rows features"], response: NDArray[np.int64], target: int) -> float:
         """The penalty that scores best on the back half of the KEPT rows, never on the reported block."""
         cut = len(response) // 2
         inner, outer = slice(None, cut), slice(cut, None)
         if not (self.fittable(response[inner]) and self.fittable(response[outer])):
             return max(PENALTIES)
+        prior = self.prior(design.shape[1], target)
         graded = []
         for penalty in PENALTIES:
-            fit = self.fitted(design[inner], response[inner], penalty)
+            fit = self.fitted(design[inner], response[inner], penalty, prior)
             graded.append((self.scores.area_under_curve(fit.applied(design[outer]), response[outer]), penalty))
         return max(graded)[1]
 
@@ -133,8 +167,9 @@ class StackCombiner:
                 if not self.fittable(response):
                     out[held, target] = flat[held, target]
                     continue
-                penalty = self.chosen(design[kept], response)
-                out[held, target] = self.fitted(design[kept], response, penalty).applied(design[held])
+                prior = self.prior(design.shape[1], target)
+                penalty = self.chosen(design[kept], response, target)
+                out[held, target] = self.fitted(design[kept], response, penalty, prior).applied(design[held])
         return out
 
     def reading(self) -> dict[str, float]:

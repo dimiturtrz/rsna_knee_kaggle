@@ -5,7 +5,7 @@ from pathlib import Path
 import torch
 from torch import Tensor, nn
 
-from kneemri.models.timm_trunk import TimmHubWeights, TimmTrunk
+from kneemri.models.timm_trunk import TimmHubWeights, TimmMapWeights, TimmOptions, TimmTrunk
 
 DIM = 8
 PATCHES = 5
@@ -49,6 +49,19 @@ def test_gradient_checkpointing_enable():
     trunk.gradient_checkpointing_enable({"use_reentrant": False})
 
     assert trunk.is_gradient_checkpointing is True
+
+
+def test_timm_hub_weights_options():
+    """A ViT asks for `dynamic_img_size`, which is what lets a 224-grid checkpoint read 336."""
+    expected: TimmOptions = {"dynamic_img_size": True}
+
+    assert TimmHubWeights("vit_base_patch16_224", DIM).options() == expected
+
+
+def test_timm_map_weights_options():
+    """A hierarchical trunk asks for NOTHING — timm refuses the keyword on a model with no table to
+    interpolate, so the override is the difference between the two families rather than a default."""
+    assert TimmMapWeights("coatnet_2_rw_224", DIM).options() == {}
 
 
 def test_resolve(tmp_path: Path):

@@ -4911,32 +4911,14 @@
     {
       "kind": "import",
       "source": "kneemri.models.backbone",
-      "target": "kneemri.models.sam_trunk",
+      "target": "kneemri.models.foreign_encoders",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.backbone",
-      "target": "kneemri.models.snapshot_trunk",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.backbone",
-      "target": "kneemri.models.state_dict_trunk",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.backbone",
-      "target": "kneemri.models.timm_trunk",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.backbone",
-      "target": "kneemri.models.trunk_tokens",
-      "weight": 1
+      "target": "kneemri.models.variants",
+      "weight": 30
     },
     {
       "kind": "import",
@@ -4948,6 +4930,48 @@
       "kind": "import",
       "source": "kneemri.models.encoder_surgery",
       "target": "kneemri.models.lora",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.encoder",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.sam_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.snapshot_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.state_dict_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.timm_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.trunk_tokens",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.foreign_encoders",
+      "target": "kneemri.models.variants",
       "weight": 1
     },
     {
@@ -16999,6 +17023,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.prior",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
       "target": "kneemri.evaluation.stack_combiner.RidgeFit",
@@ -17056,6 +17086,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
       "target": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.prior",
       "weight": 1
     },
     {
@@ -25669,6 +25705,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.models.timm_trunk.TimmHubWeights",
+      "target": "kneemri.models.timm_trunk.TimmOptions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmHubWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmHubWeights.options",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.models.timm_trunk.TimmHubWeights.build",
       "target": "kneemri.models.timm_trunk.TimmHubWeights.resolve",
@@ -25678,6 +25726,24 @@
       "kind": "construct",
       "source": "kneemri.models.timm_trunk.TimmHubWeights.build",
       "target": "kneemri.models.timm_trunk.TimmTrunk",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.models.timm_trunk.TimmMapWeights",
+      "target": "kneemri.models.timm_trunk.TimmHubWeights",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.timm_trunk.TimmMapWeights",
+      "target": "kneemri.models.timm_trunk.TimmOptions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmMapWeights.build",
+      "target": "kneemri.models.trunk_tokens.TrunkAsTokens.from_map",
       "weight": 1
     },
     {
@@ -29281,7 +29347,7 @@
       "role": null
     },
     {
-      "descendants": 229,
+      "descendants": 231,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -30529,7 +30595,7 @@
       "role": null
     },
     {
-      "descendants": 28,
+      "descendants": 30,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -30596,6 +30662,14 @@
       "descendants": 0,
       "id": "kneemri.models.fingerprint",
       "label": "fingerprint",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.foreign_encoders",
+      "label": "foreign_encoders",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -30748,6 +30822,14 @@
       "descendants": 0,
       "id": "kneemri.models.trunk_tokens",
       "label": "trunk_tokens",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.variants",
+      "label": "variants",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -34732,6 +34814,22 @@
       "descendants": 0,
       "id": "kneemri.models.timm_trunk.TimmHubWeights",
       "label": "TimmHubWeights",
+      "level": "class",
+      "parent": "kneemri.models.timm_trunk",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmMapWeights",
+      "label": "TimmMapWeights",
+      "level": "class",
+      "parent": "kneemri.models.timm_trunk",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmOptions",
+      "label": "TimmOptions",
       "level": "class",
       "parent": "kneemri.models.timm_trunk",
       "role": "satellite"
@@ -44106,6 +44204,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.prior",
+      "label": "prior",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.stack_combiner.StackCombiner.ranked",
       "label": "ranked",
       "level": "method",
@@ -51130,10 +51236,34 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmHubWeights.options",
+      "label": "options",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmHubWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.timm_trunk.TimmHubWeights.resolve",
       "label": "resolve",
       "level": "method",
       "parent": "kneemri.models.timm_trunk.TimmHubWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmMapWeights.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmMapWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmMapWeights.options",
+      "label": "options",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmMapWeights",
       "role": null
     },
     {

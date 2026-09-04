@@ -375,3 +375,25 @@ v3large_stack_s2026.pt # THE NATURAL-IMAGE HALF OF THE Q-CW PAIR, and it was arm
                       # no longer exists.
                       # RE-OPEN BY: nothing about this run. The Q-CW axis continues with a DIFFERENT
                       # pretraining domain against the same recipe, which is a new arm with its own header.
+
+radiodino_corpus_s2026.pt # THE CORPUS AXIS, PRICED AS A SEAT AND NEGATIVE. 0.8214 best holdout (epoch 8 of
+                      # 12, converged) against v3base_dense 0.8455 and base_dense 0.8512 — -0.0241 and
+                      # -0.0298, its third pre-registered branch (COSTS, 0.80-0.8392). It carried the
+                      # strongest prior any non-DINOv2 candidate has held: same ViT-B/16 architecture, same
+                      # self-distillation objective, differing from the pool ONLY in pretraining CORPUS,
+                      # which is a distance no seating experiment here had ever isolated, and 3.6 points
+                      # back from band_dense puts it inside the ~5-point diversity boundary that
+                      # radiodino_s16 sits on. So the seat was priced rather than assumed: honest12 0.8750
+                      # -> 0.8742 with this member added, -0.0008 over 909 shared studies under
+                      # RankAverage, 13 of 13 records loaded. That is an EIGHTH closed seating direction
+                      # and the only one that varies pretraining data alone.
+                      # The mechanism is now named rather than guessed. Juodelyte (TMLR 2023) measures
+                      # ImageNet and RadImageNet representations diverging after fine-tuning while their
+                      # PREDICTIONS stay similar, which is exactly a member that looks independent and
+                      # seats at zero; Krones (2026) reports mismatched medical pretraining losing to
+                      # ImageNet outright, and RadioDino's corpus is 2D radiology, not knee MRI. Kimi's
+                      # Q-EO sweep found NO published case of a weaker corpus-diverse member earning a
+                      # seat at matched architecture and objective.
+                      # RE-OPEN BY: a MODALITY-MATCHED corpus — self-supervised pretraining on volumetric
+                      # knee MRI (fastMRI knee, SKM-TEA), which is the one corpus direction the literature
+                      # still predicts a gain for. More 2D radiology slices only re-measures this row.

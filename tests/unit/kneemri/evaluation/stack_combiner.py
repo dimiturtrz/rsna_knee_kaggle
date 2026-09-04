@@ -80,17 +80,33 @@ def test_fittable():
     assert not StackCombiner.fittable(np.zeros(5, dtype=np.int64)), "and neither does all negative"
 
 
+def test_prior():
+    """The prior IS the flat vote — every member equally, and only the target's findings."""
+    combiner = StackCombiner(_pool())
+    crossing = StackCombiner(_pool(), cross=True)
+
+    own = combiner.prior(MEMBERS, 0)
+    crossed = crossing.prior(MEMBERS * len(TARGETS), 1)
+
+    assert own == pytest.approx(np.full(MEMBERS, 1.0 / MEMBERS)), "the vote weighs every member the same"
+    assert crossed[MEMBERS : 2 * MEMBERS] == pytest.approx(np.full(MEMBERS, 1.0 / MEMBERS))
+    assert crossed[:MEMBERS] == pytest.approx(np.zeros(MEMBERS)), (
+        "a vote reads one finding's columns, so the other findings start at zero and must be earned"
+    )
+
+
 def test_fitted():
-    """A tiny penalty recovers a relation that is genuinely in the features."""
+    """A tiny penalty recovers a real relation; a crushing one returns the prior it shrinks toward."""
     design = np.column_stack([np.arange(STUDIES, dtype=np.float64), np.ones(STUDIES)])
     response = (np.arange(STUDIES) >= STUDIES // 2).astype(np.int64)
+    prior = np.array([0.5, 0.5])
 
-    weak = StackCombiner.fitted(design, response, min(PENALTIES))
-    crushing = StackCombiner.fitted(design, response, 1e12)
+    weak = StackCombiner.fitted(design, response, min(PENALTIES), prior)
+    crushing = StackCombiner.fitted(design, response, 1e12, prior)
 
     assert weak.coefficients[0] > 0.0, "the first column IS the response's order, so its weight must be positive"
-    assert abs(crushing.coefficients[0]) < abs(weak.coefficients[0]), (
-        "a large penalty has to pull the fit back toward the flat vote, which is what the grid spans"
+    assert crushing.coefficients == pytest.approx(prior, abs=1e-6), (
+        "the largest penalty has to reproduce the control exactly, or the grid does not contain the vote"
     )
 
 
@@ -101,8 +117,8 @@ def test_chosen():
     design = combiner.design(ranks, 0)
     response = (_truth()[:, 0] >= 0.5).astype(np.int64)
 
-    assert combiner.chosen(design, response) in PENALTIES
-    assert combiner.chosen(design, np.ones(STUDIES, dtype=np.int64)) == max(PENALTIES), (
+    assert combiner.chosen(design, response, 0) in PENALTIES
+    assert combiner.chosen(design, np.ones(STUDIES, dtype=np.int64), 0) == max(PENALTIES), (
         "one class on either side of the inner split prices nothing, so the safest end of the grid stands"
     )
 

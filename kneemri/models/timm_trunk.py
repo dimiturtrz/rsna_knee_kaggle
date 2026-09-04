@@ -21,12 +21,24 @@ to the weights.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import override
+from typing import TypedDict, override
 
 from jaxtyping import Float
 from torch import Tensor, nn
 
-from kneemri.models.trunk_tokens import TokenConfig, TokenOutput
+from kneemri.models.trunk_tokens import TokenConfig, TokenOutput, TrunkAsTokens
+
+
+class TimmOptions(TypedDict, total=False):
+    """The build keywords `timm.create_model` may be given here, named so the unpack can be checked.
+
+    `total=False` because the hierarchical case asks for none of them. It exists as a TypedDict rather
+    than a `dict[str, bool]` for the reason `TimmHubWeights.options` states: unpacking a value-typed
+    mapping into a function with named `Path | str | None` parameters is checked key-by-key against
+    every one of them, and fails.
+    """
+
+    dynamic_img_size: bool
 
 
 class TimmTrunk(nn.Module):
@@ -53,8 +65,14 @@ class TimmTrunk(nn.Module):
     @property
     def is_gradient_checkpointing(self) -> bool:
         """What the trunk says, because the trunk is what checkpoints — the readback `switch_coverage`
-        proves `--recompute-activations` landed with."""
-        return bool(getattr(self.trunk, "grad_checkpointing", False))
+        proves `--recompute-activations` landed with.
+
+        timm puts the flag where the recomputation happens, which is not one place: a flat ViT holds it
+        on the model, and a staged trunk like MaxxVit holds one per stage and nothing at the root. So the
+        question is asked of every module and answered by any of them — reading only the root reported
+        False for a CoAtNet whose stages had all been switched on, which `switch_coverage` then refused.
+        """
+        return any(bool(getattr(module, "grad_checkpointing", False)) for module in self.modules())
 
     def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs: dict[str, object]) -> None:
         """Forward transformers' checkpointing hook onto timm's differently-spelled one.
@@ -87,6 +105,16 @@ class TimmHubWeights:
 
     repository: str = ""
     """The HuggingFace repository holding `filename`, used only when no local source is given."""
+
+    classes: int = 0
+    """How wide a classifier the CHECKPOINT carries, which is not a thing this project ever runs.
+
+    Zero builds no head at all, which is right for a self-supervised checkpoint that shipped without one.
+    A supervised release ships the head it was trained with — CoAtNet's IN-1k finetune carries
+    `head.fc.{weight,bias}` — and a headless build meets them as `Unexpected key(s) in state_dict`. The
+    answer is to build the head and leave it unused rather than to drop the keys: `forward_features`
+    never reaches it, and a strict load is the only thing holding the stated architecture to the file.
+    """
 
     def resolve(self, source: str | Path | None) -> Path:
         """The weights file on disk, from a mounted directory or by fetching `repository` once.
@@ -127,6 +155,48 @@ class TimmHubWeights:
         # through `interpolate_pos_encoding`. It is the opposite of `SamVisionWeights`, whose table is
         # re-gridded ONCE at build — SAM's is absolute and its patch embedding asserts the input matches,
         # so there is nothing to interpolate per forward and the parameter itself has to move.
-        trunk = timm.create_model(self.architecture, pretrained=False, num_classes=0, dynamic_img_size=True)
+        trunk = timm.create_model(self.architecture, pretrained=False, num_classes=self.classes, **self.options())
         trunk.load_state_dict(load_file(str(self.resolve(source))), strict=True)
         return TimmTrunk(trunk, self.dim)
+
+    def options(self) -> TimmOptions:
+        """The build keywords this family needs, which is where the two timm cases differ.
+
+        `dynamic_img_size` is a ViT keyword: it makes the position table interpolate per forward instead
+        of being re-gridded into the parameter, which is what lets a 224-grid checkpoint read 336. A
+        hierarchical trunk has no such table to interpolate and timm refuses the keyword outright, so it
+        is asked for here rather than passed unconditionally.
+
+        A `TypedDict` and not a `dict[str, bool]`: `timm.create_model` declares named parameters
+        (`checkpoint_path`, `cache_dir`, `pretrained_cfg`) that a value-typed mapping is checked against
+        one by one when unpacked, so the loose type makes the CALL fail to type rather than the mapping.
+        """
+        return {"dynamic_img_size": True}
+
+
+@dataclass(frozen=True)
+class TimmMapWeights(TimmHubWeights):
+    """A timm trunk whose `forward_features` emits a MAP, wearing the contract in two layers.
+
+    The composition is the point. `TimmTrunk` fixes the CALL — timm answers `forward_features`, the head
+    calls `backbone(pixel_values=)` — and `TrunkAsTokens.from_map` fixes the LAYOUT, flattening (n, d, h,
+    w) and supplying the prefix slot the head's `tokens[:, 1:]` assumes. A CoAtNet is short of both
+    halves, and stacking the two wrappers is what keeps either from growing a second case: gradient
+    checkpointing and the readback both delegate straight down the chain.
+
+    It is a hierarchical trunk, so `dynamic_img_size` is refused and the read size is fixed by the
+    architecture rather than interpolated. `CoAtNet-rmlp` pins its relative-position MLP to the 12x12
+    grid its stage-3 attention was pretrained on: 448 px raises `The size of tensor a (784) must match
+    the size of tensor b (576)`, measured, so 384 is the only read and `require_tiling` cannot say so.
+    """
+
+    @override
+    def options(self) -> TimmOptions:
+        """None — the position encoding is relative and baked to a grid, so there is nothing to re-grid."""
+        return {}
+
+    @override
+    def build(self, source: str | Path | None = None) -> nn.Module:  # devtools-ignore: test-mirror
+        """The loaded trunk wearing both halves of the contract. No mirror test, for the reason the base
+        `build` has none: reaching it fetches a 290 MB checkpoint and the `small` gate forbids the network."""
+        return TrunkAsTokens.from_map(super().build(source), self.dim)
