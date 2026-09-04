@@ -11787,6 +11787,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.priced",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.ratios_above",
       "weight": 1
     },
@@ -39540,6 +39546,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
       "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.priced",
+      "label": "priced",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
       "role": null

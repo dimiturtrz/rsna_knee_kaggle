@@ -30,6 +30,18 @@ fall rather than a number a reader could quote alone. For PRICING, the local cel
 even if the saturation is only attenuation: an arm is priced from an OBSERVED offline reading, which
 carries exactly the noise that attenuates the estimate.
 
+EVERY NUMBER IN THIS DOCSTRING IS HISTORY, AND QUOTING ONE IS THE BUG. The +1.55 above was fitted on
+2026-08-29 and had been carried off into a pre-registration, a kernel docstring and a board row by
+2026-09-03, where it predicted 0.938-0.939 for `holdfive_v1`; the entry scored 0.936 and was written
+down as "the offline gain does not survive to the board". It survived exactly. Holdfive's pool sat in a
+band whose fitted slope was +0.71, which predicts 0.9366. A verdict was inverted by a constant nobody
+re-read (knee-dn4t9, the THIRD time this constant was quoted from prose).
+
+So: run the tool with `--near <the offline score you are pricing against>` and quote the cell it prints,
+with its pair count. Never a scalar from any prose, this docstring included. `PRICEABLE` below makes a
+thin cell say so in its own line, because annotating the number somewhere else is what the previous two
+corrections did and neither held.
+
 THE NUMBERS ABOVE MOVED ON 2026-08-29 AND THE OLD ONES WERE ONE CONTAMINATED ROW. `raptor_solo` sat on
 the ensemble scope carrying offline 0.8938 against board 0.923, and `kneemri.evaluation.foreign_overlap`
 had already shown 896 of the 909 studies that number was read on to be inside raptor's published
@@ -98,6 +110,26 @@ written against — a constant repeated from prose while the instrument was sayi
 interval is what stops the local number becoming the next 1.72. Seeded, because a gate that re-draws
 its own answer is not a gate.
 """
+
+
+PRICEABLE = 5
+"""The fewest resolved pairs a cell may hold and still be quoted as a PRICE rather than a direction.
+
+Not a statistical threshold — there is no honest one for a median of dependent pairs — but a legibility
+gate, and it exists because the failure it blocks has now happened three times (knee-dn4t9). Every
+recurrence had the same shape: a cell was printed as `median +X.XX [low, high]`, the brackets read as a
+fitted interval, and the scalar walked off into a pre-registration, a kernel docstring and a board row
+with no memory of how many pairs made it. On 2026-09-04 the top cell held TWO pairs and still printed an
+interval, because `spread` bootstraps whatever it is handed and resampling two numbers cannot report
+less confidence than two numbers contain.
+
+Five is where a bootstrap of dependent pairs stops being a restatement of its own input. Below it the
+line says so in words, in the same place the number is, because an annotation somewhere else is what
+the last three corrections tried and none of them held.
+"""
+
+THIN = " — DIRECTION ONLY, too few pairs to price an arm with"
+"""What a cell under `PRICEABLE` says about itself, carried beside its own number and never elsewhere."""
 
 
 ENSEMBLE = "ensemble"
@@ -305,6 +337,18 @@ class BoardTransfer:
             found.append((floor, count, value, self.spread(self.ratios_above(floor))))
         return found
 
+    @staticmethod
+    def priced(count: int, value: float, spread: tuple[float, float]) -> str:
+        """One cell as a line fragment, saying in place whether it may be quoted as a price.
+
+        Here rather than at the two call sites that build cells, because the whole defect this guards is
+        a number reaching a reader without the count that qualifies it — and two formatters is two
+        chances for one of them to drop the qualification.
+        """
+        low, high = spread
+        thin = THIN if count < PRICEABLE else ""
+        return f"{count} resolved pairs, median {value:+.2f} [{low:+.2f}, {high:+.2f}]{thin}"
+
     def report(self, near: float | None = None) -> str:
         """What the holdout is worth as a selector, in the two numbers that decide a submission.
 
@@ -324,17 +368,13 @@ class BoardTransfer:
             f"over the WHOLE record — the wrong number to price an arm with, see below",
         ]
         lines += [
-            f"  among entries at or above {floor:.4f}: {count} resolved pairs, "
-            f"median {value:+.2f} [{low:+.2f}, {high:+.2f}]"
-            for floor, count, value, (low, high) in self.regimes()
+            f"  among entries at or above {floor:.4f}: {self.priced(count, value, spread)}"
+            for floor, count, value, spread in self.regimes()
         ]
         if near is not None:
             count, value = self.compression_above(near)
-            low, high = self.spread(self.ratios_above(near))
-            lines.append(
-                f"  PRICE AN ARM AT THIS ONE: at or above {near:.4f} (asked for), {count} pairs, "
-                f"median {value:+.2f} [{low:+.2f}, {high:+.2f}]"
-            )
+            cell = self.priced(count, value, self.spread(self.ratios_above(near)))
+            lines.append(f"  PRICE AN ARM AT THIS ONE: at or above {near:.4f} (asked for), {cell}")
         lines += [
             f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
             f"{sum(pair.inverted for pair in pairs if pair.resolved)}/"

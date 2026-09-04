@@ -3,7 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from kneemri.evaluation.board_transfer import REGIME_QUANTILES, BoardEntry, BoardPair, BoardTransfer
+from kneemri.evaluation.board_transfer import (
+    PRICEABLE,
+    REGIME_QUANTILES,
+    THIN,
+    BoardEntry,
+    BoardPair,
+    BoardTransfer,
+)
 
 RECORD = [
     {"note": "a comment line carries no entry and must not be read as one"},
@@ -134,6 +141,13 @@ def test_regimes(tmp_path: Path):
     assert [count for _, count, _, _ in regimes] == [0, 0], "nothing above the median is resolved here"
     assert all(floor >= 0.8500 for floor, _, _, _ in regimes), "floors come from the entries themselves"
     assert all(low <= high for *_, (low, high) in regimes), "every regime carries an interval"
+
+
+def test_priced():
+    """A cell too thin to fit says so in its OWN line, which is the only place the count travels with it."""
+    assert THIN in BoardTransfer.priced(2, 0.80, (0.71, 0.89)), "two dependent pairs are a direction"
+    assert THIN not in BoardTransfer.priced(PRICEABLE, 0.97, (0.94, 1.17))
+    assert BoardTransfer.priced(13, 0.97, (0.94, 1.17)) == "13 resolved pairs, median +0.97 [+0.94, +1.17]"
 
 
 def test_report(tmp_path: Path):

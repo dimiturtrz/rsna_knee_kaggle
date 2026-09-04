@@ -23,6 +23,13 @@
 # THE BRANCHES, pre-registered before the card is spent, against the 0.0062 three-seed floor:
 #   >= +0.0040  the ramp transfers to the dense corner. rampsix runs its full five seats (7 h) and the
 #               arithmetic in its header stands: +0.004-0.008 offline x board transfer 1.55 = +0.006-0.012.
+#               ^ THAT 1.55 IS WRONG AND WAS NEVER THE TOOL'S (knee-dn4t9, 2026-09-04). It is the
+#               whole-record median, which `board_transfer` labels in its own output as the wrong number
+#               to price an arm with; compression FALLS as the pool improves and in the band we ship in
+#               it is +0.97 [+0.94, +1.17] over 13 pairs. The same branch prices at +0.004-0.008 offline
+#               x 0.97 = +0.004-0.008 board, roughly two thirds of what is written above. Do not repair
+#               this by editing the number: run `board_transfer --near <the offline being priced
+#               against>` at write time and quote the cell it prints, count included.
 #   +0.0000 to +0.0040  transfers but SMALLER than at the disagreed corner. rampsix runs THREE seats
 #               (the dense ones) and not five - 4.2 h, and the two 0.2-0.8 seats stay unspent, since they
 #               are the corners calibsix already named as least evidenced.
