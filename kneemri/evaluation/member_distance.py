@@ -16,10 +16,14 @@ correcting it: it prices the same combined array against the same truth, and 0 o
 `BOARD_RESOLVABLE` in the sweep that preceded the split. A ruler that cannot separate a twin from a
 stranger cannot answer the question a sixth seat actually asks.
 
-SO THIS ONE READS NO LABELS AT ALL. Distance is a property of the predictions, and the truth vector is
-what drags every other reading back onto the quality axis. Dropping it is the point, not an economy:
-`Pool.truth` is available here and deliberately untouched, so a high-distance reading can never be a
-restatement of a high-quality one.
+SO THE DISTANCE ITSELF READS NO LABELS. Distance is a property of the predictions, and the truth vector
+is what drags every other reading back onto the quality axis. Keeping it out of `against` and `spread` is
+the point, not an economy: a high-distance reading can never be a restatement of a high-quality one.
+
+`report` DOES open the label table, for one column and one reason. It printed distance alone until
+2026-09-04, when `fault_ruler` measured that an ordering by distance alone is inverted here — see below.
+The candidate has to be read on both axes at once, so the report carries the solo score beside the
+distance rather than leaving the reader to fetch it from somewhere else and pair the two by hand.
 
 WHAT IT MEASURES. Rank correlation, per label, averaged over labels — the same per-label ranking the
 shipped vote applies (`Vote.ranks`), so the number is computed in the space the decision is made in
@@ -59,6 +63,7 @@ import numpy as np
 from jaxtyping import Float
 
 from kneemri.evaluation.pool import Pool
+from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import RankAverage
 
 NEIGHBOURED = 2
@@ -72,7 +77,7 @@ so it says so rather than inventing one.
 
 
 class MemberDistance:
-    """Rank-space distance between members, computed without ever opening the label table."""
+    """Rank-space distance between members: label-free to compute, read beside the solo score."""
 
     def __init__(self, roster: Pool, candidates: Pool) -> None:
         self.roster = roster
@@ -106,15 +111,28 @@ class MemberDistance:
         ]
 
     def report(self) -> list[str]:
-        """Every candidate by distance from the roster, most distant first."""
+        """Every candidate by distance from the roster, most distant first, WITH the solo score beside it.
+
+        The solo column is the only part of this class that opens the label table, and it is here because
+        `fault_ruler` measured what happens without it: read across a quality gap, distance correlates
+        -0.5313 with the gain it is supposed to predict, and +0.7086 once the pair's quality is held
+        fixed. This pool's distant members are its weak ones, so an ordering by distance alone is an
+        ordering by weakness wearing a diversity label. Two candidates are comparable on the distance
+        column when their solo scores are comparable; a distant candidate half a point below the seat bar
+        is not a find.
+        """
+        scores = LabelScores()
         rows = [
-            (max(agreements), float(np.mean(agreements)), name)
-            for name, agreements in (
-                (name, self.against(candidate))
+            (max(agreements), float(np.mean(agreements)), scores.mean(candidate, self.candidates.truth), name)
+            for name, candidate, agreements in (
+                (name, candidate, self.against(candidate))
                 for name, candidate in zip(self.candidates.names, self.candidates.predictions, strict=True)
             )
         ]
         lines = [f"roster of {len(self.roster.predictions)}, its own nearest-neighbour spread:", *self.spread()]
-        lines.append("candidates, most distant first (nearest = twin detector):")
-        lines.extend(f"  {name}: nearest {nearest:.4f}  mean {mean:.4f}" for nearest, mean, name in sorted(rows))
+        lines.append("candidates, most distant first (nearest = twin detector; compare within a solo band):")
+        lines.extend(
+            f"  {name}: nearest {nearest:.4f}  mean {mean:.4f}  solo {solo:.4f}"
+            for nearest, mean, solo, name in sorted(rows)
+        )
         return lines
