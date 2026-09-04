@@ -189,20 +189,51 @@ class ArmCheck:
     def invocations(self) -> dict[str, str]:
         """Each arm's `run_train` flag line, by arm name. Arms that never call it are absent.
 
-        Some arms drive `uv run` directly rather than through `run_train` — the diversity curve, the
-        cache build — and have no flags to check. They time out or print nothing, and are skipped
-        rather than reported: a lint that cries about files it cannot check gets ignored.
+        Some arms drive `uv run` or `.venv/Scripts/python.exe` directly rather than through `run_train` —
+        the diversity curve, the cache build, `after_ortho_encode` — and have no flags to check. They
+        print nothing and are skipped rather than reported: a lint that cries about files it cannot
+        check gets ignored.
+
+        THEY USED TO *RUN*, WHICH IS WHY `_printed` MOVES THE CWD (knee-q4c3u). Reading an arm's
+        declaration by EXECUTING it means every command the arm names outside `run_train` executes too:
+        the stub replaces `run_train` and nothing else. Seven arms invoke `.venv/Scripts/python.exe`
+        at top level with no `run_train` anywhere — `diversity_curve` (`evaluation.member_curve`),
+        `ortho_probe` and `readout_probe` (`embeddings.build_embeddings`), `raptor_features`,
+        `packaged_seats` and `trio_seat_value` (`kaggle.roster_reads`), and `build_cache`. Three of them
+        touch the GPU. So every run of this pre-flight put seven real jobs on the box, three on the card,
+        each for the full `TIMEOUT_SECONDS` before it was killed. `--only` does not prevent it: it
+        filters AFTER every script has already run.
+
+        THE BOUND IS 30 s AN ARM, NOT HOURS, and this docstring said hours until it was checked against
+        `TIMEOUT_SECONDS`. The six-hour `build_ortho_embeddings` builds that twice contended with a live
+        arm were blamed on this mechanism and are NOT it: that command appears only in
+        `after_ortho_encode.sh`, which runs `set -u` against `${1}` and therefore aborts before reaching
+        it whenever this check invokes it bare. Their launcher is still unattributed. What is fixed here
+        is the smaller, certain defect; the larger one is a live question, not a closed one.
         """
         return self._printed([[str(arm)] for arm in sorted(self.arms.glob("*.sh"))])
 
     def _printed(self, commands: list[list[str]]) -> dict[str, str]:
-        """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints."""
+        """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints.
+
+        RUN FROM THE ARMS DIRECTORY, NOT THE REPO ROOT, and that is the whole of the fix for knee-q4c3u.
+        Every arm that does work outside `run_train` reaches its interpreter by the repo-relative path
+        `.venv/Scripts/python.exe` (or by `uv`, through the same tree). From `experiments/arms` that path
+        resolves to nothing, so the line dies on `No such file or directory` in milliseconds instead of
+        running for `TIMEOUT_SECONDS` on the card. Nothing legitimate is lost: the flags this method
+        collects come from the stubbed `run_train`, whose inputs are the environment and the arm's own
+        argv, neither of which is relative to the working directory. The script path is absolutised for
+        the same reason — `$0` is what the arm resolves its lib against, and moving the cwd out from
+        under a relative one would break every arm rather than only the ones that should break.
+        """
         found: dict[str, str] = {}
         for command in commands:
+            script, *arguments = command
             try:
                 # fixed argv, our own files, no shell
                 done = Spawn().ran(
-                    [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
+                    [str(GIT_BASH) if GIT_BASH.exists() else "bash", str(Path(script).resolve()), *arguments],
+                    cwd=self.arms,
                     capture_output=True,
                     text=True,
                     timeout=TIMEOUT_SECONDS,
