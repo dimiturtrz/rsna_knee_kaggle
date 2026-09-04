@@ -351,3 +351,27 @@ ortho_stack_s2026.pt  # A MATCHED CONTROL, and it was never a seat candidate. 0.
                       # Its number is a BASELINE the arm after it is read against, not a bid.
                       # RE-OPEN BY: nothing about this run. A different OrthoDiffusion recipe is a new
                       # arm with its own header, not a re-quote of this row.
+
+medsam_dense_s2026.pt # THE MEDSAM TRUNK ON THE DENSE RECIPE, and it is the widest trunk-family shortfall
+                      # the pool has measured. 0.8137 best holdout against the same recipe's own controls
+                      # — band_dense 0.8578 and calib_dense_hold 0.8634 — so it reads -0.044 to -0.050,
+                      # seven to eight times the 0.0062 noise floor. That is not a seat question and it is
+                      # not a diversity question either: a member half a point of AUC under every other
+                      # entry on its own recipe brings its errors, not its independence, and the seat bar
+                      # is 0.8459. What the run BUYS is the trunk-family reading it was armed for — a
+                      # segmentation-pretrained (SAM) trunk transferred to a classification stack loses to
+                      # both a natural-image trunk and a domain-pretrained one, on a matched recipe.
+                      # RE-OPEN BY: a MedSAM arm that changes the transfer, not the seed — the promptable
+                      # encoder used as a region proposer feeding the stack, rather than as a plain trunk.
+                      # A re-quote of this checkpoint's number is not a re-opening.
+
+v3large_stack_s2026.pt # THE NATURAL-IMAGE HALF OF THE Q-CW PAIR, and it was armed as a reading, not a bid.
+                      # 0.8277 best holdout against its matched control ortho_stack_s2026 at 0.8417, so the
+                      # DOMAIN-pretrained trunk beats the natural-image trunk by +0.0140 on an identical
+                      # stack recipe — one control, one arm, above the 0.0062 floor and below the 1.5%
+                      # result bar, so DIRECTIONAL. It seats nowhere on merit: 0.0182 under the 0.8459 seat
+                      # bar and 0.0363 under the roster bar. The checkpoint is kept because it is one half
+                      # of the pair; deleting it would leave ortho_stack's number quoting a control that
+                      # no longer exists.
+                      # RE-OPEN BY: nothing about this run. The Q-CW axis continues with a DIFFERENT
+                      # pretraining domain against the same recipe, which is a new arm with its own header.
