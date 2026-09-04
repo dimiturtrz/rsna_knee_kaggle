@@ -46,6 +46,7 @@ ARM_GLOB = "*.sh"
 READING = "# reading:"
 UNMEASURABLE = "# unmeasurable:"
 DARK_FIT = "--fold -1"
+COMMENT = "#"
 CHECKPOINT_GLOB_SUFFIX = "*.pt"
 
 
@@ -83,8 +84,14 @@ class ArmDeclaration:
         return any(line.strip().startswith(UNMEASURABLE) for line in self.text.splitlines())
 
     def dark(self) -> bool:
-        """Whether the arm fits on everything, so no holdout number exists for it to be read by."""
-        return DARK_FIT in self.text
+        """Whether the arm fits on everything, so no holdout number exists for it to be read by.
+
+        COMMENTS DO NOT MAKE AN ARM DARK. These headers argue about the flag as often as they set it —
+        `ema224` opens by calling itself 'the fold-0 measurement' and names `--fold -1` in prose further
+        down. A substring over the whole file reads that as a dark arm, which is the check accusing an
+        arm of the opposite of what it does.
+        """
+        return any(DARK_FIT in line for line in self.text.splitlines() if not line.lstrip().startswith(COMMENT))
 
 
 class ReadingDrift:

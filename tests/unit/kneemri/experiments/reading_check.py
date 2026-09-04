@@ -36,6 +36,7 @@ def test_unmeasurable(tmp_path: Path) -> None:
 def test_dark(tmp_path: Path) -> None:
     assert ArmDeclaration.read(_arm(tmp_path, "one", DARK)).dark()
     assert not ArmDeclaration.read(_arm(tmp_path, "two", "TRAIN='--fold 0'\n")).dark()
+    assert not ArmDeclaration.read(_arm(tmp_path, "three", "# this is the fold-0 twin of --fold -1\n")).dark()
 
 
 def _drift(tmp_path: Path) -> ReadingDrift:
