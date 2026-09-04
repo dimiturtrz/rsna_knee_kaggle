@@ -7309,3 +7309,35 @@ instead of a forty-minute one. The one ordering they do reproduce is the continu
 over v3large, +0.0006 of seat value, the same sign as the +0.0194 the fitted pair reads and the +0.0203
 the frozen probe read at each trunk's own penalty. n=2 orderings is an anecdote, not an oracle; it becomes
 one if a third trunk with both readings agrees.
+
+### All ten cached trunks, priced the same way — and the screen's top row is the known fitted disaster
+
+Extending the run to every cached trunk (the same command, seconds per trunk) prices the whole frozen
+axis against the champion twelve:
+
+| probe | solo | seat into honest12 | best swap |
+| --- | --- | --- | --- |
+| `radnet121@focal-max` | 0.8197 | +0.0016 [+0.0009, +0.0023] | +0.0022 |
+| `ortholarge@focal-max` | 0.8249 | +0.0014 [+0.0008, +0.0021] | +0.0020 |
+| `vjepa2-large@mean` | 0.7985 | +0.0014 [+0.0006, +0.0022] | +0.0023 |
+| `ortholarge@mean` | 0.8170 | +0.0014 [+0.0007, +0.0021] | +0.0019 |
+| `dinov2-large@focal-max` | 0.8048 | +0.0011 | |
+| `dinov2-large@mean` | 0.7996 | +0.0010 | |
+| `v3large@focal-max` | 0.8046 | +0.0010 | |
+| `v3large@mean` | 0.7968 | +0.0008 | +0.0014 |
+| `dinov2-small@mean` | 0.7896 | +0.0002 | |
+| `orthodiff@mean` | 0.7435 | +0.0001 | +0.0012 |
+
+Eight of ten bands exclude zero and not one of the ten reaches +0.0040. The frozen trunk axis, read as
+seats rather than as solos, is flat at a tenth of the size that would matter — which is the same shape
+the fitted member axis has shown on the board seven times.
+
+AND THE SCREEN CANNOT BE USED FORWARD. Its top row is `radnet121`, the one trunk here whose FITTED
+member is on record at 0.6716 against its 0.8197 probe. So a high probe seat does NOT license an arm:
+the best frozen candidate in this table is the worst fitted member the project has trained. Whatever
+knee-tdewj becomes, it is not "probe high, then fit" — at most it is the contrapositive, and even that
+now has to survive a trunk whose probe and fitted readings disagree by 0.15.
+
+One incidental reading, recorded not acted on (the seating axis is closed): every one of the ten
+candidates takes its best seat from `mae_matched_s2026`, which makes that the twelve's weakest seat by
+this ruler's own arithmetic, ten times independently.
