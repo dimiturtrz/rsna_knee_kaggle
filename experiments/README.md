@@ -7341,3 +7341,11 @@ now has to survive a trunk whose probe and fitted readings disagree by 0.15.
 One incidental reading, recorded not acted on (the seating axis is closed): every one of the ten
 candidates takes its best seat from `mae_matched_s2026`, which makes that the twelve's weakest seat by
 this ruler's own arithmetic, ten times independently.
+
+THE POWER CAVEAT, STATED BEFORE ANYONE PLANS AGAINST THIS TABLE. Every candidate above is a RIDGE on
+frozen features, 0.7435-0.8249 solo, against a roster whose seated members run ~0.85+. A member that
+weak cannot move a twelve-way vote much whatever it knows, so "+0.001 and flat" is a statement about
+these ten ARRAYS, not about their trunks. What the table licenses is narrow and still useful: no frozen
+readout of these ten trunks is a seat as it stands, so none of them earns a card on this evidence. What
+it does NOT license is "the trunk axis is closed" — a FITTED member on any of these trunks is a
+different array with a different accuracy, and this instrument has never seen one.
