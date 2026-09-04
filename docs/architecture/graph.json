@@ -3260,6 +3260,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "kneemri.evaluation.board_transfer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transfer_strata",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.uncertainty_split",
       "target": "core.cli",
       "weight": 1
@@ -18481,6 +18523,198 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.transfer_strata.Stratum",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.transfer_strata.StratumReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata._checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "target": "kneemri.inference.vote.LogitAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata._rebuildable",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata._checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
+      "target": "kneemri.evaluation.board_transfer.BoardEntry",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
+      "target": "kneemri.evaluation.board_transfer.BoardPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
+      "target": "kneemri.evaluation.board_transfer.BoardPair.ratio",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.disagreement",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.disagreement",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata._rebuildable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.members",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "target": "kneemri.evaluation.transfer_strata.StratumReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "target": "kneemri.evaluation.transfer_strata.Stratum",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.disagreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.main",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.main",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.main",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.uncertainty_split.UncertaintySplit",
       "target": "kneemri.evaluation.pool.Pool",
@@ -29347,7 +29581,7 @@
       "role": null
     },
     {
-      "descendants": 231,
+      "descendants": 232,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29411,7 +29645,7 @@
       "role": null
     },
     {
-      "descendants": 73,
+      "descendants": 74,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29958,6 +30192,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.transduction",
       "label": "transduction",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata",
+      "label": "transfer_strata",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -33488,6 +33730,30 @@
       "label": "TestAdaptation",
       "level": "class",
       "parent": "kneemri.evaluation.transduction",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.Stratum",
+      "label": "Stratum",
+      "level": "class",
+      "parent": "kneemri.evaluation.transfer_strata",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.StratumReading",
+      "label": "StratumReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.transfer_strata",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "label": "TransferStrata",
+      "level": "class",
+      "parent": "kneemri.evaluation.transfer_strata",
       "role": "primary"
     },
     {
@@ -45048,6 +45314,118 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.transduction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.Stratum.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.Stratum",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata._checkpoints",
+      "label": "_checkpoints",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata._pool",
+      "label": "_pool",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata._rebuildable",
+      "label": "_rebuildable",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.compression",
+      "label": "compression",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.disagreement",
+      "label": "disagreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.honest",
+      "label": "honest",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.members",
+      "label": "members",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "label": "strata",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata",
       "role": null
     },
     {
