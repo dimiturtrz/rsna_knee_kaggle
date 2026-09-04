@@ -655,11 +655,20 @@ ENCODERS: dict[str, Encoder] = {
     # `MEDSAM_VIT_B.read_size`, which is where a reader looking for it will be, and `require_tiling` is
     # not sufficient to enforce it: 384 and 224 both tile patch 16 cleanly and both would be wrong.
     #
-    # WIDTH 256 IS THE NECK, NOT THE TRUNK, and the two are stated separately on purpose. The encoder runs
-    # 12 blocks at 768 wide and then projects to 256 for the mask decoder, so `dim` (what the head
-    # receives) and `stages` (what the VRAM cap must price) genuinely disagree. Declaring 256 in both
-    # places would under-bill activations by a factor of three and hand a run a cap it cannot honour,
-    # which is the failure `activation_units` was rewritten for.
+    # 768 IS THE TRUNK, AND THE NECK IS NOT READ. This entry declared 256 until 2026-09-04, because
+    # SAM's encoder runs 12 blocks at 768 wide and then projects to 256 for the mask decoder — a decoder
+    # this project never builds. `TokensInsteadOfNeck` replaces that projection at build, so `dim` and
+    # `stages` now agree at 768 and the head receives what the blocks produced.
+    #
+    # DECIDED ON A MEASUREMENT, not on the architecture argument alone (knee-h8luo). The published case
+    # against the neck is strong — it linear-probes at 11.1% ImageNet top-1 against DINOv2's 77.4%
+    # (SAMantics, arXiv:2411.15288) and the one medical model stating a read-out point drops it
+    # (FODA-PG, arXiv:2409.03947) — but MedSAM fine-tuned every image-encoder parameter and published no
+    # layer-wise breakdown, so a neck-concentrated adaptation would have made this change discard the
+    # medical part of a medical checkpoint. `kneemri.models.sam_drift` measured it against
+    # `facebook/sam-vit-base`: all twelve blocks moved 0.85-1.72 of their own initial norm and the neck
+    # moved 0.68, the least of the fifteen regions bar the position table. The adaptation is in the
+    # trunk.
     #
     # NO MOUNT YET. It can be trained here and NOT submitted. The upstream licence permits a mirror —
     # apache-2.0 and ungated, read from the HF API rather than the model card — so this is a job to do

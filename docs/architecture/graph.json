@@ -4928,6 +4928,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.sam_drift",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.slice_pooling",
       "target": "kneemri.models.depth_attention",
       "weight": 1
@@ -24782,8 +24788,26 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.sam_drift.main",
+      "target": "kneemri.models.sam_drift.SamDrift.lines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.sam_drift.main",
+      "target": "kneemri.models.sam_drift.SamDrift.moved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
       "target": "kneemri.models.sam_trunk.SamVisionWeights.regridded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
+      "target": "kneemri.models.sam_trunk.TokensInsteadOfNeck",
       "weight": 1
     },
     {
@@ -28513,7 +28537,7 @@
       "role": null
     },
     {
-      "descendants": 218,
+      "descendants": 219,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29697,7 +29721,7 @@
       "role": null
     },
     {
-      "descendants": 25,
+      "descendants": 26,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -29820,6 +29844,14 @@
       "descendants": 0,
       "id": "kneemri.models.ortho_weights",
       "label": "ortho_weights",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_drift",
+      "label": "sam_drift",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -33658,11 +33690,27 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.sam_drift.SamDrift",
+      "label": "SamDrift",
+      "level": "class",
+      "parent": "kneemri.models.sam_drift",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.sam_trunk.SamVisionWeights",
       "label": "SamVisionWeights",
       "level": "class",
       "parent": "kneemri.models.sam_trunk",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.TokensInsteadOfNeck",
+      "label": "TokensInsteadOfNeck",
+      "level": "class",
+      "parent": "kneemri.models.sam_trunk",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -49362,6 +49410,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.sam_drift.SamDrift.grouped",
+      "label": "grouped",
+      "level": "method",
+      "parent": "kneemri.models.sam_drift.SamDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_drift.SamDrift.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.models.sam_drift.SamDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_drift.SamDrift.moved",
+      "label": "moved",
+      "level": "method",
+      "parent": "kneemri.models.sam_drift.SamDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_drift.SamDrift.region",
+      "label": "region",
+      "level": "method",
+      "parent": "kneemri.models.sam_drift.SamDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_drift.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.models.sam_drift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.sam_trunk.SamVisionWeights.build",
       "label": "build",
       "level": "method",
@@ -49382,6 +49470,14 @@
       "label": "regridded",
       "level": "method",
       "parent": "kneemri.models.sam_trunk.SamVisionWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.TokensInsteadOfNeck.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.sam_trunk.TokensInsteadOfNeck",
       "role": null
     },
     {

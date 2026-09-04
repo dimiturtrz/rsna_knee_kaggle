@@ -23,10 +23,48 @@ trunk here is measured at.
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import override
 
 import torch.nn.functional as F
 from jaxtyping import Float
 from torch import Tensor, nn
+
+
+class TokensInsteadOfNeck(nn.Module):
+    """SAM's 256-channel projection, replaced by the 768-wide tokens the blocks actually produce.
+
+    THE NECK IS A DECODER'S INPUT, not a representation. SAM's vision encoder runs twelve ViT-B blocks
+    at 768 wide and then a 1x1 conv, LayerNorm, 3x3 conv, LayerNorm stack that compresses to 256
+    channels for the mask decoder — a module this project never builds. Reading a classifier off it
+    costs a 3x compression fitted to a task we do not run, and the published evidence against it is
+    direct: SAM's neck output linear-probes at 11.1% ImageNet top-1 where DINOv2 reads 77.4%
+    (SAMantics, arXiv:2411.15288), and the one medical model that states a read-out point drops this
+    exact neck to use patch embeddings instead (FODA-PG, arXiv:2409.03947).
+
+    THE OBJECTION WORTH ANSWERING was that MedSAM's fine-tune updated every image-encoder parameter,
+    the neck included, and published no layer-wise breakdown — so a neck-concentrated adaptation would
+    make this change throw away the medical part of a medical checkpoint and leave a plain SAM under
+    MedSAM's name. `kneemri.models.sam_drift` measured it against `facebook/sam-vit-base`, which is the
+    release MedSAM started from: all twelve blocks moved between 0.85 and 1.72 of their own initial
+    norm, and the neck moved 0.68 — the least-moved region of the fifteen bar the position table. The
+    adaptation is in the trunk. Dropping the neck keeps it.
+
+    Kept as a module substituted for the neck rather than as a different forward path because
+    `SamVisionEncoder.forward` calls `self.neck` unconditionally: the read-out point is a property of
+    the assembled trunk, so it belongs where the trunk is assembled and not in a branch every caller
+    has to remember to take.
+    """
+
+    @override
+    @staticmethod
+    def forward(hidden_states: Float[Tensor, "n h w d"]) -> Float[Tensor, "n d h w"]:
+        """The blocks' output as a feature MAP, which is the contract `TrunkAsTokens.from_map` reads.
+
+        A permutation and nothing else. SAM carries its spatial states channels-LAST and the real neck
+        permutes on the way in, so returning them untouched would hand the head a (n, h, w, 768) tensor
+        that flattens into 21 tokens of 21x768 — a shape error nowhere, and a grid read as a sequence.
+        """
+        return hidden_states.permute(0, 3, 1, 2).contiguous()
 
 
 @dataclass(frozen=True)
@@ -105,6 +143,13 @@ class SamVisionWeights:
         embed.data = self.regridded(embed.data, self.grid)
         encoder.config.image_size = self.read_size
         encoder.patch_embed.image_size = [self.read_size, self.read_size]
+        # The read-out point, and the reason is on `TokensInsteadOfNeck`. Substituted rather than skipped
+        # because `SamVisionEncoder.forward` calls `self.neck` unconditionally, and the discarded module
+        # is 1.3M parameters an optimiser would otherwise be handed for a decoder nothing here builds.
+        # pyrefly: ignore[bad-assignment] - `neck` is declared `SamVisionNeck`, and the substitute is
+        # deliberately not one: it is the read-out point, and narrowing the attribute to the class being
+        # replaced is what this line exists to stop honouring.
+        encoder.neck = TokensInsteadOfNeck()
         return encoder
 
 
@@ -118,9 +163,11 @@ MEDSAM_VIT_B = SamVisionWeights(
 """MedSAM's ViT-B image encoder: SAM fine-tuned on 1M+ medical images across modalities, MSK MRI included.
 
 Verified against the weights rather than described from the card — 89.7M parameters in the encoder alone,
-`pos_embed` (1, 64, 64, 768), and a 336 px read comes out (n, 256, 21, 21) after the neck. Width 256 and a
-feature MAP is the same output contract `cnxbase`, `swinbase` and `radnet121` already satisfy, so
-`TrunkAsTokens.from_map` wears it unchanged.
+`pos_embed` (1, 64, 64, 768), and a 336 px read comes out (n, 21, 21, 768) from the blocks. `build`
+replaces the neck with `TokensInsteadOfNeck`, so what the head receives is (n, 768, 21, 21): a feature
+MAP, the same output contract `cnxbase`, `swinbase` and `radnet121` already satisfy, so
+`TrunkAsTokens.from_map` wears it unchanged — at the 768 width every other ViT-B here is read at, which
+also removes read-out width as a confound against the `base_dense` and `v3base_dense` controls.
 
 THE OBJECTIVE IS THE DIVERSITY CLAIM. Every trunk in this registry was pretrained either without labels
 (DINOv2/v3, ConvNeXtV2, V-JEPA2, RadioDino) or on image-level classes (Swin, ViT-IN21k, RadImageNet). This

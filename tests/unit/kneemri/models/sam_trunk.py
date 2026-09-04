@@ -7,7 +7,7 @@ it is the only step that can be wrong while every shape still agrees.
 
 import torch
 
-from kneemri.models.sam_trunk import MEDSAM_VIT_B, SamVisionWeights
+from kneemri.models.sam_trunk import MEDSAM_VIT_B, SamVisionWeights, TokensInsteadOfNeck
 
 
 def test_grid():
@@ -46,3 +46,18 @@ def test_medsam_vit_b():
     assert MEDSAM_VIT_B.repository == "flaviagiammarino/medsam-vit-base"
     assert MEDSAM_VIT_B.read_size == 336
     assert MEDSAM_VIT_B.read_size % MEDSAM_VIT_B.patch == 0, "a read the patch grid cannot tile has no grid"
+
+
+def test_forward():
+    """The read-out permutes to a feature MAP, which is the contract the head's adapter reads.
+
+    Channels-last in, channels-first out. The assertion is on the VALUES and not only the shape,
+    because a wrong permutation of a square grid — swapping h and w rather than moving the channel
+    axis — returns the right shape from the wrong tensor.
+    """
+    hidden = torch.arange(2 * 3 * 3 * 4, dtype=torch.float32).reshape(2, 3, 3, 4)
+
+    mapped = TokensInsteadOfNeck.forward(hidden)
+
+    assert mapped.shape == (2, 4, 3, 3)
+    assert torch.equal(mapped, hidden.permute(0, 3, 1, 2))
