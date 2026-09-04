@@ -12044,6 +12044,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.partial",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.midranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.partial",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.rank_correlation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.rank_correlation",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.midranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
       "target": "kneemri.evaluation.fault_ruler.FaultRuler.errors",
       "weight": 1
@@ -12063,7 +12081,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.rank_correlation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
       "target": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.pool.Pool.rule",
       "weight": 1
     },
     {
@@ -14566,6 +14596,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.pool.Pool.combined",
       "target": "kneemri.inference.vote.Vote.combine",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pool.Pool.rule",
+      "target": "kneemri.inference.vote.Vote.named",
       "weight": 1
     },
     {
@@ -39730,6 +39766,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.midranks",
+      "label": "midranks",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.fault_ruler.FaultRuler.oracle",
       "label": "oracle",
       "level": "method",
@@ -39740,6 +39784,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.fault_ruler.FaultRuler.partial",
       "label": "partial",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.rank_correlation",
+      "label": "rank_correlation",
       "level": "method",
       "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
       "role": null
@@ -39778,24 +39830,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.fault_ruler._midranks",
-      "label": "_midranks",
-      "level": "method",
-      "parent": "kneemri.evaluation.fault_ruler",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.fault_ruler.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.evaluation.fault_ruler",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.fault_ruler.rank_correlation",
-      "label": "rank_correlation",
       "level": "method",
       "parent": "kneemri.evaluation.fault_ruler",
       "role": null
@@ -41276,6 +41312,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.pool.Pool.rows",
       "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.pool.Pool",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pool.Pool.rule",
+      "label": "rule",
       "level": "method",
       "parent": "kneemri.evaluation.pool.Pool",
       "role": null
