@@ -193,17 +193,22 @@ class ArmCheck:
         cache build — and have no flags to check. They time out or print nothing, and are skipped
         rather than reported: a lint that cries about files it cannot check gets ignored.
 
-        THEY DO NOT ACTUALLY RUN, and this was re-checked on 2026-09-04 because it looked like they did
-        (knee-q4c3u, filed as a P0 and closed as no defect). Reading a declaration by EXECUTING the arm
-        is a mechanism that WOULD run everything named outside `run_train`, so the suspicion was sound;
-        the tree just does not have the case. `stub_lib.sh` puts a no-op `uv` ahead of the real one, and
-        every arm that works outside `run_train` reaches its interpreter through `uv`. Exactly one arm
-        names `.venv/Scripts/python.exe` directly — `after_ortho_encode.sh` — and it runs `set -u`
-        against `${1}`, so invoked bare, as this method invokes it, it aborts before the line. The two
-        six-hour `build_ortho_embeddings` builds that twice contended with a live arm were blamed on this
-        method and did not come from it; their launcher is still unattributed. Do not re-file this
-        without first checking those two facts, and do not "fix" it by moving the cwd: arms `cd "$REPO"`
-        as their second line, which defeats that and nothing else.
+        THIS METHOD WAS THE LAUNCHER, and the paragraph that stood here saying otherwise was wrong —
+        knee-q4c3u was filed as a P0, closed as no defect, and the defect was real. `stub_lib.sh` puts a
+        no-op `uv` ahead of the real one, so every arm reaching its interpreter through `uv` is inert.
+        `after_ortho_encode.sh` named `.venv/Scripts/python.exe` directly, and the exoneration was that
+        `set -u` against an unbound `${1}` aborts it before that line. IT DOES NOT. The expansion sits
+        inside a pipeline, so `set -u` kills the SUBSHELL and not the script; `tasklist` fails, the
+        leading `!` turns that failure into true, and the `until` loop falls through on its first
+        iteration into a six-hour `build_ortho_embeddings`. Reproduced 2026-09-04 by running the file
+        bare, which is exactly how this method runs it: the encode started within six seconds.
+
+        The fix is in the shell — an explicit `[ $# -ge 1 ]` guard, and the file moved OUT of
+        `experiments/arms/` to `experiments/`, since a watcher is not an arm and has no flags to read.
+        Both halves matter: the glob is what made a lint that reads declarations execute a card job.
+        Do not "fix" a recurrence by moving the cwd — arms `cd "$REPO"` as their second line, which
+        defeats that and nothing else. Check instead that nothing under `arms/` reaches an interpreter
+        without going through `uv`.
         """
         return self._printed([[str(arm)] for arm in sorted(self.arms.glob("*.sh"))])
 
