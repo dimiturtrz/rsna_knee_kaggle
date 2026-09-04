@@ -7457,3 +7457,45 @@ mechanism and untested here.
 the honest move is the one Q-EJ named independently: stop opening arms and price the pool. There are 103
 packaged members and 186 scoreable checkpoints, and the seat curves this project has shipped against were
 all built on roughly 22 same-split members. A whole-pool seat sweep costs no card and no slot.
+
+## The pool priced card-free: the offline ruler cannot see our top band at all — 2026-09-04
+
+Q-EK asked how a full-fit member's seat is priced and the answer is that it is not. Kimi found no paper
+measuring whether the CV-sibling ordering survives a full-data refit, no published curve for the refit
+gain against fold fraction, and no cheap unbiased scheme — influence functions price training samples not
+members, bagged surrogates measure diversity not seat value, nested CV costs a full retrain. **Champion
+seats are priced by convention, not by measurement.**
+
+**But the same answer kills the explanation I was about to reach for.** In k-fold the refit sees
+`k/(k-1)` times the data; under an `N^{-β}` error scaling that is worth a low single-digit thousandth at
+our corpus size. So the +0.007 between `honest12` (0.937, twelve scoreable members) and
+`raptorweight_v1` (0.944, six) is **not the refit**. It is seating, diversity, or the seventh seat — the
+champion carries a foreign `raptor_v4_swa` rank-voted at 1/3 that `champion.json` deliberately keeps out
+of `members`, and `honest12` is ours-only.
+
+**And `entry_offline` states the structural fact plainly: every board entry at 0.936 and above is
+IN-SAMPLE.** The offline ruler tops out below our own top band. That is the real reason the member axis
+reads closed — not that seating stopped mattering, but that above 0.936 nothing we ship can be measured
+before it is shipped. Every closure was measured where the ruler still works.
+
+**The board agrees, from the other side.** Nine entries now sit at 0.943-0.944 across six, seven and
+eight seats: `raptorweight`, `holdswap`, `spanseat`, `stackseat`, `halfcham`, `lensseat`, `monotone`,
+`raptorseat`, `vjepaseat`. Each is the champion serving with one thing changed — a weight, one seat, the
+vote, the lens, the calibration. **Every single-seat change lands on the same number.** That is not a
+saturation argument built from one curve; it is nine board reads of the same plateau, and it says a seat
+swap cannot deliver the +0.009 to the leader.
+
+**What the sweep found.** `seat_value --against honest12` over the packaged pool classifies each
+candidate TWIN / SCALED / NOISY / DISTINCT, and only DISTINCT is a seat. Roughly half the pool reads
+DISTINCT, which is more real diversity than the ~22 same-split members every shipped seat curve was built
+on. The sweep is card-free and takes seconds a batch; it timed out only because a 120-candidate mix is
+built in one piece, so it is run in batches of ten.
+
+**One anomaly, filed rather than acted on.** `focus_mcl_s2026` reads rank **0.0445** against a roster
+boundary of 0.8956 and against its own roster line, which says "0.5332 solo — and seated deliberately at
+that number". Far below chance on a rank ruler is what an inverted prediction array looks like, and the
+member is on the shippable roster. The two numbers cannot both describe it. Audit before anything else.
+
+**What this does NOT say.** It is not a measurement of any champion seat — that is exactly what Q-EK
+established cannot be done cheaply. It prices candidates against the best entry the ruler can still see,
+and the ordering is what transfers, never the value.
