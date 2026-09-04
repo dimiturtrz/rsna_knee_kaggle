@@ -59,6 +59,12 @@ dependencies = [
     # are not keyed for. Transitive of transformers, and present in Kaggle's image, so it needs no wheel
     # in the kit; declared for the same reason `huggingface-hub` is.
     "safetensors",
+    # `kneemri/evaluation/mixing_rules.py` fits the sparse label-graph rule with sklearn's `Lasso`.
+    # Hand-rolling coordinate descent to dodge a declaration is exactly the trade `labelnoise`'s comment
+    # argues against: a soft-threshold bug reads as a null, and a null here closes a lane. Arrives
+    # transitively with cleanlab and lives in Kaggle's image, so it costs no wheel in the kit; declared
+    # because the import is direct and DEP003 is enforced.
+    "scikit-learn",
 ]
 
 [project.optional-dependencies]

@@ -26,11 +26,15 @@ def fixture_corpus() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     return features, truth, positions[:20], positions[20:]
 
 
+PREVALENCE = np.full(len(TARGETS), 0.5)
+"""Half of every finding, so a prevalence cap can never bind in a test written for the fixed scheme."""
+
+
 def test_pseudo_labels() -> None:
     """Each finding's tails are the requested size, and only the tails count as confident."""
     adaptation = TestAdaptation(PENALTY, share=0.25)
     predictions = np.random.default_rng(1).normal(size=(40, len(TARGETS)))
-    labels, weights = adaptation.pseudo_labels(predictions)
+    labels, weights = adaptation.pseudo_labels(predictions, PREVALENCE)
     assert labels.shape == predictions.shape
     assert labels.sum(axis=0).tolist() == [10] * len(TARGETS)
     assert weights.sum(axis=0).tolist() == [20.0] * len(TARGETS)
@@ -39,7 +43,8 @@ def test_pseudo_labels() -> None:
 def test_pseudo_labels_tiny_test_set() -> None:
     """A test set too small for the share still yields one study a tail, never zero."""
     adaptation = TestAdaptation(PENALTY, share=0.05)
-    labels, weights = adaptation.pseudo_labels(np.random.default_rng(2).normal(size=(3, len(TARGETS))))
+    predictions = np.random.default_rng(2).normal(size=(3, len(TARGETS)))
+    labels, weights = adaptation.pseudo_labels(predictions, PREVALENCE)
     assert labels.sum(axis=0).tolist() == [1] * len(TARGETS)
     assert weights.sum(axis=0).tolist() == [2.0] * len(TARGETS)
 
@@ -67,6 +72,7 @@ def test_delta() -> None:
     """The delta is the mean adapted area minus the mean fitted area."""
     result = AdaptationResult(
         trunk="t",
+        labelling="fixed",
         share=0.25,
         studies=9,
         fitted=dict.fromkeys(TARGETS, 0.80),
@@ -79,6 +85,7 @@ def test_line() -> None:
     """The printed row carries the trunk, the share and a signed delta."""
     result = AdaptationResult(
         trunk="ortholarge",
+        labelling="prevalence",
         share=0.1,
         studies=909,
         fitted=dict.fromkeys(TARGETS, 0.80),

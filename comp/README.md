@@ -280,6 +280,29 @@ What is still not measured: the metric's actual formula. The evaluation page is 
 not carry it, so nothing here predicts a rank — only that runtime, not accuracy, is our binding
 constraint on that board.
 
+**Update 2026-09-04 — the formula, sourced but not yet measured.** Kimi's Q-MW survey finds four
+independent secondary sources saying **macro-averaged ROC AUC over the twelve findings, equal 1/12
+weight each**: the Kaggle boilerplate notebook (`sahil4818`), two community notebooks (`beicicc`,
+`romanrozen`) and a third-party entry repo (`konradcinkusz/rsna-knee-abnormalities-efficiency-lb`) that
+claims to have checked the official Data tab. No plain-HTML official page was found; the evaluation page
+is still JS-only, exactly as this file has said since week one. So the formula is now WELL SOURCED and
+still UNMEASURED, and the distinction is the whole point of the note above about numbers lifted from
+notebooks.
+
+Two consequences if it holds. Every per-label AUC in the ledger contributes 1/12 regardless of
+prevalence, so a rare finding (Fracture, Baker's) is worth exactly as much as Effusion. And a
+calibration-only change that preserves within-label ordering cannot move the score — which is what
+`kneemri-monotone` already measured directly, by reproducing the champion's exact number from a monotone
+transform of its table.
+
+It is also a break with house style: RSNA 2023 (abdominal trauma) and RSNA 2024 (lumbar spine) both
+scored a sample-weighted log loss with an extra generated `any_*` column. Precedent is therefore a
+WEAKER prior here than it would be if 2026 had stayed consistent, which is why the sourcing is not being
+treated as the measurement. `kernels/kneemri-colnull` submits a constant table to read the intercept
+directly: exactly 0.500 confirms a plain mean of per-column AUCs and prices `colmcl`'s drop as one
+twelfth; anything else and the whole per-label lane has to be re-derived. Full survey in
+`research/2026-09-04_qmw-rsna-knee-2026-metric-definition.md`.
+
 **A note on where these numbers came from, because it is the same trap twice.** The efficiency board is
 not published by Kaggle as a board; it is the OUTPUT OF A NOTEBOOK, and it was read here as if it were
 live. It is not — hence the whole correction above. A number lifted from somebody's notebook is a claim

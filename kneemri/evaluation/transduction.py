@@ -53,7 +53,22 @@ result even if transductive adaptation were sound, and both are real rather than
       Self-training pays UNDER distribution shift; this simulation has none, by the same design that
       makes it honest about the withheld relation.
 
-So the eight cells bound naive self-training with a linear head under zero shift. They do not price
+SUSPECT (0) TESTED AND REFUTED, 2026-09-04. The labelling diagnosis above was itself a hypothesis, and
+it is wrong. `PrevalenceTail` caps each finding's positive tail by that finding's own training
+prevalence, so a 5%-prevalent finding can never be handed 25% invented positives — the exact defect the
+2026-09-03 note blamed. Forty cells, five trunks by two schemes by four tail sizes, and the prevalence
+scheme tracks the fixed one everywhere: dinov2-large -0.0036/-0.0022/-0.0021/-0.0015 against
+-0.0036/-0.0026/-0.0020/-0.0029, v3large -0.0058/-0.0029/-0.0009/-0.0016, vjepa2-large
+-0.0042/-0.0035/-0.0015/-0.0012. No cell in either scheme clears +0.0005 and none clears the 0.0062
+noise floor in either direction. The correct reading is NO GAIN, not damage.
+
+What the shape then says, and it now says it under both schemes: the delta shrinks toward zero as the
+tail GROWS. That is the signature of suspect (1), not of a prior distortion. Pseudo-labels read off a
+ridge lie along that ridge's own decision direction, so adding more of them pulls the refit back toward
+the first fit and the delta toward zero; a small tail moves the fit least but adds only its most
+extreme rows, which is where a linear fit is most wrong. Circularity, measured.
+
+So the forty cells bound naive self-training with a linear head under zero shift. They do not price
 test-time adaptation with a member head under the real test set's shift, which is the case the kernel
 would actually be in. Recorded as a measured negative on the cheapest version of the axis, NOT as a
 closed lane, and no submission slot was spent on it.
@@ -71,6 +86,7 @@ from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
 from core.findings import TARGETS
 from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus
+from kneemri.evaluation.labelling import FIXED_TAIL, LABELLINGS, Labelling
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.slice_readout import READOUTS, SliceMean
 
@@ -94,6 +110,7 @@ class AdaptationResult:
     """One trunk's fitted read, its adapted read, and the difference between them."""
 
     trunk: str
+    labelling: str
     share: float
     studies: int
     fitted: dict[str, float]
@@ -108,7 +125,7 @@ class AdaptationResult:
         """One printable row, so a caller never formats a float and a name in two places."""
         fitted, adapted = np.mean(list(self.fitted.values())), np.mean(list(self.adapted.values()))
         return (
-            f"{self.trunk:<26} share={self.share:<5} n={self.studies:<5} "
+            f"{self.trunk:<26} {self.labelling:<11} share={self.share:<5} n={self.studies:<5} "
             f"fitted={fitted:.4f} adapted={adapted:.4f} delta={self.delta:+.4f}"
         )
 
@@ -116,13 +133,15 @@ class AdaptationResult:
 class TestAdaptation:
     """Refit a probe head on the test set's own confident predictions, and score what it changed."""
 
-    def __init__(self, penalty: float, share: float = CONFIDENT_SHARE) -> None:
+    def __init__(self, penalty: float, share: float = CONFIDENT_SHARE, labelling: Labelling = FIXED_TAIL) -> None:
         self.probe = FeatureProbe(penalty)
         self.share = share
+        self.labelling = labelling
 
     def pseudo_labels(
         self,
         predictions: Float[NDArray[np.float64], "held findings"],
+        prevalence: Float[NDArray[np.float64], " findings"],
     ) -> tuple[Int[NDArray[np.int64], "held findings"], Float[NDArray[np.float64], "held findings"]]:
         """Per finding, the confident tails of the test predictions as labels, and a 0/1 mask of which count.
 
@@ -130,15 +149,7 @@ class TestAdaptation:
         because the probe's logits are unnormalised ridge outputs whose scale differs per finding — a
         fixed cutoff would label every study for one finding and none for another.
         """
-        labels = np.zeros_like(predictions, dtype=np.int64)
-        weights = np.zeros_like(predictions, dtype=np.float64)
-        tail = max(1, int(len(predictions) * self.share))
-        for column in range(predictions.shape[1]):
-            order = np.argsort(predictions[:, column])
-            labels[order[-tail:], column] = 1
-            weights[order[:tail], column] = 1.0
-            weights[order[-tail:], column] = 1.0
-        return labels, weights
+        return self.labelling.assigned(predictions, self.share, prevalence)
 
     def adapted(
         self,
@@ -156,13 +167,14 @@ class TestAdaptation:
         """
         first = self.probe.weights(features[training], truth[training])
         predictions = self.probe.predicted(features[holdout], first)
-        labels, weights = self.pseudo_labels(predictions)
+        labels, weights = self.pseudo_labels(predictions, truth[training].mean(axis=0))
         confident = weights.max(axis=1) > 0
         design = np.vstack([features[training], features[holdout][confident]])
         targets = np.vstack([truth[training], labels[confident]])
         second = self.probe.weights(design, targets)
         return AdaptationResult(
             trunk=trunk,
+            labelling=self.labelling.name,
             share=self.share,
             studies=len(holdout),
             fitted=self.areas(predictions, truth[holdout]),
@@ -187,6 +199,14 @@ def main() -> None:
     command.parser.add_argument("--trunks", type=str, nargs="+", default=sorted(TRUNKS), help="trunk names to adapt")
     command.parser.add_argument("--penalty", type=float, default=None, help="ridge penalty; default is per-trunk")
     command.parser.add_argument("--shares", type=float, nargs="+", default=list(SHARES), help="confident tail sizes")
+    command.parser.add_argument(
+        "--labellings",
+        type=str,
+        nargs="+",
+        default=sorted(LABELLINGS),
+        choices=sorted(LABELLINGS),
+        help="how confident predictions become labels",
+    )
     arguments = command.parsed()
     root = command.rooted(arguments)
     corpus = ProbeCorpus(processed=root.processed(), raw=root.raw())
@@ -199,10 +219,12 @@ def main() -> None:
         truth = corpus.truth(identifiers)
         features = FeatureProbe.pooled(corpus.features(stem), READOUTS[SliceMean.name])
         penalty = arguments.penalty or FeatureProbe.chosen(features, truth, training)
-        for share in arguments.shares:
-            result = TestAdaptation(penalty, share).adapted(name, features, truth, holdout, training)
-            results.append(result)
-            command.report([result.line()])
+        for scheme in arguments.labellings:
+            for share in arguments.shares:
+                adaptation = TestAdaptation(penalty, share, LABELLINGS[scheme])
+                result = adaptation.adapted(name, features, truth, holdout, training)
+                results.append(result)
+                command.report([result.line()])
     Denominator(len(results), "no trunk had a cached feature array to adapt on").refuse_empty()
 
 

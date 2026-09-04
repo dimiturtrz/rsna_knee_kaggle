@@ -1598,6 +1598,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.column_mixing",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_mixing",
+      "target": "kneemri.evaluation.mixing_rules",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_mixing",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_mixing",
+      "target": "kneemri.evaluation.stack_fit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.competence_axis",
       "target": "core.cli",
       "weight": 1
@@ -3244,6 +3268,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.transduction",
       "target": "kneemri.evaluation.feature_probe",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.transduction",
+      "target": "kneemri.evaluation.labelling",
       "weight": 1
     },
     {
@@ -12067,6 +12097,90 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "target": "kneemri.evaluation.column_mixing.MixingResult",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "target": "kneemri.evaluation.mixing_rules.MixingRule",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.__init__",
+      "target": "kneemri.evaluation.mixing_rules.RidgeShrink",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.chosen_penalty",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.matrix",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing.chosen_penalty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing.matrix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "target": "kneemri.evaluation.column_mixing.MixingResult",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.stack_fit.MemberHoldout.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.stack_fit.MemberHoldout.loaded",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.competence_axis.AxisReading.lines",
       "target": "core.data.corpus.anatomy.ScaleProfile.of",
@@ -13549,6 +13663,18 @@
       "weight": 1
     },
     {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.labelling.FixedTail",
+      "target": "kneemri.evaluation.labelling.Labelling",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.labelling.PrevalenceTail",
+      "target": "kneemri.evaluation.labelling.Labelling",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.level_calibration.LevelCalibration",
       "target": "kneemri.evaluation.level_calibration.LevelRates",
@@ -14374,6 +14500,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_space.MemberSpace.matrix",
       "target": "kneemri.evaluation.member_space.MemberSpace.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.mixing_rules.RidgeShrink",
+      "target": "kneemri.evaluation.mixing_rules.MixingRule",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.mixing_rules.SparseGraph",
+      "target": "kneemri.evaluation.mixing_rules.MixingRule",
       "weight": 1
     },
     {
@@ -18397,6 +18535,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.transduction.TestAdaptation",
+      "target": "kneemri.evaluation.labelling.Labelling",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.transduction.TestAdaptation",
       "target": "kneemri.evaluation.transduction.AdaptationResult",
@@ -18442,6 +18586,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.transduction.TestAdaptation.areas",
       "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transduction.TestAdaptation.pseudo_labels",
+      "target": "kneemri.evaluation.labelling.Labelling.assigned",
       "weight": 1
     },
     {
@@ -29611,7 +29761,7 @@
       "role": null
     },
     {
-      "descendants": 232,
+      "descendants": 235,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29675,7 +29825,7 @@
       "role": null
     },
     {
-      "descendants": 74,
+      "descendants": 77,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29734,6 +29884,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer",
       "label": "board_transfer",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing",
+      "label": "column_mixing",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -29852,6 +30010,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.labelling",
+      "label": "labelling",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.level_calibration",
       "label": "level_calibration",
       "level": "module",
@@ -29902,6 +30068,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_space",
       "label": "member_space",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules",
+      "label": "mixing_rules",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -32732,6 +32906,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "label": "ColumnMixing",
+      "level": "class",
+      "parent": "kneemri.evaluation.column_mixing",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.MixingResult",
+      "label": "MixingResult",
+      "level": "class",
+      "parent": "kneemri.evaluation.column_mixing",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.competence_axis.AxisReading",
       "label": "AxisReading",
       "level": "class",
@@ -32980,6 +33170,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.labelling.FixedTail",
+      "label": "FixedTail",
+      "level": "class",
+      "parent": "kneemri.evaluation.labelling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.labelling.Labelling",
+      "label": "Labelling",
+      "level": "class",
+      "parent": "kneemri.evaluation.labelling",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.labelling.PrevalenceTail",
+      "label": "PrevalenceTail",
+      "level": "class",
+      "parent": "kneemri.evaluation.labelling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.level_calibration.LevelCalibration",
       "label": "LevelCalibration",
       "level": "class",
@@ -33049,6 +33263,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.member_space",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.MixingRule",
+      "label": "MixingRule",
+      "level": "class",
+      "parent": "kneemri.evaluation.mixing_rules",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.RidgeShrink",
+      "label": "RidgeShrink",
+      "level": "class",
+      "parent": "kneemri.evaluation.mixing_rules",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.SparseGraph",
+      "label": "SparseGraph",
+      "level": "class",
+      "parent": "kneemri.evaluation.mixing_rules",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -41068,6 +41306,70 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing.chosen_penalty",
+      "label": "chosen_penalty",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing.matrix",
+      "label": "matrix",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing.ranks",
+      "label": "ranks",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.ColumnMixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.MixingResult.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.MixingResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.MixingResult.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing.MixingResult",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_mixing.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_mixing",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.competence_axis.AxisReading.balance",
       "label": "balance",
       "level": "method",
@@ -42052,6 +42354,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.labelling.FixedTail.assigned",
+      "label": "assigned",
+      "level": "method",
+      "parent": "kneemri.evaluation.labelling.FixedTail",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.labelling.Labelling.assigned",
+      "label": "assigned",
+      "level": "method",
+      "parent": "kneemri.evaluation.labelling.Labelling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.labelling.PrevalenceTail.assigned",
+      "label": "assigned",
+      "level": "method",
+      "parent": "kneemri.evaluation.labelling.PrevalenceTail",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.level_calibration.LevelCalibration.applied",
       "label": "applied",
       "level": "method",
@@ -42504,6 +42830,30 @@
       "label": "ranked",
       "level": "method",
       "parent": "kneemri.evaluation.member_space.MemberSpace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.MixingRule.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.evaluation.mixing_rules.MixingRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.RidgeShrink.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.evaluation.mixing_rules.RidgeShrink",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.mixing_rules.SparseGraph.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.evaluation.mixing_rules.SparseGraph",
       "role": null
     },
     {
