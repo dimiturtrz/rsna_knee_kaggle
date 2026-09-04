@@ -23355,6 +23355,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
+      "target": "kneemri.kaggle.kernel_sources.KernelSources.covers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.mount_check.MountCheck.verdict",
       "target": "kneemri.kaggle.kernel_sources.KernelSources.undeclared",
       "weight": 1
     },
