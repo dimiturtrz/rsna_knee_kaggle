@@ -79,17 +79,34 @@ TRUNKS: dict[str, str] = {
     "v3large@focal-max": "features_v3large_336px_12sl_r256_cls_mean_focal_max",
     "ortholarge@focal-max": "features_ortholarge_336px_12sl_r256_cls_mean_focal_max",
     "radnet121@focal-max": "features_radnet121_336px_12sl_r256_cls_mean_focal_max",
-    "dinov2-large@focal-attend": "features_large_336px_12sl_r252_cls_mean_focal_attend",
-    "v3large@focal-attend": "features_v3large_336px_12sl_r256_cls_mean_focal_attend",
-    "ortholarge@focal-attend": "features_ortholarge_336px_12sl_r256_cls_mean_focal_attend",
-    "radnet121@focal-attend": "features_radnet121_336px_12sl_r256_cls_mean_focal_attend",
+    # THE FOUR `@focal-attend` ROWS ARE GONE, and their absence is the finding. `--slice-read` named a
+    # readout in the cache FILENAME but never reached the encoder (knee-n647), so every
+    # `..._focal_attend.npy` is byte-identical to its `..._focal_max.npy` sibling — verified equal on
+    # ortholarge, v3large and radnet121. Listing both put a duplicate of each row in every table this
+    # probe printed, where it read as two instruments agreeing when there was only ever one. They are
+    # deleted rather than commented back in because the arrays still exist on disk: a name here is what
+    # makes one probeable, and the fix for the readout axis is a cache written by an encoder that
+    # actually took the flag, not a re-listing of these.
 }
 """Trunk name to the cache stem its features were written under. A declaration, not a bucket: every
 entry names an array that exists, and a trunk with no cache cannot be probed at all."""
 
 RIDGE = 100.0
-"""The probe penalty. Reported alongside a sweep rather than tuned, because a probe tuned per trunk stops
-being one instrument applied three times."""
+"""A starting point for a sweep, and NOT a penalty to compare two trunks at. It is reached only by
+`--shared-penalty`; a bare invocation gives each trunk the penalty it wants.
+
+THIS DOCSTRING ARGUED THE OPPOSITE UNTIL 2026-09-04, and the argument is wrong in a way worth stating,
+because it is the plausible one: a probe tuned per trunk does stop being one instrument applied three
+times. The flaw is that a SHARED penalty is not one instrument either. Feature magnitudes differ ~17x
+across these trunks (radnet121 max 0.173, v3large max 2.90), so one number is near-optimal for one row
+and far off for another, and what it measures is how close each trunk happened to land to it. Measured
+(knee-x4yx): at the shared 100 v3large reads 0.7829 and radnet121 0.6746, a 0.108 gap that becomes a
+0.017 LEAD for radnet121 once each is read at the penalty chosen on a nested split inside its own
+training positions. The shared reading did not shrink that difference, it INVERTED it, and two declines
+rested on it.
+
+The instrument is therefore the PROCEDURE — choose the penalty on held-in data, report on held-out —
+which is the discipline `stack_fit` already uses and which every row satisfies identically."""
 
 HOLDOUT_FOLD = 0
 """The fold every member in this project is ranked on. A probe on any other split would be a second ruler."""
@@ -280,9 +297,9 @@ def main() -> None:
         "served probe against",
     )
     command.parser.add_argument(
-        "--choose-penalty",
+        "--shared-penalty",
         action="store_true",
-        help="give each trunk the penalty it wants, chosen on a nested split inside the training positions",
+        help="report every trunk at --penalty instead. NOT a trunk comparison — see the RIDGE docstring",
     )
     command.parser.add_argument(
         "--slice-readout",
@@ -304,8 +321,11 @@ def main() -> None:
         truth = corpus.truth(identifiers)
         for readout in arguments.slice_readout:
             features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
+            # Per-trunk by DEFAULT since 2026-09-04. The shared reading is still reachable, because it is
+            # what every number quoted before that date was taken at, but it is no longer what a bare
+            # invocation prints — the wrong reading should not be the one nobody had to ask for.
             penalties = (
-                [FeatureProbe.chosen(features, truth, training)] if arguments.choose_penalty else arguments.penalty
+                arguments.penalty if arguments.shared_penalty else [FeatureProbe.chosen(features, truth, training)]
             )
             for penalty in penalties:
                 result = FeatureProbe(penalty).scored(f"{name}@{readout}", features, truth, holdout, training)
