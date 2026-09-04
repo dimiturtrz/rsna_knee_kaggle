@@ -12289,6 +12289,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.feature_probe.ProbeCorpus.graded",
+      "target": "core.data.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.feature_probe.main",
       "target": "core.data.corpus.folds.ReportFolds",
@@ -12375,6 +12381,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.feature_probe.main",
+      "target": "kneemri.evaluation.feature_probe.ProbeCorpus.graded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.feature_probe.main",
       "target": "kneemri.evaluation.feature_probe.ProbeCorpus.identifiers",
       "weight": 1
     },
@@ -12382,6 +12394,24 @@
       "kind": "calls",
       "source": "kneemri.evaluation.feature_probe.main",
       "target": "kneemri.evaluation.feature_probe.ProbeCorpus.truth",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.feature_probe.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.feature_probe.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.feature_probe.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
       "weight": 1
     },
     {
@@ -40150,6 +40180,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.feature_probe.ProbeCorpus.features",
       "label": "features",
+      "level": "method",
+      "parent": "kneemri.evaluation.feature_probe.ProbeCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.feature_probe.ProbeCorpus.graded",
+      "label": "graded",
       "level": "method",
       "parent": "kneemri.evaluation.feature_probe.ProbeCorpus",
       "role": null
