@@ -7491,10 +7491,22 @@ DISTINCT, which is more real diversity than the ~22 same-split members every shi
 on. The sweep is card-free and takes seconds a batch; it timed out only because a 120-candidate mix is
 built in one piece, so it is run in batches of ten.
 
-**One anomaly, filed rather than acted on.** `focus_mcl_s2026` reads rank **0.0445** against a roster
-boundary of 0.8956 and against its own roster line, which says "0.5332 solo — and seated deliberately at
-that number". Far below chance on a rank ruler is what an inverted prediction array looks like, and the
-member is on the shippable roster. The two numbers cannot both describe it. Audit before anything else.
+**One anomaly, and it was mine — CORRECTED the same hour it was written.** The paragraph here first
+said `focus_mcl_s2026` reads rank **0.0445** against a roster boundary of 0.8956, that far below chance
+is what an inverted prediction array looks like, and that a shippable roster member might be inverted. It
+is not. `seat_value` prints `focus_mcl_s2026.pt: nearest 0.0445  mean 0.0319  solo 0.5332` — `nearest`
+and `mean` are rank DISTANCES, small meaning most distinct, and the member's solo AUC is printed on the
+same line. Recomputed independently off the holdout array: per-label AUC 0.671 / 0.735 / 0.674 / 0.355 /
+0.674 / 0.424 / 0.400 / 0.313 / 0.434 / 0.626 / 0.642 / 0.450, mean **0.5332**, matching the roster line
+exactly. Its seat value against `honest12` is **−0.0002 [−0.0011, +0.0008]**, a straddle of zero.
+
+**The reading defect is the finding.** One `seat_value` report uses the word `rank` for a SCORE in its
+member-axes block and for a DISTANCE in its candidates block, and the batched sweep interleaves the two.
+That is what turned a printed 0.5332 into a P1 about an inverted member (knee-hmxko, closed; the naming
+is knee-hmxko's follow-on). It is the same class as the denominator errors this project keeps paying
+for: the number was right, on the same line, under a word that means two things. What IS true about the
+member is smaller and was never the claim — its checkpoint is from epoch 2 and five of twelve labels sit
+below 0.5, so it is a coin-flip member seated for distance.
 
 **What this does NOT say.** It is not a measurement of any champion seat — that is exactly what Q-EK
 established cannot be done cheaply. It prices candidates against the best entry the ruler can still see,
