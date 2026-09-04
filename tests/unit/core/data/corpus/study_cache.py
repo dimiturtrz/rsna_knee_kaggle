@@ -461,6 +461,30 @@ def test_under():
     assert merged.images_path != cache.images_path
 
 
+def test_witnessing(tmp_path: Path):
+    """The same reading, in a directory of its own — so a witness-sized decode can never land on the corpus.
+
+    A witness is eight named studies and the array they were read out of is tens of gigabytes. Nine
+    rostered members have lost that array to disk reclamation, so the shard is the only way they can
+    be witnessed at all; the eight studies each of them witnessed are still in the raw corpus.
+
+    The KEY IS UNCHANGED on purpose. It is what makes the shard the same function of the pixels as the
+    member was fitted under, and it is also why the separation has to be the directory: two files named
+    `images_336px_12sl.npy` are different files only when they sit in different directories.
+    """
+    cache = StudyCache(tmp_path, slices=12, image_size=336, routing=Routing(scheme="extended"))
+
+    shard = cache.witnessing()
+
+    assert shard.key == cache.key, "a shard decoded at another geometry would witness another function"
+    assert (shard.slices, shard.image_size, shard.routing) == (cache.slices, cache.image_size, cache.routing)
+    assert shard.directory != cache.directory
+    assert shard.images_path != cache.images_path, "the 71.6 GB artifact a suffix collision would destroy"
+    assert shard.mask_path != cache.mask_path
+    assert shard.index_path != cache.index_path
+    assert shard.witnessing().directory != shard.directory, "nesting stays below, never back onto the corpus"
+
+
 def test_report(caplog: pytest.LogCaptureFixture):
     """Coverage is logged per slot, and a build that decoded NOTHING is refused rather than announced.
 

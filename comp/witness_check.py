@@ -28,6 +28,8 @@ import torch
 from numpy.typing import NDArray
 
 from core import cli
+from core.data.corpus.study_cache import CachedCorpus, CorpusSplit
+from core.paths import DataRoot
 from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -131,7 +133,58 @@ def spread(difference: NDArray[np.float64]) -> str:
     return f"{carrying} of {len(per_label)} labels carry it"
 
 
-def check(package: MemberPackage, member: Member, root: Path, device: torch.device, batch: int | None = None) -> str:
+def witnessing(member: Member, data: DataRoot, studies: list[str]) -> tuple[CachedCorpus, list[str], list[str]]:
+    """The pixels this member's witness needs, from its cache when that exists and from raw when it does not.
+
+    A WITNESS IS EIGHT STUDIES AND THE CACHE IS FOUR THOUSAND. Reading the full array to reach eight of
+    its rows was free while the array was there, and on 2026-09-04 `roster_check` reported that for nine
+    rostered members it is not: their decodes were reclaimed under disk pressure, `res392_ws_s2026` — the
+    strongest single member this project has fitted, and the roster head — among them. Those members can
+    still SHIP, because the Kaggle kernel decodes competition studies at serve time and never opens our
+    cache. What they could not do is clear the gate that stands in front of shipping, which is this one.
+    So the dependency was never on the corpus; it was on eight studies that are still in the raw data.
+
+    THE FULL CACHE IS PREFERRED WHEN IT IS THERE, and that is not just economy. Those are the exact bytes
+    the member was scored on, so a verdict taken from them cannot be a statement about a re-decode. The
+    shard is the fallback, and nothing here ASSERTS that the two agree. The equivalence rests on the reading
+    being carried verbatim — `StudyCache.witnessing` changes the directory and no other field — so the shard
+    is decoded by the same function at the same geometry as the array the member was fitted on. That is an
+    argument, and it is checkable rather than trusted: a member that still holds its own cache can be run
+    both ways and the two residuals compared.
+
+    A STUDY THAT WILL NOT DECODE IS RETURNED, NOT RAISED, and this is the failure mode worth naming.
+    `StudyCache.decode_one` reports an unreadable study as absent in every slot rather than raising —
+    correct for a corpus build, and here it would hand the witness a BLACK study whose recorded prediction
+    was taken from a real one. The residual would blow past the bound and the verdict would read REFUSED:
+    a decode failure wearing the clothes of a reading defect, which is the one thing this check exists to
+    tell apart. So the shard's mask is asked which witnessed studies acquired nothing, and those come back
+    as UNVERIFIED with their names.
+    """
+    cache = member.cache(data.processed())
+    if cache.decoded():
+        corpus, identifiers = cache.load()
+        return corpus, identifiers, []
+    shard = cache.witnessing()
+    if not shard.decoded():
+        split = CorpusSplit(data.raw())
+        # CHECKED AGAINST THE CORPUS RATHER THAN TRUSTED, the way `CorpusSplit.named` does it for a
+        # listing on disk. A witnessed study the split does not contain is a finding about the witness —
+        # it was recorded against a different corpus — and decoding around it would shrink the set the
+        # verdict is taken over without saying so, which is a pass this check cannot afford to give.
+        unknown = sorted(set(studies) - set(split.identifiers()))
+        if unknown:
+            message = f"{len(unknown)} witnessed studies are not in the corpus, first {unknown[0]}"
+            raise ValueError(message)
+        logger.info("decoding %d witnessed studies at %s — this member's own cache is gone", len(studies), shard.key)
+        shard.build(split.source, studies, split.planes(), workers=1)
+    corpus, identifiers = shard.load()
+    acquired = {name: bool(corpus.mask[position].sum()) for position, name in enumerate(identifiers)}
+    return corpus, identifiers, [name for name in studies if not acquired.get(name, False)]
+
+
+def check(
+    package: MemberPackage, member: Member, data: DataRoot, device: torch.device, batch: int | None = None
+) -> str:
     """Re-derive one member's witness, returning a human-readable verdict.
 
     `batch` is the SHAPE the witness was produced under, and it is not decoration. Trainer.predict
@@ -152,8 +205,6 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
         # member fitted after 2026-08-24 hitting this line is one of the first two cases.
         return "UNVERIFIED - no witness (a published member, or fitted before 2026-08-24)"
 
-    corpus, identifiers = member.cache(root).load()
-    index = {name: position for position, name in enumerate(identifiers)}
     # `witness` is a dict[str, object] by declaration, so its members are narrowed before use rather
     # than suppressed per call site. A malformed witness is UNVERIFIED and never an empty study list:
     # that would have reported "ok over 0 studies", which is a pass this check cannot afford to give.
@@ -161,6 +212,12 @@ def check(package: MemberPackage, member: Member, root: Path, device: torch.devi
     if not isinstance(named, list) or not named:
         return "UNVERIFIED - the witness carries no readable list of studies"
     studies = [str(name) for name in named]
+    # READ BEFORE THE PIXELS, because which studies are wanted is what decides where the pixels come
+    # from. This was the other way round while the full corpus was the only source.
+    corpus, identifiers, absent = witnessing(member, data, studies)
+    if absent:
+        return f"UNVERIFIED - {len(absent)} witnessed studies would not decode, first {absent[0]}"
+    index = {name: position for position, name in enumerate(identifiers)}
     missing = [name for name in studies if name not in index]
     if missing:
         return f"UNVERIFIED - {len(missing)} witnessed studies are absent from this cache"
@@ -228,7 +285,9 @@ def main() -> None:
     arguments = command.parsed()
 
     package = MemberPackage.at(arguments.root, arguments.paths)
-    root = command.rooted(arguments).processed()
+    # THE ROOT ITSELF, not its processed branch: a member whose decode was reclaimed is witnessed from
+    # the DICOMs instead, so the check needs both branches and picks between them per member.
+    data = command.rooted(arguments)
     selected = arguments.device
     if selected == "auto":
         selected = VisibleCards().device().type
@@ -255,7 +314,7 @@ def main() -> None:
     verdicts: dict[str, str] = {}
     logger.info("checking %d members on %s", len(members), device.type)
     for position, member in enumerate(members, start=1):
-        verdicts[member.identifier] = check(package, member, root, device, arguments.batch)
+        verdicts[member.identifier] = check(package, member, data, device, arguments.batch)
         logger.info("  [%d/%d] %s: %s", position, len(members), member.identifier, verdicts[member.identifier])
 
     unreached = [member.identifier for member in members if member.identifier not in verdicts]

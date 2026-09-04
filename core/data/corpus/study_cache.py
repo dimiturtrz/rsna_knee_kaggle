@@ -35,6 +35,9 @@ from core.denominator import Denominator
 
 logger = logging.getLogger(__name__)
 
+WITNESS_SHARDS = "witness_shards"
+"""Where a witness-sized decode of a reading lands, so it can never be written over the reading itself."""
+
 FLUSH_EVERY = 200
 """Studies between progress flushes — how much a killed build has to decode a second time.
 
@@ -229,6 +232,31 @@ class StudyCache:
         keeps a derived cache at the geometry the corpus was actually decoded at.
         """
         return replace(self, routing=replace(self.routing, scheme=scheme))
+
+    def witnessing(self) -> "StudyCache":
+        """This same reading, in the subdirectory a WITNESS-SIZED decode of it belongs in.
+
+        A witness is eight named studies. Checking one costs a `load()` of the full corpus array — tens
+        of gigabytes memory-mapped to read about ten megabytes of it — and, worse, it costs the array
+        EXISTING: nine members on the roster lost their decode to disk reclamation and can therefore
+        never be witnessed again, `res392_ws_s2026` (the best single member this project has fitted)
+        among them. The pixels those members were scored on are gone; the eight studies each of them
+        witnessed are still in the raw corpus and decode in seconds.
+
+        THE SUBDIRECTORY IS THE WHOLE SAFETY ARGUMENT, and it is deliberately not a key suffix. `first`
+        writes `_first{N}` into the stem for exactly this hazard, and its own docstring records what was
+        at stake: a partial decode landing on the full cache's name would overwrite a 71.6 GB artifact
+        that every member on disk was fitted on, differing only in its first axis. A suffix makes that
+        collision unlikely — one `replace()` with the wrong field, one caller that builds a name by hand,
+        and the shard lands on the corpus. A different DIRECTORY makes it impossible: `images_{key}.npy`
+        here and `images_{key}.npy` there are different files whatever the key says, so no shard can ever
+        be written over the decode it is standing in for.
+
+        The reading is CARRIED, not respelled — size, slices, band, crop, scheme and truncation all come
+        with it — because a shard decoded at any other geometry would witness a different function than
+        the member was fitted as, and would do it while reporting a clean residual.
+        """
+        return replace(self, directory=self.directory / WITNESS_SHARDS)
 
     @property
     def images_path(self) -> Path:
