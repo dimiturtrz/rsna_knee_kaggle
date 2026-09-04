@@ -51,12 +51,60 @@ same data order, same everything else:
 | 0 | 0.7389 | 0.7389 | +0.0000 |
 | 1 | 0.7778 | 0.7837 | +0.0059 |
 | 2 | 0.8010 | 0.8090 | +0.0080 |
+| 3 | 0.8146 | 0.8234 | +0.0088 |
 
 Growing with epoch. Epoch 0 is identical to four decimals, which is what a term that shapes ranking
 rather than magnitude should do before the model has any ranking to shape.
 
-**Nothing is re-run until this pair converges.** It licenses or kills all sixteen at once and costs
-zero card, because both halves were already going to be run.
+## The pair cannot converge, and the price is readable anyway
+
+Written 2026-09-04 01:05Z, correcting the sentence that stood here.
+
+That sentence read "**Nothing is re-run until this pair converges.**" **The pair can never converge.**
+The term-OFF half was KILLED at epoch 3 — it exists as four rows in
+`ortho_stack_s2026.metrics.1.jsonl` and no process will ever add a fifth. Gating a P0 on a
+convergence that cannot arrive is a gate that never opens, and it sat here for a day.
+
+The matched-epoch price is readable from the four epochs that DO exist, and the shape settles it.
+The per-epoch INCREMENT is **+0.0059, +0.0021, +0.0008** — the delta is not growing linearly, it is
+saturating, and an asymptote near **+0.009 to +0.010** is what that curve extrapolates to. It is
+above the 0.0062 report floor, so the term is real; and it is bounded well under +0.015, which is
+what the decision below needs.
+
+This is a PARTIAL read on ONE trunk (ViT-L, batch 1, `--pair-memory 66`), not a converged number,
+and nothing here says the same size transfers to Swin or ConvNeXt. But the SIGN and the ORDER of
+magnitude are what the decision turns on, and both are settled.
+
+## The decision the price licenses: do not re-run the sixteen
+
+At a generous **+0.015** — half again the extrapolated asymptote — against `band_dense` 0.8578 and
+the 0.8459 seat bar:
+
+```
+swin_toprate     0.8393 -> 0.8543    under the incumbent by 0.0035
+swin_wholetop    0.8331 -> 0.8481    at the seat bar, inside the floor of it
+swin_supervised  0.8192 -> 0.8342    under the seat bar
+cnx_own_recipe   0.8186 -> 0.8336    under the seat bar
+radnet_family    0.6716 -> 0.6866    nowhere
+```
+
+**Not one of them reaches the incumbent even at the generous price.** So re-running sixteen arms
+buys a corrected number for members that still cannot be shipped — sixteen arms at ~5 h each is
+about eighty hours of card for zero seats. That ratio is not close.
+
+What the price does NOT retire is the paragraph below on the DECISION to stop a family, and that is
+where the recoverable value sits. A Swin family whose best corrected arm reads 0.854 against
+0.8578 is a family that was closed at a 0.0035 gap, not the 0.0185 gap on file. That is a family
+one arm away, not a dead one — and the pool it would join is DINOv2-monoculture, where
+`ortho_dense` (the LOWEST offline of all 37 board entries, 0.8452) served alone and read 0.907,
+about +0.02 above the DINOv2-fitted slope. So the argument for a corrected Swin arm is SEAT
+DIVERSITY, not solo quality, and it must be priced as such: ~5 h for one member landing ~0.85 solo
+whose whole case is that it is not a DINOv2.
+
+**Revised gate: re-run none of the sixteen. ONE corrected arm on the strongest family
+(`swin_toprate`'s flags plus a derived `--pair-memory`) is the only defensible spend, and it is
+gated behind `ortho_stack` and `v3large_stack`, which ask the same diversity question on a trunk
+that already has a board point.**
 
 ## What the arithmetic already says, before the price lands
 
