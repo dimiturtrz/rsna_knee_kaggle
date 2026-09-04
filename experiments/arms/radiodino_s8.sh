@@ -47,6 +47,14 @@
 # seat     none pre-registered. If it wins, the seat is not the point — the axis is, and the follow-on is
 #          patch size on the champion's own trunks, not a member built from this one.
 #
+# RESULT 2026-09-04: 0.7971, -0.0137. Lands in the UNNAMED GAP between the flat and mis-fit branches.
+# The axis is closed by Q-EI on the PREMISE: Dehghan's images are 28x28, so their patch 2 IS our 196 tokens
+# and their patch 1 IS our 784 -- same token counts, 64x the pixel area per token. Not a replication, a
+# guess that the trend survives the resolution change. Their schedule is uniform (80 epochs, one LR), so
+# the mis-fit branch's rate follow-on is dead and the epoch-6 peak is the mismatch showing up as
+# memorisation. Do not re-run this at a shorter budget. The honest successor is matched TOKEN PHYSICAL
+# SIZE -- smaller patches at a larger width -- which is a different arm and a dearer one.
+#
 # PRE-REGISTERED against `radiodino_s16`, floor 0.0062.
 #   >= +0.015 — patch size is the axis. Dehghan transfers to volumetric knee MRI, the operating point has
 #     been reading too coarsely, and the next arms are smaller patches on the trunks that already carry
