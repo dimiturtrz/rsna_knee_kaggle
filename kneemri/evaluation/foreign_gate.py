@@ -33,7 +33,8 @@ from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.protocol_prior import Ordering
 from kneemri.evaluation.supervision_gap import SupervisionGap
-from kneemri.inference.foreign_member import ForeignMember, ForeignReadings, WindowFeed
+from kneemri.inference.foreign_member import ForeignMember, WindowFeed
+from kneemri.inference.study_reading import StudyReadings
 
 logger = logging.getLogger(__name__)
 
@@ -68,16 +69,17 @@ class GateReading:
 class FeedGate:
     """One published member and one of our caches, held together so the pair can be scored."""
 
-    member: ForeignMember
-    feed: WindowFeed
+    member: StudyReadings.Member
+    feed: StudyReadings.Feed
     device: torch.device
+    gold: float
 
     def reading(self, rows: list[int], annotations: Float[np.ndarray, "studies targets"]) -> GateReading:
         """Score the member's probabilities for `rows` against the radiologists, one AUC per finding."""
-        values = ForeignReadings(self.device).predict(self.member.to(self.device), self.feed, rows)
+        values = StudyReadings(self.device).predict(self.member.to(self.device), self.feed, rows)
         ordering = Ordering()
         aucs = np.array([ordering.auc(values[:, index], annotations[:, index]) for index in range(len(TARGETS))])
-        return GateReading(aucs, self.member.spec.gold)
+        return GateReading(aucs, self.gold)
 
 
 def main() -> None:
@@ -96,7 +98,7 @@ def main() -> None:
     positions = {name: index for index, name in enumerate(WindowFeed.order(arguments.cache, arguments.key))}
     rows = [positions[name] for name in identifiers]
 
-    gate = FeedGate(member, feed, torch.device(arguments.device))
+    gate = FeedGate(member, feed, torch.device(arguments.device), member.spec.gold)
     title = f"{arguments.checkpoint.stem} through OUR {arguments.key} feed, {len(rows)} annotated studies"
     command.report(gate.reading(rows, annotations).lines(title))
 

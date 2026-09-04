@@ -11,7 +11,6 @@ from core.findings import TARGETS
 from kneemri.inference.foreign_member import (
     CHANNELS,
     ForeignMember,
-    ForeignReadings,
     ForeignSpec,
     PublishedArchive,
     WindowFeed,
@@ -138,14 +137,3 @@ def test_forward():
 
     assert logits.shape == (1, len(TARGETS))
     assert torch.isfinite(logits).all()
-
-
-def test_predict(tmp_path: Path):
-    """Probabilities come back one row per requested study, in range, in `TARGETS` order."""
-    feed = _feed(tmp_path / "cache")
-    member = ForeignMember(ForeignSpec(ARCH, RES, tuple(_labels()), GOLD, DIM)).eval()
-
-    values = ForeignReadings(torch.device("cpu"), torch.float32).predict(member, feed, [0, 2])
-
-    assert values.shape == (2, len(TARGETS))
-    assert ((values >= 0.0) & (values <= 1.0)).all()

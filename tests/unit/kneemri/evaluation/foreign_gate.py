@@ -67,7 +67,7 @@ def test_lines():
 
 def test_reading(tmp_path: Path):
     """A gate scores one AUC per finding for the rows it is given, all of them in range."""
-    gate = FeedGate(_member(), _feed(tmp_path / "cache"), torch.device("cpu"))
+    gate = FeedGate(_member(), _feed(tmp_path / "cache"), torch.device("cpu"), GOLD)
 
     reading = gate.reading([0, 1, 2, 3], _annotations())
 

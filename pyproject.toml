@@ -23,6 +23,10 @@ dependencies = [
     # because every other platform gets Triton with torch itself, and the Kaggle kernel must not try
     # to install it.
     "triton-windows; sys_platform == 'win32'",
+    # Pillar-0's trunk (kneemri/inference/pillar_member.py) imports it from the pinned checkout under
+    # external/. Declared here because a `uv sync` removes anything undeclared, and its removal shows up
+    # as an ImportError deep inside a stranger's attention block rather than as a missing dependency.
+    "einops",
     # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
     # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
     "pydicom>=3",

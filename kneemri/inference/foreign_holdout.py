@@ -26,7 +26,8 @@ import torch
 from numpy.typing import NDArray
 
 from core import cli
-from kneemri.inference.foreign_member import ForeignMember, ForeignReadings, WindowFeed
+from kneemri.inference.foreign_member import ForeignMember, WindowFeed
+from kneemri.inference.study_reading import StudyReadings
 from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ class ForeignHoldout:
     def reading(self, borrowed: HoldoutReading, order: list[str]) -> HoldoutReading:
         """The foreign member's probabilities over the borrowed studies, under the borrowed truth."""
         rows = self.rows(order, borrowed.studies)
-        values = ForeignReadings(self.device).predict(self.member.to(self.device), self.feed, rows.tolist())
+        values = StudyReadings(self.device).predict(self.member.to(self.device), self.feed, rows.tolist())
         return HoldoutReading(
             studies=borrowed.studies,
             predictions=np.asarray(values, dtype=np.float64),

@@ -50,10 +50,6 @@ subtracted anywhere below."""
 SCALE = 255.0
 """Our cache stores uint8; their reader produced floats in [0,1]. This is the whole normalisation."""
 
-PROGRESS = 10
-"""Studies between progress lines. One study is already a batch of sixty 384 px windows, so a CPU run of
-the plumbing gate is minutes rather than seconds and a silent wait is indistinguishable from a hang."""
-
 
 class PublishedArchive(TypedDict):
     """The five fields a published archive is read for, at the JSON-ish boundary of a stranger's `.pt`.
@@ -187,27 +183,3 @@ class WindowFeed:
         if pixels.shape[-1] == self.res:
             return pixels
         return torch.nn.functional.interpolate(pixels, size=(self.res, self.res), mode="bilinear", align_corners=False)
-
-
-@dataclass(frozen=True)
-class ForeignReadings:
-    """One foreign member's probabilities for a fixed set of our studies."""
-
-    device: torch.device
-    precision: torch.dtype = torch.float16
-
-    def predict(self, member: ForeignMember, feed: WindowFeed, rows: list[int]) -> Float[np.ndarray, "studies targets"]:
-        """Probabilities for each row of the cache, one study per forward.
-
-        One at a time because window counts DIFFER — a study with a missing slot has fewer bags — and
-        padding them to a common count would feed the attention pool blanks it is free to attend to. The
-        forward is already a batch of sixty windows, so the study axis buys little and risks a number.
-        """
-        chunks = []
-        with torch.no_grad(), torch.autocast("cuda", dtype=self.precision, enabled=self.device.type == "cuda"):
-            for done, row in enumerate(rows):
-                logits = member(feed.batch(row, self.device).unsqueeze(0))
-                chunks.append(torch.sigmoid(logits.float()).cpu().numpy())
-                if done % PROGRESS == 0:
-                    logger.info("%d/%d studies", done, len(rows))
-        return np.concatenate(chunks).astype(np.float64)

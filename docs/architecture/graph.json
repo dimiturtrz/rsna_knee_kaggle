@@ -2318,6 +2318,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.pillar_gate",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pillar_gate",
+      "target": "kneemri.evaluation.foreign_gate",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pillar_gate",
+      "target": "kneemri.evaluation.supervision_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pillar_gate",
+      "target": "kneemri.inference.pillar_member",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.pool",
       "target": "kneemri.evaluation.scores",
       "weight": 1
@@ -3994,6 +4018,12 @@
       "kind": "import",
       "source": "kneemri.inference.members",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pillar_member",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -12459,13 +12489,7 @@
     {
       "kind": "holds",
       "source": "kneemri.evaluation.foreign_gate.FeedGate",
-      "target": "kneemri.inference.foreign_member.ForeignMember",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.evaluation.foreign_gate.FeedGate",
-      "target": "kneemri.inference.foreign_member.WindowFeed",
+      "target": "kneemri.inference.study_reading.StudyReadings",
       "weight": 1
     },
     {
@@ -12489,13 +12513,13 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.foreign_gate.FeedGate.reading",
-      "target": "kneemri.inference.foreign_member.ForeignReadings",
+      "target": "kneemri.inference.study_reading.StudyReadings",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_gate.FeedGate.reading",
-      "target": "kneemri.inference.foreign_member.ForeignReadings.predict",
+      "target": "kneemri.inference.study_reading.StudyReadings.predict",
       "weight": 1
     },
     {
@@ -14686,6 +14710,48 @@
       "kind": "calls",
       "source": "kneemri.evaluation.paired_floor.main",
       "target": "kneemri.evaluation.published_ruler.PublishedRuler.per_seed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.evaluation.foreign_gate.FeedGate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.evaluation.foreign_gate.FeedGate.reading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.inference.pillar_member.PillarMember.rebuild",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.inference.pillar_member.VolumeFeed.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pillar_gate.main",
+      "target": "kneemri.inference.pillar_member.VolumeFeed.order",
       "weight": 1
     },
     {
@@ -20689,6 +20755,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.inference.atlas_import.AtlasImport",
+      "target": "kneemri.inference.atlas_import.AtlasImport",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.atlas_import.AtlasImport.atlas_class",
+      "target": "kneemri.inference.atlas_import.AtlasImport.install_stubs",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.inference.budget.Budget.overrunning",
       "target": "kneemri.inference.budget.Budget.measured",
@@ -20949,13 +21027,13 @@
     {
       "kind": "construct",
       "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
-      "target": "kneemri.inference.foreign_member.ForeignReadings",
+      "target": "kneemri.inference.study_reading.StudyReadings",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.foreign_holdout.ForeignHoldout.reading",
-      "target": "kneemri.inference.foreign_member.ForeignReadings.predict",
+      "target": "kneemri.inference.study_reading.StudyReadings.predict",
       "weight": 1
     },
     {
@@ -21046,24 +21124,6 @@
       "kind": "calls",
       "source": "kneemri.inference.foreign_member.ForeignMember.rebuild",
       "target": "kneemri.inference.foreign_member.ForeignSpec.of",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.inference.foreign_member.ForeignReadings",
-      "target": "kneemri.inference.foreign_member.ForeignMember",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.inference.foreign_member.ForeignReadings",
-      "target": "kneemri.inference.foreign_member.WindowFeed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.foreign_member.ForeignReadings.predict",
-      "target": "kneemri.inference.foreign_member.WindowFeed.batch",
       "weight": 1
     },
     {
@@ -21679,6 +21739,72 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.inference.pillar_member.AtlasConfig",
+      "target": "kneemri.inference.pillar_member.AtlasModel",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.pillar_member.AtlasModel",
+      "target": "kneemri.inference.pillar_member.AtlasArgs",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.pillar_member.PillarMember",
+      "target": "kneemri.inference.pillar_member.PillarMember",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.pillar_member.PillarMember",
+      "target": "kneemri.inference.pillar_member.PillarSpec",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pillar_member.PillarMember.__init__",
+      "target": "kneemri.inference.atlas_import.AtlasImport.atlas_class",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pillar_member.PillarMember.forward",
+      "target": "kneemri.inference.pillar_member.PillarMember.embedding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pillar_member.PillarMember.rebuild",
+      "target": "kneemri.inference.pillar_member.PillarSpec.of",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.pillar_member.PillarSpec",
+      "target": "kneemri.inference.pillar_member.AtlasConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.pillar_member.PillarSpec",
+      "target": "kneemri.inference.pillar_member.PillarSpec",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.pillar_member.VolumeFeed",
+      "target": "kneemri.inference.pillar_member.VolumeFeed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pillar_member.VolumeFeed.batch",
+      "target": "kneemri.inference.pillar_member.VolumeFeed.volumes",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.prediction_cache.PredictionCache",
       "target": "kneemri.inference.members.Window",
@@ -21826,6 +21952,12 @@
       "kind": "calls",
       "source": "kneemri.inference.stacked.StackedLogit.fitted",
       "target": "kneemri.inference.stacked.StackedLogit.logits",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.study_reading.StudyReadings",
+      "target": "kneemri.inference.study_reading.StudyReadings",
       "weight": 1
     },
     {
@@ -28915,7 +29047,7 @@
       "role": null
     },
     {
-      "descendants": 223,
+      "descendants": 227,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -28979,7 +29111,7 @@
       "role": null
     },
     {
-      "descendants": 70,
+      "descendants": 71,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29238,6 +29370,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.paired_floor",
       "label": "paired_floor",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pillar_gate",
+      "label": "pillar_gate",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -29715,11 +29855,19 @@
       "role": null
     },
     {
-      "descendants": 17,
+      "descendants": 20,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.atlas_import",
+      "label": "atlas_import",
+      "level": "module",
+      "parent": "kneemri.inference",
       "role": null
     },
     {
@@ -29804,6 +29952,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.pillar_member",
+      "label": "pillar_member",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.prediction_cache",
       "label": "prediction_cache",
       "level": "module",
@@ -29822,6 +29978,14 @@
       "descendants": 0,
       "id": "kneemri.inference.stacked",
       "label": "stacked",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.study_reading",
+      "label": "study_reading",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -33284,6 +33448,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.atlas_import.AtlasImport",
+      "label": "AtlasImport",
+      "level": "class",
+      "parent": "kneemri.inference.atlas_import",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.budget.Budget",
       "label": "Budget",
       "level": "class",
@@ -33337,14 +33509,6 @@
       "level": "class",
       "parent": "kneemri.inference.foreign_member",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.foreign_member.ForeignReadings",
-      "label": "ForeignReadings",
-      "level": "class",
-      "parent": "kneemri.inference.foreign_member",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -33460,6 +33624,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.pillar_member.AtlasArgs",
+      "label": "AtlasArgs",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.AtlasConfig",
+      "label": "AtlasConfig",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.AtlasModel",
+      "label": "AtlasModel",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarMember",
+      "label": "PillarMember",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarSpec",
+      "label": "PillarSpec",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.VolumeFeed",
+      "label": "VolumeFeed",
+      "level": "class",
+      "parent": "kneemri.inference.pillar_member",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.prediction_cache.PredictionCache",
       "label": "PredictionCache",
       "level": "class",
@@ -33489,6 +33701,14 @@
       "level": "class",
       "parent": "kneemri.inference.stacked",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.study_reading.StudyReadings",
+      "label": "StudyReadings",
+      "level": "class",
+      "parent": "kneemri.inference.study_reading",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -41868,6 +42088,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.pillar_gate.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.pillar_gate",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.pool.Pool.__len__",
       "label": "__len__",
       "level": "method",
@@ -46204,6 +46432,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.atlas_import.AtlasImport._unreachable",
+      "label": "_unreachable",
+      "level": "method",
+      "parent": "kneemri.inference.atlas_import.AtlasImport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.atlas_import.AtlasImport.atlas_class",
+      "label": "atlas_class",
+      "level": "method",
+      "parent": "kneemri.inference.atlas_import.AtlasImport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.atlas_import.AtlasImport.install_stubs",
+      "label": "install_stubs",
+      "level": "method",
+      "parent": "kneemri.inference.atlas_import.AtlasImport",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.budget.Budget.__init__",
       "label": "__init__",
       "level": "method",
@@ -46480,14 +46732,6 @@
       "label": "rebuild",
       "level": "method",
       "parent": "kneemri.inference.foreign_member.ForeignMember",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.foreign_member.ForeignReadings.predict",
-      "label": "predict",
-      "level": "method",
-      "parent": "kneemri.inference.foreign_member.ForeignReadings",
       "role": null
     },
     {
@@ -47020,6 +47264,86 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarMember.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarMember.embedding",
+      "label": "embedding",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarMember.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarMember.rebuild",
+      "label": "rebuild",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarSpec.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarSpec",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.PillarSpec.order",
+      "label": "order",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.PillarSpec",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.VolumeFeed.batch",
+      "label": "batch",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.VolumeFeed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.VolumeFeed.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.VolumeFeed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.VolumeFeed.order",
+      "label": "order",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.VolumeFeed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pillar_member.VolumeFeed.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "kneemri.inference.pillar_member.VolumeFeed",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.prediction_cache.PredictionCache.__init__",
       "label": "__init__",
       "level": "method",
@@ -47152,6 +47476,14 @@
       "label": "logits",
       "level": "method",
       "parent": "kneemri.inference.stacked.StackedLogit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.study_reading.StudyReadings.predict",
+      "label": "predict",
+      "level": "method",
+      "parent": "kneemri.inference.study_reading.StudyReadings",
       "role": null
     },
     {
