@@ -50,6 +50,11 @@ dependencies = [
     # otherwise have done for us. Already installed as a transitive of transformers; declared because
     # `state_dict_trunk` imports it directly and DEP003 is enforced.
     "huggingface-hub",
+    # Reading THAT file when it is a `.safetensors` rather than a `.pth` — `kneemri/models/timm_trunk.py`
+    # loads RadioDino's tensors itself, because its `config.json` names a transformers class its weights
+    # are not keyed for. Transitive of transformers, and present in Kaggle's image, so it needs no wheel
+    # in the kit; declared for the same reason `huggingface-hub` is.
+    "safetensors",
 ]
 
 [project.optional-dependencies]

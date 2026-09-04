@@ -120,6 +120,14 @@ the one encoder here whose pretraining corpus is not images as having no declara
 the quiet half of the failure `Normalization` exists to make loud, since an unread declaration and an
 agreeing one are indistinguishable from the outside."""
 
+UNLOADED_CEILING = 0.05
+"""How much of a trunk may stay at its random initialisation before the load is refused.
+
+LEGISLATED, never seeded from what the tree happens to measure. The largest BENIGN miss is a head the
+trunk does not use — a ViT-B pooler is 0.6M of 86.6M parameters, 0.7%. The smallest MALIGN one is a
+single transformer block gone astray, 1 of 12, about 8%. 5% sits between them and touches neither.
+"""
+
 
 @dataclass(frozen=True)
 class Stage:
@@ -360,6 +368,39 @@ class Encoder:
         )
         raise ValueError(message)
 
+    @staticmethod
+    def refuse_unloaded(trunk: nn.Module, missing: Sequence[str], repository: str) -> None:
+        """Refuse a trunk the checkpoint populated too little of to BE the model it is named as.
+
+        `radiodino_corpus` trained three epochs of a randomly initialised ViT-B/16 and wrote them into
+        the log as a reading about medical-corpus pretraining. RadioDino ships timm key names
+        (`blocks.*`, `patch_embed`, `cls_token`) and `ViTModel` rebuilds itself with HuggingFace ones
+        (`layers.*`, `embeddings.*`), so every checkpoint key was UNEXPECTED, every model parameter
+        MISSING, and the run descended a from-scratch trunk under a pretrained trunk's name. Sixteen
+        checks guard what gets SHIPPED and what gets QUOTED; none asked whether the weights arrived.
+
+        Transformers already computes the answer — `output_loading_info=True` returns the missing keys —
+        so this is not a heuristic about loss curves. It is the same shape as `run_setup`'s refusal of
+        `--batch 1` under a nonzero ranking term: a recipe that cannot mean what it says does not run.
+
+        On `Encoder` and not beside the loaders it guards, because it is a fact about what a registry
+        ENTRY promises: `from_hub` and `SamVisionWeights.build` both call it, and a third loader will.
+        """
+        if not missing:
+            return
+        sizes = {name: value.numel() for name, value in trunk.state_dict().items()}
+        total = sum(sizes.values())
+        unloaded = sum(sizes.get(name, 0) for name in missing)
+        if unloaded <= UNLOADED_CEILING * total:
+            return
+        message = (
+            f"{repository} left {unloaded / total:.1%} of {type(trunk).__name__} at its random "
+            f"initialisation ({len(missing)} keys), past the {UNLOADED_CEILING:.0%} ceiling — the "
+            f"checkpoint's key names do not match the class rebuilding it, so this trunk is not the "
+            f"model this variant is named for"
+        )
+        raise ValueError(message)
+
     def load(self, source: str | Path | None = None) -> nn.Module:
         """The trunk, ready to be handed to the head, from `source` or from this encoder's repository.
 
@@ -380,14 +421,20 @@ class Encoder:
         """The trunk as a HuggingFace model directory names it — the case every encoder but one is.
 
         No mirror test: exercising it means fetching real weights, which is a network call and the `small`
-        gate forbids one in a unit test. It is covered where it was always covered — the integration suite
-        `registry_to_checkpoints`, which loads every entry against its own snapshot.
+        gate forbids one in a unit test. This said it was covered by `registry_to_checkpoints`, "which
+        loads every entry against its own snapshot" — that suite reads each entry's preprocessing JSON
+        and loads no weights at all, and the gap the prose covered is where the RadioDino zero-key load
+        lived. `kneemri.models.load_check` is the sweep that does load them; it is run by hand, because
+        doing it in the gate means fetching the whole registry.
         """
         # Imported here rather than at module scope because a Kaggle kernel can only reach transformers
         # once the kit is on `sys.path`, and this module is imported before that happens.
         from transformers import AutoModel  # noqa: PLC0415 - see above
 
-        return AutoModel.from_pretrained(source or self.repository)
+        where = str(source or self.repository)
+        trunk, info = AutoModel.from_pretrained(where, output_loading_info=True)
+        self.refuse_unloaded(trunk, info["missing_keys"], where)
+        return cast("nn.Module", trunk)
 
     @property
     def mounted_source(self) -> str:

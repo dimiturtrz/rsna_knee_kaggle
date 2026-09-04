@@ -102,7 +102,9 @@ def mounted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (competition / "sample_submission.csv").write_text("StudyInstanceUID\n", encoding="utf-8")
 
     monkeypatch.setattr(kernel_module, "ENCODERS", {SMALL: replace(ENCODERS[SMALL], dim=DIM)})
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda weights: _FakeBackbone())
+    monkeypatch.setattr(
+        "transformers.AutoModel.from_pretrained", lambda weights, **_: (_FakeBackbone(), {"missing_keys": []})
+    )
     # The kernel takes the card whenever there is one, and this suite never trains or serves on it.
     # The count, not availability — see `kneemri.device.VisibleCards`.
     monkeypatch.setattr(torch.cuda, "device_count", lambda: 0)

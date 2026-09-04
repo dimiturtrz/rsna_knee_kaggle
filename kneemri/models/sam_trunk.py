@@ -23,11 +23,13 @@ trunk here is measured at.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import override
+from typing import cast, override
 
 import torch.nn.functional as F
 from jaxtyping import Float
 from torch import Tensor, nn
+
+from kneemri.models.encoder import Encoder
 
 
 class TokensInsteadOfNeck(nn.Module):
@@ -132,7 +134,15 @@ class SamVisionWeights:
         # once the kit is on `sys.path`, and this module is imported before that happens.
         from transformers import SamModel  # noqa: PLC0415 - see above
 
-        encoder = SamModel.from_pretrained(source or self.repository).vision_encoder
+        where = str(source or self.repository)
+        # `SamModel.from_pretrained` is annotated as returning the model, so the pair `output_loading_info`
+        # actually hands back is invisible to the checker; `AutoModel`'s looser annotation needs no cast.
+        loaded = cast(
+            "tuple[SamModel, dict[str, list[str]]]", SamModel.from_pretrained(where, output_loading_info=True)
+        )
+        model, info = loaded
+        Encoder.refuse_unloaded(model, info["missing_keys"], where)
+        encoder = model.vision_encoder
         embed = encoder.pos_embed
         if embed is None:
             # Not a type-checker appeasement: SAM's config has `use_abs_pos`, and a checkpoint built with

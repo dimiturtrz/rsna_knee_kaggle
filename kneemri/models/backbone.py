@@ -42,6 +42,7 @@ from kneemri.models.encoder import (
 from kneemri.models.sam_trunk import MEDSAM_VIT_B
 from kneemri.models.snapshot_trunk import ORTHOFOUNDATION_L
 from kneemri.models.state_dict_trunk import RADIMAGENET_DENSENET121
+from kneemri.models.timm_trunk import TimmHubWeights
 from kneemri.models.trunk_tokens import TrunkAsTokens
 
 SMALL = "small"
@@ -638,6 +639,13 @@ ENCODERS: dict[str, Encoder] = {
         ),
         leaf="radiodino-b16",
         params_m=86.6,
+        # ITS `config.json` LIES ABOUT ITS KEYS, which is why this entry has a builder and the other
+        # ViTs do not. The file names `ViTModel`, so `AutoModel.from_pretrained` builds the right
+        # architecture — and the weights beside it are keyed the way timm keys them, so it matches not
+        # one of them and returns a correctly-shaped ViT-B/16 at its random initialisation. That ran:
+        # `radiodino_corpus` trained three epochs of a from-scratch trunk against a pre-registration
+        # about medical pretraining. `refuse_unloaded` now refuses it; `TimmHubWeights` loads it.
+        builder=TimmHubWeights("vit_base_patch16_224", 768, repository="Snarcy/RadioDino-b16").build,
     ),
     # THE FIRST TRUNK PRETRAINED ON A DENSE OBJECTIVE, added 2026-09-04. Every encoder above was fitted
     # either without labels (DINOv2/v3, ConvNeXtV2, V-JEPA2, RadioDino) or on one label per image (Swin,

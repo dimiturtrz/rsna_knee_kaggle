@@ -227,7 +227,9 @@ def test_every_readout_a_run_can_ask_for_reaches_the_optimiser(
     # The BLOCKED stand-in, because `_options()` asks for LoRA and adaptation refuses a backbone with no
     # Linear inside its blocks. Worth carrying rather than switching off: the adapters live INSIDE the
     # encoder, so they must land in the backbone group, and this assertion is over every group at once.
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _BlockedBackbone())
+    monkeypatch.setattr(
+        "transformers.AutoModel.from_pretrained", lambda repository, **_: (_BlockedBackbone(), {"missing_keys": []})
+    )
     vocabulary, arm = vocabulary_and_arm
     for name in vocabulary:
         options, design = arm(name)
@@ -243,7 +245,9 @@ def test_every_readout_a_run_can_ask_for_reaches_the_optimiser(
 
 def test_every_model_wrapper_a_run_can_ask_for_is_applied(monkeypatch: pytest.MonkeyPatch):
     """The model half of the same claim: adapters, checkpointing and compilation are run switches too."""
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda repository: _FakeBackbone())
+    monkeypatch.setattr(
+        "transformers.AutoModel.from_pretrained", lambda repository, **_: (_FakeBackbone(), {"missing_keys": []})
+    )
     wrappers = _policies(StudyModel, NOT_A_WRAPPER | MODEL_REPORTER)
     called = _recorded(monkeypatch, StudyModel, wrappers)
 

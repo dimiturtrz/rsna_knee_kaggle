@@ -4845,6 +4845,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.backbone",
+      "target": "kneemri.models.timm_trunk",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.backbone",
       "target": "kneemri.models.trunk_tokens",
       "weight": 1
     },
@@ -4870,6 +4876,18 @@
       "kind": "import",
       "source": "kneemri.models.labelwise_attention",
       "target": "kneemri.models.slice_attention",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.load_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.load_check",
+      "target": "kneemri.models.backbone",
       "weight": 1
     },
     {
@@ -4964,6 +4982,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.sam_trunk",
+      "target": "kneemri.models.encoder",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.slice_pooling",
       "target": "kneemri.models.depth_attention",
       "weight": 1
@@ -5014,6 +5038,12 @@
       "kind": "import",
       "source": "kneemri.models.snapshot_trunk",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.timm_trunk",
+      "target": "kneemri.models.trunk_tokens",
       "weight": 1
     },
     {
@@ -24704,6 +24734,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.encoder.Encoder.from_hub",
+      "target": "kneemri.models.encoder.Encoder.refuse_unloaded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.encoder.Encoder.load",
       "target": "kneemri.models.encoder.Encoder.from_hub",
       "weight": 1
@@ -24808,6 +24844,36 @@
       "kind": "references",
       "source": "kneemri.models.grid_fit.GridFit",
       "target": "kneemri.models.grid_fit.GridFit",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.load_check.LoadCensus",
+      "target": "kneemri.models.load_check.TrunkLoad",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.load_check.LoadCensus.loaded",
+      "target": "kneemri.models.load_check.TrunkLoad",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.load_check.main",
+      "target": "kneemri.models.load_check.LoadCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.load_check.main",
+      "target": "kneemri.models.load_check.LoadCensus.loaded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.load_check.main",
+      "target": "kneemri.models.load_check.LoadCensus.report",
       "weight": 1
     },
     {
@@ -25047,6 +25113,12 @@
     {
       "kind": "calls",
       "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
+      "target": "kneemri.models.encoder.Encoder.refuse_unloaded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
       "target": "kneemri.models.sam_trunk.SamVisionWeights.regridded",
       "weight": 1
     },
@@ -25204,6 +25276,42 @@
       "kind": "calls",
       "source": "kneemri.models.state_dict_trunk.StateDictWeights.build",
       "target": "kneemri.models.state_dict_trunk.StateDictWeights.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmHubWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmHubWeights.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.timm_trunk.TimmHubWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmTrunk",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.models.timm_trunk.TimmTrunk",
+      "target": "kneemri.models.trunk_tokens.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.timm_trunk.TimmTrunk",
+      "target": "kneemri.models.trunk_tokens.TokenOutput",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.timm_trunk.TimmTrunk.__init__",
+      "target": "kneemri.models.trunk_tokens.TokenConfig",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.timm_trunk.TimmTrunk.forward",
+      "target": "kneemri.models.trunk_tokens.TokenOutput",
       "weight": 1
     },
     {
@@ -28783,7 +28891,7 @@
       "role": null
     },
     {
-      "descendants": 221,
+      "descendants": 223,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29983,7 +30091,7 @@
       "role": null
     },
     {
-      "descendants": 26,
+      "descendants": 28,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -30066,6 +30174,14 @@
       "descendants": 0,
       "id": "kneemri.models.labelwise_attention",
       "label": "labelwise_attention",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check",
+      "label": "load_check",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -30170,6 +30286,14 @@
       "descendants": 0,
       "id": "kneemri.models.state_dict_trunk",
       "label": "state_dict_trunk",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk",
+      "label": "timm_trunk",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -33912,6 +34036,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.load_check.LoadCensus",
+      "label": "LoadCensus",
+      "level": "class",
+      "parent": "kneemri.models.load_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.TrunkLoad",
+      "label": "TrunkLoad",
+      "level": "class",
+      "parent": "kneemri.models.load_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.lora.LoRALinear",
       "label": "LoRALinear",
       "level": "class",
@@ -34069,6 +34209,22 @@
       "level": "class",
       "parent": "kneemri.models.state_dict_trunk",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmHubWeights",
+      "label": "TimmHubWeights",
+      "level": "class",
+      "parent": "kneemri.models.timm_trunk",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmTrunk",
+      "label": "TimmTrunk",
+      "level": "class",
+      "parent": "kneemri.models.timm_trunk",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -49352,6 +49508,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.encoder.Encoder.refuse_unloaded",
+      "label": "refuse_unloaded",
+      "level": "method",
+      "parent": "kneemri.models.encoder.Encoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.encoder.Encoder.require_tiling",
       "label": "require_tiling",
       "level": "method",
@@ -49556,6 +49720,46 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.labelwise_attention.LabelwiseAttention",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.LoadCensus.defects",
+      "label": "defects",
+      "level": "method",
+      "parent": "kneemri.models.load_check.LoadCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.LoadCensus.loaded",
+      "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.models.load_check.LoadCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.LoadCensus.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.models.load_check.LoadCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.TrunkLoad.defect",
+      "label": "defect",
+      "level": "method",
+      "parent": "kneemri.models.load_check.TrunkLoad",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.load_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.models.load_check",
       "role": null
     },
     {
@@ -50132,6 +50336,54 @@
       "label": "resolve",
       "level": "method",
       "parent": "kneemri.models.state_dict_trunk.StateDictWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmHubWeights.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmHubWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmHubWeights.resolve",
+      "label": "resolve",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmHubWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmTrunk.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmTrunk.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmTrunk.gradient_checkpointing_enable",
+      "label": "gradient_checkpointing_enable",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmTrunk.is_gradient_checkpointing",
+      "label": "is_gradient_checkpointing",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmTrunk",
       "role": null
     },
     {

@@ -361,7 +361,7 @@ def test_model(monkeypatch: pytest.MonkeyPatch):
             order.append("compile")
 
     monkeypatch.setattr("kneemri.training.run_setup.StudyModel", lambda *args, **kwargs: _Model())
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda name: None)
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda name, **_: (None, {"missing_keys": []}))
     card = torch.device("cuda")
     RunSetup(options).model(ENCODERS[SMALL], 6, StudyDesign(), card)
 

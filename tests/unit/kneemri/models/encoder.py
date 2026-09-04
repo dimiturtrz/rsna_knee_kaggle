@@ -108,7 +108,9 @@ def test_load(
     while every encoder emitted token sequences; a family that does not would otherwise put the same
     branch in all eight.
     """
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda source: feature_map(1024, 11))
+    monkeypatch.setattr(
+        "transformers.AutoModel.from_pretrained", lambda source, **_: (feature_map(1024, 11), {"missing_keys": []})
+    )
 
     adapted = ENCODERS[CONVNEXT_BASE].load()
     assert isinstance(adapted, TrunkAsTokens), "a feature map needs the adapter"
@@ -119,7 +121,9 @@ def test_load(
     )
     assert not isinstance(ENCODERS[SMALL].load(), TrunkAsTokens), "a transformer already speaks the contract"
 
-    monkeypatch.setattr("transformers.AutoModel.from_pretrained", lambda source: token_sequence(1024, 144))
+    monkeypatch.setattr(
+        "transformers.AutoModel.from_pretrained", lambda source, **_: (token_sequence(1024, 144), {"missing_keys": []})
+    )
     wrapped = ENCODERS[SWIN_BASE].load()
     assert isinstance(wrapped, TrunkAsTokens), "a prefixless sequence still needs the prefix supplied"
     assert wrapped.forward(torch.zeros(1, 3, 384, 384)).last_hidden_state.shape == (1, 1 + 144, 1024), (
@@ -237,3 +241,12 @@ def test_claims():
     assert not ENCODERS[V3_SMALL].claims("dimiturnt/dinov3-hf/vits16plus"), "a substring is not a mount"
     assert ENCODERS[SMALL].claims("metaresearch/dinov2/PyTorch/small/1")
     assert not ENCODERS[SMALL].claims("someone/never-declared/leaf")
+
+
+def test_refuse_unloaded():
+    """A whole trunk left random refuses; a small unused head does not, and neither does a clean load."""
+    trunk = nn.Sequential(nn.Linear(64, 64), nn.Linear(64, 1))
+    Encoder.refuse_unloaded(trunk, [], "clean/load")
+    Encoder.refuse_unloaded(trunk, ["1.weight", "1.bias"], "pooler/only")
+    with pytest.raises(ValueError, match="random initialisation"):
+        Encoder.refuse_unloaded(trunk, ["0.weight", "0.bias"], "timm/named-checkpoint")
