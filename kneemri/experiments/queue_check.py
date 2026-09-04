@@ -63,6 +63,7 @@ WATCHED = "' in "
 STARTED = "=== "
 
 DONE = "ARM DONE "
+PID = "pid:"
 """What `lib.sh` echoes on SUCCESS ONLY, once the trainer exited 0 and wrote a `best holdout` line.
 
 READ FROM THE ARM'S OWN LOG, `<stem>.log`, never from a watcher's — a watcher's header quotes this
@@ -196,6 +197,37 @@ class QueuedArms:
         written for.
         """
         return any(watch.marker in line and self._armed(line) == watch.arms for line in self.watchers())
+
+    def producer(self, watch: Watch) -> str:
+        """The running process line this watch's gate resolves to, or empty when nothing is producing it.
+
+        A gate is written two ways that look nothing alike. `ARM DONE <arm>` names the ARM; `pid:<n>`
+        names the PROCESS. Every liveness test here crosses MARKERS, so two watchers gated on one running
+        job in the two different notations read as two independent producers, and the queue that owes them
+        both reads healthy. Resolving each gate to the process LINE is what makes them comparable.
+
+        A numeric token is matched as a FIELD, never as a substring: a pid is four or five digits and
+        those turn up inside paths, seeds and memory columns of unrelated rows.
+        """
+        token = watch.marker.removeprefix(DONE).removeprefix(PID).strip()
+        as_field = token.isdigit()
+        rows = (line for line in self.running.splitlines() if WATCHER not in line)
+        return next((line for line in rows if (token in line.split() if as_field else token in line)), "")
+
+    def collided(self) -> list[str]:
+        """Every arm a live watcher will start behind a producer ANOTHER live watcher is also behind.
+
+        `doubled` catches two watchers owing the SAME arm. This catches the opposite shape and the one
+        that actually happened: two watchers owing DIFFERENT arms, both gated on one running job, which
+        puts two arms on the card the moment that job exits. `after.sh` serialises within one watcher and
+        knows nothing of its peers, so nothing downstream prevents it.
+        """
+        behind: dict[str, list[Watch]] = {}
+        for watch in self.watches():
+            if self.alive(watch) and watch.waiting() and (line := self.producer(watch)):
+                behind.setdefault(line, []).append(watch)
+        clashing = [group for group in behind.values() if len({watch.waiting()[0] for watch in group}) > 1]
+        return sorted({watch.waiting()[0] for group in clashing for watch in group})
 
     def doubled(self) -> list[str]:
         """Arms that more than one live watcher will start — the expensive shape, so it is BLOCKING.
@@ -336,6 +368,12 @@ class QueuedArms:
                 f"MISARMED: {' '.join(misarmed)} — the watched file does not exist while the arm named in "
                 "the marker is running, so this watcher will wait forever; re-arm it on the real full log "
                 "(arm full logs carry the SEED, `<arm>_s<seed>.full.log`)"
+            )
+        if collided := self.collided():
+            found.append(
+                f"COLLIDED: {' '.join(collided)} — these are owed by DIFFERENT live watchers gated on one "
+                "running job, so they all start the moment it exits; kill all but one chain and re-queue "
+                "the rest behind the arm that wins the card, not behind the job they were both watching"
             )
         if doubled := self.doubled():
             found.append(

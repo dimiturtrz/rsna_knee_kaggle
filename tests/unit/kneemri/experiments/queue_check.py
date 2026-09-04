@@ -104,6 +104,45 @@ def test_doubled(tmp_path: Path):
     assert QueuedArms(tmp_path, LIVE + LIVE).doubled() == ARMS.split(), "both arms would start twice"
 
 
+PRODUCER = "User 22188 1 ? python -m kneemri.train --out /d/models/ortho_pool_read_s2026.pt\n"
+BY_PID = "experiments/arms/cnx_ladder.sh"
+BY_NAME = "experiments/arms/radiodino_corpus.sh"
+ONE_JOB = (
+    f"User 11 9 ? bash experiments/after.sh pid:22188 /d/x.log {BY_PID}\n"
+    f"User 12 9 ? bash experiments/after.sh ARM DONE ortho_pool_read /d/y.log {BY_NAME}\n"
+) + PRODUCER
+
+
+def _two_watchers(directory: Path) -> None:
+    _log(directory, "after_pid.log", "pid:22188", BY_PID)
+    _log(directory, "after_name.log", "ARM DONE ortho_pool_read", BY_NAME)
+
+
+def test_producer(tmp_path: Path):
+    """Both gate notations have to resolve to the same running line, or nothing can compare them."""
+    _two_watchers(tmp_path)
+    queue = QueuedArms(tmp_path, ONE_JOB)
+    assert [queue.producer(watch) for watch in queue.watches()] == [PRODUCER.strip()] * 2
+    idle = QueuedArms(tmp_path, ONE_JOB.replace(PRODUCER, ""))
+    assert idle.producer(idle.watches()[0]) == "", "no producer line is not a producer"
+
+
+def test_producer_will_not_match_a_pid_inside_another_column(tmp_path: Path):
+    _two_watchers(tmp_path)
+    unrelated = "User 9 1 ? python -m kneemri.train --seed 22188999 --out /d/models/other_s2026.pt\n"
+    queue = QueuedArms(tmp_path, ONE_JOB.replace(PRODUCER, unrelated))
+    assert queue.producer(queue.watches()[0]) == "", "a pid is a FIELD; digits inside a seed are not it"
+
+
+def test_collided(tmp_path: Path):
+    """Two live watchers owing DIFFERENT arms behind one job — both land on the card when it exits."""
+    _two_watchers(tmp_path)
+    assert QueuedArms(tmp_path, ONE_JOB).collided() == sorted([BY_PID, BY_NAME])
+    _log(tmp_path, "after_pid.log", "pid:22188", BY_NAME)
+    same = ONE_JOB.replace(f"pid:22188 /d/x.log {BY_PID}", f"pid:22188 /d/x.log {BY_NAME}")
+    assert QueuedArms(tmp_path, same).collided() == [], "one arm owed twice is DOUBLE-QUEUED, not a collision"
+
+
 def _armed_on(directory: Path, watched: Path | str) -> None:
     header = f"waiting for '{MARKER}' in {watched} before running: {ARMS}"
     (directory / "after_chain.log").write_text(header, encoding="utf-8")
