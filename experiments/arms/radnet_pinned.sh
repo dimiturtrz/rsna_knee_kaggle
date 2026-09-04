@@ -107,6 +107,16 @@
 #
 # Also serves knee-nj4l (architecture monoculture) and knee-nz34 (encoder-family pricing).
 #
+# --rank-weight 0 IS WHAT "VERBATIM" ACTUALLY MEANS HERE, added 2026-09-04 after the first launch of
+# this arm died on `run_setup.py:392`. `RECIPE` carries `--rank-weight 1.0`, and at `--batch 1` the
+# ranking term forms no pairs at all, so `radnet_family` descended PLAIN CROSS-ENTROPY under a ranking
+# arm's name — it is one of knee-tj88y's sixteen. The guard that now refuses that combination did not
+# exist when it ran. Matching it means matching what it DESCENDED, not what its flags claimed, so the
+# term is switched off explicitly and the A/B keeps its single variable. Passing `--pair-memory` instead
+# would turn the ranking term on for one side only and move two variables at once, which is precisely
+# the mistake that voided `ortho_stack`'s first launch.
+#
+# deliberate: --rank-weight (0, to match radnet_family's actual objective — see above)
 # deliberate: --variant
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
@@ -114,7 +124,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train radnet_pinned \
-  $RECIPE --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
+  $RECIPE --rank-weight 0 --epochs 12 --batch 1 --accumulate 6 --slice-pooling max --whole-stack \
   --variant radnet121 --backbone-lr 4e-4 --slices 20 --band-low 0.1 --band-high 0.9 --train-size 352 \
   --vram-gb 26 \
   --labels "$LABELS" --out "$MODELS/radnet_pinned_s2026.pt"
