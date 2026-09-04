@@ -86,6 +86,33 @@
 # OUR corpus at OUR resolution, which is Q-CR and a different arm. Only a gap clearly above +0.010
 # would be evidence against the shrinkage prior itself.
 #
+# A SECOND BAR, LOWER THAN THE FIRST, PRE-REGISTERED 2026-09-04 01:12Z AT EPOCH 6 (0.8417) AND BEFORE
+# ANY BRANCH COULD BE READ. `pool_census` over 166 scoreable members prints a strong-and-distant cell —
+# solo >= 0.8580 (best solo 0.8642 less the floor) AND nearest agreement < 0.9183 (the pool median). It
+# has FOUR occupants and every one of them is distant on the DECODE: merged_labelwise_cf 0.8587/0.8913,
+# labelwise_dense 0.8613/0.9011, small_batch6 0.8598/0.9159, finding_calib_dense 0.8600/0.9179. The
+# champion's own family sits at 0.9434-0.9496 — near-twins, which is the monoculture stated as a number.
+#
+# THE ViT-L TRUNKS ARE THE DISTANT AXIS AND NOTHING ELSE IS. v3large_dense reads nearest agreement
+# 0.8822 — MORE distant than any occupant of the strong cell — and ortho_dense 0.9037. Both are weak
+# solo (0.8258, 0.8452), which is exactly the shape `comp/members.declines:118` refuses: it declined
+# merged_labelwise_cf as "the most decode-diverse candidate ever priced here" and set the re-open
+# condition in writing — "Re-open on a member that is BOTH distant and at or above the seated quality
+# level, never on a distance number alone."
+#
+# SO THIS ARM HAS TWO BARS, AND THE ROSTER ONE IS THE HIGHER. 0.8640 is what it needs to ROSTER against
+# band_dense on solo quality. 0.8580 is what it needs to become the FIRST occupant of the strong-and-
+# distant cell that is distant on ARCHITECTURE rather than on decode — which is the exact member
+# knee-nj4l has been asking for and the exact member the declines file says would re-open the lane. A
+# reading between 0.8580 and 0.8640 is therefore NOT a null: it fails the solo bar and clears the
+# diversity one, and the diversity one is the bar attached to the only axis still open.
+#
+# WHAT WOULD MAKE THAT READING WRONG, said now rather than after: agreement is measured against the
+# pool's NEAREST neighbour, and ortho_stack's nearest neighbour will be ortho_dense itself (same trunk,
+# same continuation), which will pull its agreement UP toward 0.95 for a reason that has nothing to do
+# with the champion. Read its agreement against the SEATED members specifically, not against the whole
+# 166, or the number will say the opposite of what it means.
+#
 # WHAT IT CANNOT SETTLE. Nothing about SEATING — the pool is DINOv2-monoculture and a seat read here
 # would be confounded exactly as `v3large`'s was. Solo holdout only. If it clears, seat value is the
 # next question and a separate one.
