@@ -894,3 +894,12 @@ def test_every_slot_pooling_name_builds_its_own_head():
 
     with pytest.raises(KeyError):
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slot_pooling="attnd"))
+
+
+def test_train(study_model: StudyModel):
+    """The per-epoch switch reasserts the pinning, which is the only reason it lives on the override."""
+    assert study_model.train() is study_model, "torch's own contract: the switch returns the module"
+    assert study_model.training
+
+    study_model.eval()
+    assert not study_model.training, "eval needs no special case — it puts every norm where it belongs"

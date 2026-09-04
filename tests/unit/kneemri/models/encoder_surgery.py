@@ -217,3 +217,36 @@ def test_recompute_activations():
     surgery.recompute_activations()
     assert surgery.backbone.checkpointing == {"use_reentrant": False}
     assert surgery.backbone.is_gradient_checkpointing, "the public flag `applied` reads, not the call alone"
+
+
+class _NormBackbone(nn.Module):
+    """A frozen BatchNorm prefix and one trainable block, which is the shape the defect needs.
+
+    DenseNet's, reduced: everything before the opened block is norm, and the norms inside the opened
+    block move with the weights beside them.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.prefix = nn.Sequential(nn.BatchNorm1d(DIM), nn.BatchNorm1d(DIM))
+        self.block = nn.Sequential(nn.BatchNorm1d(DIM), nn.Linear(DIM, DIM))
+        self.unparameterised = nn.BatchNorm1d(DIM, affine=False)
+
+
+def test_pin_frozen_norms():
+    """A frozen norm stops tracking; an OPEN one keeps tracking; and `train()` must not undo either."""
+    backbone = _NormBackbone()
+    for parameter in backbone.prefix.parameters():
+        parameter.requires_grad_(False)
+    surgery = EncoderSurgery(backbone)
+    backbone.train()
+
+    assert surgery.pin_frozen_norms() == 2, "the two frozen prefix norms, and not the open block's"
+    assert not backbone.prefix[0].training, "a frozen norm rewriting its buffers is the whole defect"
+    assert backbone.block[0].training, "statistics frozen under moving weights is the same bug reversed"
+    assert backbone.unparameterised.training, "affine=False owns no parameter, so frozen is undecidable"
+
+
+def test_pin_frozen_norms_counts_nothing_on_a_layernorm_trunk():
+    """Every ViT, Swin and ConvNeXt here keeps no running statistics and legitimately reads zero."""
+    assert EncoderSurgery(nn.Sequential(nn.LayerNorm(DIM), nn.Linear(DIM, DIM))).pin_frozen_norms() == 0

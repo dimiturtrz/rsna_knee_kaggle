@@ -417,6 +417,30 @@ class StudyModel(nn.Module):
         merged = self.state_dict() | {key.replace(COMPILED_PREFIX, ""): value for key, value in state.items()}
         self.load_state_dict(merged)
 
+    @override
+    def train(self, mode: bool = True) -> "StudyModel":
+        """Standard train/eval switch, except that a FROZEN normalization layer stays in eval.
+
+        HERE AND NOT AT SETUP, because there is nothing a one-shot call can do. `nn.Module.train`
+        recurses into every child, so the trainer's own `model.train()` at the top of each epoch undoes
+        any earlier `eval()` on a frozen norm — which is exactly how the defect below survived a whole
+        arm. The switch is the only place the pinning can be reasserted every time it is cleared.
+
+        WHAT IT PREVENTS (knee-cj40f, measured). Freezing pins parameters; `running_mean` and
+        `running_var` are buffers and are rewritten by the forward pass itself. A frozen BatchNorm
+        prefix therefore keeps conv weights pinned to the pretraining corpus while overwriting the
+        statistics those weights consume, and cannot compensate because it is frozen. `radnet_family`
+        ran a whole DenseNet-121 arm that way: 121 BatchNorm layers, the frozen prefix included, all at
+        `num_batches_tracked = 226711`, fitted 0.6716 against the same trunk's frozen-features probe at
+        0.8197. The signature this leaves is a loss that falls while the metric does not.
+
+        `mode=False` needs no special case: eval already puts every module where a pinned norm belongs.
+        """
+        super().train(mode)
+        if mode:
+            self.surgery.pin_frozen_norms()
+        return self
+
     def low_rank(self, rank: int, alpha: float = 1.0) -> int:
         """Adapt every encoder block along a rank-r subspace — see `EncoderSurgery.low_rank`.
 

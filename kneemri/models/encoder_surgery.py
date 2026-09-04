@@ -96,6 +96,51 @@ class EncoderSurgery:
             return list(holder)
         return []
 
+    def pin_frozen_norms(self) -> int:
+        """Put every FROZEN normalization layer that keeps running statistics back into eval mode.
+
+        Freezing here is `requires_grad_(False)`, which pins PARAMETERS. `running_mean` and
+        `running_var` are BUFFERS: they are updated by the forward pass itself whenever the module is
+        in train mode, and no `requires_grad` setting anywhere touches them. So a frozen BatchNorm
+        prefix keeps its conv weights pinned to the pretraining corpus while the statistics those
+        weights consume are overwritten by the fitting corpus — and the weights cannot compensate,
+        because they are exactly the thing that was frozen.
+
+        MEASURED, not reasoned (knee-cj40f). `radnet_family_s2026.pt` is a DenseNet-121 run at
+        `unfreeze_last 6`, whose frozen prefix is BatchNorm throughout. All 121 of its BatchNorm layers
+        — `norm0` and the whole frozen prefix included — carry `num_batches_tracked = 226711` after
+        seven epochs. At momentum 0.1 the effective window is about ten batches, so the pretraining
+        statistics were not perturbed over that run, they were replaced within the first epoch. The
+        same trunk's frozen-features ridge probe reads 0.8197 against the fitted 0.6716, because the
+        probe runs in eval mode and therefore on the statistics the weights were actually trained with.
+
+        Returns how many layers were pinned, for the same reason `low_rank` returns its count: the
+        failure worth making impossible is silently pinning nothing, which looks exactly like a trunk
+        that had nothing to pin. A LayerNorm trunk — every ViT, Swin and ConvNeXt here — legitimately
+        returns 0, since `track_running_stats` is what this selects on and those layers keep none.
+
+        FROZEN IS ASKED OF THE MODULE, never of the freeze call that ran earlier. A partially opened
+        trunk has both kinds, and the norms inside an OPENED block must keep adapting: their weights
+        are moving too, so statistics and weights stay consistent there. A module counts as frozen when
+        it has no trainable parameter of its own, which is a property of the graph as it now stands
+        rather than of an argument somebody passed.
+
+        AN UNPARAMETERISED NORM IS LEFT ALONE, and that is a decision rather than an oversight. A
+        BatchNorm at `affine=False` owns no learnable tensor, so `any(...)` over its parameters is
+        vacuously False and it would read as frozen wherever it sits — including inside a fully open
+        block, where pinning it would freeze statistics under weights that are still moving, which is
+        this same bug with the sign reversed. Frozen-ness is not decidable from such a module alone, so
+        it is not decided.
+        """
+        pinned = 0
+        for module in self.backbone.modules():
+            parameters = list(module.parameters(recurse=False))
+            running = getattr(module, "track_running_stats", False)
+            if running and parameters and not any(parameter.requires_grad for parameter in parameters):
+                module.eval()
+                pinned += 1
+        return pinned
+
     def adapters(self) -> int:
         """How many LoRA adapters this encoder currently carries — zero when it was never adapted.
 
