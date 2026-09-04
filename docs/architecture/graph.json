@@ -1646,6 +1646,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.fault_ruler",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.feature_probe",
       "target": "core.cli",
       "weight": 1
@@ -11974,6 +12010,138 @@
       "kind": "calls",
       "source": "kneemri.evaluation.encoder_drift.main",
       "target": "kneemri.evaluation.encoder_drift.EncoderDrift.repository",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "target": "kneemri.evaluation.fault_ruler.PairStatistics",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.oracle",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.rates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.oracle",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.errors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.oracle",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.partial",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.errors",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.rates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.sampled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.fault_ruler.PairStatistics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "target": "kneemri.inference.vote.RankAverage.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.fault_ruler.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -28273,7 +28441,7 @@
       "role": null
     },
     {
-      "descendants": 216,
+      "descendants": 217,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -28337,7 +28505,7 @@
       "role": null
     },
     {
-      "descendants": 69,
+      "descendants": 70,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -28412,6 +28580,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.encoder_drift",
       "label": "encoder_drift",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler",
+      "label": "fault_ruler",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -31287,6 +31463,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.encoder_drift",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "label": "FaultRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.fault_ruler",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.PairStatistics",
+      "label": "PairStatistics",
+      "level": "class",
+      "parent": "kneemri.evaluation.fault_ruler",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -39518,6 +39710,94 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.encoder_drift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.errors",
+      "label": "errors",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.oracle",
+      "label": "oracle",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.partial",
+      "label": "partial",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.rates",
+      "label": "rates",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.sampled",
+      "label": "sampled",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.FaultRuler.statistics",
+      "label": "statistics",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler.FaultRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler._midranks",
+      "label": "_midranks",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.fault_ruler.rank_correlation",
+      "label": "rank_correlation",
+      "level": "method",
+      "parent": "kneemri.evaluation.fault_ruler",
       "role": null
     },
     {

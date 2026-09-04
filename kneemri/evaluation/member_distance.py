@@ -36,10 +36,23 @@ report prints what each SEATED member's nearest neighbour reads, so a candidate 
 compared against: above the roster's own worst nearest is a twin of somebody already seated, below its
 best nearest is genuinely new information.
 
-IT IS UNVALIDATED AS A PREDICTOR AND MUST BE READ THAT WAY. One paired board observation constrains it —
-the ordering it must reproduce is `lr4e-5_ws` more distant than `band_span` — and reproducing the case it
-was designed from is not evidence. It ranks; it does not price. Nothing here says how many board ticks a
-unit of distance buys, and no slot should be spent on the strength of this number alone.
+IT RANKS OFFLINE PAIR GAIN, AND IT STILL DOES NOT PRICE A SEAT. `kneemri.evaluation.fault_ruler` measured
+this statistic against the gain it is used to predict — 166 members, 1200 sampled pairs, 48000 discordance
+trials each — and it came first of four candidate rulers at +0.7086 rank correlation, ahead of the
+disagreement-error ratio (+0.6999), the raw disagreement rate (+0.6955) and the double-fault rate
+(+0.5911) that the literature says is the only one that works. Four decimals do not separate four
+collinear statistics over 1200 dependent samples; the honest reading is that this one is not worse.
+
+THE CORRELATION ONLY HOLDS WITH PAIR QUALITY HELD FIXED, and that caveat is the load-bearing half. Read
+raw, every one of the four statistics correlates NEGATIVELY with gain (this one at -0.5313), because the
+distant members of this pool are the weak ones and distance proxies for "one of these two is bad".
+`report` below ranks candidates across the whole quality range, so its ordering is exposed to exactly
+that confound — compare candidates of comparable solo score, never across a quality gap. See
+`interpretations/kneemri/2026-09-04_the-diversity-ruler-was-checked-and-the-citation-does-not-transfer.md`.
+
+Nothing here says how many board ticks a unit of distance buys — the gains above are offline, and
+`record_mix` measures the holdout pricing diversity ~2.4x too cheaply against the board. It ranks pairs;
+it does not price a roster, and no slot should be spent on the strength of this number alone.
 """
 
 import numpy as np

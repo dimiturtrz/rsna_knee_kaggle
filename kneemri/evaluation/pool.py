@@ -55,6 +55,15 @@ class Pool:
         """The subset as the names a submission would package."""
         return " + ".join(self.names[index] for index in subset)
 
+    def rule(self) -> str:
+        """What these members combine UNDER, named — the header line of every reading taken over this pool.
+
+        Here rather than read off `vote` at the call site because a reading that prints one rule's name
+        while `combined` applies another is a mislabelled ledger row that nothing fails on, and the
+        `LogitAverage`/`RankAverage` split has already been a live harness gap once.
+        """
+        return self.vote.named()
+
     def alone(self, scores: LabelScores) -> list[str]:
         """Each member's own mean score on the shared studies — the column every mix is read against."""
         return [

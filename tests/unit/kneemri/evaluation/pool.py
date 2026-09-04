@@ -52,6 +52,12 @@ def test_named():
     assert Pool(["a.pt", "b.pt", "c.pt"], members, _truth()).named((2, 0)) == "c.pt + a.pt"
 
 
+def test_rule():
+    """The pool names the vote it actually combines under, so a reading cannot print one rule and apply another."""
+    members = [_member(1.0, seed) for seed in (1, 2)]
+    assert Pool(["a.pt", "b.pt"], members, _truth(), RankAverage()).rule() == RankAverage().named()
+
+
 def test_alone():
     """Every member's own score is reported beside its name, which is what a mix is read against."""
     members = [_member(3.0, SEED), _member(0.05, SEED + 1)]
