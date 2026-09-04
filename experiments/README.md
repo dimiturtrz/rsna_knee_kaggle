@@ -7217,3 +7217,62 @@ pool without a slot.
 
 The resumed run continues at member three. Its value is the ensemble question and the board is its only
 ruler.
+
+## `ortho_stack` read 0.8417 and the lane it was built to decide is STILL OPEN — 2026-09-04
+
+Thirteen rows against a 12-epoch recipe, peak **e6 0.8417**, last e11 0.8371. Converged, not truncated —
+the anneal ran and the arm declined after its peak, which is a fit, not a killed process.
+
+| arm | trunk | recipe | holdout |
+| --- | --- | --- | --- |
+| `band_dense` | v3large (incumbent) | batch 12, rank term ON | **0.8578** |
+| `ortho_dense` | ortholarge | 224 px / 12 slices | 0.8452 |
+| `ortho_stack` | ortholarge | whole stack, batch 1 / accumulate 12 / pair-memory 66 | **0.8417** |
+| `v3large_stack` | v3large (incumbent) | identical to the row above | **on the card** |
+
+**THIS NUMBER DOES NOT CLOSE THE IN-DOMAIN TRUNK LANE, and reading it as if it did is the exact failure
+the arm header pre-registered against.** `band_dense` ran at batch 12 with the ranking term ON; this arm
+runs at batch 1 with a 66-step pair memory standing in for the pair mass that batch size used to supply.
+So `ortho_stack` − `band_dense` = −0.0161 moves TWO variables — the trunk and how the objective gets its
+pairs — and the trunk is the only one the lane is about. `v3large_stack` is the matched control: the same
+recipe on the incumbent trunk, running now. Until it lands, the only honest statement is the one against
+`ortho_dense`: **−0.0035 at the same trunk**, inside the 0.0062 floor, so moving from a 224 px / 12-slice
+read to the whole stack bought the ortho trunk nothing.
+
+**WHAT THE PAIR WILL AND WILL NOT SAY.** If `v3large_stack` lands near `band_dense`, then the pair-memory
+substitution is sound and the −0.016 is the trunk: the in-domain trunk lane closes, and `ortho_dense`'s
+written decline (−0.0050 at the seat, trunk size and continuation corpus moving together) stands with a
+second, geometry-independent point behind it. If `v3large_stack` lands near 0.842 as well, the deficit is
+the RECIPE, both ortho rows were measured under a handicap, and the lane is still undecided — the worst
+outcome available, and the one this pair exists to make visible rather than to hide.
+
+**NEITHER ORTHO ROW WAS IN THIS LEDGER BEFORE TODAY.** `ortho_dense`'s reasoning lived in
+`comp/members.declines` and its number in `interpretations/`, so a grep of this file for the trunk that has
+absorbed the last week of card time returned nothing at all. `ledger_check` did not catch it because the
+number IS recorded — elsewhere. A decline is an argument and belongs where declines live; the measurement
+belongs here.
+
+## Three runs the ledger never held: the feature-distillation pair and `clip224_tight` — 2026-09-04
+
+`ledger_check` named them; the roster and the declines file already priced them; this file said nothing.
+Recording the measurement here, since a decline is an argument and belongs in `comp/members.declines`,
+but the number belongs in the ledger.
+
+| run | what it is | holdout | disposition |
+| --- | --- | --- | --- |
+| `small_feat_pre_s2026` | stage one — a small trunk fitted to the teacher's FEATURES, head only carries the run | 0.7939 | not a member; declined in writing |
+| `small_feat_fit_s2026` | stage two — that trunk fine-tuned on the labels | **0.8571** | on the roster |
+| `clip224_tight_s2026` | CLIP trunk, tight 224 px crop | 0.8488 | on the roster |
+
+**`small_feat_fit` at 0.8571 is 0.0007 under `band_dense` (0.8578) — the same number, on a SMALL trunk.**
+Both were selected on the same 909-study holdout, so the 0.0007 is not a ranking; what it says is that
+feature distillation from the strong trunk gives back essentially all of the strong trunk's solo score at
+a fraction of the serve cost. Stage one alone reads 0.7939, so the labels do the last 0.063 — the pretrain
+is a starting point, not the member.
+
+**WHAT THIS DOES NOT SAY.** It is not evidence that distillation adds an ensemble seat. A student fitted
+to a teacher's features is, by construction, the LEAST diverse thing that could be added next to that
+teacher — the seat has to be measured, not inferred from the solo. That measurement has not been run and
+is not queued: the open lever is the trunk lane (`ortho_stack` / `v3large_stack`), and a distilled student
+priced against its own teacher is a cheaper-serving question, not a score question. Recorded so the number
+stops being invisible, not because it opens anything.
