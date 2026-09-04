@@ -4,6 +4,14 @@
 # bead: knee-59qqc
 # deliberate: --variant medsam (the arm's thesis — a dense pretraining objective on a medical corpus,
 #             at zero architectural distance from the controls)
+# deliberate: --batch 2 --accumulate 3 (the control's --batch 6 with no accumulation, SPLIT rather than
+#             changed: 2 x 3 is the same effective batch and the same number of optimiser steps, so the
+#             recipe the controls were measured under is preserved. It is split because this trunk runs
+#             windowed attention at window 14 over a 21x21 grid, which transformers pads to 28x28 inside
+#             the windowed blocks — 784 tokens of arithmetic and activation for a 441-token read, which
+#             the controls do not pay. The alternative was a smaller effective batch, and that would have
+#             confounded the objective axis with an optimisation one on the only three-way comparison
+#             this ledger has)
 #
 # WHY THIS ARM. Every trunk this project has fitted was pretrained on one of two things: no labels at all
 # (DINOv2, DINOv3, ConvNeXtV2, V-JEPA2, RadioDino) or ONE label for the whole image (Swin-IN22k,
@@ -58,11 +66,26 @@
 # in front of a trunk that never saw that distribution, with no shape anywhere to disagree and a plausible
 # curve to show for it.
 #
-# WIDTH 256, WHICH IS NARROWER THAN EVERY CONTROL. The encoder runs 768 wide and projects through its neck
-# to 256 for the mask decoder, and 256 is what the head receives. That is a real handicap against three
-# 768-wide controls and it is NOT corrected for: the pre-neck 768 tokens are reachable, but taking them
-# would mean training on a representation MedSAM's objective never optimised through. If this arm lands
-# just under its band, the width is the first thing to re-test and the second point on this trunk.
+# WIDTH 768, MATCHED TO EVERY CONTROL — and this paragraph said 256 until 2026-09-04, which was a
+# handicap the arm was carrying for no reason. The encoder runs twelve blocks 768 wide and then a neck
+# that compresses to 256 for a mask decoder this project never builds; the row read the head off that
+# neck. The stated objection to dropping it was that the pre-neck tokens are "a representation MedSAM's
+# objective never optimised through", and that objection is simply false — the objective optimises the
+# blocks BY optimising through the neck, and the neck is where the compression is, not where the
+# medicine is.
+#
+# MEASURED BEFORE CHANGING IT, because a neck-concentrated fine-tune would have made this swap discard
+# the medical part of a medical checkpoint. `kneemri.models.sam_drift` against `facebook/sam-vit-base`,
+# the release MedSAM started from: every one of the twelve blocks moved 0.85-1.72 of its own initial
+# norm, and the neck moved 0.68 — the least-moved of fifteen regions bar the position table. The
+# adaptation is in the trunk. The published case agrees at a distance: SAM's neck linear-probes at 11.1%
+# ImageNet top-1 against DINOv2's 77.4% (SAMantics, arXiv:2411.15288), and FODA-PG (arXiv:2409.03947)
+# drops this exact neck. See `knee-h8luo`.
+#
+# WHAT THE CHANGE BUYS THE READING, which is more than it buys the score: read-out width is no longer a
+# confound against `base_dense` and `v3base_dense`. Those two are 768-wide ViT-B/16 at the same token
+# count, so a LOSS here is now attributable to the pretraining objective rather than to a 3x narrower
+# head — which is the whole reason the arm exists.
 #
 # APACHE-2.0 AND UNGATED, read from the HF API rather than the model card. Mirroring to Kaggle is
 # permitted, so there is no licence question of the kind that withdrew `dimiturnt/radimagenet-densenet121`
@@ -79,14 +102,16 @@
 #
 # PRE-REGISTERED, four outcomes. Floor 0.0062, so the band around v3base_dense is 0.8393-0.8517.
 #   THE OBJECTIVE PAYS — solo >= 0.8517. A dense pretraining objective transfers BETTER than an
-#     image-level one at fixed architecture, and it does so from 256 features against 768. That would make
-#     localisation the axis the pool is short of, put the pre-neck 768 variant next on the card
-#     immediately, and reframe `knee-y59c`'s curve as a statement about objective granularity.
+#     image-level one at fixed architecture, read-out width and token count. That would make localisation
+#     the axis the pool is short of and reframe `knee-y59c`'s curve as a statement about objective
+#     granularity rather than about distance from DINOv2.
 #   MATCHES — 0.8393-0.8516. The objective does not move competence. The seat value is then the whole
 #     question: a matched solo with a POSITIVE seat says a dense objective moves the trunk's OPINION
 #     rather than its strength, which is the diversity the pool needs at no cost in quality.
-#   COSTS — 0.80-0.8392. Dense pretraining transfers worse here. Price the seat before concluding — the
-#     width handicap is a live alternative explanation and it is cheap to retest at 768.
+#   COSTS — 0.80-0.8392. Dense pretraining transfers worse here, and since 2026-09-04 that reads CLEAN:
+#     the width handicap that used to be the live alternative explanation is gone, so a loss in this band
+#     is a statement about the objective. Price the seat before concluding — a weak solo that disagrees
+#     usefully is still a seat.
 #   REFUTES — < 0.80. The dense-objective cell is closed at this capacity, `knee-y59c`'s curve survives as
 #     an objective-distance reading, and MedSAM is declined in writing with this number as the reason.
 #

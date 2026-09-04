@@ -676,7 +676,7 @@ ENCODERS: dict[str, Encoder] = {
     MEDSAM_BASE: Encoder(
         MEDSAM_BASE,
         MEDSAM_VIT_B.repository,
-        256,
+        768,
         patch=16,
         family=MEDSAM,
         # NOT the registry default. MedSAM's `preprocessor_config.json` declares mean [0, 0, 0] and std
