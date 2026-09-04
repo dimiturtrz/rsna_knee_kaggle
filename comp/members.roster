@@ -603,16 +603,12 @@ regions224_s2026.pt                  # 0.8476
 headlr224_slow_s2026.pt              # 0.8475
 small_feat_fit_s2026.pt              # 0.8571
 merged3_corpus_s2026.pt              # 0.8521
-certainty_ramp_s2026.pt              # 0.8584
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
 slot_dropout_s2026.pt                # 0.8592 - best single member the project owns
-disagreed_ramp_s2026.pt  # THE DISAGREEMENT RAMP, 0.8574 holdout (converged, peak epoch 7 of 12). Weights a
-                         # study by how much the report's own annotators disagreed, RAMPED over training
-                         # rather than applied flat: +0.0067 over disagreed_uniform_s2026's 0.8507, its
-                         # matched control, which is the only reading on this pair. Level with the best
-                         # member the pool holds (band_dense 0.8578) and second to slot_dropout 0.8592.
-                         # Rostered because it is shippable, not because a seat is claimed for it.
+# certainty_ramp_s2026 and disagreed_ramp_s2026 were named HERE and again in the 2026-09-02 block below,
+# so both packaged under one id and the second copy overwrote the first. MemberManifest.document refused
+# it on 2026-09-04; the duplicate rows are removed and the surviving rows are the later, fuller ones.
 
 crop160_span_s2026.pt       # 0.8564 — the 160 mm field at 420 px, mm/px held (0.381 vs the 130 mm
 # recipe's 0.387). Added 2026-09-02. Rostered as SHIPPABLE, not as a seat claim: it clears the 0.8521
@@ -655,6 +651,9 @@ disagreed_ramp_s2026.pt     # 0.8574 peak e7, CONVERGED. Same argument as certai
                             # family verdict; seated on merit so the pool is complete, not because the ramp
                             # earned anything. Re-open the LEVER only where supervision is thin, which is the
                             # condition ramp_dense_gate's decline named and no ramp arm has ever been run under.
+                            # From the row this one replaced: against its matched control disagreed_uniform
+                            # (0.8507) the RAMPED weighting reads +0.0067, which is the only reading on that
+                            # pair. It does not survive the three-arm family read against calib_dense_hold.
 unread_dense_s2026.pt       # 0.8577 peak e11 of 12, CONVERGED. Level with band_dense 0.8578 (-0.0001, well
                             # inside the 0.0062 floor) while trained on a DIFFERENT supervision signal:
                             # 27.3% of its targets come from unread-report derivation rather than the gold
