@@ -28,6 +28,9 @@ from kneemri.models.encoder import (
     PREPROCESSOR_FILES as PREPROCESSOR_FILES,
 )
 from kneemri.models.encoder import (
+    UNIT as UNIT,
+)
+from kneemri.models.encoder import (
     Encoder as Encoder,
 )
 from kneemri.models.encoder import (
@@ -36,6 +39,7 @@ from kneemri.models.encoder import (
 from kneemri.models.encoder import (
     Stage as Stage,
 )
+from kneemri.models.sam_trunk import MEDSAM_VIT_B
 from kneemri.models.snapshot_trunk import ORTHOFOUNDATION_L
 from kneemri.models.state_dict_trunk import RADIMAGENET_DENSENET121
 from kneemri.models.trunk_tokens import TrunkAsTokens
@@ -55,6 +59,7 @@ SWIN_BASE = "swinbase"
 VIT_IN21K = "vitin21k"
 RADIMAGENET_DENSENET = "radnet121"
 RADIODINO_BASE = "radiodinob16"
+MEDSAM_BASE = "medsam"
 
 DINOV2 = "dinov2"
 DINOV3 = "dinov3"
@@ -65,6 +70,7 @@ SWIN = "swin"
 VIT = "vit"
 RADIMAGENET = "radimagenet"
 RADIODINO = "radiodino"
+MEDSAM = "medsam"
 
 
 class MountKind:
@@ -632,5 +638,47 @@ ENCODERS: dict[str, Encoder] = {
         ),
         leaf="radiodino-b16",
         params_m=86.6,
+    ),
+    # THE FIRST TRUNK PRETRAINED ON A DENSE OBJECTIVE, added 2026-09-04. Every encoder above was fitted
+    # either without labels (DINOv2/v3, ConvNeXtV2, V-JEPA2, RadioDino) or on one label per image (Swin,
+    # ViT-IN21k, RadImageNet). MedSAM was trained to SEGMENT — to say what each pixel belongs to — on
+    # 1M+ medical images spanning modalities, musculoskeletal MRI among them. So it varies TWO axes this
+    # registry has never varied together: the objective's spatial granularity, and a corpus that actually
+    # contains the anatomy we read. That is the diversity claim, and it is about the objective rather
+    # than the architecture: the trunk underneath is a plain ViT-B, the same shape as `v3base`.
+    #
+    # 336 IS THE ONLY LEGAL READ, for a different reason than `swinbase`'s. Swin's window tables are baked
+    # at one size; SAM's POSITION EMBEDDINGS are, as a learned (1, 64, 64, 768) parameter sized for the
+    # 1024 px read it was pretrained at. `SamVisionWeights.build` resamples that table to 21x21 ONCE, and
+    # training then fits the resampled table — so the checkpoint is a function of this number and a run at
+    # any other size would interpolate a second time off an already-interpolated table. The pin lives in
+    # `MEDSAM_VIT_B.read_size`, which is where a reader looking for it will be, and `require_tiling` is
+    # not sufficient to enforce it: 384 and 224 both tile patch 16 cleanly and both would be wrong.
+    #
+    # WIDTH 256 IS THE NECK, NOT THE TRUNK, and the two are stated separately on purpose. The encoder runs
+    # 12 blocks at 768 wide and then projects to 256 for the mask decoder, so `dim` (what the head
+    # receives) and `stages` (what the VRAM cap must price) genuinely disagree. Declaring 256 in both
+    # places would under-bill activations by a factor of three and hand a run a cap it cannot honour,
+    # which is the failure `activation_units` was rewritten for.
+    #
+    # NO MOUNT YET. It can be trained here and NOT submitted. The upstream licence permits a mirror —
+    # apache-2.0 and ungated, read from the HF API rather than the model card — so this is a job to do
+    # when a member earns the seat, not a licence question of the kind RadImageNet's weights are.
+    MEDSAM_BASE: Encoder(
+        MEDSAM_BASE,
+        MEDSAM_VIT_B.repository,
+        256,
+        patch=16,
+        family=MEDSAM,
+        # NOT the registry default. MedSAM's `preprocessor_config.json` declares mean [0, 0, 0] and std
+        # [1, 1, 1] — rescale to [0, 1] and nothing further — and its upstream inference code agrees. The
+        # default would have shifted every pixel by 0.485 and scaled it by 0.229 before a trunk that never
+        # saw that distribution, with no shape anywhere to disagree.
+        normalization=UNIT,
+        leaf="medsam-vit-b",
+        params_m=89.7,
+        stages=(Stage(12, 16, 768),),
+        adapter=TrunkAsTokens.from_map,
+        builder=MEDSAM_VIT_B.build,
     ),
 }

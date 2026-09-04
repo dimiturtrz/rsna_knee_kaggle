@@ -96,6 +96,21 @@ every AugReg-trained ViT states them regardless of what it was trained on, becau
 adopted the ImageNet statistics. So a trunk's normalization cannot be predicted from its data any more
 than from its architecture, which is the whole argument for the field existing."""
 
+UNIT = Normalization((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
+"""No normalization at all past the rescale to [0, 1] — the identity, stated so it can be CHECKED.
+
+The THIRD trunk here that does not declare ImageNet, and the first whose declaration is that there is
+nothing to declare. MedSAM's `preprocessor_config.json` states `image_mean` [0, 0, 0] and `image_std`
+[1, 1, 1], and its upstream inference code agrees: it min-maxes an image to [0, 1] and stops. That is a
+property of neither the corpus nor the codebase but of the TASK — SAM's encoder was fitted on pixel
+intensities as they arrive, and segmentation never acquired the classification convention of centring
+them.
+
+Written as an explicit constant rather than left as the field's absence for the reason the field exists:
+the default is ImageNet, so a trunk that wants the identity and says nothing gets shifted by 0.485 and
+scaled by 0.229 with no shape to disagree. An empty declaration and an agreeing one are
+indistinguishable from the outside, which is exactly what `assert_declared` is written to prevent."""
+
 PREPROCESSOR_FILES = ("preprocessor_config.json", "video_preprocessor_config.json")
 """The documents a HuggingFace snapshot may state `image_mean`/`image_std` in, in the order to try.
 

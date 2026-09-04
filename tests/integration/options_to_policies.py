@@ -63,6 +63,7 @@ NOT_A_WRAPPER = {
     "slice_features",
     "slot_features",
     "supervised",
+    "train",
 }
 """`StudyModel` methods that are the model's own behaviour rather than something a run switches on.
 
@@ -71,7 +72,14 @@ model's part is to say at startup whether it can take the window at all. It atta
 builder calling it would be attaching a policy that does not exist.
 
 `context_width` is a MEASUREMENT for the same reason: the feature term has to be built at the student's
-real head width, and asking the model is what keeps that from being a guess. It switches nothing on."""
+real head width, and asking the model is what keeps that from being a guess. It switches nothing on.
+
+`train` is an OVERRIDE of `nn.Module.train`, and it is here because it is the opposite of a switch. A
+run cannot ask for it and no builder attaches it: it exists because `nn.Module.train()` recurses into
+every child and would re-enable the BatchNorm statistics that freezing a trunk is supposed to hold
+still, so the model re-pins them on the way out. A wrapper a run turns on is a choice; this one fires
+on every call whether anything asked or not, which is the point — the drift it prevents cost one whole
+trunk-family arm before it existed."""
 
 TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay"}
 MODEL_REPORTER = {"applied"}

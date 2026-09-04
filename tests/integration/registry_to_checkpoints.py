@@ -21,22 +21,27 @@ from pathlib import Path
 
 import pytest
 from huggingface_hub import hf_hub_download
-from huggingface_hub.errors import EntryNotFoundError
+from huggingface_hub.errors import EntryNotFoundError, RepositoryNotFoundError
 
 from kneemri.models.backbone import ENCODERS, PREPROCESSOR_FILES, Encoder
 
 
 def _published_document(encoder: Encoder) -> dict[str, object] | None:
     """The snapshot's own preprocessing config, or None for a release that publishes none."""
-    # Builder-backed encoders ship a converted snapshot from this disk rather than a Hub repository,
-    # so a Hub lookup would read the wrong document or fail on a missing repository. Their
-    # normalization is carried in prose and is checked by `_declaring_document` below.
-    if encoder.builder is not None:
+    # ASKED, never assumed from the entry's shape. This skipped every builder-backed encoder on the
+    # premise that one ships a converted snapshot from disk and so has no Hub document worth reading —
+    # true of the two that existed when it was written (`ortholarge` names no repository at all,
+    # `Lab-Rasool/RadImageNet` is four bare `.pt` files), and false of `medsam`, whose repository is a
+    # complete HuggingFace model directory publishing the very document this compares against. A
+    # builder says where the WEIGHTS are assembled; it says nothing about whether the release documents
+    # its preprocessing. So the lookup runs for every entry, and only a repository that cannot answer —
+    # none named, or none of the files present — falls through to the prose path.
+    if not encoder.repository:
         return None
     for name in PREPROCESSOR_FILES:
         try:
             path = hf_hub_download(encoder.repository, name)
-        except EntryNotFoundError:
+        except (EntryNotFoundError, RepositoryNotFoundError):
             continue
         return json.loads(Path(path).read_text(encoding="utf-8"))
     return None

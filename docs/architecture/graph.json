@@ -4792,7 +4792,13 @@
       "kind": "import",
       "source": "kneemri.models.backbone",
       "target": "kneemri.models.encoder",
-      "weight": 8
+      "weight": 9
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.backbone",
+      "target": "kneemri.models.sam_trunk",
+      "weight": 1
     },
     {
       "kind": "import",
@@ -24775,6 +24781,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
+      "target": "kneemri.models.sam_trunk.SamVisionWeights.regridded",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.models.slice_read.SliceRead",
       "target": "kneemri.models.grid_fit.GridFit",
@@ -28501,7 +28513,7 @@
       "role": null
     },
     {
-      "descendants": 217,
+      "descendants": 218,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29685,7 +29697,7 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -29808,6 +29820,14 @@
       "descendants": 0,
       "id": "kneemri.models.ortho_weights",
       "label": "ortho_weights",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk",
+      "label": "sam_trunk",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -33635,6 +33655,14 @@
       "level": "class",
       "parent": "kneemri.models.ortho_weights",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.SamVisionWeights",
+      "label": "SamVisionWeights",
+      "level": "class",
+      "parent": "kneemri.models.sam_trunk",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -49330,6 +49358,30 @@
       "label": "trunk",
       "level": "method",
       "parent": "kneemri.models.ortho_weights.DenoiserWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.SamVisionWeights.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.models.sam_trunk.SamVisionWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.SamVisionWeights.grid",
+      "label": "grid",
+      "level": "method",
+      "parent": "kneemri.models.sam_trunk.SamVisionWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.sam_trunk.SamVisionWeights.regridded",
+      "label": "regridded",
+      "level": "method",
+      "parent": "kneemri.models.sam_trunk.SamVisionWeights",
       "role": null
     },
     {
