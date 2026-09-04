@@ -339,3 +339,15 @@ ortho_pool_read.pt  # A PROBE, and it was never a seat candidate. It exists to r
 
   RE-OPEN BY: Q-CE resolving PERMIT, plus a score that clears 0.8521. Either alone is not enough - the
   licence gates the seat and the number gates the merit, and this member currently fails both.
+
+ortho_stack_s2026.pt  # A MATCHED CONTROL, and it was never a seat candidate. 0.8417 peak at epoch 6,
+                      # CONVERGED (12 of 12, convergence_check clean), then a monotone decline to 0.8374
+                      # at epoch 10 while the loss fell to 0.6119 — the converge-and-overfit shape this
+                      # recipe produces, so the peak is not a truncation artefact. It sits 0.0042 under
+                      # the 0.8459 seat bar and 0.0223 under the 0.8640 roster bar, so it seats nowhere
+                      # on merit. IT IS STILL DOING WORK, and that is why the checkpoint is kept: it is
+                      # v3large_stack's matched control on the trunk-pretraining-domain axis (Q-CW), and
+                      # the second half of the pair that priced the silenced ranking term in knee-tj88y.
+                      # Its number is a BASELINE the arm after it is read against, not a bid.
+                      # RE-OPEN BY: nothing about this run. A different OrthoDiffusion recipe is a new
+                      # arm with its own header, not a re-quote of this row.
