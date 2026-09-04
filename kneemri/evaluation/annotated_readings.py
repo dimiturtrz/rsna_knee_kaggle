@@ -143,6 +143,28 @@ class AnnotatedReadings:
                 logger.info("%s: read over %d annotated studies", member.file.name, len(names))
         return names, per_member
 
+    def joined(self, saved: list[Path], names: list[str]) -> list[tuple[Path, NDArray[np.float64]]]:
+        """Readings a DIFFERENT family already wrote, aligned onto the studies this run scored.
+
+        A foreign member states its own feed — a volumetric trunk has no read size and a windowed one has
+        no volume — so it cannot be rebuilt through `MemberReadings` here without an `if` whose branches
+        disagree about their arguments. It is scored by its own gate, which writes the columns, and this
+        joins them BY NAME. The alignment is the point: the gate reads the annotated studies in the order
+        `train.csv` lists them and this run reads them in corpus order, so an index-wise join would score
+        every study against another study's radiologist and still return a plausible number.
+        """
+        joined = []
+        for path in saved:
+            saved_file = np.load(path)
+            position = {str(name): index for index, name in enumerate(saved_file["identifiers"])}
+            missing = [name for name in names if name not in position]
+            if missing:
+                message = f"{path.name} holds no reading for {len(missing)} of these studies, first {missing[0]}"
+                raise ValueError(message)
+            rows = np.array([position[name] for name in names], dtype=np.int64)
+            joined.append((path, saved_file["values"][rows].astype(np.float64)))
+        return joined
+
     def paired(
         self,
         scores: "LabelScores",
@@ -188,6 +210,7 @@ def main() -> None:
     command.parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
     command.parser.add_argument("--tta", action="store_true", help="average over rotations as the curve can")
     command.parser.add_argument("--against", type=Path, default=None, help="baseline for paired deltas; default first")
+    command.parser.add_argument("--add", type=Path, nargs="*", default=[], help="npz readings from a foreign gate")
     arguments = command.parsed()
 
     from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
@@ -198,6 +221,7 @@ def main() -> None:
     views = SpatialViews() if arguments.tta else None
     reader = AnnotatedReadings(root, torch.device(arguments.device), views)
     names, per_member = reader.readings(arguments.checkpoints, identifiers, overlap=arguments.overlap)
+    per_member = per_member + reader.joined(arguments.add, names)
 
     position = {name: index for index, name in enumerate(identifiers)}
     annotations = truth[np.array([position[name] for name in names], dtype=np.int64)]

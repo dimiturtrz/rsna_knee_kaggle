@@ -40,6 +40,7 @@ def main() -> None:
     command.parser.add_argument("--key", required=True, help="the cache key, e.g. 336px_12sl")
     command.parser.add_argument("--train", type=Path, required=True, help="train.csv, which carries the gold rows")
     command.parser.add_argument("--device", default="cuda")
+    command.parser.add_argument("--out", type=Path, default=None, help="npz of the probabilities, for blending")
     arguments = command.parsed()
 
     member = PillarMember.rebuild(arguments.checkpoint)
@@ -50,7 +51,10 @@ def main() -> None:
 
     gate = FeedGate(member, feed, torch.device(arguments.device), GOLD)
     title = f"pillar0 through OUR {arguments.key} feed, {len(rows)} annotated studies"
-    command.report(gate.reading(rows, annotations).lines(title))
+    reading = gate.reading(rows, annotations)
+    if arguments.out is not None:
+        reading.save(arguments.out, identifiers)
+    command.report(reading.lines(title))
 
 
 if __name__ == "__main__":

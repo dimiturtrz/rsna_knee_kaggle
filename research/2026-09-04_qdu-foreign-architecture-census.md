@@ -126,3 +126,38 @@ Quoted from the packaged `README.md` of `fabotelli/pillar0-knee-finetune`:
 | **Macro** | **0.797** |
 
 The README does not provide per-label prevalence, confusion tables, or counts on the 58 studies. The training recipe mentions "series capped at 4/study, seed 0"; inference is described as "mean sigmoid over all series of the study", with no explicit inference-time series selection rule.
+
+
+## Addendum: Pillar-0 split artefacts and kernel cost (Q-DX follow-up)
+
+### Training-split evidence
+
+No public artefact names the studies `fabotelli/pillar0-knee-finetune` trained on:
+
+- The Kaggle Model package contains only `LICENSE`, `README.md`, and `pillar_ft_a.final.pt`; the checkpoint keys are `model`, `head`, `ep`.
+- The README states *"The 58 holdout studies were excluded from training"* and gives a training recipe, but no UID list, fold file, or training-study count.
+- Upstream `YalaLab/pillar-finetune` (GitHub) documents NLST/chest-CT fine-tuning only; no knee split.
+- Upstream `YalaLab/Pillar0-BreastMRI` (Hugging Face) is the breast-MRI base model, gated behind Name/Organization fields, and is not the knee derivative.
+- The Pillar-0 paper (arXiv [2511.17803v1](https://arxiv.org/abs/2511.17803)) covers abdomen-pelvis CT, chest CT, head CT, and breast MRI pretraining; "knee" does not appear.
+
+The held-out claim is therefore prose-only and not independently machine-verifiable.
+
+### Inference cost
+
+Published numbers exist for the Atlas backbone, not for the knee checkpoint on Kaggle hardware:
+
+- Pillar-0 paper architecture ablation: Atlas takes **0.2 s/sample** for a `384×384×384` volume at inference, vs 38.8 s/sample for a matched ViT-S. Pillar-0 is reported as 32×/15×/55× faster than MedGemma/MedImageInsight/Lingshu.
+- Knee fine-tune README gives only **training** cost: *"2 epochs on one NVIDIA B200 (~70 min)"*.
+- Local rebuild measurement (this project, `kneemri.inference.pillar_member`): **~0.70 s/series, ~2.6 GiB VRAM** at `[192,384,384]`.
+
+No published inference cost exists for the knee checkpoint itself or for T4 hardware.
+
+### Kaggle kernel limits
+
+- Wall-clock cap per submission: **9 hours**.
+- GPU observed/used in this competition: **T4 ×2**.
+- Internet disabled during scoring; only uploaded datasets/models are available.
+
+### Kernel fit estimate
+
+Inference rule is *mean sigmoid over all series of the study* with no stated series cap. For ~1,300 test studies, forward-only wall-clock is on the order of tens of minutes on fast local hardware, but the actual T4 cost will be higher and the DICOM → `[192,384,384]` preprocessing must also fit inside the 9-hour budget.

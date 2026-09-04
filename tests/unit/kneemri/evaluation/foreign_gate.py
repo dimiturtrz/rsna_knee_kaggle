@@ -43,22 +43,38 @@ def _annotations() -> np.ndarray:
     return np.array([[float(row % 2) for _ in TARGETS] for row in range(STUDIES)], dtype=np.float32)
 
 
+def _values() -> np.ndarray:
+    """One probability per study and finding, distinct per row so a saved join can be checked by value."""
+    return np.array([[0.1 * (row + 1) for _ in TARGETS] for row in range(STUDIES)], dtype=np.float64)
+
+
+def test_save(tmp_path: Path):
+    """The saved file carries the study NAMES beside the columns, which is what a blend joins on."""
+    path = tmp_path / "reading.npz"
+
+    GateReading(np.full(len(TARGETS), 0.8), GOLD, _values()).save(path, [f"s{row}" for row in range(STUDIES)])
+
+    saved = np.load(path)
+    assert list(saved["identifiers"]) == [f"s{row}" for row in range(STUDIES)]
+    assert np.allclose(saved["values"], _values()), "the probabilities, not their ordering — a blend needs both"
+
+
 def test_macro():
     """The macro is the unweighted mean of the per-finding AUCs, which is what `gold_auc` also is."""
-    reading = GateReading(np.full(len(TARGETS), 0.8), GOLD)
+    reading = GateReading(np.full(len(TARGETS), 0.8), GOLD, _values())
 
     assert reading.macro == pytest.approx(0.8)
 
 
 def test_shortfall():
     """A feed that loses ground against the published number reports a negative shortfall."""
-    assert GateReading(np.full(len(TARGETS), 0.8), GOLD).shortfall == pytest.approx(0.8 - GOLD)
-    assert GateReading(np.full(len(TARGETS), GOLD), GOLD).shortfall == pytest.approx(0.0)
+    assert GateReading(np.full(len(TARGETS), 0.8), GOLD, _values()).shortfall == pytest.approx(0.8 - GOLD)
+    assert GateReading(np.full(len(TARGETS), GOLD), GOLD, _values()).shortfall == pytest.approx(0.0)
 
 
 def test_lines():
     """Every finding gets its own row, so one collapsed label is visible rather than averaged away."""
-    lines = GateReading(np.full(len(TARGETS), 0.8), GOLD).lines("title")
+    lines = GateReading(np.full(len(TARGETS), 0.8), GOLD, _values()).lines("title")
 
     assert lines[0] == "title"
     assert sum(target in line for line in lines for target in TARGETS) == len(TARGETS)

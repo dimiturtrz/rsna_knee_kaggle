@@ -67,3 +67,24 @@ def test_paired(tmp_path: Path):
     assert len(lines) == 2, "one row per member, and the baseline does not price itself"
     assert "worst" in lines[1]
     assert "-1.0000" in lines[1], "a perfectly inverted member is a full point below the baseline"
+
+
+def test_joined(tmp_path: Path):
+    """A saved foreign reading joins BY NAME, so a different study order does not cross the rows."""
+    path = tmp_path / "foreign.npz"
+    np.savez(path, identifiers=np.array(["c", "a", "b"]), values=np.array([[3.0], [1.0], [2.0]]))
+
+    joined = _reader(tmp_path).joined([path], ["a", "b", "c"])
+
+    assert len(joined) == 1
+    assert joined[0][0] == path, "the file names the member, as a checkpoint names ours"
+    assert np.allclose(joined[0][1], np.array([[1.0], [2.0], [3.0]])), "reordered onto the studies asked for"
+
+
+def test_joined_missing(tmp_path: Path):
+    """A reading that does not cover every study is refused rather than silently scored on a subset."""
+    path = tmp_path / "short.npz"
+    np.savez(path, identifiers=np.array(["a"]), values=np.array([[1.0]]))
+
+    with pytest.raises(ValueError, match="holds no reading"):
+        _reader(tmp_path).joined([path], ["a", "b"])

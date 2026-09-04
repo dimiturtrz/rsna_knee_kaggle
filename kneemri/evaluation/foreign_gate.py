@@ -45,6 +45,17 @@ class GateReading:
 
     aucs: NDArray[np.float64]
     gold: float
+    values: Float[np.ndarray, "studies targets"]
+
+    def save(self, path: Path, identifiers: list[str]) -> None:
+        """Write the probabilities themselves, so a family scored here can be BLENDED with another one.
+
+        The AUC answers whether our pixels reach their weights; it cannot answer whether this member is
+        complementary to ours, and that question needs the columns rather than their ordering. It is the
+        58 annotated studies or nothing: every other study our corpus holds is inside these checkpoints'
+        fine-tune, so a blend measured there prices memorisation.
+        """
+        np.savez(path, identifiers=np.array(identifiers), values=self.values)
 
     @property
     def macro(self) -> float:
@@ -79,7 +90,7 @@ class FeedGate:
         values = StudyReadings(self.device).predict(self.member.to(self.device), self.feed, rows)
         ordering = Ordering()
         aucs = np.array([ordering.auc(values[:, index], annotations[:, index]) for index in range(len(TARGETS))])
-        return GateReading(aucs, self.gold)
+        return GateReading(aucs, self.gold, values)
 
 
 def main() -> None:
@@ -90,6 +101,7 @@ def main() -> None:
     command.parser.add_argument("--key", required=True, help="the cache key, e.g. 336px_12sl")
     command.parser.add_argument("--train", type=Path, required=True, help="train.csv, which carries the gold rows")
     command.parser.add_argument("--device", default="cuda")
+    command.parser.add_argument("--out", type=Path, default=None, help="npz of the probabilities, for blending")
     arguments = command.parsed()
 
     member = ForeignMember.rebuild(arguments.checkpoint)
@@ -100,7 +112,10 @@ def main() -> None:
 
     gate = FeedGate(member, feed, torch.device(arguments.device), member.spec.gold)
     title = f"{arguments.checkpoint.stem} through OUR {arguments.key} feed, {len(rows)} annotated studies"
-    command.report(gate.reading(rows, annotations).lines(title))
+    reading = gate.reading(rows, annotations)
+    if arguments.out is not None:
+        reading.save(arguments.out, identifiers)
+    command.report(reading.lines(title))
 
 
 if __name__ == "__main__":
