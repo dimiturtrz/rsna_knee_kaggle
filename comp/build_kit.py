@@ -103,7 +103,14 @@ def main() -> None:
         ).stdout.strip()
 
     revision = asked("rev-parse", "--short", "HEAD")
-    dirty = bool(asked("status", "--porcelain"))
+
+    # SCOPED TO THE PACKAGES THE KIT COPIES, because a whole-tree `status` is not the question this stamp
+    # answers. `kit_check` states the principle from the other side: what matters is not that the kit
+    # differs from HEAD but that it differs in the files a kernel LOADS. An unscoped status also reads a
+    # SECOND agent's working tree — this repo is shared, and on 2026-09-04 four untracked PDFs and one
+    # modified research note under a peer's lane stamped a kit DIRTY whose every copied file was clean,
+    # which is a refusal that can only be answered by committing somebody else's work.
+    dirty = bool(asked("status", "--porcelain", "--", *_PACKAGES))
     (out / _SOURCE_DIR / "kit.json").write_text(json.dumps({"commit": revision, "dirty": dirty}, indent=2))
 
     # THE WHEELS DIRECTORY IS AN ARGUMENT, AND THE WRONG ONE BUILDS A KIT THAT PASSES EVERY OTHER CHECK.
