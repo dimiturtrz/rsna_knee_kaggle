@@ -41,6 +41,11 @@
 # bead: knee-qxyj
 # The arm this replicates is knee-8wa0; the two-ruler rule is knee-9198.
 #
+# reading: logs/gold_recal_paired.log
+# The DECIDING number is the gold one and it lives behind a second command, which is how this arm sat
+# four days with its branch unselected while every gate read green. reading_check asserts the artefact
+# (knee-v78o1).
+#
 # deliberate: --eval-labels (the ruler must not move with the arm)
 # deliberate: --hold-annotations (the gold ruler refuses the checkpoint without it)
 # deliberate: every other flag — they are band_dense_hold's and may not be touched in this arm.

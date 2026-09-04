@@ -169,7 +169,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
-- **Fifteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
+- **Sixteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
   two days after running),
@@ -258,6 +258,16 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   the drop line, on `ENTRY IDENTITY CHANGED`, and on a census that reads `N of M` with N < M. Run it BEFORE the
   slot: `kaggle kernels output` serves the LATEST version's log, so a row written days later can never be
   re-checked. `mount_check --live` asks the same question one step earlier, of the encoder datasets. See knee-nbk3.
+  `python -m kneemri.experiments.reading_check` after an arm finishes — the only check that guards the
+  QUESTION rather than a shipment or a number. An arm declares its ruler as `# reading: <glob>` (the
+  `# deliberate:`/`# bead:` convention, one more line), and the check asserts that an arm whose checkpoint
+  is on disk left the artefact it named. `recal_dense` sat four days with its DECIDING gold number never
+  taken — ledger row written, convergence clean, roster clean, member packaged, every gate green — because
+  the reading lived in prose and needed a second command (knee-v78o1). The declared-and-missing rule
+  refuses; the dark-arm rule (an arm fitting `--fold -1` holds out nothing, so no ledger row can price it —
+  `rampsix` spent 4.2 h of card on a gate unreadable by construction, knee-s8kim) REPORTS until the twenty
+  dark arms each carry a `# reading:` or an `# unmeasurable:`, then it graduates. A declared glob is ONE
+  token: prose has spaces, which is what kept the check's own first run from being a false positive.
  A recipe is smoked with `arm_check --only <arm> --smoke <throwaway dir> --smoke-studies 60` (48 train / 12 holdout, 2 s an epoch) before it is queued for forty minutes. `--smoke` takes the DIRECTORY the throwaway checkpoints go to and `--only` takes the arm; `--studies`/`--epochs` are `train`'s flags, not this tool's, and passing the arm path to `--smoke` costs a run that dies on `FileExistsError` against the arm script itself.
   A recipe on a reading axis NOBODY HAS DECODED cannot be smoked until something writes the truncated cache, and
   `python -m kneemri.experiments.arm_check --smoke` is what writes it — sixty studies in under a minute, a distinct
