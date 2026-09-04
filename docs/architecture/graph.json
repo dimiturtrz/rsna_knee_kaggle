@@ -11079,6 +11079,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.annotated_readings.main",
+      "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.main",
       "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
       "weight": 1
     },
@@ -39832,6 +39838,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.joined",
+      "label": "joined",
+      "level": "method",
+      "parent": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.paired",
       "label": "paired",
       "level": "method",
@@ -40778,6 +40792,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate.GateReading.macro",
       "label": "macro",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_gate.GateReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_gate.GateReading.save",
+      "label": "save",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_gate.GateReading",
       "role": null
