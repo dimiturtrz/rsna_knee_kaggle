@@ -82,8 +82,15 @@ stage is saturated from three directions at once: more inputs (`knee-ezz`, 20 ca
 −0.0001), more slots (`extended_slots`, 83,297 unseen slices: +0.0002), every combining rule (0.0019).
 The limit is upstream, in what one slice's feature vector contains.
 
-So the fusion arm does not get the card. **What is NOT closed** is the one thing our four operators
-share: all of them fuse POOLED PER-SLICE VECTORS. A trunk that attends over the joint patch-token set
-across slices never forms a per-slice vector at all, and that is a different mechanism from any row
-above. Whether AnyMC3D's adaptation is of that kind is the live half of **Q-DT**; if it is only
-pooled-vector fusion, the axis is closed on published and local evidence together.
+So the fusion arm does not get the card. The one exclusion left was that all four of our operators fuse
+POOLED PER-SLICE VECTORS, and a trunk attending over the joint patch-token set across slices would be a
+different mechanism. **A-DT answered it the same day and it is not that**
+(`2026-09-04_qdt-slice-fusion-mechanism.md`): AnyMC3D encodes each slice and takes the **CLS token** as
+the slice embedding, then attends over the stack of those with one learned task query, permutation-
+invariant, no positional encoding. Patch tokens go to an auxiliary segmentation branch and never enter
+the classification fusion. Their operator is our `attend_true` with a single query instead of a 64-wide
+gate — and their own trunk-held ablation reads +0.004 over average pooling on one CT task, against our
++0.0003 over the mean on ours.
+
+**The axis is closed on published and local evidence together.** Both the mechanism and the size of the
+effect agree; the remaining difference is a knob, and the ledger has already measured that knob here.
