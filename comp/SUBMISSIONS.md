@@ -3459,3 +3459,29 @@ Board 0.953 needs offline ≈ 0.891. Every re-arrangement axis is closed in writ
 Buys back roughly thirty hours of card, and retires the standing tax of keeping fold-0 and full-corpus
 twins of every member. See
 `interpretations/kneemri/2026-09-04_the-refit-step-is-dead-at-its-own-upper-bound.md`.
+
+## spansolo_v1 — ref 55996812, 2026-09-04 00:12Z — 0.921
+
+INSTRUMENT. The LOW anchor of `knee-l67zk`'s two-solo pair: `calib_span_s2026` served alone, current
+kit, fold 0, offline 0.8545. The cell the board record never held — six solo operations exist and none
+is a current-kit DINOv2 solo.
+
+It exists to break a collinearity. `ortho_solo_v1` reads +0.02 above the DINOv2-fitted line, and offline
+level and date are collinear across the whole record, so "the kit era carries it" and "ortholarge is
+special" cannot be separated by the record itself.
+
+Pre-registered before either score: **both ≥0.900** = the kit era explains it and ortholarge is not
+special · **both ≤0.885** = it does not, and the in-domain trunk lane stays open whatever `ortho_stack`
+reads offline · **0.886-0.899** = partial, report the split and close nothing.
+
+This anchor read **0.921**, inside the ≥0.900 branch. **The pair is not complete and nothing is
+concluded on one anchor** — the partner `kneemri-holdsolo` (`calib_dense_hold_s2026`, offline 0.8634)
+ships at the next mark, and the pre-registration asks for both.
+
+What is already visible, and stated as directional rather than as the reading: the two solos that
+carry an offline number are `ortho_solo_v1` (0.8452 → 0.907) and this one (0.8545 → 0.921). The
+DINOv2 solo is above the ortholarge solo on BOTH axes, and the two-point slope is ~1.5, which is the
+record's own whole-record slope rather than the +0.97 operating-point one. Two points do not fit a
+line and the second anchor is what this waits for.
+
+`run_check` before the slot: loaded 1 of 1 members, no drop, no identity change. No card time.
