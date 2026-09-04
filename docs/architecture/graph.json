@@ -24709,6 +24709,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.models.model.StudyModel.train",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.pin_frozen_norms",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
       "target": "kneemri.models.diffusion_schedule.DiffusionSchedule",
@@ -48952,6 +48958,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.encoder_surgery.EncoderSurgery.pin_frozen_norms",
+      "label": "pin_frozen_norms",
+      "level": "method",
+      "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.encoder_surgery.EncoderSurgery.recompute_activations",
       "label": "recompute_activations",
       "level": "method",
@@ -49202,6 +49216,14 @@
       "descendants": 0,
       "id": "kneemri.models.model.StudyModel.supervised",
       "label": "supervised",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.model.StudyModel.train",
+      "label": "train",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
       "role": null
