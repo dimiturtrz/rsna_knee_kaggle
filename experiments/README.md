@@ -7511,3 +7511,53 @@ below 0.5, so it is a coin-flip member seated for distance.
 **What this does NOT say.** It is not a measurement of any champion seat — that is exactly what Q-EK
 established cannot be done cheaply. It prices candidates against the best entry the ruler can still see,
 and the ordering is what transfers, never the value.
+
+## The learned combiner closes on measurement, not on argument — a level-2 fit LOSES to the flat vote — 2026-09-04
+
+After seat count, seating, weighting, re-lensing and calibration each closed, one combiner question was
+still genuinely untried: every entry this project has shipped reduces the pool with a fixed rule whose
+only freedom is one scalar per member, shared across all twelve findings. `votefit` fitted that vector
+and `stackseat` swapped a member; neither is a level-2 model. `kneemri.evaluation.stack_combiner` fits a
+ridge per FINDING over the members' ranks, and optionally lets a finding read what the members said about
+the other eleven — a thing no vote can express at all, since a vote sees one column at a time.
+
+Priced on `honest12`'s twelve scoreable members over the 909 holdout studies. Contiguous blocks, each
+scored by a fit that never saw it; the ridge penalty picked on a split of the KEPT rows only; the flat
+vote scored on the same rows.
+
+| combiner | mean AUC | vs flat vote |
+|---|---|---|
+| flat vote (`RankAverage`) | **0.8750** | — |
+| ridge, own finding, 5 blocks | 0.8571 | **−0.0179** |
+| ridge, own finding, 10 blocks | 0.8640 | −0.0110 |
+| ridge, every finding (cross), 5 blocks | 0.8674 | −0.0076 |
+
+**The harness is validated by its own baseline.** The flat vote reads 0.8750 here against the 0.8751
+`comp/board.jsonl` recorded for `honest12` — so the two sides are being scored under the rule the ledger's
+numbers were taken under, and the losses below are not a mislabelled comparison.
+
+**Every variant loses, and the trend does not reach zero.** More training rows per fit helps (−0.0179 →
+−0.0110 at ten blocks), so part of the loss IS fit variance on 727 rows. Cross-finding features help too
+(−0.0179 → −0.0076), which says there is real cross-finding structure a vote cannot express. Neither
+correction closes the gap, and both point the same way: at this pool size the variance a fitted weight
+adds costs more than the structure it buys.
+
+**It was pre-registered as a null and it is one.** Kimi's Q-EL answer arrived the same hour: Müller et al.
+2022 found simple mean / soft majority vote EQUAL OR BETTER than SVM and logistic-regression stacking
+across medical-image ensembles, and the only case where an input-conditioned combiner clearly won was
+Hussain et al.'s per-body-part model, where the base models had genuine regional specialization. A panel
+of similar DINOv2/DINOv3 recipes has none. The recommended bar in that same letter was "if it does not
+beat mean by >0.001, no combiner is worth a card." It loses by 8 to 18 thousandths.
+
+**What this closes and what it does NOT.** The COMBINER axis is closed: nothing that reduces our existing
+pool differently is worth a card or a slot. It does not say the ensemble is at its ceiling — Q-EL also
+answered the size question, and +0.016 over best single is NORMAL for medical imaging with strong singles
+(MURA: +0.01–0.02; Shen et al. mammography: +0.03; a public three-family blend on THIS competition:
+~+0.001). Our mix is not under-combining. The remaining distance lives in the MEMBERS, which is where the
+next arm goes.
+
+**The one heterogeneity finding worth carrying forward.** The pool is near-homogeneous — DINOv2/DINOv3
+recipes plus one foreign CoAtNet seat that is in-sample and therefore unscoreable. Kimi's transfer of the
+public frontier: "if you add heterogeneity, add exactly one non-DINO member; anything more is seating
+theatre." A conv member trained on OUR corpus would be the first non-DINO seat this project can actually
+PRICE, which is a different object from the foreign one the champion already carries.

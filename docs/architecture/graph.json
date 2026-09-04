@@ -2834,6 +2834,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.stack_combiner",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_combiner",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_combiner",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_combiner",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.stack_coverage",
       "target": "core.bootstrap",
       "weight": 1
@@ -16933,6 +16957,138 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "target": "kneemri.evaluation.stack_combiner.RidgeFit",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.fittable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
+      "target": "kneemri.evaluation.stack_combiner.RidgeFit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.reading",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.reading",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.reading",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.blocked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.design",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.fittable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_combiner.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_combiner.main",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_combiner.main",
+      "target": "kneemri.evaluation.stack_combiner.StackCombiner.reading",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.stack_coverage.StackCoverage",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -29125,7 +29281,7 @@
       "role": null
     },
     {
-      "descendants": 228,
+      "descendants": 229,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29189,7 +29345,7 @@
       "role": null
     },
     {
-      "descendants": 72,
+      "descendants": 73,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29632,6 +29788,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.slot_probe",
       "label": "slot_probe",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner",
+      "label": "stack_combiner",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -33002,6 +33166,22 @@
       "label": "SlotProbe",
       "level": "class",
       "parent": "kneemri.evaluation.slot_probe",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.RidgeFit",
+      "label": "RidgeFit",
+      "level": "class",
+      "parent": "kneemri.evaluation.stack_combiner",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "label": "StackCombiner",
+      "level": "class",
+      "parent": "kneemri.evaluation.stack_combiner",
       "role": "primary"
     },
     {
@@ -43866,6 +44046,94 @@
       "label": "weights",
       "level": "method",
       "parent": "kneemri.evaluation.slot_probe.SlotProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.RidgeFit.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.RidgeFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.blocked",
+      "label": "blocked",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.chosen",
+      "label": "chosen",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.design",
+      "label": "design",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.fittable",
+      "label": "fittable",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.fitted",
+      "label": "fitted",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.StackCombiner.stacked",
+      "label": "stacked",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner.StackCombiner",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.stack_combiner.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.stack_combiner",
       "role": null
     },
     {
