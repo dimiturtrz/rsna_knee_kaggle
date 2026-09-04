@@ -7404,3 +7404,56 @@ these ten ARRAYS, not about their trunks. What the table licenses is narrow and 
 readout of these ten trunks is a seat as it stands, so none of them earns a card on this evidence. What
 it does NOT license is "the trunk axis is closed" — a FITTED member on any of these trunks is a
 different array with a different accuracy, and this instrument has never seen one.
+
+## The DATA axis closes before it costs a card week — in-domain knee-MRI pretraining is published as a wash — 2026-09-04
+
+With the patch axis closed on premise, the member axis closed on seven board flats, the convolutional
+trunk lane closed on its own gate and the label axis priced at ~zero by Q-EH, the only untouched axis
+left was DATA. We hold download credentials for fastMRI knee and SKM-TEA and have never used either.
+Every rule here says data outsizes knobs, so this looked like the schedule for the next several days.
+
+**It is not, and the reason is a published table rather than an arm.** Q-EJ found Zhang et al. (MedIA
+2024), which is almost exactly the experiment: pretrain on ~10,000 fastMRI knee exams, evaluate
+downstream on Stanford knee MRI / MRNet for abnormality, ACL and meniscus. Mean AUC against a labelled
+budget:
+
+| pretrain | 80 subj | 200 | 400 | 800 |
+|----------|---------|-----|-----|-----|
+| none | 0.433 | 0.429 | 0.474 | 0.562 |
+| ImageNet | 0.682 | 0.737 | 0.799 | **0.824** |
+| best in-domain (anatomy-aware MTL) | **0.755** | **0.783** | **0.801** | 0.819 |
+
+The in-domain gain over ImageNet is +0.073, +0.046, +0.002, **−0.005**. It is enormous against scratch
+(+0.257) and gone by 800 labelled subjects. **Scratch is not our baseline.** Our labelled corpus is
+~4,400 studies — more than five times the point where the advantage has already crossed zero, against a
+pretraining pool (~10,000 exams) larger than the ~1,500 volumes our fastMRI credentials cover. The
+survey position agrees (VanBerlo et al. 2024): in-domain SSL gains are "most prominent when unlabelled
+examples greatly outnumber labelled examples," and ours would not outnumber them at all.
+
+**The objective is not a rescue.** The only in-domain variant that beat ImageNet at any budget is an
+anatomy-aware multi-task pretext (relative slice orientation and location). Generic SSL on the same data
+scores far worse on the same downstream task: MAE 0.624, BYOL 0.753, SimCLR 0.800. So the arm that is
+cheap to build — MAE or SimMIM on reconstructed fastMRI slices — is the one the table says loses to the
+initialisation we already use. The arm that won is a hand-built anatomical pretext, which is a
+multi-week build for a gain the same table shows expiring below our labelled scale.
+
+**The sequence mismatch subtracts again.** Zhang et al. deliberately matched sagittal T2W fat-suppressed
+on both ends. fastMRI knee is mostly PD/T2; PRISM (2025) exists because multi-sequence heterogeneity
+breaks naive pretraining, and it needed 336k volumes to handle it. Any RSNA protocol spread makes the
+effective in-domain corpus smaller than the raw volume count, never larger.
+
+**What this costs and what it buys.** The arm would have been the single largest card commitment the
+project has made — a pretraining run plus a full roster retrain, multiple days — priced against a
+mechanism whose own published curve predicts zero at our labelled scale. It was retired for the price of
+one letter. This is the second axis in one day closed on PREMISE rather than on a number (the first was
+patch size, Q-EI), and both were closed before the card was spent rather than after.
+
+**What it does NOT say.** It is not evidence that our corpus is at the labelled-data ceiling — Zhang's
+curve is about where in-domain pretraining stops beating ImageNet, not about where supervised accuracy
+saturates. It is also not a verdict on external data as LABELLED augmentation, which is a different
+mechanism and untested here.
+
+**Where this leaves the schedule.** Every axis that could be opened by starting an arm is now closed, so
+the honest move is the one Q-EJ named independently: stop opening arms and price the pool. There are 103
+packaged members and 186 scoreable checkpoints, and the seat curves this project has shipped against were
+all built on roughly 22 same-split members. A whole-pool seat sweep costs no card and no slot.
