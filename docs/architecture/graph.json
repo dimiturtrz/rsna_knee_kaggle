@@ -36742,6 +36742,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.study_cache.StudyCache.witnessing",
+      "label": "witnessing",
+      "level": "method",
+      "parent": "core.data.corpus.study_cache.StudyCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.study_metadata.StudyMetadata.axes",
       "label": "axes",
       "level": "method",
