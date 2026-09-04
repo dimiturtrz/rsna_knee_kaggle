@@ -6,6 +6,7 @@ load only into this shape. `MemberPackage` checks that faithfulness numerically 
 this module is what it checks.
 """
 
+import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import override
@@ -25,6 +26,8 @@ from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slice_read import SliceRead
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
+
+logger = logging.getLogger(__name__)
 
 COMPILED_PREFIX = "_orig_mod."
 """What `torch.compile` inserts into a state-dict key when it is REBOUND over a module attribute.
@@ -191,6 +194,10 @@ class StudyModel(nn.Module):
         # nothing and no state-dict key changes. It holds the same backbone object this line just
         # registered, which is what lets the surgery run against the module the optimiser will see.
         self.surgery = EncoderSurgery(backbone)
+        # SAID ONCE PER RUN, by `train`. The pin is unconditional and has no flag to typo, which is
+        # exactly why a run that pinned NOTHING reads identically to one that worked — and the arm it
+        # exists for (`radnet_pinned`) is a matched A/B whose whole variable is this code path.
+        self.reported_pinned_norms = False
         self.pool = self.design.pool
         self.slice_pooling = self.design.slice_pooling
         self.n_slot = n_slot
@@ -438,7 +445,10 @@ class StudyModel(nn.Module):
         """
         super().train(mode)
         if mode:
-            self.surgery.pin_frozen_norms()
+            pinned = self.surgery.pin_frozen_norms()
+            if not self.reported_pinned_norms:
+                self.reported_pinned_norms = True
+                logger.info("train mode pins %d frozen norm layer(s)", pinned)
         return self
 
     def low_rank(self, rank: int, alpha: float = 1.0) -> int:
