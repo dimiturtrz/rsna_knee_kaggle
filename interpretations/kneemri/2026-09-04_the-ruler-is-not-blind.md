@@ -1,4 +1,4 @@
-# The holdout is not blind — it is blind on the easy half
+# The ruler is not blind above 0.870 — and the difficulty story it suggested does not hold
 
 `python -m kneemri.evaluation.transfer_strata`, 2026-09-04. 34 rebuildable `ensemble` entries, every
 member scored on its own holdout record, cut into five equal-count difficulty bands by member
@@ -26,10 +26,27 @@ signature — compression is worst where the cases are easy — and it is not th
 signature, which would have put the recovered slope in Q5 and left the easy bands looking normal.
 Nothing here reads near 1.0, so the "case-weighting / label-noise everywhere" branch is also out.
 
-Read plainly: **a holdout gain that comes from getting easy cases righter is worth about half of what
-its size claims on the board. A gain that comes from high-disagreement cases is worth about three
-quarters.** Both are positive. The ruler works; it is differently sensitive in different places, and
-one median over all of it reports the average of two regimes.
+Read plainly: the ruler works everywhere, and one median over all of it reports the average of bands
+that are not alike.
+
+## The refutation ran, and it cut the claim down
+
+The obvious next reading — written below as "what would refute it", then run before this file was
+committed — asks the question the per-band table is actually being read as: does a pair whose holdout
+gain sits in the HARD bands convert more of it into board than a pair whose gain sits easy? Same 34
+entries, 348 pairs the holdout resolves, split at the median hard-share:
+
+    gain made HARD transfers +0.74      gain made EASY transfers +0.67
+
+**0.07 apart.** The direction survives; the magnitude does not. A band-slope table spanning +0.44 to
++0.81 sits on top of a pair-level difference of seven hundredths, which means most of that spread is a
+fact about WHICH ENTRIES separate in which band, not about where a gain has to be made to count.
+
+So the strong version — "an easy-case gain is worth half its size, a hard-case gain three quarters" —
+is **not supported**, and it should not be planned against. What is supported is weaker and still
+useful: transfer is broadly ~0.7 wherever the gain is made, mildly better for hard-case gains, and
+nowhere near zero. The band table stays in the report because it is the thing the pair test had to be
+run against; it is not the finding.
 
 ## What it licenses, and what it does not
 
@@ -38,18 +55,22 @@ one median over all of it reports the average of two regimes.
   Q1 territory — which is the band that transfers at +0.44. This is a second, independent argument for
   what the seven board flats already said about the member axis, and it arrives from the ruler side
   rather than from the board side.
-- It **does** argue that the next arm should be picked by which band it moves, not by its whole-holdout
-  delta. A method that moves Q4-Q5 buys ~0.75 of its size; the same delta parked in Q1 buys ~0.44.
+- It does **not**, after the pair test, license picking the next arm by which band it moves. +0.74
+  against +0.67 is not a basis for choosing an axis; a method has to earn its place on the size of its
+  gain, the way it always did.
 - It is consistent with saturation being real and with there still being 0.009 of gap to the leader:
   saturation compresses the *ordering*, it does not put a wall at 0.944.
+- The strongest thing it does is negative and it is worth having: the ruler is **not** blind above
+  0.870. Every band transfers, the pair-level number is +0.7, and the plan-killing reading — "offline
+  gains stop meaning anything up here" — is dead. That was what this cost a morning to find out, and
+  it is why the next arm is still worth running.
 
-## What would refute it
+## What refuted the strong version
 
-Decompose each already-scored board pair's offline delta into per-band deltas and ask which band's
-delta predicts the pair's board delta. If a pair whose gain sits in Q5 does **not** out-transfer a pair
-whose gain sits in Q1, the per-band slopes above are an artefact of which entries happen to separate in
-which band rather than a statement about where transfer lives. That reading spends no slot either and
-is the obvious next step.
+Exactly the test written here before it ran: decompose each resolved pair's offline delta across the
+bands and ask which band's gain predicts the board delta. It came back +0.74 hard against +0.67 easy
+over 348 pairs, which is the artefact answer rather than the mechanism answer. Recorded above. The
+band table is kept, the claim built on it is not.
 
 ## Caveats that are real
 

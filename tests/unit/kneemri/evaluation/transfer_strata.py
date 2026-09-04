@@ -40,16 +40,25 @@ def _board(directory: Path) -> Path:
     return record
 
 
+STRENGTH: dict[tuple[str, ...], float] = {("a", "b"): 0.30, ("a", "c"): 0.55, ("b", "c"): 0.80}
+"""How closely each entry's members track the truth. Keyed on the MEMBERS so two entries differ by more
+than the board's resolving floor — a fixture where every entry scores the same resolves no pairs, and a
+test asserting over zero pairs asserts nothing."""
+
+
 def _pool(names: list[str]) -> Pool:
-    """Members that agree completely on the first half of the studies and disagree on the second."""
-    generator = np.random.default_rng(len(names))
+    """Members that agree on the first half of the studies and disagree on the second.
+
+    Disagreement is what the module cuts on, so it is built in rather than left to chance: the second
+    half is drawn independently per member, the first half is not.
+    """
+    generator = np.random.default_rng(7)
     truth = (generator.random((STUDIES, LABELS)) > 0.5).astype(np.float64)
-    agreed = np.tile(truth, (1, 1)) * 0.8 + 0.1
+    strength = STRENGTH.get(tuple(names), 0.5)
     predictions = []
-    for index, _ in enumerate(names):
-        member = agreed.copy()
+    for _ in names:
+        member = truth * strength + generator.random((STUDIES, LABELS)) * (1.0 - strength)
         member[STUDIES // 2 :] = generator.random((STUDIES - STUDIES // 2, LABELS))
-        member[:, 0] += 0.001 * index
         predictions.append(np.clip(member, 0.0, 1.0))
     return Pool(list(names), predictions, truth, LogitAverage())
 
@@ -125,6 +134,18 @@ def test_compression(strata: TransferStrata):
     assert strata.compression(ladder) == pytest.approx(1.0)
     assert np.isnan(strata.compression(ladder[:1]))
     assert np.isnan(strata.compression([]))
+
+
+def test_attribution(strata: TransferStrata):
+    """Both halves are priced off the pairs the holdout resolved, and an unresolvable set says so.
+
+    The fixture's three entries differ by hundredths, so what is asserted is the SHAPE of the answer —
+    two finite medians over a counted set of pairs — not a direction. A direction asserted on synthetic
+    predictions would be a test of the fixture.
+    """
+    found = strata.attribution()
+    assert found.pairs > 0
+    assert np.isfinite(found.hard) and np.isfinite(found.easy)
 
 
 def test_lines(strata: TransferStrata):

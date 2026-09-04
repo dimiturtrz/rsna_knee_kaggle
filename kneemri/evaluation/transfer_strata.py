@@ -115,6 +115,20 @@ class StratumReading:
     finding is scoring a different metric from the whole-holdout number, and the reader must see it."""
 
 
+@dataclass(frozen=True)
+class Attribution:
+    """How the pairs that gained on HARD cases transferred, against the ones that gained on easy cases."""
+
+    hard: float
+    """Median board-per-holdout ratio over the half of the pairs that made their gain highest up the
+    difficulty scale."""
+    easy: float
+    pairs: int
+    """How many pairs the holdout resolved at all. Both medians are over half of this, and no threshold
+    on their DIFFERENCE is stated here on purpose — there is no derivation for one, and inventing a bar
+    the comparison then clears would be the number-watching this file exists to replace."""
+
+
 class TransferStrata:
     """The offline-to-board slope, asked separately inside each difficulty band of the holdout."""
 
@@ -232,6 +246,47 @@ class TransferStrata:
         ]
         return float(np.median(ratios)) if ratios else float("nan")
 
+    def attribution(self) -> "Attribution":
+        """Whether a pair whose holdout gain sits in the HARD bands out-transfers one whose gain sits easy.
+
+        The per-band slopes are a statement about which entries happen to separate in which band. This is
+        the statement they are being read as: that transfer follows the DIFFICULTY of where a gain was
+        made. So take each pair the holdout resolves, split its gain across the bands, and ask whether
+        the pairs that made their gain high up the difficulty scale converted more of it into board.
+
+        A pair's whole-holdout gain is the mean of its per-band gains, which is exact rather than a proxy
+        because the bands are equal-count by construction. Pairs are split at the MEDIAN hard-share
+        rather than at a chosen threshold, so the two halves are the same size and the comparison cannot
+        be tuned by where the line was drawn.
+        """
+        readings = self.readings()
+        entries = sorted({reading.entry for reading in readings})
+        banded = {
+            entry: [reading for reading in sorted(readings, key=lambda r: r.band) if reading.entry == entry]
+            for entry in entries
+        }
+        boards = {reading.entry: reading.board for reading in readings}
+        hard = {stratum.band for stratum in self.strata()[self.bands // 2 :]}
+        graded: list[tuple[float, float]] = []
+        for index, worse in enumerate(entries):
+            for better in entries[index + 1 :]:
+                gains = [b.offline - w.offline for b, w in zip(banded[better], banded[worse], strict=True)]
+                total = float(np.mean(gains))
+                spread = float(np.sum(np.abs(gains)))
+                if abs(total) < max(DELTA_FLOOR, RESOLVED) or spread == 0.0:
+                    continue
+                share = float(sum(gain for band, gain in enumerate(gains) if band in hard)) / spread
+                graded.append((share, (boards[better] - boards[worse]) / total))
+        if not graded:
+            return Attribution(hard=float("nan"), easy=float("nan"), pairs=0)
+        ordered = sorted(graded)
+        half = len(ordered) // 2
+        return Attribution(
+            hard=float(np.median([ratio for _, ratio in ordered[half:]])),
+            easy=float(np.median([ratio for _, ratio in ordered[:half]])),
+            pairs=len(ordered),
+        )
+
     def lines(self) -> list[str]:
         """The report: one block per band, and the whole-holdout row it has to be read against."""
         readings = self.readings()
@@ -254,6 +309,14 @@ class TransferStrata:
                 f"    {reading.entry:<20} offline {reading.offline:.4f}  board {reading.board:.3f}"
                 for reading in sorted(band, key=lambda reading: reading.offline)
             )
+        attribution = self.attribution()
+        out.extend(
+            [
+                "",
+                f"pairs split at the median hard-share ({attribution.pairs} resolved): "
+                f"gain made HARD transfers {attribution.hard:+.2f}, gain made EASY transfers {attribution.easy:+.2f}",
+            ]
+        )
         return out
 
 
