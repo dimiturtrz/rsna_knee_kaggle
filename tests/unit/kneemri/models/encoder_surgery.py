@@ -94,6 +94,25 @@ def test_blocks():
     )
 
 
+class _TimmShaped(nn.Module):
+    """timm's ViT shape: the blocks live in a `Sequential`, and the tree owns no list or dict at all."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.patch_embed = nn.Sequential(nn.Conv2d(1, DIM, 1), nn.BatchNorm2d(DIM), nn.GELU())
+        self.blocks = nn.Sequential(*[_StagedBlock() for _ in range(BLOCKS)])
+
+
+def test_blocks_reads_a_homogeneous_sequential():
+    """A timm trunk keeps twelve blocks in a Sequential; the blanket refusal failed every timm arm."""
+    shaped = _TimmShaped()
+    found = EncoderSurgery(shaped).blocks()
+    assert found == list(shaped.blocks), "the Sequential holding one repeated type IS the block stack"
+    assert all(not isinstance(module, nn.Conv2d) for module in found), (
+        "and the mixed stem beside it is packaging, which is the reason Sequential was refused outright"
+    )
+
+
 def test_blocks_refuses_what_it_cannot_read():
     """Nothing to find and TWO things to find are both refusals: opening the wrong six is silent."""
     with pytest.raises(ValueError, match="no module container"):

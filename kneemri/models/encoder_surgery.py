@@ -86,14 +86,25 @@ class EncoderSurgery:
         `ModuleDict`, so a DenseNet-121 holds 58 `_DenseLayer` in four dicts and NO `ModuleList` at all,
         which read as "no blocks to unfreeze" and refused the whole arm at construction.
 
-        `Sequential` is deliberately not a third case. It is a container that also defines a forward, so
-        it wraps stages, stems and single layers as readily as repeated blocks, and counting its children
-        would make the most-repeated-type vote turn on packaging rather than on structure.
+        `Sequential` is a third case ONLY when it is HOMOGENEOUS — every child the same type. It is a
+        container that also defines a forward, so it wraps stages, stems and single layers as readily as
+        repeated blocks, and counting its children unconditionally would make the most-repeated-type vote
+        turn on packaging rather than on structure. That was the reason it was excluded outright, and the
+        reason survives: a stem is `Conv2d / BatchNorm2d / ReLU`, a stage wrapper holds one block type
+        beside a downsample, and both are heterogeneous, so both are still refused. What the blanket
+        refusal ALSO refused was a timm ViT, which keeps its twelve `Block` in a `Sequential` and owns no
+        `ModuleList` or `ModuleDict` anywhere — measured, not assumed — so every timm trunk raised "no
+        blocks to unfreeze" at construction and no arm in that family could start. Homogeneity is the
+        test because it is the property that distinguishes repetition from packaging, which is what the
+        vote was always trying to read.
         """
         if isinstance(holder, nn.ModuleDict):
             return list(holder.values())
         if isinstance(holder, nn.ModuleList):
             return list(holder)
+        if isinstance(holder, nn.Sequential) and len(holder) > 1:
+            children = list(holder)
+            return children if len({type(child) for child in children}) == 1 else []
         return []
 
     def pin_frozen_norms(self) -> int:
