@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from kneemri.inference.members import MemberPackage
-from kneemri.kaggle.mount_check import EncoderMounts, LiveReading, MountCheck, MountSweep
+from kneemri.kaggle.mount_check import MEMBERS_DATASET, EncoderMounts, LiveReading, MountCheck, MountSweep
 
 DINOV2 = "metaresearch/dinov2/PyTorch/small/1"
 DINOV3 = "dimiturnt/dinov3-hf"
@@ -37,7 +37,13 @@ def _kernel(tmp_path: Path, name: str, body: str, sources: list[str]) -> Path:
     kernel.mkdir()
     (kernel / f"{name}.py").write_text(body, encoding="utf-8")
     (kernel / "kernel-metadata.json").write_text(
-        json.dumps({"id": f"dimiturnt/{name}", "model_sources": [DINOV2], "dataset_sources": sources}),
+        json.dumps(
+            {
+                "id": f"dimiturnt/{name}",
+                "model_sources": [DINOV2],
+                "dataset_sources": [MEMBERS_DATASET, *sources],
+            }
+        ),
         encoding="utf-8",
     )
     return kernel
@@ -79,6 +85,16 @@ def test_verdict(tmp_path: Path):
 
     subset = _kernel(tmp_path, "kneemri-subset", "KernelRun(names=('v2member',)).run()\n", [])
     assert check.verdict(subset).startswith("ok"), "a DINOv2-only subset needs no DINOv3 mount"
+
+    rehearsal = _kernel(tmp_path, "kneemri-rehearsal", "KernelRun(names=('v2member',)).run()\n", [])
+    (rehearsal / "kernel-metadata.json").write_text(
+        json.dumps({"id": "dimiturnt/kneemri-rehearsal", "dataset_sources": ["dimiturnt/kneemri-ortho-pkg"]}),
+        encoding="utf-8",
+    )
+    assert check.verdict(rehearsal).startswith("skipped"), (
+        "a kernel mounting ANOTHER weights package is not this sweep's to refuse - orthorehearse read "
+        "as a refusal for a day because its one-member dataset is absent from the shipped package"
+    )
 
     ranked = _kernel(tmp_path, "kneemri-ranked", "KernelRun(members=1).run()\n", [])
     assert "does not declare dimiturnt/dinov3-hf/vits16" in check.verdict(ranked)

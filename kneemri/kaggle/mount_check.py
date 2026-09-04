@@ -31,6 +31,16 @@ from kneemri.models.backbone import MODEL_MOUNT, MountKind
 logger = logging.getLogger(__name__)
 
 METADATA = "kernel-metadata.json"
+MEMBERS_DATASET = "dimiturnt/kneemri-members"
+"""The Kaggle dataset the shipped package is pushed to — the one this sweep is holding a local copy of.
+
+A kernel may deliberately mount a DIFFERENT weights package: `kneemri-orthorehearse` attaches
+`dimiturnt/kneemri-ortho-pkg`, a one-member dataset, precisely so `MemberPackage.find` cannot pick the
+big manifest instead. Checked against the shipped package its single member is absent, so the sweep
+refused a kernel that is correct — and a gate that is permanently red is how the next real refusal gets
+read as noise. What this sweep can answer is "does a kernel that mounts OUR package declare what that
+package needs", so a kernel mounting another one is a skip with the reason, never a refusal.
+"""
 SETTLED_READS = 2
 SETTLE_ATTEMPTS = 8
 SETTLE_SECONDS = 20.0
@@ -74,6 +84,9 @@ class MountCheck:
         script = KernelScript(scripts[0])
         if script.call() is None:
             return "skipped - builds no KernelRun, so its package is not ours to check"
+        sources = KernelSources(kernel / METADATA)
+        if not sources.covers(MEMBERS_DATASET):
+            return f"skipped - mounts a weights package other than {MEMBERS_DATASET}, which this sweep is not holding"
         names = script.member_names()
         try:
             mounts = self.package.mounts(self.package.named(names) if names else None)
@@ -82,7 +95,7 @@ class MountCheck:
             # unusable — a member the package does not hold, and a member on a variant no dataset
             # mirrors — and only the raiser knows which one this is.
             return f"REFUSED - {unusable}"
-        undeclared = KernelSources(kernel / METADATA).undeclared(mounts)
+        undeclared = sources.undeclared(mounts)
         if undeclared:
             return f"REFUSED - needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"
         unpushed = self.unpushed(names)
