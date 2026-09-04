@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from core.findings import TARGETS
 from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult
@@ -106,6 +107,24 @@ def test_truth(tmp_path: Path) -> None:
     assert truth.shape == (2, len(TARGETS))
     assert truth[0, 0] == 0
     assert truth[0, 1] == 1
+
+
+def test_graded(tmp_path: Path) -> None:
+    processed = tmp_path / "processed"
+    (processed / "labels").mkdir(parents=True)
+    (tmp_path / "raw").mkdir()
+    frame = pd.DataFrame({"StudyInstanceUID": ["a", "b"]})
+    for target in TARGETS:
+        frame[target] = [0.68, 0.28]
+    frame.to_csv(processed / "labels" / "report_labels_v2.csv", index=False)
+    annotated = pd.DataFrame({"StudyInstanceUID": ["a"], TARGETS[0]: [1.0]})
+    annotated.to_csv(tmp_path / "raw" / "train.csv", index=False)
+
+    graded = ProbeCorpus(processed=processed, raw=tmp_path / "raw").graded(["a", "b"])
+
+    assert graded[0, 1] == pytest.approx(0.68)
+    assert graded[1, 1] == pytest.approx(0.28)
+    assert graded[0, 0] == pytest.approx(1.0)
 
 
 def test_identifiers(tmp_path: Path) -> None:

@@ -32,10 +32,13 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
+from core.data.labels.ruler import DEFAULT_LABELS
+from core.data.labels.targets import Targets
 from core.denominator import Denominator
 from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.slice_readout import READOUTS, SliceMean, SliceReadout
+from kneemri.runs.holdout_record import PROBE, UNKNOWN_EPOCH, HoldoutRecord
 
 LOGGER = logging.getLogger(__name__)
 
@@ -268,6 +271,19 @@ class ProbeCorpus:
         aligned = table.reindex(identifiers)
         return (aligned[list(TARGETS)].to_numpy(dtype=np.float64) > MIDPOINT).astype(np.int64)
 
+    def graded(self, identifiers: list[str]) -> Float[NDArray[np.float32], "studies findings"]:
+        """The ruler a member's `HoldoutRecord` carries — `Targets.scores`, not the binarised column.
+
+        A probe FITS against the binarisation (a ridge needs a class), but a record's truth has to be
+        what every other run was SCORED by, or `RecordMix` refuses the mix at `RULER_TOLERANCE`. Two
+        things separate the two arrays, and reading the csv directly gets only the first: members store
+        the graded level (0.08 / 0.28 / 0.68 / 0.82 / 0.94 — `ReportGrade`'s agreement rates), AND
+        `Targets.load` then OVERWRITES the studies carrying image annotations with a hard 0/1. That
+        second step is 13 of 909 studies here — 156 cells, every one of them invisible to a rounding
+        check, which is exactly the size of defect the ruler guard exists to catch.
+        """
+        return Targets.load(self.processed / "labels" / DEFAULT_LABELS, self.raw / "train.csv", identifiers).scores
+
     def identifiers(self, stem: str) -> list[str]:
         """The study order a feature cache was written in."""
         index = self.processed / f"features_index_{stem.removeprefix('features_')}.json"
@@ -334,11 +350,17 @@ def main() -> None:
                 command.report([f"    {target} {area:.4f}" for target, area in result.per_label.items()])
                 if arguments.emit_holdout is not None:
                     arguments.emit_holdout.mkdir(parents=True, exist_ok=True)
-                    np.savez(
-                        arguments.emit_holdout / f"{name}_{readout}_probe.holdout.npz",
-                        studies=np.asarray(identifiers)[holdout],
-                        predictions=FeatureProbe(penalty).holdout_record(features, truth, holdout, training),
-                        truth=truth[holdout],
+                    # WRITTEN THROUGH `HoldoutRecord`, never by a bare `savez` beside it. The flag's own
+                    # help said "seatable beside members" and the file was not: it carried three arrays
+                    # where a member's carries five, so `HoldoutRecord.read` died on `KeyError: epoch`
+                    # inside `seat_value`, four calls deep, with nothing naming the probe as the cause.
+                    # One writer means the format cannot drift again.
+                    HoldoutRecord(arguments.emit_holdout / f"{name}_{readout}_probe.npz").write(
+                        HoldoutRecord.named(identifiers, holdout),
+                        FeatureProbe(penalty).holdout_record(features, truth, holdout, training),
+                        corpus.graded(identifiers)[holdout],
+                        UNKNOWN_EPOCH,
+                        source=PROBE,
                     )
                 if arguments.emit_weights is not None:
                     arguments.emit_weights.mkdir(parents=True, exist_ok=True)

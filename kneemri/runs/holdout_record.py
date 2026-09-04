@@ -60,6 +60,15 @@ shares neither the trunk nor the feed, and the feed alone is worth -0.0348 on a 
 checkpoint (0.9167 through their reader against 0.8819 through our best cache). A comparison that
 cannot see which of the three it is holding will attribute that to weight quality."""
 
+PROBE = "probe"
+"""A ridge fitted on a trunk's CACHED features — `kneemri.evaluation.feature_probe --emit-holdout`.
+
+A fourth value rather than `DERIVED`, because a probe is not the same trunk read twice: no layer of it
+was fine-tuned, so its number is a property of the frozen representation and not of any checkpoint we
+could ship. The distinction has already cost a lane once — `radnet121` probes 0.8197 and the same trunk
+FITTED reads 0.6716, so a probe row that a tool mistook for a member's row would be off by 0.15 with
+every gate green. Its epoch is `UNKNOWN_EPOCH`, which is the truth: a ridge has no epochs."""
+
 
 @dataclass(frozen=True)
 class HoldoutReading:
