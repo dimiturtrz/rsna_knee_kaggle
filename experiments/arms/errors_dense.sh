@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 # The first arm this project fits on labels the READER did not get a vote on. `knee-teh4`.
 #
+# THIS ARM HAS RUN — 2026-09-02, twelve of twelve epochs, best 0.8420 at e6 against `band_dense`'s
+# 0.8578. DO NOT RE-RUN IT; a session on 2026-09-04 re-armed and re-queued it from the belief that it
+# had not, and the four card-hours were recovered only by chance (`knee-xi4h2`). The reading is the
+# arm's own lowest branch, IT COSTS, and it is written up in `experiments/README.md`.
+#
+# TWO NUMBERS BELOW ARE THE WRONG ROW OF THE GATE, and they are left in place because they are what the
+# arm was pre-registered on. `logs/label_errors.log` reports a budget CURVE and, separately, a row for
+# cleanlab's own confident-joint mask — and the MASK is the selector this arm ran. On the 108 confident
+# false positives the mask reads precision 0.258, lift 1.63x. The 4.05x cited at lines 17 and 43 is the
+# plain RANKING read at a 3.7% budget this arm never used. More than half the 5,360 pruned cells were
+# cells the radiologist agreed with, which is the measured mechanism for the −0.0158. The strong number
+# is still available to a different selector: `knee-jom26`.
+#
 # THE DEFECT IS MEASURED, NOT HYPOTHESISED. Over the 58 radiologist-annotated studies
 # `reader_agreement.errors` counts 108 confident false positives against 32 misses, and
 # `supervision_gap` reads that where the report says YES the radiologist agrees 65.3% of the time. Both
