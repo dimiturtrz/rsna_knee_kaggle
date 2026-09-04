@@ -3032,6 +3032,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.suspect_teacher",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.suspect_teacher",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.suspect_teacher",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.suspect_teacher",
+      "target": "kneemri.evaluation.published_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.suspect_teacher",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.table_separation",
       "target": "core.bootstrap",
       "weight": 1
@@ -17671,6 +17701,48 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "target": "kneemri.evaluation.published_ruler.PublishedRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "target": "kneemri.evaluation.published_ruler.PublishedRuler.per_seed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "target": "kneemri.evaluation.suspect_teacher.SuspectTeacher.expressed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "target": "kneemri.inference.vote.RankAverage.combine",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.suspect_teacher.main",
+      "target": "kneemri.evaluation.suspect_teacher.SuspectTeacher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.suspect_teacher.main",
+      "target": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.table_separation.TableSeparation",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -29053,7 +29125,7 @@
       "role": null
     },
     {
-      "descendants": 227,
+      "descendants": 228,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29117,7 +29189,7 @@
       "role": null
     },
     {
-      "descendants": 71,
+      "descendants": 72,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29608,6 +29680,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.supervision_gap",
       "label": "supervision_gap",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.suspect_teacher",
+      "label": "suspect_teacher",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -33059,6 +33139,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.supervision_gap",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.suspect_teacher.SuspectTeacher",
+      "label": "SuspectTeacher",
+      "level": "class",
+      "parent": "kneemri.evaluation.suspect_teacher",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -44266,6 +44354,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.supervision_gap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.suspect_teacher.SuspectTeacher.expressed",
+      "label": "expressed",
+      "level": "method",
+      "parent": "kneemri.evaluation.suspect_teacher.SuspectTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.suspect_teacher.SuspectTeacher.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.suspect_teacher.SuspectTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.suspect_teacher.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.suspect_teacher",
       "role": null
     },
     {

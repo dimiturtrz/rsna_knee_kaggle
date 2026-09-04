@@ -183,7 +183,16 @@ class Supervision:
     """
 
     unread: Path | None = None
-    """A (study, target, value) table replacing the SCORE on cells the report never read, weight untouched.
+    """A (study, target, value) table replacing the SCORE on the cells it names, weight untouched.
+
+    IT IS THE VALUE-OVERRIDE CHANNEL, and it has two producers rather than one. `unread_teacher` writes
+    the cells the report never read; `suspect_teacher` writes a CORRECTED level for the cells an
+    independent signal says the reader got wrong — the same cells `suspect` prunes, kept in the loss and
+    pointed somewhere else instead. Both are (study, target, value) tables read the same way, so this
+    stays one field; which defect an arm is treating is stated by the arm, and the two are never mixed
+    in one run because that would be two variables.
+
+    The paragraphs below describe the FIRST producer, which is the one that named the field.
 
     The complement of `suspect`, and the reason both exist on one object. That switch reaches the cell
     where the reader was confident and wrong; this one reaches the cell where the reader said NOTHING.

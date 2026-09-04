@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# The same 1,932 flagged cells, CORRECTED instead of deleted. `knee-f8hv5`.
+#
+# WHY A THIRD ARM ON THE LABEL AXIS. `errors_dense` pruned cleanlab's mask and lost 0.0158.
+# `errors_rank` prunes the ranking's 1,932 instead, which is the SELECTOR fixed. This arm holds the
+# selector at exactly that table and changes the TREATMENT, so the pair is the ablation the label-noise
+# literature does not publish: nobody holds a detector fixed and compares discarding a cell against
+# re-labelling it. Prune and re-label are the only two things anyone does with a detected cell, and
+# after these two arms we will know which of them this corpus wants — or that it wants neither, which is
+# also a finding and closes the axis rather than leaving it open on an untried treatment.
+#
+# WHAT A PRUNE THROWS AWAY. The whole cell. A hard-but-correct study stops contributing any gradient,
+# and `errors_dense` measured those to be worth three to four times a random cell. At the ranking's own
+# precision of 0.640 a THIRD of what `errors_rank` deletes is correct, so a third of the strongest
+# supervision in the corpus goes with it. Re-labelling keeps every cell in the loss at its full weight
+# and changes only what it points at.
+#
+# THE MIXTURE IS THE FIELD'S. `y_hat = 0.6 * posterior + 0.4 * original`, which is Reed 2014's form with
+# BoMD's (ICCV 2023) ablated weight — 0.2 / 0.6 / 1.0 on one fixed detected set, 0.6 winning with both
+# extremes losing. The mechanism against pure posterior is that a wrong correction at full weight injects
+# a mislabel that now looks clean; the mechanism against a small alpha is that it barely moves the cell.
+# `kneemri.evaluation.suspect_teacher` writes the table and its module doc carries the citations.
+#
+# THE POSTERIOR IS OUT-OF-FOLD AND NOT OURS. The published pool's twenty checkpoints cover the whole
+# corpus, so no cell is corrected by a model that trained on it, and it is not our trunk correcting
+# itself. Its scores are mapped through their own corpus-wide rank onto the label column's own
+# distribution before mixing, so the two tables are in one space — the mistake `UnreadTeacher.band`
+# documents from the other side.
+#
+# THE TABLE ALREADY READS AS THE MECHANISM, before any card time. Every finding's flagged cells sit far
+# ABOVE the corpus mean and the correction pulls them down — ACL 0.7269 -> 0.3651 against a corpus mean
+# of 0.2995, Lateral Meniscus 0.7697 -> 0.3580 against 0.2800. That is the over-calling defect the gold
+# census measured (108 confident false positives against 32 misses) appearing corpus-wide, in a table
+# built without ever looking at the census. Synovitis is the one finding that moves UP (+0.1495 on 13
+# cells), and it is the finding that is 84.2% UNK.
+#
+# THE PREVALENCE SHIFT IS STATED, NOT ASSUMED SMALL. 1,932 of 52,872 cells at a mean of about -0.29 is
+# roughly -0.011 on the pooled target mean; per finding the largest is ACL, 235 of 4,407 cells at -0.362,
+# about -0.019 on a 0.2995 mean or -6.4% relative. A prevalence shift is the one thing a twelve-head
+# trunk transmits between heads, so if this arm lands high the shift is the first alternative explanation
+# to rule out and `arm_read`'s per-label table is where it would show.
+#
+# PRICE. ~2 h of card on `band_dense`'s recipe and its pixel cache, no decode owed. P(clears the 0.0062
+# floor) ~ 0.30, a little above `errors_rank`'s 0.25: the treatment keeps the hard cells rather than
+# deleting them, so the mechanism that made `errors_dense` cost is absent here. The honest case against
+# is that the pool's posterior on a cell is not much of an opinion — it was fitted on the same report
+# labels, so on a cell the reader got confidently wrong it may be confidently wrong the same way.
+#
+# PRE-REGISTERED, before the arm runs:
+#
+#   >= 0.8640   THE LABEL AXIS OPENS ON RE-LABELLING. +0.0062 over the best member the project owns.
+#               Next is the alpha curve (0.4 / 0.6 / 0.8) and a budget curve, in that order.
+#   0.8640 > s >= 0.8578   DIRECTIONAL. Keep the checkpoint and price its seat; not a finding.
+#   0.8578 > s >= 0.8516   FLAT. The cells are not carrying a correctable defect at this budget, and
+#               with `errors_rank` also flat the reading is that this detector's cells are HARD rather
+#               than WRONG, whatever cleanlab's confident joint calls them.
+#   < 0.8516    IT COSTS, and with both treatments having cost the axis is CLOSED on this corpus: the
+#               cells a model disagrees with are the highest-gradient cells in the corpus, confident
+#               learning selects them by construction, and neither deleting nor correcting them helps.
+#
+# THE JOINT READING, pre-registered so it is not composed after the fact. Against `errors_rank`:
+#   both high  — the cells are wrong and either treatment works; take the cheaper.
+#   relabel high, prune low — the field's claim holds here: the information in a hard cell is worth more
+#               than the damage its wrong label does, which is the whole case for correction.
+#   prune high, relabel low — the correction is itself noisy, and the pool's posterior is the suspect.
+#   both low   — see the `< 0.8516` branch; the axis closes.
+#
+# WHAT WOULD MAKE ME DISBELIEVE IT. `--unread-targets` is a PATH, and a path that does not exist reads
+# as no overrides at all while every log line looks healthy. Check the recorded recipe prints
+# `relabel_rank1932_a06.csv` and that the table has 1,932 rows BEFORE reading the score. Check also that
+# the run does NOT also name `--label-errors`: prune plus re-label on the same cells is two variables and
+# the arm means nothing.
+#
+# deliberate: --unread-targets (the arm's thesis, and its only difference from band_dense)
+# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 (band_dense's read exactly — the control)
+#
+# reading: logs/errors_relabel_ledger.log
+#
+# bead: knee-f8hv5
+#
+# control  band_dense_s2026 = 0.8578 (the control errors_dense and errors_rank both declared)
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+TAUGHT="$PROCESSED/relabel_rank1932_a06.csv"
+require "$LABELS"
+require "$TAUGHT"
+
+run_train errors_relabel \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --unread-targets "$TAUGHT" \
+  --labels "$LABELS" --out "$MODELS/errors_relabel_s2026.pt"
