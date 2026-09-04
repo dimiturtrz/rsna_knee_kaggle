@@ -13,6 +13,29 @@
 # medical pretraining. It cannot: with three variables moving, a null says nothing about which one
 # carried it.
 #
+# THAT 0.6716 IS VOID, AND NOT FOR THE THREE-VARIABLE REASON ABOVE (knee-cj40f, measured 2026-09-04).
+# It is a fact about a broken harness. Freezing here is `requires_grad_(False)`, which pins PARAMETERS
+# and does nothing to BUFFERS — and `running_mean`/`running_var` are buffers, updated by every forward
+# in `train()` mode, which `trainer.py` puts the whole model into each epoch. DenseNet-121's frozen
+# prefix is BatchNorm throughout. Measured in the checkpoint: all 121 BatchNorm layers, `norm0` and the
+# entire frozen prefix included, carry `num_batches_tracked = 226711`. At momentum 0.1 the effective
+# window is ~10 batches, so the RadImageNet statistics were not perturbed, they were REPLACED — while
+# the conv weights that consume them stayed pinned to RadImageNet and could not compensate, because
+# they were frozen. The frozen-features ridge probe reads 0.8197 on the same trunk precisely because it
+# runs in `eval()` with the original statistics.
+#
+# WHAT THAT DOES TO THIS ARM'S READING. The magnitude is unmeasurable — the pretrained weights are gone
+# locally (request-gated at source, mirror withdrawn), so no pretrained-vs-trained diff can be taken.
+# So 0.6716 is a LOWER BOUND on that trunk under a defect, not a reading of medical supervision. The
+# REFUTES branch below must NOT be read as "the corpus killed radnet_family": that arm's number no
+# longer says anything about the corpus. This arm is now the FIRST clean measurement of the medical
+# corpus at this scale rather than the second, and its four branches stand on their own controls
+# (`base_dense` 0.8512, `v3base_dense` 0.8455), which is where they should always have stood.
+#
+# THIS TRUNK IS NOT EXPOSED TO THAT DEFECT. It is a ViT: LayerNorm throughout, no running statistics,
+# nothing to replace. The blast radius is CNN trunks with a frozen prefix — DenseNet and ResNet here;
+# ConvNeXt, Swin and every ViT use LayerNorm and are unaffected.
+#
 # `Snarcy/RadioDino-b16` is the missing control for exactly that reading. ViT-B/16, twelve blocks, 768
 # wide, global attention over the same patch grid, trained with DINO self-distillation — the same
 # architecture as `v3base` and the same objective — differing from it in the pretraining CORPUS alone:
