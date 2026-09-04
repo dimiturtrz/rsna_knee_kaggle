@@ -152,7 +152,11 @@
 #
 # bead: knee-b7a50
 # deliberate: --batch --accumulate --variant --pair-memory
-# control  band_dense = 0.8578 (best epoch 8), identical flags with the incumbent trunk.
+# control  band_dense = 0.8578 (best epoch 8). CORRECTED 2026-09-04: this line was wrong. band_dense
+#          carries variant=small and pair_memory=0 in its checkpoint config — it passes no --variant and
+#          options.py:186 defaults to SMALL — so it is NOT identical flags and NOT this trunk. The
+#          difference against it moves trunk size and pair mechanism together (knee-4joaj). The matched
+#          control is v3large_stack = 0.8277, which differs in `variant` and nothing else: +0.0140.
 #          ortho_dense = 0.8452, identical trunk at 224 px / 12 slices.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

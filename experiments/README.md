@@ -7225,7 +7225,7 @@ the anneal ran and the arm declined after its peak, which is a fit, not a killed
 
 | arm | trunk | recipe | holdout |
 | --- | --- | --- | --- |
-| `band_dense` | v3large (incumbent) | batch 12, rank term ON | **0.8578** |
+| `band_dense` | **`dinov2-small`, 22M ViT-S/14** (read from its checkpoint config, not its header) | default batch, rank term ON, no pair memory | **0.8578** |
 | `ortho_dense` | ortholarge | 224 px / 12 slices | 0.8452 |
 | `ortho_stack` | ortholarge | whole stack, batch 1 / accumulate 12 / pair-memory 66 | **0.8417** |
 | `v3large_stack` | v3large (incumbent) | identical to the row above | **0.8277** |
@@ -7247,12 +7247,27 @@ the RECIPE, both ortho rows were measured under a handicap, and the lane is stil
 outcome available, and the one this pair exists to make visible rather than to hide.
 
 **THE CONTROL LANDED AT 0.8277, AND IT IS THE TOP BRANCH: `ortho_stack` − `v3large_stack` = +0.0140,
-above the 0.0062 floor. The knee continuation carries to the operating point we actually ship.** Neither
-of the two outcomes the paragraph above hedged between happened: the control did not land near
-`band_dense` (it is 0.0301 under it), and it did not land near 0.842 either — it landed 0.0140 BELOW
-`ortho_stack`. So the −0.0161 against `band_dense` is not the trunk. It is the recipe: batch 1 with a
-66-step pair memory costs the incumbent trunk 0.0301, and the ortho trunk pays that same handicap and
-still finishes ahead of it.
+above the 0.0062 floor. The knee continuation carries to the operating point we actually ship.** That
+contrast is matched by construction — the two checkpoints' configs differ in `variant` and in nothing
+else — and it is the only statement here that does not depend on the paragraph above.
+
+**BUT `band_dense` IS NOT THE TRUNK EITHER ARM'S HEADER SAYS IT IS, so the hedge above was posed against
+a control that never existed.** `ortho_stack.sh` names it "identical flags with the incumbent trunk" and
+the table's first row called it v3large. Read from the checkpoint rather than the prose,
+`band_dense_s2026` carries `variant=small` and `pair_memory=0`: the arm passes no `--variant`,
+`options.py:186` defaults it to `SMALL`, and `backbone.py:103` maps that to `facebook/dinov2-small` — a
+**22M ViT-S/14, from DINOv2**. So `ortho_stack` − `band_dense` = −0.0161 moves the TRUNK SIZE, the trunk
+FAMILY and the pair mechanism at once, and `v3large_stack` − `band_dense` = −0.0301 does the same.
+Neither prices the recipe, and the "worst outcome available" the paragraph above described cannot be read
+off these rows at all. `v3large_stack.sh:5` had the direction right and the size wrong (it says an 86M
+ViT-B); `ortho_stack.sh` had it backwards outright. Both headers and the table are corrected, filed P1 as
+knee-4joaj.
+
+**The number that survives all of this is the one nobody was looking at: a 22M DINOv2-small at 336 px /
+20 slices reads 0.8578, above every 303M ViT-L row the project owns at that geometry.** Under the
+pair-memory recipe the ViT-L loses to a trunk a fourteenth its size. That is either a real statement
+about capacity at this data scale or the entire measured cost of the batch-1 substitution, and the two
+are not currently separable — which is exactly what `band_pairmem` is queued to fix.
 
 | operating point | ortho | v3large | continuation delta |
 | --- | --- | --- | --- |
@@ -7266,13 +7281,20 @@ data — is refuted at the point we ship. **The in-domain trunk lane is OPEN**, 
 decline now has an argument standing against it rather than beside it: that decline priced the trunk at
 the SEAT (−0.0050) under a recipe we now know handicaps every trunk in it by 0.03.
 
-**WHAT THIS DOES NOT SAY.** It does not say ortholarge belongs on the roster. Both rows sit under
-`band_dense` = 0.8578 on the fitted ruler, so nothing here beats the incumbent member; what moved is which
-VARIABLE owns the deficit. The follow-up the pair licenses is the ortho trunk at `band_dense`'s OWN recipe
-(batch 12, ranking term on, 224/12) — the one contrast the project has never run — and that is a ~40-minute
-arm, not a family. Priced against the 1.5% bar: the continuation is worth +0.014-0.019 solo wherever it has
-been measured, which does not clear it alone, so this lane earns card time as a MEMBER-quality lever behind
-`radnet_pinned`, not ahead of it.
+**WHAT THIS DOES NOT SAY.** It does not say ortholarge belongs on the roster. Both ViT-L rows sit well
+under the small-trunk `band_dense` = 0.8578 on the fitted ruler, and the project has NO measurement of a
+ViT-L at 336 px / 20 slices without the pair-memory substitution — `ortho_stack.sh:38` prices that
+configuration at 106144 MiB against a 32 GB card, so the un-handicapped ViT-L row is not merely unrun, it
+is unrunnable at this geometry. Every ViT-L number the project owns at the shipped operating point carries
+the batch-1 handicap, and its size is unmeasured. That is the gap the family's headers have been reading
+past, and it is why the four-row table above supports exactly one comparison.
+
+Priced against the 1.5% bar: the continuation is worth +0.0140-0.0194 solo wherever it has been measured
+MATCHED, which does not clear it alone, and no ortho row has yet beaten a small-trunk member that costs a
+fraction of the serve. So this lane earns card time behind `radnet_pinned`, not ahead of it. The cheap
+instrument that would price the handicap is `band_dense`'s own flag set at `--batch 1 --accumulate 12
+--pair-memory 66` on the SMALL trunk — same trunk, same geometry, one variable, and it fits — after which
+every ViT-L row above becomes readable rather than suggestive.
 
 **NEITHER ORTHO ROW WAS IN THIS LEDGER BEFORE TODAY.** `ortho_dense`'s reasoning lived in
 `comp/members.declines` and its number in `interpretations/`, so a grep of this file for the trunk that has

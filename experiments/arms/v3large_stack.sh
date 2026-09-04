@@ -3,7 +3,10 @@
 #
 # WHY THIS ARM EXISTS. `ortho_stack` moves ONE variable against `ortho_dense` (the recipe, 12 slices at
 # 224 px -> 20 at 336) and TWO against its stated control `band_dense` (the recipe AND the trunk, a
-# 303M ViT-L against an 86M ViT-B). So `ortho_stack` alone cannot separate the two readings its own
+# 303M ViT-L against an 86M ViT-B — CORRECTED 2026-09-04: band_dense's checkpoint carries
+# `variant=small`, which backbone.py:103 maps to `facebook/dinov2-small`, a 22M ViT-S/14. The gap is
+# larger than this line said and the family it crosses is DINOv2, not DINOv3. See knee-4joaj).
+# So `ortho_stack` alone cannot separate the two readings its own
 # middle branch collapses together:
 #
 #   (a) the knee-continuation gain is REAL but resolution-bound — it was worth +0.0194 at 224/12 and
