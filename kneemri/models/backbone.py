@@ -60,6 +60,8 @@ SWIN_BASE = "swinbase"
 VIT_IN21K = "vitin21k"
 RADIMAGENET_DENSENET = "radnet121"
 RADIODINO_BASE = "radiodinob16"
+RADIODINO_SMALL = "radiodinos16"
+RADIODINO_SMALL_P8 = "radiodinos8"
 MEDSAM_BASE = "medsam"
 
 DINOV2 = "dinov2"
@@ -646,6 +648,52 @@ ENCODERS: dict[str, Encoder] = {
         # `radiodino_corpus` trained three epochs of a from-scratch trunk against a pre-registration
         # about medical pretraining. `refuse_unloaded` now refuses it; `TimmHubWeights` loads it.
         builder=TimmHubWeights("vit_base_patch16_224", 768, repository="Snarcy/RadioDino-b16").build,
+    ),
+    # THE PATCH-SIZE AXIS, added 2026-09-04, and the two rows below exist ONLY as a pair. Dehghan et al.
+    # (arXiv:2602.18614) measured smaller patches beating 14/28 across twelve medical datasets — up to
+    # +12.78% balanced accuracy in 2D — which is a real mechanism for a task whose findings are thin
+    # localised structures read off a slice. But `s8` against `b16` alone would move patch size and trunk
+    # width together, and this registry already has enough family changes that varied two things at once.
+    # `s16` is the control that holds width at 384 so the pair reads patch size and nothing else.
+    #
+    # SAME PACKAGING FAULT AS `b16`. Both `config.json` files name `ViTModel` over timm-keyed weights, so
+    # both load through `TimmHubWeights` and neither may use `from_hub`. Verified against the actual key
+    # prefixes (`blocks`, `cls_token`, `patch_embed`, `pos_embed`), not inferred from the sibling entry.
+    #
+    # `s8` IS FOUR TIMES THE TOKENS at a fixed read — 28x28 against 14x14 at 224 — so its cost is a
+    # sequence-length cost, not a parameter one, and an arm on it must be priced at that rather than at
+    # its 21M parameters.
+    RADIODINO_SMALL: Encoder(
+        RADIODINO_SMALL,
+        "Snarcy/RadioDino-s16",
+        384,
+        patch=16,
+        family=RADIODINO,
+        normalization=IMAGENET,
+        normalization_evidence=(
+            "Same release, same card, same usage snippet as `radiodinob16`: resize to 224 then "
+            "`transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])`, which is "
+            "IMAGENET exactly and is also the DINO framework's own default."
+        ),
+        leaf="radiodino-s16",
+        params_m=21.7,
+        builder=TimmHubWeights("vit_small_patch16_224", 384, repository="Snarcy/RadioDino-s16").build,
+    ),
+    RADIODINO_SMALL_P8: Encoder(
+        RADIODINO_SMALL_P8,
+        "Snarcy/RadioDino-s8",
+        384,
+        patch=8,
+        family=RADIODINO,
+        normalization=IMAGENET,
+        normalization_evidence=(
+            "Same release, same card, same usage snippet as `radiodinob16`: resize to 224 then "
+            "`transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])`, which is "
+            "IMAGENET exactly and is also the DINO framework's own default."
+        ),
+        leaf="radiodino-s8",
+        params_m=21.4,
+        builder=TimmHubWeights("vit_small_patch8_224", 384, repository="Snarcy/RadioDino-s8").build,
     ),
     # THE FIRST TRUNK PRETRAINED ON A DENSE OBJECTIVE, added 2026-09-04. Every encoder above was fitted
     # either without labels (DINOv2/v3, ConvNeXtV2, V-JEPA2, RadioDino) or on one label per image (Swin,
