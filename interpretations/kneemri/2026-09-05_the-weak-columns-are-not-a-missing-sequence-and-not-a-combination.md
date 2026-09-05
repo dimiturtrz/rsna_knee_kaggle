@@ -89,6 +89,33 @@ term that was already called dead.
 of 108 by a hundredth or two in the weak columns and loses in three others. There is no member hiding
 in the roster that reads MCL or Fracture well; every member reads them badly.
 
+## And one of the three is not a target, because it cannot be READ
+
+`label_power` prices the instrument rather than the model: how precisely a per-column AUC can be
+measured at all, given that column's positive count. On the 881-study fold at AUC 0.85:
+
+| finding | positives | SE | 95% half-width | our AUC | gap to 0.90 | gap in SE |
+|---|---:|---:|---:|---:|---:|---:|
+| MCL | 153 | 0.0202 | ±0.040 | 0.7931 | 0.107 | **5.3** |
+| Lateral OA | 217 | 0.0172 | ±0.034 | 0.8156 | 0.084 | **4.9** |
+| Fracture | 62 | 0.0311 | ±0.061 | 0.8088 | 0.091 | 2.9 |
+
+MCL and Lateral OA are real, resolvable weaknesses — five standard errors is not a sampling story, and
+an arm that moved either of them would be readable on the holdout we already own. **Fracture is not a
+target.** Its own ±0.061 interval is two thirds of the gap being chased, so a full +0.09 lift would land
+inside the width of the ruler that has to confirm it; and the ledger already recorded the consequence
+before I priced it — `label_power`'s own docstring notes Fracture reading 0.784 / 0.903 / 0.864 across
+three folds under an IDENTICAL recipe. That is the same column disagreeing with itself by more than the
+lift an arm would be spending hours to buy.
+
+**So the axis re-prices.** MCL and Lateral OA to 0.90 is (0.107 + 0.084) / 12 = **+0.0159 of board**,
+which still clears the result bar on its own. Fracture's +0.0076 stays in the arithmetic only as
+something that may come for free with a shared mechanism — never as a thing an arm is aimed at, and
+never as a number quoted from a single holdout.
+
+(The per-column AUCs are `band_dense`'s on the 909-study holdout; the SEs are the 881-study fold. The
+two denominators differ by 3%, which moves an SE in the fourth decimal and none of this reading.)
+
 ## What that leaves
 
 Both hypotheses were the cheap ones, and both are gone without touching the card. What survives on the
