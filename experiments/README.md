@@ -7608,3 +7608,45 @@ genuinely saw different structure should have failed somewhere ELSE. It failed i
 places, which says the weakness is in the SUPERVISION or the DATA and not in the trunk family. That is
 the same conclusion `colmcl` reached from the board side, arrived at from the architecture side, and it
 is why the next slots go to locating the board's headroom rather than to another trunk.
+
+### `errors_rank` — pruning detector-flagged cells COSTS, and it costs most where the detector fires most — 2026-09-05
+
+Arm `experiments/arms/errors_rank.sh`, bead knee-jom26, reading `logs/errors_rank_ledger.log`.
+Control `band_dense_s2026` 0.8578 (peak e8). Twelve epochs run, peak e6 **0.8462**, plateau e7-e11
+(0.8424 / 0.8448 / 0.8427 / 0.8415 / 0.8415) — `convergence_check` silent, so this is a converged
+number and not a killed process. **Delta -0.0116**, which lands under 0.8516: the arm's OWN lowest
+pre-registered branch, "IT COSTS AGAIN".
+
+Eleven of twelve columns fall and one rises:
+
+| column | control | errors_rank | delta |
+|---|---|---|---|
+| ACL | 0.8740 | 0.8842 | +0.0102 |
+| MCL | 0.7931 | 0.7616 | **-0.0314** |
+| Lateral Meniscus | 0.8464 | 0.8177 | -0.0287 |
+| PF OA | 0.8583 | 0.8386 | -0.0197 |
+| Fracture | 0.8088 | 0.7911 | -0.0177 |
+| Medial Meniscus | 0.9047 | 0.8906 | -0.0141 |
+| Medial OA | 0.8797 | 0.8701 | -0.0097 |
+| Lateral OA | 0.8156 | 0.8060 | -0.0096 |
+| Synovitis | 0.8764 | 0.8672 | -0.0092 |
+| Contusion | 0.8705 | 0.8670 | -0.0036 |
+| Effusion | 0.8595 | 0.8560 | -0.0035 |
+| Baker's | 0.9065 | 0.9045 | -0.0020 |
+
+THE MECHANISM IS IN THE ORDERING, not the mean. MCL is the largest loss, and MCL is the column the
+overcall detector fires on hardest — `report_labels_v2` is the worst of the four reader tables on the
+58-study panel, and the audit counts 108 false positives against 32 misses. So the cells the detector
+calls wrong are the cells that carry MCL's supervision, and dropping them drops the column. This is a
+broad effect rather than one column's artifact: the loss is monotone across the table with a single
+exception, which is what a supervision cut looks like and not what noise looks like.
+
+That is `errors_dense`'s reading confirmed a second time from the opposite direction. Per its own
+pre-registration the axis now lives or dies on `errors_relabel` (knee-f8hv5) — RELABEL rather than
+PRUNE, on the card since 02:05Z, ETA ~04:00Z.
+
+Per Q-RULER4 and Q-RULER6 (Kimi, 2026-09-05) this delta has NO offline protection against board
+reversal: control and arm differ in SUPERVISION, which is exactly the case where the shared-label-noise
+assumption behind a paired comparison fails, and the model-free discordant-pair bound over the 58-study
+panel is vacuous (smallest 0.31 against deltas of ~0.01). The sign is trusted here because it is large
+and monotone, not because the panel protects it.

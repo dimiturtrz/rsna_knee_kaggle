@@ -363,3 +363,37 @@ the studies, and the four disagree with each other far more than sampling noise 
 makes agreement across them informative. That is 909 studies rather than 58, costs no card and no slot,
 and is the strongest offline ruler this project can actually build. It is not a proof of board transfer.
 Nothing offline is. It is the difference between one table's opinion and four.
+
+## 4. Q-LEFT came back a clean negative, and the repo had already priced the one mechanism it named
+
+I asked Kimi the question the closed axes leave: name a PUBLISHED mechanism that moves a mean of twelve
+per-column AUCs by 0.01, under our constraints. Their answer, verbatim:
+
+> "**Nothing I can find**, under the constraints you listed… TTA: typically +0.001–0.003 AUC at
+> saturation; you already run it. Slice-level attention / 2.5D fusion (MST, DinoAtten3D, CoPAS):
+> +0.002–0.005… Multi-task / auxiliary supervision / label-correlation modeling: +0.001–0.004…
+> AUC-margin / ranking losses: mixed, usually within noise. Self-supervised pretraining on in-domain
+> unlabeled data: the one mechanism that *can* give +0.005–0.010, but only when the pretraining corpus
+> is large and task-matched."
+>
+> "My clean answer: **no published mechanism meets the Q-LEFT bar without more data.**"
+
+I tried to break the closure on its own premise and failed, which is worth recording because the failure
+is the useful part. Kimi's supporting claim is "there is no hidden reservoir of unlabeled knee MRIs to
+pretrain on", and on this repo's terms that is FALSE: `core/data/corpus/fastmri_corpus.py` and
+`rijeka_corpus.py` are both wired up, and 231 fastMRI presigned URLs are held. The reservoir exists.
+
+The closure survives anyway, because the lever was never priced on corpus availability. `knee-fqit7`
+priced it on two ledger rows and a compute curve: OrthoFoundation is somebody else's DAPT on our own
+modality and our own joint, at 1.2M images, and it is ALREADY A MEMBER HERE as `ortholarge`. It reads
+`ortho_stack` 0.8417 against `v3large_stack` 0.8277, so DAPT is worth about **+0.014 at matched ViT-L**
+— and the ViT-L lane itself costs about that much against ViT-B, so the net against `base_dense` 0.8512
+is a wash. There is no published DINO-objective medical gain at a 12 GPU-hour budget; the positives are
+ExPLoRA at 80–100 GPU-h and BrainFound at ~104 GPU-h. P(clears 1.5%) = 0.08.
+
+So the right correction is to my objection, not to Kimi's conclusion. Having the data does not re-open a
+lever that was priced on effect size and compute. The bead's own RE-OPEN BY clause is the only live path
+and it is cheap: the two ortho rows were both run against ViT-L controls, and the trunk-size handicap was
+measured only afterwards (`band_pairmem`, knee-710gi). An ortho arm on the DENSE recipe against a ViT-L
+control at the same read separates DAPT from trunk size properly, and that is **2 h of card, not 12**.
+That is the next thing to queue when `errors_relabel` clears.
