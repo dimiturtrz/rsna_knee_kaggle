@@ -55,6 +55,14 @@ RECORD = Path("comp/board.jsonl")
 LEDGER = Path("comp/SUBMISSIONS.md")
 KERNELS = Path("comp/kernels")
 COMPETITION = "rsna-knee-abnormality-detection"
+PAGE = 100
+"""How many submissions one live page carries. A page SHORTER than this is the last one, which is the
+only end-of-history signal the API gives - so the value has to be the one actually requested, never a
+number that merely looks like the page size."""
+PAGES = 20
+"""A ceiling on the paging loop, not a budget. Five slots a day cannot reach 2000 submissions inside this
+competition, so hitting it means the short-page signal stopped arriving - and a live call that repeats
+forever is worse than one that stops early, because Kaggle answers the eleventh with a 429."""
 KERNEL_PREFIX = "kneemri-"
 VERSION_MARK = "_v"
 """How an entry id carries its revision (`chosen_v2`), and the prefix every kernel directory takes. An
@@ -419,19 +427,30 @@ class LiveBoard:
 
     @classmethod
     def taken(cls, lister: Callable[[], list[tuple[str, str]]] | None = None) -> "LiveBoard":
-        """Ask Kaggle, or ask whatever was injected in its place. Page size covers the whole history."""
+        """Ask Kaggle, or ask whatever was injected in its place."""
         listed = lister() if lister is not None else cls._kaggle()
         return cls({ref: float(score) if score else None for ref, score in listed})
 
     @staticmethod
     def _kaggle() -> list[tuple[str, str]]:
-        """The real round trip, kept in one place so every other path is credential-free."""
+        """The real round trip, kept in one place so every other path is credential-free.
+
+        PAGED, because one page is not the history. This asked for `page_size=100` and stopped there,
+        and on 2026-09-05 the 107th submission pushed seven real rows off the end of that page - which
+        this check then reported as seven records the board does not hold. A phantom-record alarm that
+        fires because the LISTING was short is the one failure a record check must not have.
+        """
         from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
 
         api = KaggleApi()
         api.authenticate()
-        listed = api.competition_submissions(COMPETITION, page_size=100) or []
-        return [(str(sub.ref), str(sub.public_score or "")) for sub in listed if sub is not None]
+        listed: list[tuple[str, str]] = []
+        for page in range(1, PAGES + 1):
+            batch = api.competition_submissions(COMPETITION, page_size=PAGE, page_number=page) or []
+            listed += [(str(sub.ref), str(sub.public_score or "")) for sub in batch if sub is not None]
+            if len(batch) < PAGE:
+                break
+        return listed
 
 
 def main() -> None:

@@ -4377,6 +4377,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.board_check",
+      "target": "kneemri.evaluation.board_transfer",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.board_check",
       "target": "kneemri.evaluation.selection_bias",
       "weight": 1
     },
@@ -25047,13 +25053,43 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
-      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.fixed",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
       "weight": 1
     },
     {
@@ -25066,6 +25102,24 @@
       "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "weight": 1
     },
     {
@@ -25087,32 +25141,44 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "target": "kneemri.evaluation.record_mix.RecordMix",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
       "kind": "construct",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
       "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
@@ -25120,6 +25186,12 @@
       "kind": "construct",
       "source": "kneemri.kaggle.priceable_blend.main",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.main",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
       "weight": 1
     },
     {
@@ -51486,8 +51558,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "label": "halves",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
       "label": "on_the_corpus_ruler",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
+      "label": "optimism",
       "level": "method",
       "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
       "role": null
@@ -51512,6 +51600,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
       "label": "scored",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.scored_on",
+      "label": "scored_on",
       "level": "method",
       "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
       "role": null

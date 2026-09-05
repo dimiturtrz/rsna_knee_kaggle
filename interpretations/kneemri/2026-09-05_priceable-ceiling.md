@@ -85,3 +85,32 @@ that is tight only because the anchor is one point. Shipping it tests the ruler,
   and greedy search over the holdout is not a tool this project may use to choose an entry.
 
 It is an INSTRUMENT. It is predicted to score BELOW the champion and cannot improve board position.
+
+## The prediction was measured AFTER it shipped, and it is 0.020 too high
+
+`priceable_blend --optimism` selects on 455 of the 909 holdout studies and prices what it found on the
+454 it never saw. It reads **selection half 0.8841, held-out half 0.8641 — optimism +0.0201**.
+
+That is larger than the entire +0.0121 the seven seats bought over the best single member. Forward
+selection over 195 members on 909 studies does not find a better ensemble; it finds the holdout. The
+seat list is the second piece of evidence and it is the stronger one: run on half the studies the search
+accepts six seats — `finding_calib_dense_s2026`, `band_dense_long_s2026`, `base224_s2026`,
+`ramp_dense_gate`, `margin_seat_s2026`, `calib_span_s2026` — of which only two are among `ceiling5`'s
+five. A search whose answer does not survive halving its own ruler was not measuring the pool.
+
+Three things change and one does not.
+
+1. **`ceiling5`'s 0.8757 is inflated by about 0.020.** Its honest offline is near 0.856, BELOW the 0.8642
+   the best single member reads. The 0.938 prediction is therefore too high and the branch to expect is
+   **below 0.936** — which reads exactly as it was written, "selection optimism exceeds the gain", now
+   with the size of that optimism known independently before the board answers.
+2. **`distinct14` is not inflated the same way**, or not by this mechanism: it declares no `selection`
+   field at all (`board_check` refuses on that, knee-jsgb), and if its fourteen were DESIGNED then
+   comparing a searched 0.8757 against a designed 0.8749 handed the searched side a free +0.020. The
+   anchor is fine; the comparison was not.
+3. **The pool's honest ceiling is ~0.864, not 0.876.** The 0.953 target needs offline ~0.891, so the gap
+   a better single model has to close is about **+0.027**, not +0.015.
+
+What does NOT change is the conclusion, which gets stronger: ensembling over this pool is saturated, and
+no selection, weighting or seating operation reaches the target. The board said that in seven flats; the
+offline arithmetic now says it twice, once with the selection gain counted and once with it removed.

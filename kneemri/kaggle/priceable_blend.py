@@ -22,10 +22,13 @@ a greedy answer is comparable to the entries already on the board rather than be
 object. The stopping rule is a gain under `MIN_GAIN`, not a fixed width, because a blend that stops
 improving has found its own size.
 
-THE NUMBER THIS PRINTS IS NOT A SEAT ARGUMENT. Selection over a holdout is selection, and the score it
-reports is optimistic by construction — the same reason the member axis is closed on the board rather
-than on this ruler. Read it as the CEILING of the priceable pool, which is what prices an arm: an arm
-that cannot beat this pool's best member is not going to move an entry built from it.
+THE NUMBER THIS PRINTS IS NOT A SEAT ARGUMENT, and `--optimism` now says by how much. Selecting on 455
+of the 909 holdout studies and pricing on the 454 it never saw reads 0.8841 against 0.8641: **+0.0201**,
+larger than the entire +0.0121 the seven seats buy over the best single member. Run on half the studies
+the search accepts a six-seat blend sharing only two members with the five it accepts on all of them, so
+the search does not reproduce on its own ruler. SUBTRACT the optimism before comparing a searched offline
+with an unsearched one, and read the raw number as a CEILING rather than an estimate: an arm that cannot
+beat this pool's best member is not going to move an entry built from it.
 """
 
 import logging
@@ -99,14 +102,38 @@ class PriceableBlend:
             tables.setdefault(np.load(record.path, allow_pickle=True)["truth"].tobytes(), []).append(member)
         return max(tables.values(), key=len) if tables else []
 
-    def scored(self, members: list[Path]) -> float:
-        """The blend's mean per-label AUC over the studies all of its members held out."""
+    def scored_on(self, members: list[Path], studies: set[str] | None) -> float:
+        """The blend's mean per-label AUC, over `studies` if given and over the whole shared split if not.
+
+        Restricted by study NAME rather than by row index on purpose: every subset of members intersects
+        to its own shared split, so a row that is study 40 for one pair is study 37 for the next. A name
+        survives that; an index quietly prices a different set of patients.
+        """
         mix = RecordMix(members, foreign=True)
         mix.narrow()
         pool = mix.per_member(VOTE_RULES[self.vote]())
-        return LabelScores().mean(pool.combined(list(range(len(pool)))), pool.truth)
+        combined = pool.combined(list(range(len(pool))))
+        if studies is None:
+            return LabelScores().mean(combined, pool.truth)
+        rows = [index for index, name in enumerate(mix.shared()) if name in studies]
+        return LabelScores().mean(combined[rows], pool.truth[rows])
 
-    def chosen(self) -> list[tuple[str, float]]:
+    def scored(self, members: list[Path]) -> float:
+        """The blend's mean per-label AUC over the studies all of its members held out."""
+        return self.scored_on(members, None)
+
+    def halves(self) -> tuple[set[str], set[str]]:
+        """The shared studies cut in two, so a search and the price of what it found share no study.
+
+        Cut by sorted position rather than at random: the split has to be the same one on every run, or
+        the optimism it measures is partly the split moving underneath it.
+        """
+        mix = RecordMix(self.on_the_corpus_ruler(self.candidates()), foreign=True)
+        mix.narrow()
+        studies = sorted(mix.shared())
+        return set(studies[0::2]), set(studies[1::2])
+
+    def chosen(self, studies: set[str] | None = None) -> list[tuple[str, float]]:
         """The greedy blend, as (member name, the blend's score once it joined)."""
         pool = self.on_the_corpus_ruler(self.candidates())
         picked: list[Path] = []
@@ -114,7 +141,7 @@ class PriceableBlend:
         best = 0.0
         while len(picked) < self.width:
             step = max(
-                ((self.scored([*picked, one]), one) for one in pool if one not in picked),
+                ((self.scored_on([*picked, one], studies), one) for one in pool if one not in picked),
                 default=(0.0, None),
             )
             if step[1] is None or step[0] - best < MIN_GAIN:
@@ -123,6 +150,30 @@ class PriceableBlend:
             picked.append(winner)
             history.append((winner.stem, best))
         return history
+
+    def optimism(self) -> list[str]:
+        """How much of a searched blend's offline score is the search finding the holdout rather than a
+        better ensemble: select on one half of the studies, price on the other, report the drop.
+
+        This is the number every prediction in this module has been missing. `report` compares a SEARCHED
+        offline against `distinct14`'s, and if that anchor was not itself searched the comparison hands
+        the searched side a head start of exactly this size. Subtract it before predicting a board score,
+        or the prediction is optimistic by construction and will read as a ruler inversion when the board
+        answers lower.
+        """
+        left, right = self.halves()
+        history = self.chosen(left)
+        if not history:
+            return ["REFUSED: no priceable member is on disk. A search that measured nothing has not passed."]
+        members = [self.models / f"{name}.pt" for name, _ in history]
+        inside = self.scored_on(members, left)
+        outside = self.scored_on(members, right)
+        return [
+            f"selected on {len(left)} studies, priced on the {len(right)} it never saw",
+            f"{len(history)} seats: {', '.join(name for name, _ in history)}",
+            f"selection half {inside:.4f}, held-out half {outside:.4f}",
+            f"optimism {inside - outside:+.4f} — subtract it from any searched offline before predicting",
+        ]
 
     def predicted(self, offline: float) -> tuple[float, float]:
         """The board band this offline score implies, through the top regime compression."""
@@ -161,11 +212,17 @@ def main() -> None:
     command.parser.add_argument("--vote", choices=tuple(VOTE_RULES), default="rank")
     command.parser.add_argument("--width", type=int, default=DEFAULT_WIDTH, help="the most seats to accept")
     command.parser.add_argument("--members", nargs="*", help="score exactly these members instead of searching")
+    command.parser.add_argument(
+        "--optimism",
+        action="store_true",
+        help="measure how much of a searched score is the search itself: select on half the studies, "
+        "price on the other half",
+    )
     arguments = command.parsed()
     root = command.rooted(arguments)
 
     blend = PriceableBlend(root.models(), arguments.vote, arguments.width)
-    command.report(blend.report(arguments.members))
+    command.report(blend.optimism() if arguments.optimism else blend.report(arguments.members))
 
 
 if __name__ == "__main__":

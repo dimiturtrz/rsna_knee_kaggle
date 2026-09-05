@@ -64,6 +64,36 @@ def test_scored(tmp_path: Path):
     assert 0.5 < blend.scored([tmp_path / f"{STRONG}.pt"]) <= 1.0, "predictions built from the truth beat chance"
 
 
+def test_scored_on(tmp_path: Path):
+    """A study subset prices only those studies, so the two halves are scored apart."""
+    blend = _blend(tmp_path)
+    left, _ = blend.halves()
+    weak = [tmp_path / "weak_s2026.pt"]
+
+    half = blend.scored_on(weak, left)
+
+    assert half != blend.scored(weak), "half the studies is not the whole split"
+
+
+def test_halves(tmp_path: Path):
+    """The cut is exhaustive, disjoint and the same on every run."""
+    blend = _blend(tmp_path)
+
+    left, right = blend.halves()
+
+    assert not left & right, "a study used to select can never be a study used to price"
+    assert len(left) + len(right) == STUDIES, "every shared study lands on one side"
+    assert (left, right) == blend.halves(), "the cut is positional, so it does not move between runs"
+
+
+def test_optimism(tmp_path: Path):
+    """The report names both halves and closes on the drop between them."""
+    lines = _blend(tmp_path).optimism()
+
+    assert "it never saw" in lines[0], "the held-out half is stated before any number is"
+    assert lines[-1].startswith("optimism "), "the last line is the correction the measurement exists for"
+
+
 def test_chosen(tmp_path: Path):
     """Forward selection opens on the strongest member and never exceeds its width."""
     history = _blend(tmp_path).chosen()

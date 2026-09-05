@@ -86,7 +86,7 @@ still, so the model re-pins them on the way out. A wrapper a run turns on is a c
 on every call whether anything asked or not, which is the point — the drift it prevents cost one whole
 trunk-family arm before it existed."""
 
-TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay"}
+TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay", "backbone_rate"}
 MODEL_REPORTER = {"applied"}
 """Each object's account of WHICH policies landed on it — read by `Landed` before the card is spent.
 
@@ -104,6 +104,11 @@ keyword carried in `Adaptation`, so there is no attachment step to miss, and the
 coefficient back off the built optimiser's first group. That read is the whole point — a keyword that
 never arrived leaves the run training at the inherited value with the flag's value in its config, and
 only asking the optimiser can tell the two apart.
+
+`backbone_rate` is `encoder_rate_decay`'s twin, added with it in 9dcc35c9 and left out of this set, which
+failed the gate on main until 2026-09-05. It reports the ANCHOR the decay is a ratio of, captured off the
+optimiser's groups the moment they are built. Same shape, same reason: `--backbone-lr` is consumed while
+the groups are constructed, so there is no attachment for a builder to make and nothing here to call.
 """
 
 
