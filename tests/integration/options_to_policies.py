@@ -64,8 +64,13 @@ NOT_A_WRAPPER = {
     "slot_features",
     "supervised",
     "train",
+    "window",
 }
 """`StudyModel` methods that are the model's own behaviour rather than something a run switches on.
+
+`window` is arithmetic over the encoder's depth, asked by whoever is about to build the optimiser. It
+attaches nothing and changes nothing; the run switch it serves is `--unfreeze-last`/`--unfreeze-offset`,
+and what LANDED is checked through `frozen_top_blocks`, not by anyone having called this.
 
 `check_whole_stack` is a REFUSAL, not a wrapper: `--whole-stack` is switched on by the trainer, and the
 model's part is to say at startup whether it can take the window at all. It attaches nothing, so a
@@ -235,7 +240,7 @@ def test_every_readout_a_run_can_ask_for_reaches_the_optimiser(
         options, design = arm(name)
         model = RunSetup(options).model(ENCODER, SLOTS, design, DEVICE)
 
-        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(4))
         grouped = [id(tensor) for group in groups for tensor in cast("list[torch.nn.Parameter]", group["params"])]
         trainable = {id(tensor) for tensor in model.parameters() if tensor.requires_grad}
 

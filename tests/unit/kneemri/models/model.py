@@ -8,12 +8,14 @@ import torch
 from torch import Tensor, nn
 
 from kneemri.models.backbone import IMAGENET, RAD_DINO
+from kneemri.models.encoder_surgery import BlockWindow
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
     COMPILED_PREFIX,
     DEPTH_REGIONS,
+    FROZEN_TOP,
     OPENED_BLOCKS,
     RECOMPUTING,
     TARGETS,
@@ -331,7 +333,7 @@ def test_low_rank():
     adapted = model.low_rank(rank=2)
     assert adapted == 36, "three Linears in each of twelve blocks, attention and MLP alike"
 
-    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=6)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(6))
     opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
     assert opened, "the adapters must be trainable"
     assert all(parameter.requires_grad for parameter in opened)
@@ -428,9 +430,17 @@ def test_low_rank_refuses_a_backbone_with_no_linears():
         model.low_rank(rank=2)
 
 
+def test_window(study_model: StudyModel):
+    """The recipe's two numbers resolved against THIS encoder's depth, which only the model knows."""
+    depth = len(study_model.surgery.blocks())
+    assert study_model.window(2) == BlockWindow(lo=depth - 2, hi=depth), "offset zero is the historic suffix"
+    assert study_model.window(2, 1) == BlockWindow(lo=depth - 3, hi=depth - 1), "the offset moves it down"
+    assert study_model.window(99).count() == depth, "asking for more blocks than exist opens every one"
+
+
 def test_parameter_groups(study_model: StudyModel):
     """The head gets its own learning rate; the encoder gets a slower one and only its last blocks."""
-    groups = study_model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+    groups = study_model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=study_model.window(2))
     assert [group["lr"] for group in groups] == [1e-3, 8e-6]
     opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
     assert opened, "the last blocks must remain trainable"
@@ -452,7 +462,7 @@ def test_parameter_groups_hold_every_trainable_tensor():
     for name in SLICE_POOLINGS:
         torch.manual_seed(SEED)
         model = StudyModel(_BlockedBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=name))
-        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+        groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(4))
 
         seen = [id(p) for group in groups for p in cast("list[torch.nn.Parameter]", group["params"])]
         trainable = {id(p) for p in model.parameters() if p.requires_grad}
@@ -472,7 +482,7 @@ def test_parameter_groups_carry_a_tensor_the_LOSS_owns():
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
     owned = torch.nn.Parameter(torch.zeros(DIM))
 
-    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2, attached=[owned])
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(2), attached=[owned])
 
     head = cast("list[torch.nn.Parameter]", groups[0]["params"])
     assert any(parameter is owned for parameter in head), "identity, not shape — a copy is not stepped"
@@ -509,7 +519,7 @@ def test_parameter_groups_layer_decay():
     """
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
-    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4, layer_decay=0.5)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(4), layer_decay=0.5)
 
     rates = [group["lr"] for group in groups]
     assert rates == [1e-3, 8e-6 * 0.125, 8e-6 * 0.25, 8e-6 * 0.5, 8e-6], "bottom to top, halving upwards"
@@ -527,7 +537,7 @@ def test_parameter_groups_flat_keeps_the_two_group_shape():
     """
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
-    flat = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4)
+    flat = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(4))
 
     assert len(flat) == 2, "head, then every opened block in ONE group"
     assert [group["lr"] for group in flat] == [1e-3, 8e-6]
@@ -543,7 +553,7 @@ def test_parameter_groups_refuses_layer_decay_under_lora():
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
     model.low_rank(rank=2)
     with pytest.raises(ValueError, match="LoRA adapters"):
-        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=4, layer_decay=0.5)
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(4), layer_decay=0.5)
 
 
 class _V3ShapedBackbone(_FakeBackbone):
@@ -560,7 +570,7 @@ def test_parameter_groups_finds_blocks_that_are_not_under_encoder():
     """A DINOv3 tree has no `encoder.layer`, and the hardcoded path raised AttributeError on it."""
     torch.manual_seed(SEED)
     model = StudyModel(_V3ShapedBackbone(), DIM, SLOTS)
-    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(2))
     opened = cast("list[torch.nn.Parameter]", groups[1]["params"])
     assert len(opened) == 4, "two Linear blocks is two weights and two biases"
     assert [p for p in model.backbone.parameters() if not p.requires_grad], "the early blocks must freeze"
@@ -573,7 +583,7 @@ def test_parameter_groups_refuses_a_backbone_with_no_blocks():
     del backbone.encoder
     model = StudyModel(backbone, DIM, SLOTS)
     with pytest.raises(ValueError, match="no module container"):
-        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(2))
 
 
 def test_parameter_groups_refuses_ambiguous_blocks():
@@ -589,7 +599,7 @@ def test_parameter_groups_refuses_ambiguous_blocks():
     backbone.decoder.layer = torch.nn.ModuleList([torch.nn.Conv1d(DIM, DIM, 1) for _ in range(12)])
     model = StudyModel(backbone, DIM, SLOTS)
     with pytest.raises(ValueError, match="ambiguous"):
-        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=2)
+        model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(2))
 
 
 def test_forward_per_slice_pooling_differs_from_channel_stacking():
@@ -760,6 +770,7 @@ def test_applied():
         RECOMPUTING: False,
         COMPILED_ENCODER: False,
         OPENED_BLOCKS: 12,
+        FROZEN_TOP: 0,
         DEPTH_REGIONS: 1,
     }
 
@@ -771,6 +782,7 @@ def test_applied():
         RECOMPUTING: True,
         COMPILED_ENCODER: False,
         OPENED_BLOCKS: 0,
+        FROZEN_TOP: 0,
         DEPTH_REGIONS: 1,
     }, (
         "adaptation freezes every base weight, so no block is open on the axis unfreeze_last moves — "
@@ -788,7 +800,7 @@ def test_parameter_groups_at_zero_depth_opens_nothing():
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
 
-    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=0)
+    groups = model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(0))
 
     assert cast("list[torch.nn.Parameter]", groups[1]["params"]) == [], "nothing in the encoder may open"
     assert model.applied()[OPENED_BLOCKS] == 0
@@ -800,7 +812,7 @@ def test_parameter_groups_clamps_a_depth_past_the_encoder():
     torch.manual_seed(SEED)
     model = StudyModel(_BlockedBackbone(), DIM, SLOTS)
 
-    model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, unfreeze_last=99)
+    model.parameter_groups(head_lr=1e-3, backbone_lr=8e-6, window=model.window(99))
 
     assert model.applied()[OPENED_BLOCKS] == 12
 

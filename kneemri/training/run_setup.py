@@ -87,6 +87,7 @@ class RunSetup:
             head_lr=self.options.head_lr,
             backbone_lr=self.options.backbone_lr,
             unfreeze_last=self.options.unfreeze_last,
+            unfreeze_offset=self.options.unfreeze_offset,
             layer_decay=self.options.layer_decay,
             weight_decay=self.options.weight_decay,
         )
@@ -174,6 +175,7 @@ class RunSetup:
             # the null policy, and this comparison is a strict equality against exactly that report.
             focus_label=options.focus_label or "",
             unfreeze_last=options.unfreeze_last,
+            unfreeze_offset=options.unfreeze_offset,
             layer_decay=options.layer_decay,
             mixup=options.mixup,
             weight_decay=options.weight_decay,

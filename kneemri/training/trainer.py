@@ -32,6 +32,7 @@ from core.data.corpus.slot_reader import GROUP
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
+from kneemri.models.encoder_surgery import NO_OFFSET
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import (
@@ -84,6 +85,15 @@ class Adaptation:
 
     unfreeze_last: int = 6
     """Six of twelve blocks — inherited from the reference, and only meaningful beside the rate above."""
+
+    unfreeze_offset: int = NO_OFFSET
+    """How many blocks at the TOP of the trunk stay frozen, which turns the suffix into a WINDOW.
+
+    Zero for every run before 2026-09-05, and that is the suffix every ledger number was measured
+    under. It exists because the block a run should open is decided by the KIND of distribution shift
+    (Lee et al., ICLR 2023) and the input-level case — which natural-image pretraining to greyscale MRI
+    is — wants EARLY blocks, the one thing `unfreeze_last` alone cannot express. See `BlockWindow`.
+    """
 
     layer_decay: float = NO_LAYER_DECAY
     """How much slower each block below the top one moves — the third member of the entangled triple.
@@ -148,7 +158,7 @@ class Trainer:
         groups = self.model.parameter_groups(
             self.adaptation.head_lr,
             self.adaptation.backbone_lr,
-            self.adaptation.unfreeze_last,
+            self.model.window(self.adaptation.unfreeze_last, self.adaptation.unfreeze_offset),
             self.adaptation.layer_decay,
             self.objective.attached(device),
         )

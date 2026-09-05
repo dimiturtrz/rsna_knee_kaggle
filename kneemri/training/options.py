@@ -163,6 +163,7 @@ class TrainingOptions:
     trunk. The second half of LP-FT; see `kneemri.training.warm_start.WarmStart` for the mechanism."""
 
     unfreeze_last: int = Adaptation().unfreeze_last
+    unfreeze_offset: int = Adaptation().unfreeze_offset
     head_lr: float = Adaptation().head_lr
     backbone_lr: float = Adaptation().backbone_lr
     layer_decay: float = Adaptation().layer_decay

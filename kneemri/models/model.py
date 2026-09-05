@@ -20,7 +20,7 @@ from torch import Tensor, nn
 from core.data.corpus.anatomy import ANATOMY, SlotAffinity
 from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, IMAGENET, SMALL, Normalization
-from kneemri.models.encoder_surgery import NO_LAYER_DECAY, EncoderSurgery
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY, NO_OFFSET, BlockWindow, EncoderSurgery
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slice_read import SliceRead
@@ -43,6 +43,7 @@ ADAPTERS = "lora_adapters"
 RECOMPUTING = "recompute_activations"
 COMPILED_ENCODER = "compile_encoder"
 OPENED_BLOCKS = "opened_blocks"
+FROZEN_TOP = "frozen_top_blocks"
 DEPTH_REGIONS = "depth_regions"
 """The keys `applied` reports under — named beside the model because the model is what they describe."""
 
@@ -487,6 +488,7 @@ class StudyModel(nn.Module):
             RECOMPUTING: bool(getattr(self.backbone, "is_gradient_checkpointing", False)),
             COMPILED_ENCODER: self.backbone._compiled_call_impl is not None,  # noqa: SLF001 - see above
             OPENED_BLOCKS: self.surgery.opened_blocks(),
+            FROZEN_TOP: self.surgery.frozen_top(),
             DEPTH_REGIONS: 1 if aggregated_elsewhere else self.design.slice_regions,
         }
 
@@ -508,7 +510,7 @@ class StudyModel(nn.Module):
         self,
         head_lr: float,
         backbone_lr: float,
-        unfreeze_last: int,
+        window: BlockWindow,
         layer_decay: float = NO_LAYER_DECAY,
         attached: list[torch.nn.Parameter] | None = None,
     ) -> list[dict[str, object]]:
@@ -527,7 +529,16 @@ class StudyModel(nn.Module):
         caller assembling its own would be a second copy of it, free to disagree.
         """
         head: dict[str, object] = {"params": [*self._readout_parameters(), *(attached or [])], "lr": head_lr}
-        return [head, *self.surgery.backbone_groups(backbone_lr, unfreeze_last, layer_decay)]
+        return [head, *self.surgery.backbone_groups(backbone_lr, window, layer_decay)]
+
+    def window(self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> BlockWindow:
+        """Which contiguous run of blocks a run opens, resolved against THIS model's encoder depth.
+
+        The caller states the recipe in the two numbers an arm script carries; only the encoder knows how
+        many blocks there are to count them against, which is why the resolution happens here and the
+        window rather than the pair is what `parameter_groups` takes.
+        """
+        return self.surgery.window(unfreeze_last, unfreeze_offset)
 
     def _readout_parameters(self) -> list[torch.nn.Parameter]:
         """Every parameter OUTSIDE the encoder — the slot head, and whatever pools the slice axis.

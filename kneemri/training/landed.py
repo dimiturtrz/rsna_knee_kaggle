@@ -36,10 +36,12 @@ from core.data.labels.targets import (
     WEIGHT_FLOOR,
     Targets,
 )
+from kneemri.models.encoder_surgery import NO_OFFSET
 from kneemri.models.model import (
     ADAPTERS,
     COMPILED_ENCODER,
     DEPTH_REGIONS,
+    FROZEN_TOP,
     OPENED_BLOCKS,
     RECOMPUTING,
     StudyModel,
@@ -268,6 +270,9 @@ class Request:
     weight_decay: float
     warmup: float
     grad_clip: float
+    unfreeze_offset: int = NO_OFFSET
+    """How many blocks at the TOP the request left frozen — zero for every arm before 2026-09-05."""
+
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
@@ -344,6 +349,10 @@ class Request:
             TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
             CERTAINTY_RAMP: self.certainty_ramp,
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
+            # WHERE the window sits, which the count above cannot see: an offset that reached
+            # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on
+            # a mechanism that never ran. Zero whenever no base block is open at all.
+            FROZEN_TOP: 0 if self.lora_rank or not self.unfreeze_last else self.unfreeze_offset,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,

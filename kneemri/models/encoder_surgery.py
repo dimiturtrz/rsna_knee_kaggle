@@ -14,6 +14,7 @@ for an encoder it never touched.
 import logging
 from collections import defaultdict
 from collections.abc import Iterator
+from dataclasses import dataclass
 
 import torch
 from torch import nn
@@ -30,6 +31,51 @@ A refactor that emits one group per block at a shared rate reproduces that only 
 optimiser-state or weight-decay difference between the two shapes is not something a score can rule
 out afterwards. So the flat case returns the old single group untouched and the decay is a branch.
 """
+
+
+NO_OFFSET = 0
+"""The offset that means "the window ends at the encoder's last block" — every run before 2026-09-05."""
+
+
+@dataclass(frozen=True)
+class BlockWindow:
+    """The contiguous run of encoder blocks a run opens, as a half-open slice over the block list.
+
+    WHY A WINDOW AND NOT A COUNT. Every unfreeze this project has run is a SUFFIX: `--unfreeze-last N`
+    opens the trailing N blocks and nothing else, so an early-only or interior fit has never been run
+    here. Lee et al. (ICLR 2023, openreview APuPRxjHvZ) fine-tune a contiguous block chosen by the KIND
+    of shift — input-level wants EARLY layers, feature-level the middle, output-level the head — and
+    natural-image pretraining to greyscale MRI is their input-level cell, which is the one their result
+    says the trailing blocks are the wrong choice for. A window is the smallest thing that can say that.
+
+    ONE WAY TO SAY IT, rather than an `--unfreeze-range` racing `--unfreeze-last` through an `if`: the
+    suffix is the window ending at the encoder's depth, and it is what `of` builds at offset zero.
+    """
+
+    lo: int
+    hi: int
+
+    @classmethod
+    def of(cls, depth: int, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> "BlockWindow":
+        """`unfreeze_last` blocks ending `unfreeze_offset` blocks below the top, clamped to the encoder.
+
+        COUNTED FROM THE FRONT, and that is the whole point of the arithmetic. `blocks[-n:]` reads as
+        "the last n" and is that for every n but ZERO, where `[-0:]` is `[0:]` — the entire encoder. A
+        head-only run therefore opened all twelve blocks and was byte-identical to `--unfreeze-last 12`
+        (measured: 2,592 parameters either way), under a name saying the opposite. `unfreeze_depth.sh`
+        takes its depth as an argument, so the head-only rung of a depth sweep was one invocation away
+        from spending a queue slot on the deepest arm in the sweep.
+
+        The clamps are the same edit's other half: asking for more blocks than the encoder has opens
+        every block rather than silently reading as a request for all of them, and an offset past the
+        depth leaves the window EMPTY rather than wrapping around to the top of the trunk.
+        """
+        hi = max(depth - max(unfreeze_offset, 0), 0)
+        return cls(lo=max(hi - max(unfreeze_last, 0), 0), hi=hi)
+
+    def count(self) -> int:
+        """How many blocks the window holds, which is what `landed` compares against the recipe."""
+        return self.hi - self.lo
 
 
 class EncoderSurgery:
@@ -217,6 +263,21 @@ class EncoderSurgery:
         # truth value — which a multi-element tensor refuses. Emptiness is the question here.
         return sum(1 for block in self.blocks() if next(self._base_parameters(block), None) is not None)
 
+    def frozen_top(self) -> int:
+        """How many blocks at the TOP hold no trainable BASE weight — what `unfreeze_offset` actually did.
+
+        `opened_blocks` counts how many blocks are open and is blind to WHERE they are, so an offset
+        that reached nothing would report the same number as one that landed. That is the shape of every
+        silent failure this class documents: an arm reporting a clean number for an encoder it never
+        touched in the place it said. Zero when nothing is open at all — under LoRA, or a head-only run —
+        because a window of no blocks sits nowhere and has no top to be below.
+        """
+        # `is not None`, never a truth test: the generator yields TENSORS, and a multi-element tensor
+        # refuses to be asked whether it is true.
+        blocks = self.blocks()
+        opened = [index for index, block in enumerate(blocks) if next(self._base_parameters(block), None) is not None]
+        return len(blocks) - 1 - max(opened) if opened else NO_OFFSET
+
     @staticmethod
     def _base_parameters(block: nn.Module) -> Iterator[torch.nn.Parameter]:
         """The block's trainable parameters that are not part of an adapter."""
@@ -230,16 +291,15 @@ class EncoderSurgery:
             parameter for parameter in block.parameters() if parameter.requires_grad and id(parameter) not in adapted
         )
 
-    def open_blocks(self, unfreeze_last: int) -> list[nn.Module]:
-        """The last `unfreeze_last` blocks, counted FROM THE FRONT so that zero means zero.
+    def window(self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> "BlockWindow":
+        """Which contiguous run of blocks this run opens, resolved against THIS encoder's depth."""
+        return BlockWindow.of(len(self.blocks()), unfreeze_last, unfreeze_offset)
 
-        Spelled once because two callers now need it, and the arithmetic is the one `last_blocks`
-        documents as having read `[-0:]` — the whole encoder — under a head-only name.
-        """
-        blocks = self.blocks()
-        return blocks[len(blocks) - min(unfreeze_last, len(blocks)) :]
+    def open_blocks(self, window: "BlockWindow") -> list[nn.Module]:
+        """The blocks inside the window, which is a SLICE and so needs no negative-index arithmetic."""
+        return self.blocks()[window.lo : window.hi]
 
-    def opened(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
+    def opened(self, window: "BlockWindow") -> list[torch.nn.Parameter]:
         """The backbone parameters this run fits, having frozen the rest.
 
         WHAT IS OPEN DIFFERS BY ADAPTATION, what the optimiser is handed does not — the two branches
@@ -248,23 +308,15 @@ class EncoderSurgery:
         """
         if self.adapters():
             return [parameter for parameter in self.backbone.parameters() if parameter.requires_grad]
-        return self.last_blocks(unfreeze_last)
+        return self.last_blocks(window)
 
-    def last_blocks(self, unfreeze_last: int) -> list[torch.nn.Parameter]:
-        """Everything outside the last `unfreeze_last` blocks frozen, and what is left returned.
+    def last_blocks(self, window: "BlockWindow") -> list[torch.nn.Parameter]:
+        """Everything outside the window frozen, and what is left returned.
 
-        COUNTED FROM THE FRONT, and that is the whole point of the arithmetic. `blocks[-n:]` reads as
-        "the last n" and is that for every n but ZERO, where `[-0:]` is `[0:]` — the entire encoder.
-        A head-only run therefore opened all twelve blocks and was byte-identical to `--unfreeze-last
-        12` (measured: 2,592 parameters either way), under a name saying the opposite.
-        `unfreeze_depth.sh` takes its depth as an argument, so the head-only rung of a depth sweep was
-        one invocation away from spending a queue slot on the deepest arm in the sweep.
-
-        The `min` is the same edit's other half: asking for more blocks than the encoder has now opens
-        every block rather than silently reading as a request for all of them, which is what
-        `applied` reports back and `landed` compares.
+        The arithmetic that decides WHICH blocks those are lives in `BlockWindow.of`, with the two
+        off-by-one failures it exists to prevent.
         """
-        opened = self.open_blocks(unfreeze_last)
+        opened = self.open_blocks(window)
         trainable = {id(parameter) for block in opened for parameter in block.parameters()}
         for parameter in self.backbone.parameters():
             if id(parameter) not in trainable:
@@ -273,7 +325,7 @@ class EncoderSurgery:
         return [parameter for parameter in self.backbone.parameters() if id(parameter) in trainable]
 
     def backbone_groups(
-        self, backbone_lr: float, unfreeze_last: int, layer_decay: float = NO_LAYER_DECAY
+        self, backbone_lr: float, window: "BlockWindow", layer_decay: float = NO_LAYER_DECAY
     ) -> list[dict[str, object]]:
         """The optimiser groups the ENCODER contributes: what is open, at which rate, per DEPTH.
 
@@ -299,7 +351,7 @@ class EncoderSurgery:
         refactor that reproduces it only numerically is not one an equality check can confirm.
         """
         if layer_decay == NO_LAYER_DECAY:
-            return [{"params": self.opened(unfreeze_last), "lr": backbone_lr}]
+            return [{"params": self.opened(window), "lr": backbone_lr}]
         if self.adapters():
             # LOUD, for the reason `objective` refuses a pair memory with no ranking term: under LoRA
             # what trains is adapters spread over every block, so a per-depth rate over the BASE blocks
@@ -309,11 +361,14 @@ class EncoderSurgery:
                 "LoRA adapters, so the base blocks it would scale are frozen"
             )
             raise ValueError(message)
-        self.last_blocks(unfreeze_last)
-        opened = self.open_blocks(unfreeze_last)
+        self.last_blocks(window)
+        opened = self.open_blocks(window)
         # The TOP block keeps `backbone_lr` and everything below it is divided down, rather than the
         # bottom keeping it and the top scaled up: the rate in the ledger is the rate the top block was
-        # measured at, so this holds that fixed and only ever slows the layers underneath.
+        # measured at, so this holds that fixed and only ever slows the layers underneath. Under an
+        # INTERIOR window the top opened block is no longer the encoder's last, and the ladder still
+        # anchors at the top of the WINDOW — otherwise an early-block arm would run every one of its
+        # blocks at a rate the ledger has never seen.
         return [
             {"params": list(block.parameters()), "lr": backbone_lr * layer_decay ** (len(opened) - 1 - depth)}
             for depth, block in enumerate(opened)

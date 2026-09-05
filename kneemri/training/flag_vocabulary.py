@@ -634,6 +634,15 @@ class FlagVocabulary:
             "cleared our noise floor, so the hypothesis is worth testing rather than inheriting.",
         )
         parser.add_argument(
+            "--unfreeze-offset",
+            type=int,
+            default=Adaptation().unfreeze_offset,
+            help="how many blocks at the TOP of the trunk stay FROZEN, which turns --unfreeze-last from "
+            "a suffix into a window. Zero is every run before 2026-09-05. Lee et al. (ICLR 2023) choose "
+            "the block by the KIND of shift, and the input-level case - natural images to greyscale MRI - "
+            "wants EARLY blocks, which a suffix cannot express.",
+        )
+        parser.add_argument(
             "--init",
             type=Path,
             default=None,

@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch import nn
 
-from kneemri.models.encoder_surgery import EncoderSurgery
+from kneemri.models.encoder_surgery import NO_OFFSET, BlockWindow, EncoderSurgery
 from kneemri.models.lora import LoRALinear
 
 DIM = 8
@@ -159,7 +159,7 @@ def test_opened_blocks():
     surgery = _surgery()
     assert surgery.opened_blocks() == BLOCKS, "nothing frozen yet, so every block holds a trainable weight"
 
-    surgery.last_blocks(2)
+    surgery.last_blocks(surgery.window(2))
     assert surgery.opened_blocks() == 2, "what `unfreeze_last` actually did, read after the freezing"
 
     adapted = _surgery()
@@ -170,20 +170,24 @@ def test_opened_blocks():
 def test_open_blocks():
     """The last n counted FROM THE FRONT, so zero means zero and more than there are means all."""
     surgery = _surgery()
-    assert len(surgery.open_blocks(0)) == 0, "`blocks[-0:]` is the whole encoder - the bug this arithmetic fixes"
-    assert len(surgery.open_blocks(2)) == 2
-    assert surgery.open_blocks(2) == surgery.blocks()[-2:]
-    assert len(surgery.open_blocks(99)) == BLOCKS, "asking for more than exist opens every block"
+    assert len(surgery.open_blocks(surgery.window(0))) == 0, "`blocks[-0:]` is the whole encoder - the bug this fixes"
+    assert len(surgery.open_blocks(surgery.window(2))) == 2
+    assert surgery.open_blocks(surgery.window(2)) == surgery.blocks()[-2:]
+    assert len(surgery.open_blocks(surgery.window(99))) == BLOCKS, "asking for more than exist opens every block"
+
+    # An INTERIOR window opens the same NUMBER of blocks somewhere else entirely, which is the whole
+    # point of the offset: `unfreeze_last` alone cannot say WHERE.
+    assert surgery.open_blocks(surgery.window(2, 4)) == surgery.blocks()[-6:-4]
 
 
 def test_opened():
     """One list either way: the adapters when adapted, the last blocks when not."""
     surgery = _surgery()
-    assert len(surgery.opened(2)) == 2 * 3 * 2, "two blocks, three Linears, a weight and a bias apiece"
+    assert len(surgery.opened(surgery.window(2))) == 2 * 3 * 2, "two blocks, three Linears, a weight and a bias apiece"
 
     adapted = _surgery()
     adapted.low_rank(rank=2)
-    handed = adapted.opened(6)
+    handed = adapted.opened(adapted.window(6))
     assert handed and all(parameter.requires_grad for parameter in handed)
     assert len(handed) == 2 * 3 * BLOCKS, "the depth is IGNORED under adaptation - every block's two adapter tensors"
 
@@ -191,21 +195,22 @@ def test_opened():
 def test_last_blocks():
     """It FREEZES as it reads: what comes back is trainable and everything outside it is not."""
     surgery = _surgery()
-    opened = surgery.last_blocks(2)
+    opened = surgery.last_blocks(surgery.window(2))
     assert all(parameter.requires_grad for parameter in opened)
     frozen = [parameter for parameter in surgery.backbone.parameters() if not parameter.requires_grad]
     assert len(frozen) == 2 * 3 * (BLOCKS - 2) + 1, "every earlier block's tensors, plus the embedding"
 
-    assert surgery.last_blocks(0) == [], "a head-only run opens NOTHING, whatever `[-0:]` would have said"
+    assert surgery.last_blocks(surgery.window(0)) == [], "a head-only run opens NOTHING, whatever `[-0:]` said"
 
 
 def test_backbone_groups():
     """Flat stays ONE group at one rate; a decay emits one per opened block, the TOP one undecayed."""
     surgery = _surgery()
-    flat = surgery.backbone_groups(backbone_lr=8e-6, unfreeze_last=2)
+    flat = surgery.backbone_groups(backbone_lr=8e-6, window=surgery.window(2))
     assert len(flat) == 1 and flat[0]["lr"] == 8e-6, "the shape every ledger number was measured under"
 
-    graded = _surgery().backbone_groups(backbone_lr=8e-6, unfreeze_last=3, layer_decay=0.5)
+    graded_surgery = _surgery()
+    graded = graded_surgery.backbone_groups(backbone_lr=8e-6, window=graded_surgery.window(3), layer_decay=0.5)
     assert [group["lr"] for group in graded] == [2e-6, 4e-6, 8e-6], (
         "the top block keeps the rate the ledger quotes and the layers under it are divided down"
     )
@@ -216,7 +221,7 @@ def test_backbone_groups_refuse_a_depth_rate_under_adapters():
     surgery = _surgery()
     surgery.low_rank(rank=2)
     with pytest.raises(ValueError, match="LoRA adapters"):
-        surgery.backbone_groups(backbone_lr=8e-6, unfreeze_last=6, layer_decay=0.75)
+        surgery.backbone_groups(backbone_lr=8e-6, window=surgery.window(6), layer_decay=0.75)
 
 
 def test_compile_encoder():
@@ -269,3 +274,72 @@ def test_pin_frozen_norms():
 def test_pin_frozen_norms_counts_nothing_on_a_layernorm_trunk():
     """Every ViT, Swin and ConvNeXt here keeps no running statistics and legitimately reads zero."""
     assert EncoderSurgery(nn.Sequential(nn.LayerNorm(DIM), nn.Linear(DIM, DIM))).pin_frozen_norms() == 0
+
+
+def test_of():
+    """The window as a half-open slice, and the equality every ledger number was measured under.
+
+    `open_blocks` was a strict suffix before 2026-09-05. Offset zero has to reproduce it EXACTLY - not
+    approximately, and not for the middle of the range only - or every score on record silently changes
+    what recipe it describes.
+    """
+    for last in (0, 1, 6, 12, 99):
+        window = BlockWindow.of(BLOCKS, last, NO_OFFSET)
+        suffix = list(range(BLOCKS))[BLOCKS - min(last, BLOCKS) :]
+        assert list(range(window.lo, window.hi)) == suffix, "offset zero IS the old suffix, at every n"
+
+    interior = BlockWindow.of(BLOCKS, 3, 4)
+    assert (interior.lo, interior.hi) == (5, 8), "three blocks ending four short of the top"
+
+    assert BlockWindow.of(BLOCKS, 6, 99) == BlockWindow(lo=0, hi=0), "an offset past the trunk opens nothing"
+    assert BlockWindow.of(BLOCKS, -1, -1) == BlockWindow(lo=BLOCKS, hi=BLOCKS), "negatives clamp, they do not wrap"
+
+
+def test_count():
+    """How many blocks the window holds - what `landed` compares against the recipe."""
+    assert BlockWindow.of(BLOCKS, 3, NO_OFFSET).count() == 3
+    assert BlockWindow.of(BLOCKS, 3, 4).count() == 3, "an interior window opens the same NUMBER elsewhere"
+    assert BlockWindow.of(BLOCKS, 99, NO_OFFSET).count() == BLOCKS
+    assert BlockWindow.of(BLOCKS, 3, BLOCKS).count() == 0
+
+
+def test_window():
+    """Resolved against THIS encoder's depth, which is the only place the depth is known."""
+    surgery = _surgery()
+    assert surgery.window(2) == BlockWindow(lo=BLOCKS - 2, hi=BLOCKS)
+    assert surgery.window(2, 3) == BlockWindow(lo=BLOCKS - 5, hi=BLOCKS - 3)
+    assert surgery.window(99).count() == BLOCKS
+
+    shallow = _surgery(depth=4)
+    assert shallow.window(2) == BlockWindow(lo=2, hi=4), "the same request lands elsewhere on a shorter trunk"
+
+
+def test_frozen_top():
+    """WHERE the window sat, read off the weights - the half `opened_blocks` cannot see.
+
+    An offset that reached nothing opens the same NUMBER of blocks in the wrong place, so a count alone
+    would read a mechanism that never ran as a null.
+    """
+    surgery = _surgery()
+    surgery.last_blocks(surgery.window(3, 4))
+    assert surgery.opened_blocks() == 3, "the count says how many"
+    assert surgery.frozen_top() == 4, "and this says where"
+
+    suffix = _surgery()
+    suffix.last_blocks(suffix.window(3))
+    assert suffix.frozen_top() == NO_OFFSET, "every arm before 2026-09-05 ends at the top"
+
+    adapted = _surgery()
+    adapted.low_rank(rank=2)
+    assert adapted.frozen_top() == NO_OFFSET, "no base block is open at all under LoRA"
+
+
+def test_backbone_groups_anchor_at_the_top_of_the_window():
+    """The ladder anchors at the TOP OPENED block, which under an interior window is not the last one.
+
+    Otherwise an early-block arm runs every one of its blocks at `backbone_lr * decay^k` for a k the
+    ledger has never seen, and its number would not be comparable with anything.
+    """
+    surgery = _surgery()
+    graded = surgery.backbone_groups(backbone_lr=8e-6, window=surgery.window(3, 4), layer_decay=0.5)
+    assert [group["lr"] for group in graded] == [2e-6, 4e-6, 8e-6], "the same ladder, one rung per opened block"
