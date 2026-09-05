@@ -681,3 +681,7 @@ radiodino_s8_s2026.pt       # 0.7971 solo, the same family at patch 8: a differe
 radnet_pinned_s2026.pt      # 0.7505 solo, RadImageNet DenseNet-121 with the trunk pinned — the only
                             # CONVOLUTIONAL member here and by far the weakest, seated for that reason
                             # alone. If a seat search never takes it, it costs a kernel nothing.
+blendema224_s2026.pt        # 0.8567 solo at the cheap 224 corner, blendhold plus --ema. Scores 0.0008
+                            # BELOW its own control, which is inside the paired floor and therefore not
+                            # a ranking; seated for the different weight trajectory an EMA leaves, not
+                            # for the score. Its reading is logs/blendema224_ledger.log.

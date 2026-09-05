@@ -4,13 +4,28 @@
 # bead: knee-y8ies
 # reading: logs/blendemalabel224_ledger.log
 #
-# GATED. DO NOT RUN until blendema224 has landed in its ADDITIVE branch (0.8555-0.8679, see that arm's
-# header). Every other branch cancels this arm rather than modifying it: SUPER-ADDITIVE demands a second
-# seed of the two-term result before a third term is added to something not yet believed; PARTIAL
-# SUBSTITUTION says the terms already overlap and a third would be priced at a discount nothing has
-# measured; SUBSTITUTES closes composition at this base and there is no chain to extend. Running this
-# arm on a two-term result that has not cleared its own gate is the exact mistake knee-orjq was closed
-# for - stacking a term whose predecessor was never confirmed.
+# UNGATED as of 2026-09-05T23:24Z, and the gate was REWRITTEN rather than passed. blendema224 landed at
+# 0.8567 - inside the ADDITIVE band by the letter, but the band was worthless: the term it tested
+# (--ema, +0.0042) is SMALLER THAN THE 0.0062 PAIRED FLOOR, so a term that transferred fully and a term
+# that vanished both land inside it. The point estimate says it vanished (-0.0008 against blendhold).
+# See logs/blendema224_ledger.log. That is a defect in how that arm was priced, not a result.
+#
+# THE FIX IS THE CONTROL, NOT THE RECIPE. This arm is unchanged; what changes is what it is measured
+# against. Comparing three terms to two terms tests a +0.0015 increment against a 0.0062 floor and is
+# unreadable for the same reason. Comparing three terms to the BARE BASE tests their SUM:
+#     native224_s2026  0.8502   (no blended labels, no EMA, no labelwise pooling)
+#     blended labels   +0.0073   (blendhold 0.8575 - native224 0.8502)
+#     ema              +0.0042   (ema224 0.8544 - native224 0.8502)
+#     labelwise        +0.0015   (labelwise224 0.8517 - native224 0.8502)
+#     sum              +0.0130 -> predicted 0.8632
+# +0.0130 clears the floor by roughly 2x, so THIS comparison can be read. It cannot say which link
+# carried the result - nothing affordable at this corner can - but it answers the question the 0.953
+# plan actually needs, which is whether a chain of small terms sums at all.
+#
+# STATE PLAINLY WHAT REMAINS UNREADABLE. Against the best single term (blendhold 0.8575) the predicted
+# gain is +0.0057, still under the floor. So a landing near 0.8632 says the chain SUMS relative to the
+# bare base while leaving "a stack beats its best member" undecided at this corner on one seed. Do not
+# report the second claim off this arm.
 #
 # WHY A THIRD TERM AND NOT A SECOND SEED. Two points cannot fit a composition rule; that limit is
 # written into blendema224's own header and into knee-orjq's close. The question the 0.953 plan actually
@@ -20,7 +35,7 @@
 # two, the increments are behaving independently over a range, which is what licenses pricing a fourth
 # and fifth by arithmetic instead of by card time.
 #
-# THE THIRD TERM. --label-pooling labelwise, measured at this exact corner by labelwise224_s2026 at
+# THE THIRD TERM. --slice-pooling labelwise, measured at this exact corner by labelwise224_s2026 at
 # 0.8517 against native224_s2026 at 0.8502: +0.0015. It is the SMALLEST of the three terms and that is
 # deliberate. A chain is tested by whether its small increments survive, not by whether its large one
 # does - a third term big enough to dominate would hide a substitution, and this one cannot.
@@ -28,33 +43,34 @@
 # term two changes which weights are KEPT (EMA), term three changes how the head READS the pooled
 # features. Nothing about one predicts another.
 #
-# ONE VARIABLE against blendema224: --label-pooling labelwise. Every other flag is that arm's.
+# ONE VARIABLE against blendema224: --slice-pooling goes from max to labelwise. It is a SUBSTITUTION of
+# one flag value, not an added flag - which is exactly how labelwise224 was measured against native224,
+# so the +0.0015 term quoted below is the same change measured at the same corner. Every other flag is
+# blendema224s.
 #
-# THE ADDITIVE PREDICTION, and it inherits blendema224's measured value rather than its prediction -
-# fill in the observed number, do not use 0.8617:
-#     predicted = blendema224_observed + (labelwise224 - native224) = blendema224_observed + 0.0015
-#
-# PRE-REGISTERED, BEFORE THE NUMBER, against the 0.0062 paired floor. Note that the term itself
-# (+0.0015) is a quarter of that floor, so the branches are NOT about resolving this term - they are
-# about whether the chain has started to bend:
-#   >= predicted+0.0062   Super-additive again, at a second link. Suspect it hard; two super-additive
-#                         links in a row at a corner where the dense analogue was 7/7 negative is more
-#                         likely a harness fault than a mechanism. Check --label-pooling fired.
-#   within 0.0062         ADDITIVE AT THE THIRD LINK. This is the result that licenses arithmetic: the
-#                         project may then price a fourth and fifth term from their singles without
-#                         spending card on each combination, and the 0.953 route becomes a search over
-#                         which singles to chain rather than a hope that a single arm clears +0.015.
-#   <= predicted-0.0062   THE CHAIN BENDS. Two terms add and three do not, which is the more interesting
-#                         negative: it puts a LENGTH on composition at this base and says a stack is
-#                         worth about one extra term, not five. Record the length; it is a number the
-#                         plan can use even though it kills the plan as written.
+# PRE-REGISTERED, BEFORE THE NUMBER. Control is native224_s2026 at 0.8502; predicted sum 0.8632; the
+# paired floor is 0.0062:
+#   >= 0.8694   SUPER-ADDITIVE. The chain gains more than its parts. Suspect it once, then take it: it
+#               would be the first evidence this project owns that composition BUYS something rather
+#               than merely surviving, and it would make chaining the primary route to +0.015.
+#   0.8570-0.8694  THE CHAIN SUMS. Three independent small terms - targets, kept weights, head pooling -
+#               compose without destroying one another at a base that is not the calibrated dense
+#               corner. knee-orjq measured a saturated corner, not a law. Follow-up is a FOURTH and
+#               FIFTH term added in the same arm, never one at a time, priced again against the bare
+#               base so the tested quantity keeps growing past the floor.
+#   <= 0.8570   THE CHAIN DOES NOT SUM. Three terms deliver no more than the best one alone, which at
+#               this corner is what knee-orjq found at its own corner. Two corners agreeing turns that
+#               close from a statement about one recipe into a statement about this project, and
+#               composition stops being a candidate route to 0.953.
+#   <= 0.8440   Harness first, not a result. Verify --label-pooling and --ema fired and that the blend
+#               labels loaded; three positive terms cannot subtract to below the bare base.
 #
 # COST. ~20 min of card. Zero submission slots. Same corner, same holdout, same gold ruler via
 # --hold-annotations.
 #
-# control  blendema224_s2026, byte-identical recipe without --label-pooling labelwise.
+# control  blendema224_s2026, byte-identical recipe without --slice-pooling labelwise.
 #
-# deliberate: --label-pooling labelwise (the arm's thesis, and the third link in the chain)
+# deliberate: --slice-pooling labelwise (the arm's thesis, and the third link in the chain)
 # deliberate: --ema (term two, held from blendema224 and not under test)
 # deliberate: --labels blend_three_v1 (term one, held from blendhold and not under test)
 # deliberate: --hold-annotations (matched to both controls; buys the gold ruler in the same run)
@@ -68,7 +84,7 @@ require "$BLEND"
 require "$LABELS"
 
 run_train blendemalabel224 \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --image-size 224 --hold-annotations --ema --label-pooling labelwise \
+  --image-size 224 --hold-annotations --ema \
   --labels "$BLEND" --eval-labels "$LABELS" --out "$MODELS/blendemalabel224_s2026.pt"
