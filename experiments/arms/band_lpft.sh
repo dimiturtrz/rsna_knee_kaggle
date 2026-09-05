@@ -75,7 +75,7 @@ set -euo pipefail
 # not about how fast it moves afterwards, and lowering the rate alongside makes a gain unattributable.
 #
 # reading: logs/band_lpft_ledger.log
-# bead: knee-6hfi
+# bead: knee-cyk91 (this arm; knee-6hfi is the OrthoDiffusion smoke and was a stale citation)
 # also: knee-a2q7, knee-cj40f
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.

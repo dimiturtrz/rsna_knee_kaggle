@@ -7803,3 +7803,45 @@ a gain the curve's own slope prices near zero.
 The ortho trunk stays open as a QUESTION and closed as a QUEUE ITEM: nothing about it is worth card
 while the position axis (`band_surgical`) and the initialisation axis (`band_lpft`) are unmeasured on a
 trunk that already reads 0.8578.
+
+### `band_lpft` — LP-FT's ID gain is a convergence-speed effect, and a long fine-tune erases it — 2026-09-05
+
+Arm `experiments/arms/band_lpft.sh`, bead knee-6hfi, reading `logs/band_lpft_ledger.log`.
+
+**0.8513 @ e6 against `band_dense` 0.8578 — MEAN −0.0065.** The arm pre-registered four bands; this
+lands 0.0003 below the FLAT floor of `0.8640 > s >= 0.8516`, i.e. in the fourth band, *worse than the
+control by more than the 0.0062 holdout floor* — by 1.05× of it. Twelve of twelve epochs ran and
+`convergence_check` lists the run in neither the truncated nor the undertrained set, so the number is
+quotable and is not a fact about a killed process.
+
+**The warm start landed, which is what the fourth band told us to check first.** That band reads
+"SUSPECT THE WARM START BEFORE THE MECHANISM", and the suspicion is retired rather than assumed: the
+recipe line carries `init = band_lpft_head.pt`, `init_scope = all`, against a control whose config
+predates the flag entirely. Stage 1 froze the trunk, so the trunk weights the stage-2 run loads are the
+same pretrained weights the control starts from and the only difference between the two runs is a head
+that has already seen the data. The arm's one variable moved, and it moved alone.
+
+**The mechanism fires, and it is spent by epoch 2.** Epoch-matched against the control, the head warm
+start is worth **+0.0233 at e0** — a real effect, in the direction Kumar et al. predict, and the largest
+single-epoch gap the pair ever shows. Curve: 0.7662 / 0.7813 / 0.8180 / 0.8246 / 0.8407 / 0.8417 /
+**0.8513** / 0.8431 / 0.8481 / 0.8474 / 0.8464 / 0.8458. The control plateaus 0.855–0.858 from e5; from
+e2 onward `band_lpft` tracks it from *below* and never crosses back. So the published +1% ID is not
+refuted so much as *relocated*: on this trunk at this budget it is a head start that twelve epochs of
+fine-tuning fully repay, and the only regime where it could show up as a score is one too short to
+converge — which is not the regime any member here ships in.
+
+**Per label the loss is not diffuse.** Four deltas clear their own paired 95% interval and all four are
+negative — MCL −0.0387\*, PF OA −0.0203\*, Medial Meniscus −0.0154\*, Medial OA −0.0149\* — against
+zero marked positives (largest unmarked gain ACL +0.0166, half-widths to ±0.0364). By structure scale,
+focal −0.0106 against regional −0.0006: the cost concentrates on exactly the findings whose ranking
+depends on fine within-slice contrast, which is what a head fitted on frozen features and then chased
+by a trunk should cost.
+
+**What this closes and what it does not.** LP-FT **closes as a recipe change** for DINOv2 whole-stack
+at 12 epochs: it costs a floor-width, it costs it on the model-bottlenecked labels, and there is no
+schedule cell left where the head start survives to the peak. It does **not** close Kumar's actual
+headline, which is OOD (+10% OOD, ID only +1%) — a flat-to-negative ID reading is *consistent* with
+that paper rather than contrary to it. But our only OOD ruler is the Kaggle board at one slot a read,
+the member axis is closed on seven board flats, and a member 0.0065 behind the incumbent is not a seat
+that a slot can be spent to price. So the OOD half stays **unmeasured and unqueued** — an open question
+with no affordable instrument, not a branch anyone should re-derive from the ID number.
