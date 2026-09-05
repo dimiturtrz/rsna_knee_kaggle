@@ -45,7 +45,12 @@ not one. Nothing currently on the card or in the pool is priced that large:
   remaining corpora: fastMRI as a fourth site is the same operation one step further out, and the nearest
   reading of that operation is negative. The corpus axis `README:4627` calls "still moving" is the
   LABEL corner, not the site corner — `merged_blend_cf` 0.8597 and `merged_span_cf` 0.8618 both hold the
-  two-site cache fixed and change what supervises it.
+  two-site cache fixed and change what supervises it. The per-label read makes the mechanism plain and
+  is worse for the site corner than the mean is: MRNet was argued onto the schedule **on KIND**, because
+  it labels meniscus and Rijeka does not, and Lateral Meniscus came back **−0.0217, last of twelve** —
+  while Synovitis, the one starred cost Rijeka's arrival left unexplained, came back **+0.0234**. Two
+  foreign sites TRADE the same columns rather than stacking. A corpus mean can sit inside the floor while
+  every column under it rotates, and adding site four has no reason to do anything else.
 
 ## The consequence for how card gets spent
 
