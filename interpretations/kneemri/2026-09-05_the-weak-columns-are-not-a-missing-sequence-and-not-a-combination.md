@@ -157,6 +157,33 @@ point the same way and disagree about how far: `crop80_span` cropped IN and lost
 direction is consistent across two arms and the size is unresolved. What is NOT licensed is another
 loss-side tilt — `focus_mcl` put the whole encoder behind MCL and regressed its own target by −0.0576.
 
+## Hypothesis 4: fastMRI+ is the coronal localisation signal MCL needs — four positives say no
+
+The ledger's verdict on `aprior_dense` is that "the localisation argument has to buy a real localisation
+signal", and fastMRI+ looked like exactly that purchase: it is CORONAL (the plane MCL is read on), it
+carries real per-finding bounding boxes, `core/data/corpus/fastmri_corpus.py` states that *"Only ACL and
+MCL get supervision on BOTH sides"*, the raw volumes have been on disk since the corpus module landed,
+and no fastMRI arm has ever run. Building the label table is minutes and no card:
+
+```
+build_fastmri --root .../raw/fastmri --scheme fastmri --labels-only
+1173 studies read, 974 carrying a box · 1172 of 1172 exams routed, 0 on an unknown acquisition
+ACL:      {0.28: 1071, 0.82: 101}
+MCL:      {0.28: 1168, 0.82:   4}
+Effusion: {0.28: 1030, 0.82: 142}
+```
+
+**MCL has four positives in 1,172 studies.** The both-sides claim in the docstring is true and worth
+nothing: the positive side is four exams. Every other finding is absence-only. So the coronal
+foreign-supervision route **cannot touch either readable weak column** — not MCL at n=4, and not Lateral
+OA, which fastMRI+ does not annotate at all. Killed at the gate, before an epoch.
+
+What the corpus CAN supervise is ACL (101 positive, 1,071 assessed negative) and Effusion (142). Neither
+is a weak column on our ruler — ACL 0.9032, Effusion 0.8683, both above the pool mean. ACL is however the
+largest extraction gap in the `supervision_gap` table above (model 0.1225 below its own label against the
+radiologist), so a fastMRI ACL arm is not empty — it is just a different question from this one, and it
+belongs to whoever prices the gap between our ruler and the board's truth. Filed, not queued.
+
 The open question, and the one now with Kimi as Q-COL: which plane and sequence MCL is actually read on
 by a radiologist, and whether any published knee-MRI system routes a finding to its plane rather than
 weighting its loss. A DECODE tilt (an MCL head that attends the coronal slots) is a different mechanism
