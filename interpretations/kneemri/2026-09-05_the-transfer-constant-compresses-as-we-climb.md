@@ -37,6 +37,15 @@ not one. Nothing currently on the card or in the pool is priced that large:
 - decode and architecture axes are closed at about **+0.005 total** (`README:4627`)
 - the member/seating axis is closed on seven board flats
 - the crop route, priced today, is **+0.0007**
+- **the corpus SITE-COUNT corner is negative, priced today off an arm nothing had read.**
+  `merged3_corpus_s2026` ran on 2026-09-01, converged (e9 0.8511, e10 0.8510, e11 0.8510), and sits on the
+  roster at **0.8521** with not one row in `experiments/README.md`. Its control is `merged_corpus_s2026`
+  **0.8545**, one variable away — the same two-site recipe with MRNet added as a third site under the
+  union table `merged3_labels.csv`. A third site is **−0.0024**. That is the measurement that prices the
+  remaining corpora: fastMRI as a fourth site is the same operation one step further out, and the nearest
+  reading of that operation is negative. The corpus axis `README:4627` calls "still moving" is the
+  LABEL corner, not the site corner — `merged_blend_cf` 0.8597 and `merged_span_cf` 0.8618 both hold the
+  two-site cache fixed and change what supervises it.
 
 ## The consequence for how card gets spent
 
