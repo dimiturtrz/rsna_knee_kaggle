@@ -21601,6 +21601,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.TrajectoryGate.standing",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.trajectory_check.main",
       "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
@@ -21634,6 +21640,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.trajectory_check.main",
       "target": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.trajectory_check.main",
+      "target": "kneemri.experiments.trajectory_check.TrajectoryGate.standing",
       "weight": 1
     },
     {
@@ -48194,6 +48206,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.trajectory_check.TrajectoryGate.spread",
       "label": "spread",
+      "level": "method",
+      "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.trajectory_check.TrajectoryGate.standing",
+      "label": "standing",
       "level": "method",
       "parent": "kneemri.experiments.trajectory_check.TrajectoryGate",
       "role": null
