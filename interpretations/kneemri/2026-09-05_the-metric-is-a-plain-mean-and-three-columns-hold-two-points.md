@@ -326,3 +326,40 @@ possible-but-unmeasured on this column, and the two leading candidates are both 
 unexplained 0.17 on the column that carries 0.014 of board is not a comfortable place to leave a finding,
 but it is an honest one, and the alternative is to keep buying explanations with slots at a price the gap
 does not justify.
+
+### The 58-study panel cannot protect a comparison, and the bound is what proves it
+
+Kimi's Q-RULER6 offered a model-free check: flipping D mislabelled cells can move a finding's AUC by at
+most D/min(P,N), so an observed difference LARGER than that bound cannot be reversed by label correction.
+It costs no model and no card — only `core.data.labels.reader_agreement`, which already prints the counts.
+
+Computed. N = 57 - P exceeds P for every finding, so the bound is D/P:
+
+    MCL 9/9 = 1.00 · Lateral OA 7/9 = 0.78 · Synovitis 17/27 = 0.63 · Fracture 10/17 = 0.59
+    PF OA 11/19 = 0.58 · Medial OA 8/14 = 0.57 · Lateral Meniscus 11/21 = 0.52 · Baker's 6/12 = 0.50
+    Effusion 16/34 = 0.47 · ACL 9/23 = 0.39 · Medial Meniscus 8/26 = 0.31
+
+**The smallest bound in the table is 0.31 and the deltas this project measures are ~0.01.** The bound
+exceeds the signal by 31x at best and by 100x on MCL. It never binds. By Kimi's own criterion — reversal
+is possible whenever the observed difference is below the bound — reversal is possible for all twelve
+findings at every effect size we have ever reported or ever will.
+
+This is a stronger negative than the underpowering Kimi already warned about, and it is a different one.
+Underpowering says the panel gives a noisy answer. This says the panel gives NO answer: even with the
+counts known exactly and no sampling error at all, the arithmetic cannot exclude a reversal. 58 studies
+with a third of the reader's positive calls disputed is simply not a ruler that can adjudicate a 0.01
+difference, and no cleverness applied to those 58 rows changes that.
+
+**Consequence, and it is uncomfortable.** Every comparison where two arms differ in SUPERVISION — which is
+`errors_rank` and `errors_relabel` against their control, by construction — has no offline protection at
+all. Not a weak one. None. The only instrument that can adjudicate such a comparison is a board slot, and
+the board has already flattened seven member-level entries, so a slot spent adjudicating one is a slot
+spent on an axis that has not moved.
+
+**What replaces it.** The panel is the wrong denominator; the full holdout is the right one. This project
+holds FOUR reader tables over all 909 studies, not one. A supervision arm that beats its control under
+`report_labels_v2` alone is a result about that table. One that beats it under all four is a result about
+the studies, and the four disagree with each other far more than sampling noise — which is precisely what
+makes agreement across them informative. That is 909 studies rather than 58, costs no card and no slot,
+and is the strongest offline ruler this project can actually build. It is not a proof of board transfer.
+Nothing offline is. It is the difference between one table's opinion and four.
