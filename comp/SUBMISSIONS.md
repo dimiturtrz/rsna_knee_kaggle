@@ -3527,3 +3527,38 @@ improving by `d` moves the board by `d/12`. A finding lane must move its own col
 the board's third decimal can show it at all, and by ~0.18 to be worth 1.5% of board alone. It also
 makes `kneemri-colmcl` (ref 56020054) a clean weight read — with the mean confirmed, the drop from
 constant-ing the MCL column is that column's real AUC minus 0.5, over twelve.
+
+## kneemri-colmcl — ref 56020054, board 0.904
+
+INSTRUMENT ON ONE COLUMN. The champion's six seats plus the raptor seat at 1/3, with the MCL column
+overwritten by a constant 0.5 after the blend. It read **outside every pre-registered band** (0.918-0.928
+expected, below 0.918 and above 0.928 the alternatives).
+
+The harness was checked before the reading was believed, because a 0.040 drop is 96% of the largest drop
+one column can produce and that is the shape of a bug:
+
+- `run_check --log` on the downloaded kernel log reads `loaded 6 of 6 members`
+- the scored `submission.csv` carries exactly the twelve `TARGETS` columns, with MCL at one unique value
+- the kernel's `chosen` tuple and `FOREIGN_WEIGHT` are byte-identical to `kneemri-raptorweight`'s
+
+So the arithmetic is forced, `colnull` having already fixed the metric as a plain unweighted mean:
+
+    MCL board AUC = (0.944 - 0.904) x 12 + 0.5 = 0.980      interval 0.968-0.992 on rounding alone
+
+MCL scores **0.8104 against our labels and ~0.980 against the board's**. It is the worst column of the
+seven-member fold-0 rank pool and very nearly the best column on the board.
+
+Consequences, in the order they cost:
+
+1. The offline per-column map does not transfer in LEVEL — the board's twelve columns must average 0.944,
+   the pool averages 0.8715.
+2. On its only externally tested point the map does not transfer in ORDERING either. It inverts. The
+   +0.0196 bottom-three headroom is not a number to plan against.
+3. The other eleven board columns average 0.9407, and the whole remaining board headroom is 0.056. The
+   owner's 0.953 target is 16% of everything left.
+4. The gap is our SUPERVISION, not the model — and it lands on the column the four-reader census already
+   calls second-worst-labelled at 50.0% radiologist agreement.
+
+Next instrument: `kneemri-colbaker`, the same ablation on Baker's (the pool's strongest column at 0.9208).
+`colmcl`'s own docstring named it as the refutation it could not make, and licensed it on exactly this
+outcome.

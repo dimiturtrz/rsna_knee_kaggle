@@ -139,3 +139,72 @@ arm aimed by it must say so.
 
 No arm has been queued on this yet, and no mechanism for lifting a specific column has been chosen.
 The lane is priced; it is not started. Nothing here is a score.
+
+## AMENDMENT, 00:25Z — `colmcl` landed outside every band, and it inverts the map above
+
+`kneemri-colmcl` scored **0.904**. The three bands registered before the slot were 0.918-0.928 (a plain
+mean at an MCL board AUC of 0.69-0.81, which is where our holdout's 0.8104 sits), below 0.918, and above
+0.928. It missed all of them downward.
+
+The harness was checked before the reading was believed, because a 0.040 drop is 96% of the largest drop
+a single column can produce and that is the shape of a bug. `run_check` on the kernel log reads `loaded
+6 of 6 members`; the scored `submission.csv` carries exactly the twelve `TARGETS` columns with MCL at one
+unique value; and the kernel's `chosen` tuple and `FOREIGN_WEIGHT` are byte-identical to the champion's.
+Nothing is wrong with the entry.
+
+So the arithmetic is forced. **MCL's board AUC is (0.944 − 0.904) × 12 + 0.5 = 0.980**, and the rounding
+interval on two three-decimal scores puts it at 0.968-0.992.
+
+MCL is the **worst** column in the table above and very nearly the **best** column on the board. Two
+things follow, and the second is the one that costs.
+
+**The map does not transfer in level.** The board's twelve columns must average 0.944, because that is
+the champion's score and the metric is their mean. The pool above averages 0.8715. Every absolute number
+in the headroom table — the +0.0196, the +0.0316, the 0.90 target itself — is computed in a coordinate
+system the board does not use.
+
+**On the one column with an external read, it does not transfer in ordering either — it inverts.** The
+section above closed with "if it lands elsewhere the map is ordering-only and any arm aimed by it must
+say so". It landed elsewhere, and worse than that clause allowed for: the map is not ordering-verified,
+it is ordering-**refuted** at its single tested point. An arm aimed at MCL by that map would have been
+aimed at the strongest column we own.
+
+What it does say, and this is the useful half: the model separates MCL almost perfectly against the
+board's labels while scoring 0.8104 against ours. That 0.17 is not the model failing to see the
+ligament. It is our supervision, and it lands on exactly the column the four-reader census already calls
+second-worst-labelled at 50.0% radiologist agreement. The two rulers that disagreed everywhere else in
+this document agree here, and they now agree with a third.
+
+**What this does to the lane.** The per-label *lift* lane is dead as priced — its price came from a map
+that has now failed its only external check, and Kimi's literature pass puts the published mechanisms
+(per-label heads, class-specific attention, CFT-style per-column calibration) at +0.02-0.04 on a weak
+column against the +0.08 the arithmetic needed. The per-label *supervision* lane is the one this
+promotes, and it is the same lane the 2026-09-04 four-reader page arrived at from the other direction.
+
+### The mean constraint, which is the most useful line on this page
+
+The twelve board columns must average exactly 0.944, because that is the champion's score and the metric
+is their mean. Two consequences fall straight out and neither needs another slot.
+
+**The other eleven columns average 0.9407.** From (0.980 + 11x) / 12 = 0.944. So a typical column sits
+near 0.94, and a Baker's ablation should drop the board by about (0.94 − 0.5) / 12 = 0.037 if Baker's is
+typical — which is where `colbaker`'s expected branch is drawn.
+
+**The entire remaining headroom on this board is 0.056.** A perfect submission scores 1.000 and we sit at
+0.944. The owner's target of 0.953 is +0.009, which is **16% of everything left**. That reframes every
+lane on the page: a mechanism does not need to find a weak column, because on the board there may not be
+one worth 0.09 — it needs to find 0.009 spread across twelve columns that are already at 0.94. The
+per-label lift lane was attractive precisely because it promised a big number in one place, and the mean
+constraint says no such place is available to promise it.
+
+It also puts a ceiling on the supervision lane before the card is spent. If fixing our labels lifted
+every column to 0.98 — MCL's measured level, the best any column here is known to reach — the board would
+read 0.980, and getting to 0.953 needs about a quarter of that. That is the first ceiling on the axis
+that comes from the board's own arithmetic rather than from someone else's corpus.
+
+**What would settle it for one slot and no card.** A second ablation, on a column the map calls STRONG.
+`colmcl`'s own docstring named this as the refutation it could not make. Baker's is the pool's best
+column at 0.9208; if its board drop is also ~0.040 then every column is near-ceiling and our map carries
+no information, if it is small the ordering is inverted broadly, and if it is 0.035 the map transfers and
+MCL alone is anomalous. Those three answers aim three different next arms, which is what an instrument is
+for.
