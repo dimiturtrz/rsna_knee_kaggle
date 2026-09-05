@@ -109,6 +109,19 @@ class ColumnHeadroom:
         return sum(row.shortfall(self.target) for row in rows) / len(TARGETS)
 
 
+REFUTED = """
+THIS MAP FAILED ITS ONLY EXTERNAL CHECK - DO NOT AIM WORK WITH IT (knee-zsyp4).
+`colmcl` replaced the MCL column with a constant and read 0.904 against the champion's 0.944, which
+under the settled metric puts MCL's BOARD auc at 0.980 (interval 0.968-0.992). MCL is the WORST column
+in this map and very nearly the BEST on the board, so the ordering printed above does not merely shift
+in level - on the one column anyone has an external read for, it INVERTS. What the map measures is our
+own supervision: MCL carries 50% radiologist agreement, the second-worst-labelled column we own, so a
+low area here says the LABELS are noisy and not that the model is weak. Reading it the other way prices
+a lane that is not there. The board's own per-column area arrives one column per slot, and until a
+column has that pair, nothing below is a target.
+"""
+
+
 def main() -> None:
     """Pool a directory of member holdouts and report the per-column map with its board arithmetic."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -129,6 +142,7 @@ def main() -> None:
         f"lifting every column below {parsed.target:.2f} up to it is worth "
         f"{headroom.board_value(rows):+.4f} of board - an UPPER BOUND, no mechanism attached"
     )
+    logger.warning(REFUTED)
 
 
 if __name__ == "__main__":
