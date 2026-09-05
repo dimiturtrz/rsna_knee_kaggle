@@ -3562,3 +3562,32 @@ Consequences, in the order they cost:
 Next instrument: `kneemri-colbaker`, the same ablation on Baker's (the pool's strongest column at 0.9208).
 `colmcl`'s own docstring named it as the refutation it could not make, and licensed it on exactly this
 outcome.
+
+## `kneemri-colbaker` — ref 56023244, board 0.903 — the per-column axis closes on the second endpoint
+
+The same ablation as `colmcl`, on the opposite end of our own ordering: Baker's cyst, the pool's
+STRONGEST column at 0.9208 offline, overwritten by a constant 0.5 after the blend. `colmcl` took the
+weakest (0.8104). Between them they bracket a 0.110-wide offline spread.
+
+    Baker's board AUC = (0.944 - 0.903) x 12 + 0.5 = 0.992      interval 0.980-1.004 on rounding alone
+    MCL board AUC     = (0.944 - 0.904) x 12 + 0.5 = 0.980      interval 0.968-0.992
+
+**The intervals overlap.** Two three-decimal board scores differenced and multiplied by twelve carry a
++/- 0.012 interval on the column, so this pair cannot order the two columns and never could have. That
+RETRACTS the ordering half of `colmcl`'s reading — "on its only externally tested point the map inverts"
+was one point read past its own resolution, and the second point does not rescue it in either direction.
+
+What the pair DOES establish is level, and it is enough to close the lane:
+
+1. **The offline spread is not there.** The two extremes of a 0.110-wide offline ordering both land at
+   about 0.98 on the board. Whatever separates our columns offline is compressed by roughly an order of
+   magnitude against Kaggle's labels — below the resolution of the only instrument that can see it.
+2. **The weak columns are elsewhere and we cannot point at them.** The ten unread columns must average
+   (0.944 x 12 − 0.992 − 0.980) / 10 = 0.9356. They carry the whole remaining headroom, and our holdout's
+   map just failed to identify either end of it.
+3. **The lane is unaffordable AND under-resolved.** One slot per column, twelve columns, each read no
+   finer than 0.012 — against a column that must move 0.018 to shift the board's third decimal at all.
+
+So the per-column axis is CLOSED, and it is closed on measurement rather than on price. Per-label work
+still lands through `colnull`'s pricing rule (a column moving by d moves the board by d/12); what is
+retired is the idea of choosing WHICH column to work on from our own holdout.
