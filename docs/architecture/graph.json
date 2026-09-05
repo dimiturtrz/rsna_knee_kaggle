@@ -9890,6 +9890,24 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.correction_lines",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.correction",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.correction_lines",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.matched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.correction_lines",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.resampled_correction",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
       "target": "core.data.labels.reader_upgrade.ReaderUpgrade.accuracy",
       "weight": 1
@@ -9904,6 +9922,12 @@
       "kind": "calls",
       "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
       "target": "core.data.labels.reader_upgrade.ReaderUpgrade.blank",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
+      "target": "core.data.labels.reader_upgrade.ReaderUpgrade.correction_lines",
       "weight": 1
     },
     {
@@ -39816,6 +39840,30 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.correction",
+      "label": "correction",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.correction_lines",
+      "label": "correction_lines",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.matched",
+      "label": "matched",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.reader_upgrade.ReaderUpgrade.report",
       "label": "report",
       "level": "method",
@@ -39826,6 +39874,14 @@
       "descendants": 0,
       "id": "core.data.labels.reader_upgrade.ReaderUpgrade.resampled",
       "label": "resampled",
+      "level": "method",
+      "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.reader_upgrade.ReaderUpgrade.resampled_correction",
+      "label": "resampled_correction",
       "level": "method",
       "parent": "core.data.labels.reader_upgrade.ReaderUpgrade",
       "role": null
