@@ -7743,3 +7743,37 @@ still needs precision above 0.5 at a budget large enough to reach a material sha
 cells, and neither detector nor their average is within reach of it. Do NOT spend a card arm on a relabel
 built from this ranking: `errors_relabel` was flat on a ranking with precision 0.720 at its budget, and this
 one is worse there.
+
+## `ortho_lpft` ran, has no row, and cannot answer the question it was built for — 2026-09-05
+
+The arm exists on disk and reads 0.7937, and until today the ledger held one line about it: a budget
+entry at 432 s/epoch. Two things are wrong with reading that number, and both are why the row is being
+written before a follow-up spends card on the same axis.
+
+**It is a FLOOR, not a reading.** `convergence_check` says `TRUNCATED  ortho_lpft_s2026  best e4 of 5
+run, 12 asked` — the process died at epoch 4 of a 12-epoch budget, and the recipe is `one_cycle`, so
+the anneal that carries the last points never ran. Nothing about 0.7937 says where this recipe lands.
+
+**It moved two variables at once.** Stage two used `--backbone-lr 1e-5` against `ortho_dense`'s 4e-5,
+alongside the warm start. So its control was never `ortho_dense`: it is the unrun `ortho_fresh_lowlr`,
+which the arm's own header states. Read against `ortho_dense`, a gap is unattributable between the
+initialisation Kumar's mechanism is about and a rate an order lower. The triple has always been missing
+that leg, and completing it costs two arms on `ortholarge`, whose direct fine-tune reads 0.8452.
+
+So LP-FT is UNMEASURED here, not refuted. `band_lpft` (queued 2026-09-05) asks the same question where
+the control already exists and `--init` is the only flag that moves: `band_dense` = 0.8578 at the
+identical trunk, slices, band, pooling and 4e-5 rate. The `ortholarge` triple stays open only as a
+question about FOREIGN trunks, where the frozen-vs-fine-tuned distortion gap measured 0.148 and the
+mechanism's headline is largest.
+
+## The CNN axis closed on its own named re-opener, card-free — 2026-09-05
+
+`radnet_pinned`'s row licensed exactly one measurement: the per-case error correlation against the mean
+ViT-incumbent. It has now been run against `honest12`, and it goes the other way from the hypothesis.
+Both CNNs read DISTINCT on all three axes at once — rank 0.4394 and 0.6415 against a roster boundary of
+0.8956, js 0.025–0.026 against 0.0150, maha 4.87–4.97 against 4.319 — which makes `radnet_family` the
+most distinct member this project has measured. Seat value: −0.0004 and −0.0009 added, −0.0001 as the
+best swap, 0 of 2 clearing the +0.0040 line. Maximal distinctness, negative seat. The supervised
+ImageNet VGG-16 / ResNet-50 arm stays unqueued, and the lane costs no further card on either of its two
+arguments. Full reading:
+`interpretations/kneemri/2026-09-05_the-cnn-axis-is-maximally-distinct-and-still-worthless.md`.
