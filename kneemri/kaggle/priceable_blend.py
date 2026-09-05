@@ -53,6 +53,15 @@ each one is real but that the pool's ceiling is not understated by stopping earl
 DEFAULT_WIDTH = 20
 """A hard cap on the blend, so a pathological pool cannot walk to two hundred seats."""
 
+DEFAULT_FOLDS = 10
+"""Ten, because the measurement is meant to price a search run at nearly full data.
+
+A two-fold cut answers a different question — what a search overfits when it reads half the corpus — and
+that reading (+0.0201 over the 195-member pool) is an upper bracket on the one this module is asked for.
+At ten the search reads 90% of the shared studies, which is the regime every offline number in
+`comp/board.jsonl` was actually taken in.
+"""
+
 ANCHOR_OFFLINE = 0.8749
 ANCHOR_BOARD = 0.937
 """`distinct14` (ref 55943714): the only entry above board 0.936 that carries an offline number."""
@@ -122,16 +131,22 @@ class PriceableBlend:
         """The blend's mean per-label AUC over the studies all of its members held out."""
         return self.scored_on(members, None)
 
-    def halves(self) -> tuple[set[str], set[str]]:
-        """The shared studies cut in two, so a search and the price of what it found share no study.
+    def folds(self, count: int = DEFAULT_FOLDS) -> list[set[str]]:
+        """The shared studies cut into `count` parts, so a search and the price of what it found share none.
 
         Cut by sorted position rather than at random: the split has to be the same one on every run, or
         the optimism it measures is partly the split moving underneath it.
+
+        THE COUNT IS THE MEASUREMENT'S SECOND VARIABLE and it is why this is not fixed at two. Selection
+        overfit grows as the ruler the search reads gets noisier, and a two-fold cut halves the studies
+        the search sees. At `count` folds the search reads `count - 1` of them, so ten folds put the
+        search on 90% of the corpus ruler rather than 50% of it, and the gap it reports is the gap of a
+        search run at nearly full data. A two-fold number is an upper bracket on that, never its value.
         """
         mix = RecordMix(self.on_the_corpus_ruler(self.candidates()), foreign=True)
         mix.narrow()
         studies = sorted(mix.shared())
-        return set(studies[0::2]), set(studies[1::2])
+        return [set(studies[start::count]) for start in range(count)]
 
     def chosen(self, studies: set[str] | None = None) -> list[tuple[str, float]]:
         """The greedy blend, as (member name, the blend's score once it joined)."""
@@ -151,29 +166,45 @@ class PriceableBlend:
             history.append((winner.stem, best))
         return history
 
-    def optimism(self) -> list[str]:
+    def optimism(self, count: int = DEFAULT_FOLDS) -> list[str]:
         """How much of a searched blend's offline score is the search finding the holdout rather than a
-        better ensemble: select on one half of the studies, price on the other, report the drop.
+        better ensemble: select on all folds but one, price on the one held out, report the drop.
 
         This is the number every prediction in this module has been missing. `report` compares a SEARCHED
         offline against `distinct14`'s, and if that anchor was not itself searched the comparison hands
         the searched side a head start of exactly this size. Subtract it before predicting a board score,
         or the prediction is optimistic by construction and will read as a ruler inversion when the board
         answers lower.
+
+        AT `count` = 2 THIS IS AN UPPER BRACKET, NOT A VALUE, and the distinction cost a wrong number in
+        a letter and a wrong branch in a pre-registration. The two-fold reading of +0.0201 was taken with
+        the search on 455 studies and the widest pool this project owns; `kneemri.evaluation.selection_bias`
+        reads +0.0025 to +0.0031 with the search on all of them and a narrower pool. Both are real and
+        they measure different regimes. Raising `count` holds the pool where it is and gives the search
+        back its studies, which is the only one of the two knobs this module controls.
         """
-        left, right = self.halves()
-        history = self.chosen(left)
-        if not history:
-            return ["REFUSED: no priceable member is on disk. A search that measured nothing has not passed."]
-        members = [self.models / f"{name}.pt" for name, _ in history]
-        inside = self.scored_on(members, left)
-        outside = self.scored_on(members, right)
-        return [
-            f"selected on {len(left)} studies, priced on the {len(right)} it never saw",
-            f"{len(history)} seats: {', '.join(name for name, _ in history)}",
-            f"selection half {inside:.4f}, held-out half {outside:.4f}",
-            f"optimism {inside - outside:+.4f} — subtract it from any searched offline before predicting",
-        ]
+        parts = self.folds(count)
+        gaps: list[float] = []
+        lines = [f"{count} folds over {sum(len(part) for part in parts)} shared studies"]
+        for index, held in enumerate(parts):
+            selection = set().union(*(part for position, part in enumerate(parts) if position != index))
+            history = self.chosen(selection)
+            if not history:
+                return ["REFUSED: no priceable member is on disk. A search that measured nothing has not passed."]
+            members = [self.models / f"{name}.pt" for name, _ in history]
+            inside = self.scored_on(members, selection)
+            outside = self.scored_on(members, held)
+            gaps.append(inside - outside)
+            lines.append(
+                f"  fold {index + 1}: selected on {len(selection)}, priced on {len(held)}; "
+                f"in-sample {inside:.4f}, held out {outside:.4f}, gap {inside - outside:+.4f} "
+                f"({len(history)} seats: {', '.join(name for name, _ in history)})"
+            )
+        lines.append(
+            f"optimism {sum(gaps) / len(gaps):+.4f} over {len(gaps)} folds, "
+            f"spread {min(gaps):+.4f} to {max(gaps):+.4f} — subtract it from any searched offline"
+        )
+        return lines
 
     def predicted(self, offline: float) -> tuple[float, float]:
         """The board band this offline score implies, through the top regime compression."""
@@ -215,14 +246,21 @@ def main() -> None:
     command.parser.add_argument(
         "--optimism",
         action="store_true",
-        help="measure how much of a searched score is the search itself: select on half the studies, "
-        "price on the other half",
+        help="measure how much of a searched score is the search itself: select on all folds but one, "
+        "price on the one held out",
+    )
+    command.parser.add_argument(
+        "--folds",
+        type=int,
+        default=DEFAULT_FOLDS,
+        help="how many folds --optimism cuts the studies into; two halves the ruler the search reads and "
+        "reports an upper bracket, ten leaves the search 90 percent of it",
     )
     arguments = command.parsed()
     root = command.rooted(arguments)
 
     blend = PriceableBlend(root.models(), arguments.vote, arguments.width)
-    command.report(blend.optimism() if arguments.optimism else blend.report(arguments.members))
+    command.report(blend.optimism(arguments.folds) if arguments.optimism else blend.report(arguments.members))
 
 
 if __name__ == "__main__":

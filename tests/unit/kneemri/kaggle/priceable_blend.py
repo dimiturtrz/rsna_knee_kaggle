@@ -10,6 +10,8 @@ from kneemri.runs.holdout_record import HoldoutRecord
 LABELS = 12
 STUDIES = 40
 WIDTH = 4
+FOLDS = 2
+"""The cheapest cut that still has an inside and an outside; the module's own default is ten."""
 RNG = np.random.default_rng(2026)
 STRONG = "strong_s2026"
 """The member whose predictions track the truth most closely, so forward selection takes it first."""
@@ -67,7 +69,7 @@ def test_scored(tmp_path: Path):
 def test_scored_on(tmp_path: Path):
     """A study subset prices only those studies, so the two halves are scored apart."""
     blend = _blend(tmp_path)
-    left, _ = blend.halves()
+    left = blend.folds(FOLDS)[0]
     weak = [tmp_path / "weak_s2026.pt"]
 
     half = blend.scored_on(weak, left)
@@ -75,22 +77,23 @@ def test_scored_on(tmp_path: Path):
     assert half != blend.scored(weak), "half the studies is not the whole split"
 
 
-def test_halves(tmp_path: Path):
-    """The cut is exhaustive, disjoint and the same on every run."""
+def test_folds(tmp_path: Path):
+    """The cut is exhaustive, disjoint and the same on every run, at whatever count it is asked for."""
     blend = _blend(tmp_path)
 
-    left, right = blend.halves()
+    parts = blend.folds(FOLDS)
 
-    assert not left & right, "a study used to select can never be a study used to price"
-    assert len(left) + len(right) == STUDIES, "every shared study lands on one side"
-    assert (left, right) == blend.halves(), "the cut is positional, so it does not move between runs"
+    assert len(parts) == FOLDS, "the count is the number of parts, not a hint"
+    assert not set.intersection(*parts), "a study used to select can never be a study used to price"
+    assert sum(len(part) for part in parts) == STUDIES, "every shared study lands on exactly one part"
+    assert parts == blend.folds(FOLDS), "the cut is positional, so it does not move between runs"
 
 
 def test_optimism(tmp_path: Path):
-    """The report names both halves and closes on the drop between them."""
-    lines = _blend(tmp_path).optimism()
+    """The report opens on the fold count and closes on the mean drop across them."""
+    lines = _blend(tmp_path).optimism(FOLDS)
 
-    assert "it never saw" in lines[0], "the held-out half is stated before any number is"
+    assert lines[0].startswith(f"{FOLDS} folds over "), "the cut is stated before any number is"
     assert lines[-1].startswith("optimism "), "the last line is the correction the measurement exists for"
 
 

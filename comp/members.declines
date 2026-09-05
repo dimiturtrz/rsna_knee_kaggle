@@ -568,3 +568,24 @@ relabel_hold_s2026    # The supervision arm read as a QUESTION, not as a member,
                       # RE-OPEN BY: a full-corpus relabel across EVERY seat of an entry, which is a
                       # retraining bill and not a reseating — one seat has been measured and is worth
                       # nothing. Or more annotated cells, which is owner-side.
+
+band_deep224_s2026    # Depth at 224 px, one variable against band224_hold_s2026, and it is DOWN by
+                      # 0.0070 (0.8446 against 0.8516) at a matched twelve-epoch budget. Under every
+                      # rostered member of its own decode group (blendhold 0.8575, ema224 0.8544,
+                      # labelwise224 0.8517), so it cannot seat on score, and its diversity case is
+                      # nil — it is the SAME recipe as the control with a longer unfreeze ladder, which
+                      # is the axis least likely to decorrelate errors. Costs 228 s an epoch against
+                      # 142 for a negative delta. Full reading: logs/band_deep224_ledger.log.
+                      # RE-OPEN BY: depth at 336, where the control's own advantage lives, or a ladder
+                      # shape that differs in more than its length. Not by a longer budget — that moves
+                      # the control too, and the epoch-budget axis is closed.
+
+coatnet_hybrid_s2026  # The hybrid-architecture question, asked once and answered clearly: 0.8259 best,
+                      # about -0.031 against the 336 px lane, at 1216 s an epoch — the schedule's most
+                      # expensive arm and its worst score. Peak at epoch 6 and declining after, so the
+                      # budget was not the bound. -0.031 is twice the significance bar in the wrong
+                      # direction and far outside the roughly 0.01 window where ensemble diversity has
+                      # ever bought back a weak member here. Full reading: logs/coatnet_hybrid_seat.log.
+                      # RE-OPEN BY: a hybrid whose PRETRAINING distribution is what differs (medical
+                      # volumes rather than ImageNet). Not by another trunk from the same family — that
+                      # is the question this arm already answered.
