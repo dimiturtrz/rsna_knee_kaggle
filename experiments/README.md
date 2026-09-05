@@ -7806,6 +7806,13 @@ The ortho trunk stays open as a QUESTION and closed as a QUEUE ITEM: nothing abo
 while the position axis (`band_surgical`) and the initialisation axis (`band_lpft`) are unmeasured on a
 trunk that already reads 0.8578.
 
+**STALE AS OF 2026-09-05 14:11Z — both of those are now measured, and neither left a queue item.**
+`band_early` read 0.8418 (−0.0160, converged, twelve epochs) and closed the position axis; `band_lpft`
+read LP-FT's gain as a convergence-speed effect that a long fine-tune erases. So the sentence above no
+longer names anything to run, and the ortho trunk's closure as a queue item does not depend on it. The
+only ortho leg still unrun is `band_mid` at offset 3, which this ledger prices as instrument-class at
+~0 expected gain and which is therefore not queued either.
+
 ### `band_lpft` — LP-FT's ID gain is a convergence-speed effect, and a long fine-tune erases it — 2026-09-05
 
 Arm `experiments/arms/band_lpft.sh`, bead knee-6hfi, reading `logs/band_lpft_ledger.log`.
