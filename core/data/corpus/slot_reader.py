@@ -58,15 +58,32 @@ SPREAD = "spread"
 ADJACENT = "adjacent"
 """A CONTIGUOUS run of slices centred in the band, so consecutive samples are consecutive in millimetres.
 
-WHY THE AXIS EXISTS AT ALL, AND WHY THE BAND WORK DID NOT ALREADY DECIDE IT. Eleven arms have varied the
-band's WIDTH and none has varied its SPACING; under `SPREAD` no two of the sampled slices are ever
-adjacent in the volume, at any width. Width is EXTENT — how much of the depth can be seen — and spacing
-is CONTIGUITY, which is a different mechanism and the one the deficit findings are defined by: a
-meniscal tear is 1-3 mm of signal that has to touch an articular surface on two CONSECUTIVE slices, and
-a spread sample cannot show that continuity however wide or narrow the band is. So the interior optimum
-`SLICE_BAND` records (0.10-0.90 beats both 0.20-0.80 and 0.00-1.00) is not evidence against this, and a
-competitor's +0.018 for a centre-adjacent nine over nine spread across twenty-four is not evidence
-against the band result. See `knee-e6sj`.
+WHY THE AXIS EXISTS AT ALL. Width is EXTENT — how much of the depth can be seen — and spacing is
+CONTIGUITY, which is a different mechanism and the one the deficit findings are defined by: a meniscal
+tear is 1-3 mm of signal that has to touch an articular surface on two CONSECUTIVE slices. So the
+interior optimum `SLICE_BAND` records (0.10-0.90 beats both 0.20-0.80 and 0.00-1.00) is not evidence
+against this, and a competitor's +0.018 for a centre-adjacent nine over nine spread across twenty-four
+is not evidence against the band result.
+
+AND WHY IT IS NOW CLOSED, BY ARITHMETIC RATHER THAN BY AN ARM. This docstring used to assert that
+"under `SPREAD` no two of the sampled slices are ever adjacent in the volume, AT ANY WIDTH". That is
+false, and it is only true when the slice budget sits far below the in-band count. Series depth measured
+over a 12-study sample (68 series): min 16, p25 26, median 32, p75 38. At `slices = 20`, which is the
+operating point every current member is fitted at, the two rules very nearly COINCIDE — consecutive
+pairs out of a possible 19, spread against adjacent:
+
+    depth 16 (min)     13 in band     12 vs 12   — the two rules are IDENTICAL
+    depth 26 (p25)     21 in band     18 vs 19
+    depth 32 (median)  25 in band     14 vs 19
+    depth 38 (p75)     31 in band      8 vs 19
+
+So at the median study `SPREAD` already delivers 74% of the available contiguity and at p25 it delivers
+95%, while `ADJACENT` still pays the full span cost (24 -> 19 indices at the median, 30 -> 19 at p75) —
+the same span-for-contiguity trade that cost `adjacent224` its Regional findings. The contrast is large
+only on deep series, which are exactly the ones where adjacency throws away the most span. There is no
+operating point where the difference is both big and span-cheap, so the axis does not open by moving to
+a denser stack; a denser stack is where `SPREAD` CONVERGES to `ADJACENT`. See `knee-e6sj`, whose
+re-open condition this retires, and the 2026-09-05 ledger row.
 """
 
 

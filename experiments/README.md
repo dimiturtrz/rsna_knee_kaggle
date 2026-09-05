@@ -8114,3 +8114,59 @@ DIVERSITY seat is a separate question this row does not answer: it is the only M
 pool that is otherwise a DINOv2-small monoculture, and the champion's own principles record twice that a
 member losing its matched control can still win a seat on error structure. That is a seat_value reading,
 not a solo one, and it costs no card.
+
+### The contiguity axis closes by arithmetic, and the docstring that opened it was wrong — card-free, 2026-09-05
+
+`adjacent224` was refuted in August (0.8462 against `native224` 0.8502, -0.0040, converged) and the axis
+was closed on it. Its close note named the one condition that would re-open it, before the result was
+known: adjacency "does not rule out adjacency at a DENSER stack where span is not the thing being spent.
+If `merged_dense_cf` (20 slices, 0.1-0.9) pays, adjacency is worth one re-test there and only there."
+That condition looked MET — the operating point moved to 20 slices over 0.10-0.90, `band_dense` reads
+0.8578 as the best single member the project owns, and `merged_blend_cf` sits in the champion. An arm was
+written against it, a 55.6 GB cache was started, and both were thrown away twenty minutes later without
+touching the card, because the premise underneath the re-open condition does not hold.
+
+WHAT THE PREMISE WAS. `Spacing`'s own docstring asserted that "under `SPREAD` no two of the sampled
+slices are ever adjacent in the volume, AT ANY WIDTH". Every argument on this axis rested on that
+sentence, `knee-e6sj` included: if spread never samples two consecutive slices, then the model can never
+see the 3D continuity a meniscal tear is defined by, on any band, and contiguity is an untested lever.
+
+IT IS FALSE, AND FALSE EXACTLY WHERE WE OPERATE. It holds only when the slice budget sits far below the
+in-band count. Series depth, measured over a 12-study sample (68 series): min 16, p25 26, median 32,
+p75 38, max 160. `band_indices` puts `int(0.1*(depth-1))` to `int(0.9*(depth-1))` in the band, so a
+median study offers 25 in-band indices — and we ask for 20 of them. Consecutive pairs out of a possible
+19, spread against adjacent:
+
+| series depth | in band | spread adj-pairs | adjacent adj-pairs | spread span | adjacent span |
+|---|---|---|---|---|---|
+| 16 (min)     | 13 | 12 | 12 | 12 | 12 |
+| 26 (p25)     | 21 | 18 | 19 | 20 | 19 |
+| 32 (median)  | 25 | 14 | 19 | 24 | 19 |
+| 38 (p75)     | 31 |  8 | 19 | 30 | 19 |
+
+At the minimum depth the two rules return the IDENTICAL index set. At p25 spread already delivers 95% of
+the available contiguity, at the median 74%. Meanwhile `ADJACENT` pays the full span cost at every depth
+— 24 indices of span down to 19 at the median, 30 down to 19 at p75 — which is the same
+span-for-contiguity trade the August arm was read as losing (Regional -0.0073 against focal -0.0018,
+broad rather than confined).
+
+WHY THAT CLOSES THE AXIS RATHER THAN MOVING IT. The contrast between the two rules is large only on DEEP
+series, and deep series are precisely where adjacency discards the most span: at depth 160 spread covers
+128 indices and adjacent covers 19. So the two things the re-open condition needed — a big contrast and a
+cheap span — are anti-correlated by construction. A denser stack is not where adjacency gets a fair test;
+it is where `SPREAD` CONVERGES TO `ADJACENT`. There is no operating point reachable from here that
+satisfies both, so the axis does not close on a second measurement, it closes on arithmetic, and
+`knee-e6sj`'s re-open condition is retired rather than merely unmet.
+
+WHAT THIS DOES NOT SAY. It does not say the rival's +0.018 was wrong. They ran 9 slices across 24, a
+budget well under the in-band count, which is the regime where the old docstring sentence IS true and
+where spread and adjacent really are different samplers. Their operating point has the property ours
+lacks. It also does not touch slice COUNT or band WIDTH, both of which are measured elsewhere and both
+of which stand.
+
+THE COST OF THE WRONG SENTENCE, written down because it is the transferable part. One false clause in a
+strategy docstring generated a P1 bead, survived its own arm's refutation intact, and was about to buy a
+second arm plus a 55.6 GB decode at the exact operating point where it is least true. Nothing in the
+gates could catch it: it is prose, it is self-consistent, and the code beneath it is correct. What caught
+it was refusing to write the arm's mechanism paragraph from the docstring and instead computing the two
+index sets — six lines, no card. The docstring now carries the table instead of the claim.
