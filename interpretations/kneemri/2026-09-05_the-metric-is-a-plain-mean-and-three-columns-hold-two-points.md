@@ -238,3 +238,62 @@ floor.
 What survives is Kimi's instrument, with its threshold moved: a relabel is licensed only if the columns
 are noise-limited ON THE BOARD, and our worst-labelled column is not. `colbaker` decides whether MCL is
 representative or anomalous, and until it reads, no card goes to the relabel.
+
+### The 0.17 ruler gap, audited — including the half of it I had got wrong myself
+
+Kimi answered Q-RULER1-4 at 01:43Z. Two of the four answers stand, one is corrected here, and the
+correction runs OPPOSITE to the direction their reply drew.
+
+**What they found, and it is a real number I had not read.** `interpretations/kneemri/2026-09-03_the-report-reader-is-the-weaker-half.md:50` carries the row
+
+    MCL               0.9762 → 0.9070   -0.0692
+
+and the reply used the 0.9070 as "the same ensemble's MCL column against the radiologist", closing
+0.096 of the 0.17 gap and concluding "the model is fine, the lexicon labels are the problem."
+
+**Three things are wrong with that use, and the third is the one that matters.**
+
+*The sample moves with the ruler.* 0.8104 is 909 studies scored against the lexicon. 0.9070 is
+**58 studies** scored against the radiologist. Two variables change at once, so none of the 0.096 can be
+attributed to the ruler alone. Their own Q-RULER3 says the 58-study panel gives an MCL standard error of
+0.08-0.10 — wide enough to swallow the whole difference they attributed to labels.
+
+*It is not the same ensemble.* That row is the fitted model of that arm, not the six-member champion
+plus the raptor seat at 1/3 that `colmcl` damaged.
+
+*The cited file says the opposite about MCL specifically.* That table is `supervision_gap`: the report
+LABEL as a predictor against the radiologist (0.9762) versus the MODEL against the radiologist (0.9070).
+Its headline is that the model beats its own supervision by 0.047 over 696 cells — and that **MCL is the
+single inversion**, the one finding where the lexicon label is the BETTER half, with a band excluding
+zero. The file's own sentence is: "Where the report is *better* — MCL, and ACL and Medial Meniscus …
+no label work can help, because there is nothing left in the label to recover."
+
+So on the one column where the board has been measured, the lexicon is not the weak half. That is the
+second time in two days that a relabel price has been argued from a number whose denominator was not
+checked, and it lands the same way: **the relabel lane is not licensed by MCL.** It also promotes
+candidates (c) case mix and (d) definitional mismatch from residual to leading, and neither is
+falsifiable offline.
+
+**What I had got wrong on my own side.** My 0.17 compared the board's champion against the SEVEN-member
+fold-0 rank pool — a different model set, which is the same class of confound I had just objected to.
+Tested rather than assumed: pooling all **103 rostered members that carry a holdout record** over the
+same 909 studies reads **MCL 0.8112** and **Baker's 0.9189** (pool mean 0.8713), against the seven-member
+pool's 0.8104 and 0.9208. The column reading is robust to the pool; the gap survives the objection. The
+champion's own six cannot be scored honestly here — five are fold -1 and have seen every holdout study —
+so the exactly-matched comparison does not exist, and that absence is itself part of the finding.
+
+**Kept without change.** Sampling variance is ruled out as the primary cause: Hanley-McNeil at 171
+positives and 738 negatives gives SE ~= 0.0255 at AUC 0.9 (verified: sqrt[0.9*0.1*(1/171 + 1/738)]), so
+0.17 is about 7 SE. And the Q-RULER2 framing is right — this is a linear inverse problem, exact recovery
+of twelve columns needs twelve independent measurements, and the only cheap path is adaptive group
+ablation under a sparsity assumption. That is precisely `colhalf`, which makes it the correct next slot
+rather than a guess.
+
+**The clause with teeth is Q-RULER4.** A shared additive label bias cancels in a paired comparison, so
+member ORDERING survives — but the assumption fails when the noise interacts differently with the two
+members, and the named failure mode is *different supervision*: a member trained on the lexicon can
+learn to reproduce its over-calling, scoring higher on our holdout and lower on the board. Every arm on
+the card right now is in that class by construction. `errors_rank` and `errors_relabel` differ from the
+`band_dense` control in NOTHING BUT supervision. So their offline delta against 0.8578 is exactly the
+comparison Q-RULER4 flags as reversible, and whatever they read has to be written down with that
+caveat attached rather than as a clean keep/kill.
