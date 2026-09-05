@@ -8078,3 +8078,39 @@ measured through a recipe that never let the trunk move.
 habit: left in the present tense after its own question was settled, it invited a 2026-08-25 audit that
 set out to build a cache for an operating point the pool had already adopted. A closed axis that does
 not say so is a standing invitation to redo the work, and today it nearly bought a second one.
+
+### mricore_corpus reads 0.8390 and the in-domain MRI trunk closes as a QUEUE ITEM — 2026-09-05
+
+**The number, with its shape.** 0.8390, best epoch **11 of 12 — the last one**, monotone from e0 0.7338
+through e11 0.8390 with the training loss falling 1.2315 to 0.7099 and never flattening. That is the
+UNDERTRAINED shape, not a converged one: the budget bound it, so 0.8390 is what twelve epochs bought and
+not what the trunk is worth. Recipe stamped in the launch log: 336 px, 20 slices, band 0.1-0.9, batch 2
+accumulate 3, backbone_lr 4e-5, unfreeze_last 6, layer_decay 1.0, one_cycle, whole_stack, attend slot
+pooling, max slice pooling. 636 s an epoch, 7.66 GB reserved.
+
+**Against the four branches pre-registered in `logs/mricore_corpus_ledger.log`.** Seat bar 0.8521 —
+missed by 0.0131. Natural-image control 0.8455 — missed by 0.0065. RadImageNet control 0.8214 — cleared
+by 0.0176. That is the third branch: **the in-domain MRI trunk does not earn a seat and does not pay
+against the natural-image recipe, so the lane closes on the gate.**
+
+**What it does NOT establish, and this is the load-bearing part.** The branch was drawn before the shape
+was known, and an arm that peaks on its final epoch has not been shown a ceiling. `ortho_slow_trunk` read
+0.8265 with the identical pathology — best epoch 11 of 12, monotone, convergence_check clean — and this
+ledger recorded then that the ortho trunk "stays open as a QUESTION and closed as a QUEUE ITEM". The same
+verdict applies here for the same reason, and it now has two points rather than one.
+
+**The pattern across the whole foreign-trunk family, which is new.** Four trunks have been run under this
+recipe: `radiodino_corpus` 0.8214, `coatnet_hybrid` 0.8259, `ortho_slow_trunk` 0.8265, `mricore_corpus`
+0.8390. Every one of them inherits `unfreeze_last 6`, `unfreeze_offset 0`, `layer_decay 1.0` — six blocks
+at a flat rate — and the two whose epoch curves were examined both peaked on their last epoch. The
+natural-image control at 0.8455 does NOT share that shape. So the family may be measuring our schedule
+rather than their pretraining, which is precisely the suspicion `band_deep_matched` was built to settle
+and which took the card at 14:52Z. If that arm clears 0.8640, every row in this paragraph is a reading of
+a recipe that never let the trunk move, and the family is owed a re-run rather than a closure.
+
+**Priced honestly for the pool.** 0.8390 is 0.0252 below the best solo the project owns and well outside
+the 0.0062 paired floor, so it is not a member and not a seat candidate on quality. Whether it is a
+DIVERSITY seat is a separate question this row does not answer: it is the only MRI-pretrained trunk in a
+pool that is otherwise a DINOv2-small monoculture, and the champion's own principles record twice that a
+member losing its matched control can still win a seat on error structure. That is a seat_value reading,
+not a solo one, and it costs no card.
