@@ -285,6 +285,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   clock. Say the compressed interval out loud whenever a mark passes.
   Pacing is not licence to ship a reseating: with nothing mechanism-backed to beat the champion, spend the
   slot on an INSTRUMENT instead, and say which of the two it is in the submission message.
+- **An arm's full log is named for its CHECKPOINT, not for the arm** — `_arm_log` (`experiments/lib.sh`)
+  uses the basename of `--out` minus `.pt`, falling back to the `run_train` name only when a run has no
+  `--out` (knee-tkyy). So `ortho_slow_trunk` writes `ortho_slow_trunk.full.log` and `mricore_corpus`
+  writes `mricore_corpus_s2026.full.log` — the seed is in one and not the other because the checkpoints
+  are spelled that way, not because logs carry seeds. The markers `_mark` writes, `ARM DONE` included,
+  go to that same file, so a watcher gated on the wrong spelling waits forever with the card idle behind
+  it. **Grep the arm for `--out` before arming a watcher.** `queue_check`'s own MISARMED hint states the
+  rule as `<arm>_s<seed>.full.log`, which is wrong and cost two wakes on 2026-09-05 — it disarmed a
+  correct watcher and then flagged the corrected one (knee-ket1c).
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint
