@@ -157,6 +157,14 @@ point the same way and disagree about how far: `crop80_span` cropped IN and lost
 direction is consistent across two arms and the size is unresolved. What is NOT licensed is another
 loss-side tilt — `focus_mcl` put the whole encoder behind MCL and regressed its own target by −0.0576.
 
+**And the crop route must be priced before it is read as a lead, because it is one already-closed axis.**
+`README:317` closes crop/centre on the mean at both extents (80 mm −0.0099, 130 mm −0.0011) and
+`crop160_span` came in FLAT — 0.8564 against `band_span`'s 0.8565. Its MCL +0.0086 is a per-label cell
+inside a ±0.040 ruler, and even taken at face value a wider crop that moved only MCL is worth
+0.0086/12 = **+0.0007 of board**, a fifth of the resolvable tick. So "wider helps MCL" is a direction
+with two consistent signs and no size — an argument for what a real mechanism would have to look like,
+NOT an arm. A crop arm queued off this paragraph would be spending hours to re-measure a closed axis.
+
 ## Hypothesis 4: fastMRI+ is the coronal localisation signal MCL needs — four positives say no
 
 The ledger's verdict on `aprior_dense` is that "the localisation argument has to buy a real localisation
