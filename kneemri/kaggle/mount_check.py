@@ -32,14 +32,22 @@ logger = logging.getLogger(__name__)
 
 METADATA = "kernel-metadata.json"
 MEMBERS_DATASET = "dimiturnt/kneemri-members"
-"""The Kaggle dataset the shipped package is pushed to — the one this sweep is holding a local copy of.
+"""The Kaggle dataset the SHIPPED package is pushed to — the fallback when a package does not say.
 
 A kernel may deliberately mount a DIFFERENT weights package: `kneemri-orthorehearse` attaches
 `dimiturnt/kneemri-ortho-pkg`, a one-member dataset, precisely so `MemberPackage.find` cannot pick the
 big manifest instead. Checked against the shipped package its single member is absent, so the sweep
 refused a kernel that is correct — and a gate that is permanently red is how the next real refusal gets
-read as noise. What this sweep can answer is "does a kernel that mounts OUR package declare what that
-package needs", so a kernel mounting another one is a skip with the reason, never a refusal.
+read as noise. What this sweep can answer is "does a kernel that mounts THE PACKAGE IT IS HOLDING
+declare what that package needs", so a kernel mounting another one is a skip with the reason.
+
+WHICH package it is holding is `--root`'s answer, not this constant's, and reading the constant made
+`--root` a flag that could not do the thing it exists for: `kneemri-relabel7` mounts a seven-member
+package of its own, and both invocations skipped it — the default sweep because the kernel names
+another dataset, and `--root <that package>` because the comparison was still against this string. An
+entry nothing checks is exactly the hole `farseat_v1` went through, and it went through it with every
+gate green. A package declares its own id in the `dataset-metadata.json` that is pushed beside it, so
+the sweep asks the package; this string is what a package built before that file existed means.
 """
 SETTLED_READS = 2
 SETTLE_ATTEMPTS = 8
@@ -54,6 +62,13 @@ class MountCheck:
     def __init__(self, package: MemberPackage, live: set[str] | None = None) -> None:
         self.package = package
         self.live = live
+        try:
+            self.dataset = LiveDataset.identified(package.root)
+        except (FileNotFoundError, KeyError):
+            # A package built before `package_members` wrote the metadata beside it, and every package
+            # a unit test builds. The shipped id is the only honest guess, and guessing it wrong can
+            # only SKIP a kernel — never pass one whose members were not looked at.
+            self.dataset = MEMBERS_DATASET
 
     def entries(self, kernels: Path) -> list[Path]:
         """Every directory under a root that is TRYING to be a kernel, in a stable order.
@@ -85,8 +100,8 @@ class MountCheck:
         if script.call() is None:
             return "skipped - builds no KernelRun, so its package is not ours to check"
         sources = KernelSources(kernel / METADATA)
-        if not sources.covers(MEMBERS_DATASET):
-            return f"skipped - mounts a weights package other than {MEMBERS_DATASET}, which this sweep is not holding"
+        if not sources.covers(self.dataset):
+            return f"skipped - mounts a weights package other than {self.dataset}, which this sweep is not holding"
         names = script.member_names()
         try:
             mounts = self.package.mounts(self.package.named(names) if names else None)

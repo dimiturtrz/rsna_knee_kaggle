@@ -281,3 +281,38 @@ def test_encoder_mounts_over():
     assert EncoderMounts.over(["dimiturnt/vjepa2-hf/vjepa2-vitl"], lambda _: flat).missing == {
         "dimiturnt/vjepa2-hf/vjepa2-vitl": "dimiturnt/vjepa2-hf"
     }
+
+
+def test_the_sweep_holds_the_package_it_was_given_not_the_one_that_ships(tmp_path: Path):
+    """`--root` decides which dataset a kernel must mount, because otherwise it decides nothing.
+
+    A one-off entry ships its members in a package of its own so `MemberPackage.find` cannot pick the
+    big manifest instead, and the sweep then skipped it BOTH ways: the default run because the kernel
+    names another dataset, and `--root <that package>` because the comparison was a module constant.
+    An entry nothing checks is the hole `farseat_v1` went through with every gate green.
+    """
+    package = _package(tmp_path)
+    (package.root / "dataset-metadata.json").write_text(json.dumps({"id": "dimiturnt/one-off"}), encoding="utf-8")
+    check = MountCheck(package)
+    assert check.dataset == "dimiturnt/one-off", "the package says which dataset it is, and it is pushed saying so"
+
+    mine = _kernel(tmp_path, "kneemri-oneoff", "KernelRun().run()\n", [DINOV3])
+    (mine / "kernel-metadata.json").write_text(
+        json.dumps(
+            {
+                "id": "dimiturnt/kneemri-oneoff",
+                "model_sources": [DINOV2],
+                "dataset_sources": ["dimiturnt/one-off", DINOV3],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert check.verdict(mine).startswith("ok"), "the kernel mounting THIS package is the one it can answer for"
+
+    theirs = _kernel(tmp_path, "kneemri-shipped", "KernelRun().run()\n", [DINOV3])
+    assert check.verdict(theirs).startswith("skipped"), "and one mounting the shipped package is now the skip"
+
+
+def test_a_package_that_does_not_say_falls_back_to_the_shipped_dataset(tmp_path: Path):
+    """Every package built before the metadata existed, and every package a unit test builds."""
+    assert MountCheck(_package(tmp_path)).dataset == MEMBERS_DATASET
