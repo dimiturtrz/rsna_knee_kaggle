@@ -440,3 +440,18 @@ ortho_slow_trunk  # 0.8265 solo, best epoch 11 of 12 — the LAST, so the curve 
   diversity argument was already priced at −0.0004/−0.0009 seat value in knee-cj40f.
   RE-OPEN BY: an ortho run that CONVERGES (a peak that is not the last epoch) and still lands within a
   floor of `band_dense`, or a seat_value reading against a fully scoreable entry that clears +0.0015.
+
+band_lpft_s2026.pt
+  0.8513 at epoch 6 of 12, CONVERGED (`convergence_check` flags neither stage). The two-stage LP-FT
+  recipe — a frozen-trunk linear probe first, then a full fine-tune — reads 0.0065 BELOW its own
+  one-stage control `band_dense` 0.8578 on the same geometry. Declined as a seat for the ordinary
+  reason: below the control on the mean, on an axis where the member/seating question is closed on
+  seven board flats, so a diversity argument cannot buy the seat back.
+  RE-OPEN BY: a seat_value reading against a fully scoreable entry that clears +0.0015, or an LP-FT
+  variant that beats its own one-stage control rather than trailing it.
+
+band_lpft_head.pt
+  0.7614 at epoch 9. This is stage ONE of the arm above — the linear probe, trunk frozen — so the
+  number is a measurement of the probe, not a member. Declined as an INSTRUMENT ARTEFACT: it is the
+  intermediate a two-stage recipe produces by construction, and it was never a seat candidate.
+  RE-OPEN BY: nothing. Stage two supersedes it; read the row above instead.
