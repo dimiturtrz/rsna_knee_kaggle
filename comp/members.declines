@@ -455,3 +455,16 @@ band_lpft_head.pt
   number is a measurement of the probe, not a member. Declined as an INSTRUMENT ARTEFACT: it is the
   intermediate a two-stage recipe produces by construction, and it was never a seat candidate.
   RE-OPEN BY: nothing. Stage two supersedes it; read the row above instead.
+
+band_early_s2026.pt
+  0.8418 at epoch 12 against band_dense 0.8578 on the identical recipe — minus 0.0160, two and a half
+  times the 0.0062 paired floor, converged rather than truncated (convergence_check clean, the peak is
+  not the last epoch). The arm opened blocks 6-11 at unfreeze-offset 6 instead of the standard offset 0,
+  which is the POSITION of the trainable window rather than its width. Declined as a MEASURED LOSS, not
+  as an untried idea: the flag was verified to have landed by reading the weights, and blocks 6-11 came
+  back byte-stock at 0.00000 drift, so the encoder really did train where the flag said. The cost was
+  uniform across ten of twelve columns, which is the signature of a worse recipe rather than of a
+  different error structure, so it is not a diversity seat either.
+  RE-OPEN BY: nothing on the position axis — this closed it, and the 2026-09-05 ledger row records the
+  closure. A depth or decay result (band_deep_matched clearing 0.8640) would re-open the WIDTH of the
+  window, which is a different flag and would need its own arm.
