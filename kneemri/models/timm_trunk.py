@@ -19,6 +19,7 @@ so nothing in the file can be asked which model they came off. A strict load is 
 to the weights.
 """
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TypedDict, override
@@ -172,6 +173,104 @@ class TimmHubWeights:
         one by one when unpacked, so the loose type makes the CALL fail to type rather than the mapping.
         """
         return {"dynamic_img_size": True}
+
+
+@dataclass(frozen=True)
+class TimmChunkedWeights(TimmHubWeights):
+    """A DINOv2 TRAINING checkpoint, whose blocks are stored in chunks, rebuilt as a flat timm ViT.
+
+    The sixth answer to "where do the weights come from", and it is the one a release gives when it ships
+    the state of its own pretraining run rather than a finished model. MRI-CORE is that: a `.pth` holding
+    one key, `teacher`, under which sit a `backbone.*` trunk and a `dino_head.*` projector that exists only
+    to compute the SSL loss and is discarded here.
+
+    THE CHUNKING IS THE PART THAT CANNOT BE GUESSED. DINOv2 builds its blocks as `block_chunks=4` groups,
+    so the twelve blocks are keyed `blocks.<group>.<block>` — and the second index is the GLOBAL block
+    number, not an offset inside the group, because each chunk is padded at the front with `nn.Identity`.
+    The pairs on this file are (0,0) (0,1) (0,2) (1,3) ... (3,11), verified against the file. A reader who
+    assumed `group * 3 + offset` gets a mapping that is right for the first three blocks and wrong for the
+    other nine, which a strict load catches and a lenient one would not.
+
+    Everything else is the parent's argument: the architecture is STATED because timm key names carry a
+    shape convention and not a class, and `strict=True` is what holds the statement to the file.
+    """
+
+    directory: str = ""
+    """Where the checkpoint sits under the data root's `reference/` kind, for the reason `LocalSnapshot`
+    names one: the registry is committed and the weights are machine-local, so the path is resolved at
+    load time rather than written down."""
+
+    section: str = ""
+    """The top-level key holding the trunk, since a training checkpoint stores several networks."""
+
+    prefix: str = ""
+    """The trunk's key prefix under `section`, stripped so what remains is timm's own naming."""
+
+    dropped: tuple[str, ...] = ()
+    """Keys the pretraining objective needed and a feature extractor does not."""
+
+    @override
+    def resolve(self, source: str | Path | None) -> Path:
+        """The checkpoint file, from a mount or from this machine's `reference/` kind.
+
+        The parent fetches from HuggingFace when given nothing; these weights are published on Google
+        Drive alone, so there is no repository to fall back to and the local root is the only answer.
+        """
+        if source is not None:
+            path = Path(source)
+            return path if path.is_file() else path / self.filename
+        # Imported here rather than at module scope because a Kaggle kernel has no data root at all, and
+        # `core.cli` reads a config file this module is imported long before.
+        from core.cli import PATHS  # noqa: PLC0415 - see above
+        from core.paths import REFERENCE, DataRoot  # noqa: PLC0415 - see above
+
+        return DataRoot.from_config(PATHS).kind(REFERENCE) / self.directory / self.filename
+
+    def flattened(self, stored: dict[str, dict[str, Tensor]]) -> dict[str, Tensor]:
+        """The trunk's parameters under timm's flat names, with the SSL machinery left behind."""
+        trunk: dict[str, Tensor] = {}
+        for key, value in stored[self.section].items():
+            if not key.startswith(self.prefix):
+                continue
+            name = key.removeprefix(self.prefix)
+            if name in self.dropped:
+                continue
+            trunk[re.sub(r"^blocks\.\d+\.(\d+)\.", r"blocks.\1.", name)] = value
+        return trunk
+
+    @override
+    def build(self, source: str | Path | None = None) -> nn.Module:  # devtools-ignore: test-mirror
+        """The loaded trunk wearing the head's calling contract. No mirror test, for the reason the parent
+        `build` has none: it reads 436 MB off a machine-local path a unit test may neither reach nor fake."""
+        # Imported here rather than at module scope for the reason `resolve` names — a kernel reaches
+        # neither library until the kit is on `sys.path`.
+        import timm  # noqa: PLC0415 - see above
+        import torch  # noqa: PLC0415 - see above
+
+        stored = torch.load(self.resolve(source), map_location="cpu", weights_only=True)
+        trunk = timm.create_model(self.architecture, pretrained=False, num_classes=self.classes, **self.options())
+        trunk.load_state_dict(self.flattened(stored), strict=True)
+        return TimmTrunk(trunk, self.dim)
+
+
+MRICORE_VITB = TimmChunkedWeights(
+    "vit_base_patch16_224",
+    768,
+    filename="MRI_CORE_vitb.pth",
+    directory="mricore",
+    section="teacher",
+    prefix="backbone.",
+    # The masked-image-modelling placeholder. It is a parameter of the pretraining objective, never of a
+    # forward pass, and timm's ViT has no slot for it — so it is dropped rather than mapped.
+    dropped=("mask_token",),
+)
+"""MRI-CORE: a ViT-B/16 pretrained with DINOv2 on 6.1M MRI slices across 18 body locations, Apache 2.0.
+
+Verified against the file rather than described from its README — 159 keys under `teacher`, of which 151
+are `backbone.*` and 8 are the discarded `dino_head.*`; the remainder flatten to a strict load into
+`timm.create_model('vit_base_patch16_224')` with 0 missing, 0 extra and 0 shape mismatch, 85.80M
+parameters, and a 336 px read comes out (n, 442, 768).
+"""
 
 
 @dataclass(frozen=True)

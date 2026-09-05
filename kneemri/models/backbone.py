@@ -71,6 +71,12 @@ from kneemri.models.variants import (
     MEDSAM_BASE as MEDSAM_BASE,
 )
 from kneemri.models.variants import (
+    MRICORE as MRICORE,
+)
+from kneemri.models.variants import (
+    MRICORE_BASE as MRICORE_BASE,
+)
+from kneemri.models.variants import (
     ORTHO_LARGE as ORTHO_LARGE,
 )
 from kneemri.models.variants import (

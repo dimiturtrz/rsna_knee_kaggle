@@ -19,7 +19,7 @@ from kneemri.models.encoder import (
 from kneemri.models.sam_trunk import MEDSAM_VIT_B
 from kneemri.models.snapshot_trunk import ORTHOFOUNDATION_L
 from kneemri.models.state_dict_trunk import RADIMAGENET_DENSENET121
-from kneemri.models.timm_trunk import TimmHubWeights, TimmMapWeights
+from kneemri.models.timm_trunk import MRICORE_VITB, TimmHubWeights, TimmMapWeights
 from kneemri.models.trunk_tokens import TrunkAsTokens
 from kneemri.models.variants import (
     COATNET,
@@ -29,6 +29,8 @@ from kneemri.models.variants import (
     DINOV3,
     MEDSAM,
     MEDSAM_BASE,
+    MRICORE,
+    MRICORE_BASE,
     ORTHO_LARGE,
     RAD_DINO,
     RADDINO,
@@ -624,5 +626,55 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
         stages=(Stage(12, 16, 768),),
         adapter=TrunkAsTokens.from_map,
         builder=MEDSAM_VIT_B.build,
+    ),
+    # THE LARGEST IN-DOMAIN PRETRAINING CORPUS THIS PROJECT CAN REACH, added 2026-09-05. Six point one
+    # million MRI slices across eighteen body locations, the knee among them, under the DINOv2 objective
+    # — against `ortholarge`'s 1.25M knee images and `radnet121`'s 1.35M mixed radiographs. It is the
+    # third and largest point on the corpus axis `knee-m69u` asks about, and the only one whose corpus is
+    # MRI rather than radiographs: every previous medical trunk here was trained on projection imaging,
+    # which shares neither the contrast mechanism nor the volumetric read.
+    #
+    # IT IS ViT-B/16 UNDER DINOv2, so `vitin21k` and `radiodinob16` are both architectural twins and the
+    # corpus is again the single moving variable — the comparison `radnet_family` could not make, because
+    # that trunk varied architecture, objective and corpus together and closed at 0.6716.
+    #
+    # WHAT THE CURVE PREDICTS, and why this is worth a card rather than a probe alone. `knee-y59c`
+    # measured solo strength anti-correlating with distance from DINOv2 across seven trunks, and
+    # `ortholarge` has since split that curve's two readings: it led every trunk FROZEN (+0.0203 on
+    # `feature_probe`) and gave the lead back FINE-TUNED. So the open question is not whether in-domain
+    # pretraining shows up — it is whether it survives a fine-tune, and `ortho_slow_trunk` is the arm
+    # testing that on the rate. This trunk is the same question asked of a corpus twenty times commoner
+    # and an objective identical to the one our own baselines were pretrained under.
+    #
+    # UNIT, DECLARED BY THE RELEASE AND NOT BY THIS REGISTRY'S DEFAULT. Their inference code feeds a
+    # `FloatTensor` in [0, 1] with no mean or std applied, which is MedSAM's recipe above and not
+    # `vitin21k`'s HALF. The default would have shifted every pixel by 0.485 before a trunk that never
+    # saw that distribution — the failure `raddino_dense` already paid for once.
+    #
+    # 224 IS THE PRETRAINED READ and 16 tiles it at 14x14, the same geometry as `vitin21k`. Larger reads
+    # interpolate the position table per forward, which `dynamic_img_size` does inside `TimmChunkedWeights`.
+    #
+    # NO MOUNT YET. Apache-2.0 and ungated, so mirroring is permitted outright; the release is on Google
+    # Drive alone, so the Kaggle dataset is the only way a kernel can ever see it. Deferred until a
+    # member earns the seat, which is the ordering `raddino` says to invert once one does.
+    MRICORE_BASE: Encoder(
+        MRICORE_BASE,
+        # No hub id: the weights are published on Google Drive and reach this machine through the data
+        # root's `reference/` kind, which is why the row carries a builder.
+        "",
+        768,
+        patch=16,
+        family=MRICORE,
+        normalization=UNIT,
+        normalization_evidence=(
+            "The release ships no preprocessing document — the checkpoint is a bare `teacher` state "
+            "dict — so the recipe comes from their own inference code, which builds the input as a "
+            "`FloatTensor` in [0, 1] and applies no mean or std. That is UNIT exactly, and it is also "
+            "what the SAM-derived pipeline the release wraps expects."
+        ),
+        leaf="mricore-vitb",
+        params_m=85.8,
+        stages=(Stage(12, 16, 768),),
+        builder=MRICORE_VITB.build,
     ),
 }

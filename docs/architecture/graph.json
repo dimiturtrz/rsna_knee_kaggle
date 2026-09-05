@@ -26353,6 +26353,42 @@
       "weight": 1
     },
     {
+      "kind": "inherits",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights",
+      "target": "kneemri.models.timm_trunk.TimmHubWeights",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmChunkedWeights.flattened",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmChunkedWeights.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmHubWeights.options",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
+      "target": "kneemri.models.timm_trunk.TimmTrunk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.timm_trunk.TimmChunkedWeights.resolve",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.models.timm_trunk.TimmHubWeights",
       "target": "kneemri.models.timm_trunk.TimmOptions",
@@ -35640,6 +35676,14 @@
       "label": "StateDictWeights",
       "level": "class",
       "parent": "kneemri.models.state_dict_trunk",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmChunkedWeights",
+      "label": "TimmChunkedWeights",
+      "level": "class",
+      "parent": "kneemri.models.timm_trunk",
       "role": "satellite"
     },
     {
@@ -52448,6 +52492,30 @@
       "label": "resolve",
       "level": "method",
       "parent": "kneemri.models.state_dict_trunk.StateDictWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmChunkedWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmChunkedWeights.flattened",
+      "label": "flattened",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmChunkedWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.timm_trunk.TimmChunkedWeights.resolve",
+      "label": "resolve",
+      "level": "method",
+      "parent": "kneemri.models.timm_trunk.TimmChunkedWeights",
       "role": null
     },
     {
