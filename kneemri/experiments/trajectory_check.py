@@ -119,10 +119,12 @@ class Spread:
     high: float
     largest: float
 
+    gate: int = GATE_EPOCH
+
     def line(self) -> str:
         """The distribution as one line, so a truncation decision can be quoted with its evidence."""
         return (
-            f"gain from e{GATE_EPOCH} to peak over {self.runs} runs: "
+            f"gain from e{self.gate} to peak over {self.runs} runs: "
             f"median +{self.median:.4f}, p{int(HIGH * 100)} +{self.high:.4f}, max +{self.largest:.4f}"
         )
 
@@ -164,7 +166,7 @@ class TrajectoryGate:
         The first run of this check reported `median +nan, max +nan` over 119 runs for exactly that."""
         return [value for row in run.rows() if isinstance(value := row.get(AUC), float) and math.isfinite(value)]
 
-    def gain(self, run: RunMetrics, budget: int | None) -> float | None:
+    def gain(self, run: RunMetrics, budget: int | None, gate: int = GATE_EPOCH) -> float | None:
         """This run's gain from the gate epoch to its peak, or None if it does not belong in the corpus.
 
         `budget` matches on the epoch count the recipe ASKED for, because the gain is a statement about a
@@ -184,17 +186,17 @@ class TrajectoryGate:
         if asked is None or (budget is not None and asked != budget):
             return None
         scored = self.scored(run)
-        if len(scored) > asked or len(scored) < math.ceil(FLOOR_SHARE * asked) or len(scored) <= GATE_EPOCH:
+        if len(scored) > asked or len(scored) < math.ceil(FLOOR_SHARE * asked) or len(scored) <= gate:
             return None
-        return max(scored) - scored[GATE_EPOCH]
+        return max(scored) - scored[gate]
 
-    def spread(self, models: Path, budget: int | None = None) -> Spread:
+    def spread(self, models: Path, budget: int | None = None, gate: int = GATE_EPOCH) -> Spread:
         """The distribution over every non-smoke run under the root that ran long enough to have one."""
         gains = [
             gain
             for metrics in sorted(models.glob("*.metrics.jsonl"))
             if (run := RunMetrics(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
-            if (gain := self.gain(run, budget)) is not None
+            if (gain := self.gain(run, budget, gate)) is not None
         ]
         # An unmounted data root, or a budget too thinly used to have a distribution, would otherwise make
         # every arm truncatable against a corpus that cannot answer — the one direction this gate must
@@ -203,7 +205,7 @@ class TrajectoryGate:
         schedule = "any schedule" if budget is None else f"a {budget}-epoch budget"
         Denominator(
             len(gains) if len(gains) >= MIN_CORPUS else 0,
-            f"only {len(gains)} run(s) under {models} match {schedule} past epoch {GATE_EPOCH}, "
+            f"only {len(gains)} run(s) under {models} match {schedule} past epoch {gate}, "
             f"and {MIN_CORPUS} are needed before a spread may decide anything",
         ).refuse_empty()
         ranked = sorted(gains)
@@ -212,15 +214,47 @@ class TrajectoryGate:
             median=statistics.median(ranked),
             high=ranked[min(int(HIGH * len(ranked)), len(ranked) - 1)],
             largest=ranked[-1],
+            gate=gate,
         )
+
+    def standing(self, models: Path, budget: int | None, gate: int) -> Spread:
+        """The spread measured from where the arm ACTUALLY IS, falling back to the calibrated gate.
+
+        WHY THIS EXISTS. `reading` credits an arm past the gate with a climb it has partly spent: the
+        corpus gains are measured from e3, and adding the largest of them to an e8 score counts the e3-e8
+        stretch twice. That was deliberate while there was only one distribution — the gate may only
+        truncate, so every approximation leaned towards letting the run continue. The cost is that the
+        ceiling GROWS with every epoch a doomed arm survives, so the check goes quiet exactly when its
+        evidence is strongest: `ortho_slow_trunk` read a ceiling of 0.8724 at e6 and 0.8787 at e8 while
+        climbing +0.0031 an epoch against a target +0.0268 away.
+
+        Measuring the corpus from the arm's own epoch removes the double count rather than tightening a
+        bound: the number becomes what runs on this schedule ACTUALLY gained from e8 to their peak, still
+        the maximum of that distribution and still generous. What it must not do is fire on a corpus too
+        thin to say anything, and a late gate admits fewer runs by construction — so a spread that cannot
+        reach MIN_CORPUS falls back to the calibrated gate and the check stays as quiet as it was before.
+        """
+        if gate <= GATE_EPOCH:
+            return self.spread(models, budget)
+        try:
+            return self.spread(models, budget, gate)
+        except SystemExit:
+            # `spread` has already logged WHICH corpus was too thin, and that line reads as a refusal
+            # because for every other caller it is one. Say what happened next, or the reader is left
+            # with an error above a verdict that was reached anyway.
+            logger.info("falling back to the calibrated gate e%d, which admits more runs", GATE_EPOCH)
+            return self.spread(models, budget)
 
     def reading(self, run: RunMetrics, target: float, spread: Spread) -> RunTrajectory:
         """Where the arm stands now, and the best it could still do by the corpus's own maximum gain.
 
-        Read from the LAST recorded epoch rather than from the gate, which is generous in the arm's favour:
-        the corpus's gains are measured from the gate, so an arm already past it is credited with a climb
-        it has partly spent. That is deliberate — the gate may only truncate, so every approximation in it
-        leans towards letting the run continue.
+        Read from the LAST recorded epoch, and the spread must therefore be measured from that same epoch —
+        which is what `standing` does. Hand it a spread gated at e3 for an arm sitting at e8 and the e3-e8
+        stretch is counted twice: once in the score it already holds, once inside the gain added to it. That
+        was the original shape and it was deliberate (the gate may only truncate, so every approximation
+        leaned towards letting the run continue), but it made the ceiling GROW with every epoch a doomed arm
+        survived. `standing` removes the double count without tightening the bound — the number is still the
+        MAXIMUM gain in the matched corpus, only measured from where the arm actually is.
         """
         scored = self.scored(run)
         return RunTrajectory(
@@ -254,14 +288,17 @@ def main() -> None:
     if arguments.target is None:
         message = "--run needs --target: this gate compares against a branch registered BEFORE the run started"
         raise SystemExit(message)
-    # MATCHED on the arm's own epoch budget, so the ceiling it is measured against is one a run on this
-    # schedule actually achieved. Falls back to the whole corpus only for an arm that recorded no recipe.
-    spread = gate.spread(models, ConvergenceCheck().asked(record))
-    logger.info("%s", spread.line())
     scored = gate.scored(record)
     if len(scored) <= GATE_EPOCH:
         message = f"{record.name()} has {len(scored)} scored epochs - nothing to read before e{GATE_EPOCH}"
         raise SystemExit(message)
+
+    # MATCHED on the arm's own epoch budget, so the ceiling it is measured against is one a run on this
+    # schedule actually achieved. Falls back to the whole corpus only for an arm that recorded no recipe.
+    # Measured from the arm's OWN epoch (see `standing`), so the climb it has already spent is not
+    # credited to it a second time.
+    spread = gate.standing(models, ConvergenceCheck().asked(record), len(scored) - 1)
+    logger.info("%s", spread.line())
 
     reading = gate.reading(record, arguments.target, spread)
     logger.info("%s", reading.line())

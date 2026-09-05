@@ -118,6 +118,28 @@ def test_spread(tmp_path: Path) -> None:
         TrajectoryGate().spread(thin, 12)
 
 
+def test_standing(tmp_path: Path) -> None:
+    """The spread measured from where the arm IS, and its fallback when that epoch admits too few runs."""
+    gate = TrajectoryGate()
+    root = corpus(tmp_path)
+
+    calibrated = gate.standing(root, 12, GATE_EPOCH)
+    assert calibrated.largest == pytest.approx(CEILING), "at the calibrated gate it is the ordinary spread"
+    assert gate.standing(root, 12, GATE_EPOCH - 1).largest == pytest.approx(CEILING), "an EARLIER gate never widens"
+
+    # The fixture curves reach their peak at e4 and hold, so a run sitting at e8 has already spent every
+    # gain the corpus records. That is the double count `standing` removes: read from e3 the same arm is
+    # credited with +0.05 of climb it is standing on top of.
+    late = gate.standing(root, 12, 8)
+    assert late.gate == 8
+    assert late.largest == pytest.approx(0.0), "no run on this schedule gained anything after e8"
+
+    # A gate past the budget matches nothing, and a ceiling read off nothing would truncate every arm.
+    fallback = gate.standing(root, 12, 12)
+    assert fallback.gate == GATE_EPOCH
+    assert fallback.largest == pytest.approx(CEILING), "too thin to decide falls back, it does not refuse"
+
+
 def test_reading(tmp_path: Path) -> None:
     """One arm against the corpus, read from its LAST epoch so the approximation favours the run."""
     gate = TrajectoryGate()
