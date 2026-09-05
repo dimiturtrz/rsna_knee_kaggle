@@ -7650,3 +7650,54 @@ reversal: control and arm differ in SUPERVISION, which is exactly the case where
 assumption behind a paired comparison fails, and the model-free discordant-pair bound over the 58-study
 panel is vacuous (smallest 0.31 against deltas of ~0.01). The sign is trusted here because it is large
 and monotone, not because the panel protects it.
+
+### `errors_relabel` — relabelling is FLAT, and the flat prices the whole lane against the detector's recall — 2026-09-05
+
+Arm `experiments/arms/errors_relabel.sh`, bead knee-f8hv5, reading `logs/errors_relabel_ledger.log`.
+
+**0.8522 @ e6 against `band_dense` 0.8578 — MEAN −0.0056.** The arm's own pre-registered FLAT band was
+`0.8578 > s >= 0.8516`, so it lands inside it by 0.0006, at the bottom edge. Twelve of twelve epochs ran,
+peak at e6 with e11 at 0.8482, so `convergence_check` reports it neither truncated nor undertrained and
+the number is quotable. Per-label the whole table is inside its own error bar: half-widths up to ±0.0310
+against a spread of −0.0250 (PF OA) to +0.0093 (ACL).
+
+**The plumbing landed and was verified before the score was read.** The recipe line carries
+`unread_targets = relabel_rank1932_a06.csv`, `labels` stays `report_labels_v2.csv` — which is correct,
+the correction is supplied through `--unread-targets` and not by swapping the table — and the corrected
+table holds exactly 1,932 rows as the header demanded. So this is a fact about relabelling, not about a
+flag that never fired.
+
+**What the treatment actually changed, with its denominators.** 1,932 corrected cells of 52,872 read
+cells is **3.65% of the corpus**. On the gold panel the detector's precision at the matched budget is
+0.720, so of those 1,932 about **1,391 were genuine errors corrected and about 541 were correct cells
+corrupted** — a net of about **+850 cells made right, 1.6% of the corpus**. (That precision is measured
+at gold budget 25 over 684 scoreable cells and EXTRAPOLATED to the 1,932-cell corpus cut; it is not
+measured there, and the corpus cut is the gold budget scaled by the same 1.294% gold-to-corpus ratio
+that makes 1,932 × 0.01294 = 25 exactly.)
+
+**Why that is a null and not a refutation of relabelling.** The gold panel carries 140 disagreements over
+684 scoreable cells — a **20.5% cell error rate**. If that rate holds corpus-wide the corpus contains
+about **10,840 wrong cells**, and this arm fixed about 850 of them: **7.8% of the defect**. A treatment
+reaching under a tenth of the corpus's label noise producing a delta inside the noise floor is exactly
+what the model predicts, not evidence against the mechanism. The binding constraint is the detector's
+**recall of 0.129**, not the corrector: at separation AUC 0.7628 the ranking cannot be extended to a
+larger budget without precision falling through the break-even `p = 0.5` that `B(2p−1)` requires.
+
+**So the LABEL AXIS closes at THIS DETECTOR, in all three treatments and both directions.** Prune at full
+budget costs −0.0158 (`errors_dense`); prune by ranking costs, and costs most where the detector fires
+most (`errors_rank`); relabel at the net-benefit-optimal budget is flat (here). The budget knob is priced
+out by arithmetic — 1× is the peak of `B(2p−1)` and 1× is what ran — and the asymmetric-cost knob `k` is
+unmeasurable, assumed in every published family and measured in none (Q-K, Kimi 2026-09-05). There is no
+remaining knob on confident learning worth a card.
+
+**What reopens it is a detector, and only a detector.** The requirement is now numeric rather than
+directional: to touch a materially larger share of 10,840 wrong cells at precision above 0.5, a
+replacement needs separation AUC materially above **0.7628** on all disagreements and, more sharply,
+above **0.6903** on the misses, where ours is close to blind (precision under 0.11 at every budget) and
+where a report-mined table should be worst by construction. That is the ceiling the detector-ceiling bead
+argues, and it is why the next build on this axis is a SimiFeat-style kNN detector over the cached 336 px
+features rather than another arm.
+
+Same Q-RULER4/Q-RULER6 caveat as `errors_rank`: control and arm differ in SUPERVISION, so the paired
+holdout comparison has no offline protection against board reversal. Here it matters less — a flat has
+nothing to reverse.
