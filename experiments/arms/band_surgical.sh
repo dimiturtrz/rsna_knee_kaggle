@@ -70,9 +70,10 @@ set -euo pipefail
 # not off the config, which is the whole reason it exists. A run whose `frozen_top_blocks` is 0 is
 # `band_dense` under another name and must be thrown away rather than read.
 #
-# deliberate: --unfreeze-offset is the ONE variable this arm moves off band_dense. The count stays at
-# the default six and the rate stays at 4e-5, because moving either alongside makes a gain unattributable
-# - which is exactly how `ortho_lpft` lost its own question.
+# deliberate: --unfreeze-offset is the ONE variable this arm moves off band_dense, and it is the ONLY
+# flag written down that the control does not write down. The count stays UNDECLARED at its default
+# six and the rate stays at 4e-5, because moving either alongside makes a gain unattributable - which
+# is exactly how `ortho_lpft` lost its own question.
 #
 # reading: logs/band_surgical_ledger.log
 # bead: knee-ep6a4
@@ -85,11 +86,11 @@ require "$LABELS"
 run_train band_early \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --unfreeze-last 6 --unfreeze-offset 6 \
+  --unfreeze-offset 6 \
   --labels "$LABELS" --out "$MODELS/band_early_s2026.pt"
 
 run_train band_mid \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
-  --unfreeze-last 6 --unfreeze-offset 3 \
+  --unfreeze-offset 3 \
   --labels "$LABELS" --out "$MODELS/band_mid_s2026.pt"
