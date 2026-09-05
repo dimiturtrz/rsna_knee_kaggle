@@ -1598,6 +1598,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.column_headroom",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_headroom",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_headroom",
+      "target": "kneemri.evaluation.stack_fit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.column_mixing",
       "target": "core.findings",
       "weight": 1
@@ -12094,6 +12112,78 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.main",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "target": "kneemri.evaluation.column_headroom.HeadroomRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "target": "kneemri.evaluation.stack_fit.MemberHoldout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_headroom.ColumnHeadroom.scored",
+      "target": "kneemri.evaluation.column_headroom.HeadroomRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_headroom.ColumnHeadroom.scored",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.ColumnHeadroom.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.HeadroomRow.line",
+      "target": "kneemri.evaluation.column_headroom.HeadroomRow.shortfall",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.column_headroom.ColumnHeadroom.board_value",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.column_headroom.ColumnHeadroom.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.column_headroom.ColumnHeadroom.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.stack_fit.MemberHoldout.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.stack_fit.MemberHoldout.loaded",
       "weight": 1
     },
     {
@@ -29761,7 +29851,7 @@
       "role": null
     },
     {
-      "descendants": 235,
+      "descendants": 236,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29825,7 +29915,7 @@
       "role": null
     },
     {
-      "descendants": 77,
+      "descendants": 78,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -29884,6 +29974,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer",
       "label": "board_transfer",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom",
+      "label": "column_headroom",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -32903,6 +33001,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.board_transfer",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "label": "ColumnHeadroom",
+      "level": "class",
+      "parent": "kneemri.evaluation.column_headroom",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.HeadroomRow",
+      "label": "HeadroomRow",
+      "level": "class",
+      "parent": "kneemri.evaluation.column_headroom",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -41302,6 +41416,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.ColumnHeadroom.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.ColumnHeadroom.board_value",
+      "label": "board_value",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.ColumnHeadroom.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.ColumnHeadroom.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.ColumnHeadroom",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.HeadroomRow.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.HeadroomRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.HeadroomRow.shortfall",
+      "label": "shortfall",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom.HeadroomRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_headroom.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_headroom",
       "role": null
     },
     {

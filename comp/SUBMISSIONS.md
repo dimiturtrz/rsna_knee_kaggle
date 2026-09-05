@@ -3485,3 +3485,45 @@ record's own whole-record slope rather than the +0.97 operating-point one. Two p
 line and the second anchor is what this waits for.
 
 `run_check` before the slot: loaded 1 of 1 members, no drop, no identity change. No card time.
+
+## `kneemri-uncalib` — ref 56019970, 2026-09-04, board **0.937**
+
+INSTRUMENT. Five seats, four of them swapped from the calibrated `_cf` build to the uncalibrated
+`_ff` build with `merged_blend_cf` held fixed, so the calibration flag is the only variable against
+`fiveship_v1` (0.941). Pre-registered before the slot: near 0.941 = calibration carries nothing and
+fleet-wide refit is licensed · near 0.937 = the 0.006 is the calibration flag and refit alone is not
+worth thirty hours of card.
+
+**It read exactly the lower anchor.** The term that was budgeted as one constant is two:
+
+| step | pair | delta |
+|---|---|---:|
+| pure refit, five seats | `twinfive` 0.935 → `uncalib` 0.937 | +0.002 |
+| calibration, five seats | `uncalib` 0.937 → `fiveship` 0.941 | +0.004 |
+| pure refit, four seats (independent) | `foldfour` 0.936 → `fitfour` 0.937 | +0.001 |
+
+Two independent pairs put pure refit at or under +0.002, under this project's 0.0062 noise floor.
+**Refitting the fleet for the refit is dead** — roughly thirty hours of card the 0.953 chain had
+budgeted at +0.006 buys +0.002. Refit *with* `--calibrated-targets` keeps the +0.006, because
+calibration is a flag on the same run and not a second run. The plan does not change; the reason
+does. Any refit shipped without the flag throws 0.004 away.
+
+Caveat on the control: `twinfive` is a fold-0 pool and this is a fold-full pool, so the +0.002 also
+carries seat-for-seat build differences. The four-seat pair is the cleaner of the two and reads
+smaller, not larger.
+
+## `kneemri-colnull` — ref 56020638, 2026-09-04, board **0.500**
+
+INSTRUMENT ON THE RULER, and it settles a question `comp/README` has carried as unmeasured since week
+one. Constant 0.5 in every cell of every column. Three bands, pre-registered: **exactly 0.500** = a
+plain mean of per-column AUCs, no offset, no non-AUC term · **0.495-0.505 but not 0.500** = a
+tie-handling or prevalence term nothing here models · **anything else** = not a mean of per-column
+AUCs, and every per-label plan in the ledger is priced on a formula that does not hold.
+
+It read **exactly 0.500**. The metric is a plain unweighted mean over the twelve findings.
+
+The consequence is that a per-label gain is now priceable without spending a slot: one column
+improving by `d` moves the board by `d/12`. A finding lane must move its own column by ~0.018 before
+the board's third decimal can show it at all, and by ~0.18 to be worth 1.5% of board alone. It also
+makes `kneemri-colmcl` (ref 56020054) a clean weight read — with the mean confirmed, the drop from
+constant-ing the MCL column is that column's real AUC minus 0.5, over twelve.
