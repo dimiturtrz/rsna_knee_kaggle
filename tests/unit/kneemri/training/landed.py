@@ -129,6 +129,7 @@ PLAIN = Request(
     weight_decay=WEIGHT_DECAY,
     warmup=ONE_CYCLE_WARMUP,
     grad_clip=UNCLIPPED,
+    backbone_lr=Adaptation().backbone_lr,
 )
 """A run that asked for nothing — the recipe every number in the ledger was measured under.
 

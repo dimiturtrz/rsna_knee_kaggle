@@ -67,6 +67,7 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    BACKBONE_RATE,
     CERTAINTY_RAMP,
     CLIPPING,
     CORPUS_OVERSAMPLE,
@@ -142,7 +143,11 @@ NOT_A_SWITCH = {
     "slot_pooling": "constructed — `SLOT_POOLINGS[...]` likewise",
     "anatomical_prior": "constructed, and a slot count the prior does not cover RAISES rather than dropping it",
     "head_lr": "a rate, not a switch: it is the group's `lr` and no path applies it partly",
-    "backbone_lr": "the same, and whether the group it names is EMPTY is what OPENED_BLOCKS already asks",
+    # `backbone_lr` was written off here on that same argument until 2026-09-05. It is COMPARED now, as
+    # BACKBONE_RATE. The argument was not wrong about the path, which is short and direct — it was wrong
+    # that a short path needs no witness: `band_deep_matched` floored its loss 0.189 above its control
+    # with every recorded flag correct, and the one reading that would have said whether the rate the
+    # depth arm was compensated with ever reached the optimiser did not exist to take (knee-62sol).
     "encoder_weights": "an INITIALISATION that cannot land silently: `PretrainedEncoder.into` raises on a "
     "variant mismatch and on any key the target does not name, so a load that did nothing is an exception "
     "rather than a control's score reported under the arm's name",
@@ -270,6 +275,7 @@ class Request:
     weight_decay: float
     warmup: float
     grad_clip: float
+    backbone_lr: float
     unfreeze_offset: int = NO_OFFSET
     """How many blocks at the TOP the request left frozen — zero for every arm before 2026-09-05."""
 
@@ -357,7 +363,7 @@ class Request:
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,
             SLOT_DROPOUT: self.slot_dropout,
-            # THE THREE OPTIMISER-PATH POLICIES, and each is read back off the object that applies it
+            # THE FOUR OPTIMISER-PATH POLICIES, and each is read back off the object that applies it
             # rather than off the value that was passed in: the decay from the optimiser's first
             # parameter group, the warmup from the field `one_cycle` hands to `pct_start`, the ceiling
             # from the `GradientClip` the step calls. A decay that never reached `AdamW` — the shape of
@@ -366,4 +372,13 @@ class Request:
             OPTIMISER_DECAY: self.weight_decay,
             WARMUP: self.warmup,
             CLIPPING: self.grad_clip,
+            # THE ANCHOR, added 2026-09-05, and the reason LAYER_DECAY above was never enough on its
+            # own: the decay is a RATIO, so it lands at exactly the asked 0.7 whether the rate it
+            # divides is the one this run asked for or the one the recipe inherited.
+            #
+            # ASKED UNCONDITIONALLY, unlike OPENED_BLOCKS and FROZEN_TOP above, because the rate is a
+            # property of the GROUP and not of what is in it: `parameter_groups` builds the backbone
+            # group at this rate whether the depth flag opened four blocks, zero, or an adapter set,
+            # so there is no configuration under which the honest request is anything but the flag.
+            BACKBONE_RATE: self.backbone_lr,
         }

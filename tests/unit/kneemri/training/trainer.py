@@ -41,6 +41,7 @@ from kneemri.training.trainer import (
     ACCUMULATION,
     AUTOCAST,
     AVERAGING,
+    BACKBONE_RATE,
     CERTAINTY_RAMP,
     CLIPPING,
     CORPUS_OVERSAMPLE,
@@ -448,6 +449,7 @@ def test_policies():
         FEATURE_TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
+        BACKBONE_RATE: Adaptation().backbone_lr,
         MIXUP: OFF,
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
@@ -471,6 +473,7 @@ def test_policies():
         FEATURE_TEACHER: False,
         ACCUMULATION: 1,
         LAYER_DECAY: NO_LAYER_DECAY,
+        BACKBONE_RATE: Adaptation().backbone_lr,
         MIXUP: OFF,
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
@@ -494,6 +497,32 @@ def test_encoder_rate_decay():
     )
     assert decayed.encoder_rate_decay() == pytest.approx(0.5)
     assert decayed.policies()[LAYER_DECAY] == pytest.approx(0.5), "and it is what the pre-flight check reads"
+
+
+def test_backbone_rate():
+    """The ANCHOR is measured, and the decayed case proves the ratio alone could never have caught it.
+
+    Both trainers below ask for the same rate and land the same anchor; only the decay differs. That is
+    the point — `encoder_rate_decay` reports 0.5 for the second and `NO_LAYER_DECAY` for the first while
+    neither says anything about the rate being divided, which is how a run can floor its loss against its
+    control with every recorded flag correct (knee-62sol).
+    """
+    asked = 9.8e-5
+
+    def trainer_at(**adaptation: float | int) -> Trainer:
+        model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
+        return Trainer(model, torch.device("cpu"), Adaptation(backbone_lr=asked, **adaptation))
+
+    flat = trainer_at(unfreeze_last=4)
+    assert flat.backbone_rate() == pytest.approx(asked)
+    assert flat.policies()[BACKBONE_RATE] == pytest.approx(asked), "and it is what the pre-flight check reads"
+
+    decayed = trainer_at(unfreeze_last=4, layer_decay=0.5)
+    assert decayed.backbone_rate() == pytest.approx(asked), "the decay divides the blocks BELOW the anchor"
+
+    frozen = trainer_at(unfreeze_last=0)
+    assert frozen.backbone_rate() == pytest.approx(asked), "the group is built at the rate even with none open"
+    assert frozen.encoder_rate_decay() == NO_LAYER_DECAY, "so the anchor is defined where the ratio is not"
 
 
 def test_one_cycle():

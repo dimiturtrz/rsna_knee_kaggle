@@ -181,6 +181,7 @@ class RunSetup:
             weight_decay=options.weight_decay,
             warmup=options.warmup,
             grad_clip=options.grad_clip,
+            backbone_lr=options.backbone_lr,
             sample_spread=options.sample_spread,
             sample_alpha=options.sample_alpha,
             certainty_ramp=options.certainty_ramp,

@@ -20,6 +20,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import torch
@@ -116,6 +117,7 @@ SCHEDULED = "one_cycle"
 REPORTS = "report_supervision"
 ACCUMULATION = "micro_batches_per_step"
 LAYER_DECAY = "encoder_rate_decay"
+BACKBONE_RATE = "encoder_top_rate"
 MIXUP = "mixup_alpha"
 OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
@@ -129,6 +131,9 @@ TARGET_CORPUS = "target_corpus"
 
 NEEDED_FOR_A_RATIO = 2
 """Two backbone groups — below that there is no pair for a per-block ratio to be defined between."""
+
+NO_OPEN_BACKBONE = 0.0
+"""The anchor of an empty backbone: under LoRA no base block is open, so no rate was asked for one."""
 
 
 LOSS_QUANTILES = ("q25", "q50", "q75", "q90", "q95")
@@ -163,6 +168,12 @@ class Trainer:
             self.objective.attached(device),
         )
         self.optimiser = torch.optim.AdamW(groups, weight_decay=self.adaptation.weight_decay)
+        # CAPTURED HERE rather than read live by `backbone_rate`, because `OneCycleLR` rewrites every
+        # group's rate to `max_lr / div_factor` the moment it is built: a live read taken after the
+        # schedule reports the anchor twenty-five times too small and the witness accuses a run whose
+        # rate landed. The groups have just been built from `Adaptation`, so this is still a measurement
+        # off the optimiser and not a read-back of the flag.
+        self.backbone_anchor = cast("float", groups[-1]["lr"]) if len(groups) > 1 else NO_OPEN_BACKBONE
         # fp16 until a run says otherwise, because that is what every number in the ledger was measured
         # under and a precision change is a numerics change.
         self.autocast_dtype = torch.float16
@@ -255,6 +266,7 @@ class Trainer:
             FEATURE_TEACHER: self.feature_teacher is not None,
             ACCUMULATION: self.accumulation.every,
             LAYER_DECAY: self.encoder_rate_decay(),
+            BACKBONE_RATE: self.backbone_rate(),
             MIXUP: self.mixup.alpha,
             OPTIMISER_DECAY: self.weight_decay(),
             WARMUP: self.warmup,
@@ -296,6 +308,25 @@ class Trainer:
         if len(backbone) < NEEDED_FOR_A_RATIO:
             return NO_LAYER_DECAY
         return float(backbone[-2]["lr"]) / float(backbone[-1]["lr"])
+
+    def backbone_rate(self) -> float:
+        """The ANCHOR the per-block decay is measured FROM, read off the optimiser rather than the flag.
+
+        `encoder_rate_decay` above witnesses the RATIO between two backbone groups, and a ratio is blind
+        to the rate it is a ratio of. A `--backbone-lr` that never reached `Adaptation` builds the groups
+        at the inherited rate, decays them by exactly the 0.7 that was asked for, and reports every
+        switch landed — so the flag with the largest effect on any foreign-trunk arm was the one flag
+        with no positive witness at all.
+
+        That is how `band_deep_matched` floored its training loss 0.189 above its own control with all
+        four recipe flags recorded correct, and why its 0.8487 could not be read as a fact about depth:
+        no number anywhere could say whether the rate compensation arrived (knee-62sol).
+
+        Taken off the LAST backbone group, which `backbone_groups` builds at `layer_decay ** 0` — the
+        anchor itself, and the only group whose rate is the flag rather than a power of it. Captured at
+        construction for the reason spelled where it is captured: a schedule rewrites the live rate.
+        """
+        return self.backbone_anchor
 
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""
