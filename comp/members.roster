@@ -661,3 +661,23 @@ unread_dense_s2026.pt       # 0.8577 peak e11 of 12, CONVERGED. Level with band_
                             # +0.0020 on gold-58 and both named fallbacks reach fewer cells, so their ceiling
                             # is lower. What seats here is the CHECKPOINT, on merit and on the only kind of
                             # diversity the pool does not already have; the LEVER is closed and stays closed.
+
+# Added 2026-09-05, the five `roster_check` found scoreable and in neither file. All five are SEATED
+# rather than declined, on the owner's standing rule that a member below the best solo can still pay in
+# an ensemble: what a seat buys is where a member is WRONG, not how often. The label lever they came from
+# is closed (see the ledger sections `errors_rank`, `errors_relabel`, `neighbour_errors`) — the lever is
+# what is closed, never the checkpoint, and these are checkpoints.
+errors_relabel_s2026.pt     # 0.8522 solo, and the only member trained on a CORRECTED label table (1,932
+                            # cells relabelled at the net-benefit-optimal budget). Its supervision differs
+                            # from every other member's on exactly the cells the reader most likely got
+                            # wrong, which is a diversity axis nothing else in the pool carries.
+errors_rank_s2026.pt        # 0.8462 solo, trained with the same detector's ranking used to PRUNE rather
+                            # than to correct. Same axis as above and the opposite treatment, so the two
+                            # disagree with each other as well as with the pool.
+radiodino_s16_s2026.pt      # 0.8108 solo, RadioDINO ViT-S/16 — a radiology-pretrained family the pool
+                            # otherwise carries only at base scale.
+radiodino_s8_s2026.pt       # 0.7971 solo, the same family at patch 8: a different patch grid over the
+                            # same corpus, which is the cheapest real decorrelation there is.
+radnet_pinned_s2026.pt      # 0.7505 solo, RadImageNet DenseNet-121 with the trunk pinned — the only
+                            # CONVOLUTIONAL member here and by far the weakest, seated for that reason
+                            # alone. If a seat search never takes it, it costs a kernel nothing.
