@@ -8298,3 +8298,34 @@ treatment is `--unread-targets` from a confident-learning detector fitted on the
 radiologist readings never enter it, by either path. It is the only supervision arm this project owns
 whose gold-58 reading will mean what it appears to mean. The four pre-registered branches in its header
 stand unchanged — and it now has no ladder standing behind it to soften a null.
+
+## 224 px costs 0.0049 of solo AUC and buys 3.2x the throughput — 2026-09-05
+
+`band224` is `band_dense`'s recipe at 224 px instead of 336, and it was armed to price the RECIPE rather
+than to find a seat. It converged 12 of 12 epochs, peak at e9.
+
+| | 336 px (`band_dense`) | 224 px (`band224`) |
+|---|---|---|
+| solo holdout AUC | 0.8578 | **0.8529** |
+| seconds per epoch, this card | 450 | **142** |
+| twelve-epoch arm | ~90 min | **~28 min** |
+
+**−0.0049 of AUC for 3.2x the throughput,** both measured on this card on the same day rather than
+inferred from pixel counts. The AUC cost is under the 0.0062 holdout noise floor, so as a MEMBER the two
+recipes are not separable — which is also why `band224` is declined as a seat (−0.0002 against honest12,
+nearest-neighbour rank 0.9097 against a 0.8956 boundary: a near-twin, not a diversity buy).
+
+**What it changes is the price of every question, not the answer to any of them.** The open lane is
+supervision — the confident-learning selector, its budget, prune against relabel — and until today each
+point on it cost ninety minutes of card, which is why the axis has exactly one refuted point on it
+(`errors_dense`) and one running (`relabel_hold`). At 28 minutes a point, a dose curve is three arms in
+an hour and a half instead of four and a half hours. That is the difference between pricing the axis and
+sampling it.
+
+**The constraint on spending it.** A 224 arm has to be read against a 224 control, and the control has to
+be a `--hold-annotations` fit or the gold ruler will refuse it. `base224_s2026` exists and is not held, so
+it cannot serve. The first 224 label-axis arm therefore owes a `band224_hold` control alongside it — 28
+minutes, and then every subsequent point on the curve is a single 28-minute arm against it.
+
+Not being spent tonight: `relabel_hold` and `rank966_hold` are both matched to `band_dense_hold` at 336
+and must stay there. This buys the arms AFTER them.

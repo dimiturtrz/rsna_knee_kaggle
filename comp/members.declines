@@ -493,3 +493,35 @@ mricore_corpus_s2026  # 0.8390 solo, the weakest of the three members priced on 
                       # solo, however differently it is wrong.
                       # RE-OPEN BY: an MRI-pretrained trunk that lands within ~0.01 of the pool's best
                       # solo. Another 2D-radiology-pretrained variant only re-measures this row.
+
+band224_s2026         # 0.8529 solo, converged 12 of 12 with its peak at e9 (0.8509 holdout AUC on the
+                      # arm metric, 0.8529 on the seat_value read). Seat value against honest12: -0.0002,
+                      # band [-0.0006, +0.0002]; best available seat (replacing mae_matched_s2026)
+                      # -0.0000. Nearest-neighbour rank 0.9097 against a roster boundary of 0.8956, so it
+                      # is the LEAST distinct thing priced this week - it is a near-twin of the pool, not
+                      # a diversity seat, and the seat interval straddles zero rather than clearing it.
+                      # IT WAS NEVER A SEAT CANDIDATE. It is the throughput arm, and on that question it
+                      # succeeded: 142 s an epoch against 450 s for the same recipe at 336 px, measured on
+                      # this card on 2026-09-05, for 0.0049 of solo AUC against band_dense 0.8578. A 3.2x
+                      # cheaper recipe that costs half a point. That is what licenses running the label
+                      # axis at exploratory cost - a 90-minute arm becomes 28 minutes - and it is recorded
+                      # in experiments/README.md rather than here.
+                      # RE-OPEN BY: nothing about this checkpoint. A 224 px member would need to beat the
+                      # pool solo, not match it cheaply; cheapness is a property of the RECIPE and it has
+                      # already been banked. Any future 224 px arm needs its own 224 px control, and
+                      # base224_s2026 is not a held fit so it cannot serve as one on the gold ruler.
+
+band224_s2026_run1    # The FIRST band224 fit, and it is declined because its record was destroyed rather
+                      # than because it was priced. A duplicate arm shell survived a session boundary,
+                      # started its own identical band224 run at about 18:16Z on 2026-09-05 after the
+                      # first had finished, and `run_train` truncates a metrics jsonl at start - so every
+                      # epoch of the completed run was overwritten and only the checkpoint remains. Its
+                      # peak epoch, its trajectory and its convergence are unrecoverable, which means
+                      # `convergence_check` can never certify a number quoted from it and no ledger row
+                      # may cite it. `card_check` reported OK throughout: a PARKED process is invisible to
+                      # it by construction, which is the hole knee-3o649 asks queue_check to close.
+                      # NOT A JUDGEMENT ON THE RECIPE. The re-run under the same seed and recipe is
+                      # `band224_s2026`, converged 12 of 12, and IT carries the reading: 0.8529 solo,
+                      # seat -0.0002, and the 3.2x throughput result that is the arm's actual output.
+                      # RE-OPEN BY: nothing. Two fits of one seeded recipe are the same experiment, and a
+                      # third would only re-measure the row the re-run already holds.
