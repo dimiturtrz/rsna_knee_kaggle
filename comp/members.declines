@@ -431,3 +431,12 @@ band_pairmem_s2026
   RE-OPEN BY: a maha column that has first reproduced board-validated seats (the knee-iyad adoption
   gate), or a rank/js pair outside the roster boundary rather than inside it.
 
+
+ortho_slow_trunk  # 0.8265 solo, best epoch 11 of 12 — the LAST, so the curve never turned over and the
+  budget bound the run. Against the arm's pre-registered branches this is the bottom cell (< 0.8402): a
+  null on the RATE hypothesis, not a closing of the ortho trunk. Declined as a SEAT for the ordinary
+  reason a 0.8265 member is declined here — 0.0313 below `band_dense` at 0.8578, on a trunk whose best
+  direct fine-tune (`ortholarge`, 0.8452) is itself below the incumbent, and the CNN/foreign-trunk
+  diversity argument was already priced at −0.0004/−0.0009 seat value in knee-cj40f.
+  RE-OPEN BY: an ortho run that CONVERGES (a peak that is not the last epoch) and still lands within a
+  floor of `band_dense`, or a seat_value reading against a fully scoreable entry that clears +0.0015.
