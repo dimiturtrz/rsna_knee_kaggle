@@ -108,6 +108,13 @@ class Study:
         spacings are properties of a SERIES, and a study whose series disagree has no single value for
         them — so it says absent rather than picking one. Absence is a value here. Spacing will
         therefore be absent on most multi-plane studies, which is honest: there is no one number.
+
+        THE SCANNER AND THE FIELD STRENGTH GO THROUGH THE SAME GATE, and unlike spacing they are
+        expected to survive it: a study is normally one visit on one machine, so its series agree. A
+        study whose series disagree was acquired on two scanners and has no single vendor, and reading
+        absent there is the answer rather than a gap. Recorded at all because they were declared on
+        `StudyMetadata` and never filled by any corpus in the tree, which left the acquisition-shift
+        axis looking unavailable when it was only unread (knee-m4jkz).
         """
         return StudyMetadata(
             identifier=self.identifier,
@@ -118,6 +125,8 @@ class Study:
             fluid_sensitive=self._agreed(acquisition.fluid_sensitive for acquisition in self.acquisitions),
             pixel_spacing_mm=self._agreed(acquisition.pixel_spacing for acquisition in self.acquisitions),
             slice_spacing_mm=self._agreed(acquisition.slice_spacing for acquisition in self.acquisitions),
+            scanner=self._agreed(acquisition.scanner for acquisition in self.acquisitions),
+            field_strength_t=self._agreed(acquisition.field_strength for acquisition in self.acquisitions),
         )
 
     @staticmethod

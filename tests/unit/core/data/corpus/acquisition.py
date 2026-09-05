@@ -228,3 +228,50 @@ def test_fluid_sensitive(series: Path):
 def test_slice_count(series: Path):
     """The slice count is the tie-break when a slot has several candidate series."""
     assert _probe(series).slice_count == 8
+
+
+def test_scanner(tmp_path: Path):
+    """One vendor is written several ways, and grouping on the raw tag would split it into cohorts.
+
+    Every spelling but the last two is one this corpus actually holds. The match is a PREFIX because
+    `GE` occurs inside ordinary words, and a substring rule would file anything containing "ge " under
+    GE — the regression case at the end is that rule failing.
+    """
+    header = _header(write_series(tmp_path / "s"))
+    for spelling, vendor in (
+        ("Siemens Healthineers", "Siemens"),
+        ("SIEMENS", "Siemens"),
+        ("Philips Medical Systems", "Philips"),
+        ("Philips Healthcare", "Philips"),
+        ("GE MEDICAL SYSTEMS", "GE"),
+        ("GEHC", "GE"),
+        ("TOSHIBA", "Canon"),
+        ("Canon Medical Systems", "Canon"),
+        ("General Electric", "GE"),
+    ):
+        header.header.Manufacturer = spelling
+        assert header.scanner == vendor, spelling
+
+    header.header.Manufacturer = "Some Vendor We Have Never Seen"
+    assert header.scanner is None, "an unrecognised manufacturer is absent, never its own cohort"
+
+    header.header.Manufacturer = "IMAGE SYSTEMS"
+    assert header.scanner is None, "a substring rule would read the GE out of IMAGE and file it there"
+
+    header.header.Manufacturer = ""
+    assert header.scanner is None
+
+
+def test_field_strength(tmp_path: Path):
+    """Tesla as the header states it, unrounded — and a non-positive reading is absent, not a value."""
+    header = _header(write_series(tmp_path / "f"))
+    assert header.field_strength is None, "a series carrying no tag has no field strength"
+
+    header.header.MagneticFieldStrength = 1.5
+    assert header.field_strength == 1.5
+
+    header.header.MagneticFieldStrength = 2.8936
+    assert header.field_strength == 2.8936, "not rounded to the nearest of 1.5 and 3.0"
+
+    header.header.MagneticFieldStrength = 0
+    assert header.field_strength is None

@@ -234,12 +234,13 @@ PROVENANCE_ONLY = {
     "rank_weight",
     "report_weight",
     "unfreeze_last",
+    "unfreeze_offset",
     "witness",
 }
 """Keys serving is right not to consult, each for its own reason.
 
-The recipe half — the two rates, `ema`, `unfreeze_last`, `rank_weight`, `pair_memory`, `report_weight` —
-describes how
+The recipe half — the two rates, `ema`, `unfreeze_last`, `unfreeze_offset`, `rank_weight`,
+`pair_memory`, `report_weight` — describes how
 the weights were FITTED, which no forward pass can act on; they exist so a member on the leaderboard can
 be traced back to the arm that made it. `img` is read only when `train_size` is absent, which is every
 member fitted before the read size could differ from the cache's. `witness` is `witness_check`'s to

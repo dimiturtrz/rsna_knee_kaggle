@@ -3470,6 +3470,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "core.data.corpus.build_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_ruler",
+      "target": "kneemri.evaluation.vendor_strata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.vote_ceiling",
       "target": "core.cli",
       "weight": 1
@@ -6292,6 +6328,12 @@
       "kind": "references",
       "source": "core.data.corpus.acquisition.SeriesHeader",
       "target": "core.data.corpus.acquisition.SeriesHeader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.acquisition.SeriesHeader.field_strength",
+      "target": "core.data.corpus.acquisition.SeriesHeader._number",
       "weight": 1
     },
     {
@@ -19376,6 +19418,174 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "target": "kneemri.evaluation.vendor_strata.Stratum",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.null_band",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.seats",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.null_band",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.null_band",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "target": "kneemri.evaluation.pool.Pool.rule",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.seats",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "target": "kneemri.evaluation.pool.Pool.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_ruler.main",
+      "target": "kneemri.evaluation.vendor_strata.VendorStrata.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "target": "kneemri.evaluation.vendor_strata.Stratum",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "target": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_strata.VendorStrata.strata",
+      "target": "kneemri.evaluation.vendor_strata.Stratum",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_strata.VendorStrata.strata",
+      "target": "kneemri.evaluation.vendor_strata.VendorStrata.fields",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_strata.VendorStrata.strata",
+      "target": "kneemri.evaluation.vendor_strata.VendorStrata.scanners",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.evaluation.vote_ceiling.VoteCeiling",
       "target": "kneemri.evaluation.pool.Pool",
       "weight": 1
@@ -30127,7 +30337,7 @@
       "role": null
     },
     {
-      "descendants": 237,
+      "descendants": 239,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -30191,7 +30401,7 @@
       "role": null
     },
     {
-      "descendants": 79,
+      "descendants": 81,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -30810,6 +31020,22 @@
       "descendants": 0,
       "id": "kneemri.evaluation.unsure_cost",
       "label": "unsure_cost",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler",
+      "label": "vendor_ruler",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata",
+      "label": "vendor_strata",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -34496,6 +34722,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "label": "VendorRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_ruler",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.Stratum",
+      "label": "Stratum",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_strata",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "label": "VendorStrata",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_strata",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.vote_ceiling.RuleReading",
       "label": "RuleReading",
       "level": "class",
@@ -36704,6 +36954,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.acquisition.SeriesHeader.field_strength",
+      "label": "field_strength",
+      "level": "method",
+      "parent": "core.data.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.acquisition.SeriesHeader.laterality_tag",
       "label": "laterality_tag",
       "level": "method",
@@ -36722,6 +36980,14 @@
       "descendants": 0,
       "id": "core.data.corpus.acquisition.SeriesHeader.pixel_spacing",
       "label": "pixel_spacing",
+      "level": "method",
+      "parent": "core.data.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.acquisition.SeriesHeader.scanner",
+      "label": "scanner",
       "level": "method",
       "parent": "core.data.corpus.acquisition.SeriesHeader",
       "role": null
@@ -46636,6 +46902,118 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.unsure_cost",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.null_band",
+      "label": "null_band",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.VendorRuler.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler.VendorRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_ruler.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.Stratum.size",
+      "label": "size",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.Stratum",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata.fields",
+      "label": "fields",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata.scanners",
+      "label": "scanners",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.VendorStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_strata.VendorStrata.strata",
+      "label": "strata",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_strata.VendorStrata",
       "role": null
     },
     {

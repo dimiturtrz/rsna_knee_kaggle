@@ -24,6 +24,14 @@ def test_readable(tmp_path: Path) -> None:
     assert check().readable(document) == [(1, "first"), (3, "second")]
     assert check().readable(tmp_path / "absent.md") == []
 
+    fenced = tmp_path / "fenced.md"
+    fenced.write_text("before\n```\n+radnet: 0.8746\n```\nafter\n", encoding="utf-8")
+    assert check().readable(fenced) == [(1, "before"), (5, "after")], "a pasted transcript is a quotation"
+
+    unclosed = tmp_path / "unclosed.md"
+    unclosed.write_text("before\n```\n+radnet: 0.8746\n", encoding="utf-8")
+    assert check().readable(unclosed) == [(1, "before")], "an unclosed fence swallows the rest, not the file"
+
 
 def test_columnar() -> None:
     assert ClaimsCheck.columnar("| band_dense | 0.8578 |")

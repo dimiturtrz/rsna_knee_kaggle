@@ -8069,10 +8069,10 @@ leading the loss, so cropping in gave back what widening out had paid for. Sent 
 and Q-SINGLE-B; the withdrawn legs went with their reasons so no search is spent on them.
 
 **No lane is currently priced at or above 0.010, which is what `knee-m69u` asked to have said out loud.**
-The card has `mricore_corpus` on it and `band_deep_matched` parked behind it, and it has no successor
-after that unless `band_deep_matched` clears its ABOVE branch at 0.8640 — the branch that would license
+The card ran `mricore_corpus` and then the compensated depth arm, whose ABOVE branch would have licensed
 re-running the whole foreign-trunk family with layer decay, on the grounds that every trunk negative was
-measured through a recipe that never let the trunk move.
+measured through a recipe that never let the trunk move. That branch did not fire; see the depth-axis
+entry at the end of this file for what it read instead.
 
 **Why this note exists at all.** The docstring of `band_coverage.py` records the cost of the opposite
 habit: left in the present tense after its own question was settled, it invited a 2026-08-25 audit that
@@ -8170,3 +8170,37 @@ second arm plus a 55.6 GB decode at the exact operating point where it is least 
 gates could catch it: it is prose, it is self-consistent, and the code beneath it is correct. What caught
 it was refusing to write the arm's mechanism paragraph from the docstring and instead computing the two
 index sets — six lines, no card. The docstring now carries the table instead of the claim.
+
+### The depth axis closes on its OWN re-run, with the rate confound removed — 2026-09-05
+
+Arm `experiments/arms/band_deep_matched.sh`, bead knee-zt3l6, reading `logs/band_deep_matched_ledger.log`.
+`--unfreeze-last 12 --layer-decay 0.7 --backbone-lr 9.8e-5 --batch 2 --accumulate 6`, twelve epochs,
+~580 s an epoch. Control `band_dense` 0.8578.
+
+**0.8487 at e11**, against the arm's own four pre-registered branches: ABOVE 0.8640 licenses the trunk
+family, 0.8516-0.8640 decay-neutral, **0.8421-0.8516 closes the depth axis**, below 0.8421 suspect the
+harness. It landed in the third band, -0.0091 against the control, outside the 0.0062 paired floor.
+
+**WHY THIS IS THE READING AND THE AUGUST ONE WAS NOT.** `band_dense_llrd` ran the same ladder at
+`--backbone-lr 4e-5` and read 0.8483 — three ten-thousandths from this arm — and the ledger REFUSED its
+BELOW branch, correctly. `StudyModel.parameter_groups` anchors the ladder at the TOP opened block, so
+opening twelve blocks does not merely add six whisper blocks beneath the control's six: it also re-grades
+the control's own six down to a geometric mean of `0.7^2.5` = 0.41 of the rate they shipped at. That arm
+moved two things and its training loss said so, flooring ~0.13 high and still descending at e10. This arm
+absorbs the ladder's geometric mean into the anchor (`4e-5 / 0.7^2.5` = 9.8e-5), so blocks 6-11 run at a
+geometric mean of 4.0e-5 — the control's flat rate — while blocks 0-5 run from 1.15e-5 down to 1.9e-6.
+
+So the confound is removed and the answer does not move: 0.8483 confounded, 0.8487 matched. Opening the
+encoder's bottom half costs ~0.009 at this operating point, and it costs it for the reason the ladder was
+supposed to rule out rather than for the rate. The depth axis is CLOSED on a matched arm.
+
+**CONVERGENCE, stated because the score is only readable with it.** Twelve of twelve epochs ran, and the
+peak IS the last epoch (e10 0.8485, e11 0.8487), so `convergence_check` classes it UNDERTRAINED rather
+than TRUNCATED — the budget bound it. The final increment is +0.0002, a thirtieth of the floor, so the
+undertraining is nominal and the score is not a floor in any useful sense. A longer budget could not
+plausibly recover 0.009.
+
+**WHAT IT DOES NOT CLOSE.** This is one encoder (DINOv2-small) at one corner (336 px, 20 slices,
+0.1-0.9). It says nothing about depth on a trunk whose pretraining is not natural-image, and the
+`ABOVE 0.8640` branch that would have licensed re-running the foreign-trunk family did not fire — so that
+family stays closed on its own ~25 arms, not on this one.

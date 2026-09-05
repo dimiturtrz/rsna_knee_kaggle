@@ -8,12 +8,19 @@ Over all 4,407 studies, 0 unreadable:
 
 | vendor | studies | spelling on disk |
 |---|---|---|
-| Siemens | ~1,951 | Siemens Healthineers 1,053 · SIEMENS 804 · Siemens 94 |
-| Philips | ~1,301 | Philips Medical Systems 718 · Philips 492 · Philips Healthcare 91 |
-| GE | ~905 | GE MEDICAL SYSTEMS 868 · GEHC 37 |
+| Siemens | 1,949 | Siemens Healthineers 1,053 · SIEMENS 804 · Siemens 94 |
+| Philips | 1,301 | Philips Medical Systems 718 · Philips 492 · Philips Healthcare 91 |
+| GE | 905 | GE MEDICAL SYSTEMS 868 · GEHC 37 |
 | Toshiba / Canon | 226 | |
+| absent | 26 | |
 
-Field strength: **1.5T 2,543 · 3T 1,601 · absent 238**. Forty-plus distinct `ManufacturerModelName`
+Counts are the verified ones, read back off the written `canonical_metadata.csv` (4,407 rows) rather
+than off the census pass — the first three were quoted with a `~` and Siemens was two studies out.
+
+Field strength: **1.50 T 2,541 · 3.00 T 1,601 · absent 240 · 1.16 T 24 · 1.00 T 1**. The two low-field
+values are why every cut on this axis is a THRESHOLD (`< 2.0 T`) and never an equality against 1.5:
+an equality test drops those 25 studies into an absent bucket that means "the tag was missing", which
+is a different fact. Forty-plus distinct `ManufacturerModelName`
 values, the largest being Ingenia 741, MAGNETOM Vida 447, Aera 400, Achieva dStream 327, MAGNETOM
 Avanto fit 262, SonataVision 214, SIGNA Explorer 213, SIGNA Artist 208, Optima MR450w 158, SIGNA
 EXCITE 136, Vantage 129, MAGNETOM Aera 122.
@@ -28,11 +35,22 @@ Medical Systems`. Any grouping has to canonicalise on a vendor map, not on the r
 ## The defect — our reader drops both fields
 
 `StudyMetadata` (`core/data/corpus/study_metadata.py`) declares `field_strength_t: float | None` and
-`scanner: str | None`. The fastMRI, MRNet and Rijeka builders populate them. **Our own corpus does
-not**: `canonical_metadata.csv`, rebuilt today via `build_cache --metadata-only`, holds **0 non-null of
+`scanner: str | None`. **No builder in the tree populates either** — not ours, not fastMRI, not MRNet,
+not Rijeka, whose own docstring states it plainly ("no age, no sex, no scanner, no field strength.
+Those cells stay None", `rijeka_corpus.py:179`). They are declared-and-never-filled schema.
+`canonical_metadata.csv`, rebuilt today via `build_cache --metadata-only`, holds **0 non-null of
 4,407** in both columns, while a direct `pydicom` read of a single study returns
 `Manufacturer = Philips Healthcare`, `ManufacturerModelName = Ingenia`, `MagneticFieldStrength = 1.5`.
 The tags are present in the files and `Study.from_directory(...).metadata()` does not carry them out.
+
+**The belief has hardened into two modules.** `kneemri/evaluation/population_split.py:10` and
+`kneemri/evaluation/study_series.py:4` both record "there is no scanner field" as a fact about this
+corpus and are designed around it. Both are right about the SHIPPED tables and wrong about the data:
+the shipped columns carry `Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane` and nothing else,
+while the DICOM headers underneath carry the manufacturer, the model and the field strength. That is
+the whole reason the axis reads as unavailable rather than as unmeasured — nobody was looking in the
+files, and `slots.py` had already established for fat suppression that the headers outrank the
+shipped columns.
 
 Same table, adjacent gaps worth recording: `pixel_spacing_mm` 344/4,407 non-null and `slice_spacing_mm`
 855/4,407. `InstitutionName`, `StationName` and `DeviceSerialNumber` are genuinely ABSENT from the
@@ -102,3 +120,42 @@ Epoch budget: `convergence_check` over 214 runs finds 166 converged and all 8 un
 4-epoch pretraining probes, not seated members.
 
 That leaves generalization, which is precisely the thing an in-distribution ruler cannot see.
+
+## The reading — the vendor axis is silent, and only field strength moves at all
+
+`python -m kneemri.evaluation.vendor_ruler`, card-free, 182 members over the 909 shared holdout studies,
+vote RankAverage, pooled best 0.8642. Every stratum is scored against the SAME statistic on 200 random
+subsets of exactly its own size, so the two numbers on a row differ in one thing only: whether the
+subset was chosen by a manufacturer or by a coin.
+
+| stratum | studies | rho | null band | verdict |
+|---|---|---|---|---|
+| Canon | 54 | — | — | under the 120 floor, not read |
+| GE | 162 | 0.933 | 0.878-0.954 | inside |
+| Philips | 280 | 0.958 | 0.939-0.973 | inside |
+| Siemens | 407 | 0.965 | 0.966-0.983 | below by 0.001 |
+| under 2 T | 531 | 0.978 | 0.980-0.990 | below by 0.002 |
+| 2 T and above | 322 | 0.941 | 0.950-0.977 | below by 0.009 |
+
+**The vendor axis reads as silent, and that is a measurement rather than an absence of one.** GE and
+Philips sit inside their own bands: a member ordering taken on those studies is the ordering a coin
+toss of the same size produces. That is the pre-registered form of "no ordering signal here", and it is
+why this axis does not get a card.
+
+**Siemens and under-2 T are NOT findings.** They fall below their bands by 0.001 and 0.002, which is
+inside the resolution of a 200-draw percentile — ten draws either side of the edge. Reading those as
+gaps is reading the control's own noise.
+
+**Only `2 T and above` shows anything**, 0.009 below its band. It is also the one stratum where the
+absolute level would be expected to move for a reason that is not shift: 3 T is concentrated in the
+newer scanners, so the cut is partly a cut on scanner generation. Member rank stays about 0.94
+correlated with the pooled order even there, so nothing here says a seat search was fitted to the mix.
+
+**What this does not say.** Every member in the pool was TRAINED on all four vendors, so this prices
+whether a vendor ORDERS members differently, never what a member trained on three vendors does on the
+fourth. That second question is a card question and this instrument cannot reach it.
+
+**A defect in the instrument itself, stated so the row is not read.** `line` prints a `top-8 kept`
+column with no null band beside it. Philips keeps 2 of 8 seats while its rho sits comfortably inside
+its band — the column contradicts the row it sits on, because subset membership reshuffles by sampling
+alone at these sizes. The column must not be read until it earns its own control. Filed.

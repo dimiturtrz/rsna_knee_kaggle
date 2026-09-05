@@ -227,11 +227,26 @@ class ClaimsCheck:
         the ledger's own design lesson asks for: a gate that fires on a correct corpus is a gate nobody
         reads. It is a BLIND SPOT, not a clean skip — a genuinely stale number inside a table passes
         here, and only a checker that parses the header can ever catch it.
+
+        NOR IS A FENCED BLOCK, for a different reason. Between a pair of ``` markers the record is
+        QUOTING a tool's own output verbatim, and the subject of a number there is whatever that tool
+        printed it under — a `seat_value` block reads `+radnet_family_s2026.pt: 0.8746`, where 0.8746
+        is the ROSTER's score with that member added and the member's own solo is 0.6716. Read as
+        prose the line accuses a correct transcript, and the record must not be edited to placate a
+        checker: a pasted block is evidence precisely because nobody retyped it. Unlike the columnar
+        case this one is cheap to detect exactly, so it is a clean skip rather than a blind spot.
         """
         if not document.exists():
             return []
-        numbered = enumerate(document.read_text(encoding="utf-8").splitlines(), start=1)
-        return [(number, line) for number, line in numbered if not ClaimsCheck.columnar(line)]
+        kept: list[tuple[int, str]] = []
+        fenced = False
+        for number, line in enumerate(document.read_text(encoding="utf-8").splitlines(), start=1):
+            if line.lstrip().startswith("```"):
+                fenced = not fenced
+                continue
+            if not fenced and not ClaimsCheck.columnar(line):
+                kept.append((number, line))
+        return kept
 
     @staticmethod
     def columnar(line: str) -> bool:

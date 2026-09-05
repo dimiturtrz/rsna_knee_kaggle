@@ -38,6 +38,26 @@ test on "SAT" fires on series that are not fat-suppressed."""
 _LONG_TR_MS = 800.0
 """Above this repetition time a sequence is no longer T1-weighted."""
 
+_VENDORS: tuple[tuple[str, str], ...] = (
+    ("SIEMENS", "Siemens"),
+    ("PHILIPS", "Philips"),
+    ("TOSHIBA", "Canon"),
+    ("CANON", "Canon"),
+    ("GE", "GE"),
+)
+"""`Manufacturer` free text to the vendor it names, matched as an uppercase PREFIX.
+
+Our corpus writes one manufacturer several ways — `Siemens Healthineers` 1053, `SIEMENS` 804,
+`Siemens` 94, `Philips Medical Systems` 718, `Philips` 492, `Philips Healthcare` 91, `GE MEDICAL
+SYSTEMS` 868, `GEHC` 37 — so grouping on the raw tag splits one vendor into three cohorts and reads
+the split as a scanner effect.
+
+A PREFIX and not a substring, which matters for exactly one entry: `GE` occurs inside ordinary words,
+so a substring rule sends any manufacturer containing "ge " — `IMAGE SYSTEMS` is the one that costs
+nothing to imagine — into the GE cohort. Every real spelling leads with its vendor, `GEHC` and
+`General Electric` included, so the prefix loses nothing. Toshiba's MRI business became Canon Medical
+Systems in 2016 and the same scanners answer to both names, so they are one cohort."""
+
 _LONG_TE_MS = 60.0
 """Above this echo time a long-TR sequence is T2-weighted rather than proton density."""
 
@@ -151,6 +171,32 @@ class SeriesHeader:
         return None
 
     @property
+    def scanner(self) -> str | None:
+        """The VENDOR this series was acquired on, canonicalised — not the model.
+
+        The model (`ManufacturerModelName`) is deliberately not recorded: our corpus holds forty-plus
+        distinct values whose largest cohort is 741 studies and whose tail is single digits, so a
+        per-model reading is subsets too small to carry an AUC. The vendor splits the same corpus into
+        four cohorts of 226 and up, which is a group a ruler can actually use.
+
+        Absent rather than a raw string when no rule matches, because an unrecognised manufacturer
+        grouped under its own spelling is the failure `_VENDORS` exists to prevent.
+        """
+        raw = str(getattr(self.header, "Manufacturer", "") or "").strip().upper()
+        return next((vendor for token, vendor in _VENDORS if raw.startswith(token)), None) if raw else None
+
+    @property
+    def field_strength(self) -> float | None:
+        """Nominal field strength in tesla, as the header states it.
+
+        Not rounded to 1.5 / 3.0: a scanner that reports 2.8936 is stating its own calibration and
+        rounding it here would hide a cohort that is neither, which is a thing this corpus could
+        contain and nobody has checked.
+        """
+        strength = self._number(getattr(self.header, "MagneticFieldStrength", None))
+        return strength if strength is not None and strength > 0 else None
+
+    @property
     def laterality_tag(self) -> str | None:
         """'L' / 'R' from the tag, treating present-but-empty as absent — which it is."""
         value = str(getattr(self.header, "Laterality", "") or "").strip().upper()
@@ -215,6 +261,8 @@ class Acquisition:
     centre_x: float | None
     slice_spacing: float | None = None
     column_axis_x: float | None = None
+    scanner: str | None = None
+    field_strength: float | None = None
 
     @property
     def through_plane_mm(self) -> float | None:
@@ -259,6 +307,8 @@ class Acquisition:
             centre_x=header.centre_x,
             slice_spacing=header.slice_spacing,
             column_axis_x=header.column_axis_x,
+            scanner=header.scanner,
+            field_strength=header.field_strength,
         )
 
     def ordered_files(self) -> tuple[str, ...]:

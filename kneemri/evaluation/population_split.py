@@ -5,9 +5,9 @@ the studies we get wrong are a recognisable population — and if they are, that
 more of them, weight them, render them differently) rather than the model lane every other instrument
 here reports on.
 
-WHAT THE COMPETITION ACTUALLY GIVES US to cut on. `train_series.csv` carries one row per series with
-`Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane`, and that is the whole of the acquisition
-metadata — there is no scanner field, no laterality field and no per-study demographic. Of what is there:
+WHAT THE COMPETITION SHIPS to cut on. `train_series.csv` carries one row per series with
+`Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane`, and that is the whole of the SHIPPED
+acquisition metadata — no scanner column, no laterality column, no per-study demographic. Of what is there:
 
  * ANATOMICAL PLANE is not a population axis at all. All 4,407 training studies carry all three of
    Axial, Coronal and Sagittal, so a cut on plane coverage has one stratum.
@@ -16,13 +16,21 @@ metadata — there is no scanner field, no laterality field and no per-study dem
    of the three fields are one field, which is why this module cuts on the count of fluid-sensitive
    series and never on fat suppression separately.
 
- * SERIES COUNT is the only real axis, 3 to 14 with a median of 5. It is how much of the knee a member
-   was shown, so if the residual is thin-acquisition-heavy the fix is an input fix.
+ * SERIES COUNT is the only real axis IN THE SHIPPED TABLE, 3 to 14 with a median of 5. It is how
+   much of the knee a member was shown, so if the residual is thin-acquisition-heavy the fix is an
+   input fix.
 
 AND IT IS NOT AN INPUT AXIS ONLY. A longer protocol is also a sicker knee — 2.8 positive findings per
 study at four series against 4.0 at six — so raw errors per study rise with series count without any
 member having been helped or hurt by the extra sequences. That is why every band reports errors per
 POSITIVE beside errors per study, and why only the former may be read.
+
+AND THE SHIPPED TABLE IS NOT THE WHOLE VOCABULARY. The DICOM headers carry the manufacturer, the model
+and the field strength, which our reader dropped until knee-m4jkz — four vendors and two field strengths
+over 4,407 studies. Those cuts are a DIFFERENT question and live in `kneemri.evaluation.vendor_ruler`:
+this module asks where the pool's residual concentrates, that one asks whether the member ORDERING is a
+property of our scanner mix. A stratum that reorders the seats is not the same finding as a stratum that
+carries more errors, and reading one as the other is how a seat search gets fitted to a nuisance axis.
 
 WHAT IT CANNOT SEE. The same two limits `residual_split` carries, since it borrows that decomposition
 whole: the operating point is prevalence-matched so false negatives and false positives are equal by

@@ -1,9 +1,17 @@
 """The competition's per-series acquisition table, reduced to one number per study.
 
-`train_series.csv` is the whole of the acquisition metadata the competition ships: one row per series,
-carrying `Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane`. There is no scanner field, no
-laterality field and no per-study demographic, so this is the entire vocabulary any population cut of
-our results can be phrased in.
+`train_series.csv` is the whole of the acquisition metadata the competition SHIPS: one row per series,
+carrying `Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane`. It has no scanner field, no
+laterality field and no per-study demographic.
+
+THAT IS A FACT ABOUT THE SHIPPED TABLE AND NOT ABOUT THE DATA, and this docstring used to state it as
+the latter — "so this is the entire vocabulary any population cut of our results can be phrased in".
+The DICOM headers underneath carry `Manufacturer`, `ManufacturerModelName` and `MagneticFieldStrength`,
+and the corpus is four vendors deep (Siemens 1,949, Philips 1,301, GE 905, Canon 226) across two field
+strengths. Our reader dropped both tags until knee-m4jkz; `canonical_metadata.csv` now carries them and
+`kneemri.evaluation.vendor_ruler` cuts on them. `slots.py` had already established the general rule for
+fat suppression: where the headers and the shipped columns both answer, the headers are the better
+witness.
 
 Two of its three columns turn out to say nothing. `Anatomical_Plane` is constant — all 4,407 training
 studies carry Axial, Coronal and Sagittal alike — and `Fat_Suppression` equals `Fluid_Sensitive` on
