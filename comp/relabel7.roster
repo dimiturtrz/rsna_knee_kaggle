@@ -1,0 +1,22 @@
+# The seven members `kneemri-relabel7` ships, and NOTHING ELSE.
+#
+# A package of its own rather than a version bump of `kneemri-members`, because the live members
+# dataset is 13 GB of 120 checkpoints and this entry names seven of them. Re-uploading 13 GB to add
+# one 89 MB file spends an hour of wall-clock and puts the CHAMPION's serving dataset through a
+# version bump for an instrument entry — a cost and a risk that buy nothing this entry needs.
+#
+# `MemberPackage.find` takes the FIRST manifest it walks to, so a kernel reading this package must
+# mount it and NOT `kneemri-members`; two mounted packages make which one serves an accident of walk
+# order. `kneemri-relabel7`'s metadata names this one alone.
+#
+# The first six are the champion's seats, unchanged, so the entry's delta is the seventh member's own
+# contribution and not a difference against a re-selected six.
+final_ws_cf.pt
+calib_span_ff.pt
+grade_ladder_cf.pt
+merged_blend_cf.pt
+lr4e-5_ws_cf.pt
+through_dense_cf.pt
+# The seventh: the only member this project owns whose TRUTH differs from every other member's —
+# fitted against a label table with 1,932 cells corrected by a confident-learning detector.
+errors_relabel_s2026.pt
