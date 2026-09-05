@@ -8032,3 +8032,49 @@ at is labelwise pooling at a HIGHER count inside the tight 0.1-0.9 band — 36 s
 reservation curve at roughly 12.3 GB with `--recompute-activations`, so it fits — but the honest
 prediction is that its MEAN stays flat and only the one column moves, which is a per-column instrument
 and not a >=0.010 lever. It is not queued ahead of the depth arm for that reason.
+
+### The input-geometry family re-audited against a NEW hypothesis, and it holds — card-free, 2026-09-05
+
+`knee-m69u` asks for a new axis, and today's reading of `knee-urvf` puts the whole target at +0.010 of
+holdout on ONE member. That combination is what makes a re-audit worth writing down even when it finds
+nothing: the hypothesis was specific, it was not the one these arms were built against, and it still
+lost. The claim was that our pipeline treats every knee as though its geometry were identical — uniform
+slices through a fixed band, no anatomical normalisation of the slice axis — and that this is the one
+input assumption no arm has ever varied.
+
+**It is varied, on four legs, and three of them were already answered before today.**
+
+* **Multi-plane input is not missing.** `train_series.csv` carries 24371 series over 4407 studies, 3 to
+  14 each with a median of 5, tagged by plane and by the two acquisition axes. `slots.py` routes them
+  into six slots chosen so each of the twelve findings has a sequence that shows it well, a missing slot
+  becomes zeros plus a mask, and `--whole-stack` members run all of it.
+* **In-plane registration is measured and unlicensed.** `alignment_damage` on 909 holdout studies:
+  focal-minus-regional differential **+0.0103, 95% [-0.0305, +0.0421]**, against a pre-registered sizing
+  argument that needed about 0.051 to clear the bar. The interval spans zero, and both raw gaps came out
+  negative, which retires the alignment proxy as a study-quality signal at the same time.
+* **Through-plane slab normalisation is a NON-PROBLEM, and this is the part that was worth checking.**
+  The band is FRACTIONAL — 0.1-0.9 of each study's own stack — so it already adapts to slab extent per
+  study, and there is no scatter for a registration step to remove. The axis also carries three trained
+  points: 0.20-0.80 = 0.8525, **0.10-0.90 = 0.8565**, 0.00-1.00 = 0.8427. An interior optimum, so the
+  band is a filter and the outer slices actively cost. That result lives in the docstring of
+  `core/data/corpus/band_coverage.py` and, until this row, was referenced nowhere in this ledger.
+
+**What survives, stated narrowly so it is not re-audited a fourth time.** Every leg above concerns the
+slice BUDGET or the WINDOW. None concerns WHICH slices are taken inside a fixed budget, and none
+concerns a localiser pointing the classifier at a structure. Those two are open, and both sit upstream
+of the aggregation stage this ledger already calls saturated from three directions (more slices -0.0001,
+more slots +0.0002, every combining rule within 0.0019). The localiser leg carries a measured headwind
+before it starts: `crop80_span` cost 0.0099 against the 130 mm crop with MCL -0.0265 and ACL -0.0263
+leading the loss, so cropping in gave back what widening out had paid for. Sent to Kimi as Q-SINGLE-A
+and Q-SINGLE-B; the withdrawn legs went with their reasons so no search is spent on them.
+
+**No lane is currently priced at or above 0.010, which is what `knee-m69u` asked to have said out loud.**
+The card has `mricore_corpus` on it and `band_deep_matched` parked behind it, and it has no successor
+after that unless `band_deep_matched` clears its ABOVE branch at 0.8640 — the branch that would license
+re-running the whole foreign-trunk family with layer decay, on the grounds that every trunk negative was
+measured through a recipe that never let the trunk move.
+
+**Why this note exists at all.** The docstring of `band_coverage.py` records the cost of the opposite
+habit: left in the present tense after its own question was settled, it invited a 2026-08-25 audit that
+set out to build a cache for an operating point the pool had already adopted. A closed axis that does
+not say so is a standing invitation to redo the work, and today it nearly bought a second one.
