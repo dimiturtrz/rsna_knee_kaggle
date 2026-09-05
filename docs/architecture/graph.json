@@ -25064,31 +25064,31 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "target": "kneemri.evaluation.record_mix.RecordMix",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "target": "kneemri.evaluation.record_mix.RecordMix.shared",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
       "weight": 1
     },
@@ -25113,7 +25113,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.optimism",
-      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
       "weight": 1
     },
     {
@@ -51558,8 +51558,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.halves",
-      "label": "halves",
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.folds",
+      "label": "folds",
       "level": "method",
       "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
       "role": null
