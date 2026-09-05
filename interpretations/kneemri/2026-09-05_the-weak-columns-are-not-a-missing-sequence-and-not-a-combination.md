@@ -116,15 +116,52 @@ never as a number quoted from a single holdout.
 (The per-column AUCs are `band_dense`'s on the 909-study holdout; the SEs are the 881-study fold. The
 two denominators differ by 3%, which moves an SE in the fourth decimal and none of this reading.)
 
+## Hypothesis 3: MCL is a LABEL ceiling — and it is the exact opposite
+
+MCL is the second-worst-agreeing column against the radiologist (50.0% of 18 calls) and the worst model
+column, so "the target is noise and no model can reach 0.90" was the obvious next hypothesis. It is
+wrong, and `kneemri.evaluation.supervision_gap` — which already exists, and whose docstring already
+warns that *"'CEILING' IS THE WRONG WORD"* because a model fitted on noisy labels can beat them by
+looking at the image — is what says so. On the 58 annotated studies, each finding scored against the
+RADIOLOGIST twice, once using the report label as the predictor and once using the model:
+
+| finding | report label | model | model − label |
+|---|---:|---:|---:|
+| ACL | 0.9865 | 0.8640 | **−0.1225** |
+| MCL | **0.9762** | 0.8798 | **−0.0964** |
+| Lateral Meniscus | 0.8422 | 0.6497 | **−0.1925** |
+| Lateral OA | 0.7892 | 0.7099 | −0.0793 |
+| Effusion | 0.8149 | 0.9453 | +0.1304 |
+
+**MCL's supervision is the second-best in the corpus.** The report label predicts the radiologist at
+0.9762 — a near-perfect target — and the model reaches 0.8798 from the pixels. So the 50%
+positive-call agreement is not a ceiling: the reader over-calls MCL and the over-calls are *orderable*,
+which is why the label still separates the radiologist's cases almost perfectly. **MCL is a model
+extraction failure with excellent supervision**, which is the one diagnosis on this axis that licenses
+an arm rather than closing one. Its band is one of the four of twelve that exclude zero.
+
+Lateral OA sits on the same side (model 0.0793 below its own label) with a weaker band. So both of the
+two READABLE weak columns are extraction failures, not label failures — and the label lane, which is
+where I was about to spend the next reading, is the wrong lane for both.
+
+(Denominator: 58 studies, 696 cells. The aggregate label−model gap is +0.0266 with an interval spanning
+zero, so this is a per-finding shape backed by four bands, not an aggregate claim.)
+
 ## What that leaves
 
-Both hypotheses were the cheap ones, and both are gone without touching the card. What survives on the
-per-label axis is training-side and shared: the weak columns are weak for **every member we own**,
-which points at the supervision or the task rather than the trunk, the plane, or the mix. The two
-readings that would separate those are (a) whether MCL's 0.81 is a label ceiling — it is the
-second-worst-agreeing column against the radiologist at 50.0% of 18 calls, and it is the worst model
-column — and (b) whether a member trained with the weak three upweighted moves them without costing
-the other nine. Neither is priced yet, and (a) is card-free.
+Three hypotheses, all killed without touching the card, and the third one inverted into a direction.
+What survives on the per-label axis is **showing the model more or better image for MCL and Lateral
+OA** — the supervision is already there and is not what is missing. The ledger's own geometry arms
+point the same way and disagree about how far: `crop80_span` cropped IN and lost MCL hardest
+(−0.0265), `crop160_span` widened OUT and gained it (+0.0086), both inside per-label noise, so the
+direction is consistent across two arms and the size is unresolved. What is NOT licensed is another
+loss-side tilt — `focus_mcl` put the whole encoder behind MCL and regressed its own target by −0.0576.
+
+The open question, and the one now with Kimi as Q-COL: which plane and sequence MCL is actually read on
+by a radiologist, and whether any published knee-MRI system routes a finding to its plane rather than
+weighting its loss. A DECODE tilt (an MCL head that attends the coronal slots) is a different mechanism
+from the LOSS tilt that failed, and `core/data/corpus/anatomy.py` already carries the per-finding
+plane × fluid-sensitivity prior it would ride on.
 
 **What must NOT be concluded from this:** it does not say the per-label axis is closed. It says two of
 its mechanisms are, and it removes the two that were free. The +0.0196 arithmetic in the earlier
