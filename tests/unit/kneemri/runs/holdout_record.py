@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutReading, HoldoutRecord
+from kneemri.runs.holdout_record import DERIVED, PROBE, UNKNOWN_EPOCH, HoldoutReading, HoldoutRecord
 
 LABELS = 12
 
@@ -24,6 +24,33 @@ def _reading(studies: list[str], offset: float = 0.0, truth: np.ndarray | None =
 def test_read(tmp_path: Path):
     """Sixty-five runs already on disk predate this, and they must say so rather than raise."""
     assert HoldoutRecord(tmp_path / "member.pt").read() is None
+
+
+def test_read_without_stamps(tmp_path: Path):
+    """A record carrying only the three arrays reads as an UNKNOWN_EPOCH probe instead of raising.
+
+    Six probe records on disk are written this way. `seat_value` named one among four candidates and
+    died on `KeyError: 'epoch is not a file in the archive'`, taking the other three down with it
+    (knee-ro2bu). A missing stamp has a reading; a missing array does not, and still raises.
+    """
+    record = HoldoutRecord(tmp_path / "probe.pt")
+    np.savez(
+        record.path,
+        studies=np.array(["a", "b"]),
+        predictions=np.zeros((2, LABELS), dtype=np.float32),
+        truth=np.zeros((2, LABELS), dtype=np.float32),
+    )
+
+    reading = record.read()
+
+    assert reading is not None
+    assert reading.epoch == UNKNOWN_EPOCH
+    assert reading.source == PROBE
+    assert len(reading.studies) == 2
+
+    np.savez(record.path, studies=np.array(["a"]), truth=np.zeros((1, LABELS), dtype=np.float32))
+    with pytest.raises(KeyError):
+        record.read()
 
 
 def test_exists(tmp_path: Path):

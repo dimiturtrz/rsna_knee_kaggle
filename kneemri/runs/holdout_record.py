@@ -184,14 +184,27 @@ class HoldoutRecord:
         return True
 
     def read(self) -> HoldoutReading | None:
-        """What this run predicted, or None for a run that finished before this was written."""
+        """What this run predicted, or None for a run that finished before this was written.
+
+        The two STAMPS are read defensively and the three ARRAYS are not, because they differ in what a
+        missing key means. Six probe records on disk carry only `studies`, `predictions` and `truth` —
+        they predate `write` and were emitted by a path that never had an epoch to state. Their stamps
+        are exactly what `UNKNOWN_EPOCH` and `PROBE` were declared to say, so defaulting them is the
+        vocabulary working rather than a guess. A missing ARRAY has no such reading: it is a truncated
+        file, and it must still raise here instead of arriving downstream as an empty holdout.
+
+        Read through `stored.files` rather than a try/except, so a record missing a stamp is a branch
+        and not an exception path — `KeyError: 'epoch is not a file in the archive'` took the whole of
+        `seat_value` down when one probe was named among four candidates (knee-ro2bu).
+        """
         if not self.exists():
             return None
         stored = np.load(self.path)
+        held = set(stored.files)
         return HoldoutReading(
             studies=[str(name) for name in stored["studies"]],
             predictions=stored["predictions"].astype(np.float64),
             truth=stored["truth"],
-            epoch=int(stored["epoch"]),
-            source=str(stored["source"]),
+            epoch=int(stored["epoch"]) if "epoch" in held else UNKNOWN_EPOCH,
+            source=str(stored["source"]) if "source" in held else PROBE,
         )
