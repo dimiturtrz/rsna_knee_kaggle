@@ -776,6 +776,7 @@ PROVENANCE_ONLY = {
     "pair_memory",
     "report_weight",
     "unfreeze_last",
+    "unfreeze_offset",
     "head_lr",
     "backbone_lr",
     "layer_decay",

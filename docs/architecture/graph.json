@@ -53178,6 +53178,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.member_record.RunOptions.unfreeze_offset",
+      "label": "unfreeze_offset",
+      "level": "method",
+      "parent": "kneemri.runs.member_record.RunOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.member_record.RunOptions.whole_stack",
       "label": "whole_stack",
       "level": "method",
