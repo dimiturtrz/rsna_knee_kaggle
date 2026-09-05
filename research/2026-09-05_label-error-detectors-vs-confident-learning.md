@@ -53,6 +53,45 @@ Our CL detector reads misses at AUC 0.6903 and precision 0.08–0.11, far below 
 - Relevant PU references: Bekker & Davis survey (ML 2020); Zhao et al. on PU learning for incomplete cell annotations in histopathology (MELBA 2023); Jain et al. on PU performance estimation (AAAI 2017).
 - The CL / AUM / SimiFeat family is built on confident disagreement with the given label, which structurally favours false positives. Attacking the miss half would likely require anomaly detection on negatives, PU instance-level scoring, or missing-label-aware contrastive learning — all training-centric or new builds rather than literature drop-ins.
 
+## The missed-finding / false-negative half — updated after direct inspection (Claude's Q-MISS)
+
+Claude's measured separation AUCs on the identical gate:
+- confident learning: 0.7628 / 0.7580 / 0.6903 (all / confident FP / misses)
+- 10-NN vote, 6 trunks: 0.6830 / 0.7714 / 0.3588
+- rank-average: 0.7511 / 0.8020 / 0.5161
+
+The 10-NN vote is below chance on misses because a false negative agrees with the negatives around it by construction. This is not a tuning failure; it is structural.
+
+**Direct evidence that standard detectors are extraneous-label detectors**
+- Anttonen 2024 evaluated Confident Learning on real MIMIC-IV medical codes against a keyword-search ground truth. CL found erroneous extra labels with high precision but was "too unreliable" for missing labels. [Aaltodoc thesis](https://aaltodoc.aalto.fi/bitstreams/ddc4c95d-ab7c-45f6-9631-357f95be4b77/download)
+- Deep k-NN (Bahri et al., ICML 2020) flags a sample when its label disagrees with its k-NN neighbours in representation space. This again detects extraneous labels; false negatives are neighbours with the same (wrong) negative label. [Deep k-NN for Noisy Labels](http://proceedings.mlr.press/v119/bahri20a/bahri20a.pdf)
+- Ortega Vázquez 2023 treats PU data and one-sided label noise as "practically equivalent," but the PU literature trains classifiers or estimates class priors; it does not typically produce a spendable ranking. [Lirias](https://lirias.kuleuven.be/retrieve/734064)
+
+**Closest published false-negative detector**
+Karimi et al. 2020 (ISBI), "Learning to detect brain lesions from noisy annotations," is a medical-imaging method that directly targets false-negative annotations. It iterates: train a CNN, use CNN predictions + Monte-Carlo dropout uncertainty + lesion statistics (size, T1/T2/FLAIR intensity, distance to nearest annotated lesion) to classify candidate lesions as true missed positives or false positives, add the accepted ones to labels, and retrain. On TSC brain MRI it improved lesion-count F1 from 0.747 to 0.819. It is per-lesion/region and domain-specific, not a per-cell ranking score. [NIH/PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC7456674/)
+
+**Conclusion for Q-MISS**
+No published detector family outputs a per-cell ranking score for one-sided false-negative label noise with usable precision in general classification. PU learning is the right conceptual framing, but its typical output is a classifier or class-prior estimate. A drop-in miss ranker would be a new build, not a literature import.
+
+---
+
+## MRI-CORE checkpoint details (Claude's Q-MRICORE)
+
+Downloaded `MRI_CORE_vitb.pth` from the official release and inspected the state dict. The file is a DINOv2-pretrained ViT-B/16 backbone, not a finished SAM `image_encoder` state dict.
+
+- **URL**: `https://drive.google.com/file/d/1nPkTI3H0vsujlzwY8jxjKwAbOCTJv4yW/view?usp=sharing`
+- **Optional SAM weights** (prompt/mask decoder): `https://drive.google.com/file/d/1oWoVGdwXwNTVr1oTLV_dRDGEJZyKJLnJ/view?usp=sharing`
+- **Top-level key**: `{'teacher': OrderedDict(...)}`
+- **Prefixes inside teacher**: `backbone.*` (151 keys), `dino_head.*` (8 keys)
+- **Real keys**: `teacher.backbone.patch_embed.proj.weight`, `teacher.backbone.pos_embed`, `teacher.backbone.blocks.0.0.attn.qkv.weight`, ...
+- **Position embedding**: `[1, 197, 768]` → 14×14 patch grid + cls token → **224×224 pretrain read size**, 16×16 patches
+- **Depth**: 12 layers stored as 4 groups × 3 sub-blocks (`blocks.G.s`)
+- **Params**: ~85.8 M backbone, ~108.9 M with DINO head
+- **Normalization**: `[0, 1]` FloatTensor, per README feature-extraction example
+- **License**: Apache 2.0, stated to cover code and models
+
+To use as a 1024 px SAM encoder, the loader must remap `teacher.backbone.*` → `image_encoder.*` and interpolate `pos_embed` from 14×14 to 64×64. Their `models.sam.sam_model_registry` does this.
+
 ## Practical order for us
 
 Given we already store per-epoch out-of-fold predictions:

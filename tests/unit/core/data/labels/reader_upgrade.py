@@ -85,3 +85,82 @@ def test_report():
 
     assert any("READS THE BLANKS" in line for line in ReaderUpgrade(lexicon, reads).report())
     assert any("SILENT TOO" in line for line in ReaderUpgrade(lexicon, mute).report())
+
+
+def test_matched():
+    """Only cells BOTH readers assert survive, and each one's verdict is carried on its own column."""
+    lexicon = _cells([("a", "acl", POSITIVE, 1.0), ("a", "pcl", POSITIVE, 0.0), ("a", "mcl", SILENT, 1.0)])
+    candidate = _cells([("a", "acl", ABSENT, 1.0), ("a", "pcl", SILENT, 0.0), ("a", "mcl", POSITIVE, 1.0)])
+
+    matched = ReaderUpgrade(lexicon, candidate).matched()
+
+    assert list(matched["target"]) == ["acl"], "a cell either reader abstained on prices no correction"
+    assert list(matched["verdict_lexicon"]) == [POSITIVE]
+    assert list(matched["verdict_candidate"]) == [ABSENT]
+
+
+def test_correction():
+    """Both rates are read on the same cells against the same truth, which is the whole point of matching."""
+    matched = pd.DataFrame(
+        [
+            ("a", "acl", POSITIVE, 1.0, POSITIVE),
+            ("a", "pcl", POSITIVE, 0.0, ABSENT),
+            ("b", "acl", ABSENT, 1.0, ABSENT),
+            ("b", "pcl", ABSENT, 0.0, ABSENT),
+        ],
+        columns=["study", "target", "verdict_lexicon", "truth", "verdict_candidate"],
+    )
+
+    shared, lexicon, candidate = ReaderUpgrade.correction(matched)
+
+    assert shared == 4
+    assert lexicon == pytest.approx(0.5), "the lexicon reads two of the four right"
+    assert candidate == pytest.approx(0.75), "the candidate corrects one of the two it disagrees on"
+
+
+def test_correction_reads_nan_on_a_disjoint_pair():
+    """No shared cell means no correction to price, and it must not read as a tie at zero."""
+    shared, lexicon, candidate = ReaderUpgrade.correction(
+        pd.DataFrame(columns=["study", "target", "verdict_lexicon", "truth", "verdict_candidate"])
+    )
+
+    assert shared == 0
+    assert np.isnan(lexicon) and np.isnan(candidate)
+
+
+def test_resampled_correction():
+    """Seeded, PAIRED, and centred on the gap it is an interval about — a tie must bracket zero."""
+    rows = [
+        (f"s{study}", f"t{cell}", POSITIVE, float(cell % 2), POSITIVE if cell % 2 else ABSENT)
+        for study in range(30)
+        for cell in range(6)
+    ]
+    matched = pd.DataFrame(rows, columns=["study", "target", "verdict_lexicon", "truth", "verdict_candidate"])
+    upgrade = ReaderUpgrade(_cells([]), _cells([]))
+
+    drawn = upgrade.resampled_correction(matched)
+
+    assert np.array_equal(drawn, upgrade.resampled_correction(matched)), "same seed, same interval"
+    _, lexicon, candidate = ReaderUpgrade.correction(matched)
+    low, high = np.percentile(drawn, (2.5, 97.5))
+    assert low <= candidate - lexicon <= high
+    assert low > 0.0, "the candidate is right on every cell here and the lexicon on half of them"
+
+
+def test_correction_lines():
+    """The branch fires on the paired interval, not on the sign of the point estimate."""
+    studies = range(30)
+    lexicon = _cells([(f"s{study}", f"t{cell}", ABSENT, float(cell % 2)) for study in studies for cell in range(6)])
+    corrector = _cells(
+        [
+            (f"s{study}", f"t{cell}", POSITIVE if cell % 2 else ABSENT, float(cell % 2))
+            for study in studies
+            for cell in range(6)
+        ]
+    )
+
+    assert any("CORRECTS:" in line for line in ReaderUpgrade(lexicon, corrector).correction_lines())
+    assert any("DOES NOT CORRECT" in line for line in ReaderUpgrade(lexicon, lexicon).correction_lines())
+    assert ReaderUpgrade(lexicon, _cells([])).correction_lines() == [
+        "no cell is asserted by both readers; the correction lane is unreadable here"
+    ]

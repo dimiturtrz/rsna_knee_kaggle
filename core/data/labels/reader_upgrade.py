@@ -72,6 +72,29 @@ class ReaderUpgrade:
         spoken = self.lexicon[self.lexicon["verdict"] != SILENT][KEY]
         return self.candidate.merge(spoken, on=KEY, how="inner")
 
+    def matched(self) -> pd.DataFrame:
+        """The cells BOTH readers asserted, carrying each one's verdict against the same truth.
+
+        The answered-pair line above is not a comparison: it scores the candidate on the subset the
+        CANDIDATE chose to speak on, while the lexicon's own rate is over every cell it answered. A
+        reader that abstains on the hard cells wins that line by declining them. Only the intersection
+        prices the correction, and correcting is the only thing left for a reader whose blank-pair
+        accuracy does not clear the majority class.
+        """
+        spoken = self.lexicon[self.lexicon["verdict"] != SILENT][[*KEY, "verdict", "truth"]]
+        mine = self.candidate[self.candidate["verdict"] != SILENT][[*KEY, "verdict"]]
+        return spoken.merge(mine, on=KEY, how="inner", suffixes=("_lexicon", "_candidate"))
+
+    @staticmethod
+    def correction(matched: pd.DataFrame) -> tuple[int, float, float]:
+        """(shared cells, the lexicon's accuracy on them, the candidate's) — the same cells for both."""
+        if matched.empty:
+            return 0, float("nan"), float("nan")
+        positive = matched["truth"] > MIDPOINT
+        lexicon = float(((matched["verdict_lexicon"] == POSITIVE) == positive).mean())
+        candidate = float(((matched["verdict_candidate"] == POSITIVE) == positive).mean())
+        return len(matched), lexicon, candidate
+
     @staticmethod
     def accuracy(cells: pd.DataFrame) -> tuple[int, float, float]:
         """(cells the candidate asserted, its accuracy on them, the majority-class rate on the same cells).
@@ -105,6 +128,25 @@ class ReaderUpgrade:
         drawn = generator.integers(0, len(hits), size=(DRAWS, len(hits)))
         return np.asarray(hits[drawn].sum(axis=1) / counts[drawn].sum(axis=1), dtype=np.float64)
 
+    def resampled_correction(self, matched: pd.DataFrame) -> Float[NDArray[np.float64], " draws"]:
+        """The candidate-minus-lexicon accuracy gap under `DRAWS` resamples of the studies.
+
+        PAIRED: each draw resamples studies once and scores both readers on the same drawn cells, so the
+        shared sampling error cancels instead of being counted twice. An unpaired interval on two rates
+        measured on identical cells is wide by construction and would hide a real correction.
+        """
+        positive = matched["truth"] > MIDPOINT
+        gap = ((matched["verdict_candidate"] == POSITIVE) == positive).astype(float) - (
+            (matched["verdict_lexicon"] == POSITIVE) == positive
+        ).astype(float)
+        per_study = matched.assign(gap=gap).groupby("study")["gap"].agg(["sum", "count"])
+        gaps = per_study["sum"].to_numpy(np.float64)
+        counts = per_study["count"].to_numpy(np.float64)
+
+        generator = np.random.default_rng(SEED)
+        drawn = generator.integers(0, len(gaps), size=(DRAWS, len(gaps)))
+        return np.asarray(gaps[drawn].sum(axis=1) / counts[drawn].sum(axis=1), dtype=np.float64)
+
     def report(self) -> list[str]:
         """Both numbers and the branch they fire, so the decision is not left to whoever reads the log."""
         blank, answered = self.blank(), self.answered()
@@ -131,6 +173,36 @@ class ReaderUpgrade:
                 "NOT DISTINGUISHABLE FROM THE MAJORITY CLASS: the candidate speaks, but its accuracy on "
                 "the blank pairs is not resolved above saying 'absent' to all of them. Do NOT spend hours "
                 "of card on the sweep — a table built from this would add confident noise, not supervision."
+            )
+        return lines + self.correction_lines()
+
+    def correction_lines(self) -> list[str]:
+        """The matched reading: on the cells both readers assert, is the candidate a CORRECTOR?
+
+        This is the branch the blank-pair gate leaves open. A candidate can add nothing where the
+        lexicon is silent and still be worth a sweep if it is right more often where the lexicon
+        SPOKE — that is the whole of Wollek's parser-to-learned-labeler gap, which is a correction
+        result and not a coverage one.
+        """
+        matched = self.matched()
+        shared, lexicon, candidate = self.correction(matched)
+        if not shared:
+            return ["no cell is asserted by both readers; the correction lane is unreadable here"]
+        low, high = np.percentile(self.resampled_correction(matched), INTERVAL)
+        lines = [
+            f"the {shared} cells BOTH readers assert: lexicon {lexicon:.3f}, candidate {candidate:.3f}",
+            f"candidate minus lexicon {candidate - lexicon:+.3f}, paired interval [{low:+.3f}, {high:+.3f}]",
+        ]
+        if low > 0.0:
+            lines.append(
+                "CORRECTS: on the same cells, read against the same truth, the candidate is right more "
+                "often than the lexicon and the paired interval clears zero. The sweep is licensed by "
+                "the CORRECTION lane even when the coverage lane is dead."
+            )
+        else:
+            lines.append(
+                "DOES NOT CORRECT: the gap on the shared cells does not clear zero. With the blank-pair "
+                "lane also dead this candidate is not a better reader on any denominator we can measure."
             )
         return lines
 
