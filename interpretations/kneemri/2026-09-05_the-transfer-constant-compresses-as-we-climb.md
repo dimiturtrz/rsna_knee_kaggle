@@ -16,8 +16,10 @@ been quoted wrong from prose twice:
 | entries ≥ 0.8670 (where we live) | 17 | **+0.98** [+0.94, +1.17] |
 | entries ≥ 0.8695 | 2 | **+0.80** [+0.71, +0.89] — DIRECTION ONLY |
 
-**The transfer is about 1:1 at our operating point, not the +1.55 that `CLAUDE.md` carries.** That
-constant was fitted before `board_check` found the file was missing fifteen scored entries, and it
+**The transfer is about 1:1 at our operating point, not the +1.55 that `kneemri/kaggle/board_check.py`'s
+docstring carries** (it records "+1.82 against a complete set's +1.55" from the 2026-08-25 repair, when
+`comp/board.jsonl` was found holding 34 of 58 submissions). That constant is a whole-record fit, and the
+whole record is exactly the scope this module refuses to price an arm with; at our operating point it
 overstates what an arm buys by roughly half. The top band is two pairs and cannot price anything on its
 own, but it points the same way as the whole-record-to-operating-point step does: **the ruler compresses
 as the score rises.** That is the ordinary shape — the board's own headroom shrinks, and the pairs that
