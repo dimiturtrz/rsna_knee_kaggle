@@ -397,3 +397,46 @@ and it is cheap: the two ortho rows were both run against ViT-L controls, and th
 measured only afterwards (`band_pairmem`, knee-710gi). An ortho arm on the DENSE recipe against a ViT-L
 control at the same read separates DAPT from trunk size properly, and that is **2 h of card, not 12**.
 That is the next thing to queue when `errors_relabel` clears.
+
+### Correction to section 4, same hour: the re-open arm was already on disk, and the answer is bigger than the bead's
+
+Section 4 above ends by naming knee-fqit7's re-open — "an ortho arm on the DENSE recipe against a ViT-L
+control, 2 h of card, not 12" — as the next thing to queue. **That is wrong and would have spent two
+hours re-running a finished arm.** `v3large_dense_s2026` has been on disk since 2026-09-02, its recipe
+is byte-identical to `ortho_dense`'s except `--variant`, and `comp/members.declines` records the pair
+already.
+
+| arm | trunk | corpus | holdout |
+|---|---|---|---|
+| `v3large_dense` | DINOv3 ViT-L, 303M | natural images | 0.8258 |
+| `ortho_dense` | OrthoFoundation ViT-L, 303M | + 1.25M knee images | 0.8452 |
+| `base224` | DINOv2 ViT-B, 86M | natural images | 0.8509 |
+
+**In-domain continuation is +0.0194 at matched trunk size and matched recipe** — three times the 0.0062
+floor and past the 1.5% bar. The decline entry corroborates it twice more: the frozen probe re-read at
+the penalty each trunk is entitled to (the knee-x4yx defect; a shared penalty is unfair when trunk
+feature magnitudes differ ~17x) gives ortholarge 0.8249 against v3large 0.8046, **+0.0203** — agreeing
+with the fitted arm to 0.001 by an independent instrument — and `ortho_stack` reads +0.0140 on
+`band_dense`'s recipe. Three instruments, one sign, one rough size.
+
+So DAPT is not the thing that failed. The decomposition against `base224` is:
+
+> DAPT **+0.0194**, the ViT-L lane **−0.0251**, net **−0.0057** — inside the floor, which is why
+> `ortho_dense` seats nothing and was declined.
+
+**THE LANE IS BLOCKED ON TRUNK SIZE, NOT ON CORPUS**, and that inverts what to ask for. The unbuilt
+exploitation path is a knee-continued trunk at ViT-**B** scale: DAPT is worth +0.019 and ViT-B is worth
++0.025 over ViT-L here, and OrthoFoundation only ships ViT-L, so the two gains have never been available
+in the same set of weights. Nothing in this repo can decide whether such a trunk exists — that is a
+literature question and it has gone to Kimi as Q-BASE.
+
+What this does NOT re-open: trunk SIZE, which the decline forbids at line 195, and rightly. Size is held
+fixed on both sides of the +0.0194 and the continuation corpus is the only free term. The seat decisions
+on both arms remain correct.
+
+And a second correction, to my own method rather than to a number. I found the +0.0194 by putting two
+metrics files side by side and was one command from filing it as a discovery. It was already written
+down, with better evidence than I had — the probe leg, the penalty defect, the withdrawal of an earlier
+reading — in `comp/members.declines`, which is not a file `bd search` reaches and not one the ledger
+duplicates. **A decline is an argument, and the third place measured results live.** Read it with
+`experiments/README.md` and `interpretations/` before filing anything.
