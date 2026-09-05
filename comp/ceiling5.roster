@@ -1,0 +1,26 @@
+# The five members `dimiturnt/kneemri-ceiling5-members` holds, one per line, read by
+# `python -m kneemri.kaggle.package_members --roster comp/ceiling5.roster`.
+#
+# WHY A SECOND ROSTER FILE EXISTS. `comp/members.roster` defines the package the CHAMPION line ships
+# from, and every entry above board 0.936 is built out of it. This one defines a package that exists to
+# answer a different question: what does the board make of the best blend this project can PRICE? Its
+# members all held out a split, none is fitted at `--fold -1`, and they were chosen by forward selection
+# on the corpus ruler (`python -m kneemri.kaggle.priceable_blend`). Merging the two rosters would make
+# the champion package unbuildable from a file whose members were selected on a holdout.
+#
+# The blend scores 0.8757 under `rank` and 0.8758 under `LogitAverage`, which is why the kernel may
+# serve the rule every other entry serves without changing what was priced. Against `distinct14`
+# (offline 0.8749, board 0.937) the top-regime compression predicts board 0.938.
+#
+# THIS IS AN INSTRUMENT. It is predicted to score BELOW the champion. The four branches it decides are
+# written in `interpretations/kneemri/2026-09-05_priceable-ceiling.md`.
+
+stack_increments_s2026.pt      # 0.8642 solo — the best member this project can price
+labelwise_dense_s2026.pt       # seat 2, blend 0.8709
+margin_seat_s2026.pt           # seat 3, blend 0.8735
+finding_calib_dense_s2026.pt   # seat 4, blend 0.8750
+blendhold_s2026.pt             # seat 5, blend 0.8757
+# Forward selection accepted two more seats (`warm_calib_lowlr_s2026`, `disagreed_ramp`) for +0.0006
+# together. Both are dropped here: the first is DECLINED on `comp/members.declines` for failing to
+# recover its parent peak, and the second bought +0.0002. Neither moves the prediction off 0.938, and
+# shipping a declined member to buy noise would put a seat on the board that no argument supports.

@@ -48,7 +48,7 @@
 #
 # control  band_dense_hold_s2026 (same recipe, original labels).
 #
-# reading: relabel_hold_annotated*.json
+# reading: logs/relabel_hold_ledger.log
 #
 # deliberate: --unread-targets (the arm's thesis)
 # deliberate: --hold-annotations (matched to the control, and the only way the second ruler will score it)

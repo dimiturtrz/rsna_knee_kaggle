@@ -32,7 +32,7 @@
 #
 # COST. ~28 minutes for twelve epochs at 224 px and 20 slices.
 #
-# reading: band224_hold_annotated*.json
+# reading: logs/band224_hold_ledger.log
 #
 # deliberate: --hold-annotations (the arm's whole purpose — the gold ruler will not score an unheld fit)
 # deliberate: --image-size 224 (band224's read exactly — the recipe this control serves)

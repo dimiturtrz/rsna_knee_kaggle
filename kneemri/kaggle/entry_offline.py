@@ -158,7 +158,7 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
 
-    entries = EntryOffline(root.processed(), arguments.record, arguments.vote)
+    entries = EntryOffline(root.models(), arguments.record, arguments.vote)
     command.report(entries.report())
     if arguments.write:
         logger.info("%d row(s) changed in %s", entries.written(), arguments.record)

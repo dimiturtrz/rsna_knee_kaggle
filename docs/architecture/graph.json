@@ -4742,6 +4742,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.priceable_blend",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.priceable_blend",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.priceable_blend",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.priceable_blend",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.priceable_entries",
       "target": "kneemri.kaggle.champion_check",
       "weight": 1
@@ -25009,6 +25033,102 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.fixed",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.report",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.report",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.fixed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.report",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.priceable_blend.main",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.priceable_blend.main",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.report",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.priceable_entries.PriceableEntries",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -29715,6 +29835,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
+      "target": "kneemri.training.trainer.Trainer.backbone_rate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.policies",
       "target": "kneemri.training.trainer.Trainer.encoder_rate_decay",
       "weight": 1
     },
@@ -30343,7 +30469,7 @@
       "role": null
     },
     {
-      "descendants": 239,
+      "descendants": 240,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -31399,7 +31525,7 @@
       "role": null
     },
     {
-      "descendants": 31,
+      "descendants": 32,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -31554,6 +31680,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend",
+      "label": "priceable_blend",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -35629,6 +35763,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.package_members",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "label": "PriceableBlend",
+      "level": "class",
+      "parent": "kneemri.kaggle.priceable_blend",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -51312,6 +51454,78 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
+      "label": "candidates",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
+      "label": "chosen",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.fixed",
+      "label": "fixed",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "label": "on_the_corpus_ruler",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.predicted",
+      "label": "predicted",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.PriceableBlend.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.priceable_blend.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.priceable_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.priceable_entries.PriceableEntries.__init__",
       "label": "__init__",
       "level": "method",
@@ -55818,6 +56032,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.augment_bag",
       "label": "augment_bag",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.backbone_rate",
+      "label": "backbone_rate",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

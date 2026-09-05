@@ -1,0 +1,22 @@
+{
+ "id": "dimiturnt/kneemri-ceiling5",
+ "title": "kneemri-ceiling5",
+ "code_file": "kneemri-ceiling5.py",
+ "language": "python",
+ "kernel_type": "script",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": [
+  "dimiturnt/kneemri-kit",
+  "dimiturnt/kneemri-ceiling5-members"
+ ],
+ "competition_sources": [
+  "rsna-knee-abnormality-detection"
+ ],
+ "kernel_sources": [],
+ "model_sources": [
+  "metaresearch/dinov2/PyTorch/small/1"
+ ]
+}

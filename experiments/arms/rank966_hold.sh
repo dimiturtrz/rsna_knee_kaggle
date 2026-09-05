@@ -62,7 +62,7 @@
 #
 # control  band_dense_hold_s2026 = 0.8956 gold / ~0.857 proxy (same recipe, no flags).
 #
-# reading: rank966_hold_annotated*.json
+# reading: logs/rank966_hold_ledger.log
 #
 # deliberate: --label-errors (the arm's thesis, and its only difference from the control)
 # deliberate: --hold-annotations (matched to the control, and the only way the gold ruler will score it)

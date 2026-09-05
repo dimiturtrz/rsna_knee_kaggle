@@ -1,0 +1,55 @@
+[{"stream_name":"stderr","time":1.525236603,"data":"installing ['jaxtyping-0.3.11-py3-none-any.whl', 'safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl', 'transformers-5.15.0-py3-none-any.whl', 'wadler_lindig-0.1.7-py3-none-any.whl']\n"}
+,{"stream_name":"stderr","time":17.264130626,"data":"NumExpr defaulting to 4 threads.\n"}
+,{"stream_name":"stderr","time":35.19537552,"data":"The 'pydicom.pixel_data_handlers' module will be removed in v4.0, please use 'from pydicom.pixels import apply_modality_lut' instead\n"}
+,{"stream_name":"stderr","time":39.183310676,"data":"3 studies, 3 with series rows\n"}
+,{"stream_name":"stderr","time":50.079681981,"data":"wrote 3 rows\n"}
+,{"stream_name":"stderr","time":50.12778705,"data":"the raptor pass cost 15s; the six get what is left\n"}
+,{"stream_name":"stderr","time":50.132705258,"data":"kit 218cf8db\n"}
+,{"stream_name":"stderr","time":65.638048788,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8987.77it/s]\n"}
+,{"stream_name":"stderr","time":67.461353099,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":67.567313685,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 10290.90it/s]\n"}
+,{"stream_name":"stderr","time":68.769179737,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":68.879380773,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8041.49it/s]\n"}
+,{"stream_name":"stderr","time":69.996993239,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":70.104696427,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 8795.32it/s]\n"}
+,{"stream_name":"stderr","time":71.31979644,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":71.42943877,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 7907.43it/s]\n"}
+,{"stream_name":"stderr","time":72.672038746,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":72.780507947,"data":"\rLoading weights:   0%|          | 0/223 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 223/223 [00:00\u003c00:00, 10529.67it/s]\n"}
+,{"stream_name":"stderr","time":74.039904268,"data":"train mode pins 0 frozen norm layer(s)\n"}
+,{"stream_name":"stderr","time":74.04015484,"data":"loaded and fingerprint-checked 6 of 6 members from /kaggle/input/datasets/dimiturnt/kneemri-members\n"}
+,{"stream_name":"stderr","time":74.040594361,"data":"overlap=False requested, INERT — all 6 members are whole-stack\n"}
+,{"stream_name":"stderr","time":74.125527839,"data":"serving: vote=LogitAverage views=identity only (default) precision=each member's own (default) deadline=27528s\n"}
+,{"stream_name":"stderr","time":74.136192253,"data":"3 studies, 15 series\n"}
+,{"stream_name":"stderr","time":77.669467004,"data":"  studies 1-3: decode 4s at [336], elapsed 4s, peak 7.2 GB vram, 3.6 GB host\n"}
+,{"stream_name":"stderr","time":77.680518231,"data":"final_ws_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":79.055602949,"data":"grade_ladder_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":80.135043828,"data":"through_dense_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":82.9165756,"data":"  studies 1-3: decode 2s at [336], elapsed 2s, projecting 0.0h of 7.6h, peak 7.2 GB vram, 3.9 GB host\n"}
+,{"stream_name":"stderr","time":82.923658936,"data":"calib_span_ff asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":85.265410152,"data":"  studies 1-3: decode 2s at [336], elapsed 2s, projecting 0.0h of 7.6h, peak 7.2 GB vram, 3.9 GB host\n"}
+,{"stream_name":"stderr","time":85.272643313,"data":"merged_blend_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":85.931114899,"data":"lr4e-5_ws_cf asked for bf16 and this device cannot run it — serving fp16\n"}
+,{"stream_name":"stderr","time":86.593486076,"data":"slot fill SAG_FLUID_FS: 0.667\n"}
+,{"stream_name":"stderr","time":86.593605807,"data":"slot fill COR_FLUID_FS: 1.000\n"}
+,{"stream_name":"stderr","time":86.593793582,"data":"slot fill AX_FLUID_FS: 1.000\n"}
+,{"stream_name":"stderr","time":86.593846726,"data":"slot fill SAG_FLUID_NOFS: 0.667\n"}
+,{"stream_name":"stderr","time":86.593932331,"data":"slot fill COR_T1: 0.333\n"}
+,{"stream_name":"stderr","time":86.594008468,"data":"slot fill SAG_T1: 0.333\n"}
+,{"stream_name":"stderr","time":86.594079118,"data":"studies with no slot at all: 0/9\n"}
+,{"stream_name":"stderr","time":86.596293265,"data":"wrote 3 rows\n"}
+,{"stream_name":"stderr","time":86.618050235,"data":"                                    StudyInstanceUID  ...  Fracture\n"}
+,{"stream_name":"stderr","time":86.618070269,"data":"0  1.2.826.0.1.3680043.8.498.10047035057544427318...  ...  0.022029\n"}
+,{"stream_name":"stderr","time":86.618076183,"data":"1  1.2.826.0.1.3680043.8.498.10062861783145312629...  ...  0.062561\n"}
+,{"stream_name":"stderr","time":86.618081328,"data":"2  1.2.826.0.1.3680043.8.498.10067514707072572280...  ...  0.038936\n"}
+,{"stream_name":"stderr","time":86.618086672,"data":"\n"}
+,{"stream_name":"stderr","time":86.618091703,"data":"[3 rows x 13 columns]\n"}
+,{"stream_name":"stderr","time":86.630411916,"data":"seated 1 foreign members over 3 studies\n"}
+,{"stream_name":"stderr","time":86.631314859,"data":"ablated 6 columns: ['MCL', 'Fracture', 'Lateral OA', 'Effusion', 'PF OA', 'Synovitis']\n"}
+,{"stream_name":"stderr","time":92.189179496,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":92.189210204,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":92.425971077,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":92.425999115,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":93.107240071,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":94.385615733,"data":"[NbConvertApp] Writing 302497 bytes to __results__.html\n"}
+]
