@@ -7845,3 +7845,35 @@ that paper rather than contrary to it. But our only OOD ruler is the Kaggle boar
 the member axis is closed on seven board flats, and a member 0.0065 behind the incumbent is not a seat
 that a slot can be spent to price. So the OOD half stays **unmeasured and unqueued** — an open question
 with no affordable instrument, not a branch anyone should re-derive from the ID number.
+
+## The public top of this leaderboard is running mechanisms we have already priced — 2026-09-05
+
+Board read 09:24Z: **rank 40 of 3094 at 0.944, tied with 13; leader 0.954; gap 0.010.** Our slope is
++0.00037/day against the frontier's +0.00024/day, so the gap closes in 62 days. Grinding does not get
+there and only a step change does, which makes "what is the top doing" a measurement worth taking
+before another arm is queued. It costs no slot: `kaggle kernels list --competition ... --sort-by
+scoreDescending` and a `kernels pull` are free.
+
+**The highest-scoring public kernel is 0.937** (`renta0426/rsna-knee-0-937-weak-label-dinov2-meniscus-resid`,
+37 votes, pulled to the data root — a foreign kernel is third-party code and is not vendored here). Its
+own front page names the whole signal path: DINOv2 + DINOv3 over six protocol-aware slots, RadImageNet
+for medical-domain error diversity, and a Raptor CoAtNet 2.5D leg, **blended by TARGET in rank space**
+with the meniscus and fracture weights carried over from its scored parent. Underneath it is a
+`SlotHead` over `cls_mean`-pooled ViT features with window pooling — structurally what we run.
+
+**Every named mechanism in it is already priced here, and the headline one is closed.** Target-wise
+fusion is a per-finding learned combiner, which `stack_combiner` measured on `honest12`'s twelve members
+over the 909 holdout studies: ridge per finding **+0.0013** at its best block count, cross-finding
+**−0.0053 to −0.0081**, against a flat vote that reproduces the ledger's own 0.8751. The Raptor
+checkpoint is already mounted by our entries. RadImageNet-for-diversity is the convolutional trunk lane,
+closed on its own gate.
+
+**So the public frontier is 0.007 BELOW us and is not carrying an axis we have not read.** That is a
+real negative: the 0.010 to the leader is in something not public, and it is not recoverable by reading
+public kernels harder. The remaining lever is a better MEMBER, not a better combiner — every combiner
+question this project has asked (seat count, seating, weighting, re-lensing, calibration, level-2 fit)
+is now closed by measurement.
+
+**What this does NOT say.** It is not a claim about the leader, who has published nothing; it is a claim
+about what is publicly visible. And it does not re-open the public-notebook floor as a target — that
+floor was already left.
