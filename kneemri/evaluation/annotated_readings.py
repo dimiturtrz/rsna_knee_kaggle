@@ -38,6 +38,16 @@ SO THE NUMBER IS A CONSISTENCY CHECK AND NEVER A CONFIRMATION. `knee-bs4l`'s +0.
 were fitted against, and no stability result changes that. Quote it as agreement between two rulers that
 share an origin; an INDEPENDENT annotated number needs constants refitted on a held half, which needs a
 retrain, and no arm has spent one.
+
+AND THERE IS A THIRD ROUTE, WHICH IS WHY THAT LIMIT IS NOW PRINTED RATHER THAN DOCUMENTED — 2026-09-05.
+`level_calibration` fits its level map ON the annotated rows and writes a recalibrated table applied
+corpus-wide BY DESIGN, so an arm carries the gold through the TABLE IT WAS HANDED rather than through the
+rows it kept — and records `calibrated_targets: False` while doing it. A nine-member supervision ladder
+was read here and printed `none of them trained on these cells`. Eight of the nine carried one of these
+routes, and `recal_dense`, the row identified as the clean exception, carried this one. The claim on the
+page was true about the table and false about the supervision, and every reader of that page including its
+author took it for the second. `gold_fitted` names the route beside the number now; it still does not
+refuse, because the reason above has not changed. See knee-vrioa.
 """
 
 import logging
@@ -65,7 +75,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 HELD = "True"
-"""What a run that withheld the annotations recorded, the options table storing every flag as a string."""
+"""What a run recorded for a flag it was given, the options table storing every flag as a string."""
+
+CORPUS_LABELS = "report_labels_v2.csv"
+"""The report-derived corpus table. Any OTHER table a run was handed is derived, and every derived table
+this project has built was derived using the gold cells — so the unknown one is flagged, not cleared."""
 
 
 class TrainedOnAnnotationsError(Exception):
@@ -93,6 +107,32 @@ class AnnotatedReadings:
                 f"reads its own supervision back. Refit with --hold-annotations (experiments/arms/holdannot.sh)"
             )
             raise TrainedOnAnnotationsError(message)
+
+    def gold_fitted(self, checkpoint: Path) -> str | None:
+        """The route by which a run's supervision carries a constant fitted on the gold cells, or None.
+
+        `withheld` guards the TABLE — whether the annotated ROWS sat in the training loss. Three routes
+        put those same 696 cells into a run's TARGETS without ever putting the rows in the table, and all
+        three pass `withheld` cleanly. Two are flags (`--calibrated-targets` invokes
+        `Supervision.MEASURED_AGREEMENT`, hardcoded from these cells, and the hold drops the rows without
+        refitting it); the third is the label table itself, which is why a flag check alone missed it.
+
+        NOT A REFUSAL, deliberately — this module's header argues the case and it still holds: calibration
+        moves targets toward annotation-space, which is the mechanism working rather than the score
+        leaking, and `level_agreement.stability` prices four of five constants under 2 sigma. It is a limit
+        on how the number may be READ, so it is reported beside the number instead of replacing it with an
+        error the caller would have to route around to see anything at all.
+        """
+        saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
+        options = saved.get("options", {})
+        if str(options.get("calibrated_targets", "")) == HELD:
+            return "--calibrated-targets (Supervision.MEASURED_AGREEMENT, fitted on these cells)"
+        if str(options.get("finding_calibration", "")) == HELD:
+            return "--finding-calibration (per-finding rates fitted on these cells)"
+        table = Path(str(options.get("labels", ""))).name
+        if table and table != CORPUS_LABELS:
+            return f"--labels {table} (derived, not the corpus {CORPUS_LABELS})"
+        return None
 
     def rows(self, reference: list[str], annotated: list[str]) -> NDArray[np.int64]:
         """Where the annotated studies sit in the corpus order, as the index array a slab takes.
@@ -227,11 +267,21 @@ def main() -> None:
     annotations = truth[np.array([position[name] for name in names], dtype=np.int64)]
     scores = LabelScores()
     combined = RankAverage().combine([values for _, values in per_member])
+    routes = [(path, reader.gold_fitted(path)) for path in arguments.checkpoints]
+    flagged = [f"  {path.stem:28s} {route}" for path, route in routes if route is not None]
+    caveat = [
+        "",
+        f"{len(flagged)} of them carry a constant FITTED on these cells, so their score here is agreement",
+        "between two rulers that share an origin, never a confirmation (knee-vrioa):",
+        *flagged,
+    ]
+    origin = caveat if flagged else []
     command.report(
-        [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them trained on these cells"]
+        [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them TRAINED on these cells"]
         + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
         + ([""] + reader.paired(scores, per_member, arguments.against or arguments.checkpoints[0], annotations))
+        + origin
     )
 
 

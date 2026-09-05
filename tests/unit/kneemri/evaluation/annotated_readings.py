@@ -32,6 +32,27 @@ def test_withheld(tmp_path: Path):
         reader.withheld(_checkpoint(tmp_path / "trained.pt", held="False"))
 
 
+def test_gold_fitted(tmp_path: Path):
+    """Each of the three routes is named, and the one that records no flag is the one that mattered.
+
+    `recal_dense` is the case: it passed `withheld`, recorded `calibrated_targets: False`, and carried the
+    gold through the recalibrated table it was handed. A flag check alone clears it.
+    """
+    reader = _reader(tmp_path)
+
+    def saved(name: str, **options: str) -> Path:
+        path = tmp_path / name
+        torch.save({"options": {"hold_annotations": "True", "labels": "/r/report_labels_v2.csv", **options}}, path)
+        return path
+
+    assert reader.gold_fitted(saved("clean.pt")) is None
+    assert "MEASURED_AGREEMENT" in str(reader.gold_fitted(saved("calib.pt", calibrated_targets="True")))
+    assert "per-finding" in str(reader.gold_fitted(saved("finding.pt", finding_calibration="True")))
+    derived = reader.gold_fitted(saved("recal.pt", calibrated_targets="False", labels="/r/report_labels_v3.csv"))
+    assert derived is not None, "a derived table carries the gold with every flag recording False"
+    assert "report_labels_v3.csv" in derived
+
+
 def test_rows(tmp_path: Path):
     """The annotated studies located in CORPUS order, with a set that misses entirely refused."""
     reader = _reader(tmp_path)

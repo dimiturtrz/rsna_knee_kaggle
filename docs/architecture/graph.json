@@ -11337,6 +11337,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.annotated_readings.main",
+      "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.gold_fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.annotated_readings.main",
       "target": "kneemri.evaluation.annotated_readings.AnnotatedReadings.joined",
       "weight": 1
     },
@@ -41476,6 +41482,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.annotated_readings.AnnotatedReadings.gold_fitted",
+      "label": "gold_fitted",
       "level": "method",
       "parent": "kneemri.evaluation.annotated_readings.AnnotatedReadings",
       "role": null
