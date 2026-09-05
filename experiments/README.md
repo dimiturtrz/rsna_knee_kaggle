@@ -7921,3 +7921,57 @@ this project keeps seeing when the mean does not move, and single-seed per-colum
 about, and it settles it negative.
 
 Beads: knee-zsyp4. Reading: `interpretations/kneemri/2026-09-05_the-offline-column-map-ranks-our-labels-not-our-model.md`.
+
+### The 36-slice coverage arms hid a per-column result: Lateral Meniscus loses 0.0432 — card-free, 2026-09-05
+
+The coverage section above closed the axis on the MEAN (`stack224` −0.0033, `cover_labelwise` −0.0014,
+both inside the 0.0062 floor) and wrote "tripling the slice count buys nothing". That reading is correct
+about the mean and wrong about what the arms measured. `supervision_gap` has since split the twelve
+findings into six where the reader is the weak part and six where the model is, and **Lateral Meniscus is
+the largest model-bound gap this project owns at −0.1925** — the report label carries the finding at
+0.8422 and the model extracts 0.6497 of it. That made it worth asking what the coverage arms did to that
+one column rather than to the average. `column_headroom` on the three checkpoints, same 909 studies:
+
+| column | `base224` 12 slices | `stack224` 36 slices | `cover_labelwise` 36 slices, labelwise pooling |
+|---|---:|---:|---:|
+| **Lateral Meniscus** | **0.8460** | **0.8028** (−0.0432) | **0.8141** (−0.0319) |
+| Fracture | 0.8184 | 0.7929 (−0.0255) | 0.7911 (−0.0273) |
+| PF OA | 0.8406 | 0.8300 (−0.0106) | 0.8190 (−0.0216) |
+| ACL | 0.8893 | 0.8809 (−0.0084) | 0.8704 (−0.0189) |
+| Medial Meniscus | 0.8949 | 0.8914 (−0.0035) | 0.9037 (+0.0088) |
+| Effusion | 0.8474 | 0.8436 (−0.0038) | 0.8554 (+0.0080) |
+| Baker's | 0.8965 | 0.9070 (+0.0105) | 0.8973 (+0.0008) |
+| MCL | 0.7803 | 0.7859 (+0.0056) | 0.8118 (+0.0315) |
+| Lateral OA | 0.8136 | 0.8238 (+0.0102) | 0.8166 (+0.0030) |
+| Contusion | 0.8430 | 0.8635 (+0.0205) | 0.8653 (+0.0223) |
+| Synovitis | 0.8701 | 0.8740 (+0.0039) | 0.8701 (0.0000) |
+| Medial OA | 0.8703 | 0.8758 (+0.0055) | 0.8793 (+0.0090) |
+| **mean** | **0.8509** | **0.8476** | **0.8495** |
+
+**Lateral Meniscus is the worst-hit column of twelve, by seven times the paired holdout floor**, and the
+mean hides it because six columns move the other way. A flat mean over twelve columns is not evidence
+that an operation did nothing; it is evidence that what it did summed to zero.
+
+**The mechanism is the dilution argument this ledger already made** (line 5095: max pooling "divides its
+evidence by the slice count. Adding slices makes the dilution WORSE"). A lateral meniscal tear is focal —
+it is carried by two or three slices of a stack — so under a max over 36 slices the chance that a
+non-carrying slice wins the argmax rises with the count. The findings that move UP under 36 slices are
+the diffuse ones (Contusion +0.0205, Medial OA, Lateral OA, MCL), which is the same argument with the
+sign flipped: a finding spread across the stack gains from seeing more of it.
+
+**The pooling operator is the lever, and it is measured here at fixed slice count.** `stack224` and
+`cover_labelwise` differ in ONE flag — max versus labelwise slice pooling, both at 36 slices in the same
+0.05-0.95 band — and Lateral Meniscus reads **+0.0113** on that swap alone, MCL +0.0259, PF OA −0.0110.
+That is the cleanest per-column pooling read on disk, and it says the operator redistributes across
+columns rather than lifting the mean (+0.0019).
+
+**What this does NOT say.** These are single-seed per-column deltas at 68 to 558 positives, so no single
+row is a result; Lateral Meniscus at −0.0432 clears the floor by 7x and Fracture at −0.0255 by 4x, and
+the rest do not. `stack224` also moves the band open with the slice count, so the 12-vs-36 comparison is
+the coverage CONCEPT and not the slice count alone — but the pooling comparison at fixed 36 is clean.
+
+**What it changes.** The naive "more image for meniscus" story is now refuted twice, card-free and in
+opposite directions: 336->392 px moved both meniscus columns by ~0 (section above), and 12->36 slices
+moved Lateral Meniscus DOWN by 0.0432. Any arm aimed at the largest model-bound column should move the
+POOLING, not the coverage, and should expect to trade MCL and Contusion for it. That is also the answer
+to Q-MENISCUS-2, taken from our own disk rather than the literature.
