@@ -417,3 +417,17 @@ coatnet_hybrid_s2026  # 0.8259 solo on the 909-study fold-0 holdout against a 0.
                       # RE-OPEN BY: a non-DINO member that is stronger SOLO (this one is 0.05 under the
                       # pool's best), or one whose weak columns are not MCL/Fracture/Lateral OA. Repeating
                       # the family at another size or LR only re-measures this row.
+
+band_pairmem_s2026
+  0.8486 mean holdout AUC over the 909-study fold-0 holdout, the strongest of the forty checkpoints
+  that carried a holdout record and appeared in neither the roster nor this file on 2026-09-05.
+  Priced against honest12 (board 0.937) rather than the champion, because five of the champion's six
+  members are fold -1 and have seen every holdout study.
+  seat_value reads it SCALED, not DISTINCT: rank 0.9093 against a roster boundary of 0.8956, js 0.0162
+  against 0.0150, maha 4.338 against 4.443. Its nearest seat is itself at 0.0162 bits and its mean
+  divergence from the roster is 0.0339 bits, which is at the roster's own per-label median. A member
+  that diverges by the amount the roster already diverges internally is a rescaling of what is seated,
+  not a new direction, and the member axis is closed on seven board flats.
+  RE-OPEN BY: a maha column that has first reproduced board-validated seats (the knee-iyad adoption
+  gate), or a rank/js pair outside the roster boundary rather than inside it.
+
