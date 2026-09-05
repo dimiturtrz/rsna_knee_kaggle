@@ -7701,3 +7701,45 @@ features rather than another arm.
 Same Q-RULER4/Q-RULER6 caveat as `errors_rank`: control and arm differ in SUPERVISION, so the paired
 holdout comparison has no offline protection against board reversal. Here it matters less — a flat has
 nothing to reverse.
+
+### neighbour_errors — the SimiFeat replacement is BUILT and MEASURED, and it does not reopen the lane — 2026-09-05
+
+No card, no slot. `python -m kneemri.evaluation.neighbour_errors --against-confident`, full output in
+`logs/neighbour_errors_combined.log`. A similarity-weighted 10-neighbour vote over six frozen 336 px trunks
+(ortholarge, v3large, large, small, radnet121, vjepa2l), read on the SAME gate, the SAME 58-study census and
+the SAME budgets confident learning is read at, so the three rankings below are directly comparable.
+
+| ranking | all disagreements (n=140) | confident false positives (n=108) | misses (n=32) | precision @budget 25 |
+|---|---|---|---|---|
+| confident learning (the floor) | 0.7628 | 0.7580 | 0.6903 | 0.720 |
+| neighbour vote | 0.6830 | 0.7714 | 0.3588 | 0.200 |
+| rank-average of the two | 0.7511 | 0.8020 | 0.5161 | 0.480 |
+
+THE COMBINATION IS THE BEST FALSE-POSITIVE RANKING THIS PROJECT HAS, BY 0.0440, AND IT STILL DOES NOT PAY.
+False positives are 77% of the census and the defect a relabel actually corrects, so 0.8020 against 0.7580
+is a real gain on the stratum that matters. The reopen condition was not an AUC on that stratum, though — it
+was the NET BENEFIT, and net benefit is `B(2p - 1)` in the precision at the budget, not in the area under the
+whole curve. Confident learning reaches precision 0.720 at budget 25; the rank-average reaches 0.480 and the
+vote alone 0.200. Both are BELOW the 0.5 break-even at every budget read, so the peak does not move to a
+larger budget — it moves off the table. A ranking can be better over its whole length and worse where it is
+spent, and this is that case.
+
+WHY THE VOTE LOSES OVERALL, AND IT IS THE PREDICTED REASON. The multi-label compromise stated in the module
+docstring is that a study carries ONE embedding and twelve labels, so the twelve findings share one
+neighbourhood. The vote's own majority mask flags 11,824 cells — 22.363% of read, against cleanlab's 6.523%
+— which is what a globally atypical study looks like when it is flagged on several findings at once. That is
+a property of the design, measured, not of the corpus.
+
+THE MISSES ARE THE OTHER HALF AND THE VOTE READS THEM BELOW CHANCE (0.3588). A miss is a finding the reader's
+table calls absent that the radiologist called present; a neighbour vote asks whether the label agrees with
+its neighbours, and a false NEGATIVE agrees with the many negatives around it by construction. This is not a
+tuning failure and no k fixes it — the detector is structurally blind to the direction, which is why the
+rank-average drags cleanlab's 0.6903 down to 0.5161 on that stratum instead of lifting it.
+
+THE LABEL AXIS STAYS CLOSED, NOW AT TWO DETECTORS RATHER THAN ONE. What was a single method's recall limit is
+now a measured statement about the family: training-free neighbour voting over frozen embeddings — AQuA's
+best-performing family — is worse than confident learning here at the operating point that pays. Reopening
+still needs precision above 0.5 at a budget large enough to reach a material share of the corpus's wrong
+cells, and neither detector nor their average is within reach of it. Do NOT spend a card arm on a relabel
+built from this ranking: `errors_relabel` was flat on a ranking with precision 0.720 at its budget, and this
+one is worse there.

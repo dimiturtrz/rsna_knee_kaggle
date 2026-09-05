@@ -2204,6 +2204,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.neighbour_errors",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.neighbour_errors",
+      "target": "core.data.labels.reader_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.neighbour_errors",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.neighbour_errors",
+      "target": "kneemri.evaluation.label_errors",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.noise_binding",
       "target": "core.cli",
       "weight": 1
@@ -14602,6 +14626,126 @@
       "kind": "inherits",
       "source": "kneemri.evaluation.mixing_rules.SparseGraph",
       "target": "kneemri.evaluation.mixing_rules.MixingRule",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.CombinedRanking.quality",
+      "target": "kneemri.evaluation.neighbour_errors.CombinedRanking._ranked",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "target": "kneemri.evaluation.label_errors.ReaderTable",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "target": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.NeighbourVote._voted",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote._column",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.NeighbourVote.agreement",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote._voted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.NeighbourVote.dissent",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "target": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "core.data.labels.reader_agreement.ReaderAgreement.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.label_errors.LabelErrorAudit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.label_errors.LabelErrorAudit.detected",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.label_errors.LabelErrorAudit.gated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.label_errors.ReaderTable.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.CombinedRanking",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.CombinedRanking.onto",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.CombinedRanking.quality",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.NeighbourVote.dissent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.TrunkView.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.neighbour_errors.main",
+      "target": "kneemri.evaluation.neighbour_errors.TrunkView.loaded",
       "weight": 1
     },
     {
@@ -29851,7 +29995,7 @@
       "role": null
     },
     {
-      "descendants": 236,
+      "descendants": 237,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -29915,7 +30059,7 @@
       "role": null
     },
     {
-      "descendants": 78,
+      "descendants": 79,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -30174,6 +30318,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.mixing_rules",
       "label": "mixing_rules",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors",
+      "label": "neighbour_errors",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -33400,6 +33552,30 @@
       "label": "SparseGraph",
       "level": "class",
       "parent": "kneemri.evaluation.mixing_rules",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.CombinedRanking",
+      "label": "CombinedRanking",
+      "level": "class",
+      "parent": "kneemri.evaluation.neighbour_errors",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "label": "NeighbourVote",
+      "level": "class",
+      "parent": "kneemri.evaluation.neighbour_errors",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "label": "TrunkView",
+      "level": "class",
+      "parent": "kneemri.evaluation.neighbour_errors",
       "role": "satellite"
     },
     {
@@ -43024,6 +43200,110 @@
       "label": "row",
       "level": "method",
       "parent": "kneemri.evaluation.mixing_rules.SparseGraph",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.CombinedRanking._ranked",
+      "label": "_ranked",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.CombinedRanking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.CombinedRanking.onto",
+      "label": "onto",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.CombinedRanking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.CombinedRanking.quality",
+      "label": "quality",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.CombinedRanking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.NeighbourVote._column",
+      "label": "_column",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.NeighbourVote._voted",
+      "label": "_voted",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.NeighbourVote.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.NeighbourVote.dissent",
+      "label": "dissent",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.NeighbourVote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView._pooled",
+      "label": "_pooled",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView._unit",
+      "label": "_unit",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView.loaded",
+      "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.TrunkView.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors.TrunkView",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.neighbour_errors.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.neighbour_errors",
       "role": null
     },
     {

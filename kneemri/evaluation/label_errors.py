@@ -79,6 +79,9 @@ FALSE_POSITIVE = "false positive"
 MISSED = "missed"
 """`reader_agreement.errors`' own `kind` values, so one census cannot be counted under two vocabularies."""
 
+CONFIDENT_JOINT = "cleanlab's own mask"
+"""The default operating point a report names — the one this module's own detector chooses for itself."""
+
 DISAGREEMENT = "disagreement"
 """Either direction. Not a `kind` there — no cell is one — which is why it is named here and not imported."""
 
@@ -332,6 +335,11 @@ class LabelErrorReport:
     quality: Float[np.ndarray, "cells"]
     flagged: Bool[np.ndarray, "cells"]
 
+    mask_name: str = CONFIDENT_JOINT
+    """Whose self-chosen operating point `flagged` is. Carried rather than written into the line, because
+    this report is rendered for other detectors too and a neighbour vote's mask printed under cleanlab's
+    name is two methods' numbers filed under one."""
+
     def lines(self) -> list[str]:
         """Coverage first, then the census, then one gate per error class."""
         counts = self.census.counts()
@@ -367,7 +375,7 @@ class LabelErrorReport:
         gate = DetectorGate(self.quality, truth)
         lines = [f"  {name} (n={int(truth.sum())}): separation AUC {gate.separation():.4f} (0.5 = chance)"]
         lines += [row.line() for row in gate.ranked()]
-        lines.append(f"    cleanlab's own mask ->{gate.at_mask(self.flagged).line().split('caught', 1)[1]}")
+        lines.append(f"    {self.mask_name} ->{gate.at_mask(self.flagged).line().split('caught', 1)[1]}")
         return lines
 
 
@@ -446,6 +454,7 @@ class LabelErrorAudit:
         reader: ReaderTable,
         quality: Float[np.ndarray, "studies targets"],
         flagged: Bool[np.ndarray, "studies targets"],
+        mask_name: str = CONFIDENT_JOINT,
     ) -> LabelErrorReport:
         """Pair the detector's per-cell output with the census, over the cells present in BOTH.
 
@@ -471,6 +480,7 @@ class LabelErrorAudit:
             census=census.restricted(inside),
             quality=quality[rows, columns],
             flagged=flagged[rows, columns],
+            mask_name=mask_name,
         )
 
 
