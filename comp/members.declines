@@ -397,3 +397,23 @@ radiodino_corpus_s2026.pt # THE CORPUS AXIS, PRICED AS A SEAT AND NEGATIVE. 0.82
                       # RE-OPEN BY: a MODALITY-MATCHED corpus — self-supervised pretraining on volumetric
                       # knee MRI (fastMRI knee, SKM-TEA), which is the one corpus direction the literature
                       # still predicts a gain for. More 2D radiology slices only re-measures this row.
+
+coatnet_hybrid_s2026  # 0.8259 solo on the 909-study fold-0 holdout against a 0.8460 pre-registration —
+                      # a miss, and trajectory_check had already projected it. But the solo number is not
+                      # why this is declined. Seat value against honest12: -0.0006, band [-0.0012,
+                      # -0.0000], and its BEST available seat (replacing mae_matched_s2026) is also
+                      # negative at -0.0005. A member whose best case is negative has no seat to find.
+                      # WHAT IT ANSWERED. The ledger's standing open question was Kimi's transfer of the
+                      # public frontier: "if you add heterogeneity, add exactly one non-DINO member".
+                      # Every scoreable member this project owns is a DINOv2/DINOv3 recipe; the champion's
+                      # only non-DINO seat is the foreign raptor CoAtNet, which is in-sample and therefore
+                      # unpriceable. coatnet_hybrid is a CoAtNet-2 conv/attention hybrid trained on OUR
+                      # corpus under OUR objective — the first non-DINO seat this project can actually
+                      # price. It prices at zero-to-negative. The architecture-diversity thesis is not
+                      # refuted in general, but it is refused HERE, on the one instance we could measure.
+                      # Its per-column shape is also the pool's own: MCL 0.715, Fracture 0.743, Lateral OA
+                      # 0.782 are its three weakest, exactly the pool's weak three. A genuinely
+                      # complementary trunk should have failed somewhere ELSE.
+                      # RE-OPEN BY: a non-DINO member that is stronger SOLO (this one is 0.05 under the
+                      # pool's best), or one whose weak columns are not MCL/Fracture/Lateral OA. Repeating
+                      # the family at another size or LR only re-measures this row.

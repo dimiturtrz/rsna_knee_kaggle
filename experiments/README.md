@@ -7588,3 +7588,23 @@ recipes plus one foreign CoAtNet seat that is in-sample and therefore unscoreabl
 public frontier: "if you add heterogeneity, add exactly one non-DINO member; anything more is seating
 theatre." A conv member trained on OUR corpus would be the first non-DINO seat this project can actually
 PRICE, which is a different object from the foreign one the champion already carries.
+
+**The non-DINO seat, priced and refused (2026-09-05).** The paragraph above named the arm this project
+had never run: a conv member trained on OUR corpus, the first non-DINO seat that could actually be
+PRICED rather than assumed. `coatnet_hybrid_s2026` is it — CoAtNet-2, twelve epochs, whole-stack, our
+objective. It read **0.8259** solo against a 0.8460 pre-registration, and more decisively it seats at
+**-0.0006** against honest12 with band [-0.0012, -0.0000]; its best available seat, replacing
+`mae_matched_s2026`, is also negative. A candidate whose best case is negative has no seat to find.
+
+Kimi's transferred rule — "add exactly one non-DINO member; anything more is seating theatre" — is
+therefore refused on the one instance this project could measure. Not refuted in general: one
+architecture at one size is one point. But the specific hope that heterogeneity per se buys a seat is
+now a measurement rather than a plan, and the seat-value band is tight enough that a bigger version of
+the same idea is not licensed by it.
+
+The informative part is the per-column shape. coatnet_hybrid's three weakest columns are MCL 0.715,
+Fracture 0.743 and Lateral OA 0.782 — the pool's own weak three, in the pool's own order. A trunk that
+genuinely saw different structure should have failed somewhere ELSE. It failed in exactly the same
+places, which says the weakness is in the SUPERVISION or the DATA and not in the trunk family. That is
+the same conclusion `colmcl` reached from the board side, arrived at from the architecture side, and it
+is why the next slots go to locating the board's headroom rather than to another trunk.
