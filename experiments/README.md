@@ -8242,3 +8242,59 @@ converged (12/12 epochs, peak not at the end) so its 0.8259 is not a budget arte
 
 **Cost: zero card, zero slots.** Three `seat_value` runs of about ten seconds each, against three
 checkpoints that already existed.
+
+## The gold-58 supervision ladder is a leak, not a result — and the ruler gap survives it — 2026-09-05
+
+Nine `--hold-annotations` checkpoints scored on the 58 radiologist-annotated studies, paired against
+`band_dense_hold_s2026` with resampled 95% intervals. Seven of eight read positive, three cleared their
+own interval, at 0.014-0.022 — magnitudes that would clear the 1.5% bar on a ruler none of them trained
+on. I wrote that up as a five-knob confirmation of the ruler-bias account. It is not one. Zero of the
+eight rows are clean.
+
+| arm | delta vs control | what carries gold information into it |
+|---|---|---|
+| `labelwise_dense_s2026` | +0.0215 clears | `--calibrated-targets` |
+| `base_clean_s2026` | +0.0195 clears | `--calibrated-targets` |
+| `recal_dense_s2026` | +0.0172 clears | trains on `$RECAL` |
+| `calib_dense_hold_s2026` | +0.0161 inside | `--calibrated-targets` |
+| `contrast_dense_s2026` | +0.0155 inside | `--calibrated-targets` |
+| `finding_calib_dense_s2026` | +0.0142 inside | `--calibrated-targets` |
+| `contrast_pool_s2026` | +0.0136 inside | `--calibrated-targets` |
+| `margin_calib_s2026` | -0.0067 inside | `--calibrated-targets` |
+| `band_dense_hold_s2026` | control 0.8956 | nothing — plain `--labels`, no calibration |
+
+**Two separate paths, one origin.** `Supervision.MEASURED_AGREEMENT` was fitted on these same 696 cells,
+which `annotated_readings --help` already says out loud; that covers the seven `--calibrated-targets`
+arms. `recal_dense` was the one I identified as the clean exception because it carries no such flag — and
+it is contaminated by the other path. `kneemri/evaluation/level_calibration.py:156` fits the level map
+**on the annotated rows** and then applies it to the whole table, the gold studies included, by design:
+"a study's report reading is recalibrated whether or not a radiologist also read its images, because the
+recalibration is a statement about the reader." A true statement about what recalibration IS, and it
+means the gold readings are inside every row of `$RECAL`.
+
+So the ladder measures this: **eight arms whose supervision constants were fitted from the 58 gold
+studies beat, on those same 58 studies, one control that never saw them.** The rank ordering of the
+deltas is not informative either — it orders the arms by how much gold-derived signal their supervision
+carries. `--hold-annotations` does not undo it. That flag drops the annotated CELLS from the loss; it
+cannot drop constants fitted from them and then baked into every study's label.
+
+**The refusal is too narrow, and it says so in the wrong words.** `annotated_readings.withheld` checks
+one thing, `options["hold_annotations"] == True`, and on the strength of it the tool prints *"9 member(s),
+none of them trained on these cells"*. Literally true and materially false: none read those cells, all
+eight were TAUGHT from constants fitted on them. A reader who trusts that line — I did — reads a leak as
+a clean measurement. Filed as knee-6r2wq (P1): the refusal has to cover fitted-constant provenance,
+`--calibrated-targets` and a `$RECAL`-family label table alike, and the census line must not claim
+independence it did not check.
+
+**What survives, and it is the thing that mattered.** The control's own two-ruler gap is untouched by
+all of this, because `band_dense_hold` is the one checkpoint with no gold-derived supervision anywhere in
+it: **0.8956 on the 58 annotated studies against ~0.857 on the report holdout, same weights, +0.039
+apart** — six times the 0.0062 noise floor. That is a fact about two rulers, not about a treatment, so
+nothing in the leak touches it. Our report labels over-call (108 false positives against 32 misses over
+the 58), and the holdout that ordered every seat decision in this project carries that same over-calling.
+
+**And it is why `relabel_hold` is now the whole test rather than the last rung of a ladder.** Its
+treatment is `--unread-targets` from a confident-learning detector fitted on the REPORT labels; the
+radiologist readings never enter it, by either path. It is the only supervision arm this project owns
+whose gold-58 reading will mean what it appears to mean. The four pre-registered branches in its header
+stand unchanged — and it now has no ladder standing behind it to soften a null.

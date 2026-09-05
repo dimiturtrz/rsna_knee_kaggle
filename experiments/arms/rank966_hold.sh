@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# rank966_hold.sh — the prune selector that was never run, on the ruler that can see it.
+#
+# bead: knee-jom26
+#
+# WHY THIS ARM. `errors_dense` pruned the cells cleanlab's confident-joint MASK flagged and scored
+# 0.8420 against `band_dense`'s 0.8578 — its own lowest branch. Its header states the reason in its own
+# words: the mask reads precision 0.258 and lift 1.63x on the 108 confident false positives, more than
+# half of the 5,360 cells it pruned were cells the radiologist AGREED with, and the 4.05x that licensed
+# the whole axis was the plain RANKING at a small budget the arm never used. So the refutation belongs
+# to that selector at that budget, and knee-jom26 has recorded since that the strong number is still
+# available to a different one. `label_flags_rank966.csv` is that selector: the ranking, 966 cells, a
+# fifth of what `errors_dense` threw away.
+#
+# WHAT THIS ARM CHANGES. One flag against `band_dense_hold_s2026`: `--label-errors` pointed at the
+# rank-966 table. Same 336 px, same 20 slices, same 0.10-0.90 band, same whole-stack max pooling, same
+# 4e-5 backbone rate, same twelve epochs, same hold.
+#
+# WHY `--hold-annotations`, AND WHY IT IS THE POINT HERE. `band_dense_hold` reads 0.8956 on the 58
+# annotated studies against ~0.857 on the report holdout — same weights, +0.039 apart, six times the
+# 0.0062 noise floor. Our report holdout carries the same over-calling as our training labels (108 false
+# positives against 32 misses over the gold 58), so it charges a member for being right about exactly the
+# cells this arm prunes. The gold ruler is the only one that can price this treatment, and only a held
+# fit is scoreable on it.
+#
+# AND THE RULER-MOVE DEFECT DOES NOT REACH THE GOLD READ. `Supervision.moves_the_ruler()` is True for a
+# prune — a pruned cell carries zero weight, so the proxy holdout table is no longer the one `band_dense`
+# was read on, which is why `errors_dense`'s header demands a re-read on the plain table before any delta
+# is quoted. The 58 annotations are not that table. They are radiologist readings of the images, untouched
+# by which report cells the loss dropped, so the gold comparison against `band_dense_hold` is like-for-like
+# by construction. Quote the gold delta first; the proxy delta needs the plain-table re-read and is
+# secondary here.
+#
+# NOT CONTAMINATED, and that has to be checked now rather than assumed — the nine-member supervision
+# ladder read on 2026-09-05 turned out to be eight arms whose supervision constants were fitted from the
+# gold 58, beating one control that never saw them (knee-vrioa). This arm carries neither route: no
+# `--calibrated-targets`, so no `Supervision.MEASURED_AGREEMENT`; and `--labels` is the plain
+# `report_labels_v2.csv`, not a `level_calibration` output. The flag table itself comes from cleanlab over
+# `PublishedRuler.per_seed()`, fitted on REPORT labels; the radiologist readings gated it and never
+# entered it.
+#
+# PRE-REGISTERED, on the GOLD ruler, against `band_dense_hold_s2026` = 0.8956:
+#
+#   gold UP, clearing its paired interval    The selector was the defect, not the axis. `errors_dense`'s
+#            -0.0158 was the mask at 5,360 cells, and pruning at the ranking's precision pays. The dose
+#            curve (966 vs 1,932 vs the mask's 5,360) becomes the next arm and the axis re-opens.
+#   gold FLAT                                Pruning does not move what the model learns at either
+#            selector or either budget, while re-labelling (`relabel_hold`, running ahead of this) may
+#            still. That splits treatment from selector cleanly: the flags are real, dropping them is
+#            inert, overwriting them is the only live treatment left.
+#   gold DOWN                                The flagged cells carry signal the metric wants even when
+#            the radiologist disagrees with them, at the ranking's precision and at a fifth of the mask's
+#            budget. That closes prune-as-treatment for good, on the ruler that was supposed to rescue it.
+#            Report the PER-LABEL rows before writing it up — the rare findings are where it would show.
+#
+# WHAT WOULD MAKE ME DISBELIEVE ANY OF IT. That the flag never landed. `--label-errors` is a PATH, and
+# `Supervision.pruned` drops a flag naming a study the table has no row for by design, so a wrong path and
+# a legitimately-subset table are the same silent zero. Check the run's own recipe prints "label_errors"
+# at this table's path AND that its row count is 966, before reading the score.
+#
+# COST. Identical to `band_dense`: ~90 minutes for twelve epochs at 336 px and 20 slices.
+#
+# control  band_dense_hold_s2026 = 0.8956 gold / ~0.857 proxy (same recipe, no flags).
+#
+# reading: rank966_hold_annotated*.json
+#
+# deliberate: --label-errors (the arm's thesis, and its only difference from the control)
+# deliberate: --hold-annotations (matched to the control, and the only way the gold ruler will score it)
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+FLAGS="$PROCESSED/label_flags_rank966.csv"
+require "$LABELS"
+require "$FLAGS"
+
+run_train rank966_hold \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --hold-annotations \
+  --label-errors "$FLAGS" \
+  --labels "$LABELS" --out "$MODELS/rank966_hold_s2026.pt"
